@@ -154,7 +154,7 @@ namespace Pulsar4X.SDL2UI
             TargetEntity = _state.LastClickedEntity;
 
             _state.Camera.PinToEntity(TargetEntity.Entity);
-            _targetRadiusAU = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().Radius;
+            _targetRadiusAU = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInAU;
             _targetRadiusKM = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInKM;
 
             var soiWorldRad_AU = OrbitProcessor.GetSOI_AU(TargetEntity.Entity);

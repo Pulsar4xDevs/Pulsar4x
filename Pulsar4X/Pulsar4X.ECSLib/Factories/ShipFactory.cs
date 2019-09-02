@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateShip(ShipClass shipClass, Entity ownerFaction, Entity parent, StarSystem starsys, string shipName = null)
         {
             Vector3 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_m;
-            var distanceFromParent = Distance.AuToMt(parent.GetDataBlob<MassVolumeDB>().Radius * 2);
+            var distanceFromParent = Distance.AuToMt(parent.GetDataBlob<MassVolumeDB>().RadiusInAU * 2);
             position.X += distanceFromParent;
 
             return CreateShip(shipClass, ownerFaction, position, parent, starsys, shipName);

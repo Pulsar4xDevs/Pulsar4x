@@ -540,7 +540,7 @@ namespace Pulsar4X.ECSLib
                 numMoons--;
             }
 
-            double minMoonOrbitDist = parentMVDB.Radius * _galaxyGen.Settings.MinMoonOrbitMultiplier;
+            double minMoonOrbitDist = parentMVDB.RadiusInAU * _galaxyGen.Settings.MinMoonOrbitMultiplier;
             double maxMoonDistance = _galaxyGen.Settings.MaxMoonOrbitDistanceByPlanetType[parentBodyDB.BodyType] * massRatioOfParent;
 
             GenerateOrbitsForBodies(system, parent, ref moons, new MinMaxStruct(minMoonOrbitDist, maxMoonDistance), new List<ProtoEntity>(), currentDateTime);
@@ -775,7 +775,7 @@ namespace Pulsar4X.ECSLib
         {
             MassVolumeDB starMVDB = star.GetDataBlob<MassVolumeDB>();
             double temp = Temperature.ToKelvin(starInfo.Temperature);
-            temp = temp * Math.Sqrt(starMVDB.Radius / (2 * distanceFromStar));
+            temp = temp * Math.Sqrt(starMVDB.RadiusInAU / (2 * distanceFromStar));
             return Temperature.ToCelsius(temp);
         }
 

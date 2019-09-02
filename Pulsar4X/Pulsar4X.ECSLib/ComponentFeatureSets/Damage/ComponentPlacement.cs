@@ -7,155 +7,6 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 {
     public static class ComponentPlacement
     {
-
-        public static EntityDamageProfileDB CreateDamageProfileDB(List<(ComponentDesign component, int count)> components, (string name, double density, float thickness) armor)
-        {
-  
-            List<(Guid, RawBmp)> typeBitmap = new List<(Guid, RawBmp)>();
-            List<(Guid id, int count)> placementOrder = new List<(Guid, int)>();
-            List<ComponentInstance> instances = new List<ComponentInstance>();
-            foreach (var componenttype in components)
-            {
-                
-                Guid typeGuid = componenttype.component.Guid;
-                
-                RawBmp compBmp = DamageTools.CreateComponentByteArray(componenttype.component, (byte)typeBitmap.Count);
-                typeBitmap.Add((typeGuid, compBmp));
-                
-
-                placementOrder.Add((typeGuid, componenttype.count));
-                for (int i = 0; i < componenttype.count; i++)
-                {
-                    ComponentInstance newInstance = new ComponentInstance(componenttype.component);
-                    instances.Add(newInstance);
-                }
-            }
-            
-            EntityDamageProfileDB shipProfile = new EntityDamageProfileDB();
-            shipProfile.PlacementOrder = placementOrder;
-            shipProfile.TypeBitmaps = typeBitmap;
-            shipProfile.Armor = armor;
-            shipProfile.ComponentLookupTable = instances;
-            shipProfile.ShipDamageProfile = CreateShipBmp(shipProfile);
-            
-            return shipProfile;
-        }
-
-        /*
-        [Obsolete]
-        public static EntityDamageProfileDB CreateShipMap(List<(ComponentDesign component, int count)> components, (string name, double density, double thickness) armor)
-        {
-
-            int minWidth = 0;
-            int minLength = 0;
-            int maxWidth = 0;
-            int maxLen = 0;
-
-
-            int shipWidth = 0;
-            int shipLen = 0;
-
-            Guid maxWidthID;
-            int maxWidthIndex = -1;
-
-
-            EntityDamageProfileDB shipProfile = new EntityDamageProfileDB();
-            
-            Dictionary<Guid, int> typeCount = new Dictionary<Guid, int>();
-            Dictionary<Guid, RawBmp> typeBitmap = new Dictionary<Guid, RawBmp>();
-
-            
-            List<(Guid id, int count)> placementOrder = new List<(Guid, int)>();
-
-
-            Dictionary<Guid, int> UnplacedComponents = new Dictionary<Guid, int>();
-
-            Dictionary<Guid, ComponentDesign> AllComponentsByDesign = new Dictionary<Guid, ComponentDesign>();
-            foreach (var componenttype in components)
-            {
-
-                RawBmp compBmp = DamageTools.CreateComponentByteArray(componenttype.component);
-                Guid typeGuid = componenttype.component.Guid;
-
-                typeCount.Add(typeGuid, componenttype.count);
-                typeBitmap.Add(typeGuid, compBmp);
-                UnplacedComponents.Add(typeGuid, componenttype.count);
-                AllComponentsByDesign[typeGuid] = componenttype.component;
-                if (minWidth < compBmp.Height)
-                {
-                    minWidth = compBmp.Height;
-                }
-
-
-                if (compBmp.Height + componenttype.count > maxWidth)
-                {
-                    maxWidth += compBmp.Height + componenttype.count;
-                    maxWidthID = typeGuid;
-                }
-
-                maxLen += compBmp.Width * componenttype.count;
-            }
-            
-            bool canTakeFrontConnections = true;
-            bool canTakeBackConnections = true;
-            foreach (var compkvp in UnplacedComponents)
-            {
-                ComponentDesign component = AllComponentsByDesign[compkvp.Key];
-                Guid compID = compkvp.Key;
-                int compCount = compkvp.Value;
-                
-
-                if (!component.Connections.HasFlag(Connections.Front)) //if we can *not* connect to front it has to go at the front.
-                {
-                    if (canTakeFrontConnections)
-                    {
-                        placementOrder.Insert(0, (compID, compCount));
-                        canTakeFrontConnections = false;
-                        if (compID == maxWidthID)
-                            maxWidthIndex = 0;
-                    }
-                    else//in this case, we've got two different types of component that have to be placed at the front(currently unsuported)
-                    {
-                        //TODO: need to handle this properly, it could concevibly happen and maybe need an accemetric design
-                        throw new Exception("Cannot Place front only component infront of a front only component");
-                    }
-                }
-                else if (!component.Connections.HasFlag(Connections.Back)) //if the component can't connect to back 
-                {
-                    if (placementOrder.Count > 0 && !canTakeBackConnections) //if we've got something in the array, and it can't take connections to the back
-                    {
-                        //in this case, we've got two different types of component that have to be placed at the back(currently unsuported)
-                        //TODO: need to handle this properly, it could concevibly happen and maybe need an accemetric design
-                        throw new Exception("Cannot Place back only component behind of a back only component");
-                    }
-                    else
-                    {
-                        placementOrder.Add((compID, compCount));
-                        canTakeBackConnections = false;
-                        if (compID == maxWidthID)
-                            maxWidthIndex = placementOrder.Count -1;
-                        
-                    }
-                }
-                else //we insert in the 'middle'. note that we're currently not handleing things that shouldnt take connections to a side.
-                {
-                    
-                    if (canTakeBackConnections)
-                        placementOrder.Add((compID, compCount));
-                    else 
-                        placementOrder.Insert(placementOrder.Count -1, (compID, compCount));
-                }
-                
-            }
-
-            shipProfile.PlacementOrder = placementOrder;
-            //shipProfile.TypeBitmaps = typeBitmap;
-            shipProfile.Armor = armor;
-            shipProfile.ShipDamageProfile = CreateShipBmp(shipProfile);
-            
-            return shipProfile;
-        }
-*/
         public static RawBmp CreateShipBmp(EntityDamageProfileDB shipProfile)
         {
             byte armorID = 255;//shipProfile.Armor.IDCode;
@@ -167,6 +18,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             var totalWidth = 0;
             int widestPoint = 0;
             int widestLen = 0;
+
+            byte componentInstance = 0;
+            
             for (int i = 0; i < po.Count; i++)
             {
                 
@@ -208,17 +62,29 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             int offsetx = 4;
             for (int i = 0; i < po.Count; i++)
             {
-                
+                componentInstance++;
                 var typeid = po[i].id;
                 var count = po[i].count;
                 var typeBmp = typeBitmaps[i].bmp;
-
+                
                 int pixHeight = typeBmp.Height * count;
 
                 int offsety = (canvasWidth - pixHeight) / 2;
 
                 int bytesPerLine = 4 * typeBmp.Width;
 
+                for (int x = 0; x < typeBmp.Width; x++)
+                {
+                    for (int y = 0; y < typeBmp.Height; y++)
+                    {
+                        var srsClr = typeBmp.GetPixel(x, y);
+                        int destx = offsetx + x;
+                        int desty = offsety + y;
+                        shipBmp.SetPixel(destx, desty, srsClr.r, componentInstance, srsClr.b, srsClr.a);
+                    }
+                }
+                
+                /*
                 for (int j = 0; j < count; j++)
                 {
                     for (int pxstrip = 0; pxstrip < typeBmp.Height; pxstrip++)
@@ -229,7 +95,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                         Buffer.BlockCopy(typeBmp.ByteArray, srcpos, shipByteArray, destPos, bytesPerLine);
                     }
                 }
-
+                */
                 offsetx += typeBmp.Width;
 
             }
@@ -302,7 +168,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         
 
             
-            shipProfile.ShipDamageProfile = shipBmp;
+            shipProfile.DamageProfile = shipBmp;
             return shipBmp;
         }
         

@@ -89,6 +89,8 @@ namespace Pulsar4X.ECSLib
             }            
             return hash;
         }
+        
+
 
     }
 
@@ -211,5 +213,7 @@ namespace Pulsar4X.ECSLib
             return retVal;
         }
     }
+
+   
 
 }

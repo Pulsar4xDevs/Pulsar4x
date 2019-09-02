@@ -204,7 +204,7 @@ namespace Pulsar4X.ECSLib
             _defaultShipClass.Components = components2;
             _defaultShipClass.Armor = ("Polyprop", 1175f, 3);
             
-            _defaultShipClass.DamageProfileDB = ComponentPlacement.CreateDamageProfileDB(components2, _defaultShipClass.Armor);
+            _defaultShipClass.DamageProfileDB = new EntityDamageProfileDB(components2, _defaultShipClass.Armor);
             return _defaultShipClass;
         }
 
@@ -224,7 +224,7 @@ namespace Pulsar4X.ECSLib
             shipdesign.Components = components2;
             shipdesign.Armor = ("Polyprop", 1175f, 3);
             
-            shipdesign.DamageProfileDB = ComponentPlacement.CreateDamageProfileDB(components2, shipdesign.Armor);
+            shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
             
         }
@@ -245,7 +245,7 @@ namespace Pulsar4X.ECSLib
             shipdesign.Components = components2;
             shipdesign.Armor = ("Polyprop", 1175f, 3);
             
-            shipdesign.DamageProfileDB = ComponentPlacement.CreateDamageProfileDB(components2, shipdesign.Armor);
+            shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
         }
 

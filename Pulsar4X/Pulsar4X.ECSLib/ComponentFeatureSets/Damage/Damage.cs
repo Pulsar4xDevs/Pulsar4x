@@ -147,46 +147,48 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         }
 
 
-        public static List<RawBmp> DealDamage(RawBmp ship, DamageFragment damage)
+        public static List<RawBmp> DealDamage(EntityDamageProfileDB damageProfile, DamageFragment damage)
         {
+            RawBmp shipDamageProfile = damageProfile.DamageProfile;
+
             List<RawBmp> damageFrames = new List<RawBmp>();
 
-            var dmass = damage.Mass;
+            var fragmentMass = damage.Mass;
             var dpos = damage.Position;
             var dvel = damage.Velocity;
             var dden = damage.Density;
             var dlen = damage.Length;
             var pos = new Vector2(dpos.x, dpos.y);
             var pixelscale = 0.01;
-            double startMomentum = dvel.Length() * dmass;
+            double startMomentum = dvel.Length() * fragmentMass;
             double momentum = startMomentum; 
             
-            byte[] byteArray = new byte[ship.ByteArray.Length];
-            Buffer.BlockCopy(ship.ByteArray, 0, byteArray, 0, ship.ByteArray.Length);
+            byte[] byteArray = new byte[shipDamageProfile.ByteArray.Length];
+            Buffer.BlockCopy(shipDamageProfile.ByteArray, 0, byteArray, 0, shipDamageProfile.ByteArray.Length);
             RawBmp firstFrame = new RawBmp()
             {
                 ByteArray = byteArray,
-                Height = ship.Height,
-                Width = ship.Width,
-                Depth = ship.Depth,
-                Stride = ship.Stride
+                Height = shipDamageProfile.Height,
+                Width = shipDamageProfile.Width,
+                Depth = shipDamageProfile.Depth,
+                Stride = shipDamageProfile.Stride
             };
             damageFrames.Add(firstFrame);
-            (byte r, byte g, byte b, byte a) savedpx = ship.GetPixel(dpos.x, dpos.y);
+            (byte r, byte g, byte b, byte a) savedpx = shipDamageProfile.GetPixel(dpos.x, dpos.y);
             (int x, int y) savedpxloc = dpos;
             
-            while (momentum > 0 && dpos.x >= 0 && dpos.x <= ship.Width && dpos.y >= 0 && dpos.y <= ship.Height)
+            while (momentum > 0 && dpos.x >= 0 && dpos.x <= shipDamageProfile.Width && dpos.y >= 0 && dpos.y <= shipDamageProfile.Height)
             {
-                byteArray = new byte[ship.ByteArray.Length];
+                byteArray = new byte[shipDamageProfile.ByteArray.Length];
                 RawBmp lastFrame = damageFrames.Last();
-                Buffer.BlockCopy(lastFrame.ByteArray, 0, byteArray, 0, ship.ByteArray.Length);
+                Buffer.BlockCopy(lastFrame.ByteArray, 0, byteArray, 0, shipDamageProfile.ByteArray.Length);
                 var thisFrame = new RawBmp()
                 {
                     ByteArray = byteArray,
-                    Height = ship.Height,
-                    Width = ship.Width,
-                    Depth = ship.Depth,
-                    Stride = ship.Stride
+                    Height = shipDamageProfile.Height,
+                    Width = shipDamageProfile.Width,
+                    Depth = shipDamageProfile.Depth,
+                    Stride = shipDamageProfile.Stride
                 };
 
                 (byte r, byte g, byte b, byte a) px = thisFrame.GetPixel(dpos.x, dpos.y);
@@ -203,11 +205,12 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                     if (momentum > 0)
                     {
                         px = ( px.r, px.g, px.b, 0);
+                        damageProfile.ComponentLookupTable[px.g].HTKRemaining -= 1;
                     }
 
                 }
 
-                thisFrame.SetPixel(dpos.x, dpos.y, byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)dmass);
+                thisFrame.SetPixel(dpos.x, dpos.y, byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)fragmentMass);
                 thisFrame.SetPixel(savedpxloc.x, savedpxloc.y, savedpx.r, savedpx.g, savedpx.b, savedpx.a);
                 damageFrames.Add(thisFrame);
                 savedpxloc = dpos;
@@ -222,14 +225,14 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             }
 
             
-            Buffer.BlockCopy(damageFrames.Last().ByteArray, 0, byteArray, 0, ship.ByteArray.Length);
+            Buffer.BlockCopy(damageFrames.Last().ByteArray, 0, byteArray, 0, shipDamageProfile.ByteArray.Length);
             var finalFrame = new RawBmp()
             {
                 ByteArray = byteArray,
-                Height = ship.Height,
-                Width = ship.Width,
-                Depth = ship.Depth,
-                Stride = ship.Stride
+                Height = shipDamageProfile.Height,
+                Width = shipDamageProfile.Width,
+                Depth = shipDamageProfile.Depth,
+                Stride = shipDamageProfile.Stride
             };
             finalFrame.SetPixel(savedpxloc.x, savedpxloc.y, savedpx.r, savedpx.g, savedpx.b, savedpx.a);
             return damageFrames;

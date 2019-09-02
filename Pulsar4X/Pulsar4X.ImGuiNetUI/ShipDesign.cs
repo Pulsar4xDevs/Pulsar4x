@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Printing;
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
@@ -37,6 +38,9 @@ namespace Pulsar4X.SDL2UI
         private int _armorIndex = 0;
         private double _armorThickness = 10;
         private (string name, double density, float thickness) _armor = ("Polyprop", 1175f, 10);
+        
+        private float _firstChildHeight = 350;
+        
         private ShipDesignUI()
         {
             _flags = ImGuiWindowFlags.NoCollapse;
@@ -74,8 +78,7 @@ namespace Pulsar4X.SDL2UI
             }
             else
                 thisitem = (ShipDesignUI)_state.LoadedWindows[typeof(ShipDesignUI)];
-
-
+            
             return thisitem;
         }
 
@@ -90,9 +93,10 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Columns(3);
                 ImGui.SetColumnWidth(0, 200);
                 ImGui.SetColumnWidth(1, 350);
+                ImGui.SetColumnWidth(2, 274);
                 if (ImGui.CollapsingHeader("Exsisting Designs"))
                 {
-                    ImGui.BeginChild("exsistingdesigns");
+                    ImGui.BeginChild("exsistingdesigns", new Vector2(200, _firstChildHeight));
 
                     for (int i = 0; i < _exsistingClasses.Count; i++)
                     {
@@ -104,19 +108,22 @@ namespace Pulsar4X.SDL2UI
                             _designName = _exsistingClasses[i].DesignName;
                             _shipComponents = _exsistingClasses[i].Components;
                             _armor = _exsistingClasses[i].Armor;
-                            _profile = ComponentPlacement.CreateDamageProfileDB(_shipComponents, _armor);
-                            _rawShipImage = _profile.ShipDamageProfile;
+                            _profile = new EntityDamageProfileDB(_shipComponents, _armor);
+                            _rawShipImage = _profile.DamageProfile;
                             _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
+
+                            _armorNames.Contains(_armor.name);
+                            _armorIndex = _armorSelection.FindIndex(foo => foo.name.Equals(_armor.name));
+                            
                         }
                     }
-                    
                     
                     ImGui.EndChild();
                 }
                 
                 ImGui.NextColumn();
                 
-                ImGui.BeginChild("ComponentSelection");
+                ImGui.BeginChild( "ComponentSelection", new Vector2(350, _firstChildHeight));
                 //ImGui.BeginGroup();
                 ImGui.Columns(3);
                 ImGui.SetColumnWidth(0, 150);
@@ -147,6 +154,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     
                 }
+                ImGui.Columns(1);
                 var selectedComponent = _componentDesigns[_selectedDesignsIndex];
                 if (ImGui.Button("Add"))
                 {
@@ -154,7 +162,7 @@ namespace Pulsar4X.SDL2UI
                     designChanged = true;
                 }
                 
-                ImGui.Separator();
+                
                 ImGui.EndChild();
 
                 ImGui.NextColumn();
@@ -164,7 +172,7 @@ namespace Pulsar4X.SDL2UI
                 
                 
                 
-                ImGui.BeginChild("ShipDesign");
+                ImGui.BeginChild("ShipDesign", new Vector2(274, _firstChildHeight));
                 
                 ImGui.Columns(2, "Ship Components", true);
                 ImGui.SetColumnWidth(0, 150);
@@ -295,8 +303,8 @@ namespace Pulsar4X.SDL2UI
                 
                 if (designChanged)
                 {
-                    _profile = ComponentPlacement.CreateDamageProfileDB(_shipComponents, _armor);
-                    _rawShipImage = _profile.ShipDamageProfile;
+                    _profile = new EntityDamageProfileDB(_shipComponents, _armor);
+                    _rawShipImage = _profile.DamageProfile;
                     
                     _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
                 }
@@ -305,7 +313,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     
                     float maxwidth = ImGui.GetWindowWidth();// ImGui.GetColumnWidth();;// 
-                    float maxheigh = 512;//ImGui.GetWindowHeight() / 2;
+                    float maxheight = 256;//ImGui.GetWindowHeight() / 2;
                     int w = _rawShipImage.Width; 
                     int h = _rawShipImage.Height;
                     float scalew = 1;
@@ -316,14 +324,14 @@ namespace Pulsar4X.SDL2UI
                         scalew = maxwidth / w;
                     }
 
-                    if (h > maxheigh)
+                    if (h > maxheight)
                     {
-                        scaleh = maxheigh / h;
+                        scaleh = maxheight / h;
                     }
 
                     scale = Math.Max(scaleh, scalew);
                     
-                    ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(w * scale, h * scale));
+                    ImGui.Image(_shipImgPtr, new Vector2(w * scale, h * scale));
                 }
                 //ImGui.NextColumn();
                 
@@ -343,11 +351,7 @@ namespace Pulsar4X.SDL2UI
                     shipClass.DesignVersion = version;
 
                 }
-
-
-
             }
-
         }
     }
 }

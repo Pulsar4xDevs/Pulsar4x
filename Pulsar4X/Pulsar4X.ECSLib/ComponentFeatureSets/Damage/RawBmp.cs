@@ -9,9 +9,25 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         public int Stride; //in a 32bit colour depth (ie 4 bits) this is 4 * width
         public int Width;
         public int Height;
-        
-        
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="width">Canvas Width in pixels</param>
+        /// <param name="height">Canvas Height in pixels</param>
+        /// <param name="depth">Colour depth in bytes (default 4 for rgba)</param>
+        public RawBmp(int width, int height, int depth = 4)
+        {
+            int size = depth * width * height;
+            int stride = width * depth;
+
+            ByteArray = new byte[size];
+            Stride = stride;
+            Depth = depth;
+            Width = width;
+            Height = height;
+        }
+
         public void SetPixel( int x, int y, byte r, byte g, byte b, byte a)
         {
             int offset = (Stride * y) + (Depth * x); 

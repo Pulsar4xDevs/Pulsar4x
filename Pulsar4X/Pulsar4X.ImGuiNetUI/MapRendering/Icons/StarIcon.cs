@@ -16,7 +16,7 @@ namespace Pulsar4X.SDL2UI
             StarInfoDB starInfo = entity.GetDataBlob<StarInfoDB>();
             _tempK = starInfo.Temperature + 273.15;
             var massVol = entity.GetDataBlob<MassVolumeDB>();
-            _bodyRadiusAU = massVol.Radius;
+            _bodyRadiusAU = massVol.RadiusInAU;
 
             double calcTemp = GMath.Clamp(_tempK, 1000, 40000);
             calcTemp = calcTemp / 100;

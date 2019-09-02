@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Numerics;
 
 using ImGuiNET;
-
+using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.SDL2UI
@@ -19,9 +20,13 @@ namespace Pulsar4X.SDL2UI
             get { return _selectedEntity;}
             set
             {
-                _selectedEntity = value;
-                _selectedEntityName = SelectedEntity.GetDataBlob<NameDB>().GetName(_state.Faction);
-                _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
+                if (_selectedEntity != value)
+                {
+                    _selectedEntity = value;
+                    _selectedEntityName = SelectedEntity.GetDataBlob<NameDB>().GetName(_state.Faction);
+                    _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
+                    OnSelectedEntityChanged();
+                }
             }
         } 
         private string _selectedEntityName;
@@ -46,6 +51,8 @@ namespace Pulsar4X.SDL2UI
         bool _drawParentSOI = false;
         //List<ECSLib.Vector4> positions = new List<ECSLib.Vector4>();
 
+        private IntPtr _dmgTxtr;
+        
         List<(string name, Entity entity)> _factionOwnedEntites = new List<(string name, Entity entity)>();
         
         
@@ -82,6 +89,29 @@ namespace Pulsar4X.SDL2UI
                 _state.EntityClickedEvent += _state_EntityClicked;
                 
             }
+        }
+
+        private void OnSelectedEntityChanged()
+        {
+            
+            if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
+            {
+                var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
+                _dmgTxtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, dmgdb.DamageProfile);
+            }
+            else if(_selectedEntity.HasDataBlob<SensorInfoDB>())
+            {
+                
+                var actualEntity = SelectedEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
+                if (actualEntity.IsValid && actualEntity.HasDataBlob<EntityDamageProfileDB>())
+                {
+                    var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
+                    _dmgTxtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, dmgdb.DamageProfile);
+                }
+            }
+            else
+                _dmgTxtr = IntPtr.Zero;
+            
         }
 
         private void _state_EntityClicked(EntityState entityState, MouseButtons btn)
@@ -291,7 +321,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("Mass " + mvdb.Mass + "Kg");
                                     ImGui.Text("Volume " + mvdb.Volume + "Km^3");
                                     ImGui.Text("Density " + mvdb.Density + "g/cm^3");
-                                    ImGui.Text("Radius " + mvdb.Radius + "Km");
+                                    ImGui.Text("Radius " + mvdb.RadiusInAU + "Km");
                                 }
 
                             }
@@ -491,6 +521,16 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     var dmgDB = actualEntity.GetDataBlob<AsteroidDamageDB>();
                                     ImGui.Text("Remaining HP: " + dmgDB.Health.ToString());
+                                }
+                            }
+                            if (_dmgTxtr != IntPtr.Zero)
+                            {
+                                if (ImGui.CollapsingHeader("DamageProfile"))
+                                {
+                                    if (ImGui.ImageButton(_dmgTxtr, new Vector2(64, 64)))
+                                    {
+                                        //show a full sized scrollable image. 
+                                    }
                                 }
                             }
 

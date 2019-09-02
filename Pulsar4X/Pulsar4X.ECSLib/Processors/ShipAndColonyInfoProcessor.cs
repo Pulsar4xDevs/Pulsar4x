@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
             mvDB.Mass = totalTonnage;
             mvDB.Volume = totalVolume;
             mvDB.Density = MassVolumeDB.CalculateDensity(totalTonnage, totalVolume);
-            mvDB.Radius = MassVolumeDB.CalculateRadius(totalTonnage, mvDB.Density);
+            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius(totalTonnage, mvDB.Density);
             
         }
     }

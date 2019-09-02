@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using ImGuiNET;
+using ImGuiSDL2CS;
 using Pulsar4X;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
@@ -145,7 +146,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                     _profile.PlacementOrder.RemoveAt(_selectedComponentIndex);
                                     _profile.PlacementOrder.Insert(_selectedComponentIndex - 1, item);
                                     _rawShipImage = ComponentPlacement.CreateShipBmp(_profile);
-                                    _shipImgPtr = CreateSDLTexture(_rawShipImage);
+                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
                                 }
                             }
 
@@ -157,7 +158,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                     _profile.PlacementOrder.RemoveAt(_selectedComponentIndex);
                                     _profile.PlacementOrder.Insert(_selectedComponentIndex + 1, item);
                                     _rawShipImage = ComponentPlacement.CreateShipBmp(_profile);
-                                    _shipImgPtr = CreateSDLTexture(_rawShipImage);
+                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
                                 }
                             }
 
@@ -228,7 +229,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                 Density = _projDensity,
                                 Length = _projLen
                             };
-                            _damageFrames = DamageTools.DealDamage(_rawShipImage, damageFrag);
+                            //_damageFrames = DamageTools.DealDamage(_rawShipImage, damageFrag);
                             _rawShipImage = _damageFrames.Last();
                         }
                     
@@ -242,7 +243,7 @@ namespace Pulsar4X.SDL2UI.Combat
                         _showFrameNum++;
                         if (_showFrameNum > _damageFrames.Count -1)
                             _showFrameNum = 0;
-                        _showDmgFrametx = CreateSDLTexture(_damageFrames[_showFrameNum]);
+                        _showDmgFrametx = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _damageFrames[_showFrameNum]);
                     }
                     int h = _damageFrames[_showFrameNum].Height;
                     int w = _damageFrames[_showFrameNum].Width;
@@ -255,42 +256,5 @@ namespace Pulsar4X.SDL2UI.Combat
             ImGui.End();
         }
 
-            IntPtr CreateSDLTexture(RawBmp rawImg)
-            {
-                IntPtr texture;
-                int h = rawImg.Height;
-                int w = rawImg.Width;
-                int d = rawImg.Depth * 8;
-                int s = rawImg.Stride;
-                IntPtr pxls;
-                unsafe
-                {
-                    fixed (byte* ptr = rawImg.ByteArray)
-                    {
-                        pxls = new IntPtr(ptr);
-                    }
-                }
-
-                uint rmask = 0xff000000;
-                uint gmask = 0x00ff0000;
-                uint bmask = 0x0000ff00;
-                uint amask = 0x000000ff;
-
-                IntPtr sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(pxls, w, h, d, s, rmask, gmask, bmask, amask);
-                texture = SDL.SDL_CreateTextureFromSurface(_state.rendererPtr, sdlSurface);
-                
-                int a;
-                uint f;
-                int qw;
-                int qh;
-                int q = SDL.SDL_QueryTexture(texture, out f, out a, out qw, out qh);
-                if (q != 0)
-                {
-                    ImGui.Text("QueryResult: " + q);
-                    ImGui.Text(SDL.SDL_GetError());
-                }
-                ImGui.Text("a: " + a +" f: " + f +" w: "+ qw +" h: "+ qh);
-                return texture;
-            }
         }
     }
