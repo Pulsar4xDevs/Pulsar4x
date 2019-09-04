@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using NCalc;
+using NCalc.Domain;
 
 namespace Pulsar4X.ECSLib
 {
@@ -375,34 +376,70 @@ namespace Pulsar4X.ECSLib
         {
             if (name == "Ability")
             {
+                string key = "";
                 int index = 0;
                 try
                 {
-                    index = (int)args.Parameters[0].Evaluate();
+                    //TODO: get rid of this once json data is rewritten to use names instead of indexes
+                    if (args.Parameters[0].Evaluate() is int)
+                    {
+                        index = (int)args.Parameters[0].Evaluate();
+                        ChainedExpression result = _designer.ComponentDesignAttributeList[index].Formula;
+                        if (result.Result == null)
+                            result.Evaluate();
+                        MakeThisDependant(result);
+                        args.Result = result.Result;
+                    }
+                    else
+                    {
+                        key = (string)args.Parameters[0].Evaluate();
 
-                    ChainedExpression result = _designer.ComponentDesignAttributes[index].Formula;
-                    if (result.Result == null)
-                        result.Evaluate();
-                    MakeThisDependant(result);
-                    args.Result = result.Result;
+                        ChainedExpression result = _designer.ComponentDesignAttributes[key].Formula;
+                        if (result.Result == null)
+                            result.Evaluate();
+                        MakeThisDependant(result);
+                        args.Result = result.Result;
+                    }
 
                 }
+                //TODO: maybe log this catch and throw the component out. (instead of throwing)
+                catch (KeyNotFoundException e) {throw new Exception("Cannot find an ability named " + key + ". " + e);}
+                
+                //TODO: the two catches below will be unnesiary once ComponentDesignAttributeList is gone.
                 catch (InvalidCastException e) { throw new Exception("Parameter must be an intiger. " + e); }
                 catch (IndexOutOfRangeException e) { throw new Exception("This component does not have an ComponentAbilitySD at index " + index + ". " + e); }
+                
             }
             if (name == "SetAbilityValue") //I might remove this..
             {
+                string key = "";
                 int index = 0;
                 try
                 {
-                    index = (int)args.Parameters[0].Evaluate();
 
-                    ChainedExpression expression = _designer.ComponentDesignAttributes[index].Formula;
-                    expression.SetResult = args.Parameters[1].Evaluate();
+                    //TODO: get rid of this once json data is rewritten to use names instead of indexes
+                    if (args.Parameters[0].Evaluate() is int)
+                    {
+                        index = (int)args.Parameters[0].Evaluate();
+                        ChainedExpression expression = _designer.ComponentDesignAttributeList[index].Formula;
+                        expression.SetResult = args.Parameters[1].Evaluate();
+                    }
+                    else
+                    {
+                        key = (string)args.Parameters[0].Evaluate();
+
+                        ChainedExpression expression = _designer.ComponentDesignAttributes[key].Formula;
+                        expression.SetResult = args.Parameters[1].Evaluate();
+                    }
 
                 }
+                //TODO: maybe log this catch and throw the component out. (instead of throwing)
+                catch (KeyNotFoundException e) {throw new Exception("Cannot find an ability named " + key  + ". " + e);}
+                
+                //TODO: the two catches below will be unnesiary once ComponentDesignAttributeList is gone.
                 catch (InvalidCastException e) { throw new Exception("Parameter must be an intiger. " + e); }
                 catch (IndexOutOfRangeException e) { throw new Exception("This component does not have an ComponentAbilitySD at index " + index + ". " + e); }
+                
             }
 
             if (name == "EnumDict")

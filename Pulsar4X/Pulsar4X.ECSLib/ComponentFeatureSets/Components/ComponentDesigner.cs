@@ -126,10 +126,13 @@ namespace Pulsar4X.ECSLib
             MaterialCostFormulas = materalCostFormulas;
             ComponentCostFormulas = componentCostForulas;
             
-            foreach (var abilitySD in componentSD.ComponentAbilitySDs)
+            foreach (ComponentTemplateAbilitySD abilitySD in componentSD.ComponentAbilitySDs)
             {
                 ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this);
-
+                
+                if(abilitySD.Name == null) //TODO: Log this, and don't use this component instead of throwing.
+                    throw new Exception("Bad Static Data. Ability name is null");
+                
                 designAttribute.Name = abilitySD.Name;
                 designAttribute.Description = abilitySD.Description;
                 designAttribute.GuiHint = abilitySD.GuiHint;
@@ -170,7 +173,10 @@ namespace Pulsar4X.ECSLib
                     designAttribute.DataBlobType = Type.GetType(abilitySD.AbilityDataBlobType);        
                 }
                 
-                ComponentDesignAttributes.Add(designAttribute);
+                ComponentDesignAttributes.Add(designAttribute.Name, designAttribute);
+                
+                //TODO: get rid of this once json data is rewritten to use names instead of indexes
+                ComponentDesignAttributeList.Add(designAttribute);
             }
 
             EvalAll();
@@ -202,7 +208,7 @@ namespace Pulsar4X.ECSLib
             //'tech' is TechSD (static data)
             factionTech.ResearchableTechs.Add(tech, 0); //add it to researchable techs 
             EvalAll();
-            foreach (var designAttribute in ComponentDesignAttributes)
+            foreach (var designAttribute in ComponentDesignAttributes.Values)
             {
                 if (designAttribute.DataBlobType != null)
                 {
@@ -371,7 +377,10 @@ namespace Pulsar4X.ECSLib
             internal set { _design.CargoTypeID = value; } 
         }
         
-        public List<ComponentDesignAttribute> ComponentDesignAttributes = new List<ComponentDesignAttribute>();
+        [Obsolete]//don't use this, TODO: get rid of this once json data is rewritten to use names instead of indexes
+        public List<ComponentDesignAttribute> ComponentDesignAttributeList = new List<ComponentDesignAttribute>();
+        
+        public Dictionary<string, ComponentDesignAttribute> ComponentDesignAttributes = new Dictionary<string, ComponentDesignAttribute>();
         public Dictionary<Type, IComponentDesignAttribute> Attributes
         {
             get { return _design.AttributesByType; }

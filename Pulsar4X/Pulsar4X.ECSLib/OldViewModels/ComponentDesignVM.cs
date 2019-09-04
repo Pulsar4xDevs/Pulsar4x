@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
             Designer = new ComponentDesigner(componentSD, _factionTech);
 
             AbilityList = new List<ComponentAbilityDesignVM>();
-            foreach (var componentAbility in Designer.ComponentDesignAttributes)
+            foreach (var componentAbility in Designer.ComponentDesignAttributes.Values)
             {
                 AbilityList.Add(new ComponentAbilityDesignVM(this, componentAbility, _staticData));
             }            

@@ -62,7 +62,7 @@ namespace Pulsar4X.Tests
 
             ComponentDesigner designer = new ComponentDesigner(componentTemplateSD, _faction.GetDataBlob<FactionTechDB>());
 
-            foreach (var ability in designer.ComponentDesignAttributes)
+            foreach (var ability in designer.ComponentDesignAttributes.Values)
             {
                 if (ability.GuiHint == GuiHint.GuiTechSelectionList)
                 {
@@ -78,7 +78,7 @@ namespace Pulsar4X.Tests
                     ability.SetValue();
             }
 
-            designer.ComponentDesignAttributes[0].SetValueFromInput(250);
+            designer.ComponentDesignAttributes["Engine Size"].SetValueFromInput(250);
 
             ComponentDesign engineDesign = designer.CreateDesign(_faction);
 
@@ -96,7 +96,7 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD mine = MineInstallation();
 
             ComponentDesigner mineDesigner = new ComponentDesigner(mine, _faction.GetDataBlob<FactionTechDB>());
-            mineDesigner.ComponentDesignAttributes[0].SetValue();
+            mineDesigner.ComponentDesignAttributes["MiningAmount"].SetValue();
             ComponentDesign mineDesign = mineDesigner.CreateDesign(_faction);
 
             Assert.AreEqual(10, mineDesign.GetAttribute<MineResourcesAtbDB>().ResourcesPerEconTick.Values.ElementAt(0));
@@ -113,7 +113,7 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD cargo = GeneralCargo();
 
             ComponentDesigner cargoDesigner = new ComponentDesigner(cargo, _faction.GetDataBlob<FactionTechDB>());
-            cargoDesigner.ComponentDesignAttributes[0].SetValue();
+            cargoDesigner.ComponentDesignAttributes["Warehouse Size"].SetValue();
  
             ComponentDesign cargoDesign = cargoDesigner.CreateDesign(_faction);
             
@@ -138,7 +138,7 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD factory = Factory();
 
             ComponentDesigner facDesigner = new ComponentDesigner(factory, _faction.GetDataBlob<FactionTechDB>());
-            facDesigner.ComponentDesignAttributes[0].SetValue();
+            facDesigner.ComponentDesignAttributes["Instalation Construction Points"].SetValue();
             ComponentDesign facDesign = facDesigner.CreateDesign(_faction);
 
             ConstructionAtbDB attributeDB = facDesign.GetAttribute<ConstructionAtbDB>();

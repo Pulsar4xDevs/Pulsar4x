@@ -52,7 +52,7 @@ namespace Pulsar4X.Tests
       
             _engineSD = NameLookup.GetTemplateSD(_game, "Engine");
             engineDesigner = new ComponentDesigner(_engineSD, _faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes[0].SetValueFromInput(5); //size = 25 power.
+            engineDesigner.ComponentDesignAttributes["Engine Size"].SetValueFromInput(5); //size = 25 power.
             
             
             

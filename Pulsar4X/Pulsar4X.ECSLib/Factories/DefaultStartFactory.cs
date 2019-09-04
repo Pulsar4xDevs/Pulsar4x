@@ -258,7 +258,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes[0].SetValueFromInput(500); //size 500 = 2500 power
+            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(500); //size 500 = 2500 power
             engineDesigner.Name = "DefaultEngine-250";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
    
@@ -273,7 +273,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner fuelTankDesigner;
             ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("E7AC4187-58E4-458B-9AEA-C3E07FC993CB")];
             fuelTankDesigner = new ComponentDesigner(tankSD, faction.GetDataBlob<FactionTechDB>());
-            fuelTankDesigner.ComponentDesignAttributes[0].SetValueFromInput(2500);
+            fuelTankDesigner.ComponentDesignAttributes["Tank Size"].SetValueFromInput(2500);
             fuelTankDesigner.Name = "Tank-500";
 
             return _fuelTank_500 = fuelTankDesigner.CreateDesign(faction);
@@ -286,9 +286,9 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner laserDesigner;
             ComponentTemplateSD laserSD = game.StaticData.ComponentTemplates[new Guid("8923f0e1-1143-4926-a0c8-66b6c7969425")];
             laserDesigner = new ComponentDesigner(laserSD, faction.GetDataBlob<FactionTechDB>());
-            laserDesigner.ComponentDesignAttributes[0].SetValueFromInput(100);
-            laserDesigner.ComponentDesignAttributes[1].SetValueFromInput(5000);
-            laserDesigner.ComponentDesignAttributes[2].SetValueFromInput(5);
+            laserDesigner.ComponentDesignAttributes["Range"].SetValueFromInput(100);
+            laserDesigner.ComponentDesignAttributes["Damage"].SetValueFromInput(5000);
+            laserDesigner.ComponentDesignAttributes["ReloadRate"].SetValueFromInput(5);
 
             return _laser = laserDesigner.CreateDesign(faction);
 
@@ -301,9 +301,9 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner fireControlDesigner;
             ComponentTemplateSD bfcSD = game.StaticData.ComponentTemplates[new Guid("33fcd1f5-80ab-4bac-97be-dbcae19ab1a0")];
             fireControlDesigner = new ComponentDesigner(bfcSD, faction.GetDataBlob<FactionTechDB>());
-            fireControlDesigner.ComponentDesignAttributes[0].SetValueFromInput(100);
-            fireControlDesigner.ComponentDesignAttributes[1].SetValueFromInput(5000);
-            fireControlDesigner.ComponentDesignAttributes[2].SetValueFromInput(1);
+            fireControlDesigner.ComponentDesignAttributes["Range"].SetValueFromInput(100);
+            fireControlDesigner.ComponentDesignAttributes["Tracking Speed"].SetValueFromInput(5000);
+            fireControlDesigner.ComponentDesignAttributes["Size vs Range"].SetValueFromInput(1);
 
             //return fireControlDesigner.CreateDesign(faction);
             return _fireControl = fireControlDesigner.CreateDesign(faction);
@@ -314,7 +314,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            componentDesigner.ComponentDesignAttributes[0].SetValueFromInput(1000000);
+            componentDesigner.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000000);
             componentDesigner.Name = "CargoInstalation1";
             //return cargoInstalation.CreateDesign(faction);
             CargoInstalation = componentDesigner.CreateDesign(faction);
@@ -327,9 +327,9 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner cargoComponent;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
             cargoComponent = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            cargoComponent.ComponentDesignAttributes[0].SetValueFromInput(5000); //5t component
-            cargoComponent.ComponentDesignAttributes[2].SetValueFromInput(500);
-            cargoComponent.ComponentDesignAttributes[3].SetValueFromInput(100);
+            cargoComponent.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(5000); //5t component
+            cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(500);
+            cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
             cargoComponent.Name = "CargoComponent5t";
             
             return _cargoHold = cargoComponent.CreateDesign(faction);
@@ -342,9 +342,9 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner cargoComponent;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
             cargoComponent = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            cargoComponent.ComponentDesignAttributes[0].SetValueFromInput(1000); //5t component
-            cargoComponent.ComponentDesignAttributes[2].SetValueFromInput(500);
-            cargoComponent.ComponentDesignAttributes[3].SetValueFromInput(100);
+            cargoComponent.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000); //5t component
+            cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(500);
+            cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
             cargoComponent.Name = "CargoComponent1t";
             
             return _cargoCompartment = cargoComponent.CreateDesign(faction);
@@ -357,13 +357,13 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner sensor;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensor = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            sensor.ComponentDesignAttributes[0].SetValueFromInput(500);  //size
-            sensor.ComponentDesignAttributes[1].SetValueFromInput(600); //best wavelength
-            sensor.ComponentDesignAttributes[2].SetValueFromInput(250); //wavelength detection width 
+            sensor.ComponentDesignAttributes["Sensor Size"].SetValueFromInput(500);  //size
+            sensor.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(600); //best wavelength
+            sensor.ComponentDesignAttributes["Detection Wavelength Width"].SetValueFromInput(250); //wavelength detection width 
             //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
-                                                                        //[4] worst detection magnatude (not settable)
-            sensor.ComponentDesignAttributes[5].SetValueFromInput(1);   //resolution
-            sensor.ComponentDesignAttributes[6].SetValueFromInput(3600);//Scan Time
+            //[4] worst detection magnatude (not settable)
+            sensor.ComponentDesignAttributes["Resolution"].SetValueFromInput(1);   //resolution
+            sensor.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
             sensor.Name = "PassiveSensor-S50";
             
             return _sensor_50 = sensor.CreateDesign(faction);
@@ -375,13 +375,13 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner sensorDesigner;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensorDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            sensorDesigner.ComponentDesignAttributes[0].SetValueFromInput(5000);  //size
-            sensorDesigner.ComponentDesignAttributes[1].SetValueFromInput(500); //best wavelength
-            sensorDesigner.ComponentDesignAttributes[2].SetValueFromInput(1000); //wavelength detection width 
+            sensorDesigner.ComponentDesignAttributes["Sensor Size"].SetValueFromInput(5000);  //size
+            sensorDesigner.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(500); //best wavelength
+            sensorDesigner.ComponentDesignAttributes["Detection Wavelength Width"].SetValueFromInput(1000); //wavelength detection width 
             //[3] best detection magnatude. (Not settable)
-            //[4] worst detection magnatude (not settable)
-            sensorDesigner.ComponentDesignAttributes[5].SetValueFromInput(5);   //resolution
-            sensorDesigner.ComponentDesignAttributes[6].SetValueFromInput(3600);//Scan Time
+            //[4] worst detection magnatude (not setta[ble)
+            sensorDesigner.ComponentDesignAttributes["Resolution"].SetValueFromInput(5);   //resolution
+            sensorDesigner.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
             sensorDesigner.Name = "PassiveSensor-S500";
             //return sensor.CreateDesign(faction);
             SensorInstalation = sensorDesigner.CreateDesign(faction);

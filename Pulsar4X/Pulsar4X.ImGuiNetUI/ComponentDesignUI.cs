@@ -55,7 +55,7 @@ namespace Pulsar4X.SDL2UI
                 if (_componentDesigner != null)
                 {
 
-                    foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes)
+                    foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values)
                     {
  
                         switch (attribute.GuiHint)
