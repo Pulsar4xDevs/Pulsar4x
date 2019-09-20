@@ -39,6 +39,7 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        
         public EntityState(SensorContact sensorContact)
         {
             Entity = sensorContact.ActualEntity;
@@ -50,6 +51,17 @@ namespace Pulsar4X.SDL2UI
             sensorContact.ActualEntity.ChangeEvent += On_entityChangeEvent;
             SetBodyType();
         }
+
+        public bool CanResearch
+        {
+            get
+            {
+                return DataBlobs.ContainsKey(typeof(EntityResearchDB)) ;
+
+            }
+        }
+
+ 
 
         void SetBodyType()
         {

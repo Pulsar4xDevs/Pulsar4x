@@ -18,6 +18,36 @@
         }
       },
       {
+        "Key": "7c23fd4d-6577-4fbe-b15e-77345558c804",
+        "Value": {
+          "Name": "Capacitors",
+          "Description": "",
+          "ID": "7c23fd4d-6577-4fbe-b15e-77345558c804",
+          "MaxLevel": 10,
+          "DataFormula": "1 + [Level] * 0.25 ",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "[Level] * 500"
+        }
+      },
+      {
+        "Key": "1167a255-b004-4a68-91af-1192169b5a37",
+        "Value": {
+          "Name": "Conductors",
+          "Description": "",
+          "ID": "1167a255-b004-4a68-91af-1192169b5a37",
+          "MaxLevel": 10,
+          "DataFormula": "[Level] * 5",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "[Level] * 500"
+        }
+      },
+      {
         "Key": "b8ef73c7-2ef0-445e-8461-1e0508958a0e",
         "Value": {
           "Name": "Maximum Engine Power Modifier",

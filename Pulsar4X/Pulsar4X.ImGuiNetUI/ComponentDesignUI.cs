@@ -38,7 +38,9 @@ namespace Pulsar4X.SDL2UI
             }
             return thisitem;
         }
-        
+
+
+
         internal override void Display()
         {
             if (IsActive && ImGui.Begin("Component Design", ref IsActive, _flags))

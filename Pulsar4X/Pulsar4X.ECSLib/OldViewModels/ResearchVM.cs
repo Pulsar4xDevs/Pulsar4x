@@ -136,7 +136,7 @@ namespace Pulsar4X.ECSLib
                 SelectedTechIndex = 0;
             }
 
-            foreach (var scientist in _colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists)
+            foreach (Scientist scientist in _colonyEntity.GetDataBlob<TeamsHousedDB>().TeamsByType[TeamTypes.Science])
             {
                 Scientists.Add(new ScientistControlVM(staticData, _factionTech, scientist));
             }
@@ -213,23 +213,23 @@ namespace Pulsar4X.ECSLib
     public class ScientistControlVM : IViewModel
     {
 
-        public Entity ScientistEntity;
+        public Scientist ScientistEntity;
         private StaticDataStore _staticData;
         //private ColonyResearchVM _parentResearchVM;
         private FactionTechDB _factionTech;
 
-        public string ScientistFirstName { get { return ScientistEntity.GetDataBlob<CommanderDB>().Name.First; } }
-        public string ScientistLastName { get { return ScientistEntity.GetDataBlob<CommanderDB>().Name.Last; } }
-        public int ScientistMaxLabs { get { return ScientistEntity.GetDataBlob<ScientistDB>().MaxLabs; } set{OnPropertyChanged();} }
+        //public string ScientistFirstName { get { return ScientistEntity.GetDataBlob<CommanderDB>().Name.First; } }
+        //public string ScientistLastName { get { return ScientistEntity.GetDataBlob<CommanderDB>().Name.Last; } }
+        //public int ScientistMaxLabs { get { return ScientistEntity.GetDataBlob<ScientistDB>().MaxLabs; } set{OnPropertyChanged();} }
 
         public byte ScientistAssignedLabs
         {
-            get { return ScientistEntity.GetDataBlob<ScientistDB>().AssignedLabs; } 
+            get { return ScientistEntity.AssignedLabs; } 
             set {ResearchProcessor.AssignLabs(ScientistEntity, value); OnPropertyChanged();}
         }
         //public int ColonyFreeLabs { get}
 
-        public Dictionary<ResearchCategories,float> ScientistBonus { get { return ScientistEntity.GetDataBlob<ScientistDB>().Bonuses; } }
+        public Dictionary<ResearchCategories,float> ScientistBonus { get { return ScientistEntity.Bonuses; } }
         private ObservableCollection<ResearchTechControlVM> _projectQueue;
         public ObservableCollection<ResearchTechControlVM> ProjectQueue { get { return _projectQueue; } }
 
@@ -247,7 +247,7 @@ namespace Pulsar4X.ECSLib
         {            
         }
 
-        public ScientistControlVM(StaticDataStore staticData, FactionTechDB factionTech, Entity scientist)
+        public ScientistControlVM(StaticDataStore staticData, FactionTechDB factionTech, Scientist scientist)
         {
             _staticData = staticData;
             _factionTech = factionTech;
@@ -267,7 +267,7 @@ namespace Pulsar4X.ECSLib
         public void Refresh(bool partialRefresh = false)
         {
             _projectQueue.Clear();
-            foreach (var techGuid in ScientistEntity.GetDataBlob<ScientistDB>().ProjectQueue)
+            foreach (var techGuid in ScientistEntity.ProjectQueue)
             {
                 _projectQueue.Add(new ResearchTechControlVM(_factionTech, techGuid));
             }

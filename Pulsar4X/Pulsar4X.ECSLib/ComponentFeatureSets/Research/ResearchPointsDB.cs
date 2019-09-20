@@ -1,7 +1,10 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System.Collections.Generic;
+
+namespace Pulsar4X.ECSLib
 {
     public class  EntityResearchDB : BaseDataBlob
     {
+        public Dictionary<ComponentInstance, int> Labs = new Dictionary<ComponentInstance, int>();
         public EntityResearchDB()
         {
         }

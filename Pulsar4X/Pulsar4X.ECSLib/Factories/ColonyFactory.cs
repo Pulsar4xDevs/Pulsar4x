@@ -34,6 +34,9 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB mvDB = new MassVolumeDB();
             blobs.Add(mvDB);
 
+            TeamsHousedDB th = new TeamsHousedDB();
+            blobs.Add(th);
+            
             //installations get added to the componentInstancesDB
             ComponentInstancesDB installations = new ComponentInstancesDB();
             blobs.Add(installations);

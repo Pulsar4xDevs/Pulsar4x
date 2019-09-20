@@ -55,30 +55,22 @@ namespace Pulsar4X.ECSLib
             entity.Manager.FindEntityByGuid(entity.FactionOwner, out faction);
             FactionAbilitiesDB factionAbilities = faction.GetDataBlob<FactionAbilitiesDB>();
             FactionTechDB factionTechs = faction.GetDataBlob<FactionTechDB>();
-            Dictionary<Entity, int> labs = new Dictionary<Entity, int>();
-
-            //TODO: why am I doing this here instead of as a recalc.
-            //foreach (var lab in entity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign.Keys.Where(inst => inst.HasDataBlob<ResearchPointsAtbDB>()))
-            //{               
-            //    int points = lab.GetDataBlob<ResearchPointsAtbDB>().PointsPerEconTick;
-            //    labs.Add(lab, points);
-            //}
-
-
-            foreach (var scientist in entity.GetDataBlob<ColonyInfoDB>().Scientists)
+            EntityResearchDB entityResearch = entity.GetDataBlob<EntityResearchDB>();
+            Dictionary<ComponentInstance, int> labs = entityResearch.Labs;
+            
+            foreach (Scientist scientist in entity.GetDataBlob<TeamsHousedDB>().TeamsByType[TeamTypes.Science])
             {
-                var scientistDB = scientist.GetDataBlob<ScientistDB>();
-
-                if (scientistDB.ProjectQueue.Count == 0)
+    
+                if (scientist.ProjectQueue.Count == 0)
                 {
                     continue;
                 }
 
                 //(TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
-                Guid projectGuid = scientist.GetDataBlob<ScientistDB>().ProjectQueue[0];
-                TechSD project = Techs[projectGuid];//_staticData.Techs[projectGuid];
-                int numProjectLabs = scientist.GetDataBlob<TeamsDB>().TeamSize;
-                float bonus = scientist.GetDataBlob<ScientistDB>().Bonuses[project.Category];
+                Guid projectGuid = scientist.ProjectQueue[0];
+                TechSD project = factionTechs.GetResarchableTech(projectGuid).tech;//_staticData.Techs[projectGuid];
+                int numProjectLabs = scientist.TeamSize;
+                float bonus = scientist.Bonuses[project.Category];
                 //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
 
                 int researchmax = CostFormula(factionTechs, project);
@@ -99,7 +91,7 @@ namespace Pulsar4X.ECSLib
                     if (factionTechs.ResearchableTechs[project] >= researchmax)
                     {
                         ApplyTech(factionTechs, project); //apply effects from tech, and add it to researched techs
-                        scientist.GetDataBlob<TeamsDB>().TeamTask = null; //team task is now nothing. 
+                        scientist.TeamTask = null; //team task is now nothing. 
                     }
                 }
             }
@@ -111,24 +103,31 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="scientist"></param>
         /// <param name="labs"></param>
-        public static void AssignLabs(Entity scientist, byte labs)
+        public static void AssignLabs(Scientist scientist, byte labs)
         {
             //TODO: ensure that the labs are availible to assign.
-            ScientistDB scientistDB = scientist.GetDataBlob<ScientistDB>();
-            scientistDB.AssignedLabs = Math.Max(scientistDB.MaxLabs, labs);
+            scientist.AssignedLabs = Math.Min(scientist.MaxLabs, labs);
         }
+        
+        public static void AddLabs(Scientist scientist, int labs)
+        {
+            //TODO: ensure that the labs are availible to assign.
+            byte numlabs = (byte)(scientist.AssignedLabs + labs);
+            AssignLabs(scientist, numlabs);
+        }
+        
+
 
         /// <summary>
         /// adds a tech to a scientists research queue.
         /// </summary>
         /// <param name="scientist"></param>
         /// <param name="techID"></param>
-        public static void AssignProject(Entity scientist, Guid techID)
+        public static void AssignProject(Scientist scientist, Guid techID)
         {
             //TODO: check valid research, scientist etc for the empire.
-            ScientistDB scientistDB = scientist.GetDataBlob<ScientistDB>();
             //TechSD project = _game.StaticData.Techs[techID];
-            scientistDB.ProjectQueue.Add(techID);
+            scientist.ProjectQueue.Add(techID);
         }
 
         /// <summary>
@@ -196,7 +195,9 @@ namespace Pulsar4X.ECSLib
                 factionTechs.ResearchableTechs.Remove(research);
             }
             else if (!factionTechs.ResearchableTechs.ContainsKey(research))
-                factionTechs.ResearchableTechs.Add(research, 0); 
+            {
+                factionTechs.MakeResearchable(research);
+            } 
 
             if (factionTechs.UnavailableTechs[research] >= research.MaxLevel)
                 factionTechs.UnavailableTechs.Remove(research); //if we've reached the max value for this tech remove it from the unavailbile list

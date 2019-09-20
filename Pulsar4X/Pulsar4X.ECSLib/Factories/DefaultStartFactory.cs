@@ -58,8 +58,8 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner facDesigner = new ComponentDesigner(facSD, factionEntity.GetDataBlob<FactionTechDB>());
             ComponentDesign facEntity = facDesigner.CreateDesign(factionEntity);
 
-            Entity scientistEntity = CommanderFactory.CreateScientist(game.GlobalManager, factionEntity);
-            colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists.Add(scientistEntity);
+            Scientist scientistEntity = CommanderFactory.CreateScientist(factionEntity, colonyEntity);
+            colonyEntity.GetDataBlob<TeamsHousedDB>().AddTeam(scientistEntity);
 
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
             //TechProcessor.ApplyTech(factionTech, game.StaticData.Techs[new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c")]); //add conventional engine for testing. 

@@ -7,6 +7,9 @@ namespace Pulsar4X.SDL2UI
 {
     public class ToolBarUI : PulsarGuiWindow
     {
+        private float _btnSize = 32;
+        public Vector2 BtnSizes = new Vector2(32, 32);
+        private List<ToolbuttonData> ToolButtons = new List<ToolbuttonData>();
         public struct ToolbuttonData
         {
             public IntPtr Picture;
@@ -16,7 +19,7 @@ namespace Pulsar4X.SDL2UI
 
         private ToolBarUI()
         {
-            _flags = ImGuiWindowFlags.NoResize;
+            _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar;
             ToolbuttonData btn =  new ToolbuttonData()
             {
                 Picture = _state.SDLImageDictionary["DesComp"],
@@ -33,6 +36,14 @@ namespace Pulsar4X.SDL2UI
                 
             };
             ToolButtons.Add(btn);
+            btn =  new ToolbuttonData()
+            {
+                Picture = _state.SDLImageDictionary["Research"],
+                TooltipText = "Research",
+                OnClick = new Action(ResearchWindow.GetInstance().SetActive)
+                
+            };
+            ToolButtons.Add(btn);
             
             
         }
@@ -46,8 +57,7 @@ namespace Pulsar4X.SDL2UI
             return (ToolBarUI)PulsarGuiWindow._state.LoadedWindows[typeof(ToolBarUI)];
         }
         
-        public Vector2 BtnSizes = new Vector2(32, 32);
-        private List<ToolbuttonData> ToolButtons = new List<ToolbuttonData>();
+
 
 
         internal void SetButtons(List<ToolbuttonData> buttons)
@@ -57,6 +67,11 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
+            float xpad = 24;
+            float ypad = 16;
+            float x = _btnSize + xpad;
+            float y = (_btnSize + ypad) * ToolButtons.Count; 
+            ImGui.SetNextWindowSize(new Vector2(x,y ));
             if (ImGui.Begin("##Toolbar", _flags))
             {
                 foreach (var button in ToolButtons)

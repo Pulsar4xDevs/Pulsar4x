@@ -33,6 +33,14 @@
           "Description": "Storage for frozen people",
           "ID": "9e52a3af-66af-4935-982d-26f3fee775b0"
         }
+      },
+      {
+        "Key": "7e08074d-682c-4452-a45a-dc97968f53ca",
+        "Value": {
+          "Name": "Passengers",
+          "Description": "Cabins for people",
+          "ID": "7e08074d-682c-4452-a45a-dc97968f53ca"
+        }
       }
     ]
   }

@@ -92,6 +92,7 @@ namespace Pulsar4X.SDL2UI
             LoadImg("CancelImg", Path.Combine( rf,"CancelIco.bmp"));
             LoadImg("DesComp", Path.Combine(rf, "DesignComponentIco.bmp"));
             LoadImg("DesShip", Path.Combine(rf, "DesignShipIco.bmp"));
+            LoadImg("Research", Path.Combine(rf, "ResearchIco.bmp"));
             /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
@@ -192,6 +193,7 @@ namespace Pulsar4X.SDL2UI
         {
              _state.LoadedWindows[this.GetType()] = this;
         }
+
 
 
         /*An example of how the constructor should be for a derived class. 

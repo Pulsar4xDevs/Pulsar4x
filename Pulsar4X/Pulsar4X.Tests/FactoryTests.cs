@@ -78,7 +78,7 @@ namespace Pulsar4X.Tests
                 typeof(ScientistDB)
             };
 
-            Entity scientist = CommanderFactory.CreateScientist(_game.GlobalManager, faction);
+            //Entity scientist = CommanderFactory.CreateScientist(faction, );
 
             //Assert.IsTrue(HasAllRequiredDatablobs(scientist, requiredDataBlobs), "Scientist Entity doesn't contains all required datablobs");
         }

@@ -152,6 +152,10 @@
     <Content Include="Resources\DesignComponentIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Remove="Resources\ResearchIco.bmp" />
+    <Content Include="Resources\ResearchIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Colony\" />

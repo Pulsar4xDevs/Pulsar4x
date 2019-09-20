@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace Pulsar4X.ECSLib
 {
@@ -21,7 +22,48 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [PublicAPI]
         [JsonProperty]
-        public Dictionary<TechSD, int> ResearchableTechs { get; internal set; }
+        internal Dictionary<TechSD, int> ResearchableTechs { get; set; }
+        
+        private Dictionary<Guid, (TechSD tech ,int pointsResearched)> Researchables = new Dictionary<Guid, (TechSD, int)>();
+        
+        public (TechSD tech, int pointsResearched) GetResarchableTech(Guid id)
+        {
+            return Researchables[id];
+        }
+
+        public List<(TechSD tech, int pointsResearched)> GetResearchableTechs()
+        {
+            var foo = new List<(TechSD tech, int pointsResearched)>();
+            foreach (var item in Researchables)
+            {
+                foo.Add(item.Value);
+            }
+
+            return foo;
+        }
+
+        internal void AddPoints(Guid id, int pointsToAdd)
+        {
+            TechSD tech = Researchables[id].tech;
+            int points = Researchables[id].pointsResearched + pointsToAdd;
+            if (points >= ResearchProcessor.CostFormula(this, tech))
+            {
+                if (ResearchedTechs.ContainsKey(tech.ID))
+                    ResearchedTechs[tech.ID] += 1;
+                else
+                    ResearchedTechs.Add(tech.ID, 0);
+            }
+            else
+            {
+                Researchables[id] = (Researchables[id].tech ,Researchables[id].pointsResearched + pointsToAdd);
+            }
+        }
+
+        public void MakeResearchable(TechSD tech)
+        {
+            if(!Researchables.ContainsKey(tech.ID))
+                Researchables.Add(tech.ID, (tech, 0));
+        }
 
         /// <summary>
         /// a list of techs not yet meeting the requirements to research
@@ -34,6 +76,9 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int ResearchPoints { get; internal set; }
 
+
+        public List<(Scientist scientist, Entity atEntity)> AllScientists { get; internal set; } = new List<(Scientist, Entity)>();
+        
         /// <summary>
         /// Constructor for datablob, this should only be used when a new faction is created.
         /// </summary>
