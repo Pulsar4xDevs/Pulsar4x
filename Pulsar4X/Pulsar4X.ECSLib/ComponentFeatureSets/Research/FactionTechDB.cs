@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 
 namespace Pulsar4X.ECSLib
@@ -33,13 +34,12 @@ namespace Pulsar4X.ECSLib
 
         public List<(TechSD tech, int pointsResearched, int pointCost)> GetResearchableTechs()
         {
-            var foo = new List<(TechSD tech, int pointsResearched, int pointCost)>();
-            foreach (var item in Researchables)
-            {
-                foo.Add(item.Value);
-            }
+            return Researchables.Values.ToList();
+        }
 
-            return foo;
+        public Dictionary<Guid, (TechSD tech, int pointsResearched, int pointCost)> GetResearchablesDic()
+        {
+            return new Dictionary<Guid, (TechSD tech, int pointsResearched, int pointCost)>(Researchables);
         }
 
         public bool IsResearchable(Guid id)
