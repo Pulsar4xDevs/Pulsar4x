@@ -127,12 +127,15 @@ namespace Pulsar4X.ECSLib
             _colonyEntity = colonyEntity;
             _factionTech = _factionEntity.GetDataBlob<FactionTechDB>();
             Scientists = new List<ScientistControlVM>();
-            if (_factionTech.ResearchableTechs.Count > 0)
+
+            var researchables = _factionTech.GetResearchableTechs();
+            
+            if (researchables.Count > 0)
             {
                 //ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
                 ResearchableTechs = new DictionaryVM<TechSD, string>(DisplayMode.Value);
-                foreach (var tech in _factionTech.ResearchableTechs.Keys)
-                    ResearchableTechs.Add(tech, tech.Name);
+                foreach (var tech in researchables)
+                    ResearchableTechs.Add(tech.tech, tech.tech.Name);
                 SelectedTechIndex = 0;
             }
 
@@ -154,7 +157,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedTech.Name == null)
                     return 0;
-                return _factionTech.ResearchableTechs[SelectedTech];
+                return _factionTech.GetResarchableTech(SelectedTech.ID).pointsResearched;
             }
         }
 
@@ -185,8 +188,8 @@ namespace Pulsar4X.ECSLib
 
             //ResearchableTechs = new ObservableCollection<TechSD>(_factionTech.ResearchableTechs.Keys);
             ResearchableTechs = new DictionaryVM<TechSD, string>(DisplayMode.Value);
-            foreach (var tech in _factionTech.ResearchableTechs.Keys)
-                ResearchableTechs.Add(tech, tech.Name);
+            foreach (var tech in _factionTech.GetResearchableTechs())
+                ResearchableTechs.Add(tech.tech, tech.tech.Name);
             /*
             foreach (var kvp in _colonyEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign)
             {
@@ -267,9 +270,9 @@ namespace Pulsar4X.ECSLib
         public void Refresh(bool partialRefresh = false)
         {
             _projectQueue.Clear();
-            foreach (var techGuid in ScientistEntity.ProjectQueue)
+            foreach (var queueItem in ScientistEntity.ProjectQueue)
             {
-                _projectQueue.Add(new ResearchTechControlVM(_factionTech, techGuid));
+                _projectQueue.Add(new ResearchTechControlVM(_factionTech, queueItem.techID));
             }
         }
     }
@@ -283,7 +286,7 @@ namespace Pulsar4X.ECSLib
         public int Level { get { return _factionTech.LevelforTech(_techSD) + 1; } }
 
         public int PointCost { get { return ResearchProcessor.CostFormula(_factionTech, _techSD); } }
-        public int PointsCompleted { get { return _factionTech.ResearchableTechs[_techSD]; } set{OnPropertyChanged();} }
+        public int PointsCompleted { get { return _factionTech.GetResarchableTech(_techSD.ID).pointsResearched; } set{OnPropertyChanged();} }
 
         public ResearchTechControlVM()
         {           
@@ -292,7 +295,7 @@ namespace Pulsar4X.ECSLib
         public ResearchTechControlVM(FactionTechDB factionTech, Guid techID)
         {
             _factionTech = factionTech;
-            _techSD = factionTech.ResearchableTechs.Keys.First(k => k.ID == techID);
+            _techSD = factionTech.GetResarchableTech(techID).tech;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 
 namespace Pulsar4X.ECSLib
 {
@@ -56,7 +57,19 @@ namespace Pulsar4X.ECSLib
             FactionAbilitiesDB factionAbilities = faction.GetDataBlob<FactionAbilitiesDB>();
             FactionTechDB factionTechs = faction.GetDataBlob<FactionTechDB>();
             EntityResearchDB entityResearch = entity.GetDataBlob<EntityResearchDB>();
-            Dictionary<ComponentInstance, int> labs = entityResearch.Labs;
+            //Dictionary<ComponentInstance, int> labs = entityResearch.Labs;
+            List<(ComponentInstance lab, int pnts)> allLabs = new List<(ComponentInstance lab, int pnts)>();
+            if (entity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<ResearchPointsAtbDB>(out var labs))
+            {
+                foreach (var labInstance in labs)
+                {
+                    var points = labInstance.Design.GetAttribute<ResearchPointsAtbDB>().PointsPerEconTick;
+                    allLabs.Add((labInstance, points));
+                }
+            }
+            
+            int labIndex = 0;
+            int maxLabs = allLabs.Count;
             
             foreach (Scientist scientist in entity.GetDataBlob<TeamsHousedDB>().TeamsByType[TeamTypes.Science])
             {
@@ -65,33 +78,44 @@ namespace Pulsar4X.ECSLib
                 {
                     continue;
                 }
+                Guid projectGuid = scientist.ProjectQueue[0].techID;
+                bool cycleProject = scientist.ProjectQueue[0].cycle;
+                
+                if(!factionTechs.IsResearchable(projectGuid))
+                {
+                    scientist.ProjectQueue.RemoveAt(0);
+                    continue;
+                }
 
+                int assignedLabs = scientist.AssignedLabs;
                 //(TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
-                Guid projectGuid = scientist.ProjectQueue[0];
+                
                 TechSD project = factionTechs.GetResarchableTech(projectGuid).tech;//_staticData.Techs[projectGuid];
-                int numProjectLabs = scientist.TeamSize;
-                float bonus = scientist.Bonuses[project.Category];
+                //int numProjectLabs = scientist.TeamSize;
+                float bonus = 1;
+                if (scientist.Bonuses.ContainsKey(project.Category))
+                    bonus += scientist.Bonuses[project.Category];
                 //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
 
-                int researchmax = CostFormula(factionTechs, project);
-
                 int researchPoints = 0;
-                foreach (var kvp in labs)
+
+                var maxIndex = Math.Max(labIndex + assignedLabs, maxLabs); //shouldn't happen unless assigned labs is more than the labs availible.
+                for (int i = labIndex; i < maxIndex; i++)
                 {
-                    while (numProjectLabs > 0)
-                    {
-                        researchPoints += kvp.Value;
-                        numProjectLabs --;
-                    }
+                    researchPoints += allLabs[i].pnts;
                 }
+                
                 researchPoints = (int)(researchPoints * bonus);
-                if (factionTechs.ResearchableTechs.ContainsKey(project))
+                
+                if (factionTechs.IsResearchable(project.ID))
                 {
-                    factionTechs.ResearchableTechs[project] += researchPoints;
-                    if (factionTechs.ResearchableTechs[project] >= researchmax)
+                    int currentLvl = factionTechs.LevelforTech(project);
+                    factionTechs.AddPoints(project.ID, researchPoints);
+                    if (factionTechs.LevelforTech(project) > currentLvl)
                     {
-                        ApplyTech(factionTechs, project); //apply effects from tech, and add it to researched techs
-                        scientist.TeamTask = null; //team task is now nothing. 
+                        scientist.ProjectQueue.RemoveAt(0);
+                        if(cycleProject)
+                            scientist.ProjectQueue.Add((project.ID, true));
                     }
                 }
             }
@@ -127,7 +151,7 @@ namespace Pulsar4X.ECSLib
         {
             //TODO: check valid research, scientist etc for the empire.
             //TechSD project = _game.StaticData.Techs[techID];
-            scientist.ProjectQueue.Add(techID);
+            scientist.ProjectQueue.Add((techID, false));
         }
 
         /// <summary>
@@ -141,12 +165,12 @@ namespace Pulsar4X.ECSLib
             {
                 bool requrementsMet = false;
 
-                if (kvpTech.Key.Requirements.Count == 0) //if requirements is an empty dict
+                if (kvpTech.Requirements.Count == 0) //if requirements is an empty dict
                 {
                     requrementsMet = true;
                 }
                 else {
-                    foreach (var kvpRequrement in kvpTech.Key.Requirements)
+                    foreach (var kvpRequrement in kvpTech.Requirements)
                     {
                         if (techdb.ResearchedTechs.ContainsKey(kvpRequrement.Key)
                             && techdb.ResearchedTechs[kvpRequrement.Key] >= kvpRequrement.Value)
@@ -162,51 +186,19 @@ namespace Pulsar4X.ECSLib
                 }
                 if (requrementsMet)
                 {
-                    requrementsMetTechs.Add(kvpTech.Key);             
+                    requrementsMetTechs.Add(kvpTech);             
                 }
             }
             foreach (var item in requrementsMetTechs)
             {
-                ApplyTech(techdb, item);
+                techdb.MakeResearchable(item);
             }
             if (requrementsMetTechs.Count > 0)
-                MakeResearchable(techdb);//run again.
+                MakeResearchable(techdb);//run again, we may have met a requirment by makign something else researchable.
         }
 
 
-        /// <summary>
-        /// Applies the researched tech to the faction. Can be used when tech is gifted, stolen, researched...
-        /// Increases the specific TechSD by one level for the given faction.
-        /// </summary>
-        /// <param name="factionAbilities"></param>
-        /// <param name="factionTechs"></param>
-        /// <param name="research"></param>
-        public static void ApplyTech(FactionTechDB factionTechs, TechSD research)
-        {
 
-            if (factionTechs.ResearchedTechs.ContainsKey(research.ID))
-                factionTechs.ResearchedTechs[research.ID] += 1;
-            else
-                factionTechs.ResearchedTechs.Add(research.ID, 0);
-
-           
-            if (factionTechs.LevelforTech(research) >= research.MaxLevel)
-            {
-                factionTechs.ResearchableTechs.Remove(research);
-            }
-            else if (!factionTechs.ResearchableTechs.ContainsKey(research))
-            {
-                factionTechs.MakeResearchable(research);
-            } 
-
-            if (factionTechs.UnavailableTechs[research] >= research.MaxLevel)
-                factionTechs.UnavailableTechs.Remove(research); //if we've reached the max value for this tech remove it from the unavailbile list
-            else                                             //else if we've not reached max value, increase the level.
-                factionTechs.UnavailableTechs[research] += 1;
-            
-            //check if it's opened up other reasearch.
-            //MakeResearchable(factionTechs);
-        }
 
 
 

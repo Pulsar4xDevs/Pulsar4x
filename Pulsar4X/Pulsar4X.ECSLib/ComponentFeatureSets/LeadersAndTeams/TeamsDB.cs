@@ -180,7 +180,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Queue of projects currently being worked on by this scientist.
         /// </summary>
-        public List<Guid> ProjectQueue { get; internal set; } = new List<Guid>();
+        public List<(Guid techID, bool cycle)> ProjectQueue { get; internal set; } = new List<(Guid,bool)>();
 
         public new string Name { get; set; }
 
@@ -194,7 +194,7 @@ namespace Pulsar4X.ECSLib
             Bonuses = bonuses;
             MaxLabs = maxLabs;
             AssignedLabs = 0;
-            ProjectQueue = new List<Guid>();
+            ProjectQueue = new List<(Guid, bool)>();
         }
 
         public Scientist(Scientist dB)

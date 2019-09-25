@@ -22,18 +22,18 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [PublicAPI]
         [JsonProperty]
-        internal Dictionary<TechSD, int> ResearchableTechs { get; set; }
+        //internal Dictionary<TechSD, int> ResearchableTechs { get; set; }
         
-        private Dictionary<Guid, (TechSD tech ,int pointsResearched)> Researchables = new Dictionary<Guid, (TechSD, int)>();
+        private Dictionary<Guid, (TechSD tech ,int pointsResearched, int pointCost)> Researchables = new Dictionary<Guid, (TechSD, int, int)>();
         
-        public (TechSD tech, int pointsResearched) GetResarchableTech(Guid id)
+        public (TechSD tech, int pointsResearched, int pointCost) GetResarchableTech(Guid id)
         {
             return Researchables[id];
         }
 
-        public List<(TechSD tech, int pointsResearched)> GetResearchableTechs()
+        public List<(TechSD tech, int pointsResearched, int pointCost)> GetResearchableTechs()
         {
-            var foo = new List<(TechSD tech, int pointsResearched)>();
+            var foo = new List<(TechSD tech, int pointsResearched, int pointCost)>();
             foreach (var item in Researchables)
             {
                 foo.Add(item.Value);
@@ -42,27 +42,52 @@ namespace Pulsar4X.ECSLib
             return foo;
         }
 
+        public bool IsResearchable(Guid id)
+        {
+            return Researchables.ContainsKey(id);
+        }
+
         internal void AddPoints(Guid id, int pointsToAdd)
         {
-            TechSD tech = Researchables[id].tech;
-            int points = Researchables[id].pointsResearched + pointsToAdd;
-            if (points >= ResearchProcessor.CostFormula(this, tech))
+            lock (Researchables) //because different systems which are on seperate threads may interact with this.
             {
-                if (ResearchedTechs.ContainsKey(tech.ID))
-                    ResearchedTechs[tech.ID] += 1;
+                TechSD tech = Researchables[id].tech;
+                int points = Researchables[id].pointsResearched + pointsToAdd;
+                if (points >= Researchables[id].pointCost)
+                {
+                    int remainder = points - Researchables[id].pointCost;
+                    if (ResearchedTechs.ContainsKey(tech.ID))
+                        ResearchedTechs[tech.ID] += 1;
+                    else
+                        ResearchedTechs.Add(tech.ID, 0);
+                    
+                    if (LevelforTech(tech) >= tech.MaxLevel)
+                    {
+                        Researchables.Remove(tech.ID);
+                    }
+                    else
+                    {
+                        int newLevelCost = ResearchProcessor.CostFormula(this, tech);
+                        Researchables[id] = (Researchables[id].tech, remainder, newLevelCost);
+                    }
+                }
                 else
-                    ResearchedTechs.Add(tech.ID, 0);
-            }
-            else
-            {
-                Researchables[id] = (Researchables[id].tech ,Researchables[id].pointsResearched + pointsToAdd);
+                {
+                    Researchables[id] = (Researchables[id].tech, points, Researchables[id].pointCost);
+                }
             }
         }
 
         public void MakeResearchable(TechSD tech)
         {
             if(!Researchables.ContainsKey(tech.ID))
-                Researchables.Add(tech.ID, (tech, 0));
+            {
+                int cost = ResearchProcessor.CostFormula(this, tech);
+                Researchables.Add(tech.ID, (tech, 0, cost));
+            }
+
+            if (UnavailableTechs.Contains(tech))
+                UnavailableTechs.Remove(tech);
         }
 
         /// <summary>
@@ -70,7 +95,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [PublicAPI]
         [JsonProperty]
-        public Dictionary<TechSD, int> UnavailableTechs { get; internal set; }
+        public HashSet<TechSD> UnavailableTechs { get; internal set; } = new HashSet<TechSD>();
 
         [PublicAPI]
         [JsonProperty]
@@ -85,30 +110,30 @@ namespace Pulsar4X.ECSLib
         /// <param name="alltechs">a list of all possible techs in game</param>
         public FactionTechDB(List<TechSD> alltechs)
         {
-            UnavailableTechs = new Dictionary<TechSD, int>();
+            
             foreach (var techSD in alltechs)
             {             
-                UnavailableTechs.Add(techSD,0);
+                UnavailableTechs.Add(techSD);
             }
             
             ResearchedTechs = new Dictionary<Guid, int>();
-            ResearchableTechs = new Dictionary<TechSD, int>();
+
             ResearchPoints = 0;
         }
 
         public FactionTechDB(FactionTechDB techDB)
         {
-            UnavailableTechs = new Dictionary<TechSD, int>(techDB.UnavailableTechs);
+            UnavailableTechs = new HashSet<TechSD>(techDB.UnavailableTechs);
             ResearchedTechs = new Dictionary<Guid, int>(techDB.ResearchedTechs);
-            ResearchableTechs = new Dictionary<TechSD, int>(techDB.ResearchableTechs);
+
             ResearchPoints = techDB.ResearchPoints;
         }
 
         public FactionTechDB()
         {
-            UnavailableTechs = new Dictionary<TechSD, int>();
+            
             ResearchedTechs = new Dictionary<Guid, int>();
-            ResearchableTechs = new Dictionary<TechSD, int>();
+
             ResearchPoints = 0;
         }
 
@@ -139,11 +164,7 @@ namespace Pulsar4X.ECSLib
                 hash = Misc.ValueHash(item.Key, hash);  
                 hash = Misc.ValueHash(item.Value, hash);
             } 
-            foreach (var item in ResearchableTechs)
-            {
-                hash = Misc.ValueHash(item.Key.ID, hash);
-                hash = Misc.ValueHash(item.Value, hash);
-            }
+
             return hash;
         }
     }

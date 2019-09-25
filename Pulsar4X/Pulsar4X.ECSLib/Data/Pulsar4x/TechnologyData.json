@@ -10,11 +10,11 @@
           "Category": "ConstructionProduction",
           "ID": "9be1305f-f206-46dd-8901-af4ae55c5429",
           "MaxLevel": 11,
-          "DataFormula": "[Level] * 1.5",
+          "DataFormula": "1 + [Level] * 1.5",
           "Requirements": {
             "List": []
           },
-          "CostFormula": "[Level] * 1"
+          "CostFormula": "1 + [Level] * 100"
         }
       },
       {
@@ -29,7 +29,7 @@
           "Requirements": {
             "List": []
           },
-          "CostFormula": "[Level] * 500"
+          "CostFormula": "1 + [Level] * 500"
         }
       },
       {
@@ -44,7 +44,7 @@
           "Requirements": {
             "List": []
           },
-          "CostFormula": "[Level] * 500"
+          "CostFormula": "1 + [Level] * 500"
         }
       },
       {
@@ -59,7 +59,7 @@
           "Requirements": {
             "List": []
           },
-          "CostFormula": "[Level] * 1"
+          "CostFormula": "1 + [Level] * 100"
         }
       },
       {
@@ -74,7 +74,7 @@
           "Requirements": {
             "List": []
           },
-          "CostFormula": "[Level] * 1"
+          "CostFormula": "1 + [Level] * 100"
         }
       },
       {
@@ -89,7 +89,7 @@
           "Requirements": {
             "List": []
           },
-          "CostFormula": "[Level] * 1"
+          "CostFormula": "1 + [Level] * 100"
         }
       },
       {
@@ -104,7 +104,7 @@
           "Requirements": {
             "List": []
           },
-          "CostFormula": "[Level] * 500"
+          "CostFormula": "1 + [Level] * 500"
         }
       },
       {
@@ -124,7 +124,7 @@
               }
             ]
           },
-          "CostFormula": "[Level] * 2500"
+          "CostFormula": "1 + [Level] * 2500"
         }
       },
       {
@@ -144,7 +144,7 @@
               }
             ]
           },
-          "CostFormula": "[Level] * 5000"
+          "CostFormula": "1 + [Level] * 5000"
         }
       },
       {
@@ -164,7 +164,7 @@
               }
             ]
           },
-          "CostFormula": "[Level] * 10000"
+          "CostFormula": "1 + [Level] * 10000"
         }
       },
       {
@@ -204,7 +204,7 @@
               }
             ]
           },
-          "CostFormula": "[Level] * 2500"
+          "CostFormula": "1 + [Level] * 2500"
         }
       },
       {
@@ -224,7 +224,7 @@
               }
             ]
           },
-          "CostFormula": "[Level] * 2500"
+          "CostFormula": "1 + [Level] * 2500"
         }
       }
     ]
