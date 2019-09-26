@@ -59,7 +59,7 @@ namespace Pulsar4X.ECSLib
                     if (ResearchedTechs.ContainsKey(tech.ID))
                         ResearchedTechs[tech.ID] += 1;
                     else
-                        ResearchedTechs.Add(tech.ID, 0);
+                        ResearchedTechs.Add(tech.ID, 1);
                     
                     if (LevelforTech(tech) >= tech.MaxLevel)
                     {
@@ -70,12 +70,15 @@ namespace Pulsar4X.ECSLib
                         int newLevelCost = ResearchProcessor.CostFormula(this, tech);
                         Researchables[id] = (Researchables[id].tech, remainder, newLevelCost);
                     }
+                    ResearchProcessor.CheckRequrements(this);
                 }
                 else
                 {
                     Researchables[id] = (Researchables[id].tech, points, Researchables[id].pointCost);
                 }
             }
+            
+            
         }
 
         public void MakeResearchable(TechSD tech)

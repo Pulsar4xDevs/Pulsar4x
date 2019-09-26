@@ -225,8 +225,9 @@ namespace Pulsar4X.SDL2UI
             ImGui.BeginChild("SelectedSci");
             Scientist scientist = _scienceTeams[selected].scientist;
             bool isDirty = false;
-            ImGui.Columns(2);
+            ImGui.Columns(3);
             ImGui.SetColumnWidth(0, 150);
+            ImGui.SetColumnWidth(1, 150);
             for (int i = 0; i < scientist.ProjectQueue.Count; i++)
             {
                 
@@ -234,8 +235,13 @@ namespace Pulsar4X.SDL2UI
                 (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
                 ImGui.Text(projItem.tech.Name);
                 //ImGui.Text(proj.Description);
+                
                 ImGui.NextColumn();
 
+                ImGui.Text(projItem.tech.Category.ToString());
+                
+                ImGui.NextColumn();
+                
                 string cyclestr = "*";
                 if (queueItem.cycle)
                     cyclestr = "O";
@@ -243,43 +249,30 @@ namespace Pulsar4X.SDL2UI
                 {
                     scientist.ProjectQueue[i] = (queueItem.techID, !queueItem.cycle);
                 }
-                //if(ImGui.IsItemHovered())
-                //    ImGui.SetTooltip("Requeue Project");
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Requeue Project");
                 
                 ImGui.SameLine();
-                if (ImGui.SmallButton("^" + "##" + i) )//&& i > 0)
+                if (ImGui.SmallButton("^" + "##" + i) && i > 0)
                 {
                     scientist.ProjectQueue.RemoveAt(i);
                     scientist.ProjectQueue.Insert(i-1, queueItem);
-                    //isDirty = true;
                 }
                 ImGui.SameLine();
-                if (ImGui.SmallButton("v" + "##" + i) )//&& i < scientist.ProjectQueue.Count)
+                if (ImGui.SmallButton("v" + "##" + i) && i < scientist.ProjectQueue.Count - 1)
                 {
                     
                     scientist.ProjectQueue.RemoveAt(i);
                     scientist.ProjectQueue.Insert(i+1, queueItem);
-                    //isDirty = true;
                 }
 
                 ImGui.SameLine();
                 if (ImGui.SmallButton("x" + "##" + i))
                 {
                     scientist.ProjectQueue.RemoveAt(i);
-                    //isDirty = true;
                 }
-
-
-
                 ImGui.NextColumn();
             }
-
-            if (isDirty)
-            {
-                _researchableTechs = _factionTechDB.GetResearchableTechs();
-                _researchableTechsByGuid = _factionTechDB.GetResearchablesDic();
-            }
-            
             ImGui.EndChild();
 
         }

@@ -158,7 +158,7 @@ namespace Pulsar4X.ECSLib
         /// maybe techsd should link up as well as down. it would make this more efficent, but harder on the modder. 
         /// </summary>
         /// <param name="techdb"></param>
-        internal static void MakeResearchable(FactionTechDB techdb)
+        internal static void CheckRequrements(FactionTechDB techdb)
         {
             List<TechSD> requrementsMetTechs = new List<TechSD>();
             foreach (var kvpTech in techdb.UnavailableTechs.ToArray())
@@ -194,7 +194,7 @@ namespace Pulsar4X.ECSLib
                 techdb.MakeResearchable(item);
             }
             if (requrementsMetTechs.Count > 0)
-                MakeResearchable(techdb);//run again, we may have met a requirment by makign something else researchable.
+                CheckRequrements(techdb);//run again, we may have met a requirment by makign something else researchable.
         }
 
 
