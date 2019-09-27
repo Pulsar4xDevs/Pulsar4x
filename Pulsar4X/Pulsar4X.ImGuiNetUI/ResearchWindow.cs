@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using System.Xml.Schema;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -220,62 +221,100 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        private int hoveredi = -1;
         private void SelectedSci(int selected)
         {
             ImGui.BeginChild("SelectedSci");
             Scientist scientist = _scienceTeams[selected].scientist;
             bool isDirty = false;
-            ImGui.Columns(3);
-            ImGui.SetColumnWidth(0, 150);
-            ImGui.SetColumnWidth(1, 150);
+            ImGui.Columns(2);
+            ImGui.SetColumnWidth(0, 300);
+            //ImGui.SetColumnWidth(1, 150);
+            
             for (int i = 0; i < scientist.ProjectQueue.Count; i++)
             {
+                ImGui.BeginGroup();
                 
                 (Guid techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[i];
                 (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
+                
+                
                 ImGui.Text(projItem.tech.Name);
                 //ImGui.Text(proj.Description);
                 
+                //ImGui.NextColumn();
+                
+                //ImGui.SameLine();
+                //ImGui.Text(projItem.tech.Category.ToString());
+
+                ImGui.EndGroup();
+                if (ImGui.IsItemHovered())
+                {
+                    hoveredi = i;
+                }
+                
                 ImGui.NextColumn();
 
-                ImGui.Text(projItem.tech.Category.ToString());
                 
-                ImGui.NextColumn();
                 
-                string cyclestr = "*";
-                if (queueItem.cycle)
-                    cyclestr = "O";
-                if (ImGui.SmallButton(cyclestr + "##" + i))
+                if (i != hoveredi) //if it's not hovered, make it invisible. 
                 {
-                    scientist.ProjectQueue[i] = (queueItem.techID, !queueItem.cycle);
+                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0,0,0,0));
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0,0,0,0));
+                    Buttons(scientist, queueItem, i);
+                    ImGui.PopStyleColor(2);
                 }
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Requeue Project");
+                else
+                    Buttons(scientist, queueItem, i);
                 
-                ImGui.SameLine();
-                if (ImGui.SmallButton("^" + "##" + i) && i > 0)
-                {
-                    scientist.ProjectQueue.RemoveAt(i);
-                    scientist.ProjectQueue.Insert(i-1, queueItem);
-                }
-                ImGui.SameLine();
-                if (ImGui.SmallButton("v" + "##" + i) && i < scientist.ProjectQueue.Count - 1)
-                {
-                    
-                    scientist.ProjectQueue.RemoveAt(i);
-                    scientist.ProjectQueue.Insert(i+1, queueItem);
-                }
-
-                ImGui.SameLine();
-                if (ImGui.SmallButton("x" + "##" + i))
-                {
-                    scientist.ProjectQueue.RemoveAt(i);
-                }
                 ImGui.NextColumn();
             }
             ImGui.EndChild();
 
         }
-        
+
+        void Buttons(Scientist scientist, (Guid techID, bool cycle) queueItem, int i)
+        {
+            
+            ImGui.BeginGroup();
+            string cyclestr = "*";
+            if (queueItem.cycle)
+                cyclestr = "O";
+            if (ImGui.SmallButton(cyclestr + "##" + i))
+            {
+                scientist.ProjectQueue[i] = (queueItem.techID, !queueItem.cycle);
+            }
+
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Requeue Project");
+
+            ImGui.SameLine();
+            if (ImGui.SmallButton("^" + "##" + i) && i > 0)
+            {
+                scientist.ProjectQueue.RemoveAt(i);
+                scientist.ProjectQueue.Insert(i - 1, queueItem);
+            }
+
+            ImGui.SameLine();
+            if (ImGui.SmallButton("v" + "##" + i) && i < scientist.ProjectQueue.Count - 1)
+            {
+
+                scientist.ProjectQueue.RemoveAt(i);
+                scientist.ProjectQueue.Insert(i + 1, queueItem);
+            }
+
+            ImGui.SameLine();
+            if (ImGui.SmallButton("x" + "##" + i))
+            {
+                scientist.ProjectQueue.RemoveAt(i);
+            }
+                
+            ImGui.EndGroup();
+            if (ImGui.IsItemHovered())
+            {
+                hoveredi = i;
+            }
+        }
+
     }
 }
