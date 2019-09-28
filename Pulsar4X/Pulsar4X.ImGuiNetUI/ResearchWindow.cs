@@ -226,35 +226,130 @@ namespace Pulsar4X.SDL2UI
         {
             ImGui.BeginChild("SelectedSci");
             Scientist scientist = _scienceTeams[selected].scientist;
-            bool isDirty = false;
-            ImGui.Columns(2);
-            ImGui.SetColumnWidth(0, 300);
+
+            //ImGui.Columns(2);
+            //ImGui.SetColumnWidth(0, 300);
             //ImGui.SetColumnWidth(1, 150);
             
-            for (int i = 0; i < scientist.ProjectQueue.Count; i++)
+            int loopto = scientist.ProjectQueue.Count;
+            if (hoveredi > -1)
+                loopto = hoveredi;
+
+            float heightt = ImGui.GetTextLineHeightWithSpacing() * loopto;
+            
+            var spacing = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
+            float hoverHeigt = ImGui.GetTextLineHeightWithSpacing() + spacing * 3;
+            
+            float heightb = ImGui.GetTextLineHeightWithSpacing() * scientist.ProjectQueue.Count - loopto;
+
+            for (int i = 0; i < loopto; i++)
             {
-                ImGui.BeginGroup();
-                
+                ImGui.BeginChild("Top", new Vector2(400, heightt));
+                ImGui.Columns(2);
+                ImGui.SetColumnWidth(0, 300);
                 (Guid techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[i];
                 (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
                 
-                
+                ImGui.BeginGroup();
                 ImGui.Text(projItem.tech.Name);
-                //ImGui.Text(proj.Description);
-                
-                //ImGui.NextColumn();
-                
-                //ImGui.SameLine();
-                //ImGui.Text(projItem.tech.Category.ToString());
-
                 ImGui.EndGroup();
                 if (ImGui.IsItemHovered())
                 {
                     hoveredi = i;
                 }
+                ImGui.NextColumn();
+                ImGui.NextColumn();
+                
+                
+                ImGui.EndChild();
+            }
+
+            if (hoveredi > -1)
+            {
+                ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 0.5f);
+                ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 2f);
+                ImGui.BeginChild("Buttons", new Vector2(400, hoverHeigt), true);
+                ImGui.Columns(2);
+                ImGui.SetColumnWidth(0, 300);
+
+                (Guid techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[hoveredi];
+                (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
+
+
+                ImGui.BeginGroup();
+                ImGui.Text(projItem.tech.Name);
+                ImGui.EndGroup();
                 
                 ImGui.NextColumn();
+                
+                Buttons(scientist, queueItem, hoveredi);
+                
+                ImGui.NextColumn();
+                
+                ImGui.EndChild();
+                ImGui.PopStyleVar(2);
 
+
+                for (int i = hoveredi + 1; i < scientist.ProjectQueue.Count; i++)
+                {
+                    ImGui.BeginChild("Bottom", new Vector2(400, heightb));
+                    ImGui.Columns(2);
+                    ImGui.SetColumnWidth(0, 300);
+                    (Guid techID, bool cycle) queueItem1 = _scienceTeams[selected].scientist.ProjectQueue[i];
+                    (TechSD tech, int amountDone, int amountMax) projItem1 = _researchableTechsByGuid[queueItem1.techID];
+
+                    ImGui.BeginGroup();
+                    ImGui.Text(projItem1.tech.Name);
+                    ImGui.EndGroup();
+                    if (ImGui.IsItemHovered())
+                    {
+                        hoveredi = i;
+                    }
+                    
+                    ImGui.NextColumn();
+                    ImGui.NextColumn();
+
+                    ImGui.EndChild();
+                }
+            }
+
+            /*
+            for (int i = 0; i < scientist.ProjectQueue.Count; i++)
+            {
+                ImGui.BeginChild("Top");
+                ImGui.Columns(2);
+                ImGui.SetColumnWidth(0, 300);
+                (Guid techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[i];
+                (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
+                
+                
+                ImGui.Text(projItem.tech.Name);
+                if (ImGui.IsItemHovered())
+                {
+                    hoveredi = i;
+                }
+                //ImGui.Text(proj.Description);
+                //ImGui.NextColumn();
+                //ImGui.SameLine();
+                //ImGui.Text(projItem.tech.Category.ToString());
+
+                ImGui.EndChild();
+                if (i == hoveredi)
+                {
+                    ImGui.BeginChild("Buttons");
+                    ImGui.Columns(2);
+                    ImGui.SetColumnWidth(0, 300);
+                    Buttons(scientist, queueItem, i);
+                    ImGui.EndChild();
+                }
+
+                ImGui.BeginChild("Bottom");
+
+                
+                
+                
+                
+                ImGui.EndChild();
                 
                 
                 if (i != hoveredi) //if it's not hovered, make it invisible. 
@@ -268,7 +363,8 @@ namespace Pulsar4X.SDL2UI
                     Buttons(scientist, queueItem, i);
                 
                 ImGui.NextColumn();
-            }
+                */
+            
             ImGui.EndChild();
 
         }
