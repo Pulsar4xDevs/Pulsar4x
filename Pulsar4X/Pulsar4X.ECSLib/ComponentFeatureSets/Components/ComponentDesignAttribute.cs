@@ -316,53 +316,59 @@ namespace Pulsar4X.ECSLib
         /// <param name="args"></param>
         private void NCalcPulsarParameters(string name, ParameterArgs args)
         {
-            if (name == "Mass")
+
+            switch (name)
             {
-                MakeThisDependant(_designer.MassFormula);
-                args.Result = _designer.MassValue;
-            }
-            if (name == "Volume")
-            {
-                MakeThisDependant(_designer.VolumeFormula);
-                args.Result = _designer.VolumeFormula;
-            }
-            if (name == "Crew")
-            {
-                MakeThisDependant(_designer.CrewFormula);
-                args.Result = _designer.CrewReqValue;
-            }
-            if (name == "HTK")
-            {
-                MakeThisDependant(_designer.HTKFormula);
-                args.Result = _designer.HTKValue;
-            }
-            if (name == "ResearchCost")
-            {
-                MakeThisDependant(_designer.ResearchCostFormula);
-                args.Result = _designer.ResearchCostValue;
-            }
-            if (name == "MineralCosts")
-            {
-                foreach (var formula in _designer.MineralCostFormulas.Values)
-                {
-                    MakeThisDependant(formula);
-                }
-                args.Result = _designer.MineralCostValues;
-            }
-            if (name == "CreditCost")
-            {
-                MakeThisDependant(_designer.CreditCostFormula);
-                args.Result = _designer.ResearchCostValue;
-            }
-            if (name == "GuidDict")
-            {
-                Dictionary<Guid, double> dict = new Dictionary<Guid, double>();
-                foreach (var kvp in _designAttribute.GuidDictionary)
-                {
-                    //MakeThisDependant(kvp.Value);
-                    dict.Add((Guid.Parse(kvp.Key.ToString())), kvp.Value.DResult);
-                }
-                args.Result = dict;
+                case "Mass":
+                    MakeThisDependant(_designer.MassFormula);
+                    args.Result = _designer.MassValue;
+                    break;
+                
+                case "Volume":
+                
+                    MakeThisDependant(_designer.VolumeFormula);
+                    args.Result = _designer.VolumeFormula;
+                    break;
+                
+                case "Crew":
+                    MakeThisDependant(_designer.CrewFormula);
+                    args.Result = _designer.CrewReqValue;
+                    break;
+                
+                case "HTK":
+                    MakeThisDependant(_designer.HTKFormula);
+                    args.Result = _designer.HTKValue;
+                    break;
+
+                case "ResearchCost":
+                    MakeThisDependant(_designer.ResearchCostFormula);
+                    args.Result = _designer.ResearchCostValue;
+                    break;
+
+                case "MineralCosts":
+                    foreach (var formula in _designer.MineralCostFormulas.Values)
+                    {
+                        MakeThisDependant(formula);
+                    }
+
+                    args.Result = _designer.MineralCostValues;
+                    break;
+
+                case "CreditCost":
+                    MakeThisDependant(_designer.CreditCostFormula);
+                    args.Result = _designer.ResearchCostValue;
+                    break;
+
+                case "GuidDict":
+                    Dictionary<Guid, double> dict = new Dictionary<Guid, double>();
+                    foreach (var kvp in _designAttribute.GuidDictionary)
+                    {
+                        //MakeThisDependant(kvp.Value);
+                        dict.Add((Guid.Parse(kvp.Key.ToString())), kvp.Value.DResult);
+                    }
+
+                    args.Result = dict;
+                    break;
             }
         }
 
