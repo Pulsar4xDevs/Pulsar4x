@@ -266,9 +266,22 @@ namespace ImGuiSDL2CS {
 
             return true;
         }
-        
-        
-        
+
+        public static byte[] BytesFromString(string str, int sizeMax = 128)
+        {
+            byte[] dstArray = new byte[sizeMax];
+            byte[] srsArray = System.Text.Encoding.UTF8.GetBytes(str);
+            int srsSize = Math.Min(srsArray.Length, sizeMax);
+            System.Buffer.BlockCopy(srsArray, 0, dstArray, 0, srsSize);
+            return dstArray;
+        }
+
+        public static string StringFromBytes(byte[] byteArray)
+        {
+            return System.Text.Encoding.UTF8.GetString(byteArray);
+        }
+
+
         public static IntPtr CreateSDLTexture(IntPtr rendererPtr, RawBmp rawImg)
         {
             IntPtr texture;

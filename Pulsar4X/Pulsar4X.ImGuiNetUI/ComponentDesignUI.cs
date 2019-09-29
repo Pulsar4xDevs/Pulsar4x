@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
+using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using SDL2;
 
@@ -13,6 +14,7 @@ namespace Pulsar4X.SDL2UI
         private int _designType;
         private string[] _designTypes;
         private ComponentTemplateSD[] _designables;
+        private byte[] _nameInputBuffer = new byte[128];
 
         private ComponentDesignUI()
         {
@@ -52,6 +54,7 @@ namespace Pulsar4X.SDL2UI
                     var factionTech = _state.Faction.GetDataBlob<FactionTechDB>();
                     var staticdata = StaticRefLib.StaticData;
                     _componentDesigner = new ComponentDesigner(_designables[_designType], factionTech);
+                    _nameInputBuffer = ImGuiSDL2CSHelper.BytesFromString(_componentDesigner.Name, 16);
                 }
 
                 if (_componentDesigner != null)
@@ -80,67 +83,67 @@ namespace Pulsar4X.SDL2UI
                         
                     }
 
-                    var _nameInputBuffer = _componentDesigner.Name.ToByteArray();
-                    ImGui.InputText("Component Name", _nameInputBuffer, (uint)_nameInputBuffer.Length);
+                    ImGui.InputText("Component Name", _nameInputBuffer, 16);
                     if (ImGui.Button("Create Design"))
                     {
-                         _componentDesigner.CreateDesign(_state.Faction);
+                        _componentDesigner.Name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
+                        _componentDesigner.CreateDesign(_state.Faction);
                     }
-                ImGui.NextColumn();
-                ImGui.BeginChild("ComponentData");
-                ImGui.Columns(2);
-                ImGui.Text("Mass");
-                ImGui.NextColumn();
-                ImGui.Text(_componentDesigner.MassValue.ToString());
-                ImGui.NextColumn();
-                
-                ImGui.Text("Volume");
-                ImGui.NextColumn();
-                ImGui.Text(_componentDesigner.VolumeValue.ToString());
-                ImGui.NextColumn();
-                
-                ImGui.Text("Crew Requred");
-                ImGui.NextColumn();
-                ImGui.Text(_componentDesigner.CrewReqValue.ToString());
-                ImGui.NextColumn();
-                
-                ImGui.Text("Cost");
-                ImGui.NextColumn();
-                ImGui.Text(_componentDesigner.CreditCostValue.ToString());
-                ImGui.NextColumn();
-                
-                ImGui.Text("Research Cost");
-                ImGui.NextColumn();
-                ImGui.Text(_componentDesigner.ResearchCostValue.ToString());
-                ImGui.NextColumn();
-                
-                ImGui.Text("Build Cost");
-                ImGui.NextColumn();
-                ImGui.Text(_componentDesigner.BuildPointCostValue.ToString());
-                ImGui.NextColumn();
-                
-                ImGui.Text("Minerals");
-                ImGui.NextColumn();
-                ImGui.NextColumn();
-                foreach (var mineral in _componentDesigner.MineralCostValues)
-                {
-                    var mineralSD = StaticRefLib.StaticData.CargoGoods.GetMineral(mineral.Key);
-                    ImGui.Text(mineralSD.Name);
                     ImGui.NextColumn();
-                    ImGui.Text(mineral.Value.ToString());
+                    ImGui.BeginChild("ComponentData");
+                    ImGui.Columns(2);
+                    ImGui.Text("Mass");
                     ImGui.NextColumn();
-                }
-/*
-                ImGui.Text("Materials");
-                ImGui.NextColumn();
-                ImGui.Text(_componentDesigner.MassValue.ToString());
-                ImGui.NextColumn();
-                
-                ImGui.Text("Components");
-                ImGui.NextColumn();
-                ImGui.Text(_componentDesigner.MassValue.ToString());
-                ImGui.NextColumn();
-*/
+                    ImGui.Text(_componentDesigner.MassValue.ToString());
+                    ImGui.NextColumn();
+                    
+                    ImGui.Text("Volume");
+                    ImGui.NextColumn();
+                    ImGui.Text(_componentDesigner.VolumeValue.ToString());
+                    ImGui.NextColumn();
+                    
+                    ImGui.Text("Crew Requred");
+                    ImGui.NextColumn();
+                    ImGui.Text(_componentDesigner.CrewReqValue.ToString());
+                    ImGui.NextColumn();
+                    
+                    ImGui.Text("Cost");
+                    ImGui.NextColumn();
+                    ImGui.Text(_componentDesigner.CreditCostValue.ToString());
+                    ImGui.NextColumn();
+                    
+                    ImGui.Text("Research Cost");
+                    ImGui.NextColumn();
+                    ImGui.Text(_componentDesigner.ResearchCostValue.ToString());
+                    ImGui.NextColumn();
+                    
+                    ImGui.Text("Build Cost");
+                    ImGui.NextColumn();
+                    ImGui.Text(_componentDesigner.BuildPointCostValue.ToString());
+                    ImGui.NextColumn();
+                    
+                    ImGui.Text("Minerals");
+                    ImGui.NextColumn();
+                    ImGui.NextColumn();
+                    foreach (var mineral in _componentDesigner.MineralCostValues)
+                    {
+                        var mineralSD = StaticRefLib.StaticData.CargoGoods.GetMineral(mineral.Key);
+                        ImGui.Text(mineralSD.Name);
+                        ImGui.NextColumn();
+                        ImGui.Text(mineral.Value.ToString());
+                        ImGui.NextColumn();
+                    }
+                    /*
+                    ImGui.Text("Materials");
+                    ImGui.NextColumn();
+                    ImGui.Text(_componentDesigner.MassValue.ToString());
+                    ImGui.NextColumn();
+                    
+                    ImGui.Text("Components");
+                    ImGui.NextColumn();
+                    ImGui.Text(_componentDesigner.MassValue.ToString());
+                    ImGui.NextColumn();
+                    */
 
                 }
                 

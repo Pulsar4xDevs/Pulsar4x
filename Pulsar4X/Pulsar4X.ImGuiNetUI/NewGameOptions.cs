@@ -1,6 +1,7 @@
 ﻿using System;
 using Pulsar4X;
 using ImGuiNET;
+using ImGuiSDL2CS;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -21,11 +22,14 @@ namespace Pulsar4X.SDL2UI
         byte[] _netPortInputBuffer = new byte[8];
         string _netPortString { get { return System.Text.Encoding.UTF8.GetString(_netPortInputBuffer); } }
         int _maxSystems = 5;
-        byte[] _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes("Test Game");
-        byte[] _factionNameInputBuffer = System.Text.Encoding.UTF8.GetBytes("UEF");
-        string _factionNameString { get { return System.Text.Encoding.UTF8.GetString(_factionNameInputBuffer); } }
-        byte[] _passInputBuffer = new byte[8];
-        string _passString { get { return System.Text.Encoding.UTF8.GetString(_passInputBuffer); } }
+ 
+
+        byte[] _nameInputBuffer = ImGuiSDL2CSHelper.BytesFromString("Test Game", 16);
+        byte[] _factionInputBuffer = ImGuiSDL2CSHelper.BytesFromString("UEF", 16);
+        byte[] _passInputBuffer = ImGuiSDL2CSHelper.BytesFromString("", 16);
+        
+        byte[] _smPassInputbuffer = ImGuiSDL2CSHelper.BytesFromString("", 16);
+        
         int _masterSeed = 12345678;
         private NewGameOptions() 
         { 
@@ -49,11 +53,16 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.Begin("New Game Setup", ref IsActive, _flags))
                 {
 
-                    ImGui.InputText("Game Name", _nameInputBuffer, (uint)_nameInputBuffer.Length);
-                    ImGui.InputText("Faction Name", _factionNameInputBuffer, 16);
+                    ImGui.InputText("Game Name", _nameInputBuffer, 16);
+                    ImGui.InputText("SM Pass", _smPassInputbuffer, 16);
+                    
+                    
+                    ImGui.InputText("Faction Name", _factionInputBuffer, 16);
                     ImGui.InputText("Password", _passInputBuffer, 16);
+                    
                     ImGui.InputInt("Max Systems", ref _maxSystems);
                     ImGui.InputInt("Master Seed:", ref _masterSeed);
+                    
                     if (ImGui.RadioButton("Host Network Game", ref _gameTypeButtonGrp, 1))
                         _selectedGameType = gameType.Nethost;
                     if (ImGui.RadioButton("Start Standalone Game", ref _gameTypeButtonGrp, 0))
@@ -61,7 +70,7 @@ namespace Pulsar4X.SDL2UI
                     if (_selectedGameType == gameType.Nethost)
                         ImGui.InputText("Network Port", _netPortInputBuffer, 8);
                     if (ImGui.Button("Create New Game!"))
-                        CreateNewGame(System.Text.Encoding.UTF8.GetString(_nameInputBuffer));
+                        CreateNewGame();
 
                     ImGui.End();
                 }
@@ -72,18 +81,18 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        void CreateNewGame(string name)
+        void CreateNewGame()
         {
 
             gameSettings = new ECSLib.NewGameSettings
             {
-                GameName = name,
+                GameName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer),
                 MaxSystems = _maxSystems,
-                SMPassword = "",
+                SMPassword = ImGuiSDL2CSHelper.StringFromBytes(_smPassInputbuffer),
                 //DataSets = options.SelectedModList.Select(dvi => dvi.Directory),
                 CreatePlayerFaction = true,
-                DefaultFactionName = "UEF",
-                DefaultPlayerPassword = "",
+                DefaultFactionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer),
+                DefaultPlayerPassword = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer),
                 DefaultSolStart = true,
                 MasterSeed = _masterSeed
             };
@@ -94,7 +103,7 @@ namespace Pulsar4X.SDL2UI
             ECSLib.FactionVM factionVM = new ECSLib.FactionVM(_state.Game);
             _state.FactionUIState = factionVM;
 
-            factionVM.CreateDefaultFaction(_factionNameString, _passString);
+            factionVM.CreateDefaultFaction(ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer), ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer));
 
             _state.SetFaction(factionVM.FactionEntity);
             //_state.MapRendering.SetSystem(factionVM.KnownSystems[0]);
