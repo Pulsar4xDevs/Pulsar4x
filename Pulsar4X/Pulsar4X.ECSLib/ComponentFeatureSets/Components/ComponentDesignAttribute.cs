@@ -380,148 +380,166 @@ namespace Pulsar4X.ECSLib
         /// <param name="args"></param>
         private void NCalcPulsarFunctions(string name, FunctionArgs args)
         {
-            if (name == "Ability")
+            string key = "Unknown Key";
+            int index = -1;
+            Guid techGuid;
+            Guid typeGuid;
+            switch (name)
             {
-                string key = "";
-                int index = 0;
-                try
-                {
-                    //TODO: get rid of this once json data is rewritten to use names instead of indexes
-                    if (args.Parameters[0].Evaluate() is int)
+
+
+
+                case "Ability":
+                    
+                    try
                     {
-                        index = (int)args.Parameters[0].Evaluate();
-                        ChainedExpression result = _designer.ComponentDesignAttributeList[index].Formula;
-                        if (result.Result == null)
-                            result.Evaluate();
-                        MakeThisDependant(result);
-                        args.Result = result.Result;
+                        //TODO: get rid of this once json data is rewritten to use names instead of indexes
+                        if (args.Parameters[0].Evaluate() is int)
+                        {
+                            index = (int)args.Parameters[0].Evaluate();
+                            ChainedExpression result = _designer.ComponentDesignAttributeList[index].Formula;
+                            if (result.Result == null)
+                                result.Evaluate();
+                            MakeThisDependant(result);
+                            args.Result = result.Result;
+                        }
+                        else
+                        {
+                            key = (string)args.Parameters[0].Evaluate();
+
+                            ChainedExpression result = _designer.ComponentDesignAttributes[key].Formula;
+                            if (result.Result == null)
+                                result.Evaluate();
+                            MakeThisDependant(result);
+                            args.Result = result.Result;
+                        }
+
                     }
-                    else
+                    //TODO: maybe log this catch and throw the component out. (instead of throwing)
+                    catch (KeyNotFoundException e)
                     {
-                        key = (string)args.Parameters[0].Evaluate();
-
-                        ChainedExpression result = _designer.ComponentDesignAttributes[key].Formula;
-                        if (result.Result == null)
-                            result.Evaluate();
-                        MakeThisDependant(result);
-                        args.Result = result.Result;
-                    }
-
-                }
-                //TODO: maybe log this catch and throw the component out. (instead of throwing)
-                catch (KeyNotFoundException e) {throw new Exception("Cannot find an ability named " + key + ". " + e);}
-                
-                //TODO: the two catches below will be unnesiary once ComponentDesignAttributeList is gone.
-                catch (InvalidCastException e) { throw new Exception("Parameter must be an intiger. " + e); }
-                catch (IndexOutOfRangeException e) { throw new Exception("This component does not have an ComponentAbilitySD at index " + index + ". " + e); }
-                
-            }
-            if (name == "SetAbilityValue") //I might remove this..
-            {
-                string key = "";
-                int index = 0;
-                try
-                {
-
-                    //TODO: get rid of this once json data is rewritten to use names instead of indexes
-                    if (args.Parameters[0].Evaluate() is int)
-                    {
-                        index = (int)args.Parameters[0].Evaluate();
-                        ChainedExpression expression = _designer.ComponentDesignAttributeList[index].Formula;
-                        expression.SetResult = args.Parameters[1].Evaluate();
-                    }
-                    else
-                    {
-                        key = (string)args.Parameters[0].Evaluate();
-
-                        ChainedExpression expression = _designer.ComponentDesignAttributes[key].Formula;
-                        expression.SetResult = args.Parameters[1].Evaluate();
+                        throw new Exception("Cannot find an ability named " + key + ". " + e);
                     }
 
-                }
-                //TODO: maybe log this catch and throw the component out. (instead of throwing)
-                catch (KeyNotFoundException e) {throw new Exception("Cannot find an ability named " + key  + ". " + e);}
-                
-                //TODO: the two catches below will be unnesiary once ComponentDesignAttributeList is gone.
-                catch (InvalidCastException e) { throw new Exception("Parameter must be an intiger. " + e); }
-                catch (IndexOutOfRangeException e) { throw new Exception("This component does not have an ComponentAbilitySD at index " + index + ". " + e); }
-                
+                    //TODO: the two catches below will be unnesiary once ComponentDesignAttributeList is gone.
+                    catch (InvalidCastException e)
+                    {
+                        throw new Exception("Parameter must be an intiger. " + e);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        throw new Exception("This component does not have an ComponentAbilitySD at index " + index + ". " + e);
+                    }
+                    break;
+
+                case "SetAbilityValue": //I might remove this..
+                    try
+                    {
+
+                        //TODO: get rid of this once json data is rewritten to use names instead of indexes
+                        if (args.Parameters[0].Evaluate() is int)
+                        {
+                            index = (int)args.Parameters[0].Evaluate();
+                            ChainedExpression expression = _designer.ComponentDesignAttributeList[index].Formula;
+                            expression.SetResult = args.Parameters[1].Evaluate();
+                        }
+                        else
+                        {
+                            key = (string)args.Parameters[0].Evaluate();
+
+                            ChainedExpression expression = _designer.ComponentDesignAttributes[key].Formula;
+                            expression.SetResult = args.Parameters[1].Evaluate();
+                        }
+
+                    }
+                    //TODO: maybe log this catch and throw the component out. (instead of throwing)
+                    catch (KeyNotFoundException e)
+                    {
+                        throw new Exception("Cannot find an ability named " + key + ". " + e);
+                    }
+
+                    //TODO: the two catches below will be unnesiary once ComponentDesignAttributeList is gone.
+                    catch (InvalidCastException e)
+                    {
+                        throw new Exception("Parameter must be an intiger. " + e);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        throw new Exception("This component does not have an ComponentAbilitySD at index " + index + ". " + e);
+                    }
+
+                    break;
+
+                case "EnumDict":
+                    string typeAsString = (string)args.Parameters[0].Evaluate();
+                    Type type = Type.GetType(typeAsString);
+                    Type dictType = typeof(Dictionary<,>).MakeGenericType(type, typeof(double));
+                    dynamic dict = Activator.CreateInstance(dictType);
+
+                    Type enumDictType = typeof(Dictionary<,>).MakeGenericType(typeof(string), type);
+                    dynamic enumConstants = Activator.CreateInstance(enumDictType);
+                    foreach (dynamic value in Enum.GetValues(type))
+                    {
+                        enumConstants.Add(Enum.GetName(type, value), value);
+                    }
+
+                    foreach (var kvp in _designAttribute.GuidDictionary)
+                    {
+                        dynamic keyd = enumConstants[(string)kvp.Key];
+                        dict.Add(keyd, kvp.Value.DResult);
+                    }
+
+                    args.Result = dict;
+                    break;
+
+                case "TechData":
+
+                    techGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
+                    TechSD techSD = _staticDataStore.Techs[techGuid];
+                    args.Result = ResearchProcessor.DataFormula(_factionTechDB, techSD);
+                    break;
+
+                //Returns the tech level for the given guid
+                case "TechLevel":
+                    techGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
+                    if (_factionTechDB.ResearchedTechs.ContainsKey(techGuid))
+                        args.Result = _factionTechDB.ResearchedTechs[techGuid];
+                    else args.Result = 0;
+                    break;
+                //currently not used, but an future experiment to pass the CargoTypeSD as a parameter
+                case "CargoType":
+                    typeGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
+                    CargoTypeSD typeSD = _staticDataStore.CargoTypes[typeGuid];
+                    args.Result = typeSD;
+                    break;
+                //used for datablob args for when a guid is required as a parameter
+                case "GuidString":
+
+                    typeGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
+                    args.Result = typeGuid;
+                    break;
+
+                //This sets the DatablobArgs. it's up to the user to ensure the right number of args for a specific datablob
+                //The datablob will be the one defined in designAbility.DataBlobType
+                //TODO document blobs and what args they take!!
+                case "DataBlobArgs":
+
+                    if (_designAttribute.DataBlobType == null)
+                        throw new Exception("This Ability does not have a DataBlob defined! define a datablob for this ability!");
+                    //_designAbility.DataBlobArgs = new List<double>();
+                    List<object> argList = new List<object>();
+                    foreach (var argParam in args.Parameters)
+                    {
+                        ChainedExpression argExpression = new ChainedExpression(argParam, _designAttribute, _factionTechDB, _staticDataStore);
+                        _isDependant = false;
+                        argExpression.Evaluate();
+                        argList.Add(argExpression.Result);
+                    }
+
+                    _designAttribute.DataBlobArgs = argList.ToArray();
+                    args.Result = argList;
+                    break;
             }
-
-            if (name == "EnumDict")
-            {
-                string typeAsString = (string)args.Parameters[0].Evaluate();
-                Type type = Type.GetType(typeAsString);
-                Type dictType = typeof(Dictionary<,>).MakeGenericType(type, typeof(double));
-                dynamic dict = Activator.CreateInstance(dictType);
-
-                Type enumDictType = typeof(Dictionary<,>).MakeGenericType(typeof(string), type);
-                dynamic enumConstants = Activator.CreateInstance(enumDictType);
-                foreach (dynamic value in Enum.GetValues(type))
-                {
-                    enumConstants.Add(Enum.GetName(type, value), value);
-                }
-
-                foreach (var kvp in _designAttribute.GuidDictionary)
-                {
-                    dynamic key = enumConstants[(string)kvp.Key];
-                    dict.Add(key, kvp.Value.DResult);
-                }
-                args.Result = dict;
-            }
-
-            if (name == "TechData")
-            {
-
-                Guid techGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
-                TechSD techSD = _staticDataStore.Techs[techGuid];
-                args.Result = ResearchProcessor.DataFormula(_factionTechDB, techSD);
-            }
-
-            //Returns the tech level for the given guid
-            if (name == "TechLevel")
-            {
-
-                Guid techGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
-                if (_factionTechDB.ResearchedTechs.ContainsKey(techGuid))
-                    args.Result = _factionTechDB.ResearchedTechs[techGuid];
-                else args.Result = 0;
-            }
-            //currently not used, but an future experiment to pass the CargoTypeSD as a parameter
-            if (name == "CargoType")
-            {
-                Guid typeGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
-                CargoTypeSD typeSD = _staticDataStore.CargoTypes[typeGuid];
-                args.Result = typeSD;
-            }
-            //used for datablob args for when a guid is required as a parameter
-            if (name == "GuidString")
-            {
-                Guid typeGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
-                args.Result = typeGuid;
-            }
-
-            //This sets the DatablobArgs. it's up to the user to ensure the right number of args for a specific datablob
-            //The datablob will be the one defined in designAbility.DataBlobType
-            //TODO document blobs and what args they take!!
-            if (name == "DataBlobArgs")
-            {
-                if (_designAttribute.DataBlobType == null)
-                    throw new Exception("This Ability does not have a DataBlob defined! define a datablob for this ability!");
-                //_designAbility.DataBlobArgs = new List<double>();
-                List<object> argList = new List<object>();
-                foreach (var argParam in args.Parameters)
-                {
-                    ChainedExpression argExpression = new ChainedExpression(argParam, _designAttribute, _factionTechDB, _staticDataStore);
-                    _isDependant = false;
-                    argExpression.Evaluate();
-                    argList.Add(argExpression.Result);
-                }
-                _designAttribute.DataBlobArgs = argList.ToArray();
-                args.Result = argList;
-            }
-
-
         }
     }
 }
