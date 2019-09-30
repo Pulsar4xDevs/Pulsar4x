@@ -232,9 +232,12 @@ namespace Pulsar4X.SDL2UI
             //ImGui.SetColumnWidth(1, 150);
             
             int loopto = scientist.ProjectQueue.Count;
+            if (hoveredi >= scientist.ProjectQueue.Count)
+                hoveredi = -1;
             if (hoveredi > -1)
                 loopto = hoveredi;
 
+            
             float heightt = ImGui.GetTextLineHeightWithSpacing() * loopto;
             
             var spacing = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
@@ -263,6 +266,7 @@ namespace Pulsar4X.SDL2UI
                 
                 ImGui.EndChild();
             }
+
 
             if (hoveredi > -1)
             {
