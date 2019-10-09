@@ -54,7 +54,7 @@ namespace Pulsar4X.SDL2UI
                     var factionTech = _state.Faction.GetDataBlob<FactionTechDB>();
                     var staticdata = StaticRefLib.StaticData;
                     _componentDesigner = new ComponentDesigner(_designables[_designType], factionTech);
-                    _nameInputBuffer = ImGuiSDL2CSHelper.BytesFromString(_componentDesigner.Name, 16);
+                    _nameInputBuffer = ImGuiSDL2CSHelper.BytesFromString(_componentDesigner.Name, 32);
                 }
 
                 if (_componentDesigner != null)
@@ -83,7 +83,7 @@ namespace Pulsar4X.SDL2UI
                         
                     }
 
-                    ImGui.InputText("Component Name", _nameInputBuffer, 16);
+                    ImGui.InputText("Component Name", _nameInputBuffer, 32);
                     if (ImGui.Button("Create Design"))
                     {
                         _componentDesigner.Name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
@@ -122,7 +122,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(_componentDesigner.BuildPointCostValue.ToString());
                     ImGui.NextColumn();
                     
-                    ImGui.Text("Minerals");
+                    ImGui.Text("Resource Costs");
                     ImGui.NextColumn();
                     ImGui.NextColumn();
                     foreach (var mineral in _componentDesigner.MineralCostValues)
@@ -133,6 +133,23 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(mineral.Value.ToString());
                         ImGui.NextColumn();
                     }
+                    foreach (var material in _componentDesigner.MaterialCostValues)
+                    {
+                        var matSD = StaticRefLib.StaticData.CargoGoods.GetMaterial(material.Key);
+                        ImGui.Text(matSD.Name);
+                        ImGui.NextColumn();
+                        ImGui.Text(material.Value.ToString());
+                        ImGui.NextColumn();
+                    }
+                    foreach (var component in _componentDesigner.ComponentCostValues)
+                    {
+                        var compSD = StaticRefLib.StaticData.CargoGoods.GetMaterial(component.Key);
+                        ImGui.Text(compSD.Name);
+                        ImGui.NextColumn();
+                        ImGui.Text(component.Value.ToString());
+                        ImGui.NextColumn();
+                    }
+                    
                     /*
                     ImGui.Text("Materials");
                     ImGui.NextColumn();

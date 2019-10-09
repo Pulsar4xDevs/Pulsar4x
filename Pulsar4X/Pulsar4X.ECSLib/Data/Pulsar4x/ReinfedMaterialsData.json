@@ -3,23 +3,95 @@
   "Data": {
     "List": [
       {
-        "Key": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+        "Key": "05dce711-8846-488a-b0f3-57fd7924b268",
         "Value": {
-          "Name": "Sorium Fuel",
-          "Description": "Fuel for SpaceShips",
-          "ID": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+          "Name": "Stainless Steel",
+          "Description": "Refined Iron",
+          "ID": "05dce711-8846-488a-b0f3-57fd7924b268",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "Mass": 1.0,
+          "RawMineralCosts": {
+            "List": [
+              {
+                "Key": "c8a64019-aef4-4453-bd9b-36b26b0e9684",
+                "Value": 88
+              },
+              {
+                "Key": "236b3092-29ca-4924-8c70-d09441757a30",
+                "Value": 11
+              },
+              {
+                "Key": "5eadda1f-43aa-44be-bdb4-395441a33f14",
+                "Value": 1
+              }
+            ]
+          },
+          "RefineryPointCost": 20,
+          "WealthCost": 0,
+          "OutputAmount": 100
+        }
+      },
+
+      {
+        "Key": "8a4a3569-df2e-4090-9752-50ff137cef6a",
+        "Value": {
+          "Name": "LOX/Hydrocarbon",
+          "Description": "Rocket Fuel",
+          "ID": "8a4a3569-df2e-4090-9752-50ff137cef6a",
           "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
           "Mass": 0.01,
           "RawMineralCosts": {
             "List": [
               {
-                "Key": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
+                "Key": "5eadda1f-43aa-44be-bdb4-395441a33f14",
                 "Value": 1
               }
             ]
           },
           "RefineryPointCost": 10,
-          "WealthCost": 0,
+          "WealthCost": 3,
+          "OutputAmount": 2
+        }
+      },
+      {
+        "Key": "207af637-95a0-4b89-ac4a-6d66a81cfb2f",
+        "Value": {
+          "Name": "Plastics",
+          "Description": "Rendered from Hydrocarbons",
+          "ID": "207af637-95a0-4b89-ac4a-6d66a81cfb2f",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "Mass": 0.01,
+          "RawMineralCosts": {
+            "List": [
+              {
+                "Key": "5eadda1f-43aa-44be-bdb4-395441a33f14",
+                "Value": 1
+              }
+            ]
+          },
+          "RefineryPointCost": 5,
+          "WealthCost": 1,
+          "OutputAmount": 2
+        }
+      },
+      {
+        "Key": "978f67d9-62fb-4b3a-a12a-8626ac3cb91b",
+        "Value": {
+          "Name": "Fissile fuels",
+          "Description": "Fuel for reactors",
+          "ID": "978f67d9-62fb-4b3a-a12a-8626ac3cb91b",
+          "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
+          "Mass": 1.0,
+          "RawMineralCosts": {
+            "List": [
+              {
+                "Key": "b084913d-385c-49e1-9877-56e805014ab0",
+                "Value": 100
+              }
+            ]
+          },
+          "RefineryPointCost": 10,
+          "WealthCost": 100,
           "OutputAmount": 1
         }
       },
@@ -44,6 +116,29 @@
           "OutputAmount": 100
         }
       },
+
+      {
+        "Key": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+        "Value": {
+          "Name": "Sorium Fuel",
+          "Description": "Fuel for SpaceShips",
+          "ID": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
+          "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
+          "Mass": 0.01,
+          "RawMineralCosts": {
+            "List": [
+              {
+                "Key": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
+                "Value": 1
+              }
+            ]
+          },
+          "RefineryPointCost": 10,
+          "WealthCost": 0,
+          "OutputAmount": 1
+        }
+      },
+      
       {
         "Key": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
         "Value": {

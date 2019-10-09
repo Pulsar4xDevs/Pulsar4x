@@ -48,6 +48,36 @@
         }
       },
       {
+        "Key": "d814f1d7-329d-407f-b514-3a5a8451e655",
+        "Value": {
+          "Name": "Alcubierre Miniaturization",
+          "Description": "Research into shrinking a drive to fit smaller form factors",
+          "ID": "d814f1d7-329d-407f-b514-3a5a8451e655",
+          "MaxLevel": 10,
+          "DataFormula": "250 - [Level] * 20 ",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "500 + [Level] * 500"
+        }
+      },
+      {
+        "Key": "c534d9f0-0d63-424f-9780-d124235903de",
+        "Value": {
+          "Name": "Alcubierre Energy Use",
+          "Description": "By finding better ways to manipulate the warp bubble, we can make the drive more efficient",
+          "ID": "c534d9f0-0d63-424f-9780-d124235903de",
+          "MaxLevel": 10,
+          "DataFormula": "10 - [Level] * 0.5 ",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "500 + [Level] * 500"
+        }
+      },
+      {
         "Key": "b8ef73c7-2ef0-445e-8461-1e0508958a0e",
         "Value": {
           "Name": "Maximum Engine Power Modifier",
@@ -90,6 +120,51 @@
             "List": []
           },
           "CostFormula": "(1 + [Level]) * 100"
+        }
+      },
+      {
+        "Key": "dc8221e0-c70c-4596-b303-dc4f79a0e16d",
+        "Value": {
+          "Name": "Solid Fuel",
+          "Description": "",
+          "ID": "dc8221e0-c70c-4596-b303-dc4f79a0e16d",
+          "MaxLevel": 10,
+          "DataFormula": "1 + [Level] * 0.1",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 500"
+        }
+      },
+      {
+        "Key": "7650c18d-ff8f-40d0-bd72-1745b52d2164",
+        "Value": {
+          "Name": "LOX / Hydrocarbon Thrust",
+          "Description": "Research into better thrust output for a given size of engine",
+          "ID": "7650c18d-ff8f-40d0-bd72-1745b52d2164",
+          "MaxLevel": 10,
+          "DataFormula": "1 + [Level] * 0.1",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 500"
+        }
+      },
+      {
+        "Key": "fa2736ed-d0bf-44a5-bc00-d25d3adaa23c",
+        "Value": {
+          "Name": "LOX / Hydrocarbon Efficiency",
+          "Description": "Research into better fuel efficiency for a given size of engine",
+          "ID": "fa2736ed-d0bf-44a5-bc00-d25d3adaa23c",
+          "MaxLevel": 10,
+          "DataFormula": "1 + [Level] * 0.1",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 500"
         }
       },
       {

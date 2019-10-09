@@ -6,7 +6,7 @@
         "Key": "2368ea53-bd01-42f0-a1c9-da55c051cd4c",
         "Value": {
           "Name": "PassiveSensor",
-          "Description": "Detects emmisions and reflections from other objects",
+          "Description": "Detects emissions and reflections from other objects",
           "ID": "2368ea53-bd01-42f0-a1c9-da55c051cd4c",
           "MassFormula": "Ability(0)",
           "VolumeFormula": "Ability(0)",
@@ -115,6 +115,304 @@
         }
       },
       {
+        "Key": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
+        "Value": {
+          "Name": "Liquid Fuel Rocket Engine",
+          "Description": "A Newtonian Thruster",
+          "ID": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
+          "MassFormula": "Ability('Size')",
+          "VolumeFormula": "Ability('Size')",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "[Mass]",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "05dce711-8846-488a-b0f3-57fd7924b268",
+                "Value": "[Mass] * 8"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 1",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo, Fighter",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "ShipComponents",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Size",
+              "Description": "Size of this engine in Kg",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1000",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "500"
+            },
+            {
+              "Name": "Thrust in Kn",
+              "Description": "The maximum thrust output of this engine",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "1.8 * [Mass] * TechData('7650c18d-ff8f-40d0-bd72-1745b52d2164')"
+            },
+            {
+              "Name": "Isp",
+              "Description": "Specific Impulse, higher is more fuel efficent",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Thrust in Kn') / TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
+            },
+            {
+              "Name": "Engine PowerDB",
+              "Description": "Move Power for ship",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('EnginePower'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAtbDB"
+            },
+            {
+              "Name": "Total Fuel Consumption per Second",
+              "Description": "Fuel Consumption Calc",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Isp')"
+            },
+            {
+              "Name": "Fuel ConsumptionDB",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Total Energy Consumption per Km'), 1)",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResourceConsumptionAtbDB"
+            },
+            {
+              "Name": "Sensor Signature",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Total Energy Consumption per Km'),0)",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "7d0b867f-e239-4b93-9b30-c6d4b769b5e4",
+        "Value": {
+          "Name": "Alcubierre Drive",
+          "Description": "Moves a ship through non newtonion space",
+          "ID": "7d0b867f-e239-4b93-9b30-c6d4b769b5e4",
+          "MassFormula": "Ability('Size')",
+          "VolumeFormula": "Ability('Size')",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "[Mass]",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
+                "Value": "[Mass] * 8"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 1",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo, Fighter",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "ShipComponents",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Size",
+              "Description": "Size of the engine in Kg",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "25000",
+              "MinFormula": "TechData('d814f1d7-329d-407f-b514-3a5a8451e655')",
+              "StepFormula": "1",
+              "AbilityFormula": "2500"
+            },
+            {
+              "Name": "Efficency vs Power",
+              "Description": "More Powerful engines are less efficient for a given size",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')",
+              "MinFormula": "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de')",
+              "StepFormula": "0.1",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "EnginePower",
+              "Description": "Move Power for ship",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Efficency vs Power') * [Mass]"
+            },
+            {
+              "Name": "Engine PowerDB",
+              "Description": "Move Power for ship",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('EnginePower'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAtbDB"
+            },
+            {
+              "Name": "Total Energy Consumption per Km",
+              "Description": "Fuel Consumption Calc",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "TechData('c534d9f0-0d63-424f-9780-d124235903de') * Pow(Ability('EnginePower'), 2.25)"
+            },
+            {
+              "Name": "Energy ConsumptionDB",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Total Energy Consumption per Km'), 1)",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResourceConsumptionAtbDB"
+            },
+            {
+              "Name": "Sensor Signature",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Total Energy Consumption per Km'),0)",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "97cf75a1-5ca3-4037-8832-4d81a89f97fa",
+        "Value": {
+          "Name": "Reactor",
+          "Description": "A non refuelable reactor, Generates power for a ship",
+          "ID": "97cf75a1-5ca3-4037-8832-4d81a89f97fa",
+          "MassFormula": "Ability('Size')",
+          "VolumeFormula": "Ability('Size')",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "[Mass]",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "05dce711-8846-488a-b0f3-57fd7924b268",
+                "Value": "[Mass] * 0.5"
+              },
+              {
+                "Key": "207af637-95a0-4b89-ac4a-6d66a81cfb2f",
+                "Value": "[Mass] * 0.4"
+              },
+              {
+                "Key": "66f15e2f-7a24-4ff6-9b68-03fcd93686f9",
+                "Value": "[Mass] * 0.1"
+              },
+              {
+                "Key": "978f67d9-62fb-4b3a-a12a-8626ac3cb91b",
+                "Value": "Ability('Fuel Consumption') * 3600 * Ability('Lifetime')"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 1",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo, Fighter",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "ShipComponents",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Size",
+              "Description": "Size of the reactor in Kg",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "25000",
+              "MinFormula": "1000",
+              "StepFormula": "1",
+              "AbilityFormula": "1500"
+            },
+            {
+              "Name": "Power Output",
+              "Description": "in Mw",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "0.05 * [Mass]"
+            },
+            {
+              "Name": "Fuel Consumption",
+              "Description": "Fuel Consumption kg per second at Max Output",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Power Output') * 0.0000001"
+            },
+            {
+              "Name": "Lifetime",
+              "Description": "How long this reactor will be useful for in Hours",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "87600",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "8760"
+            },
+            {
+              "Name": "DB",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(GuidString('978f67d9-62fb-4b3a-a12a-8626ac3cb91b'), Ability('Fuel Consumption'), GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Power Output'), Ability('Lifetime'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnergyGenerationAtb"
+            },
+            {
+              "Name": "Sensor Signature",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "Ability('Power Output')",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
+            }
+          ]
+        }
+      },
+
+      {
+        "Key": "1de23a8b-d44b-4e0f-bacd-5463a8eb939d",
+        "Value": {
+          "Name": "Battery Bank",
+          "Description": "Stores power for a ship",
+          "ID": "1de23a8b-d44b-4e0f-bacd-5463a8eb939d",
+          "MassFormula": "Ability('Size')",
+          "VolumeFormula": "Ability('Size')",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "[Mass]",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "207af637-95a0-4b89-ac4a-6d66a81cfb2f",
+                "Value": "[Mass] * 0.25"
+              },
+              {
+                "Key": "66f15e2f-7a24-4ff6-9b68-03fcd93686f9",
+                "Value": "[Mass] * 0.25"
+              },
+              {
+                "Key": "d6ebca8e-5a42-4664-a081-ca0190a6bb07",
+                "Value": "[Mass] * 0.5"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 1",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo, Fighter",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "ShipComponents",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Size",
+              "Description": "Size of the bank in Kg",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "25000",
+              "MinFormula": "1000",
+              "StepFormula": "1",
+              "AbilityFormula": "1500"
+            },
+            {
+              "Name": "Energy Storage",
+              "Description": "In foo",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Size') * 0.9"
+            },
+            {
+              "Name": "DB",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(GuidString('978f67d9-62fb-4b3a-a12a-8626ac3cb91b'), Ability('Energy Storage'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnergyStoreAtb"
+            }
+          ]
+        }
+      },
+      {
         "Key": "e76bd999-ecd7-4511-ad41-6d0c59ca97e6",
         "Value": {
           "Name": "Engine",
@@ -132,7 +430,7 @@
               }
             ]
           },
-          "ResearchCostFormula": "[Mass] * 10",
+          "ResearchCostFormula": "[Mass] * 1",
           "CreditCostFormula": "[Mass]",
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, Fighter",
@@ -307,7 +605,7 @@
           "Name": "RailGun",
           "Description": "A Projectile thrower that uses electrical energy to propel a conductive projectile",
           "ID": "fe9bf895-ac4d-4696-b121-d195c720d17b",
-          "MassFormula": "[Volume] * 0.5",
+          "MassFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Size'))",
           "VolumeFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Size'))",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "1",

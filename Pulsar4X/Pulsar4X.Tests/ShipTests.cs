@@ -65,14 +65,14 @@ namespace Pulsar4X.Tests
 
             
             ComponentInstancesDB instancesdb = _ship.GetDataBlob<ComponentInstancesDB>();
-            instancesdb.TryGetComponentsByAttribute<EnginePowerAtbDB>(out var instances1);
+            instancesdb.TryGetComponentsByAttribute<WarpEnginePowerAtbDB>(out var instances1);
             int origionalEngineNumber = instances1.Count;
             
             EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign);
             EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign);
             
             
-            instancesdb.TryGetComponentsByAttribute<EnginePowerAtbDB>(out var instances2);
+            instancesdb.TryGetComponentsByAttribute<WarpEnginePowerAtbDB>(out var instances2);
             int add2engineNumber = instances2.Count;
             
                 

@@ -13,7 +13,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class ShipDesignUI : PulsarGuiWindow
     {
-        private string _designName = "foo";
+        private byte[] _designName =  ImGuiSDL2CSHelper.BytesFromString("foo", 32);
 
         private string[] _exsistingDesigns;
         private List<ShipFactory.ShipClass> _exsistingClasses;
@@ -44,12 +44,8 @@ namespace Pulsar4X.SDL2UI
         private ShipDesignUI()
         {
             _flags = ImGuiWindowFlags.NoCollapse;
-            _componentDesigns = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray();
-            _componentNames = new string[_componentDesigns.Length];
-            for (int i = 0; i < _componentDesigns.Length; i++)
-            {
-                _componentNames[i] = _componentDesigns[i].Name;
-            }
+
+            RefreshComponentDesigns();
             
             //TODO: this is temporary armor info, needs to be added to the game proper
             _armorSelection.Add(("None", 0)    );
@@ -67,6 +63,13 @@ namespace Pulsar4X.SDL2UI
 
 
             _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns;
+            _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
+        }
+
+        private void GameLoopOnGameGlobalDateChangedEvent(DateTime newdate)
+        {
+            RefreshComponentDesigns();
+            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns;
         }
 
         internal static ShipDesignUI GetInstance()
@@ -82,6 +85,15 @@ namespace Pulsar4X.SDL2UI
             return thisitem;
         }
 
+        void RefreshComponentDesigns()
+        {
+            _componentDesigns = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray();
+            _componentNames = new string[_componentDesigns.Length];
+            for (int i = 0; i < _componentDesigns.Length; i++)
+            {
+                _componentNames[i] = _componentDesigns[i].Name;
+            }
+        }
 
         internal override void Display()
         {
@@ -105,7 +117,7 @@ namespace Pulsar4X.SDL2UI
                         if(ImGui.Selectable(name))
                         {
                             _selectedDesign = i;
-                            _designName = _exsistingClasses[i].DesignName;
+                            _designName = ImGuiSDL2CSHelper.BytesFromString(_exsistingClasses[i].DesignName, 32);
                             _shipComponents = _exsistingClasses[i].Components;
                             _armor = _exsistingClasses[i].Armor;
                             _profile = new EntityDamageProfileDB(_shipComponents, _armor);
@@ -289,8 +301,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn();
                 ImGui.Columns(1);
                 ImGui.Text("Ship Stats");
-                var _nameInputBuffer = _designName.ToByteArray();
-                ImGui.InputText("Design Name", _nameInputBuffer, (uint)_nameInputBuffer.Length);
+                
+                ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
                 
                 
                 ImGui.Separator();
@@ -339,15 +351,16 @@ namespace Pulsar4X.SDL2UI
                 if(ImGui.Button("Create Design"))
                 {
                     int version = 0;
+                    var strName = ImGuiSDL2CSHelper.StringFromBytes(_designName);
                     foreach (var shipclass in _exsistingClasses)
                     {
-                        if (shipclass.DesignName == _designName)
+                        if (shipclass.DesignName == strName)
                         {
                             if (shipclass.DesignVersion >= version)
                                 version = shipclass.DesignVersion + 1;
                         }
                     }
-                    ShipFactory.ShipClass shipClass = new ShipFactory.ShipClass(_state.Faction.GetDataBlob<FactionInfoDB>(), _designName, _shipComponents, _armor);
+                    ShipFactory.ShipClass shipClass = new ShipFactory.ShipClass(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, _armor);
                     shipClass.DesignVersion = version;
 
                 }

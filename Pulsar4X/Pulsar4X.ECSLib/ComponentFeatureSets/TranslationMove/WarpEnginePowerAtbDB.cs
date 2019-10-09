@@ -2,33 +2,33 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class EnginePowerAtbDB : BaseDataBlob, IComponentDesignAttribute
+    public class WarpEnginePowerAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         [JsonProperty]
         public int EnginePower { get; internal set; }
 
-        public EnginePowerAtbDB()
+        public WarpEnginePowerAtbDB()
         {
         }
 
-        public EnginePowerAtbDB(double power)
+        public WarpEnginePowerAtbDB(double power)
         {
             EnginePower = (int)power;
         }
 
-        public EnginePowerAtbDB(int enginePower)
+        public WarpEnginePowerAtbDB(int enginePower)
         {
             EnginePower = enginePower;
         }
 
-        public EnginePowerAtbDB(EnginePowerAtbDB abilityDB)
+        public WarpEnginePowerAtbDB(WarpEnginePowerAtbDB abilityDB)
         {
             EnginePower = abilityDB.EnginePower;
         }
 
         public override object Clone()
         {
-            return new EnginePowerAtbDB(this);
+            return new WarpEnginePowerAtbDB(this);
         }
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)

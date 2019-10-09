@@ -48,12 +48,12 @@ namespace Pulsar4X.ECSLib
             int totalEnginePower = 0;
             Dictionary<Guid, double> totalFuelUsage = new Dictionary<Guid, double>();
             var instancesDB = ship.GetDataBlob<ComponentInstancesDB>();
-            var designs = instancesDB.GetDesignsByType(typeof(EnginePowerAtbDB));
+            var designs = instancesDB.GetDesignsByType(typeof(WarpEnginePowerAtbDB));
             foreach (var design in designs)
             {
                 foreach (var instanceInfo in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
-                    var power = (EnginePowerAtbDB)instanceInfo.Design.AttributesByType[typeof(EnginePowerAtbDB)];
+                    var power = (WarpEnginePowerAtbDB)instanceInfo.Design.AttributesByType[typeof(WarpEnginePowerAtbDB)];
                     var fuelUsage = (ResourceConsumptionAtbDB)instanceInfo.Design.AttributesByType[typeof(ResourceConsumptionAtbDB)];
                     if (instanceInfo.IsEnabled)
                     {

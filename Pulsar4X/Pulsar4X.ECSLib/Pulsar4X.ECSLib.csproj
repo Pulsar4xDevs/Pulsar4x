@@ -70,48 +70,41 @@
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Data\Pulsar4x\CargoTypeData.json" />
-    <None Remove="Data\Pulsar4x\ComponentData.json" />
-    <None Remove="Data\Pulsar4x\Minerals.json" />
-    <None Remove="Data\Pulsar4x\ReinfedMaterialsData.json" />
-    <None Remove="Data\Pulsar4x\SystemGenSettings.json" />
-    <None Remove="Data\Pulsar4x\TechnologyData.json" />
-    <None Remove="Data\Pulsar4x\VersionInfo.vinfo" />
-    <None Remove="Data\Pulsar4x\InstallationData.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Data\Pulsar4x\CargoTypeData.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Pulsar4x\ComponentData.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="Data\Pulsar4x\MineralsAurora.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Pulsar4x\Minerals.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Pulsar4x\InstallationData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Pulsar4x\CargoTypeData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Pulsar4x\ComponentData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInPackage>false</IncludeInPackage>
-    </Content>
-    <Content Include="Data\Pulsar4x\Minerals.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Pulsar4x\ReinfedMaterialsData.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Pulsar4x\SystemGenSettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Pulsar4x\TechnologyData.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Pulsar4x\VersionInfo.vinfo">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Pulsar4x\InstallationData.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
+    <None Update="Data\Pulsar4x\ReinfedMaterialsData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Pulsar4x\SystemGenSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Pulsar4x\TechnologyData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\Pulsar4x\VersionInfo.vinfo">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\Pulsar4x\ComponentData.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\Pulsar4x\AtmosphericData.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

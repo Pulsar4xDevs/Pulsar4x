@@ -281,7 +281,7 @@ namespace Pulsar4X.ECSLib
                 typeof(ConstructionAtbDB).ToString(),
                 typeof(DamageControlAtbDB).ToString(),
                 typeof(ElectronicDACAtbDB).ToString(),
-                typeof(EnginePowerAtbDB).ToString(),
+                typeof(WarpEnginePowerAtbDB).ToString(),
                 typeof(ExplosionChanceAtbDB).ToString(),
                 typeof(FailureRateMitigationAtbDB).ToString(),
                 typeof(ResourceConsumptionAtbDB).ToString(),

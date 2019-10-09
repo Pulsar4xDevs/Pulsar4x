@@ -384,13 +384,10 @@ namespace Pulsar4X.ECSLib
             int index = -1;
             Guid techGuid;
             Guid typeGuid;
+            
             switch (name)
             {
-
-
-
                 case "Ability":
-                    
                     try
                     {
                         //TODO: get rid of this once json data is rewritten to use names instead of indexes
@@ -493,7 +490,6 @@ namespace Pulsar4X.ECSLib
                     break;
 
                 case "TechData":
-
                     techGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
                     TechSD techSD = _staticDataStore.Techs[techGuid];
                     args.Result = ResearchProcessor.DataFormula(_factionTechDB, techSD);
@@ -514,7 +510,6 @@ namespace Pulsar4X.ECSLib
                     break;
                 //used for datablob args for when a guid is required as a parameter
                 case "GuidString":
-
                     typeGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
                     args.Result = typeGuid;
                     break;
@@ -523,7 +518,6 @@ namespace Pulsar4X.ECSLib
                 //The datablob will be the one defined in designAbility.DataBlobType
                 //TODO document blobs and what args they take!!
                 case "DataBlobArgs":
-
                     if (_designAttribute.DataBlobType == null)
                         throw new Exception("This Ability does not have a DataBlob defined! define a datablob for this ability!");
                     //_designAbility.DataBlobArgs = new List<double>();

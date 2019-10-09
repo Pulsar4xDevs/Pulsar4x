@@ -282,7 +282,7 @@ namespace Pulsar4X.SDL2UI
                 _cargoList2 = value;
                 if(value != null)
                     value.CargoItemSelectedEvent += OnCargoItemSelectedEvent; 
-             }
+            }
         }
         CargoListPannelComplex SelectedCargoPannel;
         CargoListPannelComplex UnselectedCargoPannel;
