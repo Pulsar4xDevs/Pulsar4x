@@ -167,7 +167,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedTech.Name == null)
                     return 0;
-                return _factionTech.LevelforTech(SelectedTech) + 1;
+                return _factionTech.GetLevelforTech(SelectedTech) + 1;
             }
         }
 
@@ -283,7 +283,7 @@ namespace Pulsar4X.ECSLib
         private TechSD _techSD;
 
         public string TechName { get { return _techSD.Name; } }
-        public int Level { get { return _factionTech.LevelforTech(_techSD) + 1; } }
+        public int Level { get { return _factionTech.GetLevelforTech(_techSD) + 1; } }
 
         public int PointCost { get { return ResearchProcessor.CostFormula(_factionTech, _techSD); } }
         public int PointsCompleted { get { return _factionTech.GetResarchableTech(_techSD.ID).pointsResearched; } set{OnPropertyChanged();} }

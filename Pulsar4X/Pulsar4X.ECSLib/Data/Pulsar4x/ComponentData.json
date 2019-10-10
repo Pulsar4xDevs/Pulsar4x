@@ -20,7 +20,7 @@
               }
             ]
           },
-          "ResearchCostFormula": "[Mass] * 10",
+          "ResearchCostFormula": "[Mass] * 2",
           "CreditCostFormula": "[Mass]",
           "BuildPointCostFormula": "[Mass]",
           "MountType": "PlanetInstallation, ShipComponent, ShipCargo, Fighter",
@@ -132,7 +132,7 @@
               }
             ]
           },
-          "ResearchCostFormula": "[Mass] * 1",
+          "ResearchCostFormula": "[Mass] * 0.5",
           "CreditCostFormula": "[Mass]",
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, Fighter",
@@ -299,7 +299,7 @@
               }
             ]
           },
-          "ResearchCostFormula": "[Mass] * 1",
+          "ResearchCostFormula": "[Mass] * 0.5",
           "CreditCostFormula": "[Mass]",
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, Fighter",
@@ -380,7 +380,7 @@
               }
             ]
           },
-          "ResearchCostFormula": "[Mass] * 1",
+          "ResearchCostFormula": "[Mass] * 0.25",
           "CreditCostFormula": "[Mass]",
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, Fighter",
@@ -670,7 +670,7 @@
             {
               "Name": "dbargs",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('Calibre'), Ability('Rail Length'), Ability('Power Use'), Ability('Power Efficiency'), Ability('ROF')",
+              "AbilityFormula": "DataBlobArgs(Ability('Calibre'), Ability('Rail Length'), Ability('Power Use'), Ability('Power Efficiency'), Ability('ROF'))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.RailGunAtb"
             }
           ]

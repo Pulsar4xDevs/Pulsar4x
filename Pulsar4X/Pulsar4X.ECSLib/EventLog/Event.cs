@@ -48,6 +48,16 @@ namespace Pulsar4X.ECSLib
 
         }
 
+        public static Event NewComponentParseError(string componentName, (string expression, string error)errorItem)
+        {
+
+            string errorstring = componentName + " Not Loaded due to error: " + errorItem.error + " In Expression:" + errorItem.expression;
+            var evnt = new Event(errorstring);
+
+            evnt.EventType = EventType.DataParseError;
+            return evnt;
+        }
+
         public Event(SerializationInfo info, StreamingContext context)
         {
             Time = (DateTime)info.GetValue(nameof(Time), typeof(DateTime));

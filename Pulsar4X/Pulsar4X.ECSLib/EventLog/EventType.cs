@@ -8,6 +8,12 @@ namespace Pulsar4X.ECSLib
         SystemDateChange,
         GlobalDateChange,
 
+        #region GameErrors
+
+        DataParseError,
+
+        #endregion
+        
         #region Shipyard Events
 
         ShipConstructionBegan,

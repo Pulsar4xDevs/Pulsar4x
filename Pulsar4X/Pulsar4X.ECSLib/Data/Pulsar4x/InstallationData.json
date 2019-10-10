@@ -311,7 +311,7 @@
         "Key": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
         "Value": {
           "Name": "Infrastructure",
-          "Description": "Component and buildings needed to keep colonists alive on hostile worlds",
+          "Description": "Component and buildings needed to keep colonists alive on hostile worlds: currently non functional other than as cargospace",
           "ID": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
           "MassFormula": "1000",
           "VolumeFormula": "[Mass]",
@@ -336,27 +336,19 @@
               "Name": "Support Colonists",
               "Description": "Keeps colonists alive on hostile worlds",
               "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
-                "Entries": [ ]
-              }
+              "AbilityFormula": "500"
             },
             {
               "Name": "Storage Amount",
               "Description": "The amount of space that is dedicated to storage space. ",
               "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
-                "Entries": []
-              },
               "AbilityFormula": "500"
             },
             {
               "Name": "DBargs",
               "Description": "",
               "GuiHint": "None",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AbilityFormula": "DataBlobArgs(Ability(1), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), 0 , 0)",
+              "AbilityFormula": "DataBlobArgs(Ability('Storage Amount'), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), 0 , 0)",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]

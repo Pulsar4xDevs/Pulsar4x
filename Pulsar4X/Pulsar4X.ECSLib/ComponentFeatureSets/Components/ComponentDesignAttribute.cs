@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
         private Expression _expression;
 
         // ReSharper disable once NotAccessedField.Local (Used for debuging puroposes. though maybe it could be public and shown in the UI?)
-        private string _stringExpression;
+        internal string RawExpressionString;
 
         //this bool is used for tempory created ChainedExpressions that will not have dependants or be dependant. if these are alowed to be dependants they tend to change a dependee's dependant list while itterating.
         private bool _isDependant = true;
@@ -175,6 +175,15 @@ namespace Pulsar4X.ECSLib
 
         }
 
+        internal bool HasErrors()
+        {
+            return _expression.HasErrors();
+        }
+
+        internal string Error()
+        {
+            return _expression.Error;
+        }
 
         /// <summary>
         /// Primary Constructor for ComponentDesignDB
@@ -191,6 +200,13 @@ namespace Pulsar4X.ECSLib
             ReplaceExpression(expressionString);
         }
 
+        internal ChainedExpression(string expressionString, ComponentDesigner designer, FactionTechDB factionTech)
+        {
+            _staticDataStore = StaticRefLib.StaticData;
+            _factionTechDB = factionTech;
+            _designer = designer;
+            ReplaceExpression(expressionString);
+        }
 
         /// <summary>
         /// Primary Constructor for ComponentDesignAbilityDB
@@ -249,7 +265,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="expressionString"></param>
         internal void ReplaceExpression(string expressionString)
         {
-            _stringExpression = expressionString;
+            RawExpressionString = expressionString;
             _expression = new Expression(expressionString);
             SetupExpression();
         }
@@ -263,7 +279,7 @@ namespace Pulsar4X.ECSLib
 
             _expression = expression;
             SetupExpression();
-            _stringExpression = _expression.ParsedExpression.ToString();
+            RawExpressionString = _expression.ParsedExpression.ToString();
         }
 
         /// <summary>

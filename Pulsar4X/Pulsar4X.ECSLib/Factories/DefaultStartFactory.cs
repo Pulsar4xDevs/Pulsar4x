@@ -13,9 +13,9 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _fuelTank_500;
         private static ComponentDesign _laser;
         private static ComponentDesign _sensor_50;
-        private static ComponentDesign SensorInstalation;
+        private static ComponentDesign _sensorInstalation;
         private static ComponentDesign _fireControl;
-        private static ComponentDesign CargoInstalation;
+        private static ComponentDesign _cargoInstalation;
         private static ComponentDesign _cargoHold;
         private static ComponentDesign _cargoCompartment;
         private static ShipFactory.ShipClass _defaultShipClass;
@@ -83,10 +83,10 @@ namespace Pulsar4X.ECSLib
            
             EntityManipulation.AddComponentToEntity(colonyEntity, _fuelTank_500);
             
-            EntityManipulation.AddComponentToEntity(colonyEntity, CargoInstalation);
-            EntityManipulation.AddComponentToEntity(marsColony, CargoInstalation);
+            EntityManipulation.AddComponentToEntity(colonyEntity, _cargoInstalation);
+            EntityManipulation.AddComponentToEntity(marsColony, _cargoInstalation);
             
-            EntityManipulation.AddComponentToEntity(colonyEntity, SensorInstalation);
+            EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
 
@@ -263,6 +263,8 @@ namespace Pulsar4X.ECSLib
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
    
             _engine250 = engineDesigner.CreateDesign(faction);
+            
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_engine250.TechID);
             return _engine250;
         }
 
@@ -275,8 +277,9 @@ namespace Pulsar4X.ECSLib
             fuelTankDesigner = new ComponentDesigner(tankSD, faction.GetDataBlob<FactionTechDB>());
             fuelTankDesigner.ComponentDesignAttributes["Tank Size"].SetValueFromInput(2500);
             fuelTankDesigner.Name = "Tank-500";
-
-            return _fuelTank_500 = fuelTankDesigner.CreateDesign(faction);
+            _fuelTank_500 = fuelTankDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_500.TechID);
+            return _fuelTank_500;
         }
 
         public static ComponentDesign DefaultSimpleLaser(Game game, Entity faction)
@@ -289,8 +292,10 @@ namespace Pulsar4X.ECSLib
             laserDesigner.ComponentDesignAttributes["Range"].SetValueFromInput(100);
             laserDesigner.ComponentDesignAttributes["Damage"].SetValueFromInput(5000);
             laserDesigner.ComponentDesignAttributes["ReloadRate"].SetValueFromInput(5);
-
-            return _laser = laserDesigner.CreateDesign(faction);
+            
+            _laser = laserDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_laser.TechID);
+            return _laser;
 
         }
 
@@ -304,12 +309,14 @@ namespace Pulsar4X.ECSLib
             fireControlDesigner.ComponentDesignAttributes["Range"].SetValueFromInput(100);
             fireControlDesigner.ComponentDesignAttributes["Tracking Speed"].SetValueFromInput(5000);
             fireControlDesigner.ComponentDesignAttributes["Size vs Range"].SetValueFromInput(1);
-
+            
             //return fireControlDesigner.CreateDesign(faction);
-            return _fireControl = fireControlDesigner.CreateDesign(faction);
+            _fireControl = fireControlDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fireControl.TechID);
+            return _fireControl;
         }
 
-        public static void DefaultCargoInstalation(Game game, Entity faction)
+        public static ComponentDesign DefaultCargoInstalation(Game game, Entity faction)
         {
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
@@ -317,7 +324,9 @@ namespace Pulsar4X.ECSLib
             componentDesigner.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000000);
             componentDesigner.Name = "CargoInstalation1";
             //return cargoInstalation.CreateDesign(faction);
-            CargoInstalation = componentDesigner.CreateDesign(faction);
+            _cargoInstalation = componentDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_cargoInstalation.TechID);
+            return _cargoInstalation;
         }
 
         public static ComponentDesign ShipDefaultCargoHold(Game game, Entity faction)
@@ -331,8 +340,9 @@ namespace Pulsar4X.ECSLib
             cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(500);
             cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
             cargoComponent.Name = "CargoComponent5t";
-            
-            return _cargoHold = cargoComponent.CreateDesign(faction);
+            _cargoHold = cargoComponent.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_cargoHold.TechID);
+            return _cargoHold;
         }
         
         public static ComponentDesign ShipSmallCargo(Game game, Entity faction)
@@ -346,8 +356,9 @@ namespace Pulsar4X.ECSLib
             cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(500);
             cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
             cargoComponent.Name = "CargoComponent1t";
-            
-            return _cargoCompartment = cargoComponent.CreateDesign(faction);
+            _cargoCompartment = cargoComponent.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_cargoCompartment.TechID);
+            return _cargoCompartment;
         }
 
         public static ComponentDesign ShipPassiveSensor(Game game, Entity faction)
@@ -365,12 +376,13 @@ namespace Pulsar4X.ECSLib
             sensor.ComponentDesignAttributes["Resolution"].SetValueFromInput(1);   //resolution
             sensor.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
             sensor.Name = "PassiveSensor-S50";
-            
-            return _sensor_50 = sensor.CreateDesign(faction);
+            _sensor_50 = sensor.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_sensor_50.TechID);
+            return _sensor_50;
 
         }
 
-        public static void FacPassiveSensor(Game game, Entity faction)
+        public static ComponentDesign FacPassiveSensor(Game game, Entity faction)
         {
             ComponentDesigner sensorDesigner;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
@@ -384,7 +396,9 @@ namespace Pulsar4X.ECSLib
             sensorDesigner.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
             sensorDesigner.Name = "PassiveSensor-S500";
             //return sensor.CreateDesign(faction);
-            SensorInstalation = sensorDesigner.CreateDesign(faction);
+            _sensorInstalation = sensorDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_sensorInstalation.TechID);
+            return _sensorInstalation;
 
         }
     }

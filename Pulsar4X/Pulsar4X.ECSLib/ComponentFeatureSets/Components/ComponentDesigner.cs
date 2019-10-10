@@ -14,11 +14,62 @@ namespace Pulsar4X.ECSLib
         GuiTextDisplay
         
     }
-    
+
+    public static class ComponentParseCheck
+    {
+        public static bool IsParseable(ComponentTemplateSD componentSD, out List<(string formula,string error)> errors)
+        {
+            errors = new List<(string formula,string error)>();
+            var factionTech = new FactionTechDB();
+
+            var designer = new ComponentDesigner(componentSD, factionTech);
+
+            List<ChainedExpression> allExpressions = new List<ChainedExpression>()
+            {
+                designer.MassFormula,
+                designer.VolumeFormula,
+                designer.CrewFormula,
+                designer.HTKFormula,
+                designer.ResearchCostFormula,
+                designer.BuildCostFormula,
+                designer.CreditCostFormula
+            };
+            allExpressions.AddRange(designer.MineralCostFormulas.Values);
+            allExpressions.AddRange(designer.MaterialCostFormulas.Values);
+            allExpressions.AddRange(designer.ComponentCostFormulas.Values);
+            foreach (var value in designer.ComponentDesignAttributes.Values)
+            {
+                allExpressions.Add(value.Formula);
+                if(value.MaxValueFormula != null)
+                    allExpressions.Add(value.MaxValueFormula);
+                if(value.MinValueFormula != null)
+                    allExpressions.Add(value.MinValueFormula);
+                if(value.StepValueFormula != null)
+                    allExpressions.Add(value.StepValueFormula);
+            }
+
+            foreach (var expression in allExpressions)
+            {
+                if (expression == null)
+                {
+                    errors.Add(("Null Value", "Unexpected Null Value for Formula"));
+                }
+
+                else if (expression.HasErrors())
+                {
+                    errors.Add((expression.RawExpressionString, expression.Error()));
+                }
+            }
+
+            return (errors.Count == 0);
+        }
+    }
+
     public class ComponentDesign
     {
         public Guid Guid;
         public int ResearchCostValue;
+        public Guid TechID;
         public string TypeName; //ie the name in staticData. ie "Newtonion Thruster".
         public string Name; //player defined name. ie "5t 2kn Thruster".
         public string Description;
@@ -137,8 +188,10 @@ namespace Pulsar4X.ECSLib
                 designAttribute.Description = abilitySD.Description;
                 designAttribute.GuiHint = abilitySD.GuiHint;
 
-                if(abilitySD.AbilityFormula !=  null)
+                if (abilitySD.AbilityFormula != null)
+                {
                     designAttribute.Formula = new ChainedExpression(abilitySD.AbilityFormula, designAttribute, factionTech, staticData);
+                }
 
                 if (abilitySD.GuidDictionary != null )
                 {
@@ -204,9 +257,8 @@ namespace Pulsar4X.ECSLib
             tech.MaxLevel = 1;
             tech.CostFormula = _design.ResearchCostValue.ToString();
 
-            //TODO: does this save? this is a bit of a hack iirc since static data shouldn't technicaly be created mid game...
-            //'tech' is TechSD (static data)
-            
+
+            _design.TechID = tech.ID;
             factionTech.MakeResearchable(tech); //add it to researchable techs 
             EvalAll();
             foreach (var designAttribute in ComponentDesignAttributes.Values)

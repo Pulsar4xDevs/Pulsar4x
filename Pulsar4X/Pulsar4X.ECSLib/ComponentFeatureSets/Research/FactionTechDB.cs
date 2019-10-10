@@ -47,6 +47,26 @@ namespace Pulsar4X.ECSLib
             return Researchables.ContainsKey(id);
         }
 
+        internal void IncrementLevel(Guid id)
+        {
+            
+            TechSD tech = Researchables[id].tech;
+            if (ResearchedTechs.ContainsKey(tech.ID))
+                ResearchedTechs[tech.ID] += 1;
+            else
+                ResearchedTechs.Add(tech.ID, 1);
+            
+            if (GetLevelforTech(tech) >= tech.MaxLevel)
+            {
+                Researchables.Remove(tech.ID);
+            }
+            else
+            {
+                int newLevelCost = ResearchProcessor.CostFormula(this, tech);
+                Researchables[id] = (Researchables[id].tech, 0, newLevelCost);
+            }
+        }
+
         internal void AddPoints(Guid id, int pointsToAdd)
         {
             lock (Researchables) //because different systems which are on seperate threads may interact with this.
@@ -61,7 +81,7 @@ namespace Pulsar4X.ECSLib
                     else
                         ResearchedTechs.Add(tech.ID, 1);
                     
-                    if (LevelforTech(tech) >= tech.MaxLevel)
+                    if (GetLevelforTech(tech) >= tech.MaxLevel)
                     {
                         Researchables.Remove(tech.ID);
                     }
@@ -146,7 +166,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="techSD"></param>
         /// <returns></returns>
         [PublicAPI]
-        public int LevelforTech(TechSD techSD)
+        public int GetLevelforTech(TechSD techSD)
         {
             if (ResearchedTechs.ContainsKey(techSD.ID))
                 return ResearchedTechs[techSD.ID];

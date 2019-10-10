@@ -109,9 +109,9 @@ namespace Pulsar4X.ECSLib
                 
                 if (factionTechs.IsResearchable(project.ID))
                 {
-                    int currentLvl = factionTechs.LevelforTech(project);
+                    int currentLvl = factionTechs.GetLevelforTech(project);
                     factionTechs.AddPoints(project.ID, researchPoints);
-                    if (factionTechs.LevelforTech(project) > currentLvl)
+                    if (factionTechs.GetLevelforTech(project) > currentLvl)
                     {
                         scientist.ProjectQueue.RemoveAt(0);
                         if(cycleProject)
@@ -207,7 +207,7 @@ namespace Pulsar4X.ECSLib
             string stringExpression = tech.DataFormula;
 
             Expression expression = new Expression(stringExpression);
-            expression.Parameters.Add("Level", (double)factionTechs.LevelforTech(tech));
+            expression.Parameters.Add("Level", (double)factionTechs.GetLevelforTech(tech));
             object result = expression.Evaluate();
             if (result is int)
                 return (double)(int)result;
@@ -219,7 +219,7 @@ namespace Pulsar4X.ECSLib
             string stringExpression = tech.DataFormula;
 
             Expression expression = new Expression(stringExpression);
-            expression.Parameters.Add("Level", (double)factionTechs.LevelforTech(tech));
+            expression.Parameters.Add("Level", (double)factionTechs.GetLevelforTech(tech));
             return expression;
         }
 
@@ -228,7 +228,7 @@ namespace Pulsar4X.ECSLib
             string stringExpression = tech.CostFormula;
 
             Expression expression = new Expression(stringExpression);
-            expression.Parameters.Add("Level", factionTechs.LevelforTech(tech));
+            expression.Parameters.Add("Level", factionTechs.GetLevelforTech(tech));
             int result = (int)expression.Evaluate();
             return result;
         }

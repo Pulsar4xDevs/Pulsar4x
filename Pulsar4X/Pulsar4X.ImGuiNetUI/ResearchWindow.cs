@@ -123,7 +123,7 @@ namespace Pulsar4X.SDL2UI
                             ImGui.SetTooltip(_researchableTechs[i].tech.Description);
                         }
                         ImGui.NextColumn();
-                        ImGui.Text(_factionTechDB.LevelforTech(_researchableTechs[i].tech).ToString());
+                        ImGui.Text(_factionTechDB.GetLevelforTech(_researchableTechs[i].tech).ToString());
                         
                         ImGui.NextColumn();
                     }

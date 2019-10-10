@@ -90,7 +90,27 @@ namespace Pulsar4X.ECSLib
                     newStore.LoadedDataSets.Add(dataVInfo);
                 }
                 newStore.SetStorageTypeMap();
-                //game.StaticData = newStore;
+                
+                
+                //Test the components formula for parsability
+                List<Guid> badComponents = new List<Guid>();
+                foreach (var componentKVP in newStore.ComponentTemplates)
+                {
+                    if (!ComponentParseCheck.IsParseable(componentKVP.Value, out var errors))
+                    {
+                        badComponents.Add(componentKVP.Key);
+                        foreach (var error in errors)
+                        {
+                            StaticRefLib.EventLog.AddEvent(Event.NewComponentParseError(componentKVP.Value.Name, error));
+                        }
+
+                    }
+                }
+
+                foreach (var componentID in badComponents)
+                {
+                    newStore.ComponentTemplates.Remove(componentID);
+                }
 
             }
             catch (Exception e)
@@ -101,7 +121,7 @@ namespace Pulsar4X.ECSLib
 
                 throw;  // rethrow exception if not known ;)
             }
-}
+        }
 
         /// <summary>
         /// Checks for a valid vinfo file in the specified directory, if the file is found it loads it and 
@@ -152,6 +172,8 @@ namespace Pulsar4X.ECSLib
             dynamic data = obj["Data"].ToObject(type, Serializer);
 
             staticDataStore.Store(data);
+            
+
         }
 
         /// <summary>

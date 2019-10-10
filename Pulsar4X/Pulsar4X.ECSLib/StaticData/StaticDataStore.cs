@@ -303,7 +303,10 @@ namespace Pulsar4X.ECSLib
             if (components != null)
             {
                 foreach (KeyValuePair<Guid, ComponentTemplateSD> component in components)
+                {
                     ComponentTemplates[component.Key] = component.Value;
+
+                }
             }
         }
 
