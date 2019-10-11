@@ -128,6 +128,8 @@ namespace Pulsar4X.SDL2UI
                     foreach (var mineral in _componentDesigner.MineralCostValues)
                     {
                         var mineralSD = StaticRefLib.StaticData.CargoGoods.GetMineral(mineral.Key);
+                        var xpos = ImGui.GetCursorPosX();
+                        ImGui.SetCursorPosX(xpos + 12);
                         ImGui.Text(mineralSD.Name);
                         ImGui.NextColumn();
                         ImGui.Text(mineral.Value.ToString());
@@ -136,6 +138,8 @@ namespace Pulsar4X.SDL2UI
                     foreach (var material in _componentDesigner.MaterialCostValues)
                     {
                         var matSD = StaticRefLib.StaticData.CargoGoods.GetMaterial(material.Key);
+                        var xpos = ImGui.GetCursorPosX();
+                        ImGui.SetCursorPosX(xpos + 12);
                         ImGui.Text(matSD.Name);
                         ImGui.NextColumn();
                         ImGui.Text(material.Value.ToString());
@@ -144,6 +148,8 @@ namespace Pulsar4X.SDL2UI
                     foreach (var component in _componentDesigner.ComponentCostValues)
                     {
                         var compSD = StaticRefLib.StaticData.CargoGoods.GetMaterial(component.Key);
+                        var xpos = ImGui.GetCursorPosX();
+                        ImGui.SetCursorPosX(xpos + 12);
                         ImGui.Text(compSD.Name);
                         ImGui.NextColumn();
                         ImGui.Text(component.Value.ToString());

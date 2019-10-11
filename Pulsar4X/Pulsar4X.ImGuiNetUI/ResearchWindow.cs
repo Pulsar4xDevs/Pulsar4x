@@ -240,11 +240,13 @@ namespace Pulsar4X.SDL2UI
             
             float heightt = ImGui.GetTextLineHeightWithSpacing() * loopto;
             
-            var spacing = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
-            float hoverHeigt = ImGui.GetTextLineHeightWithSpacing() + spacing * 3;
+            var spacingH = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
+            
+            float hoverHeigt = ImGui.GetTextLineHeightWithSpacing() + spacingH * 3;
             
             float heightb = ImGui.GetTextLineHeightWithSpacing() * scientist.ProjectQueue.Count - loopto;
-
+            float colomnWidth0 = 300;
+            
             for (int i = 0; i < loopto; i++)
             {
                 ImGui.BeginChild("Top", new Vector2(400, heightt));
@@ -254,8 +256,14 @@ namespace Pulsar4X.SDL2UI
                 (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
                 
                 ImGui.BeginGroup();
+                var cpos = ImGui.GetCursorPos();
+                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
+                ImGui.Button("##projItem.tech.Name", new Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
+                ImGui.PopStyleColor();
+                ImGui.SetCursorPos(cpos);
                 ImGui.Text(projItem.tech.Name);
                 ImGui.EndGroup();
+                
                 if (ImGui.IsItemHovered())
                 {
                     hoveredi = i;
@@ -301,10 +309,16 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SetColumnWidth(0, 300);
                     (Guid techID, bool cycle) queueItem1 = _scienceTeams[selected].scientist.ProjectQueue[i];
                     (TechSD tech, int amountDone, int amountMax) projItem1 = _researchableTechsByGuid[queueItem1.techID];
-
+                    
                     ImGui.BeginGroup();
+                    var cpos = ImGui.GetCursorPos();
+                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
+                    ImGui.Button("##projItem1.tech.Name", new Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
+                    ImGui.PopStyleColor();
+                    ImGui.SetCursorPos(cpos);
                     ImGui.Text(projItem1.tech.Name);
                     ImGui.EndGroup();
+
                     if (ImGui.IsItemHovered())
                     {
                         hoveredi = i;

@@ -55,6 +55,15 @@ namespace Pulsar4X.SDL2UI
         
         List<(string name, Entity entity)> _factionOwnedEntites = new List<(string name, Entity entity)>();
         
+        private List<(string name, int count)> _listfoo = new List<(string, int)>()
+        {
+            ("Item1", 5),
+            ("Item2", 8),
+            ("Item3", 9),
+            ("Item4", 3),
+            ("Item5", 1)
+            
+        };
         
         private DebugWindow() 
         {
@@ -237,6 +246,21 @@ namespace Pulsar4X.SDL2UI
                         window.Enable(true, _state);
                     }
 
+                    
+                    if (ImGui.CollapsingHeader("UI Examples"))
+                    {
+                        ImGui.Text("ReOrderable List Exampeles");
+
+                        ImGui.Text("HoverButtons");
+                        HoverButtons();
+
+                        ImGui.Text("Static Buttons");
+                        StaticButtons();
+                
+                        ImGui.Text("Buttons Group");
+                        ButtonBox();
+                    }
+                    
                     ImGui.Text("Selected Star System: " + _state.SelectedStarSysGuid);
                     ImGui.Text("Number Of Entites: " + _state.SelectedSystem.NumberOfEntites);
                     if(ImGui.CollapsingHeader("Log"))
@@ -555,6 +579,280 @@ namespace Pulsar4X.SDL2UI
             }
 
             
+        }
+        
+                private int _hvSelectedIndex = -1;
+        void HoverButtons()
+        {
+            
+            ImGui.BeginChild("Hover Buttons");
+
+            int loopto = _listfoo.Count;
+            if (_hvSelectedIndex >= _listfoo.Count)
+                _hvSelectedIndex = -1;
+            if (_hvSelectedIndex > -1)
+                loopto = _hvSelectedIndex;
+
+
+            float heightt = ImGui.GetTextLineHeightWithSpacing() * loopto;
+
+            var spacingH = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
+
+            float hoverHeigt = ImGui.GetTextLineHeightWithSpacing() + spacingH * 3;
+
+            float heightb = ImGui.GetTextLineHeightWithSpacing() * (_listfoo.Count - loopto - 1);
+            float colomnWidth0 = 300;
+
+            for (int i = 0; i < loopto; i++)
+            {
+                ImGui.BeginChild("TopItems", new Vector2(400, heightt));
+                ImGui.Columns(2);
+                ImGui.SetColumnWidth(0, 300);
+
+                ImGui.BeginGroup();
+                var cpos = ImGui.GetCursorPos();
+                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
+                ImGui.Button("##ht"+i, new Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
+                ImGui.PopStyleColor();
+                ImGui.SetCursorPos(cpos);
+                ImGui.Text(_listfoo[i].name);
+                ImGui.EndGroup();
+
+                if (ImGui.IsItemHovered())
+                {
+                    _hvSelectedIndex = i;
+                }
+
+                ImGui.NextColumn();
+                ImGui.NextColumn();
+
+
+                ImGui.EndChild();
+            }
+
+
+            if (_hvSelectedIndex > -1)
+            {
+                ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 0.5f);
+                ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 2f);
+                ImGui.BeginChild("Buttons", new Vector2(400, hoverHeigt), true);
+                ImGui.Columns(2);
+                ImGui.SetColumnWidth(0, 300);
+
+                var queueItem = _listfoo[_hvSelectedIndex];
+
+                ImGui.BeginGroup();
+                ImGui.Text(_listfoo[_hvSelectedIndex].name);
+                ImGui.EndGroup();
+
+                ImGui.NextColumn();
+
+                ImGui.BeginGroup();
+
+                if (ImGui.SmallButton("^" + "##hv" + _hvSelectedIndex) && _hvSelectedIndex > 0)
+                {
+                    _listfoo.RemoveAt(_hvSelectedIndex);
+                    _listfoo.Insert(_hvSelectedIndex - 1, queueItem);
+                }
+
+                ImGui.SameLine();
+                if (ImGui.SmallButton("v" + "##hv" + _hvSelectedIndex) && _hvSelectedIndex < _listfoo.Count - 1)
+                {
+
+                    _listfoo.RemoveAt(_hvSelectedIndex);
+                    _listfoo.Insert(_hvSelectedIndex + 1, queueItem);
+                }
+
+                ImGui.SameLine();
+                if (ImGui.SmallButton("x" + "##hv" + _hvSelectedIndex))
+                {
+                    _listfoo.RemoveAt(_hvSelectedIndex);
+                }
+
+                ImGui.EndGroup();
+                if (ImGui.IsItemHovered())
+                {
+                    _hvSelectedIndex = _hvSelectedIndex;
+                }
+
+                ImGui.NextColumn();
+
+                ImGui.EndChild();
+                ImGui.PopStyleVar(2);
+
+
+                for (int i = _hvSelectedIndex + 1; i < _listfoo.Count; i++)
+                {
+                    ImGui.BeginChild("Bottom", new Vector2(400, heightb));
+                    ImGui.Columns(2);
+                    ImGui.SetColumnWidth(0, 300);
+
+                    ImGui.BeginGroup();
+                    var cpos = ImGui.GetCursorPos();
+                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
+                    ImGui.Button("##hb" + i, new Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
+                    ImGui.PopStyleColor();
+                    ImGui.SetCursorPos(cpos);
+                    ImGui.Text(_listfoo[i].name);
+                    ImGui.EndGroup();
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        _hvSelectedIndex = i;
+                    }
+
+                    ImGui.NextColumn();
+                    ImGui.NextColumn();
+
+                    ImGui.EndChild();
+                }
+                
+            }
+        }
+
+        void StaticButtons()
+        {
+                int selectedItem = -1;
+                for (int i = 0; i < _listfoo.Count; i++)
+                {
+                    string name = _listfoo[i].name;
+                    int number = _listfoo[i].count;
+                    
+                    /*
+                    if (ImGui.Selectable(name, selectedItem == i, ImGuiSelectableFlags.SpanAllColumns))
+                    {
+                        selectedItem = i;
+                    }
+                    */
+                    ImGui.Text(name);
+                    
+                    bool hovered = ImGui.IsItemHovered();
+                    if (hovered)
+                        selectedItem = i;
+                    
+                    ImGui.NextColumn();
+                    ImGui.Text(number.ToString());
+                    
+
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton("+##sb" + i)) //todo: imagebutton
+                    {
+                        _listfoo[i] = (name, _listfoo[i].count + 1);
+                        
+                    }
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton("-##sb" + i) && number > 0) //todo: imagebutton
+                    {
+                        _listfoo[i] = (name, _listfoo[i].count - 1);
+                        
+                    }
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton("x##sb" + i)) //todo: imagebutton
+                    {
+                        _listfoo.RemoveAt(i);
+                        
+                    }
+
+                    if (i > 0)
+                    {
+                        ImGui.SameLine();
+                        if (ImGui.SmallButton("^##sb" + i)) //todo: imagebutton
+                        {
+
+                            (string name, int count) item = _listfoo[i];
+                            _listfoo.RemoveAt(i);
+                            _listfoo.Insert(i - 1, item);
+
+
+                        }
+                    }
+
+
+                    if (_listfoo.Count <= i)
+                    {
+                        ImGui.SameLine();
+                        if (ImGui.SmallButton("v##sb" + i)) //todo: imagebutton
+                        {
+                            (string name, int count) item = _listfoo[i];
+                            _listfoo.RemoveAt(i);
+                            _listfoo.Insert(i + 1, item);
+                        }
+                    }
+                        
+                    ImGui.NextColumn();
+                    
+                }
+        }
+        
+        private (string name, int count) _bbselectedItem;
+        private int _bbSelectedIndex = -1;
+        void ButtonBox()
+        {
+            
+            ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
+            ImGui.BeginChild("ButtonBoxList", new Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.Columns(2);
+            for (int i = 0; i < _listfoo.Count; i++)
+            {
+                
+                bool selected = _bbSelectedIndex == i;
+
+                if (ImGui.Selectable(_listfoo[i].name, ref selected))
+                {
+                    _bbselectedItem = _listfoo[i];
+                    _bbSelectedIndex = i;
+                }
+                
+            }
+            
+
+            ImGui.EndChild();
+            ImGui.SameLine();
+
+            ImGui.BeginChild("Buttons##bb", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginGroup();
+            //if (ImGui.ImageButton(_state.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
+            if (ImGui.Button("^" + "##bb" + _bbSelectedIndex))
+            {
+                (string name, int count) item = _listfoo[_bbSelectedIndex];
+                _listfoo.RemoveAt(_bbSelectedIndex);
+                _listfoo.Insert(_bbSelectedIndex - 1, item);
+                _bbSelectedIndex--;
+            }
+            //if (ImGui.ImageButton(_state.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
+            if (ImGui.Button("v" + "##bb" + _bbSelectedIndex))
+            {
+                (string name, int count) item = _listfoo[_bbSelectedIndex];
+                _listfoo.RemoveAt(_bbSelectedIndex);
+                _listfoo.Insert(_bbSelectedIndex + 1, item);
+                _bbSelectedIndex++;
+            }
+            ImGui.EndGroup();
+            ImGui.SameLine();
+            //if (ImGui.ImageButton(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
+            if (ImGui.Button("+" + "##bb" + _bbSelectedIndex))
+            {
+                //_refineryVM.CurrentJobSelectedItem.ChangeRepeat(!_refineryVM.CurrentJobSelectedItem.Repeat);
+                _listfoo[_bbSelectedIndex] = (_bbselectedItem.name, _bbselectedItem.count + 1);
+            }
+        
+            ImGui.SameLine();
+            //if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
+            if (ImGui.Button("-" + "##bb" + _bbSelectedIndex))
+            {
+                //_refineryVM.CurrentJobSelectedItem.CancelJob();
+                _listfoo[_bbSelectedIndex] = (_bbselectedItem.name, _bbselectedItem.count - 1);
+            }
+
+
+
+            ImGui.EndGroup();
+
+            ImGui.EndChild();
+
+
+            ImGui.PopStyleVar();
+
         }
 
 

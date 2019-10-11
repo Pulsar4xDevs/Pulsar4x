@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using SDL2;
+using Vector3 = Pulsar4X.ECSLib.Vector3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -12,6 +14,7 @@ namespace Pulsar4X.SDL2UI
         public static GraphicDebugWindow _graphicDebugWindow;
         GraphicDebugWidget _debugWidget;
         bool _isEnabled = false;
+        
         public GraphicDebugWindow(GlobalUIState state)
         {
             _state = state;
@@ -23,7 +26,7 @@ namespace Pulsar4X.SDL2UI
             if (_graphicDebugWindow == null)
                 _graphicDebugWindow = new GraphicDebugWindow(state);
 
-  
+
 
             return _graphicDebugWindow;
         }
@@ -100,7 +103,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SameLine();
                 ImGui.Text(item.DataString);
             }
-
+            
         }
     }
 
