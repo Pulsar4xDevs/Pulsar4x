@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
             Engines = new ObservableCollection<ComponentListEngineVM>();
             foreach (var componentDesign in factionInfo.ComponentDesigns.Values)
             {
-                if (componentDesign.HasAttribute<WarpEnginePowerAtbDB>())
+                if (componentDesign.HasAttribute<WarpDriveAtb>())
                 {
                     Engines.Add(new ComponentListEngineVM(componentDesign));
                 }
@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib
     {
         public ComponentListEngineVM(ComponentDesign component) : base(component)
         {
-            AbilityAmount = component.GetAttribute<WarpEnginePowerAtbDB>().EnginePower;
+            AbilityAmount = component.GetAttribute<WarpDriveAtb>().EnginePower;
         }
     }
 

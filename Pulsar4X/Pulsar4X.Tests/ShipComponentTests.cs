@@ -231,7 +231,7 @@ namespace Pulsar4X.Tests
             enginePowerDBArgs4.Name = "Engine Power";
             enginePowerDBArgs4.Description = "Move Power for ship";
             enginePowerDBArgs4.GuiHint = GuiHint.None;
-            enginePowerDBArgs4.AbilityDataBlobType = typeof(WarpEnginePowerAtbDB).ToString();
+            enginePowerDBArgs4.AbilityDataBlobType = typeof(WarpDriveAtb).ToString();
             enginePowerDBArgs4.AbilityFormula = "DataBlobArgs(Ability(3))";
             component.ComponentAbilitySDs.Add(enginePowerDBArgs4);
 

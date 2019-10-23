@@ -292,7 +292,7 @@ namespace Pulsar4X.SDL2UI
 
                         }
                     }
-                    if (changeData.Datablob is TranslateMoveDB)
+                    if (changeData.Datablob is WarpMovingDB)
                     {
                         var widget = new ShipMoveWidget(changeData.Entity);
                         widget.OnPhysicsUpdate();
@@ -314,7 +314,7 @@ namespace Pulsar4X.SDL2UI
 
                         _orbitRings.TryRemove(changeData.Entity.Guid, out IDrawData foo);
                     }
-                    if (changeData.Datablob is TranslateMoveDB)
+                    if (changeData.Datablob is WarpMovingDB)
                     {
                         _moveIcons.TryRemove(changeData.Entity.Guid, out IDrawData foo);
                     }

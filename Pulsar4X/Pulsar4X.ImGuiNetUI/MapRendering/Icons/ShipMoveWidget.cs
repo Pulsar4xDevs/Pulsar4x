@@ -17,9 +17,9 @@ namespace Pulsar4X.SDL2UI
         SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[2];
         public ShipMoveWidget(Entity entity): base(new Vector3())
         {
-            if (entity.HasDataBlob<TranslateMoveDB>())
+            if (entity.HasDataBlob<WarpMovingDB>())
             {
-                var db = entity.GetDataBlob<TranslateMoveDB>();
+                var db = entity.GetDataBlob<WarpMovingDB>();
                 _translateStartPoint = db.TranslateEntryPoint_AU;
                 _translateEndPoint = db.TranslateExitPoint_AU;
             }

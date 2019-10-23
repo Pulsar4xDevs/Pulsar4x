@@ -29,6 +29,8 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public static ReadOnlyDictionary<Type, int> DataBlobTypes = new ReadOnlyDictionary<Type, int>(InternalDataBlobTypes);
 
+        public DateTime StarSysDateTime => ManagerSubpulses.StarSysDateTime;
+
         internal ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
 
         internal List<AEntityChangeListner> EntityListners = new List<AEntityChangeListner>();

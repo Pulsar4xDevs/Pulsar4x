@@ -177,14 +177,14 @@
               "Name": "Fuel ConsumptionDB",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Total Energy Consumption per Km'), 1)",
+              "AbilityFormula": "DataBlobArgs(GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Total Fuel Consumption per Second'), 1)",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.ResourceConsumptionAtbDB"
             },
             {
               "Name": "Sensor Signature",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('Total Energy Consumption per Km'),0)",
+              "AbilityFormula": "DataBlobArgs(Ability('Thrust in Kn'),0)",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]
@@ -193,8 +193,8 @@
       {
         "Key": "7d0b867f-e239-4b93-9b30-c6d4b769b5e4",
         "Value": {
-          "Name": "Alcubierre Drive",
-          "Description": "Moves a ship through non newtonion space",
+          "Name": "Alcubierre Warp Drive",
+          "Description": "Warps a ship through non newtonion space",
           "ID": "7d0b867f-e239-4b93-9b30-c6d4b769b5e4",
           "MassFormula": "Ability('Size')",
           "VolumeFormula": "Ability('Size')",
@@ -240,30 +240,35 @@
               "AbilityFormula": "Ability('Efficency vs Power') * [Mass]"
             },
             {
-              "Name": "Engine PowerDB",
-              "Description": "Move Power for ship",
-              "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('EnginePower'))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAtbDB"
-            },
-            {
-              "Name": "Total Energy Consumption per Km",
-              "Description": "Fuel Consumption Calc",
+              "Name": "Bubble Creation Energy Cost",
+              "Description": "How much energy required to create the warp bubble.",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "TechData('c534d9f0-0d63-424f-9780-d124235903de') * Pow(Ability('EnginePower'), 2.25)"
+              "AbilityFormula": "Ability('EnginePower') * TechData('c534d9f0-0d63-424f-9780-d124235903de') * 0.5"
             },
             {
-              "Name": "Energy ConsumptionDB",
+              "Name": "Bubble Sustain Energy Cost",
+              "Description": "How much energy required to sustain the warp bubble per second during the warp",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('EnginePower')  * TechData('7fa0dc05-5e58-4678-be44-afaad014e096')"
+            },
+            {
+              "Name": "Bubble Collapse Energy Returned",
+              "Description": "How much energy we get back from collapsing the warp bubble",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Bubble Creation Energy Cost') * TechData('d48e1883-2069-441f-ba55-69f63f47add7')",
+            },            
+            {
+              "Name": "db",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Total Energy Consumption per Km'), 1)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResourceConsumptionAtbDB"
+              "AbilityFormula": "DataBlobArgs(Ability('EnginePower'), GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Bubble Creation Energy Cost'), Ability('Bubble Sustain Energy Cost'), -Ability('Bubble Collapse Energy Returned'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.WarpDriveAtb"
             },
             {
               "Name": "Sensor Signature",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('Total Energy Consumption per Km'),0)",
+              "AbilityFormula": "DataBlobArgs(Ability('EnginePower'),0)",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]
@@ -406,7 +411,7 @@
               "Name": "DB",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(GuidString('978f67d9-62fb-4b3a-a12a-8626ac3cb91b'), Ability('Energy Storage'))",
+              "AbilityFormula": "DataBlobArgs(GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Energy Storage'))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.EnergyStoreAtb"
             }
           ]

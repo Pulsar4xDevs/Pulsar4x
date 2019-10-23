@@ -26,6 +26,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Guid FactionOwner { get; internal set; }
 
+        public DateTime StarSysDateTime => Manager.StarSysDateTime;
+
         [NotNull]
         [PublicAPI]
         public new ReadOnlyCollection<BaseDataBlob> DataBlobs => IsValid ? new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobsForEntity(ID)) : new ReadOnlyCollection<BaseDataBlob>(new List<BaseDataBlob>());

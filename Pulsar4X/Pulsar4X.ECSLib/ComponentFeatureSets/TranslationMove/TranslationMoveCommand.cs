@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
         public double RangeInKM { get; set; }
         [JsonIgnore]
         Entity _factionEntity;
-        TranslateMoveDB _db;
+        WarpMovingDB _db;
 
 
         Entity _entityCommanding;
@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning)
             {
                 var targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime);
-                _db = new TranslateMoveDB(targetIntercept.Item1);
+                _db = new WarpMovingDB(targetIntercept.Item1);
                 _db.EntryDateTime = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
                 _db.PredictedExitTime = targetIntercept.Item2;
                 _db.TranslateEntryPoint_AU = _entityCommanding.GetDataBlob<PositionDB>().AbsolutePosition_AU;
@@ -50,7 +50,7 @@ namespace Pulsar4X.ECSLib
                 if (EntityCommanding.HasDataBlob<OrbitDB>())
                     EntityCommanding.RemoveDataBlob<OrbitDB>();
                 EntityCommanding.SetDataBlob(_db);
-                TranslateMoveProcessor.StartNonNewtTranslation(EntityCommanding);
+                WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
                 IsRunning = true;
             }
         }

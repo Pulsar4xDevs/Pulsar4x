@@ -65,11 +65,41 @@
       {
         "Key": "c534d9f0-0d63-424f-9780-d124235903de",
         "Value": {
-          "Name": "Alcubierre Energy Use",
+          "Name": "Alcubierre Bubble Creation Cost",
           "Description": "By finding better ways to manipulate the warp bubble, we can make the drive more efficient",
           "ID": "c534d9f0-0d63-424f-9780-d124235903de",
           "MaxLevel": 10,
-          "DataFormula": "10 - [Level] * 0.5 ",
+          "DataFormula": "1.0 - [Level] * 0.05",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "500 + [Level] * 500"
+        }
+      },
+      {
+        "Key": "7fa0dc05-5e58-4678-be44-afaad014e096",
+        "Value": {
+          "Name": "Alcubierre Sustain Cost",
+          "Description": "By finding better ways to manipulate the warp bubble, we can make the drive more efficient",
+          "ID": "7fa0dc05-5e58-4678-be44-afaad014e096",
+          "MaxLevel": 10,
+          "DataFormula": "0.01 - [Level] * 0.05 ",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "500 + [Level] * 500"
+        }
+      },
+      {
+        "Key": "d48e1883-2069-441f-ba55-69f63f47add7",
+        "Value": {
+          "Name": "Alcubierre Collapse Efficency",
+          "Description": "We can recover some of the energy put into creating the bubble when we collapse it in a controlled manner",
+          "ID": "d48e1883-2069-441f-ba55-69f63f47add7",
+          "MaxLevel": 15,
+          "DataFormula": "0.0 + [Level] * 0.05 ",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []

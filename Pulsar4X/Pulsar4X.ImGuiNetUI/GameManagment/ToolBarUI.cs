@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -44,7 +45,14 @@ namespace Pulsar4X.SDL2UI
                 
             };
             ToolButtons.Add(btn);
-            
+            btn =  new ToolbuttonData()
+            {
+                Picture = _state.SDLImageDictionary["PowerImg"],
+                TooltipText = "Power",
+                OnClick = new Action(PowerGen.GetInstance().SetActive)
+                
+            };
+            ToolButtons.Add(btn);
             
         }
 

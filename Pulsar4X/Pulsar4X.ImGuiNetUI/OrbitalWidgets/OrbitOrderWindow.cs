@@ -127,10 +127,21 @@ namespace Pulsar4X.SDL2UI
         void EntitySelected() 
         { 
             OrderingEntity = _state.LastClickedEntity;
-            _orderEntityOrbit = OrderingEntity.Entity.GetDataBlob<OrbitDB>();
 
+            if (OrderingEntity.Entity.HasDataBlob<OrbitDB>())
+            {
+                _orderEntityOrbit = OrderingEntity.Entity.GetDataBlob<OrbitDB>();
+                _massCurrentBody = _orderEntityOrbit.Parent.GetDataBlob<MassVolumeDB>().Mass;
+            }
+            else
+            {
+                var foo =  OrderingEntity.Entity.GetDataBlob<NewtonMoveDB>();
+                _massCurrentBody = foo.ParentMass;
+            }
+
+            //else if(OrderingEntity.Entity.HasDataBlob<newton>())
             CurrentState = States.NeedsTarget;
-            _massCurrentBody = _orderEntityOrbit.Parent.GetDataBlob<MassVolumeDB>().Mass;
+            
             _massOrderingEntity = OrderingEntity.Entity.GetDataBlob<MassVolumeDB>().Mass;
             _stdGravParamCurrentBody = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;
             if (_moveWidget == null)

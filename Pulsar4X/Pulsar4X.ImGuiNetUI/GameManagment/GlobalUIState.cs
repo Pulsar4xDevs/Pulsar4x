@@ -93,6 +93,7 @@ namespace Pulsar4X.SDL2UI
             LoadImg("DesComp", Path.Combine(rf, "DesignComponentIco.bmp"));
             LoadImg("DesShip", Path.Combine(rf, "DesignShipIco.bmp"));
             LoadImg("Research", Path.Combine(rf, "ResearchIco.bmp"));
+            LoadImg("PowerImg", Path.Combine(rf, "PowerIco.bmp"));
             /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
@@ -179,6 +180,7 @@ namespace Pulsar4X.SDL2UI
     {
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
         //internal bool IsLoaded;
+        internal bool CanActive = false;
         internal bool IsActive = false;
         //internal int StateIndex = -1;
         //protected bool _IsOpen;

@@ -739,7 +739,7 @@ namespace Pulsar4X.ECSLib
             }
             else
                 moverPos = mover.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-            double spd = mover.GetDataBlob<PropulsionAbilityDB>().MaximumSpeed_MS;
+            double spd = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
             var spd1 = Distance.MToAU(spd);
             return GetInterceptPosition2(moverPos, spd1, targetOrbit, atDateTime, offsetPosition);
         }

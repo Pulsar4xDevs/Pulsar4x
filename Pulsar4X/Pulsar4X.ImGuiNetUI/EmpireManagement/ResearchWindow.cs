@@ -17,7 +17,6 @@ namespace Pulsar4X.SDL2UI
         private List<(TechSD tech, int amountDone, int amountMax)> _researchableTechs;
         
         private EntityState _currentEntity;
-        private TeamsHousedDB _teamsHousedDB;
         private List<(Scientist scientist, Entity atEntity)> _scienceTeams;
         private int _selectedTeam = -1;
        
@@ -71,8 +70,6 @@ namespace Pulsar4X.SDL2UI
         private void OnEntityChange(EntityState entityState)
         {
             _currentEntity = entityState;
-
-            _teamsHousedDB = (TeamsHousedDB)entityState.DataBlobs[typeof(TeamsHousedDB)];
         }
 
 

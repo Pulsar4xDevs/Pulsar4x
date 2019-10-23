@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
     public class TranslationMoveVM : ViewModelBase, IDBViewmodel
     {
 
-        TranslateMoveDB _tMoveDB;
+        WarpMovingDB _tMoveDB;
         PositionDB _posDB;
         PropulsionAbilityDB _propDB;
         public double Xpos { get {return _posDB.AbsolutePosition_AU.X; }}
@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
 
         public TranslationMoveVM(Game game, CommandReferences cmdRef, Entity entity)
         {
-            _tMoveDB = entity.GetDataBlob<TranslateMoveDB>();
+            _tMoveDB = entity.GetDataBlob<WarpMovingDB>();
             _posDB = entity.GetDataBlob<PositionDB>();
             _propDB = entity.GetDataBlob<PropulsionAbilityDB>();
             _cmdRef = cmdRef;

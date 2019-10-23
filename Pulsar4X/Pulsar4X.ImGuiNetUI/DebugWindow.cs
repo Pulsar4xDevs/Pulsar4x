@@ -484,6 +484,78 @@ namespace Pulsar4X.SDL2UI
 
                             }
 
+                            if (SelectedEntity.HasDataBlob<EntityEnergyGenAbilityDB>())
+                            {
+                                if (ImGui.CollapsingHeader("Power ###PowerHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                {
+                                    var powerDB = _selectedEntity.GetDataBlob<EntityEnergyGenAbilityDB>();
+                                    ImGui.Text("Generates " +powerDB.EnergyType.Name); 
+                                    ImGui.Text("Max of: " + powerDB.TotalOutputMax + "/s");
+                                    string fueltype = StaticRefLib.StaticData.CargoGoods.GetMaterial(powerDB.TotalFuelUseAtMax.type).Name;
+                                    ImGui.Text("Burning " + powerDB.TotalFuelUseAtMax.maxUse + " of "  +  fueltype); 
+                                    ImGui.Text("With " + powerDB.LocalFuel + " remaining reactor fuel");
+                                    
+                                    foreach (var etype in powerDB.EnergyStored)
+                                    {
+                                        string etypename = StaticRefLib.StaticData.CargoGoods.GetMaterial(etype.Key).Name;
+                                        ImGui.Text(etypename);
+                                        
+                                        ImGui.Text(etype.Value.ToString() + "/" + powerDB.EnergyStoreMax[etype.Key].ToString());
+                                    }
+                                    
+                                }
+                            }
+                                
+
+                            if (SelectedEntity.HasDataBlob<WarpAbilityDB>())
+                            {
+                                if (ImGui.CollapsingHeader("Warp: ###WarpHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                {
+                                    WarpAbilityDB warpDB = SelectedEntity.GetDataBlob<WarpAbilityDB>();
+  
+                                    ImGui.Text("Max Speed: " + warpDB.MaxSpeed);
+                                    ImGui.Text("CurrentVector: " + warpDB.CurrentVectorMS);
+                                    ImGui.Text("Current Speed: " + ECSLib.Vector3.Magnitude( warpDB.CurrentVectorMS));
+                                    
+                                    
+                                    //ImGui.Text("Energy type: " + warpDB.EnergyType);
+                                    ImGui.Text( StaticRefLib.StaticData.CargoGoods.GetMaterial(warpDB.EnergyType).Name);
+                                    
+                                    ImGui.Text("Creation Cost: " +warpDB.BubbleCreationCost.ToString());
+                                    ImGui.Text("Sustain Cost: " +warpDB.BubbleSustainCost.ToString());
+                                    ImGui.Text("Collapse Cost: " +warpDB.BubbleCollapseCost.ToString());
+                                    
+                                }
+                                if (SelectedEntity.HasDataBlob<WarpMovingDB>())
+                                {
+                                    var db = _state.LastClickedEntity.Entity.GetDataBlob<WarpMovingDB>();
+                                    if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                    {
+                                        ImGui.Text("EntryPoint " + db.TranslateEntryPoint_AU);
+                                        ImGui.Text("ExitPoint  " + db.TranslateExitPoint_AU);
+                                        ImGui.Text("EDA " + db.PredictedExitTime.ToString());
+                                        double distance = Distance.DistanceBetween(db.TranslateEntryPoint_AU, db.TranslateExitPoint_AU);
+                                        ImGui.Text("Distance " + distance + " AU");
+                                        ImGui.SameLine();
+                                        double distancekm = Distance.AuToKm(distance);
+                                        ImGui.Text(distancekm.ToString() + " KM");
+                                        var timeToTarget = db.PredictedExitTime - _state.PrimarySystemDateTime;
+                                        ImGui.Text("Remaining TTT " + timeToTarget);
+                                        var totalTime = db.PredictedExitTime - db.EntryDateTime;
+                                        ImGui.Text("Total TTT  " + totalTime);
+                                        double speed = ((distancekm * 1000) / totalTime.TotalSeconds);
+                                        ImGui.Text("speed2 " + speed);
+                                        ImGui.Text("LastDateTime: ");
+                                        ImGui.Text(db.LastProcessDateTime.ToString());
+                                        ImGui.Text("Time Since Last: ");
+                                        var timelen = _state.PrimarySystemDateTime - db.LastProcessDateTime;
+                                        ImGui.Text(timelen.ToString());
+
+                                    }
+
+                                }
+
+                            }
                             if (SelectedEntity.HasDataBlob<PropulsionAbilityDB>())
                             {
                                 if (ImGui.CollapsingHeader("Propulsion: ###PropulsionHeader", ImGuiTreeNodeFlags.CollapsingHeader))
@@ -508,9 +580,9 @@ namespace Pulsar4X.SDL2UI
 
                                     }
                                 }
-                                if (SelectedEntity.HasDataBlob<TranslateMoveDB>())
+                                if (SelectedEntity.HasDataBlob<WarpMovingDB>())
                                 {
-                                    var db = _state.LastClickedEntity.Entity.GetDataBlob<TranslateMoveDB>();
+                                    var db = _state.LastClickedEntity.Entity.GetDataBlob<WarpMovingDB>();
                                     if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                     {
                                         ImGui.Text("EntryPoint " + db.TranslateEntryPoint_AU);

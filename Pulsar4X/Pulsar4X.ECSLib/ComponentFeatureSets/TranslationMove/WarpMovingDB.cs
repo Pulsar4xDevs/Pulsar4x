@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     /// This datablob gets added to an entity when that entity is doing non-newtonion translation type movement.
     /// It gets removed from the entity once the entity has finished the translation. 
     /// </summary>
-    public class TranslateMoveDB : BaseDataBlob
+    public class WarpMovingDB : BaseDataBlob
     {
         [JsonProperty]
         public DateTime LastProcessDateTime = new DateTime();
@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore] //don't store datablobs, we catch this on deserialization. 
         internal PositionDB TargetPositionDB;
 
-        public TranslateMoveDB()
+        public WarpMovingDB()
         {
         }
 
@@ -59,13 +59,13 @@ namespace Pulsar4X.ECSLib
         /// Use this one to move to a specific postion vector. 
         /// </summary>
         /// <param name="targetPosition_AU">Target position au.</param>
-        public TranslateMoveDB(Vector3 targetPosition_AU)
+        public WarpMovingDB(Vector3 targetPosition_AU)
         {
             TranslateExitPoint_AU = targetPosition_AU;
             Heading_Radians = (float)Math.Atan2(targetPosition_AU.Y, targetPosition_AU.X);
         }
 
-        public TranslateMoveDB(TranslateMoveDB db)
+        public WarpMovingDB(WarpMovingDB db)
         {
             LastProcessDateTime = db.LastProcessDateTime;
             SavedNewtonionVector_AU = db.SavedNewtonionVector_AU;
@@ -97,7 +97,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new TranslateMoveDB(this);
+            return new WarpMovingDB(this);
         }
     }
 }

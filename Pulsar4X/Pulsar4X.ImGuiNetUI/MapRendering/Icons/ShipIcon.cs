@@ -11,7 +11,7 @@ namespace Pulsar4X.SDL2UI
         ComponentInstancesDB _componentInstances;
         OrbitDB _orbitDB;
         NewtonMoveDB _newtonMoveDB;
-        TranslateMoveDB _tlmoveDB;
+        WarpMovingDB _tlmoveDB;
         float _lop;
         Entity _entity;
         public ShipIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
@@ -30,8 +30,8 @@ namespace Pulsar4X.SDL2UI
             {
                 _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>(); 
             }
-            else if (entity.HasDataBlob<TranslateMoveDB>())
-                _tlmoveDB = entity.GetDataBlob<TranslateMoveDB>();
+            else if (entity.HasDataBlob<WarpMovingDB>())
+                _tlmoveDB = entity.GetDataBlob<WarpMovingDB>();
             entity.ChangeEvent += Entity_ChangeEvent;
 
 
@@ -62,14 +62,14 @@ namespace Pulsar4X.SDL2UI
                     var loan = _orbitDB.LongitudeOfAscendingNode;
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
-                else if (db is TranslateMoveDB)
-                    _tlmoveDB = (TranslateMoveDB)db;                    
+                else if (db is WarpMovingDB)
+                    _tlmoveDB = (WarpMovingDB)db;                    
             }
             else if (changeType == EntityChangeData.EntityChangeType.DBRemoved)
             {
                 if (db is OrbitDB)
                     _orbitDB = null;
-                else if (db is TranslateMoveDB)
+                else if (db is WarpMovingDB)
                     _tlmoveDB = null;
             }
         }

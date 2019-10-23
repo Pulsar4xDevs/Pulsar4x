@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
     /// 
     /// 
     /// </summary>
-    public class TranslateMoveProcessor : IHotloopProcessor
+    public class WarpMoveProcessor : IHotloopProcessor
     {
         static StaticDataStore staticData;//maybe shouldnt do this, however I can't currently see a reason we'd ever want to run with two different static data sets.
 
@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
 
         public TimeSpan FirstRunOffset => TimeSpan.FromMinutes(10);
 
-        public Type GetParameterType => typeof(TranslateMoveDB);
+        public Type GetParameterType => typeof(WarpMovingDB);
 
         public void Init(Game game)
         {
@@ -66,10 +66,12 @@ namespace Pulsar4X.ECSLib
 
         public static void StartNonNewtTranslation(Entity entity)
         {
-            var moveDB = entity.GetDataBlob<TranslateMoveDB>();
-            var propulsionDB = entity.GetDataBlob<PropulsionAbilityDB>();
+            var moveDB = entity.GetDataBlob<WarpMovingDB>();
+            var warpDB = entity.GetDataBlob<WarpAbilityDB>();
             var positionDB = entity.GetDataBlob<PositionDB>();
-            var maxSpeedMS = propulsionDB.MaximumSpeed_MS;
+            var maxSpeedMS = warpDB.MaxSpeed;
+            var powerDB = entity.GetDataBlob<EntityEnergyGenAbilityDB>();
+            EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
             positionDB.SetParent(null);
             Vector3 targetPosMt = Distance.AuToMt(moveDB.TranslateExitPoint_AU);
             Vector3 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
@@ -80,19 +82,25 @@ namespace Pulsar4X.ECSLib
             double maxKMeters = ShipMovementProcessor.CalcMaxFuelDistance_KM(entity);
             double fuelMaxDistanceMt = maxKMeters * 1000;
 
-            if (fuelMaxDistanceMt >= totalDistance)
+            var creationCost = warpDB.BubbleCreationCost;
+            var t = totalDistance / warpDB.MaxSpeed;
+            var tcost = t * warpDB.BubbleSustainCost;
+            double estored = powerDB.EnergyStored[warpDB.EnergyType];
+            
+            if (creationCost <= estored)
             {
+                
                 var currentVelocityMS = Vector3.Normalise(targetPosMt - currentPositionMt) * maxSpeedMS;
-                propulsionDB.CurrentVectorMS = currentVelocityMS;
+                warpDB.CurrentVectorMS = currentVelocityMS;
                 moveDB.CurrentNonNewtonionVectorMS = currentVelocityMS;
                 moveDB.LastProcessDateTime = entity.Manager.ManagerSubpulses.StarSysDateTime;
 
-                CargoStorageDB storedResources = entity.GetDataBlob<CargoStorageDB>();
-                foreach (var item in propulsionDB.FuelUsePerKM)
-                {
-                    var fuel = staticData.GetICargoable(item.Key);
-                    StorageSpaceProcessor.RemoveCargo(storedResources, fuel, (long)(item.Value * totalDistance / 1000));
-                }
+                //estore = (estore.stored - creationCost, estore.maxStore);
+                powerDB.AddDemand(creationCost, entity.StarSysDateTime);
+                powerDB.AddDemand(-creationCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
+                powerDB.AddDemand(warpDB.BubbleSustainCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
+                //powerDB.EnergyStore[warpDB.EnergyType] = estore;
+
             }
         }
 
@@ -107,8 +115,9 @@ namespace Pulsar4X.ECSLib
         {
             
             var manager = entity.Manager;
-            var moveDB = entity.GetDataBlob<TranslateMoveDB>();
-            var propulsionDB = entity.GetDataBlob<PropulsionAbilityDB>();
+            var moveDB = entity.GetDataBlob<WarpMovingDB>();
+            var warpDB = entity.GetDataBlob<WarpAbilityDB>();
+            
             var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;
             DateTime dateTimeFrom = moveDB.LastProcessDateTime;
             DateTime dateTimeNow = manager.ManagerSubpulses.StarSysDateTime;
@@ -138,12 +147,16 @@ namespace Pulsar4X.ECSLib
 
             if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
             {
-            
+                var powerDB = entity.GetDataBlob<EntityEnergyGenAbilityDB>();
                 newPositionMt = targetPosMt;
                 positionDB.SetParent(moveDB.TargetEntity);
                 //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
                 positionDB.RelativePosition_AU = moveDB.TranslateRalitiveExit_AU;
-                SetOrbitHere(entity, propulsionDB, positionDB, moveDB, dateTimeFuture);
+                var propulsionAbilityDB = entity.GetDataBlob<PropulsionAbilityDB>();
+                SetOrbitHere(entity, propulsionAbilityDB, positionDB, moveDB, dateTimeFuture);
+                powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
+                powerDB.AddDemand( - warpDB.BubbleSustainCost, entity.StarSysDateTime);
+                powerDB.AddDemand(-warpDB.BubbleCollapseCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
 
 
             }
@@ -157,7 +170,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        void SetOrbitHere(Entity entity, PropulsionAbilityDB propulsionDB, PositionDB positionDB, TranslateMoveDB moveDB, DateTime atDateTime)
+        void SetOrbitHere(Entity entity, PropulsionAbilityDB propulsionDB, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
         {
 
             propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
@@ -183,7 +196,7 @@ namespace Pulsar4X.ECSLib
             propulsionDB.RemainingDV_MS -= (float)(moveDB.ExpendDeltaV).Length();
             OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector_AU, atDateTime);
             
-            entity.RemoveDataBlob<TranslateMoveDB>();
+            entity.RemoveDataBlob<WarpMovingDB>();
             
             if (newOrbit.Apoapsis < targetSOI) //furtherst point within soi, normal orbit
             {
@@ -211,7 +224,7 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            List<Entity> entitysWithTranslateMove = manager.GetAllEntitiesWithDataBlob<TranslateMoveDB>();
+            List<Entity> entitysWithTranslateMove = manager.GetAllEntitiesWithDataBlob<WarpMovingDB>();
             foreach (var entity in entitysWithTranslateMove)
             {
                 ProcessEntity(entity, deltaSeconds);

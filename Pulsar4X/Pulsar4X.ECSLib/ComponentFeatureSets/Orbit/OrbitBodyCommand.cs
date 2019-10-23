@@ -95,7 +95,7 @@ namespace Pulsar4X.ECSLib
         public DateTime TransitStartDateTime;
         public Vector3 ExpendDeltaV;
 
-        TranslateMoveDB _db;
+        WarpMovingDB _db;
 
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace Pulsar4X.ECSLib
 
                 //Vector4 currentVec = OrbitProcessor.PreciseOrbitalVector(sgp, ralPos, orbitDB.SemiMajorAxis);
                 Vector3 currentVec = OrbitProcessor.GetOrbitalVector(orbitDB, TransitStartDateTime);
-                _db = new TranslateMoveDB(targetIntercept.pos);
+                _db = new WarpMovingDB(targetIntercept.pos);
                 _db.TranslateRalitiveExit_AU = TargetOffsetPosition_AU;
                 _db.EntryDateTime = TransitStartDateTime;
                 _db.PredictedExitTime = targetIntercept.eti;
@@ -158,7 +158,7 @@ namespace Pulsar4X.ECSLib
                 if (EntityCommanding.HasDataBlob<OrbitDB>())
                     EntityCommanding.RemoveDataBlob<OrbitDB>();
                 EntityCommanding.SetDataBlob(_db);
-                TranslateMoveProcessor.StartNonNewtTranslation(EntityCommanding);
+                WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
                 IsRunning = true;
 
 

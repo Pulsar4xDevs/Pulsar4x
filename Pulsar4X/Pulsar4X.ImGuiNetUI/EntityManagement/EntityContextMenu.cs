@@ -35,14 +35,18 @@ namespace Pulsar4X.SDL2UI
                 ImGui.CloseCurrentPopup();
             }
 
-            //if entity can move
-            if (_entityState.Entity.HasDataBlob<PropulsionAbilityDB>())
+            //if entity can warp
+            if (_entityState.Entity.HasDataBlob<WarpAbilityDB>())
             {
                 if (ImGui.SmallButton("Translate to a new orbit"))
                 {
                     OrbitOrderWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = OrbitOrderWindow.GetInstance(_entityState);
                 }
+            }
+            //if entity can move
+            if (_entityState.Entity.HasDataBlob<PropulsionAbilityDB>())
+            {
                 if (ImGui.SmallButton("Change current orbit"))
                 {
                     ChangeCurrentOrbitWindow.GetInstance(_entityState).IsActive = true;

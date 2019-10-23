@@ -78,14 +78,14 @@ namespace Pulsar4X.ECSLib
         }
         */
 
-        private static void SetTranslateClone(TranslateMoveDB detectedEntitiesMove, SensorInfoDB sensorInfo)
+        private static void SetTranslateClone(WarpMovingDB detectedEntitiesMove, SensorInfoDB sensorInfo)
         {
             //var quality = sensorInfo.HighestDetectionQuality.detectedSignalQuality.Percent; //quality shouldn't affect positioning. 
             //double signalBestMagnatude = sensorInfo.HighestDetectionQuality.detectedSignalStrength_kW;
             double signalNowMagnatude = sensorInfo.LatestDetectionQuality.SignalStrength_kW;
             if (signalNowMagnatude > 0.0)
             {
-                var sensorEntityMove =  GenericClone<TranslateMoveDB>(detectedEntitiesMove, sensorInfo);
+                var sensorEntityMove =  GenericClone<WarpMovingDB>(detectedEntitiesMove, sensorInfo);
 
                 sensorEntityMove.TargetPositionDB = null; //the sensorEntity shouldn't know the final destination. 
 
