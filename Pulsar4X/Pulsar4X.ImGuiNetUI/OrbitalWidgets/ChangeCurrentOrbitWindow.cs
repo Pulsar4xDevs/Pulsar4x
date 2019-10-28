@@ -160,7 +160,7 @@ namespace Pulsar4X.SDL2UI
                 _state.Faction,
                 OrderingEntity.Entity,
                 _actionDateTime,
-                (Vector2)Distance.MToAU(_deltaV_MS));
+                Distance.MToAU(_deltaV_MS));
 
             CloseWindow();
         }

@@ -13,9 +13,9 @@ namespace Pulsar4X.ECSLib
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
-        NewtonionMoveDB _db;
+        NewtonMoveDB _db;
 
-        public static void CreateCommand(Game game, Entity faction, Entity orderEntity, DateTime actionDateTime, Vector2 expendDeltaV_AU)
+        public static void CreateCommand(Game game, Entity faction, Entity orderEntity, DateTime actionDateTime, Vector3 expendDeltaV_AU)
         {
             var cmd = new ChangeCurrentOrbitCommand()
             {
@@ -25,7 +25,8 @@ namespace Pulsar4X.ECSLib
 
             };
 
-            cmd._db = new NewtonionMoveDB();
+            var parent = orderEntity.GetDataBlob<OrbitDB>().Parent;
+            cmd._db = new NewtonMoveDB(parent, Vector3.Zero);
             cmd._db.ActionOnDateTime = actionDateTime;
             cmd._db.DeltaVToExpend_AU = expendDeltaV_AU;
             
@@ -131,56 +132,67 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning)
             {
                 
-
-                (Vector3 pos, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), TransitStartDateTime, TargetOffsetPosition_AU);
-                OrbitDB orbitDB = _entityCommanding.GetDataBlob<OrbitDB>();
-                Vector3 currentPos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, TransitStartDateTime);
-                var ralPos = OrbitProcessor.GetPosition_AU(orbitDB, TransitStartDateTime);
-                var masses = _entityCommanding.GetDataBlob<MassVolumeDB>().Mass + orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
-                var sgp = GameConstants.Science.GravitationalConstant * masses / 3.347928976e33;
-
-                //Vector4 currentVec = OrbitProcessor.PreciseOrbitalVector(sgp, ralPos, orbitDB.SemiMajorAxis);
-                Vector3 currentVec = OrbitProcessor.GetOrbitalVector(orbitDB, TransitStartDateTime);
-                _db = new WarpMovingDB(targetIntercept.pos);
-                _db.TranslateRalitiveExit_AU = TargetOffsetPosition_AU;
-                _db.EntryDateTime = TransitStartDateTime;
-                _db.PredictedExitTime = targetIntercept.eti;
-                _db.TranslateEntryPoint_AU = currentPos;
-                _db.SavedNewtonionVector_AU = currentVec;
-
-                _db.ExpendDeltaV = ExpendDeltaV;
-                if (_targetEntity.HasDataBlob<SensorInfoDB>())
+                var warpDB = _entityCommanding.GetDataBlob<WarpAbilityDB>();
+                var powerDB = _entityCommanding.GetDataBlob<EntityEnergyGenAbilityDB>();
+                Guid eType = warpDB.EnergyType;
+                double estored = powerDB.EnergyStored[eType];
+                double creationCost = warpDB.BubbleCreationCost;
+                if (creationCost <= estored)
                 {
-                    _db.TargetEntity = _targetEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
+                    (Vector3 pos, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), TransitStartDateTime, TargetOffsetPosition_AU);
+                    OrbitDB orbitDB = _entityCommanding.GetDataBlob<OrbitDB>();
+                    Vector3 currentPos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, TransitStartDateTime);
+                    var ralPos = OrbitProcessor.GetPosition_AU(orbitDB, TransitStartDateTime);
+                    var masses = _entityCommanding.GetDataBlob<MassVolumeDB>().Mass + orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
+                    var sgp = GameConstants.Science.GravitationalConstant * masses / 3.347928976e33;
+
+                    //Vector4 currentVec = OrbitProcessor.PreciseOrbitalVector(sgp, ralPos, orbitDB.SemiMajorAxis);
+                    Vector3 currentVec = OrbitProcessor.GetOrbitalVector(orbitDB, TransitStartDateTime);
+                    _db = new WarpMovingDB(targetIntercept.pos);
+                    _db.TranslateRalitiveExit_AU = TargetOffsetPosition_AU;
+                    _db.EntryDateTime = TransitStartDateTime;
+                    _db.PredictedExitTime = targetIntercept.eti;
+                    _db.TranslateEntryPoint_AU = currentPos;
+                    _db.SavedNewtonionVector_AU = currentVec;
+
+                    _db.ExpendDeltaV = ExpendDeltaV;
+                    if (_targetEntity.HasDataBlob<SensorInfoDB>())
+                    {
+                        _db.TargetEntity = _targetEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
+                    }
+                    else
+                        _db.TargetEntity = _targetEntity;
+
+                    if (EntityCommanding.HasDataBlob<OrbitDB>())
+                        EntityCommanding.RemoveDataBlob<OrbitDB>();
+                    EntityCommanding.SetDataBlob(_db);
+                    WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
+
+
+                    IsRunning = true;
+                    
+                    //some debug code:
+                    /*
+                    var distance = (currentPos - targetIntercept.Item1).Length();
+                    var distancekm = Distance.AuToKm(distance);
+                    var time = targetIntercept.Item2 - TransitStartDateTime;
+                    double spd = _entityCommanding.GetDataBlob<PropulsionAbilityDB>().MaximumSpeed_MS;
+                    spd = Distance.MToAU(spd);
+                    var distb = spd * time.TotalSeconds;
+                    var distbKM = Distance.AuToKm(distb);
+                    var dif = distancekm - distbKM;
+                    //Assert.AreEqual(distancekm, distbKM);
+                    */
                 }
-                else
-                    _db.TargetEntity = _targetEntity;
-                if (EntityCommanding.HasDataBlob<OrbitDB>())
-                    EntityCommanding.RemoveDataBlob<OrbitDB>();
-                EntityCommanding.SetDataBlob(_db);
-                WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
-                IsRunning = true;
 
 
-                var distance = (currentPos - targetIntercept.Item1).Length();
-                var distancekm = Distance.AuToKm(distance);
-
-                var time = targetIntercept.Item2 - TransitStartDateTime;
-
-                double spd = _entityCommanding.GetDataBlob<PropulsionAbilityDB>().MaximumSpeed_MS;
-                spd = Distance.MToAU(spd);
-                var distb = spd * time.TotalSeconds;
-                var distbKM = Distance.AuToKm(distb);
-
-                var dif = distancekm - distbKM;
-                //Assert.AreEqual(distancekm, distbKM);
             }
 
         }
 
         internal override bool IsFinished()
         {
-            if (_db.IsAtTarget)
+            if (_db != null && _db.IsAtTarget)
                 return true;
             return false;
         }

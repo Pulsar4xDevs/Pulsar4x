@@ -40,6 +40,12 @@ namespace Pulsar4X.SDL2UI
         private (string name, double density, float thickness) _armor = ("Polyprop", 1175f, 10);
         
         private float _firstChildHeight = 350;
+
+        private double _mass;
+        private double _ttw;
+        private double _dv;
+        private double _wspd;
+        private double _tn;
         
         private ShipDesignUI()
         {
@@ -126,7 +132,7 @@ namespace Pulsar4X.SDL2UI
 
                             _armorNames.Contains(_armor.name);
                             _armorIndex = _armorSelection.FindIndex(foo => foo.name.Equals(_armor.name));
-                            
+                            designChanged = true;
                         }
                     }
                     
@@ -303,6 +309,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("Ship Stats");
                 
                 ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
+                ImGui.Text("Mass: " + _mass + "kg");
+                ImGui.Text("Total Thrust: " + _tn + "Newtons");
+                ImGui.Text("Thrust To Weight: " + _ttw);
+                ImGui.Text("Delta V:");
+                ImGui.Text("Warp Speed:" + _wspd + "m/s");
                 
                 
                 ImGui.Separator();
@@ -319,6 +330,43 @@ namespace Pulsar4X.SDL2UI
                     _rawShipImage = _profile.DamageProfile;
                     
                     _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
+
+                    double mass = 0;
+                    double fu = 0;
+                    double tn = 0;
+
+                    double wp = 0;
+                    double wcc = 0;
+                    double wsc = 0;
+                    double wec = 0;
+                    
+                    foreach (var component in _shipComponents)
+                    {
+                        mass += component.design.Mass * component.count;
+                        if (component.design.HasAttribute<NewtonionThrustAtb>())
+                        {
+                            var atb = component.design.GetAttribute<NewtonionThrustAtb>();
+                            double ev = atb.ExhaustVelocity;
+                            fu += atb.FuelUsage;
+                            tn += ev * atb.FuelUsage;
+                        }
+
+                        if (component.design.HasAttribute<WarpDriveAtb>())
+                        {
+                            var atb = component.design.GetAttribute<WarpDriveAtb>();
+                             wp += atb.WarpPower;
+                             wcc += atb.BubbleCreationCost;
+                             wsc += atb.BubbleSustainCost;
+                             wec += atb.BubbleCollapseCost;
+
+                        }
+                    }
+
+                    _mass = mass;
+                    _tn = tn;
+                    _ttw = tn / mass;
+                    _wspd = ShipMovementProcessor.MaxSpeedCalc(wp, mass);
+
                 }
 
                 if (_shipImgPtr != IntPtr.Zero)

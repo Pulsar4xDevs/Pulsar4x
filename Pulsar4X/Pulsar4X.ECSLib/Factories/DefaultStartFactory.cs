@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
 {
     public static class DefaultStartFactory
     {
-        private static ComponentDesign _engine250;
+        private static ComponentDesign _engine500;
         private static ComponentDesign _warpDrive;
         private static ComponentDesign _fuelTank_500;
         private static ComponentDesign _laser;
@@ -180,14 +180,19 @@ namespace Pulsar4X.ECSLib
             //Entity rock = AsteroidFactory.CreateAsteroid2(sol, earth, game.CurrentDateTime + TimeSpan.FromDays(365));
             Entity rock = AsteroidFactory.CreateAsteroid(solSys, earth, StaticRefLib.CurrentDateTime + TimeSpan.FromDays(365));
 
+
+            var pow = solSys.GetAllEntitiesWithDataBlob<EntityEnergyGenAbilityDB>();
+            foreach (var entityItem in pow)
+            {
+                StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(EnergyGenProcessor)).ProcessEntity(entityItem, StaticRefLib.CurrentDateTime);
+                
+            }
+            
             var entitiesWithSensors = solSys.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
             foreach (var entityItem in entitiesWithSensors)
             {
                 StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, StaticRefLib.CurrentDateTime);
             }
-
-
-
             return factionEntity;
         }
 
@@ -206,9 +211,9 @@ namespace Pulsar4X.ECSLib
                 (ShipSmallCargo(game, faction), 1),
                 (_fuelTank_500, 2),
                 (_warpDrive, 4),
-                (_battery, 1),
+                (_battery, 3),
                 (_reactor, 1),
-                (_engine250, 3),
+                (_engine500, 3),
                 
             };
             _defaultShipClass.Components = components2;
@@ -229,10 +234,10 @@ namespace Pulsar4X.ECSLib
                 (_laser, 4),     
                 (_fireControl, 2),
                 (_fuelTank_500, 2),
-                (_warpDrive, 2),
-                (_battery, 1),
+                (_warpDrive, 4),
+                (_battery, 3),
                 (_reactor, 1),
-                (_engine250, 4),
+                (_engine500, 4),
             };
             shipdesign.Components = components2;
             shipdesign.Armor = ("Polyprop", 1175f, 3);
@@ -253,10 +258,10 @@ namespace Pulsar4X.ECSLib
                 (_sensor_50, 1),    
                 (DefaultFuelTank(game, faction), 2),
                 (_cargoHold, 1),   
-                (_warpDrive, 2),
-                (_battery, 1),
+                (_warpDrive, 4),
+                (_battery, 3),
                 (_reactor, 1),
-                (_engine250, 4),
+                (_engine500, 4),
             };
             shipdesign.Components = components2;
             shipdesign.Armor = ("Polyprop", 1175f, 3);
@@ -267,21 +272,21 @@ namespace Pulsar4X.ECSLib
 
         public static ComponentDesign DefaultEngineDesign(Game game, Entity faction)
         {
-            if (_engine250 != null)
-                return _engine250;
+            if (_engine500 != null)
+                return _engine500;
             
             ComponentDesigner engineDesigner;
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("b12f50f6-ac68-4a49-b147-281a9bb34b9b")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(500); //size 500 = 2500 power
-            engineDesigner.Name = "Thruster 250";
+            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(500); 
+            engineDesigner.Name = "Thruster 500";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
    
-            _engine250 = engineDesigner.CreateDesign(faction);
+            _engine500 = engineDesigner.CreateDesign(faction);
             
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_engine250.TechID);
-            return _engine250;
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_engine500.TechID);
+            return _engine500;
         }
         public static ComponentDesign DefaultWarpDesign(Game game, Entity faction)
         {

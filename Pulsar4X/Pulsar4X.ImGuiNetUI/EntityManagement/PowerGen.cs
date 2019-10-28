@@ -47,8 +47,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
             else
             {
-                CanActive = false;
-                _entityState = null;
+                //CanActive = false;
+                //_entityState = null;
             }
         }
 
@@ -69,7 +69,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 SetEntity(_state.LastClickedEntity);
             if (IsActive && CanActive)
             {
-                ImGui.Begin("Power Display");
+                ImGui.Begin("Power Display " + _entityState.Name);
                 ImGui.Text("Current Load: ");
                 ImGui.SameLine();
                 ImGui.Text(_energyGenDB.Load.ToString());
@@ -115,18 +115,20 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 float ystep = (float)(_plotSize.Y / _energyGenDB.EnergyStoreMax[_energyGenDB.EnergyType.ID]);
                 float posX = 0;
                 float posYBase = plotPos.Y + _plotSize.Y;
-                float posYO = posYBase;
-                float posYD = posYBase;
-                float posYS = posYBase;
-                //float ypos = plotPos.Y + _plotSize.Y;
                 int index = _energyGenDB.HistogramIndex;
+                var thisData = _energyGenDB.Histogram[index];
+                float posYO = ystep * (float)thisData.outputval;
+                float posYD = ystep * (float)thisData.demandval;
+                float posYS = ystep * (float)thisData.storval;
+                //float ypos = plotPos.Y + _plotSize.Y;
+                
                 for (int i = 0; i < _energyGenDB.HistogramSize; i++)
                 {
                     
                     int idx = index + i;
                     if (idx >= _energyGenDB.HistogramSize)
                         idx -= _energyGenDB.HistogramSize;
-                    var thisData = _energyGenDB.Histogram[idx];
+                    thisData = _energyGenDB.Histogram[idx];
                     
                     float nextX = xstep * thisData.seconds;
                     float nextYO = ystep * (float)thisData.outputval;

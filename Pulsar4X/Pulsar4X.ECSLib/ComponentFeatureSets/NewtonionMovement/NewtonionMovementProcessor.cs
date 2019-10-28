@@ -48,6 +48,7 @@ namespace Pulsar4X.ECSLib
         {
 
             NewtonMoveDB newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
+            NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
             double Mass_Kg = entity.GetDataBlob<MassVolumeDB>().Mass;
             double ParentMass_kg = newtonMoveDB.ParentMass;
@@ -72,11 +73,15 @@ namespace Pulsar4X.ECSLib
 
                 double gravForce = GameConstants.Science.GravitationalConstant * (Mass_Kg * ParentMass_kg / Math.Pow(distanceToParent_m, 2));
                 Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition_m);
-           
-                Vector3 totalForce = gravForceVector + newtonMoveDB.ThrustVector;
 
-                Vector3 acceleration_mps = totalForce / Mass_Kg;
-                Vector3 newVelocity = (acceleration_mps * timeStep) + newtonMoveDB.CurrentVector_ms;
+                Vector3 acceleratonFromGrav = gravForceVector / Mass_Kg;
+                
+                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(Mass_Kg / (Mass_Kg - newtonThrust.FuelUsage));//per second
+                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / Mass_Kg; //per second
+                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVToExpend_AU / maxAccelFromThrust; //per second
+
+                Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
+                Vector3 newVelocity = (accelerationTotal * timeStep) + newtonMoveDB.CurrentVector_ms;
 
                 newtonMoveDB.CurrentVector_ms = newVelocity;
                 Vector3 deltaPos = (newtonMoveDB.CurrentVector_ms + newVelocity) / 2 * timeStep;

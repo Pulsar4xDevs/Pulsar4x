@@ -138,21 +138,6 @@
         }
       },
       {
-        "Key": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
-        "Value": {
-          "Name": "Fuel Consumption: Litres per Engine Power Hour",
-          "Description": "",
-          "ID": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
-          "MaxLevel": 12,
-          "DataFormula": "1 + [Level] * 0.1",
-          "Category": "PowerAndPropulsion",
-          "Requirements": {
-            "List": []
-          },
-          "CostFormula": "(1 + [Level]) * 100"
-        }
-      },
-      {
         "Key": "dc8221e0-c70c-4596-b303-dc4f79a0e16d",
         "Value": {
           "Name": "Solid Fuel",
@@ -168,13 +153,13 @@
         }
       },
       {
-        "Key": "7650c18d-ff8f-40d0-bd72-1745b52d2164",
+        "Key": "b056576a-124e-41c5-afcd-27d1f0bf6f4e",
         "Value": {
-          "Name": "LOX / Hydrocarbon Thrust",
-          "Description": "Research into better thrust output for a given size of engine",
-          "ID": "7650c18d-ff8f-40d0-bd72-1745b52d2164",
+          "Name": "LOX / Hydrocarbon Maximum Size",
+          "Description": "Research into better cooling allows larger engine sizes",
+          "ID": "fa2736ed-d0bf-44a5-bc00-d25d3adaa23c",
           "MaxLevel": 10,
-          "DataFormula": "1 + [Level] * 0.1",
+          "DataFormula": "8000 + [Level] * 250",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []
@@ -185,16 +170,31 @@
       {
         "Key": "fa2736ed-d0bf-44a5-bc00-d25d3adaa23c",
         "Value": {
-          "Name": "LOX / Hydrocarbon Efficiency",
-          "Description": "Research into better fuel efficiency for a given size of engine",
+          "Name": "LOX / Hydrocarbon Exhaust Velocity",
+          "Description": "Research into higher exhaust velocities for engines, making them more efficient",
           "ID": "fa2736ed-d0bf-44a5-bc00-d25d3adaa23c",
           "MaxLevel": 10,
-          "DataFormula": "1 + [Level] * 0.1",
+          "DataFormula": "1 + [Level] * 100",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []
           },
           "CostFormula": "(1 + [Level]) * 500"
+        }
+      },
+      {
+        "Key": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
+        "Value": {
+          "Name": "LOX / Hydrocarbon Fuel Consumption",
+          "Description": "Research into better plumbing and pump layouts allows higher fuel consumption for a given size ",
+          "ID": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
+          "MaxLevel": 12,
+          "DataFormula": "1 + [Level] * 0.01",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 100"
         }
       },
       {

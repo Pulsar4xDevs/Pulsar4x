@@ -41,17 +41,26 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                var targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime);
-                _db = new WarpMovingDB(targetIntercept.Item1);
-                _db.EntryDateTime = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
-                _db.PredictedExitTime = targetIntercept.Item2;
-                _db.TranslateEntryPoint_AU = _entityCommanding.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-                _db.TargetEntity = _targetEntity;
-                if (EntityCommanding.HasDataBlob<OrbitDB>())
-                    EntityCommanding.RemoveDataBlob<OrbitDB>();
-                EntityCommanding.SetDataBlob(_db);
-                WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
-                IsRunning = true;
+                var warpDB = _entityCommanding.GetDataBlob<WarpAbilityDB>();
+                var powerDB = _entityCommanding.GetDataBlob<EntityEnergyGenAbilityDB>();
+                Guid eType = warpDB.EnergyType;
+                double estored = powerDB.EnergyStored[eType];
+                double creationCost = warpDB.BubbleCreationCost;
+                if (creationCost <= estored)
+                {
+                    var targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime);
+                    _db = new WarpMovingDB(targetIntercept.Item1);
+                    _db.EntryDateTime = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
+                    _db.PredictedExitTime = targetIntercept.Item2;
+                    _db.TranslateEntryPoint_AU = _entityCommanding.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+                    _db.TargetEntity = _targetEntity;
+                    if (EntityCommanding.HasDataBlob<OrbitDB>())
+                        EntityCommanding.RemoveDataBlob<OrbitDB>();
+                    EntityCommanding.SetDataBlob(_db);
+                    
+                    WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
+                    IsRunning = true;
+                }
             }
         }
 

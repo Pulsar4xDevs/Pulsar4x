@@ -166,10 +166,13 @@ namespace Pulsar4X.ECSLib
 
         public EntityEnergyGenAbilityDB(DateTime gameTime)
         {
-            HistogramStartDate = gameTime;
+            HistogramStartDate = gameTime - TimeSpan.FromSeconds(_histogramSize);
+            dateTimeLastProcess = gameTime;// - TimeSpan.FromSeconds(_histogramSize);
+            
             Random rng = new Random();
             for (int i = 0; i < _histogramSize; i++)
             {
+                /*
                 double o = rng.Next(0, 50);
                 double d = rng.Next(0, 50);
                 double s = rng.Next(0, 50);
@@ -178,6 +181,8 @@ namespace Pulsar4X.ECSLib
                     lastt = Histogram[i - 1].seconds;
                 int t = rng.Next(lastt, lastt + 60);
                 Histogram.Add((o,d,s,t));
+                */
+                Histogram.Add((0,0,0,i));
             }
         }
 
@@ -225,13 +230,13 @@ namespace Pulsar4X.ECSLib
 
             if (output > 0)
             {
-                double timeToFill = freestore / output;
+                double timeToFill = Math.Ceiling( freestore / output);
                 DateTime interuptTime = atDateTime + TimeSpan.FromSeconds(timeToFill);
                 entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
             }
             else if (output < 0)
             {
-                double timeToEmpty = Math.Abs(stored / output);
+                double timeToEmpty = Math.Ceiling( Math.Abs(stored / output));
                 DateTime interuptTime = atDateTime + TimeSpan.FromSeconds(timeToEmpty);
                 entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
             }

@@ -5,7 +5,7 @@ using System;
 namespace Pulsar4X.ECSLib
 {
 
-    internal static class ShipMovementProcessor
+    public static class ShipMovementProcessor
     {
         public static void Initialize()
         {
@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib
                     //var fuelUsage = (ResourceConsumptionAtbDB)instanceInfo.Design.AttributesByType[typeof(ResourceConsumptionAtbDB)];
                     if (instanceInfo.IsEnabled)
                     {
-                        totalEnginePower += (int)(power.EnginePower * instanceInfo.HealthPercent());
+                        totalEnginePower += (int)(power.WarpPower * instanceInfo.HealthPercent());
                         //foreach (var item in fuelUsage.MaxUsage)
                         //{
                         //    totalFuelUsage.SafeValueAdd(item.Key, item.Value);
@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib
             
         }
 
-        public static int MaxSpeedCalc(float power, float tonage)
+        public static int MaxSpeedCalc(double power, double tonage)
         {
           // From Aurora4x wiki:  Speed = (Total Engine Power / Total Class Size in HS) * 1000 km/s
           return (int)((power / tonage) * 1000);

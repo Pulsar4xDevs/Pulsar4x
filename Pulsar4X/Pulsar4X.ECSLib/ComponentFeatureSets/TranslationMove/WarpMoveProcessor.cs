@@ -80,8 +80,7 @@ namespace Pulsar4X.ECSLib
             double totalDistance = postionDelta.Length();
 
             double maxKMeters = ShipMovementProcessor.CalcMaxFuelDistance_KM(entity);
-            double fuelMaxDistanceMt = maxKMeters * 1000;
-
+            
             var creationCost = warpDB.BubbleCreationCost;
             var t = totalDistance / warpDB.MaxSpeed;
             var tcost = t * warpDB.BubbleSustainCost;
@@ -102,6 +101,7 @@ namespace Pulsar4X.ECSLib
                 //powerDB.EnergyStore[warpDB.EnergyType] = estore;
 
             }
+
         }
 
         /// <summary>

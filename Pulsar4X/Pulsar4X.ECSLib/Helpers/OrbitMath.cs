@@ -929,12 +929,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="specificImpulse">Specific impulse.</param>
         public static double TsiolkovskyRocketEquation(double wetMass, double dryMass, double specificImpulse)
         {
-            double ve = specificImpulse * 9.8;
+            double ve = specificImpulse * 9.80665; //unsure if this is correct, do we multiply by this if we're mesuring mass not weight?
             double deltaV = ve * Math.Log(wetMass / dryMass);
             return deltaV;
         }
-
-
-
+        
     }
 }

@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
 
         
         [JsonProperty]
-        public int EnginePower { get; internal set; }
+        public int WarpPower { get; internal set; }
 
         public Guid EnergyType { get; internal set; }
         public double BubbleCreationCost { get; internal set; }
@@ -21,22 +21,22 @@ namespace Pulsar4X.ECSLib
 
         public WarpDriveAtb(double power)
         {
-            EnginePower = (int)power;
+            WarpPower = (int)power;
         }
 
-        public WarpDriveAtb(int enginePower)
+        public WarpDriveAtb(int warpPower)
         {
-            EnginePower = enginePower;
+            WarpPower = warpPower;
         }
 
         public WarpDriveAtb(WarpDriveAtb ability)
         {
-            EnginePower = ability.EnginePower;
+            WarpPower = ability.WarpPower;
         }
 
         public WarpDriveAtb(int warpPower, Guid energyType, double creationCost, double sustainCost, double bubbleCollapseCost)
         {
-            EnginePower = warpPower;
+            WarpPower = warpPower;
             EnergyType = energyType;
             BubbleCreationCost = creationCost;
             BubbleSustainCost = sustainCost;
@@ -56,6 +56,13 @@ namespace Pulsar4X.ECSLib
                 ablty.BubbleSustainCost = BubbleSustainCost;
                 ablty.BubbleCollapseCost = BubbleCollapseCost;
                 parentEntity.SetDataBlob(ablty);
+            }
+            else
+            {
+                var ablty = parentEntity.GetDataBlob<WarpAbilityDB>();
+                ablty.BubbleCreationCost += BubbleCreationCost;
+                ablty.BubbleSustainCost += BubbleSustainCost;
+                ablty.BubbleCollapseCost += BubbleCollapseCost;
             }
             ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(parentEntity);
         }

@@ -143,48 +143,42 @@
               "Name": "Size",
               "Description": "Size of this engine in Kg",
               "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "1000",
+              "MaxFormula": "TechData('b056576a-124e-41c5-afcd-27d1f0bf6f4e')",
               "MinFormula": "1",
               "StepFormula": "1",
               "AbilityFormula": "500"
             },
             {
-              "Name": "Thrust in Kn",
-              "Description": "The maximum thrust output of this engine",
+              "Name": "Exhaust Velocity",
+              "Description": "Specific Impulse in m/s, can be increased by research",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "1.8 * [Mass] * TechData('7650c18d-ff8f-40d0-bd72-1745b52d2164')"
+              "AbilityFormula": "3900 * TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
             },
             {
-              "Name": "Isp",
-              "Description": "Specific Impulse, higher is more fuel efficent",
+              "Name": "Fuel Consumption",
+              "Description": "Fuel Consumption per second",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Thrust in Kn') / TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
+              "AbilityFormula": "Ability('Size') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
             },
             {
-              "Name": "Engine PowerDB",
-              "Description": "Move Power for ship",
-              "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('EnginePower'))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnginePowerAtbDB"
-            },
-            {
-              "Name": "Total Fuel Consumption per Second",
-              "Description": "Fuel Consumption Calc",
+              "Name": "Thrust",
+              "Description": "The maximum thrust output of this engine in N",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Isp')"
+              "AbilityFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
             },
             {
-              "Name": "Fuel ConsumptionDB",
+              "Name": "DataBlob",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Total Fuel Consumption per Second'), 1)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResourceConsumptionAtbDB"
+              "AbilityFormula": "DataBlobArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
             },
+
             {
               "Name": "Sensor Signature",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('Thrust in Kn'),0)",
+              "AbilityFormula": "DataBlobArgs(Ability('Thrust'),0)",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]
@@ -237,13 +231,13 @@
               "Name": "EnginePower",
               "Description": "Move Power for ship",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Efficency vs Power') * [Mass]"
+              "AbilityFormula": "Ability('Efficency vs Power') * [Mass] * 100"
             },
             {
               "Name": "Bubble Creation Energy Cost",
               "Description": "How much energy required to create the warp bubble.",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('EnginePower') * TechData('c534d9f0-0d63-424f-9780-d124235903de') * 0.5"
+              "AbilityFormula": "Ability('EnginePower') * 0.01 * TechData('c534d9f0-0d63-424f-9780-d124235903de') * 0.5"
             },
             {
               "Name": "Bubble Sustain Energy Cost",
@@ -255,7 +249,7 @@
               "Name": "Bubble Collapse Energy Returned",
               "Description": "How much energy we get back from collapsing the warp bubble",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Bubble Creation Energy Cost') * TechData('d48e1883-2069-441f-ba55-69f63f47add7')",
+              "AbilityFormula": "Ability('Bubble Creation Energy Cost') * TechData('d48e1883-2069-441f-ba55-69f63f47add7')"
             },            
             {
               "Name": "db",

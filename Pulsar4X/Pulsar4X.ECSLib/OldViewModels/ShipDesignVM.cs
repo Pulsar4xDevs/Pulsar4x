@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib
     {
         public ComponentListEngineVM(ComponentDesign component) : base(component)
         {
-            AbilityAmount = component.GetAttribute<WarpDriveAtb>().EnginePower;
+            AbilityAmount = component.GetAttribute<WarpDriveAtb>().WarpPower;
         }
     }
 
