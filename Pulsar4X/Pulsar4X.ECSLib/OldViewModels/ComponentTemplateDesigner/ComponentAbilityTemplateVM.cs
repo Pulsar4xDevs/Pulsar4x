@@ -295,7 +295,6 @@ namespace Pulsar4X.ECSLib
                 typeof(PassiveEMSensorAtbDB).ToString(),
                 typeof(PassiveThermalSensorAtbDB).ToString(),
                 typeof(PopulationSupportAtbDB).ToString(),
-                typeof(PowerGeneratorAtbDB).ToString(),
                 typeof(RefineResourcesAtbDB).ToString(),
                 typeof(ResearchPointsAtbDB).ToString(),
                 typeof(SensorSignatureAtbDB).ToString(),

@@ -41,11 +41,15 @@ namespace Pulsar4X.SDL2UI
         
         private float _firstChildHeight = 350;
 
-        private double _mass;
+        private double _massDry;
+        private double _massWet;
         private double _ttw;
         private double _dv;
         private double _wspd;
         private double _tn;
+        private double _estor;
+        private double _egen;
+        private double _fuelStore;
         
         private ShipDesignUI()
         {
@@ -108,10 +112,11 @@ namespace Pulsar4X.SDL2UI
                 var designChanged = false;
                 
                 
-                ImGui.Columns(3);
+                ImGui.Columns(4);
                 ImGui.SetColumnWidth(0, 200);
                 ImGui.SetColumnWidth(1, 350);
-                ImGui.SetColumnWidth(2, 274);
+                ImGui.SetColumnWidth(2, 278);
+                ImGui.SetColumnWidth(3, 278);
                 if (ImGui.CollapsingHeader("Exsisting Designs"))
                 {
                     ImGui.BeginChild("exsistingdesigns", new Vector2(200, _firstChildHeight));
@@ -172,25 +177,32 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     
                 }
-                ImGui.Columns(1);
+                
+                ImGui.Columns(2);
+                ImGui.Separator();
+                ImGui.SetColumnWidth(0, 250);
+                ImGui.SetColumnWidth(1, 50);
                 var selectedComponent = _componentDesigns[_selectedDesignsIndex];
+                
+                ImGui.Text(selectedComponent.Name);
+                ImGui.NextColumn();
                 if (ImGui.Button("Add"))
                 {
                     _shipComponents.Add((selectedComponent, 1));
                     designChanged = true;
                 }
+                ImGui.Columns(1);
+                ImGui.NextColumn();
+                ImGui.Text(selectedComponent.Description);
                 
                 
                 ImGui.EndChild();
 
+                
                 ImGui.NextColumn();
 
-                ImGui.Text(selectedComponent.Name);
-                ImGui.Text(selectedComponent.Description);
-                
-                
-                
-                ImGui.BeginChild("ShipDesign", new Vector2(274, _firstChildHeight));
+
+                ImGui.BeginChild("ShipDesign", new Vector2(278, _firstChildHeight));
                 
                 ImGui.Columns(2, "Ship Components", true);
                 ImGui.SetColumnWidth(0, 150);
@@ -254,8 +266,6 @@ namespace Pulsar4X.SDL2UI
                                 designChanged = true;
                             }
                         }
-
-
                         if (_shipComponents.Count <= i)
                         {
                             ImGui.SameLine();
@@ -305,20 +315,31 @@ namespace Pulsar4X.SDL2UI
                 }
  
                 ImGui.NextColumn();
+                ImGui.EndChild();
+
+                ImGui.NextColumn();
+                
+                ImGui.BeginChild("Ship Stats", new Vector2(278, _firstChildHeight));
+                
                 ImGui.Columns(1);
                 ImGui.Text("Ship Stats");
                 
                 ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
-                ImGui.Text("Mass: " + _mass + "kg");
-                ImGui.Text("Total Thrust: " + _tn + "Newtons");
+                ImGui.Text("Mass: " + _massDry + " kg");
+                ImGui.Text("Total Thrust: " + (_tn * 0.01) + " kN");
                 ImGui.Text("Thrust To Weight: " + _ttw);
-                ImGui.Text("Delta V:");
+                ImGui.Text("Fuel Capacity: " + _fuelStore);
+                
+                ImGui.Text("Delta V: " + _dv);
                 ImGui.Text("Warp Speed:" + _wspd + "m/s");
+                ImGui.Text("Energy Output: " + _egen);
+                ImGui.Text("Energy Store:" + _estor);
                 
                 
                 ImGui.Separator();
                 
                 ImGui.EndChild();
+                
                 ImGui.NextColumn();
                 ImGui.Separator();
                 //ImGui.EndChild();
@@ -334,11 +355,16 @@ namespace Pulsar4X.SDL2UI
                     double mass = 0;
                     double fu = 0;
                     double tn = 0;
+                    double ev = 0;
 
                     double wp = 0;
                     double wcc = 0;
                     double wsc = 0;
                     double wec = 0;
+                    double egen = 0;
+                    double estor = 0;
+                    Guid thrusterFuel = Guid.Empty;
+                    Dictionary<Guid, double> cstore = new Dictionary<Guid, double>();
                     
                     foreach (var component in _shipComponents)
                     {
@@ -346,9 +372,10 @@ namespace Pulsar4X.SDL2UI
                         if (component.design.HasAttribute<NewtonionThrustAtb>())
                         {
                             var atb = component.design.GetAttribute<NewtonionThrustAtb>();
-                            double ev = atb.ExhaustVelocity;
+                            ev = atb.ExhaustVelocity;
                             fu += atb.FuelUsage;
                             tn += ev * atb.FuelUsage;
+                            thrusterFuel = atb.FuelType;
                         }
 
                         if (component.design.HasAttribute<WarpDriveAtb>())
@@ -360,13 +387,48 @@ namespace Pulsar4X.SDL2UI
                              wec += atb.BubbleCollapseCost;
 
                         }
+
+                        if (component.design.HasAttribute<EnergyGenerationAtb>())
+                        {
+                            var atb = component.design.GetAttribute<EnergyGenerationAtb>();
+                            egen = atb.PowerOutputMax;
+                            
+                        }
+
+                        if (component.design.HasAttribute<EnergyStoreAtb>())
+                        {
+                            var atb = component.design.GetAttribute<EnergyStoreAtb>();
+                            estor = atb.MaxStore;
+                        }
+
+                        if (component.design.HasAttribute<CargoStorageAtbDB>())
+                        {
+                            var atb = component.design.GetAttribute<CargoStorageAtbDB>();
+                            var typeid = atb.CargoTypeGuid;
+                            var amount = atb.StorageCapacity;
+                            if (!cstore.ContainsKey(typeid))
+                                cstore.Add(typeid, amount);
+                            else
+                                cstore[typeid] += amount;
+
+                        }
                     }
 
-                    _mass = mass;
+                    _massDry = mass;
                     _tn = tn;
                     _ttw = tn / mass;
                     _wspd = ShipMovementProcessor.MaxSpeedCalc(wp, mass);
+                    _egen = egen;
+                    _estor = estor;
+                    //double fuelMass = 0;
+                    if (thrusterFuel != Guid.Empty)
+                    {
+                        var fuel = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
+                        _fuelStore = cstore[fuel.CargoTypeID];
+                    }
 
+                    _massWet = _massDry + _fuelStore;
+                    _dv = OrbitMath.TsiolkovskyRocketEquation(_massWet, _massDry, ev);
                 }
 
                 if (_shipImgPtr != IntPtr.Zero)
