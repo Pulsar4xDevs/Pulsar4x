@@ -12,9 +12,6 @@ namespace Pulsar4X.Tests
         private Game _game;
         private EntityManager _entityManager;
         private Entity _faction;
-        private Entity _colonyEntity;
-        private MineralSD _duraniumSD;
-        private MineralSD _corundiumSD;
         private StarSystem _starSystem;
         private ShipFactory.ShipClass _shipClass;
         private Entity _ship;
@@ -50,14 +47,14 @@ namespace Pulsar4X.Tests
 
             ComponentDesigner engineDesigner;// = DefaultStartFactory.DefaultEngineDesign(_game, _faction);
       
-            _engineSD = NameLookup.GetTemplateSD(_game, "Engine");
-            engineDesigner = new ComponentDesigner(_engineSD, _faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Engine Size"].SetValueFromInput(5); //size = 25 power.
+            //_engineSD = NameLookup.GetTemplateSD(_game, "Alcubierre Warp Drive");
+            //engineDesigner = new ComponentDesigner(_engineSD, _faction.GetDataBlob<FactionTechDB>());
+            //engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(5); //size = 25 power.
             
             
             
-            _engineComponentDesign = engineDesigner.CreateDesign(_faction);
-
+            //_engineComponentDesign = engineDesigner.CreateDesign(_faction);
+            _engineComponentDesign = DefaultStartFactory.DefaultWarpDesign(_game, _faction);
             
             
             _shipClass = DefaultStartFactory.DefaultShipDesign(_game, _faction);
@@ -68,31 +65,61 @@ namespace Pulsar4X.Tests
             instancesdb.TryGetComponentsByAttribute<WarpDriveAtb>(out var instances1);
             int origionalEngineNumber = instances1.Count;
             
-            EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign);
-            EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign);
-            
-            
-            instancesdb.TryGetComponentsByAttribute<WarpDriveAtb>(out var instances2);
-            int add2engineNumber = instances2.Count;
-            
-                
-            Assert.AreEqual(origionalEngineNumber + 2, add2engineNumber);
 
-            PropulsionAbilityDB propulsion = _ship.GetDataBlob<PropulsionAbilityDB>();
+
+            WarpAbilityDB warpAbility = _ship.GetDataBlob<WarpAbilityDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
-            Assert.AreEqual(500000, propulsion.TotalEnginePower, "Incorrect TotalEnginePower");
+            WarpDriveAtb warpAtb = _engineComponentDesign.GetAttribute<WarpDriveAtb>();
+            double warpPower = warpAtb.WarpPower;
+            Assert.AreEqual(warpPower * origionalEngineNumber , warpAbility.TotalWarpPower, "Incorrect TotalEnginePower");
             float tonnage1 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
-            int expectedSpeed1 = ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, tonnage1);
-            Assert.AreEqual(expectedSpeed1, propulsion.MaximumSpeed_MS, "Incorrect Max Speed");
+            int expectedSpeed1 = ShipMovementProcessor.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage1);
+            Assert.AreEqual(expectedSpeed1, warpAbility.MaxSpeed, "Incorrect Max Speed");
 
-            EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign); //add second engine
-            Assert.AreEqual(750000, propulsion.TotalEnginePower, "Incorrect TotalEnginePower 2nd engine added");
+            
+            EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign);
+            instancesdb.TryGetComponentsByAttribute<WarpDriveAtb>(out var instances2);
+            int add2engineNumber = instances2.Count;
+            Assert.AreEqual(origionalEngineNumber + 1, add2engineNumber);            
+            
+
+            Assert.AreEqual(warpPower * add2engineNumber, warpAbility.TotalWarpPower, "Incorrect TotalEnginePower 2nd engine added");
             float tonnage2 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
-            int expectedSpeed2 = ShipMovementProcessor.MaxSpeedCalc(propulsion.TotalEnginePower, tonnage2);
-            Assert.AreEqual(expectedSpeed2, propulsion.MaximumSpeed_MS, "Incorrect Max Speed 2nd engine");
+            int expectedSpeed2 = ShipMovementProcessor.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage2);
+            Assert.AreEqual(expectedSpeed2, warpAbility.MaxSpeed, "Incorrect Max Speed 2nd engine");
 
 
-    }
+            var energydb = _ship.GetDataBlob<EnergyGenAbilityDB>();
+            var energyMax = energydb.EnergyStoreMax[energydb.EnergyType.ID];
+            energydb.EnergyStored[energydb.EnergyType.ID] = energyMax;
+
+            Assert.IsTrue(energyMax >= warpAbility.BubbleCreationCost, "Ship does not store enough energy for a succesfull warp bubble creation");
+
+            Assert.AreEqual(warpAbility.CurrentVectorMS.Length(), 0);
+
+            var posDB = _ship.GetDataBlob<PositionDB>();
+            var ralpos = posDB.RelativePosition_m;
+            var targetPos = new Vector3(ralpos.X , ralpos.Y, ralpos.Z);
+            targetPos.X += expectedSpeed2 * 60 * 60; //distance for an hours travel. 
+            TransitToOrbitCommand.CreateTransitCmd(
+                _game,
+                _faction,
+                _ship,
+                _sol,
+                targetPos,
+                _ship.StarSysDateTime,
+                new Vector3(0,0,0));
+            
+            Assert.AreEqual(warpAbility.CurrentVectorMS.Length(), expectedSpeed2, 1.0E-15);
+            // _game.GameLoop.Ticklength = TimeSpan.FromSeconds(1);
+            //_game.GameLoop.TimeStep();
+            StaticRefLib.ProcessorManager.GetProcessor<WarpMovingDB>().ProcessEntity(_ship, 1);
+            var ralposNow = posDB.RelativePosition_m;
+            var distance = Math.Abs((ralpos - ralposNow).Length());
+            
+            Assert.AreEqual(distance, expectedSpeed2, 1.0E-15);
+
+        }
   }
 }

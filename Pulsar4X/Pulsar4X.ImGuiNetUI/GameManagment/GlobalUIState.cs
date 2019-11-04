@@ -49,7 +49,7 @@ namespace Pulsar4X.SDL2UI
 
         public event EntityClickedEventHandler EntityClickedEvent;
         internal EntityState LastClickedEntity;
-        internal ECSLib.Vector3 LastWorldPointClicked;
+        internal ECSLib.Vector3 LastWorldPointClicked_m { get; set; }
 
 
 
@@ -147,7 +147,7 @@ namespace Pulsar4X.SDL2UI
         internal void MapClicked(ECSLib.Vector3 worldCoord, MouseButtons button)
         {
             if (button == MouseButtons.Primary)
-                LastWorldPointClicked = worldCoord;
+                LastWorldPointClicked_m = worldCoord;
 
             if (ActiveWindow != null)
                 ActiveWindow.MapClicked(worldCoord, button);
@@ -218,7 +218,7 @@ namespace Pulsar4X.SDL2UI
 
         internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
 
-        internal virtual void MapClicked(ECSLib.Vector3 worldPos, MouseButtons button) { }
+        internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
 
         internal void Destroy()
         {

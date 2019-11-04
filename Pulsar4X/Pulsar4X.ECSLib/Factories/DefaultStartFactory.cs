@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
 {
     public static class DefaultStartFactory
     {
-        private static ComponentDesign _engine500;
+        private static ComponentDesign _thruster500;
         private static ComponentDesign _warpDrive;
         private static ComponentDesign _fuelTank_500;
         private static ComponentDesign _laser;
@@ -69,7 +69,7 @@ namespace Pulsar4X.ECSLib
             //TechProcessor.ApplyTech(factionTech, game.StaticData.Techs[new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c")]); //add conventional engine for testing. 
             ResearchProcessor.CheckRequrements(factionTech);
             
-            DefaultEngineDesign(game, factionEntity);
+            DefaultThrusterDesign(game, factionEntity);
             DefaultWarpDesign(game, factionEntity);
             DefaultFuelTank(game, factionEntity);
             DefaultCargoInstalation(game, factionEntity);
@@ -181,7 +181,7 @@ namespace Pulsar4X.ECSLib
             Entity rock = AsteroidFactory.CreateAsteroid(solSys, earth, StaticRefLib.CurrentDateTime + TimeSpan.FromDays(365));
 
 
-            var pow = solSys.GetAllEntitiesWithDataBlob<EntityEnergyGenAbilityDB>();
+            var pow = solSys.GetAllEntitiesWithDataBlob<EnergyGenAbilityDB>();
             foreach (var entityItem in pow)
             {
                 StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(EnergyGenProcessor)).ProcessEntity(entityItem, StaticRefLib.CurrentDateTime);
@@ -209,11 +209,11 @@ namespace Pulsar4X.ECSLib
                 (DefaultSimpleLaser(game, faction), 2),     
                 (DefaultBFC(game, faction), 1),
                 (ShipSmallCargo(game, faction), 1),
-                (_fuelTank_500, 2),
-                (_warpDrive, 4),
-                (_battery, 3),
-                (_reactor, 1),
-                (_engine500, 3),
+                (DefaultFuelTank(game, faction), 2),
+                (DefaultWarpDesign(game, faction), 4),
+                (DefaultBatteryBank(game, faction), 3),
+                (DefaultFisionReactor(game, faction), 1),
+                (DefaultThrusterDesign(game, faction), 3),
                 
             };
             _defaultShipClass.Components = components2;
@@ -237,7 +237,7 @@ namespace Pulsar4X.ECSLib
                 (_warpDrive, 4),
                 (_battery, 3),
                 (_reactor, 1),
-                (_engine500, 4),
+                (_thruster500, 4),
             };
             shipdesign.Components = components2;
             shipdesign.Armor = ("Polyprop", 1175f, 3);
@@ -261,7 +261,7 @@ namespace Pulsar4X.ECSLib
                 (_warpDrive, 4),
                 (_battery, 3),
                 (_reactor, 1),
-                (_engine500, 4),
+                (_thruster500, 4),
             };
             shipdesign.Components = components2;
             shipdesign.Armor = ("Polyprop", 1175f, 3);
@@ -270,10 +270,10 @@ namespace Pulsar4X.ECSLib
             return shipdesign;
         }
 
-        public static ComponentDesign DefaultEngineDesign(Game game, Entity faction)
+        public static ComponentDesign DefaultThrusterDesign(Game game, Entity faction)
         {
-            if (_engine500 != null)
-                return _engine500;
+            if (_thruster500 != null)
+                return _thruster500;
             
             ComponentDesigner engineDesigner;
 
@@ -283,10 +283,10 @@ namespace Pulsar4X.ECSLib
             engineDesigner.Name = "Thruster 500";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
    
-            _engine500 = engineDesigner.CreateDesign(faction);
+            _thruster500 = engineDesigner.CreateDesign(faction);
             
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_engine500.TechID);
-            return _engine500;
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_thruster500.TechID);
+            return _thruster500;
         }
         public static ComponentDesign DefaultWarpDesign(Game game, Entity faction)
         {

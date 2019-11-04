@@ -155,7 +155,7 @@ namespace Pulsar4X.SDL2UI
             _aop = _orbitDB.ArgumentOfPeriapsis;
             _loP = orbitIcon._loP_radians;
 
-            var cP = new PointD() { X = orbitIcon.WorldPosition.X, Y = orbitIcon.WorldPosition.Y };
+            var cP = new PointD() { X = orbitIcon.WorldPosition_AU.X, Y = orbitIcon.WorldPosition_AU.Y };
             cP.X -= orbitIcon._linearEccentricity;
 
             var f1 = new PointD() { X = cP.X + orbitIcon._linearEccentricity, Y = cP.Y};
@@ -182,7 +182,7 @@ namespace Pulsar4X.SDL2UI
 
             
             var pos = _bodyPosition.RelativePosition_AU;
-            var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, systemDateTime);
+            var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(_orbitDB, systemDateTime);
             var ecvec = OrbitMath.EccentricityVector(_sgp, pos, (Vector3)vel);
             _trueAnom_FromEVec = OrbitMath.TrueAnomaly(ecvec, pos, (Vector3)vel);
             _trueAnom_FromStateVec = OrbitMath.TrueAnomaly(_sgp, pos, (Vector3)vel);
@@ -205,8 +205,8 @@ namespace Pulsar4X.SDL2UI
             
             _bodyPosPnt = new PointD()
             {
-                X = (_bodyPosition.AbsolutePosition_AU + _worldPosition).X,
-                Y = (_bodyPosition.AbsolutePosition_AU + _worldPosition).Y
+                X = (_bodyPosition.AbsolutePosition_AU + _worldPosition_m).X,
+                Y = (_bodyPosition.AbsolutePosition_AU + _worldPosition_m).Y
             };
             CreateLines();
 
@@ -930,7 +930,7 @@ namespace Pulsar4X.SDL2UI
 
             */
             var pos = _bodyPosition.RelativePosition_AU;
-            var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime);
+            var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(_orbitDB, _orbitDB.Parent.Manager.ManagerSubpulses.StarSysDateTime);
             var ecvec = OrbitMath.EccentricityVector(_sgp, pos, (Vector3)vel);
             var ecvec2 = OrbitMath.EccentricityVector2(_sgp, pos, (Vector3)vel);
             var evenorm = Vector3.Normalise(ecvec) * 84;
@@ -984,7 +984,7 @@ namespace Pulsar4X.SDL2UI
             speed = Distance.AuToKm(speed);
             var heading = OrbitMath.ObjectLocalHeading(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom, _orbitDB.ArgumentOfPeriapsis);
             heading += _loP;
-            var vector = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime);
+            var vector = OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime);
             var vnorm = Distance.AuToKm(vector) * 2;//Vector4.Normalise(vector) * 64;
             var headingPoints = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, heading, 128);
             PointD[] headingLine = { new PointD() { X=0,Y=0 }, new PointD() { X = vnorm.X, Y = vnorm.Y }, };
@@ -1031,7 +1031,7 @@ namespace Pulsar4X.SDL2UI
 
             
             var pos = _bodyPosition.RelativePosition_AU;
-            var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, systemDateTime);
+            var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(_orbitDB, systemDateTime);
             var ecvec = OrbitMath.EccentricityVector(_sgp, pos, vel);
             var ecvec2 = OrbitMath.EccentricityVector2(_sgp, pos, vel);
             _trueAnom_FromEVec = OrbitMath.TrueAnomaly(ecvec, pos, vel);
@@ -1092,8 +1092,8 @@ namespace Pulsar4X.SDL2UI
             
             _bodyPosPnt = new PointD() 
             { 
-                X = (_bodyPosition.AbsolutePosition_AU + _worldPosition).X, 
-                Y = (_bodyPosition.AbsolutePosition_AU + _worldPosition).Y 
+                X = (_bodyPosition.AbsolutePosition_AU + _worldPosition_m).X, 
+                Y = (_bodyPosition.AbsolutePosition_AU + _worldPosition_m).Y 
             };
             _bodyPosItem.Shape.StartPoint = _bodyPosPnt;
 
@@ -1125,7 +1125,7 @@ namespace Pulsar4X.SDL2UI
             
             var heading = OrbitMath.ObjectLocalHeading(_bodyPosition.RelativePosition_AU, _orbitDB.Eccentricity, _semiMajAxis, _trueAnom, _orbitDB.ArgumentOfPeriapsis);
             heading += _loP;
-            var vector = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime);
+            var vector = OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(_orbitDB, _orbitDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime);
             var vnorm = Vector3.Normalise(vector) * 64;
             var headingPoints = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, heading, 128);
             PointD[] headingLine = { new PointD() { X = 0, Y = 0 }, new PointD() { X = vnorm.X, Y = vnorm.Y }, };
@@ -1138,7 +1138,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU);
             Matrix nonZoomMatrix = Matrix.NewMirrorMatrix(true, false);
  
             _drawComplexShapes = new List<ComplexShape>() {};

@@ -46,6 +46,9 @@ namespace Pulsar4X.SDL2UI
         private double _ttw;
         private double _dv;
         private double _wspd;
+        private double _wcc;
+        private double _wsc;
+        private double _wec;
         private double _tn;
         private double _estor;
         private double _egen;
@@ -195,6 +198,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn();
                 ImGui.Text(selectedComponent.Description);
                 
+                //ImGui.Text();
+                
                 
                 ImGui.EndChild();
 
@@ -332,6 +337,9 @@ namespace Pulsar4X.SDL2UI
                 
                 ImGui.Text("Delta V: " + _dv);
                 ImGui.Text("Warp Speed:" + _wspd + "m/s");
+                ImGui.Text("Warp Bubble Creation: " + _wcc);
+                ImGui.Text("Warp Bubble Sustain: " + _wsc);
+                ImGui.Text("Warp Bubble Collapse: " + _wec);
                 ImGui.Text("Energy Output: " + _egen);
                 ImGui.Text("Energy Store:" + _estor);
                 
@@ -373,39 +381,39 @@ namespace Pulsar4X.SDL2UI
                         {
                             var atb = component.design.GetAttribute<NewtonionThrustAtb>();
                             ev = atb.ExhaustVelocity;
-                            fu += atb.FuelUsage;
-                            tn += ev * atb.FuelUsage;
+                            fu += atb.FuelUsage * component.count;
+                            tn += ev * atb.FuelUsage * component.count;
                             thrusterFuel = atb.FuelType;
                         }
 
                         if (component.design.HasAttribute<WarpDriveAtb>())
                         {
                             var atb = component.design.GetAttribute<WarpDriveAtb>();
-                             wp += atb.WarpPower;
-                             wcc += atb.BubbleCreationCost;
-                             wsc += atb.BubbleSustainCost;
-                             wec += atb.BubbleCollapseCost;
+                             wp += atb.WarpPower * component.count;
+                             wcc += atb.BubbleCreationCost * component.count;
+                             wsc += atb.BubbleSustainCost * component.count;
+                             wec += atb.BubbleCollapseCost * component.count;
 
                         }
 
                         if (component.design.HasAttribute<EnergyGenerationAtb>())
                         {
                             var atb = component.design.GetAttribute<EnergyGenerationAtb>();
-                            egen = atb.PowerOutputMax;
+                            egen += atb.PowerOutputMax * component.count;
                             
                         }
 
                         if (component.design.HasAttribute<EnergyStoreAtb>())
                         {
                             var atb = component.design.GetAttribute<EnergyStoreAtb>();
-                            estor = atb.MaxStore;
+                            estor += atb.MaxStore * component.count;
                         }
 
                         if (component.design.HasAttribute<CargoStorageAtbDB>())
                         {
                             var atb = component.design.GetAttribute<CargoStorageAtbDB>();
                             var typeid = atb.CargoTypeGuid;
-                            var amount = atb.StorageCapacity;
+                            var amount = atb.StorageCapacity * component.count;
                             if (!cstore.ContainsKey(typeid))
                                 cstore.Add(typeid, amount);
                             else
@@ -417,6 +425,9 @@ namespace Pulsar4X.SDL2UI
                     _massDry = mass;
                     _tn = tn;
                     _ttw = tn / mass;
+                    _wcc = wcc;
+                    _wec = wec;
+                    _wsc = wsc;
                     _wspd = ShipMovementProcessor.MaxSpeedCalc(wp, mass);
                     _egen = egen;
                     _estor = estor;
@@ -429,6 +440,7 @@ namespace Pulsar4X.SDL2UI
 
                     _massWet = _massDry + _fuelStore;
                     _dv = OrbitMath.TsiolkovskyRocketEquation(_massWet, _massDry, ev);
+
                 }
 
                 if (_shipImgPtr != IntPtr.Zero)

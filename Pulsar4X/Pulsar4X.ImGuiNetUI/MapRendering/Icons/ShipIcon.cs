@@ -222,7 +222,7 @@ namespace Pulsar4X.SDL2UI
             DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
             if (_orbitDB != null)
             {
-                var headingVector = OrbitProcessor.InstantaneousOrbitalVelocityVector(_orbitDB, atDateTime);
+                var headingVector = OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(_orbitDB, atDateTime);
                 var heading = Math.Atan2(headingVector.Y, headingVector.X);
                 Heading = (float)heading;
             }
@@ -246,7 +246,7 @@ namespace Pulsar4X.SDL2UI
 
             var shipMatrix = mirrorMatrix * scaleMatrix * rotateMatrix;
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU);
 
             DrawShapes = new Shape[this.Shapes.Count];
             for (int i = 0; i < Shapes.Count; i++)

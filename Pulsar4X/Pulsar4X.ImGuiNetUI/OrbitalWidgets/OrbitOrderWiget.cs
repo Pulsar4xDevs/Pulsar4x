@@ -250,7 +250,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition); 
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU); 
 
 
             _soiViewRadius = camera.ViewDistance(_soiWorldRadius);

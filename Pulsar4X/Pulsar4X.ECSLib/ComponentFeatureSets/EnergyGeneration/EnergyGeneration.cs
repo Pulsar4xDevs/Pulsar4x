@@ -30,44 +30,44 @@ namespace Pulsar4X.ECSLib
         {
             Guid resourceID = EnergyTypeID;
             ICargoable energyCargoable = StaticRefLib.StaticData.GetICargoable(resourceID);
-            EntityEnergyGenAbilityDB entityGenDB;
-            if (!parentEntity.HasDataBlob<EntityEnergyGenAbilityDB>())
+            EnergyGenAbilityDB genDB;
+            if (!parentEntity.HasDataBlob<EnergyGenAbilityDB>())
             {
-                entityGenDB = new EntityEnergyGenAbilityDB(parentEntity.StarSysDateTime);
-                entityGenDB.EnergyType = energyCargoable;
-                parentEntity.SetDataBlob(entityGenDB);
+                genDB = new EnergyGenAbilityDB(parentEntity.StarSysDateTime);
+                genDB.EnergyType = energyCargoable;
+                parentEntity.SetDataBlob(genDB);
                 
                 
             }
             else
             {
-                entityGenDB = parentEntity.GetDataBlob<EntityEnergyGenAbilityDB>();
+                genDB = parentEntity.GetDataBlob<EnergyGenAbilityDB>();
 
 
-                if (entityGenDB.EnergyType == null)
-                    entityGenDB.EnergyType = energyCargoable;
-                else if(entityGenDB.EnergyType != energyCargoable)//this is just to reduce complexity. we can add this ability later.
+                if (genDB.EnergyType == null)
+                    genDB.EnergyType = energyCargoable;
+                else if(genDB.EnergyType != energyCargoable)//this is just to reduce complexity. we can add this ability later.
                     throw new Exception("PrimeEntity cannot use two different energy types");
-                if (entityGenDB.TotalFuelUseAtMax.type == Guid.Empty)
-                    entityGenDB.TotalFuelUseAtMax.type = FuelType;
-                else if(entityGenDB.TotalFuelUseAtMax.type != FuelType)
+                if (genDB.TotalFuelUseAtMax.type == Guid.Empty)
+                    genDB.TotalFuelUseAtMax.type = FuelType;
+                else if(genDB.TotalFuelUseAtMax.type != FuelType)
                     throw new Exception("PrimeEntity cannot have power plants that use different fuel types");
             }
 
-            entityGenDB.TotalOutputMax += PowerOutputMax;
-            double maxUse = entityGenDB.TotalFuelUseAtMax.maxUse + FuelUsedAtMax;
-            entityGenDB.TotalFuelUseAtMax = (FuelType, maxUse);
-            entityGenDB.LocalFuel = maxUse * Lifetime;
+            genDB.TotalOutputMax += PowerOutputMax;
+            double maxUse = genDB.TotalFuelUseAtMax.maxUse + FuelUsedAtMax;
+            genDB.TotalFuelUseAtMax = (FuelType, maxUse);
+            genDB.LocalFuel = maxUse * Lifetime;
             
             //add enough energy store for 1s of running. 
-            if (entityGenDB.EnergyStoreMax.ContainsKey(EnergyTypeID))
+            if (genDB.EnergyStoreMax.ContainsKey(EnergyTypeID))
             {
-                entityGenDB.EnergyStoreMax[EnergyTypeID] += PowerOutputMax;
+                genDB.EnergyStoreMax[EnergyTypeID] += PowerOutputMax;
             }
             else
             {
-                entityGenDB.EnergyStored[EnergyTypeID] = 0;
-                entityGenDB.EnergyStoreMax[EnergyTypeID] = PowerOutputMax;
+                genDB.EnergyStored[EnergyTypeID] = 0;
+                genDB.EnergyStoreMax[EnergyTypeID] = PowerOutputMax;
             }
 
         }
@@ -87,30 +87,30 @@ namespace Pulsar4X.ECSLib
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            EntityEnergyGenAbilityDB entityGenDB;
+            EnergyGenAbilityDB genDB;
             
-            if (!parentEntity.HasDataBlob<EntityEnergyGenAbilityDB>())
+            if (!parentEntity.HasDataBlob<EnergyGenAbilityDB>())
             {
-                entityGenDB = new EntityEnergyGenAbilityDB(parentEntity.StarSysDateTime);
-                parentEntity.SetDataBlob(entityGenDB);
+                genDB = new EnergyGenAbilityDB(parentEntity.StarSysDateTime);
+                parentEntity.SetDataBlob(genDB);
             }
             else
             {
-                entityGenDB = parentEntity.GetDataBlob<EntityEnergyGenAbilityDB>();
+                genDB = parentEntity.GetDataBlob<EnergyGenAbilityDB>();
             }
-            if (entityGenDB.EnergyStoreMax.ContainsKey(EnergyTypeID))
+            if (genDB.EnergyStoreMax.ContainsKey(EnergyTypeID))
             {
-                entityGenDB.EnergyStoreMax[EnergyTypeID] += MaxStore;
+                genDB.EnergyStoreMax[EnergyTypeID] += MaxStore;
             }
             else
             {
-                entityGenDB.EnergyStored[EnergyTypeID] = 0;
-                entityGenDB.EnergyStoreMax[EnergyTypeID] = MaxStore;
+                genDB.EnergyStored[EnergyTypeID] = 0;
+                genDB.EnergyStoreMax[EnergyTypeID] = MaxStore;
             }
         }
     }
 
-    public class EntityEnergyGenAbilityDB : BaseDataBlob
+    public class EnergyGenAbilityDB : BaseDataBlob
     {
         public DateTime dateTimeLastProcess;
         public ICargoable EnergyType;
@@ -160,11 +160,11 @@ namespace Pulsar4X.ECSLib
         public List<(double outputval, double demandval, double storval, int seconds)> Histogram = new List<(double, double, double, int)>(60);
 
         [JsonConstructor]
-        private EntityEnergyGenAbilityDB()
+        private EnergyGenAbilityDB()
         {
         }
 
-        public EntityEnergyGenAbilityDB(DateTime gameTime)
+        public EnergyGenAbilityDB(DateTime gameTime)
         {
             HistogramStartDate = gameTime - TimeSpan.FromSeconds(_histogramSize);
             dateTimeLastProcess = gameTime;// - TimeSpan.FromSeconds(_histogramSize);
@@ -186,7 +186,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public EntityEnergyGenAbilityDB(EntityEnergyGenAbilityDB db)
+        public EnergyGenAbilityDB(EnergyGenAbilityDB db)
         {
             Histogram = new List<(double outputval, double demandval, double storval, int seconds)>(db.Histogram);
             _histogramSize = db._histogramSize;
@@ -212,7 +212,7 @@ namespace Pulsar4X.ECSLib
         
         public static void EnergyGen(Entity entity, DateTime atDateTime)
         {
-            EntityEnergyGenAbilityDB _energyGenDB = entity.GetDataBlob<EntityEnergyGenAbilityDB>();
+            EnergyGenAbilityDB _energyGenDB = entity.GetDataBlob<EnergyGenAbilityDB>();
 
             TimeSpan t = atDateTime - _energyGenDB.dateTimeLastProcess; 
             

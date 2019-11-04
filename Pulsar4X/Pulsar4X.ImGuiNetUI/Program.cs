@@ -88,7 +88,7 @@ namespace Pulsar4X.SDL2UI
 
                 if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.  
                 {
-                    _state.MapClicked(_state.Camera.WorldCoordinate(mouseX, mouseY), MouseButtons.Primary);//sdl and imgu use different numbers for buttons.
+                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Primary);//sdl and imgu use different numbers for buttons.
                 }
             }
 
@@ -103,7 +103,7 @@ namespace Pulsar4X.SDL2UI
 
                 if (mouseDownAltX == mouseX && mouseDownAltY == mouseY) //click on map.  
                 {
-                    _state.MapClicked(_state.Camera.WorldCoordinate(mouseX, mouseY), MouseButtons.Alt);//sdl and imgu use different numbers for buttons.
+                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Alt);//sdl and imgu use different numbers for buttons.
                 }
             }
 
@@ -111,7 +111,7 @@ namespace Pulsar4X.SDL2UI
             {
                 int deltaX = _state.Camera.MouseFrameIncrementX - e.motion.x;
                 int deltaY = _state.Camera.MouseFrameIncrementY - e.motion.y;
-                _state.Camera.WorldOffset(deltaX, deltaY);
+                _state.Camera.WorldOffset_m(deltaX, deltaY);
 
                 _state.Camera.MouseFrameIncrementX = e.motion.x;
                 _state.Camera.MouseFrameIncrementY = e.motion.y;

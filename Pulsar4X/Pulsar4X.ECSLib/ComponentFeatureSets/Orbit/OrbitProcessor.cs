@@ -125,6 +125,16 @@ namespace Pulsar4X.ECSLib
             return GetPosition_AU(orbit, GetTrueAnomaly(orbit, time));
         }
 
+        public static Vector3 GetPosition_m(OrbitDB orbit, DateTime time)
+        {
+            if (orbit.IsStationary)
+            {
+                return new Vector3(0, 0, 0);
+            }
+
+            return GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
+        }
+
         /// <summary>
         /// Calculates the root ralitive cartesian coordinate of an orbit for a given time.
         /// </summary>
@@ -145,6 +155,28 @@ namespace Pulsar4X.ECSLib
                 return rootPos + GetPosition_AU(orbit, GetTrueAnomaly(orbit, time));
             else
                 return rootPos + GetPosition_AU(orbit, GetTrueAnomaly(orbit, time));
+            //if (orbit.Eccentricity == 1)
+            //    return GetAbsolutePositionForParabolicOrbit_AU();
+            //else
+            //    return GetAbsolutePositionForHyperbolicOrbit_AU(orbit, time);
+
+        }
+        
+        public static Vector3 GetAbsolutePosition_m(OrbitDB orbit, DateTime time)
+        {
+            if (orbit.Parent == null)//if we're the parent sun
+                return GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
+            //else if we're a child
+            Vector3 rootPos = orbit.Parent.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            if (orbit.IsStationary)
+            {
+                return rootPos;
+            }
+
+            if(orbit.Eccentricity < 1)
+                return rootPos + GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
+            else
+                return rootPos + GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
             //if (orbit.Eccentricity == 1)
             //    return GetAbsolutePositionForParabolicOrbit_AU();
             //else
@@ -214,6 +246,31 @@ namespace Pulsar4X.ECSLib
 
             return new Vector3(x, y, z) * radius;
         }
+        
+        public static Vector3 GetPosition_m(OrbitDB orbit, double trueAnomaly)
+        {
+
+            if (orbit.IsStationary)
+            {
+                return new Vector3(0, 0, 0);
+            }
+
+            // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
+            double radius = orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
+
+            double incl = orbit.Inclination;
+
+            //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
+            double lofAN = orbit.LongitudeOfAscendingNode;
+            //double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
+            double angleFromLoAN = trueAnomaly + orbit.ArgumentOfPeriapsis;
+
+            double x = Math.Cos(lofAN) * Math.Cos(angleFromLoAN) - Math.Sin(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
+            double y = Math.Sin(lofAN) * Math.Cos(angleFromLoAN) + Math.Cos(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
+            double z = Math.Sin(incl) * Math.Sin(angleFromLoAN);
+
+            return new Vector3(x, y, z) * radius;
+        }
 
         /// <summary>
         /// Calculates the current Eccentric Anomaly given certain orbital parameters.
@@ -268,27 +325,45 @@ namespace Pulsar4X.ECSLib
         /// <returns>The orbital vector.</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static Vector3 GetOrbitalVector(OrbitDB orbit, DateTime atDateTime)
+        public static Vector3 GetOrbitalVector_AU(OrbitDB orbit, DateTime atDateTime)
         {
 
 
             if (UseRalitiveVelocity)
             {
-                return InstantaneousOrbitalVelocityVector(orbit, atDateTime);
+                return InstantaneousOrbitalVelocityVector_AU(orbit, atDateTime);
             }
             else
             {
-                return AbsoluteOrbitalVector(orbit, atDateTime);
+                return AbsoluteOrbitalVector_AU(orbit, atDateTime);
+            }
+        }
+        
+        /// <summary>
+        /// Gets the orbital vector, will be either Absolute or Ralitive depending on static bool UseRalitiveVelocity
+        /// </summary>
+        /// <returns>The orbital vector.</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
+        public static Vector3 GetOrbitalVector_m(OrbitDB orbit, DateTime atDateTime)
+        {
+            if (UseRalitiveVelocity)
+            {
+                return InstantaneousOrbitalVelocityVector_m(orbit, atDateTime);
+            }
+            else
+            {
+                return AbsoluteOrbitalVector_m(orbit, atDateTime);
             }
         }
 
-        public static Vector3 GetOrbitalInsertionVector(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
+        public static Vector3 GetOrbitalInsertionVector_AU(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
         {
             if (UseRalitiveVelocity)
                 return departureVelocity;
             else
             {
-                var targetVelocity = AbsoluteOrbitalVector(targetOrbit, arrivalDateTime);
+                var targetVelocity = AbsoluteOrbitalVector_AU(targetOrbit, arrivalDateTime);
                 return departureVelocity - targetVelocity;
             }
         }
@@ -299,11 +374,26 @@ namespace Pulsar4X.ECSLib
         /// <returns>The orbital vector, ralitive to the root object (ie sun)</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static Vector3 AbsoluteOrbitalVector(OrbitDB orbit, DateTime atDateTime)       
+        public static Vector3 AbsoluteOrbitalVector_AU(OrbitDB orbit, DateTime atDateTime)       
         {
-            Vector3 vector = InstantaneousOrbitalVelocityVector(orbit, atDateTime);
+            Vector3 vector = InstantaneousOrbitalVelocityVector_AU(orbit, atDateTime);
             if(orbit.Parent != null)
-                vector += AbsoluteOrbitalVector((OrbitDB)orbit.ParentDB, atDateTime);
+                vector += AbsoluteOrbitalVector_AU((OrbitDB)orbit.ParentDB, atDateTime);
+            return vector;
+
+        }
+        
+        /// <summary>
+        /// The orbital vector.
+        /// </summary>
+        /// <returns>The orbital vector, ralitive to the root object (ie sun)</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
+        public static Vector3 AbsoluteOrbitalVector_m(OrbitDB orbit, DateTime atDateTime)       
+        {
+            Vector3 vector = InstantaneousOrbitalVelocityVector_m(orbit, atDateTime);
+            if(orbit.Parent != null)
+                vector += AbsoluteOrbitalVector_m((OrbitDB)orbit.ParentDB, atDateTime);
             return vector;
 
         }
@@ -339,7 +429,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>The orbital vector ralitive to the parent</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static Vector3 InstantaneousOrbitalVelocityVector(OrbitDB orbit, DateTime atDateTime)
+        public static Vector3 InstantaneousOrbitalVelocityVector_AU(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
             var sma = orbit.SemiMajorAxisAU;
@@ -354,6 +444,29 @@ namespace Pulsar4X.ECSLib
             double loAN = orbit.LongitudeOfAscendingNode;
             return OrbitMath.ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
         }
+        
+        /// <summary>
+        /// Parent ralitive velocity vector. 
+        /// </summary>
+        /// <returns>The orbital vector ralitive to the parent</returns>
+        /// <param name="orbit">Orbit.</param>
+        /// <param name="atDateTime">At date time.</param>
+        public static Vector3 InstantaneousOrbitalVelocityVector_m(OrbitDB orbit, DateTime atDateTime)
+        {
+            var position = GetPosition_m(orbit, atDateTime);
+            var sma = orbit.SemiMajorAxis;
+            if (orbit.GravitationalParameter_Km3S2 == 0 || sma == 0)
+                return new Vector3(); //so we're not returning NaN;
+            var sgp = orbit.GravitationalParameter_m3S2;
+      
+            double e = orbit.Eccentricity;
+            double trueAnomaly = GetTrueAnomaly(orbit, atDateTime);
+            double aoP = orbit.ArgumentOfPeriapsis;
+            double i = orbit.Inclination;
+            double loAN = orbit.LongitudeOfAscendingNode;
+            return OrbitMath.ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
+        }
+        
 
         /// <summary>
         /// Gets the SOI radius of a given body.

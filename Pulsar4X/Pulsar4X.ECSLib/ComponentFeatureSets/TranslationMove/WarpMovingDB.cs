@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Pulsar4X.Vectors;
@@ -16,15 +17,33 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public DateTime LastProcessDateTime = new DateTime();
 
+        public Vector3 SavedNewtonionVector { get; internal set; }
         [JsonProperty]
-        public Vector3 SavedNewtonionVector_AU { get; internal set; }
+        public Vector3 SavedNewtonionVector_AU
+        {
+            get => Distance.MToAU(SavedNewtonionVector);
+            internal set => SavedNewtonionVector = Distance.AuToMt(value);
+        }
 
         [JsonProperty]
-        public Vector3 TranslateEntryPoint_AU { get; internal set; }
+        public Vector3 TranslateEntryPoint { get; internal set; }
+        public Vector3 TranslateEntryPoint_AU
+        {
+            get => Distance.MToAU(TranslateEntryPoint);
+            internal set => TranslateEntryPoint = Distance.AuToMt(value);
+        }
         [JsonProperty]
-        public Vector3 TranslateExitPoint_AU { get; internal set; }
+        public Vector3 TranslateExitPoint { get; internal set; }
+        public Vector3 TranslateExitPoint_AU {
+            get => Distance.MToAU(TranslateExitPoint);
+            internal set => TranslateExitPoint = Distance.AuToMt(value);
+        }
         [JsonProperty]
-        public Vector3 TranslateRalitiveExit_AU { get; internal set; }
+        public Vector3 TranslateRelitiveExit { get; internal set; }
+        public Vector3 TranslateRalitiveExit_AU {
+            get => Distance.MToAU(TranslateRelitiveExit);
+            internal set => TranslateRelitiveExit = Distance.AuToMt(value);
+        }
         [JsonProperty]
         public float Heading_Radians { get; internal set; }
         [JsonProperty]
@@ -40,6 +59,10 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [JsonProperty]
         internal Vector3 ExpendDeltaV { get; set; }
+        internal Vector3 ExpendDeltaV_AU {
+            get => Distance.MToAU(ExpendDeltaV);
+            set => ExpendDeltaV = Distance.AuToMt(value);
+        }
 
         [JsonProperty]
         internal bool IsAtTarget { get; set; }
@@ -58,19 +81,19 @@ namespace Pulsar4X.ECSLib
         /// Initializes a new instance of the <see cref="T:Pulsar4X.ECSLib.TranslateMoveDB"/> class.
         /// Use this one to move to a specific postion vector. 
         /// </summary>
-        /// <param name="targetPosition_AU">Target position au.</param>
-        public WarpMovingDB(Vector3 targetPosition_AU)
+        /// <param name="targetPosition_m">Target position in Meters.</param>
+        public WarpMovingDB(Vector3 targetPosition_m)
         {
-            TranslateExitPoint_AU = targetPosition_AU;
-            Heading_Radians = (float)Math.Atan2(targetPosition_AU.Y, targetPosition_AU.X);
+            TranslateExitPoint = targetPosition_m;
+            Heading_Radians = (float)Math.Atan2(targetPosition_m.Y, targetPosition_m.X);
         }
 
         public WarpMovingDB(WarpMovingDB db)
         {
             LastProcessDateTime = db.LastProcessDateTime;
-            SavedNewtonionVector_AU = db.SavedNewtonionVector_AU;
-            TranslateEntryPoint_AU = db.TranslateEntryPoint_AU;
-            TranslateExitPoint_AU = db.TranslateExitPoint_AU;
+            SavedNewtonionVector = db.SavedNewtonionVector;
+            TranslateEntryPoint = db.TranslateEntryPoint;
+            TranslateExitPoint = db.TranslateExitPoint;
             CurrentNonNewtonionVectorMS = db.CurrentNonNewtonionVectorMS;
             ExpendDeltaV = db.ExpendDeltaV;
             IsAtTarget = db.IsAtTarget;

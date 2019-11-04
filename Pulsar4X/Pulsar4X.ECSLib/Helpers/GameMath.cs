@@ -728,113 +728,12 @@ namespace Pulsar4X.ECSLib
         /// <param name="mover">The entity that is trying to intercept a target.</param>
         /// <param name="targetOrbit">Target orbit.</param>
         /// <param name="atDateTime">Datetime of transit start</param>
-        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
+        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition_m(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
         {
-
-            Vector3 moverPos;
-            if (mover.HasDataBlob<OrbitDB>())
-            {
-                //moverPos = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(mover.GetDataBlob<OrbitDB>(), atDateTime));
-                moverPos = OrbitProcessor.GetAbsolutePosition_AU(mover.GetDataBlob<OrbitDB>(), atDateTime);
-            }
-            else
-                moverPos = mover.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-            double spd = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
-            var spd1 = Distance.MToAU(spd);
-            return GetInterceptPosition2(moverPos, spd1, targetOrbit, atDateTime, offsetPosition);
+            Vector3 moverPos = Entity.GetPosition_m(mover, atDateTime);
+            double spd_m = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
+            return GetInterceptPosition2_m(moverPos, spd_m, targetOrbit, atDateTime, offsetPosition);
         }
-
-        /*
-        /// <summary>
-        /// Calculates a cartisian position for an intercept for a ship and an target's orbit using non newtownion movement. 
-        /// </summary>
-        /// <returns>The intercept position, and DateTime</returns>
-        /// <param name="moverPos">Mover position.</param>
-        /// <param name="speed">NonNewtonion movement speed. in ??? maybe this is where I'm bugged</param>
-        /// <param name="targetOrbit">Target orbit.</param>
-        /// <param name="atDateTime">transit start time</param>
-        public static (Vector4, DateTime) GetInterceptPosition(Vector4 moverPos, double speed, OrbitDB targetOrbit, DateTime atDateTime)
-        {
-#if DEBUG
-            var timespent = Stopwatch.StartNew();
-#endif
-
-            double transitTime1 = 0;
-
-            TimeSpan orbitalPeriod = targetOrbit.OrbitalPeriod;
-            int i1 = 0, i2 = 0, i3 = 0;
-            Vector4 workingPosition = new Vector4();
-            double timePeriod = 0;
-            double transitTime2;
-            double deltaTime = orbitalPeriod.TotalSeconds * 0.01;
-            double a0;
-            double a1 = -1;
-
-            //find coarse intercept
-            while (timePeriod < orbitalPeriod.TotalSeconds)
-            {
-                workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(timePeriod)));
-                transitTime2 = (workingPosition - moverPos).Length() / speed;
-                a0 = transitTime2 - timePeriod;
-                if (a0 > 0.0) //ignore overshoots, only do undershoots. 
-                {
-                    a0 /= orbitalPeriod.TotalSeconds; //remove full periods from the difference
-                    a0 -= Math.Floor(a0);
-                    a0 *= orbitalPeriod.TotalSeconds;
-                    if (a0 < a1 || a1 < 0)
-                    {
-                        a1 = a0;
-                        transitTime1 = transitTime2;
-                    }
-
-                }
-                timePeriod += deltaTime;
-                i1++;
-            }
-#if DEBUG
-            Console.WriteLine("CoarseTimeSpan :" + TimeSpan.FromSeconds(transitTime1));
-#endif
-            //find finer intercept;
-            for (i2 = 0; i2 < 3; i2++)
-            {
-                a1 = -1.0;
-
-                timePeriod = transitTime1 - deltaTime;
-                deltaTime *= 0.1;
-
-                while (timePeriod < orbitalPeriod.TotalSeconds)
-                {
-                    workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(timePeriod)));
-                    transitTime2 = (workingPosition - moverPos).Length() / speed;
-                    a0 = transitTime2 - timePeriod;
-                    if (a0 > 0.0)
-                    {
-                        a0 /= orbitalPeriod.TotalSeconds;
-                        a0 -= Math.Floor(a0);
-                        a0 *= orbitalPeriod.TotalSeconds;
-                        if (a0 < a1 || a1 < 0)
-                        {
-                            a1 = a0;
-                            transitTime1 = transitTime2;
-                        }
-
-                    }
-                    timePeriod += deltaTime;
-                    i3++;
-                }
-                workingPosition = Distance.AuToMt(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime + TimeSpan.FromSeconds(transitTime1)));
-#if DEBUG
-                Console.WriteLine("FineTimeSpan #" + i2 + " : " + TimeSpan.FromSeconds(transitTime1));
-#endif
-            }
-#if DEBUG
-            timespent.Stop();
-            Console.WriteLine("Intercept Calc Steps: " + i1 + i3 + " TimeSpent: " + timespent.Elapsed.TotalMilliseconds + " ms");
-#endif      
-            var finalPostion = Distance.MtToAu(workingPosition);
-            return (finalPostion, atDateTime + TimeSpan.FromSeconds(transitTime1));
-        }
-        */
 
         struct obit
         {
@@ -844,14 +743,12 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition2(Vector3 moverPos, double speed, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
+        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition2_AU(Vector3 moverPos, double speed, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
         {
 
             var pos = moverPos;
             double tim = 0;
-
-
-
+            
             var pl = new obit()
             {
                 position = moverPos,
@@ -859,9 +756,7 @@ namespace Pulsar4X.ECSLib
             };
 
             double a = targetOrbit.SemiMajorAxisAU * 2;
-
-
-
+            
             Vector3 p;
             int i;
             double tt, t, dt, a0, a1, T;
@@ -909,7 +804,67 @@ namespace Pulsar4X.ECSLib
             return (p, atDateTime + TimeSpan.FromSeconds(tim));
         }
 
-       
+        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition2_m(Vector3 moverPos, double speed, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
+        {
+
+            var pos = moverPos;
+            double tim = 0;
+            
+            var pl = new obit()
+            {
+                position = moverPos,
+                T = targetOrbit.OrbitalPeriod.TotalSeconds,
+            };
+
+            double a = targetOrbit.SemiMajorAxis * 2;
+            
+            Vector3 p;
+            int i;
+            double tt, t, dt, a0, a1, T;
+            // find orbital position with min error (coarse)
+            a1 = -1.0;
+            dt = 0.01 * pl.T;
+
+
+            for (t=0; t< pl.T; t+=dt)
+            {
+                p = OrbitProcessor.GetAbsolutePosition_m(targetOrbit, atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
+                p += offsetPosition;
+                tt = Vector3.Magnitude(p - pos) / speed;  //length(p - pos) / speed;
+                a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
+                a0 /= pl.T;                                   // remove full periods from the difference
+                a0 -= Math.Floor(a0);
+                a0 *= pl.T;
+                if ((a0 < a1) || (a1 < 0.0)) 
+                { 
+                    a1 = a0; 
+                    tim = tt; 
+                }   // remember best option
+            }
+            // find orbital position with min error (fine)
+            for (i = 0; i < 10; i++)                               // recursive increase of accuracy
+                for (a1 = -1.0, t = tim - dt, T = tim + dt, dt *= 0.1; t < T; t += dt)
+                {
+                    p = OrbitProcessor.GetAbsolutePosition_m(targetOrbit, atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
+                    p += offsetPosition;    
+                    tt = Vector3.Magnitude(p - pos) / speed;  //tt = length(p - pos) / speed;
+                    a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
+                    a0 /= pl.T;                                   // remove full periods from the difference
+                    a0 -= Math.Floor(a0);
+                    a0 *= pl.T;
+                    if ((a0 < a1) || (a1 < 0.0)) 
+                    {
+                        a1 = a0; 
+                    tim = tt; 
+                    }   // remember best option
+                }
+            // direction
+            p = OrbitProcessor.GetAbsolutePosition_m(targetOrbit, atDateTime + TimeSpan.FromSeconds(tim));//pl.position(sim_t + tim);
+            p += offsetPosition;
+            //dir = normalize(p - pos);
+            return (p, atDateTime + TimeSpan.FromSeconds(tim));
+        }
+
     }
 
     /// <summary>

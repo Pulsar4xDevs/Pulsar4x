@@ -33,7 +33,10 @@ namespace Pulsar4X.ECSLib
         {
             NewtonThrustAbilityDB db;
             if (!parentEntity.HasDataBlob<NewtonThrustAbilityDB>())
+            {
                 db = new NewtonThrustAbilityDB(FuelType);
+                parentEntity.SetDataBlob(db);
+            }
             else
             {
                 db = parentEntity.GetDataBlob<NewtonThrustAbilityDB>();

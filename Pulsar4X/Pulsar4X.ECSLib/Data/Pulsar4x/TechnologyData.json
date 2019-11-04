@@ -84,7 +84,7 @@
           "Description": "By finding better ways to manipulate the warp bubble, we can make the drive more efficient",
           "ID": "7fa0dc05-5e58-4678-be44-afaad014e096",
           "MaxLevel": 10,
-          "DataFormula": "0.01 - [Level] * 0.05 ",
+          "DataFormula": "1.0 - [Level] * 0.05 ",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []

@@ -42,17 +42,22 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning)
             {
                 var warpDB = _entityCommanding.GetDataBlob<WarpAbilityDB>();
-                var powerDB = _entityCommanding.GetDataBlob<EntityEnergyGenAbilityDB>();
+                var powerDB = _entityCommanding.GetDataBlob<EnergyGenAbilityDB>();
                 Guid eType = warpDB.EnergyType;
                 double estored = powerDB.EnergyStored[eType];
                 double creationCost = warpDB.BubbleCreationCost;
                 if (creationCost <= estored)
                 {
-                    var targetIntercept = InterceptCalcs.GetInterceptPosition(_entityCommanding, _targetEntity.GetDataBlob<OrbitDB>(), _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime);
-                    _db = new WarpMovingDB(targetIntercept.Item1);
+                    (Vector3 position, DateTime atDateTime) targetIntercept = InterceptCalcs.GetInterceptPosition_m
+                        (
+                            _entityCommanding, 
+                        _targetEntity.GetDataBlob<OrbitDB>(), 
+                            _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime
+                        );
+                    _db = new WarpMovingDB(targetIntercept.position);
                     _db.EntryDateTime = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
-                    _db.PredictedExitTime = targetIntercept.Item2;
-                    _db.TranslateEntryPoint_AU = _entityCommanding.GetDataBlob<PositionDB>().AbsolutePosition_AU;
+                    _db.PredictedExitTime = targetIntercept.atDateTime;
+                    _db.TranslateEntryPoint = _entityCommanding.GetDataBlob<PositionDB>().AbsolutePosition_m;
                     _db.TargetEntity = _targetEntity;
                     if (EntityCommanding.HasDataBlob<OrbitDB>())
                         EntityCommanding.RemoveDataBlob<OrbitDB>();

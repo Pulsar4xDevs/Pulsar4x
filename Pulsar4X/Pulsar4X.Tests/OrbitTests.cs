@@ -431,7 +431,7 @@ namespace Pulsar4X.Tests
 
 
 
-            var intercept = InterceptCalcs.GetInterceptPosition2(currentPos, nonNewtSpeed, targetOrbit ,currentDateTime);
+            var intercept = InterceptCalcs.GetInterceptPosition2_AU(currentPos, nonNewtSpeed, targetOrbit ,currentDateTime);
 
             var futurePos1 = Distance.AuToKm( OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, intercept.Item2));
 

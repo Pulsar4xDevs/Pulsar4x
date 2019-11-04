@@ -70,16 +70,14 @@ namespace Pulsar4X.ECSLib
             var warpDB = entity.GetDataBlob<WarpAbilityDB>();
             var positionDB = entity.GetDataBlob<PositionDB>();
             var maxSpeedMS = warpDB.MaxSpeed;
-            var powerDB = entity.GetDataBlob<EntityEnergyGenAbilityDB>();
+            var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
             EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
             positionDB.SetParent(null);
-            Vector3 targetPosMt = Distance.AuToMt(moveDB.TranslateExitPoint_AU);
-            Vector3 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
+            Vector3 targetPosMt = moveDB.TranslateExitPoint;
+            Vector3 currentPositionMt = positionDB.AbsolutePosition_m;
 
             Vector3 postionDelta = currentPositionMt - targetPosMt;
             double totalDistance = postionDelta.Length();
-
-            double maxKMeters = ShipMovementProcessor.CalcMaxFuelDistance_KM(entity);
             
             var creationCost = warpDB.BubbleCreationCost;
             var t = totalDistance / warpDB.MaxSpeed;
@@ -106,8 +104,6 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Moves an entity while it's in a non newtonion translation state. 
-        /// TODO: doing this in meters will likely cause problems for ships that have a large position value.
-        /// (position in meters could consevably go out of max value)
         /// </summary>
         /// <param name="entity">Entity.</param>
         /// <param name="deltaSeconds">Unused</param>
@@ -125,21 +121,18 @@ namespace Pulsar4X.ECSLib
 
             double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
             var positionDB = entity.GetDataBlob<PositionDB>();
-            var currentPositionAU = positionDB.AbsolutePosition_AU;
-            Vector3 currentPositionMt = Distance.AuToMt(positionDB.AbsolutePosition_AU);
 
-            Vector3 targetPosMt;
+            Vector3 currentPositionMt = positionDB.AbsolutePosition_m;
 
-            targetPosMt = Distance.AuToMt(moveDB.TranslateExitPoint_AU);
+            Vector3 targetPosMt = moveDB.TranslateExitPoint;
+            
 
             var deltaVecToTargetMt = currentPositionMt - targetPosMt;
 
             var newPositionMt = currentPositionMt + currentVelocityMS * deltaT;
 
-            //var distanceToTargetAU = deltaVecToTargetAU.Length();  //in au
             var distanceToTargetMt = deltaVecToTargetMt.Length();
 
-            //var deltaVecToTimeAU = currentPositionAU - TimePosAU;
             var positionDelta = currentPositionMt - newPositionMt;
 
             double distanceToMove = positionDelta.Length();
@@ -147,11 +140,10 @@ namespace Pulsar4X.ECSLib
 
             if (distanceToTargetMt <= distanceToMove) // moving would overtake target, just go directly to target
             {
-                var powerDB = entity.GetDataBlob<EntityEnergyGenAbilityDB>();
-                newPositionMt = targetPosMt;
+                var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
                 positionDB.SetParent(moveDB.TargetEntity);
                 //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
-                positionDB.RelativePosition_AU = moveDB.TranslateRalitiveExit_AU;
+                positionDB.RelativePosition_m = moveDB.TranslateRelitiveExit;
                 var propulsionAbilityDB = entity.GetDataBlob<PropulsionAbilityDB>();
                 SetOrbitHere(entity, propulsionAbilityDB, positionDB, moveDB, dateTimeFuture);
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
@@ -162,7 +154,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);
+                positionDB.AbsolutePosition_m = newPositionMt;
             }
 
 
@@ -188,10 +180,10 @@ namespace Pulsar4X.ECSLib
                 targetEntity = moveDB.TargetEntity;
             }
             OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
-            var orbitalVector = OrbitProcessor.GetOrbitalVector(targetOrbit, atDateTime);
+            var orbitalVector = OrbitProcessor.GetOrbitalVector_AU(targetOrbit, atDateTime);
             
             Vector3 parentOrbitalVector = new Vector3(orbitalVector.X, orbitalVector.Y, 0);
-            Vector3 insertionVector_AU = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector_AU, targetOrbit, atDateTime);
+            Vector3 insertionVector_AU = OrbitProcessor.GetOrbitalInsertionVector_AU(moveDB.SavedNewtonionVector_AU, targetOrbit, atDateTime);
             insertionVector_AU += Distance.MToAU(moveDB.ExpendDeltaV); //TODO: only use it if we have it. 
             propulsionDB.RemainingDV_MS -= (float)(moveDB.ExpendDeltaV).Length();
             OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector_AU, atDateTime);

@@ -347,7 +347,73 @@ namespace Pulsar4X.ECSLib
                     hash = Misc.ValueHash(item, hash);
             }
             return hash;
-        } 
+        }
+
+        public static PositionDB GetSOIParentPositionDB(Entity entity)
+        {
+            return (PositionDB)entity.GetDataBlob<PositionDB>().ParentDB;
+        }
+
+        public static Entity GetSOIParentEntity(Entity entity, PositionDB positionDB = null)
+        {
+            if (positionDB == null)
+                positionDB = entity.GetDataBlob<PositionDB>();
+            return positionDB.Parent;
+        }
+
+        public static Vector3 GetVelocity_m(Entity entity, DateTime atDateTime)
+        {
+            if (entity.HasDataBlob<OrbitDB>())
+            {
+                return OrbitProcessor.GetOrbitalVector_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
+            }
+            else if (entity.HasDataBlob<NewtonMoveDB>())
+            {
+                return  NewtonionMovementProcessor.GetPositon_m(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
+            }
+            else
+            {
+                throw new Exception("Entity has no velocity");
+            }
+        }
+
+        /// <summary>
+        /// Gets a future position for this entity, regarless of wheter it's orbit or newtonion trajectory
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="atDateTime"></param>
+        /// <param name="ralitive"></param>
+        /// <returns>In Meters</returns>
+        /// <exception cref="Exception"></exception>
+        public static Vector3 GetPosition_m(Entity entity, DateTime atDateTime, bool ralitive = true)
+        {
+            if (entity.HasDataBlob<OrbitDB>())
+            {
+                if (ralitive)
+                    return OrbitProcessor.GetPosition_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
+                else
+                    return OrbitProcessor.GetAbsolutePosition_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
+            }
+            else if (entity.HasDataBlob<NewtonMoveDB>())
+            {
+                if (ralitive)
+                    return  NewtonionMovementProcessor.GetPositon_m(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
+                else
+                    return NewtonionMovementProcessor.GetAbsulutePositon_m(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
+                
+            }
+            else if (entity.HasDataBlob<PositionDB>())
+            {
+                if(ralitive)
+                    return entity.GetDataBlob<PositionDB>().RelativePosition_m;
+                else
+                    return entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            }
+            else
+            {
+                throw new Exception("Entity is positionless");
+            }
+        }
 
         /// <summary>
         /// Used to transfer an entity between managers.

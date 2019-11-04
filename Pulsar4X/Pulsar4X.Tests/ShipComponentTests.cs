@@ -78,7 +78,7 @@ namespace Pulsar4X.Tests
                     ability.SetValue();
             }
 
-            designer.ComponentDesignAttributes["Engine Size"].SetValueFromInput(250);
+            designer.ComponentDesignAttributes["Size"].SetValueFromInput(250);
 
             ComponentDesign engineDesign = designer.CreateDesign(_faction);
 
@@ -113,7 +113,7 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD cargo = GeneralCargo();
 
             ComponentDesigner cargoDesigner = new ComponentDesigner(cargo, _faction.GetDataBlob<FactionTechDB>());
-            cargoDesigner.ComponentDesignAttributes["Warehouse Size"].SetValue();
+            cargoDesigner.ComponentDesignAttributes["Size"].SetValue();
  
             ComponentDesign cargoDesign = cargoDesigner.CreateDesign(_faction);
             
@@ -177,7 +177,7 @@ namespace Pulsar4X.Tests
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
             ComponentTemplateAbilitySD SizeFormula0 = new ComponentTemplateAbilitySD();
-            SizeFormula0.Name = "Engine Size";
+            SizeFormula0.Name = "Size";
             SizeFormula0.Description = "Size of this engine in Tons";
             SizeFormula0.GuiHint = GuiHint.GuiSelectionMaxMin;
             SizeFormula0.AbilityFormula = "250";
@@ -228,7 +228,7 @@ namespace Pulsar4X.Tests
             component.ComponentAbilitySDs.Add(enginePowerAbility3);
 
             ComponentTemplateAbilitySD enginePowerDBArgs4 = new ComponentTemplateAbilitySD();
-            enginePowerDBArgs4.Name = "Engine Power";
+            enginePowerDBArgs4.Name = "Engine Powerdb";
             enginePowerDBArgs4.Description = "Move Power for ship";
             enginePowerDBArgs4.GuiHint = GuiHint.None;
             enginePowerDBArgs4.AbilityDataBlobType = typeof(WarpDriveAtb).ToString();
@@ -243,14 +243,14 @@ namespace Pulsar4X.Tests
             component.ComponentAbilitySDs.Add(fuelConsumptionTechMod5);
 
             ComponentTemplateAbilitySD fuelConsumptionFinalCalc6 = new ComponentTemplateAbilitySD();
-            fuelConsumptionFinalCalc6.Name = "Fuel Consumption";
+            fuelConsumptionFinalCalc6.Name = "Fuel Consumptioncalc";
             fuelConsumptionFinalCalc6.Description = "Fuel Consumption Calc";
             fuelConsumptionFinalCalc6.GuiHint = GuiHint.GuiTextDisplay;
             fuelConsumptionFinalCalc6.AbilityFormula = "Ability(3) - Ability(3) * [Mass] * 0.002 * Ability(5)";
             component.ComponentAbilitySDs.Add(fuelConsumptionFinalCalc6);
 
             ComponentTemplateAbilitySD fuelConsumptionArgsDB7 = new ComponentTemplateAbilitySD();
-            fuelConsumptionArgsDB7.Name = "Fuel Consumption";
+            fuelConsumptionArgsDB7.Name = "Fuel Consumptiondb";
             fuelConsumptionArgsDB7.Description = "";
             fuelConsumptionArgsDB7.GuiHint = GuiHint.None;
             fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(ResourceConsumptionAtbDB).ToString();
@@ -275,7 +275,7 @@ namespace Pulsar4X.Tests
             component.ComponentAbilitySDs.Add(sensorSigDisplay9);
 
             ComponentTemplateAbilitySD sensorSigDBArgs10 = new ComponentTemplateAbilitySD();
-            sensorSigDBArgs10.Name = "Sensor Signature";
+            sensorSigDBArgs10.Name = "Sensor Signaturedb";
             sensorSigDBArgs10.Description = "";
             sensorSigDBArgs10.GuiHint = GuiHint.None;
             sensorSigDBArgs10.AbilityDataBlobType = typeof(SensorSignatureAtbDB).ToString();
@@ -547,7 +547,7 @@ namespace Pulsar4X.Tests
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
             ComponentTemplateAbilitySD genralCargoAbility = new ComponentTemplateAbilitySD();
-            genralCargoAbility.Name = "Storage Capacity";
+            genralCargoAbility.Name = "Size";
             genralCargoAbility.Description = "";
             genralCargoAbility.GuiHint = GuiHint.GuiTextDisplay;
             genralCargoAbility.AbilityFormula = "100";

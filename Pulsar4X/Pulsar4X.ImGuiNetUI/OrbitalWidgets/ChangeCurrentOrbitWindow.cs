@@ -99,7 +99,7 @@ namespace Pulsar4X.SDL2UI
             _stdGravParam = GameConstants.Science.GravitationalConstant * (_massParentBody + _massOrderingEntity) / 3.347928976e33;
 
             _positonAtChange_AU = OrbitProcessor.GetPosition_AU(_orderEntityOrbit, _actionDateTime);
-            var velAtChange2d = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _actionDateTime);
+            var velAtChange2d = OrbitProcessor.GetOrbitalVector_AU(_orderEntityOrbit, _actionDateTime);
             _orbitalVelocityAtChange = new ECSLib.Vector3(velAtChange2d.X, velAtChange2d.Y, 0);
             _origionalAngle = Math.Atan2(_orbitalVelocityAtChange.X, _orbitalVelocityAtChange.Y);
             IsActive = true;
@@ -146,7 +146,7 @@ namespace Pulsar4X.SDL2UI
             { 
                 _actionDateTime = newDate;
                 _positonAtChange_AU = OrbitProcessor.GetPosition_AU(_orderEntityOrbit, _actionDateTime);
-                var vector2 = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _actionDateTime);
+                var vector2 = OrbitProcessor.GetOrbitalVector_AU(_orderEntityOrbit, _actionDateTime);
                 _orbitalVelocityAtChange = new ECSLib.Vector3(vector2.X, vector2.Y,0);
                 _origionalAngle = Math.Atan2(_orbitalVelocityAtChange.X, _orbitalVelocityAtChange.Y);
             }

@@ -53,10 +53,11 @@ namespace Pulsar4X.SDL2UI
 
 
             ImGui.Text("Cursor World Coordinate:");
-            var mouseWorldCoord = _state.Camera.MouseWorldCoordinate();
-            ImGui.Text("x" + mouseWorldCoord.X);
+            var mouseWorldCoord = Distance.MToAU(_state.Camera.MouseWorldCoordinate_m());
+            
+            ImGui.Text("x" + mouseWorldCoord.X + " AU");
             ImGui.SameLine();
-            ImGui.Text("y" + mouseWorldCoord.Y);
+            ImGui.Text("y" + mouseWorldCoord.Y + " AU");
 
             ImGui.Text("Cursor View Coordinate from math:");
             var mouseViewCoord = _state.Camera.ViewCoordinate(mouseWorldCoord);
@@ -65,7 +66,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.Text("y" + mouseViewCoord.y);
 
             ImGui.Text("Camera World Coordinate:");
-            var cameraWorldCoord = _state.Camera.CameraWorldPosition;
+            var cameraWorldCoord = _state.Camera.CameraWorldPosition_AU;
             ImGui.Text("x" + cameraWorldCoord.X);
             ImGui.SameLine();
             ImGui.Text("y" + cameraWorldCoord.Y);
@@ -128,7 +129,7 @@ namespace Pulsar4X.SDL2UI
 
         private BezierCurve _bc;
 
-        public GraphicDebugWidget(Vector3 position) : base(position)
+        public GraphicDebugWidget(Vector3 positionM) : base(positionM)
         {
 
 
@@ -278,7 +279,7 @@ namespace Pulsar4X.SDL2UI
             _bc.OnFrameUpdate(matrix, camera);
             UpdateElements();
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU);
 
             Matrix nonZoomMatrix = Matrix.NewMirrorMatrix(true, false);
 

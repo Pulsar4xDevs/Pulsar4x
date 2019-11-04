@@ -206,13 +206,14 @@ namespace Pulsar4X.SDL2UI
                 {
                     ImGui.Text(_state.PrimarySystemDateTime.ToString());
                     ImGui.Text("Cursor World Coordinate:");
-                    var mouseWorldCoord = _state.Camera.MouseWorldCoordinate();
-                    ImGui.Text("x" + mouseWorldCoord.X);
+                    var mouseWorldCoord = _state.Camera.MouseWorldCoordinate_m();
+                    ImGui.Text("x" + mouseWorldCoord.X + " m");
                     ImGui.SameLine();
-                    ImGui.Text("y" + mouseWorldCoord.Y);
+                    ImGui.Text("y" + mouseWorldCoord.Y + " m");
 
                     ImGui.Text("Special Chars");
-                    //ImGui.Text("\u03A9, Ω, ω, ν");
+                    ImGui.Text("Proggy clean is crsp but these chars are blury, Ω, ω, ν");
+                    //ImGui.Text("this text is fine, Ω, ω, ν "+"this text is not blury");
                     if (ImGui.CollapsingHeader("FrameRates", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
 
@@ -484,11 +485,11 @@ namespace Pulsar4X.SDL2UI
 
                             }
 
-                            if (SelectedEntity.HasDataBlob<EntityEnergyGenAbilityDB>())
+                            if (SelectedEntity.HasDataBlob<EnergyGenAbilityDB>())
                             {
                                 if (ImGui.CollapsingHeader("Power ###PowerHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    var powerDB = _selectedEntity.GetDataBlob<EntityEnergyGenAbilityDB>();
+                                    var powerDB = _selectedEntity.GetDataBlob<EnergyGenAbilityDB>();
                                     ImGui.Text("Generates " +powerDB.EnergyType.Name); 
                                     ImGui.Text("Max of: " + powerDB.TotalOutputMax + "/s");
                                     string fueltype = StaticRefLib.StaticData.CargoGoods.GetMaterial(powerDB.TotalFuelUseAtMax.type).Name;

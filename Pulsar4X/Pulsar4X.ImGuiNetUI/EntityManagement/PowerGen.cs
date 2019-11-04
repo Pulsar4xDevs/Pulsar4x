@@ -11,7 +11,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
     {
         private EntityState _entityState;
         Vector2 _plotSize = new Vector2(512, 64);
-        private EntityEnergyGenAbilityDB _energyGenDB;
+        private EnergyGenAbilityDB _energyGenDB;
         
         
         internal static PowerGen GetInstance()
@@ -39,10 +39,10 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         public void SetEntity(EntityState entityState)
         {
-            if (entityState.DataBlobs.ContainsKey(typeof(EntityEnergyGenAbilityDB)))
+            if (entityState.DataBlobs.ContainsKey(typeof(EnergyGenAbilityDB)))
             {
                 _entityState = entityState;
-                _energyGenDB = (EntityEnergyGenAbilityDB)entityState.DataBlobs[typeof(EntityEnergyGenAbilityDB)];
+                _energyGenDB = (EnergyGenAbilityDB)entityState.DataBlobs[typeof(EnergyGenAbilityDB)];
                 CanActive = true;
             }
             else

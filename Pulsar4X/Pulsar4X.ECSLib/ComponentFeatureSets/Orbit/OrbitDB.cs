@@ -43,6 +43,10 @@ namespace Pulsar4X.ECSLib
             get { return Angle.ToDegrees(Inclination);}
             private set { Inclination = Angle.ToRadians(value); }
         }
+        
+        /// <summary>
+        /// i in radians
+        /// </summary>
         public double Inclination { get; private set; }
         
         /// <summary>
@@ -57,6 +61,9 @@ namespace Pulsar4X.ECSLib
             private set { LongitudeOfAscendingNode = Angle.ToRadians(value); }
         }
 
+        /// <summary>
+        /// LoAN in radians
+        /// </summary>
         public double LongitudeOfAscendingNode { get; private set; }
         
         
@@ -72,6 +79,9 @@ namespace Pulsar4X.ECSLib
         }
 
 
+        /// <summary>
+        /// AoP in radians
+        /// </summary>
         public  double ArgumentOfPeriapsis { get; private set; }
         
         
@@ -183,9 +193,9 @@ namespace Pulsar4X.ECSLib
             var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
             var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
 
-            var epoch1 = parent.Manager.ManagerSubpulses.StarSysDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
+            //var epoch1 = parent.Manager.ManagerSubpulses.StarSysDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
 
-            var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), atDateTime); //need to use the parent position at the epoch
+            //var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), atDateTime); //need to use the parent position at the epoch
             var posdb = entity.GetDataBlob<PositionDB>();
             posdb.SetParent(parent);
             var ralitivePos = posdb.RelativePosition_AU;//entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;

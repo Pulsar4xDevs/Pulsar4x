@@ -157,7 +157,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            var foo = camera.ViewCoordinate(WorldPosition);
+            var foo = camera.ViewCoordinate(WorldPosition_AU);
             var vsp = new PointD
             {
                 X = foo.x,

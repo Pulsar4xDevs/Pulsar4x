@@ -87,12 +87,12 @@ namespace Pulsar4X.SDL2UI
         public int CompareTo(NameIcon compareIcon)
         {
 
-            if (WorldPosition.Y > compareIcon.WorldPosition.Y) return -1;
-            else if (this.WorldPosition.Y < compareIcon.WorldPosition.Y) return 1;
+            if (WorldPosition_AU.Y > compareIcon.WorldPosition_AU.Y) return -1;
+            else if (this.WorldPosition_AU.Y < compareIcon.WorldPosition_AU.Y) return 1;
             else
             {
-                if (this.WorldPosition.X > compareIcon.WorldPosition.X) return 1;
-                else if (this.WorldPosition.X < compareIcon.WorldPosition.X) return -1;
+                if (this.WorldPosition_AU.X > compareIcon.WorldPosition_AU.X) return 1;
+                else if (this.WorldPosition_AU.X < compareIcon.WorldPosition_AU.X) return -1;
                 else return -NameString.CompareTo(compareIcon.NameString);
             }
         }

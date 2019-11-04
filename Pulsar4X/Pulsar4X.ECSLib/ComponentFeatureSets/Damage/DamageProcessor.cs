@@ -200,7 +200,7 @@ namespace Pulsar4X.ECSLib
                 EntityManager mySystem = Asteroid.Manager;
                 
 
-                var origVel = OrbitProcessor.AbsoluteOrbitalVector(origOrbit, atDateTime);
+                var origVel = OrbitProcessor.AbsoluteOrbitalVector_AU(origOrbit, atDateTime);
 
                 //public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
                 //I need the target entity, the collisionDate, and the starSystem. I may have starsystem from guid.

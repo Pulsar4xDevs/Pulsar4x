@@ -50,8 +50,8 @@ namespace Pulsar4X.ECSLib
             NewtonMoveDB newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
-            double Mass_Kg = entity.GetDataBlob<MassVolumeDB>().Mass;
-            double ParentMass_kg = newtonMoveDB.ParentMass;
+            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().Mass;
+            double parentMass_kg = newtonMoveDB.ParentMass;
 
             var manager = entity.Manager;
             DateTime dateTimeFrom = newtonMoveDB.LastProcessDateTime;
@@ -71,13 +71,13 @@ namespace Pulsar4X.ECSLib
 
                 distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
 
-                double gravForce = GameConstants.Science.GravitationalConstant * (Mass_Kg * ParentMass_kg / Math.Pow(distanceToParent_m, 2));
+                double gravForce = GameConstants.Science.GravitationalConstant * (mass_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
                 Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition_m);
 
-                Vector3 acceleratonFromGrav = gravForceVector / Mass_Kg;
+                Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
                 
-                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(Mass_Kg / (Mass_Kg - newtonThrust.FuelUsage));//per second
-                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / Mass_Kg; //per second
+                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelUsage));//per second
+                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
                 Vector3 accelerationFromThrust = newtonMoveDB.DeltaVToExpend_AU / maxAccelFromThrust; //per second
 
                 Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
@@ -99,7 +99,7 @@ namespace Pulsar4X.ECSLib
                     {
                         var orbitDB = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>();
                         newParent = orbitDB.Parent;
-                        var parentVelocity = OrbitProcessor.InstantaneousOrbitalVelocityVector(orbitDB, entity.Manager.ManagerSubpulses.StarSysDateTime);
+                        var parentVelocity = OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(orbitDB, entity.Manager.ManagerSubpulses.StarSysDateTime);
                         parentVelocity = Distance.AuToMt(parentVelocity);
                         parentRalitiveVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
            
@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
                     Vector3 posRalitiveToNewParent = positionDB.AbsolutePosition_m - newParent.GetDataBlob<PositionDB>().AbsolutePosition_m;
 
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
-                    double sgp = GMath.StandardGravitationalParameter(newParentMass + Mass_Kg);
+                    double sgp = GMath.StandardGravitationalParameter(newParentMass + mass_Kg);
                     var kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posRalitiveToNewParent, parentRalitiveVector, dateTime);
 
                     if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
@@ -123,7 +123,7 @@ namespace Pulsar4X.ECSLib
                         
                         var newOrbit = OrbitDB.FromKeplerElements(
                             newParent,
-                            Mass_Kg, 
+                            mass_Kg, 
                             kE,
                             dateTime);
                         entity.RemoveDataBlob<NewtonMoveDB>();
@@ -145,5 +145,101 @@ namespace Pulsar4X.ECSLib
             }
             newtonMoveDB.LastProcessDateTime = dateTimeFuture;
         }
+
+        public static (Vector3 pos, Vector3 vel)GetPositon_m(Entity entity, NewtonMoveDB newtonMoveDB, DateTime atDateTime)
+        {
+            PositionDB positionDB = entity.GetDataBlob<PositionDB>();
+            NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
+            DateTime dateTimeNow = entity.StarSysDateTime;
+            TimeSpan timeDelta = atDateTime - dateTimeNow;
+            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().Mass;
+            double parentMass_kg = newtonMoveDB.ParentMass;
+
+            Vector3 newRalitive = positionDB.RelativePosition_m;
+            Vector3 velocity = newtonMoveDB.CurrentVector_ms;
+            
+            double secondsToItterate = timeDelta.TotalSeconds;
+            while (secondsToItterate > 0) 
+            {
+                //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
+                //timeStep = Math.Min(timeStep, secondsToItterate);
+                double timeStep = 1;//because the above seems unstable and looses energy. 
+                double distanceToParent_m = positionDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>());
+
+                distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
+
+                double gravForce = GameConstants.Science.GravitationalConstant * (mass_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
+                Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition_m);
+
+                Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
+                
+                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelUsage));//per second
+                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
+                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVToExpend_AU / maxAccelFromThrust; //per second
+
+                Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
+                
+                Vector3 newVelocity = (accelerationTotal * timeStep) + velocity;
+                
+                
+                velocity = newVelocity;
+                Vector3 deltaPos = (velocity + newVelocity) / 2 * timeStep; //we calculate the position using the average velocity between the start and end of the delta time.
+
+                 newRalitive += deltaPos;
+
+                secondsToItterate -= timeStep;
+            }
+
+            return (newRalitive, velocity);
+        }
+        
+        public static (Vector3 pos, Vector3 vel) GetAbsulutePositon_m(Entity entity, NewtonMoveDB newtonMoveDB, DateTime atDateTime)
+        {
+            PositionDB positionDB = entity.GetDataBlob<PositionDB>();
+            NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
+            DateTime dateTimeNow = entity.StarSysDateTime;
+            TimeSpan timeDelta = atDateTime - dateTimeNow;
+            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().Mass;
+            double parentMass_kg = newtonMoveDB.ParentMass;
+
+            Vector3 newAbsolute = positionDB.AbsolutePosition_m;
+            Vector3 velocity = newtonMoveDB.CurrentVector_ms;
+            
+            double secondsToItterate = timeDelta.TotalSeconds;
+            while (secondsToItterate > 0) 
+            {
+                //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
+                //timeStep = Math.Min(timeStep, secondsToItterate);
+                double timeStep = 1;//because the above seems unstable and looses energy. 
+                double distanceToParent_m = positionDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>());
+
+                distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
+
+                double gravForce = GameConstants.Science.GravitationalConstant * (mass_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
+                Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition_m);
+
+                Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
+                
+                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelUsage));//per second
+                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
+                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVToExpend_AU / maxAccelFromThrust; //per second
+
+                Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
+                
+                Vector3 newVelocity = (accelerationTotal * timeStep) + velocity;
+                
+                
+                velocity = newVelocity;
+                Vector3 deltaPos = (velocity + newVelocity) / 2 * timeStep;
+
+                 newAbsolute += deltaPos;
+
+                secondsToItterate -= timeStep;
+            }
+
+            return (newAbsolute, velocity);
+        }
+
+
     }
 }

@@ -54,13 +54,14 @@ namespace Pulsar4X.ECSLib
             
             foreach (var design in designs)
             {
+                var warpAtb = design.GetAttribute<WarpDriveAtb>();
                 foreach (var instanceInfo in instancesDB.GetComponentsBySpecificDesign(design.Guid))
                 {
-                    var power = (WarpDriveAtb)instanceInfo.Design.AttributesByType[typeof(WarpDriveAtb)];
+                    var warpAtb2 = (WarpDriveAtb)instanceInfo.Design.AttributesByType[typeof(WarpDriveAtb)];
                     //var fuelUsage = (ResourceConsumptionAtbDB)instanceInfo.Design.AttributesByType[typeof(ResourceConsumptionAtbDB)];
                     if (instanceInfo.IsEnabled)
                     {
-                        totalEnginePower += (int)(power.WarpPower * instanceInfo.HealthPercent());
+                        totalEnginePower += (int)(warpAtb.WarpPower * instanceInfo.HealthPercent());
                         //foreach (var item in fuelUsage.MaxUsage)
                         //{
                         //    totalFuelUsage.SafeValueAdd(item.Key, item.Value);

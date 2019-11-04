@@ -130,7 +130,7 @@ namespace Pulsar4X.Tests
             Earth = NameLookup.GetFirstEntityWithName(Sol, "Earth"); //Sol.Entities[3]; //should be fourth entity created 
              EarthColony = ColonyFactory.CreateColony(HumanFaction, HumanSpecies, Earth);
 
-            DefaultEngineDesign = DefaultStartFactory.DefaultEngineDesign(Game, HumanFaction);
+            DefaultEngineDesign = DefaultStartFactory.DefaultThrusterDesign(Game, HumanFaction);
             DefaultWeaponDesign = DefaultStartFactory.DefaultSimpleLaser(Game, HumanFaction);
             DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(Game, HumanFaction);
 

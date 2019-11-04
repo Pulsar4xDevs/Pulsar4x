@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -20,11 +21,15 @@ namespace Pulsar4X.SDL2UI
     public class Icon : IDrawData
     {
         protected ECSLib.IPosition _positionDB;
-        protected ECSLib.Vector3 _worldPosition;
-        public ECSLib.Vector3 WorldPosition
+        protected ECSLib.Vector3 _worldPosition_m { get; set; }
+        public ECSLib.Vector3 WorldPosition_AU
         {
-            get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
-            set { _worldPosition = value; }
+            get { if (positionByDB) return _positionDB.AbsolutePosition_AU + Distance.AuToMt(_worldPosition_m); else return Distance.AuToMt(_worldPosition_m); }
+        }
+        public ECSLib.Vector3 WorldPosition_m
+        {
+            get { if (positionByDB) return _positionDB.AbsolutePosition_m + _worldPosition_m; else return _worldPosition_m; }
+            set { _worldPosition_m = value; }
         }
         /// <summary>
         /// If this is true, WorldPosition will be the sum of the PositionDB and any value given to WorldPosition
@@ -42,9 +47,9 @@ namespace Pulsar4X.SDL2UI
             _positionDB = positionDB;
             positionByDB = true;
         }
-        public Icon(ECSLib.Vector3 position)
+        public Icon(ECSLib.Vector3 positionM)
         {
-            _worldPosition = position;
+            _worldPosition_m = positionM;
             positionByDB = false;
         }
 
@@ -57,7 +62,7 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
+            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU);
 
             var mirrorMtx = Matrix.NewMirrorMatrix(true, false);
             var scaleMtx = Matrix.NewScaleMatrix(Scale, Scale);
