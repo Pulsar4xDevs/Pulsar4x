@@ -112,7 +112,7 @@ namespace Pulsar4X.SDL2UI
         
         public ECSLib.Vector3 MouseWorldCoordinate_m()
         {
-            System.Numerics.Vector2 mouseCoord = ImGui.GetMousePos();
+            Vector2 mouseCoord = ImGui.GetMousePos();
             double x = ((mouseCoord.X - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition_m.X;
             double y = -(((mouseCoord.Y - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition_m.Y);
             return new ECSLib.Vector3(x, y, 0);
@@ -124,12 +124,6 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="viewCoordinate"></param>
         /// <returns></returns>
-        public ECSLib.Vector3 WorldCoordinate_AU(int viewCoordinateX, int viewCoordinateY)
-        {
-            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition_AU.X;
-            double y = -(((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition_AU.Y);
-            return new ECSLib.Vector3(x, y, 0);
-        }
         public ECSLib.Vector3 WorldCoordinate_m(int viewCoordinateX, int viewCoordinateY)
         {
             double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition_m.X;
@@ -173,9 +167,9 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="viewSize"></param>
         /// <returns></returns>
-        public System.Numerics.Vector2 WorldSize(System.Numerics.Vector2 viewSize)
+        public Vector2 WorldSize(Vector2 viewSize)
         {
-            return new System.Numerics.Vector2(viewSize.X / ZoomLevel, viewSize.Y / ZoomLevel);
+            return new Vector2(viewSize.X / ZoomLevel, viewSize.Y / ZoomLevel);
         }
 
 
@@ -186,16 +180,9 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void WorldOffset_m(double xOffset, double yOffset)
         {
-            if (IsPinnedToEntity)
-            {
-                _camWorldPos_m.X += (float)(xOffset * GameConstants.Units.MetersPerAu / ZoomLevel);
-                _camWorldPos_m.Y += (float)(-yOffset * GameConstants.Units.MetersPerAu / ZoomLevel);
-            }
-            else
-            {
-                _camWorldPos_m.X += (float)(xOffset * GameConstants.Units.MetersPerAu / ZoomLevel);
-                _camWorldPos_m.Y += (float)(-yOffset * GameConstants.Units.MetersPerAu / ZoomLevel);
-            }
+            
+            _camWorldPos_m.X += (float)(xOffset * GameConstants.Units.MetersPerAu / ZoomLevel);
+            _camWorldPos_m.Y += (float)(-yOffset * GameConstants.Units.MetersPerAu / ZoomLevel);
         }
 
 
