@@ -102,13 +102,13 @@ namespace Pulsar4X.ECSLib
 
         private void OnMoveCommand()
         {
-            TranslateMoveCommand newmove = new TranslateMoveCommand()
+            WarpMoveCommand newmove = new WarpMoveCommand()
             {
                 RequestingFactionGuid = _cmdRef.FactionGuid,
                 EntityCommandingGuid = _cmdRef.EntityGuid,
                 CreatedDate = _cmdRef.GetSystemDatetime,
                 TargetEntityGuid = TargetList.SelectedKey,
-                RangeInKM = Range,
+  
             };
             _cmdRef.Handler.HandleOrder(newmove);
         }

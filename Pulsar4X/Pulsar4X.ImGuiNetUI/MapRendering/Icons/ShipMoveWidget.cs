@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
             if (entity.HasDataBlob<WarpMovingDB>())
             {
                 var db = entity.GetDataBlob<WarpMovingDB>();
-                _translateStartPoint = db.TranslateEntryPoint_AU;
+                _translateStartPoint = db.TranslateEntryAbsolutePoint_AU;
                 _translateEndPoint = db.TranslateExitPoint_AU;
             }
             if (entity.HasDataBlob<OrderableDB>())

@@ -26,11 +26,11 @@ namespace Pulsar4X.ECSLib
         }
 
         [JsonProperty]
-        public Vector3 TranslateEntryPoint { get; internal set; }
-        public Vector3 TranslateEntryPoint_AU
+        public Vector3 TranslateEntryAbsolutePoint { get; internal set; }
+        public Vector3 TranslateEntryAbsolutePoint_AU
         {
-            get => Distance.MToAU(TranslateEntryPoint);
-            internal set => TranslateEntryPoint = Distance.AuToMt(value);
+            get => Distance.MToAU(TranslateEntryAbsolutePoint);
+            internal set => TranslateEntryAbsolutePoint = Distance.AuToMt(value);
         }
         [JsonProperty]
         public Vector3 TranslateExitPoint { get; internal set; }
@@ -92,7 +92,7 @@ namespace Pulsar4X.ECSLib
         {
             LastProcessDateTime = db.LastProcessDateTime;
             SavedNewtonionVector = db.SavedNewtonionVector;
-            TranslateEntryPoint = db.TranslateEntryPoint;
+            TranslateEntryAbsolutePoint = db.TranslateEntryAbsolutePoint;
             TranslateExitPoint = db.TranslateExitPoint;
             CurrentNonNewtonionVectorMS = db.CurrentNonNewtonionVectorMS;
             ExpendDeltaV = db.ExpendDeltaV;

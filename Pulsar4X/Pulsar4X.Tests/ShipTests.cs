@@ -102,7 +102,7 @@ namespace Pulsar4X.Tests
             var ralpos = posDB.RelativePosition_m;
             var targetPos = new Vector3(ralpos.X , ralpos.Y, ralpos.Z);
             targetPos.X += expectedSpeed2 * 60 * 60; //distance for an hours travel. 
-            TransitToOrbitCommand.CreateTransitCmd(
+            WarpMoveCommand.CreateCommand(
                 _game,
                 _faction,
                 _ship,

@@ -357,13 +357,13 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public static Vector3 GetOrbitalInsertionVector_AU(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
+        public static Vector3 GetOrbitalInsertionVector_m(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
         {
             if (UseRalitiveVelocity)
                 return departureVelocity;
             else
             {
-                var targetVelocity = AbsoluteOrbitalVector_AU(targetOrbit, arrivalDateTime);
+                var targetVelocity = AbsoluteOrbitalVector_m(targetOrbit, arrivalDateTime);
                 return departureVelocity - targetVelocity;
             }
         }
@@ -551,6 +551,20 @@ namespace Pulsar4X.ECSLib
             return null;
         }
 
+        /// <summary>
+        /// Calculates a cartisian position for an intercept for a ship and an target's orbit. 
+        /// </summary>
+        /// <returns>The intercept position and DateTime</returns>
+        /// <param name="mover">The entity that is trying to intercept a target.</param>
+        /// <param name="targetOrbit">Target orbit.</param>
+        /// <param name="atDateTime">Datetime of transit start</param>
+        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition_m(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
+        {
+            Vector3 moverPos = Entity.GetPosition_m(mover, atDateTime, false);
+            double spd_m = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
+            return OrbitMath.GetInterceptPosition_m(moverPos, spd_m, targetOrbit, atDateTime, offsetPosition);
+        }
+        
         private class OrbitProcessorException : Exception
         {
             public override string Message { get; }

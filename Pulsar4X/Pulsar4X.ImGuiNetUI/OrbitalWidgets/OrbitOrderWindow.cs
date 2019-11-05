@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
         double _departureAngle = double.NaN;
 
         double _insertionOrbitalSpeed = double.NaN;
-        ECSLib.Vector3 _insertionOrbitalVelocity = ECSLib.Vector3.NaN;
+        ECSLib.Vector3 _insertionOrbitalVelocity_m = ECSLib.Vector3.NaN;
         double _insertionAngle = double.NaN;
         //(Vector4, TimeSpan) _intercept;
 
@@ -63,7 +63,7 @@ namespace Pulsar4X.SDL2UI
         enum Events: byte { SelectedEntity, SelectedPosition, ClickedAction, AltClicked}
         Action[,] fsm;
 
-        private Vector3 _targetInsertionPoint_m;
+        private Vector3 _targetInsertionPoint_m { get; set; }
 
         private Vector3 _targetInsertionPoint_AU
         {
@@ -226,7 +226,7 @@ namespace Pulsar4X.SDL2UI
         void ActionCmd() 
         {
 
-            TransitToOrbitCommand.CreateTransitCmd(
+            WarpMoveCommand.CreateCommand(
                 _state.Game,
                 _state.Faction,
                 OrderingEntityState.Entity,
@@ -342,7 +342,7 @@ namespace Pulsar4X.SDL2UI
                                     //var velAU = OrbitProcessor.PreciseOrbitalVector(sgpCBAU, ralPosCBAU, smaCurrOrbtAU);
 
 
-                                    var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody, _targetInsertionPoint_AU, _insertionOrbitalVelocity, _departureDateTime);
+                                    var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody, _targetInsertionPoint_AU, _insertionOrbitalVelocity_m, _departureDateTime);
                                     _ke = ke;
 
                                     _orbitWidget.SetParametersFromKeplerElements(ke, _targetInsertionPoint_AU);
@@ -364,7 +364,7 @@ namespace Pulsar4X.SDL2UI
                                     {
                                         InsertionCalcs();
                                     }
-                                    var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody, _targetInsertionPoint_AU, _insertionOrbitalVelocity, _departureDateTime);
+                                    var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody, _targetInsertionPoint_AU, _insertionOrbitalVelocity_m, _departureDateTime);
                                     _ke = ke;
                                     _orbitWidget.SetParametersFromKeplerElements(ke, _targetInsertionPoint_AU);
                                     _apoapsisKm = Distance.AuToKm(ke.Apoapsis);
@@ -432,7 +432,7 @@ namespace Pulsar4X.SDL2UI
 
                         ImGui.Text("Insertion Vector: ");
                         ImGui.SameLine();
-                        ImGui.Text(_insertionOrbitalVelocity.ToString("g3"));
+                        ImGui.Text(_insertionOrbitalVelocity_m.ToString("g3"));
 
                         ImGui.Text("LoAN: ");
                         ImGui.SameLine();
@@ -502,7 +502,7 @@ namespace Pulsar4X.SDL2UI
         void InsertionCalcs()
         {
             OrbitDB targetOrbit = TargetEntity.Entity.GetDataBlob<OrbitDB>();
-            (Vector3 position, DateTime eti) targetIntercept = InterceptCalcs.GetInterceptPosition_m(OrderingEntityState.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
+            (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition_m(OrderingEntityState.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
 
             DateTime estArivalDateTime = targetIntercept.eti; //rough calc. 
 
@@ -511,12 +511,12 @@ namespace Pulsar4X.SDL2UI
             double y = norm.Y * _progradeDV;
             _deltaV_MS = new Vector3(x, y, 0);
 
-            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector_AU(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
-            _insertionOrbitalVelocity = insertionVector;
+            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector_m(_departureOrbitalVelocity, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
+            _insertionOrbitalVelocity_m = insertionVector;
 
-            _insertionOrbitalVelocity += Distance.MToAU( _deltaV_MS);
-            _insertionOrbitalSpeed = _insertionOrbitalVelocity.Length();
-            _insertionAngle = Math.Atan2(_insertionOrbitalVelocity.Y, _insertionOrbitalVelocity.X);
+            _insertionOrbitalVelocity_m +=  _deltaV_MS;
+            _insertionOrbitalSpeed = _insertionOrbitalVelocity_m.Length();
+            _insertionAngle = Math.Atan2(_insertionOrbitalVelocity_m.Y, _insertionOrbitalVelocity_m.X);
             _moveWidget.SetArivalProgradeAngle(_insertionAngle);
 
             /*

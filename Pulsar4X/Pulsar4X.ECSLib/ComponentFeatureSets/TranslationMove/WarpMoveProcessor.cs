@@ -183,10 +183,10 @@ namespace Pulsar4X.ECSLib
             var orbitalVector = OrbitProcessor.GetOrbitalVector_AU(targetOrbit, atDateTime);
             
             Vector3 parentOrbitalVector = new Vector3(orbitalVector.X, orbitalVector.Y, 0);
-            Vector3 insertionVector_AU = OrbitProcessor.GetOrbitalInsertionVector_AU(moveDB.SavedNewtonionVector_AU, targetOrbit, atDateTime);
-            insertionVector_AU += Distance.MToAU(moveDB.ExpendDeltaV); //TODO: only use it if we have it. 
+            Vector3 insertionVector_m= OrbitProcessor.GetOrbitalInsertionVector_m(moveDB.SavedNewtonionVector, targetOrbit, atDateTime);
+            insertionVector_m += moveDB.ExpendDeltaV; //TODO: only use it if we have it. 
             propulsionDB.RemainingDV_MS -= (float)(moveDB.ExpendDeltaV).Length();
-            OrbitDB newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector_AU, atDateTime);
+            OrbitDB newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
             
             entity.RemoveDataBlob<WarpMovingDB>();
             
@@ -198,13 +198,13 @@ namespace Pulsar4X.ECSLib
             {
                 //find who's SOI we are in, and create an orbit around that.
                 targetEntity = OrbitProcessor.FindSOIForPosition((StarSystem)entity.Manager, positionDB.AbsolutePosition_m);
-                newOrbit = OrbitDB.FromVector(targetEntity, entity, insertionVector_AU, atDateTime);
+                newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
                 entity.SetDataBlob(newOrbit);
                 
             }
             else //closest point inside soi, but furtherest point outside. make a newtonion trajectory. 
             {
-                var newtmove = new NewtonMoveDB(targetEntity, Distance.AuToMt( insertionVector_AU));
+                var newtmove = new NewtonMoveDB(targetEntity,  insertionVector_m);
                 entity.SetDataBlob(newtmove);
             }
             

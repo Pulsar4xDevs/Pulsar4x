@@ -188,7 +188,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="parent">Parent.</param>
         /// <param name="entity">Entity.</param>
         /// <param name="velocityAU">Velocity.</param>
-        public static OrbitDB FromVector(Entity parent, Entity entity, Vector3 velocityAU, DateTime atDateTime)
+        public static OrbitDB FromVelocity_AU(Entity parent, Entity entity, Vector3 velocityAU, DateTime atDateTime)
         {
             var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
             var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
@@ -238,6 +238,65 @@ namespace Pulsar4X.ECSLib
             return orbit;
         }
 
+        
+                /// <summary>
+        /// Creates on Orbit at current location from a given velocity
+        /// </summary>
+        /// <returns>The Orbit Does not attach the OrbitDB to the entity!</returns>
+        /// <param name="parent">Parent.</param>
+        /// <param name="entity">Entity.</param>
+        /// <param name="velocity_m">Velocity.</param>
+        public static OrbitDB FromVelocity_m(Entity parent, Entity entity, Vector3 velocity_m, DateTime atDateTime)
+        {
+            var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
+            var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+
+            //var epoch1 = parent.Manager.ManagerSubpulses.StarSysDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
+
+            //var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), atDateTime); //need to use the parent position at the epoch
+            var posdb = entity.GetDataBlob<PositionDB>();
+            posdb.SetParent(parent);
+            var ralitivePos = posdb.RelativePosition_m;//entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
+            if (ralitivePos.Length() > OrbitProcessor.GetSOI_m(parent))
+                throw new Exception("Entity not in target SOI");
+
+            //var sgp = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
+            var sgp_m = GMath.StandardGravitationalParameter(myMass + parentMass);
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, ralitivePos, velocity_m, atDateTime);
+
+            var epoch = atDateTime;// - TimeSpan.FromSeconds(ke.Epoch); //ke.Epoch is seconds from periapsis.   
+
+            OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
+                        Math.Abs(ke.SemiMajorAxis),
+                        ke.Eccentricity,
+                        Angle.ToDegrees(ke.Inclination),
+                        Angle.ToDegrees(ke.LoAN),
+                        Angle.ToDegrees(ke.AoP),
+                        Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
+                        epoch);
+
+            var pos = OrbitProcessor.GetPosition_AU(orbit, atDateTime);
+            var d = Distance.AuToKm(pos - ralitivePos).Length();
+            if (d > 1)
+            {
+                var e = new Event(atDateTime, "Positional difference of " + d + "Km when creating orbit from velocity");
+                e.Entity = entity;
+                e.SystemGuid = entity.Manager.ManagerGuid;
+                e.EventType = EventType.Opps;
+                //e.Faction =  entity.FactionOwner;
+                StaticRefLib.EventLog.AddEvent(e);
+
+                //other info:
+                var keta = Angle.ToDegrees( ke.TrueAnomalyAtEpoch);
+                var obta = Angle.ToDegrees( OrbitProcessor.GetTrueAnomaly(orbit, atDateTime));
+                var tadif = Angle.ToDegrees(Angle.DifferenceBetweenRadians(keta, obta));
+                var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDateTime);
+                var pos2 = OrbitProcessor.GetPosition_AU(orbit, ke.TrueAnomalyAtEpoch);
+                var d2 = Distance.AuToKm(pos1 - pos2).Length();
+            }
+            return orbit;
+        }
+        
         public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp, Vector3 position, Vector3 velocity, DateTime atDateTime)
         {
             if (position.Length() > OrbitProcessor.GetSOI_AU(parent))

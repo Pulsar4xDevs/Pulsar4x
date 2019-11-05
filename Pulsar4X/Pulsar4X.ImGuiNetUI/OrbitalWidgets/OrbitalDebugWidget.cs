@@ -138,14 +138,22 @@ namespace Pulsar4X.SDL2UI
             _bodyPosition = orbitIcon.BodyPositionDB;
 
             _orbitDB = entityState.Entity.GetDataBlob<OrbitDB>();
-            if (_orbitDB.Parent == null) //primary star
+            if (_orbitDB != null)
             {
-                _positionDB = orbitIcon.BodyPositionDB;
+                if (_orbitDB.Parent == null) //primary star
+                {
+                    _positionDB = orbitIcon.BodyPositionDB;
+                }
+                else
+                {
+                    _positionDB = _orbitDB.Parent.GetDataBlob<PositionDB>(); //orbit's position is parent's body position. 
+                }
             }
             else
             {
-                _positionDB = _orbitDB.Parent.GetDataBlob<PositionDB>(); //orbit's position is parent's body position. 
+                
             }
+            
 
 
 
