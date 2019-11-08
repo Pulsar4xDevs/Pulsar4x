@@ -513,11 +513,11 @@ namespace Pulsar4X.SDL2UI
             (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition_m(OrderingEntityState.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
 
             DateTime estArivalDateTime = targetIntercept.eti; //rough calc. 
+            
+            var rmtx = Matrix.NewRotateMatrix(_departureAngle);
+            PointD dv = rmtx.TransformD(_progradeDV, _radialDV);
 
-            var norm = Vector3.Normalise( _departureOrbitalVelocity_m);
-            double x = norm.X * _radialDV;
-            double y = norm.Y * _progradeDV;
-            _deltaV_MS = new Vector3(x, y, 0);
+            _deltaV_MS = new Vector3(dv.X, dv.Y, 0);
 
             Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector_m(_departureOrbitalVelocity_m, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
             _insertionOrbitalVelocity_m = insertionVector;
