@@ -60,7 +60,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.Text("y" + mouseWorldCoord.Y + " AU");
 
             ImGui.Text("Cursor View Coordinate from math:");
-            var mouseViewCoord = _state.Camera.ViewCoordinate(mouseWorldCoord);
+            var mouseViewCoord = _state.Camera.ViewCoordinate_AU(mouseWorldCoord);
             ImGui.Text("x" + mouseViewCoord.x);
             ImGui.SameLine();
             ImGui.Text("y" + mouseViewCoord.y);
@@ -279,7 +279,7 @@ namespace Pulsar4X.SDL2UI
             _bc.OnFrameUpdate(matrix, camera);
             UpdateElements();
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
 
             Matrix nonZoomMatrix = Matrix.NewMirrorMatrix(true, false);
 

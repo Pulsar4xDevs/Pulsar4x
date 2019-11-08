@@ -205,12 +205,64 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.Begin("debug", ref IsActive))
                 {
                     ImGui.Text(_state.PrimarySystemDateTime.ToString());
-                    ImGui.Text("Cursor World Coordinate:");
-                    var mouseWorldCoord = _state.Camera.MouseWorldCoordinate_m();
-                    ImGui.Text("x" + mouseWorldCoord.X + " m");
-                    ImGui.SameLine();
-                    ImGui.Text("y" + mouseWorldCoord.Y + " m");
 
+                    if (ImGui.CollapsingHeader("Camera Functions", ImGuiTreeNodeFlags.CollapsingHeader))
+                    {
+                        if (_state.Camera.IsPinnedToEntity)
+                        {
+                            var entyName = _systemState.EntityStatesWithNames[_state.Camera.PinnedEntityGuid].Name;
+                            ImGui.Text("Camera is pinned to:");
+                            ImGui.SameLine();
+                            ImGui.Text(entyName);
+                        }
+                        else
+                        {
+                            ImGui.Text("Camera is not pinned to an entity.");
+                        }
+                        
+                        ImGui.Text("Zoom: " + _state.Camera.ZoomLevel);
+
+                        ImGui.Text("Raw Cursor Coordinate");
+                        Vector2 mouseCoord = ImGui.GetMousePos();
+                        ImGui.Text("x: " + mouseCoord.X);
+                        ImGui.SameLine();
+                        ImGui.Text("y: " + mouseCoord.Y);
+                        
+                        ImGui.Text("Cursor World Coordinate:");
+                        var mouseWorldCoord = _state.Camera.MouseWorldCoordinate_m();
+                        ImGui.Text("x" + Misc.StringifyDistance(mouseWorldCoord.X));
+                        ImGui.SameLine();
+                        ImGui.Text("y" + Misc.StringifyDistance(mouseWorldCoord.Y));
+                        var mouseWorldCoord_AU = _state.Camera.MouseWorldCoordinate_AU();
+                        ImGui.Text("x" + mouseWorldCoord_AU.X + " AU");
+                        ImGui.SameLine();
+                        ImGui.Text("y" + mouseWorldCoord_AU.Y + " AU");
+
+                        ImGui.Text("Cursor View Coordinate:");
+                        var mouseViewCoord = _state.Camera.ViewCoordinate_m(mouseWorldCoord);
+                        ImGui.Text("x" + mouseViewCoord.x + " p");
+                        ImGui.SameLine();
+                        ImGui.Text("y" + mouseViewCoord.y + " p");
+                        var mouseviewCoord_AU = _state.Camera.ViewCoordinate_AU(mouseWorldCoord_AU);
+                        ImGui.Text("x" + mouseviewCoord_AU.x + " p");
+                        ImGui.SameLine();
+                        ImGui.Text("y" + mouseviewCoord_AU.y + " p");
+                    
+                        ImGui.Text("Camrera WorldPosition");
+                        var camWorldCoord_m = _state.Camera.CameraWorldPosition_m;
+                        ImGui.Text("x" + camWorldCoord_m.X + " m");
+                        ImGui.SameLine();
+                        ImGui.Text("y" + camWorldCoord_m.Y + " m");
+                        var camWorldCoord_AU = _state.Camera.CameraWorldPosition_AU;
+                        ImGui.Text("x" + camWorldCoord_AU.X + " AU");
+                        ImGui.SameLine();
+                        ImGui.Text("y" + camWorldCoord_AU.Y + " AU");
+                        
+                    }
+
+
+                    
+                    
                     ImGui.Text("Special Chars");
                     ImGui.Text("Proggy clean is crsp but these chars are blury, Ω, ω, ν");
                     //ImGui.Text("this text is fine, Ω, ω, ν "+"this text is not blury");
@@ -463,23 +515,26 @@ namespace Pulsar4X.SDL2UI
                                 }
 
                             }
-
+                            
                             if (_selectedEntityState.OrbitIcon != null)
                             {
 
                                 if (ImGui.CollapsingHeader("OrbitIcon: ###OrbitIconHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     OrbitDB orbitDB = SelectedEntity.GetDataBlob<OrbitDB>();
-
-                                    //string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
-                                    //string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
-                                    //ImGui.Text("StartAngleRadians: " + startRadian);
-                                    //ImGui.Text("StartAngleDegrees: " + startDegrees);
-                                    if (ImGui.CollapsingHeader("OrbitIconLines", ImGuiTreeNodeFlags.CollapsingHeader))
+                                    if (orbitDB != null)
                                     {
-                                        var window = OrbitalDebugWindow.GetWindow(_state.LastClickedEntity);
-                                        window.Display();
-                                        window.Enable(true, _state);
+                                        //string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
+                                        //string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
+                                        //ImGui.Text("StartAngleRadians: " + startRadian);
+
+                                        //ImGui.Text("StartAngleDegrees: " + startDegrees);
+                                        if (ImGui.CollapsingHeader("OrbitIconLines", ImGuiTreeNodeFlags.CollapsingHeader))
+                                        {
+                                            var window = OrbitalDebugWindow.GetWindow(_state.LastClickedEntity);
+                                            window.Display();
+                                            window.Enable(true, _state);
+                                        }
                                     }
                                 }
 

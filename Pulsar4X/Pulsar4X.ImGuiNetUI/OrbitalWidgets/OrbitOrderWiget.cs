@@ -39,22 +39,22 @@ namespace Pulsar4X.SDL2UI
 
         internal PointD Apoapsis;
         internal PointD Periapsis;
-        internal double OrbitEllipseSemiMaj;
-        internal double OrbitEllipseSemiMinor;
+        internal double OrbitEllipseSemiMaj_m;
+        internal double OrbitEllipseSemiMinor_m;
 
         internal double LonditudeOfPeriapsis; //the orbit is an ellipse which is rotated arround one of the focal points. this is eqal to the LoAN + AoP 
 
-        double _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
+        double _linearEccentricity_m; //distance from the center of the ellpse to one of the focal points. 
 
         PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         SDL.SDL_Point[] _drawPoints;
         //sphere of influance radius, if the entity is outside this, then this is affected by the parent (or other) gravitational body
-        double _soiWorldRadius; 
+        double _soiWorldRadius_AU; 
         float _soiViewRadius;
         //this is the size of the planet that we're trying to orbit, 
         //if the entity is inside this... currently nothing happens, 
         //but it shoudl be bad. we should not allow translations inside this radius, and warn if the orbit goes within this radius. 
-        double _targetWorldRadius;
+        double _targetWorldRadius_AU;
         float _targetViewRadius;
         #endregion
 
@@ -81,7 +81,7 @@ namespace Pulsar4X.SDL2UI
         float _alphaChangeAmount;
 
         double _eccentricity;
-        Vector3 _position;
+        Vector3 _position_m;
 
         #endregion
 
@@ -97,13 +97,13 @@ namespace Pulsar4X.SDL2UI
 
             _bodyPositionDB = targetEntity.GetDataBlob<PositionDB>();
 
-            OrbitEllipseSemiMaj = 20000;
-            OrbitEllipseSemiMinor = 20000;
+            OrbitEllipseSemiMaj_m = 20000;
+            OrbitEllipseSemiMinor_m = 20000;
 
-            _linearEccentricity = 0;
+            _linearEccentricity_m = 0;
 
-            _soiWorldRadius = OrbitProcessor.GetSOI_AU(targetEntity);
-            _targetWorldRadius = targetEntity.GetDataBlob<MassVolumeDB>().RadiusInAU;
+            _soiWorldRadius_AU = OrbitProcessor.GetSOI_AU(targetEntity);
+            _targetWorldRadius_AU = targetEntity.GetDataBlob<MassVolumeDB>().RadiusInAU;
             Setup();
 
         }
@@ -113,13 +113,13 @@ namespace Pulsar4X.SDL2UI
             var targetEntity = orbitDB.Parent;
             _bodyPositionDB = targetEntity.GetDataBlob<PositionDB>();
 
-            OrbitEllipseSemiMaj = (float)orbitDB.SemiMajorAxisAU;
+            OrbitEllipseSemiMaj_m = (float)orbitDB.SemiMajorAxis;
             _eccentricity = orbitDB.Eccentricity;
-            EllipseMath.SemiMinorAxis(OrbitEllipseSemiMaj, _eccentricity);
-            _linearEccentricity = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj);
+            EllipseMath.SemiMinorAxis(OrbitEllipseSemiMaj_m, _eccentricity);
+            _linearEccentricity_m = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj_m);
 
-            _soiWorldRadius = OrbitProcessor.GetSOI_AU(targetEntity);
-            _targetWorldRadius = targetEntity.GetDataBlob<MassVolumeDB>().RadiusInAU;
+            _soiWorldRadius_AU = OrbitProcessor.GetSOI_AU(targetEntity);
+            _targetWorldRadius_AU = targetEntity.GetDataBlob<MassVolumeDB>().RadiusInAU;
             Setup();
         }
 
@@ -143,15 +143,15 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        public void SetParametersFromKeplerElements(KeplerElements ke, Vector3 position)
+        public void SetParametersFromKeplerElements(KeplerElements ke_m, Vector3 position_m)
         {
 
-            _eccentricity = ke.Eccentricity;
-            _linearEccentricity = ke.LinierEccentricity;
+            _eccentricity = ke_m.Eccentricity;
+            _linearEccentricity_m = ke_m.LinierEccentricity;
+            _position_m = position_m;
 
-
-            OrbitEllipseSemiMaj = ke.SemiMajorAxis; 
-            OrbitEllipseSemiMinor = ke.SemiMinorAxis;
+            OrbitEllipseSemiMaj_m = ke_m.SemiMajorAxis; 
+            OrbitEllipseSemiMinor_m = ke_m.SemiMinorAxis;
 
             //TODO: Periapsis and Apoapsis calc doesn't look right to me... though it's not currently being used. 
             //this was probibly written when the orbit could only be created when the ship was at the pere or apo. 
@@ -167,7 +167,7 @@ namespace Pulsar4X.SDL2UI
                 X = Math.Cos(ke.TrueAnomaly) * ke.Apoapsis
             };
             */
-            if (ke.Inclination > Math.PI * 0.5 && ke.Inclination < Math.PI * 1.5) //ke inclination is in radians.
+            if (ke_m.Inclination > Math.PI * 0.5 && ke_m.Inclination < Math.PI * 1.5) //ke inclination is in radians.
             {
                 IsRetrogradeOrbit = true;
             }
@@ -176,12 +176,12 @@ namespace Pulsar4X.SDL2UI
                 IsRetrogradeOrbit = false;
             }
 
-            _position = position;
+            
 
-            LonditudeOfPeriapsis = ke.LoAN + ke.AoP;
-            _loAN = ke.LoAN;
-            _aoP = ke.AoP;
-            _trueAnomaly = ke.TrueAnomalyAtEpoch;
+            LonditudeOfPeriapsis = ke_m.LoAN + ke_m.AoP;
+            _loAN = ke_m.LoAN;
+            _aoP = ke_m.AoP;
+            _trueAnomaly = ke_m.TrueAnomalyAtEpoch;
             OnPhysicsUpdate();
         }
 
@@ -195,8 +195,8 @@ namespace Pulsar4X.SDL2UI
             double angle = 0;
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
-                double x1 = OrbitEllipseSemiMaj * Math.Sin(angle) - _linearEccentricity; //we add the focal distance so the focal point is "center"
-                double y1 = OrbitEllipseSemiMinor * Math.Cos(angle);
+                double x1 = OrbitEllipseSemiMaj_m * Math.Sin(angle) - _linearEccentricity_m; //we add the focal distance so the focal point is "center"
+                double y1 = OrbitEllipseSemiMinor_m * Math.Cos(angle);
 
                 //rotates the points to allow for the LongditudeOfPeriapsis. 
                 double x2 = (x1 * coslop) - (y1 * sinlop);
@@ -211,6 +211,7 @@ namespace Pulsar4X.SDL2UI
                 var mtxr1 = Matrix3d.IDRotateZ(-LonditudeOfPeriapsis);
                 var mtxri = Matrix3d.IDRotateX(Math.PI);
                 var mtxr2 = Matrix3d.IDRotateZ(LonditudeOfPeriapsis);
+
                 var mtxr = mtxr1 * mtxri * mtxr2;
                 for (int i = 0; i < _points.Length; i++)
                 {
@@ -226,7 +227,7 @@ namespace Pulsar4X.SDL2UI
 
 
             CreatePointArray();
-            PointD pointD = new PointD() { X = _position.X, Y = _position.Y };
+            PointD pointD = new PointD() { X = _position_m.X, Y = _position_m.Y };
 
             double minDist = CalcDistance(pointD, _points[_index]);
 
@@ -250,11 +251,11 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU); 
+            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU); 
 
 
-            _soiViewRadius = camera.ViewDistance(_soiWorldRadius);
-            _targetViewRadius = camera.ViewDistance(_targetWorldRadius);
+            _soiViewRadius = camera.ViewDistance(_soiWorldRadius_AU);
+            _targetViewRadius = camera.ViewDistance(_targetWorldRadius_AU);
             int index = _index;
 
 
@@ -269,32 +270,47 @@ namespace Pulsar4X.SDL2UI
                     index = 0; 
                 
                     
-                translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
+                translated = matrix.TransformD(Distance.MToAU( _points[index].X), Distance.MToAU(_points[index].Y)); //add zoom transformation. 
 
                 int x = (int)(ViewScreenPos.x + translated.X);
                 int y = (int)(ViewScreenPos.y + translated.Y);
 
                 _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
             }
+            
+            
+            
         }
 
 
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
+            
+            //Orbit line
             //now we draw a line between each of the points in the translatedPoints[] array.
             float alpha = MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
-                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
+                var au = 1;//GameConstants.Units.MetersPerAu;
+                int x1 = (int)(_drawPoints[i].x * au);
+                int y1 = (int)(_drawPoints[i].y * au);
+                int x2 = (int)(_drawPoints[i + 1].x * au);
+                int y2 = (int)(_drawPoints[i + 1].y * au);
+                
+                //SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
 
                 SDL.SDL_SetRenderDrawColor(rendererPtr, Red, Grn, Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up. 
-;
-                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
+                
+                SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
+                //SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i + 1].y);
                 alpha -= _alphaChangeAmount;
 
             }
 
+            
+            
+            //SOI filled circle area. 
             SDL.SDL_SetRenderDrawColor(rendererPtr, 0, 50, 100, 100);
             //DrawPrimitive.DrawFilledCircle(rendererPtr ,ViewScreenPos.x , ViewScreenPos.y, (int)_soiViewRadius);
             //DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _soiViewRadius, _soiViewRadius);
@@ -328,7 +344,7 @@ namespace Pulsar4X.SDL2UI
                 //var err2 = SDL.SDL_GetError();
             }
   */         
-            
+            //Planet Filled Circle
             SDL.SDL_SetRenderDrawColor(rendererPtr, 100, 0, 0, 255);
             DrawPrimitive.DrawEllipse(rendererPtr, ViewScreenPos.x, ViewScreenPos.y, _targetViewRadius, _targetViewRadius);
             var plntPts = CreatePrimitiveShapes.BresenhamCircle(ViewScreenPos.x, ViewScreenPos.y, (int)_targetViewRadius);

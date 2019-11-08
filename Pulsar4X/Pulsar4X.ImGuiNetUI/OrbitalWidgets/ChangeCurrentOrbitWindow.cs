@@ -24,20 +24,20 @@ namespace Pulsar4X.SDL2UI
         DateTime _actionDateTime;
 
         //double _origionalOrbitalSpeed = double.NaN;
-        ECSLib.Vector3 _orbitalVelocityAtChange = ECSLib.Vector3.NaN;
+        ECSLib.Vector3 _orbitalVelocityAtChange_m = ECSLib.Vector3.NaN;
         double _origionalAngle = double.NaN;
 
-        double _newOrbitalSpeed = double.NaN;
-        ECSLib.Vector3 _newOrbitalVelocity = ECSLib.Vector3.NaN;
+        double _newOrbitalSpeed_m = double.NaN;
+        ECSLib.Vector3 _newOrbitalVelocity_m = ECSLib.Vector3.NaN;
         double _newAngle = double.NaN;
 
         double _massOrderingEntity = double.NaN;
         double _massParentBody = double.NaN;
-        double _stdGravParam = double.NaN;
+        double _stdGravParam_m = double.NaN;
 
-        ECSLib.Vector3 _positonAtChange_AU;
+        ECSLib.Vector3 _positonAtChange_m;
 
-        KeplerElements _ke;
+        KeplerElements _ke_m;
         //double _apoapsisKm;
         //double _periapsisKM;
         //double _targetRadiusAU;
@@ -96,12 +96,12 @@ namespace Pulsar4X.SDL2UI
 
             _massParentBody = _orderEntityOrbit.Parent.GetDataBlob<MassVolumeDB>().Mass;
             _massOrderingEntity = OrderingEntity.Entity.GetDataBlob<MassVolumeDB>().Mass;
-            _stdGravParam = GameConstants.Science.GravitationalConstant * (_massParentBody + _massOrderingEntity) / 3.347928976e33;
+            _stdGravParam_m = OrbitMath.CalculateStandardGravityParameterInM3S2(_massOrderingEntity, _massParentBody);
 
-            _positonAtChange_AU = OrbitProcessor.GetPosition_AU(_orderEntityOrbit, _actionDateTime);
-            var velAtChange2d = OrbitProcessor.GetOrbitalVector_AU(_orderEntityOrbit, _actionDateTime);
-            _orbitalVelocityAtChange = new ECSLib.Vector3(velAtChange2d.X, velAtChange2d.Y, 0);
-            _origionalAngle = Math.Atan2(_orbitalVelocityAtChange.X, _orbitalVelocityAtChange.Y);
+            _positonAtChange_m = OrbitProcessor.GetPosition_m(_orderEntityOrbit, _actionDateTime);
+            var velAtChange2d = OrbitProcessor.GetOrbitalVector_m(_orderEntityOrbit, _actionDateTime);
+            _orbitalVelocityAtChange_m = new Vector3(velAtChange2d.X, velAtChange2d.Y, 0);
+            _origionalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
             IsActive = true;
         }
 
@@ -145,10 +145,10 @@ namespace Pulsar4X.SDL2UI
             if (_actionDateTime < newDate)
             { 
                 _actionDateTime = newDate;
-                _positonAtChange_AU = OrbitProcessor.GetPosition_AU(_orderEntityOrbit, _actionDateTime);
-                var vector2 = OrbitProcessor.GetOrbitalVector_AU(_orderEntityOrbit, _actionDateTime);
-                _orbitalVelocityAtChange = new ECSLib.Vector3(vector2.X, vector2.Y,0);
-                _origionalAngle = Math.Atan2(_orbitalVelocityAtChange.X, _orbitalVelocityAtChange.Y);
+                _positonAtChange_m = OrbitProcessor.GetPosition_m(_orderEntityOrbit, _actionDateTime);
+                var vector2 = OrbitProcessor.GetOrbitalVector_m(_orderEntityOrbit, _actionDateTime);
+                _orbitalVelocityAtChange_m = new Vector3(vector2.X, vector2.Y,0);
+                _origionalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
             }
         }
 
@@ -173,16 +173,16 @@ namespace Pulsar4X.SDL2UI
             _deltaV_MS = new ECSLib.Vector3(x, y, 0);
 
 
-            _newOrbitalVelocity = _orbitalVelocityAtChange + Distance.MToAU(_deltaV_MS);
-            _newOrbitalSpeed = _newOrbitalVelocity.Length();
-            var spdmps = Distance.AuToMt(_newOrbitalSpeed);
-            _newAngle = Math.Atan2(_newOrbitalVelocity.X, _newOrbitalVelocity.Y);
+            _newOrbitalVelocity_m = _orbitalVelocityAtChange_m + _deltaV_MS;
+            _newOrbitalSpeed_m = _newOrbitalVelocity_m.Length();
+            
+            _newAngle = Math.Atan2(_newOrbitalVelocity_m.X, _newOrbitalVelocity_m.Y);
 
 
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParam, _positonAtChange_AU, _newOrbitalVelocity, _actionDateTime);
-            _ke = ke;
+            _ke_m = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParam_m, _positonAtChange_m, _newOrbitalVelocity_m, _actionDateTime);
+             
 
-            _orbitWidget.SetParametersFromKeplerElements(ke, _positonAtChange_AU);
+            _orbitWidget.SetParametersFromKeplerElements(_ke_m, _positonAtChange_m);
 
             /*
             var sgpCBAU = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);

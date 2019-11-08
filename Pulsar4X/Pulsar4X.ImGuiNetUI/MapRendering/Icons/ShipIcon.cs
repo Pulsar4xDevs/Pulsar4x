@@ -246,7 +246,7 @@ namespace Pulsar4X.SDL2UI
 
             var shipMatrix = mirrorMatrix * scaleMatrix * rotateMatrix;
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
 
             DrawShapes = new Shape[this.Shapes.Count];
             for (int i = 0; i < Shapes.Count; i++)

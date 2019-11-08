@@ -54,7 +54,7 @@ namespace Pulsar4X.SDL2UI
             var tm = camera.GetPanMatrix();
             
             Matrix nonZoomMatrix = Matrix.NewMirrorMatrix(true, false);
-            var vsp = camera.ViewCoordinate(new Vector3(0,0,0));
+            var vsp = camera.ViewCoordinate_AU(new Vector3(0,0,0));
 
             _drawPoints = new PointD[_linePoints.Count];
 

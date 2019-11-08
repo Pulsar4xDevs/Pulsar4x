@@ -13,46 +13,53 @@ namespace Pulsar4X.ECSLib
             if (amountInKg > 100000000)
             {
                 amountInKg = amountInKg * 0.00000001;
-                stringWeight = amountInKg.ToString(format) + "MT";
+                stringWeight = amountInKg.ToString(format) + " MT";
             }
             else if (amountInKg > 100000)
             {
                 amountInKg = amountInKg * 0.00001;
-                stringWeight = amountInKg.ToString(format) + "KT";
+                stringWeight = amountInKg.ToString(format) + " KT";
             }
             else if (amountInKg > 1000)
             {
                 amountInKg = amountInKg * 0.001;
-                stringWeight = amountInKg.ToString(format) + "T";
+                stringWeight = amountInKg.ToString(format) + " T";
             }
 
-            else { stringWeight = amountInKg.ToString(format) + "Kg"; }
+            else { stringWeight = amountInKg.ToString(format) + " Kg"; }
 
             return stringWeight;
         }
 
         
-        public static string StringifyDistance(double lengthInKM,  string format = "0.###")
+        public static string StringifyDistance(double length_m,  string format = "0.###")
         {
 
-            string stringDistance = "0 Km";
-            if (lengthInKM > 100000000)
+            string stringDistance = "0 m";
+            double abslen = Math.Abs(length_m);
+            double len;
+            if (abslen > 1.0e12)
             {
-                lengthInKM = lengthInKM * 0.00000001;
-                stringDistance = lengthInKM.ToString(format) + "Gm";
+                len = length_m * 1.0e-12;
+                stringDistance = len.ToString(format) + " GKm";
             }
-            else if (lengthInKM > 100000)
+            else if (abslen > 1.0e9)
             {
-                lengthInKM = lengthInKM * 0.00001;
-                stringDistance = lengthInKM.ToString(format) + "Mm";
+                len = length_m * 1.0e-9;
+                stringDistance = len.ToString(format) + " MKm";
             }
-            else if (lengthInKM > 1000)
+            else if (abslen > 1.0e6)
             {
-                lengthInKM = lengthInKM * 0.001;
-                stringDistance = lengthInKM.ToString(format) + "KKm";
+                len = length_m * 1.0e-6;
+                stringDistance = len.ToString(format) + " KKm";
             }
-
-            else { stringDistance = lengthInKM.ToString(format) + "Km"; }
+            else if (abslen > 1.0e3)
+            {
+                len = length_m * 0.001;
+                stringDistance = len.ToString(format) + " Km";
+            }
+            
+            else { stringDistance = length_m.ToString(format) + " m"; }
 
             return stringDistance;
         }

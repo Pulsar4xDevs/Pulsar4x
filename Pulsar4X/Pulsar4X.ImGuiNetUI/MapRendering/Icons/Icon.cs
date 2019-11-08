@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
         protected ECSLib.Vector3 _worldPosition_m { get; set; }
         public ECSLib.Vector3 WorldPosition_AU
         {
-            get { if (positionByDB) return _positionDB.AbsolutePosition_AU + Distance.AuToMt(_worldPosition_m); else return Distance.AuToMt(_worldPosition_m); }
+            get { return Distance.MToAU(WorldPosition_m); }
         }
         public ECSLib.Vector3 WorldPosition_m
         {
@@ -41,15 +41,15 @@ namespace Pulsar4X.SDL2UI
         //public bool ShapesScaleWithZoom = false; //this possibly could change if you're zoomed in enough? normaly though, false for entity icons, true for orbit rings
         public float Scale = 1;
         public float Heading = 0;
-
+        public bool InMeters = false;
         public Icon(ECSLib.IPosition positionDB)
         {
             _positionDB = positionDB;
             positionByDB = true;
         }
-        public Icon(ECSLib.Vector3 positionM)
+        public Icon(Vector3 position_m)
         {
-            _worldPosition_m = positionM;
+            _worldPosition_m = position_m;
             positionByDB = false;
         }
 
@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU);
+                ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
 
             var mirrorMtx = Matrix.NewMirrorMatrix(true, false);
             var scaleMtx = Matrix.NewScaleMatrix(Scale, Scale);
@@ -98,7 +98,11 @@ namespace Pulsar4X.SDL2UI
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    SDL.SDL_RenderDrawLine(rendererPtr, Convert.ToInt32(shape.Points[i].X), Convert.ToInt32(shape.Points[i].Y), Convert.ToInt32(shape.Points[i + 1].X), Convert.ToInt32(shape.Points[i + 1].Y));
+                    var x1 = Convert.ToInt32(shape.Points[i].X);
+                    var y1 = Convert.ToInt32(shape.Points[i].Y);
+                    var x2 = Convert.ToInt32(shape.Points[i+1].X);
+                    var y2 = Convert.ToInt32(shape.Points[i+1].Y);
+                    SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
 
@@ -111,13 +115,13 @@ namespace Pulsar4X.SDL2UI
     {
         Shape _shape;
         Shape _drawShape;
-        protected ECSLib.IPosition _positionDB;
-        protected ECSLib.Vector3 _worldPosition;
+        protected IPosition _positionDB;
+        protected Vector3 _worldPosition;
         public SDL.SDL_Point ViewScreenPos;
 
         bool positionByDB;
 
-        public ECSLib.Vector3 WorldPosition
+        public Vector3 WorldPosition_AU
         {
             get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
@@ -152,7 +156,7 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
+            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
             var vsp = new PointD
             {
                 X = ViewScreenPos.x ,
@@ -221,7 +225,7 @@ namespace Pulsar4X.SDL2UI
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition);
+            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition);
             var vsp = new PointD
             {
                 X = ViewScreenPos.x,

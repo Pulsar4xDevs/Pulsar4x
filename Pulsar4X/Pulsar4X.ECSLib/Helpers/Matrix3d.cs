@@ -85,7 +85,29 @@ namespace Pulsar4X.ECSLib
                 W = new double[4] { 0,                0,                0,                1 }
             };
         }
+
+        public static Matrix3d IDScale(double x, double y, double z)
+        {
+            return new Matrix3d()
+            {
+                X = new double[4] {x, 0, 0, 0 },
+                Y = new double[4] {0, y, 0, 0 },
+                Z = new double[4] {0, 0, z, 0 }, 
+                W = new double[4] {0, 0, 0, 1 }
+            };
+        }
         
+        public static Matrix3d IDTranslate(double x, double y, double z)
+        {
+            return new Matrix3d()
+            {
+                X = new double[4] {0, 0, 0, 0 },
+                Y = new double[4] {0, 0, 0, 0 },
+                Z = new double[4] {0, 0, 0, 0 }, 
+                W = new double[4] {x, y, z, 1 }
+            };
+        }
+
         /// <summary>
         /// Dot product of left matrix dot right matrix
         /// </summary>

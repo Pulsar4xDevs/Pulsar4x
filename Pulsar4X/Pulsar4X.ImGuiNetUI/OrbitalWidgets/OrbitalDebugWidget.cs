@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using ImGuiNET;
+using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using SDL2;
 
@@ -213,8 +214,8 @@ namespace Pulsar4X.SDL2UI
             
             _bodyPosPnt = new PointD()
             {
-                X = (_bodyPosition.AbsolutePosition_AU + _worldPosition_m).X,
-                Y = (_bodyPosition.AbsolutePosition_AU + _worldPosition_m).Y
+                X = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).X,
+                Y = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).Y
             };
             CreateLines();
 
@@ -1100,8 +1101,8 @@ namespace Pulsar4X.SDL2UI
             
             _bodyPosPnt = new PointD() 
             { 
-                X = (_bodyPosition.AbsolutePosition_AU + _worldPosition_m).X, 
-                Y = (_bodyPosition.AbsolutePosition_AU + _worldPosition_m).Y 
+                X = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).X, 
+                Y = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).Y 
             };
             _bodyPosItem.Shape.StartPoint = _bodyPosPnt;
 
@@ -1146,7 +1147,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
             Matrix nonZoomMatrix = Matrix.NewMirrorMatrix(true, false);
  
             _drawComplexShapes = new List<ComplexShape>() {};

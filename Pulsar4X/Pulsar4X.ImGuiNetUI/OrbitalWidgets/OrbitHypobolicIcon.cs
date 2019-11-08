@@ -153,7 +153,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            ViewScreenPos = camera.ViewCoordinate(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
 
             _drawPoints = new SDL.SDL_Point[_numberOfPoints];
 

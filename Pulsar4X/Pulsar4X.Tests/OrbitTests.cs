@@ -34,11 +34,12 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestPreciseOrbitalSpeed()
         {
-            double parentMass = 5.97237e24;
-            double objMass = 7.342e22;
-            double sgpm = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
-            var speedm = OrbitMath.InstantaneousOrbitalSpeed(sgpm, 405.400, 384.399);
-            Assert.AreEqual(9700, speedm, 0.01);
+            
+            var parentMass = 5.97237e24;
+            var objMass = 7.342e22;
+            var sgpm = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
+            var speedm = OrbitMath.InstantaneousOrbitalSpeed(sgpm, 405400000, 384399000);
+            Assert.AreEqual(970, speedm, 0.025);
         }
 
 

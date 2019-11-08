@@ -28,8 +28,9 @@ namespace Pulsar4X.SDL2UI
 
         PositionDB _targetPositionDB;
 
-        Vector3 _transitLeavePositionRalitive; //ralitive to the parentBody
-        private Vector3 _transitArrivePosition_m { get; set; }
+        Vector3 _transitLeavePositionRalitive_m; //ralitive to the parentBody
+        private Vector3 _transitArriveRalitivePos_m { get; set; }
+        private Vector3 _transitArriveAbsolutePos_m { get; set; }
 
         SDL_Point[] _linePoints;
 
@@ -79,8 +80,9 @@ namespace Pulsar4X.SDL2UI
 
         public void SetArrivalPosition(Vector3 ralitiveWorldPosition_m)
         {
-            _transitArrivePosition_m = ralitiveWorldPosition_m;
-            _arriveIcon.SetTransitPostion(_transitArrivePosition_m);
+            _transitArriveRalitivePos_m = ralitiveWorldPosition_m;
+            _transitArriveAbsolutePos_m = _targetPositionDB.AbsolutePosition_m + _transitArriveRalitivePos_m;
+            _arriveIcon.SetTransitPositon(_transitArriveRalitivePos_m);
         }
 
 
@@ -88,7 +90,7 @@ namespace Pulsar4X.SDL2UI
         public void SetDepartureProgradeAngle(double angle)
         {
             _departIcon.ProgradeAngle = angle;
-            _departIcon.SetTransitPostion(_transitLeavePositionRalitive);
+            _departIcon.SetTransitPositon(_transitLeavePositionRalitive_m);
 
         }
         public void SetArivalProgradeAngle(double angle)
@@ -96,7 +98,7 @@ namespace Pulsar4X.SDL2UI
             if (_arriveIcon != null)
             {
                 _arriveIcon.ProgradeAngle = angle;
-                _arriveIcon.SetTransitPostion(_transitArrivePosition_m);
+                _arriveIcon.SetTransitPositon(_transitArriveRalitivePos_m);
             }
         }
 
@@ -106,7 +108,7 @@ namespace Pulsar4X.SDL2UI
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 
-            _transitLeavePositionRalitive = Entity.GetPosition_m(_movingEntity, _transitLeaveDateTime);
+            _transitLeavePositionRalitive_m = Entity.GetPosition_m(_movingEntity, _transitLeaveDateTime);
 
         }
 
@@ -118,11 +120,11 @@ namespace Pulsar4X.SDL2UI
                 _arriveIcon.OnFrameUpdate(matrix, camera);
                 _linePoints = new SDL_Point[2];
 
-                var dvsp = camera.ViewCoordinate(_departIcon.WorldPosition_AU);
-                var avsp = camera.ViewCoordinate(_arriveIcon.WorldPosition_AU);
+                var dvsp = camera.ViewCoordinate_AU(_departIcon.WorldPosition_AU);
+                var avsp = camera.ViewCoordinate_AU(_arriveIcon.WorldPosition_AU);
                 _linePoints[0] = dvsp;
 
-                var arrive = matrix.Transform(_arriveIcon.WorldPosition_AU.X, _arriveIcon.WorldPosition_AU.Y);
+                //SDL_Point arrive = matrix.Transform(_arriveIcon.WorldPosition_m.X, _arriveIcon.WorldPosition_m.Y);
                 _linePoints[1] = avsp;
             }
 
@@ -135,8 +137,14 @@ namespace Pulsar4X.SDL2UI
             {
                 _arriveIcon.Draw(rendererPtr, camera);
                 //draw the transitLine
+
+                var x1 = _linePoints[0].x;
+                var y1 = _linePoints[0].y;
+                var x2 = _linePoints[1].x;
+                var y2 = _linePoints[1].y;
+                
                 SDL_SetRenderDrawColor(rendererPtr, TransitLineColor.r, TransitLineColor.g, TransitLineColor.b, TransitLineColor.a);
-                SDL.SDL_RenderDrawLine(rendererPtr, _linePoints[0].x, _linePoints[0].y, _linePoints[1].x, _linePoints[1].y);
+                SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
 
             }
         }
@@ -152,7 +160,7 @@ namespace Pulsar4X.SDL2UI
         public double ProgradeAngle = 0;
         double _arrivePntRadius;
         PositionDB _parentPosition;
-        //PositionDB _myPosition;
+        //PositionDB /;
 
         //DateTime TransitDateTime;
         //Vector4 _transitPosition;
@@ -163,6 +171,7 @@ namespace Pulsar4X.SDL2UI
         {
             _parentPosition = parentPos;
             positionByDB = true;
+            //InMeters = true;
             Setup();
         }
 
@@ -269,10 +278,11 @@ namespace Pulsar4X.SDL2UI
         /// <summary>
         /// Sets the transit postion.
         /// </summary>
-        /// <param name="transitPositionOffset_m">Transit position offset, this is the world position ralitive to the parent body</param>
-        public void SetTransitPostion(Vector3 transitPositionOffset_m)
+        /// <param name="transitPositionRalitive_m">Transit position offset, this is the world position ralitive to the parent body</param>
+        public void SetTransitPositon(Vector3 transitPositionRalitive_m)
         {
-            _worldPosition_m = transitPositionOffset_m;
+            _worldPosition_m = transitPositionRalitive_m;
+            
             OnPhysicsUpdate();
         }
 
@@ -302,7 +312,54 @@ namespace Pulsar4X.SDL2UI
                 _progradeArrow.Points[i] = rotate.TransformD(_arrow[i]);
             }
             Shapes[0] = _progradeArrow;
-            base.OnFrameUpdate(matrix, camera);
+            
+            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
+            
+            var vcm = camera.ViewCoordinate_m(WorldPosition_m);
+            var vcau = camera.ViewCoordinate_AU(WorldPosition_AU);
+            
+            var mirrorMtx = Matrix.NewMirrorMatrix(true, false);
+            var scaleMtx = Matrix.NewScaleMatrix(Scale, Scale);
+            Matrix nonZoomMatrix = mirrorMtx * scaleMtx;
+
+            DrawShapes = new Shape[this.Shapes.Count];
+            for (int i = 0; i < Shapes.Count; i++)
+            {
+                var shape = Shapes[i];
+                PointD[] drawPoints = new PointD[shape.Points.Length];
+                
+                for (int i2 = 0; i2 < shape.Points.Length; i2++)
+                {
+                    int x;
+                    int y;
+
+                    var tranlsatedPoint = nonZoomMatrix.TransformD( shape.Points[i2].X,  shape.Points[i2].Y);
+                    x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
+                    y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
+                    drawPoints[i2] = new PointD() { X = x, Y = y };
+                }
+                DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
+            }
+        }
+        
+        public override void Draw(IntPtr rendererPtr, Camera camera)
+        {
+            if (DrawShapes == null)
+                return;
+            foreach (var shape in DrawShapes)
+            {
+                SDL.SDL_SetRenderDrawColor(rendererPtr, shape.Color.r, shape.Color.g, shape.Color.b, shape.Color.a);
+
+                for (int i = 0; i < shape.Points.Length - 1; i++)
+                {
+                    var x1 = Convert.ToInt32(shape.Points[i].X);
+                    var y1 = Convert.ToInt32(shape.Points[i].Y);
+                    var x2 = Convert.ToInt32(shape.Points[i+1].X);
+                    var y2 = Convert.ToInt32(shape.Points[i+1].Y);
+                    SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
+                }
+            }
+
         }
     }
 }
