@@ -84,7 +84,12 @@ namespace Pulsar4X.ECSLib
             {
                 EntityManipulation.AddComponentToEntity(ship, item.design, item.count);
             }
-            
+
+            if (ship.HasDataBlob<NewtonThrustAbilityDB>() && ship.HasDataBlob<CargoStorageDB>())
+            {
+                NewtonionMovementProcessor.CalcDeltaV(ship);
+            }
+
             return ship;
         }
 

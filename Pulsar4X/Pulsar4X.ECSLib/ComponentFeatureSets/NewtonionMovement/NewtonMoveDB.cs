@@ -18,14 +18,14 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// in kg/s (mass)
         /// </summary>
-        public double FuelUsage;
+        public double FuelBurnRate;
 
-        public NewtonionThrustAtb(double exhaustVelocity, Guid fuelType, double fuelUsage)
+        public NewtonionThrustAtb(double exhaustVelocity, Guid fuelType, double fuelBurnRate)
         {
             //ThrustInNewtons = thrust;
             ExhaustVelocity = exhaustVelocity;
             FuelType = fuelType;
-            FuelUsage = fuelUsage;
+            FuelBurnRate = fuelBurnRate;
         }
         
 
@@ -47,8 +47,17 @@ namespace Pulsar4X.ECSLib
 
             //db.ThrustInNewtons += ThrustInNewtons;
             db.ExhaustVelocity = ExhaustVelocity;
-            db.FuelUsage += FuelUsage;
-            db.ThrustInNewtons += ExhaustVelocity * FuelUsage;
+            db.FuelBurnRate += FuelBurnRate;
+            db.ThrustInNewtons += ExhaustVelocity * FuelBurnRate;
+            
+            /*
+            var wetmass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
+            ProcessedMaterialSD foo = StaticRefLib.StaticData.CargoGoods.GetMaterials()[FuelType];
+            var cargo = parentEntity.GetDataBlob<CargoStorageDB>();
+            var fuelAmount = StorageSpaceProcessor.GetAmount(cargo, foo);
+            var dryMass = wetmass - fuelAmount;
+            db.DeltaV = OrbitMath.TsiolkovskyRocketEquation(wetmass, dryMass, ExhaustVelocity);
+            */
         }
     }
 
@@ -59,8 +68,14 @@ namespace Pulsar4X.ECSLib
         //public double SpecificImpulseASL = 0;
         public double ExhaustVelocity = 0;
         public Guid FuelType; //todo: change this to a list and enable multple fuel types. 
-        public double FuelUsage = 0;
+        
+        /// <summary>
+        /// in Kg/s
+        /// </summary>
+        public double FuelBurnRate = 0;
 
+        public double DeltaV = 0;
+        
         [JsonConstructor]
         private NewtonThrustAbilityDB()
         {

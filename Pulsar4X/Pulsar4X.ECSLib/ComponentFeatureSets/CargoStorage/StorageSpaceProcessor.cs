@@ -43,12 +43,18 @@ namespace Pulsar4X.ECSLib
 
         public static long GetAmount(CargoStorageDB storeDB, Guid storeTypeGuid, Guid itemGuid)
         {
-            return storeDB.StoredCargoTypes[storeTypeGuid].ItemsAndAmounts[itemGuid];
+            if(storeDB.StoredCargoTypes.ContainsKey(storeTypeGuid))
+                if(storeDB.StoredCargoTypes[storeTypeGuid].ItemsAndAmounts.ContainsKey(itemGuid))
+                    return storeDB.StoredCargoTypes[storeTypeGuid].ItemsAndAmounts[itemGuid];
+            return 0;
         }
 
         public static long GetAmount(CargoStorageDB storeDB, ICargoable item)
         {
-            return storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID];
+            if(storeDB.StoredCargoTypes.ContainsKey(item.CargoTypeID))
+                if(storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts.ContainsKey(item.ID))
+                    return storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID];
+            return 0;
         }
         
         /// <summary>

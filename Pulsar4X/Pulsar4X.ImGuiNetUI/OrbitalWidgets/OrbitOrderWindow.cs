@@ -52,6 +52,10 @@ namespace Pulsar4X.SDL2UI
         double _stdGravParamCurrentBody = double.NaN;
         double _stdGravParamTargetBody_m = double.NaN;
 
+        private double _exhastVelocity = double.NaN;
+        private double _fuelRate = double.NaN;
+        private double _fuelToBurn = 0;
+
         string _displayText;
         string _tooltipText = "";
         OrbitOrderWiget _orbitWidget;
@@ -93,10 +97,12 @@ namespace Pulsar4X.SDL2UI
 
                 }
             }
-            if(OrderingEntityState.Entity.HasDataBlob<PropulsionAbilityDB>())
+            if(OrderingEntityState.Entity.HasDataBlob<NewtonThrustAbilityDB>())
             {
-                var propDB = OrderingEntityState.Entity.GetDataBlob<PropulsionAbilityDB>();
-                _maxDV = propDB.RemainingDV_MS;
+                var newtDB = OrderingEntityState.Entity.GetDataBlob<NewtonThrustAbilityDB>();
+                _exhastVelocity = newtDB.ExhaustVelocity;
+                _maxDV = (float)newtDB.DeltaV;
+                _fuelRate = newtDB.FuelBurnRate;
             }
 
             fsm = new Action[4, 4]
@@ -297,8 +303,8 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive)
             {
-                var size = new System.Numerics.Vector2(200, 100);
-                var pos = new System.Numerics.Vector2(_state.MainWinSize.X / 2 - size.X / 2, _state.MainWinSize.Y / 2 - size.Y / 2);
+                var size = new Vector2(200, 100);
+                var pos = new Vector2(_state.MainWinSize.X / 2 - size.X / 2, _state.MainWinSize.Y / 2 - size.Y / 2);
 
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);
@@ -386,6 +392,11 @@ namespace Pulsar4X.SDL2UI
                         ImGui.SameLine();
                         ImGui.Text(TargetEntity.Name);
                     }
+
+                    
+                    ImGui.Text("Fuel to burn:" + Misc.StringifyWeight(_fuelToBurn));
+                    ImGui.Text("Burn Time" + (int)(_fuelToBurn / _fuelRate) +" s");
+                    ImGui.Text("DeltaV: " + Misc.StringifyDistance(_deltaV_MS.Length())+ "/s");
                     
                     ImGui.Text("Eccentricity: ");
                     ImGui.Text(_eccentricity.ToString("g3"));
@@ -518,6 +529,7 @@ namespace Pulsar4X.SDL2UI
             PointD dv = rmtx.TransformD(_progradeDV, _radialDV);
 
             _deltaV_MS = new Vector3(dv.X, dv.Y, 0);
+            _fuelToBurn = OrbitMath.TsiolkovskyFuelUse(_massOrderingEntity, _exhastVelocity, _deltaV_MS.Length());
 
             Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector_m(_departureOrbitalVelocity_m, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
             _insertionOrbitalVelocity_m = insertionVector;

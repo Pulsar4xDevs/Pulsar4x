@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
 
                 Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
                 
-                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelUsage));//per second
+                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
                 double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
                 Vector3 accelerationFromThrust = newtonMoveDB.DeltaVToExpend_AU / maxAccelFromThrust; //per second
 
@@ -173,7 +173,7 @@ namespace Pulsar4X.ECSLib
 
                 Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
                 
-                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelUsage));//per second
+                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
                 double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
                 Vector3 accelerationFromThrust = newtonMoveDB.DeltaVToExpend_AU / maxAccelFromThrust; //per second
 
@@ -220,7 +220,7 @@ namespace Pulsar4X.ECSLib
 
                 Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
                 
-                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelUsage));//per second
+                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
                 double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
                 Vector3 accelerationFromThrust = newtonMoveDB.DeltaVToExpend_AU / maxAccelFromThrust; //per second
 
@@ -238,6 +238,25 @@ namespace Pulsar4X.ECSLib
             }
 
             return (newAbsolute, velocity);
+        }
+
+        /// <summary>
+        /// calculates, sets and returns DV. 
+        /// </summary>
+        /// <param name="parentEntity"></param>
+        /// <returns></returns>
+        public static double CalcDeltaV(Entity parentEntity)
+        {
+            var db = parentEntity.GetDataBlob<NewtonThrustAbilityDB>();
+            var ft = db.FuelType;
+            var ev = db.ExhaustVelocity;
+            
+            var wetmass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
+            ProcessedMaterialSD fuel = StaticRefLib.StaticData.CargoGoods.GetMaterials()[ft];
+            var cargo = parentEntity.GetDataBlob<CargoStorageDB>();
+            var fuelAmount = StorageSpaceProcessor.GetAmount(cargo, fuel);
+            var dryMass = wetmass - fuelAmount;
+            return db.DeltaV = OrbitMath.TsiolkovskyRocketEquation(wetmass, dryMass, ev);
         }
 
 

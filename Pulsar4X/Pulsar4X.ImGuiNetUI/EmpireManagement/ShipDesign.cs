@@ -381,8 +381,8 @@ namespace Pulsar4X.SDL2UI
                         {
                             var atb = component.design.GetAttribute<NewtonionThrustAtb>();
                             ev = atb.ExhaustVelocity;
-                            fu += atb.FuelUsage * component.count;
-                            tn += ev * atb.FuelUsage * component.count;
+                            fu += atb.FuelBurnRate * component.count;
+                            tn += ev * atb.FuelBurnRate * component.count;
                             thrusterFuel = atb.FuelType;
                         }
 

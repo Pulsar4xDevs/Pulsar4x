@@ -927,14 +927,35 @@ namespace Pulsar4X.ECSLib
         /// <returns>deltaV</returns>
         /// <param name="wetMass">Wet mass.</param>
         /// <param name="dryMass">Dry mass.</param>
-        /// <param name="specificImpulse">Specific impulse.</param>
-        public static double TsiolkovskyRocketEquation(double wetMass, double dryMass, double specificImpulse)
+        /// <param name="ve">ExhaustVelocity, not isp</param>
+        public static double TsiolkovskyRocketEquation(double wetMass, double dryMass, double ve)
         {
-            double ve = specificImpulse * 9.80665; //unsure if this is correct, do we multiply by this if we're mesuring mass not weight?
+            
             double deltaV = ve * Math.Log(wetMass / dryMass);
             return deltaV;
         }
-        
+
+
+        public static double TsiolkovskyFuelUse(double wetMass, double ve, double deltaV)
+        {
+            
+            //dv = ve * log(wet/dry)
+            //dv / ve = log(wet/dry)
+            //dv / log(wet/dry) = ve
+            //
+            
+            //double b = deltaV / ve;
+            //double a = Math.Exp(b);
+            //double dryMass = wetMass / a;
+            //double fuelUse = wetMass - dryMass;
+
+            double dryMass = wetMass / Math.Exp(deltaV / ve);
+            
+            double fuelUse = wetMass - dryMass;
+            
+            return fuelUse;
+        }
+
         struct obit
         {
             public Vector3 position;

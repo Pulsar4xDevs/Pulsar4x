@@ -118,11 +118,23 @@ namespace Pulsar4X.ECSLib
             Entity ship1 = ShipFactory.CreateShip(shipClass, factionEntity, earth, solSys, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipClass, factionEntity, earth, solSys, "Ensuing Calm");
             Entity ship3 = ShipFactory.CreateShip(shipClass, factionEntity, earth, solSys, "Touch-and-Go");
+            Entity gunShip = ShipFactory.CreateShip(gunShipClass, factionEntity, earth, solSys, "Prevailing Stillness");
+            Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), factionEntity, earth, solSys, "Planet Express Ship");
             var fuel = NameLookup.GetMaterialSD(game, "Sorium Fuel");
-            StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
-            StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
-            StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
-
+            var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
+            StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            NewtonionMovementProcessor.CalcDeltaV(ship1);
+            NewtonionMovementProcessor.CalcDeltaV(ship2);
+            NewtonionMovementProcessor.CalcDeltaV(ship3);
+            NewtonionMovementProcessor.CalcDeltaV(gunShip);
+            NewtonionMovementProcessor.CalcDeltaV(courier);
+            //StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
+            //StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
+            //StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
 
 
             double test_a = 0.5; //AU
@@ -147,21 +159,15 @@ namespace Pulsar4X.ECSLib
             ship3.GetDataBlob<PositionDB>().SetParent(solStar);
             StaticRefLib.ProcessorManager.RunProcessOnEntity<OrbitDB>(ship3, 0);
 
-
-            Entity gunShip = ShipFactory.CreateShip(gunShipClass, factionEntity, earth, solSys, "Prevailing Stillness");
+            
             gunShip.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector3(8.52699302490434E-05, 0, 0);
-            StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //give the gunship a hypobolic orbit to test:
-
             //var orbit = OrbitDB.FromVector(earth, gunShip, new Vector4(0, velInAU, 0, 0), game.CurrentDateTime);
             gunShip.RemoveDataBlob<OrbitDB>();
             var nmdb = new NewtonMoveDB(earth, new Vector3(0, -10000.0, 0));
-  
             gunShip.SetDataBlob<NewtonMoveDB>(nmdb);
 
-            //Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), factionEntity, earth, solSys, "Planet Express Ship");
-            Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), factionEntity, earth, solSys, "Planet Express Ship");
-            StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
+
 
             solSys.SetDataBlob(ship1.ID, new TransitableDB());
             solSys.SetDataBlob(ship2.ID, new TransitableDB());
