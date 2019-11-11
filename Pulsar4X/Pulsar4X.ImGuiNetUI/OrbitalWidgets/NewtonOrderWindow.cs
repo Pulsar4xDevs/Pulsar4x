@@ -53,7 +53,20 @@ namespace Pulsar4X.SDL2UI
         string _displayText;
         string _tooltipText = "";
         OrbitOrderWiget _orbitWidget;
-
+        
+        private NewtonionOrderUI _newtonUI;
+        
+        private double _eccentricity;
+        private double Eccentricity
+        {
+            get { return _eccentricity; } 
+            set
+            {
+                if (_newtonUI != null)
+                    _newtonUI.Eccentricity = value;
+                _eccentricity = value;
+            } 
+        }
 
         private ChangeCurrentOrbitWindow(EntityState entity)
         {
@@ -102,6 +115,13 @@ namespace Pulsar4X.SDL2UI
             var velAtChange2d = OrbitProcessor.GetOrbitalVector_m(_orderEntityOrbit, _actionDateTime);
             _orbitalVelocityAtChange_m = new Vector3(velAtChange2d.X, velAtChange2d.Y, 0);
             _origionalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
+
+            
+            var newtondb = entity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
+            _newtonUI = new NewtonionOrderUI(newtondb, _massOrderingEntity);
+            
+            
+            
             IsActive = true;
         }
 
@@ -118,16 +138,11 @@ namespace Pulsar4X.SDL2UI
                         _state.SelectedSysMapRender.UIWidgets.Add(nameof(OrbitOrderWiget), _orbitWidget);
                     }
 
-                    var maxprogradeDV = _maxDV - Math.Abs(_radialDV);
-                    var maxradialDV = _maxDV - Math.Abs(_progradeDV);
-                    if (ImGui.SliderFloat("Prograde DV", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
-                    {
+
+                    if(_newtonUI.Display())
                         Calcs();
-                    }
-                    if (ImGui.SliderFloat("Radial DV", ref _radialDV, -maxradialDV, maxradialDV))
-                    {
-                        Calcs();
-                    }
+                    
+                    
 
                     if (ImGui.Button("Action Command"))
                         ActionCmd();
@@ -168,9 +183,9 @@ namespace Pulsar4X.SDL2UI
         void Calcs()
         {
        
-            double x = (_radialDV * Math.Cos(_origionalAngle)) - (_progradeDV * Math.Sin(_origionalAngle));
-            double y = (_radialDV * Math.Sin(_origionalAngle)) + (_progradeDV * Math.Cos(_origionalAngle));
-            _deltaV_MS = new ECSLib.Vector3(x, y, 0);
+            //double x = (_radialDV * Math.Cos(_origionalAngle)) - (_progradeDV * Math.Sin(_origionalAngle));
+            //double y = (_radialDV * Math.Sin(_origionalAngle)) + (_progradeDV * Math.Cos(_origionalAngle));
+            _deltaV_MS = _newtonUI.DeltaV; //new ECSLib.Vector3(x, y, 0);
 
 
             _newOrbitalVelocity_m = _orbitalVelocityAtChange_m + _deltaV_MS;
@@ -204,5 +219,67 @@ namespace Pulsar4X.SDL2UI
             }
 
         }
+    }
+    
+    
+        public class NewtonionOrderUI
+    {
+
+        double _fuelToBurn = double.NaN;
+        public Vector3 DeltaV { get; set; } = Vector3.Zero;
+        
+        float _progradeDV;
+        float _radialDV;
+        
+        double _maxDV;
+        private double _exhastVelocity = double.NaN;
+        private double _fuelRate = double.NaN;
+        private double _wetMass;
+        private double _dryMass;
+        private double _curmass;
+        
+        public double DepartureAngle { get; set; }
+        public double Eccentricity { get; set; }
+
+        public NewtonionOrderUI(NewtonThrustAbilityDB newtonAbility, double currentMass)
+        {
+            _exhastVelocity = newtonAbility.ExhaustVelocity;
+            _fuelRate = newtonAbility.FuelBurnRate;
+            _maxDV = newtonAbility.DeltaV;
+            _curmass = currentMass;
+        }
+
+        public bool Display()
+        {
+            bool changes = false;
+            float maxprogradeDV = (float)(_maxDV - Math.Abs(_radialDV));
+            float maxradialDV = (float)(_maxDV - Math.Abs(_progradeDV));
+                        
+            if (ImGui.SliderFloat("Prograde DV", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
+            {
+                Calcs();
+                changes = true;
+            }
+            if (ImGui.SliderFloat("Radial DV", ref _radialDV, -maxradialDV, maxradialDV))
+            {
+                Calcs();
+                changes = true;
+            }
+            
+            ImGui.Text("Fuel to burn:" + Misc.StringifyWeight(_fuelToBurn));
+            ImGui.Text("Burn time: " + (int)(_fuelToBurn / _fuelRate) +" s");
+            ImGui.Text("DeltaV: " + Misc.StringifyDistance(DeltaV.Length())+ "/s of " + Misc.StringifyDistance(_maxDV) + "/s");
+            ImGui.Text("Eccentricity: " + Eccentricity.ToString("g3"));
+            return changes;
+        }
+
+        private void Calcs()
+        {
+            var rmtx = Matrix.NewRotateMatrix(DepartureAngle);
+            PointD dv = rmtx.TransformD(_radialDV, _progradeDV);
+            DeltaV = new Vector3(dv.X, dv.Y, 0);
+            _fuelToBurn = OrbitMath.TsiolkovskyFuelUse(_curmass, _exhastVelocity, DeltaV.Length());
+        }
+
     }
 }
