@@ -395,22 +395,22 @@ namespace Pulsar4X.SDL2UI
 
                     
                     ImGui.Text("Fuel to burn:" + Misc.StringifyWeight(_fuelToBurn));
-                    ImGui.Text("Burn Time" + (int)(_fuelToBurn / _fuelRate) +" s");
-                    ImGui.Text("DeltaV: " + Misc.StringifyDistance(_deltaV_MS.Length())+ "/s");
+                    ImGui.Text("Burn time: " + (int)(_fuelToBurn / _fuelRate) +" s");
+                    ImGui.Text("DeltaV: " + Misc.StringifyDistance(_deltaV_MS.Length())+ "/s of " + Misc.StringifyDistance(_maxDV) + "/s");
                     
-                    ImGui.Text("Eccentricity: ");
-                    ImGui.Text(_eccentricity.ToString("g3"));
+                    ImGui.Text("Eccentricity: " + _eccentricity.ToString("g3"));
+                    
 
                     if (ImGui.CollapsingHeader("Orbit Data"))
                     {
 
                         ImGui.Text("Apoapsis: ");
                         ImGui.SameLine();
-                        ImGui.Text(_apoapsis_m.ToString("g3") + " (Alt: " + _apAlt.ToString("g3") + ")");
+                        ImGui.Text(Misc.StringifyDistance(_apoapsis_m) + " (Alt: " + Misc.StringifyDistance(_apAlt) + ")");
 
                         ImGui.Text("Periapsis: ");
                         ImGui.SameLine();
-                        ImGui.Text(_periapsis_m.ToString("g3") + " (Alt: " + _peAlt.ToString("g3") + ")");
+                        ImGui.Text(Misc.StringifyDistance(_periapsis_m) + " (Alt: " + Misc.StringifyDistance(_peAlt) + ")");
 
                         ImGui.Text("DepartureSpeed: ");
                         //ImGui.SameLine();
