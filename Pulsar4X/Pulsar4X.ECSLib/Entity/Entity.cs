@@ -369,6 +369,8 @@ namespace Pulsar4X.ECSLib
             }
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {
+                throw new NotImplementedException();
+                //return entity.GetDataBlob<NewtonMoveDB>().CurrentVector_ms;
                 return  NewtonionMovementProcessor.GetPositon_m(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
             }
             else

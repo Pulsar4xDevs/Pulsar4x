@@ -12,7 +12,9 @@ namespace Pulsar4X.ECSLib
         }
 
         
-
+        /*
+         This was used when warp drive used fuel instead of energy. 
+         keeping it around incase we do a simular non newtonion drive that uses fuel. 
         public static double CalcMaxFuelDistance_KM(Entity shipEntity)
         {
             CargoStorageDB storedResources = shipEntity.GetDataBlob<CargoStorageDB>();
@@ -34,7 +36,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
             return distance;
-        }
+        }*/
 
 
 

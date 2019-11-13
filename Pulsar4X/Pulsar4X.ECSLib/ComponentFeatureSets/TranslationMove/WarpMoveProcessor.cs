@@ -144,8 +144,8 @@ namespace Pulsar4X.ECSLib
                 positionDB.SetParent(moveDB.TargetEntity);
                 //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
                 positionDB.RelativePosition_m = moveDB.TranslateRelitiveExit;
-                var propulsionAbilityDB = entity.GetDataBlob<PropulsionAbilityDB>();
-                SetOrbitHere(entity, propulsionAbilityDB, positionDB, moveDB, dateTimeFuture);
+                
+                SetOrbitHere(entity, positionDB, moveDB, dateTimeFuture);
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
                 powerDB.AddDemand( - warpDB.BubbleSustainCost, entity.StarSysDateTime);
                 powerDB.AddDemand(-warpDB.BubbleCollapseCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
@@ -162,10 +162,10 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        void SetOrbitHere(Entity entity, PropulsionAbilityDB propulsionDB, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
+        void SetOrbitHere(Entity entity, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
         {
 
-            propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
+            //propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
 
             double targetSOI = OrbitProcessor.GetSOI_m(moveDB.TargetEntity);
 
@@ -183,9 +183,14 @@ namespace Pulsar4X.ECSLib
             var orbitalVector = OrbitProcessor.GetOrbitalVector_AU(targetOrbit, atDateTime);
             
             Vector3 parentOrbitalVector = new Vector3(orbitalVector.X, orbitalVector.Y, 0);
-            Vector3 insertionVector_m= OrbitProcessor.GetOrbitalInsertionVector_m(moveDB.SavedNewtonionVector, targetOrbit, atDateTime);
+            Vector3 insertionVector_m = OrbitProcessor.GetOrbitalInsertionVector_m(moveDB.SavedNewtonionVector, targetOrbit, atDateTime);
+            
+            positionDB.SetParent(targetEntity);
+            NewtonThrustCommand.CreateCommand(entity.FactionOwner, entity, entity.StarSysDateTime, moveDB.ExpendDeltaV);
+            
+            /*
             insertionVector_m += moveDB.ExpendDeltaV; //TODO: only use it if we have it. 
-            propulsionDB.RemainingDV_MS -= (float)(moveDB.ExpendDeltaV).Length();
+            
             OrbitDB newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
             
             entity.RemoveDataBlob<WarpMovingDB>();
@@ -210,7 +215,7 @@ namespace Pulsar4X.ECSLib
             
             positionDB.SetParent(targetEntity);
             moveDB.IsAtTarget = true;
-            
+            */
 
         }
 

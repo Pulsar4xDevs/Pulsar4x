@@ -354,7 +354,11 @@ namespace Pulsar4X.ECSLib
         {
             var x = Math.Sqrt(1 - Math.Pow(eccentricity, 2)) * Math.Sin(eccentricAnomaly);
             var y = Math.Cos(eccentricAnomaly) - eccentricity;
-            return Angle.NormaliseRadiansPositive( Math.Atan2(x, y));
+            var ta = Angle.NormaliseRadiansPositive( Math.Atan2(x, y));
+            if(ta == double.NaN)
+                throw new Exception("Is NaN");
+
+            return ta;
         }
 
         

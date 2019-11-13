@@ -111,7 +111,7 @@ namespace Pulsar4X.ECSLib
         public Payload(Entity missileEntity)
         {
             Name = missileEntity.GetDataBlob<NameDB>().DefaultName;
-            Speed = missileEntity.GetDataBlob<PropulsionAbilityDB>().MaximumSpeed_MS;
+            //Speed = missileEntity.GetDataBlob<PropulsionAbilityDB>().MaximumSpeed_MS;
 
         }
 

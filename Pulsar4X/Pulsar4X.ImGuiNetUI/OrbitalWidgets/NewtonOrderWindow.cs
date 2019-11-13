@@ -19,23 +19,23 @@ namespace Pulsar4X.SDL2UI
         float _progradeDV;
         float _radialDV;
 
-        ECSLib.Vector3 _deltaV_MS;
+        Vector3 _deltaV_MS;
 
         DateTime _actionDateTime;
 
         //double _origionalOrbitalSpeed = double.NaN;
-        ECSLib.Vector3 _orbitalVelocityAtChange_m = ECSLib.Vector3.NaN;
+        Vector3 _orbitalVelocityAtChange_m = ECSLib.Vector3.NaN;
         double _origionalAngle = double.NaN;
 
         double _newOrbitalSpeed_m = double.NaN;
-        ECSLib.Vector3 _newOrbitalVelocity_m = ECSLib.Vector3.NaN;
+        Vector3 _newOrbitalVelocity_m = ECSLib.Vector3.NaN;
         double _newAngle = double.NaN;
 
         double _massOrderingEntity = double.NaN;
         double _massParentBody = double.NaN;
         double _stdGravParam_m = double.NaN;
 
-        ECSLib.Vector3 _positonAtChange_m;
+        Vector3 _positonAtChange_m;
 
         KeplerElements _ke_m;
         //double _apoapsisKm;
@@ -79,10 +79,10 @@ namespace Pulsar4X.SDL2UI
             //CurrentState = States.NeedsTarget;
 
 
-            if(OrderingEntity.Entity.HasDataBlob<PropulsionAbilityDB>())
+            if(OrderingEntity.Entity.HasDataBlob<NewtonThrustAbilityDB>())
             {
-                var propDB = OrderingEntity.Entity.GetDataBlob<PropulsionAbilityDB>();
-                _maxDV = propDB.RemainingDV_MS;
+                var propDB = OrderingEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
+                _maxDV = (float)propDB.DeltaV;
             }
             IsActive = true;
         }
@@ -170,12 +170,11 @@ namespace Pulsar4X.SDL2UI
         void ActionCmd()
         {
 
-            ChangeCurrentOrbitCommand.CreateCommand(
-                _state.Game,
-                _state.Faction,
+            NewtonThrustCommand.CreateCommand(
+                _state.Faction.Guid,
                 OrderingEntity.Entity,
                 _actionDateTime,
-                Distance.MToAU(_deltaV_MS));
+                _deltaV_MS);
 
             CloseWindow();
         }

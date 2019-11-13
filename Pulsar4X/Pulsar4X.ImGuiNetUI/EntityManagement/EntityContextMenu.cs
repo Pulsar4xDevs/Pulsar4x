@@ -45,7 +45,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
             //if entity can move
-            if (_entityState.Entity.HasDataBlob<PropulsionAbilityDB>())
+            if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>())
             {
                 if (ImGui.SmallButton("Change current orbit"))
                 {

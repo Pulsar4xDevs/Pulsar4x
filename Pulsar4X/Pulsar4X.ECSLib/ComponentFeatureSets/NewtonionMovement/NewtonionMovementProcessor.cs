@@ -77,8 +77,26 @@ namespace Pulsar4X.ECSLib
                 Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
                 
                 double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
-                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
-                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVToExpend_AU / maxAccelFromThrust; //per second
+                //double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
+
+                
+                Vector3 manuverDV = newtonMoveDB.DeltaVForManuver_m; //how much dv needed to complete the manuver.
+                double dryMass = mass_Kg - newtonThrust.FuelBurnRate * timeStep;
+                
+                //how much dv can we get in this timestep.
+                double deltaVThisStep = OrbitMath.TsiolkovskyRocketEquation(mass_Kg, dryMass, newtonThrust.ExhaustVelocity);
+                deltaVThisStep = Math.Min(manuverDV.Length(), deltaVThisStep); //don't use more Dv than what is called for.
+                deltaVThisStep = Math.Min(newtonThrust.DeltaV, deltaVThisStep); //check we've got the deltaV to spend.
+                
+                Vector3 vectorDVThisStep = Vector3.Normalise(manuverDV) * deltaVThisStep;
+
+                //remove the deltaV we're expending from the max (TODO: Remove fuel from cargo)
+                newtonThrust.DeltaV -= deltaVThisStep;
+                //remove the vectorDV from the amount needed to fully complete the manuver. 
+                newtonMoveDB.DeltaVForManuver_m -= vectorDVThisStep;
+                
+
+                Vector3 accelerationFromThrust = vectorDVThisStep;// / maxAccelFromThrust; //per second
 
                 Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
                 Vector3 newVelocity = (accelerationTotal * timeStep) + newtonMoveDB.CurrentVector_ms;
@@ -90,6 +108,8 @@ namespace Pulsar4X.ECSLib
 
                 double sOIRadius = OrbitProcessor.GetSOI_m(newtonMoveDB.SOIParent);
 
+                
+                
                 if (positionDB.RelativePosition_m.Length() >= sOIRadius)
                 {
                     Entity newParent;
@@ -99,8 +119,7 @@ namespace Pulsar4X.ECSLib
                     {
                         var orbitDB = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>();
                         newParent = orbitDB.Parent;
-                        var parentVelocity = OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(orbitDB, entity.Manager.ManagerSubpulses.StarSysDateTime);
-                        parentVelocity = Distance.AuToMt(parentVelocity);
+                        var parentVelocity = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbitDB, entity.StarSysDateTime);
                         parentRalitiveVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
            
                     }
@@ -110,37 +129,47 @@ namespace Pulsar4X.ECSLib
                         var parentVelocity = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().CurrentVector_ms;
                         parentRalitiveVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
                     }
-                    double newParentMass = newParent.GetDataBlob<MassVolumeDB>().Mass;
+                    parentMass_kg = newParent.GetDataBlob<MassVolumeDB>().Mass;
                     
                     Vector3 posRalitiveToNewParent = positionDB.AbsolutePosition_m - newParent.GetDataBlob<PositionDB>().AbsolutePosition_m;
 
+
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
-                    double sgp = GMath.StandardGravitationalParameter(newParentMass + mass_Kg);
+                    double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
                     var kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posRalitiveToNewParent, parentRalitiveVector, dateTime);
 
+                    positionDB.SetParent(newParent);
+                    newtonMoveDB.ParentMass = parentMass_kg;
+                    newtonMoveDB.SOIParent = newParent;
+                }
+                
+                if (newtonMoveDB.DeltaVForManuver_m.Length() <= 0) //if we've completed the manuver.
+                {
+                    var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
+                    double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
+                    
+                    KeplerElements kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, positionDB.RelativePosition_m, newtonMoveDB.CurrentVector_ms, dateTime);
+
+                    var parentEntity = Entity.GetSOIParentEntity(entity, positionDB);
+                    
                     if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
                     {
-                        
                         var newOrbit = OrbitDB.FromKeplerElements(
-                            newParent,
+                            parentEntity,
                             mass_Kg, 
                             kE,
                             dateTime);
                         entity.RemoveDataBlob<NewtonMoveDB>();
                         entity.SetDataBlob(newOrbit);
-                        positionDB.SetParent(newParent);
-                        var newPos = OrbitProcessor.GetPosition_AU(newOrbit, dateTime);
-                        positionDB.RelativePosition_AU = newPos;
-                        break;
+                        positionDB.SetParent(parentEntity);
+                        var newPos = OrbitProcessor.GetPosition_m(newOrbit, dateTime);
+                        positionDB.RelativePosition_m = newPos;
+                            
                     }
-                    else //else we're in a hyperbolic trajectory around our new parent, so just coninue the newtonion move. 
-                    {
-                        positionDB.SetParent(newParent);
-                        newtonMoveDB.ParentMass = newParentMass;
-                        newtonMoveDB.SOIParent = newParent;    
-                    }
-
+                    break;
+                    
                 }
+                
                 secondsToItterate -= timeStep;
             }
             newtonMoveDB.LastProcessDateTime = dateTimeFuture;
@@ -175,7 +204,7 @@ namespace Pulsar4X.ECSLib
                 
                 double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
                 double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
-                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVToExpend_AU / maxAccelFromThrust; //per second
+                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVForManuver_AU / maxAccelFromThrust; //per second
 
                 Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
                 
@@ -222,7 +251,7 @@ namespace Pulsar4X.ECSLib
                 
                 double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
                 double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
-                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVToExpend_AU / maxAccelFromThrust; //per second
+                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVForManuver_AU / maxAccelFromThrust; //per second
 
                 Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
                 

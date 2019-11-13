@@ -45,8 +45,6 @@ namespace Pulsar4X.ECSLib
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if (!parentEntity.HasDataBlob<PropulsionAbilityDB>())
-                parentEntity.SetDataBlob(new PropulsionAbilityDB());
             
             if (!parentEntity.HasDataBlob<WarpAbilityDB>())
             {

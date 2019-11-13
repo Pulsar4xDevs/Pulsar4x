@@ -582,90 +582,74 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("Collapse Cost: " +warpDB.BubbleCollapseCost.ToString());
                                     
                                 }
-                                if (SelectedEntity.HasDataBlob<WarpMovingDB>())
-                                {
-                                    var db = _state.LastClickedEntity.Entity.GetDataBlob<WarpMovingDB>();
-                                    if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
-                                    {
-                                        ImGui.Text("EntryPoint " + db.TranslateEntryAbsolutePoint_AU);
-                                        ImGui.Text("ExitPoint  " + db.TranslateExitPoint_AU);
-                                        ImGui.Text("EDA " + db.PredictedExitTime.ToString());
-                                        double distance = Distance.DistanceBetween(db.TranslateEntryAbsolutePoint_AU, db.TranslateExitPoint_AU);
-                                        ImGui.Text("Distance " + distance + " AU");
-                                        ImGui.SameLine();
-                                        double distancekm = Distance.AuToKm(distance);
-                                        ImGui.Text(distancekm.ToString() + " KM");
-                                        var timeToTarget = db.PredictedExitTime - _state.PrimarySystemDateTime;
-                                        ImGui.Text("Remaining TTT " + timeToTarget);
-                                        var totalTime = db.PredictedExitTime - db.EntryDateTime;
-                                        ImGui.Text("Total TTT  " + totalTime);
-                                        double speed = ((distancekm * 1000) / totalTime.TotalSeconds);
-                                        ImGui.Text("speed2 " + speed);
-                                        ImGui.Text("LastDateTime: ");
-                                        ImGui.Text(db.LastProcessDateTime.ToString());
-                                        ImGui.Text("Time Since Last: ");
-                                        var timelen = _state.PrimarySystemDateTime - db.LastProcessDateTime;
-                                        ImGui.Text(timelen.ToString());
 
-                                    }
-
-                                }
 
                             }
-                            if (SelectedEntity.HasDataBlob<PropulsionAbilityDB>())
+                            if (SelectedEntity.HasDataBlob<NewtonMoveDB>())
                             {
-                                if (ImGui.CollapsingHeader("Propulsion: ###PropulsionHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                var nmdb = _state.LastClickedEntity.Entity.GetDataBlob<NewtonMoveDB>();
+                                var ntdb = _state.LastClickedEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
+                                if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    PropulsionAbilityDB propulsionDB = SelectedEntity.GetDataBlob<PropulsionAbilityDB>();
-                                    ImGui.Text("NonNewt Engine Power: " + propulsionDB.TotalEnginePower);
-                                    ImGui.Text("Max Speed: " + propulsionDB.MaximumSpeed_MS);
-                                    ImGui.Text("CurrentVector: " + propulsionDB.CurrentVectorMS);
-                                    ImGui.Text("Current Speed: " + ECSLib.Vector3.Magnitude( propulsionDB.CurrentVectorMS));
-                                    if (_state.LastClickedEntity.Entity.HasDataBlob<CargoStorageDB>())
-                                    {
-                                        var fuelsGuid = propulsionDB.FuelUsePerKM;
-                                        var storage = _state.LastClickedEntity.Entity.GetDataBlob<CargoStorageDB>();
-                                        foreach (var fuelItemGuid in fuelsGuid.Keys)
-                                        {
-                                            var fuel = _state.Game.StaticData.GetICargoable(fuelItemGuid);
-                                            ImGui.Text(fuel.Name);
-                                            ImGui.SameLine();
-                                            ImGui.Text(StorageSpaceProcessor.GetAmount(storage, fuel).ToString());
-                                                 
-                                        }
-
-                                    }
-                                }
-                                if (SelectedEntity.HasDataBlob<WarpMovingDB>())
-                                {
-                                    var db = _state.LastClickedEntity.Entity.GetDataBlob<WarpMovingDB>();
-                                    if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
-                                    {
-                                        ImGui.Text("EntryPoint " + db.TranslateEntryAbsolutePoint_AU);
-                                        ImGui.Text("ExitPoint  " + db.TranslateExitPoint_AU);
-                                        ImGui.Text("EDA " + db.PredictedExitTime.ToString());
-                                        double distance = Distance.DistanceBetween(db.TranslateEntryAbsolutePoint_AU, db.TranslateExitPoint_AU);
-                                        ImGui.Text("Distance " + distance + " AU");
-                                        ImGui.SameLine();
-                                        double distancekm = Distance.AuToKm(distance);
-                                        ImGui.Text(distancekm.ToString() + " KM");
-                                        var timeToTarget = db.PredictedExitTime - _state.PrimarySystemDateTime;
-                                        ImGui.Text("Remaining TTT " + timeToTarget);
-                                        var totalTime = db.PredictedExitTime - db.EntryDateTime;
-                                        ImGui.Text("Total TTT  " + totalTime);
-                                        double speed = ((distancekm * 1000) / totalTime.TotalSeconds);
-                                        ImGui.Text("speed2 " + speed);
-                                        ImGui.Text("LastDateTime: ");
-                                        ImGui.Text(db.LastProcessDateTime.ToString());
-                                        ImGui.Text("Time Since Last: ");
-                                        var timelen = _state.PrimarySystemDateTime - db.LastProcessDateTime;
-                                        ImGui.Text(timelen.ToString());
-
-                                    }
+                                    ImGui.Text("Manuver DV:" + Misc.StringifyDistance(nmdb.DeltaVForManuver_m.Length())+"/s");
+                                    ImGui.Text("Parent Body: " + nmdb.SOIParent.GetDataBlob<NameDB>().DefaultName);
+                                    ImGui.Text("Current Vector:");
+                                    ImGui.Text("X:" + Misc.StringifyDistance(nmdb.CurrentVector_ms.X)+"/s");
+                                    ImGui.Text("Y:" + Misc.StringifyDistance(nmdb.CurrentVector_ms.Y)+"/s");
+                                    ImGui.Text("Z:" + Misc.StringifyDistance(nmdb.CurrentVector_ms.Z)+"/s");
+                                    
+                                    ImGui.Text("Remaining Dv:" + Misc.StringifyDistance( ntdb.DeltaV) + "/s");
+                                    ImGui.Text("Exhaust Velocity: " + ntdb.ExhaustVelocity);
+                                    ImGui.Text("BurnRate: " + ntdb.FuelBurnRate);
+                                    ImGui.Text("Thrust: " + ntdb.ThrustInNewtons);
+                                    
 
                                 }
 
                             }
+                            
+                            if (SelectedEntity.HasDataBlob<WarpMovingDB>())
+                            {
+                                var db = _state.LastClickedEntity.Entity.GetDataBlob<WarpMovingDB>();
+                                if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                {
+                                    ImGui.Text("EntryPoint: ");
+                                    ImGui.Text("X:" + Misc.StringifyDistance(db.TranslateEntryAbsolutePoint.X));
+                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.TranslateEntryAbsolutePoint.Y));
+                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.TranslateEntryAbsolutePoint.Z));
+                                    
+                                    
+                                    ImGui.Text("ExitPoint: ");
+                                    ImGui.Text("X:" + Misc.StringifyDistance(db.TranslateExitPoint.X));
+                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.TranslateExitPoint.Y));
+                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.TranslateExitPoint.Z));
+                                    
+                                    ImGui.Text("Relitive ExitPoint: ");
+                                    ImGui.Text("X:" + Misc.StringifyDistance(db.TranslateRelitiveExit.X));
+                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.TranslateRelitiveExit.Y));
+                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.TranslateRelitiveExit.Z));
+                                    
+                                    
+                                    ImGui.Text("EDA " + db.PredictedExitTime.ToString());
+                                    double distance = Distance.DistanceBetween(db.TranslateEntryAbsolutePoint_AU, db.TranslateExitPoint_AU);
+                                    ImGui.Text("Distance " + Misc.StringifyDistance(distance));
+                                    ImGui.SameLine();
+                                    var timeToTarget = db.PredictedExitTime - _state.PrimarySystemDateTime;
+                                    ImGui.Text("Remaining TTT " + timeToTarget);
+                                    var totalTime = db.PredictedExitTime - db.EntryDateTime;
+                                    ImGui.Text("Total TTT  " + totalTime);
+                                    double speed = ((distance) / totalTime.TotalSeconds);
+                                    ImGui.Text("speed2 " + speed);
+                                    ImGui.Text("LastDateTime: ");
+                                    ImGui.Text(db.LastProcessDateTime.ToString());
+                                    ImGui.Text("Time Since Last: ");
+                                    var timelen = _state.PrimarySystemDateTime - db.LastProcessDateTime;
+                                    ImGui.Text(timelen.ToString());
+
+                                }
+                            }
+
+                            
                             if (SelectedEntity.HasDataBlob<SensorInfoDB>())
                             {
                                 var actualEntity = SelectedEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;

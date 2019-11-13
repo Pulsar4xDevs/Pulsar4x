@@ -177,7 +177,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionAbilityDB>().CurrentVectorMS.Length()).ToString("N2");
+                return "Defunct";//Distance.AuToKm(Entity.GetVelocity_m(SelectedShip).ToString("N2");
             }
         }
 
@@ -187,7 +187,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionAbilityDB>().CurrentVectorMS.X).ToString("N2");
+                return "Defunct";//Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionAbilityDB>().CurrentVectorMS.X).ToString("N2");
             }
         }
 
@@ -197,7 +197,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionAbilityDB>().CurrentVectorMS.Y).ToString("N2");
+                return "Defunct";//Distance.AuToKm(SelectedShip.GetDataBlob<PropulsionAbilityDB>().CurrentVectorMS.Y).ToString("N2");
             }
         }
 
@@ -227,7 +227,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (SelectedShip == null)
                     return "";
-                return SelectedShip.GetDataBlob<PropulsionAbilityDB>().MaximumSpeed_MS.ToString("N5");
+                return"Defunct";// SelectedShip.GetDataBlob<PropulsionAbilityDB>().MaximumSpeed_MS.ToString("N5");
             }
         }
 
@@ -332,7 +332,7 @@ namespace Pulsar4X.ECSLib
             _shipList.Clear();
             foreach(Entity ship in SelectedSystem.GetAllEntitiesWithDataBlob<ShipInfoDB>(_gameVM.CurrentAuthToken))
             {
-                if (ship.HasDataBlob<PropulsionAbilityDB>())
+                if (ship.HasDataBlob<WarpAbilityDB>())
                     ShipList.Add(ship, ship.GetDataBlob<NameDB>().GetName(_gameVM.CurrentFaction));
             }
 

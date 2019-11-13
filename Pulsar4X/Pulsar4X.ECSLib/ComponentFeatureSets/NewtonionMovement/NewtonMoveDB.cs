@@ -96,7 +96,11 @@ namespace Pulsar4X.ECSLib
     {
         internal DateTime LastProcessDateTime = new DateTime();
         
-        public Vector3 DeltaVToExpend_AU  { get; internal set; }
+        public Vector3 DeltaVForManuver_m { get; internal set; }
+        public Vector3 DeltaVForManuver_AU
+        {
+            get { return Distance.MToAU(DeltaVForManuver_m); }
+        }
         public DateTime ActionOnDateTime { get; internal set; }
         
         

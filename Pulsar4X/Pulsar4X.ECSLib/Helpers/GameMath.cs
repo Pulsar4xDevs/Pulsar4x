@@ -674,7 +674,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB moverOrbit = mover.GetDataBlob<OrbitDB>();
             Vector3 moverPosInKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(moverOrbit, atDateTime));
 
-            PropulsionAbilityDB moverPropulsion = mover.GetDataBlob<PropulsionAbilityDB>();
+            //PropulsionAbilityDB moverPropulsion = mover.GetDataBlob<PropulsionAbilityDB>();
 
             Vector3 targetPosInKM = Distance.AuToKm((OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime)));
 
