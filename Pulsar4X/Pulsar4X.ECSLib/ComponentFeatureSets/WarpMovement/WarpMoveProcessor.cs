@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
             var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
             EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
             positionDB.SetParent(null);
-            Vector3 targetPosMt = moveDB.TranslateExitPoint;
+            Vector3 targetPosMt = moveDB.ExitPointAbsolute;
             Vector3 currentPositionMt = positionDB.AbsolutePosition_m;
 
             Vector3 postionDelta = currentPositionMt - targetPosMt;
@@ -124,7 +124,7 @@ namespace Pulsar4X.ECSLib
 
             Vector3 currentPositionMt = positionDB.AbsolutePosition_m;
 
-            Vector3 targetPosMt = moveDB.TranslateExitPoint;
+            Vector3 targetPosMt = moveDB.ExitPointAbsolute;
             
 
             var deltaVecToTargetMt = currentPositionMt - targetPosMt;
@@ -143,7 +143,7 @@ namespace Pulsar4X.ECSLib
                 var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
                 positionDB.SetParent(moveDB.TargetEntity);
                 //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
-                positionDB.RelativePosition_m = moveDB.TranslateRelitiveExit;
+                positionDB.RelativePosition_m = moveDB.ExitPointRalitive;
                 
                 SetOrbitHere(entity, positionDB, moveDB, dateTimeFuture);
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
@@ -180,42 +180,45 @@ namespace Pulsar4X.ECSLib
                 targetEntity = moveDB.TargetEntity;
             }
             OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
-            var orbitalVector = OrbitProcessor.GetOrbitalVector_AU(targetOrbit, atDateTime);
+
             
-            Vector3 parentOrbitalVector = new Vector3(orbitalVector.X, orbitalVector.Y, 0);
             Vector3 insertionVector_m = OrbitProcessor.GetOrbitalInsertionVector_m(moveDB.SavedNewtonionVector, targetOrbit, atDateTime);
             
             positionDB.SetParent(targetEntity);
-            NewtonThrustCommand.CreateCommand(entity.FactionOwner, entity, entity.StarSysDateTime, moveDB.ExpendDeltaV);
-            
-            /*
-            insertionVector_m += moveDB.ExpendDeltaV; //TODO: only use it if we have it. 
-            
-            OrbitDB newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
-            
-            entity.RemoveDataBlob<WarpMovingDB>();
-            
-            if (newOrbit.Apoapsis < targetSOI) //furtherst point within soi, normal orbit
+
+            if (moveDB.ExpendDeltaV.Length() != 0)
             {
-                entity.SetDataBlob(newOrbit);
+                NewtonThrustCommand.CreateCommand(entity.FactionOwner, entity, entity.StarSysDateTime, moveDB.ExpendDeltaV);
+                entity.RemoveDataBlob<WarpMovingDB>();
+                moveDB.IsAtTarget = true;
             }
-            else if (newOrbit.Periapsis > targetSOI) //closest point outside soi
+            else
             {
-                //find who's SOI we are in, and create an orbit around that.
-                targetEntity = OrbitProcessor.FindSOIForPosition((StarSystem)entity.Manager, positionDB.AbsolutePosition_m);
-                newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
-                entity.SetDataBlob(newOrbit);
-                
+                OrbitDB newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
+                entity.RemoveDataBlob<WarpMovingDB>();
+
+
+                if (newOrbit.Apoapsis < targetSOI) //furtherst point within soi, normal orbit
+                {
+                    entity.SetDataBlob(newOrbit);
+                }
+                else if (newOrbit.Periapsis > targetSOI) //closest point outside soi
+                {
+                    //find who's SOI we are in, and create an orbit around that.
+                    targetEntity = OrbitProcessor.FindSOIForPosition((StarSystem)entity.Manager, positionDB.AbsolutePosition_m);
+                    newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
+                    entity.SetDataBlob(newOrbit);
+
+                }
+                else //closest point inside soi, but furtherest point outside. make a newtonion trajectory. 
+                {
+                    var newtmove = new NewtonMoveDB(targetEntity, insertionVector_m);
+                    entity.SetDataBlob(newtmove);
+                }
+
+                positionDB.SetParent(targetEntity);
+                moveDB.IsAtTarget = true;
             }
-            else //closest point inside soi, but furtherest point outside. make a newtonion trajectory. 
-            {
-                var newtmove = new NewtonMoveDB(targetEntity,  insertionVector_m);
-                entity.SetDataBlob(newtmove);
-            }
-            
-            positionDB.SetParent(targetEntity);
-            moveDB.IsAtTarget = true;
-            */
 
         }
 

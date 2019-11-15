@@ -524,7 +524,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="orbit">Orbit.</param>
         public static double MeanOrbitalVelocityInAU(OrbitDB orbit)
         {
-            double a = orbit.SemiMajorAxisAU;
+            double a = orbit.SemiMajorAxis_AU;
             double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
             double orbitalPerodSeconds = orbit.OrbitalPeriod.TotalSeconds;
             double peremeter = Math.PI * (3* (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
@@ -859,7 +859,7 @@ namespace Pulsar4X.ECSLib
         public static double TimeToRadiusFromPeriapsis(OrbitDB orbit, double radiusAU)
         {
             throw new NotImplementedException();
-            var a = orbit.SemiMajorAxisAU;
+            var a = orbit.SemiMajorAxis_AU;
             var e = orbit.Eccentricity;
             var p = EllipseMath.SemiLatusRectum(a, e);
             var angle = AngleAtRadus(radiusAU, p, e);

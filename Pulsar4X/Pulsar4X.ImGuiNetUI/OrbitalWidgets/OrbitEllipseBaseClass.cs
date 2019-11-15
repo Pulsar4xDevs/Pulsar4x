@@ -70,13 +70,13 @@ namespace Pulsar4X.SDL2UI
                 _positionDB = _orbitDB.Parent.GetDataBlob<PositionDB>(); //orbit's position is parent's body position. 
             }
 
-            SemiMaj = (float)_orbitDB.SemiMajorAxisAU;
+            SemiMaj = (float)_orbitDB.SemiMajorAxis_AU;
 
-            SemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxisAU, _orbitDB.Eccentricity);
+            SemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxis_AU, _orbitDB.Eccentricity);
 
 
 
-            _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxisAU); //linear ecentricity
+            _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxis_AU); //linear ecentricity
 
             
             if (_orbitDB.Inclination_Degrees > 90 && _orbitDB.Inclination_Degrees < 270) //orbitDB is in degrees.

@@ -231,7 +231,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
-            double radius = orbit.SemiMajorAxisAU * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
+            double radius = orbit.SemiMajorAxis_AU * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
 
             double incl = orbit.Inclination;
 
@@ -408,7 +408,7 @@ namespace Pulsar4X.ECSLib
         public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
-            var sma = orbit.SemiMajorAxisAU;
+            var sma = orbit.SemiMajorAxis_AU;
             if (orbit.GravitationalParameter_Km3S2 == 0 || sma == 0)
                 return (0,0); //so we're not returning NaN;
             var sgp = orbit.GravitationalParameterAU;
@@ -432,7 +432,7 @@ namespace Pulsar4X.ECSLib
         public static Vector3 InstantaneousOrbitalVelocityVector_AU(OrbitDB orbit, DateTime atDateTime)
         {
             var position = GetPosition_AU(orbit, atDateTime);
-            var sma = orbit.SemiMajorAxisAU;
+            var sma = orbit.SemiMajorAxis_AU;
             if (orbit.GravitationalParameter_Km3S2 == 0 || sma == 0)
                 return new Vector3(); //so we're not returning NaN;
             var sgp = orbit.GravitationalParameterAU;
@@ -478,7 +478,7 @@ namespace Pulsar4X.ECSLib
             var orbitDB = entity.GetDataBlob<OrbitDB>();
             if (orbitDB.Parent != null) //if we're not the parent star
             {
-                var semiMajAxis = orbitDB.SemiMajorAxisAU;
+                var semiMajAxis = orbitDB.SemiMajorAxis_AU;
 
                 var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
 

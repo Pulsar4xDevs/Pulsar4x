@@ -414,13 +414,13 @@ namespace Pulsar4X.ECSLib
                 return null;
             }
 
-            double sma = GMath.SelectFromRange(minDistance, maxDistance, system.RNG.NextDouble());
+            double sma_m = Distance.AuToMt( GMath.SelectFromRange(minDistance, maxDistance, system.RNG.NextDouble()));
 
             // Calculate max eccentricity.
             // First calc max eccentricity for the apoapsis.
-            double maxApoEccentricity = (maxDistance - sma) / sma;
+            double maxApoEccentricity = (maxDistance - sma_m) / sma_m;
             // Now calc max eccentricity for periapsis.
-            double minPeriEccentricity = -((minDistance - sma) / sma);
+            double minPeriEccentricity = -((minDistance - sma_m) / sma_m);
 
             // Use the smaller value.
             if (minPeriEccentricity < maxApoEccentricity)
@@ -444,7 +444,7 @@ namespace Pulsar4X.ECSLib
             // Now select a random eccentricity within the limits.
             double eccentricity = GMath.SelectFromRange(eccentricityMinMax, system.RNG.NextDouble());
 
-            return new OrbitDB(parent, parentMass, myMass, sma, eccentricity, system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, currentDateTime);
+            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, currentDateTime);
         }
 
         private void FinalizeBodies(StaticDataStore staticData, StarSystem system, Entity body, int bodyCount, DateTime currentDateTime)
@@ -606,9 +606,9 @@ namespace Pulsar4X.ECSLib
             // we will use the reference orbit + MaxAsteroidOrbitDeviation to constrain the orbit values:
 
             // Create semiMajorAxis:
-            double deviation = referenceOrbit.SemiMajorAxisAU * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
-            double min = referenceOrbit.SemiMajorAxisAU - deviation;
-            double max = referenceOrbit.SemiMajorAxisAU + deviation;
+            double deviation = referenceOrbit.SemiMajorAxis_AU * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
+            double min = referenceOrbit.SemiMajorAxis_AU - deviation;
+            double max = referenceOrbit.SemiMajorAxis_AU + deviation;
             double semiMajorAxis = GMath.SelectFromRange(min, max, system.RNG.NextDouble());  // don't need to raise to power, reference orbit already did that.
 
             deviation = referenceOrbit.Eccentricity * Math.Pow(_galaxyGen.Settings.MaxAsteroidOrbitDeviation, 2);
@@ -668,7 +668,7 @@ namespace Pulsar4X.ECSLib
             else
             {
                 OrbitDB parentOrbit = parent.GetDataBlob<OrbitDB>();
-                parentSMA += parentOrbit.SemiMajorAxisAU;
+                parentSMA += parentOrbit.SemiMajorAxis_AU;
                 if (parentOrbit.Parent == null)
                 {
                     throw new InvalidOperationException("Body cannot be finalized without a root star.");
@@ -703,7 +703,7 @@ namespace Pulsar4X.ECSLib
                 bodyInfo.LengthOfDay += TimeSpan.FromHours(_galaxyGen.Settings.MiniumPossibleDayLength);
 
             // Note that base temp does not take into account albedo or atmosphere.
-            bodyInfo.BaseTemperature = (float)CalculateBaseTemperatureOfBody(star, starInfo, bodyOrbit.SemiMajorAxisAU + parentSMA);
+            bodyInfo.BaseTemperature = (float)CalculateBaseTemperatureOfBody(star, starInfo, bodyOrbit.SemiMajorAxis_AU + parentSMA);
 
             // generate Plate tectonics
             if (bodyInfo.BodyType == BodyType.Terrestrial)
@@ -973,13 +973,13 @@ namespace Pulsar4X.ECSLib
                         // if moon get planet orbit, then star
                         var parentOrbitDB = orbit.ParentDB as OrbitDB;
                         starInfo = parentOrbitDB.Parent.GetDataBlob<StarInfoDB>();
-                        ecosphereRatio = (parentOrbitDB.SemiMajorAxisAU / starInfo.EcoSphereRadius);
+                        ecosphereRatio = (parentOrbitDB.SemiMajorAxis_AU / starInfo.EcoSphereRadius);
                     }
                     else
                     {
                         // if planet get star:
                         starInfo = orbit.Parent.GetDataBlob<StarInfoDB>();
-                        ecosphereRatio = GMath.Clamp(orbit.SemiMajorAxisAU / starInfo.EcoSphereRadius, 0.1, 2);
+                        ecosphereRatio = GMath.Clamp(orbit.SemiMajorAxis_AU / starInfo.EcoSphereRadius, 0.1, 2);
                     }
 
                     atm = atm * ecosphereRatio;  // if inside eco sphere this will reduce atmo, increase it if outside.

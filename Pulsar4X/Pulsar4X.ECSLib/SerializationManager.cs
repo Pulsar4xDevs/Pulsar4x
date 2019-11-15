@@ -601,7 +601,7 @@ namespace Pulsar4X.ECSLib
 
             // add orbit details:
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SemiMajorAxis", "NS");
-            varNode.InnerText = orbit.SemiMajorAxisAU.ToString("N3");
+            varNode.InnerText = orbit.SemiMajorAxis_AU.ToString("N3");
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Apoapsis", "NS");

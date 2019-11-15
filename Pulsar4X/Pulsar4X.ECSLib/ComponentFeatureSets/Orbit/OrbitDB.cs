@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
         /// Radius of an orbit at the orbit's two most distant points.
         /// </summary>
         [PublicAPI]
-        public double SemiMajorAxisAU
+        public double SemiMajorAxis_AU
         {
             get { return Distance.MToAU(SemiMajorAxis);}
             private set { SemiMajorAxis = Distance.AuToMt(value); }
@@ -172,7 +172,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [PublicAPI]
         [JsonProperty]
-        public bool IsStationary { get; private set; }
+        public bool IsStationary { get; private set; } = false;
 
         [JsonProperty]
         private double _parentMass;
@@ -181,71 +181,14 @@ namespace Pulsar4X.ECSLib
 
         #region Construction Interface
 
+        
         /// <summary>
         /// Creates on Orbit at current location from a given velocity
         /// </summary>
         /// <returns>The Orbit Does not attach the OrbitDB to the entity!</returns>
-        /// <param name="parent">Parent.</param>
-        /// <param name="entity">Entity.</param>
-        /// <param name="velocityAU">Velocity.</param>
-        public static OrbitDB FromVelocity_AU(Entity parent, Entity entity, Vector3 velocityAU, DateTime atDateTime)
-        {
-            var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
-            var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
-
-            //var epoch1 = parent.Manager.ManagerSubpulses.StarSysDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
-
-            //var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), atDateTime); //need to use the parent position at the epoch
-            var posdb = entity.GetDataBlob<PositionDB>();
-            posdb.SetParent(parent);
-            var ralitivePos = posdb.RelativePosition_AU;//entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
-            if (ralitivePos.Length() > OrbitProcessor.GetSOI_AU(parent))
-                throw new Exception("Entity not in target SOI");
-
-            var sgp = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, ralitivePos, velocityAU, atDateTime);
-
-            var epoch = atDateTime;// - TimeSpan.FromSeconds(ke.Epoch); //ke.Epoch is seconds from periapsis.   
-
-            OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
-                        Math.Abs(ke.SemiMajorAxis),
-                        ke.Eccentricity,
-                        Angle.ToDegrees(ke.Inclination),
-                        Angle.ToDegrees(ke.LoAN),
-                        Angle.ToDegrees(ke.AoP),
-                        Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
-                        epoch);
-
-            var pos = OrbitProcessor.GetPosition_AU(orbit, atDateTime);
-            var d = Distance.AuToKm(pos - ralitivePos).Length();
-            if (d > 1)
-            {
-                var e = new Event(atDateTime, "Positional difference of " + d + "Km when creating orbit from velocity");
-                e.Entity = entity;
-                e.SystemGuid = entity.Manager.ManagerGuid;
-                e.EventType = EventType.Opps;
-                //e.Faction =  entity.FactionOwner;
-                StaticRefLib.EventLog.AddEvent(e);
-
-                //other info:
-                var keta = Angle.ToDegrees( ke.TrueAnomalyAtEpoch);
-                var obta = Angle.ToDegrees( OrbitProcessor.GetTrueAnomaly(orbit, atDateTime));
-                var tadif = Angle.ToDegrees(Angle.DifferenceBetweenRadians(keta, obta));
-                var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDateTime);
-                var pos2 = OrbitProcessor.GetPosition_AU(orbit, ke.TrueAnomalyAtEpoch);
-                var d2 = Distance.AuToKm(pos1 - pos2).Length();
-            }
-            return orbit;
-        }
-
-        
-                /// <summary>
-        /// Creates on Orbit at current location from a given velocity
-        /// </summary>
-        /// <returns>The Orbit Does not attach the OrbitDB to the entity!</returns>
-        /// <param name="parent">Parent.</param>
-        /// <param name="entity">Entity.</param>
-        /// <param name="velocity_m">Velocity.</param>
+        /// <param name="parent">Parent. must have massdb</param>
+        /// <param name="entity">Entity. must have massdb</param>
+        /// <param name="velocity_m">Velocity in meters.</param>
         public static OrbitDB FromVelocity_m(Entity parent, Entity entity, Vector3 velocity_m, DateTime atDateTime)
         {
             var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
@@ -262,24 +205,30 @@ namespace Pulsar4X.ECSLib
 
             //var sgp = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var sgp_m = GMath.StandardGravitationalParameter(myMass + parentMass);
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, ralitivePos, velocity_m, atDateTime);
+            var ke_m = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, ralitivePos, velocity_m, atDateTime);
 
-            var epoch = atDateTime;// - TimeSpan.FromSeconds(ke.Epoch); //ke.Epoch is seconds from periapsis.   
+            
+            OrbitDB orbit = new OrbitDB(parent)
+            {
+                SemiMajorAxis = ke_m.SemiMajorAxis,
+                Eccentricity = ke_m.Eccentricity,
+                Inclination = ke_m.Inclination,
+                LongitudeOfAscendingNode = ke_m.LoAN,
+                ArgumentOfPeriapsis = ke_m.AoP,
+                MeanAnomalyAtEpoch = ke_m.MeanAnomalyAtEpoch,
+                Epoch = atDateTime,
 
-            OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
-                        Math.Abs(ke.SemiMajorAxis),
-                        ke.Eccentricity,
-                        Angle.ToDegrees(ke.Inclination),
-                        Angle.ToDegrees(ke.LoAN),
-                        Angle.ToDegrees(ke.AoP),
-                        Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
-                        epoch);
+                _parentMass = parentMass,
+                _myMass = myMass
 
-            var pos = OrbitProcessor.GetPosition_AU(orbit, atDateTime);
-            var d = Distance.AuToKm(pos - ralitivePos).Length();
+            };
+            orbit.CalculateExtendedParameters();
+
+            var pos = OrbitProcessor.GetPosition_m(orbit, atDateTime);
+            var d = (pos - ralitivePos).Length();
             if (d > 1)
             {
-                var e = new Event(atDateTime, "Positional difference of " + d + "Km when creating orbit from velocity");
+                var e = new Event(atDateTime, "Positional difference of " + Misc.StringifyDistance(d) + " when creating orbit from velocity");
                 e.Entity = entity;
                 e.SystemGuid = entity.Manager.ManagerGuid;
                 e.EventType = EventType.Opps;
@@ -287,53 +236,69 @@ namespace Pulsar4X.ECSLib
                 StaticRefLib.EventLog.AddEvent(e);
 
                 //other info:
-                var keta = Angle.ToDegrees( ke.TrueAnomalyAtEpoch);
+                var keta = Angle.ToDegrees( ke_m.TrueAnomalyAtEpoch);
                 var obta = Angle.ToDegrees( OrbitProcessor.GetTrueAnomaly(orbit, atDateTime));
                 var tadif = Angle.ToDegrees(Angle.DifferenceBetweenRadians(keta, obta));
-                var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDateTime);
-                var pos2 = OrbitProcessor.GetPosition_AU(orbit, ke.TrueAnomalyAtEpoch);
-                var d2 = Distance.AuToKm(pos1 - pos2).Length();
+                var pos1 = OrbitProcessor.GetPosition_m(orbit, atDateTime);
+                var pos2 = OrbitProcessor.GetPosition_m(orbit, ke_m.TrueAnomalyAtEpoch);
+                var d2 = (pos1 - pos2).Length();
             }
+            
+            
             return orbit;
         }
         
-        public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp, Vector3 position, Vector3 velocity, DateTime atDateTime)
+                
+        /// <summary>
+        /// In Meters!
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="myMass"></param>
+        /// <param name="parentMass"></param>
+        /// <param name="sgp_m"></param>
+        /// <param name="position_m"></param>
+        /// <param name="velocity_m"></param>
+        /// <param name="atDateTime"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp_m, Vector3 position_m, Vector3 velocity_m, DateTime atDateTime)
         {
-            if (position.Length() > OrbitProcessor.GetSOI_AU(parent))
+            if (position_m.Length() > OrbitProcessor.GetSOI_AU(parent))
                 throw new Exception("Entity not in target SOI");
             //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity, atDateTime);
-            OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
-                        ke.SemiMajorAxis,
-                        ke.Eccentricity,
-                        Angle.ToDegrees(ke.Inclination),
-                        Angle.ToDegrees(ke.LoAN),
-                        Angle.ToDegrees(ke.AoP),
-                        Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
-                        atDateTime);// - TimeSpan.FromSeconds(ke.Epoch));
-            var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, atDateTime);
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position_m, velocity_m, atDateTime);
+            
+            
+            OrbitDB orbit = new OrbitDB(parent)
+            {
+                SemiMajorAxis = ke.SemiMajorAxis,
+                Eccentricity = ke.Eccentricity,
+                Inclination = ke.Inclination,
+                LongitudeOfAscendingNode = ke.LoAN,
+                ArgumentOfPeriapsis = ke.AoP,
+                MeanAnomalyAtEpoch = ke.MeanAnomalyAtEpoch,
+                Epoch = atDateTime,
+
+                _parentMass = parent.GetDataBlob<MassVolumeDB>().Mass,
+                _myMass = myMass
+
+            };
+            orbit.CalculateExtendedParameters();
+            
+            var pos = OrbitProcessor.GetAbsolutePosition_m(orbit, atDateTime);
             return orbit;
         }
 
 
-        public static OrbitDB FromVectorKM(Entity parent, double myMass, double parentMass, double sgp, Vector3 position, Vector3 velocity, DateTime atDateTime)
-        {
-            if (Distance.KmToAU(position.Length()) > OrbitProcessor.GetSOI_AU(parent))
-                throw new Exception("Entity not in target SOI");
-            //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity, atDateTime);
-            OrbitDB orbit = new OrbitDB(parent, parentMass, myMass,
-                        Distance.KmToAU(ke.SemiMajorAxis),
-                        ke.Eccentricity,
-                        Angle.ToDegrees(ke.Inclination),
-                        Angle.ToDegrees(ke.LoAN),
-                        Angle.ToDegrees(ke.AoP),
-                        Angle.ToDegrees(ke.MeanAnomalyAtEpoch),
-                        atDateTime);// - TimeSpan.FromSeconds(ke.Epoch));
-            var pos = OrbitProcessor.GetAbsolutePosition_AU(orbit, atDateTime);
-            return orbit;
-        }
 
+        /// <summary>
+        /// In Meters
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="myMass"></param>
+        /// <param name="ke">in m</param>
+        /// <param name="atDateTime"></param>
+        /// <returns></returns>
         public static OrbitDB FromKeplerElements(Entity parent, double myMass, KeplerElements ke, DateTime atDateTime)
         {
 
@@ -341,7 +306,7 @@ namespace Pulsar4X.ECSLib
             {
                 SemiMajorAxis = ke.SemiMajorAxis,
                 Eccentricity = ke.Eccentricity,
-                Inclination_Degrees = ke.Inclination,
+                Inclination = ke.Inclination,
                 LongitudeOfAscendingNode = ke.LoAN,
                 ArgumentOfPeriapsis = ke.AoP,
                 MeanAnomalyAtEpoch = ke.MeanAnomalyAtEpoch,
@@ -385,8 +350,6 @@ namespace Pulsar4X.ECSLib
 
                 _parentMass = parent.GetDataBlob<MassVolumeDB>().Mass,
                 _myMass = obj.GetDataBlob<MassVolumeDB>().Mass
-
-                
                 
             };
             orbit.IsStationary = false;
@@ -398,14 +361,14 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Returns an orbit representing the defined parameters.
         /// </summary>
-        /// <param name="semiMajorAxis">SemiMajorAxis of orbit in AU.</param>
+        /// <param name="semiMajorAxis_AU">SemiMajorAxis of orbit in AU.</param>
         /// <param name="eccentricity">Eccentricity of orbit.</param>
         /// <param name="inclination">Inclination of orbit in degrees.</param>
         /// <param name="longitudeOfAscendingNode">Longitude of ascending node in degrees.</param>
         /// <param name="longitudeOfPeriapsis">Longitude of periapsis in degrees.</param>
         /// <param name="meanLongitude">Longitude of object at epoch in degrees.</param>
         /// <param name="epoch">reference time for these orbital elements.</param>
-        public static OrbitDB FromMajorPlanetFormat([NotNull] Entity parent, double parentMass, double myMass, double semiMajorAxis, double eccentricity, double inclination,
+        public static OrbitDB FromMajorPlanetFormat([NotNull] Entity parent, double parentMass, double myMass, double semiMajorAxis_AU, double eccentricity, double inclination,
                                                     double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
         {
             if (parent == null)
@@ -417,21 +380,21 @@ namespace Pulsar4X.ECSLib
             double argumentOfPeriapsis = longitudeOfPeriapsis - longitudeOfAscendingNode;
             // http://en.wikipedia.org/wiki/Mean_longitude
             double meanAnomaly = meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis);
-
-            return new OrbitDB(parent, parentMass, myMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
+            double sma_m = Distance.AuToMt(semiMajorAxis_AU);
+            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
         }
 
         /// <summary>
         /// Returns an orbit representing the defined parameters.
         /// </summary>
-        /// <param name="semiMajorAxis">SemiMajorAxis of orbit in AU.</param>
+        /// <param name="semiMajorAxis_AU">SemiMajorAxis of orbit in AU.</param>
         /// <param name="eccentricity">Eccentricity of orbit.</param>
         /// <param name="inclination">Inclination of orbit in degrees.</param>
         /// <param name="longitudeOfAscendingNode">Longitude of ascending node in degrees.</param>
         /// <param name="argumentOfPeriapsis">Argument of periapsis in degrees.</param>
         /// <param name="meanAnomaly">Mean Anomaly in degrees.</param>
         /// <param name="epoch">reference time for these orbital elements.</param>
-        public static OrbitDB FromAsteroidFormat([NotNull] Entity parent, double parentMass, double myMass, double semiMajorAxis, double eccentricity, double inclination,
+        public static OrbitDB FromAsteroidFormat([NotNull] Entity parent, double parentMass, double myMass, double semiMajorAxis_AU, double eccentricity, double inclination,
                                                 double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
         {
             if (parent == null)
@@ -439,14 +402,31 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException(nameof(parent));
             }
 
-            return new OrbitDB(parent, parentMass, myMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
+            double sma_m = Distance.AuToMt(semiMajorAxis_AU);
+            
+            OrbitDB orbit = new OrbitDB(parent)
+            {
+                SemiMajorAxis = sma_m,
+                Eccentricity = eccentricity,
+                Inclination_Degrees = inclination,
+                LongitudeOfAscendingNode_Degrees = longitudeOfAscendingNode,
+                ArgumentOfPeriapsis_Degrees = argumentOfPeriapsis,
+                MeanAnomalyAtEpoch_Degrees = meanAnomaly,
+                Epoch = epoch,
+
+                _parentMass = parentMass,
+                _myMass = myMass
+
+            };
+            orbit.CalculateExtendedParameters();
+            return orbit;
         }
 
-        internal OrbitDB(Entity parent, double parentMass, double myMass, double semiMajorAxisAU, double eccentricity, double inclinationDegrees,
+        internal OrbitDB(Entity parent, double parentMass, double myMass, double semiMajorAxis_m, double eccentricity, double inclinationDegrees,
                         double longitudeOfAscendingNodeDegrees, double argumentOfPeriapsisDegrees, double meanAnomaly, DateTime epoch)
             : base(parent)
         {
-            SemiMajorAxisAU = semiMajorAxisAU;
+            SemiMajorAxis = semiMajorAxis_m;
             Eccentricity = eccentricity;
             Inclination_Degrees = inclinationDegrees;
             LongitudeOfAscendingNode_Degrees = longitudeOfAscendingNodeDegrees;
@@ -469,7 +449,7 @@ namespace Pulsar4X.ECSLib
         public OrbitDB(Entity parent)
             : base(parent)
         {
-            IsStationary = true;
+            IsStationary = false;
         }
 
         public OrbitDB(OrbitDB toCopy)
@@ -505,7 +485,7 @@ namespace Pulsar4X.ECSLib
             GravitationalParameterAU = GMath.GrabitiationalParameter_Au3s2(_parentMass + _myMass);// (149597870700 * 149597870700 * 149597870700);
             GravitationalParameter_m3S2 = GMath.StandardGravitationalParameter(_parentMass + _myMass);
 
-            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(Distance.AuToKm(SemiMajorAxisAU), 3) / (GravitationalParameter_Km3S2));
+            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(Distance.AuToKm(SemiMajorAxis_AU), 3) / (GravitationalParameter_Km3S2));
             if (orbitalPeriod * 10000000 > long.MaxValue)
             {
                 OrbitalPeriod = TimeSpan.MaxValue;
@@ -516,11 +496,11 @@ namespace Pulsar4X.ECSLib
             }
 
             // http://en.wikipedia.org/wiki/Mean_motion
-            MeanMotion_DegreesSec = Math.Sqrt(GravitationalParameter_Km3S2 / Math.Pow(Distance.AuToKm(SemiMajorAxisAU), 3)); // Calculated in radians.
+            MeanMotion_DegreesSec = Math.Sqrt(GravitationalParameter_Km3S2 / Math.Pow(Distance.AuToKm(SemiMajorAxis_AU), 3)); // Calculated in radians.
             MeanMotion_DegreesSec = Angle.ToDegrees(MeanMotion_DegreesSec); // Stored in degrees.
 
-            Apoapsis_AU = (1 + Eccentricity) * SemiMajorAxisAU;
-            Periapsis_AU = (1 - Eccentricity) * SemiMajorAxisAU;
+            Apoapsis_AU = (1 + Eccentricity) * SemiMajorAxis_AU;
+            Periapsis_AU = (1 - Eccentricity) * SemiMajorAxis_AU;
 
             SOI_m = OrbitMath.GetSOI(SemiMajorAxis, _myMass, _parentMass);
 
@@ -562,7 +542,7 @@ namespace Pulsar4X.ECSLib
             double signalNowMagnatude = sensorInfo.LatestDetectionQuality.SignalStrength_kW;
 
 
-            SemiMajorAxisAU = actualDB.SemiMajorAxisAU;
+            SemiMajorAxis_AU = actualDB.SemiMajorAxis_AU;
             Eccentricity = actualDB.Eccentricity;
             Inclination_Degrees = actualDB.Inclination_Degrees;
             LongitudeOfAscendingNode_Degrees = actualDB.LongitudeOfAscendingNode_Degrees;
@@ -575,7 +555,7 @@ namespace Pulsar4X.ECSLib
 
         public int GetValueCompareHash(int hash = 17)
         {
-            hash = Misc.ValueHash(SemiMajorAxisAU, hash);
+            hash = Misc.ValueHash(SemiMajorAxis_AU, hash);
             hash = Misc.ValueHash(Eccentricity, hash);
 
 

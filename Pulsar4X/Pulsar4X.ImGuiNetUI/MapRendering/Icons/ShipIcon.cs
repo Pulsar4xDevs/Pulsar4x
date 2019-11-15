@@ -11,7 +11,7 @@ namespace Pulsar4X.SDL2UI
         ComponentInstancesDB _componentInstances;
         OrbitDB _orbitDB;
         NewtonMoveDB _newtonMoveDB;
-        WarpMovingDB _tlmoveDB;
+        WarpMovingDB _warpMoveDB;
         float _lop;
         Entity _entity;
         public ShipIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
@@ -31,7 +31,7 @@ namespace Pulsar4X.SDL2UI
                 _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>(); 
             }
             else if (entity.HasDataBlob<WarpMovingDB>())
-                _tlmoveDB = entity.GetDataBlob<WarpMovingDB>();
+                _warpMoveDB = entity.GetDataBlob<WarpMovingDB>();
             entity.ChangeEvent += Entity_ChangeEvent;
 
 
@@ -63,14 +63,14 @@ namespace Pulsar4X.SDL2UI
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
                 else if (db is WarpMovingDB)
-                    _tlmoveDB = (WarpMovingDB)db;                    
+                    _warpMoveDB = (WarpMovingDB)db;                    
             }
             else if (changeType == EntityChangeData.EntityChangeType.DBRemoved)
             {
                 if (db is OrbitDB)
                     _orbitDB = null;
                 else if (db is WarpMovingDB)
-                    _tlmoveDB = null;
+                    _warpMoveDB = null;
             }
         }
 
@@ -222,7 +222,7 @@ namespace Pulsar4X.SDL2UI
             DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
             if (_orbitDB != null)
             {
-                var headingVector = OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(_orbitDB, atDateTime);
+                var headingVector = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(_orbitDB, atDateTime);
                 var heading = Math.Atan2(headingVector.Y, headingVector.X);
                 Heading = (float)heading;
             }
@@ -230,9 +230,9 @@ namespace Pulsar4X.SDL2UI
             {
                 Heading = (float)Math.Atan2(_newtonMoveDB.CurrentVector_ms.Y, _newtonMoveDB.CurrentVector_ms.X); 
             }
-            else if (_tlmoveDB != null)
+            else if (_warpMoveDB != null)
             {
-                Heading = _tlmoveDB.Heading_Radians;
+                Heading = _warpMoveDB.Heading_Radians;
             }
 
         }

@@ -603,7 +603,7 @@ namespace Pulsar4X.ECSLib
                 _parentStarGuid = orbitDB.Parent.GetDataBlob<OrbitDB>().Parent.Guid;
             }
 
-            SemiMajorAxis = orbitDB.SemiMajorAxisAU;
+            SemiMajorAxis = orbitDB.SemiMajorAxis_AU;
             Apoapsis = orbitDB.Apoapsis_AU;
             Periapsis = orbitDB.Periapsis_AU;
             ArgumentOfPeriapsis = orbitDB.ArgumentOfPeriapsis_Degrees;

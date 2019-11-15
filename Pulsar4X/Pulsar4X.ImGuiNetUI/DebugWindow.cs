@@ -443,7 +443,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("MeanVelocity: " + Distance.AuToKm( OrbitMath.MeanOrbitalVelocityInAU(orbitDB)) + "Km/s");
                                     ImGui.Text("SOI Radius: " + Distance.AuToKm(OrbitProcessor.GetSOI_AU(_state.LastClickedEntity.Entity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
-                                    ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxisAU);
+                                    ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis_AU);
                                     ImGui.Text("Periapsis: " + Distance.AuToKm(orbitDB.Periapsis_AU).ToString("g3") + " Km");
                                     ImGui.Text("Appoapsis: " + Distance.AuToKm(orbitDB.Apoapsis_AU).ToString("g3") + " Km");
                                     if (orbitDB.Parent != null)
@@ -614,24 +614,24 @@ namespace Pulsar4X.SDL2UI
                                 if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     ImGui.Text("EntryPoint: ");
-                                    ImGui.Text("X:" + Misc.StringifyDistance(db.TranslateEntryAbsolutePoint.X));
-                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.TranslateEntryAbsolutePoint.Y));
-                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.TranslateEntryAbsolutePoint.Z));
+                                    ImGui.Text("X:" + Misc.StringifyDistance(db.EntryPointAbsolute.X));
+                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.EntryPointAbsolute.Y));
+                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.EntryPointAbsolute.Z));
                                     
                                     
                                     ImGui.Text("ExitPoint: ");
-                                    ImGui.Text("X:" + Misc.StringifyDistance(db.TranslateExitPoint.X));
-                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.TranslateExitPoint.Y));
-                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.TranslateExitPoint.Z));
+                                    ImGui.Text("X:" + Misc.StringifyDistance(db.ExitPointAbsolute.X));
+                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.ExitPointAbsolute.Y));
+                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.ExitPointAbsolute.Z));
                                     
                                     ImGui.Text("Relitive ExitPoint: ");
-                                    ImGui.Text("X:" + Misc.StringifyDistance(db.TranslateRelitiveExit.X));
-                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.TranslateRelitiveExit.Y));
-                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.TranslateRelitiveExit.Z));
+                                    ImGui.Text("X:" + Misc.StringifyDistance(db.ExitPointRalitive.X));
+                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.ExitPointRalitive.Y));
+                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.ExitPointRalitive.Z));
                                     
                                     
                                     ImGui.Text("EDA " + db.PredictedExitTime.ToString());
-                                    double distance = Distance.DistanceBetween(db.TranslateEntryAbsolutePoint_AU, db.TranslateExitPoint_AU);
+                                    double distance = Distance.DistanceBetween(db.EntryPointAbsolute, db.ExitPointAbsolute);
                                     ImGui.Text("Distance " + Misc.StringifyDistance(distance));
                                     ImGui.SameLine();
                                     var timeToTarget = db.PredictedExitTime - _state.PrimarySystemDateTime;

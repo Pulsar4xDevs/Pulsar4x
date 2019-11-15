@@ -76,23 +76,11 @@ namespace Pulsar4X.ECSLib
                 double creationCost = warpDB.BubbleCreationCost;
                 if (creationCost <= estored)
                 {
-                    (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition_m
-                        (
-                            _entityCommanding, 
-                        _targetEntity.GetDataBlob<OrbitDB>(), 
-                            _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime
-                        );
                     
-                    Vector3 startPosAbsolute_m = Entity.GetPosition_m(_entityCommanding, TransitStartDateTime, false);
-                    Vector3 currentVec_m = Entity.GetVelocity_m(_entityCommanding, TransitStartDateTime);
+                    _db = new WarpMovingDB(_entityCommanding, _targetEntity, TargetOffsetPosition_m);
+                    _db.ExpendDeltaV = ExpendDeltaV;
                     
-                    _db = new WarpMovingDB(targetIntercept.position);
-                    _db.TranslateEntryAbsolutePoint = startPosAbsolute_m;
-                    _db.EntryDateTime = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
-                    _db.TranslateRelitiveExit = TargetOffsetPosition_m;
-                    _db.PredictedExitTime = targetIntercept.atDateTime;
-                    _db.SavedNewtonionVector = currentVec_m;
-                    _db.TargetEntity = _targetEntity;
+
                     if (EntityCommanding.HasDataBlob<OrbitDB>())
                         EntityCommanding.RemoveDataBlob<OrbitDB>();
                     if(EntityCommanding.HasDataBlob<NewtonMoveDB>())
@@ -104,13 +92,9 @@ namespace Pulsar4X.ECSLib
                     
                     
                     //debug code:
-                    double distance = (_db.TranslateEntryAbsolutePoint - _db.TranslateExitPoint).Length();
+                    double distance = (_db.EntryPointAbsolute - _db.ExitPointAbsolute).Length();
                     double time = distance / _entityCommanding.GetDataBlob<WarpAbilityDB>().MaxSpeed;
                     //Assert.AreEqual((_db.PredictedExitTime - _db.EntryDateTime).TotalSeconds, time, 1.0e-10);
-
-
-
-
 
                 }
             }

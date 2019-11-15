@@ -127,6 +127,15 @@ namespace Pulsar4X.ECSLib
             StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            var elec = NameLookup.GetMaterialSD(game, "Electrical Energy");
+            ship1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            gunShip.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            
+            
+            
             NewtonionMovementProcessor.CalcDeltaV(ship1);
             NewtonionMovementProcessor.CalcDeltaV(ship2);
             NewtonionMovementProcessor.CalcDeltaV(ship3);

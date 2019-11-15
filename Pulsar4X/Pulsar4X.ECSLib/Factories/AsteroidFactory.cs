@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
             else
                 mass = asteroidMass;
 
-            var speed = Distance.KmToAU(40);
+            var speed = 40000;
             Vector3 velocity = new Vector3(speed, 0, 0);
 
 
@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
             planetInfo.SupportsPopulations = false;
             planetInfo.BodyType = BodyType.Asteroid;
 
-            Vector3 targetPos = OrbitProcessor.GetAbsolutePosition_AU(target.GetDataBlob<OrbitDB>(), collisionDate);
+            Vector3 targetPos = OrbitProcessor.GetAbsolutePosition_m(target.GetDataBlob<OrbitDB>(), collisionDate);
             TimeSpan timeToCollision = collisionDate - StaticRefLib.CurrentDateTime;
 
 
@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
             var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
             var myMass = massVolume.Mass;
 
-            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
+            double sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
             OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
 
             var currentpos = OrbitProcessor.GetAbsolutePosition_AU(orbit, StaticRefLib.CurrentDateTime);
@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
             //OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, position, velocity, atDateTime);
             //OrbitDB orbit = (OrbitDB)origOrbit.Clone();
-            OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, origOrbit.SemiMajorAxisAU, 
+            OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, origOrbit.SemiMajorAxis_AU, 
                 origOrbit.Eccentricity, origOrbit.Inclination_Degrees, origOrbit.LongitudeOfAscendingNode_Degrees, 
                 origOrbit.ArgumentOfPeriapsis_Degrees, origOrbit.MeanMotion_DegreesSec, origOrbit.Epoch);
 

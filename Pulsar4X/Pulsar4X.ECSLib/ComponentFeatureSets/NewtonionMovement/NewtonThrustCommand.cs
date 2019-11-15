@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
 
             };
 
-            var parent = orderEntity.GetDataBlob<OrbitDB>().Parent;
+            var parent = Entity.GetSOIParentEntity(orderEntity);
             cmd._db = new NewtonMoveDB(parent, Vector3.Zero);
             cmd._db.ActionOnDateTime = actionDateTime;
             cmd._db.DeltaVForManuver_m = expendDeltaV_m;
@@ -37,7 +37,8 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                _entityCommanding.RemoveDataBlob<OrbitDB>();
+                if(_entityCommanding.HasDataBlob<OrbitDB>())
+                    _entityCommanding.RemoveDataBlob<OrbitDB>();
                 _entityCommanding.SetDataBlob(_db);
                 IsRunning = true;
 

@@ -76,7 +76,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 
                 ImGui.Text("Current Output: ");
                 ImGui.SameLine();
-                ImGui.Text(_energyGenDB.Output.ToString());
+                
+                ImGui.Text(_energyGenDB.Output.ToString() + " / " + _energyGenDB.TotalOutputMax);
                 
                 ImGui.Text("Current Demand: ");
                 ImGui.SameLine();
@@ -84,7 +85,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 
                 ImGui.Text("Stored: ");
                 ImGui.SameLine();
-                ImGui.Text(_energyGenDB.EnergyStored[_energyGenDB.EnergyType.ID].ToString());
+                string stor = _energyGenDB.EnergyStored[_energyGenDB.EnergyType.ID].ToString();
+                string max = _energyGenDB.EnergyStoreMax[_energyGenDB.EnergyType.ID].ToString();
+                ImGui.Text(stor + " / " + max);
 
                 //
 
