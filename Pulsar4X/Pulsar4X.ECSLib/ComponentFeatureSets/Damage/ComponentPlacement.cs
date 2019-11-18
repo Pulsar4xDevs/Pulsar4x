@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework.Constraints;
+using Pulsar4X.Vectors;
 
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 {
@@ -11,6 +12,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         {
             byte armorID = 255;//shipProfile.Armor.IDCode;
             var po = shipProfile.PlacementOrder;
+            
             List<(Guid typeID, RawBmp bmp)> typeBitmaps = shipProfile.TypeBitmaps;
             int componentWidthNum = 0;
 
@@ -57,33 +59,49 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                 Width = canvasLen,
                 Height = canvasWidth,
             };
+
+            if (po.Count <= 0)
+            {
+                return shipBmp;
+            }
+
             byte[] shipByteArray = new byte[size];
 
             int offsetx = 4;
             for (int i = 0; i < po.Count; i++)
             {
+                if (po[i].count == 0)
+                {
+                    continue;
+                }
+                var typeBmp = typeBitmaps[i].bmp;
                 componentInstance++;
                 var typeid = po[i].id;
                 var count = po[i].count;
-                var typeBmp = typeBitmaps[i].bmp;
+                int maxPixHeight = typeBmp.Height * count;
                 
-                int pixHeight = typeBmp.Height * count;
-
-                int offsety = (canvasWidth - pixHeight) / 2;
-
-                int bytesPerLine = 4 * typeBmp.Width;
-
-                for (int x = 0; x < typeBmp.Width; x++)
+                for (int o = 0; o < count; o++)
                 {
-                    for (int y = 0; y < typeBmp.Height; y++)
+
+                    //pixHeight -= - (o * typeBmp.Height);
+                    int offsety = (canvasWidth - maxPixHeight) / 2;
+                    offsety += typeBmp.Height * o;
+
+                    //not doing anything?
+                    int bytesPerLine = 4 * typeBmp.Width;
+
+                    for (int x = 0; x < typeBmp.Width; x++)
                     {
-                        var srsClr = typeBmp.GetPixel(x, y);
-                        int destx = offsetx + x;
-                        int desty = offsety + y;
-                        shipBmp.SetPixel(destx, desty, srsClr.r, componentInstance, srsClr.b, srsClr.a);
+                        for (int y = 0; y < typeBmp.Height; y++)
+                        {
+                            var srsClr = typeBmp.GetPixel(x, y);
+                            int destx = offsetx + x;
+                            int desty = offsety + y;
+                            shipBmp.SetPixel(destx, desty, srsClr.r, componentInstance, srsClr.b, srsClr.a);
+                        }
                     }
                 }
-                
+
                 /*
                 for (int j = 0; j < count; j++)
                 {
@@ -100,11 +118,22 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
             }
 
-            shipBmp.ByteArray = shipByteArray;
+            //shipBmp.ByteArray = shipByteArray;
 
-            
+            //TODO: somehow make lines thicker without crashing
+           
+
+            //below is a failed attempt at trying to make lines thicker
+            //int bezzierMargin = 50;
+            //widestPoint -= bezzierMargin;
+            //widestLen -= bezzierMargin
+            //bool canvasWidthIsBigEnough = canvasWidth > bezzierMargin;
+            //bool canvasLenIsBigEnough = canvasLen > bezzierMargin;
+            //canvasWidth = (canvasWidthIsBigEnough ? canvasWidth - bezzierMargin : canvasWidth);
+            //canvasLen = (canvasLenIsBigEnough?canvasLen-bezzierMargin:canvasLen);
+            float addedLineThickness = 0;//((canvasWidthIsBigEnough&&canvasLenIsBigEnough)?4:0);
             //create bezzier control points for front and rear armor/skin
-            
+
             (int x, int y)[] controlPointsFore = new (int x, int y)[4];
 
             controlPointsFore[0] = (0, canvasWidth / 2);
@@ -146,11 +175,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             for (int i = 1; i < linePoints.Count; i++)
             {
                 var coordEnd = linePoints[i];
-                ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10, 255, 255, 255, 255);
+                ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
                 //Mirror:
                 coordStart = (coordStart.x, canvasWidth - coordStart.y);
                 coordEnd = (coordEnd.x, canvasWidth - coordEnd.y);
-                ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10, 255, 255, 255, 255);
+                ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
                 coordStart = linePoints[i];
             }
             
@@ -159,17 +188,29 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             (int x, int y) straightStart = controlPointsFore[3];
             (int x, int y) straightEnd = controlPointsAft[0];
             
-            ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10, 255, 255, 255, 255);
+            ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
             //Mirror:
             straightStart = (straightStart.x, canvasWidth - straightStart.y);
             straightEnd = (straightEnd.x, canvasWidth - straightEnd.y);
-            ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10, 255, 255, 255, 255);
+            ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
 
-        
 
-            
-            shipProfile.DamageProfile = shipBmp;
-            return shipBmp;
+            //adding margins to the bitmap(white space around its edges to make it look cleaner once displayed)
+            Vector2 shipbmpMargins = new Vector2(shipBmp.Width*0.1,shipBmp.Height*0.1);
+            RawBmp finalShipBmp = new RawBmp(shipBmp.Width + (int)shipbmpMargins.X*2, shipBmp.Height+ (int)shipbmpMargins.Y*2, shipBmp.Depth);
+            //shifting 
+            for (int x = 0; x < shipBmp.Width; x++)
+            {
+                for (int y = 0; y < shipBmp.Height; y++)
+                {
+                    var srsClr = shipBmp.GetPixel(x,y);
+                    finalShipBmp.SetPixel(x+(int)shipbmpMargins.X, y+(int)shipbmpMargins.Y, srsClr.r, srsClr.g, srsClr.b, srsClr.a);
+                }
+            }
+
+
+            shipProfile.DamageProfile = finalShipBmp;
+            return finalShipBmp;
         }
         
         private static double BezCalc(double t, double a0, double a1, double a2, double a3)
