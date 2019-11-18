@@ -1,62 +1,82 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
-  <TargetFramework>net47</TargetFramework>
-  <Authors>Pulsar4XDevs</Authors>
-  <Company>Pulsar4X</Company>
-  <Product>Pulsar4x.ECSLib</Product>
-  <Version>1.0.0</Version>
-  <PackageId>Pulsar4X.ECSLib</PackageId>
+    <TargetFramework>net47</TargetFramework>
+    <Authors>Pulsar4XDevs</Authors>
+    <Company>Pulsar4X</Company>
+    <Product>Pulsar4x.ECSLib</Product>
+    <Version>1.0.0</Version>
+    <PackageId>Pulsar4X.ECSLib</PackageId>
+    <FileUpgradeFlags>40</FileUpgradeFlags>
+    <UpgradeBackupLocation>C:\Users\matia\source\repos\Pulsar4x\Pulsar4X\Backup\Pulsar4X.ECSLib\</UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Linux_x64' ">
     <IntermediateOutputPath>obj\Linux_x64\Debug</IntermediateOutputPath>
     <DebugSymbols>false</DebugSymbols>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <OutputPath>bin\Linux_x64\Debug</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Linux_x64' ">
     <IntermediateOutputPath>obj\Linux_x64\Release</IntermediateOutputPath>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Linux_x64\Release</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Windows_x64' ">
     <IntermediateOutputPath>obj\Windows_x64\Debug</IntermediateOutputPath>
     <DebugSymbols>false</DebugSymbols>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <OutputPath>bin\Windows_x64\Debug</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Windows_x64' ">
     <IntermediateOutputPath>obj\Windows_x64\Release</IntermediateOutputPath>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Windows_x64\Release</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Windows_x86' ">
     <IntermediateOutputPath>obj\Windows_x86\Debug</IntermediateOutputPath>
     <DebugSymbols>false</DebugSymbols>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <OutputPath>bin\Windows_x86\Debug</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Windows_x86' ">
     <IntermediateOutputPath>obj\Windows_x86\Release</IntermediateOutputPath>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Windows_x86\Release</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Lidgren.Network" Version="1.0.2" />

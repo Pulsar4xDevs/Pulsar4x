@@ -11,7 +11,7 @@ namespace Pulsar4X.SDL2UI
     public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
     public class GlobalUIState
     {
-
+        internal PulsarGuiWindow distanceRulerWindow { get; set; }
         internal Game Game;
         internal FactionVM FactionUIState;
         internal bool IsGameLoaded { get { return Game != null; } }
@@ -151,6 +151,10 @@ namespace Pulsar4X.SDL2UI
 
             if (ActiveWindow != null)
                 ActiveWindow.MapClicked(worldCoord, button);
+
+            if (distanceRulerWindow != null)
+                distanceRulerWindow.MapClicked(worldCoord, button);
+            
         }
         internal void EntityClicked(Guid entityGuid, Guid starSys, MouseButtons button)
         {

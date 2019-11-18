@@ -53,7 +53,10 @@ namespace Pulsar4X.SDL2UI
                 
             };
             ToolButtons.Add(btn);
+            //we initialize a distance ruler instance so that it gets displayed automatically.
+            DistanceRuler.GetInstance();
             
+
         }
 
         internal static ToolBarUI GetInstance()
