@@ -30,7 +30,6 @@ namespace Pulsar4X.SDL2UI
 
         private DistanceRuler() {
             //_flags = ImGuiWindowFlags.NoCollapse;
-            _state.distanceRulerWindow = this;
         }
 
         
