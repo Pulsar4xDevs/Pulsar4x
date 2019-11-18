@@ -134,9 +134,22 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             //((canvasWidthIsBigEnough&&canvasLenIsBigEnough)?4:0);
 
 
-            float addedLineThickness = 0;
+            float addedLineThickness = 5;
 
+            //adding margins to the bitmap(white space around its edges to make it look cleaner once displayed)
+            Vector2 shipbmpMargins = new Vector2(shipBmp.Width*0.1+addedLineThickness,shipBmp.Height*0.1+addedLineThickness);
+            RawBmp finalShipBmp = new RawBmp(shipBmp.Width + (int)shipbmpMargins.X*2, shipBmp.Height+ (int)shipbmpMargins.Y*2, shipBmp.Depth);
+            //shifting 
+            for (int x = 0; x < shipBmp.Width; x++)
+            {
+                for (int y = 0; y < shipBmp.Height; y++)
+                {
+                    var srsClr = shipBmp.GetPixel(x,y);
+                    finalShipBmp.SetPixel(x+(int)shipbmpMargins.X, y+(int)shipbmpMargins.Y, srsClr.r, srsClr.g, srsClr.b, srsClr.a);
+                }
+            }
 
+            shipBmp = finalShipBmp;
            
 
 
@@ -183,13 +196,13 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             for (int i = 1; i < linePoints.Count; i++)
             {
                 var coordEnd = linePoints[i];
-                ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
+                ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255, shipbmpMargins);
                 //Mirror:
                 coordStart = (coordStart.x, canvasWidth - coordStart.y);
                
                 coordEnd = (coordEnd.x, canvasWidth - coordEnd.y);
                 
-                ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
+                ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255, shipbmpMargins);
                 coordStart = linePoints[i];
             }
             
@@ -198,28 +211,15 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             (int x, int y) straightStart = controlPointsFore[3];
             (int x, int y) straightEnd = controlPointsAft[0];
             
-            ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
+            ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255, shipbmpMargins);
             //Mirror:
             straightStart = (straightStart.x, canvasWidth - straightStart.y);
             straightEnd = (straightEnd.x, canvasWidth - straightEnd.y);
-            ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
+            ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255, shipbmpMargins);
 
 
             
-             //adding margins to the bitmap(white space around its edges to make it look cleaner once displayed)
-            Vector2 shipbmpMargins = new Vector2(shipBmp.Width*0.1,shipBmp.Height*0.1);
-            RawBmp finalShipBmp = new RawBmp(shipBmp.Width + (int)shipbmpMargins.X*2, shipBmp.Height+ (int)shipbmpMargins.Y*2, shipBmp.Depth);
-            //shifting 
-            for (int x = 0; x < shipBmp.Width; x++)
-            {
-                for (int y = 0; y < shipBmp.Height; y++)
-                {
-                    var srsClr = shipBmp.GetPixel(x,y);
-                    finalShipBmp.SetPixel(x+(int)shipbmpMargins.X, y+(int)shipbmpMargins.Y, srsClr.r, srsClr.g, srsClr.b, srsClr.a);
-                }
-            }
-
-            shipBmp = finalShipBmp;
+             
 
             shipProfile.DamageProfile = shipBmp;
             return shipBmp;
@@ -236,8 +236,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
 
 
-        static void ThickLine(RawBmp bmp, (int x, int y) coordStart, (int x, int y) coordEnd, float wd, byte r, byte g, byte b, byte a)
+        static void ThickLine(RawBmp bmp, (int x, int y) coordStart, (int x, int y) coordEnd, float wd, byte r, byte g, byte b, byte a, Vector2 margins)
         {
+            
+
             var x0 = coordStart.x;
             var y0 = coordStart.y;
             var x1 = coordEnd.x;
@@ -252,14 +254,14 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             for (wd = (wd+1)/2; ; ) 
             {                                   /* pixel loop */
                 alph = (byte)Math.Max(0, r * Math.Abs(err-dx+dy)/ed-wd+1);
-                bmp.SetPixel(x0, y0, r, g, b, alph);
+                bmp.SetPixel(x0 + (int)margins.X, y0 + (int)margins.Y, r, g, b, alph);
                 e2 = err; x2 = x0;
                 if (2*e2 >= -dx) 
                 {                                           /* x step */
                     for (e2 += dy, y2 = y0; e2 < ed * wd && (y1 != y2 || dx > dy); e2 += dx)
                     {
                         alph = (byte)Math.Max(0, a * (Math.Abs(e2) / ed - wd + 1));
-                        bmp.SetPixel(x0, y2 += sy, r, g, b, alph);
+                        bmp.SetPixel(x0+(int)margins.X, (y2 += sy)+(int)margins.Y, r, g, b, alph);
                     }
 
                     if (x0 == x1) break;
@@ -270,13 +272,18 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                     for (e2 = dx - e2; e2 < ed * wd && (x1 != x2 || dx < dy); e2 += dy)
                     {
                         alph = (byte)Math.Max(0, a * (Math.Abs(e2) / ed - wd + 1));
-                        bmp.SetPixel(x2 += sx, y0, r, g, b, alph);
+                        bmp.SetPixel((x2 += sx)+(int)margins.X, y0+(int)margins.Y, r, g, b, alph);
                     }
 
                     if (y0 == y1) break;
                     err += dx; y0 += sy; 
                 }
             }
+        }
+        static void ThickLine(RawBmp bmp, (int x, int y) coordStart, (int x, int y) coordEnd, float wd, byte r, byte g, byte b, byte a)
+        {
+            ThickLine(bmp, coordStart, coordEnd, wd, r, g, b, a, new Vector2(0,0));
+            
         }
     }
 }
