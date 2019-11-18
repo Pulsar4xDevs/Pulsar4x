@@ -131,7 +131,15 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             //bool canvasLenIsBigEnough = canvasLen > bezzierMargin;
             //canvasWidth = (canvasWidthIsBigEnough ? canvasWidth - bezzierMargin : canvasWidth);
             //canvasLen = (canvasLenIsBigEnough?canvasLen-bezzierMargin:canvasLen);
-            float addedLineThickness = 0;//((canvasWidthIsBigEnough&&canvasLenIsBigEnough)?4:0);
+            //((canvasWidthIsBigEnough&&canvasLenIsBigEnough)?4:0);
+
+
+            float addedLineThickness = 0;
+
+
+           
+
+
             //create bezzier control points for front and rear armor/skin
 
             (int x, int y)[] controlPointsFore = new (int x, int y)[4];
@@ -178,7 +186,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                 ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
                 //Mirror:
                 coordStart = (coordStart.x, canvasWidth - coordStart.y);
+               
                 coordEnd = (coordEnd.x, canvasWidth - coordEnd.y);
+                
                 ThickLine(shipBmp, coordStart, coordEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
                 coordStart = linePoints[i];
             }
@@ -195,7 +205,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             ThickLine(shipBmp, straightStart, straightEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255);
 
 
-            //adding margins to the bitmap(white space around its edges to make it look cleaner once displayed)
+            
+             //adding margins to the bitmap(white space around its edges to make it look cleaner once displayed)
             Vector2 shipbmpMargins = new Vector2(shipBmp.Width*0.1,shipBmp.Height*0.1);
             RawBmp finalShipBmp = new RawBmp(shipBmp.Width + (int)shipbmpMargins.X*2, shipBmp.Height+ (int)shipbmpMargins.Y*2, shipBmp.Depth);
             //shifting 
@@ -208,9 +219,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                 }
             }
 
+            shipBmp = finalShipBmp;
 
-            shipProfile.DamageProfile = finalShipBmp;
-            return finalShipBmp;
+            shipProfile.DamageProfile = shipBmp;
+            return shipBmp;
         }
         
         private static double BezCalc(double t, double a0, double a1, double a2, double a3)
