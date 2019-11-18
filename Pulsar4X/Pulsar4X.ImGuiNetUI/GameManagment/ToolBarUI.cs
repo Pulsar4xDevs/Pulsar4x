@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.ECSLib;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 namespace Pulsar4X.SDL2UI
@@ -76,8 +77,10 @@ namespace Pulsar4X.SDL2UI
             ToolButtons = buttons;
         }
 
+
         internal override void Display()
         {
+            
             float xpad = 24;
             float ypad = 16;
             float x = _btnSize + xpad;
@@ -85,6 +88,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowSize(new Vector2(x,y ));
             if (ImGui.Begin("##Toolbar", _flags))
             {
+               
                 foreach (var button in ToolButtons)
                 {
                     
