@@ -102,11 +102,13 @@ namespace Pulsar4X.SDL2UI
             _state.ContextMenu = new EntityContextMenu(_state, entityGuid);
             _state.ContextMenu.Display();
         }
+        
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
             if (camera.ZoomLevel < DrawAtZoom)
                 return;
+
 
             int x = (int)(X + ViewOffset.X);
             int y = (int)(Y + ViewOffset.Y);
@@ -116,7 +118,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushStyleColor(ImGuiCol.WindowBg, new System.Numerics.Vector4(0, 0, 0, 0)); //make the background transperent. 
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
-            //ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));
+            //ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));// <- not used
             ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
@@ -158,9 +160,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key, 1))
                 {
-                    _state.EntityClicked(name.Key, _starSysGuid, MouseButtons.Alt);
-                    _state.ContextMenu = new EntityContextMenu(_state, name.Key);
-                    _state.ContextMenu.Display();
+                    setUpContextMenu(name.Key);
 
                     ImGui.EndPopup();
                 }
@@ -183,10 +183,11 @@ namespace Pulsar4X.SDL2UI
             ViewDisplayRect.Height = size.Y;
 
             ImGui.PopStyleColor();
-
-            ImGui.End();
             ImGui.PopStyleColor(); //have to pop the color change after pushing it.
             ImGui.PopStyleVar(3);
+
+            ImGui.End();
+            
 
 
         }
