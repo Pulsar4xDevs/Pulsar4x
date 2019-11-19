@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
         internal bool ShowDemoWindow;
         internal bool ShowDamageWindow;
         internal IntPtr rendererPtr;
-
+        internal Guid _lastContextMenuOpenedEntityGuid = Guid.Empty;
 
         internal GalacticMapRender GalacticMap;
 
@@ -144,9 +144,17 @@ namespace Pulsar4X.SDL2UI
             GalacticMap.SetFaction();
         }
 
+        //checks wether any event changed the mouse position after a new mouse click, indicating the user is doing something else with the mouse as he was doing before.
+        internal void onFocusMoved(){
+            _lastContextMenuOpenedEntityGuid = Guid.Empty;
+        }
+
         //checks wether the planet icon is clicked
         internal void MapClicked(ECSLib.Vector3 worldCoord, MouseButtons button)
         {
+
+            
+
             if (button == MouseButtons.Primary)
                 LastWorldPointClicked_m = worldCoord;
 
@@ -156,7 +164,9 @@ namespace Pulsar4X.SDL2UI
             if (LoadedWindows.ContainsKey(typeof(DistanceRuler)))
                 LoadedWindows[typeof(DistanceRuler)].MapClicked(worldCoord, button);
 
-            if(button == MouseButtons.Primary){
+            
+
+            if(true){
                 var allEntities = StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames;
                 //gets all entities with a position on the map
                 double closestEntityDistInM = double.MaxValue;
@@ -176,6 +186,9 @@ namespace Pulsar4X.SDL2UI
                     }
                 
                 }
+
+
+                
                 //checks if there is a closest entity
                 if(closestEntity != null){
                     if(closestEntity.HasDataBlob<MassVolumeDB>()){
@@ -187,7 +200,14 @@ namespace Pulsar4X.SDL2UI
 
                         if(closestEntityDistInM <= closestEntity.GetDataBlob<MassVolumeDB>().RadiusInM || Camera.WorldDistance(minPixelRadius) >=  Distance.MToAU(closestEntityDistInM)){
                             ImGui.Begin("--crash fixer--(this menu`s whole purpose is preventing a ImGui global state related game crash)");
+                           
                             EntityClicked(closestEntity.Guid, SelectedStarSysGuid, button);
+                            ImGui.End();
+                            
+                            if(button == MouseButtons.Alt){
+                                _lastContextMenuOpenedEntityGuid = closestEntity.Guid;
+                            }
+                            
                         }
                     }
                    

@@ -53,6 +53,7 @@ namespace Pulsar4X.SDL2UI
                     _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
                 }
             }
+            //if entity can fire?
             if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>())
             {
                 if (ImGui.SmallButton("Fire Control"))
@@ -63,6 +64,7 @@ namespace Pulsar4X.SDL2UI
                     _state.ActiveWindow = instance;
                 }
             }
+            //if entity can be renamed?
             if (ImGui.SmallButton("Rename"))
             {
                 RenameWindow.GetInstance(_entityState).IsActive = true;

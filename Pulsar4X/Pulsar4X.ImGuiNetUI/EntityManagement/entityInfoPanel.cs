@@ -40,7 +40,8 @@ namespace Pulsar4X.SDL2UI
                 if(_state.LastClickedEntity != null){
                     ImGui.Text("name: "+_state.LastClickedEntity.Name);
                     //ImGui.Text(""+_state.LastClickedEntity.);
-                } 
+                }
+                ImGui.End();
             }
         }
     }

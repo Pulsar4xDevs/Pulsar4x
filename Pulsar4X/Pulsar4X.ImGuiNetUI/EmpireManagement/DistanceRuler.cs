@@ -84,8 +84,8 @@ namespace Pulsar4X.SDL2UI
                 //displays the size in meters of the current screen area account for zoom and window dimensions
                 var windowCornerInWorldCoordinate = _state.Camera.WorldCoordinate_m((int)_state.MainWinSize.X, (int)_state.MainWinSize.Y);
                 ImGui.Text("Current screen is:");
-                ImGui.Text(((windowCornerInWorldCoordinate.X - _state.Camera.CameraWorldPosition_m.X)*2).ToString() + " meters wide.");
-                ImGui.Text((-(windowCornerInWorldCoordinate.Y - _state.Camera.CameraWorldPosition_m.Y)*2).ToString() + " meters tall.");
+                ImGui.Text(ECSLib.Misc.StringifyDistance(((windowCornerInWorldCoordinate.X - _state.Camera.CameraWorldPosition_m.X)*2))+" wide.");
+                ImGui.Text(ECSLib.Misc.StringifyDistance((-(windowCornerInWorldCoordinate.Y - _state.Camera.CameraWorldPosition_m.Y)*2))+" tall.");
                 //ImGui.Text((_state.Camera.WorldCoordinate_m((int)_state.Camera.ViewPortSize.X, (int)_state.Camera.ViewPortSize.Y).X - _state.Camera.CameraWorldPosition_m.X).ToString());
 
                 //the measure button, when clicked class starts listening for first mouse click to start measuring stick, wherever the mouse goes after that is the other end of the measuring stick.
@@ -106,10 +106,10 @@ namespace Pulsar4X.SDL2UI
 
                     SDL.SDL_SetRenderDrawColor(_state.rendererPtr, 255,255,255,255);
                     SDL.SDL_RenderDrawLine(_state.rendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);;
-                    ImGui.SetTooltip(Math.Sqrt(Math.Pow(_firstClick.X -lastMousePos.X, 2) + Math.Pow(_firstClick.Y - lastMousePos.Y, 2)).ToString()+" meters");
+                    ImGui.SetTooltip(ECSLib.Misc.StringifyDistance(Math.Sqrt(Math.Pow(_firstClick.X -lastMousePos.X, 2) + Math.Pow(_firstClick.Y - lastMousePos.Y, 2))));
                 }
 
-                //ImGui.End();
+                ImGui.End();
             }
             else
             {
