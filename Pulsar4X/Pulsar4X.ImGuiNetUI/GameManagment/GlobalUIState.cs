@@ -6,12 +6,23 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.IO;
+using Pulsar4X.SDL2UI;
+
 namespace Pulsar4X.SDL2UI
 {
     public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
     public class GlobalUIState
     {
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
+        internal static readonly Dictionary<Type, string> namesForMenus = new Dictionary<Type, string>{
+            {typeof(PinCameraBlankMenuHelper), "Pin camera"},
+            {typeof(OrbitOrderWindow), "Translate to a new orbit"},
+            {typeof(ChangeCurrentOrbitWindow), "Change current orbit"},
+            {typeof(WeaponTargetingControl), "Fire Control" },
+            {typeof(RenameWindow), "Rename"},
+            {typeof(CargoTransfer), "Cargo"},
+            {typeof(ColonyPanel), "econ"}
+        };
         internal Game Game;
         internal FactionVM FactionUIState;
         internal bool IsGameLoaded { get { return Game != null; } }
@@ -166,56 +177,54 @@ namespace Pulsar4X.SDL2UI
 
             
 
-            if(true){
-                var allEntities = StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames;
-                //gets all entities with a position on the map
-                double closestEntityDistInM = double.MaxValue;
-                Entity closestEntity = null;
-                //iterates over entities. Compares the next one with the previous closest-to-click one, if next one is closer, set that one as the closest, repeat for all entities.
-                foreach(var oneEntityState in allEntities){
-                    var oneEntity = oneEntityState.Value.Entity;
-                    if(oneEntity.HasDataBlob<PositionDB>()){
-                        var thisDistanceInM = Math.Sqrt(Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition_m.X-worldCoord.X, 2) + Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition_m.Y -worldCoord.Y,2));
-                        if(thisDistanceInM <= closestEntityDistInM){
+            var allEntities = StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames;
+            //gets all entities with a position on the map
+            double closestEntityDistInM = double.MaxValue;
+            Entity closestEntity = null;
+            //iterates over entities. Compares the next one with the previous closest-to-click one, if next one is closer, set that one as the closest, repeat for all entities.
+            foreach(var oneEntityState in allEntities){
+                var oneEntity = oneEntityState.Value.Entity;
+                if(oneEntity.HasDataBlob<PositionDB>()){
+                    var thisDistanceInM = Math.Sqrt(Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition_m.X-worldCoord.X, 2) + Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition_m.Y -worldCoord.Y,2));
+                    if(thisDistanceInM <= closestEntityDistInM){
                             
-                            closestEntityDistInM = thisDistanceInM;
-                            closestEntity = oneEntity;
+                        closestEntityDistInM = thisDistanceInM;
+                        closestEntity = oneEntity;
                         
                         
-                        }
                     }
-                
-                }
-
-
-                
-                //checks if there is a closest entity
-                if(closestEntity != null){
-                    if(closestEntity.HasDataBlob<MassVolumeDB>()){
-                        int minPixelRadius = 20;
-                        
-                        
-                        //var distanceBetweenMouseAndEntity = Math.Sqrt(Math.Pow(closestEntity.GetDataBlob<PositionDB>().AbsolutePosition_m - worldCoord,2) + Math.Pow(entityPositionInScreenPixels.Y- mousePosInPixels.Y,2));
-                        //int distComp = (int)Math.Sqrt(Math.Pow(50,2)/2);
-
-                        if(closestEntityDistInM <= closestEntity.GetDataBlob<MassVolumeDB>().RadiusInM || Camera.WorldDistance(minPixelRadius) >=  Distance.MToAU(closestEntityDistInM)){
-                            ImGui.Begin("--crash fixer--(this menu`s whole purpose is preventing a ImGui global state related game crash)");
-                           
-                            EntityClicked(closestEntity.Guid, SelectedStarSysGuid, button);
-                            ImGui.End();
-                            
-                            if(button == MouseButtons.Alt){
-                                _lastContextMenuOpenedEntityGuid = closestEntity.Guid;
-                            }
-                            
-                        }
-                    }
-                   
-                   
-                    
                 }
                 
             }
+
+
+                
+            //checks if there is a closest entity
+            if(closestEntity != null){
+                if(closestEntity.HasDataBlob<MassVolumeDB>()){
+                    int minPixelRadius = 20;
+                        
+                        
+                    //var distanceBetweenMouseAndEntity = Math.Sqrt(Math.Pow(closestEntity.GetDataBlob<PositionDB>().AbsolutePosition_m - worldCoord,2) + Math.Pow(entityPositionInScreenPixels.Y- mousePosInPixels.Y,2));
+                    //int distComp = (int)Math.Sqrt(Math.Pow(50,2)/2);
+
+                    if(closestEntityDistInM <= closestEntity.GetDataBlob<MassVolumeDB>().RadiusInM || Camera.WorldDistance(minPixelRadius) >=  Distance.MToAU(closestEntityDistInM)){
+                        ImGui.Begin("--crash fixer--(this menu`s whole purpose is preventing a ImGui global state related game crash)");
+                           
+                        EntityClicked(closestEntity.Guid, SelectedStarSysGuid, button);
+                        ImGui.End();
+                            
+                        if(button == MouseButtons.Alt){
+                            _lastContextMenuOpenedEntityGuid = closestEntity.Guid;
+                        }
+                            
+                    }
+                }
+                   
+                   
+                    
+            }
+                
 
             if (LoadedWindows.ContainsKey(typeof(ToolBarUI)))
                 LoadedWindows[typeof(ToolBarUI)].MapClicked(worldCoord, button);
@@ -232,7 +241,6 @@ namespace Pulsar4X.SDL2UI
             if (ActiveWindow != null)
                 ActiveWindow.EntityClicked(StarSystemStates[starSys].EntityStatesWithNames[entityGuid], button);
             OnEntitySelected();
-            EntityInfoPanel.GetInstance().SetActive();
         }
 
         void OnEntitySelected()
