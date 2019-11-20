@@ -97,10 +97,18 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        private void setUpContextMenu(Guid entityGuid){
+            _state.EntityClicked(entityGuid, _starSysGuid, MouseButtons.Alt);
+            _state.ContextMenu = new EntityContextMenu(_state, entityGuid);
+            _state.ContextMenu.Display();
+        }
+        
+
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
             if (camera.ZoomLevel < DrawAtZoom)
                 return;
+
 
             int x = (int)(X + ViewOffset.X);
             int y = (int)(Y + ViewOffset.Y);
@@ -110,7 +118,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushStyleColor(ImGuiCol.WindowBg, new System.Numerics.Vector4(0, 0, 0, 0)); //make the background transperent. 
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
-            //ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));
+            //ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));// <- not used
             ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
@@ -120,19 +128,30 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(0, 0, 0, 0));
             if (ImGui.Button(NameString)) //If the name gets clicked, we tell the state. 
             {
+                
                 _state.EntityClicked(_entityGuid, _starSysGuid, MouseButtons.Primary);
 
             }
+            
             if (ImGui.BeginPopupContextItem("NameContextMenu", 1))
             {
-                _state.EntityClicked(_entityGuid, _starSysGuid, MouseButtons.Alt);
-                _state.ContextMenu = new EntityContextMenu(_state, _entityGuid);
-                _state.ContextMenu.Display();
-
+                
+                setUpContextMenu(_entityGuid);
                 ImGui.EndPopup();
+               
+               
+            }
+            //checks the state if the icon of the entity with this nameicon was altClicked, if yes then display the normal context menu
+            if(_state._lastContextMenuOpenedEntityGuid == _entityGuid){
+                if(ImGui.BeginPopupContextVoid()){
+                   setUpContextMenu(_entityGuid);
+                   ImGui.EndPopup();
+                }
             }
 
-            ImGui.BeginChild("subnames");
+
+
+            //ImGui.BeginChild("subnames");
             foreach (var name in SubNames)
             {
                 if (ImGui.Button(name.Value))
@@ -141,15 +160,20 @@ namespace Pulsar4X.SDL2UI
                 }
                 if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key, 1))
                 {
-                    _state.EntityClicked(name.Key, _starSysGuid, MouseButtons.Alt);
-                    _state.ContextMenu = new EntityContextMenu(_state, name.Key);
-                    _state.ContextMenu.Display();
+                    setUpContextMenu(name.Key);
 
                     ImGui.EndPopup();
                 }
+                //checks the state if the icon of the entity with this subNameicon was altClicked, if yes then display the normal context menu for the the subname
+                if(_state._lastContextMenuOpenedEntityGuid == name.Key){
+                    if(ImGui.BeginPopupContextVoid()){
+                        setUpContextMenu(name.Key);
+                        ImGui.EndPopup();
+                    }
+                }
             }
 
-            ImGui.EndChild();
+            //ImGui.EndChild();
 
             //var size = ImGui.GetItemRectSize();
             var size = ImGui.GetWindowSize();
@@ -159,10 +183,11 @@ namespace Pulsar4X.SDL2UI
             ViewDisplayRect.Height = size.Y;
 
             ImGui.PopStyleColor();
-
-            ImGui.End();
             ImGui.PopStyleColor(); //have to pop the color change after pushing it.
             ImGui.PopStyleVar(3);
+
+            ImGui.End();
+            
 
 
         }
