@@ -47,10 +47,12 @@ namespace Pulsar4X.SDL2UI
                         var parentEntity = _state.LastClickedEntity.Entity.GetDataBlob<PositionDB>().Parent;
                         bool hasParentEntity = false;
                         if(parentEntity != null){
-                            if(parentEntity.HasDataBlob<NameDB>()){
+                            if(_state.StarSystemStates[_state.SelectedStarSysGuid].EntityStatesWithNames.ContainsKey(parentEntity.Guid)){
                                 hasParentEntity = true;
                                 if(ImGui.SmallButton(_state.StarSystemStates[_state.SelectedStarSysGuid].EntityStatesWithNames[parentEntity.Guid].Name)){
+                                //if(ImGui.SmallButton(parentEntity.GetDataBlob<NameDB>().GetName(_state.Faction.Guid))){
                                     _state.EntityClicked(parentEntity.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
+                                //}
                                 }
                             }
                         }
@@ -60,7 +62,7 @@ namespace Pulsar4X.SDL2UI
                         bool hasChildrenEntities = false;
                         ImGui.Text("Children entities: ");
                         foreach(var childEntity in _state.LastClickedEntity.Entity.GetDataBlob<PositionDB>().Children){
-                            if(childEntity.HasDataBlob<NameDB>()){
+                            if(_state.StarSystemStates[_state.SelectedStarSysGuid].EntityStatesWithNames.ContainsKey(childEntity.Guid)){
                                 hasChildrenEntities = true;
                                 if(ImGui.SmallButton(_state.StarSystemStates[_state.SelectedStarSysGuid].EntityStatesWithNames[childEntity.Guid].Name)){
                                     _state.EntityClicked(childEntity.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);

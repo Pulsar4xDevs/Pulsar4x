@@ -197,7 +197,6 @@ namespace Pulsar4X.SDL2UI
         //WARNING!!! DO NOT USE FOR BULK DRAWING, USE DRAWALL FOR BULK DRAWING^^;
         public void Draw(IntPtr rendererPtr, Camera camera, bool createNewWindow)
         {
-
             if (camera.ZoomLevel < DrawAtZoom)
                 return;
 
@@ -220,14 +219,14 @@ namespace Pulsar4X.SDL2UI
             }
             
             ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(0, 0, 0, 0));
-            if (ImGui.Button(NameString)) //If the name gets clicked, we tell the state. 
+            if (ImGui.Button(NameString+"##"+_entityGuid.ToString())) //If the name gets clicked, we tell the state. 
             {
                 
                 _state.EntityClicked(_entityGuid, _starSysGuid, MouseButtons.Primary);
 
             }
             
-            if (ImGui.BeginPopupContextItem("NameContextMenu", 1))
+            if (ImGui.BeginPopupContextItem("NameContextMenu"+_entityGuid.ToString()+NameString, 1))
             {
                 
                 setUpContextMenu(_entityGuid);
@@ -248,11 +247,11 @@ namespace Pulsar4X.SDL2UI
             //ImGui.BeginChild("subnames");
             foreach (var name in SubNames)
             {
-                if (ImGui.Button(name.Value))
+                if (ImGui.Button(name.Value+"##"+_entityGuid.ToString()+name.Key.ToString()+name.Value))
                 {
                     _state.EntityClicked(name.Key, _starSysGuid, MouseButtons.Primary);
                 }
-                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key, 1))
+                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key+name.Value+_entityGuid.ToString()+NameString, 1))
                 {
                     setUpContextMenu(name.Key);
 
@@ -280,9 +279,10 @@ namespace Pulsar4X.SDL2UI
             if(createNewWindow){
                ImGui.PopStyleColor(); //have to pop the color change after pushing it.
                ImGui.PopStyleVar(3);
+                ImGui.End();
             }
 
-            //ImGui.End();
+            
             
 
 
