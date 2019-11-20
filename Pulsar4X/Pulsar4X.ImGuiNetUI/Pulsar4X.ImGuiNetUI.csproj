@@ -1,64 +1,85 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net47</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <FileUpgradeFlags>40</FileUpgradeFlags>
+    <UpgradeBackupLocation>C:\Users\matia\source\repos\Pulsar4x\Pulsar4X\Backup2\</UpgradeBackupLocation>
+    <OldToolsVersion>Current</OldToolsVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Linux_x64' ">
     <IntermediateOutputPath>obj\Linux_x64\Debug</IntermediateOutputPath>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <OutputPath>bin\Linux_x64\Debug</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Linux_x64' ">
     <IntermediateOutputPath>obj\Linux_x64\Release</IntermediateOutputPath>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\build\bin\Linux_x64\Release</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <AssemblyName>Pulsar4X</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Windows_x64' ">
     <IntermediateOutputPath>obj\Windows_x64\Debug</IntermediateOutputPath>
     <DebugSymbols>true</DebugSymbols>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <OutputPath>bin\Windows_x64\Debug</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Windows_x64' ">
     <IntermediateOutputPath>obj\Windows_x64\Release</IntermediateOutputPath>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Windows_x64\Release</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Windows_x86' ">
     <IntermediateOutputPath>obj\Windows_x86\Debug</IntermediateOutputPath>
     <DebugSymbols>false</DebugSymbols>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <OutputPath>bin\Windows_x86\Debug</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Windows_x86' ">
     <IntermediateOutputPath>obj\Windows_x86\Release</IntermediateOutputPath>
-    <DebugType></DebugType>
+    <DebugType>
+    </DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Windows_x86\Release</OutputPath>
-    <DefineConstants></DefineConstants>
-    <NoWarn></NoWarn>
+    <DefineConstants>
+    </DefineConstants>
+    <NoWarn>
+    </NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>

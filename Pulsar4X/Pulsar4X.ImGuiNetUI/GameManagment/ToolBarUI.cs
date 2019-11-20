@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Pulsar4X.ECSLib;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 namespace Pulsar4X.SDL2UI
@@ -11,6 +12,8 @@ namespace Pulsar4X.SDL2UI
         private float _btnSize = 32;
         public Vector2 BtnSizes = new Vector2(32, 32);
         private List<ToolbuttonData> ToolButtons = new List<ToolbuttonData>();
+        //data for a toolbar button, requires an SDL image(for Picture), a PulsarGuiWindow`s SetActive function or equivalent/similar(for OnClick) and
+        //the tool tip text to be displayed when the button is hovered(for TooltipText)
         public struct ToolbuttonData
         {
             public IntPtr Picture;
@@ -18,6 +21,7 @@ namespace Pulsar4X.SDL2UI
             public Action OnClick;
         }
 
+        //constructs the toolbar with the given buttons
         private ToolBarUI()
         {
             _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar;
@@ -54,6 +58,8 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
             
+            
+
         }
 
         internal static ToolBarUI GetInstance()
@@ -73,6 +79,7 @@ namespace Pulsar4X.SDL2UI
             ToolButtons = buttons;
         }
 
+
         internal override void Display()
         {
             float xpad = 24;
@@ -82,6 +89,8 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowSize(new Vector2(x,y ));
             if (ImGui.Begin("##Toolbar", _flags))
             {
+                
+                //displays the default toolbar menu icons
                 foreach (var button in ToolButtons)
                 {
                     

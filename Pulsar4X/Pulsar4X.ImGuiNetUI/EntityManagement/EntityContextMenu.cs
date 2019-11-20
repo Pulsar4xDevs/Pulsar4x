@@ -2,6 +2,7 @@
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -29,6 +30,36 @@ namespace Pulsar4X.SDL2UI
             ActiveEntity = _entityState.Entity;
             ImGui.BeginGroup();
 
+            
+            if(EntityUIWindows.checkIfCanOpenWindow<PinCameraBlankMenuHelper>( _entityState)){
+            
+                EntityUIWindows.openUIWindow<PinCameraBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PinCameraBlankMenuHelper)]), _entityState, _state, true);
+            }
+            if(EntityUIWindows.checkIfCanOpenWindow<OrbitOrderWindow>(_entityState)){
+            
+                EntityUIWindows.openUIWindow<OrbitOrderWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(OrbitOrderWindow)]), _entityState, _state, true);
+            }
+            if(EntityUIWindows.checkIfCanOpenWindow<ChangeCurrentOrbitWindow>(_entityState)){
+            
+                EntityUIWindows.openUIWindow<ChangeCurrentOrbitWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ChangeCurrentOrbitWindow)]), _entityState, _state, true);
+            }
+            if(EntityUIWindows.checkIfCanOpenWindow<WeaponTargetingControl>(_entityState)){
+            
+                EntityUIWindows.openUIWindow<WeaponTargetingControl>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(WeaponTargetingControl)]), _entityState, _state, true);
+            }
+            if(EntityUIWindows.checkIfCanOpenWindow<RenameWindow>( _entityState)){
+            
+                EntityUIWindows.openUIWindow<RenameWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(RenameWindow)]), _entityState, _state, true);
+            }
+            if(EntityUIWindows.checkIfCanOpenWindow<CargoTransfer>(_entityState)){
+            
+                EntityUIWindows.openUIWindow<CargoTransfer>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(CargoTransfer)]), _entityState, _state, true);
+            }
+            if(EntityUIWindows.checkIfCanOpenWindow<ColonyPanel>( _entityState)){
+            
+                EntityUIWindows.openUIWindow<ColonyPanel>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ColonyPanel)]), _entityState, _state, true);
+            }
+            /*
             if (ImGui.SmallButton("Pin Camera"))
             {
                 _state.Camera.PinToEntity(_entityState.Entity);
@@ -53,6 +84,7 @@ namespace Pulsar4X.SDL2UI
                     _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
                 }
             }
+            //if entity can fire?
             if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>())
             {
                 if (ImGui.SmallButton("Fire Control"))
@@ -63,6 +95,7 @@ namespace Pulsar4X.SDL2UI
                     _state.ActiveWindow = instance;
                 }
             }
+            //if entity can be renamed?
             if (ImGui.SmallButton("Rename"))
             {
                 RenameWindow.GetInstance(_entityState).IsActive = true;
@@ -91,7 +124,7 @@ namespace Pulsar4X.SDL2UI
                     instance.IsActive = true;
                     _state.ActiveWindow = instance;
                 } 
-            }
+            }*/
 
             ImGui.EndGroup();
 

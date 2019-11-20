@@ -9,6 +9,7 @@ using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 
+
 namespace Pulsar4X.SDL2UI
 {
     public class ShipDesignUI : PulsarGuiWindow
@@ -463,7 +464,7 @@ namespace Pulsar4X.SDL2UI
                         scaleh = maxheight / h;
                     }
 
-                    scale = Math.Max(scaleh, scalew);
+                    scale = Math.Min(scaleh, scalew);
                     
                     ImGui.Image(_shipImgPtr, new Vector2(w * scale, h * scale));
                 }

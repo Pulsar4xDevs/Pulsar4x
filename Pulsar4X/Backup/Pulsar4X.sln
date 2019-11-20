@@ -1,0 +1,74 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2009
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulsar4X.ECSLib", "Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj", "{E716FA06-ECDF-B446-96B4-B790AAB5713B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulsar4X.Tests", "Pulsar4X.Tests\Pulsar4X.Tests.csproj", "{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulsar4X.ImGuiNetUI", "Pulsar4X.ImGuiNetUI\Pulsar4X.ImGuiNetUI.csproj", "{8F27EDF1-1680-4CD2-809C-A9D25B207168}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Linux_x64 = Debug|Linux_x64
+		Debug|Windows_x64 = Debug|Windows_x64
+		Debug|Windows_x86 = Debug|Windows_x86
+		Release|Linux_x64 = Release|Linux_x64
+		Release|Windows_x64 = Release|Windows_x64
+		Release|Windows_x86 = Release|Windows_x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Debug|Linux_x64.ActiveCfg = Debug|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Debug|Linux_x64.Build.0 = Debug|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Debug|Windows_x64.ActiveCfg = Debug|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Debug|Windows_x64.Build.0 = Debug|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Debug|Windows_x86.ActiveCfg = Debug|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Debug|Windows_x86.Build.0 = Debug|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Release|Linux_x64.ActiveCfg = Release|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Release|Linux_x64.Build.0 = Release|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Release|Windows_x64.ActiveCfg = Release|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Release|Windows_x64.Build.0 = Release|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Release|Windows_x86.ActiveCfg = Release|Any CPU
+		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Release|Windows_x86.Build.0 = Release|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Debug|Linux_x64.ActiveCfg = Debug|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Debug|Linux_x64.Build.0 = Debug|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Debug|Windows_x64.ActiveCfg = Debug|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Debug|Windows_x64.Build.0 = Debug|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Debug|Windows_x86.ActiveCfg = Debug|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Debug|Windows_x86.Build.0 = Debug|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Release|Linux_x64.ActiveCfg = Release|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Release|Linux_x64.Build.0 = Release|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Release|Windows_x64.ActiveCfg = Release|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Release|Windows_x64.Build.0 = Release|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Release|Windows_x86.ActiveCfg = Release|Any CPU
+		{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}.Release|Windows_x86.Build.0 = Release|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Debug|Linux_x64.ActiveCfg = Debug|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Debug|Linux_x64.Build.0 = Debug|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Debug|Windows_x64.ActiveCfg = Debug|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Debug|Windows_x64.Build.0 = Debug|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Debug|Windows_x86.ActiveCfg = Debug|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Debug|Windows_x86.Build.0 = Debug|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Release|Linux_x64.ActiveCfg = Release|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Release|Linux_x64.Build.0 = Release|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Release|Windows_x64.ActiveCfg = Release|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Release|Windows_x64.Build.0 = Release|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Release|Windows_x86.ActiveCfg = Release|Any CPU
+		{8F27EDF1-1680-4CD2-809C-A9D25B207168}.Release|Windows_x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA804614-B897-4C3B-A595-7761BA4664BE}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.ChangeLogPolicy = $1
+		$1.UpdateMode = ProjectRoot
+		$0.DotNetNamingPolicy = $2
+		$0.VersionControlPolicy = $3
+	EndGlobalSection
+	GlobalSection(AvalonStudioProperties) = preSolution
+		StartupItem = {30509646-A52E-4563-AE27-706882D7F8C3}
+	EndGlobalSection
+EndGlobal

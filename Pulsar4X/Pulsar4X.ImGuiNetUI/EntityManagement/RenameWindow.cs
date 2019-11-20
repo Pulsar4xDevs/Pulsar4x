@@ -10,10 +10,14 @@ namespace Pulsar4X.SDL2UI
         byte[] nameInputBuffer; 
         string nameString { get { return System.Text.Encoding.UTF8.GetString(nameInputBuffer); } }
 
-        public RenameWindow(EntityState entity)
-        {
+        private void reset(EntityState entity){
             _entityState = entity;
             nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(_entityState.Name);
+        }
+
+        public RenameWindow(EntityState entity)
+        {
+            reset(entity);
         }
         internal static RenameWindow GetInstance(EntityState entity)
         {
@@ -21,7 +25,9 @@ namespace Pulsar4X.SDL2UI
             {
                 return new RenameWindow(entity);
             }
-            return (RenameWindow)_state.LoadedWindows[typeof(RenameWindow)];
+            var retval = (RenameWindow)_state.LoadedWindows[typeof(RenameWindow)];
+            retval.reset(entity);
+            return retval;
         }
 
         internal override void Display()
@@ -34,11 +40,19 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     if (ImGui.SmallButton("Set"))
                     {
-                        RenameCommand.CreateRenameCommand(_state.Game, _state.Faction, _entityState.Entity, nameString);
-                        _entityState.Name = nameString;
-                        _entityState.NameIcon.NameString = nameString;
-                        IsActive = false;
+                        if(nameInputBuffer[0] != 0){
+                        
+                            RenameCommand.CreateRenameCommand(_state.Game, _state.Faction, _entityState.Entity, nameString);
+                            _entityState.Name = nameString;
+                            _entityState.NameIcon.NameString = nameString;
+                            IsActive = false;
+                        }
+
+                        
+                        
+                        
                     }
+                    ImGui.Text(nameString.Length.ToString());
                 }
                 ImGui.End();
             }
