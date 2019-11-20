@@ -4,12 +4,37 @@ using ImGuiNET;
 using Pulsar4X.ECSLib;
 using SDL2;
 using System.Numerics;
+using System.Collections;
+using System.Linq;
 //using Vector2 = ImGuiNET.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {
+
+    public static class ListExtra
+    {
+        public static void Resize<T>(this List<T> list, int sz, T c)
+        {
+            int cur = list.Count;
+            if(sz < cur)
+                list.RemoveRange(sz, cur - sz);
+            else if(sz > cur)
+            {
+                if(sz > list.Capacity)//this bit is purely an optimisation, to avoid multiple automatic capacity changes.
+                  list.Capacity = sz;
+                list.AddRange(Enumerable.Repeat(c, sz - cur));
+            }
+        }
+        public static void Resize<T>(this List<T> list, int sz) where T : new()
+        {
+            Resize(list, sz, new T());
+        }
+    }
+
+
     public class NameIcon : Icon, IComparable<NameIcon>, IRectangle
     {
+
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings;
         internal bool IsActive = true;
         GlobalUIState _state;
@@ -28,6 +53,7 @@ namespace Pulsar4X.SDL2UI
         internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[(int)_bodyType]; } }
         public NameIcon(EntityState entityState, GlobalUIState state) : base(entityState.Entity.GetDataBlob<PositionDB>())
         {
+            Random rnd = new Random();
             _state = state;
             _entityGuid = entityState.Entity.Guid;
             StarSystem starsys = (StarSystem)entityState.Entity.Manager;
@@ -102,10 +128,76 @@ namespace Pulsar4X.SDL2UI
             _state.ContextMenu = new EntityContextMenu(_state, entityGuid);
             _state.ContextMenu.Display();
         }
-        
+
+
+        //use to correctly draw all passed name icons
+        public static void DrawAll(IntPtr rendererPtr, Camera camera, List<NameIcon> nameIcons){
+            List<List<NameIcon>> nameIconGroupings = new List<List<NameIcon>>();
+            List<bool> alreadyGroupedItems = new List<bool>();
+            ListExtra.Resize<bool>(alreadyGroupedItems, nameIcons.Count, false);
+            
+          // while(true){
+           
+           //}
+
+            //ImGui.Begin("");
+            //ImGui.Text(nameIcons[5].NameString);
+            //ImGui.End();
+
+            int iterations = 0;
+            foreach(var nameIcon in nameIcons){
+                if(!alreadyGroupedItems[iterations]){
+                    nameIconGroupings.Add(new List<NameIcon>());
+                    nameIconGroupings[nameIconGroupings.Count -1].Add(nameIcon);
+                    alreadyGroupedItems[iterations] = true;
+                    int nestedIterations = 0;
+                    foreach(var nestedNameIcon in nameIcons){
+                        if(iterations != nestedIterations && !alreadyGroupedItems[nestedIterations]){
+                            //check if two names are within the same pixel of distance, if so groups them together into a single window to prevent name overlapping.
+                            if((Math.Pow((nameIcon.X+nameIcon.ViewOffset.X)-(nestedNameIcon.X+nestedNameIcon.ViewOffset.X),2)+Math.Pow((nameIcon.Y+nameIcon.ViewOffset.Y)-(nestedNameIcon.Y+nestedNameIcon.ViewOffset.Y),2)) < Math.Pow(2,2)){
+                                nameIconGroupings[nameIconGroupings.Count -1].Add(nestedNameIcon);
+                                alreadyGroupedItems[nestedIterations] = true;
+                            }
+                        }
+                        nestedIterations++;
+                    }
+                }
+                iterations++;
+            }
+            
+            
+            foreach(var nameIconGrouping in nameIconGroupings){
+                int x = (int)(nameIconGrouping[0].X + nameIconGrouping[0].ViewOffset.X);
+                int y = (int)(nameIconGrouping[0].Y + nameIconGrouping[0].ViewOffset.Y);
+                System.Numerics.Vector2 pos = new System.Numerics.Vector2(x, y);
+
+                ImGui.PushStyleColor(ImGuiCol.WindowBg, new System.Numerics.Vector4(0, 0, 0, 0)); //make the background transperent. 
+
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
+
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
+                ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
+                ImGui.Begin(nameIconGrouping[0].NameString, ref nameIconGrouping[0].IsActive, nameIconGrouping[0]._flags);
+                foreach(var finalNameIcon in nameIconGrouping){
+                   finalNameIcon.Draw(rendererPtr, camera, false);
+                }
+                ImGui.PopStyleColor(); //have to pop the color change after pushing it.
+                ImGui.PopStyleVar(3);
+                ImGui.End();
+            }
+        }
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
+            base.Draw(rendererPtr, camera);
+            Draw(rendererPtr, camera, true);
+        }
+
+        //WARNING!!! DO NOT USE FOR BULK DRAWING, USE DRAWALL FOR BULK DRAWING^^;
+        public void Draw(IntPtr rendererPtr, Camera camera, bool createNewWindow)
+        {
+
             if (camera.ZoomLevel < DrawAtZoom)
                 return;
 
@@ -114,17 +206,19 @@ namespace Pulsar4X.SDL2UI
             int y = (int)(Y + ViewOffset.Y);
             System.Numerics.Vector2 pos = new System.Numerics.Vector2(x, y);
 
+            if(createNewWindow){
+                ImGui.PushStyleColor(ImGuiCol.WindowBg, new System.Numerics.Vector4(0, 0, 0, 0)); //make the background transperent. 
 
-            ImGui.PushStyleColor(ImGuiCol.WindowBg, new System.Numerics.Vector4(0, 0, 0, 0)); //make the background transperent. 
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+                //ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));// <- not used
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
 
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
-            //ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));// <- not used
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
+                ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
 
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
-            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-
-            ImGui.Begin(NameString, ref IsActive, _flags);
+                ImGui.Begin(NameString, ref IsActive, _flags);
+            }
+            
             ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(0, 0, 0, 0));
             if (ImGui.Button(NameString)) //If the name gets clicked, we tell the state. 
             {
@@ -183,10 +277,12 @@ namespace Pulsar4X.SDL2UI
             ViewDisplayRect.Height = size.Y;
 
             ImGui.PopStyleColor();
-            ImGui.PopStyleColor(); //have to pop the color change after pushing it.
-            ImGui.PopStyleVar(3);
+            if(createNewWindow){
+               ImGui.PopStyleColor(); //have to pop the color change after pushing it.
+               ImGui.PopStyleVar(3);
+            }
 
-            ImGui.End();
+            //ImGui.End();
             
 
 

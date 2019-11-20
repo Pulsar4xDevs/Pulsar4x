@@ -67,6 +67,7 @@ namespace Pulsar4X.SDL2UI
 
         private bool MyEventHandler(SDL2Window window, SDL.SDL_Event e)
         {
+
             int mouseX;
             int mouseY;
             SDL.SDL_GetMouseState(out mouseX, out mouseY);
