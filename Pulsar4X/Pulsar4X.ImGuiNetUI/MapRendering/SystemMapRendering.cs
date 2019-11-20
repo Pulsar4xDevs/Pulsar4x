@@ -302,6 +302,13 @@ namespace Pulsar4X.SDL2UI
                         _moveIcons[changeData.Entity.Guid] = widget;
                         //_moveIcons.Add(changeData.Entity.Guid, widget);
                     }
+
+                    if (changeData.Datablob is NewtonMoveDB)
+                    {
+                        OrbitHypobolicIcon orb;
+                        orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                        _orbitRings.AddOrUpdate(changeData.Entity.Guid, orb, ((guid, data) => data = orb));
+                    }
                     //if (changeData.Datablob is NameDB)
                     //TextIconList[changeData.Entity.Guid] = new TextIcon(changeData.Entity, _camera);
 
@@ -317,6 +324,11 @@ namespace Pulsar4X.SDL2UI
                     if (changeData.Datablob is WarpMovingDB)
                     {
                         _moveIcons.TryRemove(changeData.Entity.Guid, out IDrawData foo);
+                    }
+
+                    if (changeData.Datablob is NewtonMoveDB)
+                    {
+                        _orbitRings.TryRemove(changeData.Entity.Guid, out IDrawData foo);
                     }
 
                     //if (changeData.Datablob is NameDB)

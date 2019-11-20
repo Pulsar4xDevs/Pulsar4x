@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
         {
         }
 
-        public TimeSpan RunFrequency => TimeSpan.FromMinutes(5);
+        public TimeSpan RunFrequency => TimeSpan.FromSeconds(1);
 
         public TimeSpan FirstRunOffset => TimeSpan.FromSeconds(0);
 
@@ -66,7 +66,7 @@ namespace Pulsar4X.ECSLib
 
                 //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
                 //timeStep = Math.Min(timeStep, secondsToItterate);
-                double timeStep = 1;//because the above seems unstable and looses energy. 
+                double timeStepInSeconds = 1;//because the above seems unstable and looses energy. 
                 double distanceToParent_m = positionDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>());
 
                 distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
@@ -74,35 +74,35 @@ namespace Pulsar4X.ECSLib
                 double gravForce = GameConstants.Science.GravitationalConstant * (mass_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
                 Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition_m);
 
-                Vector3 acceleratonFromGrav = gravForceVector / mass_Kg;
+                Vector3 totalDVFromGrav = (gravForceVector / mass_Kg) * timeStepInSeconds;
                 
                 double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
-                //double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
+                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
 
                 
                 Vector3 manuverDV = newtonMoveDB.DeltaVForManuver_m; //how much dv needed to complete the manuver.
-                double dryMass = mass_Kg - newtonThrust.FuelBurnRate * timeStep;
                 
+                double dryMass = mass_Kg - newtonThrust.FuelBurnRate * timeStepInSeconds; //how much our ship weighs after a timestep of fuel is used.
                 //how much dv can we get in this timestep.
                 double deltaVThisStep = OrbitMath.TsiolkovskyRocketEquation(mass_Kg, dryMass, newtonThrust.ExhaustVelocity);
                 deltaVThisStep = Math.Min(manuverDV.Length(), deltaVThisStep); //don't use more Dv than what is called for.
                 deltaVThisStep = Math.Min(newtonThrust.DeltaV, deltaVThisStep); //check we've got the deltaV to spend.
                 
-                Vector3 vectorDVThisStep = Vector3.Normalise(manuverDV) * deltaVThisStep;
+                Vector3 totalDVFromThrust = Vector3.Normalise(manuverDV) * deltaVThisStep;
 
-                //remove the deltaV we're expending from the max (TODO: Remove fuel from cargo)
+                //remove the deltaV we're expending from the max (TODO: Remove fuel from cargo, change mass of ship)
                 newtonThrust.DeltaV -= deltaVThisStep;
                 //remove the vectorDV from the amount needed to fully complete the manuver. 
-                newtonMoveDB.DeltaVForManuver_m -= vectorDVThisStep;
+                newtonMoveDB.DeltaVForManuver_m -= totalDVFromThrust;
                 
 
-                Vector3 accelerationFromThrust = vectorDVThisStep;// / maxAccelFromThrust; //per second
+          
 
-                Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
-                Vector3 newVelocity = (accelerationTotal * timeStep) + newtonMoveDB.CurrentVector_ms;
+                Vector3 totalDV = totalDVFromGrav + totalDVFromThrust;
+                Vector3 newVelocity = totalDV + newtonMoveDB.CurrentVector_ms;
 
                 newtonMoveDB.CurrentVector_ms = newVelocity;
-                Vector3 deltaPos = (newtonMoveDB.CurrentVector_ms + newVelocity) / 2 * timeStep;
+                Vector3 deltaPos = (newtonMoveDB.CurrentVector_ms + newVelocity) / 2 * timeStepInSeconds;
 
                 positionDB.RelativePosition_m += deltaPos;
 
@@ -170,7 +170,7 @@ namespace Pulsar4X.ECSLib
                     
                 }
                 
-                secondsToItterate -= timeStep;
+                secondsToItterate -= timeStepInSeconds;
             }
             newtonMoveDB.LastProcessDateTime = dateTimeFuture;
         }

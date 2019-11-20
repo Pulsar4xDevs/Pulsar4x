@@ -33,7 +33,8 @@ namespace Pulsar4X.SDL2UI
         protected int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
         protected float _segmentArcSweepRadians; //how large each segment in the drawn portion of the ellipse.  
         protected float _alphaChangeAmount;
- 
+
+        private double _dv = 0;
 
         public OrbitHypobolicIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonMoveDB>().SOIParent.GetDataBlob<PositionDB>())
         {
@@ -72,7 +73,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void CreatePointArray()
         {
-
+            _dv = _newtonMoveDB.DeltaVForManuver_m.Length();
             Vector3 vel = Distance.MToAU(_newtonMoveDB.CurrentVector_ms);
             Vector3 pos = myPosDB.RelativePosition_AU;
             Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
@@ -176,6 +177,10 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
+            if (_dv != _newtonMoveDB.DeltaVForManuver_m.Length())
+                CreatePointArray();
+            
+            
             Vector3 pos = myPosDB.RelativePosition_AU;
             var ralitivePos = new PointD() { X = pos.X, Y = pos.Y };
 
