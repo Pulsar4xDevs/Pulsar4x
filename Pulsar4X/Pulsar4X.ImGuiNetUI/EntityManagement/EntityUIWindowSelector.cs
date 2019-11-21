@@ -7,6 +7,7 @@ using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 namespace Pulsar4X.SDL2UI
 {
+    //basically an always open context menu for the currently selected entity.
     public class EntityUIWindowSelector : PulsarGuiWindow
     {
         private EntityUIWindowSelector()
