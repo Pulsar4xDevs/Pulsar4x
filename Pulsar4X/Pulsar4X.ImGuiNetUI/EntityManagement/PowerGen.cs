@@ -67,9 +67,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             if(_entityState != _state.LastClickedEntity)
                 SetEntity(_state.LastClickedEntity);
-            if (IsActive && CanActive)
+            if (IsActive && CanActive && ImGui.Begin("Power Display " + _entityState.Name, ref IsActive, _flags))
             {
-                ImGui.Begin("Power Display " + _entityState.Name);
                 ImGui.Text("Current Load: ");
                 ImGui.SameLine();
                 ImGui.Text(_energyGenDB.Load.ToString());
