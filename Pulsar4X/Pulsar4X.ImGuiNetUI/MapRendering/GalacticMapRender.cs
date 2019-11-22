@@ -103,10 +103,14 @@ namespace Pulsar4X.SDL2UI
             {
                 lock (_nameIcons)
                 {
+                    List<NameIcon> nameIcons = new List<NameIcon>();
                     foreach (var item in _nameIcons)
                     {
-                        item.Value.Draw(_state.rendererPtr, _state.Camera);
+                        nameIcons.Add(item.Value);
+                         
+                        //item.Value.Draw(_state.rendererPtr, _state.Camera);
                     }
+                    NameIcon.DrawAll(_state.rendererPtr, _state.Camera, nameIcons);
                 }
             }
         }

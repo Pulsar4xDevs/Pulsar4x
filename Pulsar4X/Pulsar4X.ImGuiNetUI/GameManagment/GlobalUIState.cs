@@ -175,26 +175,30 @@ namespace Pulsar4X.SDL2UI
             if (LoadedWindows.ContainsKey(typeof(DistanceRuler)))
                 LoadedWindows[typeof(DistanceRuler)].MapClicked(worldCoord, button);
 
-            
-
-            var allEntities = StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames;
+            Dictionary<Guid, EntityState> allEntities = null;
+            if(StarSystemStates.ContainsKey(SelectedStarSysGuid)){
+                allEntities = StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames;
+            }
             //gets all entities with a position on the map
             double closestEntityDistInM = double.MaxValue;
             Entity closestEntity = null;
             //iterates over entities. Compares the next one with the previous closest-to-click one, if next one is closer, set that one as the closest, repeat for all entities.
-            foreach(var oneEntityState in allEntities){
-                var oneEntity = oneEntityState.Value.Entity;
-                if(oneEntity.HasDataBlob<PositionDB>()){
-                    var thisDistanceInM = Math.Sqrt(Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition_m.X-worldCoord.X, 2) + Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition_m.Y -worldCoord.Y,2));
-                    if(thisDistanceInM <= closestEntityDistInM){
+            if(allEntities != null){
+            
+                foreach(var oneEntityState in allEntities){
+                    var oneEntity = oneEntityState.Value.Entity;
+                    if(oneEntity.HasDataBlob<PositionDB>()){
+                        var thisDistanceInM = Math.Sqrt(Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition_m.X-worldCoord.X, 2) + Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition_m.Y -worldCoord.Y,2));
+                        if(thisDistanceInM <= closestEntityDistInM){
                             
-                        closestEntityDistInM = thisDistanceInM;
-                        closestEntity = oneEntity;
+                            closestEntityDistInM = thisDistanceInM;
+                            closestEntity = oneEntity;
                         
                         
+                        }
                     }
-                }
                 
+                }
             }
 
 
