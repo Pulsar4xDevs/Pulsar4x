@@ -36,6 +36,27 @@ namespace Pulsar4X.ECSLib
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
 
+
+            /*
+            GalaxyFactory GalaxyGen = game.GalaxyGen;
+            SystemBodyFactory _systemBodyFactory = new SystemBodyFactory(GalaxyGen);
+
+            SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
+            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
+            NameDB halleysNameDB = new NameDB("testName");
+            double halleysSemiMajAxis = 17.834; //AU
+            double halleysEccentricity = 0.96714;
+            double halleysInclination = 180; //162.26° note retrograde orbit.
+            double halleysLoAN = 58.42; //°
+            double halleysAoP = 111.33;//°
+            double halleysMeanAnomaly = 38.38;//°
+            OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(solSys.Entities[0], solSys.Entities[0].GetDataBlob<MassVolumeDB>().Mass, halleysMVDB.Mass, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
+            PositionDB halleysPositionDB = new PositionDB(0,0,0, solSys.Guid, solSys.Entities[0]); // + earthPositionDB.AbsolutePosition_AU, sol.Guid);
+            SensorProfileDB sensorProfile = new SensorProfileDB();
+            Entity halleysComet = new Entity(solSys, new List<BaseDataBlob> { halleysPositionDB, halleysNameDB });
+            //_systemBodyFactory.MineralGeneration(game.StaticData, solSys, halleysComet);
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, halleysBodyDB, halleysMVDB);*/
+
             var namedEntites = solSys.GetAllEntitiesWithDataBlob<NameDB>();
             foreach (var entity in namedEntites)
             {
@@ -62,10 +83,13 @@ namespace Pulsar4X.ECSLib
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
 
-            
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
 
             factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "UEF");
+
+            
+
+
             var entitiesWithSensors = solSys.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
             foreach (var entityItem in entitiesWithSensors)
             {
@@ -74,29 +98,12 @@ namespace Pulsar4X.ECSLib
 
 
             StarSystemFactory starfac2 = new StarSystemFactory(game);
-            StarSystem solSys2 = starfac2.CreateTestSystem(game, 1000, 1000);
+            StarSystem solSys2 = starfac2.CreateTestSystem(game);
            
             solSys2.NameDB = new NameDB("other system");
             Entity solStar = solSys2.Entities[0];
-
-            SystemBodyInfoDB venusBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.77f };
-            MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.KmToAU(6051.8));
-            NameDB venusNameDB = new NameDB("LOL");
-            double venusSemiMajAxis = 0.72333199;
-            double venusEccentricity = 0.00677323;
-            double venusInclination = 0;
-            double venusLoAN = 76.68069;
-            double venusLoP = 131.53298;
-            double venusMeanLongd = 181.97973;
-            OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().Mass, venusMVDB.Mass, venusSemiMajAxis, venusEccentricity, venusInclination, venusLoAN, venusLoP, venusMeanLongd, game.GalaxyGen.Settings.J2000);
-            PositionDB venusPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(venusOrbitDB, StaticRefLib.CurrentDateTime), solSys2.Guid);
-            SensorProfileDB sensorProfile = new SensorProfileDB();
-            //venusPositionDB.X_AU += 1000;
-            //venusPositionDB.X_AU += 1000;
-            Entity earth2 = new Entity(solSys2, new List<BaseDataBlob> { sensorProfile, venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
-            var _systemBodyFactory = new SystemBodyFactory(game.GalaxyGen);
-            _systemBodyFactory.MineralGeneration(game.StaticData, solSys2, earth2);
-            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, venusBodyDB, venusMVDB);
+            Entity earth2 = solSys2.Entities[1];
+            
 
 
             //sol.ManagerSubpulses.Init(sol);
@@ -125,6 +132,9 @@ namespace Pulsar4X.ECSLib
             }
 
 
+            
+
+
             return factionEntity;
         }
 
@@ -133,7 +143,7 @@ namespace Pulsar4X.ECSLib
             //USE THIS TO TEST CODE
             //TESTING STUFFF
             //return completeTest(game, name);
-            //while(true){
+           // while(true){
             
             //}
             //TESTING STUFF

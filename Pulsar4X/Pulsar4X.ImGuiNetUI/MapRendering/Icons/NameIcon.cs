@@ -279,7 +279,7 @@ namespace Pulsar4X.SDL2UI
             if(createNewWindow){
                ImGui.PopStyleColor(); //have to pop the color change after pushing it.
                ImGui.PopStyleVar(3);
-                ImGui.End();
+               ImGui.End();
             }
 
             

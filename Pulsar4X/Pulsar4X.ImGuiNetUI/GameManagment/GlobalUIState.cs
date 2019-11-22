@@ -140,9 +140,14 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetActiveSystem(Guid activeSysID)
         {
-            var SelectedSystem = StarSystemStates[activeSysID].StarSystem;
-            PrimarySystemDateTime = SelectedSystem.ManagerSubpulses.StarSysDateTime;
-            GalacticMap.SelectedStarSysGuid = activeSysID;
+            if(activeSysID != SelectedStarSysGuid){
+                var SelectedSys = StarSystemStates[activeSysID].StarSystem;
+                PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
+                GalacticMap.SelectedStarSysGuid = activeSysID;
+                DebugWindow.GetInstance().systemState = StarSystemStates[activeSysID];
+                LastClickedEntity = null;
+            }
+            
         }
 
         internal void EnableGameMaster()

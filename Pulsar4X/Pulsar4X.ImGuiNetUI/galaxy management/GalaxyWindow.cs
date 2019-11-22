@@ -49,7 +49,6 @@ namespace Pulsar4X.SDL2UI
                 //if (ImGui.Begin("LOL",_flags))
                 //{
            
-                ImGui.Text("LOL");
                 uint iterations = 0;
                 foreach (var starSystem in _state.StarSystemStates)
                 {

@@ -59,8 +59,10 @@ namespace Pulsar4X.ECSLib
             var surveyDB = new JPSurveyableDB(pointsRequired, new Dictionary<Entity, int>());
             var posDB = new PositionDB(x, y, 0, Guid.Empty);
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
+            //for testing purposes
+            var sensorProfileDB = new SensorProfileDB();
 
-            return ProtoEntity.Create(Guid.Empty, new BaseDataBlob[] { surveyDB, posDB, nameDB });
+            return ProtoEntity.Create(Guid.Empty, new BaseDataBlob[] { surveyDB, posDB, nameDB, sensorProfileDB });
         }
     }
 }

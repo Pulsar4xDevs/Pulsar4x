@@ -31,6 +31,7 @@ namespace Pulsar4X.SDL2UI
         } 
         private string _selectedEntityName;
         SystemState _systemState;
+        public SystemState systemState{get{return _systemState;} set{_systemState = value;}}
         float largestGFPS = 0;
         int largestIndex = 0;
 
