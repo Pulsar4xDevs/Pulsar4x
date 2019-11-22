@@ -50,9 +50,9 @@ namespace Pulsar4X.ECSLib
         public StarSystem CreateTestSystem(Game game, int x = 0, int y = 0)
         {
             
-            StarSystem sol = new StarSystem(game, "Sol", -1);
+            StarSystem sol = new StarSystem(game, "something", -1);
 
-            Entity sun = _starFactory.CreateStar(sol, GameConstants.Units.SolarMassInKG, GameConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
+            Entity sun = _starFactory.CreateStar(sol, GameConstants.Units.SolarMassInKG, GameConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "something");
             sun.GetDataBlob<PositionDB>().X_AU += x;
             sun.GetDataBlob<PositionDB>().Y_AU += x;
             
@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib
 
             SystemBodyInfoDB venusBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.77f };
             MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.KmToAU(6051.8));
-            NameDB venusNameDB = new NameDB("Venus");
+            NameDB venusNameDB = new NameDB("AYLMAOROFL");
             double venusSemiMajAxis = 0.72333199;
             double venusEccentricity = 0.00677323;
             double venusInclination = 0;
@@ -95,7 +95,7 @@ namespace Pulsar4X.ECSLib
 
             SystemBodyInfoDB earthBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.306f };
             MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius(5.9726E24, Distance.KmToAU(6378.1));
-            NameDB earthNameDB = new NameDB("Earth");
+            NameDB earthNameDB = new NameDB("OMG");
             double earthSemiMajAxis = 1.00000011;
             double earthEccentricity = 0.01671022;
             double earthInclination = 0;
@@ -118,7 +118,7 @@ namespace Pulsar4X.ECSLib
 
             SystemBodyInfoDB lunaBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true };
             MassVolumeDB lunaMVDB = MassVolumeDB.NewFromMassAndRadius(0.073E24, Distance.KmToAU(1738.14));
-            NameDB lunaNameDB = new NameDB("Luna");
+            NameDB lunaNameDB = new NameDB("NOWAY");
             double lunaSemiMajAxis = Distance.KmToAU(0.3844E6);
             double lunaEccentricity = 0.0549;
             double lunaInclination = 0;//5.1;
@@ -135,32 +135,9 @@ namespace Pulsar4X.ECSLib
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, lunaBodyDB, lunaMVDB);
 
 
-            SystemBodyInfoDB marsBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo=0.25f };
-            MassVolumeDB marsMVDB = MassVolumeDB.NewFromMassAndRadius(0.64174E24, Distance.KmToAU(3396.2));
-            NameDB marsNameDB = new NameDB("Mars");
-            double marsSemiMajAxis = Distance.KmToAU(227.92E6);
-            double marsEccentricity = 0.0934; //wiki says .0934
-            double marsInclination = 0;//1.85;
-            double marsLoAN = 49.57854;
-            double marsAoP = 336.04084;
-            double marsMeanLong = 355.45332;
-            OrbitDB marsOrbitDB =OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, marsMVDB.Mass, marsSemiMajAxis, marsEccentricity, marsInclination, marsLoAN, marsAoP, marsMeanLong, GalaxyGen.Settings.J2000);
-            Dictionary<AtmosphericGasSD, float> marsAtmoGasses = new Dictionary<AtmosphericGasSD, float>();
-            marsAtmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(12), 0.95f * 0.01f);   // C02% * Mars Atms
-            marsAtmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(6), 0.027f * 0.01f);   // N% * Mars Atms
-            marsAtmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(9), 0.007f * 0.01f);   // O% * Mars Atms
-            marsAtmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(11), 0.016f * 0.01f);  // Ar% * Mars Atms
-            AtmosphereDB marsAtmo = new AtmosphereDB(0.087f, false, 0, 0, 0, -55, marsAtmoGasses);
-            PositionDB marsPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(marsOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun);
-            sensorProfile = new SensorProfileDB();
-            Entity mars = new Entity(sol, new List<BaseDataBlob> {sensorProfile, marsPositionDB, marsBodyDB, marsMVDB, marsNameDB, marsOrbitDB, marsAtmo } );
-            _systemBodyFactory.MineralGeneration(game.StaticData, sol, mars);
-            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, marsBodyDB, marsMVDB);
-
-
             SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
             MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
-            NameDB halleysNameDB = new NameDB("Halleys Comet");
+            NameDB halleysNameDB = new NameDB("ASSHOLE");
             double halleysSemiMajAxis = 17.834; //AU
             double halleysEccentricity = 0.96714;
             double halleysInclination = 180; //162.26° note retrograde orbit.

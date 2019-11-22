@@ -74,29 +74,12 @@ namespace Pulsar4X.ECSLib
 
 
             StarSystemFactory starfac2 = new StarSystemFactory(game);
-            StarSystem solSys2 = starfac2.CreateTestSystem(game, 1000, 1000);
+            StarSystem solSys2 = starfac2.CreateTestSystem(game);
            
             solSys2.NameDB = new NameDB("other system");
             Entity solStar = solSys2.Entities[0];
-
-            SystemBodyInfoDB venusBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.77f };
-            MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.KmToAU(6051.8));
-            NameDB venusNameDB = new NameDB("LOL");
-            double venusSemiMajAxis = 0.72333199;
-            double venusEccentricity = 0.00677323;
-            double venusInclination = 0;
-            double venusLoAN = 76.68069;
-            double venusLoP = 131.53298;
-            double venusMeanLongd = 181.97973;
-            OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().Mass, venusMVDB.Mass, venusSemiMajAxis, venusEccentricity, venusInclination, venusLoAN, venusLoP, venusMeanLongd, game.GalaxyGen.Settings.J2000);
-            PositionDB venusPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(venusOrbitDB, StaticRefLib.CurrentDateTime), solSys2.Guid);
-            SensorProfileDB sensorProfile = new SensorProfileDB();
-            //venusPositionDB.X_AU += 1000;
-            //venusPositionDB.X_AU += 1000;
-            Entity earth2 = new Entity(solSys2, new List<BaseDataBlob> { sensorProfile, venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
-            var _systemBodyFactory = new SystemBodyFactory(game.GalaxyGen);
-            _systemBodyFactory.MineralGeneration(game.StaticData, solSys2, earth2);
-            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, venusBodyDB, venusMVDB);
+            Entity earth2 = solSys2.Entities[1];
+            
 
 
             //sol.ManagerSubpulses.Init(sol);
@@ -133,7 +116,7 @@ namespace Pulsar4X.ECSLib
             //USE THIS TO TEST CODE
             //TESTING STUFFF
             //return completeTest(game, name);
-            //while(true){
+           // while(true){
             
             //}
             //TESTING STUFF
