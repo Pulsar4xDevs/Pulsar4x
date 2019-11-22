@@ -103,6 +103,7 @@ namespace Pulsar4X.SDL2UI
             LoadImg("CancelImg", Path.Combine( rf,"CancelIco.bmp"));
             LoadImg("DesComp", Path.Combine(rf, "DesignComponentIco.bmp"));
             LoadImg("DesShip", Path.Combine(rf, "DesignShipIco.bmp"));
+            LoadImg("GalMap", Path.Combine(rf, "GalaxyMapIco.bmp"));
             LoadImg("Research", Path.Combine(rf, "ResearchIco.bmp"));
             LoadImg("PowerImg", Path.Combine(rf, "PowerIco.bmp"));
             /*

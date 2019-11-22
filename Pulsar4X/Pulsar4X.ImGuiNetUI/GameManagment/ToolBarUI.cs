@@ -61,7 +61,7 @@ namespace Pulsar4X.SDL2UI
             ToolButtons.Add(btn);
             btn = new ToolbuttonData()
             {
-                Picture = _state.SDLImageDictionary["DesShip"],
+                Picture = _state.SDLImageDictionary["GalMap"],
                 TooltipText = "Galaxy Browser",
                 OnClick = new Action(GalaxyWindow.GetInstance().SetActive)
 
