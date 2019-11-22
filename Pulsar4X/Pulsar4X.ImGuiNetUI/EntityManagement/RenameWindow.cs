@@ -36,6 +36,7 @@ namespace Pulsar4X.SDL2UI
             {
                 if (ImGui.Begin("Rename", ref IsActive, _flags))
                 {
+                    Array.Resize(ref nameInputBuffer, 16);
                     ImGui.InputText("##name", nameInputBuffer, 16);
                     ImGui.SameLine();
                     if (ImGui.SmallButton("Set"))
@@ -49,10 +50,7 @@ namespace Pulsar4X.SDL2UI
                         }
 
                         
-                        
-                        
                     }
-                    ImGui.Text(nameString.Length.ToString());
                 }
                 ImGui.End();
             }
