@@ -111,7 +111,7 @@ namespace Pulsar4X.SDL2UI
             _state.SetActiveSystem(factionVM.KnownSystems[0].Guid);
             DebugWindow.GetInstance().SetGameEvents();
             IsActive = false;
-            //we initialize a distance window instances so that they get always displayed and automatically open after new game is created.
+            //we initialize window instances so that they get always displayed and automatically open after new game is created.
             TimeControl.GetInstance().IsActive = true;
             ToolBarUI.GetInstance().IsActive = true;
             EntityUIWindowSelector.GetInstance().IsActive = true;

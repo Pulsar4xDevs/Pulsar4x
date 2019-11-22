@@ -106,8 +106,11 @@ namespace Pulsar4X.SDL2UI
                     List<NameIcon> nameIcons = new List<NameIcon>();
                     foreach (var item in _nameIcons)
                     {
+                        //if(_state.StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames.ContainsKey(item.Key)){
                         nameIcons.Add(item.Value);
+                       
                          
+                        //}
                         //item.Value.Draw(_state.rendererPtr, _state.Camera);
                     }
                     NameIcon.DrawAll(_state.rendererPtr, _state.Camera, nameIcons);
@@ -155,6 +158,8 @@ namespace Pulsar4X.SDL2UI
                         name.OnFrameUpdate(matrix, _camera);
                 }
                 item.Value.Draw(_renderPtr, _camera);
+
+                
             }
             lock (_nameIcons)
             {

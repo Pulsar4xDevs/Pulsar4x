@@ -25,6 +25,7 @@ namespace Pulsar4X.SDL2UI
         private ToolBarUI()
         {
             _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar;
+
             ToolbuttonData btn =  new ToolbuttonData()
             {
                 Picture = _state.SDLImageDictionary["DesComp"],
@@ -33,6 +34,7 @@ namespace Pulsar4X.SDL2UI
                 
             };
             ToolButtons.Add(btn);
+
             btn =  new ToolbuttonData()
             {
                 Picture = _state.SDLImageDictionary["DesShip"],
@@ -57,8 +59,17 @@ namespace Pulsar4X.SDL2UI
                 
             };
             ToolButtons.Add(btn);
-            
-            
+            btn = new ToolbuttonData()
+            {
+                Picture = _state.SDLImageDictionary["DesShip"],
+                TooltipText = "Galaxy Browser",
+                OnClick = new Action(GalaxyWindow.GetInstance().SetActive)
+
+            };
+            ToolButtons.Add(btn);
+
+
+
 
         }
 
@@ -89,15 +100,19 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowSize(new Vector2(x,y ));
             if (ImGui.Begin("##Toolbar", _flags))
             {
-                
+                uint iterations = 0;
                 //displays the default toolbar menu icons
                 foreach (var button in ToolButtons)
                 {
-                    
+                    ImGui.PushID(iterations.ToString());
                     if(ImGui.ImageButton(button.Picture, BtnSizes))
                         button.OnClick();
                     if(ImGui.IsItemHovered())
                         ImGui.SetTooltip(button.TooltipText);
+
+                    
+                    ImGui.PopID();
+                    iterations++;
                 }
                 
                 ImGui.End();
