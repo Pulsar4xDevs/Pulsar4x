@@ -35,8 +35,12 @@ namespace Pulsar4X.SDL2UI
         //displays selected entity info
         internal override void Display()
         {
+            ImGui.SetNextWindowSize(new Vector2(175, 225), ImGuiCond.Once);
             if (ImGui.Begin("Currently selected", _flags))
             {
+
+                
+                
 
                 if(ImGui.Button("see all small bodies")){
                         SmallBodyEntityInfoPanel.GetInstance().SetActive();

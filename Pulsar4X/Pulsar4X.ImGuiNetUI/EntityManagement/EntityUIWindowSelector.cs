@@ -37,7 +37,7 @@ namespace Pulsar4X.SDL2UI
         //displays selected entity info
         internal override void Display()
         {
-            ImGui.SetNextWindowSize(new Vector2(150, 200));
+            ImGui.SetNextWindowSize(new Vector2(150, 200), ImGuiCond.Once);
             if (ImGui.Begin("Actions", _flags))
             {
                 //check if ANY entity has been clicked
