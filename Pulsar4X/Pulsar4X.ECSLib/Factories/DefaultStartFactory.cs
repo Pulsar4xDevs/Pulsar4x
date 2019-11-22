@@ -36,6 +36,27 @@ namespace Pulsar4X.ECSLib
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
 
+
+            /*
+            GalaxyFactory GalaxyGen = game.GalaxyGen;
+            SystemBodyFactory _systemBodyFactory = new SystemBodyFactory(GalaxyGen);
+
+            SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
+            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
+            NameDB halleysNameDB = new NameDB("testName");
+            double halleysSemiMajAxis = 17.834; //AU
+            double halleysEccentricity = 0.96714;
+            double halleysInclination = 180; //162.26° note retrograde orbit.
+            double halleysLoAN = 58.42; //°
+            double halleysAoP = 111.33;//°
+            double halleysMeanAnomaly = 38.38;//°
+            OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(solSys.Entities[0], solSys.Entities[0].GetDataBlob<MassVolumeDB>().Mass, halleysMVDB.Mass, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
+            PositionDB halleysPositionDB = new PositionDB(0,0,0, solSys.Guid, solSys.Entities[0]); // + earthPositionDB.AbsolutePosition_AU, sol.Guid);
+            SensorProfileDB sensorProfile = new SensorProfileDB();
+            Entity halleysComet = new Entity(solSys, new List<BaseDataBlob> { halleysPositionDB, halleysNameDB });
+            //_systemBodyFactory.MineralGeneration(game.StaticData, solSys, halleysComet);
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, halleysBodyDB, halleysMVDB);*/
+
             var namedEntites = solSys.GetAllEntitiesWithDataBlob<NameDB>();
             foreach (var entity in namedEntites)
             {
@@ -62,10 +83,13 @@ namespace Pulsar4X.ECSLib
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
 
-            
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
 
             factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "UEF");
+
+            
+
+
             var entitiesWithSensors = solSys.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
             foreach (var entityItem in entitiesWithSensors)
             {
@@ -106,6 +130,9 @@ namespace Pulsar4X.ECSLib
             {
                 StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, StaticRefLib.CurrentDateTime);
             }
+
+
+            
 
 
             return factionEntity;
