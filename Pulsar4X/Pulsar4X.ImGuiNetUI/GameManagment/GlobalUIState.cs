@@ -105,6 +105,7 @@ namespace Pulsar4X.SDL2UI
             LoadImg("DesShip", Path.Combine(rf, "DesignShipIco.bmp"));
             LoadImg("GalMap", Path.Combine(rf, "GalaxyMapIco.bmp"));
             LoadImg("Research", Path.Combine(rf, "ResearchIco.bmp"));
+            LoadImg("Ruler", Path.Combine(rf, "RulerIco.bmp"));
             LoadImg("PowerImg", Path.Combine(rf, "PowerIco.bmp"));
             /*
             int gltxtrID;

@@ -67,7 +67,14 @@ namespace Pulsar4X.SDL2UI
 
             };
             ToolButtons.Add(btn);
+            btn = new ToolbuttonData()
+            {
+                Picture = _state.SDLImageDictionary["Ruler"],
+                TooltipText = "Measure distance",
+                OnClick = new Action(DistanceRuler.GetInstance().SetActive)
 
+            };
+            ToolButtons.Add(btn);
 
 
 

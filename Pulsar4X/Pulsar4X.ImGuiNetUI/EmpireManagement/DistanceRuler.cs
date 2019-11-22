@@ -81,7 +81,7 @@ namespace Pulsar4X.SDL2UI
         }
         internal override void Display()
         {
-            if(ImGui.Begin("Map Scale", _flags))
+            if(IsActive == true && ImGui.Begin("Map Scale", ref IsActive, _flags))
             {
                 //displays the size in meters of the current screen area account for zoom and window dimensions
                 var windowCornerInWorldCoordinate = _state.Camera.WorldCoordinate_m((int)_state.MainWinSize.X, (int)_state.MainWinSize.Y);

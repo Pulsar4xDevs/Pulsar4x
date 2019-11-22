@@ -115,7 +115,6 @@ namespace Pulsar4X.SDL2UI
             TimeControl.GetInstance().IsActive = true;
             ToolBarUI.GetInstance().IsActive = true;
             EntityUIWindowSelector.GetInstance().IsActive = true;
-            DistanceRuler.GetInstance().IsActive = true;
             EntityInfoPanel.GetInstance().IsActive = true;
         }
     }
