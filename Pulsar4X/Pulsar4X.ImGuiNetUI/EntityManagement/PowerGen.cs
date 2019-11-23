@@ -39,11 +39,11 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         public void SetEntity(EntityState entityState)
         {
-            if (entityState.DataBlobs.ContainsKey(typeof(EnergyGenAbilityDB)))
+            if (entityState.DataBlobs.ContainsKey(typeof(EnergyGenAbilityDB)))//If the entity has power data
             {
-                _entityState = entityState;
-                _energyGenDB = (EnergyGenAbilityDB)entityState.DataBlobs[typeof(EnergyGenAbilityDB)];
-                CanActive = true;
+                _entityState = entityState;//Store it as the entity being show
+                _energyGenDB = (EnergyGenAbilityDB)entityState.DataBlobs[typeof(EnergyGenAbilityDB)];//Store it's power value
+                CanActive = true;//And note if that it can be displayed
             }
             else
             {
@@ -65,8 +65,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         internal override void Display()
         {
-            if(_entityState != _state.LastClickedEntity)
+            if(_entityState != _state.LastClickedEntity)//If the selected entity has changed
                 SetEntity(_state.LastClickedEntity);
+            //If the player has activated the menu and there is a body that can be displayed show the menu
             if (IsActive && CanActive && ImGui.Begin("Power Display " + _entityState.Name, ref IsActive, _flags))
             {
                 ImGui.Text("Current Load: ");

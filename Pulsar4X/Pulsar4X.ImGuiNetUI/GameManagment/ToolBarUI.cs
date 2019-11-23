@@ -31,7 +31,7 @@ namespace Pulsar4X.SDL2UI
                 Picture = _state.SDLImageDictionary["DesComp"],
                 TooltipText = "Design a new component or facility",
                 OnClick = new Action(ComponentDesignUI.GetInstance().SetActive)
-                
+                //Opens up the componet design menu
             };
             ToolButtons.Add(btn);
 
@@ -40,7 +40,7 @@ namespace Pulsar4X.SDL2UI
                 Picture = _state.SDLImageDictionary["DesShip"],
                 TooltipText = "Design a new Ship",
                 OnClick = new Action(ShipDesignUI.GetInstance().SetActive)
-                
+                //Opens up the ship design menu
             };
             ToolButtons.Add(btn);
             btn =  new ToolbuttonData()
@@ -48,7 +48,7 @@ namespace Pulsar4X.SDL2UI
                 Picture = _state.SDLImageDictionary["Research"],
                 TooltipText = "Research",
                 OnClick = new Action(ResearchWindow.GetInstance().SetActive)
-                
+                //Opens up the research menu
             };
             ToolButtons.Add(btn);
             btn =  new ToolbuttonData()
@@ -56,7 +56,7 @@ namespace Pulsar4X.SDL2UI
                 Picture = _state.SDLImageDictionary["PowerImg"],
                 TooltipText = "Power",
                 OnClick = new Action(PowerGen.GetInstance().SetActive)
-                
+                //Opens the power menu if the player has a body with power selected
             };
             ToolButtons.Add(btn);
             btn = new ToolbuttonData()
@@ -72,7 +72,7 @@ namespace Pulsar4X.SDL2UI
                 Picture = _state.SDLImageDictionary["Ruler"],
                 TooltipText = "Measure distance",
                 OnClick = new Action(DistanceRuler.GetInstance().SetActive)
-
+                //Opens the ruler menu
             };
             ToolButtons.Add(btn);
 
