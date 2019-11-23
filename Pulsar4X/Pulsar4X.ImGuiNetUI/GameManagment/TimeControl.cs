@@ -73,9 +73,18 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.Combo("##spnCmbo", ref _timeSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
                 AdjustTimeSpan();
             ImGui.SameLine();
-
+            if (_isPaused == true)
+            {
             if (ImGui.ImageButton(_state.SDLImageDictionary["PlayImg"], new Vector2(16, 16)))
                 PausePlayPressed();
+            }
+            else
+            {
+                if (ImGui.ImageButton(_state.SDLImageDictionary["PauseImg"], new Vector2(16, 16)))
+                    PausePlayPressed();
+            }
+
+            
             ImGui.SameLine();
             if (ImGui.ImageButton(_state.SDLImageDictionary["OneStepImg"], new Vector2(16, 16)))
                 OneStepPressed();
