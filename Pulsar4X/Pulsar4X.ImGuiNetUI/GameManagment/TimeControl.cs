@@ -75,8 +75,11 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if (_isPaused == true)
             {
-            if (ImGui.ImageButton(_state.SDLImageDictionary["PlayImg"], new Vector2(16, 16)))
-                PausePlayPressed();
+                if (ImGui.ImageButton(_state.SDLImageDictionary["PlayImg"], new Vector2(16, 16)))
+                    PausePlayPressed();
+                ImGui.SameLine();
+                if (ImGui.ImageButton(_state.SDLImageDictionary["OneStepImg"], new Vector2(16, 16)))
+                    OneStepPressed();
             }
             else
             {
@@ -85,9 +88,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             
-            ImGui.SameLine();
-            if (ImGui.ImageButton(_state.SDLImageDictionary["OneStepImg"], new Vector2(16, 16)))
-                OneStepPressed();
+
             if (_expanded)
             {
                 ImGui.PushItemWidth(100);
