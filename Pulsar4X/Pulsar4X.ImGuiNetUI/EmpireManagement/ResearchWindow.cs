@@ -171,14 +171,30 @@ namespace Pulsar4X.SDL2UI
                     if(ImGui.IsItemHovered())
                         ImGui.SetTooltip("Assigned / Total");
                     ImGui.SameLine();
-                    if (ImGui.SmallButton("+"))
+
+                    //Checks if more labs can be assigned
+                    if (facsAssigned < allfacs)
                     {
-                        ResearchProcessor.AddLabs(scint, 1);
+                        if (ImGui.SmallButton("+"))//If so allow the user to add more labs
+                        {
+                            ResearchProcessor.AddLabs(scint, 1);
+                        }
                     }
+                    else// Otherwise create an invisible button for spacing
+                    {
+                        Vector2 buttonsize = new Vector2(15, 0);
+                        ImGui.InvisibleButton(" ", buttonsize);
+                    }
+
+                    
+
                     ImGui.SameLine();
                     if (ImGui.SmallButton("-"))
                     {
-                        ResearchProcessor.AddLabs(scint, -1);
+                        if (facsAssigned == 0)//If there are no labs to remove
+                            ResearchProcessor.AddLabs(scint, allfacs);//Roll over to max number of labs
+                        else
+                            ResearchProcessor.AddLabs(scint, -1);//Otherwise remove a lab
                     }
 
                     ImGui.NextColumn();
