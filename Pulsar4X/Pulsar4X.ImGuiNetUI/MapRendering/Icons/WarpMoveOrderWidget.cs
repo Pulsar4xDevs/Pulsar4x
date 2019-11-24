@@ -6,7 +6,7 @@ using static SDL2.SDL;
 
 namespace Pulsar4X.SDL2UI
 {
-    public class TranslateMoveOrderWidget : IDrawData
+    public class WarpMoveOrderWidget : IDrawData
     {
         public SDL_Color TransitLineColor = new SDL_Color() { r = 0, g = 255, b = 255, a = 100 };
 
@@ -34,7 +34,7 @@ namespace Pulsar4X.SDL2UI
 
         SDL_Point[] _linePoints;
 
-        public TranslateMoveOrderWidget(GlobalUIState state, Entity orderingEntity)
+        public WarpMoveOrderWidget(GlobalUIState state, Entity orderingEntity)
         {
             _state = state;
             _currentDateTime = _state.PrimarySystemDateTime;
