@@ -21,7 +21,8 @@ namespace Pulsar4X.SDL2UI
             {typeof(WeaponTargetingControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
-            {typeof(ColonyPanel), "econ"}
+            {typeof(ColonyPanel), "econ"},
+            {typeof(GotoSystemBlankMenuHelper), "goto system"}
         };
         internal Game Game;
         internal FactionVM FactionUIState;

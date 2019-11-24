@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System;
 
 namespace Pulsar4X.ECSLib
 {
@@ -21,19 +22,27 @@ namespace Pulsar4X.ECSLib
         public int SurveyPointsRequired;
         [JsonProperty]
         public Dictionary<Entity, int> SurveyPointsAccumulated;
+        [JsonProperty]
+        public Entity JumpPointTo;
 
         /// <summary>
         /// Default public constructor for Json
         /// </summary>
         public JPSurveyableDB() { }
 
+
+        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated): this(pointsRequired, pointsAccumulated, null){
+
+        }
+
         /// <summary>
         /// Copy constructor
         /// </summary>
-        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated)
+        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated, Entity jumpPointTo)
         {
             SurveyPointsRequired = pointsRequired;
             SurveyPointsAccumulated = new Dictionary<Entity, int>(pointsAccumulated);
+            JumpPointTo = jumpPointTo;
         }
 
         /// <summary>
@@ -42,7 +51,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public override object Clone()
         {
-            return new JPSurveyableDB(SurveyPointsRequired, SurveyPointsAccumulated);
+            return new JPSurveyableDB(SurveyPointsRequired, SurveyPointsAccumulated, JumpPointTo);
         }
     }
 }

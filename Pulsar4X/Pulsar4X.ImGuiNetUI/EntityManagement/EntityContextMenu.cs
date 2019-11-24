@@ -35,7 +35,11 @@ namespace Pulsar4X.SDL2UI
             
                 EntityUIWindows.openUIWindow<PinCameraBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PinCameraBlankMenuHelper)]), _entityState, _state, true);
             }
-            if(EntityUIWindows.checkIfCanOpenWindow<OrbitOrderWindow>(_entityState)){
+            if (EntityUIWindows.checkIfCanOpenWindow<GotoSystemBlankMenuHelper>(_entityState))
+            {
+                EntityUIWindows.openUIWindow<GotoSystemBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]), _entityState, _state, true);
+            }
+            if (EntityUIWindows.checkIfCanOpenWindow<OrbitOrderWindow>(_entityState)){
             
                 EntityUIWindows.openUIWindow<OrbitOrderWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(OrbitOrderWindow)]), _entityState, _state, true);
             }
