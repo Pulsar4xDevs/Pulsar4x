@@ -55,12 +55,12 @@ namespace Pulsar4X.SDL2UI
                         if (ImGui.IsItemHovered())
                             ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(PinCameraBlankMenuHelper)]);
                     }
-                    if (EntityUIWindows.checkIfCanOpenWindow<OrbitOrderWindow>(_entityState))
+                    if (EntityUIWindows.checkIfCanOpenWindow<WarpOrderWindow>(_entityState))
                     {
 
-                        EntityUIWindows.openUIWindow<OrbitOrderWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(OrbitOrderWindow)]), _entityState, _state, false);
+                        EntityUIWindows.openUIWindow<WarpOrderWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(WarpOrderWindow)]), _entityState, _state, false);
                         if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(OrbitOrderWindow)]);
+                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(WarpOrderWindow)]);
                     }
                     if (EntityUIWindows.checkIfCanOpenWindow<ChangeCurrentOrbitWindow>(_entityState))
                     {

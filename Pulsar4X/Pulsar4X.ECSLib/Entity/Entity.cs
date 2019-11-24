@@ -361,17 +361,22 @@ namespace Pulsar4X.ECSLib
             return positionDB.Parent;
         }
 
-        public static Vector3 GetVelocity_m(Entity entity, DateTime atDateTime)
+        public static Vector3 GetVelocity_m(Entity entity, DateTime atDateTime, bool ralitive = true)
         {
             if (entity.HasDataBlob<OrbitDB>())
             {
-                return OrbitProcessor.GetOrbitalVector_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
+                if(ralitive)
+                    return OrbitProcessor.InstantaneousOrbitalVelocityVector_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
+                else
+                    return OrbitProcessor.AbsoluteOrbitalVector_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
             }
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {
-                throw new NotImplementedException();
-                //return entity.GetDataBlob<NewtonMoveDB>().CurrentVector_ms;
-                return  NewtonionMovementProcessor.GetPositon_m(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
+                var vel = NewtonionMovementProcessor.GetPositon_m(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
+                if (ralitive)
+                    return vel;
+                else //recurse
+                    return GetVelocity_m(GetSOIParentEntity(entity), atDateTime, false) + vel;
             }
             else
             {

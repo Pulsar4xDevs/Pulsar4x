@@ -26,7 +26,9 @@ namespace Pulsar4X.ECSLib
             };
 
             var parent = Entity.GetSOIParentEntity(orderEntity);
-            cmd._db = new NewtonMoveDB(parent, Vector3.Zero);
+            var currentVel = Entity.GetVelocity_m(orderEntity, actionDateTime);
+
+            cmd._db = new NewtonMoveDB(parent, currentVel);
             cmd._db.ActionOnDateTime = actionDateTime;
             cmd._db.DeltaVForManuver_m = expendDeltaV_m;
             

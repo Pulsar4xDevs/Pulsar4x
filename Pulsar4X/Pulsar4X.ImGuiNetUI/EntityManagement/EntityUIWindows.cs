@@ -26,7 +26,7 @@ namespace Pulsar4X.SDL2UI
                 return true;
             }
             //if entity can warp
-            if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && typeof(T) == typeof(OrbitOrderWindow))
+            if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && typeof(T) == typeof(WarpOrderWindow))
             {
                 return true;
             }
@@ -76,10 +76,10 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 //if entity can warp
-                if (typeof(T) == typeof(OrbitOrderWindow))
+                if (typeof(T) == typeof(WarpOrderWindow))
                 {
-                    OrbitOrderWindow.GetInstance(_entityState).IsActive = true;
-                    _state.ActiveWindow = OrbitOrderWindow.GetInstance(_entityState);
+                    WarpOrderWindow.GetInstance(_entityState).IsActive = true;
+                    _state.ActiveWindow = WarpOrderWindow.GetInstance(_entityState);
                 }
                
                 if (typeof(T) == typeof(ChangeCurrentOrbitWindow))
