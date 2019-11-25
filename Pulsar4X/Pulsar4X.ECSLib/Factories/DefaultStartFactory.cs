@@ -136,7 +136,9 @@ namespace Pulsar4X.ECSLib
                        
             
             var JPSurveyPoint1 = solSys.GetAllEntitiesWithDataBlob<JPSurveyableDB>()[0];
+            JPSurveyPoint1.GetDataBlob<JPSurveyableDB>().SystemToGuid = solSys2.Guid;
             var JPSurveyPoint2 = solSys2.GetAllEntitiesWithDataBlob<JPSurveyableDB>()[0];
+            JPSurveyPoint2.GetDataBlob<JPSurveyableDB>().SystemToGuid = solSys.Guid;
             JPSurveyPoint1.GetDataBlob<JPSurveyableDB>().JumpPointTo = JPSurveyPoint2;
             JPSurveyPoint2.GetDataBlob<JPSurveyableDB>().JumpPointTo = JPSurveyPoint1;
 
