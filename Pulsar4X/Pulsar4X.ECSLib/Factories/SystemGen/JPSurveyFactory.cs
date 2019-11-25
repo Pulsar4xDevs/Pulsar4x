@@ -10,9 +10,7 @@ namespace Pulsar4X.ECSLib
             // TODO: Make these settings load from GalaxyGen settings.
             var ringSettings = new Dictionary<double, int>
             {
-                { 2, 6 },
-                { 4, 12 },
-                { 6, 12 }
+                { 2, 6 }
             };
 
             var surveyPoints = new List<ProtoEntity>();
