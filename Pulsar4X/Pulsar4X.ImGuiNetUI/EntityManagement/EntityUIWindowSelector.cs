@@ -47,7 +47,12 @@ namespace Pulsar4X.SDL2UI
 
                     var _entityState = _state.LastClickedEntity;
 
-
+                    if (EntityUIWindows.checkIfCanOpenWindow<PlanetaryWindow>(_entityState))
+                    {
+                        EntityUIWindows.openUIWindow<PlanetaryWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PlanetaryWindow)]), _entityState, _state, false);
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(PlanetaryWindow)]);
+                    }
                     if (EntityUIWindows.checkIfCanOpenWindow<PinCameraBlankMenuHelper>(_entityState))
                     {
                         EntityUIWindows.openUIWindow<PinCameraBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PinCameraBlankMenuHelper)]), _entityState, _state, false);

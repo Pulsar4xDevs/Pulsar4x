@@ -23,7 +23,8 @@ namespace Pulsar4X.SDL2UI
             {typeof(CargoTransfer), "Cargo"},
             {typeof(ColonyPanel), "econ"},
             {typeof(GotoSystemBlankMenuHelper), "goto system"},
-            {typeof(SelectPrimaryBlankMenuHelper), "select as primary"}
+            {typeof(SelectPrimaryBlankMenuHelper), "select as primary"},
+            {typeof(PlanetaryWindow), "Planetary window"}
         };
         internal Game Game;
         internal FactionVM FactionUIState;

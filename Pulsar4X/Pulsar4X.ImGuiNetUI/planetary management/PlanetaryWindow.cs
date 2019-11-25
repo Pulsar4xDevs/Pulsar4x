@@ -10,8 +10,11 @@ namespace Pulsar4X.SDL2UI
 {
     class PlanetaryWindow : PulsarGuiWindow
     {
-
+        private enum PlanetarySubWindows{
+        generalInfo, installations
+        }
         private EntityState _lookedAtEntity;
+        private PlanetarySubWindows _selectedSubWindow = PlanetarySubWindows.generalInfo;
 
         private PlanetaryWindow(EntityState entity)
         {
@@ -56,12 +59,54 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            if (IsActive == true && ImGui.Begin("Planetary interface", ref IsActive, _flags))
+            ImGui.SetNextWindowSize(new Vector2(400,400),ImGuiCond.Once);
+            if (IsActive == true && ImGui.Begin("Planetary window: "+_lookedAtEntity.Name, ref IsActive, _flags))
             {
-                if (_lookedAtEntity.Entity.HasDataBlob<ColonyInfoDB>())
-                {
-
+                if(ImGui.SmallButton("general info")){
+                    _selectedSubWindow = PlanetarySubWindows.generalInfo;
                 }
+                ImGui.SameLine();
+                if(ImGui.SmallButton("installations")){
+                    _selectedSubWindow = PlanetarySubWindows.installations;
+                }
+                ImGui.BeginChild("data");
+                switch(_selectedSubWindow){
+                    case PlanetarySubWindows.generalInfo:
+                        if(_lookedAtEntity.Entity.HasDataBlob<MassVolumeDB>()){
+                            var tempMassVolume = _lookedAtEntity.Entity.GetDataBlob<MassVolumeDB>();
+                            ImGui.Text("radius: "+ECSLib.Misc.StringifyDistance(tempMassVolume.RadiusInM));
+                            ImGui.Text("mass: "+tempMassVolume.Mass.ToString() + " kg");
+                            ImGui.Text("volume: " +tempMassVolume.VolumeM3.ToString() + " m^3");
+                            ImGui.Text("density: "+tempMassVolume.Density + " kg/m^3");
+                        }
+                        if (_lookedAtEntity.Entity.HasDataBlob<ColonyInfoDB>())
+                        {
+                            ColonyInfoDB tempColonyInfo = _lookedAtEntity.Entity.GetDataBlob<ColonyInfoDB>();
+                            ImGui.Text("populations: ");
+                            foreach(var popPerSpecies in tempColonyInfo.Population){
+                                ImGui.Text(popPerSpecies.Value.ToString()+" of species: ");
+                                ImGui.SameLine();
+                                if(popPerSpecies.Key.HasDataBlob<NameDB>()){
+                                    ImGui.Text(popPerSpecies.Key.GetDataBlob<NameDB>().DefaultName);
+                                }else {
+                                    ImGui.Text("unknown.");
+                                }
+                            }
+                        }
+                        if(_lookedAtEntity.Entity.HasDataBlob<InstallationsDB>()){
+                            InstallationsDB tempInstallations = _lookedAtEntity.Entity.GetDataBlob<InstallationsDB>();
+                    
+                        }
+                   
+                    
+                    break;
+                    case PlanetarySubWindows.installations:
+                    break;
+                    default:
+                    break;
+                }
+                ImGui.EndChild();
+                ImGui.End();
             }
 
         }

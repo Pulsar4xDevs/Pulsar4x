@@ -40,6 +40,11 @@ namespace Pulsar4X.SDL2UI
         [PublicAPI]
         internal static bool checkIfCanOpenWindow<T>(EntityState _entityState) where T : PulsarGuiWindow
         {
+            //if can open a planetary window
+            if(_entityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship && typeof(T) == typeof(PlanetaryWindow)){
+                return true;
+            }
+
            //if can be used to pin
             if (typeof(T) == typeof(PinCameraBlankMenuHelper))
             {
@@ -98,6 +103,11 @@ namespace Pulsar4X.SDL2UI
         {
             if (open)
             {
+                if(typeof(T)== typeof(PlanetaryWindow)){
+                    var instance = PlanetaryWindow.GetInstance(_entityState);
+                    instance.IsActive = true;
+                    _state.ActiveWindow = instance;
+                }
                 
                 if (typeof(T) == typeof(PinCameraBlankMenuHelper))
                 {
