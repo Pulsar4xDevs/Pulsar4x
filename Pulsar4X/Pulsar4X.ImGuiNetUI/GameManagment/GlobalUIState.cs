@@ -21,7 +21,9 @@ namespace Pulsar4X.SDL2UI
             {typeof(WeaponTargetingControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
-            {typeof(ColonyPanel), "econ"}
+            {typeof(ColonyPanel), "econ"},
+            {typeof(GotoSystemBlankMenuHelper), "goto system"},
+            {typeof(SelectPrimaryBlankMenuHelper), "select as primary"}
         };
         internal Game Game;
         internal FactionVM FactionUIState;
@@ -59,7 +61,8 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
 
         public event EntityClickedEventHandler EntityClickedEvent;
-        internal EntityState LastClickedEntity;
+        internal EntityState LastClickedEntity = null;
+        internal EntityState PrimaryEntity = null;
         internal ECSLib.Vector3 LastWorldPointClicked_m { get; set; }
 
 
@@ -119,6 +122,11 @@ namespace Pulsar4X.SDL2UI
             */
         }
 
+        private void deactivateAllClosableWindows(){
+            foreach(var window in LoadedWindows){
+                window.Value.IsActive = false;
+            }
+        }
 
         internal void LoadImg(string name, string path)
         {
@@ -142,11 +150,13 @@ namespace Pulsar4X.SDL2UI
         internal void SetActiveSystem(Guid activeSysID)
         {
             if(activeSysID != SelectedStarSysGuid){
+                deactivateAllClosableWindows();
                 var SelectedSys = StarSystemStates[activeSysID].StarSystem;
                 PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
                 GalacticMap.SelectedStarSysGuid = activeSysID;
                 DebugWindow.GetInstance().systemState = StarSystemStates[activeSysID];
                 LastClickedEntity = null;
+                PrimaryEntity = null;
             }
             
         }
@@ -242,6 +252,13 @@ namespace Pulsar4X.SDL2UI
             
             
         }
+
+        internal void EntitySelectedAsPrimary(Guid entityGuid, Guid starSys){
+            PrimaryEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
+            if(ActiveWindow != null)
+                ActiveWindow.EntitySelectedAsPrimary(PrimaryEntity);
+        }
+
         internal void EntityClicked(Guid entityGuid, Guid starSys, MouseButtons button)
         {
             
@@ -307,6 +324,8 @@ namespace Pulsar4X.SDL2UI
         internal abstract void Display();
 
         internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
+
+        internal virtual void EntitySelectedAsPrimary(EntityState entity){ }
 
         internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
 

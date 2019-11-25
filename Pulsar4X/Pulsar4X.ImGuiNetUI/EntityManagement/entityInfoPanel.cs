@@ -47,7 +47,15 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 if(_state.LastClickedEntity != null && _state.StarSystemStates.ContainsKey(_state.SelectedStarSysGuid)){
-                    ImGui.Text("Name: "+_state.LastClickedEntity.Name);
+                    ImGui.Text("Subject: "+_state.LastClickedEntity.Name);
+                    if (_state.PrimaryEntity != null)
+                    {
+                        ImGui.Text("Primary: "+_state.PrimaryEntity.Name);
+                    }
+                    else
+                    {
+                        ImGui.Text("Select primary...");
+                    }
                     //ImGui.Text(""+_state.LastClickedEntity.);
                     //gets all children and parent nodes, displays their names and makes them clickable to navigate towards them.
 

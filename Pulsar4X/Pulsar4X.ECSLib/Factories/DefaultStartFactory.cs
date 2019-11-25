@@ -99,11 +99,12 @@ namespace Pulsar4X.ECSLib
 
             StarSystemFactory starfac2 = new StarSystemFactory(game);
             StarSystem solSys2 = starfac2.CreateTestSystem(game);
-           
+
+
+
             solSys2.NameDB = new NameDB("other system");
             Entity solStar = solSys2.Entities[0];
             Entity earth2 = solSys2.Entities[1];
-            
 
 
             //sol.ManagerSubpulses.Init(sol);
@@ -132,8 +133,12 @@ namespace Pulsar4X.ECSLib
             }
 
 
+                       
             
-
+            var JPSurveyPoint1 = solSys.GetAllEntitiesWithDataBlob<JPSurveyableDB>()[0];
+            var JPSurveyPoint2 = solSys2.GetAllEntitiesWithDataBlob<JPSurveyableDB>()[0];
+            JPSurveyPoint1.GetDataBlob<JPSurveyableDB>().JumpPointTo = JPSurveyPoint2;
+            JPSurveyPoint2.GetDataBlob<JPSurveyableDB>().JumpPointTo = JPSurveyPoint1;
 
             return factionEntity;
         }
