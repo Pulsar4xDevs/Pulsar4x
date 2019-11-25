@@ -29,7 +29,6 @@ namespace Pulsar4X.SDL2UI
         {
             ActiveEntity = _entityState.Entity;
             ImGui.BeginGroup();
-
             
             if(EntityUIWindows.checkIfCanOpenWindow<PinCameraBlankMenuHelper>( _entityState)){
             
@@ -38,6 +37,10 @@ namespace Pulsar4X.SDL2UI
             if (EntityUIWindows.checkIfCanOpenWindow<GotoSystemBlankMenuHelper>(_entityState))
             {
                 EntityUIWindows.openUIWindow<GotoSystemBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]), _entityState, _state, true);
+            }
+            if (EntityUIWindows.checkIfCanOpenWindow<SelectPrimaryBlankMenuHelper>(_entityState))
+            {
+                EntityUIWindows.openUIWindow<SelectPrimaryBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(SelectPrimaryBlankMenuHelper)]), _entityState,_state, true);
             }
             if (EntityUIWindows.checkIfCanOpenWindow<OrbitOrderWindow>(_entityState)){
             

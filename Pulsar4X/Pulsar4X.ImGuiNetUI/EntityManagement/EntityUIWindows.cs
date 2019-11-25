@@ -23,6 +23,16 @@ namespace Pulsar4X.SDL2UI
         }
     }
 
+
+    //a do nothing helper class that is plugged into generics for static checks
+    public class SelectPrimaryBlankMenuHelper : PulsarGuiWindow
+    {
+        internal override void Display()
+        {
+
+        }
+    }
+
     //has all initialization rutines for common entity management related UI windows, also has a function that checks if a window can be opened for a given EntityState
     public class EntityUIWindows
     {
@@ -35,12 +45,18 @@ namespace Pulsar4X.SDL2UI
             {
                 return true;
             }
+            //if can be used to go to another system
             if (_entityState.Entity.HasDataBlob<JPSurveyableDB>() && typeof(T) == typeof(GotoSystemBlankMenuHelper) )
             {
                 if (_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo != null)
                 {
                     return true;
                 }
+            }
+            //if can be selected as primary
+            if (typeof(T) == typeof(SelectPrimaryBlankMenuHelper))
+            {
+                return true;
             }
             //if entity can warp
             if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && typeof(T) == typeof(OrbitOrderWindow))
@@ -76,7 +92,7 @@ namespace Pulsar4X.SDL2UI
         }
         // use type PinCameraBlankMenuHelper to pin camara, should use checkIfCanOpenWindow with type before trying to open a given window
         //type parameter is the type of window opened, first parameter indicates wether the window should be opened, second parameter is EntityState for the entity using the window
-        //(or window using the entity?) third is the GlobalUIState and fourth indicates wether this function should manage closing preopened pop-ups(mostly utility for EntityContextMenu class)
+        //(or window using the entity?) third is the GlobalUIState and fourth indicates wether this function should manage closing preopened pop-ups(mostly utility for EntityContextMenu class[should be set to true when this is used in it])
         [PublicAPI]
         internal static void openUIWindow<T>(bool open, EntityState _entityState, GlobalUIState _state, bool managesUIPopUps = false) where T : PulsarGuiWindow
         {
@@ -95,6 +111,8 @@ namespace Pulsar4X.SDL2UI
                 else if (typeof(T) == typeof(GotoSystemBlankMenuHelper))
                 {
                     _state.SetActiveSystem(_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>().SystemGuid);
+                }else if(typeof(T)==typeof(SelectPrimaryBlankMenuHelper)){
+                    _state.EntitySelectedAsPrimary(_entityState.Entity.Guid, _entityState.StarSysGuid);
                 }
                 //if entity can warp
                 else if (typeof(T) == typeof(OrbitOrderWindow))

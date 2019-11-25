@@ -22,7 +22,8 @@ namespace Pulsar4X.SDL2UI
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
             {typeof(ColonyPanel), "econ"},
-            {typeof(GotoSystemBlankMenuHelper), "goto system"}
+            {typeof(GotoSystemBlankMenuHelper), "goto system"},
+            {typeof(SelectPrimaryBlankMenuHelper), "select as primary"}
         };
         internal Game Game;
         internal FactionVM FactionUIState;
@@ -60,7 +61,8 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
 
         public event EntityClickedEventHandler EntityClickedEvent;
-        internal EntityState LastClickedEntity;
+        internal EntityState LastClickedEntity = null;
+        internal EntityState PrimaryEntity = null;
         internal ECSLib.Vector3 LastWorldPointClicked_m { get; set; }
 
 
@@ -243,6 +245,13 @@ namespace Pulsar4X.SDL2UI
             
             
         }
+
+        internal void EntitySelectedAsPrimary(Guid entityGuid, Guid starSys){
+            PrimaryEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
+            if(ActiveWindow != null)
+                ActiveWindow.EntitySelectedAsPrimary(PrimaryEntity);
+        }
+
         internal void EntityClicked(Guid entityGuid, Guid starSys, MouseButtons button)
         {
             
@@ -308,6 +317,8 @@ namespace Pulsar4X.SDL2UI
         internal abstract void Display();
 
         internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
+
+        internal virtual void EntitySelectedAsPrimary(EntityState entity){ }
 
         internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
 
