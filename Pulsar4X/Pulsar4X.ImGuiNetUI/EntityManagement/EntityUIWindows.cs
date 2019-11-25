@@ -33,13 +33,34 @@ namespace Pulsar4X.SDL2UI
         }
     }
 
+    //a do nothing helper class that is plugged into generics for static checks
+    public class JumpThroughJumpPointBlankMenuHelper : PulsarGuiWindow
+    {
+        internal override void Display()
+        {
+
+        }
+    }
+
     //has all initialization rutines for common entity management related UI windows, also has a function that checks if a window can be opened for a given EntityState
     public class EntityUIWindows
     {
         //checks if given menu can be opened for given entity
         [PublicAPI]
-        internal static bool checkIfCanOpenWindow<T>(EntityState _entityState) where T : PulsarGuiWindow
+        internal static bool checkIfCanOpenWindow<T>(EntityState _entityState, GlobalUIState _state) where T : PulsarGuiWindow
         {
+
+
+            if(typeof(T)==typeof(JumpThroughJumpPointBlankMenuHelper)){
+                if(checkIfCanOpenWindow<GotoSystemBlankMenuHelper>(_entityState, _state)){
+                    if(_state.PrimaryEntity != null){
+                        if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (ECSLib.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition_m, _entityState.Position.AbsolutePosition_m) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m)){
+                            return true;
+                        }
+
+                    }
+                }
+            }
             //if can open a planetary window
             if(_entityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship && typeof(T) == typeof(PlanetaryWindow)){
                 return true;
@@ -103,6 +124,10 @@ namespace Pulsar4X.SDL2UI
         {
             if (open)
             {
+                //TODO: implement this(moving a ship entity[_state.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
+                if(typeof(T)==typeof(JumpThroughJumpPointBlankMenuHelper)){
+                    
+                }
                 if(typeof(T)== typeof(PlanetaryWindow)){
                     var instance = PlanetaryWindow.GetInstance(_entityState);
                     instance.IsActive = true;
