@@ -24,6 +24,8 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Entity, int> SurveyPointsAccumulated;
         [JsonProperty]
         public Entity JumpPointTo;
+        [JsonProperty]
+        public Guid SystemToGuid;
 
         /// <summary>
         /// Default public constructor for Json
@@ -31,18 +33,19 @@ namespace Pulsar4X.ECSLib
         public JPSurveyableDB() { }
 
 
-        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated): this(pointsRequired, pointsAccumulated, null){
+        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated): this(pointsRequired, pointsAccumulated, null, Guid.Empty){
 
         }
 
         /// <summary>
         /// Copy constructor
         /// </summary>
-        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated, Entity jumpPointTo)
+        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated, Entity jumpPointTo, Guid systemToGuid)
         {
             SurveyPointsRequired = pointsRequired;
             SurveyPointsAccumulated = new Dictionary<Entity, int>(pointsAccumulated);
             JumpPointTo = jumpPointTo;
+            SystemToGuid = systemToGuid;
         }
 
         /// <summary>
@@ -51,7 +54,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public override object Clone()
         {
-            return new JPSurveyableDB(SurveyPointsRequired, SurveyPointsAccumulated, JumpPointTo);
+            return new JPSurveyableDB(SurveyPointsRequired, SurveyPointsAccumulated, JumpPointTo, SystemToGuid);
         }
     }
 }
