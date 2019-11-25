@@ -31,40 +31,42 @@ namespace Pulsar4X.SDL2UI
             ImGui.BeginGroup();
             
             if(EntityUIWindows.checkIfCanOpenWindow<PinCameraBlankMenuHelper>( _entityState)){
-            
-                EntityUIWindows.openUIWindow<PinCameraBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PinCameraBlankMenuHelper)]), _entityState, _state, true);
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PinCameraBlankMenuHelper)]);
+                EntityUIWindows.openUIWindow(typeof(PinCameraBlankMenuHelper), _entityState, _state, buttonresult ,true);
             }
             if (EntityUIWindows.checkIfCanOpenWindow<GotoSystemBlankMenuHelper>(_entityState))
             {
-                EntityUIWindows.openUIWindow<GotoSystemBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]), _entityState, _state, true);
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]);
+                EntityUIWindows.openUIWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state, buttonresult, true);
             }
             if (EntityUIWindows.checkIfCanOpenWindow<SelectPrimaryBlankMenuHelper>(_entityState))
             {
-                EntityUIWindows.openUIWindow<SelectPrimaryBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(SelectPrimaryBlankMenuHelper)]), _entityState,_state, true);
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(SelectPrimaryBlankMenuHelper)]);
+                EntityUIWindows.openUIWindow(typeof(SelectPrimaryBlankMenuHelper), _entityState, _state, buttonresult, true); 
             }
             if (EntityUIWindows.checkIfCanOpenWindow<OrbitOrderWindow>(_entityState)){
-            
-                EntityUIWindows.openUIWindow<OrbitOrderWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(OrbitOrderWindow)]), _entityState, _state, true);
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(OrbitOrderWindow)]);
+                EntityUIWindows.openUIWindow(typeof(OrbitOrderWindow), _entityState, _state, buttonresult, true);
             }
             if(EntityUIWindows.checkIfCanOpenWindow<ChangeCurrentOrbitWindow>(_entityState)){
-            
-                EntityUIWindows.openUIWindow<ChangeCurrentOrbitWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ChangeCurrentOrbitWindow)]), _entityState, _state, true);
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ChangeCurrentOrbitWindow)]);
+                EntityUIWindows.openUIWindow(typeof(ChangeCurrentOrbitWindow), _entityState, _state, buttonresult, true);
             }
             if(EntityUIWindows.checkIfCanOpenWindow<WeaponTargetingControl>(_entityState)){
-            
-                EntityUIWindows.openUIWindow<WeaponTargetingControl>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(WeaponTargetingControl)]), _entityState, _state, true);
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(WeaponTargetingControl)]);
+                EntityUIWindows.openUIWindow(typeof(WeaponTargetingControl), _entityState, _state, buttonresult, true);
             }
             if(EntityUIWindows.checkIfCanOpenWindow<RenameWindow>( _entityState)){
-            
-                EntityUIWindows.openUIWindow<RenameWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(RenameWindow)]), _entityState, _state, true);
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(RenameWindow)]);
+                EntityUIWindows.openUIWindow(typeof(RenameWindow), _entityState, _state, buttonresult, true);
             }
             if(EntityUIWindows.checkIfCanOpenWindow<CargoTransfer>(_entityState)){
-            
-                EntityUIWindows.openUIWindow<CargoTransfer>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(CargoTransfer)]), _entityState, _state, true);
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(CargoTransfer)]);
+                EntityUIWindows.openUIWindow(typeof(CargoTransfer), _entityState, _state, buttonresult, true);
             }
             if(EntityUIWindows.checkIfCanOpenWindow<ColonyPanel>( _entityState)){
-            
-                EntityUIWindows.openUIWindow<ColonyPanel>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ColonyPanel)]), _entityState, _state, true);
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ColonyPanel)]);
+                EntityUIWindows.openUIWindow(typeof(ColonyPanel), _entityState, _state, buttonresult, true);
             }
             /*
             if (ImGui.SmallButton("Pin Camera"))

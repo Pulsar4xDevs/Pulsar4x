@@ -2,6 +2,8 @@
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.SDL2UI;
+using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 
 namespace Pulsar4X.SDL2UI
@@ -40,7 +42,13 @@ namespace Pulsar4X.SDL2UI
         [PublicAPI]
         internal static bool checkIfCanOpenWindow<T>(EntityState _entityState) where T : PulsarGuiWindow
         {
-           //if can be used to pin
+            //Checks if the power gen menu can be opened
+            if (_entityState.Entity.HasDataBlob<EnergyGenAbilityDB>() && typeof(T) == typeof(PowerGen))
+            {
+                return true;
+            }
+
+            //Check if the pin menu can be opened
             if (typeof(T) == typeof(PinCameraBlankMenuHelper))
             {
                 return true;
@@ -94,12 +102,12 @@ namespace Pulsar4X.SDL2UI
         //type parameter is the type of window opened, first parameter indicates wether the window should be opened, second parameter is EntityState for the entity using the window
         //(or window using the entity?) third is the GlobalUIState and fourth indicates wether this function should manage closing preopened pop-ups(mostly utility for EntityContextMenu class[should be set to true when this is used in it])
         [PublicAPI]
-        internal static void openUIWindow<T>(bool open, EntityState _entityState, GlobalUIState _state, bool managesUIPopUps = false) where T : PulsarGuiWindow
+        internal static void openUIWindow(Type T, EntityState _entityState , GlobalUIState _state , bool open = true, bool managesUIPopUps = false)
         {
             if (open)
             {
                 
-                if (typeof(T) == typeof(PinCameraBlankMenuHelper))
+                if (T == typeof(PinCameraBlankMenuHelper))
                 {
                     _state.Camera.PinToEntity(_entityState.Entity);
                     if (managesUIPopUps)
@@ -108,26 +116,26 @@ namespace Pulsar4X.SDL2UI
                     }
                     
                 }
-                else if (typeof(T) == typeof(GotoSystemBlankMenuHelper))
+                else if (T == typeof(GotoSystemBlankMenuHelper))
                 {
                     _state.SetActiveSystem(_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>().SystemGuid);
-                }else if(typeof(T)==typeof(SelectPrimaryBlankMenuHelper)){
+                }else if(T==typeof(SelectPrimaryBlankMenuHelper)){
                     _state.EntitySelectedAsPrimary(_entityState.Entity.Guid, _entityState.StarSysGuid);
                 }
                 //if entity can warp
-                else if (typeof(T) == typeof(OrbitOrderWindow))
+                else if (T == typeof(OrbitOrderWindow))
                 {
                     OrbitOrderWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = OrbitOrderWindow.GetInstance(_entityState);
                 }
                
-                else if (typeof(T) == typeof(ChangeCurrentOrbitWindow))
+                else if (T == typeof(ChangeCurrentOrbitWindow))
                 {
                     ChangeCurrentOrbitWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
                 }
                
-                else if (typeof(T) == typeof(WeaponTargetingControl))
+                else if (T == typeof(WeaponTargetingControl))
                 {
                     var instance = WeaponTargetingControl.GetInstance(_entityState);
                     instance.SetOrderEntity(_entityState);
@@ -135,7 +143,7 @@ namespace Pulsar4X.SDL2UI
                     _state.ActiveWindow = instance;
                 }
                
-                else if (typeof(T) == typeof(RenameWindow))
+                else if (T == typeof(RenameWindow))
                 {
                     RenameWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = RenameWindow.GetInstance(_entityState);
@@ -143,7 +151,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 
 
-                else if (typeof(T) == typeof(CargoTransfer))
+                else if (T == typeof(CargoTransfer))
                 {
                     var instance = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState);
                     instance.IsActive = true;
@@ -152,7 +160,7 @@ namespace Pulsar4X.SDL2UI
                 
                 //econOrderwindow
 
-                else if (typeof(T) == typeof(ColonyPanel))
+                else if (T == typeof(ColonyPanel))
                 {
                     var instance = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState);
                     instance.IsActive = true;
