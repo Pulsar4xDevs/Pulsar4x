@@ -122,6 +122,11 @@ namespace Pulsar4X.SDL2UI
             */
         }
 
+        private void deactivateAllClosableWindows(){
+            foreach(var window in LoadedWindows){
+                window.Value.IsActive = false;
+            }
+        }
 
         internal void LoadImg(string name, string path)
         {
@@ -145,11 +150,13 @@ namespace Pulsar4X.SDL2UI
         internal void SetActiveSystem(Guid activeSysID)
         {
             if(activeSysID != SelectedStarSysGuid){
+                deactivateAllClosableWindows();
                 var SelectedSys = StarSystemStates[activeSysID].StarSystem;
                 PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
                 GalacticMap.SelectedStarSysGuid = activeSysID;
                 DebugWindow.GetInstance().systemState = StarSystemStates[activeSysID];
                 LastClickedEntity = null;
+                PrimaryEntity = null;
             }
             
         }
