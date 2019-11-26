@@ -34,22 +34,24 @@ namespace Pulsar4X.SDL2UI
 
             void ContextButton(Type T)
             {
+                //Creates a context button if it is valid
                 if(EntityUIWindows.checkIfCanOpenWindow(T, _entityState)){
                 bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[T]);
                 EntityUIWindows.openUIWindow(T, _entityState, _state, buttonresult ,true);
                 }
             }
             
-            ContextButton(typeof(PinCameraBlankMenuHelper));
-            ContextButton(typeof(GotoSystemBlankMenuHelper));
+            //Creates all the context buttons
             ContextButton(typeof(SelectPrimaryBlankMenuHelper));
-            ContextButton(typeof(OrbitOrderWindow));
-            ContextButton(typeof(ChangeCurrentOrbitWindow));
-            ContextButton(typeof(WeaponTargetingControl));
+            ContextButton(typeof(PinCameraBlankMenuHelper));
             ContextButton(typeof(RenameWindow));
+            ContextButton(typeof(WeaponTargetingControl));
             ContextButton(typeof(CargoTransfer));
             ContextButton(typeof(ColonyPanel));
             ContextButton(typeof(PlanetaryWindow));
+            ContextButton(typeof(GotoSystemBlankMenuHelper));
+            ContextButton(typeof(OrbitOrderWindow));
+            ContextButton(typeof(ChangeCurrentOrbitWindow));
 
             ImGui.EndGroup();
 

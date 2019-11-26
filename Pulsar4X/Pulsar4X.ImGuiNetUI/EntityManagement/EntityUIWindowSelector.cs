@@ -61,11 +61,13 @@ namespace Pulsar4X.SDL2UI
                 //if true, display all possible toolbar menu icons for it
                 if (_state.LastClickedEntity != null)
                 {
+                    //Gets the last clicked entity
                     var _entityState = _state.LastClickedEntity;
 
                     ToolbuttonData btn;
 
                     void NewButton(Type T,  string PictureString, string TooltipText, List<ToolbuttonData> ButtonList) {
+                        //Creates a buttton if it is usuable in this situation
                         if (EntityUIWindows.checkIfCanOpenWindow(T, _entityState))
                         {
                             btn = new ToolbuttonData()
@@ -85,6 +87,7 @@ namespace Pulsar4X.SDL2UI
                         NewButton(T, PictureString, TooltipText, StandardButtons);
                     }
 
+                    //Populates Buttons
 
                     NewStandardButton(typeof(SelectPrimaryBlankMenuHelper), "Select", "Selects the entity");
                     NewStandardButton(typeof(PinCameraBlankMenuHelper), "Pin", "Focuses camera");
@@ -95,7 +98,8 @@ namespace Pulsar4X.SDL2UI
                     NewCondtionalButton(typeof(ColonyPanel), "Industry", "Opens Industry menu");
                     NewCondtionalButton(typeof(WeaponTargetingControl), "Firecon", "Opens firecontrol menu");
                    
-                    //displays the default toolbar menu icons
+                    //Displays all buttons
+                    //TODO: Move this to functions (exact formating still needs to be decided.
                     uint iterations = 0;
 
                     foreach (var button in StandardButtons)
@@ -134,6 +138,7 @@ namespace Pulsar4X.SDL2UI
 
                     void ActionButton(Type T)
                     {
+                    //Makes a small button if it is usable in this situation
                         if (EntityUIWindows.checkIfCanOpenWindow(T,_entityState))
                         {
                             bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[T]);
@@ -143,10 +148,12 @@ namespace Pulsar4X.SDL2UI
                         }
                     }
 
+                    //Makes all small buttons
+                    ActionButton(typeof(PlanetaryWindow));
                     ActionButton(typeof(GotoSystemBlankMenuHelper));
                     ActionButton(typeof(OrbitOrderWindow));
                     ActionButton(typeof(ChangeCurrentOrbitWindow));
-                    ActionButton(typeof(PlanetaryWindow));
+
 
 
                 }
