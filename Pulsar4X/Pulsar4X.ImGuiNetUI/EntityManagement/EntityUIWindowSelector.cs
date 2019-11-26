@@ -180,26 +180,13 @@ namespace Pulsar4X.SDL2UI
                     CondtionalButtons = new List<ToolbuttonData>();
                     StandardButtons = new List<ToolbuttonData>();
 
-                    if (EntityUIWindows.checkIfCanOpenWindow<PinCameraBlankMenuHelper>(_entityState))
-                    {
-                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]);
-                        EntityUIWindows.openUIWindow(typeof(PinCameraBlankMenuHelper), _entityState, _state, buttonresult);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(PinCameraBlankMenuHelper)]);
-                    }
+
                     if (EntityUIWindows.checkIfCanOpenWindow<GotoSystemBlankMenuHelper>(_entityState))
                     {
                         bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]);
                         EntityUIWindows.openUIWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state, buttonresult);
                         if (ImGui.IsItemHovered())
                             ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<SelectPrimaryBlankMenuHelper>(_entityState))
-                    {
-                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(SelectPrimaryBlankMenuHelper)]);
-                        EntityUIWindows.openUIWindow(typeof(SelectPrimaryBlankMenuHelper), _entityState, _state, buttonresult);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(SelectPrimaryBlankMenuHelper)]);
                     }
                     if (EntityUIWindows.checkIfCanOpenWindow<OrbitOrderWindow>(_entityState))
                     {
@@ -214,33 +201,6 @@ namespace Pulsar4X.SDL2UI
                         EntityUIWindows.openUIWindow(typeof(ChangeCurrentOrbitWindow), _entityState, _state, buttonresult);
                         if (ImGui.IsItemHovered())
                             ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(ChangeCurrentOrbitWindow)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<WeaponTargetingControl>(_entityState))
-                    {
-                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(WeaponTargetingControl)]);
-                        EntityUIWindows.openUIWindow(typeof(WeaponTargetingControl), _entityState, _state, buttonresult);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(WeaponTargetingControl)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<RenameWindow>(_entityState))
-                    {
-                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(RenameWindow)]);
-                        EntityUIWindows.openUIWindow(typeof(RenameWindow), _entityState, _state, buttonresult);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(RenameWindow)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<CargoTransfer>(_entityState))
-                    {
-                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(CargoTransfer)]);
-                        EntityUIWindows.openUIWindow(typeof(CargoTransfer), _entityState, _state, buttonresult);
-                        ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(CargoTransfer)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<ColonyPanel>(_entityState))
-                    {
-                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ColonyPanel)]);
-                        EntityUIWindows.openUIWindow(typeof(ColonyPanel), _entityState, _state, buttonresult);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(ColonyPanel)]);
                     }
                     if (EntityUIWindows.checkIfCanOpenWindow<PlanetaryWindow>(_entityState))
                     {
