@@ -49,6 +49,9 @@ namespace Pulsar4X.SDL2UI
 
         }
         //displays selected entity info
+
+
+
         internal override void Display()
         {
             ImGui.SetNextWindowSize(new Vector2(150, 200), ImGuiCond.Once);
@@ -62,86 +65,36 @@ namespace Pulsar4X.SDL2UI
 
                     ToolbuttonData btn;
 
-                    if (EntityUIWindows.checkIfCanOpenWindow<SelectPrimaryBlankMenuHelper>(_entityState))
-                    {
-                        btn = new ToolbuttonData()
+                    void NewButton(Type T,  string PictureString, string TooltipText, List<ToolbuttonData> ButtonList) {
+                        if (EntityUIWindows.checkIfCanOpenWindow(T, _entityState))
                         {
-                            Picture = _state.SDLImageDictionary["Select"],
-                            TooltipText = "Selects the entity",
-                            ClickType = typeof(SelectPrimaryBlankMenuHelper)
-                            //Opens up the componet design menu
-                        };
-                        StandardButtons.Add(btn);
+                            btn = new ToolbuttonData()
+                            {   
+                                Picture = _state.SDLImageDictionary[PictureString],
+                                TooltipText = TooltipText,
+                                ClickType = T
+                                //Opens up the componet design menu
+                            };
+                            ButtonList.Add(btn);
+                        }
                     }
-                    if (EntityUIWindows.checkIfCanOpenWindow<PinCameraBlankMenuHelper>(_entityState))
-                    {
-                        btn = new ToolbuttonData()
-                        {
-                            Picture = _state.SDLImageDictionary["Pin"],
-                            TooltipText = "Focuses camera",
-                            ClickType = typeof(PinCameraBlankMenuHelper)
-                            //Opens up the componet design menu
-                        };
-                        StandardButtons.Add(btn);
+                    void NewCondtionalButton(Type T, string PictureString, string TooltipText) {
+                        NewButton(T, PictureString, TooltipText, CondtionalButtons);
                     }
-                    if (EntityUIWindows.checkIfCanOpenWindow<RenameWindow>(_entityState))
-                    {
-                        btn = new ToolbuttonData()
-                        {
-                            Picture = _state.SDLImageDictionary["Rename"],
-                            TooltipText = "Renames the entity",
-                            ClickType = typeof(RenameWindow)
-                            //Opens up the componet design menu
-                        };
-                        StandardButtons.Add(btn);
-                    }
-
-                    if (EntityUIWindows.checkIfCanOpenWindow<PowerGen>(_entityState))
-                    {
-                        btn = new ToolbuttonData()
-                        {
-                            Picture = _state.SDLImageDictionary["Power"],
-                            TooltipText = "Shows power stats",
-                            ClickType = typeof(PowerGen)
-                            //Opens the power menu if the player has a body with power selected
-                        };
-                        CondtionalButtons.Add(btn);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<CargoTransfer>(_entityState))
-                    {
-                        btn = new ToolbuttonData()
-                        {
-                            Picture = _state.SDLImageDictionary["Cargo"],
-                            TooltipText = "Shows cargo",
-                            ClickType = typeof(CargoTransfer)
-                            //Opens the power menu if the player has a body with power selected
-                        };
-                        CondtionalButtons.Add(btn);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<ColonyPanel>(_entityState))
-                    {
-                        btn = new ToolbuttonData()
-                        {
-                            Picture = _state.SDLImageDictionary["Industry"],
-                            TooltipText = "Opens Industry menu",
-                            ClickType = typeof(ColonyPanel)
-                            //Opens the power menu if the player has a body with power selected
-                        };
-                        CondtionalButtons.Add(btn);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<WeaponTargetingControl>(_entityState))
-                    {
-                        btn = new ToolbuttonData()
-                        {
-                            Picture = _state.SDLImageDictionary["Firecon"],
-                            TooltipText = "Opens firecontrol menu",
-                            ClickType = typeof(WeaponTargetingControl)
-                            //Opens the power menu if the player has a body with power selected
-                        };
-                        CondtionalButtons.Add(btn);
+                    void NewStandardButton(Type T, string PictureString, string TooltipText) {
+                        NewButton(T, PictureString, TooltipText, StandardButtons);
                     }
 
 
+                    NewStandardButton(typeof(SelectPrimaryBlankMenuHelper), "Select", "Selects the entity");
+                    NewStandardButton(typeof(PinCameraBlankMenuHelper), "Pin", "Focuses camera");
+                    NewStandardButton(typeof(RenameWindow), "Rename", "Renames the entity");
+
+                    NewCondtionalButton(typeof(PowerGen), "Power", "Shows power stats");
+                    NewCondtionalButton(typeof(CargoTransfer), "Cargo", "Shows cargo");
+                    NewCondtionalButton(typeof(ColonyPanel), "Industry", "Opens Industry menu");
+                    NewCondtionalButton(typeof(WeaponTargetingControl), "Firecon", "Opens firecontrol menu");
+                   
                     //displays the default toolbar menu icons
                     uint iterations = 0;
 
@@ -176,39 +129,24 @@ namespace Pulsar4X.SDL2UI
                         iterations++; 
                     }
 
-                    ImGui.NewLine();
                     CondtionalButtons = new List<ToolbuttonData>();
                     StandardButtons = new List<ToolbuttonData>();
 
+                    void ActionButton(Type T)
+                    {
+                        if (EntityUIWindows.checkIfCanOpenWindow(T,_entityState))
+                        {
+                            bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[T]);
+                            EntityUIWindows.openUIWindow(T, _entityState, _state, buttonresult);
+                            if (ImGui.IsItemHovered())
+                                ImGui.SetTooltip(GlobalUIState.namesForMenus[T]);
+                        }
+                    }
 
-                    if (EntityUIWindows.checkIfCanOpenWindow<GotoSystemBlankMenuHelper>(_entityState))
-                    {
-                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]);
-                        EntityUIWindows.openUIWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state, buttonresult);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<OrbitOrderWindow>(_entityState))
-                    {
-                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(OrbitOrderWindow)]);
-                        EntityUIWindows.openUIWindow(typeof(OrbitOrderWindow), _entityState, _state, buttonresult);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(OrbitOrderWindow)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<ChangeCurrentOrbitWindow>(_entityState))
-                    {
-                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ChangeCurrentOrbitWindow)]);
-                        EntityUIWindows.openUIWindow(typeof(ChangeCurrentOrbitWindow), _entityState, _state, buttonresult);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(ChangeCurrentOrbitWindow)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<PlanetaryWindow>(_entityState))
-                    {
-                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PlanetaryWindow)]);
-                        EntityUIWindows.openUIWindow(typeof(PlanetaryWindow), _entityState, _state, buttonresult);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(PlanetaryWindow)]);
-                    }
+                    ActionButton(typeof(GotoSystemBlankMenuHelper));
+                    ActionButton(typeof(OrbitOrderWindow));
+                    ActionButton(typeof(ChangeCurrentOrbitWindow));
+                    ActionButton(typeof(PlanetaryWindow));
 
 
                 }

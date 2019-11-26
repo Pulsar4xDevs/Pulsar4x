@@ -48,12 +48,12 @@ namespace Pulsar4X.SDL2UI
     {
         //checks if given menu can be opened for given entity
         [PublicAPI]
-        internal static bool checkIfCanOpenWindow<T>(EntityState _entityState, GlobalUIState _state) where T : PulsarGuiWindow
+        internal static bool checkIfCanOpenWindow(Type T, EntityState _entityState, GlobalUIState _state)
         {
 
 
-            if(typeof(T)==typeof(JumpThroughJumpPointBlankMenuHelper)){
-                if(checkIfCanOpenWindow<GotoSystemBlankMenuHelper>(_entityState, _state)){
+            if(T == typeof(JumpThroughJumpPointBlankMenuHelper)){
+                if(checkIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state)){
                     if(_state.PrimaryEntity != null){
                         if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (ECSLib.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition_m, _entityState.Position.AbsolutePosition_m) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m)){
                             return true;
@@ -74,20 +74,20 @@ namespace Pulsar4X.SDL2UI
                 return false;
             }
         }
-        internal static bool checkIfCanOpenWindow<T>(EntityState _entityState) where T : PulsarGuiWindow
+        internal static bool checkIfCanOpenWindow(Type T, EntityState _entityState)
         {
             //Checks if the power gen menu can be opened
-            if (_entityState.Entity.HasDataBlob<EnergyGenAbilityDB>() && typeof(T) == typeof(PowerGen))
+            if (_entityState.Entity.HasDataBlob<EnergyGenAbilityDB>() && T == typeof(PowerGen))
             {
                 return true;
             }
             //Check if the pin menu can be opened
-            else if (typeof(T) == typeof(PinCameraBlankMenuHelper))
+            else if (T == typeof(PinCameraBlankMenuHelper))
             {
                 return true;
             }
             //if can be used to go to another system
-            else if (_entityState.Entity.HasDataBlob<JPSurveyableDB>() && typeof(T) == typeof(GotoSystemBlankMenuHelper) )
+            else if (_entityState.Entity.HasDataBlob<JPSurveyableDB>() && T == typeof(GotoSystemBlankMenuHelper) )
             {
                 if (_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo != null)
                 {
@@ -98,41 +98,41 @@ namespace Pulsar4X.SDL2UI
                 }
             }
             //if can be selected as primary
-            else if (typeof(T) == typeof(SelectPrimaryBlankMenuHelper))
+            else if (T == typeof(SelectPrimaryBlankMenuHelper))
             {
                 return true;
             }
             //if entity can warp
-            else if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && typeof(T) == typeof(OrbitOrderWindow))
+            else if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && T == typeof(OrbitOrderWindow))
             {
                 return true;
             }
             //if entity can move
-            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && typeof(T) == typeof(ChangeCurrentOrbitWindow))
+            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
             {
                 return true;
             }
             //if entity can fire?
-            else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && typeof(T) == typeof(WeaponTargetingControl))
+            else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && T == typeof(WeaponTargetingControl))
             {
                 return true;
             }
             //if entity can be renamed?
-            else if (typeof(T) == typeof(RenameWindow))
+            else if (T == typeof(RenameWindow))
             {
                 return true;
             }
             //if entity can target
-            else if (_entityState.Entity.HasDataBlob<CargoStorageDB>() && typeof(T) == typeof(CargoTransfer))
+            else if (_entityState.Entity.HasDataBlob<CargoStorageDB>() && T == typeof(CargoTransfer))
             {
                 return true;
             }
             //if entity can mine || refine || build
-            else if (_entityState.Entity.HasDataBlob<ColonyInfoDB>() && typeof(T) == typeof(ColonyPanel))
+            else if (_entityState.Entity.HasDataBlob<ColonyInfoDB>() && T == typeof(ColonyPanel))
             {
                 return true;
             }
-            else if(_entityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship && typeof(T) == typeof(PlanetaryWindow)){
+            else if(_entityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship && T == typeof(PlanetaryWindow)){
                 return true;
             }
             else {return false;}
