@@ -2,6 +2,8 @@
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.SDL2UI;
+using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 
 namespace Pulsar4X.SDL2UI
@@ -33,7 +35,6 @@ namespace Pulsar4X.SDL2UI
         }
     }
 
-    //a do nothing helper class that is plugged into generics for static checks
     public class JumpThroughJumpPointBlankMenuHelper : PulsarGuiWindow
     {
         internal override void Display()
@@ -47,94 +48,80 @@ namespace Pulsar4X.SDL2UI
     {
         //checks if given menu can be opened for given entity
         [PublicAPI]
-        internal static bool checkIfCanOpenWindow<T>(EntityState _entityState, GlobalUIState _state) where T : PulsarGuiWindow
+        internal static bool checkIfCanOpenWindow(Type T, EntityState _entityState, GlobalUIState _state)
         {
 
 
-            if(typeof(T)==typeof(JumpThroughJumpPointBlankMenuHelper)){
-                if(checkIfCanOpenWindow<GotoSystemBlankMenuHelper>(_entityState, _state)){
+            if(T == typeof(JumpThroughJumpPointBlankMenuHelper)){
+                if(checkIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state)){
                     if(_state.PrimaryEntity != null){
                         if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (ECSLib.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition_m, _entityState.Position.AbsolutePosition_m) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m)){
                             return true;
                         }
-
+                        else { return false; }
                     }
+                    else { return false; }
                 }
+                else { return false; }
             }
-            //if can open a planetary window
-            if(_entityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship && typeof(T) == typeof(PlanetaryWindow)){
-                return true;
-            }
-
-           //if can be used to pin
-            if (typeof(T) == typeof(PinCameraBlankMenuHelper))
-            {
-                return true;
-            }
+            else { return false; }
+        }
+        internal static bool checkIfCanOpenWindow(Type T, EntityState _entityState)
+        {
+            //Checks if the power gen menu can be opened
+            if (_entityState.Entity.HasDataBlob<EnergyGenAbilityDB>() && T == typeof(PowerGen))
+                { return true; }
+            //Check if the pin menu can be opened
+            else if (T == typeof(PinCameraBlankMenuHelper))
+                { return true; }
             //if can be used to go to another system
-            if (_entityState.Entity.HasDataBlob<JPSurveyableDB>() && typeof(T) == typeof(GotoSystemBlankMenuHelper) )
+            else if (_entityState.Entity.HasDataBlob<JPSurveyableDB>() && T == typeof(GotoSystemBlankMenuHelper) )
             {
                 if (_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo != null)
                 {
                     return true;
                 }
+                else {
+                    return false;
+                }
             }
             //if can be selected as primary
-            if (typeof(T) == typeof(SelectPrimaryBlankMenuHelper))
-            {
-                return true;
-            }
+            else if (T == typeof(SelectPrimaryBlankMenuHelper))
+                { return true; }
             //if entity can warp
-            if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && typeof(T) == typeof(OrbitOrderWindow))
-            {
-                return true;
-            }
+            else if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && T == typeof(OrbitOrderWindow))
+                { return true; }
             //if entity can move
-            if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && typeof(T) == typeof(ChangeCurrentOrbitWindow))
-            {
-                return true;
-            }
+            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
+                { return true; }
             //if entity can fire?
-            if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && typeof(T) == typeof(WeaponTargetingControl))
-            {
-                return true;
-            }
+            else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && T == typeof(WeaponTargetingControl))
+                { return true; }
             //if entity can be renamed?
-            if (typeof(T) == typeof(RenameWindow))
-            {
-                return true;
-            }
+            else if (T == typeof(RenameWindow))
+                { return true; }
             //if entity can target
-            if (_entityState.Entity.HasDataBlob<CargoStorageDB>() && typeof(T) == typeof(CargoTransfer))
-            {
-                return true;
-            }
+            else if (_entityState.Entity.HasDataBlob<CargoStorageDB>() && T == typeof(CargoTransfer))
+                { return true; }
             //if entity can mine || refine || build
-            if (_entityState.Entity.HasDataBlob<ColonyInfoDB>() && typeof(T) == typeof(ColonyPanel))
-            {
+            else if (_entityState.Entity.HasDataBlob<ColonyInfoDB>() && T == typeof(ColonyPanel))
+            { return true; }
+            else if(_entityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship && T == typeof(PlanetaryWindow)) {
                 return true;
             }
-            return false;
+            else {return false;}
         }
         // use type PinCameraBlankMenuHelper to pin camara, should use checkIfCanOpenWindow with type before trying to open a given window
         //type parameter is the type of window opened, first parameter indicates wether the window should be opened, second parameter is EntityState for the entity using the window
         //(or window using the entity?) third is the GlobalUIState and fourth indicates wether this function should manage closing preopened pop-ups(mostly utility for EntityContextMenu class[should be set to true when this is used in it])
         [PublicAPI]
-        internal static void openUIWindow<T>(bool open, EntityState _entityState, GlobalUIState _state, bool managesUIPopUps = false) where T : PulsarGuiWindow
+        internal static void openUIWindow(Type T, EntityState _entityState , GlobalUIState _state , bool open = true, bool managesUIPopUps = false)
         {
             if (open)
             {
-                //TODO: implement this(moving a ship entity[_state.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
-                if(typeof(T)==typeof(JumpThroughJumpPointBlankMenuHelper)){
-                    
-                }
-                if(typeof(T)== typeof(PlanetaryWindow)){
-                    var instance = PlanetaryWindow.GetInstance(_entityState);
-                    instance.IsActive = true;
-                    _state.ActiveWindow = instance;
-                }
-                
-                if (typeof(T) == typeof(PinCameraBlankMenuHelper))
+                //If the user has requested a menu be opened and if
+                //Menu is pin menu
+                if (T == typeof(PinCameraBlankMenuHelper))
                 {
                     _state.Camera.PinToEntity(_entityState.Entity);
                     if (managesUIPopUps)
@@ -143,34 +130,35 @@ namespace Pulsar4X.SDL2UI
                     }
                     
                 }
-                else if (typeof(T) == typeof(GotoSystemBlankMenuHelper))
+                //Menu is goto system menu
+                else if (T == typeof(GotoSystemBlankMenuHelper))
                 {
                     _state.SetActiveSystem(_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>().SystemGuid);
-                }else if(typeof(T)==typeof(SelectPrimaryBlankMenuHelper)){
+                }else if(T==typeof(SelectPrimaryBlankMenuHelper)){
                     _state.EntitySelectedAsPrimary(_entityState.Entity.Guid, _entityState.StarSysGuid);
                 }
                 //if entity can warp
-                else if (typeof(T) == typeof(OrbitOrderWindow))
+                else if (T == typeof(OrbitOrderWindow))
                 {
                     OrbitOrderWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = OrbitOrderWindow.GetInstance(_entityState);
                 }
-               
-                else if (typeof(T) == typeof(ChangeCurrentOrbitWindow))
+               //Menu is change orbit menu
+                else if (T == typeof(ChangeCurrentOrbitWindow))
                 {
                     ChangeCurrentOrbitWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
                 }
-               
-                else if (typeof(T) == typeof(WeaponTargetingControl))
+                //Menu is ficrecontrol menu
+                else if (T == typeof(WeaponTargetingControl))
                 {
                     var instance = WeaponTargetingControl.GetInstance(_entityState);
                     instance.SetOrderEntity(_entityState);
                     instance.IsActive = true;
                     _state.ActiveWindow = instance;
                 }
-               
-                else if (typeof(T) == typeof(RenameWindow))
+                //Menu is rename menu
+                else if (T == typeof(RenameWindow))
                 {
                     RenameWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = RenameWindow.GetInstance(_entityState);
@@ -179,24 +167,33 @@ namespace Pulsar4X.SDL2UI
                     }
                     
                 }
-                
-
-                else if (typeof(T) == typeof(CargoTransfer))
+                //Menu is cargo menu
+                else if (T == typeof(CargoTransfer))
                 {
                     var instance = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState);
                     instance.IsActive = true;
                     _state.ActiveWindow = instance;
                 }
-                
-                //econOrderwindow
-
-                else if (typeof(T) == typeof(ColonyPanel))
+                //Menu is econ menu
+                else if (T == typeof(ColonyPanel))
                 {
                     var instance = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState);
                     instance.IsActive = true;
                     _state.ActiveWindow = instance;
                 }
+                //
+                if(T == typeof(PlanetaryWindow)){
+                    var instance = PlanetaryWindow.GetInstance(_entityState);
+                    instance.IsActive = true;
+                    _state.ActiveWindow = instance;
+                
+                //TODO: implement this(moving a ship entity[_state.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
+                if(T == typeof(JumpThroughJumpPointBlankMenuHelper)){
+
+                }
             }
         }
     }
 }
+}
+    

@@ -10,6 +10,20 @@ namespace Pulsar4X.SDL2UI
     //basically an always open context menu for the currently selected entity.
     public class EntityUIWindowSelector : PulsarGuiWindow
     {
+
+        public Vector2 BtnSizes = new Vector2(32, 32);
+        private List<ToolbuttonData> StandardButtons = new List<ToolbuttonData>();
+        private List<ToolbuttonData> CondtionalButtons = new List<ToolbuttonData>();
+        //data for a toolbar button, requires an SDL image(for Picture), a PulsarGuiWindow`s SetActive function or equivalent/similar(for OnClick) and
+        //the tool tip text to be displayed when the button is hovered(for TooltipText)
+        public struct ToolbuttonData
+        {
+            public IntPtr Picture;
+            public string TooltipText;
+            public Action OnClick;
+            public Type ClickType;
+            
+        }
         private EntityUIWindowSelector()
         {
             _flags =  ImGuiWindowFlags.NoCollapse;
@@ -35,99 +49,97 @@ namespace Pulsar4X.SDL2UI
 
         }
         //displays selected entity info
+
+
+
         internal override void Display()
         {
             ImGui.SetNextWindowSize(new Vector2(150, 200), ImGuiCond.Once);
-            string entityName;
-            if(_state.LastClickedEntity != null){
-                entityName = _state.LastClickedEntity.Name;
-            } else{
-                entityName = "(...no entity clicked)";
-            }
-            if (ImGui.Begin("Actions: "+entityName+"###ActionsWindow", _flags))
+            if (ImGui.Begin("Actions", _flags))
             {
                 //check if ANY entity has been clicked
                 //if true, display all possible toolbar menu icons for it
                 if (_state.LastClickedEntity != null)
                 {
-                    
+                    //Gets the last clicked entity
                     var _entityState = _state.LastClickedEntity;
 
-                    if (EntityUIWindows.checkIfCanOpenWindow<PlanetaryWindow>(_entityState, _state))
-                    {
-                        EntityUIWindows.openUIWindow<PlanetaryWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PlanetaryWindow)]), _entityState, _state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(PlanetaryWindow)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<PinCameraBlankMenuHelper>(_entityState, _state))
-                    {
-                        EntityUIWindows.openUIWindow<PinCameraBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PinCameraBlankMenuHelper)]), _entityState, _state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(PinCameraBlankMenuHelper)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<GotoSystemBlankMenuHelper>(_entityState, _state))
-                    {
-                        EntityUIWindows.openUIWindow<GotoSystemBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]), _entityState,_state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(GotoSystemBlankMenuHelper)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<SelectPrimaryBlankMenuHelper>(_entityState, _state))
-                    {
-                        EntityUIWindows.openUIWindow<SelectPrimaryBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(SelectPrimaryBlankMenuHelper)]), _entityState,_state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(SelectPrimaryBlankMenuHelper)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<OrbitOrderWindow>(_entityState, _state))
-                    {
+                    ToolbuttonData btn;
 
-                        EntityUIWindows.openUIWindow<OrbitOrderWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(OrbitOrderWindow)]), _entityState, _state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(OrbitOrderWindow)]);
+                    void NewButton(Type T,  string PictureString, string TooltipText, List<ToolbuttonData> ButtonList) {
+                        //Creates a buttton if it is usuable in this situation
+                        if (EntityUIWindows.checkIfCanOpenWindow(T, _entityState))
+                        {
+                            btn = new ToolbuttonData()
+                            {   
+                                Picture = _state.SDLImageDictionary[PictureString],
+                                TooltipText = TooltipText,
+                                ClickType = T
+                                //Opens up the componet design menu
+                            };
+                            ButtonList.Add(btn);
+                        }
                     }
-                    if (EntityUIWindows.checkIfCanOpenWindow<ChangeCurrentOrbitWindow>(_entityState, _state))
-                    {
+                    void NewCondtionalButton(Type T, string PictureString, string TooltipText) {
+                        NewButton(T, PictureString, TooltipText, CondtionalButtons);
+                    }
+                    void NewStandardButton(Type T, string PictureString, string TooltipText) {
+                        NewButton(T, PictureString, TooltipText, StandardButtons);
+                    }
 
-                        EntityUIWindows.openUIWindow<ChangeCurrentOrbitWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ChangeCurrentOrbitWindow)]), _entityState, _state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(ChangeCurrentOrbitWindow)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<WeaponTargetingControl>(_entityState, _state))
-                    {
+                    //Populates Buttons
 
-                        EntityUIWindows.openUIWindow<WeaponTargetingControl>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(WeaponTargetingControl)]), _entityState, _state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(WeaponTargetingControl)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<RenameWindow>(_entityState, _state))
-                    {
+                    NewStandardButton(typeof(SelectPrimaryBlankMenuHelper), "Select", "Selects the entity");
+                    NewStandardButton(typeof(PinCameraBlankMenuHelper), "Pin", "Focuses camera");
+                    NewStandardButton(typeof(RenameWindow), "Rename", "Renames the entity");
 
-                        EntityUIWindows.openUIWindow<RenameWindow>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(RenameWindow)]), _entityState, _state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(RenameWindow)]);
-                    }
-                    if (EntityUIWindows.checkIfCanOpenWindow<CargoTransfer>(_entityState, _state))
-                    {
+                    NewCondtionalButton(typeof(PowerGen), "Power", "Shows power stats");
+                    NewCondtionalButton(typeof(CargoTransfer), "Cargo", "Shows cargo");
+                    NewCondtionalButton(typeof(ColonyPanel), "Industry", "Opens Industry menu");
+                    NewCondtionalButton(typeof(WeaponTargetingControl), "Firecon", "Opens firecontrol menu");
+                   
+                    //Displays all buttons in a list
+                    void PrintButtonList (ref List<ToolbuttonData> PrintButtons) {
+                        uint iterations = 0;
+                        foreach (var button in PrintButtons)
+                        {
+                            ImGui.SameLine();
+                            ImGui.PushID(iterations.ToString());
+                            if (ImGui.ImageButton(button.Picture, BtnSizes))
+                                EntityUIWindows.openUIWindow(button.ClickType ,_entityState, _state);
+                            if (ImGui.IsItemHovered())
+                                ImGui.SetTooltip(button.TooltipText);
 
-                        EntityUIWindows.openUIWindow<CargoTransfer>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(CargoTransfer)]), _entityState, _state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(CargoTransfer)]);
+                            ImGui.PopID();
+                            iterations++;
+                        }
+                        ImGui.NewLine();
+                        PrintButtons = new List<ToolbuttonData>();
                     }
-                    if (EntityUIWindows.checkIfCanOpenWindow<ColonyPanel>(_entityState, _state))
-                    {
+                    
+                    //Prints both button lists
+                    PrintButtonList(ref StandardButtons);
+                    PrintButtonList(ref CondtionalButtons);
 
-                        EntityUIWindows.openUIWindow<ColonyPanel>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ColonyPanel)]), _entityState, _state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(ColonyPanel)]);
-                    }
-                    //joint entity actions(PrimaryEntity+ LastClickedEntity)
-                    if (EntityUIWindows.checkIfCanOpenWindow<JumpThroughJumpPointBlankMenuHelper>(_entityState, _state))
+                    void ActionButton(Type T)
                     {
-                        ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(255, 0, 0, 0));
-                        EntityUIWindows.openUIWindow<JumpThroughJumpPointBlankMenuHelper>(ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(JumpThroughJumpPointBlankMenuHelper)]), _entityState, _state, false);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(JumpThroughJumpPointBlankMenuHelper)]);
-                        ImGui.PopStyleColor();
+                    //Makes a small button if it is usable in this situation
+                        if (EntityUIWindows.checkIfCanOpenWindow(T,_entityState))
+                        {
+                            bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[T]);
+                            EntityUIWindows.openUIWindow(T, _entityState, _state, buttonresult);
+                            if (ImGui.IsItemHovered())
+                                ImGui.SetTooltip(GlobalUIState.namesForMenus[T]);
+                        }
                     }
+
+                    //Makes all small buttons
+                    ActionButton(typeof(PlanetaryWindow));
+                    ActionButton(typeof(GotoSystemBlankMenuHelper));
+                    ActionButton(typeof(OrbitOrderWindow));
+                    ActionButton(typeof(ChangeCurrentOrbitWindow));
+
+
 
                 }
                 ImGui.End();

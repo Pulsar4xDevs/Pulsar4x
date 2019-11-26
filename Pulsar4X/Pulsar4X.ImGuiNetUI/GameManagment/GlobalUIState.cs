@@ -109,8 +109,14 @@ namespace Pulsar4X.SDL2UI
             LoadImg("DesShip", Path.Combine(rf, "DesignShipIco.bmp"));
             LoadImg("GalMap", Path.Combine(rf, "GalaxyMapIco.bmp"));
             LoadImg("Research", Path.Combine(rf, "ResearchIco.bmp"));
+            LoadImg("Power", Path.Combine(rf, "PowerIco.bmp"));
             LoadImg("Ruler", Path.Combine(rf, "RulerIco.bmp"));
-            LoadImg("PowerImg", Path.Combine(rf, "PowerIco.bmp"));
+            LoadImg("Cargo", Path.Combine(rf, "CargoIco.bmp"));
+            LoadImg("Firecon", Path.Combine(rf, "FireconIco.bmp"));
+            LoadImg("Industry", Path.Combine(rf, "IndustryIco.bmp"));
+            LoadImg("Pin", Path.Combine(rf, "PinIco.bmp"));
+            LoadImg("Rename", Path.Combine(rf, "RenameIco.bmp"));
+            LoadImg("Select", Path.Combine(rf, "SelectIco.bmp"));
             /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
