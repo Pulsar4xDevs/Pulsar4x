@@ -98,43 +98,28 @@ namespace Pulsar4X.SDL2UI
                     NewCondtionalButton(typeof(ColonyPanel), "Industry", "Opens Industry menu");
                     NewCondtionalButton(typeof(WeaponTargetingControl), "Firecon", "Opens firecontrol menu");
                    
-                    //Displays all buttons
-                    //TODO: Move this to functions (exact formating still needs to be decided.
-                    uint iterations = 0;
+                    //Displays all buttons in a list
+                    void PrintButtonList (ref List<ToolbuttonData> PrintButtons) {
+                        uint iterations = 0;
+                        foreach (var button in PrintButtons)
+                        {
+                            ImGui.SameLine();
+                            ImGui.PushID(iterations.ToString());
+                            if (ImGui.ImageButton(button.Picture, BtnSizes))
+                                EntityUIWindows.openUIWindow(button.ClickType ,_entityState, _state);
+                            if (ImGui.IsItemHovered())
+                                ImGui.SetTooltip(button.TooltipText);
 
-                    foreach (var button in StandardButtons)
-                    {
-                        ImGui.SameLine();
-                        ImGui.PushID(iterations.ToString());
-                        if (ImGui.ImageButton(button.Picture, BtnSizes))
-                            EntityUIWindows.openUIWindow(button.ClickType ,_entityState, _state);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(button.TooltipText);
-
-
-                        ImGui.PopID();
-                        iterations++;
+                            ImGui.PopID();
+                            iterations++;
+                        }
+                        ImGui.NewLine();
+                        PrintButtons = new List<ToolbuttonData>();
                     }
-
-                    ImGui.NewLine();
-                    iterations = 0;
-
-                    foreach (var button in CondtionalButtons)
-                    {
-                        ImGui.SameLine();
-                        ImGui.PushID(iterations.ToString());
-                        if (ImGui.ImageButton(button.Picture, BtnSizes))
-                            EntityUIWindows.openUIWindow(button.ClickType, _entityState, _state);
-                        if (ImGui.IsItemHovered())
-                            ImGui.SetTooltip(button.TooltipText);
-
-
-                        ImGui.PopID();
-                        iterations++; 
-                    }
-
-                    CondtionalButtons = new List<ToolbuttonData>();
-                    StandardButtons = new List<ToolbuttonData>();
+                    
+                    //Prints both button lists
+                    PrintButtonList(ref StandardButtons);
+                    PrintButtonList(ref CondtionalButtons);
 
                     void ActionButton(Type T)
                     {
