@@ -45,7 +45,6 @@ namespace Pulsar4X.ECSLib
                 Game game = (Game)context.Context;
                 Dictionary<string, List<Guid>> instanceProcessors = (Dictionary<string, List<Guid>>)info.GetValue(nameof(InstanceProcessors), typeof(Dictionary<string, List<Guid>>));
                 ProcessorManager processManager = StaticRefLib.ProcessorManager;
-                Entity entity;
                 foreach (var kvpItem in instanceProcessors)
                 {
                     
@@ -57,7 +56,7 @@ namespace Pulsar4X.ECSLib
                     
                     foreach (var entityGuid in kvpItem.Value)
                     {
-                        if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity)) //might be a better way to do this, can we get the manager from here and just search localy?
+                        if (game.GlobalManager.FindEntityByGuid(entityGuid, out Entity entity)) //might be a better way to do this, can we get the manager from here and just search localy?
                         {
 
                             InstanceProcessors[typeName].Add(entity);
@@ -99,6 +98,33 @@ namespace Pulsar4X.ECSLib
                 }
 
                 return procList;
+            }
+
+            internal List<string> RemoveEntity(Entity entity)
+            {
+                var procList = new List<String>();
+                var removelist = new List<string>();
+                foreach (var kvp in InstanceProcessors)
+                {
+                    if (kvp.Value.Contains(entity))
+                        kvp.Value.Remove(entity);
+                    procList.Add(kvp.Key);
+                    if(kvp.Value.Count == 0)
+                        removelist.Add(kvp.Key);
+                }
+
+                foreach (var item in removelist)
+                {
+                    InstanceProcessors.Remove(item);
+                }
+                return procList;
+            }
+
+            internal bool IsEmpty()
+            {
+                if (InstanceProcessors.Count == 0 && SystemProcessors.Count == 0)
+                    return true;
+                return false;
             }
         }
 
@@ -250,17 +276,55 @@ namespace Pulsar4X.ECSLib
         {
             //possibly need to implement a reverse dictionary so entities can be looked up backwards, rather than itterating through?
             //MUST remove empty entries in the dictionary as an empty entitylist will be seen as a systemInterupt. 
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+
+            List<DateTime> removekeys = new List<DateTime>();
+            foreach (var kvp in QueuedProcesses)
+            {
+                kvp.Value.RemoveEntity(entity);
+                if(kvp.Value.IsEmpty())
+                    removekeys.Add(kvp.Key);
+            }
+
+            foreach (var item in removekeys)
+            {
+                QueuedProcesses.Remove(item);
+            }
+            
         }
 
         /// <summary>
-        /// transfers all references from this dictionary to the new one
+        /// transfers all references from this starSystem to the new one
+        /// Note that doing this could cause a temporal anomaly if the system we're moving to is ahead of this one.
+        /// This should only be done from the TimeLoop when it has synched the systems.
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="starsys"></param>
         internal void TransferEntity(Entity entity, StarSystem starsys)
         {
-            throw new NotImplementedException();
+
+            Dictionary<DateTime, List<string>> procDict = GetInstanceProcForEntity(entity);
+            List<DateTime> removekeys = new List<DateTime>();
+            
+            //get the dates and processors associated with this entity
+            foreach (var kvp in QueuedProcesses)
+            {
+                var procs = kvp.Value.RemoveEntity(entity);
+                if(procs.Count > 0)
+                    procDict.Add(kvp.Key, procs);
+                if(kvp.Value.IsEmpty())
+                    removekeys.Add(kvp.Key);
+            }
+            
+            //cleanup
+            foreach (var item in removekeys)
+            {
+                QueuedProcesses.Remove(item);
+            }
+            
+            
+            //add the processors to the new system
+            starsys.ManagerSubpulses.ImportProcDictForEntity(entity, procDict);
         }
 
 
@@ -282,8 +346,6 @@ namespace Pulsar4X.ECSLib
                 //ShipMovementProcessor.Process(_entityManager, (int)deltaActual.TotalSeconds); //process movement for any entity that can move (not orbit)
                 //_entityManager.Game.ProcessorManager.Hotloop<PropulsionDB>(_entityManager, (int)deltaActual.TotalSeconds);
                 ProcessToNextInterupt(nextDate);
-
-
             }
         }
 
