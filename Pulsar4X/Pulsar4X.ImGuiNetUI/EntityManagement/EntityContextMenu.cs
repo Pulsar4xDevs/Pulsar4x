@@ -25,6 +25,10 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        internal void CallButton(Type T) {
+        
+        }
+
         internal void Display()
         {
             ActiveEntity = _entityState.Entity;
@@ -68,6 +72,13 @@ namespace Pulsar4X.SDL2UI
                 bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(ColonyPanel)]);
                 EntityUIWindows.openUIWindow(typeof(ColonyPanel), _entityState, _state, buttonresult, true);
             }
+            if (EntityUIWindows.checkIfCanOpenWindow<PlanetaryWindow>(_entityState))
+            {
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PlanetaryWindow)]);
+                EntityUIWindows.openUIWindow(typeof(PlanetaryWindow), _entityState, _state, buttonresult, true);
+            }
+
+            
             /*
             if (ImGui.SmallButton("Pin Camera"))
             {

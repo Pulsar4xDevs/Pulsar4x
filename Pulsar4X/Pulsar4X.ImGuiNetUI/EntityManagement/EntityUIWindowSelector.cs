@@ -242,6 +242,14 @@ namespace Pulsar4X.SDL2UI
                         if (ImGui.IsItemHovered())
                             ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(ColonyPanel)]);
                     }
+                    if (EntityUIWindows.checkIfCanOpenWindow<PlanetaryWindow>(_entityState))
+                    {
+                        bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[typeof(PlanetaryWindow)]);
+                        EntityUIWindows.openUIWindow(typeof(PlanetaryWindow), _entityState, _state, buttonresult);
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip(GlobalUIState.namesForMenus[typeof(PlanetaryWindow)]);
+                    }
+
 
                 }
                 ImGui.End();
