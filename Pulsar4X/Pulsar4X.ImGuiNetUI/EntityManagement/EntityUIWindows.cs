@@ -174,7 +174,10 @@ namespace Pulsar4X.SDL2UI
                 {
                     RenameWindow.GetInstance(_entityState).IsActive = true;
                     _state.ActiveWindow = RenameWindow.GetInstance(_entityState);
-                    ImGui.CloseCurrentPopup();
+                    if(managesUIPopUps){
+                        ImGui.CloseCurrentPopup();
+                    }
+                    
                 }
                 
 

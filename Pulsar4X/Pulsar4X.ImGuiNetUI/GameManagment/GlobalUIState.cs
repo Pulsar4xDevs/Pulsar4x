@@ -148,9 +148,9 @@ namespace Pulsar4X.SDL2UI
             GalacticMap.SetFaction();
         }
 
-        internal void SetActiveSystem(Guid activeSysID)
+        internal void SetActiveSystem(Guid activeSysID, bool refresh = false)
         {
-            if(activeSysID != SelectedStarSysGuid){
+            if(activeSysID != SelectedStarSysGuid || refresh){
                 deactivateAllClosableWindows();
                 var SelectedSys = StarSystemStates[activeSysID].StarSystem;
                 PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
@@ -160,6 +160,11 @@ namespace Pulsar4X.SDL2UI
                 PrimaryEntity = null;
             }
             
+        }
+
+        internal void refreshStarSystemStates(){
+            SetFaction(Faction);
+            SetActiveSystem(SelectedStarSysGuid ,true);
         }
 
         internal void EnableGameMaster()
