@@ -141,6 +141,7 @@ namespace Pulsar4X.ECSLib
                     positionDB.SetParent(newParent);
                     newtonMoveDB.ParentMass = parentMass_kg;
                     newtonMoveDB.SOIParent = newParent;
+                    newtonMoveDB.CurrentVector_ms = parentRalitiveVector;
                 }
                 
                 if (newtonMoveDB.DeltaVForManuver_m.Length() <= 0) //if we've completed the manuver.

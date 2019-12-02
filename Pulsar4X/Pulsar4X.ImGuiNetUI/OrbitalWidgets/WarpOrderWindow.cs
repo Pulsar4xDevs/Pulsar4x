@@ -9,7 +9,7 @@ namespace Pulsar4X.SDL2UI
     /// <summary>
     /// Orbit order window - this whole thing is a somewhat horrible state machine
     /// </summary>
-    public class OrbitOrderWindow : PulsarGuiWindow// IOrderWindow
+    public class WarpOrderWindow : PulsarGuiWindow// IOrderWindow
     {
        
         EntityState OrderingEntityState;
@@ -71,7 +71,7 @@ namespace Pulsar4X.SDL2UI
         string _displayText;
         string _tooltipText = "";
         OrbitOrderWiget _orbitWidget;
-        TranslateMoveOrderWidget _moveWidget;
+        WarpMoveOrderWidget _moveWidget;
         bool _smMode;
 
         enum States: byte { NeedsEntity, NeedsTarget, NeedsInsertionPoint, NeedsActioning }
@@ -86,7 +86,7 @@ namespace Pulsar4X.SDL2UI
             get { return Distance.MToAU(_targetInsertionPoint_m); }
         }
 
-        private OrbitOrderWindow(EntityState entityState, bool smMode = false)
+        private WarpOrderWindow(EntityState entityState, bool smMode = false)
         {
 
 
@@ -104,7 +104,7 @@ namespace Pulsar4X.SDL2UI
                 //_state.MapRendering.UIWidgets.Add(_orbitWidget);
                 if (_moveWidget == null)
                 {
-                    _moveWidget = new TranslateMoveOrderWidget(_state, OrderingEntityState.Entity);
+                    _moveWidget = new WarpMoveOrderWidget(_state, OrderingEntityState.Entity);
                     _state.SelectedSysMapRender.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
 
                 }
@@ -127,13 +127,13 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        internal static OrbitOrderWindow GetInstance(EntityState entity, bool SMMode = false)
+        internal static WarpOrderWindow GetInstance(EntityState entity, bool SMMode = false)
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(OrbitOrderWindow)))
+            if (!_state.LoadedWindows.ContainsKey(typeof(WarpOrderWindow)))
             {
-                return new OrbitOrderWindow(entity, SMMode);
+                return new WarpOrderWindow(entity, SMMode);
             }
-            var instance = (OrbitOrderWindow)_state.LoadedWindows[typeof(OrbitOrderWindow)];
+            var instance = (WarpOrderWindow)_state.LoadedWindows[typeof(WarpOrderWindow)];
             instance.OrderingEntityState = entity;
             instance.CurrentState = States.NeedsTarget;
             instance._departureDateTime = _state.PrimarySystemDateTime;
@@ -165,7 +165,7 @@ namespace Pulsar4X.SDL2UI
             _stdGravParamCurrentBody = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;
             if (_moveWidget == null)
             {
-                _moveWidget = new TranslateMoveOrderWidget(_state, OrderingEntityState.Entity);
+                _moveWidget = new WarpMoveOrderWidget(_state, OrderingEntityState.Entity);
                 _state.SelectedSysMapRender.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
             }
             DepartureCalcs();
@@ -512,7 +512,12 @@ namespace Pulsar4X.SDL2UI
 
             //OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate()
 
-            _departureOrbitalVelocity_m = Entity.GetVelocity_m(OrderingEntityState.Entity, _departureDateTime);
+            
+            if(OrbitProcessor.UseRalitiveVelocity)
+                _departureOrbitalVelocity_m = Entity.GetVelocity_m(OrderingEntityState.Entity, _departureDateTime, true);
+            else
+                _departureOrbitalVelocity_m = Entity.GetVelocity_m(OrderingEntityState.Entity, _departureDateTime, false);
+            
             _departureOrbitalSpeed_m = _departureOrbitalVelocity_m.Length();
             _departureAngle = Math.Atan2(_departureOrbitalVelocity_m.Y, _departureOrbitalVelocity_m.X);
             _moveWidget.SetDepartureProgradeAngle(_departureAngle);
