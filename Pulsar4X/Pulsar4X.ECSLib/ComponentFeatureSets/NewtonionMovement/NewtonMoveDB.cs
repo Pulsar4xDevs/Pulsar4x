@@ -105,7 +105,9 @@ namespace Pulsar4X.ECSLib
         
         
 
-
+        /// <summary>
+        /// Parent ralitive velocity vector. 
+        /// </summary>
         public Vector3 CurrentVector_ms { get; internal set; }
 
         public Entity SOIParent { get; internal set; }
