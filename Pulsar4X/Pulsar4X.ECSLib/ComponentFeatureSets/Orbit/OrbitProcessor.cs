@@ -320,6 +320,60 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Untested.
+        /// Gets the Eccentric Anomaly for a hyperbolic trajectory.
+        /// This still requres the Mean Anomaly to be known however.
+        /// Which I'm unsure how to calculate from time. so this may not be useful. included for completeness. 
+        /// </summary>
+        /// <param name="orbit"></param>
+        /// <param name="currentMeanAnomaly"></param>
+        /// <returns></returns>
+        public static double GetEccentricAnomalyH(OrbitDB orbit, double currentMeanAnomaly)
+        {
+            
+            //Kepler's Equation
+            const int numIterations = 1000;
+            var f = new double[numIterations];
+            const double epsilon = 1E-12; // Plenty of accuracy.
+            int i = 0;
+
+            if (orbit.Eccentricity > 0.8)
+            {
+                f[i] = Math.PI;
+            }
+            else
+            {
+                f[i] = currentMeanAnomaly;
+            }
+            
+            do
+            {
+                // Newton's Method.
+                /*					 F(n) - e sinh(E(n)) - M(t)
+                 * F(n+1) = E(n) - ( ------------------------- )
+                 *					      1 - e cosh(F(n)
+                 * 
+                 * F == EccentricAnomalyH, e == Eccentricity, M == MeanAnomaly.
+                 * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
+                */
+                f[i + 1] = f[i] - (f[i] - orbit.Eccentricity * Math.Sinh(f[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cosh(f[i]));
+                i++;
+            } while (Math.Abs(f[i] - f[i - 1]) > epsilon && i + 1 < numIterations);
+
+            if (i + 1 >= numIterations)
+            {
+                Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.");
+                gameEvent.Entity = orbit.OwningEntity;
+                gameEvent.EventType = EventType.Opps;
+
+                StaticRefLib.EventLog.AddEvent(gameEvent);
+                //throw new OrbitProcessorException("Non-convergence of Newton's method while calculating Eccentric Anomaly.", orbit.OwningEntity);
+            }
+
+            return f[i - 1];
+        }
+
+        /// <summary>
         /// Gets the orbital vector, will be either Absolute or Ralitive depending on static bool UseRalitiveVelocity
         /// </summary>
         /// <returns>The orbital vector.</returns>
