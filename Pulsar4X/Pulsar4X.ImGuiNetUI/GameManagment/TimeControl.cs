@@ -61,7 +61,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushStyleColor(ImGuiCol.Header, new Vector4(0, 0, 0, 0));
             ImGui.PushStyleColor(ImGuiCol.HeaderActive, new Vector4(0, 0, 0, 0));
             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0, 0, 0, 0));
-            if (ImGui.CollapsingHeader("", _xpanderFlags))
+            if (ImGui.CollapsingHeader("", _xpanderFlags))//Let the user open up the the time frequency menu
                 _expanded = true;
             else
                 _expanded = false;
@@ -73,13 +73,23 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.Combo("##spnCmbo", ref _timeSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
                 AdjustTimeSpan();
             ImGui.SameLine();
+            if (_isPaused == true)//When time is paused
+            {
+                if (ImGui.ImageButton(_state.SDLImageDictionary["PlayImg"], new Vector2(16, 16)))//Provide a button to unpause
+                    PausePlayPressed();
+                ImGui.SameLine();
+                if (ImGui.ImageButton(_state.SDLImageDictionary["OneStepImg"], new Vector2(16, 16)))//Provide a button to increment time
+                    OneStepPressed();
+            }
+            else//When time is running
+            {
+                if (ImGui.ImageButton(_state.SDLImageDictionary["PauseImg"], new Vector2(16, 16)))//Provide a button to unpause time
+                    PausePlayPressed();
+            }
 
-            if (ImGui.ImageButton(_state.SDLImageDictionary["PlayImg"], new Vector2(16, 16)))
-                PausePlayPressed();
-            ImGui.SameLine();
-            if (ImGui.ImageButton(_state.SDLImageDictionary["OneStepImg"], new Vector2(16, 16)))
-                OneStepPressed();
-            if (_expanded)
+            
+
+            if (_expanded)//When the submenu is expanded allow the user to adjust time frequency
             {
                 ImGui.PushItemWidth(100);
                 if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), 1))

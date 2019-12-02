@@ -96,7 +96,10 @@ namespace Pulsar4X.SDL2UI
                 {
                     var sysid = kvp.Key;
                     var sysmap = kvp.Value;
-                    sysmap.DrawNameIcons();
+                    if(sysid == _state.SelectedStarSysGuid){
+                        sysmap.DrawNameIcons();
+                    }
+                    
                 }
             }
             else
@@ -106,8 +109,14 @@ namespace Pulsar4X.SDL2UI
                     List<NameIcon> nameIcons = new List<NameIcon>();
                     foreach (var item in _nameIcons)
                     {
-                        nameIcons.Add(item.Value);
+                        //if(_state.StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames.ContainsKey(item.Key)){
+                        if(item.Key == _state.SelectedStarSysGuid){
+                            nameIcons.Add(item.Value);
+                        }
+                        
+                       
                          
+                        //}
                         //item.Value.Draw(_state.rendererPtr, _state.Camera);
                     }
                     NameIcon.DrawAll(_state.rendererPtr, _state.Camera, nameIcons);
@@ -154,7 +163,12 @@ namespace Pulsar4X.SDL2UI
                     foreach (var name in _nameIcons.Values)
                         name.OnFrameUpdate(matrix, _camera);
                 }
-                item.Value.Draw(_renderPtr, _camera);
+                if(item.Key == _state.SelectedStarSysGuid){
+                     item.Value.Draw(_renderPtr, _camera);
+                }
+               
+
+                
             }
             lock (_nameIcons)
             {

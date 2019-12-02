@@ -46,6 +46,119 @@ namespace Pulsar4X.ECSLib
             return newSystem;
         }
 
+
+        public StarSystem CreateTestSystem(Game game, int x = 0, int y = 0)
+        {
+            
+            StarSystem sol = new StarSystem(game, "something", -1);
+
+            Entity sun = _starFactory.CreateStar(sol, GameConstants.Units.SolarMassInKG, GameConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "something");
+            sun.GetDataBlob<PositionDB>().X_AU += x;
+            sun.GetDataBlob<PositionDB>().Y_AU += x;
+            
+            MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
+
+            SystemBodyInfoDB mercuryBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.068f }; //Albedo = 0.068f
+            MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
+            NameDB mercuryNameDB = new NameDB("LOLXDWTF");
+            double mercurySemiMajAxis = 0.387098;
+            double mercuryEccentricity = 0.205630;
+            double mercuryInclination = 0;
+            double mercuryLoAN = 48.33167;
+            double mercuryLoP = 77.45645;
+            double mercuryMeanLongd = 252.25084;
+            OrbitDB mercuryOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, mercuryMVDB.Mass, mercurySemiMajAxis, mercuryEccentricity, mercuryInclination, mercuryLoAN, mercuryLoP, mercuryMeanLongd, GalaxyGen.Settings.J2000);
+            PositionDB mercuryPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(mercuryOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun);
+            //AtmosphereDB mercuryAtmo = new AtmosphereDB();
+            SensorProfileDB sensorProfile = new SensorProfileDB();
+            mercuryPositionDB.X_AU += x;
+            mercuryPositionDB.Y_AU += x;
+            Entity mercury = new Entity(sol, new List<BaseDataBlob>{sensorProfile, mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, mercury);
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, mercuryBodyDB, mercuryMVDB);
+
+            SystemBodyInfoDB venusBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.77f };
+            MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.KmToAU(6051.8));
+            NameDB venusNameDB = new NameDB("AYLMAOROFL");
+            double venusSemiMajAxis = 0.72333199;
+            double venusEccentricity = 0.00677323;
+            double venusInclination = 0;
+            double venusLoAN = 76.68069;
+            double venusLoP = 131.53298;
+            double venusMeanLongd = 181.97973;
+            OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, venusMVDB.Mass, venusSemiMajAxis, venusEccentricity, venusInclination, venusLoAN, venusLoP, venusMeanLongd, GalaxyGen.Settings.J2000);
+            PositionDB venusPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(venusOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun);
+            sensorProfile = new SensorProfileDB();
+            Entity venus = new Entity(sol, new List<BaseDataBlob> { sensorProfile, venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, venus);
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, venusBodyDB, venusMVDB);
+
+            SystemBodyInfoDB earthBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.306f };
+            MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius(5.9726E24, Distance.KmToAU(6378.1));
+            NameDB earthNameDB = new NameDB("OMG");
+            double earthSemiMajAxis = 1.00000011;
+            double earthEccentricity = 0.01671022;
+            double earthInclination = 0;
+            double earthLoAN = -11.26064;
+            double earthLoP = 102.94719;
+            double earthMeanLongd = 100.46435;
+            OrbitDB earthOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, earthMVDB.Mass, earthSemiMajAxis, earthEccentricity, earthInclination, earthLoAN, earthLoP, earthMeanLongd, GalaxyGen.Settings.J2000);
+            earthBodyDB.Tectonics = TectonicActivity.EarthLike;
+            PositionDB earthPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(earthOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun);
+            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
+            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(6), 0.78f);
+            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(9), 0.12f);
+            atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(11), 0.01f);
+            AtmosphereDB earthAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+            sensorProfile = new SensorProfileDB();
+            Entity earth = new Entity(sol, new List<BaseDataBlob> {sensorProfile, earthPositionDB, earthBodyDB, earthMVDB, earthNameDB, earthOrbitDB, earthAtmosphereDB });
+            _systemBodyFactory.HomeworldMineralGeneration(game.StaticData, sol, earth);
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, earthBodyDB, earthMVDB);
+
+
+            SystemBodyInfoDB lunaBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true };
+            MassVolumeDB lunaMVDB = MassVolumeDB.NewFromMassAndRadius(0.073E24, Distance.KmToAU(1738.14));
+            NameDB lunaNameDB = new NameDB("NOWAY");
+            double lunaSemiMajAxis = Distance.KmToAU(0.3844E6);
+            double lunaEccentricity = 0.0549;
+            double lunaInclination = 0;//5.1;
+            // Next three values are unimportant. Luna's LoAN and AoP regress/progress by one revolution every 18.6/8.85 years respectively.
+            // Our orbit code it not advanced enough to deal with LoAN/AoP regression/progression. 
+            double lunaLoAN = 125.08;
+            double lunaAoP = 318.0634;
+            double lunaMeanAnomaly = 115.3654;
+            OrbitDB lunaOrbitDB = OrbitDB.FromAsteroidFormat(earth, earthMVDB.Mass, lunaMVDB.Mass, lunaSemiMajAxis, lunaEccentricity, lunaInclination, lunaLoAN, lunaAoP, lunaMeanAnomaly, GalaxyGen.Settings.J2000);
+            PositionDB lunaPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(lunaOrbitDB, StaticRefLib.CurrentDateTime) + earthPositionDB.AbsolutePosition_AU, sol.Guid, earth);
+            sensorProfile = new SensorProfileDB();
+            Entity luna = new Entity(sol, new List<BaseDataBlob> {sensorProfile, lunaPositionDB, lunaBodyDB, lunaMVDB, lunaNameDB, lunaOrbitDB });
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, luna);
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, lunaBodyDB, lunaMVDB);
+
+
+            SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
+            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
+            NameDB halleysNameDB = new NameDB("ASSHOLE");
+            double halleysSemiMajAxis = 17.834; //AU
+            double halleysEccentricity = 0.96714;
+            double halleysInclination = 180; //162.26° note retrograde orbit.
+            double halleysLoAN = 58.42; //°
+            double halleysAoP = 111.33;//°
+            double halleysMeanAnomaly = 38.38;//°
+            OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(sun, sunMVDB.Mass, halleysMVDB.Mass, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
+            PositionDB halleysPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(halleysOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun); // + earthPositionDB.AbsolutePosition_AU, sol.Guid);
+            sensorProfile = new SensorProfileDB();
+            Entity halleysComet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, halleysPositionDB, halleysBodyDB, halleysMVDB, halleysNameDB, halleysOrbitDB });
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, halleysComet);
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, halleysBodyDB, halleysMVDB);
+
+            JPSurveyFactory.GenerateJPSurveyPoints(sol);
+
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
+            return sol;
+        }
+
+
+
         #region Create Sol
 
         /// <summary>
@@ -59,7 +172,7 @@ namespace Pulsar4X.ECSLib
             StarSystem sol = new StarSystem(game, "Sol", -1);
 
             Entity sun = _starFactory.CreateStar(sol, GameConstants.Units.SolarMassInKG, GameConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
-
+           
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
             SystemBodyInfoDB mercuryBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.068f }; //Albedo = 0.068f

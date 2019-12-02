@@ -226,6 +226,8 @@ namespace Pulsar4X.SDL2UI
 
             }
             
+            
+            
             if (ImGui.BeginPopupContextItem("NameContextMenu"+_entityGuid.ToString()+NameString, 1))
             {
                 
@@ -241,7 +243,9 @@ namespace Pulsar4X.SDL2UI
                    ImGui.EndPopup();
                 }
             }
-
+            if(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.HasDataBlob<JPSurveyableDB>() && _state.StarSystemStates.ContainsKey(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid)){
+                ImGui.Text("Jumps to: "+_state.StarSystemStates[_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid].StarSystem.NameDB.DefaultName);
+            }
 
 
             //ImGui.BeginChild("subnames");
@@ -279,7 +283,7 @@ namespace Pulsar4X.SDL2UI
             if(createNewWindow){
                ImGui.PopStyleColor(); //have to pop the color change after pushing it.
                ImGui.PopStyleVar(3);
-                ImGui.End();
+               ImGui.End();
             }
 
             

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System;
 
 namespace Pulsar4X.ECSLib
 {
@@ -21,19 +22,33 @@ namespace Pulsar4X.ECSLib
         public int SurveyPointsRequired;
         [JsonProperty]
         public Dictionary<Entity, int> SurveyPointsAccumulated;
+        [JsonProperty]
+        public Entity JumpPointTo;
+        [JsonProperty]
+        public Guid SystemToGuid;
+        [JsonProperty]
+        public double MinimumDistanceToJump_m;
 
         /// <summary>
         /// Default public constructor for Json
         /// </summary>
         public JPSurveyableDB() { }
 
+
+        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated, double minimumDistanceToJump_m): this(pointsRequired, pointsAccumulated, null, Guid.Empty, minimumDistanceToJump_m){
+
+        }
+
         /// <summary>
         /// Copy constructor
         /// </summary>
-        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated)
+        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated, Entity jumpPointTo, Guid systemToGuid, double minimumDistanceToJump_m)
         {
             SurveyPointsRequired = pointsRequired;
             SurveyPointsAccumulated = new Dictionary<Entity, int>(pointsAccumulated);
+            JumpPointTo = jumpPointTo;
+            SystemToGuid = systemToGuid;
+            MinimumDistanceToJump_m = minimumDistanceToJump_m;
         }
 
         /// <summary>
@@ -42,7 +57,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public override object Clone()
         {
-            return new JPSurveyableDB(SurveyPointsRequired, SurveyPointsAccumulated);
+            return new JPSurveyableDB(SurveyPointsRequired, SurveyPointsAccumulated, JumpPointTo, SystemToGuid, MinimumDistanceToJump_m);
         }
     }
 }
