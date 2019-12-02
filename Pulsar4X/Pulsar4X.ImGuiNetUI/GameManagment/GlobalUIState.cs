@@ -16,12 +16,15 @@ namespace Pulsar4X.SDL2UI
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
         internal static readonly Dictionary<Type, string> namesForMenus = new Dictionary<Type, string>{
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},
-            {typeof(WarpOrderWindow), "Warp to a new orbit"},
+            {typeof(OrbitOrderWindow), "Translate to a new orbit"},
             {typeof(ChangeCurrentOrbitWindow), "Change current orbit"},
             {typeof(WeaponTargetingControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
-            {typeof(ColonyPanel), "Econ"}
+            {typeof(ColonyPanel), "econ"},
+            {typeof(GotoSystemBlankMenuHelper), "goto system"},
+            {typeof(SelectPrimaryBlankMenuHelper), "select as primary"},
+            {typeof(PlanetaryWindow), "Planetary window"}
         };
         internal Game Game;
         internal FactionVM FactionUIState;
@@ -59,7 +62,8 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
 
         public event EntityClickedEventHandler EntityClickedEvent;
-        internal EntityState LastClickedEntity;
+        internal EntityState LastClickedEntity = null;
+        internal EntityState PrimaryEntity = null;
         internal ECSLib.Vector3 LastWorldPointClicked_m { get; set; }
 
 
@@ -103,8 +107,16 @@ namespace Pulsar4X.SDL2UI
             LoadImg("CancelImg", Path.Combine( rf,"CancelIco.bmp"));
             LoadImg("DesComp", Path.Combine(rf, "DesignComponentIco.bmp"));
             LoadImg("DesShip", Path.Combine(rf, "DesignShipIco.bmp"));
+            LoadImg("GalMap", Path.Combine(rf, "GalaxyMapIco.bmp"));
             LoadImg("Research", Path.Combine(rf, "ResearchIco.bmp"));
-            LoadImg("PowerImg", Path.Combine(rf, "PowerIco.bmp"));
+            LoadImg("Power", Path.Combine(rf, "PowerIco.bmp"));
+            LoadImg("Ruler", Path.Combine(rf, "RulerIco.bmp"));
+            LoadImg("Cargo", Path.Combine(rf, "CargoIco.bmp"));
+            LoadImg("Firecon", Path.Combine(rf, "FireconIco.bmp"));
+            LoadImg("Industry", Path.Combine(rf, "IndustryIco.bmp"));
+            LoadImg("Pin", Path.Combine(rf, "PinIco.bmp"));
+            LoadImg("Rename", Path.Combine(rf, "RenameIco.bmp"));
+            LoadImg("Select", Path.Combine(rf, "SelectIco.bmp"));
             /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
@@ -117,6 +129,11 @@ namespace Pulsar4X.SDL2UI
             */
         }
 
+        private void deactivateAllClosableWindows(){
+            foreach(var window in LoadedWindows){
+                window.Value.IsActive = false;
+            }
+        }
 
         internal void LoadImg(string name, string path)
         {
@@ -137,11 +154,23 @@ namespace Pulsar4X.SDL2UI
             GalacticMap.SetFaction();
         }
 
-        internal void SetActiveSystem(Guid activeSysID)
+        internal void SetActiveSystem(Guid activeSysID, bool refresh = false)
         {
-            var SelectedSystem = StarSystemStates[activeSysID].StarSystem;
-            PrimarySystemDateTime = SelectedSystem.ManagerSubpulses.StarSysDateTime;
-            GalacticMap.SelectedStarSysGuid = activeSysID;
+            if(activeSysID != SelectedStarSysGuid || refresh){
+                deactivateAllClosableWindows();
+                var SelectedSys = StarSystemStates[activeSysID].StarSystem;
+                PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
+                GalacticMap.SelectedStarSysGuid = activeSysID;
+                DebugWindow.GetInstance().systemState = StarSystemStates[activeSysID];
+                LastClickedEntity = null;
+                PrimaryEntity = null;
+            }
+            
+        }
+
+        internal void refreshStarSystemStates(){
+            SetFaction(Faction);
+            SetActiveSystem(SelectedStarSysGuid ,true);
         }
 
         internal void EnableGameMaster()
@@ -235,6 +264,13 @@ namespace Pulsar4X.SDL2UI
             
             
         }
+
+        internal void EntitySelectedAsPrimary(Guid entityGuid, Guid starSys){
+            PrimaryEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
+            if(ActiveWindow != null)
+                ActiveWindow.EntitySelectedAsPrimary(PrimaryEntity);
+        }
+
         internal void EntityClicked(Guid entityGuid, Guid starSys, MouseButtons button)
         {
             
@@ -300,6 +336,8 @@ namespace Pulsar4X.SDL2UI
         internal abstract void Display();
 
         internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
+
+        internal virtual void EntitySelectedAsPrimary(EntityState entity){ }
 
         internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
 

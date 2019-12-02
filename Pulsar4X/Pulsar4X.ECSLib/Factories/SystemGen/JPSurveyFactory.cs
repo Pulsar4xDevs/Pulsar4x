@@ -10,9 +10,7 @@ namespace Pulsar4X.ECSLib
             // TODO: Make these settings load from GalaxyGen settings.
             var ringSettings = new Dictionary<double, int>
             {
-                { 2, 6 },
-                { 4, 12 },
-                { 6, 12 }
+                { 2, 6 }
             };
 
             var surveyPoints = new List<ProtoEntity>();
@@ -56,11 +54,13 @@ namespace Pulsar4X.ECSLib
             // TODO: Load "pointsRequired" from GalaxyGen settings
             const int pointsRequired = 400;
 
-            var surveyDB = new JPSurveyableDB(pointsRequired, new Dictionary<Entity, int>());
+            var surveyDB = new JPSurveyableDB(pointsRequired, new Dictionary<Entity, int>(), 10000000);
             var posDB = new PositionDB(x, y, 0, Guid.Empty);
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
+            //for testing purposes
+            var sensorProfileDB = new SensorProfileDB();
 
-            return ProtoEntity.Create(Guid.Empty, new BaseDataBlob[] { surveyDB, posDB, nameDB });
+            return ProtoEntity.Create(Guid.Empty, new BaseDataBlob[] { surveyDB, posDB, nameDB, sensorProfileDB });
         }
     }
 }

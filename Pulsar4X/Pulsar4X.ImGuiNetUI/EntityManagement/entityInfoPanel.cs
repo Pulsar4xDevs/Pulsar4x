@@ -35,24 +35,38 @@ namespace Pulsar4X.SDL2UI
         //displays selected entity info
         internal override void Display()
         {
+            ImGui.SetNextWindowSize(new Vector2(175, 225), ImGuiCond.Once);
             if (ImGui.Begin("Currently selected", _flags))
             {
+
+                
+                
 
                 if(ImGui.Button("see all small bodies")){
                         SmallBodyEntityInfoPanel.GetInstance().SetActive();
                 }
 
                 if(_state.LastClickedEntity != null && _state.StarSystemStates.ContainsKey(_state.SelectedStarSysGuid)){
-                    ImGui.Text("Name: "+_state.LastClickedEntity.Name);
+
+                    if (_state.PrimaryEntity != null)
+                    {
+                        ImGui.Text("Primary: " + _state.PrimaryEntity.Name);
+                    }
+                    else
+                    {
+                        ImGui.Text("(Select primary...)");
+                    }
+
+                    ImGui.Text("Subject: "+_state.LastClickedEntity.Name);
+                    
                     //ImGui.Text(""+_state.LastClickedEntity.);
                     //gets all children and parent nodes, displays their names and makes them clickable to navigate towards them.
 
                     
 
-                     //TODO: switch positionDB for a hierarchicalDB that only stores data about an organizational hierarchy(ex. sol->earth->luna)
                     if(_state.LastClickedEntity.Entity.HasDataBlob<PositionDB>()){
                         ImGui.Text("Parent entity: ");
-                        //TODO: switch positionDB for a hierarchicalDB that only stores data about an organizational hierarchy(ex. sol->earth->luna)
+
                         var parentEntity = _state.LastClickedEntity.Entity.GetDataBlob<PositionDB>().Parent;
                         bool hasParentEntity = false;
                         if(parentEntity != null){
@@ -73,7 +87,6 @@ namespace Pulsar4X.SDL2UI
                         }
                         bool hasChildrenEntities = false;
                         ImGui.Text("Children entities: ");
-                        //TODO: switch positionDB for a hierarchicalDB that only stores data about an organizational hierarchy(ex. sol->earth->luna)
                         foreach(var childEntity in _state.LastClickedEntity.Entity.GetDataBlob<PositionDB>().Children){
                             //checks if child exists in the seclted star system and has name
                             if(_state.StarSystemStates[_state.SelectedStarSysGuid].EntityStatesWithNames.ContainsKey(childEntity.Guid)){
@@ -92,6 +105,10 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("(...No children entities)");
                         }
                     }
+                }else
+                {
+
+                    ImGui.Text("(select subject...)");
                 }
                 ImGui.End();
             }

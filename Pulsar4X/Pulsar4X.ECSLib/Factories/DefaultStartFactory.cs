@@ -23,8 +23,137 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _cargoCompartment;
         private static ShipFactory.ShipClass _defaultShipClass;
         
+
+        // this code is a test for multiple systems, worth mentioning it utterly failed, modularity is good when you have it huh.ç
+        //TODO: try further tests at smaller distances between systems, create own starSystemFactory function for testing.
+        private static Entity completeTest(Game game, string name){
+            var log = StaticRefLib.EventLog;
+            StarSystemFactory starfac = new StarSystemFactory(game);
+            StarSystem solSys = starfac.CreateSol(game);
+            //sol.ManagerSubpulses.Init(sol);
+            Entity earth = solSys.Entities[3]; //should be fourth entity created 
+            //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
+            Entity factionEntity = FactionFactory.CreateFaction(game, name);
+            Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
+
+
+            /*
+            GalaxyFactory GalaxyGen = game.GalaxyGen;
+            SystemBodyFactory _systemBodyFactory = new SystemBodyFactory(GalaxyGen);
+
+            SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
+            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
+            NameDB halleysNameDB = new NameDB("testName");
+            double halleysSemiMajAxis = 17.834; //AU
+            double halleysEccentricity = 0.96714;
+            double halleysInclination = 180; //162.26° note retrograde orbit.
+            double halleysLoAN = 58.42; //°
+            double halleysAoP = 111.33;//°
+            double halleysMeanAnomaly = 38.38;//°
+            OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(solSys.Entities[0], solSys.Entities[0].GetDataBlob<MassVolumeDB>().Mass, halleysMVDB.Mass, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
+            PositionDB halleysPositionDB = new PositionDB(0,0,0, solSys.Guid, solSys.Entities[0]); // + earthPositionDB.AbsolutePosition_AU, sol.Guid);
+            SensorProfileDB sensorProfile = new SensorProfileDB();
+            Entity halleysComet = new Entity(solSys, new List<BaseDataBlob> { halleysPositionDB, halleysNameDB });
+            //_systemBodyFactory.MineralGeneration(game.StaticData, solSys, halleysComet);
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, halleysBodyDB, halleysMVDB);*/
+
+            var namedEntites = solSys.GetAllEntitiesWithDataBlob<NameDB>();
+            foreach (var entity in namedEntites)
+            {
+                var nameDB = entity.GetDataBlob<NameDB>();
+                nameDB.SetName(factionEntity.Guid, nameDB.DefaultName);
+            }
+
+            //once per game init stuff
+            DefaultThrusterDesign(game, factionEntity);
+            DefaultWarpDesign(game, factionEntity);
+            DefaultFuelTank(game, factionEntity);
+            DefaultCargoInstalation(game, factionEntity);
+            DefaultSimpleLaser(game, factionEntity);
+            DefaultBFC(game, factionEntity);
+            ShipDefaultCargoHold(game, factionEntity);
+            ShipSmallCargo(game, factionEntity);
+            ShipPassiveSensor(game, factionEntity);
+            FacPassiveSensor(game, factionEntity);
+            DefaultFisionReactor(game, factionEntity);
+            DefaultBatteryBank(game, factionEntity);
+
+            Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
+            EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
+            ReCalcProcessor.ReCalcAbilities(colonyEntity);
+
+
+            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
+
+            factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "UEF");
+
+            
+
+
+            var entitiesWithSensors = solSys.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
+            foreach (var entityItem in entitiesWithSensors)
+            {
+                StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, StaticRefLib.CurrentDateTime);
+            }
+
+
+            StarSystemFactory starfac2 = new StarSystemFactory(game);
+            StarSystem solSys2 = starfac2.CreateTestSystem(game);
+
+
+
+            solSys2.NameDB = new NameDB("other system");
+            Entity solStar = solSys2.Entities[0];
+            Entity earth2 = solSys2.Entities[1];
+
+
+            //sol.ManagerSubpulses.Init(sol);
+            //Entity earth2 = solSys2.Entities[3]; //should be fourth entity created 
+            //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
+
+            var namedEntites2 = solSys2.GetAllEntitiesWithDataBlob<NameDB>();
+            foreach (var entity in namedEntites2)
+            {
+                var nameDB = entity.GetDataBlob<NameDB>();
+                nameDB.SetName(factionEntity.Guid, nameDB.DefaultName);
+            }
+
+            Entity colonyEntity2 = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth2);
+            EntityManipulation.AddComponentToEntity(colonyEntity2, _sensorInstalation);
+            ReCalcProcessor.ReCalcAbilities(colonyEntity2);
+
+
+            
+            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys2.Guid);
+            
+            var entitiesWithSensors2 = solSys2.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
+            foreach (var entityItem in entitiesWithSensors2)
+            {
+                StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, StaticRefLib.CurrentDateTime);
+            }
+
+
+                       
+            
+            var JPSurveyPoint1 = solSys.GetAllEntitiesWithDataBlob<JPSurveyableDB>()[0];
+            JPSurveyPoint1.GetDataBlob<JPSurveyableDB>().SystemToGuid = solSys2.Guid;
+            var JPSurveyPoint2 = solSys2.GetAllEntitiesWithDataBlob<JPSurveyableDB>()[0];
+            JPSurveyPoint2.GetDataBlob<JPSurveyableDB>().SystemToGuid = solSys.Guid;
+            JPSurveyPoint1.GetDataBlob<JPSurveyableDB>().JumpPointTo = JPSurveyPoint2;
+            JPSurveyPoint2.GetDataBlob<JPSurveyableDB>().JumpPointTo = JPSurveyPoint1;
+
+            return factionEntity;
+        }
+
         public static Entity DefaultHumans(Game game, string name)
         {
+            //USE THIS TO TEST CODE
+            //TESTING STUFFF
+            //return completeTest(game, name);
+           // while(true){
+            
+            //}
+            //TESTING STUFF
             var log = StaticRefLib.EventLog;
             StarSystemFactory starfac = new StarSystemFactory(game);
             StarSystem solSys = starfac.CreateSol(game);
@@ -100,8 +229,10 @@ namespace Pulsar4X.ECSLib
             var rawSorium = NameLookup.GetMineralSD(game, "Sorium");
             StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), rawSorium, 5000);
 
-
+            
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
+
+            
 
             //test systems
             //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateEccTest(game).Guid);

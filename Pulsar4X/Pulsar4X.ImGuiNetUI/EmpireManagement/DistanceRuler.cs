@@ -17,6 +17,7 @@ namespace Pulsar4X.SDL2UI
         //measuring booleans
         private bool _measuring = false;
         private bool _firstClickDone = false;
+        private float _zoomLevelAtFirstClick = 0;
         //~measuring booleans
         private ECSLib.Vector3 _firstClick;
         private Vector2 _firstClickInViewCoord;
@@ -64,6 +65,7 @@ namespace Pulsar4X.SDL2UI
                     //if measuring register first click
                     if (!_firstClickDone)
                     {
+                        _zoomLevelAtFirstClick = _state.Camera.ZoomLevel;
                         _firstClick = worldPos_m;
                         _firstClickInViewCoord = ImGui.GetMousePos();
                         _firstClickDone = true;
@@ -79,7 +81,7 @@ namespace Pulsar4X.SDL2UI
         }
         internal override void Display()
         {
-            if(ImGui.Begin("Map Scale", _flags))
+            if(IsActive == true && ImGui.Begin("Map Scale", ref IsActive, _flags))//Lets the user close the ruler
             {
                 //displays the size in meters of the current screen area account for zoom and window dimensions
                 var windowCornerInWorldCoordinate = _state.Camera.WorldCoordinate_m((int)_state.MainWinSize.X, (int)_state.MainWinSize.Y);
@@ -101,12 +103,16 @@ namespace Pulsar4X.SDL2UI
                 //if the first click has already been done, then start showing distance and draw line between first click and the latest mouse position
                 else if (_firstClickDone)
                 {
-                    ECSLib.Vector3 lastMousePos = _state.Camera.MouseWorldCoordinate_m();
-                    Vector2 lastMousePosInViewCoord = ImGui.GetMousePos();
+                    if(_zoomLevelAtFirstClick != _state.Camera.ZoomLevel){
+                        _stopMeasuring();
+                    }else{
+                        ECSLib.Vector3 lastMousePos = _state.Camera.MouseWorldCoordinate_m();
+                        Vector2 lastMousePosInViewCoord = ImGui.GetMousePos();
 
-                    SDL.SDL_SetRenderDrawColor(_state.rendererPtr, 255,255,255,255);
-                    SDL.SDL_RenderDrawLine(_state.rendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);;
-                    ImGui.SetTooltip(ECSLib.Misc.StringifyDistance(Math.Sqrt(Math.Pow(_firstClick.X -lastMousePos.X, 2) + Math.Pow(_firstClick.Y - lastMousePos.Y, 2))));
+                        SDL.SDL_SetRenderDrawColor(_state.rendererPtr, 255,255,255,255);
+                        SDL.SDL_RenderDrawLine(_state.rendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);;
+                        ImGui.SetTooltip(ECSLib.Misc.StringifyDistance(Math.Sqrt(Math.Pow(_firstClick.X -lastMousePos.X, 2) + Math.Pow(_firstClick.Y - lastMousePos.Y, 2))));
+                    }
                 }
 
                 ImGui.End();

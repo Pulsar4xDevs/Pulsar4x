@@ -25,20 +25,22 @@ namespace Pulsar4X.SDL2UI
         private ToolBarUI()
         {
             _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar;
+
             ToolbuttonData btn =  new ToolbuttonData()
             {
                 Picture = _state.SDLImageDictionary["DesComp"],
                 TooltipText = "Design a new component or facility",
                 OnClick = new Action(ComponentDesignUI.GetInstance().SetActive)
-                
+                //Opens up the component design menu
             };
             ToolButtons.Add(btn);
+
             btn =  new ToolbuttonData()
             {
                 Picture = _state.SDLImageDictionary["DesShip"],
                 TooltipText = "Design a new Ship",
                 OnClick = new Action(ShipDesignUI.GetInstance().SetActive)
-                
+                //Opens up the ship design menu
             };
             ToolButtons.Add(btn);
             btn =  new ToolbuttonData()
@@ -46,19 +48,27 @@ namespace Pulsar4X.SDL2UI
                 Picture = _state.SDLImageDictionary["Research"],
                 TooltipText = "Research",
                 OnClick = new Action(ResearchWindow.GetInstance().SetActive)
-                
+                //Opens up the research menu
             };
             ToolButtons.Add(btn);
-            btn =  new ToolbuttonData()
+            btn = new ToolbuttonData()
             {
-                Picture = _state.SDLImageDictionary["PowerImg"],
-                TooltipText = "Power",
-                OnClick = new Action(PowerGen.GetInstance().SetActive)
-                
+                Picture = _state.SDLImageDictionary["GalMap"],
+                TooltipText = "Galaxy Browser",
+                OnClick = new Action(GalaxyWindow.GetInstance().SetActive)
+
             };
             ToolButtons.Add(btn);
-            
-            
+            btn = new ToolbuttonData()
+            {
+                Picture = _state.SDLImageDictionary["Ruler"],
+                TooltipText = "Measure distance",
+                OnClick = new Action(DistanceRuler.GetInstance().SetActive)
+                //Opens the ruler menu
+            };
+            ToolButtons.Add(btn);
+
+
 
         }
 
@@ -89,15 +99,19 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowSize(new Vector2(x,y ));
             if (ImGui.Begin("##Toolbar", _flags))
             {
-                
+                uint iterations = 0;
                 //displays the default toolbar menu icons
                 foreach (var button in ToolButtons)
                 {
-                    
+                    ImGui.PushID(iterations.ToString());
                     if(ImGui.ImageButton(button.Picture, BtnSizes))
                         button.OnClick();
                     if(ImGui.IsItemHovered())
                         ImGui.SetTooltip(button.TooltipText);
+
+                    
+                    ImGui.PopID();
+                    iterations++;
                 }
                 
                 ImGui.End();

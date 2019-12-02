@@ -10,6 +10,7 @@ namespace Pulsar4X.SDL2UI
         byte[] nameInputBuffer; 
         string nameString { get { return System.Text.Encoding.UTF8.GetString(nameInputBuffer); } }
 
+
         private void reset(EntityState entity){
             _entityState = entity;
             nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(_entityState.Name);
@@ -36,17 +37,21 @@ namespace Pulsar4X.SDL2UI
             {
                 if (ImGui.Begin("Rename", ref IsActive, _flags))
                 {
-                    Array.Resize(ref nameInputBuffer, 16);
-                    ImGui.InputText("##name", nameInputBuffer, 16);
+                    //TODO: Move this to settings
+                    uint umaxnamesize = 64;
+
+                    Array.Resize(ref nameInputBuffer, checked((int)umaxnamesize));//Resize the text buffer
+                    ImGui.InputText("##name", nameInputBuffer, umaxnamesize);//Gets the text from the user and stores it into the buffer
+
                     ImGui.SameLine();
-                    if (ImGui.SmallButton("Set"))
+                    if (ImGui.SmallButton("Set"))//Gives the user the option to set the name
                     {
-                        if(nameInputBuffer[0] != 0){
+                        if(nameInputBuffer[0] != 0){//If the user has not entered an empty name
                         
                             RenameCommand.CreateRenameCommand(_state.Game, _state.Faction, _entityState.Entity, nameString);
-                            _entityState.Name = nameString;
-                            _entityState.NameIcon.NameString = nameString;
-                            IsActive = false;
+                            _entityState.Name = nameString;//Rename the object
+                            _entityState.NameIcon.NameString = nameString;//Rename the name of the object on the map
+                            IsActive = false;//Close the window
                         }
 
                         

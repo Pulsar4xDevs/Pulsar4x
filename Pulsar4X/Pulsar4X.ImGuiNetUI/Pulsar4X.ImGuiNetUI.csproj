@@ -103,7 +103,20 @@
     <None Remove="Resources\CancelIco.bmp" />
     <None Remove="Resources\DnArrow.bmp" />
     <None Remove="Resources\RepeatIco.bmp" />
+    <None Remove="Resources\RulerIco.bmp" />
     <None Remove="Resources\UpArrow.bmp" />
+    <None Update="Resources\CargoIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\FireconIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\IndustryIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\PinIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\ProggyClean.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -165,11 +178,17 @@
     <Content Include="Resources\RepeatIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\RulerIco.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\UpArrow.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\DesignShipIco.bmp" />
     <Content Include="Resources\DesignShipIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\GalaxyMapIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Remove="Resources\DesignComponentIco.bmp" />
@@ -180,12 +199,22 @@
     <Content Include="Resources\ResearchIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Remove="Resources\RulerIco.bmp" />
+    <Content Include="Resources\RulerIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="OrbitalWidgets\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Resources\CancelIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\RenameIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\SelectIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\UpArrow.bmp">
