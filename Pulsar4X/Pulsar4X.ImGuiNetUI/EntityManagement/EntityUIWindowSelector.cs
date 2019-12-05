@@ -136,7 +136,7 @@ namespace Pulsar4X.SDL2UI
                     //Makes all small buttons
                     ActionButton(typeof(PlanetaryWindow));
                     ActionButton(typeof(GotoSystemBlankMenuHelper));
-                    ActionButton(typeof(OrbitOrderWindow));
+                    ActionButton(typeof(WarpOrderWindow));
                     ActionButton(typeof(ChangeCurrentOrbitWindow));
 
 

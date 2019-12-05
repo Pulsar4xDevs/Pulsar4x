@@ -89,7 +89,7 @@ namespace Pulsar4X.SDL2UI
             else if (T == typeof(SelectPrimaryBlankMenuHelper))
                 { return true; }
             //if entity can warp
-            else if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && T == typeof(OrbitOrderWindow))
+            else if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && T == typeof(WarpOrderWindow))
                 { return true; }
             //if entity can move
             else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
@@ -138,10 +138,10 @@ namespace Pulsar4X.SDL2UI
                     _state.EntitySelectedAsPrimary(_entityState.Entity.Guid, _entityState.StarSysGuid);
                 }
                 //if entity can warp
-                else if (T == typeof(OrbitOrderWindow))
+                else if (T == typeof(WarpOrderWindow))
                 {
-                    OrbitOrderWindow.GetInstance(_entityState).IsActive = true;
-                    _state.ActiveWindow = OrbitOrderWindow.GetInstance(_entityState);
+                    WarpOrderWindow.GetInstance(_entityState).IsActive = true;
+                    _state.ActiveWindow = WarpOrderWindow.GetInstance(_entityState);
                 }
                //Menu is change orbit menu
                 else if (T == typeof(ChangeCurrentOrbitWindow))

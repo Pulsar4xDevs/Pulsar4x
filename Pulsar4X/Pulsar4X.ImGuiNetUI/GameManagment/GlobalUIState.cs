@@ -16,7 +16,7 @@ namespace Pulsar4X.SDL2UI
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
         internal static readonly Dictionary<Type, string> namesForMenus = new Dictionary<Type, string>{
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},
-            {typeof(OrbitOrderWindow), "Translate to a new orbit"},
+            {typeof(WarpOrderWindow), "Translate to a new orbit"},
             {typeof(ChangeCurrentOrbitWindow), "Change current orbit"},
             {typeof(WeaponTargetingControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
