@@ -208,11 +208,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn();
 
 
-                ImGui.BeginChild("ShipDesign", new Vector2(278, _firstChildHeight));
+                ImGui.BeginChild("ShipDesign", new Vector2(280, _firstChildHeight));
                 
                 ImGui.Columns(2, "Ship Components", true);
                 ImGui.SetColumnWidth(0, 150);
-                ImGui.SetColumnWidth(1, 124);
+                ImGui.SetColumnWidth(1, 128);
                 ImGui.Text("Component");
                 ImGui.NextColumn();
                 ImGui.Text("Count"); ImGui.NextColumn();
@@ -272,10 +272,10 @@ namespace Pulsar4X.SDL2UI
                                 designChanged = true;
                             }
                         }
-                        if (_shipComponents.Count <= i)
+                        if (i < _shipComponents.Count -1 )
                         {
                             ImGui.SameLine();
-                            if (ImGui.SmallButton("V##" + i)) //todo: imagebutton
+                            if (ImGui.SmallButton("v##" + i)) //todo: imagebutton
                             {
                                 (ComponentDesign design, int count) item = _shipComponents[i];
                                 _shipComponents.RemoveAt(i);

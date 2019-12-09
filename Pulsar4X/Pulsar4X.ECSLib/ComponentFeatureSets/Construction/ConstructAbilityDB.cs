@@ -23,6 +23,7 @@ namespace Pulsar4X.ECSLib
         public ushort NumberOrdered { get; set; }
         public ushort NumberCompleted { get; internal set; }
         public int ProductionPointsLeft { get; internal set; }
+        public int ProductionPointsCost { get; private set; }
         //again no reason this can't be public set
         public bool Auto { get; set; }
 
@@ -32,6 +33,7 @@ namespace Pulsar4X.ECSLib
             NumberOrdered = numberOrderd;
             NumberCompleted = 0;
             ProductionPointsLeft = jobPoints;
+            ProductionPointsCost = jobPoints;
             Auto = auto;
         }
     }
@@ -39,7 +41,7 @@ namespace Pulsar4X.ECSLib
 
     public class ConstructionJob : JobBase
     {
-        
+        public string Name; 
         public ConstructionType ConstructionType { get; internal set; }
         public Entity InstallOn { get; internal set; }
         public Dictionary<Guid, int> MineralsRequired { get; internal set; }
@@ -55,9 +57,19 @@ namespace Pulsar4X.ECSLib
             MaterialsRequired = new Dictionary<Guid, int>(matCost);
             ComponentsRequired = new Dictionary<Guid, int>(componentCost);
         }
+
+        public ConstructionJob(ComponentDesign design, ushort numOrdered, bool auto): base(design.Guid, numOrdered, design.BuildPointCost, auto)
+        {
+            Name = design.Name;
+            ConstructionType = design.ConstructionType;
+            MineralsRequired = design.MaterialCosts;
+            MaterialsRequired = design.MaterialCosts;
+            ComponentsRequired = design.ComponentCosts;
+        }
+
     }
 
-    public class  ConstructionDB : BaseDataBlob
+    public class  ConstructAbilityDB : BaseDataBlob
     {
         public int PointsPerTick { get; internal set; }
 
@@ -68,7 +80,7 @@ namespace Pulsar4X.ECSLib
         public List<ConstructionJob> JobBatchList { get; internal set; }
 
 
-        public ConstructionDB()
+        public ConstructAbilityDB()
         {
             ConstructionRates = new Dictionary<ConstructionType, int>
             {
@@ -81,7 +93,7 @@ namespace Pulsar4X.ECSLib
             JobBatchList = new List<ConstructionJob>();
         }
 
-        public ConstructionDB(ConstructionDB db)
+        public ConstructAbilityDB(ConstructAbilityDB db)
         {
             ConstructionRates = db.ConstructionRates;
             JobBatchList = db.JobBatchList;
@@ -89,7 +101,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new ConstructionDB(this);
+            return new ConstructAbilityDB(this);
         }
     }
 }

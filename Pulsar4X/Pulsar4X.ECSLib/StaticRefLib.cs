@@ -12,6 +12,8 @@ namespace Pulsar4X.ECSLib
         public static EventLog EventLog { get; private set; }
         internal static TimeLoop GameLoop { get; private set; }
 
+        internal static IOrderHandler OrderHandler { get; private set; }
+        
         /// <summary>
         /// this is used to marshal events to the UI thread. 
         /// </summary>
@@ -32,6 +34,7 @@ namespace Pulsar4X.ECSLib
             GameLoop = new TimeLoop(game);
             EventLog = new EventLog(game);
             SyncContext = SynchronizationContext.Current;
+            OrderHandler = game.OrderHandler;
         }
     }
 }

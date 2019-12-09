@@ -89,7 +89,7 @@ namespace Pulsar4X.ECSLib
             AddHotloopProcessor<EntityResearchDB>(new ResearchProcessor(game.StaticData));
             AddHotloopProcessor<MiningDB>(new MineResourcesProcessor(_staticData));
             AddHotloopProcessor<RefiningDB>(new RefineResourcesProcessor(_staticData.ProcessedMaterials));
-            AddHotloopProcessor<ConstructionDB>(new ConstructEntitiesProcessor());
+            AddHotloopProcessor<ConstructAbilityDB>(new ConstructEntitiesProcessor());
             AddHotloopProcessor<PropulsionDB>(new ShipMovement());
             AddHotloopProcessor<OrbitDB>(new OrbitProcessor());
             AddHotloopProcessor<NewtonBalisticDB>(new NewtonBalisticProcessor());

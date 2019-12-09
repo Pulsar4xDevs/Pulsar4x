@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    public class ConstructionAbilityVM : JobAbilityBaseVM<ConstructionDB, ConstructionJob>
+    public class ConstructionAbilityVM : JobAbilityBaseVM<ConstructAbilityDB, ConstructionJob>
     {
         private FactionInfoDB _factionInfo { get 
             {

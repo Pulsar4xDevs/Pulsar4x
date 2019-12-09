@@ -1,14 +1,15 @@
-﻿using System;
+using System;
 
 namespace Pulsar4X.ECSLib
 {
-    public class RefineOrdersCommand:EntityCommand
+    public class ConstructItemCommand:EntityCommand
     {
 
-        public Guid MaterialGuid { get; set; }
+        public Guid DesignGuid { get; set; }
         public ushort NumberOrderd { get; set; }
         public bool RepeatJob { get; set; } = false;
 
+        
         internal override int ActionLanes => 1; //blocks movement
         internal override bool IsBlocking => true;
 
@@ -18,17 +19,18 @@ namespace Pulsar4X.ECSLib
 
 
         private Entity _factionEntity;
+        private ComponentDesign _design;
         private StaticDataStore _staticData;
-        private RefineingJob _job;
+        private ConstructionJob _job;
 
 
 
-        public RefineOrdersCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid materal, ushort quantity, bool repeatJob )
+        public ConstructItemCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid designGuid, ushort quantity, bool repeatJob )
         {
             RequestingFactionGuid = factionGuid;
             EntityCommandingGuid = thisEntity;
             CreatedDate = systemDate;
-            MaterialGuid = materal;
+            DesignGuid = designGuid;
             NumberOrderd = quantity;
             RepeatJob = repeatJob;
             UseActionLanes = false;
@@ -39,7 +41,7 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                RefiningProcessor.AddJob(_staticData, _entityCommanding, _job);
+                ConstructionProcessor.AddJob(_factionEntity.GetDataBlob<FactionInfoDB>(), _entityCommanding, _job);
                 IsRunning = true;
             }
         }
@@ -50,11 +52,13 @@ namespace Pulsar4X.ECSLib
             _staticData = game.StaticData;
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                if (_staticData.CargoGoods.IsMaterial(MaterialGuid))
+                var factionInfo = _factionEntity.GetDataBlob<FactionInfoDB>();
+                if (factionInfo.ComponentDesigns.ContainsKey(DesignGuid))
                 {
-                    int pointCost = _staticData.CargoGoods.GetMaterial(MaterialGuid).RefineryPointCost;
-                    _job = new RefineingJob(MaterialGuid, NumberOrderd, pointCost, RepeatJob);
+                    _design = factionInfo.ComponentDesigns[DesignGuid];
+                    _job = new ConstructionJob(_design, NumberOrderd, RepeatJob);
                     return true;
+                    
                 }
             }
             return false;
@@ -71,7 +75,7 @@ namespace Pulsar4X.ECSLib
     
     }
     
-    public class CancelJob : EntityCommand
+    public class ConstructCancelJob : EntityCommand
     {
         public Guid JobID { get; set; }
 
@@ -84,7 +88,7 @@ namespace Pulsar4X.ECSLib
         private Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
-        public CancelJob(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid jobID)
+        public ConstructCancelJob(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid jobID)
         {
             RequestingFactionGuid = factionGuid;
             EntityCommandingGuid = thisEntity;
@@ -95,7 +99,7 @@ namespace Pulsar4X.ECSLib
 
         internal override void ActionCommand(Game game)
         {
-            var jobBatchList = _entityCommanding.GetDataBlob<RefiningDB>().JobBatchList;
+            var jobBatchList = _entityCommanding.GetDataBlob<ConstructAbilityDB>().JobBatchList;
             lock (jobBatchList)
             {
                 var job = jobBatchList.Find((obj) => obj.JobID == this.JobID);
@@ -134,7 +138,7 @@ namespace Pulsar4X.ECSLib
 
     }
 
-    public class ChangeRepeatJob : EntityCommand
+    public class ConstructChangeRepeatJob : EntityCommand
     {
         public Guid JobID { get; set; }
         public bool Repeats { get; set; }
@@ -148,7 +152,7 @@ namespace Pulsar4X.ECSLib
         private Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
-        public ChangeRepeatJob(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid jobID, bool repeats)
+        public ConstructChangeRepeatJob(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid jobID, bool repeats)
         {
             RequestingFactionGuid = factionGuid;
             EntityCommandingGuid = thisEntity;
@@ -160,7 +164,7 @@ namespace Pulsar4X.ECSLib
 
         internal override void ActionCommand(Game game)
         {
-            var jobBatchList = _entityCommanding.GetDataBlob<RefiningDB>().JobBatchList;
+            var jobBatchList = _entityCommanding.GetDataBlob<ConstructAbilityDB>().JobBatchList;
             lock (jobBatchList)
             {
                 var job = jobBatchList.Find((obj) => obj.JobID == this.JobID);
@@ -198,7 +202,7 @@ namespace Pulsar4X.ECSLib
         }
 
     }
-    public class RePrioritizeCommand : EntityCommand
+    public class ConstructRePrioritizeCommand : EntityCommand
     {
         public Guid JobID { get; set; }
         public short Delta { get; set; }
@@ -212,7 +216,7 @@ namespace Pulsar4X.ECSLib
         private Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
-        public RePrioritizeCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid jobID, short delta)
+        public ConstructRePrioritizeCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid jobID, short delta)
         {
             RequestingFactionGuid = factionGuid;
             EntityCommandingGuid = thisEntity;
@@ -224,7 +228,7 @@ namespace Pulsar4X.ECSLib
 
         internal override void ActionCommand(Game game)
         {
-            RefiningProcessor.ChangeJobPriority(_entityCommanding, JobID, Delta);
+            ConstructionProcessor.ChangeJobPriority(_entityCommanding, JobID, Delta);
             IsRunning = true;
         }
 

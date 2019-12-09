@@ -75,7 +75,7 @@ namespace Pulsar4X.ECSLib
     {
         internal Guid FactionGuid;
         internal Guid EntityGuid;
-        internal IOrderHandler Handler;
+        public IOrderHandler Handler;
         private ManagerSubPulse _subPulse;
         internal DateTime GetSystemDatetime { get { return _subPulse.StarSysDateTime; } }
 

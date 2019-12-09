@@ -60,6 +60,14 @@ namespace Pulsar4X.SDL2UI
 
             }
         }
+        public bool CanConstruct
+        {
+            get
+            {
+                return DataBlobs.ContainsKey(typeof(ConstructAbilityDB)) ;
+
+            }
+        }
 
  
 

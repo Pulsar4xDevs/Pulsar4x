@@ -61,8 +61,8 @@ namespace Pulsar4X.ECSLib
         
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if (!parentEntity.HasDataBlob<ConstructionDB>())
-                parentEntity.SetDataBlob(new ConstructionDB());
+            if (!parentEntity.HasDataBlob<ConstructAbilityDB>())
+                parentEntity.SetDataBlob(new ConstructAbilityDB());
             ConstructionProcessor.ReCalcConstructionRate(parentEntity);
         }
     }

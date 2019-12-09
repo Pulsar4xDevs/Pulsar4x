@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    internal interface IOrderHandler
+    public interface IOrderHandler
     {
         Game Game { get; }
 
