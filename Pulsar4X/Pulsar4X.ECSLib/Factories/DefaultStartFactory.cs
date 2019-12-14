@@ -228,7 +228,10 @@ namespace Pulsar4X.ECSLib
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             var rawSorium = NameLookup.GetMineralSD(game, "Sorium");
             StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), rawSorium, 5000);
-
+            var iron = NameLookup.GetMineralSD(game, "Iron");
+            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), iron, 5000);
+            var hydrocarbon = NameLookup.GetMineralSD(game, "Hydrocarbons");
+            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), hydrocarbon, 5000);
             
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
 
@@ -275,7 +278,7 @@ namespace Pulsar4X.ECSLib
             //StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
-
+            
 
             double test_a = 0.5; //AU
             double test_e = 0;

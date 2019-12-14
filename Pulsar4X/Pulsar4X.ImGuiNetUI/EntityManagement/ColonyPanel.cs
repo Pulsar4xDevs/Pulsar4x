@@ -113,7 +113,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushID("refinary");
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
             ImGui.BeginChild("Current Jobs", new System.Numerics.Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
-
+            Vector2 progsize = new Vector2(128, ImGui.GetTextLineHeight());
             foreach (var job in _refineryVM.CurrentJobs.ToArray())
             {
 
@@ -121,6 +121,10 @@ namespace Pulsar4X.SDL2UI
                 if (job == _refineryVM.CurrentJobSelectedItem)
                     selected = true;
 
+                float percent = 1 - (float)job.ProductionPointsLeft / job.ProductionPointsCost;
+                var cpos = ImGui.GetCursorPos();
+                ImGui.ProgressBar(percent, progsize, "");
+                ImGui.SetCursorPos(cpos);
                 if (ImGui.Selectable(job.SingleLineText, ref selected))
                 {
                     _refineryVM.CurrentJobSelectedItem = job;
@@ -131,13 +135,12 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     ImGui.Image(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16));
                 }
-
-
             }
+            
             ImGui.EndChild();
             ImGui.SameLine();
 
-            ImGui.BeginChild("Buttons", new System.Numerics.Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("Buttons", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
             ImGui.BeginGroup();
             if (ImGui.ImageButton(_state.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
             { _refineryVM.CurrentJobSelectedItem.ChangePriority(-1); }
@@ -236,26 +239,26 @@ namespace Pulsar4X.SDL2UI
             ImGui.BeginGroup();
             if (ImGui.ImageButton(_state.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
             {
-                var cmd = new ConstructRePrioritizeCommand(_state.Faction.Guid, _selectedEntity.Entity.Guid, _selectedEntity.Entity.StarSysDateTime, _selectedConJob.ItemGuid, 1);
+                var cmd = new ConstructRePrioritizeCommand(_state.Faction.Guid, _selectedEntity.Entity.Guid, _selectedEntity.Entity.StarSysDateTime, _selectedConJob.JobID, -1);
                 _selectedEntity.CmdRef.Handler.HandleOrder(cmd);
             }
 
             if (ImGui.ImageButton(_state.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
             {
-                var cmd = new ConstructRePrioritizeCommand(_state.Faction.Guid, _selectedEntity.Entity.Guid, _selectedEntity.Entity.StarSysDateTime, _selectedConJob.ItemGuid, -1);
+                var cmd = new ConstructRePrioritizeCommand(_state.Faction.Guid, _selectedEntity.Entity.Guid, _selectedEntity.Entity.StarSysDateTime, _selectedConJob.JobID, 1);
                 _selectedEntity.CmdRef.Handler.HandleOrder(cmd);
             }
             ImGui.EndGroup();
             ImGui.SameLine();
             if (ImGui.ImageButton(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
             {
-                var cmd = new ConstructChangeRepeatJob(_state.Faction.Guid, _selectedEntity.Entity.Guid, _selectedEntity.Entity.StarSysDateTime, _selectedConJob.ItemGuid, !_selectedConJob.Auto);
+                var cmd = new ConstructChangeRepeatJob(_state.Faction.Guid, _selectedEntity.Entity.Guid, _selectedEntity.Entity.StarSysDateTime, _selectedConJob.JobID, !_selectedConJob.Auto);
                 _selectedEntity.CmdRef.Handler.HandleOrder(cmd);
             }
             ImGui.SameLine();
             if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
             {
-                var cmd = new ConstructCancelJob(_state.Faction.Guid, _selectedEntity.Entity.Guid, _selectedEntity.Entity.StarSysDateTime, _selectedConJob.ItemGuid);
+                var cmd = new ConstructCancelJob(_state.Faction.Guid, _selectedEntity.Entity.Guid, _selectedEntity.Entity.StarSysDateTime, _selectedConJob.JobID);
                 _selectedEntity.CmdRef.Handler.HandleOrder(cmd);
             }
 

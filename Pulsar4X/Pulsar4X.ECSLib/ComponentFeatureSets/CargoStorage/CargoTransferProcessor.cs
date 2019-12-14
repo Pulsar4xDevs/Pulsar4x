@@ -27,52 +27,47 @@ namespace Pulsar4X.ECSLib
             CargoTransferDB datablob = entity.GetDataBlob<CargoTransferDB>();
             OrbitDB orbitDB = entity.GetDataBlob<OrbitDB>();
 
-
- 
-
-
-
             if (datablob.DistanceBetweenEntitys <= 100)//todo: this is going to have to be based of mass or something, ie being further away from a colony on a planet is ok, but two ships should be close. 
+            {
+                for (int i = 0; i < datablob.ItemsLeftToTransfer.Count; i++)
                 {
-                    for (int i = 0; i < datablob.ItemsLeftToTransfer.Count; i++)
-                    {
-                        var item = datablob.ItemsLeftToTransfer[i];
-                        ICargoable cargoItem = item.Item1;
-                        long amountToXfer = item.Item2;
+                    var item = datablob.ItemsLeftToTransfer[i];
+                    ICargoable cargoItem = item.Item1;
+                    long amountToXfer = item.Item2;
 
-                        Guid cargoTypeID = cargoItem.CargoTypeID;
-                        int itemMassPerUnit = cargoItem.Mass;
+                    Guid cargoTypeID = cargoItem.CargoTypeID;
+                    int itemMassPerUnit = cargoItem.Mass;
 
-                        if (!datablob.CargoToDB.StoredCargoTypes.ContainsKey(cargoTypeID))
-                            datablob.CargoToDB.StoredCargoTypes.Add(cargoTypeID, new CargoTypeStore());
+                    if (!datablob.CargoToDB.StoredCargoTypes.ContainsKey(cargoTypeID))
+                        datablob.CargoToDB.StoredCargoTypes.Add(cargoTypeID, new CargoTypeStore());
 
-                        var toCargoTypeStore = datablob.CargoToDB.StoredCargoTypes[cargoTypeID];        //reference to the cargoType store we're pushing to.
-                        var toCargoItemAndAmount = toCargoTypeStore.ItemsAndAmounts;                //reference to dictionary holding the cargo we want to send too
-                        var fromCargoTypeStore = datablob.CargoFromDB.StoredCargoTypes[cargoTypeID];    //reference to the cargoType store we're pulling from.
-                        var fromCargoItemAndAmount = fromCargoTypeStore.ItemsAndAmounts;            //reference to dictionary we want to pull cargo from. 
+                    var toCargoTypeStore = datablob.CargoToDB.StoredCargoTypes[cargoTypeID];        //reference to the cargoType store we're pushing to.
+                    var toCargoItemAndAmount = toCargoTypeStore.ItemsAndAmounts;                //reference to dictionary holding the cargo we want to send too
+                    var fromCargoTypeStore = datablob.CargoFromDB.StoredCargoTypes[cargoTypeID];    //reference to the cargoType store we're pulling from.
+                    var fromCargoItemAndAmount = fromCargoTypeStore.ItemsAndAmounts;            //reference to dictionary we want to pull cargo from. 
 
-                        long totalweightToTransfer = itemMassPerUnit * amountToXfer;
-                        long weightToTransferThisTick = Math.Min(totalweightToTransfer, datablob.TransferRateInKG * deltaSeconds);          //only the amount that can be transfered in this timeframe. 
+                    long totalweightToTransfer = itemMassPerUnit * amountToXfer;
+                    long weightToTransferThisTick = Math.Min(totalweightToTransfer, datablob.TransferRateInKG * deltaSeconds);          //only the amount that can be transfered in this timeframe. 
 
-                        weightToTransferThisTick = Math.Min(weightToTransferThisTick, toCargoTypeStore.FreeCapacityKg); //check cargo to has enough weight capacity
+                    weightToTransferThisTick = Math.Min(weightToTransferThisTick, toCargoTypeStore.FreeCapacityKg); //check cargo to has enough weight capacity
 
-                        long numberXfered = weightToTransferThisTick / itemMassPerUnit;//get the number of items from the mass transferable
-                        numberXfered = Math.Min(numberXfered, fromCargoItemAndAmount[cargoItem.ID]); //check from has enough to send. 
+                    long numberXfered = weightToTransferThisTick / itemMassPerUnit;//get the number of items from the mass transferable
+                    numberXfered = Math.Min(numberXfered, fromCargoItemAndAmount[cargoItem.ID]); //check from has enough to send. 
 
-                        weightToTransferThisTick = numberXfered * itemMassPerUnit;
+                    weightToTransferThisTick = numberXfered * itemMassPerUnit;
 
-                        if (!toCargoItemAndAmount.ContainsKey(cargoItem.ID))
-                            toCargoItemAndAmount.Add(cargoItem.ID, numberXfered);
-                        else
-                            toCargoItemAndAmount[cargoItem.ID] += numberXfered;
+                    if (!toCargoItemAndAmount.ContainsKey(cargoItem.ID))
+                        toCargoItemAndAmount.Add(cargoItem.ID, numberXfered);
+                    else
+                        toCargoItemAndAmount[cargoItem.ID] += numberXfered;
 
-                        toCargoTypeStore.FreeCapacityKg -= weightToTransferThisTick;
+                    toCargoTypeStore.FreeCapacityKg -= weightToTransferThisTick;
 
-                        fromCargoItemAndAmount[cargoItem.ID] -= numberXfered;
-                        fromCargoTypeStore.FreeCapacityKg += weightToTransferThisTick;
-                        datablob.ItemsLeftToTransfer[i] = new Tuple<ICargoable, long>(cargoItem, amountToXfer -= numberXfered);
-                    }
-                } 
+                    fromCargoItemAndAmount[cargoItem.ID] -= numberXfered;
+                    fromCargoTypeStore.FreeCapacityKg += weightToTransferThisTick;
+                    datablob.ItemsLeftToTransfer[i] = new Tuple<ICargoable, long>(cargoItem, amountToXfer -= numberXfered);
+                }
+            } 
         }
 
         internal static void FirstRun(Entity entity)

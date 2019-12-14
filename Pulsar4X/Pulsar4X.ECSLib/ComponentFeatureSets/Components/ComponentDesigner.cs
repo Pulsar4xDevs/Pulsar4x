@@ -148,7 +148,7 @@ namespace Pulsar4X.ECSLib
             ComponentMountType = componentSD.MountType;
             ConstructionType = componentSD.ConstructionType;
             CargoTypeID = componentSD.CargoTypeID;
-
+            _design.CargoTypeID = componentSD.CargoTypeID;
             
             Dictionary<Guid, ChainedExpression> mineralCostFormulas = new Dictionary<Guid, ChainedExpression>();
             Dictionary<Guid, ChainedExpression> materalCostFormulas = new Dictionary<Guid, ChainedExpression>();

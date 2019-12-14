@@ -117,6 +117,8 @@ namespace Pulsar4X.ECSLib
             IsEnabled = isEnabled;
             HTKRemaining = design.HTK;
             HTKMax = design.HTK;
+            CargoTypeID = design.CargoTypeID;
+            Name = design.Name;
         }
 
 
@@ -128,6 +130,8 @@ namespace Pulsar4X.ECSLib
             ComponentLoadPercent = instance.ComponentLoadPercent;
             HTKRemaining = instance.HTKRemaining;
             HTKMax = instance.HTKMax;
+            CargoTypeID = instance.CargoTypeID;
+            Name = instance.Name;
 
         }
         

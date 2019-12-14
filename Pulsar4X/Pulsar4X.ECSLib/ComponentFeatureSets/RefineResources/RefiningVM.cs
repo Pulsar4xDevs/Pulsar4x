@@ -137,6 +137,7 @@ namespace Pulsar4X.ECSLib
         public int Completed => JobItem.NumberCompleted;
         public int BatchQuantity => JobItem.NumberOrdered;
         public int ProductionPointsLeft => JobItem.ProductionPointsLeft;
+        public int ProductionPointsCost => JobItem.ProductionPointsCost;
         public float ItemPercentRemaining { get; set; }
         internal RefineJobVM(RefiningVM parentVM, StaticDataStore staticData, RefineingJob job, CommandReferences cmdRef)
         {

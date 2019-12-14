@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
             var colonyConstruction = colony.GetDataBlob<ConstructAbilityDB>();
 
             var pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
-            int maxPoints = colonyConstruction.PointsPerTick;
+            int maxPoints = colonyConstruction.PointsPerTick; //TODO: should we get rid of this one? seems like a double up with the pointRates.
 
             List<ConstructionJob> constructionJobs = colonyConstruction.JobBatchList;
             foreach (ConstructionJob batchJob in constructionJobs.ToArray())
@@ -60,34 +60,50 @@ namespace Pulsar4X.ECSLib
                 resourcePoints += designInfo.MaterialCosts.Sum(item => item.Value);
                 resourcePoints += designInfo.ComponentCosts.Sum(item => item.Value);
 
+                //how many construction points each resourcepoint is worth.
+                float pointPerResource = (float)designInfo.BuildPointCost / resourcePoints;
+                
                 while ((pointRates[conType] > 0) && (maxPoints > 0) && (batchJob.NumberCompleted < batchJob.NumberOrdered))
                 {
                     //gather availible resorces for this job.
-                    
-                    ConsumeResources(stockpile, batchJob.MineralsRequired);
-                    ConsumeResources(stockpile, batchJob.MaterialsRequired);
-                    ConsumeResources(stockpile, batchJob.ComponentsRequired);
+                    //right now we take all the resources we can, for an individual item in the batch. 
+                    //even if we're taking more than we can use in this turn, we're squirriling it away. 
 
-                    int useableResourcePoints = designInfo.MineralCosts.Sum(item => item.Value) - batchJob.MineralsRequired.Sum(item => item.Value);
-                    useableResourcePoints += designInfo.MaterialCosts.Sum(item => item.Value) - batchJob.MaterialsRequired.Sum(item => item.Value);
-                    useableResourcePoints += designInfo.ComponentCosts.Sum(item => item.Value) - batchJob.ComponentsRequired.Sum(item => item.Value);
-                    //how many construction points each resourcepoint is worth.
-                    int pointPerResource = designInfo.BuildPointCost / resourcePoints;
+                    IDictionary<Guid, int> batchJobMineralsRequired = batchJob.MineralsRequired;
+                    IDictionary<Guid, int> batchJobMaterialsRequired = batchJob.MaterialsRequired;
+                    IDictionary<Guid, int> batchJobComponentsRequired = batchJob.ComponentsRequired;
+                    ConsumeResources(stockpile, ref batchJobMineralsRequired);
+                    ConsumeResources(stockpile, ref batchJobMaterialsRequired);
+                    ConsumeResources(stockpile, ref batchJobComponentsRequired);
+
+                    //we calculate the difference between the design resources and the amount of resources we've squirreled away. 
+                    
+                    // this is the total of the resources that we don't have access to for this item. 
+                    int unusableResourceSum = batchJobMineralsRequired.Sum(item => item.Value) + batchJobMaterialsRequired.Sum(item => item.Value) + batchJobComponentsRequired.Sum(item => item.Value);
+                    // this is the total resources that can be used on this item. 
+                    int useableResourcePoints = resourcePoints - unusableResourceSum;
+                    
                     
                     //calculate how many construction points each resource we've got stored for this job is worth
-                    int pointsToUse = Math.Min(pointRates[conType], maxPoints);
+                    float pointsToUse = Math.Min(pointRates[conType], maxPoints);
                     pointsToUse = Math.Min(pointsToUse, batchJob.ProductionPointsLeft);
                     pointsToUse = Math.Min(pointsToUse, useableResourcePoints * pointPerResource);
                     
+                    if(pointsToUse < 0)
+                        throw new Exception("Can't have negitive production");
+                    
                     //construct only enough for the amount of resources we have. 
-                    batchJob.ProductionPointsLeft -= pointsToUse;
-                    pointRates[conType] -= pointsToUse;                    
-                    maxPoints -= pointsToUse;
+                    batchJob.ProductionPointsLeft -= (int)Math.Floor(pointsToUse);
+                    pointRates[conType] -= (int)Math.Ceiling(pointsToUse);                    
+                    maxPoints -= (int)Math.Ceiling(pointsToUse);
 
                     if (batchJob.ProductionPointsLeft == 0)
                     {
                         BatchJobItemComplete(colony, stockpile, batchJob, designInfo);
                     }
+
+                    if (pointsToUse == 0)
+                        break;
                 }
             }
         }
@@ -130,7 +146,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="stockpile"></param>
         /// <param name="toUse"></param>
-        private static void ConsumeResources(CargoStorageDB fromCargo, IDictionary<Guid, int> toUse)
+        private static void ConsumeResources(CargoStorageDB fromCargo, ref IDictionary<Guid, int> toUse)
         {   
             foreach (KeyValuePair<Guid, int> kvp in toUse.ToArray())
             {             
@@ -151,8 +167,12 @@ namespace Pulsar4X.ECSLib
                         }
                     }
                 }
-                StorageSpaceProcessor.RemoveCargo(fromCargo, cargoItem, amountUsedThisTick);            
-                toUse[kvp.Key] -= amountUsedThisTick;                      
+
+                if (amountUsedThisTick > 0)
+                {
+                    StorageSpaceProcessor.RemoveCargo(fromCargo, cargoItem, amountUsedThisTick);
+                    toUse[kvp.Key] -= amountUsedThisTick;
+                }
             }         
         }
 

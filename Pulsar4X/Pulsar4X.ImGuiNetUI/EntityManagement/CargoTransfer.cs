@@ -56,7 +56,7 @@ namespace Pulsar4X.SDL2UI
 
         public void Display()
         {
-            Update();
+            //Update();
             var width = ImGui.GetWindowWidth() * 0.5f;
             
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
@@ -82,7 +82,7 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
             }
-            ImGui.EndChild();
+            ImGui.EndChild(); 
         }
 
     }
