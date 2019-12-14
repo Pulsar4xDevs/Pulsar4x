@@ -255,7 +255,7 @@ namespace Pulsar4X.ECSLib
     /// Static data and dealing with it. It has two properties, HasID and IDPropertyName, that are used to 
     /// signal that this piece of static data has a unique guid that represents it.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Struct)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public class StaticDataAttribute : Attribute
     {
         public bool HasID { get; set; }

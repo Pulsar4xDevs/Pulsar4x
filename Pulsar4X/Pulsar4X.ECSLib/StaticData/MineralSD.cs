@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Pulsar4X.ECSLib
 {
     [StaticData(true, IDPropertyName = "ID")]
-    public struct MineralSD : ICargoable
+    public class MineralSD : ICargoable
     {
         public string Name { get; set; }
         public string Description;
