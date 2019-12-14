@@ -7,12 +7,12 @@ namespace Pulsar4X.ECSLib
     [Flags]
     public enum ConstructionType
     {
-        None            = 0,
-        Installations   = 1 << 0,
-        ShipComponents  = 1 << 1,
-        Ships           = 1 << 2,
-        Fighters        = 1 << 3,
-        Ordnance        = 1 << 4,
+        None            = 1 << 1,
+        Installations   = 1 << 2,
+        ShipComponents  = 1 << 3,
+        Ships           = 1 << 4,
+        Fighters        = 1 << 5,
+        Ordnance        = 1 << 6,
     }
 
     public class JobBase

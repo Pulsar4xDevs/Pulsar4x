@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
         public Guid DesignGuid { get; set; }
         public ushort NumberOrderd { get; set; }
         public bool RepeatJob { get; set; } = false;
-
+        public bool AutoInstall { get; set; } = false;
         
         internal override int ActionLanes => 1; //blocks movement
         internal override bool IsBlocking => true;
@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        public ConstructItemCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid designGuid, ushort quantity, bool repeatJob )
+        public ConstructItemCommand(Guid factionGuid, Guid thisEntity, DateTime systemDate, Guid designGuid, ushort quantity = 1, bool repeatJob = false, bool autoInstall = false )
         {
             RequestingFactionGuid = factionGuid;
             EntityCommandingGuid = thisEntity;
@@ -33,6 +33,7 @@ namespace Pulsar4X.ECSLib
             DesignGuid = designGuid;
             NumberOrderd = quantity;
             RepeatJob = repeatJob;
+            AutoInstall = autoInstall;
             UseActionLanes = false;
         }
 
@@ -57,6 +58,8 @@ namespace Pulsar4X.ECSLib
                 {
                     _design = factionInfo.ComponentDesigns[DesignGuid];
                     _job = new ConstructionJob(_design, NumberOrderd, RepeatJob);
+                    if (_design.ConstructionType.HasFlag(ConstructionType.Installations))
+                        _job.InstallOn = _entityCommanding;
                     return true;
                     
                 }

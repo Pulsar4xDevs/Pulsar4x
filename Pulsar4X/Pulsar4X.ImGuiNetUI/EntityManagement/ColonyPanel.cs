@@ -94,12 +94,12 @@ namespace Pulsar4X.SDL2UI
                     }
 
 
-                    if (_refineryVM != null && ImGui.CollapsingHeader("Refinary"))
+                    if (_refineryVM != null && ImGui.CollapsingHeader("Refinary Points: " + _refineryVM.PointsPerDay))
                     {
                         RefinaryDisplay();
                     }
 
-                    if (_selectedEntity.CanConstruct && ImGui.CollapsingHeader("Construction"))
+                    if (_selectedEntity.CanConstruct && ImGui.CollapsingHeader("Construction Points: " + _constrDB.PointsPerTick))
                     {
                         ConstructionDisplay();
                     }
@@ -187,7 +187,8 @@ namespace Pulsar4X.SDL2UI
                         
         }
 
-        
+
+        private ComponentDesign[] _constructableDesigns;
         string[] _constructablesNames;
         Guid[] _constructablesIDs;
         private int _selectedIndex = 0;
@@ -195,12 +196,13 @@ namespace Pulsar4X.SDL2UI
         private int _newjobSelectionIndex = 0;
         private int _newbatchCount = 1;
         private bool _newbatchRepeat = false;
+        private bool _autoInstall = true;
         void ConstructionDisplay()
         {
             ImGui.PushID("construction");
             
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
-            ImGui.Text("Industry Output:" + _constrDB.PointsPerTick);
+            //ImGui.Text("Industry Output:" + _constrDB.PointsPerTick);
             ImGui.BeginChild("Current Jobs", new Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
             Vector2 progsize = new Vector2(128, ImGui.GetTextLineHeight());
             ImGui.Columns(2);
@@ -276,17 +278,17 @@ namespace Pulsar4X.SDL2UI
             {
                 _newjobSelectionIndex = curItem;
             }
-            int batchCount = _newbatchCount;
-            if (ImGui.InputInt("Batch Count", ref batchCount))
-            {
-                _newbatchCount = batchCount;
-            }
-            bool repeatJob = _newbatchRepeat;
-            if (ImGui.Checkbox("Repeat Job", ref repeatJob))
-            {
-                _newbatchRepeat = repeatJob;
-            }
+
+            ImGui.InputInt("Batch Count", ref _newbatchCount);
+            
+            ImGui.Checkbox("Repeat Job", ref _newbatchRepeat);
             ImGui.SameLine();
+            //if the selected item can be installed on a colony:
+            if (_constructableDesigns[_newjobSelectionIndex].ConstructionType.HasFlag(ConstructionType.Installations))
+            {
+                ImGui.Checkbox("Auto Install on colony", ref _autoInstall);
+                ImGui.SameLine();
+            }
             if (ImGui.Button("Create New Job"))
             {
                 var cmd = new ConstructItemCommand
@@ -297,6 +299,7 @@ namespace Pulsar4X.SDL2UI
                     _constructablesIDs[_newjobSelectionIndex], 
                     (ushort)_newbatchCount, 
                     _newbatchRepeat
+                    
                 );
                 _selectedEntity.CmdRef.Handler.HandleOrder(cmd);
             }
@@ -335,11 +338,13 @@ namespace Pulsar4X.SDL2UI
             lock (_factionInfoDB.ComponentDesigns)
             {
                 int num = _factionInfoDB.ComponentDesigns.Count;
+                _constructableDesigns = new ComponentDesign[num];
                 _constructablesNames = new string[num]; 
                 _constructablesIDs = new Guid[num];
                 int i = 0;
                 foreach (var design in _factionInfoDB.ComponentDesigns)
                 {
+                    _constructableDesigns[i] = design.Value;
                     _constructablesIDs[i] = design.Key;
                     _constructablesNames[i] = design.Value.Name;
                     i++;

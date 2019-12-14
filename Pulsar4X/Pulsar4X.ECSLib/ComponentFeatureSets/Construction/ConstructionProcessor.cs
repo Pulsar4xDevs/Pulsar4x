@@ -108,19 +108,19 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static void BatchJobItemComplete(Entity colonyEntity, CargoStorageDB storage, ConstructionJob batchJob, ComponentDesign designInfo)
+        private static void BatchJobItemComplete(Entity constructingEntity, CargoStorageDB storage, ConstructionJob batchJob, ComponentDesign designInfo)
         {
-            var colonyConstruction = colonyEntity.GetDataBlob<ConstructAbilityDB>();
+            var colonyConstruction = constructingEntity.GetDataBlob<ConstructAbilityDB>();
             batchJob.NumberCompleted++;
             batchJob.ProductionPointsLeft = designInfo.BuildPointCost;
             batchJob.MineralsRequired = designInfo.MineralCosts;
             batchJob.MineralsRequired = designInfo.MaterialCosts;
             batchJob.MineralsRequired = designInfo.ComponentCosts;
 
-            ComponentInstance specificComponent = new ComponentInstance(designInfo);
             if (batchJob.InstallOn != null)
             {
-                if (batchJob.InstallOn == colonyEntity || StorageSpaceProcessor.HasEntity(storage, colonyEntity.GetDataBlob<CargoAbleTypeDB>()))
+                ComponentInstance specificComponent = new ComponentInstance(designInfo);
+                if (batchJob.InstallOn == constructingEntity || StorageSpaceProcessor.HasEntity(storage, batchJob.InstallOn.GetDataBlob<CargoAbleTypeDB>()))
                 {
                     EntityManipulation.AddComponentToEntity(batchJob.InstallOn, specificComponent);
                     ReCalcProcessor.ReCalcAbilities(batchJob.InstallOn);
@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                StorageSpaceProcessor.AddCargo(storage, specificComponent, 1);
+                StorageSpaceProcessor.AddCargo(storage, designInfo, 1);
             }
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
@@ -177,7 +177,7 @@ namespace Pulsar4X.ECSLib
         public static void ReCalcConstructionRate(Entity colonyEntity)
         {
 
-            //List<Entity> installations = colonyEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.ToList();
+            //List<Entity> installations = constructingEntity.GetDataBlob<ColonyInfoDB>().Installations.Keys.ToList();
             
             var factories = new List<Entity>();
 
@@ -227,7 +227,7 @@ namespace Pulsar4X.ECSLib
         public static void AddJob(FactionInfoDB factionInfo, Entity colonyEntity, ConstructionJob job)
         {
             var constructingDB = colonyEntity.GetDataBlob<ConstructAbilityDB>();
-            //var factionInfo = colonyEntity.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>();
+            //var factionInfo = constructingEntity.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>();
             lock (constructingDB.JobBatchList) //prevent threaded race conditions
             {
                 //check that this faction does have the design on file. I *think* all this type of construction design will get stored in factionInfo.ComponentDesigns
