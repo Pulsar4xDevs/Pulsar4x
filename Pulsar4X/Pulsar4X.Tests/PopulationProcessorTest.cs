@@ -217,7 +217,7 @@ namespace Pulsar4X.Tests
             foreach (var design in popSupportTypes)
             {
                 var designValue = design.GetAttribute<PopulationSupportAtbDB>().PopulationCapacity;
-                var numberOf = instancesDB.GetNumberOfComponentsOfDesign(design.Guid);
+                var numberOf = instancesDB.GetNumberOfComponentsOfDesign(design.ID);
                 popSupportValue = designValue * numberOf;
             }
 

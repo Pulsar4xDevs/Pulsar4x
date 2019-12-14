@@ -98,7 +98,7 @@ namespace Pulsar4X.ECSLib
         public string GetName()
         {
             string designName = Design.Name;
-            return designName + "# " + ParentInstances.GetComponentsBySpecificDesign(Design.Guid).IndexOf(this);
+            return designName + "# " + ParentInstances.GetComponentsBySpecificDesign(Design.ID).IndexOf(this);
         }
 
         [JsonConstructor]

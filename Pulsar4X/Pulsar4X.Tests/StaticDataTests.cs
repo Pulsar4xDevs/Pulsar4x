@@ -76,23 +76,23 @@ namespace Pulsar4X.Tests
 
             StaticDataManager.ExportStaticData(minList, "MineralsExportTest.json");
 
-            //Dictionary<Guid, TechSD> techs = Tech();
+            //Dictionary<ID, TechSD> techs = Tech();
             //TechSD tech1 = new TechSD();
             //tech1.Name = "Trans-Newtonian Technology";
-            //tech1.Requirements = new Dictionary<Guid, int>();
+            //tech1.Requirements = new Dictionary<ID, int>();
             //tech1.Description = "Unlocks almost all other technology.";
             //tech1.Cost = 1000;
             //tech1.Category = ResearchCategories.ConstructionProduction;
-            //tech1.ID = Guid.NewGuid();
+            //tech1.ID = ID.NewGuid();
 
             //TechSD tech2 = new TechSD();
             //tech2.Name = "Construction Rate";
-            //tech2.Requirements = new Dictionary<Guid, int>();
+            //tech2.Requirements = new Dictionary<ID, int>();
             //tech2.Requirements.Add(tech1.ID, 0);
             //tech2.Description = "Boosts Construction Rate by 12 BP";
             //tech2.Cost = 3000;
             //tech2.Category = ResearchCategories.ConstructionProduction;
-            //tech2.ID = Guid.NewGuid();
+            //tech2.ID = ID.NewGuid();
 
             //techs.Add(tech1.ID, tech1);
             //techs.Add(tech2.ID, tech2);
@@ -111,9 +111,9 @@ namespace Pulsar4X.Tests
             //install.CargoSize = 1;
             //install.BaseAbilityAmounts = new Dictionary<AbilityType, int>();
             //install.BaseAbilityAmounts.Add(AbilityType.Mine, 1);
-            //install.TechRequirements = new List<Guid>();
+            //install.TechRequirements = new List<ID>();
             //install.TechRequirements.Add(tech1.ID); //use trans-newtonian techology you just added to the tech list
-            //install.ResourceCosts = new Dictionary<Guid, int>();
+            //install.ResourceCosts = new Dictionary<ID, int>();
             //install.ResourceCosts.Add(min.ID,60); //use Sorium that you just added to the mineral list
             //install.WealthCost = 120;
             //install.BuildPoints = 120;
@@ -126,16 +126,16 @@ namespace Pulsar4X.Tests
             //launchAbility.Ability = AbilityType.LaunchMissileSize;
             //launchAbility.AbilityAmount = new List<float>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
             //launchAbility.CrewAmount = new List<float>() { 3, 6, 9, 12, 15, 18, 21, 24, 27, 30};
-            ////launchAbility.ID = Guid.NewGuid();
+            ////launchAbility.ID = ID.NewGuid();
             //launchAbility.Name = "Missile Launcher Size";
             //launchAbility.Description = "Can fire a missile of this size or smaller";
             //launchAbility.WeightAmount = new List<float>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-            //launchAbility.TechRequirements = new List<Guid>() { };
+            //launchAbility.TechRequirements = new List<ID>() { };
 
             //ComponentAbilitySD reloadAbility = new ComponentAbilitySD();
             //reloadAbility.Name = "Missile Launcher Reload Rate";
             //reloadAbility.Description = "Speed at which this launcher can reload from a magazine";
-            ////reloadAbility.ID = Guid.NewGuid();
+            ////reloadAbility.ID = ID.NewGuid();
             //reloadAbility.Ability = AbilityType.ReloadRateFromMag;
             //reloadAbility.AbilityAmount = new List<float>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
             //reloadAbility.CrewAmount = new List<float>() { };
@@ -144,11 +144,11 @@ namespace Pulsar4X.Tests
             //missileLauncher.ComponentAbilitySDs = new List<ComponentAbilitySD>() { launchAbility, reloadAbility};
             //missileLauncher.Name = "MissileLauncher";
             //missileLauncher.Description = "Can launch Missiles and be reloaded via a magazine";
-            //missileLauncher.ID = Guid.NewGuid();
+            //missileLauncher.ID = ID.NewGuid();
 
             ////StaticDataManager.ExportStaticData(launchAbility, "./launcherabilitytest.json");
             ////StaticDataManager.ExportStaticData(reloadAbility, "./launcherabilitytest.json");
-            //Dictionary<Guid, ComponentSD> components = new Dictionary<Guid, ComponentSD>();
+            //Dictionary<ID, ComponentSD> components = new Dictionary<ID, ComponentSD>();
             //components.Add(missileLauncher.ID, missileLauncher);
             //StaticDataManager.ExportStaticData(components, "./Componentstest.json");
 

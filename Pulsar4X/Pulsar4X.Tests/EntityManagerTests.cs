@@ -56,7 +56,7 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(testEntity.GetValueCompareHash() == clonedEntity.GetValueCompareHash(), "ValueCompareHash should match");//currently valueCompareHash does not check guid of the entity. I'm undecided wheather it should or not. 
             Entity clonedTest;
             Assert.IsTrue(game2.GlobalManager.FindEntityByGuid(testEntity.Guid, out clonedTest), "Game2 should have the test entity");
-            Assert.IsTrue(testEntity.Guid == clonedEntity.Guid, "Guid's need to match, if we get to this assert, then we've got two entities in game2, one of them has the correct guid but no datablobs, the other has a new guid but is complete.");
+            Assert.IsTrue(testEntity.Guid == clonedEntity.Guid, "ID's need to match, if we get to this assert, then we've got two entities in game2, one of them has the correct guid but no datablobs, the other has a new guid but is complete.");
             Assert.IsTrue(ReferenceEquals(clonedTest, clonedEntity),"These should be the same object" );
             Assert.IsTrue(testEntity.DataBlobs.Count == clonedTest.DataBlobs.Count);
             Assert.IsTrue(testEntity.DataBlobs.Count == clonedEntity.DataBlobs.Count); 
@@ -310,11 +310,11 @@ namespace Pulsar4X.Tests
             Entity testEntity = Entity.Create(_game.GlobalManager, Guid.Empty);
 
             Assert.IsTrue(testEntity.IsValid);
-            // Check Guid local lookup.
+            // Check ID local lookup.
             Assert.IsTrue(_game.GlobalManager.TryGetEntityByGuid(testEntity.Guid, out foundEntity));
             Assert.IsTrue(testEntity == foundEntity);
             
-            // Check Guid global lookup.
+            // Check ID global lookup.
             Assert.IsTrue(_game.GlobalManager.FindEntityByGuid(testEntity.Guid, out foundEntity));
             Assert.AreEqual(testEntity, foundEntity);
 
@@ -322,7 +322,7 @@ namespace Pulsar4X.Tests
             testEntity.Destroy();
             Assert.IsFalse(testEntity.IsValid);
 
-            // Check bad Guid lookups.
+            // Check bad ID lookups.
             Assert.IsFalse(_game.GlobalManager.TryGetEntityByGuid(Guid.Empty, out foundEntity));
             Assert.IsFalse(_game.GlobalManager.FindEntityByGuid(Guid.Empty, out foundEntity));
         }

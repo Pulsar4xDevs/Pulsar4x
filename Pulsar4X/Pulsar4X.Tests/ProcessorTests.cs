@@ -39,7 +39,7 @@
 //            blobs.Add(planetDB);
 //            Entity planetEntity = new Entity(_entityManager, blobs);
 
-//            Dictionary<Guid, MineralDepositInfo> minerals = planetDB.Minerals;
+//            Dictionary<ID, MineralDepositInfo> minerals = planetDB.Minerals;
 
 //            MineralDepositInfo duraniumDeposit = new MineralDepositInfo { Amount = 10000, Accessibility = 1, HalfOriginalAmount = 5000 };
 
@@ -56,7 +56,7 @@
 //            InstallationsDB installationsDB = _colonyEntity.GetDataBlob<InstallationsDB>();
 
 //            //wow holy shit, this is a pain. definatly need to add an "AddInstallation" to the InstallationProcessor. (and RemoveInstallation);
-//            Guid mineguidGuid = new Guid("406E22B5-65DB-4C7E-B956-B120B0466503");
+//            ID mineguidGuid = new ID("406E22B5-65DB-4C7E-B956-B120B0466503");
 //            //InstallationSD mineSD = StaticDataManager.StaticDataStore.Installations[mineguidGuid];
 //            installationsDB.Installations[mineguidGuid] = 1f;
 //            InstallationEmployment installationEmployment = new InstallationEmployment {Enabled = true, Type = mineguidGuid};
@@ -80,8 +80,8 @@
 //            //first with no population;
 //            Entity colonyEntity = _faction.GetDataBlob<FactionDB>().Colonies[0];
 //            InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
-//            Dictionary<Guid, float> mineralstockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-//            Dictionary<Guid, float> mineralstockpilePreMined = new Dictionary<Guid, float>(mineralstockpile);
+//            Dictionary<ID, float> mineralstockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+//            Dictionary<ID, float> mineralstockpilePreMined = new Dictionary<ID, float>(mineralstockpile);
 
 
 //            InstallationProcessor.Employment(colonyEntity); //do employment check;
@@ -108,14 +108,14 @@
 //        public void TestConstruction()
 //        {
 //            ColonyInfoDB colonyInfo = _colonyEntity.GetDataBlob<ColonyInfoDB>();
-//            Guid itemConstructing = new Guid();//just a random guid for now.
+//            ID itemConstructing = new ID();//just a random guid for now.
 //            double ablityPointsThisColony = 100;
 //            List<ConstructionJob> jobList = new List<ConstructionJob>();
 
-//            Dictionary<Guid,float> stockpileOut = new Dictionary<Guid, float>();
+//            Dictionary<ID,float> stockpileOut = new Dictionary<ID, float>();
 
 //            PercentValue priority = new PercentValue {Percent = 1};
-//            Dictionary<Guid,int> jobRawMaterials = new Dictionary<Guid, int>();
+//            Dictionary<ID,int> jobRawMaterials = new Dictionary<ID, int>();
 //            jobRawMaterials.Add(_duraniumSD.ID, 5000); //500 per item
 //            jobRawMaterials.Add(_corundiumSD.ID, 70); //7 per item
 //            ConstructionJob newJob = new ConstructionJob 

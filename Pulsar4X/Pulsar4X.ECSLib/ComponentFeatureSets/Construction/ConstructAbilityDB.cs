@@ -58,7 +58,7 @@ namespace Pulsar4X.ECSLib
             ComponentsRequired = new Dictionary<Guid, int>(componentCost);
         }
 
-        public ConstructionJob(ComponentDesign design, ushort numOrdered, bool auto): base(design.Guid, numOrdered, design.BuildPointCost, auto)
+        public ConstructionJob(ComponentDesign design, ushort numOrdered, bool auto): base(design.ID, numOrdered, design.BuildPointCost, auto)
         {
             Name = design.Name;
             ConstructionType = design.ConstructionType;

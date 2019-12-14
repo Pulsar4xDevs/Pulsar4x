@@ -13,7 +13,8 @@ namespace Pulsar4X.ECSLib
     {
 
         /// <summary>
-        /// checks if the storage contains all the items and amounts in a given dictionary. 
+        /// checks if the storage contains all the items and amounts in a given dictionary.
+        /// note that this will not return true for unique(damaged) items.  
         /// </summary>
         /// <param name="stockpile"></param>
         /// <param name="costs"></param>
@@ -34,26 +35,41 @@ namespace Pulsar4X.ECSLib
                             return false;
                     }
 
-                    if (costitem.Value > stockpile.StoredCargoTypes[costitem.Key.CargoTypeID].ItemsAndAmounts[costitem.Key.ID])
+                    if (costitem.Value > stockpile.StoredCargoTypes[costitem.Key.CargoTypeID].ItemsAndAmounts[costitem.Key.ID].amount)
                         return false;
                 }
             }
             return true;
         }
 
+        /// <summary>
+        /// returns the number of items of a given item guid,
+        /// Not this will not count unique(damaged) items.
+        /// </summary>
+        /// <param name="storeDB"></param>
+        /// <param name="storeTypeGuid"></param>
+        /// <param name="itemGuid"></param>
+        /// <returns></returns>
         public static long GetAmount(CargoStorageDB storeDB, Guid storeTypeGuid, Guid itemGuid)
         {
             if(storeDB.StoredCargoTypes.ContainsKey(storeTypeGuid))
                 if(storeDB.StoredCargoTypes[storeTypeGuid].ItemsAndAmounts.ContainsKey(itemGuid))
-                    return storeDB.StoredCargoTypes[storeTypeGuid].ItemsAndAmounts[itemGuid];
+                    return storeDB.StoredCargoTypes[storeTypeGuid].ItemsAndAmounts[itemGuid].amount;
             return 0;
         }
 
+        /// <summary>
+        /// returns the number of items of a given ICargoable item,
+        /// Not this will not count unique(damaged) items.
+        /// </summary>
+        /// <param name="storeDB"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
         public static long GetAmount(CargoStorageDB storeDB, ICargoable item)
         {
             if(storeDB.StoredCargoTypes.ContainsKey(item.CargoTypeID))
                 if(storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts.ContainsKey(item.ID))
-                    return storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID];
+                    return storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID].amount;
             return 0;
         }
         
@@ -87,7 +103,8 @@ namespace Pulsar4X.ECSLib
                 if (cargoItem.MustBeSpecificCargo)
                     storeDB.StoredCargoTypes[item.CargoTypeID].SpecificEntites[cargoItem.ID].Remove(cargoItem.OwningEntity);
             }
-            storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] -= amount;
+            var newTotal = storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID].amount - amount;
+            storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] = (item, newTotal);
             //FreeCapacity is *MASS*
             storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacityKg += item.Mass * amount; 
         }
@@ -105,15 +122,25 @@ namespace Pulsar4X.ECSLib
                     storeDB.StoredCargoTypes[item.CargoTypeID].SpecificEntites[cargoItem.ID].Add(cargoItem.OwningEntity);
                 }
             }
+
+            var id = item.ID;
+            //if the item is a componentInstance, and has no damage we store it by design.
+            if(item is ComponentInstance)
+            {
+                ComponentInstance ci = (ComponentInstance)item;
+                if(ci.HTKRemaining == ci.HTKMax)
+                    id = ci.Design.ID;
+            }
             if(!storeDB.StoredCargoTypes.ContainsKey(item.CargoTypeID))
                 storeDB.StoredCargoTypes.Add(item.CargoTypeID, new CargoTypeStore());
-            else if(!storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts.ContainsKey(item.ID))
-                storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts.Add(item.ID, 0);
-            
+
             if(!storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts.ContainsKey(item.ID))
-                storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts.Add(item.ID, amount);
+                storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts.Add(id, (item, amount));
             else
-                storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] += amount;
+            {
+                long total = storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID].amount + amount;
+                storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] = (item, total);
+            }
             //FreeCapacity is *MASS*
             storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacityKg -= item.Mass * amount; 
         }
@@ -128,11 +155,11 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// psudo randomly drops cargo. this could be made a bit better maybe... but should do for now. 
-        /// TODO: actualy this is compleatly broken. it's removing amount instead of weight.
+        /// TODO: this is probly not very random, figure a better seed. 
         /// </summary>
         /// <param name="typeStore"></param>
-        /// <param name="weightToLoose"></param>
-        private static void DropRandomCargo(CargoTypeStore typeStore, long weightToLoose)
+        /// <param name="massToLoose"></param>
+        private static void DropRandomCargo(CargoTypeStore typeStore, long massToLoose)
         {
             int n = typeStore.ItemsAndAmounts.Count();
             int seed = n;
@@ -148,13 +175,17 @@ namespace Pulsar4X.ECSLib
             }
 
             int i = 0;
-            while (weightToLoose > 0)
+            while (massToLoose > 0)
             {
-                long amountStored = typeStore.ItemsAndAmounts[indexes[i]];
-                long removeAmount = Math.Min(amountStored, weightToLoose);
+                var itemAmounts = typeStore.ItemsAndAmounts[indexes[i]];
+                long amountStored = itemAmounts.amount;
+                int itemMass = itemAmounts.item.Mass;
+                long totalMass = amountStored * itemMass;
+                long removeMass = Math.Min(totalMass, massToLoose);
+                long removeAmount = removeMass / itemMass;
                 //TODO: create a new entity for the dropped cargo so it can be collected.
-                typeStore.ItemsAndAmounts[indexes[i]] -= removeAmount;
-                weightToLoose -= removeAmount;
+                typeStore.ItemsAndAmounts[indexes[i]] = (itemAmounts.item, itemAmounts.amount - removeAmount);
+                massToLoose -= removeMass;
                 i++;
             }
         }
@@ -206,7 +237,7 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in storageComponents) //first loop through the component types
             {                
                 Entity componentDesign = kvp.Key;
-                Guid cargoTypeID = componentDesign.GetDataBlob<CargoStorageAtbDB>().CargoTypeGuid;
+                ID cargoTypeID = componentDesign.GetDataBlob<CargoStorageAtbDB>().CargoTypeGuid;
                 long alowableSpace = 0;
                 foreach (var specificComponent in kvp.Value) //then loop through each specific component
                 {//checking the helth...

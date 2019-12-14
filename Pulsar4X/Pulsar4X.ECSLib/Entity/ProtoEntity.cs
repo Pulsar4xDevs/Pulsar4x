@@ -122,9 +122,9 @@ namespace Pulsar4X.ECSLib
                 //bool exists1 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                 var protoEntity = new ProtoEntity();
                 //StarObject (Entity)
-                reader.Read(); // PropertyName Guid
-                reader.Read(); // Actual Guid
-                protoEntity.Guid = serializer.Deserialize<Guid>(reader); // Deserialize the Guid
+                reader.Read(); // PropertyName ID
+                reader.Read(); // Actual ID
+                protoEntity.Guid = serializer.Deserialize<Guid>(reader); // Deserialize the ID
                 //bool exists2 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                 // Deserialize the dataBlobs
                 reader.Read(); // PropertyName DATABLOB
@@ -148,7 +148,7 @@ namespace Pulsar4X.ECSLib
             {
                 ProtoEntity protoEntity = (ProtoEntity)value;
                 writer.WriteStartObject(); // Start the Entity.
-                writer.WritePropertyName("Guid"); // Write the Guid PropertyName
+                writer.WritePropertyName("ID"); // Write the ID PropertyName
                 serializer.Serialize(writer, protoEntity.Guid); // Write the Entity's guid.
                 foreach (BaseDataBlob dataBlob in protoEntity.DataBlobs.Where(dataBlob => dataBlob != null))
                 {

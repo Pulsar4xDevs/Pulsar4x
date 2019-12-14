@@ -196,15 +196,15 @@ namespace Pulsar4X.Tests
                 {new Guid("c827d369-3f16-43ef-b112-7d5bcafb74c7"),""},
                 {new Guid("db6818f3-99e9-46c1-b903-f3af978c38b2"),""},
                 {new Guid("f3f10e56-9345-40cc-af42-342e7240355d"),""}
-                //new Guid("58d047e6-c567-4db6-8c76-bfd4a201af94"),
-                //new Guid("bd75bf88-1dad-4022-b401-acdf05ab73f8"),
-                //new Guid("042ce9d4-5a2c-4d8e-9ae4-be059920839c"),
-                //new Guid("93611831-9183-484a-9920-13b39d64e272"),
-                //new Guid("32eda0ab-c117-4224-b148-6c9d0e474296"),
-                //new Guid("cbb1a7ce-3c26-4b5b-abd7-9a99c670d68d"),
-                //new Guid("6e34cc46-0693-4676-b0ca-f076fb36acaf"),
-                //new Guid("9bb4d1c4-680f-4c98-b927-337654073575"),
-                //new Guid("c9587310-f7dd-45d0-ac4c-b6f59a1e1897")
+                //new ID("58d047e6-c567-4db6-8c76-bfd4a201af94"),
+                //new ID("bd75bf88-1dad-4022-b401-acdf05ab73f8"),
+                //new ID("042ce9d4-5a2c-4d8e-9ae4-be059920839c"),
+                //new ID("93611831-9183-484a-9920-13b39d64e272"),
+                //new ID("32eda0ab-c117-4224-b148-6c9d0e474296"),
+                //new ID("cbb1a7ce-3c26-4b5b-abd7-9a99c670d68d"),
+                //new ID("6e34cc46-0693-4676-b0ca-f076fb36acaf"),
+                //new ID("9bb4d1c4-680f-4c98-b927-337654073575"),
+                //new ID("c9587310-f7dd-45d0-ac4c-b6f59a1e1897")
             };
             engineTypeAbility1.AbilityFormula = "TechData('f3f10e56-9345-40cc-af42-342e7240355d')";
 

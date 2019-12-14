@@ -48,7 +48,7 @@ namespace Pulsar4X.Networking
         public Entity CurrentFaction { get { return _gameVM.CurrentFaction; } }
         public string ConnectedToGameName { get; private set; }
 
-        //private Dictionary<Guid, string> _factions; 
+        //private Dictionary<ID, string> _factions; 
         //public ObservableCollection<FactionItem> Factions { get; set; }
         private GameVM _gameVM;
 
@@ -325,7 +325,7 @@ namespace Pulsar4X.Networking
             {
                 Entity otherFactionEntity;
                 Game.GlobalManager.FindEntityByGuid(entityID, out otherFactionEntity);
-                Messages.Add("Warning! Guid does not match, Something is changing the guid. "); 
+                Messages.Add("Warning! ID does not match, Something is changing the guid. "); 
 
             }
 
@@ -450,7 +450,7 @@ namespace Pulsar4X.Networking
             Guid entityGuid = new Guid(message.ReadBytes(16));
             Entity entity;
             if (!this.Game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
-                Messages.Add("ImportProcDataFail: No Entity for Guid: " + entityGuid);
+                Messages.Add("ImportProcDataFail: No Entity for ID: " + entityGuid);
             else
             {
                 int len = message.ReadInt32();
@@ -491,7 +491,7 @@ namespace Pulsar4X.Networking
             {
                 StarSystem newStarsystem = new StarSystem(Game, "newSystem", 0, systemID);
                 newStarsystem.Game = Game;
-                //newStarsystem.Guid = systemID;
+                //newStarsystem.ID = systemID;
                 //Game.Systems[systemID] = newStarsystem;
             }
             
@@ -510,7 +510,7 @@ namespace Pulsar4X.Networking
             var mStream = new MemoryStream(data);
             Entity entity;
             if (!this.Game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
-                Messages.Add("DatablobImportFail: No Entity for Guid: " + entityGuid);
+                Messages.Add("DatablobImportFail: No Entity for ID: " + entityGuid);
             else
             {
                 string fullName = "Pulsar4X.ECSLib." + name; 
@@ -560,7 +560,7 @@ namespace Pulsar4X.Networking
                         Guid entityID = new Guid(message.ReadBytes(16));
                         Entity entity;
                         if (!this.Game.GlobalManager.FindEntityByGuid(entityID, out entity))
-                            Messages.Add("Remove Entity Fail: No Entity for Guid: " + entityID);
+                            Messages.Add("Remove Entity Fail: No Entity for ID: " + entityID);
                         else
                             entity.Manager.RemoveEntity(entity);
                     }
@@ -577,7 +577,7 @@ namespace Pulsar4X.Networking
                         int typeIndex = message.ReadInt32();                //datablob typeIndex
                         Entity entity;
                         if (!this.Game.GlobalManager.FindEntityByGuid(entityID, out entity))
-                            Messages.Add("Remove " + name + " Datablob Fail: No Entity for Guid: " + entityID + " this is not critical and can be ignored.");
+                            Messages.Add("Remove " + name + " Datablob Fail: No Entity for ID: " + entityID + " this is not critical and can be ignored.");
                         else
                         {
                             if (entity.HasDataBlob(typeIndex))

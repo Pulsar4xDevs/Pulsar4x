@@ -649,17 +649,17 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Attempts to find the entity with the associated Guid. Checks globally.
+        /// Attempts to find the entity with the associated ID. Checks globally.
         /// </summary>
         /// <returns>True if entityID is found.</returns>
-        /// <exception cref="GuidNotFoundException">Guid was found in Global list, but not locally. Should not be possible.</exception>
+        /// <exception cref="GuidNotFoundException">ID was found in Global list, but not locally. Should not be possible.</exception>
         [PublicAPI]
         public bool FindEntityByGuid(Guid entityGuid, out Entity entity)
         {
             if (Game == null)
             {
                 // This is a "fake" manager not connected to other managers.
-                // This manager can only perform local Guid lookups.
+                // This manager can only perform local ID lookups.
                 return _localEntityDictionary.TryGetValue(entityGuid, out entity);
             }
             _globalGuidDictionaryLock.EnterReadLock();
@@ -688,11 +688,11 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Gets the entity with the associated Guid, this checks globaly
+        /// Gets the entity with the associated ID, this checks globaly
         /// </summary>
         /// <param name="entityGuid"></param>
         /// <returns>Entity if found</returns>
-        /// <exception cref="GuidNotFoundException">Guid was not found</exception>
+        /// <exception cref="GuidNotFoundException">ID was not found</exception>
         [PublicAPI]
         public Entity GetGlobalEntityByGuid(Guid entityGuid)
         {
@@ -703,10 +703,10 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Gets the entity with the associated Guid. Checks only this EntityManager.
+        /// Gets the entity with the associated ID. Checks only this EntityManager.
         /// </summary>
         /// <returns>The Entity if found</returns>
-        /// <exception cref="GuidNotFoundException">Guid was not found in Global list, orlocally</exception>
+        /// <exception cref="GuidNotFoundException">ID was not found in Global list, orlocally</exception>
         [PublicAPI]
         public Entity GetLocalEntityByGuid(Guid entityGuid)
         {
@@ -719,7 +719,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Gets the associated entity of the specified Guid. Checks only this EntityManager.
+        /// Gets the associated entity of the specified ID. Checks only this EntityManager.
         /// <para></para>
         /// Does not throw exceptions.
         /// </summary>

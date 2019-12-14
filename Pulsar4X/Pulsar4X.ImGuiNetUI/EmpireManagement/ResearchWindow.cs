@@ -348,7 +348,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.BeginChild("Top");
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 300);
-                (Guid techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[i];
+                (ID techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[i];
                 (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
                 
                 

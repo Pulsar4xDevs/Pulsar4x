@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
             AllComponents.Add(instance.ID, instance);
             
             var design = instance.Design;
-            AllDesigns[design.Guid] = design;
+            AllDesigns[design.ID] = design;
             foreach (var attbkvp in design.AttributesByType)
             {
                 //add the design to the dictionary if it's not already there.
@@ -55,10 +55,10 @@ namespace Pulsar4X.ECSLib
             }
 
             //add the component instance to the dictionary if it's not already there. 
-            if (!_componentsByDesign.ContainsKey(design.Guid))
-                _componentsByDesign.Add(design.Guid, new List<ComponentInstance>());
-            if (!_componentsByDesign[design.Guid].Contains(instance))
-                _componentsByDesign[design.Guid].Add(instance);
+            if (!_componentsByDesign.ContainsKey(design.ID))
+                _componentsByDesign.Add(design.ID, new List<ComponentInstance>());
+            if (!_componentsByDesign[design.ID].Contains(instance))
+                _componentsByDesign[design.ID].Add(instance);
 
 
             
@@ -81,9 +81,9 @@ namespace Pulsar4X.ECSLib
         {
             
             var design = instance.Design;
-            AllDesigns.Remove(design.Guid);
+            AllDesigns.Remove(design.ID);
             AllComponents.Remove(instance.ID);
-            _componentsByDesign[design.Guid].Remove(instance);
+            _componentsByDesign[design.ID].Remove(instance);
 
             foreach (var atbkvp in design.AttributesByType)
             {

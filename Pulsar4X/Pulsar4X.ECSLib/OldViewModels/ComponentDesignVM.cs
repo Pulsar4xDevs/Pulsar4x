@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentDesignVM : IViewModel
     {
-        //public Dictionary<string, Guid> ComponentTypes { get; set; }
+        //public Dictionary<string, ID> ComponentTypes { get; set; }
         public DictionaryVM<string, Guid> ComponentTypes { get; } = new DictionaryVM<string, Guid>(DisplayMode.Key);
         public ComponentDesigner Designer { get; private set; }
         

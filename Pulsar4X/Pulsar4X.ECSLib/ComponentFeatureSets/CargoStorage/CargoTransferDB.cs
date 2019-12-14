@@ -18,8 +18,8 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         internal CargoStorageDB CargoToDB { get; set; }
 
-        internal List<Tuple<ICargoable, long>> OrderedToTransfer { get; set; }
-        internal List<Tuple<ICargoable, long>> ItemsLeftToTransfer;
+        internal List<(ICargoable item, long amount)> OrderedToTransfer { get; set; }
+        internal List<(ICargoable item, long amount)> ItemsLeftToTransfer;
 
         internal double DistanceBetweenEntitys { get; set; }
         internal int TransferRateInKG { get; set; } = 1000;

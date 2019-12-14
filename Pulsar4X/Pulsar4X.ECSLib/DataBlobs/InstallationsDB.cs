@@ -5,10 +5,10 @@ namespace Pulsar4X.ECSLib
 {
     //public struct ConstructionJob
     //{        
-    //    public Guid Type;
+    //    public ID Type;
     //    public float ItemsRemaining;
     //    public PercentValue PriorityPercent;
-    //    public Dictionary<Guid, int> RawMaterialsRemaining;
+    //    public Dictionary<ID, int> RawMaterialsRemaining;
     //    public int BuildPointsRemaining;
     //    public int BuildPointsPerItem;
     //}

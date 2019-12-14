@@ -59,15 +59,15 @@ namespace Pulsar4X.ECSLib
             Update();
         }
 
-        public List<Tuple<Guid, long>> ItemsToMoveOut()
+        public List<(Guid itemID, long amount)> ItemsToMoveOut()
         {
-            List<Tuple<Guid, long>> items = new List<Tuple<Guid, long>>();
+            List<(Guid itemID, long amount)> items = new List<(Guid , long )>();
 
             foreach (var item in _cargoItemsDict)
             {
                 if(item.Value.ItemOutgoingAmount > 0)
                 {
-                    items.Add(new Tuple<Guid, long>(item.Key, item.Value.ItemOutgoingAmount)); 
+                    items.Add((item.Key, item.Value.ItemOutgoingAmount)); 
                 }
             }
 
@@ -92,11 +92,11 @@ namespace Pulsar4X.ECSLib
             {
                 if(!_cargoItemsDict.ContainsKey(kvp.Key))
                 { //if the key from the DB's dictionary is not in our dictionary here
-                    var newCargoItemVM = new CargoItemVM(_staticData.GetICargoable(kvp.Key)); //then create a new CargoItemVM
+                    var newCargoItemVM = new CargoItemVM(kvp.Value.item); //then create a new CargoItemVM
                     _cargoItemsDict.Add(kvp.Key, newCargoItemVM); //add it to the dictionary
                     CargoItems.Add(newCargoItemVM); //then add it to the observable collection
                 }
-                _cargoItemsDict[kvp.Key].Update(kvp.Value); //since the object in the observable collection is the same object as the one in the dictionary, update the object via the dictionary
+                _cargoItemsDict[kvp.Key].Update(kvp.Value.amount); //since the object in the observable collection is the same object as the one in the dictionary, update the object via the dictionary
             }
 
             foreach(var key in _cargoItemsDict.Keys.ToArray()) {

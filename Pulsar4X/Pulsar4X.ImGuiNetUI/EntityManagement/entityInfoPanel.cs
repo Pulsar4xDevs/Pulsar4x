@@ -76,7 +76,7 @@ namespace Pulsar4X.SDL2UI
                                 var tempEntityState = _state.StarSystemStates[_state.SelectedStarSysGuid].EntityStatesWithNames[parentEntity.Guid];
                                 hasParentEntity = true;
                                 if(ImGui.SmallButton(tempEntityState.Name)){
-                                //if(ImGui.SmallButton(parentEntity.GetDataBlob<NameDB>().GetName(_state.Faction.Guid))){
+                                //if(ImGui.SmallButton(parentEntity.GetDataBlob<NameDB>().GetName(_state.Faction.ID))){
                                     _state.EntityClicked(parentEntity.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
                                 //}
                                 }

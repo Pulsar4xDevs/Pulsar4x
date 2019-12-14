@@ -6,8 +6,9 @@ namespace Pulsar4X.ECSLib
 {
     public class CargoXferOrder:EntityCommand
     {
-        public List<Tuple<Guid, long>> ItemsGuidsToTransfer;
-        public List<Tuple<ICargoable, long>> ItemICargoablesToTransfer = new List<Tuple<ICargoable, long>>();
+        public List<(Guid ID, long amount)> ItemsGuidsToTransfer;
+        [JsonIgnore]
+        public List<(ICargoable item, long amount)> ItemICargoablesToTransfer = new List<(ICargoable item, long amount)>();
         public Guid SendCargoToEntityGuid { get; set; }
 
         internal override int ActionLanes => 1;
@@ -23,7 +24,7 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         Entity sendToEntity;
 
-        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<Tuple<Guid,long>> itemsToMove )
+        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(Guid ID, long amount)> itemsToMove )
         {
             var cmd = new CargoXferOrder()
             {
@@ -32,6 +33,23 @@ namespace Pulsar4X.ECSLib
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 SendCargoToEntityGuid = cargoToEntity.Guid,
                 ItemsGuidsToTransfer = itemsToMove
+            };
+            game.OrderHandler.HandleOrder(cmd);
+        }
+        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
+        {
+            List<(Guid item,long amount)> itemGuidAmounts = new List<(Guid, long)>();
+            foreach (var tup in itemsToMove)
+            {
+                itemGuidAmounts.Add((tup.item.ID, tup.amount));
+            }
+            var cmd = new CargoXferOrder()
+            {
+                RequestingFactionGuid = faction.Guid,
+                EntityCommandingGuid = cargoFromEntity.Guid,
+                CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
+                SendCargoToEntityGuid = cargoToEntity.Guid,
+                ItemsGuidsToTransfer = itemGuidAmounts
             };
             game.OrderHandler.HandleOrder(cmd);
         }
@@ -66,7 +84,7 @@ namespace Pulsar4X.ECSLib
             foreach (var tup in ItemsGuidsToTransfer)
             {
                 //(ICargoable)game.StaticData.FindDataObjectUsingID(ItemToTransfer);
-                ItemICargoablesToTransfer.Add(new Tuple<ICargoable, long>( staticData.GetICargoable(tup.Item1), tup.Item2));
+                ItemICargoablesToTransfer.Add((staticData.GetICargoable(tup.ID), tup.amount));
             }
         }
 
@@ -102,7 +120,7 @@ namespace Pulsar4X.ECSLib
             return amount;
          }
 
-        //public CargoXferOrder(Entity entityCommanding, Entity loadFromEntity, List<Tuple<Guid,long>> typesAndAmounts )
+        //public CargoXferOrder(Entity entityCommanding, Entity loadFromEntity, List<Tuple<ID,long>> typesAndAmounts )
         //{
 
         //}

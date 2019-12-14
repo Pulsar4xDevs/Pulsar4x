@@ -170,7 +170,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="state"></param>
         private void InvokeDateChange(object state)
         {
-            //Event logevent = new Event(_systemLocalDateTime, "System Date Change", _entityManager.Guid, null, null, null);
+            //Event logevent = new Event(_systemLocalDateTime, "System Date Change", _entityManager.ID, null, null, null);
             //logevent.EventType = EventType.SystemDateChange;
             //_entityManager.Game.EventLog.AddEvent(logevent);
 

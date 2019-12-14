@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetFaction()
         {
-            //StarIcons = new Dictionary<Guid, IDrawData>();
+            //StarIcons = new Dictionary<ID, IDrawData>();
             int i = 0;
             double startangle = 0;//Math.PI * 0.5;
             float angleIncrease = (float)Math.Max(0.78539816339, 6.28318530718 / _state.StarSystemStates.Count);

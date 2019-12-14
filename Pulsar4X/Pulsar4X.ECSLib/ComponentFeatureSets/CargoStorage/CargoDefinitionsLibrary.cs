@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage
 
         Dictionary<Guid, ICargoable> GetAll();
 
-        object GetAny(Guid id);
+        ICargoable GetAny(Guid id);
 
         bool IsOther(Guid id);
         ICargoable GetOther(string nameOfCargo);
@@ -105,7 +105,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage
             }
         }
 
-        public object GetAny(Guid id)
+        public ICargoable GetAny(Guid id)
         {
             if (_minerals.ContainsKey(id))
                 return _minerals[id];

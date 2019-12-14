@@ -543,7 +543,7 @@ namespace Pulsar4X.ECSLib
             _freeBeamList.Clear();
             foreach (var design in designs)
             {
-                foreach (var instance in instancesDB.GetComponentsBySpecificDesign(design.Guid))
+                foreach (var instance in instancesDB.GetComponentsBySpecificDesign(design.ID))
                 {
                     int beamCount = 0;
                     if (instance.GetAbilityState<WeaponState>().FireControl == null)
@@ -593,7 +593,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (var design in designs)
             {
-                foreach (var fc in instancesDB.GetComponentsBySpecificDesign(design.Guid))
+                foreach (var fc in instancesDB.GetComponentsBySpecificDesign(design.ID))
                 {
                     if (fc.GetAbilityState<FireControlAbilityState>().AssignedWeapons.Contains(beam))
                         return true;

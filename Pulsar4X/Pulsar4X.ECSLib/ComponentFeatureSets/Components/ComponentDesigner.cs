@@ -65,21 +65,23 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class ComponentDesign
+    public class ComponentDesign : ICargoable
     {
-        public Guid Guid;
+        public Guid ID { get; internal set; }
+        public string Name { get; internal set; } //player defined name. ie "5t 2kn Thruster".
+        public Guid CargoTypeID { get; internal set; }
+        public int Mass { get; internal set; }
+        
         public int ResearchCostValue;
         public Guid TechID;
         public string TypeName; //ie the name in staticData. ie "Newtonion Thruster".
-        public string Name; //player defined name. ie "5t 2kn Thruster".
         public string Description;
-        public int Mass;
         public int Volume;
         public int HTK;
         public int CrewReq;
         public int BuildPointCost;
         public int CreditCost;
-        public Guid CargoTypeID;
+        
         //public int ResearchCostValue;
         public Dictionary<Guid, int> MineralCosts;
         public Dictionary<Guid, int> MaterialCosts;
@@ -137,7 +139,7 @@ namespace Pulsar4X.ECSLib
             TypeName = componentSD.Name;
             Name = componentSD.Name;
             Description = componentSD.Description;
-            _design.Guid = Guid.NewGuid();
+            _design.ID = Guid.NewGuid();
             MassFormula = new ChainedExpression(componentSD.MassFormula, this, factionTech, staticData);
             VolumeFormula = new ChainedExpression(componentSD.VolumeFormula, this, factionTech, staticData);
             CrewFormula = new ChainedExpression(componentSD.CrewReqFormula, this, factionTech, staticData);
@@ -276,7 +278,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            faction.InternalComponentDesigns.Add(_design.Guid, _design);
+            faction.InternalComponentDesigns.Add(_design.ID, _design);
             return _design;
             
         }

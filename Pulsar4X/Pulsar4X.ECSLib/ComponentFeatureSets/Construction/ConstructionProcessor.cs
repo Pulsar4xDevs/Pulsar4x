@@ -150,21 +150,15 @@ namespace Pulsar4X.ECSLib
         {   
             foreach (KeyValuePair<Guid, int> kvp in toUse.ToArray())
             {             
-                ICargoable cargoItem = fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(kvp.Key);
+                ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);//fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(kvp.Key);
+                
                 Guid cargoTypeID = cargoItem.CargoTypeID;
                 int amountUsedThisTick = 0;
                 if (fromCargo.StoredCargoTypes.ContainsKey(cargoTypeID))
                 {
                     if (fromCargo.StoredCargoTypes[cargoTypeID].ItemsAndAmounts.ContainsKey(cargoItem.ID))
                     {
-                        if (fromCargo.StoredCargoTypes[cargoTypeID].ItemsAndAmounts[cargoItem.ID] >= kvp.Value)
-                        {
-                            amountUsedThisTick = kvp.Value;
-                        }
-                        else
-                        {
-                            amountUsedThisTick = (int)fromCargo.StoredCargoTypes[cargoTypeID].ItemsAndAmounts[cargoItem.ID];
-                        }
+                        amountUsedThisTick = Math.Min((int)fromCargo.StoredCargoTypes[cargoTypeID].ItemsAndAmounts[cargoItem.ID].amount, kvp.Value);
                     }
                 }
 

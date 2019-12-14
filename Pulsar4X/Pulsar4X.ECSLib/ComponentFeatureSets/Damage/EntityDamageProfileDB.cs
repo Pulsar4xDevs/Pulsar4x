@@ -39,7 +39,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             foreach (var componenttype in components)
             {
                 
-                Guid typeGuid = componenttype.component.Guid;
+                Guid typeGuid = componenttype.component.ID;
                 
                 RawBmp compBmp = DamageTools.CreateComponentByteArray(componenttype.component, (byte)typeBitmap.Count);
                 typeBitmap.Add((typeGuid, compBmp));

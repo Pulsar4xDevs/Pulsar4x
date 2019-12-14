@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             /*
-            PositionDB pos2 = new PositionDB(new Vector4(0, -0, 0, 0), new Guid());
+            PositionDB pos2 = new PositionDB(new Vector4(0, -0, 0, 0), new ID());
             var shape2 = new Shape() { Color = new SDL.SDL_Color() { r = 255, g = 0, b = 0, a = 255 }, Points = CreatePrimitiveShapes.RoundedCylinder(50, 100, 0, 0) };
             var shapes2 = new List<Shape>() { shape2 };
 

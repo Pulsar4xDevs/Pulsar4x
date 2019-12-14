@@ -83,7 +83,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             /*
 
                             ComponentDesign thruster = new ComponentDesign();
-                            thruster.Guid = Guid.NewGuid();
+                            thruster.ID = ID.NewGuid();
                             thruster.Connections = Connections.Front | Connections.Sides;
                             thruster.Volume = 10;
                             thruster.AspectRatio = 1;
@@ -91,14 +91,14 @@ namespace Pulsar4X.SDL2UI.Combat
 
 
                             ComponentDesign fuel = new ComponentDesign();
-                            fuel.Guid = Guid.NewGuid();
+                            fuel.ID = ID.NewGuid();
                             fuel.Connections = Connections.Front | Connections.Sides | Connections.Back;
                             fuel.Volume = 100;
                             fuel.AspectRatio = 2f;
                             fuel.DamageResistance = DamageTools.DamageResistsLookupTable[100];
 
                             ComponentDesign lifeSuport = new ComponentDesign();
-                            lifeSuport.Guid = Guid.NewGuid();
+                            lifeSuport.ID = ID.NewGuid();
                             lifeSuport.Connections = Connections.Front | Connections.Sides | Connections.Back;
                             lifeSuport.Volume = 5;
                             lifeSuport.AspectRatio = 1;
@@ -106,7 +106,7 @@ namespace Pulsar4X.SDL2UI.Combat
 
 
                             ComponentDesign cargo = new ComponentDesign();
-                            cargo.Guid = Guid.NewGuid();
+                            cargo.ID = ID.NewGuid();
                             cargo.Connections = Connections.Front | Connections.Sides | Connections.Back;
                             cargo.Volume = 100;
                             cargo.AspectRatio = 0.5f;

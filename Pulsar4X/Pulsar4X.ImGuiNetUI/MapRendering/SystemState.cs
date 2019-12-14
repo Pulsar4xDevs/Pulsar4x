@@ -77,7 +77,7 @@ namespace Pulsar4X.SDL2UI
         private SystemState(StarSystem system)
         {
             StarSystem = system;
-            //SystemContacts = system.FactionSensorContacts[faction.Guid];
+            //SystemContacts = system.FactionSensorContacts[faction.ID];
             //_sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
 
@@ -105,7 +105,7 @@ namespace Pulsar4X.SDL2UI
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
             {
                 var entityState = new EntityState(sensorContact) { Name = "Unknown" };
-                EntityStates.Add(sensorContact.ActualEntity.Guid, entityState);
+                EntityStates.Add(sensorContact.ActualEntity.ID, entityState);
             }*/
         }
 

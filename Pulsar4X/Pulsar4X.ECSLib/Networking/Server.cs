@@ -207,7 +207,7 @@ namespace Pulsar4X.Networking
             if (this.Game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
                 SendEntityData(sender, entity);
             else
-                Messages.Add(sender.ToString() + "EntityDataRequestFail: No Entity for Guid: " + entityGuid);
+                Messages.Add(sender.ToString() + "EntityDataRequestFail: No Entity for ID: " + entityGuid);
         }
 
         void HandleRequestEntityHash(NetIncomingMessage message)
@@ -218,7 +218,7 @@ namespace Pulsar4X.Networking
             if (this.Game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
                 SendEntityHashData(sender, entity);
             else
-                Messages.Add(sender.ToString() + "EntityHashRequestFail: No Entity for Guid: " + entityGuid);
+                Messages.Add(sender.ToString() + "EntityHashRequestFail: No Entity for ID: " + entityGuid);
             
         }
 
@@ -231,7 +231,7 @@ namespace Pulsar4X.Networking
 
             Entity entity;
             if (!this.Game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
-                Messages.Add(sender + "DatablobRequestFail: No Entity for Guid: " + entityGuid);
+                Messages.Add(sender + "DatablobRequestFail: No Entity for ID: " + entityGuid);
             else
             {
                 var datablob = entity.GetDataBlob<BaseDataBlob>(datablobTypeIndex);
@@ -418,7 +418,7 @@ namespace Pulsar4X.Networking
             MemoryStream mStream = new MemoryStream();
             NetOutgoingMessage netMessage = NetPeerObject.CreateMessage();
             netMessage.Write((byte)ToClientMsgType.SendEntityHashData);
-            netMessage.Write(entity.Guid.ToByteArray());                                        //Entity Guid
+            netMessage.Write(entity.Guid.ToByteArray());                                        //Entity ID
             netMessage.Write(entity.Manager.ManagerSubpulses.StarSysDateTime.ToBinary());   //Date
             netMessage.Write(entity.GetHashCode());                                             //Entity Hash
             netMessage.Write(entity.DataBlobs.Count);                                           //NumberOfDatablobs
@@ -575,14 +575,14 @@ namespace Pulsar4X.Networking
 
         //    List<Entity> factions = Game.GlobalManager.GetAllEntitiesWithDataBlob<FactionInfoDB>();
         //    //we don't want to send the whole entitys, just a dictionary of guid ID and the string name. 
-        //    //Dictionary<Guid,string> factionGuidNames = factions.ToDictionary(faction => faction.Guid, faction => faction.GetDataBlob<NameDB>().DefaultName);
+        //    //Dictionary<ID,string> factionGuidNames = factions.ToDictionary(faction => faction.ID, faction => faction.GetDataBlob<NameDB>().DefaultName);
 
         //    List<FactionItem> factionItems = new List<FactionItem>();
         //    foreach (var faction in factions)
         //    {
         //        FactionItem factionItem = new FactionItem();
         //        factionItem.Name = faction.GetDataBlob<NameDB>().DefaultName;
-        //        factionItem.ID = faction.Guid;
+        //        factionItem.ID = faction.ID;
         //        factionItems.Add(factionItem);
         //    }
 

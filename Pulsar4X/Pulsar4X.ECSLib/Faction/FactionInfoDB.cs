@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
             foreach (var item in InternalComponentDesigns)
             {
                 hash = Misc.ValueHash(item.Key, hash);
-                hash = Misc.ValueHash(item.Value.Guid, hash);
+                hash = Misc.ValueHash(item.Value.ID, hash);
             }
             foreach (var item in InternalMissileDesigns)
             {

@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
         public StarSystem(SerializationInfo info, StreamingContext context) : base(info, context)
         {
 
-            ManagerGuid = (Guid)info.GetValue("Guid", typeof(Guid));
+            ManagerGuid = (Guid)info.GetValue("ID", typeof(Guid));
             Seed = (int)info.GetValue("Seed", typeof(int));
             NameDB = (NameDB)info.GetValue("Name", typeof(NameDB));
         }
@@ -74,7 +74,7 @@ namespace Pulsar4X.ECSLib
             List<Entity> bodies = this.GetAllEntitiesWithDataBlob<StarInfoDB>();
             bodies.AddRange(this.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>());
 
-            info.AddValue("Guid", Guid);
+            info.AddValue("ID", Guid);
             info.AddValue("Seed", Seed);
             info.AddValue("Name", NameDB);
             info.AddValue("Bodies", bodies);
@@ -83,7 +83,7 @@ namespace Pulsar4X.ECSLib
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             
-            info.AddValue("Guid", Guid);
+            info.AddValue("ID", Guid);
             info.AddValue("Seed", Seed);
             info.AddValue("Name", NameDB);
             base.GetObjectData(info, context);

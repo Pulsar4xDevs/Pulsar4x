@@ -144,10 +144,10 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Creates and fills out the properties of this ViewModel from the entity with the provided Guid.
+        /// Creates and fills out the properties of this ViewModel from the entity with the provided ID.
         /// </summary>
         /// <exception cref="InvalidOperationException">Cannot create a Planet ViewModel without an initialized game.</exception>
-        /// <exception cref="GuidNotFoundException">Thrown when the supplied Guid is not found in the game.</exception>
+        /// <exception cref="GuidNotFoundException">Thrown when the supplied ID is not found in the game.</exception>
         internal static SystemVM Create(GameVM gameVM, Guid starSystemGuid)
         {
             if (gameVM.Game == null)

@@ -33,8 +33,8 @@ namespace Pulsar4X.Networking
     /*Messages look like:
      * 
      * GameData, (string)gameName, (long)currentDate
-     * SystemData, (Byte[])Guid, (Byte[])memoryStream
-     * EntityData, (Byte[])Guid, (Byte[])memoryStream
+     * SystemData, (Byte[])ID, (Byte[])memoryStream
+     * EntityData, (Byte[])ID, (Byte[])memoryStream
      * 
      * 
      * FactionDataRequest, (string)factionName, (string)password
@@ -48,7 +48,7 @@ namespace Pulsar4X.Networking
     //    public DataMessageType DataMessageType { get; set; }
     //    public object DataObject { get; set; }
 
-    //    public Guid EntityGuid { get; set; }
+    //    public ID EntityGuid { get; set; }
     //    public string PropertyName { get; set; }//actualy can I look at how wpf does this?
     //}
 

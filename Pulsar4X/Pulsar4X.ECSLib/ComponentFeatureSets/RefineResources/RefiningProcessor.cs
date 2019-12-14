@@ -130,7 +130,7 @@ namespace Pulsar4X.ECSLib
         //    Dictionary<Entity, int> Refinerys = installations.Where(kvp => kvp.Key.HasDataBlob<RefineResourcesDB>()).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
         //    int pointsRate = 0;
-        //    Dictionary<Guid, int> matRate = new Dictionary<Guid, int>();
+        //    Dictionary<ID, int> matRate = new Dictionary<ID, int>();
         //    foreach (var RefineryKvp in Refinerys)
         //    {
         //        int points = RefineryKvp.Key.GetDataBlob<RefineResourcesDB>().RefineryPoints;

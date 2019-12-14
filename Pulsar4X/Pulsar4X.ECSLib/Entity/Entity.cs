@@ -116,11 +116,11 @@ namespace Pulsar4X.ECSLib
 
 
         /// <summary>
-        /// Creates a new entity with a randomly generated Guid, registered with the provided manager with the optionally provided dataBlobs.
+        /// Creates a new entity with a randomly generated ID, registered with the provided manager with the optionally provided dataBlobs.
         /// </summary>
         /// <returns>The create.</returns>
         /// <param name="manager">Manager.</param>
-        /// <param name="faction">the faction owner of this new entity. use Guid.Empty for a non owned entity.</param>
+        /// <param name="faction">the faction owner of this new entity. use ID.Empty for a non owned entity.</param>
         /// <param name="dataBlobs">Data blobs.</param>
         [PublicAPI]
 
@@ -139,7 +139,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <returns>The create.</returns>
         /// <param name="manager">Manager.</param>
-        /// <param name="faction">the faction owner of this new entity. use Guid.Empty for a non owned entity.</param>
+        /// <param name="faction">the faction owner of this new entity. use ID.Empty for a non owned entity.</param>
         /// <param name="protoEntity">Proto entity.</param>
         public static Entity Create(EntityManager manager, Guid faction, ProtoEntity protoEntity)
         {
@@ -328,7 +328,7 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         /// <summary>
-        /// Simple override to display entities as their Guid.
+        /// Simple override to display entities as their ID.
         /// 
         /// Used mostly in debugging.
         /// </summary>
@@ -479,10 +479,10 @@ namespace Pulsar4X.ECSLib
                 Game game = (Game)serializer.Context.Context;
                 Entity entity;
 
-                // Parse the Guid from the reader.
+                // Parse the ID from the reader.
                 Guid entityGuid = Guid.Parse(reader.Value.ToString());
 
-                // Lookup the entity using a global Guid lookup.
+                // Lookup the entity using a global ID lookup.
                 if (entityGuid == Guid.Empty)
                     return InvalidEntity;
                 if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))

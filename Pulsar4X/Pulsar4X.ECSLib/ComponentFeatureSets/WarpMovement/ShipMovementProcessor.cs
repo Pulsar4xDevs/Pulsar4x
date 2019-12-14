@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
             foreach (var design in designs)
             {
                 var warpAtb = design.GetAttribute<WarpDriveAtb>();
-                foreach (var instanceInfo in instancesDB.GetComponentsBySpecificDesign(design.Guid))
+                foreach (var instanceInfo in instancesDB.GetComponentsBySpecificDesign(design.ID))
                 {
                     var warpAtb2 = (WarpDriveAtb)instanceInfo.Design.AttributesByType[typeof(WarpDriveAtb)];
                     //var fuelUsage = (ResourceConsumptionAtbDB)instanceInfo.Design.AttributesByType[typeof(ResourceConsumptionAtbDB)];

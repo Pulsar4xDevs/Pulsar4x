@@ -31,9 +31,9 @@ namespace Pulsar4X.ECSLib
             {
                 for (int i = 0; i < datablob.ItemsLeftToTransfer.Count; i++)
                 {
-                    var item = datablob.ItemsLeftToTransfer[i];
-                    ICargoable cargoItem = item.Item1;
-                    long amountToXfer = item.Item2;
+                    (ICargoable item, long amount) itemsToXfer = datablob.ItemsLeftToTransfer[i];
+                    ICargoable cargoItem = itemsToXfer.item;
+                    long amountToXfer = itemsToXfer.amount;
 
                     Guid cargoTypeID = cargoItem.CargoTypeID;
                     int itemMassPerUnit = cargoItem.Mass;
@@ -52,20 +52,24 @@ namespace Pulsar4X.ECSLib
                     weightToTransferThisTick = Math.Min(weightToTransferThisTick, toCargoTypeStore.FreeCapacityKg); //check cargo to has enough weight capacity
 
                     long numberXfered = weightToTransferThisTick / itemMassPerUnit;//get the number of items from the mass transferable
-                    numberXfered = Math.Min(numberXfered, fromCargoItemAndAmount[cargoItem.ID]); //check from has enough to send. 
+                    numberXfered = Math.Min(numberXfered, fromCargoItemAndAmount[cargoItem.ID].amount); //check from has enough to send. 
 
                     weightToTransferThisTick = numberXfered * itemMassPerUnit;
 
                     if (!toCargoItemAndAmount.ContainsKey(cargoItem.ID))
-                        toCargoItemAndAmount.Add(cargoItem.ID, numberXfered);
+                        toCargoItemAndAmount.Add(cargoItem.ID,(cargoItem, numberXfered));
                     else
-                        toCargoItemAndAmount[cargoItem.ID] += numberXfered;
+                    {
+                        long totalTo = toCargoItemAndAmount[cargoItem.ID].amount + numberXfered;
+                        toCargoItemAndAmount[cargoItem.ID] = (cargoItem, totalTo);
+                    }
 
                     toCargoTypeStore.FreeCapacityKg -= weightToTransferThisTick;
 
-                    fromCargoItemAndAmount[cargoItem.ID] -= numberXfered;
+                    long totalFrom = toCargoItemAndAmount[cargoItem.ID].amount - numberXfered;
+                    fromCargoItemAndAmount[cargoItem.ID] = (cargoItem, totalFrom);
                     fromCargoTypeStore.FreeCapacityKg += weightToTransferThisTick;
-                    datablob.ItemsLeftToTransfer[i] = new Tuple<ICargoable, long>(cargoItem, amountToXfer -= numberXfered);
+                    datablob.ItemsLeftToTransfer[i] = (cargoItem, amountToXfer - numberXfered);
                 }
             } 
         }

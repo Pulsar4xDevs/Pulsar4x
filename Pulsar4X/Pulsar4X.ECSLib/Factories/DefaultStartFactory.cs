@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
             double halleysAoP = 111.33;//°
             double halleysMeanAnomaly = 38.38;//°
             OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(solSys.Entities[0], solSys.Entities[0].GetDataBlob<MassVolumeDB>().Mass, halleysMVDB.Mass, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
-            PositionDB halleysPositionDB = new PositionDB(0,0,0, solSys.Guid, solSys.Entities[0]); // + earthPositionDB.AbsolutePosition_AU, sol.Guid);
+            PositionDB halleysPositionDB = new PositionDB(0,0,0, solSys.ID, solSys.Entities[0]); // + earthPositionDB.AbsolutePosition_AU, sol.ID);
             SensorProfileDB sensorProfile = new SensorProfileDB();
             Entity halleysComet = new Entity(solSys, new List<BaseDataBlob> { halleysPositionDB, halleysNameDB });
             //_systemBodyFactory.MineralGeneration(game.StaticData, solSys, halleysComet);
@@ -195,7 +195,7 @@ namespace Pulsar4X.ECSLib
             colonyEntity.GetDataBlob<TeamsHousedDB>().AddTeam(scientistEntity);
 
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
-            //TechProcessor.ApplyTech(factionTech, game.StaticData.Techs[new Guid("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c")]); //add conventional engine for testing. 
+            //TechProcessor.ApplyTech(factionTech, game.StaticData.Techs[new ID("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c")]); //add conventional engine for testing. 
             ResearchProcessor.CheckRequrements(factionTech);
             
             DefaultThrusterDesign(game, factionEntity);
@@ -232,14 +232,15 @@ namespace Pulsar4X.ECSLib
             StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), iron, 5000);
             var hydrocarbon = NameLookup.GetMineralSD(game, "Hydrocarbons");
             StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), hydrocarbon, 5000);
-            
+            var stainless = NameLookup.GetMaterialSD(game, "Stainless Steel");
+            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), stainless, 1000);
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
 
             
 
             //test systems
-            //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateEccTest(game).Guid);
-            //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateLongitudeTest(game).Guid);
+            //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateEccTest(game).ID);
+            //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateLongitudeTest(game).ID);
 
 
             factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "UEF");

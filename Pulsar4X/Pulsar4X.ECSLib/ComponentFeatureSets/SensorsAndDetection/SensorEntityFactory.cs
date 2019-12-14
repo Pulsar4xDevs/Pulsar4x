@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib
                     sensorInfo,
                     SetPositionClone(sensorInfo),               
                     };
-                //sensorInfo.SensorEntity = Entity.Create(detectedEntity.Manager.FactionSensorManagers[detectingFaction.Guid], detectingFaction.Guid, datablobs);
+                //sensorInfo.SensorEntity = Entity.Create(detectedEntity.Manager.FactionSensorManagers[detectingFaction.ID], detectingFaction.ID, datablobs);
                 var pos = SetPositionClone(sensorInfo);
 
                 //detectingFaction.GetDataBlob<FactionOwnerDB>().SetOwned(sensorInfo.SensorContact);

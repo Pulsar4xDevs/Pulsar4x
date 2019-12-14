@@ -204,11 +204,11 @@ namespace Pulsar4X.SDL2UI
                         _nameIcons[entityItem.Guid].AddSubName(colony);
                         _sysState.EntityStatesWithPosition[entityItem.Guid].NameIcon = _nameIcons[entityItem.Guid];
                         /*
-                        IconEntityStates.Add(colony.Guid, new EntityState(colony)
+                        IconEntityStates.Add(colony.ID, new EntityState(colony)
                         {
 
-                            Name = _nameIcons[entityItem.Guid].SubNames[colony.Guid],
-                            NameIcon = _nameIcons[entityItem.Guid]
+                            Name = _nameIcons[entityItem.ID].SubNames[colony.ID],
+                            NameIcon = _nameIcons[entityItem.ID]
                         });*/
                     }
                 }
@@ -300,7 +300,7 @@ namespace Pulsar4X.SDL2UI
                         //matrix.Scale(_camera.ZoomLevel);
                         //widget.OnFrameUpdate(matrix, _camera);
                         _moveIcons[changeData.Entity.Guid] = widget;
-                        //_moveIcons.Add(changeData.Entity.Guid, widget);
+                        //_moveIcons.Add(changeData.Entity.ID, widget);
                     }
 
                     if (changeData.Datablob is NewtonMoveDB)
@@ -310,9 +310,9 @@ namespace Pulsar4X.SDL2UI
                         _orbitRings.AddOrUpdate(changeData.Entity.Guid, orb, ((guid, data) => data = orb));
                     }
                     //if (changeData.Datablob is NameDB)
-                    //TextIconList[changeData.Entity.Guid] = new TextIcon(changeData.Entity, _camera);
+                    //TextIconList[changeData.Entity.ID] = new TextIcon(changeData.Entity, _camera);
 
-                    //_entityIcons[changeData.Entity.Guid] = new EntityIcon(changeData.Entity, _camera);
+                    //_entityIcons[changeData.Entity.ID] = new EntityIcon(changeData.Entity, _camera);
                 }
                 if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
                 {
@@ -332,7 +332,7 @@ namespace Pulsar4X.SDL2UI
                     }
 
                     //if (changeData.Datablob is NameDB)
-                    //TextIconList.Remove(changeData.Entity.Guid);
+                    //TextIconList.Remove(changeData.Entity.ID);
                 }
             }
         }

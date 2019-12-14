@@ -74,7 +74,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <value>The items and amounts.</value>
         [JsonProperty]
-        public Dictionary<Guid, long> ItemsAndAmounts { get;} = new Dictionary<Guid, long>();
+        public Dictionary<Guid,(ICargoable item, long amount)> ItemsAndAmounts { get;} = new Dictionary<Guid,(ICargoable, long)>();
          
         [JsonProperty]
         public Dictionary<Guid,List<Entity>> SpecificEntites { get; } = new Dictionary<Guid, List<Entity>>();

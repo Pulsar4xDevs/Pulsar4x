@@ -146,7 +146,7 @@ namespace Pulsar4X.Tests
                 Assert.IsTrue(importedEntity.IsValid);
                 // Check to find the guid.
                 Assert.IsTrue(system.FindEntityByGuid(clone.Guid, out foundEntity));
-                // Check the Guid imported correctly.
+                // Check the ID imported correctly.
                 Assert.AreEqual(clone.Guid, importedEntity.Guid);
                 // Check the datablobs imported correctly.
                 Assert.AreEqual(clone.DataBlobs.Where(dataBlob => dataBlob != null).ToList().Count, importedEntity.DataBlobs.Count);

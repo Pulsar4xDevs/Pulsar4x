@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
                 /*
                 foreach (var kvp in instances.ComponentsByDesign)
                 {
-                    if (labDesigns.Contains(kvp.Key.Guid))
+                    if (labDesigns.Contains(kvp.Key.ID))
                     {
                         _colonyResearchVms.Add(new ColonyResearchVM(_staticData, colony));
                     }
@@ -194,7 +194,7 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in _colonyEntity.GetDataBlob<ComponentInstancesDB>().ComponentsByDesign)
             {
                 if (labDesigns.Contains(kvp.Key))
-                    _allLabs.Add(kvp.Key.Guid, kvp.Value.Count);
+                    _allLabs.Add(kvp.Key.ID, kvp.Value.Count);
             }*/
             AllLabs = AllLabs;
 

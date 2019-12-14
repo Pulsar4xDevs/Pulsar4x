@@ -140,9 +140,9 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        internal List<Tuple<Guid,long>> GetAllToMoveOut()
+        internal List<(Guid,long)> GetAllToMoveOut()
         {
-            List<Tuple<Guid, long>> listToMove = new List<Tuple<Guid, long>>();
+            List<(Guid,long)> listToMove = new List<(Guid,long)>();
 
             foreach (var item in _cargoResourceStoresDict.Values)
             {

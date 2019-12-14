@@ -25,7 +25,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 instance = (PowerGen)_state.LoadedWindows[typeof(PowerGen)];
             if(instance._entityState != _state.LastClickedEntity)
                 instance.SetEntity(_state.LastClickedEntity);
-            //instance._sysState = _state.StarSystemStates[_state.SelectedSystem.Guid];
+            //instance._sysState = _state.StarSystemStates[_state.SelectedSystem.ID];
             _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent += instance.ManagerSubpulses_SystemDateChangedEvent;
 
 

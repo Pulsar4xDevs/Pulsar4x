@@ -100,8 +100,8 @@ namespace Pulsar4X.SDL2UI
                 if (item.HasDataBlob<NameDB>() && item.HasDataBlob<PositionDB>())
                 {
                     string name = item.GetDataBlob<NameDB>().GetName(_state.Faction);
-                    _systemEntityNames.Add(item.Guid, name);
-                    _systemEntites.Add(item.Guid, item);
+                    _systemEntityNames.Add(item.ID, name);
+                    _systemEntites.Add(item.ID, item);
 
                 }
             }*/
@@ -201,7 +201,7 @@ namespace Pulsar4X.SDL2UI
                         foreach (var weapon in fc.AssignedWeapons)
                         {
                             bool isEnabled = weapon.GetDataBlob<ComponentInstanceInfoDB>().IsEnabled;
-                            if (ImGui.Checkbox(weaponNames[weapon.Guid], ref isEnabled))
+                            if (ImGui.Checkbox(weaponNames[weapon.ID], ref isEnabled))
                             {
                                 //give an enable/disable order. 
                             }

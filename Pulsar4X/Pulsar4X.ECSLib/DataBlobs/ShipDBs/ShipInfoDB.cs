@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
 
         #region Properties
         /// <summary>
-        /// The guid of the ship class, if this is a ship class then the Guid will be empty. 
+        /// The guid of the ship class, if this is a ship class then the ID will be empty. 
         /// use IsClassDefinition() to determin if this is a ship class definmition
         /// </summary>
         public Guid ShipClassDefinition { get; set; }

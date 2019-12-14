@@ -27,13 +27,13 @@ namespace Pulsar4X.ECSLib
                     var oldOwner = _factionOwner;
                     if (_factionOwner != null)
                     {
-                        oldOwner.GetDataBlob<FactionOwnerDB>().OwnedEntities.Remove(this.OwningEntity.Guid);
+                        oldOwner.GetDataBlob<FactionOwnerDB>().OwnedEntities.Remove(this.OwningEntity.ID);
                     }
                     _factionOwner = newOwner;
                     if (!OwningEntity.IsValid)
                         throw new Exception("Invalid Entity, Ownership must be se *after* the entity has been setup (don't include OwnedDB at entity creation, do it after creation)");
                     FactionOwnerDB = _factionOwner.GetDataBlob<FactionOwnerDB>();
-                    FactionOwnerDB.OwnedEntities[this.OwningEntity.Guid] = this.OwningEntity;
+                    FactionOwnerDB.OwnedEntities[this.OwningEntity.ID] = this.OwningEntity;
                 }
             }
         }
@@ -44,7 +44,7 @@ namespace Pulsar4X.ECSLib
                 throw new Exception("SetFactionOwner should be called from FactionOwnerDB.SetOwned");
             _factionOwner = factionOwnerDB.OwningEntity;
             FactionOwnerDB = factionOwnerDB;
-            OwningEntity.FactionOwner = factionOwnerDB.OwningEntity.Guid;
+            OwningEntity.FactionOwner = factionOwnerDB.OwningEntity.ID;
         }
 
         /*
@@ -106,8 +106,8 @@ namespace Pulsar4X.ECSLib
 
         public int GetValueCompareHash(int hash = 17)
         {
-            hash = Misc.ValueHash(_factionOwner.Guid, hash);
-            //hash = Misc.ValueHash(_obectOwner.Guid, hash);
+            hash = Misc.ValueHash(_factionOwner.ID, hash);
+            //hash = Misc.ValueHash(_obectOwner.ID, hash);
             return hash; 
         }
 
@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
         {
-            //_factionOwner.GetDataBlob<OwnerDB>().OwnedEntities[this.OwningEntity.Guid] = this.OwningEntity;
+            //_factionOwner.GetDataBlob<OwnerDB>().OwnedEntities[this.OwningEntity.ID] = this.OwningEntity;
         }
     }
 
@@ -125,9 +125,9 @@ namespace Pulsar4X.ECSLib
     {
         /*
         [JsonProperty]
-        internal Guid ParentStarSystem { get; set; }
+        internal ID ParentStarSystem { get; set; }
         [JsonProperty]
-        internal Dictionary<Guid, Entity> OwnedEntities { get; set; } = new Dictionary<Guid, Entity>();
+        internal Dictionary<ID, Entity> OwnedEntities { get; set; } = new Dictionary<ID, Entity>();
 
 */
 
@@ -137,7 +137,7 @@ namespace Pulsar4X.ECSLib
         internal void SetOwned(Entity childEntity)
         {
             OwnedDB ownedDB;
-            OwnedEntities[childEntity.Guid] = childEntity;
+            OwnedEntities[childEntity.ID] = childEntity;
             if (!childEntity.HasDataBlob<OwnedDB>())
             {
                 ownedDB = new OwnedDB();
@@ -158,7 +158,7 @@ namespace Pulsar4X.ECSLib
         ObjectOwnershipDB(ObjectOwnershipDB toClone) : base(toClone.Parent)
         {
             //ParentStarSystem = toClone.ParentStarSystem;
-            //OwnedEntities = new Dictionary<Guid, Entity>(toClone.OwnedEntities);
+            //OwnedEntities = new Dictionary<ID, Entity>(toClone.OwnedEntities);
         }
 
         public int GetValueCompareHash(int hash = 17)

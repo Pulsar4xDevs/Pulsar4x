@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
         /// Why is ProjectQueue not a queue?
         /// </remarks>
         public List<Guid> ProjectQueue { get; internal set; }
-//        public List<Guid> ProjectQueue { get; internal set; } 
+//        public List<ID> ProjectQueue { get; internal set; } 
 
         public ScientistDB() { }
 
