@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
@@ -13,7 +14,7 @@ namespace Pulsar4X.ECSLib
             {
                 { typeof(ShipInfoDB), new Action<ShipInfoDB>(processor => {ShipAndColonyInfoProcessor.ReCalculateShipTonnaageAndHTK(CurrentEntity); }) },
                 { typeof(MiningDB), new Action<MiningDB>(processor => { MineResourcesProcessor.CalcMaxRate(CurrentEntity);}) },
-                { typeof(RefiningDB), new Action<RefiningDB>(processor => { RefiningProcessor.ReCalcRefiningRate(CurrentEntity); }) },
+                { typeof(RefineAbilityDB), new Action<RefineAbilityDB>(processor => { RefiningProcessor.ReCalcRefiningRate(CurrentEntity); }) },
                 { typeof(ConstructAbilityDB), new Action<ConstructAbilityDB>(processor => { ConstructionProcessor.ReCalcConstructionRate(CurrentEntity); }) },
                 { typeof(ColonyLifeSupportDB), new Action<ColonyLifeSupportDB>(processor => {PopulationProcessor.ReCalcMaxPopulation(CurrentEntity); }) },
                 { typeof(BeamWeaponsDB), new Action<BeamWeaponsDB>(processor => {WeaponHelpers.RecalcBeamWeapons(CurrentEntity); }) },

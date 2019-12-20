@@ -1,6 +1,6 @@
 using System;
 
-namespace Pulsar4X.ECSLib
+namespace Pulsar4X.ECSLib.Industry
 {
     public class ConstructItemCommand:EntityCommand
     {
@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         private Entity _factionEntity;
         private ComponentDesign _design;
         private StaticDataStore _staticData;
-        private ConstructionJob _job;
+        private ConstructJob _job;
 
 
 
@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
                 if (factionInfo.ComponentDesigns.ContainsKey(DesignGuid))
                 {
                     _design = factionInfo.ComponentDesigns[DesignGuid];
-                    _job = new ConstructionJob(_design, NumberOrderd, RepeatJob);
+                    _job = new ConstructJob(_design, NumberOrderd, RepeatJob);
                     if (_design.ConstructionType.HasFlag(ConstructionType.Installations))
                         _job.InstallOn = _entityCommanding;
                     return true;

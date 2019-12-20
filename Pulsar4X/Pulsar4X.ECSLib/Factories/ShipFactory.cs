@@ -5,44 +5,44 @@ using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 
 namespace Pulsar4X.ECSLib
 {
+    
+    public class ShipClass : ICargoable
+    {
+        public Guid ID { get; } = Guid.NewGuid();
+        public string Name { get; set; }
+        public Guid CargoTypeID { get; }
+        public int DesignVersion = 0;
+        public bool IsObsolete = false;
+        public int Mass { get; }
+        public double Volume;
+        public List<(ComponentDesign design, int count)> Components;
+        public (string name, double density, float thickness) Armor;
+        public Dictionary<Guid, int> MineralCosts;
+        public Dictionary<Guid, int> MaterialCosts;
+        public Dictionary<Guid, int> ComponentCosts;
+        public Dictionary<Guid, int> ShipInstanceCost;
+        public int CrewReq;
+        public int BuildPointCost;
+        public int CreditCost;
+        public EntityDamageProfileDB DamageProfileDB;
+
+
+        public ShipClass(FactionInfoDB factionInfoDB )
+        {
+            factionInfoDB.ShipDesigns.Add(ID, this);
+        }
+
+        public ShipClass(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (string name, double density, float thickness) armor)
+        {
+            faction.ShipDesigns.Add(ID, this);
+            Name = name;
+            Components = components;
+            Armor = armor;
+        }
+    }
     public static class ShipFactory
     {
         
-        public class ShipClass
-        {
-            public Guid Guid = Guid.NewGuid();
-            public string DesignName;
-            public int DesignVersion = 0;
-            public bool IsObsolete = false;
-            public double Mass;
-            public double Volume;
-            public List<(ComponentDesign design, int count)> Components;
-            public (string name, double density, float thickness) Armor;
-            public Dictionary<MineralSD, int> MineralCost;
-            public Dictionary<ProcessedMaterialSD, int> MaterialCost;
-            public Dictionary<ComponentDesign, int> ComponentCost;
-            public int CrewReq;
-            public int BuildPointCost;
-            public int CreditCost;
-            public EntityDamageProfileDB DamageProfileDB;
-
-
-            public ShipClass(FactionInfoDB factionInfoDB )
-            {
-                factionInfoDB.ShipDesigns.Add(this);
-            }
-
-            public ShipClass(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (string name, double density, float thickness) armor)
-            {
-                faction.ShipDesigns.Add(this);
-                DesignName = name;
-                Components = components;
-                Armor = armor;
-            }
-
-
-        }
-
         public static Entity CreateShip(ShipClass shipClass, Entity ownerFaction, Entity parent, StarSystem starsys, string shipName = null)
         {
             Vector3 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_m;

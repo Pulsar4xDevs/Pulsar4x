@@ -6,6 +6,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
@@ -117,7 +118,7 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class RefineryAbilityVM : JobAbilityBaseVM<RefiningDB, RefineingJob>
+    public class RefineryAbilityVM : JobAbilityBaseVM<RefineAbilityDB, RefineingJob>
     {
         public RefineryAbilityVM(StaticDataStore staticData, Entity colonyEntity) : base(staticData, colonyEntity)
         {

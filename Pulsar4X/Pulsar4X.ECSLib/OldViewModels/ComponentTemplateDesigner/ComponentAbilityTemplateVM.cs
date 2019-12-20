@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Windows.Input;
+using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {

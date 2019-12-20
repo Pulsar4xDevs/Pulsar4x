@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Pulsar4X.ECSLib
+namespace Pulsar4X.ECSLib.Industry
 {
     public class RefineResourcesAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
@@ -47,8 +47,8 @@ namespace Pulsar4X.ECSLib
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if (!parentEntity.HasDataBlob<RefiningDB>())
-                parentEntity.SetDataBlob(new RefiningDB());
+            if (!parentEntity.HasDataBlob<RefineAbilityDB>())
+                parentEntity.SetDataBlob(new RefineAbilityDB());
             RefiningProcessor.ReCalcRefiningRate(parentEntity);
         }
     }

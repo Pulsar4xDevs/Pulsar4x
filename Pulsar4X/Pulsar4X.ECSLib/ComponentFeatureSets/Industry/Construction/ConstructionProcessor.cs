@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace Pulsar4X.ECSLib
+namespace Pulsar4X.ECSLib.Industry
 {
 
     public class ConstructEntitiesProcessor : IHotloopProcessor
@@ -50,8 +50,8 @@ namespace Pulsar4X.ECSLib
             var pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
             int maxPoints = colonyConstruction.PointsPerTick; //TODO: should we get rid of this one? seems like a double up with the pointRates.
 
-            List<ConstructionJob> constructionJobs = colonyConstruction.JobBatchList;
-            foreach (ConstructionJob batchJob in constructionJobs.ToArray())
+            List<ConstructJob> constructionJobs = new List<ConstructJob>(colonyConstruction.JobBatchList.OfType<ConstructJob>());
+            foreach (ConstructJob batchJob in constructionJobs.ToArray())
             {
                 var designInfo = factionInfo.ComponentDesigns[batchJob.ItemGuid];
                 ConstructionType conType = batchJob.ConstructionType;
@@ -108,7 +108,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static void BatchJobItemComplete(Entity constructingEntity, CargoStorageDB storage, ConstructionJob batchJob, ComponentDesign designInfo)
+        private static void BatchJobItemComplete(Entity constructingEntity, CargoStorageDB storage, ConstructJob batchJob, ComponentDesign designInfo)
         {
             var colonyConstruction = constructingEntity.GetDataBlob<ConstructAbilityDB>();
             batchJob.NumberCompleted++;
@@ -146,7 +146,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="stockpile"></param>
         /// <param name="toUse"></param>
-        private static void ConsumeResources(CargoStorageDB fromCargo, ref IDictionary<Guid, int> toUse)
+        internal static void ConsumeResources(CargoStorageDB fromCargo, ref IDictionary<Guid, int> toUse)
         {   
             foreach (KeyValuePair<Guid, int> kvp in toUse.ToArray())
             {             
@@ -224,7 +224,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         /// <param name="job"></param>
         [PublicAPI]
-        public static void AddJob(FactionInfoDB factionInfo, Entity colonyEntity, ConstructionJob job)
+        public static void AddJob(FactionInfoDB factionInfo, Entity colonyEntity, ConstructJob job)
         {
             var constructingDB = colonyEntity.GetDataBlob<ConstructAbilityDB>();
             //var factionInfo = constructingEntity.GetDataBlob<OwnedDB>().OwnedByFaction.GetDataBlob<FactionInfoDB>();

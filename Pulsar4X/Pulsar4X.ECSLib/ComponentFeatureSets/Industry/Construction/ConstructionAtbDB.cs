@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace Pulsar4X.ECSLib
+namespace Pulsar4X.ECSLib.Industry
 {
     /// <summary>
     /// A single ability can provide multiple types of CP's. Some may even overlap. 

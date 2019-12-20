@@ -1,55 +1,27 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 
-namespace Pulsar4X.ECSLib
+namespace Pulsar4X.ECSLib.Industry
 {
-    [Flags]
-    public enum ConstructionType
+
+    public class ConstructJob : JobBase
     {
-        None            = 1 << 1,
-        Installations   = 1 << 2,
-        ShipComponents  = 1 << 3,
-        Ships           = 1 << 4,
-        Fighters        = 1 << 5,
-        Ordnance        = 1 << 6,
-    }
-
-    public class JobBase
-    {
-        public Guid JobID = Guid.NewGuid();
-        public Guid ItemGuid { get; private set; }
-        //yes this can be public set just fine. no reason not to here...
-        public ushort NumberOrdered { get; set; }
-        public ushort NumberCompleted { get; internal set; }
-        public int ProductionPointsLeft { get; internal set; }
-        public int ProductionPointsCost { get; private set; }
-        //again no reason this can't be public set
-        public bool Auto { get; set; }
-
-        public JobBase(Guid guid, ushort numberOrderd, int jobPoints, bool auto)
-        {
-            ItemGuid = guid;
-            NumberOrdered = numberOrderd;
-            NumberCompleted = 0;
-            ProductionPointsLeft = jobPoints;
-            ProductionPointsCost = jobPoints;
-            Auto = auto;
-        }
-    }
-
-
-    public class ConstructionJob : JobBase
-    {
-        public string Name; 
+      
         public ConstructionType ConstructionType { get; internal set; }
         public Entity InstallOn { get; internal set; }
         public Dictionary<Guid, int> MineralsRequired { get; internal set; }
         public Dictionary<Guid, int> MaterialsRequired { get; internal set; }
         public Dictionary<Guid, int> ComponentsRequired { get; internal set; }
 
-        public ConstructionJob(Guid designGuid, ConstructionType constructionType, ushort numberOrderd, int jobPoints, bool auto, 
-            Dictionary<Guid,int> mineralCost, Dictionary<Guid, int> matCost, Dictionary<Guid,int> componentCost  ): 
+        public ConstructJob()
+        {
+        }
+
+        public ConstructJob(Guid designGuid, ConstructionType constructionType, ushort numberOrderd, int jobPoints, bool auto, 
+                            Dictionary<Guid,int> mineralCost, Dictionary<Guid, int> matCost, Dictionary<Guid,int> componentCost  ): 
             base(designGuid, numberOrderd, jobPoints, auto)
         {
             ConstructionType = constructionType;
@@ -58,7 +30,7 @@ namespace Pulsar4X.ECSLib
             ComponentsRequired = new Dictionary<Guid, int>(componentCost);
         }
 
-        public ConstructionJob(ComponentDesign design, ushort numOrdered, bool auto): base(design.ID, numOrdered, design.BuildPointCost, auto)
+        public ConstructJob(ComponentDesign design, ushort numOrdered, bool auto): base(design.ID, numOrdered, design.BuildPointCost, auto)
         {
             Name = design.Name;
             ConstructionType = design.ConstructionType;
@@ -66,10 +38,26 @@ namespace Pulsar4X.ECSLib
             MaterialsRequired = design.MaterialCosts;
             ComponentsRequired = design.ComponentCosts;
         }
-
+        
+        public override void InitialiseJob(FactionInfoDB factionInfo, Entity industryEntity, Guid guid, ushort numberOrderd, bool auto)
+        {
+            ItemGuid = guid;
+            var design = factionInfo.ComponentDesigns[ItemGuid];
+            Name = design.Name;
+            MineralsRequired = design.MineralCosts;
+            MaterialsRequired = design.MaterialCosts;
+            ComponentsRequired = design.ComponentCosts;
+            NumberOrdered = numberOrderd;
+            NumberCompleted = 0;
+            ProductionPointsLeft = design.BuildPointCost;
+            ProductionPointsCost = design.BuildPointCost;
+            Auto = auto;
+            if (design.ConstructionType.HasFlag(ConstructionType.Installations))
+                InstallOn = industryEntity;
+        }
     }
 
-    public class  ConstructAbilityDB : BaseDataBlob
+    public class  ConstructAbilityDB : BaseDataBlob, IIndustryDB
     {
         public int PointsPerTick { get; internal set; }
 
@@ -77,7 +65,17 @@ namespace Pulsar4X.ECSLib
         public Dictionary<ConstructionType, int> ConstructionRates { get; internal set; }
 
         [JsonProperty]
-        public List<ConstructionJob> JobBatchList { get; internal set; }
+        public List<JobBase> JobBatchList { get; internal set; }
+
+        public List<ICargoable> GetJobItems(FactionInfoDB factionInfoDB)
+        {
+            List<ICargoable> designs = new List<ICargoable>();
+            foreach (var design in factionInfoDB.ComponentDesigns.Values)
+            {
+                designs.Add(design);
+            }
+            return designs;
+        }
 
 
         public ConstructAbilityDB()
@@ -90,7 +88,7 @@ namespace Pulsar4X.ECSLib
                 {ConstructionType.ShipComponents, 0},
                 {ConstructionType.Ships, 0},
             };
-            JobBatchList = new List<ConstructionJob>();
+            JobBatchList = new List<JobBase>();
         }
 
         public ConstructAbilityDB(ConstructAbilityDB db)

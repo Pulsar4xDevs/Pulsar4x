@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
@@ -25,8 +26,8 @@ namespace Pulsar4X.ECSLib
             blobs.Add(colonyBonuses);       
             MiningDB colonyMinesDB = new MiningDB();
             blobs.Add(colonyMinesDB);
-            RefiningDB colonyRefining = new RefiningDB();
-            blobs.Add(colonyRefining);
+            RefineAbilityDB colonyRefineAbility = new RefineAbilityDB();
+            blobs.Add(colonyRefineAbility);
             ConstructAbilityDB colonyConstruction = new ConstructAbilityDB();
             blobs.Add(colonyConstruction);
             OrderableDB orderableDB = new OrderableDB();

@@ -17,7 +17,7 @@ namespace Pulsar4X.SDL2UI
         private byte[] _designName =  ImGuiSDL2CSHelper.BytesFromString("foo", 32);
 
         private string[] _exsistingDesigns;
-        private List<ShipFactory.ShipClass> _exsistingClasses;
+        private List<ShipClass> _exsistingClasses;
         private int _selectedDesign = -1;
         
         private ComponentDesign[] _componentDesigns;
@@ -76,14 +76,14 @@ namespace Pulsar4X.SDL2UI
             }
 
 
-            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns;
+            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
             _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
         }
 
         private void GameLoopOnGameGlobalDateChangedEvent(DateTime newdate)
         {
             RefreshComponentDesigns();
-            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns;
+            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
         }
 
         internal static ShipDesignUI GetInstance()
@@ -128,11 +128,11 @@ namespace Pulsar4X.SDL2UI
                     for (int i = 0; i < _exsistingClasses.Count; i++)
                     {
 
-                        string name = _exsistingClasses[i].DesignName;
+                        string name = _exsistingClasses[i].Name;
                         if(ImGui.Selectable(name))
                         {
                             _selectedDesign = i;
-                            _designName = ImGuiSDL2CSHelper.BytesFromString(_exsistingClasses[i].DesignName, 32);
+                            _designName = ImGuiSDL2CSHelper.BytesFromString(_exsistingClasses[i].Name, 32);
                             _shipComponents = _exsistingClasses[i].Components;
                             _armor = _exsistingClasses[i].Armor;
                             _profile = new EntityDamageProfileDB(_shipComponents, _armor);
@@ -477,13 +477,13 @@ namespace Pulsar4X.SDL2UI
                     var strName = ImGuiSDL2CSHelper.StringFromBytes(_designName);
                     foreach (var shipclass in _exsistingClasses)
                     {
-                        if (shipclass.DesignName == strName)
+                        if (shipclass.Name == strName)
                         {
                             if (shipclass.DesignVersion >= version)
                                 version = shipclass.DesignVersion + 1;
                         }
                     }
-                    ShipFactory.ShipClass shipClass = new ShipFactory.ShipClass(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, _armor);
+                    ShipClass shipClass = new ShipClass(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, _armor);
                     shipClass.DesignVersion = version;
 
                 }

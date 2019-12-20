@@ -10,8 +10,8 @@ namespace Pulsar4X.ECSLib
         public string Description;
         public Guid ID { get; set; }
 
-        public Dictionary<Guid, int> RawMineralCosts;
-        public Dictionary<Guid, int> RefinedMateraialsCosts;
+        public Dictionary<Guid, int> MineralsRequired;
+        public Dictionary<Guid, int> MaterialsRequired;
         public ushort RefineryPointCost;
         public ushort WealthCost;
         public ushort OutputAmount;

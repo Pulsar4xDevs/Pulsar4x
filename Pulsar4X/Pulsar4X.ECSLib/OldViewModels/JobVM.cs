@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
@@ -22,7 +23,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (_job is RefineingJob)
                     return _staticData.CargoGoods.GetMaterial(_job.ItemGuid).Name;
-                else if (_job is ConstructionJob)
+                else if (_job is ConstructJob)
                 {
                     Entity faction;
                     _colonyEntity.Manager.FindEntityByGuid(_colonyEntity.FactionOwner, out faction);
@@ -57,7 +58,7 @@ namespace Pulsar4X.ECSLib
 
             if (_job is RefineingJob)
                 _jobTotalPoints = _staticData.CargoGoods.GetMaterial(_job.ItemGuid).RefineryPointCost;
-            else if (_job is ConstructionJob)
+            else if (_job is ConstructJob)
                 _jobTotalPoints = _colonyEntity.GetDataBlob<ObjectOwnershipDB>().Parent.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].BuildPointCost;
 
             JobPriorityCommand = new JobPriorityCommand<TDataBlob, TJob>(this);

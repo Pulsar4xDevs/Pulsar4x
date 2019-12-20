@@ -13,7 +13,7 @@ namespace Pulsar4X.Tests
         private EntityManager _entityManager;
         private Entity _faction;
         private StarSystem _starSystem;
-        private ShipFactory.ShipClass _shipClass;
+        private ShipClass _shipClass;
         private Entity _ship;
         private ComponentDesign _engineComponentDesign;
         private ComponentTemplateSD _engineSD;

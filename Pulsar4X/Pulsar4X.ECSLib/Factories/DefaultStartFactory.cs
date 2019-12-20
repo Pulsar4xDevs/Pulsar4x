@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _battery;
         private static ComponentDesign _cargoHold;
         private static ComponentDesign _cargoCompartment;
-        private static ShipFactory.ShipClass _defaultShipClass;
+        private static ShipClass _defaultShipClass;
         
 
         // this code is a test for multiple systems, worth mentioning it utterly failed, modularity is good when you have it huh.ç
@@ -247,8 +247,8 @@ namespace Pulsar4X.ECSLib
 
 
             // Todo: handle this in CreateShip
-            ShipFactory.ShipClass shipClass = DefaultShipDesign(game, factionEntity);
-            ShipFactory.ShipClass gunShipClass = GunShipDesign(game, factionEntity);
+            ShipClass shipClass = DefaultShipDesign(game, factionEntity);
+            ShipClass gunShipClass = GunShipDesign(game, factionEntity);
 
             Entity ship1 = ShipFactory.CreateShip(shipClass, factionEntity, earth, solSys, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipClass, factionEntity, earth, solSys, "Ensuing Calm");
@@ -347,12 +347,12 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        public static ShipFactory.ShipClass DefaultShipDesign(Game game, Entity faction)
+        public static ShipClass DefaultShipDesign(Game game, Entity faction)
         {
             if (_defaultShipClass != null)
                 return _defaultShipClass;
-            _defaultShipClass = new ShipFactory.ShipClass(faction.GetDataBlob<FactionInfoDB>());
-            _defaultShipClass.DesignName = "Ob'enn dropship";
+            _defaultShipClass = new ShipClass(faction.GetDataBlob<FactionInfoDB>());
+            _defaultShipClass.Name = "Ob'enn dropship";
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
                 (ShipPassiveSensor(game, faction), 1), 
@@ -373,11 +373,11 @@ namespace Pulsar4X.ECSLib
             return _defaultShipClass;
         }
 
-        public static ShipFactory.ShipClass GunShipDesign(Game game, Entity faction)
+        public static ShipClass GunShipDesign(Game game, Entity faction)
         {
 
-            var shipdesign = new ShipFactory.ShipClass(faction.GetDataBlob<FactionInfoDB>());
-            shipdesign.DesignName = "Sanctum Adroit GunShip";
+            var shipdesign = new ShipClass(faction.GetDataBlob<FactionInfoDB>());
+            shipdesign.Name = "Sanctum Adroit GunShip";
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
                 (_sensor_50, 1), 
@@ -397,10 +397,10 @@ namespace Pulsar4X.ECSLib
             
         }
 
-        public static ShipFactory.ShipClass CargoShipDesign(Game game, Entity faction)
+        public static ShipClass CargoShipDesign(Game game, Entity faction)
         {
-            var shipdesign = new ShipFactory.ShipClass(faction.GetDataBlob<FactionInfoDB>());
-            shipdesign.DesignName = "Cargo Courier";
+            var shipdesign = new ShipClass(faction.GetDataBlob<FactionInfoDB>());
+            shipdesign.Name = "Cargo Courier";
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
                 (DefaultSimpleLaser(game, faction), 1),     

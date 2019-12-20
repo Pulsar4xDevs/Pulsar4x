@@ -110,7 +110,7 @@
 //            ColonyInfoDB colonyInfo = _colonyEntity.GetDataBlob<ColonyInfoDB>();
 //            ID itemConstructing = new ID();//just a random guid for now.
 //            double ablityPointsThisColony = 100;
-//            List<ConstructionJob> jobList = new List<ConstructionJob>();
+//            List<ConstructJob> jobList = new List<ConstructJob>();
 
 //            Dictionary<ID,float> stockpileOut = new Dictionary<ID, float>();
 
@@ -118,7 +118,7 @@
 //            Dictionary<ID,int> jobRawMaterials = new Dictionary<ID, int>();
 //            jobRawMaterials.Add(_duraniumSD.ID, 5000); //500 per item
 //            jobRawMaterials.Add(_corundiumSD.ID, 70); //7 per item
-//            ConstructionJob newJob = new ConstructionJob 
+//            ConstructJob newJob = new ConstructJob 
 //            {
 //                Type = itemConstructing,  
 //                ItemsRemaining = 10, 

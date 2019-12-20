@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
-    //public struct ConstructionJob
+    //public struct ConstructJob
     //{        
     //    public ID Type;
     //    public float ItemsRemaining;
@@ -34,23 +34,23 @@ namespace Pulsar4X.ECSLib
 
         public List<InstallationEmployment> EmploymentList { get; set; } 
         /// <summary>
-        /// list of ConstructionJob Structs.
+        /// list of ConstructJob Structs.
         /// </summary>
-        //public List<ConstructionJob> InstallationJobs { get; set; }
-        //public List<ConstructionJob> OrdnanceJobs { get; set; }
-        //public List<ConstructionJob> ComponentJobs { get; set; }
-        //public List<ConstructionJob> FigherJobs { get; set; }
-        //public List<ConstructionJob> RefineryJobs { get; set; }
+        //public List<ConstructJob> InstallationJobs { get; set; }
+        //public List<ConstructJob> OrdnanceJobs { get; set; }
+        //public List<ConstructJob> ComponentJobs { get; set; }
+        //public List<ConstructJob> FigherJobs { get; set; }
+        //public List<ConstructJob> RefineryJobs { get; set; }
         public InstallationsDB()
         {
             Installations = new Dictionary<Guid, float>();
             WorkingInstallations = new Dictionary<Guid, int>();
             EmploymentList = new List<InstallationEmployment>();
-            //InstallationJobs = new List<ConstructionJob>();
-            //ComponentJobs = new List<ConstructionJob>(); 
-            //OrdnanceJobs = new List<ConstructionJob>();
-            //FigherJobs = new List<ConstructionJob>();
-            //RefineryJobs = new List<ConstructionJob>();
+            //InstallationJobs = new List<ConstructJob>();
+            //ComponentJobs = new List<ConstructJob>(); 
+            //OrdnanceJobs = new List<ConstructJob>();
+            //FigherJobs = new List<ConstructJob>();
+            //RefineryJobs = new List<ConstructJob>();
         }
 
         public InstallationsDB(InstallationsDB db)
@@ -58,11 +58,11 @@ namespace Pulsar4X.ECSLib
             Installations = new Dictionary<Guid, float>(db.Installations);
             WorkingInstallations = new Dictionary<Guid, int>(db.WorkingInstallations);
             EmploymentList = new List<InstallationEmployment>(db.EmploymentList);
-            //InstallationJobs = new List<ConstructionJob>(db.InstallationJobs);
-            //ComponentJobs = new List<ConstructionJob>(db.ComponentJobs);
-            //OrdnanceJobs = new List<ConstructionJob>(db.OrdnanceJobs);
-            //FigherJobs = new List<ConstructionJob>(db.FigherJobs);
-            //RefineryJobs = new List<ConstructionJob>(db.RefineryJobs);
+            //InstallationJobs = new List<ConstructJob>(db.InstallationJobs);
+            //ComponentJobs = new List<ConstructJob>(db.ComponentJobs);
+            //OrdnanceJobs = new List<ConstructJob>(db.OrdnanceJobs);
+            //FigherJobs = new List<ConstructJob>(db.FigherJobs);
+            //RefineryJobs = new List<ConstructJob>(db.RefineryJobs);
         }
 
         public override object Clone()

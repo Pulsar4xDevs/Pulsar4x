@@ -3,6 +3,8 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.Industry;
+using Pulsar4X.ImGuiNetUI.EntityManagement;
 using Vector2 = System.Numerics.Vector2;
 
 
@@ -13,10 +15,14 @@ namespace Pulsar4X.SDL2UI
         EntityState _selectedEntity;
         CargoStorageVM _storeVM;
         RefiningVM _refineryVM;
+        private RefineAbilityDB _refineDB;
         private ConstructAbilityDB _constrDB;
+        private ShipYardAbilityDB _shipYardDB;
         private FactionInfoDB _factionInfoDB;
-        
- 
+
+        private IndustryPannel<RefineAbilityDB, RefineingJob> _refinaryIndustryPannel;
+        private IndustryPannel<ConstructAbilityDB, ConstructJob> _construcIndustryPannel;
+        private IndustryPannel<ShipYardAbilityDB, ShipYardJob> _shipYardIndustryPannel;
 
         CargoListPannelSimple _cargoList;
         StaticDataStore _staticData;
@@ -94,20 +100,28 @@ namespace Pulsar4X.SDL2UI
                     }
 
 
-                    if (_refineryVM != null && ImGui.CollapsingHeader("Refinary Points: " + _refineryVM.PointsPerDay))
+                    if (_refinaryIndustryPannel != null && ImGui.CollapsingHeader("Refinary Points: " + _refineDB.PointsPerTick))
                     {
-                        RefinaryDisplay();
+                        _refinaryIndustryPannel.Display();
                     }
 
-                    if (_selectedEntity.CanConstruct && ImGui.CollapsingHeader("Construction Points: " + _constrDB.PointsPerTick))
+                    if (_construcIndustryPannel != null && ImGui.CollapsingHeader("Construction Points: " + _constrDB.PointsPerTick))
                     {
-                        ConstructionDisplay();
+                        _construcIndustryPannel.Display();
+                    }
+                    
+                    if (_shipYardIndustryPannel != null && ImGui.CollapsingHeader("Construction Points: " + _shipYardDB.PointsPerTick))
+                    {
+                        _shipYardIndustryPannel.Display();
                     }
                 }
                 ImGui.End();
             }
         }
 
+        
+        
+        /*
         void RefinaryDisplay()
         {
             ImGui.PushID("refinary");
@@ -160,7 +174,7 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.EndChild();
 
-            ImGui.BeginChild("CreateJob", new Vector2(0, 84), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("InitialiseJob", new Vector2(0, 84), true, ImGuiWindowFlags.ChildWindow);
 
             int curItem = _refineryVM.NewJobSelectedIndex;
             if (ImGui.Combo("NewJobSelection", ref curItem, _refineryVM.ItemDictionary.DisplayList.ToArray(), _refineryVM.ItemDictionary.Count))
@@ -192,7 +206,7 @@ namespace Pulsar4X.SDL2UI
         string[] _constructablesNames;
         Guid[] _constructablesIDs;
         private int _selectedIndex = 0;
-        private ConstructionJob _selectedConJob;
+        private ConstructJob _selectedConJob;
         private int _newjobSelectionIndex = 0;
         private int _newbatchCount = 1;
         private bool _newbatchRepeat = false;
@@ -220,7 +234,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SetCursorPos(cpos);
                 if (ImGui.Selectable(jobname, ref selected))
                 {
-                    _selectedConJob = joblist[i];
+                    _selectedConJob = (ConstructJob)joblist[i];
                     _selectedIndex = i;
                 }
                 ImGui.NextColumn();
@@ -270,7 +284,7 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.EndChild();
 
-            ImGui.BeginChild("CreateJob", new Vector2(0, 84), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("InitialiseJob", new Vector2(0, 84), true, ImGuiWindowFlags.ChildWindow);
 
             int curItem = _newjobSelectionIndex;
 
@@ -309,6 +323,15 @@ namespace Pulsar4X.SDL2UI
             ImGui.PopID();
         }
 
+        
+        
+        
+        
+        */
+        
+        
+        
+        
         internal void HardRefresh()
         {
             _factionInfoDB = _state.Faction.GetDataBlob<FactionInfoDB>();
@@ -319,22 +342,45 @@ namespace Pulsar4X.SDL2UI
                 _storeVM.SetUpdateListner(_selectedEntity.Entity.Manager.ManagerSubpulses);
 
             }
-            if(_selectedEntity.Entity.HasDataBlob<RefiningDB>())
+
+            if (_selectedEntity.Entity.HasDataBlob<RefineAbilityDB>())
             {
-                var refinaryDB = _selectedEntity.Entity.GetDataBlob<RefiningDB>();
-                _refineryVM = new RefiningVM(_state.Game, _selectedEntity.CmdRef, refinaryDB);
-                _refineryVM.SetUpdateListner(_selectedEntity.Entity.Manager.ManagerSubpulses);
+                _refineDB = _selectedEntity.Entity.GetDataBlob<RefineAbilityDB>();
+                RefineingJob rjob = new RefineingJob();
+                _refinaryIndustryPannel = new IndustryPannel<RefineAbilityDB, RefineingJob>(_state, _selectedEntity.Entity, _refineDB, rjob);
+            }
+            else
+            {
+                _refineDB = null;
+                _refinaryIndustryPannel = null;
             }
             if(_selectedEntity.Entity.HasDataBlob<ConstructAbilityDB>())
             {
                 _constrDB = _selectedEntity.Entity.GetDataBlob<ConstructAbilityDB>();
+                ConstructJob cjob = new ConstructJob();
+                _construcIndustryPannel = new IndustryPannel<ConstructAbilityDB, ConstructJob>(_state, _selectedEntity.Entity, _constrDB, cjob);
+                
             }
             else
             {
                 _constrDB = null;
+                _construcIndustryPannel = null;
+            }
+            if(_selectedEntity.Entity.HasDataBlob<ShipYardAbilityDB>())
+            {
+                _shipYardDB = _selectedEntity.Entity.GetDataBlob<ShipYardAbilityDB>();
+                ShipYardJob sjob = new ShipYardJob();
+                _shipYardIndustryPannel = new IndustryPannel<ShipYardAbilityDB, ShipYardJob>(_state, _selectedEntity.Entity, _shipYardDB, sjob);
+                
+            }
+            else
+            {
+                _shipYardDB = null;
+                _shipYardIndustryPannel = null;
             }
             _cargoList = new CargoListPannelSimple(_staticData, _selectedEntity);
 
+            /*
             lock (_factionInfoDB.ComponentDesigns)
             {
                 int num = _factionInfoDB.ComponentDesigns.Count;
@@ -351,7 +397,7 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 
-            }
+            }*/
 
         }
 

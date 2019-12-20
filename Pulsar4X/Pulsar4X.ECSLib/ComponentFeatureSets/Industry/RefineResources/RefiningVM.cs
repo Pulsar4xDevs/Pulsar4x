@@ -4,12 +4,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 
-namespace Pulsar4X.ECSLib
+namespace Pulsar4X.ECSLib.Industry
 {
     public class RefiningVM : ViewModelBase, IDBViewmodel
     {
         Guid _factionGuid;
-        RefiningDB _refineDB;
+        RefineAbilityDB _refineDB;
         StaticDataStore _staticData;
         IOrderHandler _orderHandler;
         int _pointsPerDay;
@@ -56,12 +56,12 @@ namespace Pulsar4X.ECSLib
             Update();
         }
 
-        public RefiningVM(Game game, CommandReferences cmdRef, RefiningDB refiningDB)
+        public RefiningVM(Game game, CommandReferences cmdRef, RefineAbilityDB refineAbilityDB)
         {
             _staticData = game.StaticData;
-            _refineDB = refiningDB;
+            _refineDB = refineAbilityDB;
             _orderHandler = game.OrderHandler;
-            _factionGuid = refiningDB.OwningEntity.FactionOwner;
+            _factionGuid = refineAbilityDB.OwningEntity.FactionOwner;
             _cmdRef = cmdRef;
             foreach (var kvp in _staticData.CargoGoods.GetMaterials())
             {
@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
 
     public class RefineJobVM : ViewModelBase
     {
-        internal RefineingJob JobItem { get; private set; }
+        internal JobBase JobItem { get; private set; }
         StaticDataStore _staticData;
         public Guid JobID { get { return JobItem.JobID; } }
         public CommandReferences _cmdRef;
@@ -139,7 +139,7 @@ namespace Pulsar4X.ECSLib
         public int ProductionPointsLeft => JobItem.ProductionPointsLeft;
         public int ProductionPointsCost => JobItem.ProductionPointsCost;
         public float ItemPercentRemaining { get; set; }
-        internal RefineJobVM(RefiningVM parentVM, StaticDataStore staticData, RefineingJob job, CommandReferences cmdRef)
+        internal RefineJobVM(RefiningVM parentVM, StaticDataStore staticData, JobBase job, CommandReferences cmdRef)
         {
             _parent = parentVM;
             _staticData = staticData;

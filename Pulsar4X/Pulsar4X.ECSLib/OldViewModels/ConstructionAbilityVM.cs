@@ -1,10 +1,11 @@
 ﻿using Pulsar4X.ECSLib;
 using System;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
-    public class ConstructionAbilityVM : JobAbilityBaseVM<ConstructAbilityDB, ConstructionJob>
+    public class ConstructionAbilityVM : JobAbilityBaseVM<ConstructAbilityDB, ConstructJob>
     {
         private FactionInfoDB _factionInfo { get 
             {
@@ -34,7 +35,7 @@ namespace Pulsar4X.ECSLib
             Dictionary<Guid, int> materialCost = componentInfo.MaterialCosts;
             Dictionary<Guid, int> componentCost = componentInfo.ComponentCosts;
 
-            ConstructionJob newjob = new ConstructionJob(NewJobSelectedItem, componentInfo.ConstructionType, NewJobBatchCount, buildpointCost, NewJobRepeat,
+            ConstructJob newjob = new ConstructJob(NewJobSelectedItem, componentInfo.ConstructionType, NewJobBatchCount, buildpointCost, NewJobRepeat,
                 mineralCost, materialCost, componentCost);
 
             ConstructionProcessor.AddJob(_factionInfo, _colonyEntity_, newjob);

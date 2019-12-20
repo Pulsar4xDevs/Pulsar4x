@@ -3,6 +3,7 @@ using Pulsar4X.ECSLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.Tests
 {

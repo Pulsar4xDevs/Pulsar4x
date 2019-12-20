@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
         public List<Entity> Colonies { get; internal set; } = new List<Entity>();
 
         [JsonProperty]
-        public List<ShipFactory.ShipClass> ShipDesigns = new List<ShipFactory.ShipClass>();
+        public Dictionary<Guid, ShipClass> ShipDesigns = new Dictionary<Guid, ShipClass>();
 
         public ReadOnlyDictionary<Guid, ComponentDesign> ComponentDesigns => new ReadOnlyDictionary<Guid, ComponentDesign>(InternalComponentDesigns);
         [JsonProperty]
@@ -56,14 +56,15 @@ namespace Pulsar4X.ECSLib
             List<Entity> species,
             List<Guid> knownSystems,
             List<Entity> colonies,
-            List<ShipFactory.ShipClass> shipClasses)
+            Dictionary<Guid, ComponentDesign> componentDesigns,
+            Dictionary<Guid, ShipClass> shipClasses)
         {
             Species = species;
             KnownSystems = knownSystems;
             Colonies = colonies;
+            InternalComponentDesigns = componentDesigns;
             ShipDesigns = shipClasses;
             KnownFactions = new List<Entity>();
-            InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>();
         }
         
 
@@ -73,7 +74,7 @@ namespace Pulsar4X.ECSLib
             KnownSystems = new List<Guid>(factionDB.KnownSystems);
             KnownFactions = new List<Entity>(factionDB.KnownFactions);
             Colonies = new List<Entity>(factionDB.Colonies);
-            ShipDesigns = new List<ShipFactory.ShipClass>(factionDB.ShipDesigns);
+            ShipDesigns = new Dictionary<Guid, ShipClass>(factionDB.ShipDesigns);
             InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>(factionDB.ComponentDesigns);
             InternalMissileDesigns = new Dictionary<Guid, Entity>(factionDB.MissileDesigns);
             InternalKnownJumpPoints = new Dictionary<Guid, List<Entity>>(factionDB.KnownJumpPoints);
@@ -108,9 +109,9 @@ namespace Pulsar4X.ECSLib
             {
                 hash = Misc.ValueHash(item.Guid, hash);
             }
-            foreach (var item in ShipDesigns)
+            foreach (var item in ShipDesigns.Keys)
             {
-                hash = Misc.ValueHash(item.Guid, hash);
+                hash = Misc.ValueHash(item, hash);
             }
             foreach (var item in InternalComponentDesigns)
             {

@@ -79,11 +79,12 @@ namespace Pulsar4X.ECSLib
         internal Game()
         {
 
-
+            OrderHandler = new StandAloneOrderHandler(this);
+            
             StaticRefLib.Setup(this);
 
             GlobalManager = new EntityManager(this, true);
-            OrderHandler = new StandAloneOrderHandler(this);
+            
 
         }
 
