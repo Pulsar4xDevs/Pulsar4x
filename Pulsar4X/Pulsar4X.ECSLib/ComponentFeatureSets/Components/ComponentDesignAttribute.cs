@@ -486,6 +486,11 @@ namespace Pulsar4X.ECSLib
                 case "EnumDict":
                     string typeAsString = (string)args.Parameters[0].Evaluate();
                     Type type = Type.GetType(typeAsString);
+                    if (type == null)
+                    {
+                        throw new Exception("Type not found: " + typeAsString + " Check spelling and namespaces");
+                    }
+
                     Type dictType = typeof(Dictionary<,>).MakeGenericType(type, typeof(double));
                     dynamic dict = Activator.CreateInstance(dictType);
 

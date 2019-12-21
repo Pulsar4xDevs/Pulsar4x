@@ -63,7 +63,8 @@ namespace Pulsar4X.ECSLib.Industry
                 //how many construction points each resourcepoint is worth.
                 float pointPerResource = (float)designInfo.BuildPointCost / resourcePoints;
                 
-                while ((pointRates[conType] > 0) && (maxPoints > 0) && (batchJob.NumberCompleted < batchJob.NumberOrdered))
+                while ((pointRates[conType] > 0) && (maxPoints > 0) &&
+                       (batchJob.NumberCompleted < batchJob.NumberOrdered))
                 {
                     //gather availible resorces for this job.
                     //right now we take all the resources we can, for an individual item in the batch. 

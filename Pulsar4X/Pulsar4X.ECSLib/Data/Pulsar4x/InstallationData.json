@@ -209,7 +209,7 @@
                 ]
               },
               "AbilityFormula": "DataBlobArgs([GuidDict], Ability(0))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.RefineResourcesAtbDB"
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.RefineResourcesAtbDB"
             }
           ]
         }
@@ -301,8 +301,8 @@
                   }
                 ]
               },
-              "AbilityFormula": "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.ConstructionType'))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ConstructionAtbDB"
+              "AbilityFormula": "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.Industry.ConstructionType'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.ConstructionAtbDB"
             }
           ]
         }

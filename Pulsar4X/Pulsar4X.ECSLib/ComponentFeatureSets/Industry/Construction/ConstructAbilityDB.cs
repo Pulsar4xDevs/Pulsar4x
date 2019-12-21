@@ -37,6 +37,7 @@ namespace Pulsar4X.ECSLib.Industry
             MineralsRequired = design.MineralCosts;
             MaterialsRequired = design.MaterialCosts;
             ComponentsRequired = design.ComponentCosts;
+            ConstructionType = design.ConstructionType;
         }
         
         public override void InitialiseJob(FactionInfoDB factionInfo, Entity industryEntity, Guid guid, ushort numberOrderd, bool auto)
@@ -51,6 +52,7 @@ namespace Pulsar4X.ECSLib.Industry
             NumberCompleted = 0;
             ProductionPointsLeft = design.BuildPointCost;
             ProductionPointsCost = design.BuildPointCost;
+            ConstructionType = design.ConstructionType;
             Auto = auto;
             if (design.ConstructionType.HasFlag(ConstructionType.Installations))
                 InstallOn = industryEntity;
