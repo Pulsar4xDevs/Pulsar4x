@@ -8,28 +8,39 @@ using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.ImGuiNetUI.EntityManagement
 {
-    public class IndustryPannel<T,U>where T: BaseDataBlob, IIndustryDB where U: JobBase
+    public class IndustryPannel<T>where T: BaseDataBlob, IIndustryDB
     {
-        
+        private Guid _factionID;
         private ICargoable[] _constructableDesigns;
         string[] _constructablesNames;
         Guid[] _constructablesIDs;
-        private int _selectedIndex = 0;
-        private JobBase _selectedConJob;
+        private JobBase _newConJob;
         private int _newjobSelectionIndex = 0;
-        private int _newbatchCount = 1;
-        private bool _newbatchRepeat = false;
-        private bool _autoInstall = true;
+        private int _newJobbatchCount = 1;
+        private bool _newJobRepeat = false;
+        private bool _newJobAutoInstall = true;
+
+        private JobBase[] _existingJobList;
+        private int _selectedExistingIndex = 0;
+        private JobBase _selectedExistingConJob
+        {
+            get
+            {
+                if (_existingJobList.Length > 0)
+                    return _existingJobList[_newjobSelectionIndex];
+                return null;
+            }
+        }
         private Entity _selectedEntity;
         private IIndustryDB _industryDB;
         private GlobalUIState _state;
-        private U _job;
-        public IndustryPannel(GlobalUIState state, Entity selectedEntity, T industryDB, U job)
+        //private JobBase _job;
+        public IndustryPannel(GlobalUIState state, Entity selectedEntity, T industryDB, JobBase job)
         {
             _state = state;
             _selectedEntity = selectedEntity;
             _industryDB = industryDB;
-            _job = job;
+            //_job = job;
             var factionInfoDB = state.Faction.GetDataBlob<FactionInfoDB>();
             var jobItems = _industryDB.GetJobItems(factionInfoDB);
             _constructablesNames = new string[jobItems.Count];
@@ -41,6 +52,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 _constructablesIDs[i] = jobItems[i].ID;
                 _constructablesNames[i] = jobItems[i].Name;
             }
+            _existingJobList = _industryDB.JobBatchList.ToArray();
         }
         
         Guid SelectedConstrucableID
@@ -51,7 +63,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         public void Display()
         {
             
-            ImGui.PushID(_job.ToString());
+            ImGui.PushID(typeof(T).ToString());
             
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
             //ImGui.Text("Industry Output:" + _constrDB.PointsPerTick);
@@ -59,21 +71,20 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             Vector2 progsize = new Vector2(128, ImGui.GetTextLineHeight());
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 128);
-            var joblist = _industryDB.JobBatchList.ToArray();
-            for (int i = 0; i < joblist.Length; i++)
+            _existingJobList = _industryDB.JobBatchList.ToArray(); //should maybe cache this and update on datechange
+            for (int i = 0; i < _existingJobList.Length; i++)
             {
                 var cpos = ImGui.GetCursorPos();
-                var batchJob = joblist[i];
-                string jobname = joblist[i].Name;
+                var batchJob = _existingJobList[i];
+                string jobname = _existingJobList[i].Name;
                 
-                bool selected = _selectedIndex == i;
+                bool selected = _selectedExistingIndex == i;
                 float percent = 1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost;
                 ImGui.ProgressBar(percent, progsize, "");
                 ImGui.SetCursorPos(cpos);
                 if (ImGui.Selectable(jobname, ref selected))
                 {
-                    _selectedConJob = joblist[i];
-                    _selectedIndex = i;
+                    _selectedExistingIndex = i;
                 }
                 ImGui.NextColumn();
                 ImGui.Text(batchJob.NumberCompleted + "/" + batchJob.NumberOrdered);
@@ -94,28 +105,36 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             if (ImGui.ImageButton(_state.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
             {
 
-                var cmd = IndustryOrder<T,U>.CreateChangePriorityOrder
-                    (_state.Faction.Guid, _selectedEntity, _selectedConJob.JobID, -1);
+                var cmd = IndustryOrder<T>.CreateChangePriorityOrder
+                    (_factionID, _selectedEntity, _selectedExistingConJob.JobID, -1);
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
 
             if (ImGui.ImageButton(_state.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
             {
-                var cmd = IndustryOrder<T,U>.CreateChangePriorityOrder
-                    (_state.Faction.Guid, _selectedEntity, _selectedConJob.JobID, 1);
+                var cmd = IndustryOrder<T>.CreateChangePriorityOrder
+                    (_factionID, _selectedEntity, _selectedExistingConJob.JobID, 1);
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
             ImGui.EndGroup();
             ImGui.SameLine();
             if (ImGui.ImageButton(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
             {
-                var cmd = new ConstructChangeRepeatJob(_state.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedConJob.JobID, !_selectedConJob.Auto);
+                
+                var jobcount = _selectedExistingConJob.NumberOrdered;
+                var jobrepeat = _selectedExistingConJob.Auto;
+
+                var cmd = IndustryOrder<T>.CreateEditJobOrder
+                    (_factionID, _selectedEntity, _selectedExistingConJob.JobID, jobcount, !jobrepeat);
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
             ImGui.SameLine();
             if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
             {
-                var cmd = new ConstructCancelJob(_state.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedConJob.JobID);
+                //new ConstructCancelJob(_state.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
+                var cmd = IndustryOrder<T>.CreateCancelJobOrder
+                    (_factionID, _selectedEntity, _selectedExistingConJob.JobID);
+
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
 
@@ -132,23 +151,36 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             if (ImGui.Combo("NewJobSelection", ref curItem, _constructablesNames, _constructablesNames.Length))
             {
                 _newjobSelectionIndex = curItem;
+                
+                switch (_industryDB)
+                {
+                    case RefineAbilityDB r:
+                        _newConJob = new RefineingJob();
+                        break;
+                    case ConstructAbilityDB c:
+                        _newConJob = new ConstructJob();
+                        break;
+                    case ShipYardAbilityDB s:
+                        _newConJob = new ShipYardJob();
+                        break;
+                }
             }
 
-            ImGui.InputInt("Batch Count", ref _newbatchCount);
+            ImGui.InputInt("Batch Count", ref _newJobbatchCount);
             
-            ImGui.Checkbox("Repeat Job", ref _newbatchRepeat);
+            ImGui.Checkbox("Repeat Job", ref _newJobRepeat);
             ImGui.SameLine();
             //if the selected item can be installed on a colony:
 
-            switch (_constructableDesigns[_newjobSelectionIndex])
+            switch (_industryDB)
             {
-                case RefineingJob j:
-                    RefinarySpecific(j);
+                case RefineAbilityDB r:
+                    RefinarySpecific(r);
                     break;
-                case ConstructJob c:
+                case ConstructAbilityDB c:
                     ComponentSpecific(c);
                     break;
-                case ShipYardJob s:
+                case ShipYardAbilityDB s:
                     ShipSpecific(s);
                     break;
             }
@@ -157,8 +189,24 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             
             if (ImGui.Button("Create New Job"))
             {
-                var cmd = IndustryOrder<T, U>.CreateNewJobOrder(_state.Faction.Guid, _selectedEntity, _job);
-                _job.InitialiseJob(_state.Faction.GetDataBlob<FactionInfoDB>(), _selectedEntity, SelectedConstrucableID, (ushort)_newbatchCount, _newbatchRepeat );
+                if (_newConJob == null) //make sure that a job has been created. 
+                {
+                    switch (_industryDB)
+                    {
+                        case RefineAbilityDB r:
+                            _newConJob = new RefineingJob();
+                            break;
+                        case ConstructAbilityDB c:
+                            _newConJob = new ConstructJob();
+                            break;
+                        case ShipYardAbilityDB s:
+                            _newConJob = new ShipYardJob();
+                            break;
+                    }
+                }
+
+                var cmd = IndustryOrder<T>.CreateNewJobOrder(_state.Faction.Guid, _selectedEntity, _newConJob);
+                _newConJob.InitialiseJob(_state.Faction.GetDataBlob<FactionInfoDB>(), _selectedEntity, SelectedConstrucableID, (ushort)_newJobbatchCount, _newJobRepeat );
                 
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
@@ -170,20 +218,28 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.PopID();
         }
 
-        void RefinarySpecific(RefineingJob j)
+        void RefinarySpecific(RefineAbilityDB r)
         {
         }
 
-        void ComponentSpecific(ConstructJob c)
+        void ComponentSpecific(ConstructAbilityDB c)
         {
-            if (c.ConstructionType.HasFlag(ConstructionType.Installations))
+            if(_newConJob != null)
             {
-                ImGui.Checkbox("Auto Install on colony", ref _autoInstall);
-                ImGui.SameLine();
+                ConstructJob job = (ConstructJob)_newConJob;
+                if (job.ConstructionType.HasFlag(ConstructionType.Installations))
+                {
+                    ImGui.Checkbox("Auto Install on colony", ref _newJobAutoInstall);
+                    if (_newJobAutoInstall)
+                        job.InstallOn = _selectedEntity;
+                    else
+                        job.InstallOn = null;
+                    ImGui.SameLine();
+                }
             }
         }
 
-        void ShipSpecific(ShipYardJob s)
+        void ShipSpecific(ShipYardAbilityDB s)
         {
         }
     }

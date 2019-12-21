@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib.Industry
         /// <param name="industryEntity"></param>
         /// <param name="job"></param>
         [PublicAPI]
-        public static void AddJob<T, U>(Entity industryEntity, U job) where T: BaseDataBlob, IIndustryDB where U: JobBase
+        public static void AddJob<T>(Entity industryEntity, JobBase job) where T: BaseDataBlob, IIndustryDB
         {
             var industryDB = industryEntity.GetDataBlob<T>();
             lock (industryDB.JobBatchList) //prevent threaded race conditions
@@ -158,7 +158,7 @@ namespace Pulsar4X.ECSLib.Industry
     }
 
 
-    public class IndustryOrder<T, U>:EntityCommand where T: BaseDataBlob, IIndustryDB where U: JobBase
+    public class IndustryOrder<T>:EntityCommand where T: BaseDataBlob, IIndustryDB 
     {
 
         public enum OrderTypeEnum
@@ -188,17 +188,17 @@ namespace Pulsar4X.ECSLib.Industry
         private Entity _factionEntity;
         private ComponentDesign _design;
         private StaticDataStore _staticData;
-        private U _job;
+        private JobBase _job;
 
 
 
-        public static IndustryOrder<T, U> CreateNewJobOrder(
+        public static IndustryOrder<T> CreateNewJobOrder(
             Guid factionGuid, Entity thisEntity,
-            U jobItem
+            JobBase jobItem
         )
         {
             
-            IndustryOrder<T, U> order = new IndustryOrder<T, U>(factionGuid, thisEntity);
+            IndustryOrder<T> order = new IndustryOrder<T>(factionGuid, thisEntity);
             order._job = jobItem;
             order.OrderType = OrderTypeEnum.NewJob;
             order.ItemID = jobItem.ItemGuid;
@@ -207,35 +207,35 @@ namespace Pulsar4X.ECSLib.Industry
 
         
         
-        public static IndustryOrder<T, U> CreateCancelJobOrder(
+        public static IndustryOrder<T> CreateCancelJobOrder(
             Guid factionGuid, Entity thisEntity,
             Guid OrderID
         )
         {
-            IndustryOrder<T, U> order = new IndustryOrder<T, U>(factionGuid, thisEntity);
+            IndustryOrder<T> order = new IndustryOrder<T>(factionGuid, thisEntity);
             order.OrderType = OrderTypeEnum.CancelJob;
             order.ItemID = OrderID;
             return order;
         }
         
-        public static IndustryOrder<T, U> CreateChangePriorityOrder(
+        public static IndustryOrder<T> CreateChangePriorityOrder(
             Guid factionGuid, Entity thisEntity,
             Guid OrderID, short delta
         )
         {
-            IndustryOrder<T, U> order = new IndustryOrder<T, U>(factionGuid, thisEntity);
+            IndustryOrder<T> order = new IndustryOrder<T>(factionGuid, thisEntity);
             order.OrderType = OrderTypeEnum.ChangePriority;
             order.ItemID = OrderID;
             order.Delta = delta;
             return order;
         }
         
-        public static IndustryOrder<T, U> CreateEditJobOrder(
+        public static IndustryOrder<T> CreateEditJobOrder(
             Guid factionGuid, Entity thisEntity,
             Guid OrderID, ushort quantity = 1, bool repeatJob = false, bool autoInstall = false
         )
         {
-            IndustryOrder<T, U> order = new IndustryOrder<T, U>(factionGuid, thisEntity);
+            IndustryOrder<T> order = new IndustryOrder<T>(factionGuid, thisEntity);
             order.OrderType = OrderTypeEnum.ChangePriority;
             order.ItemID = OrderID;
             order.NumberOrderd = quantity;
@@ -261,7 +261,7 @@ namespace Pulsar4X.ECSLib.Industry
                 switch (OrderType)
                 {
                     case OrderTypeEnum.NewJob:
-                        IndustryTools.AddJob<T,U>( _entityCommanding, _job);
+                        IndustryTools.AddJob<T>( _entityCommanding, _job);
                         break;
                     case OrderTypeEnum.CancelJob:
                         IndustryTools.CancelExsistingJob<T>(_entityCommanding, ItemID);

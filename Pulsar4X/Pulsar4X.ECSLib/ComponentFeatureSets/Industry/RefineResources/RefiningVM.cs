@@ -6,6 +6,7 @@ using System.Windows.Input;
 
 namespace Pulsar4X.ECSLib.Industry
 {
+    [Obsolete]
     public class RefiningVM : ViewModelBase, IDBViewmodel
     {
         Guid _factionGuid;
@@ -51,8 +52,8 @@ namespace Pulsar4X.ECSLib.Industry
         public void OnNewBatchJob()
         {
             DateTime dateTime = _refineDB.OwningEntity.Manager.ManagerSubpulses.StarSysDateTime;
-            var newBatchCommand = new RefineOrdersCommand(_factionGuid, _refineDB.OwningEntity.Guid, dateTime, NewJobSelectedItem, NewJobBatchCount, NewJobRepeat);
-            _orderHandler.HandleOrder(newBatchCommand);
+            //var newBatchCommand = new RefineOrdersCommand(_factionGuid, _refineDB.OwningEntity.Guid, dateTime, NewJobSelectedItem, NewJobBatchCount, NewJobRepeat);
+            //_orderHandler.HandleOrder(newBatchCommand);
             Update();
         }
 
@@ -151,20 +152,20 @@ namespace Pulsar4X.ECSLib.Industry
         public ICommand ChangePriorityCmd { get { return new RelayCommand<short>(param => ChangePriority(param)); } }
         public void ChangePriority(short delta)
         {
-            RePrioritizeCommand newCommand = new RePrioritizeCommand(_cmdRef.FactionGuid, _cmdRef.EntityGuid, _cmdRef.GetSystemDatetime, JobItem.JobID, delta);
-            _cmdRef.Handler.HandleOrder(newCommand);
+            //RePrioritizeCommand newCommand = new RePrioritizeCommand(_cmdRef.FactionGuid, _cmdRef.EntityGuid, _cmdRef.GetSystemDatetime, JobItem.JobID, delta);
+            //_cmdRef.Handler.HandleOrder(newCommand);
             _parent.Update();
         }
         public void ChangeRepeat(bool repeats)
         {
-            ChangeRepeatJob newCommand = new ChangeRepeatJob(_cmdRef.FactionGuid, _cmdRef.EntityGuid, _cmdRef.GetSystemDatetime, JobItem.JobID, repeats);
-            _cmdRef.Handler.HandleOrder(newCommand);
+            //ChangeRepeatJob newCommand = new ChangeRepeatJob(_cmdRef.FactionGuid, _cmdRef.EntityGuid, _cmdRef.GetSystemDatetime, JobItem.JobID, repeats);
+            //_cmdRef.Handler.HandleOrder(newCommand);
             _parent.Update();
         }
         public void CancelJob()
         {
-            CancelJob newCommand = new CancelJob(_cmdRef.FactionGuid, _cmdRef.EntityGuid, _cmdRef.GetSystemDatetime, JobItem.JobID);
-            _cmdRef.Handler.HandleOrder(newCommand);
+            //CancelJob newCommand = new CancelJob(_cmdRef.FactionGuid, _cmdRef.EntityGuid, _cmdRef.GetSystemDatetime, JobItem.JobID);
+            //_cmdRef.Handler.HandleOrder(newCommand);
             _parent.Update();
         }
         internal void Update()

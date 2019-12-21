@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib.Industry
     {
       
         public ConstructionType ConstructionType { get; internal set; }
-        public Entity InstallOn { get; internal set; }
+        public Entity InstallOn { get; set; }
         public Dictionary<Guid, int> MineralsRequired { get; internal set; }
         public Dictionary<Guid, int> MaterialsRequired { get; internal set; }
         public Dictionary<Guid, int> ComponentsRequired { get; internal set; }
@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib.Industry
         public override void InitialiseJob(FactionInfoDB factionInfo, Entity industryEntity, Guid guid, ushort numberOrderd, bool auto)
         {
             ItemGuid = guid;
-            var design = factionInfo.ComponentDesigns[ItemGuid];
+            ComponentDesign design = factionInfo.ComponentDesigns[ItemGuid];
             Name = design.Name;
             MineralsRequired = design.MineralCosts;
             MaterialsRequired = design.MaterialCosts;
@@ -54,7 +54,9 @@ namespace Pulsar4X.ECSLib.Industry
             ProductionPointsCost = design.BuildPointCost;
             ConstructionType = design.ConstructionType;
             Auto = auto;
-            if (design.ConstructionType.HasFlag(ConstructionType.Installations))
+            //below is a bit funky, becase we're overriding Init job and the others don't have this option, 
+            //we set it in the ui, then check it here. 
+            if (design.ConstructionType.HasFlag(ConstructionType.Installations) && InstallOn != null)
                 InstallOn = industryEntity;
         }
     }

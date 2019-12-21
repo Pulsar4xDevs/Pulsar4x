@@ -14,15 +14,14 @@ namespace Pulsar4X.SDL2UI
     {
         EntityState _selectedEntity;
         CargoStorageVM _storeVM;
-        RefiningVM _refineryVM;
         private RefineAbilityDB _refineDB;
         private ConstructAbilityDB _constrDB;
         private ShipYardAbilityDB _shipYardDB;
         private FactionInfoDB _factionInfoDB;
 
-        private IndustryPannel<RefineAbilityDB, RefineingJob> _refinaryIndustryPannel;
-        private IndustryPannel<ConstructAbilityDB, ConstructJob> _construcIndustryPannel;
-        private IndustryPannel<ShipYardAbilityDB, ShipYardJob> _shipYardIndustryPannel;
+        private IndustryPannel<RefineAbilityDB> _refinaryIndustryPannel;
+        private IndustryPannel<ConstructAbilityDB> _construcIndustryPannel;
+        private IndustryPannel<ShipYardAbilityDB> _shipYardIndustryPannel;
 
         CargoListPannelSimple _cargoList;
         StaticDataStore _staticData;
@@ -135,7 +134,7 @@ namespace Pulsar4X.SDL2UI
             {
                 _refineDB = _selectedEntity.Entity.GetDataBlob<RefineAbilityDB>();
                 RefineingJob rjob = new RefineingJob();
-                _refinaryIndustryPannel = new IndustryPannel<RefineAbilityDB, RefineingJob>(_state, _selectedEntity.Entity, _refineDB, rjob);
+                _refinaryIndustryPannel = new IndustryPannel<RefineAbilityDB>(_state, _selectedEntity.Entity, _refineDB, rjob);
             }
             else
             {
@@ -146,7 +145,7 @@ namespace Pulsar4X.SDL2UI
             {
                 _constrDB = _selectedEntity.Entity.GetDataBlob<ConstructAbilityDB>();
                 ConstructJob cjob = new ConstructJob();
-                _construcIndustryPannel = new IndustryPannel<ConstructAbilityDB, ConstructJob>(_state, _selectedEntity.Entity, _constrDB, cjob);
+                _construcIndustryPannel = new IndustryPannel<ConstructAbilityDB>(_state, _selectedEntity.Entity, _constrDB, cjob);
                 
             }
             else
@@ -158,7 +157,7 @@ namespace Pulsar4X.SDL2UI
             {
                 _shipYardDB = _selectedEntity.Entity.GetDataBlob<ShipYardAbilityDB>();
                 ShipYardJob sjob = new ShipYardJob();
-                _shipYardIndustryPannel = new IndustryPannel<ShipYardAbilityDB, ShipYardJob>(_state, _selectedEntity.Entity, _shipYardDB, sjob);
+                _shipYardIndustryPannel = new IndustryPannel<ShipYardAbilityDB>(_state, _selectedEntity.Entity, _shipYardDB, sjob);
                 
             }
             else
