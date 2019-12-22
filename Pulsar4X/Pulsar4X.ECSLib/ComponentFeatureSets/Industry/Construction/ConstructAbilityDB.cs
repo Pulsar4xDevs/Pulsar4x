@@ -20,6 +20,19 @@ namespace Pulsar4X.ECSLib.Industry
         {
         }
 
+        public ConstructJob(FactionInfoDB factionInfo, Guid designGuid)
+        {
+            ItemGuid = designGuid;
+            ComponentDesign design = factionInfo.ComponentDesigns[ItemGuid];
+            Name = design.Name;
+            MineralsRequired = design.MineralCosts;
+            MaterialsRequired = design.MaterialCosts;
+            ComponentsRequired = design.ComponentCosts;
+            ProductionPointsLeft = design.BuildPointCost;
+            ProductionPointsCost = design.BuildPointCost;
+            ConstructionType = design.ConstructionType;
+        }
+
         public ConstructJob(Guid designGuid, ConstructionType constructionType, ushort numberOrderd, int jobPoints, bool auto, 
                             Dictionary<Guid,int> mineralCost, Dictionary<Guid, int> matCost, Dictionary<Guid,int> componentCost  ): 
             base(designGuid, numberOrderd, jobPoints, auto)
@@ -54,10 +67,7 @@ namespace Pulsar4X.ECSLib.Industry
             ProductionPointsCost = design.BuildPointCost;
             ConstructionType = design.ConstructionType;
             Auto = auto;
-            //below is a bit funky, becase we're overriding Init job and the others don't have this option, 
-            //we set it in the ui, then check it here. 
-            if (design.ConstructionType.HasFlag(ConstructionType.Installations) && InstallOn != null)
-                InstallOn = industryEntity;
+            
         }
     }
 

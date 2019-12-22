@@ -42,6 +42,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             _industryDB = industryDB;
             //_job = job;
             var factionInfoDB = state.Faction.GetDataBlob<FactionInfoDB>();
+            _factionID = state.Faction.Guid;
             var jobItems = _industryDB.GetJobItems(factionInfoDB);
             _constructablesNames = new string[jobItems.Count];
             _constructableDesigns = new ICargoable[jobItems.Count];
@@ -158,7 +159,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         _newConJob = new RefineingJob();
                         break;
                     case ConstructAbilityDB c:
-                        _newConJob = new ConstructJob();
+                        _newConJob = new ConstructJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                         break;
                     case ShipYardAbilityDB s:
                         _newConJob = new ShipYardJob();

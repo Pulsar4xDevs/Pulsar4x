@@ -236,7 +236,7 @@ namespace Pulsar4X.ECSLib.Industry
         )
         {
             IndustryOrder<T> order = new IndustryOrder<T>(factionGuid, thisEntity);
-            order.OrderType = OrderTypeEnum.ChangePriority;
+            order.OrderType = OrderTypeEnum.EditJob;
             order.ItemID = OrderID;
             order.NumberOrderd = quantity;
             order.RepeatJob = repeatJob;
