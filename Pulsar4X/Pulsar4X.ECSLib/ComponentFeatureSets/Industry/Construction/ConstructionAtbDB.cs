@@ -16,7 +16,6 @@ namespace Pulsar4X.ECSLib.Industry
         public ReadOnlyDictionary<ConstructionType, int> ConstructionPoints => new ReadOnlyDictionary<ConstructionType, int>(InternalConstructionPoints);
 
         public int InstallationConstrustionPoints => GetConstructionPoints(ConstructionType.Installations);
-        public int ShipConstructionPoints => GetConstructionPoints(ConstructionType.Ships);
         public int FighterConstructionPoints => GetConstructionPoints(ConstructionType.Fighters);
         public int OrdnanceConstructionPoints => GetConstructionPoints(ConstructionType.Ordnance);
 

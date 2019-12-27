@@ -12,9 +12,9 @@ namespace Pulsar4X.ECSLib.Industry
       
         public ConstructionType ConstructionType { get; internal set; }
         public Entity InstallOn { get; set; }
-        public Dictionary<Guid, int> MineralsRequired { get; internal set; }
-        public Dictionary<Guid, int> MaterialsRequired { get; internal set; }
-        public Dictionary<Guid, int> ComponentsRequired { get; internal set; }
+        public Dictionary<Guid, int> MineralsRequired { get; internal set; } = new Dictionary<Guid, int>();
+        public Dictionary<Guid, int> MaterialsRequired { get; internal set; } = new Dictionary<Guid, int>();
+        public Dictionary<Guid, int> ComponentsRequired { get; internal set; } = new Dictionary<Guid, int>();
 
         public ConstructJob()
         {
@@ -30,6 +30,9 @@ namespace Pulsar4X.ECSLib.Industry
             ComponentsRequired = design.ComponentCosts;
             ProductionPointsLeft = design.BuildPointCost;
             ProductionPointsCost = design.BuildPointCost;
+            design.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
             ConstructionType = design.ConstructionType;
         }
 
@@ -50,6 +53,9 @@ namespace Pulsar4X.ECSLib.Industry
             MineralsRequired = design.MineralCosts;
             MaterialsRequired = design.MaterialCosts;
             ComponentsRequired = design.ComponentCosts;
+            design.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
             ConstructionType = design.ConstructionType;
         }
         
@@ -61,6 +67,9 @@ namespace Pulsar4X.ECSLib.Industry
             MineralsRequired = design.MineralCosts;
             MaterialsRequired = design.MaterialCosts;
             ComponentsRequired = design.ComponentCosts;
+            design.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
             NumberOrdered = numberOrderd;
             NumberCompleted = 0;
             ProductionPointsLeft = design.BuildPointCost;
@@ -73,7 +82,7 @@ namespace Pulsar4X.ECSLib.Industry
 
     public class  ConstructAbilityDB : BaseDataBlob, IIndustryDB
     {
-        public int PointsPerTick { get; internal set; }
+        public int ConstructionPoints { get; internal set; }
 
         [JsonProperty]
         public Dictionary<ConstructionType, int> ConstructionRates { get; internal set; }
@@ -100,7 +109,6 @@ namespace Pulsar4X.ECSLib.Industry
                 {ConstructionType.Installations, 0}, 
                 {ConstructionType.Fighters, 0}, 
                 {ConstructionType.ShipComponents, 0},
-                {ConstructionType.Ships, 0},
             };
             JobBatchList = new List<JobBase>();
         }

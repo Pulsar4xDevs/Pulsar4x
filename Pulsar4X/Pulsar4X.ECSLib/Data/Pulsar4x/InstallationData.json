@@ -288,10 +288,6 @@
                     "Value": "Ability(1)"
                   },
                   {
-                    "Key": "Ships",
-                    "Value": "Ability(2)"
-                  },
-                  {
                     "Key": "Fighters",
                     "Value": "Ability(3)"
                   },
@@ -303,6 +299,57 @@
               },
               "AbilityFormula": "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.Industry.ConstructionType'))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.ConstructionAtbDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "0BD304FF-FDEA-493C-8979-15FE86B7123E",
+        "Value": {
+          "Name": "Space Port",
+          "Description": "Construction and launch facilities for ships",
+          "ID": "0BD304FF-FDEA-493C-8979-15FE86B7123E",
+          "MassFormula": "500000",
+          "VolumeFormula": "[Mass]",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "1000000",
+          "MineralCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ConstructionType": "Installations",
+          "ComponentAbilitySDs": [
+            {
+              "Name": "Ship Construction Points",
+              "Description": "",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "1000"
+            },
+            {
+              "Name": "Slips",
+              "Description": "Number of slips that can construct or service ships",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "db",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Ship Construction Points'), Ability('Slips'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.ShipYardAtbDB"
             }
           ]
         }

@@ -21,6 +21,7 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _battery;
         private static ComponentDesign _cargoHold;
         private static ComponentDesign _cargoCompartment;
+        private static ComponentDesign _spacePort;
         private static ShipClass _defaultShipClass;
         
 
@@ -222,6 +223,7 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(marsColony, _cargoInstalation);
             
             EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
+            EntityManipulation.AddComponentToEntity(colonyEntity, SpacePort(factionEntity));
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
 
@@ -351,8 +353,7 @@ namespace Pulsar4X.ECSLib
         {
             if (_defaultShipClass != null)
                 return _defaultShipClass;
-            _defaultShipClass = new ShipClass(faction.GetDataBlob<FactionInfoDB>());
-            _defaultShipClass.Name = "Ob'enn dropship";
+            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
                 (ShipPassiveSensor(game, faction), 1), 
@@ -366,18 +367,14 @@ namespace Pulsar4X.ECSLib
                 (DefaultThrusterDesign(game, faction), 3),
                 
             };
-            _defaultShipClass.Components = components2;
-            _defaultShipClass.Armor = ("Polyprop", 1175f, 3);
-            
+            _defaultShipClass = new ShipClass(factionInfo, "Ob'enn Dropship", components2, ("Polyprop", 1175f, 3));
             _defaultShipClass.DamageProfileDB = new EntityDamageProfileDB(components2, _defaultShipClass.Armor);
             return _defaultShipClass;
         }
 
         public static ShipClass GunShipDesign(Game game, Entity faction)
         {
-
-            var shipdesign = new ShipClass(faction.GetDataBlob<FactionInfoDB>());
-            shipdesign.Name = "Sanctum Adroit GunShip";
+            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
                 (_sensor_50, 1), 
@@ -389,18 +386,14 @@ namespace Pulsar4X.ECSLib
                 (_reactor, 1),
                 (_thruster500, 4),
             };
-            shipdesign.Components = components2;
-            shipdesign.Armor = ("Polyprop", 1175f, 3);
-            
+            var shipdesign = new ShipClass(factionInfo, "Sanctum Adroit GunShip", components2, ("Polyprop", 1175f, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
-            
         }
 
         public static ShipClass CargoShipDesign(Game game, Entity faction)
         {
-            var shipdesign = new ShipClass(faction.GetDataBlob<FactionInfoDB>());
-            shipdesign.Name = "Cargo Courier";
+            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
                 (DefaultSimpleLaser(game, faction), 1),     
@@ -413,11 +406,22 @@ namespace Pulsar4X.ECSLib
                 (_reactor, 1),
                 (_thruster500, 4),
             };
-            shipdesign.Components = components2;
-            shipdesign.Armor = ("Polyprop", 1175f, 3);
-            
+            var shipdesign = new ShipClass(factionInfo, "Cargo Courier", components2, ("Polyprop", 1175f, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
+        }
+
+        public static ComponentDesign SpacePort(Entity faction)
+        {
+            if (_spacePort != null)
+                return _spacePort;
+            ComponentDesigner spacePortDesigner;
+            ComponentTemplateSD spaceportSD = StaticRefLib.StaticData.ComponentTemplates[new Guid("0BD304FF-FDEA-493C-8979-15FE86B7123E")];
+            spacePortDesigner = new ComponentDesigner(spaceportSD, faction.GetDataBlob<FactionTechDB>());
+            spacePortDesigner.Name = "Space Port";
+            _spacePort = spacePortDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_spacePort.TechID);
+            return _spacePort;
         }
 
         public static ComponentDesign DefaultThrusterDesign(Game game, Entity faction)

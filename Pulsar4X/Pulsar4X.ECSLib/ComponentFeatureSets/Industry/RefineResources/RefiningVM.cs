@@ -83,7 +83,7 @@ namespace Pulsar4X.ECSLib.Industry
 
         public void Update()
         {
-            PointsPerDay = _refineDB.PointsPerTick;
+            PointsPerDay = _refineDB.ConstructionPoints;
 
             for (int index = 0; index < _refineDB.JobBatchList.Count; index++)
             {

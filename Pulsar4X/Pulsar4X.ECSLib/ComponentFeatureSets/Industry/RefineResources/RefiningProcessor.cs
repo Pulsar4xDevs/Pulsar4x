@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib.Industry
             CargoStorageDB stockpiles = colony.GetDataBlob<CargoStorageDB>();
             RefineAbilityDB refineAbilityDB = colony.GetDataBlob<RefineAbilityDB>();
             StaticDataStore staticData = colony.Manager.Game.StaticData;
-            int RefineryPoints = refineAbilityDB.PointsPerTick;
+            int RefineryPoints = refineAbilityDB.ConstructionPoints;
 
             for (int jobIndex = 0; jobIndex < refineAbilityDB.JobBatchList.Count; jobIndex++)
             {
@@ -169,7 +169,7 @@ namespace Pulsar4X.ECSLib.Industry
 
             var refining = colonyEntity.GetDataBlob<RefineAbilityDB>();
             refining.RefiningRates = rates;
-            refining.PointsPerTick = maxPoints;
+            refining.ConstructionPoints = maxPoints;
         }
 
 

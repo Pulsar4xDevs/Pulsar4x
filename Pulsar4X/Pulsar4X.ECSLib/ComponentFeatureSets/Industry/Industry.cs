@@ -9,14 +9,13 @@ namespace Pulsar4X.ECSLib.Industry
         None            = 1 << 1,
         Installations   = 1 << 2,
         ShipComponents  = 1 << 3,
-        Ships           = 1 << 4,
-        Fighters        = 1 << 5,
-        Ordnance        = 1 << 6,
+        Fighters        = 1 << 4,
+        Ordnance        = 1 << 5,
     }
 
     public interface IIndustryDB
     {
-        int PointsPerTick { get; }
+        int ConstructionPoints { get; }
         
         List<JobBase> JobBatchList { get; }
 
@@ -35,6 +34,8 @@ namespace Pulsar4X.ECSLib.Industry
         public int ProductionPointsCost { get; protected set; }
         public bool Auto { get; internal set; }
 
+        public Dictionary<Guid, int> ResourcesRequired { get; internal set; } = new Dictionary<Guid, int>();
+        
         public JobBase()
         {
         }

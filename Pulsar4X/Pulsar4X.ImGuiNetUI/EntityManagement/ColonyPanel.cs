@@ -99,17 +99,17 @@ namespace Pulsar4X.SDL2UI
                     }
 
 
-                    if (_refinaryIndustryPannel != null && ImGui.CollapsingHeader("Refinary Points: " + _refineDB.PointsPerTick))
+                    if (_refinaryIndustryPannel != null && ImGui.CollapsingHeader("Refinary Points: " + _refineDB.ConstructionPoints))
                     {
                         _refinaryIndustryPannel.Display();
                     }
 
-                    if (_construcIndustryPannel != null && ImGui.CollapsingHeader("Construction Points: " + _constrDB.PointsPerTick))
+                    if (_construcIndustryPannel != null && ImGui.CollapsingHeader("Construction Points: " + _constrDB.ConstructionPoints))
                     {
                         _construcIndustryPannel.Display();
                     }
                     
-                    if (_shipYardIndustryPannel != null && ImGui.CollapsingHeader("Construction Points: " + _shipYardDB.PointsPerTick))
+                    if (_shipYardIndustryPannel != null && ImGui.CollapsingHeader("Construction Points: " + _shipYardDB.ConstructionPoints))
                     {
                         _shipYardIndustryPannel.Display();
                     }

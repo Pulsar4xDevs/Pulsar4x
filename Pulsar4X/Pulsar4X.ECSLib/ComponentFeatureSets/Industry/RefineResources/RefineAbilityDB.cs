@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib.Industry
 {
@@ -25,6 +26,8 @@ namespace Pulsar4X.ECSLib.Industry
             Name = design.Name;
             MineralsRequired = design.MineralsRequired;
             MaterialsRequired = design.MaterialsRequired;
+            design.MineralsRequired.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.MaterialsRequired.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
             NumberOrdered = numberOrderd;
             NumberCompleted = 0;
             ProductionPointsLeft = design.RefineryPointCost;
@@ -36,7 +39,7 @@ namespace Pulsar4X.ECSLib.Industry
 
     public class RefineAbilityDB : BaseDataBlob, ICreateViewmodel, IIndustryDB
     {
-        public int PointsPerTick { get; internal set; }
+        public int ConstructionPoints { get; internal set; }
 
         //recalc this on game load todo implement this in the processor. 
         public Dictionary<Guid, int> RefiningRates{ get; internal set; }

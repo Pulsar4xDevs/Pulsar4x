@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib.Industry
             var colonyConstruction = colony.GetDataBlob<ConstructAbilityDB>();
 
             var pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
-            int maxPoints = colonyConstruction.PointsPerTick; //TODO: should we get rid of this one? seems like a double up with the pointRates.
+            int maxPoints = colonyConstruction.ConstructionPoints; //TODO: should we get rid of this one? seems like a double up with the pointRates.
 
             List<ConstructJob> constructionJobs = new List<ConstructJob>(colonyConstruction.JobBatchList.OfType<ConstructJob>());
             foreach (ConstructJob batchJob in constructionJobs.ToArray())
@@ -188,7 +188,6 @@ namespace Pulsar4X.ECSLib.Industry
                 {ConstructionType.Installations, 0},
                 {ConstructionType.Fighters, 0},
                 {ConstructionType.ShipComponents, 0},
-                {ConstructionType.Ships, 0},
             };
             var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
             
@@ -213,7 +212,7 @@ namespace Pulsar4X.ECSLib.Industry
                 if (p > maxPoints)
                     maxPoints = p;
             }
-            colonyEntity.GetDataBlob<ConstructAbilityDB>().PointsPerTick = maxPoints;
+            colonyEntity.GetDataBlob<ConstructAbilityDB>().ConstructionPoints = maxPoints;
         }
 
 

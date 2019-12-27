@@ -17,20 +17,17 @@ namespace Pulsar4X.ECSLib
         public double Volume;
         public List<(ComponentDesign design, int count)> Components;
         public (string name, double density, float thickness) Armor;
-        public Dictionary<Guid, int> MineralCosts;
-        public Dictionary<Guid, int> MaterialCosts;
-        public Dictionary<Guid, int> ComponentCosts;
-        public Dictionary<Guid, int> ShipInstanceCost;
+        public Dictionary<Guid, int> MineralCosts = new Dictionary<Guid, int>();
+        public Dictionary<Guid, int> MaterialCosts = new Dictionary<Guid, int>();
+        public Dictionary<Guid, int> ComponentCosts = new Dictionary<Guid, int>();
+        public Dictionary<Guid, int> ShipInstanceCost = new Dictionary<Guid, int>();
         public int CrewReq;
         public int BuildPointCost;
         public int CreditCost;
         public EntityDamageProfileDB DamageProfileDB;
 
 
-        public ShipClass(FactionInfoDB factionInfoDB )
-        {
-            factionInfoDB.ShipDesigns.Add(ID, this);
-        }
+
 
         public ShipClass(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (string name, double density, float thickness) armor)
         {
@@ -38,6 +35,12 @@ namespace Pulsar4X.ECSLib
             Name = name;
             Components = components;
             Armor = armor;
+
+            
+            foreach (var component in components)
+            {
+                Mass += component.design.Mass * component.count;
+            }
         }
     }
     public static class ShipFactory
@@ -46,7 +49,7 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateShip(ShipClass shipClass, Entity ownerFaction, Entity parent, StarSystem starsys, string shipName = null)
         {
             Vector3 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_m;
-            var distanceFromParent = Distance.AuToMt(parent.GetDataBlob<MassVolumeDB>().RadiusInAU * 2);
+            var distanceFromParent = parent.GetDataBlob<MassVolumeDB>().RadiusInM * 2;
             position.X += distanceFromParent;
 
             return CreateShip(shipClass, ownerFaction, position, parent, starsys, shipName);

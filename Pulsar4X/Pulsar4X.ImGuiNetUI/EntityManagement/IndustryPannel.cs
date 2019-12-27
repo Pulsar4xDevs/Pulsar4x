@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using Microsoft.Win32;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.Industry;
 using Pulsar4X.SDL2UI;
+using Vector3 = Pulsar4X.ECSLib.Vector3;
 
 
 namespace Pulsar4X.ImGuiNetUI.EntityManagement
@@ -27,10 +30,13 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             get
             {
                 if (_existingJobList.Length > 0)
-                    return _existingJobList[_newjobSelectionIndex];
+                    return _existingJobList[_selectedExistingIndex];
                 return null;
             }
         }
+
+        private JobBase _lastClickedJob;
+        
         private Entity _selectedEntity;
         private IIndustryDB _industryDB;
         private GlobalUIState _state;
@@ -65,9 +71,14 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             
             ImGui.PushID(typeof(T).ToString());
+
+            ImGui.BeginChild("Industry", new Vector2(600, 200));
+            ImGui.Columns(2);
+            ImGui.SetColumnWidth(0, 416);
+            ImGui.SetColumnWidth(1, 200);
             
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
-            //ImGui.Text("Industry Output:" + _constrDB.PointsPerTick);
+            //ImGui.Text("Industry Output:" + _constrDB.ConstructionPoints);
             ImGui.BeginChild("Current Jobs", new Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
             Vector2 progsize = new Vector2(128, ImGui.GetTextLineHeight());
             ImGui.Columns(2);
@@ -86,6 +97,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 if (ImGui.Selectable(jobname, ref selected))
                 {
                     _selectedExistingIndex = i;
+                    _lastClickedJob = _selectedExistingConJob;
                 }
                 ImGui.NextColumn();
                 ImGui.Text(batchJob.NumberCompleted + "/" + batchJob.NumberOrdered);
@@ -138,21 +150,32 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
-
+            switch (_selectedExistingConJob)
+            {
+                case RefineingJob r:
+                    RefinarySpecificExisting(r);
+                    break;
+                case ConstructJob c:
+                    ComponentSpecificExisting(c);
+                    break;
+                case ShipYardJob s:
+                    ShipyardSpecificExisting(s);
+                    break;
+            }
 
 
             ImGui.EndGroup();
 
             ImGui.EndChild();
 
-            ImGui.BeginChild("InitialiseJob", new Vector2(0, 84), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("InitialiseJob", new Vector2(404, 84), true, ImGuiWindowFlags.ChildWindow);
 
             int curItem = _newjobSelectionIndex;
 
             if (ImGui.Combo("NewJobSelection", ref curItem, _constructablesNames, _constructablesNames.Length))
             {
                 _newjobSelectionIndex = curItem;
-                
+                _lastClickedJob = _newConJob;
                 switch (_industryDB)
                 {
                     case RefineAbilityDB r:
@@ -176,13 +199,13 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             switch (_industryDB)
             {
                 case RefineAbilityDB r:
-                    RefinarySpecific(r);
+                    RefinarySpecificNew(r);
                     break;
                 case ConstructAbilityDB c:
-                    ComponentSpecific(c);
+                    ComponentSpecificNew(c);
                     break;
                 case ShipYardAbilityDB s:
-                    ShipSpecific(s);
+                    ShipSpecificNew(s);
                     break;
             }
             
@@ -215,15 +238,28 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             
 
             ImGui.EndChild();
+            
+            ImGui.NextColumn();
+            if(_lastClickedJob != null)
+            {
+                CostsDisplay(_lastClickedJob);
+                ImGui.NextColumn();
+            }
+            
+            
+            
+            
+            ImGui.EndChild();
             ImGui.PopStyleVar();
             ImGui.PopID();
+            
         }
 
-        void RefinarySpecific(RefineAbilityDB r)
+        void RefinarySpecificNew(RefineAbilityDB r)
         {
         }
 
-        void ComponentSpecific(ConstructAbilityDB c)
+        void ComponentSpecificNew(ConstructAbilityDB c)
         {
             if(_newConJob != null)
             {
@@ -240,8 +276,69 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
         }
 
-        void ShipSpecific(ShipYardAbilityDB s)
+        void ShipSpecificNew(ShipYardAbilityDB s)
+        {
+
+        }
+        
+        void RefinarySpecificExisting(RefineingJob r)
         {
         }
+        void ComponentSpecificExisting(ConstructJob c)
+        {
+        }
+        void ShipyardSpecificExisting(ShipYardJob s)
+        {
+
+            if(s.ProductionPointsLeft == 0)
+            {
+                if (_selectedEntity.HasDataBlob<ColonyInfoDB>())
+                {
+                    var planet = _selectedEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
+                    var lowOrbit = planet.GetDataBlob<MassVolumeDB>().RadiusInM * 0.33333;
+                    
+                    var mass = s.ShipDesign.Mass;
+                    var exaustVelocity = 275;
+                    var sgp = OrbitMath.CalculateStandardGravityParameter(s.ShipDesign.Mass, planet.GetDataBlob<MassVolumeDB>().Mass);
+                    Vector3 pos = new Vector3(lowOrbit, 0, 0);
+                    double alt = lowOrbit - planet.GetDataBlob<MassVolumeDB>().RadiusInM;
+                    var vel = OrbitMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
+                    var fuelCost = OrbitMath.TsiolkovskyFuelCost(mass, exaustVelocity, vel.speed);
+
+                    
+                    if (ImGui.Button("Launch to Low Orbit"))
+                    {
+
+
+                    }
+                    //ImGui.SameLine();
+
+
+                    ImGui.Text("Fuel Cost: " + fuelCost);
+                    
+                }
+            }
+            
+        }
+
+        void CostsDisplay(JobBase selectedJob)
+        {
+            ImGui.BeginChild("Resources Requred", new Vector2(180, 184 ), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.Columns(2);
+            ImGui.SetColumnWidth(0, 140);
+            ImGui.SetColumnWidth(1, 40);
+            foreach (var item in selectedJob.ResourcesRequired)
+            {
+                ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(item.Key);
+
+                ImGui.Text(cargoItem.Name);
+                ImGui.NextColumn();
+                ImGui.Text(item.Value.ToString());
+                ImGui.NextColumn();
+            }
+            
+            ImGui.EndChild();
+        }
+        
     }
 }

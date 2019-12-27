@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Newtonsoft.Json;
 
@@ -8,12 +9,16 @@ namespace Pulsar4X.ECSLib.Industry
 {
     public class ShipYardAbilityDB : BaseDataBlob, IIndustryDB
     {
-        
-        public int PointsPerTick { get; internal set; }
-
-        public List<int> SlipSizes = new List<int>();
         [JsonProperty]
-        public List<JobBase> JobBatchList { get; internal set; }
+        public int ConstructionPoints { get; internal set; }
+
+        [JsonProperty]
+        public List<JobBase> JobBatchList { get; } = new List<JobBase>();
+
+        [JsonProperty]
+        public List<(Guid componentID, int size)> Slips = new List<(Guid componentID, int size)>();
+        
+
 
         public List<ICargoable> GetJobItems(FactionInfoDB factionInfoDB)
         {
@@ -27,12 +32,15 @@ namespace Pulsar4X.ECSLib.Industry
             
         }
 
+        public ShipYardAbilityDB()
+        {
+        }
 
         public ShipYardAbilityDB(ShipYardAbilityDB db)
         {
-            PointsPerTick = db.PointsPerTick;
-            SlipSizes = new List<int>(db.SlipSizes);
-            JobBatchList = db.JobBatchList;
+            ConstructionPoints = db.ConstructionPoints;
+            Slips = new List<(Guid componentID, int size)>(db.Slips);
+            JobBatchList = new List<JobBase>(db.JobBatchList);
         }
 
         public override object Clone()
@@ -43,6 +51,7 @@ namespace Pulsar4X.ECSLib.Industry
     
     public class ShipYardJob : JobBase
     {
+        public Guid SlipID;
 
         public ShipClass ShipDesign { get; set; }
 
@@ -58,26 +67,33 @@ namespace Pulsar4X.ECSLib.Industry
         {
         }
 
-        public ShipYardJob(Guid designGuid, ShipClass shipdesign, ushort numberOrderd, int jobPoints, bool auto, 
+        public ShipYardJob(ShipClass design, ushort numberOrderd, int jobPoints, bool auto, 
                            Dictionary<Guid,int> mineralCost, Dictionary<Guid, int> matCost, Dictionary<Guid,int> componentCost  ): 
-            base(designGuid, numberOrderd, jobPoints, auto)
+            base(design.ID, numberOrderd, jobPoints, auto)
         {
-            Name = shipdesign.Name;
-            ShipDesign = shipdesign;
+            Name = design.Name;
+            ShipDesign = design;
             MineralsRequired = new Dictionary<Guid, int>(mineralCost);
             MaterialsRequired = new Dictionary<Guid, int>(matCost);
             ComponentsRequired = new Dictionary<Guid, int>(componentCost);
+            design.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
         }
 
-        public ShipYardJob(ShipClass shipdesign, ushort numOrdered, bool auto): 
-            base(shipdesign.ID, numOrdered, shipdesign.BuildPointCost, auto)
+        public ShipYardJob(ShipClass design, ushort numOrdered, Guid slipID, bool auto): 
+            base(design.ID, numOrdered, design.BuildPointCost, auto)
         {
-            Name = shipdesign.Name;
-            ShipDesign = shipdesign;
-            MineralsRequired = shipdesign.MineralCosts;
-            MaterialsRequired = shipdesign.MaterialCosts;
-            ComponentsRequired = shipdesign.ComponentCosts;
-            ShipDesignInstancesRequired = shipdesign.ShipInstanceCost;
+            SlipID = slipID;
+            Name = design.Name;
+            ShipDesign = design;
+            MineralsRequired = design.MineralCosts;
+            MaterialsRequired = design.MaterialCosts;
+            ComponentsRequired = design.ComponentCosts;
+            design.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            ShipDesignInstancesRequired = design.ShipInstanceCost;
         }
 
         public override void InitialiseJob(FactionInfoDB factionInfo, Entity industryEntity, Guid guid, ushort numberOrderd, bool auto)
@@ -89,6 +105,12 @@ namespace Pulsar4X.ECSLib.Industry
             MineralsRequired = design.MineralCosts;
             MaterialsRequired = design.MaterialCosts;
             ComponentsRequired = design.ComponentCosts;
+
+            design.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+
+            
             ShipDesignInstancesRequired = design.ShipInstanceCost;
             
             NumberOrdered = numberOrderd;
@@ -97,6 +119,7 @@ namespace Pulsar4X.ECSLib.Industry
             ProductionPointsCost = design.BuildPointCost;
             Auto = auto;
         }
+        
 
     }
 
@@ -111,9 +134,10 @@ namespace Pulsar4X.ECSLib.Industry
             var syconstruction = colony.GetDataBlob<ShipYardAbilityDB>();
 
             
-            int maxPoints = syconstruction.PointsPerTick; 
+            int maxPoints = syconstruction.ConstructionPoints; 
 
             List<ShipYardJob> constructionJobs = new List<ShipYardJob>(syconstruction.JobBatchList.OfType<ShipYardJob>());
+            
             foreach (ShipYardJob batchJob in constructionJobs.ToArray())
             {
                 var designInfo = batchJob.ShipDesign;
@@ -128,6 +152,7 @@ namespace Pulsar4X.ECSLib.Industry
                 
                 while ((maxPoints > 0) && (batchJob.NumberCompleted < batchJob.NumberOrdered))
                 {
+
                     //gather availible resorces for this job.
                     //right now we take all the resources we can, for an individual item in the batch. 
                     //even if we're taking more than we can use in this turn, we're squirriling it away. 
@@ -175,8 +200,71 @@ namespace Pulsar4X.ECSLib.Industry
 
         static void BatchJobShipComplete(Entity constructingEntity, ShipYardAbilityDB shipYard, ShipYardJob batchJob, ShipClass shipDesign)
         {
+            //need to sort out what we're going to do ui wise here.
+            //we want to be able to:
+            //store small ships in cargo, 
+            //transfer small ships to another entity (carrier)
+            //auto launch ships
+            //leave them in the slip and launch them manualy.
+            //have them auto join a taskforce (and automaticaly path to it)
+            //launching from a planet should cost fuel and materials. 
         }
-        
 
+        internal static void ReCalcConstructionRate(Entity industryEntity)
+        {
+
+            ShipYardAbilityDB sy = industryEntity.GetDataBlob<ShipYardAbilityDB>();
+            var instancesDB = industryEntity.GetDataBlob<ComponentInstancesDB>();
+            List<(Guid ID, int size)> totalSlips = new List<(Guid ID, int size)>();
+            int totalConstructionPoints = 0;
+            if (instancesDB.TryGetComponentsByAttribute<ShipYardAtbDB>(out var instances))
+            {
+                foreach (var instance in instances)
+                {
+                    float healthPercent = instance.HealthPercent();
+                    var designInfo = instance.Design.GetAttribute<ShipYardAtbDB>();
+                    totalConstructionPoints += designInfo.ConstructionPoints;
+                    totalSlips.Add((instance.ID, designInfo.SlipSize));
+                }
+            }
+            
+            sy.ConstructionPoints = totalConstructionPoints;
+            sy.Slips = totalSlips;
+        }
+    }
+    
+    public class ShipYardAtbDB : BaseDataBlob, IComponentDesignAttribute
+    {
+        public int ConstructionPoints;
+        public int SlipSize;
+        public ShipYardAtbDB(int constructionPoints, int slipSize)
+        {
+            ConstructionPoints = constructionPoints;
+            SlipSize = slipSize;
+        }
+
+        [JsonConstructor]
+        public ShipYardAtbDB()
+        {
+            
+        }
+
+        public override object Clone()
+        {
+            return new ShipYardAtbDB(this);
+        }
+
+        public ShipYardAtbDB(ShipYardAtbDB atb)
+        {
+            ConstructionPoints = atb.ConstructionPoints;
+            SlipSize = atb.SlipSize;
+        }
+
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if (!parentEntity.HasDataBlob<ShipYardAbilityDB>())
+                parentEntity.SetDataBlob(new ShipYardAbilityDB());
+            ShipyardProcessor.ReCalcConstructionRate(parentEntity);
+        }
     }
 }

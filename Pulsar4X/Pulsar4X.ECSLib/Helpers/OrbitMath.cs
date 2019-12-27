@@ -960,6 +960,13 @@ namespace Pulsar4X.ECSLib
             return fuelUse;
         }
 
+        public static double TsiolkovskyFuelCost(double dryMass, double ve, double deltaV)
+        {
+            double wetMass = dryMass * Math.Exp(deltaV / ve);
+            double fuelUse = wetMass - dryMass;
+            return fuelUse;
+        }
+
         struct obit
         {
             public Vector3 position;
