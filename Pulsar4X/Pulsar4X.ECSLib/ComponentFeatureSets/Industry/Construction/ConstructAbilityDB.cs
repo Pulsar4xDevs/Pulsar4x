@@ -59,24 +59,11 @@ namespace Pulsar4X.ECSLib.Industry
             ConstructionType = design.ConstructionType;
         }
         
-        public override void InitialiseJob(FactionInfoDB factionInfo, Entity industryEntity, Guid guid, ushort numberOrderd, bool auto)
+        public override void InitialiseJob(ushort numberOrderd, bool auto)
         {
-            ItemGuid = guid;
-            ComponentDesign design = factionInfo.ComponentDesigns[ItemGuid];
-            Name = design.Name;
-            MineralsRequired = design.MineralCosts;
-            MaterialsRequired = design.MaterialCosts;
-            ComponentsRequired = design.ComponentCosts;
-            design.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            design.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
             NumberOrdered = numberOrderd;
             NumberCompleted = 0;
-            ProductionPointsLeft = design.BuildPointCost;
-            ProductionPointsCost = design.BuildPointCost;
-            ConstructionType = design.ConstructionType;
             Auto = auto;
-            
         }
     }
 
@@ -90,9 +77,9 @@ namespace Pulsar4X.ECSLib.Industry
         [JsonProperty]
         public List<JobBase> JobBatchList { get; internal set; }
 
-        public List<ICargoable> GetJobItems(FactionInfoDB factionInfoDB)
+        public List<IConstrucableDesign> GetJobItems(FactionInfoDB factionInfoDB)
         {
-            List<ICargoable> designs = new List<ICargoable>();
+            List<IConstrucableDesign> designs = new List<IConstrucableDesign>();
             foreach (var design in factionInfoDB.ComponentDesigns.Values)
             {
                 designs.Add(design);

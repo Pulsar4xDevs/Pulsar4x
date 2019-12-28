@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.Industry;
 
@@ -65,10 +66,11 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class ComponentDesign : ICargoable
+    public class ComponentDesign : ICargoable, IConstrucableDesign
     {
         public Guid ID { get; internal set; }
         public string Name { get; internal set; } //player defined name. ie "5t 2kn Thruster".
+        
         public Guid CargoTypeID { get; internal set; }
         public int Mass { get; internal set; }
         
@@ -83,6 +85,7 @@ namespace Pulsar4X.ECSLib
         public int CreditCost;
         
         //public int ResearchCostValue;
+        public Dictionary<Guid, int> ResourceCosts { get; internal set; } = new Dictionary<Guid, int>();
         public Dictionary<Guid, int> MineralCosts;
         public Dictionary<Guid, int> MaterialCosts;
         public Dictionary<Guid, int> ComponentCosts;
@@ -172,6 +175,7 @@ namespace Pulsar4X.ECSLib
                 }
                 else //TODO: log don't crash.
                     throw new Exception("GUID object {" + kvp.Key + "} not found in materialCosting for " + this.TypeName + " This object needs to be either a mineral, material or component defined in the Data folder");
+                
 
             }
 
@@ -296,6 +300,10 @@ namespace Pulsar4X.ECSLib
             SetMineralCosts();
             SetMaterialCosts();
             SetComponentCosts();
+            
+            MineralCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
+            MaterialCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
+            ComponentCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
         }
 
         public string TypeName

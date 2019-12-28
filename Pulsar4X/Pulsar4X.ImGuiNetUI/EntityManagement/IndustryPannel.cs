@@ -14,7 +14,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
     public class IndustryPannel<T>where T: BaseDataBlob, IIndustryDB
     {
         private Guid _factionID;
-        private ICargoable[] _constructableDesigns;
+        private IConstrucableDesign[] _constructableDesigns;
         string[] _constructablesNames;
         Guid[] _constructablesIDs;
         private JobBase _newConJob;
@@ -51,7 +51,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             _factionID = state.Faction.Guid;
             var jobItems = _industryDB.GetJobItems(factionInfoDB);
             _constructablesNames = new string[jobItems.Count];
-            _constructableDesigns = new ICargoable[jobItems.Count];
+            _constructableDesigns = new IConstrucableDesign[jobItems.Count];
             _constructablesIDs = new Guid[jobItems.Count];
             for (int i = 0; i < jobItems.Count; i++)
             {
@@ -72,7 +72,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             
             ImGui.PushID(typeof(T).ToString());
 
-            ImGui.BeginChild("Industry", new Vector2(600, 200));
+            ImGui.BeginChild("Industry", new Vector2(608, 200));
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 416);
             ImGui.SetColumnWidth(1, 200);
@@ -175,19 +175,19 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             if (ImGui.Combo("NewJobSelection", ref curItem, _constructablesNames, _constructablesNames.Length))
             {
                 _newjobSelectionIndex = curItem;
-                _lastClickedJob = _newConJob;
                 switch (_industryDB)
                 {
                     case RefineAbilityDB r:
-                        _newConJob = new RefineingJob();
+                        _newConJob = new RefineingJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                         break;
                     case ConstructAbilityDB c:
                         _newConJob = new ConstructJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                         break;
                     case ShipYardAbilityDB s:
-                        _newConJob = new ShipYardJob();
+                        _newConJob = new ShipYardJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                         break;
                 }
+                _lastClickedJob = _newConJob;
             }
 
             ImGui.InputInt("Batch Count", ref _newJobbatchCount);
@@ -218,19 +218,19 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     switch (_industryDB)
                     {
                         case RefineAbilityDB r:
-                            _newConJob = new RefineingJob();
+                            _newConJob = new RefineingJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                             break;
                         case ConstructAbilityDB c:
-                            _newConJob = new ConstructJob();
+                            _newConJob = new ConstructJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                             break;
                         case ShipYardAbilityDB s:
-                            _newConJob = new ShipYardJob();
+                            _newConJob = new ShipYardJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                             break;
                     }
                 }
 
                 var cmd = IndustryOrder<T>.CreateNewJobOrder(_state.Faction.Guid, _selectedEntity, _newConJob);
-                _newConJob.InitialiseJob(_state.Faction.GetDataBlob<FactionInfoDB>(), _selectedEntity, SelectedConstrucableID, (ushort)_newJobbatchCount, _newJobRepeat );
+                _newConJob.InitialiseJob((ushort)_newJobbatchCount, _newJobRepeat );
                 
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
@@ -323,14 +323,15 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         void CostsDisplay(JobBase selectedJob)
         {
-            ImGui.BeginChild("Resources Requred", new Vector2(180, 184 ), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("Resources Requred", new Vector2(188, 184 ), true, ImGuiWindowFlags.ChildWindow);
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 140);
-            ImGui.SetColumnWidth(1, 40);
+            ImGui.SetColumnWidth(1, 48);
             foreach (var item in selectedJob.ResourcesRequired)
             {
                 ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(item.Key);
-
+                if (cargoItem == null)
+                    cargoItem = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[item.Key];
                 ImGui.Text(cargoItem.Name);
                 ImGui.NextColumn();
                 ImGui.Text(item.Value.ToString());

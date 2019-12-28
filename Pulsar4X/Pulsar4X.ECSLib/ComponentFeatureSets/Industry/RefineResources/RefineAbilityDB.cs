@@ -14,26 +14,31 @@ namespace Pulsar4X.ECSLib.Industry
         public RefineingJob()
         {
         }
+        
+        public RefineingJob(FactionInfoDB factionInfo, Guid materialID)
+        {
+            ItemGuid = materialID;
+            var design = StaticRefLib.StaticData.CargoGoods.GetMaterial(materialID);
+            Name = design.Name;
+            MineralsRequired = design.MineralsRequired;
+            MaterialsRequired = design.MaterialsRequired;
+            ProductionPointsLeft = design.RefineryPointCost;
+            ProductionPointsCost = design.RefineryPointCost;
+            design.MineralsRequired?.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            design.MaterialsRequired?.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            NumberOrdered = 1;
+;
+        }
 
         public RefineingJob(Guid matGuid, ushort numberOrderd, int jobPoints, bool auto): base(matGuid, numberOrderd, jobPoints, auto)
         {
             Name = StaticRefLib.StaticData.CargoGoods.GetMaterial(matGuid).Name;
         }
-        public override void InitialiseJob(FactionInfoDB factionInfo, Entity industryEntity, Guid guid, ushort numberOrderd, bool auto)
+        public override void InitialiseJob(ushort numberOrderd, bool auto)
         {
-            ItemGuid = guid;
-            var design = StaticRefLib.StaticData.CargoGoods.GetMaterial(ItemGuid);
-            Name = design.Name;
-            MineralsRequired = design.MineralsRequired;
-            MaterialsRequired = design.MaterialsRequired;
-            design.MineralsRequired.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            design.MaterialsRequired.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
             NumberOrdered = numberOrderd;
             NumberCompleted = 0;
-            ProductionPointsLeft = design.RefineryPointCost;
-            ProductionPointsCost = design.RefineryPointCost;
             Auto = auto;
-            
         }
     }
 
@@ -45,10 +50,10 @@ namespace Pulsar4X.ECSLib.Industry
         public Dictionary<Guid, int> RefiningRates{ get; internal set; }
 
         [JsonProperty] public List<JobBase> JobBatchList { get; internal set; } = new List<JobBase>();
-        public List<ICargoable> GetJobItems(FactionInfoDB factionInfoDB)
+        public List<IConstrucableDesign> GetJobItems(FactionInfoDB factionInfoDB)
         {
             var mats = StaticRefLib.StaticData.CargoGoods.GetMaterialsList();
-            List<ICargoable> refinables = new List<ICargoable>();
+            List<IConstrucableDesign> refinables = new List<IConstrucableDesign>();
             foreach (var mat in mats)
             {
                 refinables.Add(mat);

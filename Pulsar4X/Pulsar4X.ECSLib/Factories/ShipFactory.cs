@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
     
-    public class ShipClass : ICargoable
+    public class ShipClass : ICargoable, IConstrucableDesign
     {
         public Guid ID { get; } = Guid.NewGuid();
         public string Name { get; set; }
@@ -17,6 +18,7 @@ namespace Pulsar4X.ECSLib
         public double Volume;
         public List<(ComponentDesign design, int count)> Components;
         public (string name, double density, float thickness) Armor;
+        public Dictionary<Guid, int> ResourceCosts { get; internal set; } = new Dictionary<Guid, int>();
         public Dictionary<Guid, int> MineralCosts = new Dictionary<Guid, int>();
         public Dictionary<Guid, int> MaterialCosts = new Dictionary<Guid, int>();
         public Dictionary<Guid, int> ComponentCosts = new Dictionary<Guid, int>();
@@ -40,7 +42,13 @@ namespace Pulsar4X.ECSLib
             foreach (var component in components)
             {
                 Mass += component.design.Mass * component.count;
+                ComponentCosts.Add(component.design.ID, component.count);
             }
+            
+            
+            MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
+            MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
+            ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
         }
     }
     public static class ShipFactory

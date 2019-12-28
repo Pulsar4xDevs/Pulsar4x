@@ -90,6 +90,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage
                 {
                     _definitions[entry.ID] = entry;
                     _processedMaterials[entry.ID] = entry;
+                    entry.MineralsRequired?.ToList().ForEach(x => entry.ResourceCosts[x.Key] = x.Value);
+                    entry.MaterialsRequired?.ToList().ForEach(x => entry.ResourceCosts[x.Key] = x.Value);
                 }
             }
         }

@@ -20,10 +20,10 @@ namespace Pulsar4X.ECSLib.Industry
         
 
 
-        public List<ICargoable> GetJobItems(FactionInfoDB factionInfoDB)
+        public List<IConstrucableDesign> GetJobItems(FactionInfoDB factionInfoDB)
         {
 
-                List<ICargoable> designs = new List<ICargoable>();
+                List<IConstrucableDesign> designs = new List<IConstrucableDesign>();
                 foreach (var design in factionInfoDB.ShipDesigns.Values)
                 {
                     designs.Add(design);
@@ -67,6 +67,25 @@ namespace Pulsar4X.ECSLib.Industry
         {
         }
 
+        public ShipYardJob(FactionInfoDB factionInfo, Guid designGuid)
+        {
+            ItemGuid = designGuid;
+            ShipDesign = factionInfo.ShipDesigns[ItemGuid];
+            Name = ShipDesign.Name;
+            MineralsRequired = ShipDesign.MineralCosts;
+            MaterialsRequired = ShipDesign.MaterialCosts;
+            ComponentsRequired = ShipDesign.ComponentCosts;
+            ProductionPointsLeft = ShipDesign.BuildPointCost;
+            ProductionPointsCost = ShipDesign.BuildPointCost;
+            ShipDesign.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            ShipDesign.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            ShipDesign.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
+            ShipDesignInstancesRequired = ShipDesign.ShipInstanceCost;
+            
+            NumberOrdered = 1;
+
+        }
+        
         public ShipYardJob(ShipClass design, ushort numberOrderd, int jobPoints, bool auto, 
                            Dictionary<Guid,int> mineralCost, Dictionary<Guid, int> matCost, Dictionary<Guid,int> componentCost  ): 
             base(design.ID, numberOrderd, jobPoints, auto)
@@ -96,27 +115,10 @@ namespace Pulsar4X.ECSLib.Industry
             ShipDesignInstancesRequired = design.ShipInstanceCost;
         }
 
-        public override void InitialiseJob(FactionInfoDB factionInfo, Entity industryEntity, Guid guid, ushort numberOrderd, bool auto)
+        public override void InitialiseJob(ushort numberOrderd, bool auto)
         {
-            ItemGuid = guid;
-            var design = factionInfo.ShipDesigns[ItemGuid];
-            ShipDesign = design;
-            Name = design.Name;
-            MineralsRequired = design.MineralCosts;
-            MaterialsRequired = design.MaterialCosts;
-            ComponentsRequired = design.ComponentCosts;
-
-            design.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            design.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-
-            
-            ShipDesignInstancesRequired = design.ShipInstanceCost;
-            
             NumberOrdered = numberOrderd;
             NumberCompleted = 0;
-            ProductionPointsLeft = design.BuildPointCost;
-            ProductionPointsCost = design.BuildPointCost;
             Auto = auto;
         }
         

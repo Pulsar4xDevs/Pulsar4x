@@ -19,8 +19,17 @@ namespace Pulsar4X.ECSLib.Industry
         
         List<JobBase> JobBatchList { get; }
 
-        List<ICargoable> GetJobItems(FactionInfoDB factionInfoDB);
+        List<IConstrucableDesign> GetJobItems(FactionInfoDB factionInfoDB);
 
+    }
+
+    public interface IConstrucableDesign
+    {
+        Guid ID { get;  }
+        string Name { get;  } //player defined name. ie "5t 2kn Thruster".
+
+        Dictionary<Guid, int> ResourceCosts { get; }
+        
     }
 
     public abstract class JobBase
@@ -50,7 +59,7 @@ namespace Pulsar4X.ECSLib.Industry
             Auto = auto;
         }
 
-        public abstract void InitialiseJob(FactionInfoDB infoDB, Entity industryEntity, Guid guid, ushort numberOrderd, bool auto);
+        public abstract void InitialiseJob(ushort numberOrderd, bool auto);
 
     }
 

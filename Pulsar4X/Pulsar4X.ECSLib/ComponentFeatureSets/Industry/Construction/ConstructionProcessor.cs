@@ -117,7 +117,7 @@ namespace Pulsar4X.ECSLib.Industry
             batchJob.MineralsRequired = designInfo.MineralCosts;
             batchJob.MineralsRequired = designInfo.MaterialCosts;
             batchJob.MineralsRequired = designInfo.ComponentCosts;
-
+            
             if (batchJob.InstallOn != null)
             {
                 ComponentInstance specificComponent = new ComponentInstance(designInfo);

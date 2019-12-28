@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
     [StaticData(true, IDPropertyName = "ID")]
-    public class ProcessedMaterialSD : ICargoable
+    public class ProcessedMaterialSD : ICargoable, IConstrucableDesign
     {
         public string Name { get; set; }
+        public Dictionary<Guid, int> ResourceCosts { get; } = new Dictionary<Guid, int>();
         public string Description;
         public Guid ID { get; set; }
 
