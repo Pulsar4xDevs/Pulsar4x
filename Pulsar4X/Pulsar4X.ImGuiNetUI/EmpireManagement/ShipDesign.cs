@@ -436,7 +436,8 @@ namespace Pulsar4X.SDL2UI
                     if (thrusterFuel != Guid.Empty)
                     {
                         var fuel = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
-                        _fuelStore = cstore[fuel.CargoTypeID];
+                        if(cstore.ContainsKey(fuel.CargoTypeID))
+                            _fuelStore = cstore[fuel.CargoTypeID];
                     }
 
                     _massWet = _massDry + _fuelStore;
