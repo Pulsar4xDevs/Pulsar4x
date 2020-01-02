@@ -29,7 +29,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             get
             {
-                if (_existingJobList.Length > 0)
+                if (_existingJobList.Length > 0 && _existingJobList.Length > _selectedExistingIndex)
                     return _existingJobList[_selectedExistingIndex];
                 return null;
             }
@@ -298,18 +298,13 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     var lowOrbit = planet.GetDataBlob<MassVolumeDB>().RadiusInM * 0.33333;
                     
                     var mass = s.ShipDesign.Mass;
-                    var exaustVelocity = 275;
-                    var sgp = OrbitMath.CalculateStandardGravityParameter(s.ShipDesign.Mass, planet.GetDataBlob<MassVolumeDB>().Mass);
-                    Vector3 pos = new Vector3(lowOrbit, 0, 0);
-                    double alt = lowOrbit - planet.GetDataBlob<MassVolumeDB>().RadiusInM;
-                    var vel = OrbitMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
-                    var fuelCost = OrbitMath.TsiolkovskyFuelCost(mass, exaustVelocity, vel.speed);
+                    
+                    var fuelCost = OrbitMath.FuelCostToLowOrbit(planet, mass);
 
                     
                     if (ImGui.Button("Launch to Low Orbit"))
                     {
-
-
+                        LaunchShipCmd.CreateCommand(_factionID, _selectedEntity, s.SlipID);
                     }
                     //ImGui.SameLine();
 

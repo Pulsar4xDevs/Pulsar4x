@@ -960,6 +960,34 @@ namespace Pulsar4X.ECSLib
             return fuelUse;
         }
 
+        /// <summary>
+        /// Currently this only calculates the change in velocity from 0 to planet radius +* 0.33333.
+        /// TODO: add gravity drag and atmosphere drag, and tech improvements for such.  
+        /// </summary>
+        /// <param name="planetEntity"></param>
+        /// <param name="payload"></param>
+        /// <returns></returns>
+        public static double FuelCostToLowOrbit(Entity planetEntity, double payload)
+        {
+            var lowOrbit = LowOrbitRadius(planetEntity);
+            
+            var exaustVelocity = 275;
+            var sgp = OrbitMath.CalculateStandardGravityParameter(payload, planetEntity.GetDataBlob<MassVolumeDB>().Mass);
+            Vector3 pos = new Vector3(lowOrbit, 0, 0);
+            
+            var vel = OrbitMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
+            var fuelCost = OrbitMath.TsiolkovskyFuelCost(payload, exaustVelocity, vel.speed);
+            return fuelCost;
+        }
+
+        public static double LowOrbitRadius(Entity planetEntity)
+        {
+            var prad = planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM;
+            double alt = prad * 0.33333;
+            var lowOrbit = prad + alt;
+            return lowOrbit;
+        }
+
         public static double TsiolkovskyFuelCost(double dryMass, double ve, double deltaV)
         {
             double wetMass = dryMass * Math.Exp(deltaV / ve);
@@ -967,7 +995,7 @@ namespace Pulsar4X.ECSLib
             return fuelUse;
         }
 
-        struct obit
+        struct orbit
         {
             public Vector3 position;
             public double T;
@@ -988,7 +1016,7 @@ namespace Pulsar4X.ECSLib
             var pos = moverAbsolutePos;
             double tim = 0;
             
-            var pl = new obit()
+            var pl = new orbit()
             {
                 position = moverAbsolutePos,
                 T = targetOrbit.OrbitalPeriod.TotalSeconds,

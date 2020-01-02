@@ -34,9 +34,9 @@ namespace Pulsar4X.ECSLib
             WarpPower = ability.WarpPower;
         }
 
-        public WarpDriveAtb(int warpPower, Guid energyType, double creationCost, double sustainCost, double bubbleCollapseCost)
+        public WarpDriveAtb(double warpPower, Guid energyType, double creationCost, double sustainCost, double bubbleCollapseCost)
         {
-            WarpPower = warpPower;
+            WarpPower = (int)warpPower;
             EnergyType = energyType;
             BubbleCreationCost = creationCost;
             BubbleSustainCost = sustainCost;
