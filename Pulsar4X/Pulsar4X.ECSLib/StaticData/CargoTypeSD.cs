@@ -17,6 +17,13 @@ namespace Pulsar4X.ECSLib
         Guid CargoTypeID { get;  }
         int Mass { get;  }
     }
+
+    [StaticData(true, IDPropertyName = "ID")]
+    public struct IndustryTypeSD
+    {
+        public string Name;
+        public Guid ID;
+    }
 }
 
 

@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib.Industry
                     
                     while (job.NumberCompleted < job.NumberOrdered && job.ProductionPointsLeft > 0)
                     {
-                        if (job.ProductionPointsLeft == material.RefineryPointCost)
+                        if (job.ProductionPointsLeft == material.IndustryPointCosts)
                         {
                             //consume all ingredients for this job on the first point use. 
                             if (StorageSpaceProcessor.HasRequiredItems(stockpiles, cargoablecosts))
@@ -87,7 +87,7 @@ namespace Pulsar4X.ECSLib.Industry
                         }
                    
                         //use Refinery points
-                        ushort pointsUsed = (ushort)Math.Min(job.ProductionPointsLeft, material.RefineryPointCost);
+                        ushort pointsUsed = (ushort)Math.Min(job.ProductionPointsLeft, material.IndustryPointCosts);
                         job.ProductionPointsLeft -= pointsUsed;
                         RefineryPoints -= pointsUsed;
 
@@ -96,7 +96,7 @@ namespace Pulsar4X.ECSLib.Industry
                         {
                             job.NumberCompleted++; //complete job, 
                             StorageSpaceProcessor.AddCargo(stockpiles, material, material.OutputAmount); //and add the product to the stockpile                        
-                            job.ProductionPointsLeft = material.RefineryPointCost; //and reset the points left for the next job in the batch.
+                            job.ProductionPointsLeft = material.IndustryPointCosts; //and reset the points left for the next job in the batch.
                         }
                         
                     }
@@ -107,7 +107,7 @@ namespace Pulsar4X.ECSLib.Industry
                         refineAbilityDB.JobBatchList.RemoveAt(jobIndex);
                         if (job.Auto) //but if it's set to auto, re-add it. 
                         {
-                            job.ProductionPointsLeft = material.RefineryPointCost;
+                            job.ProductionPointsLeft = material.IndustryPointCosts;
                             job.NumberCompleted = 0;
                             refineAbilityDB.JobBatchList.Add(job);
                         }
@@ -116,7 +116,14 @@ namespace Pulsar4X.ECSLib.Industry
             }
         }
 
-        
+        internal static void BatchJobItemComplete(Entity industryEntity, CargoStorageDB storage, JobBase batchJob, ProcessedMaterialSD material)
+        {
+            //complete job, 
+            StorageSpaceProcessor.AddCargo(storage, material, material.OutputAmount); //and add the product to the stockpile                        
+            batchJob.ProductionPointsLeft = material.IndustryPointCosts; //and reset the points left for the next job in the batch.
+        }
+
+
 
 
 

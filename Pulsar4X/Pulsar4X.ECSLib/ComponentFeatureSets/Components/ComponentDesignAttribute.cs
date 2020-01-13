@@ -361,13 +361,22 @@ namespace Pulsar4X.ECSLib
                     args.Result = _designer.ResearchCostValue;
                     break;
 
-                case "MineralCosts":
-                    foreach (var formula in _designer.MineralCostFormulas.Values)
+                case "ResourceCosts":
+                    foreach (var formula in _designer.ResourceCostFormulas.Values)
                     {
                         MakeThisDependant(formula);
                     }
 
-                    args.Result = _designer.MineralCostValues;
+                    args.Result = _designer.ResourceCostValues;
+                    break;
+                
+                case "MineralCosts":
+                    foreach (var formula in _designer.ResourceCostFormulas.Values)
+                    {
+                        MakeThisDependant(formula);
+                    }
+
+                    args.Result = _designer.ResourceCostValues;
                     break;
 
                 case "CreditCost":

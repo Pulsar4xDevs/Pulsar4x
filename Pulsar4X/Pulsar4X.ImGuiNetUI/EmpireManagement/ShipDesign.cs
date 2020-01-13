@@ -17,7 +17,7 @@ namespace Pulsar4X.SDL2UI
         private byte[] _designName =  ImGuiSDL2CSHelper.BytesFromString("foo", 32);
 
         private string[] _exsistingDesigns;
-        private List<ShipClass> _exsistingClasses;
+        private List<ShipDesign> _exsistingClasses;
         private int _selectedDesign = -1;
         
         private ComponentDesign[] _componentDesigns;
@@ -170,10 +170,16 @@ namespace Pulsar4X.SDL2UI
                     var design = _componentDesigns[i];
                     string name = design.Name;
                     
-                    if (ImGui.Selectable(name, _selectedDesignsIndex == i, ImGuiSelectableFlags.SpanAllColumns))
+                    if (ImGui.Selectable(name, _selectedDesignsIndex == i, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick))
                     {
                         _selectedDesignsIndex = i;
+                        if (ImGui.IsMouseDoubleClicked(0))
+                        {
+                            _shipComponents.Add((_componentDesigns[_selectedDesignsIndex], 1));
+                            designChanged = true;   
+                        }
                     }
+                    
                     ImGui.NextColumn();
                     ImGui.Text(design.Mass.ToString());
                     ImGui.NextColumn();
@@ -484,8 +490,8 @@ namespace Pulsar4X.SDL2UI
                                 version = shipclass.DesignVersion + 1;
                         }
                     }
-                    ShipClass shipClass = new ShipClass(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, _armor);
-                    shipClass.DesignVersion = version;
+                    ShipDesign shipDesign = new ShipDesign(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, _armor);
+                    shipDesign.DesignVersion = version;
 
                 }
             }

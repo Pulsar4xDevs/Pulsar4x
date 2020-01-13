@@ -169,7 +169,7 @@ namespace Pulsar4X.Tests
 
             component.BuildPointCostFormula = "[Mass]";
 
-            component.MineralCostFormula = new Dictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Mass] * 8" } };
+            component.ResourceCostFormula = new Dictionary<Guid, string> { { new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "[Mass] * 8" } };
 
             component.CreditCostFormula = "[Mass]";
 
@@ -305,7 +305,7 @@ namespace Pulsar4X.Tests
             
             component.BuildPointCostFormula = "[Mass]";
 
-            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "60"}, 
+            component.ResourceCostFormula = new Dictionary<Guid, string> {{new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"), "60"}, 
             {new Guid("2ae2a928-3e14-45d5-befc-5bd6ed16ec0a"), "60"}};
 
             component.CreditCostFormula = "120";
@@ -361,7 +361,7 @@ namespace Pulsar4X.Tests
 
             component.BuildPointCostFormula = "[Mass]";
 
-            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
+            component.ResourceCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
 
             component.CreditCostFormula = "120";
@@ -402,7 +402,7 @@ namespace Pulsar4X.Tests
 
             component.BuildPointCostFormula = "[Mass]";
 
-            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
+            component.ResourceCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
 
             component.CreditCostFormula = "120";
@@ -453,14 +453,14 @@ namespace Pulsar4X.Tests
 
             component.BuildPointCostFormula = "[Mass]";
 
-            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
+            component.ResourceCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"}, 
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
 
             component.CreditCostFormula = "120";
 
             component.MountType = ComponentMountType.PlanetInstallation | ComponentMountType.ShipCargo;
 
-            component.ConstructionType = ConstructionType.Installations;
+            //component.IndustryTypeID = IndustryType.Installations;
 
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
@@ -513,7 +513,7 @@ namespace Pulsar4X.Tests
                 { "Ordnance", "Ability(4)" }
             };
             atbconstructor.AbilityDataBlobType = typeof(ConstructionAtbDB).ToString();
-            atbconstructor.AbilityFormula = "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.ConstructionType'))";
+            atbconstructor.AbilityFormula = "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.IndustryTypeID'))";
             component.ComponentAbilitySDs.Add(atbconstructor);
 
             return component;
@@ -538,13 +538,13 @@ namespace Pulsar4X.Tests
 
             component.BuildPointCostFormula = "[Mass]";
 
-            component.MineralCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"},
+            component.ResourceCostFormula = new Dictionary<Guid, string> {{new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), "60"},
             {new Guid("c3bcb597-a2d1-4b12-9349-26586c8a921c"), "60"}};
 
             component.CreditCostFormula = "120";
 
             component.MountType = ComponentMountType.PlanetInstallation | ComponentMountType.ShipCargo;
-            component.ConstructionType = ConstructionType.Installations | ConstructionType.ShipComponents;
+            //component.IndustryTypeID = IndustryType.Installations | IndustryType.ShipComponents;
             component.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
 
             ComponentTemplateAbilitySD genralCargoAbility = new ComponentTemplateAbilitySD();

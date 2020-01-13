@@ -1,0 +1,45 @@
+{
+
+  "Type": "IndustryTypes",
+  "Data": {
+    "Entries": [
+      {
+        "Key": "265B36EE-BAED-4F92-9AEC-BC8A7EA0DF1F",
+        "Value": {
+          "Name": "Refining",
+          "ID": "265B36EE-BAED-4F92-9AEC-BC8A7EA0DF1F"
+        }
+      },
+      {
+        "Key": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+        "Value": {
+          "Name": "Component Construction",
+          "ID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86"
+        }
+      },      
+      {
+        "Key": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
+        "Value": {
+          "Name": "Installation Construction",
+          "ID": "EC717019-D9B2-4F24-ADE2-BFFC87294545"
+        }
+      },
+      {
+        "Key": "5ADBF620-3740-4FD7-98BE-E8670D58945F",
+        "Value": {
+          "Name": "Ordinance Construction",
+          "ID": "5ADBF620-3740-4FD7-98BE-E8670D58945F"
+        }
+      },
+      {
+        "Key": "91823C5B-A71A-4364-A62C-489F0183EFB5",
+        "Value": {
+          "Name": "Ship Assembly",
+          "ID": "91823C5B-A71A-4364-A62C-489F0183EFB5"
+        }
+      }
+
+    ]
+  }
+
+}

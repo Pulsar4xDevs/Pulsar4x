@@ -71,10 +71,10 @@ namespace Pulsar4X.ECSLib
                     text += "HTK: " + Designer.HTKValue + Environment.NewLine;
                     text += "Crew: " + Designer.CrewReqValue + Environment.NewLine;
                     text += "ResearchCost: " + Designer.ResearchCostValue + Environment.NewLine;
-                    foreach (var kvp in Designer.MineralCostValues)
+                    foreach (var kvp in Designer.ResourceCostValues)
                     {
-                        string mineralName = _staticData.CargoGoods.GetMineral(kvp.Key).Name;
-                        text += mineralName + ": " + kvp.Value + Environment.NewLine;
+                        string resourceName = _staticData.CargoGoods.GetAny(kvp.Key).Name;
+                        text += resourceName + ": " + kvp.Value + Environment.NewLine;
                     }
                     text += "Credit Cost: " + Designer.CreditCostValue + Environment.NewLine;
                 }

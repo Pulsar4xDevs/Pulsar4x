@@ -10,11 +10,8 @@ namespace Pulsar4X.ECSLib.Industry
     public class ConstructJob : JobBase
     {
       
-        public ConstructionType ConstructionType { get; internal set; }
+        public Guid IndustryType { get; internal set; }
         public Entity InstallOn { get; set; }
-        public Dictionary<Guid, int> MineralsRequired { get; internal set; } = new Dictionary<Guid, int>();
-        public Dictionary<Guid, int> MaterialsRequired { get; internal set; } = new Dictionary<Guid, int>();
-        public Dictionary<Guid, int> ComponentsRequired { get; internal set; } = new Dictionary<Guid, int>();
 
         public ConstructJob()
         {
@@ -25,38 +22,25 @@ namespace Pulsar4X.ECSLib.Industry
             ItemGuid = designGuid;
             ComponentDesign design = factionInfo.ComponentDesigns[ItemGuid];
             Name = design.Name;
-            MineralsRequired = design.MineralCosts;
-            MaterialsRequired = design.MaterialCosts;
-            ComponentsRequired = design.ComponentCosts;
-            ProductionPointsLeft = design.BuildPointCost;
-            ProductionPointsCost = design.BuildPointCost;
-            design.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            design.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            ConstructionType = design.ConstructionType;
+            ProductionPointsLeft = design.IndustryPointCosts;
+            ProductionPointsCost = design.IndustryPointCosts;
+            ResourcesRequired = design.ResourceCosts;
+            IndustryType = design.IndustryTypeID;
         }
 
-        public ConstructJob(Guid designGuid, ConstructionType constructionType, ushort numberOrderd, int jobPoints, bool auto, 
-                            Dictionary<Guid,int> mineralCost, Dictionary<Guid, int> matCost, Dictionary<Guid,int> componentCost  ): 
+        public ConstructJob(Guid designGuid, Guid industryType, ushort numberOrderd, int jobPoints, bool auto, 
+                            Dictionary<Guid,int> resourceCost  ): 
             base(designGuid, numberOrderd, jobPoints, auto)
         {
-            ConstructionType = constructionType;
-            MineralsRequired = new Dictionary<Guid, int>(mineralCost);
-            MaterialsRequired = new Dictionary<Guid, int>(matCost);
-            ComponentsRequired = new Dictionary<Guid, int>(componentCost);
+            IndustryType = industryType;
+            ResourcesRequired = resourceCost;
         }
 
-        public ConstructJob(ComponentDesign design, ushort numOrdered, bool auto): base(design.ID, numOrdered, design.BuildPointCost, auto)
+        public ConstructJob(ComponentDesign design, ushort numOrdered, bool auto): base(design.ID, numOrdered, design.IndustryPointCosts, auto)
         {
             Name = design.Name;
-            ConstructionType = design.ConstructionType;
-            MineralsRequired = design.MineralCosts;
-            MaterialsRequired = design.MaterialCosts;
-            ComponentsRequired = design.ComponentCosts;
-            design.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            design.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
-            ConstructionType = design.ConstructionType;
+            ResourcesRequired = design.ResourceCosts;
+            IndustryType = design.IndustryTypeID;
         }
         
         public override void InitialiseJob(ushort numberOrderd, bool auto)

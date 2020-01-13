@@ -119,11 +119,11 @@ namespace Pulsar4X.ECSLib
             sd.MassFormula = SelectedComponent.MassFormula;
             sd.HTKFormula = SelectedComponent.HTKFormula;
             sd.CrewReqFormula = SelectedComponent.CrewReqFormula;
-            sd.MineralCostFormula = new Dictionary<Guid, string>();
+            sd.ResourceCostFormula = new Dictionary<Guid, string>();
             foreach (var item in SelectedComponent.MineralCostFormula)
             {
                 if(item.MineralFormula != null)
-                    sd.MineralCostFormula.Add(item.Minerals.GetKey(), item.MineralFormula);
+                    sd.ResourceCostFormula.Add(item.Minerals.GetKey(), item.MineralFormula);
             }
             sd.ResearchCostFormula = SelectedComponent.ResearchCostFormula;
             sd.CreditCostFormula = SelectedComponent.CreditCostFormula;

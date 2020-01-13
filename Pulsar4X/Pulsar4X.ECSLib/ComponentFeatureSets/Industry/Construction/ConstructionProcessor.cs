@@ -25,7 +25,8 @@ namespace Pulsar4X.ECSLib.Industry
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            ConstructionProcessor.ConstructStuff(entity);
+            //ConstructionProcessor.ConstructStuff(entity);
+            IndustryTools.ConstructStuff(entity);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
@@ -39,6 +40,7 @@ namespace Pulsar4X.ECSLib.Industry
 
     public static class ConstructionProcessor
     {
+        /*
         internal static void ConstructStuff(Entity colony)
         {
             CargoStorageDB stockpile = colony.GetDataBlob<CargoStorageDB>();
@@ -47,21 +49,18 @@ namespace Pulsar4X.ECSLib.Industry
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             var colonyConstruction = colony.GetDataBlob<ConstructAbilityDB>();
 
-            var pointRates = new Dictionary<ConstructionType, int>(colonyConstruction.ConstructionRates);
+            var pointRates = new Dictionary<Guid, int>(colonyConstruction.ConstructionRates);
             int maxPoints = colonyConstruction.ConstructionPoints; //TODO: should we get rid of this one? seems like a double up with the pointRates.
 
             List<ConstructJob> constructionJobs = new List<ConstructJob>(colonyConstruction.JobBatchList.OfType<ConstructJob>());
             foreach (ConstructJob batchJob in constructionJobs.ToArray())
             {
                 var designInfo = factionInfo.ComponentDesigns[batchJob.ItemGuid];
-                ConstructionType conType = batchJob.ConstructionType;
+                Guid conType = batchJob.IndustryType;
                 //total number of resources requred for a single job in this batch
-                int resourcePoints = designInfo.MineralCosts.Sum(item => item.Value);
-                resourcePoints += designInfo.MaterialCosts.Sum(item => item.Value);
-                resourcePoints += designInfo.ComponentCosts.Sum(item => item.Value);
-
+                var resourcePoints = designInfo.ResourceCosts.Sum(item => item.Value);
                 //how many construction points each resourcepoint is worth.
-                float pointPerResource = (float)designInfo.BuildPointCost / resourcePoints;
+                float pointPerResource = (float)designInfo.IndustryPointCosts / resourcePoints;
                 
                 while ((pointRates[conType] > 0) && (maxPoints > 0) &&
                        (batchJob.NumberCompleted < batchJob.NumberOrdered))
@@ -70,17 +69,13 @@ namespace Pulsar4X.ECSLib.Industry
                     //right now we take all the resources we can, for an individual item in the batch. 
                     //even if we're taking more than we can use in this turn, we're squirriling it away. 
 
-                    IDictionary<Guid, int> batchJobMineralsRequired = batchJob.MineralsRequired;
-                    IDictionary<Guid, int> batchJobMaterialsRequired = batchJob.MaterialsRequired;
-                    IDictionary<Guid, int> batchJobComponentsRequired = batchJob.ComponentsRequired;
-                    ConsumeResources(stockpile, ref batchJobMineralsRequired);
-                    ConsumeResources(stockpile, ref batchJobMaterialsRequired);
-                    ConsumeResources(stockpile, ref batchJobComponentsRequired);
-
+                   IDictionary<Guid, int> resourceCosts = batchJob.ResourcesRequired;
+                   ConsumeResources(stockpile, ref resourceCosts);
                     //we calculate the difference between the design resources and the amount of resources we've squirreled away. 
                     
                     // this is the total of the resources that we don't have access to for this item. 
-                    int unusableResourceSum = batchJobMineralsRequired.Sum(item => item.Value) + batchJobMaterialsRequired.Sum(item => item.Value) + batchJobComponentsRequired.Sum(item => item.Value);
+                    
+                    int unusableResourceSum = resourceCosts.Sum(item => item.Value);
                     // this is the total resources that can be used on this item. 
                     int useableResourcePoints = resourcePoints - unusableResourceSum;
                     
@@ -108,15 +103,15 @@ namespace Pulsar4X.ECSLib.Industry
                 }
             }
         }
-
-        private static void BatchJobItemComplete(Entity constructingEntity, CargoStorageDB storage, ConstructJob batchJob, ComponentDesign designInfo)
+*/
+        internal static void BatchJobItemComplete(Entity constructingEntity, CargoStorageDB storage, ConstructJob batchJob, ComponentDesign designInfo)
         {
             var colonyConstruction = constructingEntity.GetDataBlob<ConstructAbilityDB>();
             batchJob.NumberCompleted++;
-            batchJob.ProductionPointsLeft = designInfo.BuildPointCost;
-            batchJob.MineralsRequired = designInfo.MineralCosts;
-            batchJob.MineralsRequired = designInfo.MaterialCosts;
-            batchJob.MineralsRequired = designInfo.ComponentCosts;
+            batchJob.ResourcesRequired = designInfo.ResourceCosts;
+            
+            batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
+
             
             if (batchJob.InstallOn != null)
             {

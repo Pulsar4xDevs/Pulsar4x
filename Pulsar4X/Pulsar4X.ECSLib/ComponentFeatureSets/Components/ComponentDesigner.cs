@@ -35,9 +35,10 @@ namespace Pulsar4X.ECSLib
                 designer.BuildCostFormula,
                 designer.CreditCostFormula
             };
-            allExpressions.AddRange(designer.MineralCostFormulas.Values);
-            allExpressions.AddRange(designer.MaterialCostFormulas.Values);
-            allExpressions.AddRange(designer.ComponentCostFormulas.Values);
+            allExpressions.AddRange(designer.ResourceCostFormulas.Values);
+            //allExpressions.AddRange(designer.MineralCostFormulas.Values);
+            //allExpressions.AddRange(designer.MaterialCostFormulas.Values);
+            //allExpressions.AddRange(designer.ComponentCostFormulas.Values);
             foreach (var value in designer.ComponentDesignAttributes.Values)
             {
                 allExpressions.Add(value.Formula);
@@ -81,15 +82,13 @@ namespace Pulsar4X.ECSLib
         public int Volume;
         public int HTK;
         public int CrewReq;
-        public int BuildPointCost;
+        public int IndustryPointCosts { get; set; }
+        public Guid IndustryTypeID { get; set; }
         public int CreditCost;
         
         //public int ResearchCostValue;
         public Dictionary<Guid, int> ResourceCosts { get; internal set; } = new Dictionary<Guid, int>();
-        public Dictionary<Guid, int> MineralCosts;
-        public Dictionary<Guid, int> MaterialCosts;
-        public Dictionary<Guid, int> ComponentCosts;
-        public ConstructionType ConstructionType;
+
         public ComponentMountType ComponentMountType;
         //public List<ComponentDesignAtbData> ComponentDesignAttributes;
         public Dictionary<Type, IComponentDesignAttribute> AttributesByType = new Dictionary<Type, IComponentDesignAttribute>();
@@ -151,16 +150,18 @@ namespace Pulsar4X.ECSLib
             BuildCostFormula = new ChainedExpression(componentSD.BuildPointCostFormula, this, factionTech, staticData);
             CreditCostFormula = new ChainedExpression(componentSD.CreditCostFormula, this, factionTech, staticData);
             ComponentMountType = componentSD.MountType;
-            ConstructionType = componentSD.ConstructionType;
+            IndustryType = componentSD.IndustryTypeID;
             CargoTypeID = componentSD.CargoTypeID;
             _design.CargoTypeID = componentSD.CargoTypeID;
             
-            Dictionary<Guid, ChainedExpression> mineralCostFormulas = new Dictionary<Guid, ChainedExpression>();
-            Dictionary<Guid, ChainedExpression> materalCostFormulas = new Dictionary<Guid, ChainedExpression>();
-            Dictionary<Guid, ChainedExpression> componentCostForulas = new Dictionary<Guid, ChainedExpression>();
-            foreach (var kvp in componentSD.MineralCostFormula)
+
+            Dictionary<Guid, ChainedExpression> resourceCostForulas = new Dictionary<Guid, ChainedExpression>();
+            //Dictionary<Guid, ChainedExpression> mineralCostFormulas = new Dictionary<Guid, ChainedExpression>();
+            //Dictionary<Guid, ChainedExpression> materalCostFormulas = new Dictionary<Guid, ChainedExpression>();
+            //Dictionary<Guid, ChainedExpression> componentCostForulas = new Dictionary<Guid, ChainedExpression>();
+            foreach (var kvp in componentSD.ResourceCostFormula)
             {
-      
+                /*
                 if (staticData.CargoGoods.IsMaterial(kvp.Key))
                 {
                     materalCostFormulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech, staticData));
@@ -176,12 +177,18 @@ namespace Pulsar4X.ECSLib
                 else //TODO: log don't crash.
                     throw new Exception("GUID object {" + kvp.Key + "} not found in materialCosting for " + this.TypeName + " This object needs to be either a mineral, material or component defined in the Data folder");
                 
+                */
+                if(staticData.CargoGoods.GetAny(kvp.Key) != null)
+                    resourceCostForulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech));
+                else //TODO: log don't crash.
+                    throw new Exception("GUID object {" + kvp.Key + "} not found in resourceCosting for " + this.TypeName + " This object needs to be either a mineral, material or component defined in the Data folder");
 
             }
 
-            MineralCostFormulas = mineralCostFormulas;
-            MaterialCostFormulas = materalCostFormulas;
-            ComponentCostFormulas = componentCostForulas;
+            ResourceCostFormulas = resourceCostForulas;
+            //MineralCostFormulas = mineralCostFormulas;
+           // MaterialCostFormulas = materalCostFormulas;
+            //ComponentCostFormulas = componentCostForulas;
             
             foreach (ComponentTemplateAbilitySD abilitySD in componentSD.ComponentAbilitySDs)
             {
@@ -275,14 +282,28 @@ namespace Pulsar4X.ECSLib
                         designAttribute.SetValue();  //force recalc.
                                  
                     object[] constructorArgs = designAttribute.DataBlobArgs;
+                    try
+                    {
+                        dynamic attrbute = (IComponentDesignAttribute)Activator.CreateInstance(designAttribute.DataBlobType, constructorArgs);
+                        _design.AttributesByType.Add(attrbute.GetType(), attrbute);
+                    }
+                    catch (MissingMethodException e)
+                    {
+                        string exstr = "The Attribute: " + designAttribute.DataBlobType + " was found, but the arguments did not match any constructors.\nThe given arguments are:\n" 
+                                       + designAttribute.DataBlobArgs + "\n" 
+                                       + constructorArgs + "\n" 
+                                       + "which are of type: " + constructorArgs.GetType() 
+                                       + "\nThe full exception is as follows:\n" + e;
+                        throw new Exception(exstr);
+                    }
+
                     
-                    dynamic attrbute = (IComponentDesignAttribute)Activator.CreateInstance(designAttribute.DataBlobType, constructorArgs);
-                    _design.AttributesByType.Add(attrbute.GetType(), attrbute);
                     
                 }
             }
 
             faction.InternalComponentDesigns.Add(_design.ID, _design);
+            faction.IndustryDesigns[_design.ID] = _design;
             return _design;
             
         }
@@ -297,6 +318,8 @@ namespace Pulsar4X.ECSLib
             SetHTK();
             SetResearchCost();
             SetBuildCost();
+            SetResourceCosts();
+            /*
             SetMineralCosts();
             SetMaterialCosts();
             SetComponentCosts();
@@ -304,6 +327,7 @@ namespace Pulsar4X.ECSLib
             MineralCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
             MaterialCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
             ComponentCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
+            */
         }
 
         public string TypeName
@@ -368,15 +392,28 @@ namespace Pulsar4X.ECSLib
             _design.ResearchCostValue = ResearchCostFormula.IntResult;
         }
 
-        public int BuildPointCostValue { get { return _design.BuildPointCost; } }
+        public int IndustryPointCostsValue { get { return _design.IndustryPointCosts; } }
         internal ChainedExpression BuildCostFormula { get; set; }
         public void SetBuildCost()
         {
             BuildCostFormula.Evaluate();
-            _design.BuildPointCost = BuildCostFormula.IntResult;
+            _design.IndustryPointCosts = BuildCostFormula.IntResult;
         }
 
+        public Dictionary<Guid, int> ResourceCostValues => _design.ResourceCosts;
+        internal Dictionary<Guid, ChainedExpression> ResourceCostFormulas { get; set; }
+        public void SetResourceCosts()
+        {
+            Dictionary<Guid,int> dict = new Dictionary<Guid, int>();
+            foreach (var kvp in ResourceCostFormulas)
+            {
+                kvp.Value.Evaluate();
+                dict.Add(kvp.Key, kvp.Value.IntResult);  
+            }
+            _design.ResourceCosts = dict;
+        }
         
+        /*
         public Dictionary<Guid, int> MineralCostValues => _design.MineralCosts;
         internal Dictionary<Guid, ChainedExpression> MineralCostFormulas { get; set; }
         public void SetMineralCosts()
@@ -415,7 +452,7 @@ namespace Pulsar4X.ECSLib
             }
             _design.ComponentCosts = dict;
         }
-        
+        */
         
         public int CreditCostValue => _design.CreditCost;
         internal ChainedExpression CreditCostFormula { get; set; }
@@ -429,10 +466,10 @@ namespace Pulsar4X.ECSLib
         {
             get { return _design.ComponentMountType;} 
             internal set { _design.ComponentMountType = value; } }
-        public ConstructionType ConstructionType
+        public Guid IndustryType
         {
-            get { return _design.ConstructionType; }
-            internal set { _design.ConstructionType = value; }
+            get { return _design.IndustryTypeID; }
+            internal set { _design.IndustryTypeID = value; }
         }
         public Guid CargoTypeID 
         {             

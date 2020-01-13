@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
+using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
@@ -31,13 +32,17 @@ namespace Pulsar4X.ECSLib
         public List<Entity> Colonies { get; internal set; } = new List<Entity>();
 
         [JsonProperty]
-        public Dictionary<Guid, ShipClass> ShipDesigns = new Dictionary<Guid, ShipClass>();
+        public Dictionary<Guid, ShipDesign> ShipDesigns = new Dictionary<Guid, ShipDesign>();
 
         public ReadOnlyDictionary<Guid, ComponentDesign> ComponentDesigns => new ReadOnlyDictionary<Guid, ComponentDesign>(InternalComponentDesigns);
         [JsonProperty]
         internal Dictionary<Guid, ComponentDesign> InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>();
 
 
+        public Dictionary<Guid, IConstrucableDesign> IndustryDesigns = new Dictionary<Guid, IConstrucableDesign>();
+        
+        
+        
         [PublicAPI]
         public ReadOnlyDictionary<Guid, Entity> MissileDesigns => new ReadOnlyDictionary<Guid, Entity>(InternalMissileDesigns);
         [JsonProperty]
@@ -50,14 +55,19 @@ namespace Pulsar4X.ECSLib
         internal Dictionary<Guid, SensorContact> SensorContacts = new Dictionary<Guid, SensorContact>();
 
 
-        public FactionInfoDB()  { }
+        public FactionInfoDB()
+        {
+            Dictionary<Guid, ComponentDesign> componentDesigns = new Dictionary<Guid, ComponentDesign>();
+            Dictionary<Guid, ShipDesign> shipClasses = new Dictionary<Guid, ShipDesign>();
+            SetIndustryDesigns(componentDesigns, shipClasses);
+        }
 
         public FactionInfoDB(
             List<Entity> species,
             List<Guid> knownSystems,
             List<Entity> colonies,
             Dictionary<Guid, ComponentDesign> componentDesigns,
-            Dictionary<Guid, ShipClass> shipClasses)
+            Dictionary<Guid, ShipDesign> shipClasses)
         {
             Species = species;
             KnownSystems = knownSystems;
@@ -65,6 +75,7 @@ namespace Pulsar4X.ECSLib
             InternalComponentDesigns = componentDesigns;
             ShipDesigns = shipClasses;
             KnownFactions = new List<Entity>();
+            SetIndustryDesigns(componentDesigns, shipClasses);
         }
         
 
@@ -74,15 +85,36 @@ namespace Pulsar4X.ECSLib
             KnownSystems = new List<Guid>(factionDB.KnownSystems);
             KnownFactions = new List<Entity>(factionDB.KnownFactions);
             Colonies = new List<Entity>(factionDB.Colonies);
-            ShipDesigns = new Dictionary<Guid, ShipClass>(factionDB.ShipDesigns);
+            InternalKnownJumpPoints = new Dictionary<Guid, List<Entity>>(factionDB.KnownJumpPoints);
+            
+            ShipDesigns = new Dictionary<Guid, ShipDesign>(factionDB.ShipDesigns);
             InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>(factionDB.ComponentDesigns);
             InternalMissileDesigns = new Dictionary<Guid, Entity>(factionDB.MissileDesigns);
-            InternalKnownJumpPoints = new Dictionary<Guid, List<Entity>>(factionDB.KnownJumpPoints);
+            IndustryDesigns = new Dictionary<Guid, IConstrucableDesign>(factionDB.IndustryDesigns);
+            
         }
 
         public override object Clone()
         {
             return new FactionInfoDB(this);
+        }
+
+        void SetIndustryDesigns(            
+            Dictionary<Guid, ComponentDesign> componentDesigns,
+            Dictionary<Guid, ShipDesign> shipClasses)
+        {
+            foreach (var mat in StaticRefLib.StaticData.CargoGoods.GetMaterialsList())
+            {
+                IndustryDesigns[mat.ID] = mat;
+            }
+            foreach (var design in componentDesigns)
+            {
+                IndustryDesigns[design.Key] = design.Value;
+            }
+            foreach (var design in shipClasses)
+            {
+                IndustryDesigns[design.Key] = design.Value;
+            }
         }
 
         [OnDeserialized]

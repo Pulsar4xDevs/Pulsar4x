@@ -22,12 +22,11 @@ namespace Pulsar4X.ECSLib.Industry
             Name = design.Name;
             MineralsRequired = design.MineralsRequired;
             MaterialsRequired = design.MaterialsRequired;
-            ProductionPointsLeft = design.RefineryPointCost;
-            ProductionPointsCost = design.RefineryPointCost;
+            ProductionPointsLeft = design.IndustryPointCosts;
+            ProductionPointsCost = design.IndustryPointCosts;
             design.MineralsRequired?.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
             design.MaterialsRequired?.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
             NumberOrdered = 1;
-;
         }
 
         public RefineingJob(Guid matGuid, ushort numberOrderd, int jobPoints, bool auto): base(matGuid, numberOrderd, jobPoints, auto)
@@ -49,7 +48,8 @@ namespace Pulsar4X.ECSLib.Industry
         //recalc this on game load todo implement this in the processor. 
         public Dictionary<Guid, int> RefiningRates{ get; internal set; }
 
-        [JsonProperty] public List<JobBase> JobBatchList { get; internal set; } = new List<JobBase>();
+        [JsonProperty] 
+        public List<JobBase> JobBatchList { get; internal set; } = new List<JobBase>();
         public List<IConstrucableDesign> GetJobItems(FactionInfoDB factionInfoDB)
         {
             var mats = StaticRefLib.StaticData.CargoGoods.GetMaterialsList();

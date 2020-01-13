@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _cargoHold;
         private static ComponentDesign _cargoCompartment;
         private static ComponentDesign _spacePort;
-        private static ShipClass _defaultShipClass;
+        private static ShipDesign _defaultShipDesign;
         
 
         // this code is a test for multiple systems, worth mentioning it utterly failed, modularity is good when you have it huh.ç
@@ -249,13 +249,13 @@ namespace Pulsar4X.ECSLib
 
 
             // Todo: handle this in CreateShip
-            ShipClass shipClass = DefaultShipDesign(game, factionEntity);
-            ShipClass gunShipClass = GunShipDesign(game, factionEntity);
+            ShipDesign shipDesign = DefaultShipDesign(game, factionEntity);
+            ShipDesign gunShipDesign = GunShipDesign(game, factionEntity);
 
-            Entity ship1 = ShipFactory.CreateShip(shipClass, factionEntity, earth, solSys, "Serial Peacemaker");
-            Entity ship2 = ShipFactory.CreateShip(shipClass, factionEntity, earth, solSys, "Ensuing Calm");
-            Entity ship3 = ShipFactory.CreateShip(shipClass, factionEntity, earth, solSys, "Touch-and-Go");
-            Entity gunShip = ShipFactory.CreateShip(gunShipClass, factionEntity, earth, solSys, "Prevailing Stillness");
+            Entity ship1 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Serial Peacemaker");
+            Entity ship2 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Ensuing Calm");
+            Entity ship3 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Touch-and-Go");
+            Entity gunShip = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Prevailing Stillness");
             Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), factionEntity, earth, solSys, "Planet Express Ship");
             var fuel = NameLookup.GetMaterialSD(game, "Sorium Fuel");
             var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
@@ -320,10 +320,10 @@ namespace Pulsar4X.ECSLib
             solSys.SetDataBlob(gunShip.ID, new TransitableDB());
             solSys.SetDataBlob(courier.ID, new TransitableDB());
 
-            //Entity ship = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
+            //Entity ship = ShipFactory.CreateShip(shipDesign, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB
 
-            //Entity ship3 = ShipFactory.CreateShip(shipClass, sol.SystemManager, factionEntity, position, sol, "Contiual Pacifier");
+            //Entity ship3 = ShipFactory.CreateShip(shipDesign, sol.SystemManager, factionEntity, position, sol, "Contiual Pacifier");
             //ship3.SetDataBlob((OrbitDB)earth.GetDataBlob<OrbitDB>().Clone());//second ship clone earth OrbitDB
 
 
@@ -349,10 +349,10 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        public static ShipClass DefaultShipDesign(Game game, Entity faction)
+        public static ShipDesign DefaultShipDesign(Game game, Entity faction)
         {
-            if (_defaultShipClass != null)
-                return _defaultShipClass;
+            if (_defaultShipDesign != null)
+                return _defaultShipDesign;
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
@@ -367,12 +367,12 @@ namespace Pulsar4X.ECSLib
                 (DefaultThrusterDesign(game, faction), 3),
                 
             };
-            _defaultShipClass = new ShipClass(factionInfo, "Ob'enn Dropship", components2, ("Polyprop", 1175f, 3));
-            _defaultShipClass.DamageProfileDB = new EntityDamageProfileDB(components2, _defaultShipClass.Armor);
-            return _defaultShipClass;
+            _defaultShipDesign = new ShipDesign(factionInfo, "Ob'enn Dropship", components2, ("Polyprop", 1175f, 3));
+            _defaultShipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _defaultShipDesign.Armor);
+            return _defaultShipDesign;
         }
 
-        public static ShipClass GunShipDesign(Game game, Entity faction)
+        public static ShipDesign GunShipDesign(Game game, Entity faction)
         {
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
@@ -386,12 +386,12 @@ namespace Pulsar4X.ECSLib
                 (_reactor, 1),
                 (_thruster500, 4),
             };
-            var shipdesign = new ShipClass(factionInfo, "Sanctum Adroit GunShip", components2, ("Polyprop", 1175f, 3));
+            var shipdesign = new ShipDesign(factionInfo, "Sanctum Adroit GunShip", components2, ("Polyprop", 1175f, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
         }
 
-        public static ShipClass CargoShipDesign(Game game, Entity faction)
+        public static ShipDesign CargoShipDesign(Game game, Entity faction)
         {
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
@@ -406,7 +406,7 @@ namespace Pulsar4X.ECSLib
                 (_reactor, 1),
                 (_thruster500, 4),
             };
-            var shipdesign = new ShipClass(factionInfo, "Cargo Courier", components2, ("Polyprop", 1175f, 3));
+            var shipdesign = new ShipDesign(factionInfo, "Cargo Courier", components2, ("Polyprop", 1175f, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
         }

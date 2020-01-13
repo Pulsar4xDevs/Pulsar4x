@@ -15,13 +15,13 @@ namespace Pulsar4X.ECSLib
         public string VolumeFormula;
         public string HTKFormula;       
         public string CrewReqFormula;
-        public Dictionary<Guid,string> MineralCostFormula; //mats and components can also be included here.
+        public Dictionary<Guid,string> ResourceCostFormula; //mins, mats and components can also be included here.
         public string ResearchCostFormula;
         public string CreditCostFormula;
         public string BuildPointCostFormula;
         //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
         public ComponentMountType MountType;
-        public ConstructionType ConstructionType;
+        public Guid IndustryTypeID;
         public Guid CargoTypeID; //cargo TypeID from CargoTypeSD
         public List<ComponentTemplateAbilitySD> ComponentAbilitySDs;
     }

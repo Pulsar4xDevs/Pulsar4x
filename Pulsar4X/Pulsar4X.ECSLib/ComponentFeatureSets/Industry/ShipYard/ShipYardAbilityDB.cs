@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib.Industry
     {
         public Guid SlipID;
 
-        public ShipClass ShipDesign { get; set; }
+        public ShipDesign ShipDesign { get; set; }
 
         public Dictionary<Guid, int> MineralsRequired { get; internal set; }
         public Dictionary<Guid, int> MaterialsRequired { get; internal set; }
@@ -75,8 +75,8 @@ namespace Pulsar4X.ECSLib.Industry
             MineralsRequired = ShipDesign.MineralCosts;
             MaterialsRequired = ShipDesign.MaterialCosts;
             ComponentsRequired = ShipDesign.ComponentCosts;
-            ProductionPointsLeft = ShipDesign.BuildPointCost;
-            ProductionPointsCost = ShipDesign.BuildPointCost;
+            ProductionPointsLeft = ShipDesign.IndustryPointCosts;
+            ProductionPointsCost = ShipDesign.IndustryPointCosts;
             ShipDesign.MineralCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
             ShipDesign.MaterialCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
             ShipDesign.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib.Industry
 
         }
         
-        public ShipYardJob(ShipClass design, ushort numberOrderd, int jobPoints, bool auto, 
+        public ShipYardJob(ShipDesign design, ushort numberOrderd, int jobPoints, bool auto, 
                            Dictionary<Guid,int> mineralCost, Dictionary<Guid, int> matCost, Dictionary<Guid,int> componentCost  ): 
             base(design.ID, numberOrderd, jobPoints, auto)
         {
@@ -100,8 +100,8 @@ namespace Pulsar4X.ECSLib.Industry
             design.ComponentCosts.ToList().ForEach(x => ResourcesRequired[x.Key] = x.Value);
         }
 
-        public ShipYardJob(ShipClass design, ushort numOrdered, Guid slipID, bool auto): 
-            base(design.ID, numOrdered, design.BuildPointCost, auto)
+        public ShipYardJob(ShipDesign design, ushort numOrdered, Guid slipID, bool auto): 
+            base(design.ID, numOrdered, design.IndustryPointCosts, auto)
         {
             SlipID = slipID;
             Name = design.Name;
@@ -150,7 +150,7 @@ namespace Pulsar4X.ECSLib.Industry
                 resourcePoints += designInfo.ComponentCosts.Sum(item => item.Value);
 
                 //how many construction points each resourcepoint is worth.
-                float pointPerResource = (float)designInfo.BuildPointCost / resourcePoints;
+                float pointPerResource = (float)designInfo.IndustryPointCosts / resourcePoints;
                 
                 while ((maxPoints > 0) && (batchJob.NumberCompleted < batchJob.NumberOrdered))
                 {
@@ -191,7 +191,7 @@ namespace Pulsar4X.ECSLib.Industry
 
                     if (batchJob.ProductionPointsLeft == 0)
                     {
-                        BatchJobShipComplete(colony, syconstruction, batchJob, designInfo);
+                        BatchJobShipComplete(colony, batchJob, designInfo);
                     }
 
                     if (pointsToUse == 0)
@@ -200,7 +200,7 @@ namespace Pulsar4X.ECSLib.Industry
             }
         }
 
-        static void BatchJobShipComplete(Entity constructingEntity, ShipYardAbilityDB shipYard, ShipYardJob batchJob, ShipClass shipDesign)
+        internal static void BatchJobShipComplete(Entity constructingEntity, ShipYardJob batchJob, ShipDesign shipDesign)
         {
             //need to sort out what we're going to do ui wise here.
             //we want to be able to:

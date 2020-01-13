@@ -57,9 +57,9 @@ namespace Pulsar4X.ECSLib
             _parentJobAbility = parentJobAbilityVM;
 
             if (_job is RefineingJob)
-                _jobTotalPoints = _staticData.CargoGoods.GetMaterial(_job.ItemGuid).RefineryPointCost;
+                _jobTotalPoints = _staticData.CargoGoods.GetMaterial(_job.ItemGuid).IndustryPointCosts;
             else if (_job is ConstructJob)
-                _jobTotalPoints = _colonyEntity.GetDataBlob<ObjectOwnershipDB>().Parent.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].BuildPointCost;
+                _jobTotalPoints = _colonyEntity.GetDataBlob<ObjectOwnershipDB>().Parent.GetDataBlob<FactionInfoDB>().ComponentDesigns[_job.ItemGuid].IndustryPointCosts;
 
             JobPriorityCommand = new JobPriorityCommand<TDataBlob, TJob>(this);
         }

@@ -93,7 +93,7 @@ namespace Pulsar4X.Tests
 
         public ComponentDesign DefaultWeaponDesign { get; set; }
 
-        public ShipClass DefaultShipDesign { get; set; }
+        public ShipDesign DefaultShipDesign { get; set; }
 
         public Entity EarthColony { get; set; }
 

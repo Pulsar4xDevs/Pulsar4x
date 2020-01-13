@@ -19,9 +19,8 @@ namespace Pulsar4X.SDL2UI
         private ShipYardAbilityDB _shipYardDB;
         private FactionInfoDB _factionInfoDB;
 
-        private IndustryPannel<RefineAbilityDB> _refinaryIndustryPannel;
-        private IndustryPannel<ConstructAbilityDB> _construcIndustryPannel;
-        private IndustryPannel<ShipYardAbilityDB> _shipYardIndustryPannel;
+        private IndustryAbilityDB _industryDB;
+        private IndustryPannel2 _industryPannel;
 
         CargoListPannelSimple _cargoList;
         StaticDataStore _staticData;
@@ -98,6 +97,11 @@ namespace Pulsar4X.SDL2UI
                         _cargoList.Display();                       
                     }
 
+                    if (_industryPannel != null)// && ImGui.CollapsingHeader("Refinary Points: " + _industryDB.ConstructionPoints))
+                    {
+                        _industryPannel.Display();
+                    }
+                    /*
 
                     if (_refinaryIndustryPannel != null && ImGui.CollapsingHeader("Refinary Points: " + _refineDB.ConstructionPoints))
                     {
@@ -112,7 +116,7 @@ namespace Pulsar4X.SDL2UI
                     if (_shipYardIndustryPannel != null && ImGui.CollapsingHeader("Construction Points: " + _shipYardDB.ConstructionPoints))
                     {
                         _shipYardIndustryPannel.Display();
-                    }
+                    }*/
                 }
                 ImGui.End();
             }
@@ -130,41 +134,18 @@ namespace Pulsar4X.SDL2UI
 
             }
 
-            if (_selectedEntity.Entity.HasDataBlob<RefineAbilityDB>())
+            if (_selectedEntity.Entity.HasDataBlob<IndustryAbilityDB>())
             {
-                _refineDB = _selectedEntity.Entity.GetDataBlob<RefineAbilityDB>();
+                _industryDB = _selectedEntity.Entity.GetDataBlob<IndustryAbilityDB>();
                 RefineingJob rjob = new RefineingJob();
-                _refinaryIndustryPannel = new IndustryPannel<RefineAbilityDB>(_state, _selectedEntity.Entity, _refineDB, rjob);
+                _industryPannel = new IndustryPannel2(_state, _selectedEntity.Entity, _industryDB);
             }
             else
             {
-                _refineDB = null;
-                _refinaryIndustryPannel = null;
+                _industryDB = null;
+                _industryPannel = null;
             }
-            if(_selectedEntity.Entity.HasDataBlob<ConstructAbilityDB>())
-            {
-                _constrDB = _selectedEntity.Entity.GetDataBlob<ConstructAbilityDB>();
-                ConstructJob cjob = new ConstructJob();
-                _construcIndustryPannel = new IndustryPannel<ConstructAbilityDB>(_state, _selectedEntity.Entity, _constrDB, cjob);
-                
-            }
-            else
-            {
-                _constrDB = null;
-                _construcIndustryPannel = null;
-            }
-            if(_selectedEntity.Entity.HasDataBlob<ShipYardAbilityDB>())
-            {
-                _shipYardDB = _selectedEntity.Entity.GetDataBlob<ShipYardAbilityDB>();
-                ShipYardJob sjob = new ShipYardJob();
-                _shipYardIndustryPannel = new IndustryPannel<ShipYardAbilityDB>(_state, _selectedEntity.Entity, _shipYardDB, sjob);
-                
-            }
-            else
-            {
-                _shipYardDB = null;
-                _shipYardIndustryPannel = null;
-            }
+            
             _cargoList = new CargoListPannelSimple(_staticData, _selectedEntity);
 
             /*

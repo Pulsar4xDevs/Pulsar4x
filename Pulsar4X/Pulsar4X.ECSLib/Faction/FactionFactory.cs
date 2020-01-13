@@ -43,6 +43,8 @@ namespace Pulsar4X.ECSLib
         {
             var name = new NameDB(factionName);
 
+            //var facinfo = new FactionInfoDB(new List<Entity>(), new List<Guid>(), );
+            
             var blobs = new List<BaseDataBlob> { 
                 name, 
                 new FactionInfoDB(), 

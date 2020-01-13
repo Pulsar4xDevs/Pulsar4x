@@ -268,7 +268,7 @@ namespace Pulsar4X.ECSLib
             HTKFormula = designSD.HTKFormula;
             CrewReqFormula = designSD.CrewReqFormula;
             MineralCostFormula.Clear(); 
-            foreach (var item in designSD.MineralCostFormula)
+            foreach (var item in designSD.ResourceCostFormula)
             {
                 MineralCostFormula.Add(new MineralFormulaVM(ParentVM, _staticData, item));
             }

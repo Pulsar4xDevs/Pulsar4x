@@ -12,7 +12,7 @@
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "50000",
-          "MineralCostFormula": {
+          "ResourceCostFormula": {
             "Entries": [
               {
                 "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
@@ -29,7 +29,7 @@
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
-          "ConstructionType": "Installations",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
           "ComponentAbilitySDs": [
             {
               "Name": "MiningAmount",
@@ -127,7 +127,7 @@
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "1000000",
-          "MineralCostFormula": {
+          "ResourceCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
@@ -144,7 +144,7 @@
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
-          "ConstructionType": "Installations",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
           "ComponentAbilitySDs": [
             {
               "Name": "RP Amount Per EconTick",
@@ -160,36 +160,45 @@
         "Key": "90592586-0bd6-4885-8526-7181e08556b5",
         "Value": {
           "Name": "Refinery",
-          "Description": "Refines Sorium into fuel",
+          "Description": "An installation designed to refine base minerals into materials",
           "ID": "90592586-0bd6-4885-8526-7181e08556b5",
-          "MassFormula": "500000",
+          "MassFormula": "Ability('Size')",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
-          "CrewReqFormula": "1000000",
-          "MineralCostFormula": {
+          "CrewReqFormula": "[Mass] * 0.1",
+          "ResourceCostFormula": {
             "Entries": [
               {
-                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "60"
+                "Key": "c8a64019-aef4-4453-bd9b-36b26b0e9684",
+                "Value": "[Mass] * 0.05"
               },
               {
-                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
-                "Value": "60"
+                "Key": "66f15e2f-7a24-4ff6-9b68-03fcd93686f9",
+                "Value": "[Mass] * 0.005"
               }
             ]
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Mass]",
-          "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
+          "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
-          "ConstructionType": "Installations",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
           "ComponentAbilitySDs": [
             {
-              "Name": "Refinary Points",
+              "Name": "Size",
+              "Description": "Size of this installation",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "100",
+              "StepFormula": "50",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Refinery Points",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "100"
+              "AbilityFormula": "Ability('Size') * 0.1"
             },
             {
               "Name": "RefineAbilitys",
@@ -199,17 +208,13 @@
                 "Entries":
                 [
                   {
-                    "Key": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
-                    "Value": 1
-                  },
-                  {
-                    "Key": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
-                    "Value": 1
+                    "Key": "265B36EE-BAED-4F92-9AEC-BC8A7EA0DF1F",
+                    "Value": "Ability('Refinery Points')"
                   }
                 ]
               },
-              "AbilityFormula": "DataBlobArgs([GuidDict], Ability(0))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.RefineResourcesAtbDB"
+              "AbilityFormula": "DataBlobArgs([GuidDict])",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
         }
@@ -220,19 +225,19 @@
           "Name": "Factory",
           "Description": "Constructs Facilities, Fighters Ammo and Components",
           "ID": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
-          "MassFormula": "500000",
+          "MassFormula": "Ability('Size')",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
-          "CrewReqFormula": "1000000",
-          "MineralCostFormula": {
+          "CrewReqFormula": "[Mass] * 0.1",
+          "ResourceCostFormula": {
             "Entries": [
               {
-                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "60"
+                "Key": "c8a64019-aef4-4453-bd9b-36b26b0e9684",
+                "Value": "[Mass] * 0.05"
               },
               {
-                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
-                "Value": "60"
+                "Key": "66f15e2f-7a24-4ff6-9b68-03fcd93686f9",
+                "Value": "[Mass] * 0.005"
               }
             ]
           },
@@ -241,64 +246,63 @@
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
-          "ConstructionType": "Installations",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
           "ComponentAbilitySDs": [
             {
-              "Name": "Instalation Construction Points",
-              "Description": "",
-              "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "500"
+              "Name": "Size",
+              "Description": "Size of this installation",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "100",
+              "StepFormula": "50",
+              "AbilityFormula": "5000"
             },
             {
               "Name": "Component Construction Points",
               "Description": "",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "100"
-            },
-            {
-              "Name": "Ship Construction Points",
+              "AbilityFormula": "[Mass] * 0.1"
+            },            {
+              "Name": "Installation Construction Points",
               "Description": "",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "100"
+              "AbilityFormula": "[Mass] * 0.1"
             },
             {
               "Name": "Fighter Construction Points",
               "Description": "",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "100"
+              "AbilityFormula": "0"
             },
             {
               "Name": "Ordnance Construction Points",
               "Description": "",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "100"
+              "AbilityFormula": "[Mass] * 0.1"
             },
             {
               "Name": "Construction Points",
               "Description": "",
               "GuiHint": "None",
               "GuidDictionary": {
-                "Entries": [
+                "Entries":
+                [
                   {
-                    "Key": "Installations",
-                    "Value": "Ability(0)"
+                    "Key": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+                    "Value": "Ability('Component Construction Points')"
                   },
                   {
-                    "Key": "ShipComponents",
-                    "Value": "Ability(1)"
+                    "Key": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
+                    "Value": "Ability('Installation Construction Points')"
                   },
                   {
-                    "Key": "Fighters",
-                    "Value": "Ability(3)"
-                  },
-                  {
-                    "Key": "Ordnance",
-                    "Value": "Ability(4)"
+                    "Key": "5ADBF620-3740-4FD7-98BE-E8670D58945F",
+                    "Value": "Ability('Ordnance Construction Points')"
                   }
                 ]
               },
-              "AbilityFormula": "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.Industry.ConstructionType'))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.ConstructionAtbDB"
+              "AbilityFormula": "DataBlobArgs([GuidDict])",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
         }
@@ -313,7 +317,7 @@
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "1000000",
-          "MineralCostFormula": {
+          "ResourceCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
@@ -330,26 +334,45 @@
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
-          "ConstructionType": "Installations",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
           "ComponentAbilitySDs": [
             {
-              "Name": "Ship Construction Points",
+              "Name": "Component Construction Points",
               "Description": "",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "1000"
             },
             {
-              "Name": "Slips",
-              "Description": "Number of slips that can construct or service ships",
+              "Name": "Ship Assembly Points",
+              "Description": "",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "1"
+              "AbilityFormula": "1000"
+            },
+            {
+              "Name": "Slip Size",
+              "Description": "Maximum volume of ship size this slip can work on",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "10000"
             },
             {
               "Name": "db",
               "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('Ship Construction Points'), Ability('Slips'))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.ShipYardAtbDB"
+              "GuidDictionary": {
+                "Entries":
+                [
+                  {
+                    "Key": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+                    "Value": "Ability('Component Construction Points')"
+                  },
+                  {
+                    "Key": "91823C5B-A71A-4364-A62C-489F0183EFB5",
+                    "Value": "Ability('Ship Assembly Points')"
+                  }
+                ]
+              },
+              "AbilityFormula": "DataBlobArgs([GuidDict], Ability('Slip Size'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
         }
@@ -364,7 +387,7 @@
           "VolumeFormula": "[Mass]",
           "HTKFormula": "1000",
           "CrewReqFormula": "10",
-          "MineralCostFormula": {
+          "ResourceCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
@@ -377,7 +400,7 @@
           "BuildPointCostFormula": "100",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
-          "ConstructionType": "Installations",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
           "ComponentAbilitySDs": [
             {
               "Name": "Support Colonists",
@@ -411,7 +434,7 @@
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "Ability(1) * 0.1",
-          "MineralCostFormula": {
+          "ResourceCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
@@ -428,7 +451,7 @@
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
-          "ConstructionType": "Installations",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
           "ComponentAbilitySDs": [
             {
               "Name": "Warehouse Size",
@@ -507,7 +530,7 @@
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "Ability(1)",
-          "MineralCostFormula": {
+          "ResourceCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
@@ -524,7 +547,7 @@
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
-          "ConstructionType": "Installations",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
           "ComponentAbilitySDs": [
             {
               "Name": "Tank Size",

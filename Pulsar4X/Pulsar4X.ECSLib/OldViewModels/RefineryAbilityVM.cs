@@ -135,7 +135,7 @@ namespace Pulsar4X.ECSLib
 
         public override void OnNewBatchJob()
         {
-            RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.CargoGoods.GetMaterial(NewJobSelectedItem).RefineryPointCost, NewJobRepeat);
+            RefineingJob newjob = new RefineingJob(NewJobSelectedItem, NewJobBatchCount, _staticData_.CargoGoods.GetMaterial(NewJobSelectedItem).IndustryPointCosts, NewJobRepeat);
             RefiningProcessor.AddJob(_staticData_, _colonyEntity_, newjob);
             Refresh();
         }

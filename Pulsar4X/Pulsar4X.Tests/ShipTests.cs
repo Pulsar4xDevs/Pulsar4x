@@ -13,7 +13,7 @@ namespace Pulsar4X.Tests
         private EntityManager _entityManager;
         private Entity _faction;
         private StarSystem _starSystem;
-        private ShipClass _shipClass;
+        private ShipDesign _shipDesign;
         private Entity _ship;
         private ComponentDesign _engineComponentDesign;
         private ComponentTemplateSD _engineSD;
@@ -57,8 +57,8 @@ namespace Pulsar4X.Tests
             _engineComponentDesign = DefaultStartFactory.DefaultWarpDesign(_game, _faction);
             
             
-            _shipClass = DefaultStartFactory.DefaultShipDesign(_game, _faction);
-            _ship = ShipFactory.CreateShip(_shipClass, _faction, _sol, _starSystem, "Testship");
+            _shipDesign = DefaultStartFactory.DefaultShipDesign(_game, _faction);
+            _ship = ShipFactory.CreateShip(_shipDesign, _faction, _sol, _starSystem, "Testship");
 
             
             ComponentInstancesDB instancesdb = _ship.GetDataBlob<ComponentInstancesDB>();

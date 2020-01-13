@@ -119,12 +119,26 @@ namespace Pulsar4X.SDL2UI
                     
                     ImGui.Text("Build Cost");
                     ImGui.NextColumn();
-                    ImGui.Text(_componentDesigner.BuildPointCostValue.ToString());
+                    ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString());
                     ImGui.NextColumn();
                     
                     ImGui.Text("Resource Costs");
                     ImGui.NextColumn();
                     ImGui.NextColumn();
+                    
+                    foreach (var kvp in _componentDesigner.ResourceCostValues)
+                    {
+                        var resource = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);
+                        if(resource == null)     
+                            resource = (ICargoable)_state.Faction.GetDataBlob<FactionInfoDB>().IndustryDesigns[kvp.Key];
+                        var xpos = ImGui.GetCursorPosX();
+                        ImGui.SetCursorPosX(xpos + 12);
+                        ImGui.Text(resource.Name);
+                        ImGui.NextColumn();
+                        ImGui.Text(kvp.Value.ToString());
+                        ImGui.NextColumn();
+                    }
+                    /*
                     foreach (var mineral in _componentDesigner.MineralCostValues)
                     {
                         var mineralSD = StaticRefLib.StaticData.CargoGoods.GetMineral(mineral.Key);
@@ -155,6 +169,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(component.Value.ToString());
                         ImGui.NextColumn();
                     }
+                    */
                     
                     /*
                     ImGui.Text("Materials");

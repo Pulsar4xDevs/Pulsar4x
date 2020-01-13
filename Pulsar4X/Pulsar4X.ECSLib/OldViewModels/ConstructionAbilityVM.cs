@@ -26,11 +26,11 @@ namespace Pulsar4X.ECSLib
             NewJobBatchCount = 1;
             NewJobRepeat = false;
         }
-
+/*
         public override void OnNewBatchJob()
         {
             ComponentDesign componentInfo = _factionInfo.ComponentDesigns[NewJobSelectedItem];
-            int buildpointCost = componentInfo.BuildPointCost;
+            int buildpointCost = componentInfo.IndustryPointCosts;
             Dictionary<Guid, int> mineralCost = componentInfo.MineralCosts;
             Dictionary<Guid, int> materialCost = componentInfo.MaterialCosts;
             Dictionary<Guid, int> componentCost = componentInfo.ComponentCosts;
@@ -40,6 +40,11 @@ namespace Pulsar4X.ECSLib
 
             ConstructionProcessor.AddJob(_factionInfo, _colonyEntity_, newjob);
             Refresh();
-        }
+        }*/
+[Obsolete]
+public override void OnNewBatchJob()
+{
+    throw new NotImplementedException();
+}
     }
 }
