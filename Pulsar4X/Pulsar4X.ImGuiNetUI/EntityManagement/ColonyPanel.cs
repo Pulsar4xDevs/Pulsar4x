@@ -14,9 +14,6 @@ namespace Pulsar4X.SDL2UI
     {
         EntityState _selectedEntity;
         CargoStorageVM _storeVM;
-        private RefineAbilityDB _refineDB;
-        private ConstructAbilityDB _constrDB;
-        private ShipYardAbilityDB _shipYardDB;
         private FactionInfoDB _factionInfoDB;
 
         private IndustryAbilityDB _industryDB;

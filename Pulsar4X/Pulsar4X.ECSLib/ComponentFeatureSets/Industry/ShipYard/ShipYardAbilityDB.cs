@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib.Industry
 {
+    /*
     public class ShipYardAbilityDB : BaseDataBlob, IIndustryDB
     {
         [JsonProperty]
@@ -48,7 +49,7 @@ namespace Pulsar4X.ECSLib.Industry
             return new ShipYardAbilityDB(this);
         }
     }
-    
+    */
     public class ShipYardJob : JobBase
     {
         public Guid SlipID;
@@ -124,7 +125,7 @@ namespace Pulsar4X.ECSLib.Industry
         
 
     }
-
+/*
     public static class ShipyardProcessor
     {
         internal static void ConstructStuff(Entity colony)
@@ -234,7 +235,8 @@ namespace Pulsar4X.ECSLib.Industry
             sy.Slips = totalSlips;
         }
     }
-    
+*/    
+/*
     public class ShipYardAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         public int ConstructionPoints;
@@ -269,4 +271,5 @@ namespace Pulsar4X.ECSLib.Industry
             ShipyardProcessor.ReCalcConstructionRate(parentEntity);
         }
     }
+    */
 }

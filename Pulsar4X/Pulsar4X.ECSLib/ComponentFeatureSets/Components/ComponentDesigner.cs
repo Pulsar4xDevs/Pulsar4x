@@ -84,6 +84,40 @@ namespace Pulsar4X.ECSLib
         public int CrewReq;
         public int IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
+        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, IndustryJob batchJob, IConstrucableDesign designInfo)
+        {
+            var colonyConstruction = industryEntity.GetDataBlob<ConstructAbilityDB>();
+            batchJob.NumberCompleted++;
+            batchJob.ResourcesRequired = designInfo.ResourceCosts;
+            
+            batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
+
+            
+            if (batchJob.InstallOn != null)
+            {
+                ComponentInstance specificComponent = new ComponentInstance((ComponentDesign)designInfo);
+                if (batchJob.InstallOn == industryEntity || StorageSpaceProcessor.HasEntity(storage, batchJob.InstallOn.GetDataBlob<CargoAbleTypeDB>()))
+                {
+                    EntityManipulation.AddComponentToEntity(batchJob.InstallOn, specificComponent);
+                    ReCalcProcessor.ReCalcAbilities(batchJob.InstallOn);
+                }
+            }
+            else
+            {
+                StorageSpaceProcessor.AddCargo(storage, (ComponentDesign)designInfo, 1);
+            }
+
+            if (batchJob.NumberCompleted == batchJob.NumberOrdered)
+            {
+                colonyConstruction.JobBatchList.Remove(batchJob);
+                if (batchJob.Auto)
+                {
+                    colonyConstruction.JobBatchList.Add(batchJob);
+                }
+            }
+        }
+
+
         public int CreditCost;
         
         //public int ResearchCostValue;

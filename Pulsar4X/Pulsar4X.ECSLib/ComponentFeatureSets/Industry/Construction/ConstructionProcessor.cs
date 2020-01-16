@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib.Industry
 {
-
+/*
     public class ConstructEntitiesProcessor : IHotloopProcessor
     {
         public TimeSpan RunFrequency {
@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib.Industry
                 ProcessEntity(entity, deltaSeconds);
             }
         }
-    }
+    }*/
 
     public static class ConstructionProcessor
     {

@@ -33,7 +33,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             get
             {
-                if (_selectedProdLine != null && _prodLines.Count > 0)
+                if (_selectedProdLine != Guid.Empty 
+                    && _selectedExistingIndex > -1
+                    && _prodLines[_selectedProdLine].Jobs.Count >= _selectedExistingIndex)
                 {
                     return _prodLines[_selectedProdLine].Jobs[_selectedExistingIndex];
                 }
@@ -126,9 +128,10 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         public void Display()
         {
   
-            ImGui.Columns(2);
+            ImGui.Columns(3);
             ImGui.SetColumnWidth(0, 285);
-            ImGui.SetColumnWidth(1, 200);
+            ImGui.SetColumnWidth(1, 300);
+            ImGui.SetColumnWidth(1, 190);
             
             ProdLineDisplay();
             
@@ -138,6 +141,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             EditButtonsDisplay();
             NewJobDisplay();
             ImGui.EndGroup();
+            ImGui.NextColumn();
+            if(_selectedExistingConJob != null)
+                CostsDisplay(_selectedExistingConJob);
             
             
                 
@@ -145,17 +151,19 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         public void ProdLineDisplay()
         {
-            ImGui.BeginChild("prodline", new Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow );
-            ImGui.Columns(2);
-            ImGui.SetColumnWidth(0, 128);
+            ImGui.BeginChild("prodline", new Vector2(280, 300), true, ImGuiWindowFlags.ChildWindow );
+
 
             foreach (var kvp in _prodLines)
             {
+                
                 IndustryAbilityDB.ProductionLine ud = kvp.Value;
                 ImGui.PushID(kvp.Key.ToString());
                 //ImGui.Selectable()
                 if (ImGui.CollapsingHeader(ud.FacName))
                 {
+                    ImGui.Columns(2);
+                    ImGui.SetColumnWidth(0, 128);
                     Vector2 progsize = new Vector2(128, ImGui.GetTextLineHeight());
                     for (int ji = 0; ji < ud.Jobs.Count; ji++)
                     {
@@ -245,13 +253,13 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             //ImGui.BeginChild("InitialiseJob", new Vector2(404, 84), true, ImGuiWindowFlags.ChildWindow);
             if(_newjobSelectionIndex.pline != Guid.Empty)
             {
-                int curItem = _newjobSelectionIndex.item;
+                int curItemIndex = _newjobSelectionIndex.item;
 
                 var constructableNames = _contructablesByPline[_selectedProdLine].itemNames;
 
-                if (ImGui.Combo("NewJobSelection", ref curItem, constructableNames, constructableNames.Length))
+                if (ImGui.Combo("NewJobSelection", ref curItemIndex, constructableNames, constructableNames.Length))
                 {
-                    _newjobSelectionIndex = (_selectedProdLine, curItem);
+                    _newjobSelectionIndex = (_newjobSelectionIndex.pline, curItemIndex);
                     _newConJob = new IndustryJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                     _lastClickedJob = _newConJob;
                 }
@@ -265,10 +273,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 if (ImGui.Button("Create New Job"))
                 {
-                    if (_newConJob == null) //make sure that a job has been created. 
-                    {
-                        _newConJob = new IndustryJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
-                    }
+
+                    _newConJob = new IndustryJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
 
                     var cmd = IndustryOrder2.CreateNewJobOrder(_factionID, _selectedEntity, _selectedProdLine, _newConJob);
                     _newConJob.InitialiseJob((ushort)_newJobbatchCount, _newJobRepeat);
@@ -279,6 +285,26 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
 
             //ImGui.EndChild();
+        }
+        
+        void CostsDisplay(JobBase selectedJob)
+        {
+            ImGui.BeginChild("Resources Requred", new Vector2(188, 184 ), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.Columns(2);
+            ImGui.SetColumnWidth(0, 140);
+            ImGui.SetColumnWidth(1, 48);
+            foreach (var item in selectedJob.ResourcesRequired)
+            {
+                ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(item.Key);
+                if (cargoItem == null)
+                    cargoItem = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[item.Key];
+                ImGui.Text(cargoItem.Name);
+                ImGui.NextColumn();
+                ImGui.Text(item.Value.ToString());
+                ImGui.NextColumn();
+            }
+            
+            ImGui.EndChild();
         }
 
     }

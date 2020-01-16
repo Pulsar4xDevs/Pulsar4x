@@ -26,6 +26,36 @@ namespace Pulsar4X.ECSLib.Industry
 
     }
 
+    public class IndustryProcessor : IHotloopProcessor
+    {
+        public TimeSpan RunFrequency
+        {
+            get { return TimeSpan.FromDays(1); }
+        }
+
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(3);
+
+        public Type GetParameterType => typeof(IndustryAbilityDB);
+
+        public void Init(Game game)
+        {
+            //unneeded.
+        }
+
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            IndustryTools.ConstructStuff(entity);
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            foreach (var entity in manager.GetAllEntitiesWithDataBlob<IndustryAbilityDB>())
+            {
+                ProcessEntity(entity, deltaSeconds);
+            }
+        }
+    }
+
     public class IndustryAbilityDB : BaseDataBlob
     {
 
@@ -134,6 +164,8 @@ namespace Pulsar4X.ECSLib.Industry
 
         int IndustryPointCosts { get; }
         Guid IndustryTypeID { get; }
+        
+        void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, IndustryJob batchJob, IConstrucableDesign designInfo);
 
     }
 
@@ -166,7 +198,7 @@ namespace Pulsar4X.ECSLib.Industry
         }
 
         public abstract void InitialiseJob(ushort numberOrderd, bool auto);
-
+        
     }
 
     public class IndustryJob : JobBase
@@ -183,7 +215,11 @@ namespace Pulsar4X.ECSLib.Industry
             ProductionPointsLeft = design.IndustryPointCosts;
             ProductionPointsCost = design.IndustryPointCosts;
             NumberOrdered = 1;
+
+            
         }
+
+        public Entity InstallOn { get; set; }
 
         public override void InitialiseJob(ushort numberOrderd, bool auto)
         {
@@ -195,21 +231,7 @@ namespace Pulsar4X.ECSLib.Industry
 
     public static class IndustryTools
     {
-        /// <summary>
-        /// Adds a job to an entities industry
-        /// </summary>
-        /// <param name="industryEntity"></param>
-        /// <param name="job"></param>
-        [PublicAPI]
-        public static void AddJob<T>(Entity industryEntity, JobBase job) where T: BaseDataBlob, IIndustryDB
-        {
-            var industryDB = industryEntity.GetDataBlob<T>();
-            lock (industryDB.JobBatchList) //prevent threaded race conditions
-            {
-                industryDB.JobBatchList.Add(job);
-            }
-        }
-        
+
         public static void AddJob(Entity industryEntity, Guid plineID, IndustryJob job) 
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
@@ -225,45 +247,6 @@ namespace Pulsar4X.ECSLib.Industry
             }
         }
         
-        /// <summary>
-        /// Changes priority in the job queue
-        /// </summary>
-        /// <param name="industryEntity"></param>
-        /// <param name="jobID"></param>
-        /// <param name="delta">-1 increase priority, +1 decrease</param>
-        /// <typeparam name="T"></typeparam>
-        public static void ChangeJobPriority<T>(Entity industryEntity, Guid jobID, int delta) where T: BaseDataBlob, IIndustryDB
-        {
-            var industryDB = industryEntity.GetDataBlob<T>();
-            
-            lock (industryDB.JobBatchList) //prevent threaded race conditions
-            {
-                //first check that the job does still exsist in the list.
-                var job = industryDB.JobBatchList.Find((obj) => obj.JobID == jobID);
-                if (job != null)
-                {
-                    var currentIndex = industryDB.JobBatchList.IndexOf(job);
-                    var newIndex = currentIndex + delta;
-                    if (newIndex <= 0)
-                    {
-                        industryDB.JobBatchList.RemoveAt(currentIndex);
-                        industryDB.JobBatchList.Insert(0, job);
-                    }
-                    else if (newIndex >= industryDB.JobBatchList.Count - 1)
-                    {
-                        industryDB.JobBatchList.RemoveAt(currentIndex);
-                        industryDB.JobBatchList.Add(job);
-                    }
-                    else
-                    {
-                        industryDB.JobBatchList.RemoveAt(currentIndex);
-                        industryDB.JobBatchList.Insert(newIndex, job);
-                    }
-                }
-            }
-        }
-
-
         public static void ChangeJobPriority(Entity industryEntity, Guid prodLine, Guid jobID, int delta) 
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
@@ -293,33 +276,7 @@ namespace Pulsar4X.ECSLib.Industry
         }
         
         
-        /// <summary>
-        /// change the number ordered, whether it repeats etc.
-        /// </summary>
-        /// <param name="industryEntity"></param>
-        /// <param name="jobID"></param>
-        /// <param name="RepeatJob"></param>
-        /// <param name="NumberOrderd"></param>
-        /// <param name="autoInstall"></param>
-        /// <typeparam name="T"></typeparam>
-        public static void EditExsistingJob<T>(Entity industryEntity, Guid jobID, bool RepeatJob = false, ushort NumberOrderd = 1, bool autoInstall = false) where T: BaseDataBlob, IIndustryDB
-        {
-            var jobBatchList = industryEntity.GetDataBlob<T>().JobBatchList;
-            lock (jobBatchList)
-            {
-                var job = jobBatchList.Find((obj) => obj.JobID == jobID);
-                if (job != null)//.Contains(job))
-                {
-                    job.Auto = RepeatJob;
-                    job.NumberOrdered = NumberOrderd;
-                    if (job is ConstructJob)
-                    {
-                        var cj = (ConstructJob)job;
-                        cj.InstallOn = industryEntity;
-                    }
-                }
-            }
-        }
+
 
         public static void EditExsistingJob(Entity industryEntity, Guid prodLine, Guid jobID, bool RepeatJob = false, ushort NumberOrderd = 1, bool autoInstall = false)
         {
@@ -339,28 +296,7 @@ namespace Pulsar4X.ECSLib.Industry
                 
             }
         }
-
         
-        /// <summary>
-        /// as per the tin.
-        /// </summary>
-        /// <param name="industryEntity"></param>
-        /// <param name="jobID"></param>
-        /// <typeparam name="T"></typeparam>
-        public static void CancelExsistingJob<T>(Entity industryEntity, Guid jobID) where T: BaseDataBlob, IIndustryDB
-        {
-            var jobBatchList = industryEntity.GetDataBlob<T>().JobBatchList;
-            lock (jobBatchList)
-            {
-                var job = jobBatchList.Find((obj) => obj.JobID == jobID);
-
-                if (job != null)//.Contains(job))
-                {
-                    jobBatchList.Remove(job);
-                }
-            }
-        }
-       
         public static void CancelExsistingJob(Entity industryEntity, Guid prodLine, Guid jobID) 
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
@@ -373,16 +309,13 @@ namespace Pulsar4X.ECSLib.Industry
             }
         }
 
-        
-
-        
-        internal static void ConstructStuff(Entity colony)
+        internal static void ConstructStuff(Entity industryEntity)
         {
-            CargoStorageDB stockpile = colony.GetDataBlob<CargoStorageDB>();
+            CargoStorageDB stockpile = industryEntity.GetDataBlob<CargoStorageDB>();
             Entity faction;
-            colony.Manager.FindEntityByGuid(colony.FactionOwner, out faction);
+            industryEntity.Manager.FindEntityByGuid(industryEntity.FactionOwner, out faction);
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
-            var industryDB = colony.GetDataBlob<IndustryAbilityDB>();
+            var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
 
             //var pointRates = industryDB.IndustryTypeRates;
             //int maxPoints = industryDB.ConstructionPoints; 
@@ -401,7 +334,7 @@ namespace Pulsar4X.ECSLib.Industry
 
                 for (int i = 0; i < Joblist.Count; i++)
                 {
-                    JobBase batchJob = Joblist[i];
+                    IndustryJob batchJob = Joblist[i];
                     IConstrucableDesign designInfo = factionInfo.IndustryDesigns[batchJob.ItemGuid];
                     float pointsToUse = industryPointsRemaining[designInfo.IndustryTypeID] * productionPercentage;
                     //total number of resources requred for a single job in this batch
@@ -444,7 +377,7 @@ namespace Pulsar4X.ECSLib.Industry
                         
                         if (batchJob.ProductionPointsLeft == 0)
                         {
-                            BatchJobItemComplete(colony, stockpile, batchJob, designInfo);
+                            designInfo.OnConstructionComplete(industryEntity, stockpile, batchJob, designInfo);
                         }
                     }
                 }
@@ -474,183 +407,10 @@ namespace Pulsar4X.ECSLib.Industry
                 }
             }         
         }
-
-
-        static void BatchJobItemComplete(Entity industryEntity, CargoStorageDB storage, JobBase batchJob, IConstrucableDesign designInfo)
-        {
-            batchJob.NumberCompleted++; 
-            switch (batchJob)
-            {
-                case RefineingJob r:
-                    RefiningProcessor.BatchJobItemComplete(industryEntity, storage, (RefineingJob)batchJob, (ProcessedMaterialSD)designInfo);
-                    break;
-                case ConstructJob c:
-                    ConstructionProcessor.BatchJobItemComplete(industryEntity, storage, (ConstructJob)batchJob, (ComponentDesign)designInfo);
-                    break;
-                case ShipYardJob s:
-                    ShipyardProcessor.BatchJobShipComplete(industryEntity, (ShipYardJob)batchJob, (ShipDesign)designInfo);
-                    break;
-            }
-        }
+        
     }
 
 
-    public class IndustryOrder<T>:EntityCommand where T: BaseDataBlob, IIndustryDB 
-    {
-
-        public enum OrderTypeEnum
-        {
-            NewJob,
-            CancelJob,
-            ChangePriority,
-            EditJob
-        }
-        public OrderTypeEnum OrderType;
-        
-        public Guid ItemID { get; set; }
-        public ushort NumberOrderd { get; set; }
-        public bool RepeatJob { get; set; } = false;
-        public bool AutoInstall { get; set; } = false;
-        
-        public short Delta { get; set; }
-        
-        internal override int ActionLanes => 1; //blocks movement
-        internal override bool IsBlocking => true;
-
-
-        private Entity _entityCommanding;
-        internal override Entity EntityCommanding{get{return _entityCommanding;}}
-
-
-        private Entity _factionEntity;
-        private ComponentDesign _design;
-        private StaticDataStore _staticData;
-        private JobBase _job;
-
-
-
-        public static IndustryOrder<T> CreateNewJobOrder(
-            Guid factionGuid, Entity thisEntity,
-            JobBase jobItem
-        )
-        {
-            
-            IndustryOrder<T> order = new IndustryOrder<T>(factionGuid, thisEntity);
-            order._job = jobItem;
-            order.OrderType = OrderTypeEnum.NewJob;
-            order.ItemID = jobItem.ItemGuid;
-            return order;
-        }
-
-        
-        
-        public static IndustryOrder<T> CreateCancelJobOrder(
-            Guid factionGuid, Entity thisEntity,
-            Guid OrderID
-        )
-        {
-            IndustryOrder<T> order = new IndustryOrder<T>(factionGuid, thisEntity);
-            order.OrderType = OrderTypeEnum.CancelJob;
-            order.ItemID = OrderID;
-            return order;
-        }
-        
-        public static IndustryOrder<T> CreateChangePriorityOrder(
-            Guid factionGuid, Entity thisEntity,
-            Guid OrderID, short delta
-        )
-        {
-            IndustryOrder<T> order = new IndustryOrder<T>(factionGuid, thisEntity);
-            order.OrderType = OrderTypeEnum.ChangePriority;
-            order.ItemID = OrderID;
-            order.Delta = delta;
-            return order;
-        }
-        
-        public static IndustryOrder<T> CreateEditJobOrder(
-            Guid factionGuid, Entity thisEntity,
-            Guid OrderID, ushort quantity = 1, bool repeatJob = false, bool autoInstall = false
-        )
-        {
-            IndustryOrder<T> order = new IndustryOrder<T>(factionGuid, thisEntity);
-            order.OrderType = OrderTypeEnum.EditJob;
-            order.ItemID = OrderID;
-            order.NumberOrderd = quantity;
-            order.RepeatJob = repeatJob;
-            order.AutoInstall = autoInstall;
-            return order;
-        }
-        
-        
-        private IndustryOrder(Guid factionGuid, Entity thisEntity)
-        {
-            RequestingFactionGuid = factionGuid;
-            EntityCommandingGuid = thisEntity.Guid;
-            CreatedDate = thisEntity.StarSysDateTime;
-            UseActionLanes = false;
-        }
-        
-
-        internal override void ActionCommand(Game game)
-        {
-            if (!IsRunning)
-            {
-                switch (OrderType)
-                {
-                    case OrderTypeEnum.NewJob:
-                        IndustryTools.AddJob<T>( _entityCommanding, _job);
-                        break;
-                    case OrderTypeEnum.CancelJob:
-                        IndustryTools.CancelExsistingJob<T>(_entityCommanding, ItemID);
-                        break;
-                    case OrderTypeEnum.EditJob:
-                        IndustryTools.EditExsistingJob<T>(_entityCommanding, ItemID, RepeatJob, NumberOrderd, AutoInstall);
-                        break;
-                    case OrderTypeEnum.ChangePriority:
-                        IndustryTools.ChangeJobPriority<T>(_entityCommanding, ItemID, Delta);
-                        break;
-                }
-                
-
-                IsRunning = true;
-            }
-        }
-
-        internal override bool IsValidCommand(Game game)
-        {       
-            _staticData = game.StaticData;
-            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
-            {
-                var factionInfo = _factionEntity.GetDataBlob<FactionInfoDB>();
-                //_job.InitialiseJob(factionInfo, _entityCommanding, ItemID, NumberOrderd, RepeatJob);
-                
-                /* TODO: should we check this? do we need to?
-                if (factionInfo.ComponentDesigns.ContainsKey(ItemID))
-                {
-                    _design = factionInfo.ComponentDesigns[ItemID];
-                    _job = new ConstructJob(_design, NumberOrderd, RepeatJob);
-                    if (_design.IndustryTypeID.HasFlag(IndustryTypeID.Installations))
-                        _job.InstallOn = _entityCommanding;
-                    return true;
-                    
-                }
-                */
-                return true;
-            }
-            return false;
-        }
-
-        internal override bool IsFinished()
-        {
-            if (_job.Auto == false && _job.NumberCompleted == _job.NumberOrdered)
-            {
-                return true;
-            }
-            return false;
-        }
-    
-    }
-    
     
     public class IndustryOrder2:EntityCommand 
     {
