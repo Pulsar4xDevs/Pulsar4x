@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-
+/*
 namespace Pulsar4X.ECSLib
 {
     public class ColonyScreenVM : IViewModel
@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
         public PlanetMineralDepositVM PlanetMineralDepositVM { get; set; }
 
         public RefineryAbilityVM RefineryAbilityVM { get; set; }
-        public ConstructionAbilityVM ConstructionAbilityVM { get; set; }
+        //public ConstructionAbilityVM ConstructionAbilityVM { get; set; }
 
         public ColonyResearchVM ColonyResearchVM { get; set; }
 
@@ -68,7 +68,7 @@ namespace Pulsar4X.ECSLib
          
             RefineryAbilityVM = new RefineryAbilityVM(staticData, _colonyEntity);
 
-            ConstructionAbilityVM = new ConstructionAbilityVM(staticData, _colonyEntity);
+            //ConstructionAbilityVM = new ConstructionAbilityVM(staticData, _colonyEntity);
 
             ColonyResearchVM = new ColonyResearchVM(staticData, _colonyEntity);
         }
@@ -99,7 +99,7 @@ namespace Pulsar4X.ECSLib
         {
             PlanetMineralDepositVM.Refresh();
             RefineryAbilityVM.Refresh();
-            ConstructionAbilityVM.Refresh();
+            //ConstructionAbilityVM.Refresh();
             UpdatePop();
             CargoStoreVM.Update();
             foreach (var facilityvm in Facilities)
@@ -228,3 +228,4 @@ namespace Pulsar4X.ECSLib
         }
     }
 }
+*/

@@ -154,9 +154,16 @@ namespace Pulsar4X.ECSLib.Industry
             }
         }
     }
-
+    public enum ConstructableGuiHints
+    {
+        None,
+        CanBeLaunched,
+        CanBeInstalled
+    }
     public interface IConstrucableDesign
     {
+        ConstructableGuiHints GuiHints { get; }
+        
         Guid ID { get;  }
         string Name { get;  } //player defined name. ie "5t 2kn Thruster".
 
@@ -165,7 +172,7 @@ namespace Pulsar4X.ECSLib.Industry
         int IndustryPointCosts { get; }
         Guid IndustryTypeID { get; }
         
-        void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, IndustryJob batchJob, IConstrucableDesign designInfo);
+        void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo);
 
     }
 
@@ -322,7 +329,7 @@ namespace Pulsar4X.ECSLib.Industry
 
             
             //List<JobBase> constructionJobs = new List<JobBase>(industryDB.JobBatchList);
-            foreach (var kvp in industryDB.ProductionLines)
+            foreach (var kvp in industryDB.ProductionLines.ToArray())
             {
                 Guid prodLineID = kvp.Key;
                 var prodLine = kvp.Value;
@@ -377,7 +384,7 @@ namespace Pulsar4X.ECSLib.Industry
                         
                         if (batchJob.ProductionPointsLeft == 0)
                         {
-                            designInfo.OnConstructionComplete(industryEntity, stockpile, batchJob, designInfo);
+                            designInfo.OnConstructionComplete(industryEntity, stockpile, prodLineID, batchJob, designInfo);
                         }
                     }
                 }

@@ -50,6 +50,7 @@ namespace Pulsar4X.ECSLib.Industry
         }
     }
     */
+    /*
     public class ShipYardJob : JobBase
     {
         public Guid SlipID;
@@ -125,7 +126,9 @@ namespace Pulsar4X.ECSLib.Industry
         
 
     }
-/*
+
+    */
+    /*
     public static class ShipyardProcessor
     {
         internal static void ConstructStuff(Entity colony)

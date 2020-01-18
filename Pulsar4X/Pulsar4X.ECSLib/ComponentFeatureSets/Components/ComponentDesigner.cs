@@ -69,6 +69,7 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentDesign : ICargoable, IConstrucableDesign
     {
+        public ConstructableGuiHints GuiHints { get; set; } 
         public Guid ID { get; internal set; }
         public string Name { get; internal set; } //player defined name. ie "5t 2kn Thruster".
         
@@ -84,9 +85,9 @@ namespace Pulsar4X.ECSLib
         public int CrewReq;
         public int IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, IndustryJob batchJob, IConstrucableDesign designInfo)
+        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         {
-            var colonyConstruction = industryEntity.GetDataBlob<ConstructAbilityDB>();
+            var colonyConstruction = industryEntity.GetDataBlob<IndustryAbilityDB>();
             batchJob.NumberCompleted++;
             batchJob.ResourcesRequired = designInfo.ResourceCosts;
             
@@ -109,10 +110,10 @@ namespace Pulsar4X.ECSLib
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
             {
-                colonyConstruction.JobBatchList.Remove(batchJob);
+                colonyConstruction.ProductionLines[productionLine].Jobs.Remove(batchJob);
                 if (batchJob.Auto)
                 {
-                    colonyConstruction.JobBatchList.Add(batchJob);
+                    colonyConstruction.ProductionLines[productionLine].Jobs.Add(batchJob);
                 }
             }
         }
@@ -187,7 +188,8 @@ namespace Pulsar4X.ECSLib
             IndustryType = componentSD.IndustryTypeID;
             CargoTypeID = componentSD.CargoTypeID;
             _design.CargoTypeID = componentSD.CargoTypeID;
-            
+            if (componentSD.MountType.HasFlag(ComponentMountType.PlanetInstallation))
+                _design.GuiHints = ConstructableGuiHints.CanBeInstalled;
 
             Dictionary<Guid, ChainedExpression> resourceCostForulas = new Dictionary<Guid, ChainedExpression>();
             //Dictionary<Guid, ChainedExpression> mineralCostFormulas = new Dictionary<Guid, ChainedExpression>();

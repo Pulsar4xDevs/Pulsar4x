@@ -134,7 +134,6 @@ namespace Pulsar4X.SDL2UI
             if (_selectedEntity.Entity.HasDataBlob<IndustryAbilityDB>())
             {
                 _industryDB = _selectedEntity.Entity.GetDataBlob<IndustryAbilityDB>();
-                RefineingJob rjob = new RefineingJob();
                 _industryPannel = new IndustryPannel2(_state, _selectedEntity.Entity, _industryDB);
             }
             else

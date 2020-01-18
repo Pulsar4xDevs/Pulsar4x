@@ -26,10 +26,6 @@ namespace Pulsar4X.ECSLib
             blobs.Add(colonyBonuses);       
             MiningDB colonyMinesDB = new MiningDB();
             blobs.Add(colonyMinesDB);
-            RefineAbilityDB colonyRefineAbility = new RefineAbilityDB();
-            blobs.Add(colonyRefineAbility);
-            ConstructAbilityDB colonyConstruction = new ConstructAbilityDB();
-            blobs.Add(colonyConstruction);
             OrderableDB orderableDB = new OrderableDB();
             blobs.Add(orderableDB);
             MassVolumeDB mvDB = new MassVolumeDB();

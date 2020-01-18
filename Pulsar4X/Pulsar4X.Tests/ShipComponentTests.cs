@@ -142,9 +142,9 @@ namespace Pulsar4X.Tests
             facDesigner.ComponentDesignAttributes["Instalation Construction Points"].SetValue();
             ComponentDesign facDesign = facDesigner.CreateDesign(_faction);
 
-            ConstructionAtbDB attributeDB = facDesign.GetAttribute<ConstructionAtbDB>();
+            IndustryAtb attributeDB = facDesign.GetAttribute<IndustryAtb>();
 
-            Assert.AreEqual(100, attributeDB.ConstructionPoints[ConstructionType.ShipComponents]);
+            //Assert.AreEqual(100, attributeDB.IndustryPoints[ConstructionType.ShipComponents]);
 
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(factory.ID, factory);
@@ -428,7 +428,7 @@ namespace Pulsar4X.Tests
                 { new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"),"0"},
                 { new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB"),"0"}
             };
-            refineJobsAbility.AbilityDataBlobType = typeof(RefineResourcesAtbDB).ToString();
+            refineJobsAbility.AbilityDataBlobType = typeof(IndustryAtb).ToString();
             refineJobsAbility.AbilityFormula = "DataBlobArgs([GuidDict], Ability(0))";
             component.ComponentAbilitySDs.Add(refineJobsAbility);
             return component;
@@ -512,7 +512,7 @@ namespace Pulsar4X.Tests
                 { "Fighters", "Ability(3)" },
                 { "Ordnance", "Ability(4)" }
             };
-            atbconstructor.AbilityDataBlobType = typeof(ConstructionAtbDB).ToString();
+            atbconstructor.AbilityDataBlobType = typeof(IndustryAtb).ToString();
             atbconstructor.AbilityFormula = "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.IndustryTypeID'))";
             component.ComponentAbilitySDs.Add(atbconstructor);
 

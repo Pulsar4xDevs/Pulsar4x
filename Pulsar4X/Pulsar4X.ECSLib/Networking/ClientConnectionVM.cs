@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Pulsar4X.Networking;
-
+/*
 namespace Pulsar4X.ECSLib
 {
     public class ClientConnectionVM : ViewModelBase
@@ -79,3 +79,4 @@ namespace Pulsar4X.ECSLib
 
     }
 }
+*/

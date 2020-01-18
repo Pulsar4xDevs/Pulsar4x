@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.CollapsingHeader(storetype.HeaderText + "###" + _entityState.Name + storetype.StorageTypeName, ImGuiTreeNodeFlags.CollapsingHeader))
                 {
 
-                    foreach (CargoItemVM item in storetype.CargoItems)
+                    foreach (CargoItemVM item in storetype.CargoItems.ToArray())
                     {
                         if(ImGui.Selectable(item.ItemName))
                         {

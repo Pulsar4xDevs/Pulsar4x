@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
         {
             get
             {
-                return DataBlobs.ContainsKey(typeof(ConstructAbilityDB)) ;
+                return DataBlobs.ContainsKey(typeof(IndustryAbilityDB)) ;
 
             }
         }

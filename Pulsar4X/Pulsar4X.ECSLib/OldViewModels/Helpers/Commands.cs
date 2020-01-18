@@ -1,7 +1,7 @@
 ﻿using Pulsar4X.ECSLib;
 using System;
 using System.Windows.Input;
-
+/*
 namespace Pulsar4X.ECSLib
 {
     public class JobPriorityCommand<TDataBlob, TJob> : ICommand
@@ -35,3 +35,4 @@ namespace Pulsar4X.ECSLib
 
 
 }
+*/

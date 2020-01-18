@@ -1,11 +1,13 @@
-﻿using Pulsar4X.ECSLib;
+﻿using System;
+using Pulsar4X.ECSLib;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Pulsar4X.ECSLib.Industry;
-
+/*
 namespace Pulsar4X.ECSLib
 {
+    [Obsolete]
     public class JobVM<TDataBlob, TJob> : IViewModel
         where TDataBlob : BaseDataBlob
     {
@@ -19,6 +21,7 @@ namespace Pulsar4X.ECSLib
         private int _jobTotalPoints;
         public string Item
         {
+            
             get
             {
                 if (_job is RefineingJob)
@@ -32,7 +35,7 @@ namespace Pulsar4X.ECSLib
                 else
                     return "Unknown Jobtype";
 
-            }
+            }*
         }
 
         public ushort Completed { get { return _job.NumberCompleted; } set { OnPropertyChanged(); } }
@@ -91,3 +94,4 @@ namespace Pulsar4X.ECSLib
         }
     }
 }
+*/

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Input;
-
+/*
 namespace Pulsar4X.ECSLib
 {
     public class TranslationMoveVM : ViewModelBase, IDBViewmodel
@@ -75,7 +75,7 @@ namespace Pulsar4X.ECSLib
                 return _orbitCommand ?? (_orbitCommand = new CommandHandler(OnOrbitCommand, true));
             }
         }
-        */
+        
         private ICommand _moveCommand;
         public ICommand MoveCommand
         {
@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        /*
+        
         private void OnOrbitCommand()
         {
             OrbitBodyCommand newmove = new OrbitBodyCommand()
@@ -98,7 +98,7 @@ namespace Pulsar4X.ECSLib
                 PeriapsisInKM = this.Perihelion,
             };
             _cmdRef.Handler.HandleOrder(newmove);
-        }*/
+        }
 
         private void OnMoveCommand()
         {
@@ -122,3 +122,4 @@ namespace Pulsar4X.ECSLib
         }
     }
 }
+*/

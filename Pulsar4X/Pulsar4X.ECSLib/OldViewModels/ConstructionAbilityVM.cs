@@ -2,9 +2,10 @@
 using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib.Industry;
-
+/*
 namespace Pulsar4X.ECSLib
 {
+    /*
     public class ConstructionAbilityVM : JobAbilityBaseVM<ConstructAbilityDB, ConstructJob>
     {
         private FactionInfoDB _factionInfo { get 
@@ -25,7 +26,7 @@ namespace Pulsar4X.ECSLib
             NewJobSelectedIndex = 0;
             NewJobBatchCount = 1;
             NewJobRepeat = false;
-        }
+        } */
 /*
         public override void OnNewBatchJob()
         {
@@ -41,6 +42,7 @@ namespace Pulsar4X.ECSLib
             ConstructionProcessor.AddJob(_factionInfo, _colonyEntity_, newjob);
             Refresh();
         }*/
+/*
 [Obsolete]
 public override void OnNewBatchJob()
 {
@@ -48,3 +50,4 @@ public override void OnNewBatchJob()
 }
     }
 }
+*/

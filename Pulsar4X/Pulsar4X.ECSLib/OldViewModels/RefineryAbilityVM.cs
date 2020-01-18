@@ -7,7 +7,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Pulsar4X.ECSLib.Industry;
-
+/*
 namespace Pulsar4X.ECSLib
 {
     public abstract class JobAbilityBaseVM<TDataBlob, TJob> : ViewModelBase
@@ -165,4 +165,4 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-}
+}*/

@@ -97,7 +97,7 @@ namespace Pulsar4X.ECSLib
         public int SelectedScientistIndex { get; set; }
         public ScientistControlVM SelectedScientist { get; set; }
         //public string SelectedScientist { get { return Scientists[SelectedScientist].ScientistFirstName}
-
+/*
         private ICommand _addNewProject;
         public ICommand AddNewProject
         {
@@ -105,7 +105,7 @@ namespace Pulsar4X.ECSLib
             {
                 return _addNewProject ?? (_addNewProject = new CommandHandler(OnNewProject, true));
             }
-        }
+        }*/
 
         public void OnNewProject()
         {

@@ -29,13 +29,13 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         private Guid _selectedProdLine;
         private int _selectedExistingIndex = -1;
-        private JobBase _selectedExistingConJob
+        private IndustryJob _selectedExistingConJob
         {
             get
             {
                 if (_selectedProdLine != Guid.Empty 
                     && _selectedExistingIndex > -1
-                    && _prodLines[_selectedProdLine].Jobs.Count >= _selectedExistingIndex)
+                    && _prodLines[_selectedProdLine].Jobs.Count > _selectedExistingIndex)
                 {
                     return _prodLines[_selectedProdLine].Jobs[_selectedExistingIndex];
                 }
@@ -44,7 +44,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
         }
 
-        private JobBase _lastClickedJob;
+        private IndustryJob _lastClickedJob { get; set; }
+        private IConstrucableDesign _lastClickedDesign;
         
         private Entity _selectedEntity;
         private IndustryAbilityDB _industryDB;
@@ -122,16 +123,22 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         Guid SelectedConstrucableID
         {
-            get { return _contructablesByPline[_newjobSelectionIndex.pline].itemIDs[_newjobSelectionIndex.item]; }
+
+            get
+            {
+                if(_contructablesByPline.Count != _industryDB.ProductionLines.Count)
+                    OnUpdate();
+                return _contructablesByPline[_newjobSelectionIndex.pline].itemIDs[_newjobSelectionIndex.item];
+            }
         }
 
         public void Display()
         {
   
-            ImGui.Columns(3);
+            ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 285);
             ImGui.SetColumnWidth(1, 300);
-            ImGui.SetColumnWidth(1, 190);
+            //ImGui.SetColumnWidth(1, 190);
             
             ProdLineDisplay();
             
@@ -140,10 +147,11 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.BeginGroup();
             EditButtonsDisplay();
             NewJobDisplay();
+            if(_lastClickedJob != null)
+                CostsDisplay(_lastClickedJob);
             ImGui.EndGroup();
-            ImGui.NextColumn();
-            if(_selectedExistingConJob != null)
-                CostsDisplay(_selectedExistingConJob);
+            //ImGui.NextColumn();
+
             
             
                 
@@ -160,6 +168,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 IndustryAbilityDB.ProductionLine ud = kvp.Value;
                 ImGui.PushID(kvp.Key.ToString());
                 //ImGui.Selectable()
+                
                 if (ImGui.CollapsingHeader(ud.FacName))
                 {
                     ImGui.Columns(2);
@@ -179,6 +188,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         {
                             _selectedExistingIndex =  ji;
                             _lastClickedJob = _selectedExistingConJob;
+                            _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                         }
 
                         ImGui.NextColumn();
@@ -192,11 +202,14 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                         ImGui.NextColumn();
                     }
+                    ImGui.Columns(1);
                 }
                 if (ImGui.IsItemClicked())
                 {
                     _selectedProdLine = kvp.Key;
                     _newjobSelectionIndex = (_selectedProdLine, 0);
+                    _lastClickedJob = _selectedExistingConJob;
+                    _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                 }
                 
                 ImGui.PopID();
@@ -244,7 +257,48 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
 
+            if (_lastClickedDesign != null)
+            {
+                if (_lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeInstalled)
+                {
+                    ImGui.Checkbox("Auto Install on colony", ref _newJobAutoInstall);
+                    
+                    if (_newJobAutoInstall)
+                        _lastClickedJob.InstallOn = _selectedEntity;
+                    else
+                        _lastClickedJob.InstallOn = null;
+                    
+                }
+                
+                if (_lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeLaunched)
+                {
+                    if (_selectedEntity.HasDataBlob<ColonyInfoDB>())
+                    {
+                        var s = (ShipDesign)_lastClickedDesign;
+                        var planet = _selectedEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
+                        var lowOrbit = planet.GetDataBlob<MassVolumeDB>().RadiusInM * 0.33333;
+                    
+                        var mass = s.Mass;
+                    
+                        var fuelCost = OrbitMath.FuelCostToLowOrbit(planet, mass);
+
+                    
+                        if (ImGui.Button("Launch to Low Orbit"))
+                        {
+                            LaunchShipCmd.CreateCommand(_factionID, _selectedEntity, _selectedProdLine, _lastClickedJob.JobID);
+                        }
+                        //ImGui.SameLine();
+
+
+                        ImGui.Text("Fuel Cost: " + fuelCost);
+                    
+                    }
+                }
+            }
+
             ImGui.EndGroup();
+            
+            //ImGui.Button("Install On Parent")
             
         }
 
@@ -262,6 +316,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     _newjobSelectionIndex = (_newjobSelectionIndex.pline, curItemIndex);
                     _newConJob = new IndustryJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                     _lastClickedJob = _newConJob;
+                    _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                 }
 
                 ImGui.InputInt("Batch Count", ref _newJobbatchCount);
@@ -278,7 +333,10 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                     var cmd = IndustryOrder2.CreateNewJobOrder(_factionID, _selectedEntity, _selectedProdLine, _newConJob);
                     _newConJob.InitialiseJob((ushort)_newJobbatchCount, _newJobRepeat);
-
+                    if(_newJobAutoInstall)
+                        _newConJob.InstallOn = _selectedEntity;
+                    _lastClickedJob = _newConJob;
+                    _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                     StaticRefLib.OrderHandler.HandleOrder(cmd);
                 }
 
@@ -289,7 +347,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         
         void CostsDisplay(JobBase selectedJob)
         {
-            ImGui.BeginChild("Resources Requred", new Vector2(188, 184 ), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("Resources Requred", new Vector2(294, 184 ), true, ImGuiWindowFlags.ChildWindow);
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 140);
             ImGui.SetColumnWidth(1, 48);
@@ -309,134 +367,3 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
     }
 }
-
-
-
-                    /*
-                    
-                    //ImGui.Text(ud.FacName + " points: " + ud.MaxPoints);
-                    ImGui.Columns(2);
-                    ImGui.SetColumnWidth(0, 416);
-                    ImGui.SetColumnWidth(1, 200);
-
-                    ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
-                    //ImGui.Text("Industry Output:" + _constrDB.ConstructionPoints);
-                    ImGui.BeginChild("Current Jobs", new Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
-                    Vector2 progsize = new Vector2(128, ImGui.GetTextLineHeight());
-                    ImGui.Columns(2);
-                    ImGui.SetColumnWidth(0, 128);
-
-                    for (int ji = 0; ji < ud.Jobs.Count; ji++)
-                    {
-                        var cpos = ImGui.GetCursorPos();
-                        var batchJob = ud.Jobs[ji];
-                        string jobname = ud.Jobs[ji].Name;
-
-                        bool selected = _selectedExistingIndex ==  ji;
-                        float percent = 1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost;
-                        ImGui.ProgressBar(percent, progsize, "");
-                        ImGui.SetCursorPos(cpos);
-                        if (ImGui.Selectable(jobname, ref selected))
-                        {
-                            _selectedExistingIndex =  ji;
-                            _lastClickedJob = _selectedExistingConJob;
-                        }
-
-                        ImGui.NextColumn();
-                        ImGui.Text(batchJob.NumberCompleted + "/" + batchJob.NumberOrdered);
-
-                        if (batchJob.Auto)
-                        {
-                            ImGui.SameLine();
-                            ImGui.Image(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16));
-                        }
-
-                        ImGui.NextColumn();
-                    }
-
-                    ImGui.EndChild();
-
-
-                    ImGui.BeginChild("InitialiseJob", new Vector2(404, 84), true, ImGuiWindowFlags.ChildWindow);
-
-                    int curItem = _newjobSelectionIndex;
-
-                    if (ImGui.Combo("NewJobSelection", ref curItem, _constructablesNames, _constructablesNames.Length))
-                    {
-                        _newjobSelectionIndex = curItem;
-                        _newConJob = new IndustryJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
-                        _lastClickedJob = _newConJob;
-                    }
-
-                    ImGui.InputInt("Batch Count", ref _newJobbatchCount);
-
-                    ImGui.Checkbox("Repeat Job", ref _newJobRepeat);
-                    ImGui.SameLine();
-                    //if the selected item can be installed on a colony:
-
-
-
-
-
-                    if (ImGui.Button("Create New Job"))
-                    {
-                        if (_newConJob == null) //make sure that a job has been created. 
-                        {
-                            _newConJob = new IndustryJob(_state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
-                        }
-
-                        var cmd = IndustryOrder2.CreateNewJobOrder(_factionID, _selectedEntity, _selectedProdLine, _newConJob);
-                        _newConJob.InitialiseJob((ushort)_newJobbatchCount, _newJobRepeat);
-
-                        StaticRefLib.OrderHandler.HandleOrder(cmd);
-                    }
-
-
-
-                    ImGui.EndChild();
-                    */
-
-
-
-                /*
-                ImGui.SameLine();
-
-                ImGui.BeginChild("Buttons", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
-                ImGui.BeginGroup();
-
-                if (ImGui.ImageButton(_state.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
-                {
-
-                    var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, -1);
-                    StaticRefLib.OrderHandler.HandleOrder(cmd);
-                }
-
-                if (ImGui.ImageButton(_state.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
-                {
-                    var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, 1);
-                    StaticRefLib.OrderHandler.HandleOrder(cmd);
-                }
-
-                ImGui.EndGroup();
-                ImGui.SameLine();
-                if (ImGui.ImageButton(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
-                {
-
-                    var jobcount = _selectedExistingConJob.NumberOrdered;
-                    var jobrepeat = _selectedExistingConJob.Auto;
-
-                    var cmd = IndustryOrder2.CreateEditJobOrder(_factionID, _selectedEntity, _selectedProdLine,_selectedExistingConJob.JobID, jobcount, !jobrepeat);
-                    StaticRefLib.OrderHandler.HandleOrder(cmd);
-                }
-
-                ImGui.SameLine();
-                if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
-                {
-                    //new ConstructCancelJob(_state.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
-                    var cmd = IndustryOrder2.CreateCancelJobOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID);
-
-                    StaticRefLib.OrderHandler.HandleOrder(cmd);
-                }
-
-                ImGui.EndGroup();
-                */

@@ -9,6 +9,7 @@ namespace Pulsar4X.ECSLib
     
     public class ShipDesign : ICargoable, IConstrucableDesign
     {
+        public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;
         public Guid ID { get; } = Guid.NewGuid();
         public string Name { get; set; }
         public Guid CargoTypeID { get; }
@@ -29,7 +30,7 @@ namespace Pulsar4X.ECSLib
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ship Assembly"
         public Guid IndustryTypeID { get; } = new Guid("91823C5B-A71A-4364-A62C-489F0183EFB5");
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, IndustryJob batchJob, IConstrucableDesign designInfo)
+        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         { 
             var industrydb = industryEntity.GetDataBlob<IndustryAbilityDB>();
             

@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-
+/*
 namespace Pulsar4X.ECSLib
 {
     public class ShipOrderVM : IViewModel
@@ -506,7 +506,7 @@ namespace Pulsar4X.ECSLib
                         
                 
             }
-*/
+
             _fireControlList.SelectedIndex = 0;
 
             
@@ -559,7 +559,7 @@ namespace Pulsar4X.ECSLib
             //new List<KeyValuePair<Entity, List<Entity>>>(SelectedShip.GetDataBlob<ComponentInstancesDB>().SpecificInstances.Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>() || item.Key.HasDataBlob<SimpleBeamWeaponAtbDB>()).ToList());
 
             bool isBeamControlled = false;
-            */
+            
 
 
             // Get a list of all beam weapons not currently controlled by a fire control
@@ -575,7 +575,7 @@ namespace Pulsar4X.ECSLib
                         _freeBeamList.Add(new KeyValuePair<Entity, string>(instance, kvp.Key.GetDataBlob<NameDB>().DefaultName + " " + ++beamCount));
 
                 }
-            }*/
+            }
 
             OnPropertyChanged(nameof(AttachedBeamList));
             OnPropertyChanged(nameof(FreeBeamList));
@@ -614,7 +614,7 @@ namespace Pulsar4X.ECSLib
                         return true;
                 }
             }
-            */
+            
             return false;
         }
 
@@ -651,7 +651,7 @@ namespace Pulsar4X.ECSLib
             BaseOrder nextOrder;
             //Queue<BaseOrder> orderList = SelectedShip.GetDataBlob<ShipInfoDB>().Orders;
 
-            /*
+            
             int totalOrders = orderList.Count;
 
             for (int i = 0; i < totalOrders; i++)
@@ -660,7 +660,7 @@ namespace Pulsar4X.ECSLib
                 if(nextOrder != SelectedMoveOrder)
                     orderList.Enqueue(nextOrder);
             }
-*/
+
             
             RefreshOrders(0,0);
         }
@@ -788,3 +788,4 @@ namespace Pulsar4X.ECSLib
 
     }
 }
+*/
