@@ -137,7 +137,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
   
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 285);
-            ImGui.SetColumnWidth(1, 300);
+            ImGui.SetColumnWidth(1, 308);
             //ImGui.SetColumnWidth(1, 190);
             
             ProdLineDisplay();
@@ -351,6 +351,10 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 140);
             ImGui.SetColumnWidth(1, 48);
+            ImGui.Text("Industry Points");
+            ImGui.NextColumn();
+            ImGui.Text(selectedJob.ProductionPointsLeft.ToString());
+            ImGui.NextColumn();
             foreach (var item in selectedJob.ResourcesRequired)
             {
                 ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(item.Key);

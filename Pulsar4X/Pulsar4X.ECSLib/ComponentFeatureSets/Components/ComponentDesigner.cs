@@ -321,7 +321,7 @@ namespace Pulsar4X.ECSLib
                     try
                     {
                         dynamic attrbute = (IComponentDesignAttribute)Activator.CreateInstance(designAttribute.DataBlobType, constructorArgs);
-                        _design.AttributesByType.Add(attrbute.GetType(), attrbute);
+                        _design.AttributesByType[attrbute.GetType()] = attrbute;
                     }
                     catch (MissingMethodException e)
                     {
@@ -338,7 +338,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            faction.InternalComponentDesigns.Add(_design.ID, _design);
+            faction.InternalComponentDesigns[_design.ID] = _design;
             faction.IndustryDesigns[_design.ID] = _design;
             return _design;
             

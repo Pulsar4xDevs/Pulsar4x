@@ -88,6 +88,9 @@ namespace Pulsar4X.SDL2UI
                     {
                         _componentDesigner.Name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
                         _componentDesigner.CreateDesign(_state.Faction);
+                        //we reset the designer here, so we don't end up trying to edit the precious design. 
+                        var factionTech = _state.Faction.GetDataBlob<FactionTechDB>();
+                        _componentDesigner = new ComponentDesigner(_designables[_designType], factionTech);
                     }
                     ImGui.NextColumn();
                     ImGui.BeginChild("ComponentData");
