@@ -24,8 +24,8 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentDesignAttribute
     {
-        public string Name;
-        public string Description;
+        public string Name ="";
+        public string Description ="";
 
         public GuiHint GuiHint;
         public Type DataBlobType;
