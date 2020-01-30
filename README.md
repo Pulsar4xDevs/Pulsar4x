@@ -64,5 +64,8 @@ You'll need SDL2 installed.
 **Important: there are a number of NuGet packages that VS/Monodevelop should automaticaly get the first time you attempt to build. 
 The IDE will have a number of errors but build the solution anyway, VS will get the packages for you.**
 
+### Compiling from a terminal:
+See https://github.com/Pulsar4xDevs/Pulsar4x/issues/255 for instructions on compiling in linux from the term.
+
 ## Working with the code:
 This section is a work in progress. Read the pages on the [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki), which includes some [style guidelines](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/Formating-rules-and-guidelines) or ask me questions on [Gitter](https://gitter.im/Pulsar4x/Lobby#), [Discord](https://discord.gg/qy8eZHh), or create an [issue](https://github.com/Pulsar4xDevs/Pulsar4x/issues). 
