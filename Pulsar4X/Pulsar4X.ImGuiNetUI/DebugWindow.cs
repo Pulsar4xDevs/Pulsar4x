@@ -206,6 +206,7 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.Begin("debug", ref IsActive))
                 {
                     ImGui.Text(_state.PrimarySystemDateTime.ToString());
+                    ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
 
                     if (ImGui.CollapsingHeader("Camera Functions", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
