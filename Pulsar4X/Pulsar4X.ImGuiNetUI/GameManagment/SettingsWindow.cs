@@ -15,7 +15,7 @@ namespace Pulsar4X.SDL2UI
         //UserOrbitSettings _userOrbitSettings;
 
         bool IsThreaded;
-
+        private bool EnforceSingleThread;
         bool RalitiveOrbitVelocity;
         private SettingsWindow()
         {
@@ -25,7 +25,8 @@ namespace Pulsar4X.SDL2UI
 
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             IsThreaded = _state.Game.Settings.EnableMultiThreading;
-
+            EnforceSingleThread = _state.Game.Settings.EnforceSingleThread;
+            
             RalitiveOrbitVelocity = ECSLib.OrbitProcessor.UseRalitiveVelocity;
         }
         internal static SettingsWindow GetInstance()
@@ -70,6 +71,17 @@ namespace Pulsar4X.SDL2UI
                         {
                             _state.Game.Settings.EnableMultiThreading = IsThreaded;
                         }
+
+                        if (ImGui.Checkbox("EnforceSingleThread", ref EnforceSingleThread))
+                        {
+                            _state.Game.Settings.EnforceSingleThread = EnforceSingleThread;
+                            if (EnforceSingleThread)
+                            {
+                                IsThreaded = false;
+                                _state.Game.Settings.EnableMultiThreading = false;
+                            }
+                        }
+
                         if (ImGui.Checkbox("Translate Uses Ralitive Velocity", ref RalitiveOrbitVelocity))
                         {
                             ECSLib.OrbitProcessor.UseRalitiveVelocity = RalitiveOrbitVelocity;

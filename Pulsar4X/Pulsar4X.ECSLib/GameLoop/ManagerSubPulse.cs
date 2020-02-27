@@ -23,6 +23,8 @@ namespace Pulsar4X.ECSLib
         private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
 
         public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
+        public bool IsProcessing = false;
+        public string CurrentProcess = "Waiting";
 
         private ProcessorManager _processManager;
 
@@ -334,6 +336,7 @@ namespace Pulsar4X.ECSLib
                 throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
             //the system may need to run several times for a target datetime
             //keep processing the system till we've reached the wanted datetime
+            IsProcessing = true;
             while (StarSysDateTime < targetDateTime)
             {
                 //calculate max time the system can run/time to next interupt
@@ -347,6 +350,9 @@ namespace Pulsar4X.ECSLib
                 //_entityManager.Game.ProcessorManager.Hotloop<PropulsionDB>(_entityManager, (int)deltaActual.TotalSeconds);
                 ProcessToNextInterupt(nextDate);
             }
+
+            CurrentProcess = "Waiting";
+            IsProcessing = false;
         }
 
         private DateTime GetNextInterupt(TimeSpan maxSpan)
@@ -378,6 +384,7 @@ namespace Pulsar4X.ECSLib
                 {
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
+                    CurrentProcess = systemProcess.ToString();
                     systemProcess.ProcessManager(_entityManager, deltaSeconds);
                     sw.Stop();
                     ProcessTime[systemProcess.GetType()] = sw.Elapsed;
@@ -387,6 +394,7 @@ namespace Pulsar4X.ECSLib
                 {
                     var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
                     Stopwatch sw = new Stopwatch();
+                    CurrentProcess = instanceProcessSet.Key;
                     sw.Start();
                     foreach (var entity in instanceProcessSet.Value)
                     {

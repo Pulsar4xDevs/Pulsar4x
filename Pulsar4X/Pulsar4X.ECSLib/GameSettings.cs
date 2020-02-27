@@ -98,7 +98,8 @@ namespace Pulsar4X.ECSLib
         public TimeSpan EconomyCycleTime { get; set; } = TimeSpan.FromDays(1); //this is currently not used here, need to re-implement
 
         public bool EnableMultiThreading { get; set; } = false;
-
+        public bool EnforceSingleThread { get; set; } = false; //if above is false and this is true, everything will be done on the main thread, and the UI will wait for processes to finish before updating.
+        
 
 
         #endregion

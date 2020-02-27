@@ -21,6 +21,11 @@ namespace Pulsar4X.ECSLib
         Stopwatch _subpulseStopwatch = new Stopwatch();
         private Timer _timer = new Timer();
 
+        private Action<TimeLoop> runSystemProcesses = (TimeLoop obj) =>
+        {
+            obj.DoProcessing(obj.GameGlobalDateTime + obj.Ticklength);
+        };
+        
         //changes how often the tick happens
         public float TimeMultiplier
         {
@@ -118,7 +123,13 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public void TimeStep()
         {
-            DoProcessing(GameGlobalDateTime + Ticklength);
+            
+            //DoProcessing(GameGlobalDateTime + Ticklength);
+            
+            Task tsk = Task.Run(() => DoProcessing(GameGlobalDateTime + Ticklength));
+            if (_game.Settings.EnforceSingleThread)
+                tsk.Wait();
+            //tsk.Start();
             _timer.Stop();
         }
 
@@ -127,7 +138,11 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public void TimeStep(DateTime toDate)
         {
-            DoProcessing(toDate);
+            //DoProcessing(toDate);
+            Task tsk = Task.Run(() => DoProcessing(toDate));
+            if (_game.Settings.EnforceSingleThread)
+                tsk.Wait();
+            //tsk.Start();
             _timer.Stop();
         }
 

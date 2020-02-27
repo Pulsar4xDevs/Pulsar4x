@@ -292,6 +292,16 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text(item.Value.ToString());
                         }
 
+                        foreach (var starsys in StaticRefLib.Game.Systems.Values)
+                        {
+                            ImGui.Text(starsys.Guid.ToString()); 
+                            ImGui.Text("    IsProcecssing: " + starsys.ManagerSubpulses.IsProcessing);
+                            ImGui.Text("    CurrentProcess: " + starsys.ManagerSubpulses.CurrentProcess);
+                        }
+                        
+                        
+
+
                     }
 
                     if (ImGui.CollapsingHeader("GraphicTests", ImGuiTreeNodeFlags.CollapsingHeader))
