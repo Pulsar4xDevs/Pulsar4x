@@ -49,11 +49,11 @@ namespace Pulsar4X.SDL2UI
             if (IsActive && ImGui.Begin("Component Design", ref IsActive, _flags))
             {             
 
-                GuiDesignUI();
+                GuiDesignUI();//Part design
 
-                ImGui.Columns(2, "Main");
+                ImGui.Columns(2, "Main");//Col 1 contains list of comp types, col 2 contains the cost
 
-                if (ImGui.ListBox("", ref _designType, _designTypes, _designTypes.Length))
+                if (ImGui.ListBox("", ref _designType, _designTypes, _designTypes.Length))//Lists the possible comp types
                 {
                     var factionTech = _state.Faction.GetDataBlob<FactionTechDB>();
                     var staticdata = StaticRefLib.StaticData;
@@ -62,30 +62,31 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 ImGui.NextColumn();
-                GuiCostText();
+
+                GuiCostText();//Print cost
 
                 ImGui.End();
             }
 
-            void GuiDesignUI()
+            void GuiDesignUI()//Creates all UI elements need for designing the Component
             {
                 ImGui.Text("Component Specifications");
-                if (_componentDesigner != null)
+                if (_componentDesigner != null)//Make sure comp is selected
                 {
-                    foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values)
+                    foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values)//For each property of the comp type
                     {
 
-                        switch (attribute.GuiHint)
+                        switch (attribute.GuiHint)//Either
                         {
                             case GuiHint.None:
                                 break;
-                            case GuiHint.GuiTechSelectionList:
+                            case GuiHint.GuiTechSelectionList://Let the user pick a type from a list
                                 GuiHintTechSelection(attribute);
                                 break;
-                            case GuiHint.GuiSelectionMaxMin:
+                            case GuiHint.GuiSelectionMaxMin://Set a value
                                 GuiHintMaxMin(attribute);
                                 break;
-                            case GuiHint.GuiTextDisplay:
+                            case GuiHint.GuiTextDisplay://Display a stat
                                 GuiHintText(attribute);
                                 break;
                             default:
@@ -106,7 +107,7 @@ namespace Pulsar4X.SDL2UI
                     }
                     ImGui.NewLine();
                 } 
-                else
+                else//Tell the user they don't have a comp type selected
                 {
                     ImGui.NewLine();
                     ImGui.Text("No component type selected");
@@ -119,10 +120,10 @@ namespace Pulsar4X.SDL2UI
 
 
 
-            void GuiCostText()
+            void GuiCostText()//Prints a 2 col table with the costs of the part
             {
                 ImGui.BeginChild("Cost");
-                if (_componentDesigner != null)
+                if (_componentDesigner != null)//If a part time is selected
                 {
                     ImGui.Columns(2);
                     ImGui.BeginTabItem("Cost");
@@ -134,7 +135,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Research Cost");
                     ImGui.Text("Build Cost");
                     ImGui.Text("Resource Costs");
-                    ImGui.NextColumn();
+                    ImGui.NextColumn();//Add all the cost names to col 1
 
                     
                     ImGui.Text(_componentDesigner.MassValue.ToString());
@@ -143,8 +144,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(_componentDesigner.CreditCostValue.ToString());
                     ImGui.Text(_componentDesigner.ResearchCostValue.ToString());
                     ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString());
-                    ImGui.NextColumn();
-
+                    ImGui.NextColumn();//Add all the price values to col 2
 
 
                     foreach (var kvp in _componentDesigner.ResourceCostValues)
