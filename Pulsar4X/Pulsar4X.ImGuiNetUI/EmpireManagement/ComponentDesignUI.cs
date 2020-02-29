@@ -16,6 +16,7 @@ namespace Pulsar4X.SDL2UI
         private string[] _designTypes;
         private ComponentTemplateSD[] _designables;
         private byte[] _nameInputBuffer = new byte[128];
+        bool compactmod = false;
 
         private ComponentDesignUI()
         {
@@ -53,7 +54,15 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.Columns(2, "Main");//Col 1 contains list of comp types, col 2 contains the cost
 
-                if (ImGui.ListBox("", ref _designType, _designTypes, _designTypes.Length))//Lists the possible comp types
+                int numelements = Convert.ToInt32((ImGui.GetContentRegionAvail().Y - 20) / 17);  
+                if (numelements < 4) {
+                    numelements = 4;
+                }
+                else if (numelements > _designTypes.Length) {
+                    numelements = _designTypes.Length;
+                }
+                ImGui.PushItemWidth(-1);
+                if (ImGui.ListBox("", ref _designType, _designTypes, _designTypes.Length, numelements))//Lists the possible comp types
                 {
                     var factionTech = _state.Faction.GetDataBlob<FactionTechDB>();
                     var staticdata = StaticRefLib.StaticData;
@@ -62,15 +71,22 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 ImGui.NextColumn();
-
                 GuiCostText();//Print cost
-
                 ImGui.End();
             }
 
             void GuiDesignUI()//Creates all UI elements need for designing the Component
             {
                 ImGui.Text("Component Specifications");
+                ImGui.SameLine(ImGui.GetWindowWidth() - 70);
+                if (ImGui.Button("Compact"))
+                {
+                    compactmod = !compactmod;
+                }
+
+
+                ImGui.NewLine();
+
                 if (_componentDesigner != null)//Make sure comp is selected
                 {
                     foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values)//For each property of the comp type
@@ -214,16 +230,33 @@ namespace Pulsar4X.SDL2UI
             }
             void GuiHintText(ComponentDesignAttribute attribute)
             {
-                ImGui.TextWrapped(attribute.Name + ": ");
-                ImGui.SameLine();
-                ImGui.TextWrapped(attribute.Value.ToString());
-                ImGui.NewLine();
+                if(compactmod)
+                {
+                    ImGui.TextWrapped(attribute.Name + ": " + attribute.Value.ToString());
+                    ImGui.NewLine();
+                }
+                else
+                {
+                    ImGui.TextWrapped(attribute.Name + ":");
+                    ImGui.SameLine();
+                    ImGui.TextWrapped(attribute.Value.ToString());
+                    ImGui.NewLine();
+                }
             }
             void GuiHintMaxMin(ComponentDesignAttribute attribute)
             {
-                ImGui.TextWrapped(attribute.Name + ": ");
-                ImGui.SameLine();
-                ImGui.TextWrapped(attribute.Description);
+                if (compactmod)
+                {
+                    ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
+                    ImGui.NewLine();
+                }
+                else
+                {
+                    ImGui.TextWrapped(attribute.Name + ":");
+                    ImGui.SameLine();
+                    ImGui.TextWrapped(attribute.Description);
+                    ImGui.NewLine();
+                }
 
                 attribute.SetMax();
                 attribute.SetMin();
@@ -250,21 +283,38 @@ namespace Pulsar4X.SDL2UI
                     fstepPtr =  new IntPtr(&fstep);
                 }
                 //ImGui.DragScalar("##slider" + attribute.Name, ImGuiDataType.Double, valPtr, 1f, minPtr, maxPtr);
-                if (ImGui.SliderScalar("##scaler" + attribute.Name, ImGuiDataType.Double, valPtr, minPtr, maxPtr))
+                
+
+                if (compactmod)
                 {
-                    attribute.SetValueFromInput(val);
-                    
-                    
                 }
-                if(ImGui.InputScalar("##input" + attribute.Name, ImGuiDataType.Double, valPtr, stepPtr, fstepPtr))
+                else
+                {
+                    ImGui.PushItemWidth(-1);
+                    if (ImGui.SliderScalar("##scaler" + attribute.Name, ImGuiDataType.Double, valPtr, minPtr, maxPtr))
+                    {
+                        attribute.SetValueFromInput(val);
+                    }
+                }
+                ImGui.PushItemWidth(-1);
+                if (ImGui.InputScalar("##input" + attribute.Name, ImGuiDataType.Double, valPtr, stepPtr, fstepPtr))
                     attribute.SetValueFromInput(val);
                 ImGui.NewLine();
             }
             void GuiHintTechSelection(ComponentDesignAttribute attribute)
             {
-                ImGui.TextWrapped(attribute.Name + ": ");
-                ImGui.SameLine();
-                ImGui.TextWrapped(attribute.Description);
+                if (compactmod)
+                {
+                    ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
+                    ImGui.NewLine();
+                }
+                else
+                {
+                    ImGui.TextWrapped(attribute.Name + ":");
+                    ImGui.SameLine();
+                    ImGui.TextWrapped(attribute.Description);
+                    ImGui.NewLine();
+                }
                 //StaticRefLib.StaticData.Techs[attribute.Value]
                 ImGui.TextWrapped(attribute.Value.ToString());
 /*
