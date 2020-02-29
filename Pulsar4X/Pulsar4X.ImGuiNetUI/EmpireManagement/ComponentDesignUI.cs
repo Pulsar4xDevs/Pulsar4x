@@ -195,15 +195,15 @@ namespace Pulsar4X.SDL2UI
 
             void GuiHintText(ComponentDesignAttribute attribute)
             {
-                ImGui.Text(attribute.Name);
-                ImGui.Text(attribute.Description);
-                ImGui.Text(attribute.Value.ToString());
+                ImGui.TextWrapped(attribute.Name);
+                ImGui.TextWrapped(attribute.Description);
+                ImGui.TextWrapped(attribute.Value.ToString());
 
             }
             void GuiHintMaxMin(ComponentDesignAttribute attribute)
             {
-                ImGui.Text(attribute.Name);
-                ImGui.Text(attribute.Description);
+                ImGui.TextWrapped(attribute.Name);
+                ImGui.TextWrapped(attribute.Description);
 
                 attribute.SetMax();
                 attribute.SetMin();
@@ -241,10 +241,10 @@ namespace Pulsar4X.SDL2UI
             }
             void GuiHintTechSelection(ComponentDesignAttribute attribute)
             {
-                ImGui.Text(attribute.Name);
-                ImGui.Text(attribute.Description);
+                ImGui.TextWrapped(attribute.Name);
+                ImGui.TextWrapped(attribute.Description);
                 //StaticRefLib.StaticData.Techs[attribute.Value]
-                ImGui.Text(attribute.Value.ToString());
+                ImGui.TextWrapped(attribute.Value.ToString());
 /*
                 int techSelection;
                 List<string> techs = attribute.GuidDictionary
