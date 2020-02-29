@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
@@ -18,7 +19,7 @@ namespace Pulsar4X.SDL2UI
 
         private ComponentDesignUI()
         {
-            _flags = ImGuiWindowFlags.NoCollapse;
+            //_flags = ImGuiWindowFlags.NoCollapse;
         }
 
         internal static ComponentDesignUI GetInstance()
@@ -46,10 +47,13 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
             if (IsActive && ImGui.Begin("Component Design", ref IsActive, _flags))
-            {
+            {             
 
-                ImGui.Columns(2);
-                if (ImGui.ListBox("Type", ref _designType, _designTypes, _designTypes.Length))
+                GuiDesignUI();
+
+                ImGui.Columns(2, "Main");
+
+                if (ImGui.ListBox("", ref _designType, _designTypes, _designTypes.Length))
                 {
                     var factionTech = _state.Faction.GetDataBlob<FactionTechDB>();
                     var staticdata = StaticRefLib.StaticData;
@@ -57,12 +61,20 @@ namespace Pulsar4X.SDL2UI
                     _nameInputBuffer = ImGuiSDL2CSHelper.BytesFromString(_componentDesigner.Name, 32);
                 }
 
+                ImGui.NextColumn();
+                GuiCostText();
+
+                ImGui.End();
+            }
+
+            void GuiDesignUI()
+            {
+                ImGui.Text("Component Specifications");
                 if (_componentDesigner != null)
                 {
-
                     foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values)
                     {
- 
+
                         switch (attribute.GuiHint)
                         {
                             case GuiHint.None:
@@ -80,10 +92,10 @@ namespace Pulsar4X.SDL2UI
                                 throw new ArgumentOutOfRangeException();
                         }
 
-                        
-                    }
 
-                    ImGui.InputText("Component Name", _nameInputBuffer, 32);
+                    }
+                    ImGui.Text("Name");
+                    ImGui.InputText("", _nameInputBuffer, 32);
                     if (ImGui.Button("Create Design"))
                     {
                         _componentDesigner.Name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
@@ -92,47 +104,53 @@ namespace Pulsar4X.SDL2UI
                         var factionTech = _state.Faction.GetDataBlob<FactionTechDB>();
                         _componentDesigner = new ComponentDesigner(_designables[_designType], factionTech);
                     }
-                    ImGui.NextColumn();
-                    ImGui.BeginChild("ComponentData");
+                    ImGui.NewLine();
+                } 
+                else
+                {
+                    ImGui.NewLine();
+                    ImGui.Text("No component type selected");
+                    ImGui.NewLine();
+                }
+            }
+
+            
+
+
+
+
+            void GuiCostText()
+            {
+                ImGui.BeginChild("Cost");
+                if (_componentDesigner != null)
+                {
                     ImGui.Columns(2);
+                    ImGui.BeginTabItem("Cost");
+                    
                     ImGui.Text("Mass");
-                    ImGui.NextColumn();
-                    ImGui.Text(_componentDesigner.MassValue.ToString());
-                    ImGui.NextColumn();
-                    
                     ImGui.Text("Volume");
-                    ImGui.NextColumn();
-                    ImGui.Text(_componentDesigner.VolumeValue.ToString());
-                    ImGui.NextColumn();
-                    
-                    ImGui.Text("Crew Requred");
-                    ImGui.NextColumn();
-                    ImGui.Text(_componentDesigner.CrewReqValue.ToString());
-                    ImGui.NextColumn();
-                    
+                    ImGui.Text("Crew Requred"); 
                     ImGui.Text("Cost");
-                    ImGui.NextColumn();
-                    ImGui.Text(_componentDesigner.CreditCostValue.ToString());
-                    ImGui.NextColumn();
-                    
                     ImGui.Text("Research Cost");
-                    ImGui.NextColumn();
-                    ImGui.Text(_componentDesigner.ResearchCostValue.ToString());
-                    ImGui.NextColumn();
-                    
                     ImGui.Text("Build Cost");
-                    ImGui.NextColumn();
-                    ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString());
-                    ImGui.NextColumn();
-                    
                     ImGui.Text("Resource Costs");
                     ImGui.NextColumn();
-                    ImGui.NextColumn();
+
                     
+                    ImGui.Text(_componentDesigner.MassValue.ToString());
+                    ImGui.Text(_componentDesigner.VolumeValue.ToString());
+                    ImGui.Text(_componentDesigner.CrewReqValue.ToString());
+                    ImGui.Text(_componentDesigner.CreditCostValue.ToString());
+                    ImGui.Text(_componentDesigner.ResearchCostValue.ToString());
+                    ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString());
+                    ImGui.NextColumn();
+
+
+
                     foreach (var kvp in _componentDesigner.ResourceCostValues)
                     {
                         var resource = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);
-                        if(resource == null)     
+                        if (resource == null)
                             resource = (ICargoable)_state.Faction.GetDataBlob<FactionInfoDB>().IndustryDesigns[kvp.Key];
                         var xpos = ImGui.GetCursorPosX();
                         ImGui.SetCursorPosX(xpos + 12);
@@ -141,68 +159,70 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(kvp.Value.ToString());
                         ImGui.NextColumn();
                     }
-                    /*
-                    foreach (var mineral in _componentDesigner.MineralCostValues)
-                    {
-                        var mineralSD = StaticRefLib.StaticData.CargoGoods.GetMineral(mineral.Key);
-                        var xpos = ImGui.GetCursorPosX();
-                        ImGui.SetCursorPosX(xpos + 12);
-                        ImGui.Text(mineralSD.Name);
-                        ImGui.NextColumn();
-                        ImGui.Text(mineral.Value.ToString());
-                        ImGui.NextColumn();
-                    }
-                    foreach (var material in _componentDesigner.MaterialCostValues)
-                    {
-                        var matSD = StaticRefLib.StaticData.CargoGoods.GetMaterial(material.Key);
-                        var xpos = ImGui.GetCursorPosX();
-                        ImGui.SetCursorPosX(xpos + 12);
-                        ImGui.Text(matSD.Name);
-                        ImGui.NextColumn();
-                        ImGui.Text(material.Value.ToString());
-                        ImGui.NextColumn();
-                    }
-                    foreach (var component in _componentDesigner.ComponentCostValues)
-                    {
-                        var compSD = StaticRefLib.StaticData.CargoGoods.GetMaterial(component.Key);
-                        var xpos = ImGui.GetCursorPosX();
-                        ImGui.SetCursorPosX(xpos + 12);
-                        ImGui.Text(compSD.Name);
-                        ImGui.NextColumn();
-                        ImGui.Text(component.Value.ToString());
-                        ImGui.NextColumn();
-                    }
-                    */
-                    
-                    /*
-                    ImGui.Text("Materials");
-                    ImGui.NextColumn();
-                    ImGui.Text(_componentDesigner.MassValue.ToString());
-                    ImGui.NextColumn();
-                    
-                    ImGui.Text("Components");
-                    ImGui.NextColumn();
-                    ImGui.Text(_componentDesigner.MassValue.ToString());
-                    ImGui.NextColumn();
-                    */
 
+                    //Old Cost code I think
+                    if (false)
+                    {
+                        /*
+                        foreach (var mineral in _componentDesigner.MineralCostValues)
+                        {
+                            var mineralSD = StaticRefLib.StaticData.CargoGoods.GetMineral(mineral.Key);
+                            var xpos = ImGui.GetCursorPosX();
+                            ImGui.SetCursorPosX(xpos + 12);
+                            ImGui.Text(mineralSD.Name);
+                            ImGui.NextColumn();
+                            ImGui.Text(mineral.Value.ToString());
+                            ImGui.NextColumn();
+                        }
+                        foreach (var material in _componentDesigner.MaterialCostValues)
+                        {
+                            var matSD = StaticRefLib.StaticData.CargoGoods.GetMaterial(material.Key);
+                            var xpos = ImGui.GetCursorPosX();
+                            ImGui.SetCursorPosX(xpos + 12);
+                            ImGui.Text(matSD.Name);
+                            ImGui.NextColumn();
+                            ImGui.Text(material.Value.ToString());
+                            ImGui.NextColumn();
+                        }
+                        foreach (var component in _componentDesigner.ComponentCostValues)
+                        {
+                            var compSD = StaticRefLib.StaticData.CargoGoods.GetMaterial(component.Key);
+                            var xpos = ImGui.GetCursorPosX();
+                            ImGui.SetCursorPosX(xpos + 12);
+                            ImGui.Text(compSD.Name);
+                            ImGui.NextColumn();
+                            ImGui.Text(component.Value.ToString());
+                            ImGui.NextColumn();
+                        }
+                        */
+
+                        /*
+                        ImGui.Text("Materials");
+                        ImGui.NextColumn();
+                        ImGui.Text(_componentDesigner.MassValue.ToString());
+                        ImGui.NextColumn();
+
+                        ImGui.Text("Components");
+                        ImGui.NextColumn();
+                        ImGui.Text(_componentDesigner.MassValue.ToString());
+                        ImGui.NextColumn();
+                        */
+                    } 
                 }
                 
-
-
-                ImGui.End();
+                ImGui.EndChild();
             }
-
             void GuiHintText(ComponentDesignAttribute attribute)
             {
-                ImGui.TextWrapped(attribute.Name);
-                ImGui.TextWrapped(attribute.Description);
+                ImGui.TextWrapped(attribute.Name + ": ");
+                ImGui.SameLine();
                 ImGui.TextWrapped(attribute.Value.ToString());
-
+                ImGui.NewLine();
             }
             void GuiHintMaxMin(ComponentDesignAttribute attribute)
             {
-                ImGui.TextWrapped(attribute.Name);
+                ImGui.TextWrapped(attribute.Name + ": ");
+                ImGui.SameLine();
                 ImGui.TextWrapped(attribute.Description);
 
                 attribute.SetMax();
@@ -238,10 +258,12 @@ namespace Pulsar4X.SDL2UI
                 }
                 if(ImGui.InputScalar("##input" + attribute.Name, ImGuiDataType.Double, valPtr, stepPtr, fstepPtr))
                     attribute.SetValueFromInput(val);
+                ImGui.NewLine();
             }
             void GuiHintTechSelection(ComponentDesignAttribute attribute)
             {
-                ImGui.TextWrapped(attribute.Name);
+                ImGui.TextWrapped(attribute.Name + ": ");
+                ImGui.SameLine();
                 ImGui.TextWrapped(attribute.Description);
                 //StaticRefLib.StaticData.Techs[attribute.Value]
                 ImGui.TextWrapped(attribute.Value.ToString());
@@ -255,7 +277,7 @@ namespace Pulsar4X.SDL2UI
                     var staticdata = StaticRefLib.StaticData;
                     _componentDesign = GenericComponentFactory.StaticToDesign(_designables[_designType], factionTech, staticdata);
                 }*/
-
+                ImGui.NewLine();
             }
         }
     }
