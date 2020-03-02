@@ -308,7 +308,12 @@ namespace Pulsar4X.SDL2UI
         {
             IsActive = true;
         }
-       
+
+        public void ToggleActive()
+        {
+            IsActive = !IsActive;
+        }
+
 
         protected PulsarGuiWindow()
         {
