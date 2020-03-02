@@ -378,6 +378,10 @@ namespace Pulsar4X.ECSLib
                 else //recurse
                     return GetVelocity_m(GetSOIParentEntity(entity), atDateTime, false) + vel;
             }
+            else if (entity.HasDataBlob<WarpMovingDB>())
+            {
+                return entity.GetDataBlob<WarpMovingDB>().SavedNewtonionVector;
+            }
             else
             {
                 throw new Exception("Entity has no velocity");

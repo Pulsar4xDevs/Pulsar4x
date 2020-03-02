@@ -232,9 +232,10 @@ namespace Pulsar4X.ECSLib
                 
                 if(abilitySD.Name == null) //TODO: Log this, and don't use this component instead of throwing.
                     throw new Exception("Bad Static Data. Ability name is null");
-                
                 designAttribute.Name = abilitySD.Name;
-                designAttribute.Description = abilitySD.Description;
+                
+                if (abilitySD.Description != null)
+                    designAttribute.Description = abilitySD.Description;
                 designAttribute.GuiHint = abilitySD.GuiHint;
 
                 if (abilitySD.AbilityFormula != null)

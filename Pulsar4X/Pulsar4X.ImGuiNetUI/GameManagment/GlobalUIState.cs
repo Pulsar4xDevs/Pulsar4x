@@ -304,11 +304,15 @@ namespace Pulsar4X.SDL2UI
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
         internal static GlobalUIState _state;
-        public void SetActive()
+        public void SetActive(bool ActiveVal = true)
         {
-            IsActive = true;
+            IsActive = ActiveVal;
         }
-       
+        public void ToggleActive()
+        {
+            IsActive = !IsActive;
+        }
+
 
         protected PulsarGuiWindow()
         {

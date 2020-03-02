@@ -24,8 +24,8 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentDesignAttribute
     {
-        public string Name;
-        public string Description;
+        public string Name ="";
+        public string Description ="";
 
         public GuiHint GuiHint;
         public Type DataBlobType;
@@ -127,15 +127,23 @@ namespace Pulsar4X.ECSLib
         {
             get
             {
-                if (Result == null)
-                    Evaluate();
-                if (Result is int)
-                    return (int)Result;
-                if (Result is double)
-                    return (int)(double)Result;
-                else
+                switch (Result)
                 {
-                    throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not double or int");
+                    case null:
+                        Evaluate();
+                        if(Result is null)
+                            throw new Exception("Result type is unexpectedly null");
+                        else
+                            return IntResult;
+                    case double val:
+                        return (int)val; 
+                    case float val:
+                        return (int)val;
+                    case int val:
+                        return val;
+                    default:
+                        throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not double or int");
+                    
                 }
             }
         }
@@ -147,15 +155,23 @@ namespace Pulsar4X.ECSLib
         {
             get
             {
-                if (Result == null)
-                    Evaluate();
-                if (Result is double)
-                    return (double)Result;
-                if (Result is int)
-                    return (int)Result;
-                else
+                switch (Result)
                 {
-                    throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not double or int");
+                    case null:
+                        Evaluate();
+                        if(Result is null)
+                            throw new Exception("Result type is unexpectedly null");
+                        else
+                            return DResult;
+                    case double val:
+                        return val; 
+                    case float val:
+                        return val;
+                    case int val:
+                        return val;
+                    default:
+                        throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not double or int");
+                    
                 }
             }
         }

@@ -30,7 +30,7 @@ namespace Pulsar4X.SDL2UI
             {
                 Picture = _state.SDLImageDictionary["DesComp"],
                 TooltipText = "Design a new component or facility",
-                OnClick = new Action(ComponentDesignUI.GetInstance().SetActive)
+                OnClick = new Action(ComponentDesignUI.GetInstance().ToggleActive)
                 //Opens up the component design menu
             };
             ToolButtons.Add(btn);
@@ -39,7 +39,7 @@ namespace Pulsar4X.SDL2UI
             {
                 Picture = _state.SDLImageDictionary["DesShip"],
                 TooltipText = "Design a new Ship",
-                OnClick = new Action(ShipDesignUI.GetInstance().SetActive)
+                OnClick = new Action(ShipDesignUI.GetInstance().ToggleActive)
                 //Opens up the ship design menu
             };
             ToolButtons.Add(btn);
@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
             {
                 Picture = _state.SDLImageDictionary["Research"],
                 TooltipText = "Research",
-                OnClick = new Action(ResearchWindow.GetInstance().SetActive)
+                OnClick = new Action(ResearchWindow.GetInstance().ToggleActive)
                 //Opens up the research menu
             };
             ToolButtons.Add(btn);
@@ -55,7 +55,7 @@ namespace Pulsar4X.SDL2UI
             {
                 Picture = _state.SDLImageDictionary["GalMap"],
                 TooltipText = "Galaxy Browser",
-                OnClick = new Action(GalaxyWindow.GetInstance().SetActive)
+                OnClick = new Action(GalaxyWindow.GetInstance().ToggleActive)
 
             };
             ToolButtons.Add(btn);
@@ -63,7 +63,7 @@ namespace Pulsar4X.SDL2UI
             {
                 Picture = _state.SDLImageDictionary["Ruler"],
                 TooltipText = "Measure distance",
-                OnClick = new Action(DistanceRuler.GetInstance().SetActive)
+                OnClick = new Action(DistanceRuler.GetInstance().ToggleActive)
                 //Opens the ruler menu
             };
             ToolButtons.Add(btn);
