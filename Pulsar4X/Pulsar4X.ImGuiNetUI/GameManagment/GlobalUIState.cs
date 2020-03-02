@@ -312,6 +312,10 @@ namespace Pulsar4X.SDL2UI
         {
             IsActive = !IsActive;
         }
+        public bool GetActive()
+        {
+            return IsActive;
+        }
 
 
         protected PulsarGuiWindow()
