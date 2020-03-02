@@ -75,7 +75,12 @@ namespace Pulsar4X.ECSLib.Industry
 
 
         public Dictionary<Guid, ProductionLine> ProductionLines { get; } = new Dictionary<Guid, ProductionLine>();
-        
+
+        [JsonConstructor]
+        private IndustryAbilityDB()
+        {
+        }
+
         public IndustryAbilityDB(Dictionary<Guid, ProductionLine> productionLines)
         {
             ProductionLines = productionLines;
@@ -93,7 +98,7 @@ namespace Pulsar4X.ECSLib.Industry
 
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new IndustryAbilityDB(this);
         }
 
 

@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
-    
-    public class ShipDesign : ICargoable, IConstrucableDesign
+    [JsonObject]
+    public class ShipDesign : ICargoable, IConstrucableDesign, ISerializable
     {
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;
         public Guid ID { get; } = Guid.NewGuid();
@@ -39,8 +41,10 @@ namespace Pulsar4X.ECSLib
         public int CreditCost;
         public EntityDamageProfileDB DamageProfileDB;
 
-
-
+        [JsonConstructor]
+        internal ShipDesign()
+        {
+        }
 
         public ShipDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (string name, double density, float thickness) armor)
         {
@@ -64,6 +68,11 @@ namespace Pulsar4X.ECSLib
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             IndustryPointCosts = Mass;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            throw new NotImplementedException();
         }
     }
     public static class ShipFactory

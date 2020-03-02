@@ -420,6 +420,14 @@ namespace Pulsar4X.ECSLib
             StaticRefLib.SetEventlog(eventLog);
             return eventLog;
         }
+
+        public static ShipDesign ImportDesign(Game game, Stream inputStream)
+        {
+            ShipDesign design = new ShipDesign();
+            design = Import(game, inputStream, design);
+            return design;
+        }
+
         private static TObj Import<TObj>([NotNull] Game game, [NotNull] Stream inputStream, [NotNull] TObj obj)
         {
             if (game == null)

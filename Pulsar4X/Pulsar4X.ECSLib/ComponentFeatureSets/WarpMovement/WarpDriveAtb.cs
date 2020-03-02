@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -85,9 +86,20 @@ namespace Pulsar4X.ECSLib
         {
         }
 
+        public WarpAbilityDB(WarpAbilityDB db)
+        {
+            MaxSpeed = db.MaxSpeed;
+            TotalWarpPower = db.TotalWarpPower;
+            EnergyType = db.EnergyType;
+            BubbleCreationCost = db.BubbleCreationCost;
+            BubbleSustainCost = db.BubbleSustainCost;
+            BubbleCollapseCost = db.BubbleCollapseCost;
+            CurrentVectorMS = db.CurrentVectorMS;
+        }
+
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new WarpAbilityDB(this);
         }
     }
 

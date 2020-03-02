@@ -133,24 +133,7 @@ namespace Pulsar4X.Tests
 
         }
 
-        [Test]
-        public void TestFactoryComponentCreation()
-        {
-            ComponentTemplateSD factory = Factory();
 
-            ComponentDesigner facDesigner = new ComponentDesigner(factory, _faction.GetDataBlob<FactionTechDB>());
-            facDesigner.ComponentDesignAttributes["Instalation Construction Points"].SetValue();
-            ComponentDesign facDesign = facDesigner.CreateDesign(_faction);
-
-            IndustryAtb attributeDB = facDesign.GetAttribute<IndustryAtb>();
-
-            //Assert.AreEqual(100, attributeDB.IndustryPoints[ConstructionType.ShipComponents]);
-
-            Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
-            componentsDict.Add(factory.ID, factory);
-            StaticDataManager.ExportStaticData(componentsDict, "FactoryComponentTest.json");
-
-        }
 
         public static ComponentTemplateSD EngineComponentSD()
         {

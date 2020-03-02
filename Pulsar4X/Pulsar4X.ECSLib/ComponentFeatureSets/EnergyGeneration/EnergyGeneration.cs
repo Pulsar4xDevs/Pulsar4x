@@ -203,7 +203,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new EnergyGenAbilityDB(this);
         }
     }
 
