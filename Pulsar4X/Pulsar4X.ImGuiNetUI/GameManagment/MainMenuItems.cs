@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.Begin("Pulsar4X Main Menu", ref IsActive, _flags))
                 {
 
-                    if (ImGui.Button("Start a New Game", buttonSize))
+                    if (ImGui.Button("Start a New Game", buttonSize) || _state.debugnewgame)
                     {
                         //_state.NewGameOptions.IsActive = true;
                         var newgameoptions = NewGameOptions.GetInstance();

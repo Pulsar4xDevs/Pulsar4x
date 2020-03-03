@@ -9,10 +9,15 @@ using System.IO;
 using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
+
+    
 {
+    
+
     public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
     public class GlobalUIState
     {
+        public bool debugnewgame = false;
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
         internal static readonly Dictionary<Type, string> namesForMenus = new Dictionary<Type, string>{
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},

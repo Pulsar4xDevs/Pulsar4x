@@ -69,7 +69,7 @@ namespace Pulsar4X.SDL2UI
                         _selectedGameType = gameType.Standalone;
                     if (_selectedGameType == gameType.Nethost)
                         ImGui.InputText("Network Port", _netPortInputBuffer, 8);
-                    if (ImGui.Button("Create New Game!"))
+                    if (ImGui.Button("Create New Game!") || _state.debugnewgame)
                         CreateNewGame();
 
                     ImGui.End();
