@@ -28,6 +28,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive)
             {
+                
                 _researchableTechs = _factionTechDB.GetResearchableTechs();
                 _researchableTechsByGuid = _factionTechDB.GetResearchablesDic();
             }
@@ -73,21 +74,24 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
+
+
             if (IsActive && ImGui.Begin("Research and Development", ref IsActive, _flags))
             {
+                float width = ImGui.GetContentRegionAvail().X - 300;
                 ImGui.Columns(2);
-                ImGui.SetColumnWidth(0, 300);
-                ImGui.Text("Projects");
-                ImGui.NextColumn();
+                ImGui.SetColumnWidth(0, width);
                 ImGui.Text("Science Teams");
+                ImGui.NextColumn();
+                ImGui.Text("Projects");
                 ImGui.NextColumn();
                 ImGui.Separator();
 
-                DisplayTechs();
+                DisplayTeams();
                 
                 ImGui.NextColumn();
 
-                DisplayTeams();
+                DisplayTechs();
 
                 ImGui.Separator();
                 ImGui.Columns(1);
@@ -102,21 +106,23 @@ namespace Pulsar4X.SDL2UI
 
         private void DisplayTeams()
         {
-            ImGui.BeginChild("Teams", new Vector2(550, 250));
+            ImGui.BeginChild("Teams");
 
             ImGui.Columns(4);
-            ImGui.SetColumnWidth(0, 150);
-            ImGui.SetColumnWidth(1, 150);
-            ImGui.SetColumnWidth(2, 100);
-            ImGui.SetColumnWidth(3, 150);
+            //ImGui.SetColumnWidth(0, 150);
+            ImGui.SetColumnWidth(1, 90);
+            ImGui.SetColumnWidth(2, 250);
+            //ImGui.SetColumnWidth(3, 150);
             ImGui.Text("Scientist");
-            ImGui.NextColumn();
-            ImGui.Text("Location");
             ImGui.NextColumn();
             ImGui.Text("Labs");
             ImGui.NextColumn();
             ImGui.Text("Current Project");
             ImGui.NextColumn();
+            ImGui.Text("Location");
+            ImGui.NextColumn();
+            
+
             ImGui.Separator();
             for (int i = 0; i < _scienceTeams.Count; i++)
             {
@@ -129,8 +135,7 @@ namespace Pulsar4X.SDL2UI
                     _selectedTeam = i;
                 }
 
-                ImGui.NextColumn();
-                ImGui.Text(_scienceTeams[i].atEntity.GetDataBlob<NameDB>().GetName(_state.Faction));
+
 
                 ImGui.NextColumn();
                 int allfacs = 0;
@@ -180,7 +185,7 @@ namespace Pulsar4X.SDL2UI
                     float frac = (float)proj.amountDone / proj.amountMax;
                     var size = ImGui.GetTextLineHeight();
                     var pos = ImGui.GetCursorPos();
-                    ImGui.ProgressBar(frac, new Vector2(150, size), "");
+                    ImGui.ProgressBar(frac, new Vector2(245, size), "");
                     ImGui.SetCursorPos(pos);
                     ImGui.Text(proj.tech.Name);
                     if (ImGui.IsItemHovered())
@@ -196,6 +201,9 @@ namespace Pulsar4X.SDL2UI
 
 
                 }
+
+                ImGui.NextColumn();
+                ImGui.Text(_scienceTeams[i].atEntity.GetDataBlob<NameDB>().GetName(_state.Faction));
             }
             ImGui.EndChild();
 
@@ -223,7 +231,7 @@ namespace Pulsar4X.SDL2UI
                     float frac = (float)_researchableTechs[i].amountDone / _researchableTechs[i].amountMax;
                     var size = ImGui.GetTextLineHeight();
                     var pos = ImGui.GetCursorPos();
-                    ImGui.ProgressBar(frac, new Vector2(248, size), "");
+                    ImGui.ProgressBar(frac, new Vector2(245, size), "");
                     ImGui.SetCursorPos(pos);
                     ImGui.Text(_researchableTechs[i].tech.Name);
 
