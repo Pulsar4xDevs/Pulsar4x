@@ -82,147 +82,13 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("Science Teams");
                 ImGui.NextColumn();
                 ImGui.Separator();
-                
-                ImGui.BeginChild("ResearchablesHeader", new Vector2(300, ImGui.GetTextLineHeightWithSpacing() + 2));
-                ImGui.Columns(2);
-                ImGui.SetColumnWidth(0, 250);
-                ImGui.Text("Tech");
-                ImGui.NextColumn();
-                ImGui.Text("Level");
-                ImGui.NextColumn();
-                ImGui.Separator();
-                ImGui.EndChild();
-                
-                ImGui.BeginChild("techlist", new Vector2(300, 250));
-                ImGui.Columns(2);
-                ImGui.SetColumnWidth(0,250);
-                
-                for (int i = 0; i < _researchableTechs.Count; i++)
-                {
-                    if (_researchableTechs[i].amountMax > 0) //could happen if bad json data?
-                    {
-                        float frac = (float)_researchableTechs[i].amountDone / _researchableTechs[i].amountMax;
-                        var size = ImGui.GetTextLineHeight();
-                        var pos = ImGui.GetCursorPos();
-                        ImGui.ProgressBar(frac, new Vector2(248, size), "");
-                        ImGui.SetCursorPos(pos);
-                        ImGui.Text(_researchableTechs[i].tech.Name);
-                        
-                        if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
-                        {
-                            if(_selectedTeam > -1)
-                                ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].tech.ID);
-                        }
-                        if(ImGui.IsItemHovered())
-                        {
-                            ImGui.SetTooltip(_researchableTechs[i].tech.Description);
-                        }
-                        ImGui.NextColumn();
-                        ImGui.Text(_factionTechDB.GetLevelforTech(_researchableTechs[i].tech).ToString());
-                        
-                        ImGui.NextColumn();
-                    }
-                }
-                ImGui.EndChild();
+
+                DisplayTechs();
                 
                 ImGui.NextColumn();
 
-                ImGui.BeginChild("Teams", new Vector2(550, 250));
-                
-                ImGui.Columns(4);
-                ImGui.SetColumnWidth(0, 150);
-                ImGui.SetColumnWidth(1, 150);
-                ImGui.SetColumnWidth(2, 100);
-                ImGui.SetColumnWidth(3, 150);
-                ImGui.Text("Scientist");
-                ImGui.NextColumn();
-                ImGui.Text("Location");
-                ImGui.NextColumn();
-                ImGui.Text("Labs");
-                ImGui.NextColumn();
-                ImGui.Text("Current Project");
-                ImGui.NextColumn();
-                ImGui.Separator();
-                for (int i = 0; i < _scienceTeams.Count; i++)
-                {
+                DisplayTeams();
 
-                    bool isSelected = _selectedTeam == i;
-                    
-                    Scientist scint = _scienceTeams[i].scientist;
-                    if (ImGui.Selectable(_scienceTeams[i].Item1.Name, isSelected))
-                    {
-                        _selectedTeam = i;
-                    }
-
-                    ImGui.NextColumn();
-                    ImGui.Text(_scienceTeams[i].atEntity.GetDataBlob<NameDB>().GetName(_state.Faction));
-                    
-                    ImGui.NextColumn();
-                    int allfacs = 0;
-                    int facsAssigned = scint.AssignedLabs;
-                    //int facsFree = 0;
-                    if(
-                    _scienceTeams[i].atEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<ResearchPointsAtbDB>( out var foo ))
-                    {
-                        allfacs = foo.Count;
-                        //facsFree = allfacs - facsAssigned;
-                    }
-                    ImGui.Text(facsAssigned.ToString() + "/" + allfacs.ToString());
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Assigned / Total");
-                    ImGui.SameLine();
-
-                    //Checks if more labs can be assigned
-                    if (facsAssigned < allfacs)
-                    {
-                        if (ImGui.SmallButton("+"))//If so allow the user to add more labs
-                        {
-                            ResearchProcessor.AddLabs(scint, 1);
-                        }
-                    }
-                    else// Otherwise create an invisible button for spacing
-                    {
-                        Vector2 buttonsize = new Vector2(15, 0);
-                        ImGui.InvisibleButton(" ", buttonsize);
-                    }
-
-                    
-
-                    ImGui.SameLine();
-                    if (ImGui.SmallButton("-"))
-                    {
-                        if (facsAssigned == 0)//If there are no labs to remove
-                            ResearchProcessor.AddLabs(scint, allfacs);//Roll over to max number of labs
-                        else
-                            ResearchProcessor.AddLabs(scint, -1);//Otherwise remove a lab
-                    }
-
-                    ImGui.NextColumn();
-                    if (scint.ProjectQueue.Count > 0 && _factionTechDB.IsResearchable(scint.ProjectQueue[0].techID))
-                    {
-                        var proj = _researchableTechsByGuid[scint.ProjectQueue[0].techID];
-                        
-                        float frac = (float)proj.amountDone / proj.amountMax;
-                        var size = ImGui.GetTextLineHeight();
-                        var pos = ImGui.GetCursorPos();
-                        ImGui.ProgressBar(frac, new Vector2(150, size), "");
-                        ImGui.SetCursorPos(pos);
-                        ImGui.Text(proj.tech.Name);
-                        if(ImGui.IsItemHovered())
-                        {
-                            string queue = "";
-                            foreach (var queueItem in _scienceTeams[i].scientist.ProjectQueue)
-                            {
-                                queue += _researchableTechsByGuid[queueItem.techID].tech.Name + "\n";
-                            }
-                            ImGui.SetTooltip(queue);
-                        }
-
-
-
-                    }
-                }
-                ImGui.EndChild();
                 ImGui.Separator();
                 ImGui.Columns(1);
                 if (_selectedTeam > -1)
@@ -233,6 +99,151 @@ namespace Pulsar4X.SDL2UI
         }
 
         private int hoveredi = -1;
+
+        private void DisplayTeams()
+        {
+            ImGui.BeginChild("Teams", new Vector2(550, 250));
+
+            ImGui.Columns(4);
+            ImGui.SetColumnWidth(0, 150);
+            ImGui.SetColumnWidth(1, 150);
+            ImGui.SetColumnWidth(2, 100);
+            ImGui.SetColumnWidth(3, 150);
+            ImGui.Text("Scientist");
+            ImGui.NextColumn();
+            ImGui.Text("Location");
+            ImGui.NextColumn();
+            ImGui.Text("Labs");
+            ImGui.NextColumn();
+            ImGui.Text("Current Project");
+            ImGui.NextColumn();
+            ImGui.Separator();
+            for (int i = 0; i < _scienceTeams.Count; i++)
+            {
+
+                bool isSelected = _selectedTeam == i;
+
+                Scientist scint = _scienceTeams[i].scientist;
+                if (ImGui.Selectable(_scienceTeams[i].Item1.Name, isSelected))
+                {
+                    _selectedTeam = i;
+                }
+
+                ImGui.NextColumn();
+                ImGui.Text(_scienceTeams[i].atEntity.GetDataBlob<NameDB>().GetName(_state.Faction));
+
+                ImGui.NextColumn();
+                int allfacs = 0;
+                int facsAssigned = scint.AssignedLabs;
+                //int facsFree = 0;
+                if (
+                _scienceTeams[i].atEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<ResearchPointsAtbDB>(out var foo))
+                {
+                    allfacs = foo.Count;
+                    //facsFree = allfacs - facsAssigned;
+                }
+                ImGui.Text(facsAssigned.ToString() + "/" + allfacs.ToString());
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Assigned / Total");
+                ImGui.SameLine();
+
+                //Checks if more labs can be assigned
+                if (facsAssigned < allfacs)
+                {
+                    if (ImGui.SmallButton("+"))//If so allow the user to add more labs
+                    {
+                        ResearchProcessor.AddLabs(scint, 1);
+                    }
+                }
+                else// Otherwise create an invisible button for spacing
+                {
+                    Vector2 buttonsize = new Vector2(15, 0);
+                    ImGui.InvisibleButton(" ", buttonsize);
+                }
+
+
+
+                ImGui.SameLine();
+                if (ImGui.SmallButton("-"))
+                {
+                    if (facsAssigned == 0)//If there are no labs to remove
+                        ResearchProcessor.AddLabs(scint, allfacs);//Roll over to max number of labs
+                    else
+                        ResearchProcessor.AddLabs(scint, -1);//Otherwise remove a lab
+                }
+
+                ImGui.NextColumn();
+                if (scint.ProjectQueue.Count > 0 && _factionTechDB.IsResearchable(scint.ProjectQueue[0].techID))
+                {
+                    var proj = _researchableTechsByGuid[scint.ProjectQueue[0].techID];
+
+                    float frac = (float)proj.amountDone / proj.amountMax;
+                    var size = ImGui.GetTextLineHeight();
+                    var pos = ImGui.GetCursorPos();
+                    ImGui.ProgressBar(frac, new Vector2(150, size), "");
+                    ImGui.SetCursorPos(pos);
+                    ImGui.Text(proj.tech.Name);
+                    if (ImGui.IsItemHovered())
+                    {
+                        string queue = "";
+                        foreach (var queueItem in _scienceTeams[i].scientist.ProjectQueue)
+                        {
+                            queue += _researchableTechsByGuid[queueItem.techID].tech.Name + "\n";
+                        }
+                        ImGui.SetTooltip(queue);
+                    }
+
+
+
+                }
+            }
+            ImGui.EndChild();
+
+        }
+        private void DisplayTechs()
+        {
+            ImGui.BeginChild("ResearchablesHeader", new Vector2(300, ImGui.GetTextLineHeightWithSpacing() + 2));
+            ImGui.Columns(2);
+            ImGui.SetColumnWidth(0, 250);
+            ImGui.Text("Tech");
+            ImGui.NextColumn();
+            ImGui.Text("Level");
+            ImGui.NextColumn();
+            ImGui.Separator();
+            ImGui.EndChild();
+
+            ImGui.BeginChild("techlist", new Vector2(300, 250));
+            ImGui.Columns(2);
+            ImGui.SetColumnWidth(0, 250);
+
+            for (int i = 0; i < _researchableTechs.Count; i++)
+            {
+                if (_researchableTechs[i].amountMax > 0) //could happen if bad json data?
+                {
+                    float frac = (float)_researchableTechs[i].amountDone / _researchableTechs[i].amountMax;
+                    var size = ImGui.GetTextLineHeight();
+                    var pos = ImGui.GetCursorPos();
+                    ImGui.ProgressBar(frac, new Vector2(248, size), "");
+                    ImGui.SetCursorPos(pos);
+                    ImGui.Text(_researchableTechs[i].tech.Name);
+
+                    if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
+                    {
+                        if (_selectedTeam > -1)
+                            ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].tech.ID);
+                    }
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip(_researchableTechs[i].tech.Description);
+                    }
+                    ImGui.NextColumn();
+                    ImGui.Text(_factionTechDB.GetLevelforTech(_researchableTechs[i].tech).ToString());
+
+                    ImGui.NextColumn();
+                }
+            }
+            ImGui.EndChild();
+        }
         private void SelectedSci(int selected)
         {
             ImGui.BeginChild("SelectedSci");
@@ -342,58 +353,62 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            /*
-            for (int i = 0; i < scientist.ProjectQueue.Count; i++)
+            if(false)
             {
-                ImGui.BeginChild("Top");
-                ImGui.Columns(2);
-                ImGui.SetColumnWidth(0, 300);
-                (ID techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[i];
-                (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
-                
-                
-                ImGui.Text(projItem.tech.Name);
-                if (ImGui.IsItemHovered())
+                /*
+                for (int i = 0; i < scientist.ProjectQueue.Count; i++)
                 {
-                    hoveredi = i;
-                }
-                //ImGui.Text(proj.Description);
-                //ImGui.NextColumn();
-                //ImGui.SameLine();
-                //ImGui.Text(projItem.tech.Category.ToString());
-
-                ImGui.EndChild();
-                if (i == hoveredi)
-                {
-                    ImGui.BeginChild("Buttons");
+                    ImGui.BeginChild("Top");
                     ImGui.Columns(2);
                     ImGui.SetColumnWidth(0, 300);
-                    Buttons(scientist, queueItem, i);
+                    (ID techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[i];
+                    (TechSD tech, int amountDone, int amountMax) projItem = _researchableTechsByGuid[queueItem.techID];
+
+
+                    ImGui.Text(projItem.tech.Name);
+                    if (ImGui.IsItemHovered())
+                    {
+                        hoveredi = i;
+                    }
+                    //ImGui.Text(proj.Description);
+                    //ImGui.NextColumn();
+                    //ImGui.SameLine();
+                    //ImGui.Text(projItem.tech.Category.ToString());
+
                     ImGui.EndChild();
-                }
+                    if (i == hoveredi)
+                    {
+                        ImGui.BeginChild("Buttons");
+                        ImGui.Columns(2);
+                        ImGui.SetColumnWidth(0, 300);
+                        Buttons(scientist, queueItem, i);
+                        ImGui.EndChild();
+                    }
 
-                ImGui.BeginChild("Bottom");
+                    ImGui.BeginChild("Bottom");
 
-                
-                
-                
-                
-                ImGui.EndChild();
-                
-                
-                if (i != hoveredi) //if it's not hovered, make it invisible. 
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0,0,0,0));
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0,0,0,0));
-                    Buttons(scientist, queueItem, i);
-                    ImGui.PopStyleColor(2);
-                }
-                else
-                    Buttons(scientist, queueItem, i);
-                
-                ImGui.NextColumn();
-                */
-            
+
+
+
+
+                    ImGui.EndChild();
+
+
+                    if (i != hoveredi) //if it's not hovered, make it invisible. 
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0,0,0,0));
+                        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0,0,0,0));
+                        Buttons(scientist, queueItem, i);
+                        ImGui.PopStyleColor(2);
+                    }
+                    else
+                        Buttons(scientist, queueItem, i);
+
+                    ImGui.NextColumn();
+                    */
+            }
+
+
             ImGui.EndChild();
 
         }
