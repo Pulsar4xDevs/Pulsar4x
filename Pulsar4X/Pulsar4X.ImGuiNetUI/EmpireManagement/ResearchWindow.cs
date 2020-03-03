@@ -74,7 +74,13 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-
+            if (_selectedTeam == -1)
+            {
+                if (_scienceTeams.Count > 0)
+                {
+                    _selectedTeam = 1;
+                }
+            }
 
             if (IsActive && ImGui.Begin("Research and Development", ref IsActive, _flags))
             {
