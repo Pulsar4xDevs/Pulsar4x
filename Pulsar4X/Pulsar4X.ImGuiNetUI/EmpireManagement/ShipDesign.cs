@@ -126,18 +126,38 @@ namespace Pulsar4X.SDL2UI
                     RefreshComponentDesigns();
                 }
 
+                
+
                 float imageheight = ImGui.GetContentRegionAvail().Y / 3;
                 float height = ImGui.GetContentRegionAvail().Y - imageheight;
                 float partlistwidth = 350;
                 float shortwindowwidth = ImGui.GetContentRegionAvail().X - partlistwidth;
+                bool compactimage = CheckDisplayImage(1, imageheight, shortwindowwidth);
 
-                ImGui.BeginChild("ShipDesign", new Vector2(ImGui.GetContentRegionAvail().X , height));
+                if (compactimage)
+                {
+                    ImGui.BeginChild("ShipDesign", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y));
+                    imageheight = ImGui.GetContentRegionAvail().Y / 2;
+                    height = ImGui.GetContentRegionAvail().Y - imageheight;
+                }
+                else
+                {
+                    ImGui.BeginChild("ShipDesign", new Vector2(ImGui.GetContentRegionAvail().X, height));
+                }
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, shortwindowwidth);
                 //ImGui.SetColumnWidth(1, 350);
                 //ImGui.SetColumnWidth(2, 278);
                 //ImGui.SetColumnWidth(3, 278);
-                    ImGui.BeginChild("Small Design Windows");
+                    if (compactimage)
+                    {
+                        ImGui.BeginChild("Small Design Windows", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y- imageheight));
+                    }
+                    else
+                    {
+                        ImGui.BeginChild("Small Design Windows");
+                    }
+                    
                     ImGui.Columns(3);
                         DisplayShips();             
                 
@@ -150,6 +170,11 @@ namespace Pulsar4X.SDL2UI
                         DisplayComponents();
                     ImGui.EndChild();
 
+                    if (compactimage)
+                    {
+                        DisplayImage(shortwindowwidth, imageheight);
+                    }
+
                     ImGui.NextColumn();
                     
                     DisplayComponentSelection();
@@ -157,10 +182,13 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                 ImGui.EndChild();
 
-                ImGui.Separator();
-                ImGui.Columns(1);
-
-                DisplayImage(1, imageheight);
+                if(!compactimage)
+                {
+                    ImGui.Separator();
+                    ImGui.Columns(1);
+                    DisplayImage(ImGui.GetWindowWidth(), imageheight);
+                }
+                
             }
         }
 
@@ -522,12 +550,43 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        internal void DisplayImage(float maxwidth, float maxheight)
+        internal bool CheckDisplayImage(float maxwidth, float maxheight, float checkwidth)
         {
             if (_shipImgPtr != IntPtr.Zero && displayimage)
             {
 
                 maxwidth = ImGui.GetWindowWidth();// ImGui.GetColumnWidth();;// 
+                int maxheightint = (int)(maxheight / 4);
+                maxheight = maxheightint * 4;//ImGui.GetWindowHeight() * _imageratio;
+                int w = _rawShipImage.Width;
+                int h = _rawShipImage.Height;
+                float scalew = 1;
+                float scaleh = 1;
+                float scale;
+                if (w > maxwidth)
+                {
+                    scalew = maxwidth / w;
+                }
+
+                if (h > maxheight)
+                {
+                    scaleh = maxheight / h;
+                }
+
+                scale = Math.Min(scaleh, scalew);
+
+                if (w * scale < checkwidth)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        internal void DisplayImage(float maxwidth, float maxheight)
+        {
+            if (_shipImgPtr != IntPtr.Zero && displayimage)
+            {
                 int maxheightint = (int)(maxheight / 4);
                 maxheight = maxheightint*4;//ImGui.GetWindowHeight() * _imageratio;
                 int w = _rawShipImage.Width;
