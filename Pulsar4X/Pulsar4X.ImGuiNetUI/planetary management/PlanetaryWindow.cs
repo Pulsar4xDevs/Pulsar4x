@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         {
             //_flags = ImGuiWindowFlags.NoCollapse;
 
-
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
             onEntityChange(entity);
            
         }

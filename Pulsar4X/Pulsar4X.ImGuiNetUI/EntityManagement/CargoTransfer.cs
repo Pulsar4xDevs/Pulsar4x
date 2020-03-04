@@ -20,6 +20,7 @@ namespace Pulsar4X.SDL2UI
             _entityState = entity;
             _storageDatablob = entity.Entity.GetDataBlob<CargoStorageDB>();
             entity.Entity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
+            
             Update();
         }
 

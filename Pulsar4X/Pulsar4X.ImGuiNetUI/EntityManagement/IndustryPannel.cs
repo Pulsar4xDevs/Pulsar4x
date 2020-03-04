@@ -55,6 +55,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         
         public IndustryPannel2(GlobalUIState state, Entity selectedEntity, IndustryAbilityDB industryDB)
         {
+            
             _state = state;
             _selectedEntity = selectedEntity;
             _industryDB = industryDB;
