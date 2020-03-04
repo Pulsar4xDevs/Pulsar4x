@@ -11,7 +11,7 @@ using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
-    class  GalaxyWindow: PulsarGuiWindow
+    public class  GalaxyWindow: PulsarGuiWindow
     {
 
         private GalaxyWindow()
@@ -29,14 +29,9 @@ namespace Pulsar4X.SDL2UI
             {
                 thisItem = new GalaxyWindow();
             }
-            else
-            {
-                thisItem = (GalaxyWindow)_state.LoadedWindows[typeof(GalaxyWindow)];
-            }
-
+            thisItem = (GalaxyWindow)_state.LoadedWindows[typeof(GalaxyWindow)];
 
             return thisItem;
-
 
         }
 
@@ -46,8 +41,6 @@ namespace Pulsar4X.SDL2UI
             //ImGui.SetNextWindowSize();
             if (IsActive && ImGui.Begin("Galaxy Browser", ref IsActive, _flags))
             {
-                //if (ImGui.Begin("LOL",_flags))
-                //{
            
                 uint iterations = 0;
                 foreach (var starSystem in _state.StarSystemStates)
@@ -61,7 +54,6 @@ namespace Pulsar4X.SDL2UI
                     iterations++;
                 }
                 ImGui.End();
-            //}
             }
         }
     }

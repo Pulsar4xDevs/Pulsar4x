@@ -76,7 +76,7 @@ namespace Pulsar4X.SDL2UI
                 Picture = _state.SDLImageDictionary["Ruler"],
                 TooltipText = "Measure distance",
                 OnClick = new Action(DistanceRuler.GetInstance().ToggleActive),
-                //GetActive = new Func<bool>(DistanceRuler.GetInstance().GetActive)
+                GetActive = new Func<bool>(DistanceRuler.GetInstance().GetActive)
                 //Opens the ruler menu
             };
             ToolButtons.Add(btn);
@@ -161,6 +161,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.PopID();
                     iterations++;
                 }
+                ImGui.PushStyleColor(buttonidx, unclickedcolor);
 
                 ImGui.End();
             }
