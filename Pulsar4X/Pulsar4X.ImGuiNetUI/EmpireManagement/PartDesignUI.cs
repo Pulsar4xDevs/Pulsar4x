@@ -41,8 +41,6 @@ namespace Pulsar4X.SDL2UI
             }
             _componentDesigner = new ComponentDesigner(_designables[_designType], factionTech);
             _windowname = _componentDesigner.Name;
-
-            SetSize(300, 500);
             StartDisplay();
 
         }
