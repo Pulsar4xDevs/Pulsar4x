@@ -11,11 +11,13 @@ using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
-    public class  GalaxyWindow: PulsarGuiWindow
+    public class  GalaxyWindow : PulsarGuiWindow
     {
 
         private GalaxyWindow()
         {
+            SetSize(20, 20);
+            
             //_flags = ImGuiWindowFlags.NoCollapse;
         }
 

@@ -18,8 +18,10 @@ namespace Pulsar4X.SDL2UI
 
         public RenameWindow(EntityState entity)
         {
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
             reset(entity);
         }
+
         internal static RenameWindow GetInstance(EntityState entity)
         {
             if (!_state.LoadedWindows.ContainsKey(typeof(RenameWindow)))

@@ -17,7 +17,7 @@ namespace Pulsar4X.SDL2UI
     public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
     public class GlobalUIState
     {
-        public bool debugnewgame = false;
+        public bool debugnewgame = true;
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
         internal static readonly Dictionary<Type, string> namesForMenus = new Dictionary<Type, string>{
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},
@@ -303,12 +303,19 @@ namespace Pulsar4X.SDL2UI
     public abstract class PulsarGuiWindow
     {
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
+        Vector2 WindowSize;
         //internal bool IsLoaded;
         internal bool CanActive = false;
         internal bool IsActive = false;
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
         internal static GlobalUIState _state;
+        public void SetSize (float x, float y)
+        {
+            WindowSize = new Vector2(x, y);
+            ImGui.SetWindowSize(WindowSize);
+        }
+        
         public void SetActive(bool ActiveVal = true)
         {
             IsActive = ActiveVal;

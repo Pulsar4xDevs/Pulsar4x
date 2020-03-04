@@ -11,7 +11,7 @@ namespace Pulsar4X.SDL2UI
     {
 	    private EntityInfoPanel()
 	    {
-	        _flags =  ImGuiWindowFlags.NoCollapse;
+	        _flags =  ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize;
         
         }
 

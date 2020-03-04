@@ -26,7 +26,7 @@ namespace Pulsar4X.SDL2UI
         }
         private EntityUIWindowSelector()
         {
-            _flags =  ImGuiWindowFlags.NoCollapse;
+            _flags =  ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize;
 
         }
 
