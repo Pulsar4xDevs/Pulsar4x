@@ -39,8 +39,6 @@ namespace Pulsar4X.SDL2UI
         private int _armorIndex = 0;
         private double _armorThickness = 10;
         private (string name, double density, float thickness) _armor = ("Polyprop", 1175f, 10);
-        
-        private float _firstChildHeight = 350;
 
         private double _massDry;
         private double _massWet;
@@ -54,6 +52,7 @@ namespace Pulsar4X.SDL2UI
         private double _estor;
         private double _egen;
         private double _fuelStore;
+        bool displayimage = true;
 
         private bool existingdesignsstatus = true;
         bool designChanged = false;
@@ -127,32 +126,41 @@ namespace Pulsar4X.SDL2UI
                     RefreshComponentDesigns();
                 }
 
-                ImGui.Columns(4);
-                ImGui.SetColumnWidth(0, 200);
-                ImGui.SetColumnWidth(1, 350);
-                ImGui.SetColumnWidth(2, 278);
-                ImGui.SetColumnWidth(3, 278);
-                DisplayShips();             
+                float imageheight = ImGui.GetContentRegionAvail().Y / 3;
+                float height = ImGui.GetContentRegionAvail().Y - imageheight;
+                float partlistwidth = 350;
+                float shortwindowwidth = ImGui.GetContentRegionAvail().X - partlistwidth;
+
+                ImGui.BeginChild("ShipDesign", new Vector2(ImGui.GetContentRegionAvail().X , height));
+                ImGui.Columns(2);
+                ImGui.SetColumnWidth(0, shortwindowwidth);
+                //ImGui.SetColumnWidth(1, 350);
+                //ImGui.SetColumnWidth(2, 278);
+                //ImGui.SetColumnWidth(3, 278);
+                    ImGui.BeginChild("Small Design Windows");
+                    ImGui.Columns(3);
+                        DisplayShips();             
                 
-                ImGui.NextColumn();
+                        ImGui.NextColumn();
 
-                DisplayComponentSelection();
-                
-                ImGui.NextColumn();
+                        DisplayStats();
 
-                DisplayComponents();
+                        ImGui.NextColumn();
 
-                ImGui.NextColumn();
+                        DisplayComponents();
+                    ImGui.EndChild();
 
-                DisplayStats();
+                    ImGui.NextColumn();
+                    
+                    DisplayComponentSelection();
 
-                ImGui.NextColumn();
+                    ImGui.NextColumn();
+                ImGui.EndChild();
+
                 ImGui.Separator();
                 ImGui.Columns(1);
 
-                DisplayImage();
-
-                NewShipButton();
+                DisplayImage(1, imageheight);
             }
         }
 
@@ -180,7 +188,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (ImGui.CollapsingHeader("Exsisting Designs", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.BeginChild("exsistingdesigns", new Vector2(200, _firstChildHeight));
+                ImGui.BeginChild("exsistingdesigns");
 
                 for (int i = 0; i < _exsistingClasses.Count; i++)
                 {
@@ -208,7 +216,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void DisplayComponents()
         {
-            ImGui.BeginChild("ShipDesign", new Vector2(280, _firstChildHeight));
+            ImGui.BeginChild("ShipDesign");
 
             ImGui.Columns(2, "Ship Components", true);
             ImGui.SetColumnWidth(0, 150);
@@ -326,7 +334,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void DisplayComponentSelection()
         {
-            ImGui.BeginChild("ComponentSelection", new Vector2(350, _firstChildHeight));
+            ImGui.BeginChild("ComponentSelection");
             //ImGui.BeginGroup();
             ImGui.Columns(3);
             ImGui.SetColumnWidth(0, 150);
@@ -389,6 +397,21 @@ namespace Pulsar4X.SDL2UI
 
         internal void DisplayStats()
         {
+            
+
+            ImGui.BeginChild("Ship Stats");
+
+            ImGui.Columns(1);
+
+            ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
+            NewShipButton();
+            ImGui.SameLine();
+            ImGui.Checkbox("Show Pic", ref displayimage);
+            ImGui.NewLine();
+
+            
+
+            ImGui.Text("Ship Stats");
             if (designChanged)
             {
                 _profile = new EntityDamageProfileDB(_shipComponents, _armor);
@@ -479,13 +502,6 @@ namespace Pulsar4X.SDL2UI
                 _dv = OrbitMath.TsiolkovskyRocketEquation(_massWet, _massDry, ev);
 
             }
-
-            ImGui.BeginChild("Ship Stats", new Vector2(278, _firstChildHeight));
-
-            ImGui.Columns(1);
-            ImGui.Text("Ship Stats");
-
-            ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
             ImGui.Text("Mass: " + _massDry + " kg");
             ImGui.Text("Total Thrust: " + (_tn * 0.01) + " kN");
             ImGui.Text("Thrust To Weight: " + _ttw);
@@ -506,18 +522,19 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        internal void DisplayImage()
+        internal void DisplayImage(float maxwidth, float maxheight)
         {
-            if (_shipImgPtr != IntPtr.Zero)
+            if (_shipImgPtr != IntPtr.Zero && displayimage)
             {
 
-                float maxwidth = ImGui.GetWindowWidth();// ImGui.GetColumnWidth();;// 
-                float maxheight = 256;//ImGui.GetWindowHeight() / 2;
+                maxwidth = ImGui.GetWindowWidth();// ImGui.GetColumnWidth();;// 
+                int maxheightint = (int)(maxheight / 4);
+                maxheight = maxheightint*4;//ImGui.GetWindowHeight() * _imageratio;
                 int w = _rawShipImage.Width;
                 int h = _rawShipImage.Height;
                 float scalew = 1;
                 float scaleh = 1;
-                float scale = 1;
+                float scale;
                 if (w > maxwidth)
                 {
                     scalew = maxwidth / w;
