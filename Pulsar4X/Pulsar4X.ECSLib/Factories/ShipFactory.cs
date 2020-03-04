@@ -60,7 +60,16 @@ namespace Pulsar4X.ECSLib
                 Mass += component.design.Mass * component.count;
                 CrewReq += component.design.CrewReq;
                 CreditCost += component.design.CreditCost;
-                ComponentCosts.Add(component.design.ID, component.count);
+                
+                if (ComponentCosts.ContainsKey(component.design.ID))
+                {
+                    ComponentCosts[component.design.ID] = ComponentCosts[component.design.ID] + component.count;
+                }
+                else
+                {
+                    ComponentCosts.Add(component.design.ID, component.count);
+                }
+
             }
             
             
