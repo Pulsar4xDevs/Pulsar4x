@@ -225,6 +225,10 @@ namespace Pulsar4X.SDL2UI
             {
                 item.Display();
             }
+            foreach (var item in _state.LoadedNonUniqueWindows.Values.ToArray())
+            {
+                item.Display();
+            }
 
             //because the nameIcons are IMGUI not SDL we draw them here. 
             _state.GalacticMap.DrawNameIcons();
