@@ -44,7 +44,7 @@ namespace Pulsar4X.SDL2UI
 
         private double _massDry;
         private double _massWet;
-        private double _ttw;
+        private double _ttwr;
         private double _dv;
         private double _wspd;
         private double _wcc;
@@ -350,18 +350,18 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("Ship Stats");
                 
                 ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
-                ImGui.Text("Mass: " + _massDry + " kg");
-                ImGui.Text("Total Thrust: " + (_tn * 0.01) + " kN");
-                ImGui.Text("Thrust To Weight: " + _ttw);
-                ImGui.Text("Fuel Capacity: " + _fuelStore);
+                ImGui.Text("Mass: " + Misc.StringifyWeight(_massDry));
+                ImGui.Text("Total Thrust: " + Misc.StringifyThrust(_tn));
+                ImGui.Text("Thrust To Weight Ratio: " + _ttwr.ToString("0.00"));
+                ImGui.Text("Fuel Capacity: " + _fuelStore); 
                 
-                ImGui.Text("Delta V: " + _dv);
-                ImGui.Text("Warp Speed:" + _wspd + "m/s");
-                ImGui.Text("Warp Bubble Creation: " + _wcc);
-                ImGui.Text("Warp Bubble Sustain: " + _wsc);
-                ImGui.Text("Warp Bubble Collapse: " + _wec);
-                ImGui.Text("Energy Output: " + _egen);
-                ImGui.Text("Energy Store:" + _estor);
+                ImGui.Text("Delta V: " + Misc.StringifyVelocity(_dv));
+                ImGui.Text("Warp Speed:" + Misc.StringifyVelocity(_wspd));
+                ImGui.Text("Warp Bubble Creation: " + _wcc + " seconds");
+                ImGui.Text("Warp Bubble Sustain: " + _wsc + " seconds");
+                ImGui.Text("Warp Bubble Collapse: " + _wec + " seconds");
+                ImGui.Text("Energy Output: " + _egen + " MW"); // Placeholder units
+                ImGui.Text("Energy Store:" + _estor + " MW");  //
                 
                 
                 ImGui.Separator();
@@ -444,7 +444,7 @@ namespace Pulsar4X.SDL2UI
 
                     _massDry = mass;
                     _tn = tn;
-                    _ttw = tn / mass;
+                    _ttwr = (tn / mass) * 0.01;
                     _wcc = wcc;
                     _wec = wec;
                     _wsc = wsc;
