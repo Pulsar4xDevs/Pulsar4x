@@ -135,7 +135,7 @@ namespace Pulsar4X.SDL2UI
                 float shortwindowwidth = ImGui.GetContentRegionAvail().X - partlistwidth;
                 bool compactimage = CheckDisplayImage(1, imageheight, shortwindowwidth);
 
-                if (compactimage)
+                if (compactimage || !displayimage)
                 {
                     ImGui.BeginChild("ShipDesign", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y));
                     imageheight = ImGui.GetContentRegionAvail().Y / 2;
@@ -145,6 +145,8 @@ namespace Pulsar4X.SDL2UI
                 {
                     ImGui.BeginChild("ShipDesign", new Vector2(ImGui.GetContentRegionAvail().X, height));
                 }
+
+                //imageheight = imageheight * 0.9f;
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, shortwindowwidth);
                 //ImGui.SetColumnWidth(1, 350);
@@ -183,7 +185,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                 ImGui.EndChild();
 
-                if(!compactimage)
+                if(!compactimage && displayimage)
                 {
                     ImGui.Separator();
                     ImGui.Columns(1);
