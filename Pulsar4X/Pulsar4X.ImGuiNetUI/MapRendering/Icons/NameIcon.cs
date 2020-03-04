@@ -35,7 +35,7 @@ namespace Pulsar4X.SDL2UI
     public class NameIcon : Icon, IComparable<NameIcon>, IRectangle
     {
 
-        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings;
+        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoBringToFrontOnFocus;
         internal bool IsActive = true;
         GlobalUIState _state;
         NameDB _nameDB;
