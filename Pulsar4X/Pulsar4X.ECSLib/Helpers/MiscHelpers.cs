@@ -64,6 +64,56 @@ namespace Pulsar4X.ECSLib
             return stringDistance;
         }
 
+
+        public static string StringifyVelocity(double velocity_m, string format = "0.##")
+        {
+            string stringVelocity = " 0 m/s";
+            if (velocity_m > 1.0e9)
+            {
+                velocity_m = velocity_m * 1.0e-9;
+                stringVelocity = velocity_m.ToString(format) + " Gm/s";
+            }
+            else if (velocity_m > 1.0e6)
+            {
+                velocity_m = velocity_m * 1.0e-6;
+                stringVelocity = velocity_m.ToString(format) + " Mm/s";
+            }
+            else if (velocity_m > 1.0e3)
+            {
+                velocity_m = velocity_m * 1.0e-3;
+                stringVelocity = velocity_m.ToString(format) + " Km/s";
+            }
+
+            else { stringVelocity = velocity_m.ToString(format) + " m/s"; }
+
+            return stringVelocity;
+        }
+
+
+        public static string StringifyThrust(double thrust_n, string format = "0.00")
+        {
+            string stringThrust = " 0 KN";
+            if (thrust_n > 1.0e9)
+            {
+                thrust_n = thrust_n * 1.0e-9;
+                stringThrust = thrust_n.ToString(format) + " GN";
+            }
+            else if (thrust_n > 1.0e6)
+            {
+                thrust_n = thrust_n * 1.0e-6;
+                stringThrust = thrust_n.ToString(format) + " MN";
+            }
+            else if (thrust_n > 1.0e3)
+            {
+                thrust_n = thrust_n * 1.0e-3;
+                stringThrust = thrust_n.ToString(format) + " KN";
+            }
+
+            else { stringThrust = thrust_n.ToString(format) + " KN"; }
+
+            return stringThrust;
+        }
+
         public static bool HasReqiredItems(Dictionary<Guid, int> stockpile, Dictionary<Guid, int> costs)
         {
             if (costs == null)

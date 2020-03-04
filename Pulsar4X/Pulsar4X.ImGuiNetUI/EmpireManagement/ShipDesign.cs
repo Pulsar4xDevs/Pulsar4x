@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
 
         private double _massDry;
         private double _massWet;
-        private double _ttw;
+        private double _ttwr;
         private double _dv;
         private double _wspd;
         private double _wcc;
