@@ -115,6 +115,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive && ImGui.Begin("Ship Design", ref IsActive, _flags))
             {
+
                 
 
                 if(_exsistingClasses.Count != _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList().Count)
@@ -530,6 +531,7 @@ namespace Pulsar4X.SDL2UI
                 _dv = OrbitMath.TsiolkovskyRocketEquation(_massWet, _massDry, ev);
 
             }
+            designChanged = false;
             ImGui.Text("Mass: " + _massDry + " kg");
             ImGui.Text("Total Thrust: " + (_tn * 0.01) + " kN");
             ImGui.Text("Thrust To Weight: " + _ttw);
