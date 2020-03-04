@@ -55,7 +55,6 @@ namespace Pulsar4X.SDL2UI
         private double _egen;
         private double _fuelStore;
 
-        private int existingshipcount;
         private bool existingdesignsstatus = true;
         
         private ShipDesignUI()
@@ -79,9 +78,6 @@ namespace Pulsar4X.SDL2UI
                 _armorNames[i]= _armorSelection[i].name;
             }
 
-
-            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
-            existingshipcount = _exsistingClasses.Count;
             _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
         }
 
@@ -120,13 +116,18 @@ namespace Pulsar4X.SDL2UI
             {
                 var designChanged = false;
 
-                if(existingshipcount != _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList().Count)
+                if(_exsistingClasses.Count != _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList().Count)
                 {
                     _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
-                    existingshipcount = _exsistingClasses.Count;
                 }
-                
-                
+                if (_componentDesigns.Length != _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray().Length)
+                {
+                    RefreshComponentDesigns();
+                }
+
+
+
+
                 ImGui.Columns(4);
                 ImGui.SetColumnWidth(0, 200);
                 ImGui.SetColumnWidth(1, 350);
