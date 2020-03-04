@@ -140,13 +140,13 @@ namespace Pulsar4X.SDL2UI
                 //if entity can warp
                 else if (T == typeof(WarpOrderWindow))
                 {
-                    WarpOrderWindow.GetInstance(_entityState).IsActive = true;
+                    WarpOrderWindow.GetInstance(_entityState).ToggleActive();
                     _state.ActiveWindow = WarpOrderWindow.GetInstance(_entityState);
                 }
                //Menu is change orbit menu
                 else if (T == typeof(ChangeCurrentOrbitWindow))
                 {
-                    ChangeCurrentOrbitWindow.GetInstance(_entityState).IsActive = true;
+                    ChangeCurrentOrbitWindow.GetInstance(_entityState).ToggleActive();
                     _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
                 }
                 //Menu is ficrecontrol menu
@@ -154,13 +154,13 @@ namespace Pulsar4X.SDL2UI
                 {
                     var instance = WeaponTargetingControl.GetInstance(_entityState);
                     instance.SetOrderEntity(_entityState);
-                    instance.IsActive = true;
+                    instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
                 //Menu is rename menu
                 else if (T == typeof(RenameWindow))
                 {
-                    RenameWindow.GetInstance(_entityState).IsActive = true;
+                    RenameWindow.GetInstance(_entityState).ToggleActive();
                     _state.ActiveWindow = RenameWindow.GetInstance(_entityState);
                     if(managesUIPopUps){
                         ImGui.CloseCurrentPopup();
@@ -171,20 +171,20 @@ namespace Pulsar4X.SDL2UI
                 else if (T == typeof(CargoTransfer))
                 {
                     var instance = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState);
-                    instance.IsActive = true;
+                    instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
                 //Menu is econ menu
                 else if (T == typeof(ColonyPanel))
                 {
                     var instance = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState);
-                    instance.IsActive = true;
+                    instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
                 //
                 if(T == typeof(PlanetaryWindow)){
                     var instance = PlanetaryWindow.GetInstance(_entityState);
-                    instance.IsActive = true;
+                    instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 
                 //TODO: implement this(moving a ship entity[_state.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
