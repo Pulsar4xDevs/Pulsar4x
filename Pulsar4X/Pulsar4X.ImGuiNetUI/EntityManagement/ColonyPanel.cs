@@ -26,7 +26,7 @@ namespace Pulsar4X.SDL2UI
             _selectedEntity = selectedEntity;
             _cargoList = new CargoListPannelSimple(staticData, selectedEntity);
             _staticData = staticData;
-            _flags = ImGuiWindowFlags.AlwaysAutoResize;
+            
         }
 
         public static ColonyPanel GetInstance(StaticDataStore staticData, EntityState selectedEntity)
@@ -65,6 +65,7 @@ namespace Pulsar4X.SDL2UI
             //installation pannel (install constructed components
             if (IsActive)
             {
+                _flags = ImGuiWindowFlags.AlwaysAutoResize;
                 if (ImGui.Begin("Cargo", ref IsActive, _flags))
                 {
 

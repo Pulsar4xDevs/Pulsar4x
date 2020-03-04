@@ -64,6 +64,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             _factionID = state.Faction.Guid;
 
 
+
             _selectedEntity.Manager.ManagerSubpulses.SystemDateChangedEvent += OnDatechange;
             OnUpdate();
         }
@@ -160,7 +161,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         public void ProdLineDisplay()
         {
-            ImGui.BeginChild("prodline", new Vector2(280, 300), true, ImGuiWindowFlags.ChildWindow );
+            ImGui.BeginChild("prodline", new Vector2(280, 300), true, ImGuiWindowFlags.ChildWindow | ImGuiWindowFlags.AlwaysAutoResize);
 
 
             foreach (var kvp in _prodLines)

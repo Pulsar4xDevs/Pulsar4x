@@ -60,7 +60,7 @@ namespace Pulsar4X.SDL2UI
             //Update();
             var width = ImGui.GetWindowWidth() * 0.5f;
             
-            ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
+            ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true, ImGuiWindowFlags.AlwaysAutoResize);
             foreach (var storetype in CargoResourceStores)
             {
                 if (ImGui.CollapsingHeader(storetype.HeaderText + "###" + _entityState.Name + storetype.StorageTypeName, ImGuiTreeNodeFlags.CollapsingHeader))
@@ -433,6 +433,10 @@ namespace Pulsar4X.SDL2UI
                 _selectedEntityRight.Entity,
                 _selectedEntityLeft.Entity,
                 CargoListRight.GetAllToMoveOut());
+        }
+        public CargoTransfer()
+        {
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
         }
 
         internal override void Display()
