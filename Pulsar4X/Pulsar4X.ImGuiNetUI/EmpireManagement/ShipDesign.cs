@@ -56,9 +56,11 @@ namespace Pulsar4X.SDL2UI
         private double _fuelStore;
 
         private int existingshipcount;
+        private bool existingdesignsstatus = true;
         
         private ShipDesignUI()
         {
+            
             _flags = ImGuiWindowFlags.NoCollapse;
 
             RefreshComponentDesigns();
@@ -130,7 +132,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SetColumnWidth(1, 350);
                 ImGui.SetColumnWidth(2, 278);
                 ImGui.SetColumnWidth(3, 278);
-                if (ImGui.CollapsingHeader("Exsisting Designs"))
+                if (ImGui.CollapsingHeader("Exsisting Designs", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     ImGui.BeginChild("exsistingdesigns", new Vector2(200, _firstChildHeight));
 
