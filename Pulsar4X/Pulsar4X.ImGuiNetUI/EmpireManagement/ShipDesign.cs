@@ -515,7 +515,7 @@ namespace Pulsar4X.SDL2UI
 
                 _massDry = mass;
                 _tn = tn;
-                _ttw = tn / mass;
+                _ttwr = (tn / mass) * 0.01;
                 _wcc = wcc;
                 _wec = wec;
                 _wsc = wsc;
@@ -535,13 +535,13 @@ namespace Pulsar4X.SDL2UI
 
             }
             designChanged = false;
-            ImGui.Text("Mass: " + _massDry + " kg");
-            ImGui.Text("Total Thrust: " + (_tn * 0.01) + " kN");
-            ImGui.Text("Thrust To Weight: " + _ttw);
-            ImGui.Text("Fuel Capacity: " + _fuelStore);
+            ImGui.Text("Mass: " + Misc.StringifyWeight(_massDry));
+            ImGui.Text("Total Thrust: " + Misc.StringifyThrust(_tn * 0.01));
+            ImGui.Text("Thrust To Weight: " + _ttwr);
+            ImGui.Text("Fuel Capacity: " + Misc.StringifyWeight(_fuelStore));
 
-            ImGui.Text("Delta V: " + _dv);
-            ImGui.Text("Warp Speed:" + _wspd + "m/s");
+            ImGui.Text("Delta V: " + Misc.StringifyVelocity(_dv));
+            ImGui.Text("Warp Speed:" + Misc.StringifyVelocity(_wspd));
             ImGui.Text("Warp Bubble Creation: " + _wcc);
             ImGui.Text("Warp Bubble Sustain: " + _wsc);
             ImGui.Text("Warp Bubble Collapse: " + _wec);
