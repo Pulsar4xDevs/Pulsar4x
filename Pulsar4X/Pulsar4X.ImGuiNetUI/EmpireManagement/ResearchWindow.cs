@@ -71,13 +71,13 @@ namespace Pulsar4X.SDL2UI
             _currentEntity = entityState;
         }
 
-
         internal override void Display()
         {
 
             if (IsActive && ImGui.Begin("Research and Development", ref IsActive, _flags))
             {
                 float width = ImGui.GetContentRegionAvail().X - 300;
+                float height = ImGui.GetTextLineHeightWithSpacing() * (_scienceTeams.Count + 2);
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, width);
                 ImGui.Text("Science Teams");
@@ -86,18 +86,25 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn();
                 ImGui.Separator();
 
-                DisplayTeams();
-                
-                ImGui.NextColumn();
+                DisplayTeams(width, height);
 
-                DisplayTechs();
-
-                ImGui.Separator();
+                ImGui.BeginChild("Separator", new Vector2(width, ImGui.GetTextLineHeightWithSpacing() + 1));
                 ImGui.Columns(1);
+                ImGui.Text("Tech Que");
+                ImGui.Separator();
+                ImGui.EndChild();
+
                 if (_selectedTeam > -1)
                 {
                     SelectedSci(_selectedTeam);
                 }
+
+                ImGui.NextColumn();
+
+                DisplayTechs();
+
+                
+
 
                 if (_selectedTeam == -1)
                 {
@@ -112,9 +119,9 @@ namespace Pulsar4X.SDL2UI
 
         private int hoveredi = -1;
 
-        private void DisplayTeams()
+        private void DisplayTeams(float width, float height)
         {
-            ImGui.BeginChild("Teams");
+            ImGui.BeginChild("Teams", new Vector2(width, height));
 
             ImGui.Columns(4);
             //ImGui.SetColumnWidth(0, 150);
@@ -275,10 +282,12 @@ namespace Pulsar4X.SDL2UI
             if (hoveredi > -1)
                 loopto = hoveredi;
 
-            
-            float heightt = ImGui.GetTextLineHeightWithSpacing() * loopto;
-            
             var spacingH = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
+
+
+            float heightt = ImGui.GetTextLineHeightWithSpacing() * loopto + spacingH * loopto;
+            
+            
             
             float hoverHeigt = ImGui.GetTextLineHeightWithSpacing() + spacingH * 3;
             
@@ -342,7 +351,7 @@ namespace Pulsar4X.SDL2UI
 
                 for (int i = hoveredi + 1; i < scientist.ProjectQueue.Count; i++)
                 {
-                    ImGui.BeginChild("Bottom", new Vector2(400, heightb));
+                    ImGui.BeginChild("Bottom");
                     ImGui.Columns(2);
                     ImGui.SetColumnWidth(0, 300);
                     (Guid techID, bool cycle) queueItem1 = _scienceTeams[selected].scientist.ProjectQueue[i];
