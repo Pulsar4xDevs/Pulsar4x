@@ -514,7 +514,7 @@ namespace Pulsar4X.SDL2UI
 
                 _massDry = mass;
                 _tn = tn;
-                _ttw = tn / mass;
+                _ttwr = tn / mass;
                 _wcc = wcc;
                 _wec = wec;
                 _wsc = wsc;
@@ -536,7 +536,7 @@ namespace Pulsar4X.SDL2UI
             designChanged = false;
             ImGui.Text("Mass: " + _massDry + " kg");
             ImGui.Text("Total Thrust: " + (_tn * 0.01) + " kN");
-            ImGui.Text("Thrust To Weight: " + _ttw);
+            ImGui.Text("Thrust To Weight: " + _ttwr);
             ImGui.Text("Fuel Capacity: " + _fuelStore);
 
             ImGui.Text("Delta V: " + _dv);

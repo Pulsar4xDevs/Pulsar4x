@@ -16,7 +16,6 @@ namespace Pulsar4X.SDL2UI
 
         private GalaxyWindow()
         {
-            SetSize(20, 20);
             
             //_flags = ImGuiWindowFlags.NoCollapse;
         }
