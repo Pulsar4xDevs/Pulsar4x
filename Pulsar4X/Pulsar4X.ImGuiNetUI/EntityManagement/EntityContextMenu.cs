@@ -37,7 +37,12 @@ namespace Pulsar4X.SDL2UI
                 //Creates a context button if it is valid
                 if(EntityUIWindows.checkIfCanOpenWindow(T, _entityState)){
                 bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[T]);
-                EntityUIWindows.openUIWindow(T, _entityState, _state, buttonresult ,true);
+                    {
+
+                        EntityUIWindows.openUIWindow(T, _entityState, _state, buttonresult ,true);
+
+                    }
+                
                 }
             }
             

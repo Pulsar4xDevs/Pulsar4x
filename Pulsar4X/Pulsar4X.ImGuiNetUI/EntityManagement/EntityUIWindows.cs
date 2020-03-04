@@ -52,10 +52,14 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            if(T == typeof(JumpThroughJumpPointBlankMenuHelper)){
-                if(checkIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state)){
-                    if(_state.PrimaryEntity != null){
-                        if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (ECSLib.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition_m, _entityState.Position.AbsolutePosition_m) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m)){
+            if(T == typeof(JumpThroughJumpPointBlankMenuHelper))
+            {
+                if(checkIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state))
+                {
+                    if(_state.PrimaryEntity != null)
+                    {
+                        if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (ECSLib.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition_m, _entityState.Position.AbsolutePosition_m) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m))
+                        {
                             return true;
                         }
                         else { return false; }
@@ -182,18 +186,37 @@ namespace Pulsar4X.SDL2UI
                     _state.ActiveWindow = instance;
                 }
                 //
-                if(T == typeof(PlanetaryWindow)){
+                if (T == typeof(PlanetaryWindow))
+                {
                     var instance = PlanetaryWindow.GetInstance(_entityState);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
-                
-                //TODO: implement this(moving a ship entity[_state.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
-                if(T == typeof(JumpThroughJumpPointBlankMenuHelper)){
 
+                    //TODO: implement this(moving a ship entity[_state.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
+                    if (T == typeof(JumpThroughJumpPointBlankMenuHelper))
+                    {
+
+                    }
                 }
             }
         }
+        public static bool checkopenUIWindow(Type T, EntityState _entityState, GlobalUIState _state)
+        {
+            //If the user has requested a menu be opened and if
+            bool returnval;
+
+            if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
+            else if (T == typeof(ChangeCurrentOrbitWindow)) returnval = ChangeCurrentOrbitWindow.GetInstance(_entityState).GetActive();
+            else if (T == typeof(WeaponTargetingControl)) returnval = WeaponTargetingControl.GetInstance(_entityState).GetActive();
+            else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
+            else if (T == typeof(CargoTransfer)) returnval = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState).GetActive();
+            else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState).GetActive();
+            else returnval = false;
+            return returnval;
+
+
+        }
     }
-}
+
 }
     

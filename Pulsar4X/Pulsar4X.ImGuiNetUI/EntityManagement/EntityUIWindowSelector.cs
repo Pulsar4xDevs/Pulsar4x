@@ -101,19 +101,42 @@ namespace Pulsar4X.SDL2UI
                     //Displays all buttons in a list
                     void PrintButtonList (ref List<ToolbuttonData> PrintButtons) {
                         uint iterations = 0;
+                        uint unclickedcolor;
+                        uint clickedcolour;
+                        ImGuiCol buttonidx = ImGuiCol.Button;
+                        unsafe
+                        {
+                            Vector4* unclickedcolorv = ImGui.GetStyleColorVec4(ImGuiCol.Button);
+                            Vector4* clickedcolorv = ImGui.GetStyleColorVec4(ImGuiCol.ButtonActive);
+                            unclickedcolor = ImGui.ColorConvertFloat4ToU32(*unclickedcolorv);
+                            clickedcolour = ImGui.ColorConvertFloat4ToU32(*clickedcolorv);
+                        }
                         foreach (var button in PrintButtons)
                         {
                             ImGui.SameLine();
                             ImGui.PushID(iterations.ToString());
+                            if (EntityUIWindows.checkopenUIWindow(button.ClickType, _entityState, _state))//If the window is open
+                            {
+                                ImGui.PushStyleColor(buttonidx, clickedcolour);//Have the button be "pressed"
+                            }
+                            else//If closed
+                            {
+                                ImGui.PushStyleColor(buttonidx, unclickedcolor);//Have the button be colored normally
+                            }
                             if (ImGui.ImageButton(button.Picture, BtnSizes))
-                                EntityUIWindows.openUIWindow(button.ClickType ,_entityState, _state);
+                            {
+                                EntityUIWindows.openUIWindow(button.ClickType, _entityState, _state);
+                            }
+
                             if (ImGui.IsItemHovered())
                                 ImGui.SetTooltip(button.TooltipText);
 
                             ImGui.PopID();
                             iterations++;
                         }
+                        
                         ImGui.NewLine();
+                        ImGui.PushStyleColor(buttonidx, unclickedcolor);//Have the button be colored normally
                         PrintButtons = new List<ToolbuttonData>();
                     }
                     
