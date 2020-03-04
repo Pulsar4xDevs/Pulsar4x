@@ -79,6 +79,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
+            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
         }
 
         private void GameLoopOnGameGlobalDateChangedEvent(DateTime newdate)
