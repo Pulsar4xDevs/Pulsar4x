@@ -60,7 +60,8 @@ namespace Pulsar4X.SDL2UI
         private ShipDesignUI()
         {
             
-            _flags = ImGuiWindowFlags.NoCollapse;
+            //_flags = ImGuiWindowFlags.NoCollapse;
+
 
             RefreshComponentDesigns();
             

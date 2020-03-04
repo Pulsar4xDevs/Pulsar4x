@@ -58,6 +58,7 @@ namespace Pulsar4X.SDL2UI
         internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
 
         internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new Dictionary<Type, PulsarGuiWindow>();
+        internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new Dictionary<String, NonUniquePulsarGuiWindow>();
         internal PulsarGuiWindow ActiveWindow { get; set; }
 
         internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new List<List<UserOrbitSettings>>();
@@ -332,7 +333,7 @@ namespace Pulsar4X.SDL2UI
 
         protected PulsarGuiWindow()
         {
-             _state.LoadedWindows[this.GetType()] = this;
+                _state.LoadedWindows[this.GetType()] = this;
         }
 
 
@@ -358,6 +359,92 @@ namespace Pulsar4X.SDL2UI
         internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
 
         internal virtual void EntitySelectedAsPrimary(EntityState entity){ }
+
+        internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
+
+        internal void Destroy()
+        {
+            /*
+            IsLoaded = false;
+            var lastItem = _state.LoadedWindows[_state.LoadedWindows.Count - 1];
+            if (lastItem.StateIndex != _state.LoadedWindows.Count - 1)
+                throw new Exception("index error in window count");
+            _state.LoadedWindows.RemoveAt(lastItem.StateIndex);
+            _state.LoadedWindows[StateIndex] = lastItem;
+            */
+        }
+
+    }
+
+    public abstract class NonUniquePulsarGuiWindow
+    {
+        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
+        Vector2 WindowSize;
+        //internal bool IsLoaded;
+        internal bool CanActive = false;
+        internal bool IsActive = false;
+        internal string UniqueName = "test";
+        //internal int StateIndex = -1;
+        //protected bool _IsOpen;
+        internal static GlobalUIState _state;
+        public void SetSize(float x, float y)
+        {
+            WindowSize = new Vector2(x, y);
+            ImGui.SetWindowSize(WindowSize);
+        }
+
+        public void SetActive(bool ActiveVal = true)
+        {
+            IsActive = ActiveVal;
+        }
+        public void ToggleActive()
+        {
+            IsActive = !IsActive;
+        }
+        public bool GetActive()
+        {
+            return IsActive;
+        }
+
+        public void SetName(string Newname)
+        {
+            UniqueName = Newname;
+        }
+
+        public void StartDisplay()
+        {
+            _state.LoadedNonUniqueWindows[this.UniqueName] = this;
+        }
+
+
+        protected NonUniquePulsarGuiWindow()
+        {
+                
+        }
+
+
+
+        /*An example of how the constructor should be for a derived class. 
+         * 
+        private  DerivedClass (GlobalUIState state):base(state)
+        {
+            any other DerivedClass specific constrctor stuff here.
+        }
+        internal static DerivedClass GetInstance(GlobalUIState state)
+        {
+            if (!state.LoadedWindows.ContainsKey(typeof(DerivedClass)))
+            {
+                return new DerivedClass(state);
+            }
+            return (DerivedClass)state.LoadedWindows[typeof(DerivedClass)];
+        }
+        */
+
+        internal abstract void Display();
+
+        internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
+
+        internal virtual void EntitySelectedAsPrimary(EntityState entity) { }
 
         internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
 
