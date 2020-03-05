@@ -26,9 +26,9 @@ namespace Pulsar4X.SDL2UI
             {typeof(WeaponTargetingControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
-            {typeof(ColonyPanel), "econ"},
-            {typeof(GotoSystemBlankMenuHelper), "goto system"},
-            {typeof(SelectPrimaryBlankMenuHelper), "select as primary"},
+            {typeof(ColonyPanel), "Economy"},
+            {typeof(GotoSystemBlankMenuHelper), "Go to system"},
+            {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
             {typeof(PlanetaryWindow), "Planetary window"}
         };
         internal Game Game;

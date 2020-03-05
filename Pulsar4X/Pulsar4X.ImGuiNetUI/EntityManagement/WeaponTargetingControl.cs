@@ -28,6 +28,7 @@ namespace Pulsar4X.SDL2UI
 
         private WeaponTargetingControl(EntityState entity)
         {
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
             _orderingEntity = entity.Entity;
             IsActive = true;
         }
