@@ -19,7 +19,6 @@ namespace Pulsar4X.SDL2UI
 
         private ComponentDesignUI()
         {
-            SetSize(200, 200);
             //_flags = ImGuiWindowFlags.NoCollapse;
         }
 

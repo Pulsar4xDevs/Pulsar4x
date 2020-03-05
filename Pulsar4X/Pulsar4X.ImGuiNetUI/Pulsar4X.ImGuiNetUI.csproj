@@ -105,6 +105,9 @@
     <None Remove="Resources\RepeatIco.bmp" />
     <None Remove="Resources\RulerIco.bmp" />
     <None Remove="Resources\UpArrow.bmp" />
+    <None Update="imgui.ini">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\CargoIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
