@@ -155,7 +155,15 @@ namespace Pulsar4X.SDL2UI
             else
             {
                 var foo =  OrderingEntityState.Entity.GetDataBlob<NewtonMoveDB>();
-                _massCurrentBody = foo.ParentMass;
+                if(foo == null)
+                {
+
+                }
+                else
+                {
+                    _massCurrentBody = foo.ParentMass;
+                }
+                
             }
 
             //else if(OrderingEntity.Entity.HasDataBlob<newton>())
