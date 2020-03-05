@@ -30,7 +30,6 @@ namespace Pulsar4X.SDL2UI
         {
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             _orderingEntity = entity.Entity;
-            IsActive = true;
         }
 
         private void OpenFire(Guid fcID, SetOpenFireControlOrder.FireModes mode)
