@@ -61,11 +61,15 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushStyleColor(ImGuiCol.Header, new Vector4(0, 0, 0, 0));
             ImGui.PushStyleColor(ImGuiCol.HeaderActive, new Vector4(0, 0, 0, 0));
             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0, 0, 0, 0));
+
+            DateTime currenttime = _state.SelectedSystemTime;
             if (ImGui.CollapsingHeader("", _xpanderFlags))//Let the user open up the the time frequency menu
                 _expanded = true;
             else
                 _expanded = false;
             ImGui.PopStyleColor(3);
+            ImGui.SameLine();
+            ImGui.Text(currenttime.ToShortDateString());
             ImGui.SameLine();
             if (ImGui.SliderInt("##spnSldr", ref _timeSpanValue, 1, 60, _timeSpanValue.ToString()))
                 AdjustTimeSpan();
@@ -86,12 +90,14 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.ImageButton(_state.SDLImageDictionary["PauseImg"], new Vector2(16, 16)))//Provide a button to unpause time
                     PausePlayPressed();
             }
-
             
 
+            
             if (_expanded)//When the submenu is expanded allow the user to adjust time frequency
             {
                 ImGui.PushItemWidth(100);
+                ImGui.Text("   " + currenttime.ToShortTimeString());
+                ImGui.SameLine();
                 if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), 1))
                     AdjustFreqency();
                 ImGui.SameLine();

@@ -45,6 +45,7 @@ namespace Pulsar4X.SDL2UI
         internal GalacticMapRender GalacticMap;
 
         internal StarSystem SelectedSystem { get { return StarSystemStates[SelectedStarSysGuid].StarSystem; } }
+        internal DateTime SelectedSystemTime { get { return StarSystemStates[SelectedStarSysGuid].StarSystem.StarSysDateTime; } }
         internal Guid SelectedStarSysGuid { get { return GalacticMap.SelectedStarSysGuid; } }
         internal SystemMapRendering SelectedSysMapRender { get { return GalacticMap.SelectedSysMapRender; } }
         internal DateTime PrimarySystemDateTime; //= new DateTime();
