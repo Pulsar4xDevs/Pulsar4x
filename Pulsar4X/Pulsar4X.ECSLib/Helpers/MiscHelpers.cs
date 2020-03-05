@@ -109,7 +109,7 @@ namespace Pulsar4X.ECSLib
                 stringThrust = thrust_n.ToString(format) + " KN";
             }
 
-            else { stringThrust = thrust_n.ToString(format) + " KN"; }
+            else { stringThrust = thrust_n.ToString(format) + " N"; }
 
             return stringThrust;
         }
