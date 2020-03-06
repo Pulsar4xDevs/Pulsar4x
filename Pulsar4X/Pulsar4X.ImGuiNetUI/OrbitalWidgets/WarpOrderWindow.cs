@@ -92,7 +92,6 @@ namespace Pulsar4X.SDL2UI
 
             OrderingEntityState = entityState;
             _smMode = smMode;
-            IsActive = true;
 
             _displayText = "Orbit Order: " + OrderingEntityState.Name;
             _tooltipText = "Select target to orbit";

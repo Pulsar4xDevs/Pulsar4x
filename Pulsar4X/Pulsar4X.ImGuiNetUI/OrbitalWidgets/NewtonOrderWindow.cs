@@ -84,7 +84,6 @@ namespace Pulsar4X.SDL2UI
                 var propDB = OrderingEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
                 _maxDV = (float)propDB.DeltaV;
             }
-            IsActive = true;
         }
 
         internal static ChangeCurrentOrbitWindow GetInstance(EntityState entity)
