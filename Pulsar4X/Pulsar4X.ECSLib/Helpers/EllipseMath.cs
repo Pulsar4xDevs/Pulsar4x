@@ -21,9 +21,9 @@ namespace Pulsar4X.ECSLib
         {
             return (apoapsis + periapsis) / 2;
         }
-        public static double SemiMajorAxisFromLinerEccentricity(double linierEccentricity, double eccentricity)
+        public static double SemiMajorAxisFromLinearEccentricity(double linearEccentricity, double eccentricity)
         {
-            return linierEccentricity * eccentricity;
+            return linearEccentricity * eccentricity;
         }
         public static double SemiMinorAxis(double semiMajorAxis, double eccentricity)
         {
@@ -35,17 +35,17 @@ namespace Pulsar4X.ECSLib
             return Math.Sqrt(Math.Abs(apoapsis) * Math.Abs(periapsis));
         }
 
-        public static double LinierEccentricity(double appoapsis, double semiMajorAxis)
+        public static double LinearEccentricity(double appoapsis, double semiMajorAxis)
         {
             return appoapsis - semiMajorAxis;
         }
-        public static double LinierEccentricityFromEccentricity(double semiMajorAxis, double eccentricity)
+        public static double LinearEccentricityFromEccentricity(double semiMajorAxis, double eccentricity)
         {
             return semiMajorAxis * eccentricity;
         }
-        public static double Eccentricity(double linierEccentricity, double semiMajorAxis)
+        public static double Eccentricity(double linearEccentricity, double semiMajorAxis)
         {
-            return linierEccentricity / semiMajorAxis;
+            return linearEccentricity / semiMajorAxis;
         }
 
         public static double Apoapsis(double eccentricity, double semiMajorAxis)

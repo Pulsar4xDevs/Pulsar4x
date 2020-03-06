@@ -74,11 +74,11 @@ namespace Pulsar4X.SDL2UI
                   
                         }
                         ImGui.SameLine();
-                        ImGui.Text(item.ItemWeightPerUnit);
+                        ImGui.Text(item.ItemMassPerUnit);
                         ImGui.SameLine();
                         ImGui.Text(item.NumberOfItems);
                         ImGui.SameLine();
-                        ImGui.Text(item.TotalWeight);
+                        ImGui.Text(item.TotalMass);
 
                     }
                 }
@@ -238,19 +238,19 @@ namespace Pulsar4X.SDL2UI
                             CargoItemSelectedEvent.Invoke(this);
                         }
                         ImGui.SameLine();
-                        ImGui.Text(item.ItemWeightPerUnit);
+                        ImGui.Text(item.ItemMassPerUnit);
                         ImGui.SameLine();
                         ImGui.Text(item.NumberOfItems);
                         ImGui.SameLine();
-                        ImGui.Text(item.TotalWeight);
+                        ImGui.Text(item.TotalMass);
 
                         ImGui.Text("+" + item.ItemIncomingAmount.ToString());
                         ImGui.SameLine();
-                        ImGui.Text(item.GetIncomingWeight());
+                        ImGui.Text(item.GetIncomingMass());
                         ImGui.SameLine();
                         ImGui.Text("-" + item.ItemOutgoingAmount.ToString());
                         ImGui.SameLine();
-                        ImGui.Text(item.GetOutgoungWeight());
+                        ImGui.Text(item.GetOutgoingMass());
 
                     }
                 }

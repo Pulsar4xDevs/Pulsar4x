@@ -320,7 +320,7 @@ namespace Pulsar4X.Tests
             
             //check EccentricAnomaly:
             var objE = (OrbitProcessor.GetEccentricAnomaly(objOrbit, objOrbit.MeanAnomalyAtEpoch_Degrees));
-            //var keE =   (OrbitMath.Gete(position, ke.SemiMajorAxis, ke.LinierEccentricity, ke.AoP));
+            //var keE =   (OrbitMath.Gete(position, ke.SemiMajorAxis, ke.LinearEccentricity, ke.AoP));
             /*
             if (objE != keE)
             {

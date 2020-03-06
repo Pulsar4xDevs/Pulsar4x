@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
     {
         public IWarhead Warhead;
         public float Calibre;
-        public float Weight;
+        public float Mass;
 
 
     }
