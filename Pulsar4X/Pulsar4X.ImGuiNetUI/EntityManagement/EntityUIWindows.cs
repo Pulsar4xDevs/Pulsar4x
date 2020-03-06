@@ -144,13 +144,13 @@ namespace Pulsar4X.SDL2UI
                 //if entity can warp
                 else if (T == typeof(WarpOrderWindow))
                 {
-                    WarpOrderWindow.GetInstance(_entityState).ToggleActive();
+                    WarpOrderWindow.GetInstance(_entityState).SetActive();
                     _state.ActiveWindow = WarpOrderWindow.GetInstance(_entityState);
                 }
                //Menu is change orbit menu
                 else if (T == typeof(ChangeCurrentOrbitWindow))
                 {
-                    ChangeCurrentOrbitWindow.GetInstance(_entityState).ToggleActive();
+                    ChangeCurrentOrbitWindow.GetInstance(_entityState).SetActive();
                     _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
                 }
                 //Menu is ficrecontrol menu

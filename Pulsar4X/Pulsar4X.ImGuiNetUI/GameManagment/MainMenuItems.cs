@@ -37,7 +37,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         //_state.NewGameOptions.IsActive = true;
                         var newgameoptions = NewGameOptions.GetInstance();
-                        newgameoptions.IsActive = true;
+                        newgameoptions.SetActive(true);
                         this.IsActive = false;
                     }
                     if (_state.IsGameLoaded)
@@ -46,7 +46,7 @@ namespace Pulsar4X.SDL2UI
                             _saveGame = !_saveGame;
                         if (ImGui.Button("Options", buttonSize))
                         {
-                            SettingsWindow.GetInstance().IsActive = !SettingsWindow.GetInstance().IsActive;
+                            SettingsWindow.GetInstance().ToggleActive();
                             IsActive = false;
                         }
                     }
@@ -59,7 +59,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     var pannel = SMPannel.GetInstance();
                     _state.ActiveWindow = pannel;
-                    pannel.IsActive = true;
+                    pannel.SetActive();
                     _state.EnableGameMaster();
                     this.IsActive = false;
                 }

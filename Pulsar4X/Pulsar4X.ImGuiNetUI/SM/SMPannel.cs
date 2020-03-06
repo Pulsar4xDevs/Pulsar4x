@@ -41,7 +41,7 @@ namespace Pulsar4X.SDL2UI
                     if (ImGui.Button("AddOrbit"))
                     {
                         var pannel = WarpOrderWindow.GetInstance(_selectedEntity, true);
-                        pannel.IsActive = true;
+                        pannel.SetActive();
                         _state.ActiveWindow = pannel;
                     }
 

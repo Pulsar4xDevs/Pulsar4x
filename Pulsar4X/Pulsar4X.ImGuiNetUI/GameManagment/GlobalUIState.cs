@@ -101,7 +101,7 @@ namespace Pulsar4X.SDL2UI
 
             Camera = new Camera(viewport);
 
-            MainMenuItems.GetInstance().IsActive = true;
+            MainMenuItems.GetInstance().SetActive();
 
             string rf = "Resources";
             LoadImg("Logo", Path.Combine( rf,"PulsarLogo.bmp"));
@@ -138,7 +138,7 @@ namespace Pulsar4X.SDL2UI
 
         private void deactivateAllClosableWindows(){
             foreach(var window in LoadedWindows){
-                window.Value.IsActive = false;
+                window.Value.SetActive(false);
             }
         }
 
@@ -307,7 +307,7 @@ namespace Pulsar4X.SDL2UI
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
         //internal bool IsLoaded;
         internal bool CanActive = false;
-        internal bool IsActive = false;
+        protected bool IsActive = false;
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
         internal static GlobalUIState _state;

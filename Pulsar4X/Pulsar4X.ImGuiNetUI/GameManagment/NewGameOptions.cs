@@ -79,7 +79,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.End();
                 }
                 else
-                    MainMenuItems.GetInstance().IsActive = true;
+                    MainMenuItems.GetInstance().SetActive();
                 
             }
 
@@ -116,10 +116,10 @@ namespace Pulsar4X.SDL2UI
             DebugWindow.GetInstance().SetGameEvents();
             IsActive = false;
             //we initialize window instances so that they get always displayed and automatically open after new game is created.
-            TimeControl.GetInstance().IsActive = true;
-            ToolBarUI.GetInstance().IsActive = true;
-            EntityUIWindowSelector.GetInstance().IsActive = true;
-            EntityInfoPanel.GetInstance().IsActive = true;
+            TimeControl.GetInstance().SetActive();
+            ToolBarUI.GetInstance().SetActive();
+            EntityUIWindowSelector.GetInstance().SetActive();
+            EntityInfoPanel.GetInstance().SetActive();
         }
     }
 }
