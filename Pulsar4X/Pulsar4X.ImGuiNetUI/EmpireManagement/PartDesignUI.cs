@@ -139,12 +139,12 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();//Add all the cost names to col 1
 
                     
-                    ImGui.Text(_componentDesigner.MassValue.ToString());
-                    ImGui.Text(_componentDesigner.VolumeValue.ToString());
+                    ImGui.Text(Misc.StringifyMass(_componentDesigner.MassValue));
+                    ImGui.Text(Misc.StringifyVolume(_componentDesigner.VolumeValue));
                     ImGui.Text(_componentDesigner.CrewReqValue.ToString());
                     ImGui.Text(_componentDesigner.CreditCostValue.ToString());
-                    ImGui.Text(_componentDesigner.ResearchCostValue.ToString());
-                    ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString());
+                    ImGui.Text(_componentDesigner.ResearchCostValue.ToString() + " RP");
+                    ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString() + " BP");
                     ImGui.NextColumn();//Add all the price values to col 2
 
 

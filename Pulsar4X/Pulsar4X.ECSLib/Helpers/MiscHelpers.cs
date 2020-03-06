@@ -7,30 +7,54 @@ namespace Pulsar4X.ECSLib
     public static class Misc
     {
 
-        public static string StringifyWeight(double amountInKg, string format = "0.###")
+        public static string StringifyMass(double amountInKg, string format = "0.###")
         {
-            string stringWeight = "0 Kg";
+            string stringMass = "0 Kg";
             if (amountInKg > 100000000)
             {
                 amountInKg = amountInKg * 0.00000001;
-                stringWeight = amountInKg.ToString(format) + " MT";
+                stringMass = amountInKg.ToString(format) + " MT";
             }
             else if (amountInKg > 100000)
             {
                 amountInKg = amountInKg * 0.00001;
-                stringWeight = amountInKg.ToString(format) + " KT";
+                stringMass = amountInKg.ToString(format) + " KT";
             }
             else if (amountInKg > 1000)
             {
                 amountInKg = amountInKg * 0.001;
-                stringWeight = amountInKg.ToString(format) + " T";
+                stringMass = amountInKg.ToString(format) + " T";
             }
 
-            else { stringWeight = amountInKg.ToString(format) + " Kg"; }
+            else { stringMass = amountInKg.ToString(format) + " Kg"; }
 
-            return stringWeight;
+            return stringMass;
         }
 
+        public static string StringifyVolume(double volume_m, string format = "0.###")
+        {
+            string stringVolume = "0 m^3";
+
+            if (volume_m > 1.0e9)
+            {
+                volume_m = volume_m * 1.0e-9;
+                stringVolume = volume_m.ToString(format) + " Gm^3";
+            }
+            else if (volume_m > 1.0e6)
+            {
+                volume_m = volume_m * 1.0e-6;
+                stringVolume = volume_m.ToString(format) + " Mm^3";
+            }
+            else if (volume_m > 1.0e3)
+            {
+                volume_m = volume_m * 1.0e-3;
+                stringVolume = volume_m.ToString(format) + " Km^3";
+            }
+
+            else { stringVolume = volume_m.ToString(format) + " m^3";  }
+
+            return stringVolume;
+        }
         
         public static string StringifyDistance(double length_m,  string format = "0.###")
         {
@@ -114,7 +138,7 @@ namespace Pulsar4X.ECSLib
             return stringThrust;
         }
 
-        public static bool HasReqiredItems(Dictionary<Guid, int> stockpile, Dictionary<Guid, int> costs)
+        public static bool HasRequiredItems(Dictionary<Guid, int> stockpile, Dictionary<Guid, int> costs)
         {
             if (costs == null)
                 return true;
@@ -256,7 +280,7 @@ namespace Pulsar4X.ECSLib
     public static class ListExtension
     {
         [PublicAPI]
-        public static List<Entity> GetEntititiesWithDataBlob<TDataBlob>(this List<Entity> list) where TDataBlob : BaseDataBlob
+        public static List<Entity> GetEntitiesWithDataBlob<TDataBlob>(this List<Entity> list) where TDataBlob : BaseDataBlob
         {
             var retVal = new List<Entity>();
             foreach (Entity entity in list)

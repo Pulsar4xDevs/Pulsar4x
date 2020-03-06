@@ -81,11 +81,11 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     ImGui.Text(item.ItemName);
                                     ImGui.SameLine();
-                                    ImGui.Text(item.ItemWeightPerUnit);
+                                    ImGui.Text(item.ItemMassPerUnit);
                                     ImGui.SameLine();
                                     ImGui.Text(item.NumberOfItems);
                                     ImGui.SameLine();
-                                    ImGui.Text(item.TotalWeight);
+                                    ImGui.Text(item.TotalMass);
 
                                 }
 
