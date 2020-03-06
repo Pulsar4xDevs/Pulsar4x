@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
         private ResearchWindow()
         {
             OnFactionChange();
-            _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent; 
+            _state.Game.GamePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent; 
         }
 
         private void GameLoopOnGameGlobalDateChangedEvent(DateTime newdate)

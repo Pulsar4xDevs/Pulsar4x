@@ -10,7 +10,7 @@ namespace Pulsar4X.SDL2UI
     public class TimeControl : PulsarGuiWindow
     {
         
-        ECSLib.TimeLoop _timeloop {get { return _state.Game.GameLoop; } }
+        ECSLib.MasterTimePulse _timeloop {get { return _state.Game.GamePulse; } }
 
         bool _isPaused = true;
         int _timeSpanValue = 1;

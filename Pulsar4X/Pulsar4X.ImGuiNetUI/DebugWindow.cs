@@ -94,7 +94,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (_state.Game != null)
             {
-                _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
+                _state.Game.GamePulse.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
                 _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
                 _state.EntityClickedEvent += _state_EntityClicked;
                 
@@ -134,7 +134,7 @@ namespace Pulsar4X.SDL2UI
 
         void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)
         {
-            _currentGFPS = (float)_state.Game.GameLoop.LastSubtickTime.TotalSeconds;
+            _currentGFPS = (float)_state.Game.GamePulse.LastSubtickTime.TotalSeconds;
 
             if (_currentGFPS > largestGFPS)
             {
@@ -179,7 +179,7 @@ namespace Pulsar4X.SDL2UI
         void SystemSubpulse_SystemDateChangedEvent(DateTime newDate)
         {
             _dateChangeSinceLastFrame = true;
-            _currentSFPS = (float)_state.Game.GameLoop.LastSubtickTime.TotalSeconds;
+            _currentSFPS = (float)_state.Game.GamePulse.LastSubtickTime.TotalSeconds;
             _systemRates[_systemRateIndex] = _currentSFPS;
             if (_systemRateIndex >= _systemRates.Length - 1)
                 _systemRateIndex = 0;

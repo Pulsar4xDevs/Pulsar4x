@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
             }
             
 
-            _gameVM.Game.GameLoop.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
+            _gameVM.Game.GamePulse.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
         }
 
         private void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)

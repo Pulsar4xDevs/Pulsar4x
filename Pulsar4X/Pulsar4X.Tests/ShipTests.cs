@@ -112,8 +112,8 @@ namespace Pulsar4X.Tests
                 new Vector3(0,0,0));
             
             Assert.AreEqual(warpAbility.CurrentVectorMS.Length(), expectedSpeed2, 1.0E-15);
-            // _game.GameLoop.Ticklength = TimeSpan.FromSeconds(1);
-            //_game.GameLoop.TimeStep();
+            // _game.GamePulse.Ticklength = TimeSpan.FromSeconds(1);
+            //_game.GamePulse.TimeStep();
             StaticRefLib.ProcessorManager.GetProcessor<WarpMovingDB>().ProcessEntity(_ship, 1);
             var ralposNow = posDB.RelativePosition_m;
             var distance = Math.Abs((ralpos - ralposNow).Length());

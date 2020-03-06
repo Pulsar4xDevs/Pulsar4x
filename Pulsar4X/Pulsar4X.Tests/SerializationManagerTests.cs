@@ -101,7 +101,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(firstOrigional.Guid, firstLoaded.Guid);
             Assert.AreEqual(firstOrigional.NameDB.DefaultName, firstLoaded.NameDB.DefaultName);
   
-            Assert.AreEqual(origional.GameLoop, loadedGame.GameLoop);
+            Assert.AreEqual(origional.GamePulse, loadedGame.GamePulse);
 
             Assert.AreEqual(firstOrigional.ManagerSubpulses.GetTotalNumberOfProceses(), firstLoaded.ManagerSubpulses.GetTotalNumberOfProceses());
             Assert.AreEqual(firstOrigional.ManagerSubpulses.GetInteruptDateTimes(), firstLoaded.ManagerSubpulses.GetInteruptDateTimes());

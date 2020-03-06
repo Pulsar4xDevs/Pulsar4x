@@ -18,7 +18,44 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class ManagerSubPulse
-    { 
+    {
+
+        public struct PerformanceData
+        {
+            public double FullPulseTimeMS;
+            public double[] SubpulseTimes;
+        }
+        
+        Stopwatch _masterPulseStopwatch = new Stopwatch();
+        Stopwatch _subPulseStopwatch = new Stopwatch();
+        Stopwatch _processStopwatch = new Stopwatch();
+        
+        private double _fullPulseTimeMS = double.PositiveInfinity;
+        private List<double> _subpulseTimes = new List<double>();
+
+        public PerformanceData[] PerfHistory;
+        public int PerfHistoryIndex { get; private set; }
+    
+        /// <summary>
+        /// Threadsafe Change the amount of history we store for this Manager.
+        /// </summary>
+        public int PerfHistoryCount
+        {
+            get { return PerfHistory.Length; }
+            set
+            {
+                lock (PerfHistory)
+                {
+                    int copyCount = Math.Min(PerfHistory.Length, value);
+                    var oldHistory = PerfHistory;
+                    PerfHistory = new PerformanceData[value];
+                    Buffer.BlockCopy(oldHistory, 0, PerfHistory, 0, copyCount);
+                    if (PerfHistoryIndex > value-1)
+                        PerfHistoryIndex = value-1;
+                }
+            }
+        }
+        
         [JsonProperty]
         private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
 
@@ -131,6 +168,28 @@ namespace Pulsar4X.ECSLib
         }
 
 
+        private void AddPerfHistory()
+        {
+            if (PerfHistoryCount <= 0)
+                return;
+            lock (PerfHistory)
+            {
+                PerfHistoryIndex++;
+                if (PerfHistoryIndex >= PerfHistoryCount)
+                    PerfHistoryIndex = 0;
+                PerformanceData newData = new PerformanceData() {FullPulseTimeMS = _fullPulseTimeMS, SubpulseTimes = _subpulseTimes.ToArray()};
+                PerfHistory[PerfHistoryIndex] = newData;
+            }
+        }
+
+        public PerformanceData GetLastPerfData()
+        {
+            lock (PerfHistory)
+            {
+                return PerfHistory[PerfHistoryIndex];
+            }
+        }
+        
         internal Dictionary<DateTime, List<String>> GetInstanceProcForEntity(Entity entity)
         {
             var procDict = new Dictionary<DateTime, List<string>>();
@@ -298,7 +357,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// transfers all references from this starSystem to the new one
         /// Note that doing this could cause a temporal anomaly if the system we're moving to is ahead of this one.
-        /// This should only be done from the TimeLoop when it has synched the systems.
+        /// This should only be done from the MasterTimePulse when it has synched the systems.
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="starsys"></param>
@@ -336,9 +395,12 @@ namespace Pulsar4X.ECSLib
                 throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
             //the system may need to run several times for a target datetime
             //keep processing the system till we've reached the wanted datetime
+            _masterPulseStopwatch.Restart();
+            _subpulseTimes = new List<double>();
             IsProcessing = true;
             while (StarSysDateTime < targetDateTime)
             {
+                _subPulseStopwatch.Restart();
                 //calculate max time the system can run/time to next interupt
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
                 TimeSpan timeDeltaMax = targetDateTime - StarSysDateTime;
@@ -349,9 +411,15 @@ namespace Pulsar4X.ECSLib
                 //ShipMovementProcessor.Process(_entityManager, (int)deltaActual.TotalSeconds); //process movement for any entity that can move (not orbit)
                 //_entityManager.Game.ProcessorManager.Hotloop<PropulsionDB>(_entityManager, (int)deltaActual.TotalSeconds);
                 ProcessToNextInterupt(nextDate);
+                _subPulseStopwatch.Stop();
+                _subpulseTimes.Add(_subPulseStopwatch.ElapsedMilliseconds);
             }
 
             CurrentProcess = "Waiting";
+            _masterPulseStopwatch.Stop();
+            _fullPulseTimeMS = _masterPulseStopwatch.ElapsedMilliseconds;
+            AddPerfHistory();
+            
             IsProcessing = false;
         }
 
@@ -382,27 +450,25 @@ namespace Pulsar4X.ECSLib
 
                 foreach(var systemProcess in QueuedProcesses[nextInteruptDateTime].SystemProcessors)
                 {
-                    Stopwatch sw = new Stopwatch();
-                    sw.Start();
+                    _processStopwatch.Restart();
                     CurrentProcess = systemProcess.ToString();
                     systemProcess.ProcessManager(_entityManager, deltaSeconds);
-                    sw.Stop();
-                    ProcessTime[systemProcess.GetType()] = sw.Elapsed;
+                    _processStopwatch.Stop();
+                    ProcessTime[systemProcess.GetType()] = _processStopwatch.Elapsed;
                     AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
                 }
                 foreach(var instanceProcessSet in QueuedProcesses[nextInteruptDateTime].InstanceProcessors)
                 {
                     var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
-                    Stopwatch sw = new Stopwatch();
+                    _processStopwatch.Restart();
                     CurrentProcess = instanceProcessSet.Key;
-                    sw.Start();
                     foreach (var entity in instanceProcessSet.Value)
                     {
 
                         processor.ProcessEntity(entity, nextInteruptDateTime);
                     }
-                    sw.Stop();
-                    ProcessTime[processor.GetType()] = sw.Elapsed;
+                    _processStopwatch.Stop();
+                    ProcessTime[processor.GetType()] = _processStopwatch.Elapsed;
                 }
                 QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 
             }

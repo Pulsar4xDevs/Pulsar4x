@@ -267,12 +267,12 @@ namespace Pulsar4X.Networking
             DateTime hostToDatetime = DateTime.FromBinary(message.ReadInt64());
             DateTime hostFromDatetime = DateTime.FromBinary(message.ReadInt64());
             TimeSpan hostDelta = hostToDatetime - hostFromDatetime;
-            TimeSpan ourDelta = hostToDatetime - Game.GameLoop.GameGlobalDateTime;
+            TimeSpan ourDelta = hostToDatetime - Game.GamePulse.GameGlobalDateTime;
             if (ourDelta < TimeSpan.FromSeconds(0))
                 throw new Exception("Client has gotten ahead of host, this should not happen");
             string messageStr = "TickEvent: DateTime: " + hostToDatetime + " HostDelta: " + hostDelta + " OurDelta: " + ourDelta;
             Messages.Add(messageStr);
-            Game.GameLoop.TimeStep(hostToDatetime);
+            Game.GamePulse.TimeStep(hostToDatetime);
 
         }
 
@@ -289,7 +289,7 @@ namespace Pulsar4X.Networking
             var mStream = new MemoryStream(data);
             StaticRefLib.GameSettings = SerializationManager.ImportGameSettings(mStream);
             mStream.Close();
-            Game.GameLoop.GameGlobalDateTime = hostDateTime;
+            Game.GamePulse.GameGlobalDateTime = hostDateTime;
             //TODO: #CleanCode: the below should probilby be in refactored to somewhere else. 
             //TODO: #Network: it should also maybe be able to request a dataset from the server if it hasn't got it localy. 
             if (Game.Settings.DataSets != null)

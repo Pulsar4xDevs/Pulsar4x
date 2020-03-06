@@ -78,7 +78,7 @@ namespace Pulsar4X.SDL2UI
                 _armorNames[i]= _armorSelection[i].name;
             }
 
-            _state.Game.GameLoop.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
+            _state.Game.GamePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
             _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
         }
 

@@ -95,7 +95,7 @@ namespace Pulsar4X.Networking
             NetPeerObject.Start();
 
             StartListning();
-            Game.GameLoop.GameGlobalDateChangedEvent += SendTickInfo;
+            Game.GamePulse.GameGlobalDateChangedEvent += SendTickInfo;
         }
 
         protected override void HandleDiscoveryRequest(NetIncomingMessage message)

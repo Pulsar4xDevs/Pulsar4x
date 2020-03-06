@@ -8,9 +8,9 @@ namespace Pulsar4X.ECSLib
         public static Game Game { get; private set; }
         public static StaticDataStore StaticData { get; internal set; }
         internal static ProcessorManager ProcessorManager { get; private set; }
-        public static DateTime CurrentDateTime { get { return GameLoop.GameGlobalDateTime; } }
+        public static DateTime CurrentDateTime { get { return GamePulse.GameGlobalDateTime; } }
         public static EventLog EventLog { get; private set; }
-        internal static TimeLoop GameLoop { get; private set; }
+        internal static MasterTimePulse GamePulse { get; private set; }
 
         public static IOrderHandler OrderHandler { get; private set; }
         
@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
             Game = game;
             StaticData = game.StaticData;
             ProcessorManager = new ProcessorManager(game);
-            GameLoop = new TimeLoop(game);
+            GamePulse = new MasterTimePulse(game);
             EventLog = new EventLog(game);
             SyncContext = SynchronizationContext.Current;
             OrderHandler = game.OrderHandler;
