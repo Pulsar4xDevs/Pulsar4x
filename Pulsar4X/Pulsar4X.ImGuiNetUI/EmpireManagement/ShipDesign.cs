@@ -536,7 +536,7 @@ namespace Pulsar4X.SDL2UI
             designChanged = false;
             ImGui.Text("Mass: " + Misc.StringifyMass(_massDry));
             ImGui.Text("Total Thrust: " + Misc.StringifyThrust(_tn));
-            ImGui.Text("Thrust To Weight: " + _ttwr);
+            ImGui.Text("Thrust To Mass Ratio: " + _ttwr);
             ImGui.Text("Fuel Capacity: " + Misc.StringifyMass(_fuelStore));
 
             ImGui.Text("Delta V: " + Misc.StringifyVelocity(_dv));

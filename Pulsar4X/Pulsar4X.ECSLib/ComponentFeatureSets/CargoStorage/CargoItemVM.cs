@@ -23,32 +23,32 @@ namespace Pulsar4X.ECSLib
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string ItemName { get { return CargoableItem.Name; } }
-        public string ItemWeightPerUnit { get { return CargoableItem.Mass.ToString(); } }
+        public string ItemMassPerUnit { get { return CargoableItem.Mass.ToString(); } }
         private string _noOfItems;
         public string NumberOfItems {
             get { return _noOfItems; } set { _noOfItems = value; OnPropertyChanged(); }
         }
-        public string GetIncomingWeight()
+        public string GetIncomingMass()
         {
             return Misc.StringifyMass(ItemIncomingAmount * CargoableItem.Mass, "0.###"); 
         }
-        public string GetOutgoungWeight()
+        public string GetOutgoingMass()
         {
             return Misc.StringifyMass(ItemOutgoingAmount * CargoableItem.Mass, "0.###");
         }
-        public string GetStoredWeight()
+        public string GetStoredMass()
         {
             return Misc.StringifyMass(_itemCount * CargoableItem.Mass, "0.###");
         }
 
-        private string _totalWeight;
+        private string _totalMass;
 
-        public string TotalWeight
+        public string TotalMass
         {
-            get { return _totalWeight; }
+            get { return _totalMass; }
             set
             {
-                _totalWeight = value;
+                _totalMass = value;
                 OnPropertyChanged();
             }
         }
@@ -59,10 +59,10 @@ namespace Pulsar4X.ECSLib
             CargoableItem = cargoableItem;
         }
 
-        private void setTotalWeight()
+        private void setTotalMass()
         {
-            double totalWeight = _itemCount * CargoableItem.Mass;
-            TotalWeight = Misc.StringifyMass(totalWeight, "0.###");
+            double totalMass = _itemCount * CargoableItem.Mass;
+            TotalMass = Misc.StringifyMass(totalMass, "0.###");
         }
 
         public void Update(long itemCount)
@@ -71,7 +71,7 @@ namespace Pulsar4X.ECSLib
             if(_itemCount != itemCount) {
                 _itemCount = itemCount;
                 NumberOfItems = _itemCount.ToString();
-                setTotalWeight();
+                setTotalMass();
             }
         }
 
