@@ -147,7 +147,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             _eccentricity = ke_m.Eccentricity;
-            _linearEccentricity_m = ke_m.LinierEccentricity;
+            _linearEccentricity_m = ke_m.LinearEccentricity;
             _position_m = position_m;
 
             OrbitEllipseSemiMaj_m = ke_m.SemiMajorAxis; 

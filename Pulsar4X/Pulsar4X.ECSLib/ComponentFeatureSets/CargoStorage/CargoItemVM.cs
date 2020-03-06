@@ -30,15 +30,15 @@ namespace Pulsar4X.ECSLib
         }
         public string GetIncomingWeight()
         {
-            return Misc.StringifyWeight(ItemIncomingAmount * CargoableItem.Mass, "0.###"); 
+            return Misc.StringifyMass(ItemIncomingAmount * CargoableItem.Mass, "0.###"); 
         }
         public string GetOutgoungWeight()
         {
-            return Misc.StringifyWeight(ItemOutgoingAmount * CargoableItem.Mass, "0.###");
+            return Misc.StringifyMass(ItemOutgoingAmount * CargoableItem.Mass, "0.###");
         }
         public string GetStoredWeight()
         {
-            return Misc.StringifyWeight(_itemCount * CargoableItem.Mass, "0.###");
+            return Misc.StringifyMass(_itemCount * CargoableItem.Mass, "0.###");
         }
 
         private string _totalWeight;
@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib
         private void setTotalWeight()
         {
             double totalWeight = _itemCount * CargoableItem.Mass;
-            TotalWeight = Misc.StringifyWeight(totalWeight, "0.###");
+            TotalWeight = Misc.StringifyMass(totalWeight, "0.###");
         }
 
         public void Update(long itemCount)

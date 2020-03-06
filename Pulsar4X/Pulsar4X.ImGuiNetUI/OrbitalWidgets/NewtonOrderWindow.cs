@@ -265,7 +265,7 @@ namespace Pulsar4X.SDL2UI
                 changes = true;
             }
             
-            ImGui.Text("Fuel to burn:" + Misc.StringifyWeight(_fuelToBurn));
+            ImGui.Text("Fuel to burn:" + Misc.StringifyMass(_fuelToBurn));
             ImGui.Text("Burn time: " + (int)(_fuelToBurn / _fuelRate) +" s");
             ImGui.Text("DeltaV: " + Misc.StringifyDistance(DeltaV.Length())+ "/s of " + Misc.StringifyDistance(_maxDV) + "/s");
             ImGui.Text("Eccentricity: " + Eccentricity.ToString("g3"));
