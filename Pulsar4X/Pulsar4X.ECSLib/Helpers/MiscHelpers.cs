@@ -31,6 +31,30 @@ namespace Pulsar4X.ECSLib
             return stringMass;
         }
 
+        public static string StringifyVolume(double volume_m, string format = "0.###")
+        {
+            string stringVolume = "0 m^3";
+
+            if (volume_m > 1.0e9)
+            {
+                volume_m = volume_m * 1.0e-9;
+                stringVolume = volume_m.ToString(format) + " Gm^3";
+            }
+            else if (volume_m > 1.0e6)
+            {
+                volume_m = volume_m * 1.0e-6;
+                stringVolume = volume_m.ToString(format) + " Mm^3";
+            }
+            else if (volume_m > 1.0e3)
+            {
+                volume_m = volume_m * 1.0e-3;
+                stringVolume = volume_m.ToString(format) + " Km^3";
+            }
+
+            else { stringVolume = volume_m.ToString(format) + " m^3";  }
+
+            return stringVolume;
+        }
         
         public static string StringifyDistance(double length_m,  string format = "0.###")
         {
