@@ -32,20 +32,7 @@ namespace Pulsar4X.SDL2UI
         private string _selectedEntityName;
         SystemState _systemState;
         public SystemState systemState{get{return _systemState;} set{_systemState = value;}}
-        float largestGFPS = 0;
-        int largestIndex = 0;
 
-        float _currentGFPS;
-        int _gameRateIndex = 0;
-        float[] _gameRates = new float[80];
-
-        float _currentFPS;
-        int _frameRateIndex = 0;
-        float[] _frameRates = new float[80];
-
-        float _currentSFPS;
-        int _systemRateIndex = 0;
-        float[] _systemRates = new float[80];
         bool _dateChangeSinceLastFrame = true;
         bool _isRunningFrame = false;
         bool _drawSOI = false;
@@ -134,57 +121,14 @@ namespace Pulsar4X.SDL2UI
 
         void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)
         {
-            _currentGFPS = (float)_state.Game.GamePulse.LastSubtickTime.TotalSeconds;
-
-            if (_currentGFPS > largestGFPS)
-            {
-                largestGFPS = _currentGFPS;
-                largestIndex = 0;
-            }
-            else if (largestIndex == _gameRates.Length)
-            {
-                largestGFPS = _currentGFPS;
-                foreach (var item in _gameRates)
-                {
-                    if (item > largestGFPS)
-                        largestGFPS = item;
-                }
-            }
-            else
-            {
-                largestIndex++;
-            }
-
-            _gameRates[_gameRateIndex] = _currentGFPS;
-            if (_gameRateIndex >= _gameRates.Length - 1)
-                _gameRateIndex = 0;
-            else
-                _gameRateIndex++;
 
             //positions.Add(_state.LastClickedEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU);
         }
 
-
-        void SetFrameRateArray()
-        {
-            _currentFPS = ImGui.GetIO().Framerate;
-            _frameRates[_frameRateIndex] = _currentFPS;
-            if (_frameRateIndex < _frameRates.Length - 1)
-                _frameRateIndex++;
-            else
-                _frameRateIndex = 0;
-
-        }
-
+        
         void SystemSubpulse_SystemDateChangedEvent(DateTime newDate)
         {
             _dateChangeSinceLastFrame = true;
-            _currentSFPS = (float)_state.Game.GamePulse.LastSubtickTime.TotalSeconds;
-            _systemRates[_systemRateIndex] = _currentSFPS;
-            if (_systemRateIndex >= _systemRates.Length - 1)
-                _systemRateIndex = 0;
-            else
-                _systemRateIndex++;
 
             if (_systemState.EntitiesAdded.Count > 0 || _systemState.EntitysToBin.Count > 0)
             {
@@ -193,7 +137,6 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        DateTime lastDate = new DateTime();
         ECSLib.Vector3 pos = new ECSLib.Vector3();
         double truAnomoly = 0;
 
@@ -202,7 +145,6 @@ namespace Pulsar4X.SDL2UI
             _isRunningFrame = true;
             if (IsActive)
             {
-                SetFrameRateArray();
                 if (ImGui.Begin("debug", ref IsActive))
                 {
                     ImGui.Text(_state.PrimarySystemDateTime.ToString());
@@ -268,41 +210,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Special Chars");
                     ImGui.Text("Proggy clean is crsp but these chars are blury, Ω, ω, ν");
                     //ImGui.Text("this text is fine, Ω, ω, ν "+"this text is not blury");
-                    if (ImGui.CollapsingHeader("FrameRates", ImGuiTreeNodeFlags.CollapsingHeader))
-                    {
 
-                        //plot vars: (label, values, valueOffset, overlayText, scaleMin, scaleMax, graphSize, Stride)
-                        //core game processing rate.
-                        //ImGui.PlotHistogram("##GRHistogram", _gameRatesDisplay, 10, _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
-                        //ImGui.PlotHistogram("##GRHistogram1", _gameRatesDisplay, 0 , _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
-                        //string label, ref float values... 
-                        //ImGui.PlotHistogram(
-                        ImGui.PlotHistogram("Game Tick ##GTHistogram", ref _gameRates[0], _gameRates.Length , _gameRateIndex, _currentGFPS.ToString(), 0f, largestGFPS, new Vector2(248, 60), sizeof(float));
-                        ImGui.PlotLines("Game Tick ##GTPlotlines", ref _gameRates[0], _gameRates.Length, _gameRateIndex, _currentGFPS.ToString(), 0, largestGFPS, new Vector2(248, 60), sizeof(float));
-                        //current star system processing rate. 
-                        ImGui.PlotHistogram("System Tick ##STHistogram", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0f, 1f, new Vector2(248, 60), sizeof(float));
-                        ImGui.PlotLines("System Tick ##STPlotlines", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0, 1, new Vector2(248, 60), sizeof(float));
-                        //ui framerate
-                        ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new Vector2(248, 60), sizeof(float));
-
-                        foreach (var item in _systemState.StarSystem.ManagerSubpulses.ProcessTime)
-                        {
-                            ImGui.Text(item.Key.Name);
-                            ImGui.SameLine();
-                            ImGui.Text(item.Value.ToString());
-                        }
-
-                        foreach (var starsys in StaticRefLib.Game.Systems.Values)
-                        {
-                            ImGui.Text(starsys.Guid.ToString()); 
-                            ImGui.Text("    IsProcecssing: " + starsys.ManagerSubpulses.IsProcessing);
-                            ImGui.Text("    CurrentProcess: " + starsys.ManagerSubpulses.CurrentProcess);
-                        }
-                        
-                        
-
-
-                    }
 
                     if (ImGui.CollapsingHeader("GraphicTests", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
@@ -310,8 +218,8 @@ namespace Pulsar4X.SDL2UI
                         window.Display();
                         window.Enable(true, _state);
                     }
-
                     
+
                     if (ImGui.CollapsingHeader("UI Examples"))
                     {
                         ImGui.Text("ReOrderable List Exampeles");
@@ -441,7 +349,7 @@ namespace Pulsar4X.SDL2UI
                                     //{
                                     pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _state.PrimarySystemDateTime);
                                         truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _state.PrimarySystemDateTime);
-                                        lastDate = _state.PrimarySystemDateTime;
+                                        //lastDate = _state.PrimarySystemDateTime;
                                     //}
 
                                     ImGui.Text("x: " + pos.X);

@@ -56,6 +56,12 @@ namespace Pulsar4X.SDL2UI
                     {
                         DebugWindow.GetInstance().ToggleActive();
                     }
+                    
+                    bool perfActive = PerformanceDisplay.GetInstance().GetActive();
+                    if (ImGui.Checkbox("Show Pulsar Performance Window", ref perfActive))
+                    {
+                        PerformanceDisplay.GetInstance().ToggleActive();
+                    }
 
                     ImGui.Checkbox("Show ImguiMetrix", ref _state.ShowMetrixWindow);
                     ImGui.Checkbox("Show ImgDebug", ref _state.ShowImgDbg);

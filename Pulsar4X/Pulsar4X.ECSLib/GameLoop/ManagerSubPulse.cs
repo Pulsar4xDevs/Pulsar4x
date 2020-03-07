@@ -24,6 +24,7 @@ namespace Pulsar4X.ECSLib
         {
             public double FullPulseTimeMS;
             public double[] SubpulseTimes;
+            public (string pname, double[] ptimes, double psum)[] ProcessTimes;
         }
         
         Stopwatch _masterPulseStopwatch = new Stopwatch();
@@ -32,8 +33,9 @@ namespace Pulsar4X.ECSLib
         
         private double _fullPulseTimeMS = double.PositiveInfinity;
         private List<double> _subpulseTimes = new List<double>();
-
-        public PerformanceData[] PerfHistory;
+        private Dictionary<string, List<double>> _detailedProcessTimes = new Dictionary<string, List<double>>();
+        
+        public PerformanceData[] PerfHistory = new PerformanceData[1];
         public int PerfHistoryIndex { get; private set; }
     
         /// <summary>
@@ -59,7 +61,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
 
-        public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
+        //public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
         public bool IsProcessing = false;
         public string CurrentProcess = "Waiting";
 
@@ -172,12 +174,38 @@ namespace Pulsar4X.ECSLib
         {
             if (PerfHistoryCount <= 0)
                 return;
+            
+            
+            (string pname, double[] ptimes, double psum)[] pTimes = new (string pname, double[] ptimes, double psum)[_detailedProcessTimes.Count];
+
+            int i1 = 0;
+            foreach (var kvp in _detailedProcessTimes)
+            {
+                var array = kvp.Value.ToArray();
+                
+                double sum = 0;
+                for (int i = 0; i < array.Length; i++)
+                {
+                    sum += array[i];
+                }
+                pTimes[i1] = (kvp.Key, array, sum);
+                i1++;
+            }
+            
+            
+            PerformanceData newData = new PerformanceData()
+            {
+                FullPulseTimeMS = _fullPulseTimeMS, 
+                SubpulseTimes = _subpulseTimes.ToArray(),
+                ProcessTimes = pTimes
+            };
+            
             lock (PerfHistory)
             {
                 PerfHistoryIndex++;
                 if (PerfHistoryIndex >= PerfHistoryCount)
                     PerfHistoryIndex = 0;
-                PerformanceData newData = new PerformanceData() {FullPulseTimeMS = _fullPulseTimeMS, SubpulseTimes = _subpulseTimes.ToArray()};
+                
                 PerfHistory[PerfHistoryIndex] = newData;
             }
         }
@@ -259,10 +287,24 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// constructor for json
         /// </summary>
-        public ManagerSubPulse() { } 
+        [JsonConstructor]
+        private ManagerSubPulse()
+        {
+            AddPerfHistory();
+        } 
 
         internal ManagerSubPulse(EntityManager entityMan, ProcessorManager procMan) 
         {
+            (string pname, double[] ptimes, double psum)[] pTimes = new (string pname, double[] ptimes, double psum)[]{};
+            PerformanceData newData = new PerformanceData()
+            {
+                FullPulseTimeMS = _fullPulseTimeMS, 
+                SubpulseTimes = _subpulseTimes.ToArray(),
+                ProcessTimes = pTimes
+            };
+            PerfHistory[PerfHistoryIndex] = newData;
+            
+            
             _systemLocalDateTime = StaticRefLib.CurrentDateTime;
             _entityManager = entityMan;
             _processManager = procMan;
@@ -397,6 +439,7 @@ namespace Pulsar4X.ECSLib
             //keep processing the system till we've reached the wanted datetime
             _masterPulseStopwatch.Restart();
             _subpulseTimes = new List<double>();
+            _detailedProcessTimes = new Dictionary<string, List<double>>();
             IsProcessing = true;
             while (StarSysDateTime < targetDateTime)
             {
@@ -454,7 +497,11 @@ namespace Pulsar4X.ECSLib
                     CurrentProcess = systemProcess.ToString();
                     systemProcess.ProcessManager(_entityManager, deltaSeconds);
                     _processStopwatch.Stop();
-                    ProcessTime[systemProcess.GetType()] = _processStopwatch.Elapsed;
+                    //ProcessTime[systemProcess.GetType()] = _processStopwatch.Elapsed;
+                    string pname = systemProcess.GetType().Name;
+                    if(!_detailedProcessTimes.ContainsKey(pname))
+                        _detailedProcessTimes.Add(pname, new List<double>());
+                    _detailedProcessTimes[pname].Add(_processStopwatch.ElapsedTicks);
                     AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
                 }
                 foreach(var instanceProcessSet in QueuedProcesses[nextInteruptDateTime].InstanceProcessors)
@@ -468,7 +515,11 @@ namespace Pulsar4X.ECSLib
                         processor.ProcessEntity(entity, nextInteruptDateTime);
                     }
                     _processStopwatch.Stop();
-                    ProcessTime[processor.GetType()] = _processStopwatch.Elapsed;
+                    //ProcessTime[processor.GetType()] = _processStopwatch.Elapsed;
+                    string pname = processor.GetType().Name;
+                    if(!_detailedProcessTimes.ContainsKey(pname))
+                        _detailedProcessTimes.Add(pname, new List<double>());
+                    _detailedProcessTimes[pname].Add(_processStopwatch.ElapsedTicks);
                 }
                 QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 
             }
