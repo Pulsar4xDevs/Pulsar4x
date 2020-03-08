@@ -28,7 +28,7 @@ namespace Pulsar4X.SDL2UI
         int _systemRateIndex = 0;
         float[] _systemRates = new float[80];
 
-        public void OnGlobalDateChange()
+        public void OnGlobalDateChange(DateTime newDate)
         {
             _currentGFPS = (float)_state.Game.GamePulse.LastSubtickTime.TotalSeconds;
 
@@ -63,7 +63,7 @@ namespace Pulsar4X.SDL2UI
         
         private PerformanceDisplay() 
         {
-              
+            _state.Game.GamePulse.GameGlobalDateChangedEvent += OnGlobalDateChange;
         }
         internal static PerformanceDisplay GetInstance()
         {
@@ -126,6 +126,8 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(starsys.Guid.ToString());
                     ImGui.Text("    IsProcecssing: " + starsys.ManagerSubpulses.IsProcessing);
                     ImGui.Text("    CurrentProcess: " + starsys.ManagerSubpulses.CurrentProcess);
+                    ImGui.Text("    Last Total ProcessTime: " + starsys.ManagerSubpulses.GetLastPerfData().FullPulseTimeMS);
+                    
                 }
             }
         }
