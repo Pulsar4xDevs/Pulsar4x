@@ -42,8 +42,8 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.Begin("Debug GUI Window", ref IsActive))
                 {
                     ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
-                    ImGui.Text("Window Width: " + ImGui.GetContentRegionAvail().Y);
-                    ImGui.Text("Window Height: " + ImGui.GetContentRegionAvail().X);
+                    ImGui.Text("Window Height: " + ImGui.GetContentRegionAvail().Y);
+                    ImGui.Text("Window Width: " + ImGui.GetContentRegionAvail().X);
 
                 }
 
