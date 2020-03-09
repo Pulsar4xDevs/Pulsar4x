@@ -255,7 +255,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        internal List<BaseDataBlob> GetAllDataBlobsForEntity(int entityID)
+        public List<BaseDataBlob> GetAllDataBlobsForEntity(int entityID)
         {
             var dataBlobs = new List<BaseDataBlob>();
             for (int i = 0; i < InternalDataBlobTypes.Count; i++)
@@ -270,7 +270,7 @@ namespace Pulsar4X.ECSLib
             return dataBlobs;
         }
 
-        internal List<T> GetAllDataBlobsOfType<T>(int typeIndex) where T : BaseDataBlob
+        public List<T> GetAllDataBlobsOfType<T>(int typeIndex) where T : BaseDataBlob
         {
             var dataBlobs = new List<T>();
             foreach (var item in _dataBlobMap[typeIndex])
@@ -298,7 +298,7 @@ namespace Pulsar4X.ECSLib
             return dataBlobs;
         }
 
-        internal List<T> GetAllDataBlobsOfType<T>() where T : BaseDataBlob
+        public List<T> GetAllDataBlobsOfType<T>() where T : BaseDataBlob
         {
             return GetAllDataBlobsOfType<T>(GetTypeIndex<T>());
         }

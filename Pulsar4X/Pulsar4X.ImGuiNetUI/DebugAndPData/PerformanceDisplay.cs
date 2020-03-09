@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
 
 using ImGuiNET;
@@ -10,6 +11,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class PerformanceDisplay : PulsarGuiWindow
     {
+        Stopwatch _sw = new Stopwatch();
         
         SystemState _systemState;
         
@@ -58,6 +60,13 @@ namespace Pulsar4X.SDL2UI
                 _gameRateIndex++;
 
         }
+
+        private double ticks1;
+        private double ticks2;
+        private double ticks3;
+        private double count1;
+        private double count2;
+        private double count3;
         
         
         
@@ -110,6 +119,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new Vector2(248, 60), sizeof(float));
 
                 var data = _systemState.StarSystem.ManagerSubpulses.GetLastPerfData();
+                ImGui.Text("StarSystemID: " + _systemState.StarSystem.Guid);
                 foreach (var item in data.ProcessTimes)
                 {
                     ImGui.Text(item.pname);
@@ -120,15 +130,56 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     ImGui.Text( "averaging: " + (item.psum / item.ptimes.Length).ToString() + "ms");
                 }
+                ImGui.Text("    IsProcecssing: " + _systemState.StarSystem.ManagerSubpulses.IsProcessing);
+                ImGui.Text("    CurrentProcess: " + _systemState.StarSystem.ManagerSubpulses.CurrentProcess);
+                ImGui.Text("    Last Total ProcessTime: " + data.FullPulseTimeMS);
 
-                foreach (var starsys in StaticRefLib.Game.Systems.Values)
+                if(ImGui.CollapsingHeader("All Systems"))
                 {
-                    ImGui.Text(starsys.Guid.ToString());
-                    ImGui.Text("    IsProcecssing: " + starsys.ManagerSubpulses.IsProcessing);
-                    ImGui.Text("    CurrentProcess: " + starsys.ManagerSubpulses.CurrentProcess);
-                    ImGui.Text("    Last Total ProcessTime: " + starsys.ManagerSubpulses.GetLastPerfData().FullPulseTimeMS);
+                    foreach (var starsys in StaticRefLib.Game.Systems.Values)
+                    {
+                        ImGui.Text(starsys.Guid.ToString());
+                        ImGui.Text("    IsProcecssing: " + starsys.ManagerSubpulses.IsProcessing);
+                        ImGui.Text("    CurrentProcess: " + starsys.ManagerSubpulses.CurrentProcess);
+                        ImGui.Text("    Last Total ProcessTime: " + starsys.ManagerSubpulses.GetLastPerfData().FullPulseTimeMS);
+
+                    }
+                }
+
+
+                if (ImGui.CollapsingHeader("Call Times"))
+                {
+
+                    if (ImGui.Button("Time"))
+                    {
+                        _sw.Restart();
+                        var entites = _systemState.StarSystem.GetAllEntitiesWithDataBlob<OrbitDB>();
+                        _sw.Stop();
+                        count1 = entites.Count;
+                        ticks1 = _sw.ElapsedTicks;
+                        
+                        _sw.Restart();
+                        var datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>();
+                        _sw.Stop();
+                        count2 = entites.Count;
+                        ticks2 = _sw.ElapsedTicks;
+                        
+                        int typeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+                        _sw.Restart();
+                        datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>(typeIndex);
+                        _sw.Stop();
+                        count3 = entites.Count;
+                        ticks3 = _sw.ElapsedTicks;
+                    }
+                    ImGui.Text("Using GetEntitysWithDatablob");
+                    ImGui.Text(ticks1 + " ticks to retreave " + count1 + " Entites");
+                    ImGui.Text("Using GetAllDataBlobsOfType<T>()");
+                    ImGui.Text(ticks2 + " ticks to retreave " + count2 + " Datablobs by Type");
+                    ImGui.Text("Using GetAllDataBlobsOfType<T>(int typeIndex)");
+                    ImGui.Text(ticks3 + " ticks to retreave " + count3 + " Datablobs by typeIndex");
                     
                 }
+
             }
         }
     }
