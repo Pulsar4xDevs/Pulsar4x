@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
+using Hjson;
 
 namespace Pulsar4X.ECSLib
 {
@@ -76,12 +77,19 @@ namespace Pulsar4X.ECSLib
                 }
 
                 // now we can move on to looking for json files:
-                string[] files = Directory.GetFiles(dataDirectory, "*.json");
+                string[] jsonfiles = Directory.GetFiles(dataDirectory, "*.json");
+                string[] hjsonfiles = Directory.GetFiles(dataDirectory, "*.hjson");
 
-                if (files.GetLength(0) < 1)
+                if (jsonfiles.GetLength(0) < 1 && hjsonfiles.GetLength(0) < 1)
                     return;
 
-                foreach (string file in files)
+                foreach (string file in jsonfiles)
+                {
+                    curFileName = file;
+                    obj = Load(file);
+                    StoreObject(obj, newStore);
+                }
+                foreach (string file in hjsonfiles)
                 {
                     curFileName = file;
                     obj = Load(file);
@@ -186,13 +194,26 @@ namespace Pulsar4X.ECSLib
         private static JObject Load(string file)
         {
             JObject obj;
-            using (var sr = new StreamReader(file))
-            using (JsonReader reader = new JsonTextReader(sr))
-            {
-                obj = (JObject)Serializer.Deserialize(reader);
-            }
+
+            string hjsonobj = HjsonValue.Load(file).ToString();
+            obj = JObject.Parse(hjsonobj);
 
             return obj;
+
+            /*
+            //var stream = new MemoryStream();
+            //var writer = new StreamWriter(stream);
+            //writer.Write(hjsonobj);
+            //writer.Flush();
+            //stream.Position = 0;
+
+            //using (var sr = new StreamReader(stream))
+            //using (JsonReader reader = new JsonTextReader(sr))
+            //{
+            //    obj = (JObject)Serializer.Deserialize(reader);
+            //}
+            */
+
         }
 
         /// <summary>

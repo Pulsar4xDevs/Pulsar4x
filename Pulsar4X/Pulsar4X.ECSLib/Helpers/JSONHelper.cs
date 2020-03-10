@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Hjson;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections;
