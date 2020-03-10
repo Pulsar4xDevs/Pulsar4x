@@ -388,13 +388,18 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+
+        // called when item on transfer screen is clicked
+        // ought to update currently selected item
         void OnCargoItemSelectedEvent(CargoListPannelComplex cargoPannel)
         {
             SelectedCargoPannel = cargoPannel;
             if (cargoPannel == CargoListLeft)
                 UnselectedCargoPannel = CargoListRight;
             else UnselectedCargoPannel = CargoListLeft;
-            UnselectedCargoPannel.SelectedCargoVM = null;
+
+            if(UnselectedCargoPannel != null)
+                UnselectedCargoPannel.SelectedCargoVM = null;
             
         }
 
@@ -454,7 +459,7 @@ namespace Pulsar4X.SDL2UI
 
                         if (SelectedCargoPannel != null && SelectedCargoPannel.SelectedCargoVM != null)
                         {
-                            if (UnselectedCargoPannel.CanStore(SelectedCargoPannel.SelectedCargoVM.CargoableItem.CargoTypeID))
+                            if (UnselectedCargoPannel != null && UnselectedCargoPannel.CanStore(SelectedCargoPannel.SelectedCargoVM.CargoableItem.CargoTypeID))
                             {
                                 if (ImGui.Button("x100"))
                                 { MoveItems(100); }
