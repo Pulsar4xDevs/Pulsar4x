@@ -71,6 +71,7 @@ namespace Pulsar4X.SDL2UI
         private ChangeCurrentOrbitWindow(EntityState entity)
         {
 
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
 
             OnEntityChange(entity);
 

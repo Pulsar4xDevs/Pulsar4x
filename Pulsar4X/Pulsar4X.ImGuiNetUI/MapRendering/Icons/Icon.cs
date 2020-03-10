@@ -28,8 +28,17 @@ namespace Pulsar4X.SDL2UI
         }
         public ECSLib.Vector3 WorldPosition_m
         {
-            get { if (positionByDB) return _positionDB.AbsolutePosition_m + _worldPosition_m; else return _worldPosition_m; }
-            set { _worldPosition_m = value; }
+            get 
+            { 
+                if (positionByDB) 
+                    return _positionDB.AbsolutePosition_m + _worldPosition_m; 
+                else 
+                    return _worldPosition_m; 
+            }
+            set 
+            { 
+                _worldPosition_m = value; 
+            }
         }
         /// <summary>
         /// If this is true, WorldPosition will be the sum of the PositionDB and any value given to WorldPosition
