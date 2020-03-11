@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
                         if (ImGui.Button("Options", buttonSize))
                         {
                             SettingsWindow.GetInstance().ToggleActive();
-                            IsActive = false;
+                            this.SetActive(false);
                         }
                     }
                     ImGui.Button("Resume a Current Game", buttonSize);
