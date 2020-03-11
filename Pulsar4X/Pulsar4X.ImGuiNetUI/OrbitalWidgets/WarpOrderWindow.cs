@@ -88,12 +88,12 @@ namespace Pulsar4X.SDL2UI
 
         private WarpOrderWindow(EntityState entityState, bool smMode = false)
         {
-
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
 
             OrderingEntityState = entityState;
             _smMode = smMode;
 
-            _displayText = "Orbit Order: " + OrderingEntityState.Name;
+            _displayText = "Warp Order: " + OrderingEntityState.Name;
             _tooltipText = "Select target to orbit";
             CurrentState = States.NeedsTarget;
             //TargetEntity = new EntityState(Entity.InvalidEntity) { Name = "" };
@@ -579,7 +579,7 @@ namespace Pulsar4X.SDL2UI
 
         void CloseWindow()
         {
-            IsActive = false;
+            this.SetActive(false);
             CurrentState = States.NeedsEntity;
             _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateTimeChange;
             _progradeDV = 0;
