@@ -29,7 +29,6 @@ namespace Pulsar4X.SDL2UI
  
         List<(ComponentDesign design, int count)> _shipComponents = new List<(ComponentDesign design, int count)>();
         
-        private EntityDamageProfileDB _profile;
         private RawBmp _rawShipImage;
         private IntPtr _shipImgPtr;
         
@@ -231,7 +230,7 @@ namespace Pulsar4X.SDL2UI
                         _designName = ImGuiSDL2CSHelper.BytesFromString(_exsistingClasses[i].Name, 32);
                         _shipComponents = _exsistingClasses[i].Components;
                         _armor = _exsistingClasses[i].Armor;
-                        _profile = new EntityDamageProfileDB(_shipComponents, _armor);
+                        EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, _armor);
                         _rawShipImage = _profile.DamageProfile;
                         _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
 
@@ -445,7 +444,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.Text("Ship Stats");
             if (designChanged)
             {
-                _profile = new EntityDamageProfileDB(_shipComponents, _armor);
+                EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, _armor);
                 _rawShipImage = _profile.DamageProfile;
 
                 _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
