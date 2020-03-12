@@ -29,6 +29,7 @@ namespace Pulsar4X.SDL2UI
  
         List<(ComponentDesign design, int count)> _shipComponents = new List<(ComponentDesign design, int count)>();
         
+        private EntityDamageProfileDB _profile;
         private RawBmp _rawShipImage;
         private IntPtr _shipImgPtr;
         
@@ -226,13 +227,14 @@ namespace Pulsar4X.SDL2UI
                     string name = _exsistingClasses[i].Name;
                     if (ImGui.Selectable(name))
                     {
-                         
                         _selectedDesign = i;
                         _designName = ImGuiSDL2CSHelper.BytesFromString(_exsistingClasses[i].Name, 32);
                         _shipComponents = _exsistingClasses[i].Components;
                         _armor = _exsistingClasses[i].Armor;
-                        EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, _armor);
-                        _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _profile.DamageProfile);
+                        _profile = new EntityDamageProfileDB(_shipComponents, _armor);
+                        _rawShipImage = _profile.DamageProfile;
+                        _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
+
                         _armorNames.Contains(_armor.name);
                         _armorIndex = _armorSelection.FindIndex(foo => foo.name.Equals(_armor.name));
                         designChanged = true;
@@ -443,9 +445,10 @@ namespace Pulsar4X.SDL2UI
             ImGui.Text("Ship Stats");
             if (designChanged)
             {
-                EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, _armor);
+                _profile = new EntityDamageProfileDB(_shipComponents, _armor);
+                _rawShipImage = _profile.DamageProfile;
 
-                _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _profile.DamageProfile);
+                _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
 
                 double mass = 0;
                 double fu = 0;
