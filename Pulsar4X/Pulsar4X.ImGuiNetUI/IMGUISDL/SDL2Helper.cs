@@ -39,8 +39,10 @@ namespace ImGuiSDL2CS {
         }
         
         
-        public static IntPtr CreateSDLTexture(IntPtr rendererPtr, RawBmp rawImg)
+        public static IntPtr CreateSDLTexture(IntPtr rendererPtr, RawBmp rawImg, bool clean = false)
         {
+
+
             IntPtr texture;
             int h = rawImg.Height;
             int w = rawImg.Width;
@@ -60,9 +62,13 @@ namespace ImGuiSDL2CS {
             uint bmask = 0x0000ff00;
             uint amask = 0x000000ff;
 
+
+            SDL.SDL_DestroyTexture(rendererPtr);
             IntPtr sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(pxls, w, h, d, s, rmask, gmask, bmask, amask);
             texture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
-                
+            SDL.SDL_FreeSurface(sdlSurface);
+
+
             int a;
             uint f;
             int qw;
@@ -74,6 +80,7 @@ namespace ImGuiSDL2CS {
                 ImGui.Text(SDL.SDL_GetError());
             }
             ImGui.Text("a: " + a +" f: " + f +" w: "+ qw +" h: "+ qh);
+            
             return texture;
         }
 

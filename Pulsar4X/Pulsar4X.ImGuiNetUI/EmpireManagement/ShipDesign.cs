@@ -19,6 +19,7 @@ namespace Pulsar4X.SDL2UI
         private string[] _exsistingDesigns;
         private List<ShipDesign> _exsistingClasses;
         private int _selectedDesign = -1;
+        bool _imagecreated = false;
         
         private ComponentDesign[] _componentDesigns;
         private string[] _componentNames;
@@ -232,10 +233,7 @@ namespace Pulsar4X.SDL2UI
                         _designName = ImGuiSDL2CSHelper.BytesFromString(_exsistingClasses[i].Name, 32);
                         _shipComponents = _exsistingClasses[i].Components;
                         _armor = _exsistingClasses[i].Armor;
-                        EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, _armor);
-                        _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _profile.DamageProfile);
-                        rawimagewidth = _profile.DamageProfile.Width;
-                        rawimageheight = _profile.DamageProfile.Height;
+                        GenImage();
                         _armorNames.Contains(_armor.name);
                         _armorIndex = _armorSelection.FindIndex(foo => foo.name.Equals(_armor.name));
                         designChanged = true;
@@ -427,6 +425,15 @@ namespace Pulsar4X.SDL2UI
             ImGui.EndChild();
         }
 
+        internal void GenImage()
+        {
+            EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, _armor);
+            _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _profile.DamageProfile, _imagecreated);
+            rawimagewidth = _profile.DamageProfile.Width;
+            rawimageheight = _profile.DamageProfile.Height;
+            _imagecreated = true;
+        }
+
         internal void DisplayStats()
         {
             
@@ -446,10 +453,10 @@ namespace Pulsar4X.SDL2UI
             ImGui.Text("Ship Stats");
             if (designChanged)
             {
-                EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, _armor);
-                _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _profile.DamageProfile);
-                rawimagewidth = _profile.DamageProfile.Width;
-                rawimageheight = _profile.DamageProfile.Height;
+                if(displayimage)
+                {
+                    GenImage();
+                }
 
                 double mass = 0;
                 double fu = 0;
