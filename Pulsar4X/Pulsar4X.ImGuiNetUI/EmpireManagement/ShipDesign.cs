@@ -29,7 +29,6 @@ namespace Pulsar4X.SDL2UI
  
         List<(ComponentDesign design, int count)> _shipComponents = new List<(ComponentDesign design, int count)>();
         
-        private RawBmp _rawShipImage;
         private IntPtr _shipImgPtr;
         
         //TODO: armor, temporary, maybe density should be an "equvelent" and have a different mass? (damage calcs use density for penetration)
@@ -38,6 +37,9 @@ namespace Pulsar4X.SDL2UI
         private int _armorIndex = 0;
         private double _armorThickness = 10;
         private (string name, double density, float thickness) _armor = ("Polyprop", 1175f, 10);
+
+        private int rawimagewidth;
+        private int rawimageheight;
 
         private double _massDry;
         private double _massWet;
@@ -231,9 +233,9 @@ namespace Pulsar4X.SDL2UI
                         _shipComponents = _exsistingClasses[i].Components;
                         _armor = _exsistingClasses[i].Armor;
                         EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, _armor);
-                        _rawShipImage = _profile.DamageProfile;
-                        _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
-
+                        _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _profile.DamageProfile);
+                        rawimagewidth = _profile.DamageProfile.Width;
+                        rawimageheight = _profile.DamageProfile.Height;
                         _armorNames.Contains(_armor.name);
                         _armorIndex = _armorSelection.FindIndex(foo => foo.name.Equals(_armor.name));
                         designChanged = true;
@@ -445,9 +447,9 @@ namespace Pulsar4X.SDL2UI
             if (designChanged)
             {
                 EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, _armor);
-                _rawShipImage = _profile.DamageProfile;
-
-                _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
+                _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _profile.DamageProfile);
+                rawimagewidth = _profile.DamageProfile.Width;
+                rawimageheight = _profile.DamageProfile.Height;
 
                 double mass = 0;
                 double fu = 0;
@@ -561,24 +563,22 @@ namespace Pulsar4X.SDL2UI
                 maxwidth = ImGui.GetWindowWidth();// ImGui.GetColumnWidth();;// 
                 int maxheightint = (int)(maxheight / 4);
                 maxheight = maxheightint * 4;//ImGui.GetWindowHeight() * _imageratio;
-                int w = _rawShipImage.Width;
-                int h = _rawShipImage.Height;
                 float scalew = 1;
                 float scaleh = 1;
                 float scale;
-                if (w > maxwidth)
+                if (rawimagewidth > maxwidth)
                 {
-                    scalew = maxwidth / w;
+                    scalew = maxwidth / rawimagewidth;
                 }
 
-                if (h > maxheight)
+                if (rawimageheight > maxheight)
                 {
-                    scaleh = maxheight / h;
+                    scaleh = maxheight / rawimageheight;
                 }
 
                 scale = Math.Min(scaleh, scalew);
 
-                if (w * scale < checkwidth)
+                if (rawimagewidth * scale < checkwidth)
                 {
                     return true;
                 }
@@ -592,24 +592,22 @@ namespace Pulsar4X.SDL2UI
             {
                 int maxheightint = (int)(maxheight / 4);
                 maxheight = maxheightint*4;//ImGui.GetWindowHeight() * _imageratio;
-                int w = _rawShipImage.Width;
-                int h = _rawShipImage.Height;
                 float scalew = 1;
                 float scaleh = 1;
                 float scale;
-                if (w > maxwidth)
+                if (rawimagewidth > maxwidth)
                 {
-                    scalew = maxwidth / w;
+                    scalew = maxwidth / rawimagewidth;
                 }
 
-                if (h > maxheight)
+                if (rawimageheight > maxheight)
                 {
-                    scaleh = maxheight / h;
+                    scaleh = maxheight / rawimageheight;
                 }
 
                 scale = Math.Min(scaleh, scalew);
 
-                ImGui.Image(_shipImgPtr, new Vector2(w * scale, h * scale));
+                ImGui.Image(_shipImgPtr, new Vector2(rawimagewidth * scale, rawimageheight * scale));
             }
         }
     }
