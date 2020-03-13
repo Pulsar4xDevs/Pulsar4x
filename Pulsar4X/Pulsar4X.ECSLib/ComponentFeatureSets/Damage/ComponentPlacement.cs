@@ -16,9 +16,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             
             List<(Guid typeID, RawBmp bmp)> typeBitmaps = shipProfile.TypeBitmaps;
             List<(int width, int height)> partsize = new List<(int width, int height)>();
-            partsize.Add((0, 0));
+            partsize.Add((1, 1));
             int componentWidthNum = 0;
-
+             
             int totalLen = 0;
             var totalWidth = 0;
 
