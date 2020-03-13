@@ -106,12 +106,17 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         
         public static RawBmp CreateComponentByteArray(ComponentDesign componentDesign, byte typeID)
         {
-            //cm resolution
-            var vol = componentDesign.Volume * 100 / 3;
+            //1 pixel = 1iter resolution
+            var vol = componentDesign.Volume * 1000;
 
-            int width = (int)Math.Sqrt(vol * componentDesign.AspectRatio);
-            int height = (int)(componentDesign.AspectRatio * width);
+            double floatdepth = Math.Pow(componentDesign.AspectRatio, (float)1 / 3);
+            double CSA = componentDesign.Volume / floatdepth;
+            double floatwidth = Math.Sqrt(CSA) * (double)componentDesign.AspectRatio;
+            int depth = (int)floatdepth;
+            int width = (int)floatwidth;
+            int height = (int)(CSA / width);
             int v2d = height * width;
+            int volume = (int)vol;
 
             if (componentDesign.AspectRatio > 1)
             {
@@ -119,9 +124,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                 height = (int)(height / componentDesign.AspectRatio);
             }
 
-            int depth = 4;
-            int size = depth * width * height;
-            int stride = width * depth;
+            int imagedepth = 4;
+            int size = imagedepth * width * height;
+            int stride = width * imagedepth;
             
             byte[] buffer = new byte[size];
 
@@ -130,7 +135,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                 for (int iy = 0; iy < height; iy++)
                 {
                     byte c = typeID;
-                    RawBmp.SetPixel(ref buffer, stride, depth, ix, iy, 255, 255,c, 255);
+                    RawBmp.SetPixel(ref buffer, stride, imagedepth, ix, iy, 255, 255,c, 255);
                 }
             }
 
@@ -138,7 +143,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             {
                 ByteArray =  buffer,
                 Stride = stride,
-                Depth =  4,
+                Depth = imagedepth,
                 Width = width,
                 Height = height,
                 

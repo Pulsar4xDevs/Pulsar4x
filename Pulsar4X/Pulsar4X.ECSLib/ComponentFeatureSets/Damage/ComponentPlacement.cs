@@ -145,7 +145,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             List<int> lineHeight = new List<int>();
             
 
-            int spacer = -5;
+            int spacer = 5;
 
             int numparts = partsize.Count();
 
