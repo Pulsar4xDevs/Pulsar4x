@@ -79,6 +79,7 @@ namespace Pulsar4X.SDL2UI
             {
                 _armorNames[i]= _armorSelection[i].name;
             }
+            _armor.thickness = _armorIndex;
 
             _state.Game.GamePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
             _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
@@ -237,6 +238,8 @@ namespace Pulsar4X.SDL2UI
                         _armorNames.Contains(_armor.name);
                         _armorIndex = _armorSelection.FindIndex(foo => foo.name.Equals(_armor.name));
                         designChanged = true;
+                        _armor.thickness = _exsistingClasses[i].Armor.thickness;
+                        _armorThickness = _armor.thickness;
                     }
                 }
 
@@ -349,12 +352,14 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.SmallButton("+##armor")) //todo: imagebutton
             {
                 _armorThickness++;
+                _armor.thickness = (float)_armorThickness;
                 designChanged = true;
             }
             ImGui.SameLine();
             if (ImGui.SmallButton("-##armor") && _armorThickness > 0) //todo: imagebutton
             {
                 _armorThickness--;
+                _armor.thickness = (float)_armorThickness;
                 designChanged = true;
             }
 
@@ -573,15 +578,8 @@ namespace Pulsar4X.SDL2UI
                 float scalew = 1;
                 float scaleh = 1;
                 float scale;
-                if (rawimagewidth > maxwidth)
-                {
-                    scalew = maxwidth / rawimagewidth;
-                }
-
-                if (rawimageheight > maxheight)
-                {
-                    scaleh = maxheight / rawimageheight;
-                }
+                scalew = maxwidth / rawimagewidth;
+                scaleh = maxheight / rawimageheight;
 
                 scale = Math.Min(scaleh, scalew);
 
@@ -602,15 +600,9 @@ namespace Pulsar4X.SDL2UI
                 float scalew = 1;
                 float scaleh = 1;
                 float scale;
-                if (rawimagewidth > maxwidth)
-                {
-                    scalew = maxwidth / rawimagewidth;
-                }
 
-                if (rawimageheight > maxheight)
-                {
-                    scaleh = maxheight / rawimageheight;
-                }
+                scalew = maxwidth / rawimagewidth;
+                scaleh = maxheight / rawimageheight;
 
                 scale = Math.Min(scaleh, scalew);
 
