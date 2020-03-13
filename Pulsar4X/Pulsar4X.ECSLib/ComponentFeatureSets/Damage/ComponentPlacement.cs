@@ -102,18 +102,6 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                     }
                 }
 
-                /*
-                for (int j = 0; j < count; j++)
-                {
-                    for (int pxstrip = 0; pxstrip < typeBmp.Height; pxstrip++)
-                    {
-                        int srcpos = typeBmp.Stride * pxstrip;
-                        int destPos = shipBmp.GetOffset(offsetx, offsety + pxstrip + (typeBmp.Height * j));
-
-                        Buffer.BlockCopy(typeBmp.ByteArray, srcpos, shipByteArray, destPos, bytesPerLine);
-                    }
-                }
-                */
                 offsetx += typeBmp.Width;
 
             }
@@ -178,20 +166,22 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             bottomcoordStart = (bottomcoordStart.x, halfwidth + bottomcoordStart.y);
             topcoordStart = (topcoordStart.x, halfwidth - topcoordStart.y);
             float thickness = (shipProfile.Armor.thickness - 3) / 10 + 3;
+            float maxdensity = 7900;//TODO read this from armor data
+            byte armorcolor = (byte)Math.Min(255 * ((shipProfile.Armor.density / 2 + maxdensity / 2) / maxdensity), 255);
             for (int i = 1; i < linePoints.Count; i++)
             {
                 //Draws the bottom line
                 var bottomcoordEnd = linePoints[i];
                 bottomcoordEnd = (bottomcoordEnd.x, halfwidth + bottomcoordEnd.y);
 
-                DrawLine(shipBmp, bottomcoordStart, bottomcoordEnd, thickness, 255, 255, 255, 255, shipbmpMargins);
+                DrawLine(shipBmp, bottomcoordStart, bottomcoordEnd, thickness, armorcolor, 255, 255, 255, shipbmpMargins);
                 bottomcoordStart = bottomcoordEnd;
 
                 //Draws the top line
                 var topcoordEnd = linePoints[i];
                 topcoordEnd = (topcoordEnd.x, halfwidth - topcoordEnd.y);
 
-                DrawLine(shipBmp, topcoordStart, topcoordEnd, thickness, 255, 255, 255, 255, shipbmpMargins);
+                DrawLine(shipBmp, topcoordStart, topcoordEnd, thickness, armorcolor, 255, 255, 255, shipbmpMargins);
                 topcoordStart = topcoordEnd;
             }
             

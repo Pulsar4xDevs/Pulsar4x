@@ -340,6 +340,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.NextColumn();
             if (ImGui.Combo("##Armor Selection", ref _armorIndex, _armorNames, 6))
             {
+                _armor.density = _armorSelection[_armorIndex].density;
                 designChanged = true;
             }
             ImGui.SameLine();
