@@ -577,15 +577,8 @@ namespace Pulsar4X.SDL2UI
                 float scalew = 1;
                 float scaleh = 1;
                 float scale;
-                if (rawimagewidth > maxwidth)
-                {
-                    scalew = maxwidth / rawimagewidth;
-                }
-
-                if (rawimageheight > maxheight)
-                {
-                    scaleh = maxheight / rawimageheight;
-                }
+                scalew = maxwidth / rawimagewidth;
+                scaleh = maxheight / rawimageheight;
 
                 scale = Math.Min(scaleh, scalew);
 
@@ -606,15 +599,9 @@ namespace Pulsar4X.SDL2UI
                 float scalew = 1;
                 float scaleh = 1;
                 float scale;
-                if (rawimagewidth > maxwidth)
-                {
-                    scalew = maxwidth / rawimagewidth;
-                }
 
-                if (rawimageheight > maxheight)
-                {
-                    scaleh = maxheight / rawimageheight;
-                }
+                scalew = maxwidth / rawimagewidth;
+                scaleh = maxheight / rawimageheight;
 
                 scale = Math.Min(scaleh, scalew);
 

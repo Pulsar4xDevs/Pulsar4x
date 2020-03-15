@@ -6,6 +6,7 @@
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\matia\source\repos\Pulsar4x\Pulsar4X\Backup2\</UpgradeBackupLocation>
     <OldToolsVersion>Current</OldToolsVersion>
+    <ApplicationIcon>Resources\pulsaricon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Linux_x64' ">
@@ -214,6 +215,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="Resources\CancelIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\pulsaricon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\RenameIco.bmp">

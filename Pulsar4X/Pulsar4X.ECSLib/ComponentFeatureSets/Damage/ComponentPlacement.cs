@@ -16,8 +16,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             
             List<(Guid typeID, RawBmp bmp)> typeBitmaps = shipProfile.TypeBitmaps;
             List<(int width, int height)> partsize = new List<(int width, int height)>();
+            partsize.Add((1, 1));
             int componentWidthNum = 0;
-
+             
             int totalLen = 0;
             var totalWidth = 0;
 
@@ -65,7 +66,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
             byte[] shipByteArray = new byte[size];
 
-            int offsetx = 4;
+            int offsetx = 0;
             for (int i = 0; i < po.Count; i++)
             {
                 if (po[i].count == 0)
@@ -88,7 +89,6 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                     offsety += typeBmp.Height * o;
 
                     //not doing anything?
-                    int bytesPerLine = 4 * typeBmp.Width;
 
                     for (int x = 0; x < typeBmp.Width; x++)
                     {
@@ -127,7 +127,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             float addedLineThickness = 5;
 
             //adding margins to the bitmap(white space around its edges to make it look cleaner once displayed)
-            Vector2 shipbmpMargins = new Vector2(shipBmp.Width*0.1+addedLineThickness,shipBmp.Height*0.1+addedLineThickness);
+            Vector2 shipbmpMargins = new Vector2(shipBmp.Width*0.1,shipBmp.Height*0.1);
             RawBmp finalShipBmp = new RawBmp(shipBmp.Width + (int)shipbmpMargins.X*2, shipBmp.Height+ (int)shipbmpMargins.Y*2, shipBmp.Depth);
             //shifting 
             for (int x = 0; x < shipBmp.Width; x++)
@@ -145,7 +145,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             List<int> lineHeight = new List<int>();
             
 
-            int spacer = 5;
+            int spacer = 1;
 
             int numparts = partsize.Count();
 
@@ -177,20 +177,21 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             var topcoordStart = linePoints[0];
             bottomcoordStart = (bottomcoordStart.x, halfwidth + bottomcoordStart.y);
             topcoordStart = (topcoordStart.x, halfwidth - topcoordStart.y);
+            float thickness = (shipProfile.Armor.thickness - 3) / 10 + 3;
             for (int i = 1; i < linePoints.Count; i++)
             {
                 //Draws the bottom line
                 var bottomcoordEnd = linePoints[i];
                 bottomcoordEnd = (bottomcoordEnd.x, halfwidth + bottomcoordEnd.y);
 
-                ThickLine(shipBmp, bottomcoordStart, bottomcoordEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255, shipbmpMargins);
+                DrawLine(shipBmp, bottomcoordStart, bottomcoordEnd, thickness, 255, 255, 255, 255, shipbmpMargins);
                 bottomcoordStart = bottomcoordEnd;
 
                 //Draws the top line
                 var topcoordEnd = linePoints[i];
                 topcoordEnd = (topcoordEnd.x, halfwidth - topcoordEnd.y);
 
-                ThickLine(shipBmp, topcoordStart, topcoordEnd,  shipProfile.Armor.thickness / 10 + addedLineThickness, 255, 255, 255, 255, shipbmpMargins);
+                DrawLine(shipBmp, topcoordStart, topcoordEnd, thickness, 255, 255, 255, 255, shipbmpMargins);
                 topcoordStart = topcoordEnd;
             }
             
@@ -200,7 +201,52 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             shipProfile.DamageProfile = shipBmp;
             return shipBmp;
         }
-       
+
+
+        static void DrawLine(RawBmp bmp, (int x, int y) coordStart, (int x, int y) coordEnd, float width, byte r, byte g, byte b, byte a, Vector2 margins)
+        {
+            
+
+            var x0 = coordStart.x;
+            var y0 = coordStart.y;
+            var x1 = coordEnd.x;
+            var y1 = coordEnd.y;
+
+            int delatx = Math.Abs(x1 - x0);
+            int delaty = y1 - y0;
+            double slope = Math.Abs((double)delaty / (double)delatx);
+            double signedslope = (double)delaty / (double)delatx;
+            double perpslope = 1 / signedslope;
+            byte alph = a;
+            //double dwidth = (double)(width);
+
+            int vmargin = (int)(width / 2);
+            double dwidth = (double)(width) / Math.Sin(Math.Atan(1/slope));
+
+
+            for (int yoffset = -(int)(dwidth / 2); yoffset < (int)(dwidth / 2); yoffset++)
+            {
+
+                int rx0 = x0;// - (int)((double)yoffset * signedslope);
+                int ry0 = y0 + yoffset;
+                int rx1 = x1;// - (int)((double)yoffset * signedslope);
+                int ry1 = y1 + yoffset;
+
+                for (int i = rx0; i < rx1; i++)
+                {
+                    int currentx = Math.Abs(rx1 - i);
+                    double progress = (double)currentx / (double)delatx;
+                    int pixx = i;
+                    int pixy = ry1 - (int)(progress * delaty);
+                    if (pixy > Math.Max(y1, y0) + vmargin)
+                        break;
+                    if (pixy < Math.Min(y1, y0) - vmargin)
+                        break;
+
+                    bmp.SetPixel(pixx + (int)margins.X, pixy + (int)margins.Y, r, g, b, alph);
+                }
+            }
+        }
 
 
         static void ThickLine(RawBmp bmp, (int x, int y) coordStart, (int x, int y) coordEnd, float wd, byte r, byte g, byte b, byte a, Vector2 margins)
@@ -246,11 +292,6 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                     err += dx; y0 += sy; 
                 }
             }
-        }
-        static void ThickLine(RawBmp bmp, (int x, int y) coordStart, (int x, int y) coordEnd, float wd, byte r, byte g, byte b, byte a)
-        {
-            ThickLine(bmp, coordStart, coordEnd, wd, r, g, b, a, new Vector2(0,0));
-            
         }
     }
 }
