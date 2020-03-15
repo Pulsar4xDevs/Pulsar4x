@@ -64,6 +64,8 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public Dictionary<Guid, IndustryTypeSD> IndustryTypes = new Dictionary<Guid, IndustryTypeSD>();
         
+        public Dictionary<Guid, ArmorSD> ArmorTypes = new Dictionary<Guid, ArmorSD>();
+        
         /// <summary>
         /// Settings used by system generation. 
         /// @todo make Galaxy gen use this instead of default data (DO NOT DELETE THE HARD CODED DATA THO, that should be a fall back).
@@ -119,6 +121,9 @@ namespace Pulsar4X.ECSLib
                     "IndustryTypes", typeof(Dictionary<Guid, IndustryTypeSD>)
                 },
                 {
+                    "ArmorTypes", typeof(Dictionary<Guid, ArmorSD>)
+                },
+                {
                     "SystemGenSettings", typeof(SystemGenSettingsSD)
                 },
                 {
@@ -159,6 +164,9 @@ namespace Pulsar4X.ECSLib
                 },
                 {
                     typeof(Dictionary<Guid, IndustryTypeSD>), "IndustryTypes"
+                },
+                {
+                    typeof(Dictionary<Guid, ArmorSD>), "ArmorTypes"
                 },
                 {
                     typeof(SystemGenSettingsSD), "SystemGenSettings"
@@ -338,6 +346,17 @@ namespace Pulsar4X.ECSLib
                 foreach (KeyValuePair<Guid,IndustryTypeSD> kvp in industryTypes)
                 {
                     IndustryTypes[kvp.Key] = kvp.Value;
+                }
+            }
+        }
+        
+        internal void Store(Dictionary<Guid, ArmorSD> armorTypes)
+        {
+            if (armorTypes != null)
+            {
+                foreach (KeyValuePair<Guid,ArmorSD> kvp in armorTypes)
+                {
+                    ArmorTypes[kvp.Key] = kvp.Value;
                 }
             }
         }
