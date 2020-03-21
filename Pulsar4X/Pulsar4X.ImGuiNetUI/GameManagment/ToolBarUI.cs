@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 namespace Pulsar4X.SDL2UI
@@ -50,6 +51,15 @@ namespace Pulsar4X.SDL2UI
                 TooltipText = "Design a new Ship",
                 OnClick = new Action(ShipDesignUI.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(ShipDesignUI.GetInstance().GetActive)
+                //Opens up the ship design menu
+            };
+            ToolButtons.Add(btn);
+            btn =  new ToolbuttonData()
+            {
+                Picture = _state.SDLImageDictionary["DesOrd"],
+                TooltipText = "Design a Missile",
+                OnClick = new Action(OrdinanceDesignUI.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(OrdinanceDesignUI.GetInstance().GetActive)
                 //Opens up the ship design menu
             };
             ToolButtons.Add(btn);

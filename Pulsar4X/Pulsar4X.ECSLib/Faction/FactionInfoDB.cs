@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
@@ -33,7 +34,10 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public Dictionary<Guid, ShipDesign> ShipDesigns = new Dictionary<Guid, ShipDesign>();
-
+        
+        [JsonProperty]
+        public Dictionary<Guid, OrdnanceDesign> MissileDesigns = new Dictionary<Guid, OrdnanceDesign>();
+        
         public ReadOnlyDictionary<Guid, ComponentDesign> ComponentDesigns => new ReadOnlyDictionary<Guid, ComponentDesign>(InternalComponentDesigns);
         [JsonProperty]
         internal Dictionary<Guid, ComponentDesign> InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>();
@@ -42,11 +46,6 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, IConstrucableDesign> IndustryDesigns = new Dictionary<Guid, IConstrucableDesign>();
         
         
-        
-        [PublicAPI]
-        public ReadOnlyDictionary<Guid, Entity> MissileDesigns => new ReadOnlyDictionary<Guid, Entity>(InternalMissileDesigns);
-        [JsonProperty]
-        internal Dictionary<Guid, Entity> InternalMissileDesigns = new Dictionary<Guid, Entity>();
 
         [JsonProperty]
         /// <summary>
@@ -89,7 +88,6 @@ namespace Pulsar4X.ECSLib
             
             ShipDesigns = new Dictionary<Guid, ShipDesign>(factionDB.ShipDesigns);
             InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>(factionDB.ComponentDesigns);
-            InternalMissileDesigns = new Dictionary<Guid, Entity>(factionDB.MissileDesigns);
             IndustryDesigns = new Dictionary<Guid, IConstrucableDesign>(factionDB.IndustryDesigns);
             
         }
@@ -149,12 +147,7 @@ namespace Pulsar4X.ECSLib
             {
                 hash = Misc.ValueHash(item.Key, hash);
                 hash = Misc.ValueHash(item.Value.ID, hash);
-            }
-            foreach (var item in InternalMissileDesigns)
-            {
-                hash = Misc.ValueHash(item.Key, hash);
-                hash = Misc.ValueHash(item.Value.Guid, hash);
-            }
+            } 
             foreach (var system in InternalKnownJumpPoints)
             {
                 hash = Misc.ValueHash(system.Key, hash);

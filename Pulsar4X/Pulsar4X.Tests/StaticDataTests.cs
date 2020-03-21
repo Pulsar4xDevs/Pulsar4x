@@ -141,7 +141,7 @@ namespace Pulsar4X.Tests
             //reloadAbility.CrewAmount = new List<float>() { };
 
             //ComponentSD missileLauncher = new ComponentSD();
-            //missileLauncher.ComponentAbilitySDs = new List<ComponentAbilitySD>() { launchAbility, reloadAbility};
+            //missileLauncher.ComponentAtbSDs = new List<ComponentAbilitySD>() { launchAbility, reloadAbility};
             //missileLauncher.Name = "MissileLauncher";
             //missileLauncher.Description = "Can launch Missiles and be reloaded via a magazine";
             //missileLauncher.ID = ID.NewGuid();

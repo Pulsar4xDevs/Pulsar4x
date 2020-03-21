@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
             SelectedComponent.SetDesignSD(Components.GetKey());// = mainTemplateVM;
             ComponentAbilitySDs.Clear();
             var tmp = new List<ComponentAbilityTemplateVM>();
-            foreach (var item in Components.GetKey().ComponentAbilitySDs)
+            foreach (var item in Components.GetKey().ComponentAtbSDs)
             {
                 var vm = new ComponentAbilityTemplateVM(this, item, ComponentAbilitySDs, _staticData);
                 tmp.Add(vm);
@@ -137,10 +137,10 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            sd.ComponentAbilitySDs = new List<ComponentTemplateAbilitySD>();
+            sd.ComponentAtbSDs = new List<ComponentTemplateAttributeSD>();
             foreach (var item in ComponentAbilitySDs)
             {
-                sd.ComponentAbilitySDs.Add(item.CreateSD());
+                sd.ComponentAtbSDs.Add(item.CreateSD());
             }
 
             if (_staticData.ComponentTemplates.Keys.Contains(sd.ID))

@@ -209,6 +209,10 @@
     <Content Include="Resources\RulerIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Remove="Resources\DesignOrdnanceIco.bmp" />
+    <Content Include="Resources\DesignOrdnanceIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="OrbitalWidgets\" />

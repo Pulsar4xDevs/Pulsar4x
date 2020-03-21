@@ -23,11 +23,11 @@ namespace Pulsar4X.ECSLib
         public ComponentMountType MountType;
         public Guid IndustryTypeID;
         public Guid CargoTypeID; //cargo TypeID from CargoTypeSD
-        public List<ComponentTemplateAbilitySD> ComponentAbilitySDs;
+        public List<ComponentTemplateAttributeSD> ComponentAtbSDs;
     }
 
     [StaticDataAttribute(false)]
-    public struct ComponentTemplateAbilitySD
+    public struct ComponentTemplateAttributeSD
     {
         public string Name;
         public string Description;

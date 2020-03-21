@@ -7,12 +7,16 @@ using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
+    [Flags]
     public enum GuiHint
     {
-        None,
-        GuiTechSelectionList,
-        GuiSelectionMaxMin,
-        GuiTextDisplay
+        None = 1,
+        GuiDisplayBool = 2,
+        GuiTechSelectionList = 4,
+        GuiSelectionMaxMin = 8,
+        GuiTextDisplay = 16,
+        GuiEnumSelectionList = 32,
+        
         
     }
 
@@ -226,7 +230,7 @@ namespace Pulsar4X.ECSLib
            // MaterialCostFormulas = materalCostFormulas;
             //ComponentCostFormulas = componentCostForulas;
             
-            foreach (ComponentTemplateAbilitySD abilitySD in componentSD.ComponentAbilitySDs)
+            foreach (ComponentTemplateAttributeSD abilitySD in componentSD.ComponentAtbSDs)
             {
                 ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this);
                 

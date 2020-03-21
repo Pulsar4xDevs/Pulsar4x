@@ -136,8 +136,5 @@ namespace Pulsar4X.ECSLib
 
             return ship;
         }
-
-
-
     }
 }

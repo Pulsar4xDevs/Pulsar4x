@@ -30,7 +30,7 @@
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "MiningAmount",
               "Description": "",
@@ -145,7 +145,7 @@
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "RP Amount Per EconTick",
               "Description": "",
@@ -184,7 +184,7 @@
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Size",
               "Description": "Size of this installation",
@@ -247,7 +247,7 @@
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Size",
               "Description": "Size of this installation",
@@ -335,7 +335,7 @@
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Component Construction Points",
               "Description": "",
@@ -401,7 +401,7 @@
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Support Colonists",
               "Description": "Keeps colonists alive on hostile worlds",
@@ -452,7 +452,7 @@
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Warehouse Size",
               "Description": "",
@@ -548,7 +548,7 @@
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Tank Size",
               "Description": "",
