@@ -206,27 +206,27 @@ namespace Pulsar4X.ECSLib
         /// Constructor for filled
         /// </summary>
         /// <param name="parent"></param>
-        /// <param name="abilitySD"></param>
+        /// <param name="attributeSD"></param>
         /// <param name="parentList"></param>
         /// <param name="staticData"></param>
-        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentTemplateAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
+        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentTemplateAttributeSD attributeSD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
         {
-            Name = abilitySD.Name;
-            Description = abilitySD.Description;
-            SelectedGuiHint.SelectedIndex = (int)abilitySD.GuiHint;
-            if (abilitySD.AbilityDataBlobType != null)
+            Name = attributeSD.Name;
+            Description = attributeSD.Description;
+            SelectedGuiHint.SelectedIndex = (int)attributeSD.GuiHint;
+            if (attributeSD.AbilityDataBlobType != null)
             {
-                AbilityDataBlobType = abilitySD.AbilityDataBlobType;
+                AbilityDataBlobType = attributeSD.AbilityDataBlobType;
             }
-            AbilityFormula = abilitySD.AbilityFormula;
-            MinFormula = abilitySD.MinFormula;
-            MaxFormula = abilitySD.MaxFormula;
-            StepFormula = abilitySD.StepFormula;
-            //GuidDictionary = abilitySD.GuidDictionary;
+            AbilityFormula = attributeSD.AbilityFormula;
+            MinFormula = attributeSD.MinFormula;
+            MaxFormula = attributeSD.MaxFormula;
+            StepFormula = attributeSD.StepFormula;
+            //GuidDictionary = attributeSD.GuidDictionary;
             DictionaryVM<Guid, string> techSelected = new DictionaryVM<Guid, string>();
-            if (abilitySD.GuiHint == GuiHint.GuiTechSelectionList)
+            if (attributeSD.GuiHint == GuiHint.GuiTechSelectionList)
             {
-                foreach (var item in abilitySD.GuidDictionary)
+                foreach (var item in attributeSD.GuidDictionary)
                 {
                     techSelected.Add(Guid.Parse(item.Key.ToString()), _staticData.Techs[Guid.Parse(item.Key.ToString())].Name);
                 }
@@ -318,9 +318,9 @@ namespace Pulsar4X.ECSLib
 
 
 
-        public ComponentTemplateAbilitySD CreateSD()
+        public ComponentTemplateAttributeSD CreateSD()
         {
-            ComponentTemplateAbilitySD sd = new ComponentTemplateAbilitySD();
+            ComponentTemplateAttributeSD sd = new ComponentTemplateAttributeSD();
             sd.Name = Name;
             sd.Description = Description;
             sd.AbilityDataBlobType = AbilityDataBlobType;

@@ -33,11 +33,11 @@ namespace Pulsar4X.SDL2UI
         private IntPtr _shipImgPtr;
         
         //TODO: armor, temporary, maybe density should be an "equvelent" and have a different mass? (damage calcs use density for penetration)
-        List<(string name, double density)> _armorSelection = new List<(string name, double density)>();
+        List<ArmorSD> _armorSelection = new List<ArmorSD>();
         private string[] _armorNames;
         private int _armorIndex = 0;
-        private double _armorThickness = 10;
-        private (string name, double density, float thickness) _armor = ("Polyprop", 1175f, 10);
+        private float _armorThickness = 10;
+        private ArmorSD _armor;
 
         private int rawimagewidth;
         private int rawimageheight;
@@ -65,21 +65,22 @@ namespace Pulsar4X.SDL2UI
 
 
             RefreshComponentDesigns();
-            
-            //TODO: this is temporary armor info, needs to be added to the game proper
-            _armorSelection.Add(("None", 0)    );
-            _armorSelection.Add(("Polyprop", 1175f)    );
-            _armorSelection.Add(("Aluminium", 2700f)    );
-            _armorSelection.Add(("Titanium", 4540f)    );
-            _armorSelection.Add(("SteelCarbon", 7860)    );
-            _armorSelection.Add(("SteelStainless", 7900)    );
 
-            _armorNames = new string[_armorSelection.Count];
-            for (int i = 0; i < _armorSelection.Count; i++)
+            _armorNames = new string[StaticRefLib.StaticData.ArmorTypes.Count];
+            int i = 0;
+            foreach (var kvp in StaticRefLib.StaticData.ArmorTypes)
             {
-                _armorNames[i]= _armorSelection[i].name;
+                var armorMat = _state.Game.StaticData.GetICargoable(kvp.Key);
+                _armorSelection.Add(kvp.Value);
+                
+                _armorNames[i]= armorMat.Name;
+                i++;
             }
-            _armor.thickness = _armorIndex;
+            
+            
+            
+            
+
 
             _state.Game.GamePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
             _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
@@ -89,6 +90,8 @@ namespace Pulsar4X.SDL2UI
         {
             RefreshComponentDesigns();
             _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
+            _armor = StaticRefLib.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            _armorThickness = 3;
         }
 
         internal static ShipDesignUI GetInstance()
@@ -212,7 +215,7 @@ namespace Pulsar4X.SDL2UI
                             version = shipclass.DesignVersion + 1;
                     }
                 }
-                ShipDesign shipDesign = new ShipDesign(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, _armor);
+                ShipDesign shipDesign = new ShipDesign(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, (_armor, _armorThickness));
                 shipDesign.DesignVersion = version;
 
             }
@@ -233,13 +236,11 @@ namespace Pulsar4X.SDL2UI
                         _selectedDesign = i;
                         _designName = ImGuiSDL2CSHelper.BytesFromString(_exsistingClasses[i].Name, 32);
                         _shipComponents = _exsistingClasses[i].Components;
-                        _armor = _exsistingClasses[i].Armor;
+                        _armor = _exsistingClasses[i].Armor.type;
                         GenImage();
-                        _armorNames.Contains(_armor.name);
-                        _armorIndex = _armorSelection.FindIndex(foo => foo.name.Equals(_armor.name));
+                        _armorIndex = _armorSelection.IndexOf(_armor);
+                        _armorThickness = _exsistingClasses[i].Armor.thickness;
                         designChanged = true;
-                        _armor.thickness = _exsistingClasses[i].Armor.thickness;
-                        _armorThickness = _armor.thickness;
                     }
                 }
 
@@ -338,13 +339,13 @@ namespace Pulsar4X.SDL2UI
             ImGui.NextColumn();
             ImGui.Text("Thickness ");
             ImGui.NextColumn();
-            if (ImGui.Combo("##Armor Selection", ref _armorIndex, _armorNames, 6))
+            if (ImGui.Combo("##Armor Selection", ref _armorIndex, _armorNames, _armorNames.Length))
             {
                 _armor.density = _armorSelection[_armorIndex].density;
                 designChanged = true;
             }
             ImGui.SameLine();
-            ImGui.Text(_armorSelection[_armorIndex].density.ToString());
+            ImGui.Text(_armorSelection[_armorIndex].Density.ToString());
             //ImGui.EndChild();
             ImGui.NextColumn();
             ImGui.Text(_armorThickness.ToString());
@@ -353,14 +354,12 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.SmallButton("+##armor")) //todo: imagebutton
             {
                 _armorThickness++;
-                _armor.thickness = (float)_armorThickness;
                 designChanged = true;
             }
             ImGui.SameLine();
             if (ImGui.SmallButton("-##armor") && _armorThickness > 0) //todo: imagebutton
             {
                 _armorThickness--;
-                _armor.thickness = (float)_armorThickness;
                 designChanged = true;
             }
 
@@ -433,7 +432,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void GenImage()
         {
-            EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, _armor);
+            EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, (_armor, _armorThickness));
             _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _profile.DamageProfile, _imagecreated);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;

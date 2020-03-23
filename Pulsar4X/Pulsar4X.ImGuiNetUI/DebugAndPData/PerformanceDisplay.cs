@@ -1,16 +1,25 @@
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
-
+using System.Reflection;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
 {
+    
     public class PerformanceDisplay : PulsarGuiWindow
     {
+
+        private string[] _dataBlobTypeStrings;
+        private Type[] _dataBlobTypes;
+        private int _dataBlobTypeIndex;
+
+        
         Stopwatch _sw = new Stopwatch();
         
         SystemState _systemState;
@@ -58,10 +67,10 @@ namespace Pulsar4X.SDL2UI
                 _gameRateIndex = 0;
             else
                 _gameRateIndex++;
-
         }
 
         private double ticks1;
+        private double ms1;
         private double ticks2;
         private double ticks3;
         private double count1;
@@ -73,6 +82,16 @@ namespace Pulsar4X.SDL2UI
         private PerformanceDisplay() 
         {
             _state.Game.GamePulse.GameGlobalDateChangedEvent += OnGlobalDateChange;
+            _dataBlobTypes = new Type[EntityManager.DataBlobTypes.Count];
+            _dataBlobTypeStrings = new String[EntityManager.DataBlobTypes.Count];
+
+            int i = 0;
+            foreach (var kvp in EntityManager.DataBlobTypes)
+            {
+                _dataBlobTypes[i]=kvp.Key;
+                _dataBlobTypeStrings[i] = kvp.Key.Name;
+                i++;
+            }
         }
         internal static PerformanceDisplay GetInstance()
         {
@@ -134,6 +153,14 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("    CurrentProcess: " + _systemState.StarSystem.ManagerSubpulses.CurrentProcess);
                 ImGui.Text("    Last Total ProcessTime: " + data.FullPulseTimeMS);
 
+                var numDB = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>().Count;
+                ImGui.Text("ObitDB Count: " + numDB);
+                numDB = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>().Count;
+                ImGui.Text("NewtonMoveDB Count: " + numDB);
+                numDB = _systemState.StarSystem.GetAllDataBlobsOfType<SensorAbilityDB>().Count;
+                ImGui.Text("SensorAbilityDB Count: " + numDB);
+                
+                
                 if(ImGui.CollapsingHeader("All Systems"))
                 {
                     foreach (var starsys in StaticRefLib.Game.Systems.Values)
@@ -150,36 +177,53 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.CollapsingHeader("Call Times"))
                 {
 
+                    
+                    
                     if (ImGui.Button("Time"))
                     {
                         _sw.Restart();
-                        var entites = _systemState.StarSystem.GetAllEntitiesWithDataBlob<OrbitDB>();
+                        List<Entity> entites = _systemState.StarSystem.GetAllEntitiesWithDataBlob<NewtonMoveDB>();
                         _sw.Stop();
                         count1 = entites.Count;
                         ticks1 = _sw.ElapsedTicks;
+                        ms1 = _sw.ElapsedMilliseconds;
                         
                         _sw.Restart();
-                        var datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>();
+                        var datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>();
                         _sw.Stop();
-                        count2 = entites.Count;
+                        count2 = datablobs.Count;
                         ticks2 = _sw.ElapsedTicks;
                         
-                        int typeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+                        int typeIndex = EntityManager.GetTypeIndex<NewtonMoveDB>();
                         _sw.Restart();
-                        datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>(typeIndex);
+                        datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>(typeIndex);
                         _sw.Stop();
-                        count3 = entites.Count;
+                        count3 = datablobs.Count;
                         ticks3 = _sw.ElapsedTicks;
+                        
+                        
+
+                        
                     }
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     ImGui.Text("Using GetEntitysWithDatablob");
                     ImGui.Text(ticks1 + " ticks to retreave " + count1 + " Entites");
+                    ImGui.Text(ms1 + " in ms");
                     ImGui.Text("Using GetAllDataBlobsOfType<T>()");
                     ImGui.Text(ticks2 + " ticks to retreave " + count2 + " Datablobs by Type");
                     ImGui.Text("Using GetAllDataBlobsOfType<T>(int typeIndex)");
                     ImGui.Text(ticks3 + " ticks to retreave " + count3 + " Datablobs by typeIndex");
+                
+                    
+                    
                     
                 }
-
             }
         }
     }

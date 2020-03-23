@@ -367,7 +367,8 @@ namespace Pulsar4X.ECSLib
                 (DefaultThrusterDesign(game, faction), 3),
                 
             };
-            _defaultShipDesign = new ShipDesign(factionInfo, "Ob'enn Dropship", components2, ("Polyprop", 1175f, 3));
+            ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            _defaultShipDesign = new ShipDesign(factionInfo, "Ob'enn Dropship", components2, (plastic, 3));
             _defaultShipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _defaultShipDesign.Armor);
             return _defaultShipDesign;
         }
@@ -386,7 +387,8 @@ namespace Pulsar4X.ECSLib
                 (_reactor, 1),
                 (_thruster500, 4),
             };
-            var shipdesign = new ShipDesign(factionInfo, "Sanctum Adroit GunShip", components2, ("Polyprop", 1175f, 3));
+            ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            var shipdesign = new ShipDesign(factionInfo, "Sanctum Adroit GunShip", components2, (plastic, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
         }
@@ -406,7 +408,8 @@ namespace Pulsar4X.ECSLib
                 (_reactor, 1),
                 (_thruster500, 4),
             };
-            var shipdesign = new ShipDesign(factionInfo, "Cargo Courier", components2, ("Polyprop", 1175f, 3));
+            ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            var shipdesign = new ShipDesign(factionInfo, "Cargo Courier", components2, (plastic, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
         }

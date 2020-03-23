@@ -122,6 +122,9 @@
     <None Update="Data\Pulsar4x\IndustryTypeData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Data\Pulsar4x\ArmorTypeData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\Pulsar4x\ComponentData.json">

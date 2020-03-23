@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib
         public int Mass { get; }
         public double Volume;
         public List<(ComponentDesign design, int count)> Components;
-        public (string name, double density, float thickness) Armor;
+        public (ArmorSD type, float thickness) Armor;
         public Dictionary<Guid, int> ResourceCosts { get; internal set; } = new Dictionary<Guid, int>();
         public Dictionary<Guid, int> MineralCosts = new Dictionary<Guid, int>();
         public Dictionary<Guid, int> MaterialCosts = new Dictionary<Guid, int>();
@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
         {
         }
 
-        public ShipDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (string name, double density, float thickness) armor)
+        public ShipDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (ArmorSD armorType, float thickness) armor)
         {
             faction.ShipDesigns.Add(ID, this);
             faction.IndustryDesigns[ID] = this;
@@ -136,8 +136,5 @@ namespace Pulsar4X.ECSLib
 
             return ship;
         }
-
-
-
     }
 }

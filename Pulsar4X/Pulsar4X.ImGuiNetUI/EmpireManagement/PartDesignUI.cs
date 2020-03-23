@@ -18,7 +18,11 @@ namespace Pulsar4X.SDL2UI
         private byte[] _nameInputBuffer = new byte[128];
         bool compactmod = false;
         string _windowname;
+        
 
+        private TechSD[] _techSDs;
+        private string[] _techNames;
+        private int _techSelectedIndex = -1;
         //new internal static GlobalUIState _state;
 
         public PartDesignUI(int designType, GlobalUIState state)
@@ -74,28 +78,36 @@ namespace Pulsar4X.SDL2UI
 
                 if (_componentDesigner != null)//Make sure comp is selected
                 {
-                    foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values)//For each property of the comp type
+                    foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values) //For each property of the comp type
                     {
 
-                        switch (attribute.GuiHint)//Either
+                        if ((attribute.GuiHint & GuiHint.GuiDisplayBool) == GuiHint.GuiDisplayBool)
+                        {
+                            if(attribute.Value == 0)
+                                break;
+                        }
+
+                        switch (attribute.GuiHint) //Either
                         {
                             case GuiHint.None:
                                 break;
-                            case GuiHint.GuiTechSelectionList://Let the user pick a type from a list
+                            case GuiHint.GuiTechSelectionList: //Let the user pick a type from a list
                                 GuiHintTechSelection(attribute);
                                 break;
-                            case GuiHint.GuiSelectionMaxMin://Set a value
+                            case GuiHint.GuiSelectionMaxMin: //Set a value
                                 GuiHintMaxMin(attribute);
                                 break;
-                            case GuiHint.GuiTextDisplay://Display a stat
+                            case GuiHint.GuiTextDisplay: //Display a stat
                                 GuiHintText(attribute);
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
-
-
+                        
                     }
+
+
+                
                     ImGui.Text("Name");
                     ImGui.InputText("", _nameInputBuffer, 32);
                     if (ImGui.Button("Create Design"))
@@ -300,18 +312,65 @@ namespace Pulsar4X.SDL2UI
                     ImGui.TextWrapped(attribute.Description);
                     ImGui.NewLine();
                 }
-                //StaticRefLib.StaticData.Techs[attribute.Value]
-                ImGui.TextWrapped(attribute.Value.ToString());
-/*
-                int techSelection;
-                List<string> techs = attribute.GuidDictionary
-                
-                if (ImGui.ListBox("Tech" + attribute.Name, ref _designType, _designTypes, _designTypes.Length))
+
+                int i = 0;
+                _techSDs = new TechSD[attribute.GuidDictionary.Count];
+                _techNames = new string[attribute.GuidDictionary.Count];
+                foreach (var kvp in attribute.GuidDictionary)
                 {
-                    var factionTech = _uiState.Faction.GetDataBlob<FactionTechDB>();
-                    var staticdata = StaticRefLib.StaticData;
-                    _componentDesign = GenericComponentFactory.StaticToDesign(_designables[_designType], factionTech, staticdata);
-                }*/
+                    TechSD sd = StaticRefLib.StaticData.Techs[Guid.Parse((string)kvp.Key)];
+                    _techSDs[i] = sd;
+                    _techNames[i] = sd.Name;
+                    i++;
+                }
+                
+                ImGui.TextWrapped(attribute.Value.ToString());
+
+
+
+                if (ImGui.Combo("Select Tech", ref _techSelectedIndex, _techNames, _techNames.Length))
+                {
+                    attribute.SetValueFromGuidList(_techSDs[_techSelectedIndex].ID);
+                }
+                
+                ImGui.NewLine();
+            }
+            void GuiHintEnumSelection(ComponentDesignAttribute attribute)
+            {
+                if (compactmod)
+                {
+                    ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
+                    ImGui.NewLine();
+                }
+                else
+                {
+                    ImGui.TextWrapped(attribute.Name + ":");
+                    ImGui.SameLine();
+                    ImGui.TextWrapped(attribute.Description);
+                    ImGui.NewLine();
+                }
+                
+                
+                int i = 0;
+                _techSDs = new TechSD[attribute.GuidDictionary.Count];
+                _techNames = new string[attribute.GuidDictionary.Count];
+                foreach (var kvp in attribute.GuidDictionary)
+                {
+                    TechSD sd = StaticRefLib.StaticData.Techs[Guid.Parse((string)kvp.Key)];
+                    _techSDs[i] = sd;
+                    _techNames[i] = sd.Name;
+                    i++;
+                }
+                
+                ImGui.TextWrapped(attribute.Value.ToString());
+
+
+
+                if (ImGui.Combo("Select Tech", ref _techSelectedIndex, _techNames, _techNames.Length))
+                {
+                    attribute.SetValueFromGuidList(_techSDs[_techSelectedIndex].ID);
+                }
+                
                 ImGui.NewLine();
             }
         }

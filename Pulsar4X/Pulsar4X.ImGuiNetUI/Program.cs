@@ -9,6 +9,9 @@ using System.Linq;
 using Pulsar4X.SDL2UI.Combat;
 using Vector3 = System.Numerics.Vector3;
 
+
+//this comment is a test to see if github works(quartuxz)
+
 namespace Pulsar4X.SDL2UI
 {
     public class Program

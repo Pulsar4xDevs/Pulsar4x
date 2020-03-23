@@ -26,6 +26,7 @@ namespace Pulsar4X.ECSLib
     {
         public string Name ="";
         public string Description ="";
+        public string Unit = "";
 
         public GuiHint GuiHint;
         public Type DataBlobType;

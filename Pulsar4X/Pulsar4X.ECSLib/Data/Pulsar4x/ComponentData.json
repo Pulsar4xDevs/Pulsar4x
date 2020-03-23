@@ -26,9 +26,10 @@
           "MountType": "PlanetInstallation, ShipComponent, ShipCargo, Fighter",
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Sensor Size",
+			  "Units": "T",
               "Description": "Size of this sensor in Tons",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -41,6 +42,7 @@
             },
             {
               "Name": "Ideal Detection Wavelength",
+			  "Units": "nm",
               "Description": "In NanoMeters, Most Efficent at this wavelength.",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -53,6 +55,7 @@
             },
             {
               "Name": "Detection Wavelength Width",
+			  "Units": "Unknown",
               "Description": "How far from the ideal wavelength will this still detect a signal",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -65,6 +68,7 @@
             },
             {
               "Name": "Sensitivity At Ideal Wavelength",
+			  "Units": "Unknown",
               "Description": "From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
@@ -83,6 +87,7 @@
             },
             {
               "Name": "Resolution",
+			  "Units": "Unknown",
               "Description": "How much detail it can get from a detection. affects likelyhood of component detection etc. ",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -95,6 +100,7 @@
             },
             {
               "Name": "Scan Time",
+			  "Units": "s (assumed)",
               "Description": "how long it takes to complete a full scan",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -138,9 +144,10 @@
           "MountType": "ShipComponent, ShipCargo, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Size",
+			  "Units": "kg",
               "Description": "Size of this engine in Kg",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "TechData('b056576a-124e-41c5-afcd-27d1f0bf6f4e')",
@@ -150,18 +157,21 @@
             },
             {
               "Name": "Exhaust Velocity",
+			  "Units": "m/s",
               "Description": "Specific Impulse in m/s, can be increased by research",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "3900 * TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
             },
             {
               "Name": "Fuel Consumption",
+			  "Units": "kg/s (assumed)",
               "Description": "Fuel Consumption per second",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Size') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
             },
             {
               "Name": "Thrust",
+			  "Units": "N",
               "Description": "The maximum thrust output of this engine in N",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
@@ -176,6 +186,7 @@
 
             {
               "Name": "Sensor Signature",
+			  "Units": "unknown",
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability('Thrust'),0)",
@@ -208,9 +219,10 @@
           "MountType": "ShipComponent, ShipCargo, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Size",
+			  "Units": "kg",
               "Description": "Size of the engine in Kg",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "25000",
@@ -220,6 +232,7 @@
             },
             {
               "Name": "Efficency vs Power",
+			  "Units": "EvP (Assumed)",
               "Description": "More Powerful engines are less efficient for a given size",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')",
@@ -229,24 +242,28 @@
             },
             {
               "Name": "EnginePower",
+			  "Units": "EP (Assumed)",
               "Description": "Move Power for ship",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Efficency vs Power') * [Mass] * 100"
             },
             {
               "Name": "Bubble Creation Energy Cost",
+			  "Units": "unknown energy unit",
               "Description": "How much energy required to create the warp bubble.",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('EnginePower') * 0.01 * TechData('c534d9f0-0d63-424f-9780-d124235903de') * 0.5"
             },
             {
               "Name": "Bubble Sustain Energy Cost",
+			  "Units": "unknown energy unit",
               "Description": "How much energy required to sustain the warp bubble per second during the warp",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('EnginePower') * 0.0001 * TechData('7fa0dc05-5e58-4678-be44-afaad014e096')"
             },
             {
               "Name": "Bubble Collapse Energy Returned",
+			  "Units": "unknown energy unit",
               "Description": "How much energy we get back from collapsing the warp bubble",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Bubble Creation Energy Cost') * TechData('d48e1883-2069-441f-ba55-69f63f47add7')"
@@ -260,6 +277,7 @@
             },
             {
               "Name": "Sensor Signature",
+			  "Units": "unknown",
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability('EnginePower'),0)",
@@ -304,9 +322,10 @@
           "MountType": "ShipComponent, ShipCargo, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Size",
+			  "Units": "kg",
               "Description": "Size of the reactor in Kg",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "25000",
@@ -316,18 +335,21 @@
             },
             {
               "Name": "Power Output",
+			  "Units": "MW",
               "Description": "in Mw",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "0.05 * [Mass]"
             },
             {
               "Name": "Fuel Consumption",
+			  "Units": "kg/s",
               "Description": "Fuel Consumption kg per second at Max Output",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Power Output') * 0.0000001"
             },
             {
               "Name": "Lifetime",
+			  "Units": "H",
               "Description": "How long this reactor will be useful for in Hours",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "87600",
@@ -344,6 +366,7 @@
             },
             {
               "Name": "Sensor Signature",
+			  "Units": "unknown",
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "Ability('Power Output')",
@@ -385,9 +408,10 @@
           "MountType": "ShipComponent, ShipCargo, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Size",
+			  "Units": "kg",
               "Description": "Size of the bank in Kg",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "25000",
@@ -397,6 +421,7 @@
             },
             {
               "Name": "Energy Storage",
+			  "Units": "unknown energy unit",
               "Description": "In foo",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Size') * 0.9"
@@ -435,9 +460,10 @@
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Range",
+			  "Units": "unknown",
               "Description": "MaxRange",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "10000",
@@ -447,6 +473,7 @@
             },
             {
               "Name": "Damage",
+			  "Units": "unknown",
               "Description": "Damage Amount",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
@@ -456,6 +483,7 @@
             },
             {
               "Name": "ReloadRate",
+			  "Units": "unknown",
               "Description": "How long it takes to reload",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
@@ -496,9 +524,10 @@
           "MountType": "ShipComponent, ShipCargo",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Calibre",
+			  "Units": "mm",
               "Description": "Caliber of this weapon in mm",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "250",
@@ -508,6 +537,7 @@
             },
             {
               "Name": "Rail Length",
+			  "Units": "unknown",
               "Description": "Length of the rail in m - directly effects the final velocity of the projectile",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
@@ -517,6 +547,7 @@
             },
             {
               "Name": "Auto Reloader Size",
+			  "Units": "unknown",
               "Description": "Increases the mass and size of the weapon, but increases the rate of fire.",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
@@ -526,17 +557,20 @@
             },
             {
               "Name": "Power Use",
+			  "Units": "MJ",
               "Description": "In MegaJules.",
               "GuiHint": "None",
               "AbilityFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * Ability('Calibre') * Ability('Rail Length')"
             },
             {
               "Name": "Power Efficency",
+			  "Units": "unknown",
               "GuiHint": "None",
               "AbilityFormula": "45 + TechData('1167a255-b004-4a68-91af-1192169b5a37')"
             },
             {
               "Name": "ROF",
+			  "Units": "Rounds/unknown",
               "GuiHint": "None",
               "AbilityFormula": "Ability('Auto Reloader Size') / Ability('Calibre')"
             },
@@ -573,9 +607,10 @@
           "MountType": "ShipComponent, ShipCargo",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Range",
+			  "Units": "kkm",
               "Description": "in kkm",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -588,6 +623,7 @@
             },
             {
               "Name": "Tracking Speed",
+			  "Units": "km/s",
               "Description": "in km/s",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -600,6 +636,7 @@
             },
             {
               "Name": "Size vs Range",
+			  "Units": "SVR",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
@@ -611,6 +648,7 @@
             },
             {
               "Name": "Size vs TrackingSpeed",
+			  "Units": "SVTS",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
@@ -622,6 +660,7 @@
             },
             {
               "Name": "Size",
+			  "Units": "unknown",
               "GuiHint": "None",
               "GuidDictionary": {
                 "Entries": []
@@ -644,6 +683,231 @@
               },
               "AbilityFormula": "DataBlobArgs(Ability(0), Ability(1))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.BeamFireControlAtbDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "BBC29A72-C4D3-4389-94DE-36C3BE3B7B0E",
+        "Value": {
+          "Name": "Missile Electronics Suite",
+          "Description": "Trigger, Sensors components for missiles",
+          "ID": "BBC29A72-C4D3-4389-94DE-36C3BE3B7B0E",
+          "MassFormula": "Ability(0)",
+          "VolumeFormula": "Ability(0)",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "[Mass]",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
+                "Value": "[Mass] * 8"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 2",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "PlanetInstallation, ShipComponent, ShipCargo, Fighter",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Trigger Type",
+              "Description": "",
+              "GuiHint": "GuiEnumSelectionList",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "2500",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Guidance Type",
+              "Description": "",
+              "GuiHint": "GuiEnumSelectionList",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "2500",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            
+            
+            
+            
+            
+            
+            {
+              "Name": "Sensor Size",
+			  "Units": "t",
+              "Description": "Size of this sensor in Tons",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "2500",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Ideal Detection Wavelength",
+			  "Units": "nm",
+              "Description": "In NanoMeters, Most Efficent at this wavelength.",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1e12",
+              "MinFormula": "0.01",
+              "StepFormula": "1",
+              "AbilityFormula": "600"
+            },
+            {
+              "Name": "Detection Wavelength Width",
+			  "Units": "unknown",
+              "Description": "How far from the ideal wavelength will this still detect a signal",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "500",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "250"
+            },
+            {
+              "Name": "Sensitivity At Ideal Wavelength",
+			  "Units": "unknown",
+              "Description": "From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula":"10000 - (10 * Ability(0))"
+            },
+            {
+              "Name": "Detection Ability at Worst Wavelength",
+			  "Units": "unknown",
+              "Description": "From Tech TODO: tech needs including",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "10000"
+            },
+            {
+              "Name": "Resolution",
+			  "Units": "unknown",
+              "Description": "How much detail it can get from a detection. affects likelyhood of component detection etc. ",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Scan Time",
+			  "Units": "unknown",
+              "Description": "how long it takes to complete a full scan",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "86400",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "3600"
+            },            {
+              "Name": "DatablobArguments",
+              "Description": "(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(1), Ability(2), Ability(3), Ability(4), Ability(5), Ability(6))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
+            }
+          ]
+        }
+      },
+
+      {
+        "Key": "9FDB2A15-4413-40A9-9229-19D05B3765FE",
+        "Value": {
+          "Name": "Solid Fuel Missile Engine",
+          "Description": "A Newtonian Thruster",
+          "ID": "9FDB2A15-4413-40A9-9229-19D05B3765FE",
+          "MassFormula": "Ability('Size')",
+          "VolumeFormula": "Ability('Size')",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "[Mass]",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "05dce711-8846-488a-b0f3-57fd7924b268",
+                "Value": "[Mass] * 8"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 0.5",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "Missile",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Size",
+			  "Units": "kg",
+              "Description": "Size of this engine in Kg",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "500"
+            },
+            {
+              "Name": "Exhaust Velocity",
+			  "Units": "m/s",
+              "Description": "Specific Impulse in m/s, can be increased by research",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "2500"
+            },
+            {
+              "Name": "Fuel Consumption",
+			  "Units": "unknown mass units/s",
+              "Description": "Fuel Consumption per second",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Size') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
+            },
+            {
+              "Name": "Thrust",
+			  "Units": "N",
+              "Description": "The maximum thrust output of this engine in N",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
+            },
+            {
+              "Name": "DataBlob",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
+            },
+
+            {
+              "Name": "Sensor Signature",
+			  "Units": "Unknown",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Thrust'),0)",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]
         }
@@ -672,9 +936,10 @@
           "MountType": "ShipComponent, ShipCargo",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
-          "ComponentAbilitySDs": [
+          "ComponentAtbSDs": [
             {
               "Name": "Size",
+			  "Units": "unknown",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
