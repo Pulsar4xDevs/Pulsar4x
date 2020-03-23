@@ -31,6 +31,7 @@ namespace Pulsar4X.ECSLib
     {
         public string Name;
         public string Description;
+        public string Unit;
         public GuiHint GuiHint; //if AbilityFormula uses AbilityArgs(), this should be none!
 
         //used if guihint is GuiSelectionList
@@ -39,7 +40,8 @@ namespace Pulsar4X.ECSLib
         //used if GuiHint is GuiMinMax
         public string MaxFormula;
         public string MinFormula;
-        public string StepFormula; 
+        public string StepFormula;
+        
 
         //if guihint is selection list or minmax, this should point to a default value. 
         public string AbilityFormula;

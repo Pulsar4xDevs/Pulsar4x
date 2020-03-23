@@ -242,6 +242,9 @@ namespace Pulsar4X.ECSLib
                     designAttribute.Description = abilitySD.Description;
                 designAttribute.GuiHint = abilitySD.GuiHint;
 
+                if (abilitySD.Unit != null)
+                    designAttribute.Unit = abilitySD.Unit;
+
                 if (abilitySD.AbilityFormula != null)
                 {
                     designAttribute.Formula = new ChainedExpression(abilitySD.AbilityFormula, designAttribute, factionTech, staticData);
