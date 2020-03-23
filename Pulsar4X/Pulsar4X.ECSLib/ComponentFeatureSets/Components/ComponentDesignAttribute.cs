@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
         private ComponentTemplateAttributeSD _templateSD;
         public string Name { get { return _templateSD.Name; } }
         public string Description { get { return _templateSD.Description; } }
-        public string Unit = "";
+        public string Unit { get { return _templateSD.Unit; } }
         public GuiHint GuiHint { get { return _templateSD.GuiHint; } }
         
         public Type DataBlobType;
