@@ -43,7 +43,7 @@
             {
               "Name": "Ideal Detection Wavelength",
               "Units": "nm",
-              "Description": "In NanoMeters, Most Efficent at this wavelength.",
+              "Description": "The wavelength this sensor is most efficent at detecting",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
@@ -55,7 +55,7 @@
             },
             {
               "Name": "Detection Wavelength Width",
-			        "Units": "Unknown",
+              "Units": "nm",
               "Description": "How far from the ideal wavelength will this still detect a signal",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -100,7 +100,7 @@
             },
             {
               "Name": "Scan Time",
-			        "Units": "s (assumed)",
+			        "Units": "s",
               "Description": "how long it takes to complete a full scan",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -222,7 +222,7 @@
           "ComponentAtbSDs": [
             {
               "Name": "Size",
-			        "Units": "kg",
+              "Units": "kg",
               "Description": "Mass of the engine",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "25000",
@@ -232,7 +232,7 @@
             },
             {
               "Name": "Efficency vs Power",
-			        "Units": "EvP (Assumed)",
+              "Units": "EvP",
               "Description": "More Powerful engines are less efficient for a given size",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')",
@@ -242,32 +242,32 @@
             },
             {
               "Name": "EnginePower",
-			        "Units": "EP (Assumed)",
+              "Units": "EP",
               "Description": "Move Power for ship",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Efficency vs Power') * [Mass] * 100"
             },
             {
               "Name": "Bubble Creation Energy Cost",
-			        "Units": "unknown energy unit",
+              "Units": "J",
               "Description": "How much energy required to create the warp bubble.",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('EnginePower') * 0.01 * TechData('c534d9f0-0d63-424f-9780-d124235903de') * 0.5"
             },
             {
               "Name": "Bubble Sustain Energy Cost",
-			        "Units": "unknown energy unit",
+              "Units": "W",
               "Description": "How much energy required to sustain the warp bubble per second during the warp",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('EnginePower') * 0.0001 * TechData('7fa0dc05-5e58-4678-be44-afaad014e096')"
             },
             {
               "Name": "Bubble Collapse Energy Returned",
-			        "Units": "unknown energy unit",
+              "Units": "J",
               "Description": "How much energy we get back from collapsing the warp bubble",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Bubble Creation Energy Cost') * TechData('d48e1883-2069-441f-ba55-69f63f47add7')"
-            },            
+            },
             {
               "Name": "db",
               "Description": "",
@@ -277,7 +277,7 @@
             },
             {
               "Name": "Sensor Signature",
-			        "Units": "unknown",
+              "Units": "unknown",
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability('EnginePower'),0)",
@@ -335,10 +335,10 @@
             },
             {
               "Name": "Power Output",
-			        "Units": "w",
-              "Description": "in Mw",
+              "Units": "w",
+              "Description": "in w",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "0.05 * [Mass]"
+              "AbilityFormula": "50000 * [Mass]"
             },
             {
               "Name": "Fuel Consumption",
@@ -421,10 +421,10 @@
             },
             {
               "Name": "Energy Storage",
-			        "Units": "unknown energy unit",
-              "Description": "In foo",
+              "Units": "J",
+              "Description": "Energy capacity of this part",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Size') * 0.9"
+              "AbilityFormula": "Ability('Size') * 500000"
             },
             {
               "Name": "DB",
@@ -463,8 +463,8 @@
           "ComponentAtbSDs": [
             {
               "Name": "Range",
-			        "Units": "unknown",
-              "Description": "MaxRange",
+			        "Units": "m",
+              "Description": "Maximum range at which the laser can fire at",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "10000",
               "MinFormula": "1000",
@@ -473,8 +473,8 @@
             },
             {
               "Name": "Damage",
-			        "Units": "unknown",
-              "Description": "Damage Amount",
+			        "Units": "J",
+              "Description": "Energy output of laser pulse",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
               "MinFormula": "1",
@@ -483,8 +483,8 @@
             },
             {
               "Name": "ReloadRate",
-			        "Units": "unknown",
-              "Description": "How long it takes to reload",
+			        "Units": "s",
+              "Description": "How much of a delay there is between laser pulses",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
               "MinFormula": "1",
@@ -660,7 +660,7 @@
             },
             {
               "Name": "Size",
-			        "Units": "unknown",
+			        "Units": "kg",
               "GuiHint": "None",
               "GuidDictionary": {
                 "Entries": []
