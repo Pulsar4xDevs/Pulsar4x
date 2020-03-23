@@ -8,8 +8,8 @@
           "Name": "PassiveSensor",
           "Description": "Detects emissions and reflections from other objects",
           "ID": "2368ea53-bd01-42f0-a1c9-da55c051cd4c",
-          "MassFormula": "Ability(0)",
-          "VolumeFormula": "Ability(0)",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "ResourceCostFormula": {
@@ -28,8 +28,8 @@
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAtbSDs": [
             {
-              "Name": "Sensor Size",
-			        "Units": "kg",
+              "Name": "Mass",
+              "Units": "kg",
               "Description": "Mass of this sensor",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -68,13 +68,13 @@
             },
             {
               "Name": "Sensitivity At Ideal Wavelength",
-			        "Units": "Unknown",
+              "Units": "Unknown",
               "Description": "From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula":"10000 - (10 * Ability(0))"
+              "AbilityFormula": "10000 - (10 * Ability(0))"
             },
             {
               "Name": "Detection Ability at Worst Wavelength",
@@ -87,7 +87,7 @@
             },
             {
               "Name": "Resolution",
-			        "Units": "Unknown",
+              "Units": "Unknown",
               "Description": "How much detail it can get from a detection. affects likelyhood of component detection etc. ",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -100,7 +100,7 @@
             },
             {
               "Name": "Scan Time",
-			        "Units": "s",
+              "Units": "s",
               "Description": "how long it takes to complete a full scan",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -110,7 +110,8 @@
               "MinFormula": "1",
               "StepFormula": "1",
               "AbilityFormula": "3600"
-            },            {
+            },
+            {
               "Name": "DatablobArguments",
               "Description": "(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)",
               "GuiHint": "None",
@@ -126,8 +127,8 @@
           "Name": "Liquid Fuel Rocket Engine",
           "Description": "A Newtonian Thruster",
           "ID": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
-          "MassFormula": "Ability('Size')",
-          "VolumeFormula": "Ability('Size')",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "ResourceCostFormula": {
@@ -146,8 +147,8 @@
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
           "ComponentAtbSDs": [
             {
-              "Name": "Size",
-			        "Units": "kg",
+              "Name": "Mass",
+              "Units": "kg",
               "Description": "Mass of this engine",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "TechData('b056576a-124e-41c5-afcd-27d1f0bf6f4e')",
@@ -157,21 +158,21 @@
             },
             {
               "Name": "Exhaust Velocity",
-			        "Units": "m/s",
+              "Units": "m/s",
               "Description": "Specific Impulse in m/s, can be increased by research",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "3900 * TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
             },
             {
               "Name": "Fuel Consumption",
-			        "Units": "kg/s",
+              "Units": "kg/s",
               "Description": "Fuel Consumption per second",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Size') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
+              "AbilityFormula": "Ability('Mass') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
             },
             {
               "Name": "Thrust",
-			        "Units": "N",
+              "Units": "N",
               "Description": "The maximum thrust output of this engine",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
@@ -186,7 +187,7 @@
 
             {
               "Name": "Sensor Signature",
-			        "Units": "unknown",
+              "Units": "unknown",
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability('Thrust'),0)",
@@ -201,8 +202,8 @@
           "Name": "Alcubierre Warp Drive",
           "Description": "Warps a ship through non newtonion space",
           "ID": "7d0b867f-e239-4b93-9b30-c6d4b769b5e4",
-          "MassFormula": "Ability('Size')",
-          "VolumeFormula": "Ability('Size')",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "ResourceCostFormula": {
@@ -221,7 +222,7 @@
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
           "ComponentAtbSDs": [
             {
-              "Name": "Size",
+              "Name": "Mass",
               "Units": "kg",
               "Description": "Mass of the engine",
               "GuiHint": "GuiSelectionMaxMin",
@@ -292,8 +293,8 @@
           "Name": "Reactor",
           "Description": "A non refuelable reactor, Generates power for a ship",
           "ID": "97cf75a1-5ca3-4037-8832-4d81a89f97fa",
-          "MassFormula": "Ability('Size')",
-          "VolumeFormula": "Ability('Size')",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "ResourceCostFormula": {
@@ -324,8 +325,8 @@
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
           "ComponentAtbSDs": [
             {
-              "Name": "Size",
-			        "Units": "kg",
+              "Name": "Mass",
+              "Units": "kg",
               "Description": "Mass of the reactor",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "25000",
@@ -342,14 +343,14 @@
             },
             {
               "Name": "Fuel Consumption",
-			        "Units": "kg/s",
+              "Units": "kg/s",
               "Description": "Fuel Consumption kg per second at Max Output",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Power Output') * 0.0000001"
             },
             {
               "Name": "Lifetime",
-			        "Units": "s",
+              "Units": "s",
               "Description": "How long this reactor will be useful for",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "87600",
@@ -366,7 +367,7 @@
             },
             {
               "Name": "Sensor Signature",
-			        "Units": "unknown",
+              "Units": "unknown",
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "Ability('Power Output')",
@@ -382,8 +383,8 @@
           "Name": "Battery Bank",
           "Description": "Stores power for a ship",
           "ID": "1de23a8b-d44b-4e0f-bacd-5463a8eb939d",
-          "MassFormula": "Ability('Size')",
-          "VolumeFormula": "Ability('Size')",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "ResourceCostFormula": {
@@ -410,8 +411,8 @@
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
           "ComponentAtbSDs": [
             {
-              "Name": "Size",
-			        "Units": "kg",
+              "Name": "Mass",
+              "Units": "kg",
               "Description": "Mass of the bank",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "25000",
@@ -424,7 +425,7 @@
               "Units": "J",
               "Description": "Energy capacity of this part",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Size') * 500000"
+              "AbilityFormula": "Ability('Mass') * 500000"
             },
             {
               "Name": "DB",
@@ -506,8 +507,8 @@
           "Name": "RailGun",
           "Description": "A Projectile thrower that uses electrical energy to propel a conductive projectile",
           "ID": "fe9bf895-ac4d-4696-b121-d195c720d17b",
-          "MassFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Size'))",
-          "VolumeFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Size'))",
+          "MassFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Mass'))",
+          "VolumeFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Mass'))",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "1",
           "ResourceCostFormula": {
@@ -527,7 +528,7 @@
           "ComponentAtbSDs": [
             {
               "Name": "Calibre",
-			        "Units": "mm",
+              "Units": "mm",
               "Description": "Caliber of this weapon in mm",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "250",
@@ -537,7 +538,7 @@
             },
             {
               "Name": "Rail Length",
-			        "Units": "unknown",
+              "Units": "unknown",
               "Description": "Length of the rail - directly effects the final velocity of the projectile",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
@@ -546,9 +547,9 @@
               "AbilityFormula": "1"
             },
             {
-              "Name": "Auto Reloader Size",
-			        "Units": "unknown",
-              "Description": "Increases the mass and size of the weapon, but increases the rate of fire.",
+              "Name": "Auto Reloader Mass",
+              "Units": "unknown",
+              "Description": "Increases the mass of the weapon, but increases the rate of fire.",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
               "MinFormula": "1",
@@ -557,22 +558,22 @@
             },
             {
               "Name": "Power Use",
-			        "Units": "MJ",
+              "Units": "MJ",
               "Description": "In MegaJules.",
               "GuiHint": "None",
               "AbilityFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * Ability('Calibre') * Ability('Rail Length')"
             },
             {
               "Name": "Power Efficency",
-			        "Units": "unknown",
+              "Units": "unknown",
               "GuiHint": "None",
               "AbilityFormula": "45 + TechData('1167a255-b004-4a68-91af-1192169b5a37')"
             },
             {
               "Name": "ROF",
-			        "Units": "Rounds/unknown",
+              "Units": "Rounds/unknown",
               "GuiHint": "None",
-              "AbilityFormula": "Ability('Auto Reloader Size') / Ability('Calibre')"
+              "AbilityFormula": "Ability('Auto Reloader Mass') / Ability('Calibre')"
             },
             {
               "Name": "dbargs",
@@ -589,7 +590,7 @@
           "Name": "BeamFireControl",
           "Description": "",
           "ID": "33fcd1f5-80ab-4bac-97be-dbcae19ab1a0",
-          "MassFormula": "Ability(4)",
+          "MassFormula": "Ability('Mass')",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass]",
@@ -610,7 +611,7 @@
           "ComponentAtbSDs": [
             {
               "Name": "Range",
-			        "Units": "kkm",
+              "Units": "kkm",
               "Description": "in kkm",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -623,7 +624,7 @@
             },
             {
               "Name": "Tracking Speed",
-			        "Units": "km/s",
+              "Units": "km/s",
               "Description": "in km/s",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -636,7 +637,7 @@
             },
             {
               "Name": "Size vs Range",
-			        "Units": "SVR",
+              "Units": "SVR",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
@@ -648,7 +649,7 @@
             },
             {
               "Name": "Size vs TrackingSpeed",
-			        "Units": "SVTS",
+              "Units": "SVTS",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
@@ -659,8 +660,8 @@
               "AbilityFormula": "1"
             },
             {
-              "Name": "Size",
-			        "Units": "kg",
+              "Name": "Mass",
+              "Units": "kg",
               "GuiHint": "None",
               "GuidDictionary": {
                 "Entries": []
@@ -673,13 +674,13 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "Ability(4)"
+              "AbilityFormula": "Ability('Mass')"
             },
             {
               "Name": "DBargs",
               "GuiHint": "None",
               "GuidDictionary": {
-                "Entries": [ ]
+                "Entries": []
               },
               "AbilityFormula": "DataBlobArgs(Ability(0), Ability(1))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.BeamFireControlAtbDB"
@@ -693,8 +694,8 @@
           "Name": "Missile Electronics Suite",
           "Description": "Trigger, Sensors components for missiles",
           "ID": "BBC29A72-C4D3-4389-94DE-36C3BE3B7B0E",
-          "MassFormula": "Ability(0)",
-          "VolumeFormula": "Ability(0)",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "ResourceCostFormula": {
@@ -736,15 +737,15 @@
               "StepFormula": "1",
               "AbilityFormula": "10"
             },
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
             {
-              "Name": "Sensor Size",
-			        "Units": "kg",
+              "Name": "Mass",
+              "Units": "kg",
               "Description": "Mass of this sensor",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -757,7 +758,7 @@
             },
             {
               "Name": "Ideal Detection Wavelength",
-			        "Units": "nm",
+              "Units": "nm",
               "Description": "In NanoMeters, Most Efficent at this wavelength.",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -770,7 +771,7 @@
             },
             {
               "Name": "Detection Wavelength Width",
-			        "Units": "unknown",
+              "Units": "unknown",
               "Description": "How far from the ideal wavelength will this still detect a signal",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -783,17 +784,17 @@
             },
             {
               "Name": "Sensitivity At Ideal Wavelength",
-			        "Units": "unknown",
+              "Units": "unknown",
               "Description": "From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula":"10000 - (10 * Ability(0))"
+              "AbilityFormula": "10000 - (10 * Ability(0))"
             },
             {
               "Name": "Detection Ability at Worst Wavelength",
-			        "Units": "unknown",
+              "Units": "unknown",
               "Description": "From Tech TODO: tech needs including",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
@@ -803,7 +804,7 @@
             },
             {
               "Name": "Resolution",
-			        "Units": "unknown",
+              "Units": "unknown",
               "Description": "How much detail it can get from a detection. affects likelyhood of component detection etc. ",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -816,7 +817,7 @@
             },
             {
               "Name": "Scan Time",
-			        "Units": "unknown",
+              "Units": "unknown",
               "Description": "how long it takes to complete a full scan",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
@@ -826,7 +827,8 @@
               "MinFormula": "1",
               "StepFormula": "1",
               "AbilityFormula": "3600"
-            },            {
+            },
+            {
               "Name": "DatablobArguments",
               "Description": "(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)",
               "GuiHint": "None",
@@ -843,8 +845,8 @@
           "Name": "Solid Fuel Missile Engine",
           "Description": "A Newtonian Thruster",
           "ID": "9FDB2A15-4413-40A9-9229-19D05B3765FE",
-          "MassFormula": "Ability('Size')",
-          "VolumeFormula": "Ability('Size')",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "ResourceCostFormula": {
@@ -863,8 +865,8 @@
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
           "ComponentAtbSDs": [
             {
-              "Name": "Size",
-			        "Units": "kg",
+              "Name": "Mass",
+              "Units": "kg",
               "Description": "Mass of this engine",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "10",
@@ -874,21 +876,21 @@
             },
             {
               "Name": "Exhaust Velocity",
-			        "Units": "m/s",
+              "Units": "m/s",
               "Description": "Specific Impulse in m/s, can be increased by research",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "2500"
             },
             {
               "Name": "Fuel Consumption",
-			        "Units": "unknown mass units/s",
+              "Units": "unknown mass units/s",
               "Description": "Fuel Consumption per second",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Size') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
+              "AbilityFormula": "Ability('Mass') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
             },
             {
               "Name": "Thrust",
-			        "Units": "N",
+              "Units": "N",
               "Description": "The maximum thrust output of this engine in N",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
@@ -903,7 +905,7 @@
 
             {
               "Name": "Sensor Signature",
-			        "Units": "Unknown",
+              "Units": "Unknown",
               "Description": "",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability('Thrust'),0)",
@@ -918,7 +920,7 @@
           "Name": "TestWeight",
           "Description": "",
           "ID": "57614ddb-0756-44cf-857b-8a6578493792",
-          "MassFormula": "Ability(0)",
+          "MassFormula": "Ability('Mass')",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass]",
@@ -938,8 +940,9 @@
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
           "ComponentAtbSDs": [
             {
-              "Name": "Size",
-			        "Units": "unknown",
+              "Name": "Mass",
+              "Units": "kg",
+              "Description": "The mass of the weight",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
