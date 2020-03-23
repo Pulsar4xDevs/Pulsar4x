@@ -331,6 +331,96 @@
           },
           "CostFormula": "(1 + [Level]) * 2500"
         }
+      },
+      {
+        "Key": "E27F5256-7044-49A3-8260-58FC376DC219",
+        "Value": {
+          "Name": "HE Warheads",
+          "Description": "High Explosive Warheads that produce a large amount of heat and pressure",
+          "Category": "MissilesKineticWeapons",
+          "ID": "E27F5256-7044-49A3-8260-58FC376DC219",
+          "MaxLevel": 10,
+          "DataFormula": "[Level]",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 2500"
+        }
+      },
+      {
+        "Key": "D996C440-5ED5-4DC9-A899-F93389783C43",
+        "Value": {
+          "Name": "Fragmentation Warheads",
+          "Description": "Warheads that produce a large amount of fragmentation",
+          "Category": "MissilesKineticWeapons",
+          "ID": "D996C440-5ED5-4DC9-A899-F93389783C43",
+          "MaxLevel": 10,
+          "DataFormula": "[Level]",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 2500"
+        }
+      },
+      {
+        "Key": "2F77C4FE-15DD-4D25-8CB9-D46A11058F5A",
+        "Value": {
+          "Name": "Fission Warheads",
+          "Description": "Warheads that produce massive amounts of Heat and pressure",
+          "Category": "MissilesKineticWeapons",
+          "ID": "2F77C4FE-15DD-4D25-8CB9-D46A11058F5A",
+          "MaxLevel": 10,
+          "DataFormula": "[Level]",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 2500"
+        }
+      },
+      {
+        "Key": "0E3B23AC-75F5-47DD-A2AA-BF893E2D96EC",
+        "Value": {
+          "Name": "Laser Warheads",
+          "Description": "Smart warheads that fire a high energy beam towards the target on detonation",
+          "Category": "MissilesKineticWeapons",
+          "ID": "0E3B23AC-75F5-47DD-A2AA-BF893E2D96EC",
+          "MaxLevel": 10,
+          "DataFormula": "[Level]",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 2500"
+        }
+      },
+      {
+        "Key": "9C35C1E9-50E7-415D-98ED-4E71CE8A354E",
+        "Value": {
+          "Name": "Trigger Tech",
+          "Description": "Enables different warhead triggers for ordnance",
+          "Category": "MissilesKineticWeapons",
+          "ID": "9C35C1E9-50E7-415D-98ED-4E71CE8A354E",
+          "MaxLevel": 4,
+          "DataFormula": "[Level]",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 500"
+        }
+      },
+      {
+        "Key": "5582AAD0-D7F0-46E5-92A9-C2CCCB4BA9CF",
+        "Value": {
+          "Name": "Guidance Tech",
+          "Description": "Enables different guidance options ordnance",
+          "Category": "MissilesKineticWeapons",
+          "ID": "5582AAD0-D7F0-46E5-92A9-C2CCCB4BA9CF",
+          "MaxLevel": 4,
+          "DataFormula": "[Level]",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 500"
+        }
       }
     ]
   }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using NCalc;
-using NCalc.Domain;
 
 namespace Pulsar4X.ECSLib
 {
@@ -13,27 +12,79 @@ namespace Pulsar4X.ECSLib
         //void OnComponentDeInstalation(Entity ship, Entity component);
     }
 
-    public class ComponentDesignAtbData
-    {
-        public string Name;
-        public string Description;
-        public Type DataBlobType;
-        internal ComponentDesigner ParentComponent;
-        public double Value;
-    }
-
     public class ComponentDesignAttribute
     {
-        public string Name ="";
-        public string Description ="";
-
-        public GuiHint GuiHint;
+        private ComponentTemplateAttributeSD _templateSD;
+        public string Name { get { return _templateSD.Name; } }
+        public string Description { get { return _templateSD.Description; } }
+        public GuiHint GuiHint { get { return _templateSD.GuiHint; } }
+        
         public Type DataBlobType;
+
+        public Type EnumType;
+        public int EnumSelection;
         //public BaseDataBlob DataBlob;
         internal ComponentDesigner ParentComponent; 
-        public ComponentDesignAttribute(ComponentDesigner parentComponent)
+        public ComponentDesignAttribute(ComponentDesigner parentComponent, ComponentTemplateAttributeSD templateAtb, FactionTechDB factionTech)
         {
             ParentComponent = parentComponent;
+            _templateSD = templateAtb;
+            var staticData = StaticRefLib.StaticData;
+
+            if (_templateSD.AbilityFormula != null)
+            {
+                Formula = new ChainedExpression(_templateSD.AbilityFormula, this, factionTech, staticData);
+            }
+
+            if (_templateSD.GuidDictionary != null )
+            {
+                GuidDictionary = new Dictionary<object, ChainedExpression>();
+                if (GuiHint == GuiHint.GuiTechSelectionList)
+                {
+                    foreach (var kvp in _templateSD.GuidDictionary)
+                    {
+                        if (factionTech.ResearchedTechs.ContainsKey(Guid.Parse(kvp.Key.ToString())))
+                        {
+                            TechSD techSD = staticData.Techs[Guid.Parse(kvp.Key.ToString())];
+                            GuidDictionary.Add(kvp.Key, new ChainedExpression(ResearchProcessor.DataFormula(factionTech, techSD).ToString(), this, factionTech, staticData));                      
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var kvp in _templateSD.GuidDictionary)
+                    {
+                        GuidDictionary.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech, staticData));
+                    }
+                }
+            }
+            if (GuiHint == GuiHint.GuiSelectionMaxMin)
+            {
+                MaxValueFormula = new ChainedExpression(_templateSD.MaxFormula, this, factionTech, staticData);
+                MinValueFormula = new ChainedExpression(_templateSD.MinFormula, this, factionTech, staticData);
+                StepValueFormula = new ChainedExpression(_templateSD.StepFormula, this, factionTech, staticData);
+            }
+            if (_templateSD.AbilityDataBlobType != null)
+            {
+                DataBlobType = Type.GetType(_templateSD.AbilityDataBlobType);        
+            }
+
+            if (GuiHint == GuiHint.GuiEnumSelectionList)
+            {
+                MaxValueFormula = new ChainedExpression(_templateSD.MaxFormula, this, factionTech, staticData);
+                MinValueFormula = new ChainedExpression(_templateSD.MinFormula, this, factionTech, staticData);
+                StepValueFormula = new ChainedExpression(_templateSD.StepFormula, this, factionTech, staticData);
+                SetMax();
+                SetMin();
+                SetStep();
+                EnumType = Type.GetType(_templateSD.EnumTypeName);
+                if(EnumType == null)
+                    throw new Exception("EnymTypeName not found: " + _templateSD.EnumTypeName);
+                EnumSelection = (int)Value;
+                //string[] names = Enum.GetNames(EnumType);
+            }
+
+
         }
 
         public Dictionary<object, ChainedExpression> GuidDictionary;

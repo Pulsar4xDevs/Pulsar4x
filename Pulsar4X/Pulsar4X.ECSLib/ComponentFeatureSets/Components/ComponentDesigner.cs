@@ -230,59 +230,10 @@ namespace Pulsar4X.ECSLib
            // MaterialCostFormulas = materalCostFormulas;
             //ComponentCostFormulas = componentCostForulas;
             
-            foreach (ComponentTemplateAttributeSD abilitySD in componentSD.ComponentAtbSDs)
+            foreach (ComponentTemplateAttributeSD attrbSD in componentSD.ComponentAtbSDs)
             {
-                ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this);
-                
-                if(abilitySD.Name == null) //TODO: Log this, and don't use this component instead of throwing.
-                    throw new Exception("Bad Static Data. Ability name is null");
-                designAttribute.Name = abilitySD.Name;
-                
-                if (abilitySD.Description != null)
-                    designAttribute.Description = abilitySD.Description;
-                designAttribute.GuiHint = abilitySD.GuiHint;
-
-                if (abilitySD.AbilityFormula != null)
-                {
-                    designAttribute.Formula = new ChainedExpression(abilitySD.AbilityFormula, designAttribute, factionTech, staticData);
-                }
-
-                if (abilitySD.GuidDictionary != null )
-                {
-                    designAttribute.GuidDictionary = new Dictionary<object, ChainedExpression>();
-                    if (designAttribute.GuiHint == GuiHint.GuiTechSelectionList)
-                    {
-                        foreach (var kvp in abilitySD.GuidDictionary)
-                        {
-                            if (factionTech.ResearchedTechs.ContainsKey(Guid.Parse(kvp.Key.ToString())))
-                            {
-                                TechSD techSD = staticData.Techs[Guid.Parse(kvp.Key.ToString())];
-                                designAttribute.GuidDictionary.Add(kvp.Key, new ChainedExpression(ResearchProcessor.DataFormula(factionTech, techSD).ToString(), designAttribute, factionTech, staticData));                      
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach (var kvp in abilitySD.GuidDictionary)
-                        {
-                            designAttribute.GuidDictionary.Add(kvp.Key, new ChainedExpression(kvp.Value, designAttribute, factionTech, staticData));
-                        }
-                    }
-                }
-                if (designAttribute.GuiHint == GuiHint.GuiSelectionMaxMin)
-                {
-                    designAttribute.MaxValueFormula = new ChainedExpression(abilitySD.MaxFormula, designAttribute, factionTech, staticData);
-                    designAttribute.MinValueFormula = new ChainedExpression(abilitySD.MinFormula, designAttribute, factionTech, staticData);
-                    designAttribute.StepValueFormula = new ChainedExpression(abilitySD.StepFormula, designAttribute, factionTech, staticData);
-                }
-                if (abilitySD.AbilityDataBlobType != null)
-                {
-                    designAttribute.DataBlobType = Type.GetType(abilitySD.AbilityDataBlobType);        
-                }
-                
+                ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this, attrbSD, factionTech);
                 ComponentDesignAttributes.Add(designAttribute.Name, designAttribute);
-                
-                //TODO: get rid of this once json data is rewritten to use names instead of indexes
                 ComponentDesignAttributeList.Add(designAttribute);
             }
 

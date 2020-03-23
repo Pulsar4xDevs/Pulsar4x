@@ -23,6 +23,10 @@ namespace Pulsar4X.SDL2UI
         private TechSD[] _techSDs;
         private string[] _techNames;
         private int _techSelectedIndex = -1;
+        
+        //private TechSD[] _techSDs;
+        private string[] _enumNames;
+        
         //new internal static GlobalUIState _state;
 
         public PartDesignUI(int designType, GlobalUIState state)
@@ -80,7 +84,9 @@ namespace Pulsar4X.SDL2UI
                 {
                     foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values) //For each property of the comp type
                     {
-
+                        ImGui.PushID(attribute.Name);
+                        
+                        
                         if ((attribute.GuiHint & GuiHint.GuiDisplayBool) == GuiHint.GuiDisplayBool)
                         {
                             if(attribute.Value == 0)
@@ -100,10 +106,16 @@ namespace Pulsar4X.SDL2UI
                             case GuiHint.GuiTextDisplay: //Display a stat
                                 GuiHintText(attribute);
                                 break;
+                            case GuiHint.GuiEnumSelectionList: //Let the user pick a type from a hard coded list
+                                GuiHintEnumSelection(attribute);
+                                break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
                         
+                        
+                        
+                        ImGui.PopID();
                     }
 
 
@@ -352,23 +364,16 @@ namespace Pulsar4X.SDL2UI
                 
                 
                 int i = 0;
-                _techSDs = new TechSD[attribute.GuidDictionary.Count];
-                _techNames = new string[attribute.GuidDictionary.Count];
-                foreach (var kvp in attribute.GuidDictionary)
-                {
-                    TechSD sd = StaticRefLib.StaticData.Techs[Guid.Parse((string)kvp.Key)];
-                    _techSDs[i] = sd;
-                    _techNames[i] = sd.Name;
-                    i++;
-                }
+                //_techSDs = new TechSD[attribute.GuidDictionary.Count];
+                _enumNames = Enum.GetNames(attribute.EnumType);
+
                 
                 ImGui.TextWrapped(attribute.Value.ToString());
 
-
-
-                if (ImGui.Combo("Select Tech", ref _techSelectedIndex, _techNames, _techNames.Length))
+                if (ImGui.Combo("Select", ref attribute.EnumSelection, _enumNames, (int)attribute.MaxValue + 1))
                 {
-                    attribute.SetValueFromGuidList(_techSDs[_techSelectedIndex].ID);
+                    int enumVal = (int)Enum.Parse(attribute.EnumType, _enumNames[attribute.EnumSelection]);
+                    attribute.SetValueFromInput(enumVal);
                 }
                 
                 ImGui.NewLine();

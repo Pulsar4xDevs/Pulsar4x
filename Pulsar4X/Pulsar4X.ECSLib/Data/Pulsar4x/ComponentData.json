@@ -677,115 +677,34 @@
               "Name": "Trigger Type",
               "Description": "",
               "GuiHint": "GuiEnumSelectionList",
+              "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite+TriggerTypes",
               "GuidDictionary": {
                 "Entries": []
               },
-              "MaxFormula": "2500",
-              "MinFormula": "1",
+              "MaxFormula": "TechLevel('9C35C1E9-50E7-415D-98ED-4E71CE8A354E')",
+              "MinFormula": "0",
               "StepFormula": "1",
-              "AbilityFormula": "10"
+              "AbilityFormula": "0"
             },
             {
               "Name": "Guidance Type",
               "Description": "",
               "GuiHint": "GuiEnumSelectionList",
+              "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite+GuidanceTypes",
               "GuidDictionary": {
                 "Entries": []
               },
-              "MaxFormula": "2500",
-              "MinFormula": "1",
+              "MaxFormula": "TechLevel('5582AAD0-D7F0-46E5-92A9-C2CCCB4BA9CF')",
+              "MinFormula": "0",
               "StepFormula": "1",
-              "AbilityFormula": "10"
-            },
-            
-            
-            
-            
-            
-            
-            {
-              "Name": "Sensor Size",
-              "Description": "Size of this sensor in Tons",
-              "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "MaxFormula": "2500",
-              "MinFormula": "1",
-              "StepFormula": "1",
-              "AbilityFormula": "10"
+              "AbilityFormula": "0"
             },
             {
-              "Name": "Ideal Detection Wavelength",
-              "Description": "In NanoMeters, Most Efficent at this wavelength.",
-              "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "MaxFormula": "1e12",
-              "MinFormula": "0.01",
-              "StepFormula": "1",
-              "AbilityFormula": "600"
-            },
-            {
-              "Name": "Detection Wavelength Width",
-              "Description": "How far from the ideal wavelength will this still detect a signal",
-              "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "MaxFormula": "500",
-              "MinFormula": "1",
-              "StepFormula": "1",
-              "AbilityFormula": "250"
-            },
-            {
-              "Name": "Sensitivity At Ideal Wavelength",
-              "Description": "From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0",
-              "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AbilityFormula":"10000 - (10 * Ability(0))"
-            },
-            {
-              "Name": "Detection Ability at Worst Wavelength",
-              "Description": "From Tech TODO: tech needs including",
-              "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AbilityFormula": "10000"
-            },
-            {
-              "Name": "Resolution",
-              "Description": "How much detail it can get from a detection. affects likelyhood of component detection etc. ",
-              "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "MaxFormula": "100",
-              "MinFormula": "1",
-              "StepFormula": "1",
-              "AbilityFormula": "10"
-            },
-            {
-              "Name": "Scan Time",
-              "Description": "how long it takes to complete a full scan",
-              "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "MaxFormula": "86400",
-              "MinFormula": "1",
-              "StepFormula": "1",
-              "AbilityFormula": "3600"
-            },            {
               "Name": "DatablobArguments",
-              "Description": "(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)",
+              "Description": "(int GuidanceTypeEnumValue, int TriggerType)",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability(1), Ability(2), Ability(3), Ability(4), Ability(5), Ability(6))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
+              "AbilityFormula": "DataBlobArgs(Ability(1), Ability(2))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite"
             }
           ]
         }

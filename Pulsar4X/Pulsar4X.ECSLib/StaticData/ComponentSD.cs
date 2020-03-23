@@ -36,6 +36,11 @@ namespace Pulsar4X.ECSLib
         //used if guihint is GuiSelectionList
         public Dictionary<object, string> GuidDictionary;
 
+        public string EnumTypeName;
+        //public string[] EnumItems;
+        //public string[] EnumTechReq;
+        //public string[] EnumFormula;
+        
         //used if GuiHint is GuiMinMax
         public string MaxFormula;
         public string MinFormula;
