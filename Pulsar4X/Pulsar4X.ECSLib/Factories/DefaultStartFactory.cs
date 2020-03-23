@@ -436,7 +436,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("b12f50f6-ac68-4a49-b147-281a9bb34b9b")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(500); 
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(500); 
             engineDesigner.Name = "Thruster 500";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
    
@@ -454,7 +454,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("7d0b867f-e239-4b93-9b30-c6d4b769b5e4")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(1000); //size 500 = 2500 power
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1000); //size 500 = 2500 power
             engineDesigner.Name = "Alcuberi-White 500";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
    
@@ -530,7 +530,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{97cf75a1-5ca3-4037-8832-4d81a89f97fa}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            componentDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(1000);
+            componentDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1000);
             componentDesigner.Name = "Reactor15k";
             //return cargoInstalation.CreateDesign(faction);
             _reactor = componentDesigner.CreateDesign(faction);
@@ -543,7 +543,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{1de23a8b-d44b-4e0f-bacd-5463a8eb939d}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            componentDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(1000);
+            componentDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1000);
             componentDesigner.Name = "Battery900";
             //return cargoInstalation.CreateDesign(faction);
             _battery = componentDesigner.CreateDesign(faction);
@@ -590,7 +590,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner sensor;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensor = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            sensor.ComponentDesignAttributes["Sensor Size"].SetValueFromInput(500);  //size
+            sensor.ComponentDesignAttributes["Mass"].SetValueFromInput(500);  //size
             sensor.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(600); //best wavelength
             sensor.ComponentDesignAttributes["Detection Wavelength Width"].SetValueFromInput(250); //wavelength detection width 
             //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
@@ -609,7 +609,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner sensorDesigner;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensorDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            sensorDesigner.ComponentDesignAttributes["Sensor Size"].SetValueFromInput(5000);  //size
+            sensorDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(5000);  //size
             sensorDesigner.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(500); //best wavelength
             sensorDesigner.ComponentDesignAttributes["Detection Wavelength Width"].SetValueFromInput(1000); //wavelength detection width 
             //[3] best detection magnatude. (Not settable)

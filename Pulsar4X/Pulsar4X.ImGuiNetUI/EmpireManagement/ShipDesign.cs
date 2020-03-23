@@ -341,6 +341,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.NextColumn();
             if (ImGui.Combo("##Armor Selection", ref _armorIndex, _armorNames, _armorNames.Length))
             {
+                _armor = _armorSelection[_armorIndex];
                 designChanged = true;
             }
             ImGui.SameLine();
