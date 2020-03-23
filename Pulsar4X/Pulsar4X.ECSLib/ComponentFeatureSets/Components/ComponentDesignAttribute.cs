@@ -509,7 +509,8 @@ namespace Pulsar4X.ECSLib
                     //TODO: maybe log this catch and throw the component out. (instead of throwing)
                     catch (KeyNotFoundException e)
                     {
-                        throw new Exception("Cannot find an ability named " + key + ". " + e);
+                        
+                        throw new Exception("Cannot find an ability named " + key + ", in " + _designer.Name + " " + e);
                     }
 
                     //TODO: the two catches below will be unnesiary once ComponentDesignAttributeList is gone.

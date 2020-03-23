@@ -694,8 +694,8 @@
           "Name": "Missile Electronics Suite",
           "Description": "Trigger, Sensors components for missiles",
           "ID": "BBC29A72-C4D3-4389-94DE-36C3BE3B7B0E",
-          "MassFormula": "Ability('Mass')",
-          "VolumeFormula": "Ability('Mass')",
+          "MassFormula": "10",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "ResourceCostFormula": {
