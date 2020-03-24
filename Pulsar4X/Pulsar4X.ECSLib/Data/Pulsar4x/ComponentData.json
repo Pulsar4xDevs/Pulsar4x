@@ -544,9 +544,29 @@
               "AbilityFormula": "500"
             },
             {
-              "Name": "Efficency",
+              "Name": "Conversion Efficency",
               "Units": "%",
-              "Description": "What percentage of energy gets converted into light (tech)",
+              "Description": "What percentage of input energy gets converted into light (tech)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1",
+              "MinFormula": "0",
+              "StepFormula": "0.1",
+              "AbilityFormula": "0.5"
+            },
+            {
+              "Name": "Chamber Absorption",
+              "Units": "%",
+              "Description": "What percentage of stored light in the chamber is lost as heat (tech)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1",
+              "MinFormula": "0",
+              "StepFormula": "0.1",
+              "AbilityFormula": "0.5"
+            },
+            {
+              "Name": "Lense Efficency",
+              "Units": "%",
+              "Description": "What percentage of stored light is lost during firing (tech)",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "1",
               "MinFormula": "0",
@@ -605,14 +625,28 @@
               "Units": "K",
               "Description": "What temp the laser operates at",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "1/4 * (1 - Ability('Efficency')) / (Ability('Emissitivity') * Ability('Radiator area') * 0.00000005670374419)"
+              "AbilityFormula": "Pow( Ability('Thermal Output') / (Ability('Emissitivity') * Ability('Radiator area') * 0.00000005670374419), 1/4 )"
+            },
+            {
+              "Name": "Input Light",
+              "Units": "J",
+              "Description": "Energy output of a laser pulse",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Conversion Efficency') * Ability('Power Input')"
             },
             {
               "Name": "Pulse Energy",
               "Units": "J",
               "Description": "Energy output of a laser pulse",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Efficency') * Ability('Power Input') * Ability('Charge Period')"
+              "AbilityFormula": "Ability('Lense Efficency') * (Ability('Input Light') - Ability('Input Light') * Exp(Ability('Chamber Absorption') * -1 * Ability('Charge Period'))) / Ability('Chamber Absorption')"
+            },
+            {
+              "Name": "Thermal Output",
+              "Units": "W",
+              "Description": "Waste Thermal heat output by laser",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "(Ability('Power Input') * Ability('Charge Period') - Ability('Pulse Energy')) / Ability('Charge Period')"
             },
             {
               "Name": "Beam waist",
