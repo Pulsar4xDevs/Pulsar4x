@@ -443,7 +443,7 @@
           "Name": "LaserGun",
           "Description": "Laser Gun",
           "ID": "8923f0e1-1143-4926-a0c8-66b6c7969425",
-          "MassFormula": "Ability(0)  / 1000 * Ability(1) / Ability(2)",
+          "MassFormula": "Ability('Range')  / 1000 * Ability('Damage') / Ability('ReloadRate')",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
           "CrewReqFormula": "[Mass]",
@@ -464,7 +464,7 @@
           "ComponentAtbSDs": [
             {
               "Name": "Range",
-			        "Units": "m",
+              "Units": "m",
               "Description": "Maximum range at which the laser can fire at",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "10000",
@@ -474,7 +474,7 @@
             },
             {
               "Name": "Damage",
-			        "Units": "J",
+              "Units": "J",
               "Description": "Energy output of laser pulse",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
@@ -484,7 +484,7 @@
             },
             {
               "Name": "ReloadRate",
-			        "Units": "s",
+              "Units": "s",
               "Description": "How much of a delay there is between laser pulses",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
@@ -602,7 +602,7 @@
               }
             ]
           },
-          "ResearchCostFormula": "Ability(5)",
+          "ResearchCostFormula": "[Mass]",
           "CreditCostFormula": "[Mass]",
           "BuildPointCostFormula": "[Mass]",
           "MountType": "ShipComponent, ShipCargo",
@@ -666,15 +666,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "(Ability(0) + Ability(1) / 100) * Ability(2) *  Ability(3)"
-            },
-            {
-              "Name": "Research Cost",
-              "GuiHint": "None",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AbilityFormula": "Ability('Mass')"
+              "AbilityFormula": "(Ability('Range') + Ability('Tracking Speed') / 100) * Ability('Size vs Range') *  Ability('Size vs TrackingSpeed')"
             },
             {
               "Name": "DBargs",
