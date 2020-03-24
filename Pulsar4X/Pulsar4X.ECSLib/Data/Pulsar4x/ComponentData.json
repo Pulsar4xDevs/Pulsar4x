@@ -538,10 +538,10 @@
               "Units": "y",
               "Description": "What the wavelength of the output energy weapon is (tech)",
               "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "100",
-              "MinFormula": "1",
+              "MaxFormula": "1000",
+              "MinFormula": "100",
               "StepFormula": "1",
-              "AbilityFormula": "10"
+              "AbilityFormula": "500"
             },
             {
               "Name": "Efficency",
@@ -558,7 +558,7 @@
               "Units": "M",
               "Description": "Distance to target (debug)",
               "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "100000000000",
+              "MaxFormula": "100000000",
               "MinFormula": "1",
               "StepFormula": "1",
               "AbilityFormula": "10"
@@ -578,10 +578,10 @@
               "Units": "m",
               "Description": "How thick radiators are (tech)",
               "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "100",
-              "MinFormula": "1",
-              "StepFormula": "1",
-              "AbilityFormula": "10"
+              "MaxFormula": "1",
+              "MinFormula": "0",
+              "StepFormula": "0.1",
+              "AbilityFormula": "0.5"
             },
             {
               "Name": "Radiator Volume",
@@ -605,7 +605,7 @@
               "Units": "K",
               "Description": "What temp the laser operates at",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "1/4 * (1 - Ability('Efficency')) / (Ability('Emissitivity') * Ability('Radiator area'))"
+              "AbilityFormula": "1/4 * (1 - Ability('Efficency')) / (Ability('Emissitivity') * Ability('Radiator area') * 0.00000005670374419)"
             },
             {
               "Name": "Pulse Energy",
@@ -619,7 +619,7 @@
               "Units": "J",
               "Description": "Width of beam at focal length (debug)",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": " Ability('Operating Temprature') * Ability('Focal Length') * Ability('Target Wavelength') * ( 1 / Ability('Lens Diameter') ) "
+              "AbilityFormula": " Ability('Operating Temprature') * Ability('Operating Temprature') * Ability('Focal Length') * 0.000000001 * Ability('Target Wavelength') * ( 1 / Ability('Lens Diameter') ) "
             },
             {
               "Name": "dbargs",
