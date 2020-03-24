@@ -465,7 +465,7 @@
             {
               "Name": "Range",
               "Units": "m",
-              "Description": "Maximum range at which the laser can fire at",
+              "Description": "(Legacy) Maximum range at which the laser can fire at",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "10000",
               "MinFormula": "1000",
@@ -475,7 +475,7 @@
             {
               "Name": "Damage",
               "Units": "J",
-              "Description": "Energy output of laser pulse",
+              "Description": "(Legacy) Energy output of laser pulse",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
               "MinFormula": "1",
@@ -485,6 +485,47 @@
             {
               "Name": "ReloadRate",
               "Units": "s",
+              "Description": "(Legacy) How much of a delay there is between laser pulses",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+
+            {
+              "Name": "Power Input",
+              "Units": "W",
+              "Description": "How much power the laser consumes",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "1",
+              "StepFormula": "10",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Chamber Volume",
+              "Units": "L",
+              "Description": "Volume of the chamber",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "1",
+              "StepFormula": "10",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Lens Diameter",
+              "Units": "M",
+              "Description": "Diameter of a laser",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "1",
+              "StepFormula": "10",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Charge Period",
+              "Units": "s",
               "Description": "How much of a delay there is between laser pulses",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "100",
@@ -493,9 +534,97 @@
               "AbilityFormula": "10"
             },
             {
+              "Name": "Target Wavelength",
+              "Units": "y",
+              "Description": "What the wavelength of the output energy weapon is (tech)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Efficency",
+              "Units": "%",
+              "Description": "What percentage of energy gets converted into light (tech)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1",
+              "MinFormula": "0",
+              "StepFormula": "0.1",
+              "AbilityFormula": "0.5"
+            },
+            {
+              "Name": "Focal Length",
+              "Units": "M",
+              "Description": "Distance to target (debug)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100000000000",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Emissitivity",
+              "Units": "%",
+              "Description": "How emissive radiators are (tech)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1",
+              "MinFormula": "0",
+              "StepFormula": "0.1",
+              "AbilityFormula": "0.5"
+            },
+            {
+              "Name": "Radiator Thickness",
+              "Units": "m",
+              "Description": "How thick radiators are (tech)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Radiator Volume",
+              "Units": "L",
+              "Description": "Volume of the chamber",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "1",
+              "StepFormula": "10",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Radiator area",
+              "Units": "m^2",
+              "Description": "How much area radiators have (debug)",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Radiator Volume') / Ability('Radiator Thickness')"
+            },
+            {
+              "Name": "Operating Temprature",
+              "Units": "K",
+              "Description": "What temp the laser operates at",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "1/4 * (1 - Ability('Efficency')) / (Ability('Emissitivity') * Ability('Radiator area'))"
+            },
+            {
+              "Name": "Pulse Energy",
+              "Units": "J",
+              "Description": "Energy output of a laser pulse",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Efficency') * Ability('Power Input') * Ability('Charge Period')"
+            },
+            {
+              "Name": "Beam waist",
+              "Units": "J",
+              "Description": "Width of beam at focal length (debug)",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": " Ability('Operating Temprature') * Ability('Focal Length') * Ability('Target Wavelength') * ( 1 / Ability('Lens Diameter') ) "
+            },
+            {
               "Name": "dbargs",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability(0), Ability(1), Ability(2))",
+              "AbilityFormula": "DataBlobArgs(Ability('Range'), Ability('Damage'), Ability('ReloadRate'))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.SimpleBeamWeaponAtbDB"
             }
           ]
