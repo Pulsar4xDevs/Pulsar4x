@@ -155,4 +155,10 @@
     <Folder Include="Factories\ShipComponents\" />
     <Folder Include="ComponentFeatureSets\NewtonionMovement\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Data\Pulsar4x\ComponentDataOrdnance.json" />
+    <Content Include="Data\Pulsar4x\ComponentDataOrdnance.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

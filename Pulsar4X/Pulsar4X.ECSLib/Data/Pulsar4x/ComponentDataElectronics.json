@@ -246,24 +246,11 @@
               "Name": "Trigger Type",
               "Description": "",
               "GuiHint": "GuiEnumSelectionList",
-              "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite+TriggerTypes",
+              "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.TriggerTypes",
               "GuidDictionary": {
                 "Entries": []
               },
               "MaxFormula": "TechLevel('9C35C1E9-50E7-415D-98ED-4E71CE8A354E') + 2",
-              "MinFormula": "0",
-              "StepFormula": "1",
-              "AbilityFormula": "0"
-            },
-            {
-              "Name": "Guidance Type",
-              "Description": "",
-              "GuiHint": "GuiEnumSelectionList",
-              "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite+GuidanceTypes",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "MaxFormula": "TechLevel('5582AAD0-D7F0-46E5-92A9-C2CCCB4BA9CF')",
               "MinFormula": "0",
               "StepFormula": "1",
               "AbilityFormula": "0"
@@ -280,11 +267,119 @@
               "AbilityFormula": "500"
             },
             {
+              "Name": "Depth Trigger Distance",
+              "Description": "Trigger will fire after this many seconds from contact",
+              "Units" : "MilliSeconds",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuiIsEnabledFormula" : "if(Ability('Trigger Type') = 3, true, false)",
+              "MaxFormula": "10000",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "5"
+            },
+            {
+              "Name": "Guidance Type",
+              "Description": "",
+              "GuiHint": "GuiEnumSelectionList",
+              "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.GuidanceTypes",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "TechLevel('5582AAD0-D7F0-46E5-92A9-C2CCCB4BA9CF') + 3",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "0"
+            },
+            {
+              "Name": "Sensor Mass",
+              "Units": "kg",
+              "Description": "Mass of this sensor",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "2500",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Ideal Detection Wavelength",
+              "Units": "nm",
+              "Description": "The wavelength this sensor is most efficent at detecting",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1e12",
+              "MinFormula": "0.01",
+              "StepFormula": "1",
+              "AbilityFormula": "600"
+            },
+            {
+              "Name": "Detection Wavelength Width",
+              "Units": "nm",
+              "Description": "How far from the ideal wavelength will this still detect a signal",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "500",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "250"
+            },
+            {
+              "Name": "Sensitivity At Ideal Wavelength",
+              "Units": "Unknown",
+              "Description": "From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "10000 - (10 * Ability(0))"
+            },
+            {
+              "Name": "Detection Ability at Worst Wavelength",
+              "Description": "From Tech TODO: tech needs including",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "10000"
+            },
+            {
+              "Name": "Resolution",
+              "Units": "Unknown",
+              "Description": "Higher Resolution sensors are less likely to be affected by ECM ",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
               "Name": "DatablobArguments",
               "Description": "(int GuidanceTypeEnumValue, int TriggerType)",
               "GuiHint": "None",
               "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Guidance Type'))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite"
+            },
+            {
+              "Name": "SensorDatablobArguments",
+              "Description": "(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Wavelength Width'), Ability('Sensitivity At Ideal Wavelength'), Ability('Detection Ability at Worst Wavelength'), Ability('Resolution'), Ability(6))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
             }
           ]
         }

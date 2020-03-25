@@ -85,35 +85,31 @@ namespace Pulsar4X.SDL2UI
                     foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values) //For each property of the comp type
                     {
                         ImGui.PushID(attribute.Name);
-                        
-                        
-                        if (!attribute.IsEnabled)
+
+
+                        if (attribute.IsEnabled)
                         {
-                            break;
+                            switch (attribute.GuiHint) //Either
+                            {
+                                case GuiHint.None:
+                                    break;
+                                case GuiHint.GuiTechSelectionList: //Let the user pick a type from a list
+                                    GuiHintTechSelection(attribute);
+                                    break;
+                                case GuiHint.GuiSelectionMaxMin: //Set a value
+                                    GuiHintMaxMin(attribute);
+                                    break;
+                                case GuiHint.GuiTextDisplay: //Display a stat
+                                    GuiHintText(attribute);
+                                    break;
+                                case GuiHint.GuiEnumSelectionList: //Let the user pick a type from a hard coded list
+                                    GuiHintEnumSelection(attribute);
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException();
+                            }
                         }
 
-                        switch (attribute.GuiHint) //Either
-                        {
-                            case GuiHint.None:
-                                break;
-                            case GuiHint.GuiTechSelectionList: //Let the user pick a type from a list
-                                GuiHintTechSelection(attribute);
-                                break;
-                            case GuiHint.GuiSelectionMaxMin: //Set a value
-                                GuiHintMaxMin(attribute);
-                                break;
-                            case GuiHint.GuiTextDisplay: //Display a stat
-                                GuiHintText(attribute);
-                                break;
-                            case GuiHint.GuiEnumSelectionList: //Let the user pick a type from a hard coded list
-                                GuiHintEnumSelection(attribute);
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
-                        
-                        
-                        
                         ImGui.PopID();
                     }
 

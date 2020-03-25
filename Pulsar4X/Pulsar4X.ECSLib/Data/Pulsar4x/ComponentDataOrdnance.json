@@ -1,0 +1,214 @@
+{
+  "Type": "ComponentTemplates",
+  "Data": {
+    "Entries": [
+      {
+        "Key": "DF9954A7-C5C5-4B49-965C-446B483DA2BE",
+        "Value": {
+          "Name": "Missile Payload",
+          "Description": "Payload of a missile",
+          "ID": "DF9954A7-C5C5-4B49-965C-446B483DA2BE",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "0",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "05dce711-8846-488a-b0f3-57fd7924b268",
+                "Value": "[Mass] * 8"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 0.5",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "Missile",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Mass",
+              "Units": "kg",
+              "Description": "Mass of this engine",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "500"
+            },
+            {
+              "Name": "Trigger Type",
+              "Description": "",
+              "GuiHint": "GuiEnumSelectionList",
+              "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.TriggerTypes",
+              "MaxFormula": "TechLevel('9C35C1E9-50E7-415D-98ED-4E71CE8A354E') + 3",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "0"
+            },
+            {
+              "Name": "Payload Type",
+              "Description": "",
+              "GuiHint": "GuiEnumSelectionList",
+              "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.PayloadTypes",
+              "MaxFormula": "2",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "0"
+            },
+            {
+              "Name": "Explosive Mass",
+              "Units": "kg",
+              "Description": "Mass of explosive",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 0 || Ability('Payload Type') = 1, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "500",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Frag Mass",
+              "Units": "kg",
+              "Description": "Mass of individual fragments",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 0, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "500",
+              "MinFormula": "0",
+              "StepFormula": "0.1",
+              "AbilityFormula": "100"
+            },
+            {
+              "Name": "Frag Number",
+              "Units": "kg",
+              "Description": "number of individual fragments (average)",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 0, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "500",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Frag Cone",
+              "Units": "kg",
+              "Description": "Cone angle, larger is more efficent per fragment",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 0, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "360",
+              "MinFormula": "45",
+              "StepFormula": "1",
+              "AbilityFormula": "180"
+            },
+            {
+              "Name": "Liner Radius",
+              "Units": "mm",
+              "Description": "Affects the shape and velocity of the slug",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 1, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "500",
+              "MinFormula": "0.01",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Liner Cone angle",
+              "Units": "Degrees",
+              "Description": "Affects the shape and velocity of the slug",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 1, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "180",
+              "MinFormula": "25",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Submunition Type",
+              "Units": "Degrees",
+              "Description": "Pre-Designed missile to use as a submunition",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 2, true, false)",
+              "GuiHint": "GuiOrdnanceSelectionList",
+              "AbilityFormula": "0"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "9FDB2A15-4413-40A9-9229-19D05B3765FE",
+        "Value": {
+          "Name": "Solid Fuel Missile Engine",
+          "Description": "A Newtonian Thruster",
+          "ID": "9FDB2A15-4413-40A9-9229-19D05B3765FE",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "[Mass]",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "05dce711-8846-488a-b0f3-57fd7924b268",
+                "Value": "[Mass] * 8"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 0.5",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "Missile",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Mass",
+              "Units": "kg",
+              "Description": "Mass of this engine",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "500"
+            },
+            {
+              "Name": "Exhaust Velocity",
+              "Units": "m/s",
+              "Description": "Specific Impulse in m/s, can be increased by research",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "2500"
+            },
+            {
+              "Name": "Fuel Consumption",
+              "Units": "unknown mass units/s",
+              "Description": "Fuel Consumption per second",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Mass') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
+            },
+            {
+              "Name": "Thrust",
+              "Units": "N",
+              "Description": "The maximum thrust output of this engine in N",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
+            },
+            {
+              "Name": "DataBlob",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
+            },
+
+            {
+              "Name": "Sensor Signature",
+              "Units": "Unknown",
+              "Description": "",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Thrust'),0)",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

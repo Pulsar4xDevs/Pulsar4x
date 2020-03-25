@@ -68,18 +68,20 @@ namespace Pulsar4X.SDL2UI
                 i++;
             }
             
-            _electronicsPackage = new string[4];
-            _electronicsPackage[0] = "Dumbfire";
-            _electronicsPackage[1] = "Parent Guided";
-            _electronicsPackage[2] = "Passive IR Seeking";
-            _electronicsPackage[3] = "Active Radar";
+
 
             var componentDesigns = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns;
+            List<ComponentDesign> missileSensors = new List<ComponentDesign>();
             List<ComponentDesign> missileEngines = new List<ComponentDesign>();
             foreach (ComponentDesign cdes in componentDesigns.Values)
             {
                 if ((cdes.ComponentMountType & ComponentMountType.Missile) == ComponentMountType.Missile)
                 {
+                    if (cdes.AttributesByType.ContainsKey(typeof(SensorReceverAtbDB)))
+                    {
+                        missileSensors.Add(cdes);
+                    }
+
                     if (cdes.AttributesByType.ContainsKey(typeof(NewtonionThrustAtb)))
                     {
                         missileEngines.Add(cdes);
@@ -87,6 +89,12 @@ namespace Pulsar4X.SDL2UI
                 }
             }
             
+            _electronicsPackage = new string[missileSensors.Count];
+            i = 0;
+            foreach (var senDes in missileSensors)
+            {
+                _electronicsPackage[i] = senDes.Name;
+            }
             _engineDesigns = new string[missileEngines.Count];
             i = 0;
             foreach (var engDes in missileEngines)
