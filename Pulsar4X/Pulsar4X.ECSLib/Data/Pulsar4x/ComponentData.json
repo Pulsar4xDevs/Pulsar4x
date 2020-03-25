@@ -721,7 +721,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "MaxFormula": "TechLevel('9C35C1E9-50E7-415D-98ED-4E71CE8A354E')",
+              "MaxFormula": "TechLevel('9C35C1E9-50E7-415D-98ED-4E71CE8A354E') + 2",
               "MinFormula": "0",
               "StepFormula": "1",
               "AbilityFormula": "0"
@@ -740,10 +740,21 @@
               "AbilityFormula": "0"
             },
             {
+              "Name": "Prox Trigger Distance",
+              "Description": "Trigger will fire when this distance from target",
+              "Units" : "Meters",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuiIsEnabledFormula" : "if(Ability('Trigger Type') = 2, true, false)",
+              "MaxFormula": "10000",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "500"
+            },
+            {
               "Name": "DatablobArguments",
               "Description": "(int GuidanceTypeEnumValue, int TriggerType)",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability(1), Ability(2))",
+              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Guidance Type'))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite"
             }
           ]

@@ -34,6 +34,7 @@ namespace Pulsar4X.ECSLib
         public string Unit;
         public GuiHint GuiHint; //if AbilityFormula uses AbilityArgs(), this should be none!
 
+        public string GuiIsEnabledFormula; //if this attribute should be displayed/enabled
         //used if guihint is GuiSelectionList
         public Dictionary<object, string> GuidDictionary;
 

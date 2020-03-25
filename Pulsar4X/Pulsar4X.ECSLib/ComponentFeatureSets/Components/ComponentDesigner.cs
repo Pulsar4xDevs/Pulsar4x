@@ -339,6 +339,7 @@ namespace Pulsar4X.ECSLib
         }
 
 
+        
 
         public int MassValue
         {
