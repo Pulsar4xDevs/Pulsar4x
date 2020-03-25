@@ -1,0 +1,294 @@
+{
+  "Type": "ComponentTemplates",
+  "Data": {
+    "Entries": [
+      {
+        "Key": "2368ea53-bd01-42f0-a1c9-da55c051cd4c",
+        "Value": {
+          "Name": "PassiveSensor",
+          "Description": "Detects emissions and reflections from other objects",
+          "ID": "2368ea53-bd01-42f0-a1c9-da55c051cd4c",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "[Mass]",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
+                "Value": "[Mass] * 8"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 2",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "PlanetInstallation, ShipComponent, ShipCargo, Fighter",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Mass",
+              "Units": "kg",
+              "Description": "Mass of this sensor",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "2500",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Ideal Detection Wavelength",
+              "Units": "nm",
+              "Description": "The wavelength this sensor is most efficent at detecting",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1e12",
+              "MinFormula": "0.01",
+              "StepFormula": "1",
+              "AbilityFormula": "600"
+            },
+            {
+              "Name": "Detection Wavelength Width",
+              "Units": "nm",
+              "Description": "How far from the ideal wavelength will this still detect a signal",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "500",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "250"
+            },
+            {
+              "Name": "Sensitivity At Ideal Wavelength",
+              "Units": "Unknown",
+              "Description": "From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "10000 - (10 * Ability(0))"
+            },
+            {
+              "Name": "Detection Ability at Worst Wavelength",
+              "Description": "From Tech TODO: tech needs including",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "10000"
+            },
+            {
+              "Name": "Resolution",
+              "Units": "Unknown",
+              "Description": "How much detail it can get from a detection. affects likelyhood of component detection etc. ",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Scan Time",
+              "Units": "s",
+              "Description": "how long it takes to complete a full scan",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "86400",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "3600"
+            },
+            {
+              "Name": "DatablobArguments",
+              "Description": "(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability(1), Ability(2), Ability(3), Ability(4), Ability(5), Ability(6))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "33fcd1f5-80ab-4bac-97be-dbcae19ab1a0",
+        "Value": {
+          "Name": "BeamFireControl",
+          "Description": "",
+          "ID": "33fcd1f5-80ab-4bac-97be-dbcae19ab1a0",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "[Mass]",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "[Mass]",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Mass]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass]",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Range",
+              "Units": "kkm",
+              "Description": "in kkm",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "175",
+              "MinFormula": "10",
+              "StepFormula": "5",
+              "AbilityFormula": "20"
+            },
+            {
+              "Name": "Tracking Speed",
+              "Units": "km/s",
+              "Description": "in km/s",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "25000",
+              "MinFormula": "1250",
+              "StepFormula": "250",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Size vs Range",
+              "Units": "SVR",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "4",
+              "MinFormula": "0.25",
+              "StepFormula": "0.25",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "Size vs TrackingSpeed",
+              "Units": "SVTS",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "4",
+              "MinFormula": "0.25",
+              "StepFormula": "0.25",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "Mass",
+              "Units": "kg",
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "(Ability('Range') + Ability('Tracking Speed') / 100) * Ability('Size vs Range') *  Ability('Size vs TrackingSpeed')"
+            },
+            {
+              "Name": "DBargs",
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AbilityFormula": "DataBlobArgs(Ability(0), Ability(1))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.BeamFireControlAtbDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "BBC29A72-C4D3-4389-94DE-36C3BE3B7B0E",
+        "Value": {
+          "Name": "Missile Electronics Suite",
+          "Description": "Trigger, Sensors components for missiles",
+          "ID": "BBC29A72-C4D3-4389-94DE-36C3BE3B7B0E",
+          "MassFormula": "10",
+          "VolumeFormula": "[Mass]",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "[Mass]",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
+                "Value": "[Mass] * 8"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 2",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "PlanetInstallation, ShipComponent, ShipCargo, Fighter",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Trigger Type",
+              "Description": "",
+              "GuiHint": "GuiEnumSelectionList",
+              "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite+TriggerTypes",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "TechLevel('9C35C1E9-50E7-415D-98ED-4E71CE8A354E') + 2",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "0"
+            },
+            {
+              "Name": "Guidance Type",
+              "Description": "",
+              "GuiHint": "GuiEnumSelectionList",
+              "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite+GuidanceTypes",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "TechLevel('5582AAD0-D7F0-46E5-92A9-C2CCCB4BA9CF')",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "0"
+            },
+            {
+              "Name": "Prox Trigger Distance",
+              "Description": "Trigger will fire when this distance from target",
+              "Units" : "Meters",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuiIsEnabledFormula" : "if(Ability('Trigger Type') = 2, true, false)",
+              "MaxFormula": "10000",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "500"
+            },
+            {
+              "Name": "DatablobArguments",
+              "Description": "(int GuidanceTypeEnumValue, int TriggerType)",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Guidance Type'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

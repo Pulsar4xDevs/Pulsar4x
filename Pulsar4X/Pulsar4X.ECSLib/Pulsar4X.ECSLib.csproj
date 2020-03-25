@@ -91,6 +91,21 @@
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="Data\Pulsar4x\ComponentDataEnergy.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInPackage>false</IncludeInPackage>
+    </None>
+    <None Update="Data\Pulsar4x\ComponentDataPropulsion.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInPackage>false</IncludeInPackage>
+    </None>
+    <None Update="Data\Pulsar4x\ComponentDataElectronics.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <IncludeInPackage>false</IncludeInPackage>
+    </None>
+    <None Update="Data\Pulsar4x\ComponentDataWeapons.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Data\Pulsar4x\MineralsAurora.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -103,7 +118,7 @@
     <None Update="Data\Pulsar4x\CargoTypeData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Data\Pulsar4x\ComponentData.json">
+    <None Update="Data\Pulsar4x\ComponentDataMisc.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInPackage>false</IncludeInPackage>
     </None>
@@ -127,8 +142,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Update="Data\Pulsar4x\ComponentData.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update="Data\Pulsar4x\ComponentDataMisc.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Data\Pulsar4x\AtmosphericData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

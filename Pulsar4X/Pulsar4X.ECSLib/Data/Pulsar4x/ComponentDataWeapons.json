@@ -1,0 +1,321 @@
+{
+  "Type": "ComponentTemplates",
+  "Data": {
+    "Entries": [
+      {
+        "Key": "8923f0e1-1143-4926-a0c8-66b6c7969425",
+        "Value": {
+          "Name": "LaserGun",
+          "Description": "Laser Gun",
+          "ID": "8923f0e1-1143-4926-a0c8-66b6c7969425",
+          "MassFormula": "Ability('Power Input') / 1000 + Ability('Chamber Volume') + Ability('Radiator Volume')",
+          "VolumeFormula": "Ability('Power Input') / 1000 + Ability('Chamber Volume')",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "[Mass]",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Mass]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass]",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Range",
+              "Units": "m",
+              "Description": "(Legacy) Maximum range at which the laser can fire at",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "1000",
+              "StepFormula": "10",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Damage",
+              "Units": "J",
+              "Description": "(Legacy) Energy output of laser pulse",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "ReloadRate",
+              "Units": "s",
+              "Description": "(Legacy) How much of a delay there is between laser pulses",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Power Input",
+              "Units": "W",
+              "Description": "How much power the laser consumes",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000000",
+              "MinFormula": "1",
+              "StepFormula": "10",
+              "AbilityFormula": "100000"
+            },
+            {
+              "Name": "Chamber Volume",
+              "Units": "L",
+              "Description": "Volume of the chamber",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "1",
+              "StepFormula": "10",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Lens Diameter",
+              "Units": "M",
+              "Description": "Diameter of a laser",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10000",
+              "MinFormula": "1",
+              "StepFormula": "10",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Charge Period",
+              "Units": "s",
+              "Description": "How much of a delay there is between laser pulses",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Duty Cycle",
+              "Units": "%",
+              "Description": "What percentage of the lasers charge perioid is spent firing ",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1",
+              "MinFormula": "0",
+              "StepFormula": "0.1",
+              "AbilityFormula": "0.1"
+            },
+            {
+              "Name": "Target Wavelength",
+              "Units": "y",
+              "Description": "What the wavelength of the output energy weapon is ",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1000",
+              "MinFormula": "100",
+              "StepFormula": "1",
+              "AbilityFormula": "500"
+            },
+            {
+              "Name": "Chamber Absorption",
+              "Units": "%",
+              "Description": "What percentage of stored light in the chamber is lost as heat (tech)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1",
+              "MinFormula": "0",
+              "StepFormula": "0.1",
+              "AbilityFormula": "0.9"
+            },
+
+            {
+              "Name": "Focal Length",
+              "Units": "M",
+              "Description": "Distance to target (debug)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100000000",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "1000000"
+            },
+            {
+              "Name": "Emissitivity",
+              "Units": "%",
+              "Description": "How emissive radiators are (tech)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1",
+              "MinFormula": "0",
+              "StepFormula": "0.1",
+              "AbilityFormula": "0.5"
+            },
+            {
+              "Name": "Radiator Thickness",
+              "Units": "m",
+              "Description": "How thick radiators are (tech)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1",
+              "MinFormula": "0",
+              "StepFormula": "0.1",
+              "AbilityFormula": "0.5"
+            },
+            {
+              "Name": "Radiator Volume",
+              "Units": "L",
+              "Description": "Volume of the chamber",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "Ability('Chamber Volume')",
+              "MinFormula": "1",
+              "StepFormula": "10",
+              "AbilityFormula": "5000"
+            },
+            {
+              "Name": "Radiator area",
+              "Units": "m^2",
+              "Description": "How much area radiators have (debug)",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Radiator Volume') / Ability('Radiator Thickness')"
+            },
+            {
+              "Name": "Operating Temprature",
+              "Units": "K",
+              "Description": "What temp the laser operates at",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Pow( Ability('Thermal Output') / (Ability('Emissitivity') * Ability('Radiator area') * 0.00000005670374419), 1/4 )"
+            },
+            {
+              "Name": "Input Light",
+              "Units": "W",
+              "Description": "Energy out put of a laser pulse",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Conversion Efficency') * Ability('Power Input')"
+            },
+            {
+              "Name": "Conversion Efficency",
+              "Units": "%",
+              "Description": "What percentage of input energy gets converted into light (tech)",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Target Wavelength') / 1000"
+            },
+            {
+              "Name": "Lense Emission",
+              "Units": "%",
+              "Description": "What percentage of stored light is fired (tech)",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": " Ability('Duty Cycle') "
+            },
+            {
+              "Name": "Pulse Energy",
+              "Units": "J",
+              "Description": "Energy output of a laser pulse",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Lense Emission') * (Ability('Input Light') - Ability('Input Light') * Exp(Ability('Chamber Absorption') * -1 * Ability('Charge Period'))) / Ability('Chamber Absorption')"
+            },
+            {
+              "Name": "Thermal Output",
+              "Units": "W",
+              "Description": "Waste Thermal heat output by laser",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "(Ability('Power Input') * Ability('Charge Period') - Ability('Pulse Energy')) / Ability('Charge Period')"
+            },
+            {
+              "Name": "Beam waist",
+              "Units": "M",
+              "Description": "Width of beam at focal length (debug)",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": " Ability('Operating Temprature') * Ability('Operating Temprature') * Ability('Focal Length') * 0.000000001 * Ability('Target Wavelength') * ( 1 / Ability('Lens Diameter') ) "
+            },
+            {
+              "Name": "dbargs",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Range'), Ability('Damage'), Ability('ReloadRate'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.SimpleBeamWeaponAtbDB"
+            }
+          ]
+        }
+      },
+	  {
+        "Key": "fe9bf895-ac4d-4696-b121-d195c720d17b",
+        "Value": {
+          "Name": "RailGun",
+          "Description": "A Projectile thrower that uses electrical energy to propel a conductive projectile",
+          "ID": "fe9bf895-ac4d-4696-b121-d195c720d17b",
+          "MassFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Mass'))",
+          "VolumeFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Mass'))",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "1",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Mass]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass]",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Calibre",
+              "Units": "mm",
+              "Description": "Caliber of this weapon in mm",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "250",
+              "MinFormula": "10",
+              "StepFormula": "1",
+              "AbilityFormula": "25"
+            },
+            {
+              "Name": "Rail Length",
+              "Units": "unknown",
+              "Description": "Length of the rail - directly effects the final velocity of the projectile",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "Auto Reloader Mass",
+              "Units": "unknown",
+              "Description": "Increases the mass of the weapon, but increases the rate of fire.",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Power Use",
+              "Units": "MJ",
+              "Description": "In MegaJules.",
+              "GuiHint": "None",
+              "AbilityFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * Ability('Calibre') * Ability('Rail Length')"
+            },
+            {
+              "Name": "Power Efficency",
+              "Units": "unknown",
+              "GuiHint": "None",
+              "AbilityFormula": "45 + TechData('1167a255-b004-4a68-91af-1192169b5a37')"
+            },
+            {
+              "Name": "ROF",
+              "Units": "Rounds/unknown",
+              "GuiHint": "None",
+              "AbilityFormula": "Ability('Auto Reloader Mass') / Ability('Calibre')"
+            },
+            {
+              "Name": "dbargs",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Calibre'), Ability('Rail Length'), Ability('Power Use'), Ability('Power Efficiency'), Ability('ROF'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.RailGunAtb"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
