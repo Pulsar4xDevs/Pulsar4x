@@ -880,6 +880,39 @@
               "MinFormula": "0",
               "StepFormula": "1",
               "AbilityFormula": "0"
+            },                        
+            {
+              "Name": "Timed Trigger Setting",
+              "Description": "Trigger will fire this many seconds after launch",
+              "Units" : "Seconds",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuiIsEnabledFormula" : "if(Ability('Trigger Type') = 1, true, false)",
+              "MaxFormula": "10000",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "500"
+            },            
+            {
+              "Name": "Prox Trigger Distance",
+              "Description": "Trigger will fire when this distance from target",
+              "Units" : "Meters",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuiIsEnabledFormula" : "if(Ability('Trigger Type') = 2, true, false)",
+              "MaxFormula": "10000",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "500"
+            },
+            {
+              "Name": "Depth Trigger Distance",
+              "Description": "Trigger will fire when this time after hitting target",
+              "Units" : "MilliSeconds",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuiIsEnabledFormula" : "if(Ability('Trigger Type') = 2, true, false)",
+              "MaxFormula": "10000",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AbilityFormula": "1"
             },
             {
               "Name": "Guidance Type",
@@ -895,11 +928,11 @@
               "AbilityFormula": "0"
             },
             {
-              "Name": "Prox Trigger Distance",
+              "Name": "Passive Guidance Sensor",
               "Description": "Trigger will fire when this distance from target",
               "Units" : "Meters",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuiIsEnabledFormula" : "if(Ability('Trigger Type') = 2, true, false)",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2, true, false)",
               "MaxFormula": "10000",
               "MinFormula": "0",
               "StepFormula": "1",
