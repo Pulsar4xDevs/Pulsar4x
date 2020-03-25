@@ -117,16 +117,6 @@
               "StepFormula": "1",
               "AbilityFormula": "500"
             },
-            {
-              "Name": "Chamber Absorption",
-              "Units": "%",
-              "Description": "What percentage of stored light in the chamber is lost as heat (tech)",
-              "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "1",
-              "MinFormula": "0",
-              "StepFormula": "0.1",
-              "AbilityFormula": "0.9"
-            },
 
             {
               "Name": "Focal Length",
@@ -148,16 +138,7 @@
               "StepFormula": "0.1",
               "AbilityFormula": "0.5"
             },
-            {
-              "Name": "Radiator Thickness",
-              "Units": "m",
-              "Description": "How thick radiators are (tech)",
-              "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "1",
-              "MinFormula": "0",
-              "StepFormula": "0.1",
-              "AbilityFormula": "0.5"
-            },
+
             {
               "Name": "Radiator Volume",
               "Units": "L",
@@ -167,6 +148,13 @@
               "MinFormula": "1",
               "StepFormula": "10",
               "AbilityFormula": "5000"
+            },
+			{
+              "Name": "Radiator Thickness",
+              "Units": "m",
+              "Description": "How thick radiators are (debug)",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Pow(Ability('Radiator Volume'), 1/4)"
             },
             {
               "Name": "Radiator area",
@@ -188,6 +176,13 @@
               "Description": "Energy out put of a laser pulse",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Conversion Efficency') * Ability('Power Input')"
+            },
+			{
+              "Name": "Chamber Absorption",
+              "Units": "%",
+              "Description": "What percentage of stored light in the chamber is lost as heat (tech)",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "(Ability('Input Light') / Ability('Chamber Volume')) / (3000 * 2000 * 1000)"
             },
             {
               "Name": "Conversion Efficency",
