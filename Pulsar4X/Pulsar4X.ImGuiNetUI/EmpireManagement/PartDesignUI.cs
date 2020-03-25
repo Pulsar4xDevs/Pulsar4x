@@ -147,7 +147,7 @@ namespace Pulsar4X.SDL2UI
 
             void GuiCostText()//Prints a 2 col table with the costs of the part
             {
-                ImGui.BeginChild("Cost");
+                //ImGui.BeginChild("Cost");
                 if (_componentDesigner != null)//If a part time is selected
                 {
                     ImGui.Columns(2);
@@ -185,70 +185,24 @@ namespace Pulsar4X.SDL2UI
                         ImGui.NextColumn();
                     }
 
-                    //Old Cost code I think
-                    if (false)
-                    {
-                        /*
-                        foreach (var mineral in _componentDesigner.MineralCostValues)
-                        {
-                            var mineralSD = StaticRefLib.StaticData.CargoGoods.GetMineral(mineral.Key);
-                            var xpos = ImGui.GetCursorPosX();
-                            ImGui.SetCursorPosX(xpos + 12);
-                            ImGui.Text(mineralSD.Name);
-                            ImGui.NextColumn();
-                            ImGui.Text(mineral.Value.ToString());
-                            ImGui.NextColumn();
-                        }
-                        foreach (var material in _componentDesigner.MaterialCostValues)
-                        {
-                            var matSD = StaticRefLib.StaticData.CargoGoods.GetMaterial(material.Key);
-                            var xpos = ImGui.GetCursorPosX();
-                            ImGui.SetCursorPosX(xpos + 12);
-                            ImGui.Text(matSD.Name);
-                            ImGui.NextColumn();
-                            ImGui.Text(material.Value.ToString());
-                            ImGui.NextColumn();
-                        }
-                        foreach (var component in _componentDesigner.ComponentCostValues)
-                        {
-                            var compSD = StaticRefLib.StaticData.CargoGoods.GetMaterial(component.Key);
-                            var xpos = ImGui.GetCursorPosX();
-                            ImGui.SetCursorPosX(xpos + 12);
-                            ImGui.Text(compSD.Name);
-                            ImGui.NextColumn();
-                            ImGui.Text(component.Value.ToString());
-                            ImGui.NextColumn();
-                        }
-                        */
 
-                        /*
-                        ImGui.Text("Materials");
-                        ImGui.NextColumn();
-                        ImGui.Text(_componentDesigner.MassValue.ToString());
-                        ImGui.NextColumn();
 
-                        ImGui.Text("Components");
-                        ImGui.NextColumn();
-                        ImGui.Text(_componentDesigner.MassValue.ToString());
-                        ImGui.NextColumn();
-                        */
-                    } 
                 }
                 
-                ImGui.EndChild();
+                //ImGui.EndChild();
             }
             void GuiHintText(ComponentDesignAttribute attribute)
             {
                 if(compactmod)
                 {
-                    ImGui.TextWrapped(attribute.Name + ": " + attribute.Value.ToString());
+                    ImGui.TextWrapped(attribute.Name + ": " + attribute.Value.ToString() + " " + attribute.Unit);
                     ImGui.NewLine();
                 }
                 else
                 {
                     ImGui.TextWrapped(attribute.Name + ":");
                     ImGui.SameLine();
-                    ImGui.TextWrapped(attribute.Value.ToString());
+                    ImGui.TextWrapped(attribute.Value.ToString() + " " + attribute.Unit);
                     ImGui.NewLine();
                 }
             }
