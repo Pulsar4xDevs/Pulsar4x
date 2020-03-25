@@ -177,26 +177,26 @@
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Conversion Efficency') * Ability('Power Input')"
             },
-			{
+            {
               "Name": "Chamber Absorption",
               "Units": "%",
               "Description": "What percentage of stored light in the chamber is lost as heat (tech)",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "(Ability('Input Light') / Ability('Chamber Volume')) / (3000 * 2000 * 1000)"
+              "AbilityFormula": "(Ability('Input Light') / (Ability('Chamber Volume') * Ability('Target Wavelength')))"
             },
             {
               "Name": "Conversion Efficency",
               "Units": "%",
               "Description": "What percentage of input energy gets converted into light (tech)",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Target Wavelength') / 1000"
+              "AbilityFormula": "Sqrt( Ability('Target Wavelength') / 1000 )"
             },
             {
               "Name": "Lense Emission",
               "Units": "%",
               "Description": "What percentage of stored light is fired (tech)",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": " Ability('Duty Cycle') "
+              "AbilityFormula": "Sqrt( Ability('Duty Cycle') )"
             },
             {
               "Name": "Pulse Energy",
