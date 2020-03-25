@@ -87,10 +87,9 @@ namespace Pulsar4X.SDL2UI
                         ImGui.PushID(attribute.Name);
                         
                         
-                        if ((attribute.GuiHint & GuiHint.GuiDisplayBool) == GuiHint.GuiDisplayBool)
+                        if (!attribute.IsEnabled)
                         {
-                            if(attribute.Value == 0)
-                                break;
+                            break;
                         }
 
                         switch (attribute.GuiHint) //Either

@@ -20,6 +20,15 @@ namespace Pulsar4X.ECSLib
         public string Description { get { return _templateSD.Description; } }
         public string Unit { get { return _templateSD.Unit; } }
         public GuiHint GuiHint { get { return _templateSD.GuiHint; } }
+        public bool IsEnabled {
+            get
+            {
+                if (IsEnabledFormula == null)
+                    return true;
+                IsEnabledFormula.Evaluate();
+                return IsEnabledFormula.BoolResult;
+            }
+        }
         
         public Type DataBlobType;
 
@@ -81,12 +90,22 @@ namespace Pulsar4X.ECSLib
                 SetStep();
                 EnumType = Type.GetType(_templateSD.EnumTypeName);
                 if(EnumType == null)
-                    throw new Exception("EnymTypeName not found: " + _templateSD.EnumTypeName);
+                    throw new Exception("EnumTypeName not found: " + _templateSD.EnumTypeName);
                 EnumSelection = (int)Value;
                 //string[] names = Enum.GetNames(EnumType);
             }
 
+            if (_templateSD.GuiIsEnabledFormula != null)
+            {
+                IsEnabledFormula = new ChainedExpression(_templateSD.GuiIsEnabledFormula, this, factionTech, staticData);
+                var ghint = GuiHint.GuiTextDisplay | GuiHint.GuiDisplayBool;
+            }
+        }
 
+        internal ChainedExpression IsEnabledFormula { get; set; }
+        public void RecalcIsEnabled()
+        {
+            IsEnabledFormula.Evaluate();
         }
 
         public Dictionary<object, ChainedExpression> GuidDictionary;
@@ -229,6 +248,26 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+
+        internal bool BoolResult
+        {
+            get{
+                switch (Result)
+                {
+                 case null:
+                     Evaluate();
+                     if(Result is null)
+                        throw new Exception("Result type is unexpectedly null");
+                     else
+                         return BoolResult;
+                 case bool val:
+                     return val;
+                 default:
+                     throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not a boolian value");
+
+                }
+            }
+        }
 
         /// <summary>
         /// Evaluates the expression and updates the Result.
