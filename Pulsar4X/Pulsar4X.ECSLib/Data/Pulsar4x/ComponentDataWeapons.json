@@ -62,7 +62,7 @@
               "Units": "W",
               "Description": "How much power the laser consumes",
               "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "(Ability('Chamber Volume') * Ability('Target Wavelength') / Ability('Conversion Efficency')",
+              "MaxFormula": "(Ability('Chamber Volume') * Ability('Target Wavelength') / Ability('Conversion Efficency'))",
               "MinFormula": "1",
               "StepFormula": "10",
               "AbilityFormula": "100000"
