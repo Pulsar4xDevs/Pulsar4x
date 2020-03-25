@@ -232,6 +232,89 @@
             }
           ]
         }
+      },
+	  {
+        "Key": "fe9bf895-ac4d-4696-b121-d195c720d17b",
+        "Value": {
+          "Name": "RailGun",
+          "Description": "A Projectile thrower that uses electrical energy to propel a conductive projectile",
+          "ID": "fe9bf895-ac4d-4696-b121-d195c720d17b",
+          "MassFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Mass'))",
+          "VolumeFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Mass'))",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "1",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Mass]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass]",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Calibre",
+              "Units": "mm",
+              "Description": "Caliber of this weapon in mm",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "250",
+              "MinFormula": "10",
+              "StepFormula": "1",
+              "AbilityFormula": "25"
+            },
+            {
+              "Name": "Rail Length",
+              "Units": "unknown",
+              "Description": "Length of the rail - directly effects the final velocity of the projectile",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "1"
+            },
+            {
+              "Name": "Auto Reloader Mass",
+              "Units": "unknown",
+              "Description": "Increases the mass of the weapon, but increases the rate of fire.",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Power Use",
+              "Units": "MJ",
+              "Description": "In MegaJules.",
+              "GuiHint": "None",
+              "AbilityFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * Ability('Calibre') * Ability('Rail Length')"
+            },
+            {
+              "Name": "Power Efficency",
+              "Units": "unknown",
+              "GuiHint": "None",
+              "AbilityFormula": "45 + TechData('1167a255-b004-4a68-91af-1192169b5a37')"
+            },
+            {
+              "Name": "ROF",
+              "Units": "Rounds/unknown",
+              "GuiHint": "None",
+              "AbilityFormula": "Ability('Auto Reloader Mass') / Ability('Calibre')"
+            },
+            {
+              "Name": "dbargs",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Calibre'), Ability('Rail Length'), Ability('Power Use'), Ability('Power Efficiency'), Ability('ROF'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.RailGunAtb"
+            }
+          ]
+        }
       }
     ]
   }
