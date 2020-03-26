@@ -30,7 +30,7 @@
             {
               "Name": "Mass",
               "Units": "kg",
-              "Description": "Mass of this engine",
+              "Description": "Max Mass of the payload",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "10",
               "MinFormula": "1",
@@ -52,7 +52,7 @@
               "Description": "",
               "GuiHint": "GuiEnumSelectionList",
               "EnumTypeName" : "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.PayloadTypes",
-              "MaxFormula": "2",
+              "MaxFormula": "3",
               "MinFormula": "0",
               "StepFormula": "1",
               "AbilityFormula": "0"
@@ -67,6 +67,14 @@
               "MinFormula": "1",
               "StepFormula": "1",
               "AbilityFormula": "10"
+            },
+            {
+              "Name": "TNT Equivalent",
+              "Units": "kg",
+              "Description": "TNT eq of explosive mass",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 0 || Ability('Payload Type') = 1, true, false)",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Explosive Mass') * TechData('8E3FE9A4-6D65-4DFD-9B15-9617240742BF')"
             },
             {
               "Name": "Frag Mass",
@@ -91,7 +99,7 @@
               "AbilityFormula": "10"
             },
             {
-              "Name": "Frag Cone",
+              "Name": "Frag Cone Angle",
               "Units": "kg",
               "Description": "Cone angle, larger is more efficent per fragment",
               "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 0, true, false)",
@@ -100,6 +108,14 @@
               "MinFormula": "45",
               "StepFormula": "1",
               "AbilityFormula": "180"
+            },
+            {
+              "Name": "ExplDataBlob",
+              "Description": "",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 0, true, false)",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass'), Ability('Explosive Mass'), Ability('Frag Mass'), Ability('Frag Number'), Ability('Frag Cone Angle'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.OrdnanceExplosivePayload"
             },
             {
               "Name": "Liner Radius",
@@ -124,12 +140,38 @@
               "AbilityFormula": "10"
             },
             {
+              "Name": "ShapeDataBlob",
+              "Description": "",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 1, true, false)",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass'), Ability('Explosive Mass'), Ability('Liner Radius'), Ability('Liner Cone angle'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.OrdnanceShapedPayload"
+            },
+            {
               "Name": "Submunition Type",
               "Units": "Degrees",
               "Description": "Pre-Designed missile to use as a submunition",
               "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 2, true, false)",
               "GuiHint": "GuiOrdnanceSelectionList",
               "AbilityFormula": "0"
+            },
+            {
+              "Name": "Submunition Count",
+              "Description": "Number of submunitions in this payload",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 2, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "180",
+              "MinFormula": "25",
+              "StepFormula": "1",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "SubmDataBlob",
+              "Description": "",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 2, true, false)",
+              "GuiHint": "None",
+              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass'), Ability('Submunition Type'), Ability('Submunition Count'))",
+              "AbilityDataBlobType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.OrdnanceSubmunitionsPayload"
             }
           ]
         }

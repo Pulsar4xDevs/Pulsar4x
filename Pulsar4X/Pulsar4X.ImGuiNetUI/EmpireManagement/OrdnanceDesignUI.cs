@@ -52,31 +52,35 @@ namespace Pulsar4X.SDL2UI
         public void HardRefresh()
         {
             var designs = _state.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns;
+            var componentDesigns = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns;
+
+            foreach (var des in componentDesigns)
+            {
+
+            }
+            
             _currentDesigns = designs.Values.ToArray();
             _currentDesignNames = new string[_currentDesigns.Length];
             int i = 0;
-            
-            _payload = new string[_currentDesigns.Length + 3];
-            _payload[0] = "KineticKill";
-            _payload[1] = "FragWarhead";
-            _payload[2] = "LaserWarhead";
-            
             foreach (var mdesign in _currentDesigns)
             {
                 _currentDesignNames[i] = mdesign.Name;
-                _payload[i + 3] = mdesign.Name;
                 i++;
             }
             
 
 
-            var componentDesigns = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns;
+            List<ComponentDesign> missilePayload = new List<ComponentDesign>();
             List<ComponentDesign> missileSensors = new List<ComponentDesign>();
             List<ComponentDesign> missileEngines = new List<ComponentDesign>();
             foreach (ComponentDesign cdes in componentDesigns.Values)
             {
                 if ((cdes.ComponentMountType & ComponentMountType.Missile) == ComponentMountType.Missile)
                 {
+                    if (cdes.AttributesByType.ContainsKey(typeof(OrdnancePayloadAtb)))
+                    {
+                        missilePayload.Add(cdes);
+                    }
                     if (cdes.AttributesByType.ContainsKey(typeof(SensorReceverAtbDB)))
                     {
                         missileSensors.Add(cdes);
@@ -86,22 +90,29 @@ namespace Pulsar4X.SDL2UI
                     {
                         missileEngines.Add(cdes);
                     }
+
                 }
             }
             
+            _payload = new string[missilePayload.Count];
+            i = 0;
+            foreach (var des in missilePayload)
+            {
+                _payload[i] = des.Name;
+            }
             _electronicsPackage = new string[missileSensors.Count];
             i = 0;
-            foreach (var senDes in missileSensors)
+            foreach (var des in missileSensors)
             {
-                _electronicsPackage[i] = senDes.Name;
+                _electronicsPackage[i] = des.Name;
             }
             _engineDesigns = new string[missileEngines.Count];
             i = 0;
-            foreach (var engDes in missileEngines)
+            foreach (var des in missileEngines)
             {
-                _engineDesigns[i] = engDes.Name;
+                _engineDesigns[i] = des.Name;
             }
-            
+
             
 
         }

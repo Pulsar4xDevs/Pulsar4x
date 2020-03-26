@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
         public Type DataBlobType;
 
         public Type EnumType;
-        public int EnumSelection;
+        public int ListSelection;
         //public BaseDataBlob DataBlob;
         internal ComponentDesigner ParentComponent; 
         public ComponentDesignAttribute(ComponentDesigner parentComponent, ComponentTemplateAttributeSD templateAtb, FactionTechDB factionTech)
@@ -91,7 +91,7 @@ namespace Pulsar4X.ECSLib
                 EnumType = Type.GetType(_templateSD.EnumTypeName);
                 if(EnumType == null)
                     throw new Exception("EnumTypeName not found: " + _templateSD.EnumTypeName);
-                EnumSelection = (int)Value;
+                ListSelection = (int)Value;
                 //string[] names = Enum.GetNames(EnumType);
             }
 
@@ -99,6 +99,11 @@ namespace Pulsar4X.ECSLib
             {
                 IsEnabledFormula = new ChainedExpression(_templateSD.GuiIsEnabledFormula, this, factionTech, staticData);
                 var ghint = GuiHint.GuiTextDisplay | GuiHint.GuiDisplayBool;
+            }
+
+            if (GuiHint == GuiHint.GuiOrdnanceSelectionList)
+            {
+                
             }
         }
 
@@ -113,6 +118,11 @@ namespace Pulsar4X.ECSLib
         public void SetValueFromGuidList(Guid techguid)
         {
             Formula.ReplaceExpression("TechData('" + techguid + "')");
+        }
+        
+        public void SetValueFromComponentList(Guid componentID)
+        {
+            Formula.ReplaceExpression("'" + componentID + "'");
         }
 
         internal ChainedExpression Formula { get; set; }

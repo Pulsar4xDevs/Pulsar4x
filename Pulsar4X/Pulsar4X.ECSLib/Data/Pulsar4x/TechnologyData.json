@@ -333,6 +333,21 @@
         }
       },
       {
+        "Key": "8E3FE9A4-6D65-4DFD-9B15-9617240742BF",
+        "Value": {
+          "Name": "High Explosives",
+          "Description": "Better explosive compounds increase the Relative effectiveness factor",
+          "Category": "MissilesKineticWeapons",
+          "ID": "8E3FE9A4-6D65-4DFD-9B15-9617240742BF",
+          "MaxLevel": 10,
+          "DataFormula": "1.66 + [Level] * 0.1",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 2500"
+        }
+      },
+      {
         "Key": "E27F5256-7044-49A3-8260-58FC376DC219",
         "Value": {
           "Name": "HE Warheads",

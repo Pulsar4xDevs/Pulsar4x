@@ -33,6 +33,49 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         Submunitions
     }
 
+    
+    
+    public class OrdnancePayloadAtb : IComponentDesignAttribute
+    {
+
+        public OrdnancePayloadAtb(TriggerTypes trigger, double totalMass)
+        {
+        }
+
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class OrdnanceExplosivePayload : OrdnancePayloadAtb
+    {
+        public double ExposiveMass; //tnt equvelent
+        
+        public OrdnanceExplosivePayload(int trigger, double totalMass, double tntEqMass, double fragMass, double fragNum, double fragCone) : base((TriggerTypes)trigger, totalMass)
+        {
+        }
+    }
+    
+    public class OrdnanceShapedPayload : OrdnancePayloadAtb
+    {
+        public OrdnanceShapedPayload(int trigger, double totalMass, double tntEqMass, double linerRadius, double linerAngle): base((TriggerTypes)trigger, totalMass)
+        {
+        }
+    }
+    public class OrdnanceLaserPayload : OrdnancePayloadAtb
+    {
+        public OrdnanceLaserPayload(int trigger, double totalMass, SimpleBeamWeaponAtbDB beamWeaponAtbDB): base((TriggerTypes)trigger, totalMass)
+        {
+        }
+    }
+    public class OrdnanceSubmunitionsPayload : OrdnancePayloadAtb
+    {
+        public OrdnanceSubmunitionsPayload(int trigger, double totalMass, Guid designID, int count): base((TriggerTypes)trigger, totalMass)
+        {
+        }
+    }
+
     public class OrdnanceDesign : ICargoable, IConstrucableDesign, ISerializable
     {
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;

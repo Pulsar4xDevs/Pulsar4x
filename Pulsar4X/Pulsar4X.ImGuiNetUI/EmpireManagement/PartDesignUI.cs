@@ -5,6 +5,7 @@ using System.Linq;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -25,7 +26,7 @@ namespace Pulsar4X.SDL2UI
         private int _techSelectedIndex = -1;
         
         //private TechSD[] _techSDs;
-        private string[] _enumNames;
+        private string[] _listNames;
         
         //new internal static GlobalUIState _state;
 
@@ -104,6 +105,9 @@ namespace Pulsar4X.SDL2UI
                                     break;
                                 case GuiHint.GuiEnumSelectionList: //Let the user pick a type from a hard coded list
                                     GuiHintEnumSelection(attribute);
+                                    break;
+                                case GuiHint.GuiOrdnanceSelectionList:
+                                    GuiHintOrdnanceSelection(attribute);
                                     break;
                                 default:
                                     throw new ArgumentOutOfRangeException();
@@ -314,15 +318,53 @@ namespace Pulsar4X.SDL2UI
                 
                 int i = 0;
                 //_techSDs = new TechSD[attribute.GuidDictionary.Count];
-                _enumNames = Enum.GetNames(attribute.EnumType);
+                _listNames = Enum.GetNames(attribute.EnumType);
 
                 
                 ImGui.TextWrapped(attribute.Value.ToString());
 
-                if (ImGui.Combo("Select", ref attribute.EnumSelection, _enumNames, (int)attribute.MaxValue + 1))
+                if (ImGui.Combo("Select", ref attribute.ListSelection, _listNames, (int)attribute.MaxValue + 1))
                 {
-                    int enumVal = (int)Enum.Parse(attribute.EnumType, _enumNames[attribute.EnumSelection]);
+                    int enumVal = (int)Enum.Parse(attribute.EnumType, _listNames[attribute.ListSelection]);
                     attribute.SetValueFromInput(enumVal);
+                }
+                
+                ImGui.NewLine();
+            }
+
+            void GuiHintOrdnanceSelection(ComponentDesignAttribute attribute)
+            {
+                var dict = _state.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns;
+                _listNames = new string[dict.Count];
+                OrdnanceDesign[] ordnances = new OrdnanceDesign[dict.Count];
+                int i = 0;
+                foreach (var kvp in dict)
+                {
+                    _listNames[i] = kvp.Value.Name;
+                    ordnances[i] = kvp.Value;
+                }
+                
+                
+                
+                if (compactmod)
+                {
+                    ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
+                    ImGui.NewLine();
+                }
+                else
+                {
+                    ImGui.TextWrapped(attribute.Name + ":");
+                    ImGui.SameLine();
+                    ImGui.TextWrapped(attribute.Description);
+                    ImGui.NewLine();
+                }
+                
+                
+                ImGui.TextWrapped(attribute.Value.ToString());
+
+                if (ImGui.Combo("Select", ref attribute.ListSelection, _listNames, _listNames.Length))
+                {
+                    attribute.SetValueFromComponentList(ordnances[ attribute.ListSelection].ID);
                 }
                 
                 ImGui.NewLine();
