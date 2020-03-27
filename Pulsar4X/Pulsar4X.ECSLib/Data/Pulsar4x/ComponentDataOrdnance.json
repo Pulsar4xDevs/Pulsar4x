@@ -20,7 +20,7 @@
               }
             ]
           },
-          "ResearchCostFormula": "[Mass] * 0.5",
+          "ResearchCostFormula": "0",
           "CreditCostFormula": "[Mass]",
           "BuildPointCostFormula": "[Mass]",
           "MountType": "Missile",
@@ -30,12 +30,9 @@
             {
               "Name": "Mass",
               "Units": "kg",
-              "Description": "Max Mass of the payload",
-              "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "10",
-              "MinFormula": "1",
-              "StepFormula": "1",
-              "AbilityFormula": "500"
+              "Description": "Total Mass of the payload",
+              "GuiHint": "None",
+              "AbilityFormula": "Ability('Mass0') + Ability('Mass1') + Ability('Mass2')"
             },
             {
               "Name": "Trigger Type",
@@ -84,13 +81,12 @@
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "500",
               "MinFormula": "0",
-              "StepFormula": "0.1",
-              "AbilityFormula": "100"
+              "StepFormula": "0.01",
+              "AbilityFormula": "0.1"
             },
             {
-              "Name": "Frag Number",
-              "Units": "kg",
-              "Description": "number of individual fragments (average)",
+              "Name": "Frag Count",
+              "Description": "Number of individual fragments",
               "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 0, true, false)",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "500",
@@ -110,11 +106,18 @@
               "AbilityFormula": "180"
             },
             {
+              "Name": "Mass0",
+              "Units": "kg",
+              "Description": "Total Mass of the payload",
+              "GuiHint": "None",
+              "AbilityFormula": "if(Ability('Payload Type') = 0, Ability('Explosive Mass') + Ability('Frag Mass') * Ability('Frag Count'), 0)"
+            },
+            {
               "Name": "ExplDataBlob",
               "Description": "",
               "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 0, true, false)",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass'), Ability('Explosive Mass'), Ability('Frag Mass'), Ability('Frag Number'), Ability('Frag Cone Angle'))",
+              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass0'), Ability('TNT Equivalent'), Ability('Frag Mass'), Ability('Frag Count'), Ability('Frag Cone Angle'))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.OrdnanceExplosivePayload"
             },
             {
@@ -129,8 +132,8 @@
               "AbilityFormula": "10"
             },
             {
-              "Name": "Liner Cone angle",
-              "Units": "Degrees",
+              "Name": "Liner Cone Height",
+              "Units": "mm",
               "Description": "Affects the shape and velocity of the slug",
               "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 1, true, false)",
               "GuiHint": "GuiSelectionMaxMin",
@@ -140,11 +143,43 @@
               "AbilityFormula": "10"
             },
             {
+              "Name": "Liner Thickness",
+              "Units": "mm",
+              "Description": "Affects the shape and velocity of the slug",
+              "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 1, true, false)",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "10",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "3"
+            },
+            {
+              "Name": "LinerDensity",
+              "Units": "kg/m^3",
+              "Description": "Density of copper",
+              "GuiHint": "None",
+              "AbilityFormula": "8940"
+            },
+            {
+              "Name": "LinerVolume",
+              "Units": "mm^3",
+              "Description": "volume of the cone liner",
+              "GuiHint": "None",
+              "AbilityFormula": "Ability('Liner Thickness') * 3.14159265359 * Ability('Liner Radius') * Ability('Liner Radius') + Sqrt( Pow(Ability('Liner Cone Height'),2) + Pow(Ability('Liner Radius'),2) ) "
+            },
+            {
+              "Name": "Mass1",
+              "Units": "kg",
+              "Description": "Total Mass of the payload",
+              "GuiHint": "None",
+              "AbilityFormula": "if(Ability('Payload Type') = 1, Ability('Explosive Mass') + Ability('LinerVolume') * 1000 / Ability('LinerDensity') , 0)"
+            },
+            {
               "Name": "ShapeDataBlob",
               "Description": "",
               "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 1, true, false)",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass'), Ability('Explosive Mass'), Ability('Liner Radius'), Ability('Liner Cone angle'))",
+              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass1'), Ability('TNT Equivalent'), Ability('Liner Radius'), Ability('Liner Cone Height'))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.OrdnanceShapedPayload"
             },
             {
@@ -166,11 +201,25 @@
               "AbilityFormula": "10"
             },
             {
+              "Name": "SubMunitionWeight",
+              "Units": "kg",
+              "Description": "How the hell am I going to get this",
+              "GuiHint": "None",
+              "AbilityFormula": "10"
+            },
+            {
+              "Name": "Mass2",
+              "Units": "kg",
+              "Description": "Total Mass of the payload",
+              "GuiHint": "None",
+              "AbilityFormula": "if(Ability('Payload Type') = 2, Ability('Submunition Count') * Ability('SubMunitionWeight'), 0)"
+            },
+            {
               "Name": "SubmDataBlob",
               "Description": "",
               "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 2, true, false)",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass'), Ability('Submunition Type'), Ability('Submunition Count'))",
+              "AbilityFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass2'), Ability('Submunition Type'), Ability('Submunition Count'))",
               "AbilityDataBlobType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.OrdnanceSubmunitionsPayload"
             }
           ]
@@ -179,13 +228,13 @@
       {
         "Key": "9FDB2A15-4413-40A9-9229-19D05B3765FE",
         "Value": {
-          "Name": "Solid Fuel Missile Engine",
+          "Name": "Missile SRB",
           "Description": "A Newtonian Thruster",
           "ID": "9FDB2A15-4413-40A9-9229-19D05B3765FE",
-          "MassFormula": "Ability('Mass')",
-          "VolumeFormula": "Ability('Mass')",
+          "MassFormula": "Ability('Engine Mass') + Ability('Fuel Mass')",
+          "VolumeFormula": "[Mass]",
           "HTKFormula": "Max(1, [Mass] / 100)",
-          "CrewReqFormula": "[Mass]",
+          "CrewReqFormula": "0",
           "ResourceCostFormula": {
             "Entries": [
               {
@@ -202,11 +251,21 @@
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
           "ComponentAtbSDs": [
             {
-              "Name": "Mass",
+              "Name": "Engine Mass",
               "Units": "kg",
-              "Description": "Mass of this engine",
+              "Description": "Mass of the engine",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "10",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AbilityFormula": "5"
+            },
+            {
+              "Name": "Fuel Mass",
+              "Units": "kg",
+              "Description": "Mass of the fuel",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "1000000",
               "MinFormula": "1",
               "StepFormula": "1",
               "AbilityFormula": "500"
@@ -214,16 +273,16 @@
             {
               "Name": "Exhaust Velocity",
               "Units": "m/s",
-              "Description": "Specific Impulse in m/s, can be increased by research",
+              "Description": "Specific Impulse in m/s, can be increased by research (todo)",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "2500"
             },
             {
               "Name": "Fuel Consumption",
-              "Units": "unknown mass units/s",
+              "Units": "kg/s",
               "Description": "Fuel Consumption per second",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Mass') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
+              "AbilityFormula": "Ability('Engine Mass') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
             },
             {
               "Name": "Thrust",
@@ -231,6 +290,13 @@
               "Description": "The maximum thrust output of this engine in N",
               "GuiHint": "GuiTextDisplay",
               "AbilityFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
+            },
+            {
+              "Name": "Burn Time",
+              "Units": "s",
+              "Description": "Fuel Consumption per second",
+              "GuiHint": "GuiTextDisplay",
+              "AbilityFormula": "Ability('Fuel Mass') / Ability('Fuel Consumption')"
             },
             {
               "Name": "DataBlob",

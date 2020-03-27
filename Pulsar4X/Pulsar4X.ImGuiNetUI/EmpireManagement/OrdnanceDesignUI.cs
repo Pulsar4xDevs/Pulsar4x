@@ -81,6 +81,22 @@ namespace Pulsar4X.SDL2UI
                     {
                         missilePayload.Add(cdes);
                     }
+                    if (cdes.AttributesByType.ContainsKey(typeof(OrdnanceExplosivePayload)))
+                    {
+                        missilePayload.Add(cdes);
+                    }
+                    if (cdes.AttributesByType.ContainsKey(typeof(OrdnanceShapedPayload)))
+                    {
+                        missilePayload.Add(cdes);
+                    }
+                    if (cdes.AttributesByType.ContainsKey(typeof(OrdnanceLaserPayload)))
+                    {
+                        missilePayload.Add(cdes);
+                    }
+                    if (cdes.AttributesByType.ContainsKey(typeof(OrdnanceSubmunitionsPayload)))
+                    {
+                        missilePayload.Add(cdes);
+                    }
                     if (cdes.AttributesByType.ContainsKey(typeof(SensorReceverAtbDB)))
                     {
                         missileSensors.Add(cdes);

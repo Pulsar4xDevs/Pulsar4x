@@ -50,22 +50,39 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
     public class OrdnanceExplosivePayload : OrdnancePayloadAtb
     {
-        public double ExposiveMass; //tnt equvelent
+        public double ExposiveTnTEQMass; //tnt equvelent
+        public double FragMass;
+        public double FragCount;
+        public double FragCone;
         
-        public OrdnanceExplosivePayload(int trigger, double totalMass, double tntEqMass, double fragMass, double fragNum, double fragCone) : base((TriggerTypes)trigger, totalMass)
+        public OrdnanceExplosivePayload(int trigger, double totalMass, double tntEqMass, double fragMass, double fragCount, double fragCone) : base((TriggerTypes)trigger, totalMass)
         {
+            ExposiveTnTEQMass = tntEqMass;
+            FragMass = fragMass;
+            FragCount = fragCount;
+            FragCone = fragCone;
         }
     }
     
     public class OrdnanceShapedPayload : OrdnancePayloadAtb
     {
-        public OrdnanceShapedPayload(int trigger, double totalMass, double tntEqMass, double linerRadius, double linerAngle): base((TriggerTypes)trigger, totalMass)
+        double ExposiveTnTEQMass; 
+        double LinerRadius;
+        double LinerDepth;
+        double LinerAngle;
+        double LinerThickness;
+        public OrdnanceShapedPayload(int trigger, double totalMass, double tntEqMass, double linerRadius, double linerDepth, double linerThickness): base((TriggerTypes)trigger, totalMass)
         {
+            ExposiveTnTEQMass = tntEqMass;
+            LinerRadius = linerRadius;
+            LinerDepth = linerDepth;
+            LinerAngle = Math.Asin(LinerRadius / LinerDepth);
+            LinerThickness = linerThickness;
         }
     }
     public class OrdnanceLaserPayload : OrdnancePayloadAtb
     {
-        public OrdnanceLaserPayload(int trigger, double totalMass, SimpleBeamWeaponAtbDB beamWeaponAtbDB): base((TriggerTypes)trigger, totalMass)
+        public OrdnanceLaserPayload(int trigger, double totalMass, Guid designID): base((TriggerTypes)trigger, totalMass)
         {
         }
     }
@@ -76,6 +93,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         }
     }
 
+    
+    
+    
     public class OrdnanceDesign : ICargoable, IConstrucableDesign, ISerializable
     {
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;

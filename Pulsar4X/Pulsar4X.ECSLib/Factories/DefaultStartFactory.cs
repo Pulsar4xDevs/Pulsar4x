@@ -13,6 +13,8 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _warpDrive;
         private static ComponentDesign _fuelTank_500;
         private static ComponentDesign _laser;
+        private static ComponentDesign _payload;
+        private static ComponentDesign _missileSRB;
         private static ComponentDesign _sensor_50;
         private static ComponentDesign _sensorInstalation;
         private static ComponentDesign _fireControl;
@@ -78,7 +80,9 @@ namespace Pulsar4X.ECSLib
             FacPassiveSensor(game, factionEntity);
             DefaultFisionReactor(game, factionEntity);
             DefaultBatteryBank(game, factionEntity);
-
+            DefaultFragPayload(game, factionEntity);
+            DefaultMissileSRB(game, factionEntity);
+            
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
             EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
@@ -211,6 +215,8 @@ namespace Pulsar4X.ECSLib
             FacPassiveSensor(game, factionEntity);
             DefaultFisionReactor(game, factionEntity);
             DefaultBatteryBank(game, factionEntity);
+            DefaultFragPayload(game, factionEntity);
+            DefaultMissileSRB(game, factionEntity);
             
             EntityManipulation.AddComponentToEntity(colonyEntity, mineDesign);
             EntityManipulation.AddComponentToEntity(colonyEntity, refinaryDesign);
@@ -493,6 +499,39 @@ namespace Pulsar4X.ECSLib
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_laser.TechID);
             return _laser;
 
+        }
+        public static ComponentDesign DefaultFragPayload(Game game, Entity faction)
+        {
+            if (_payload != null)
+                return _payload;
+            ComponentDesigner payloadDesigner;
+            ComponentTemplateSD payloadSD = game.StaticData.ComponentTemplates[new Guid("DF9954A7-C5C5-4B49-965C-446B483DA2BE")];
+            payloadDesigner = new ComponentDesigner(payloadSD, faction.GetDataBlob<FactionTechDB>());
+            payloadDesigner.ComponentDesignAttributes["Trigger Type"].SetValueFromInput(2);
+            payloadDesigner.ComponentDesignAttributes["Payload Type"].SetValueFromInput(0);
+            payloadDesigner.ComponentDesignAttributes["Explosive Mass"].SetValueFromInput(2);
+            payloadDesigner.ComponentDesignAttributes["Frag Mass"].SetValueFromInput(0.1);
+            payloadDesigner.ComponentDesignAttributes["Frag Count"].SetValueFromInput(30);
+            payloadDesigner.ComponentDesignAttributes["Frag Cone Angle"].SetValueFromInput(180);
+            payloadDesigner.Name = "ProxFrag 5kg";
+            _payload = payloadDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_payload.TechID);
+            return _payload;
+        }
+        
+        public static ComponentDesign DefaultMissileSRB(Game game, Entity faction)
+        {
+            if (_missileSRB != null)
+                return _missileSRB;
+            ComponentDesigner srbDesigner;
+            ComponentTemplateSD srbSD = game.StaticData.ComponentTemplates[new Guid("9FDB2A15-4413-40A9-9229-19D05B3765FE")];
+            srbDesigner = new ComponentDesigner(srbSD, faction.GetDataBlob<FactionTechDB>());
+            srbDesigner.ComponentDesignAttributes["Engine Mass"].SetValueFromInput(1);
+            srbDesigner.ComponentDesignAttributes["Fuel Mass"].SetValueFromInput(199);
+            srbDesigner.Name = "SRB 200";
+            _missileSRB = srbDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileSRB.TechID);
+            return _missileSRB;
         }
 
         public static ComponentDesign DefaultBFC(Game game, Entity faction)
