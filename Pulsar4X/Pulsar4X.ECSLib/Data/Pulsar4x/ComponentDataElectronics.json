@@ -45,9 +45,6 @@
               "Units": "nm",
               "DescriptionFormula": "'The wavelength this sensor is most efficent at detecting'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
               "MaxFormula": "1e12",
               "MinFormula": "0.01",
               "StepFormula": "1",
@@ -58,9 +55,6 @@
               "Units": "nm",
               "DescriptionFormula": "'How far from the ideal wavelength will this still detect a signal'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
               "MaxFormula": "500",
               "MinFormula": "1",
               "StepFormula": "1",
@@ -68,17 +62,15 @@
             },
             {
               "Name": "Sensitivity At Ideal Wavelength",
-              "Units": "Unknown",
-              "DescriptionFormula": "'From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0'",
+              "Units": "Kw",
+              "DescriptionFormula": "'Smallest signal this can detect at the ideal wavelength. From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0'",
               "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AttributeFormula": "10000 - (10 * Ability(0))"
+              "AttributeFormula": "10000 - (10 * Ability('Mass'))"
             },
             {
               "Name": "Detection Ability at Worst Wavelength",
-              "DescriptionFormula": "'From Tech TODO: tech needs including'",
+              "Units": "Kw",
+              "DescriptionFormula": "'Smallest signal this can detect at the worst wavelength. From Tech TODO: tech needs including'",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
                 "Entries": []
@@ -87,25 +79,19 @@
             },
             {
               "Name": "Resolution",
-              "Units": "Unknown",
+              "Units": "MegaPixel",
               "DescriptionFormula": "'How much detail it can get from a detection. affects likelyhood of component detection etc. '",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "MaxFormula": "100",
-              "MinFormula": "1",
+              "MaxFormula": "1000",
+              "MinFormula": "0.1",
               "StepFormula": "1",
-              "AttributeFormula": "10"
+              "AttributeFormula": "1"
             },
             {
               "Name": "Scan Time",
               "Units": "s",
-              "DescriptionFormula": "'how long it takes to complete a full scan",
+              "DescriptionFormula": "'how long it takes to complete a full scan'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
               "MaxFormula": "86400",
               "MinFormula": "1",
               "StepFormula": "1",
@@ -115,7 +101,7 @@
               "Name": "DatablobArguments",
               "DescriptionFormula": "'(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)'",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability(1), Ability(2), Ability(3), Ability(4), Ability(5), Ability(6))",
+              "AttributeFormula": "DataBlobArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Wavelength Width'), Ability('Sensitivity At Ideal Wavelength'), Ability('Detection Ability at Worst Wavelength'), Ability('Resolution'), Ability('Scan Time'))",
               "AttributeType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
             }
           ]

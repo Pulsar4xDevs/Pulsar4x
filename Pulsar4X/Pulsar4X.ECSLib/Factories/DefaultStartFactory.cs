@@ -15,6 +15,7 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _laser;
         private static ComponentDesign _payload;
         private static ComponentDesign _missileSRB;
+        private static ComponentDesign _missileSuite;
         private static ComponentDesign _sensor_50;
         private static ComponentDesign _sensorInstalation;
         private static ComponentDesign _fireControl;
@@ -82,7 +83,7 @@ namespace Pulsar4X.ECSLib
             DefaultBatteryBank(game, factionEntity);
             DefaultFragPayload(game, factionEntity);
             DefaultMissileSRB(game, factionEntity);
-            
+            DefaultMissileSensors(game, factionEntity);
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
             EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
@@ -217,6 +218,7 @@ namespace Pulsar4X.ECSLib
             DefaultBatteryBank(game, factionEntity);
             DefaultFragPayload(game, factionEntity);
             DefaultMissileSRB(game, factionEntity);
+            DefaultMissileSensors(game, factionEntity);
             
             EntityManipulation.AddComponentToEntity(colonyEntity, mineDesign);
             EntityManipulation.AddComponentToEntity(colonyEntity, refinaryDesign);
@@ -519,6 +521,23 @@ namespace Pulsar4X.ECSLib
             return _payload;
         }
         
+        public static ComponentDesign DefaultMissileSensors(Game game, Entity faction)
+        {
+            if (_missileSuite != null)
+                return _missileSuite;
+            ComponentDesigner suiteDesigner;
+            ComponentTemplateSD srbSD = game.StaticData.ComponentTemplates[new Guid("BBC29A72-C4D3-4389-94DE-36C3BE3B7B0E")];
+            suiteDesigner = new ComponentDesigner(srbSD, faction.GetDataBlob<FactionTechDB>());
+            suiteDesigner.ComponentDesignAttributes["Guidance Type"].SetValueFromInput(2);
+            suiteDesigner.ComponentDesignAttributes["Sensor Mass"].SetValueFromInput(10);
+            suiteDesigner.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(600);
+            suiteDesigner.ComponentDesignAttributes["Detection Wavelength Width"].SetValueFromInput(100);
+            suiteDesigner.ComponentDesignAttributes["Resolution"].SetValueFromInput(1);
+            suiteDesigner.Name = "Passive Yellow 1MP ";
+            _missileSuite = suiteDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileSuite.TechID);
+            return _missileSuite;
+        }
         public static ComponentDesign DefaultMissileSRB(Game game, Entity faction)
         {
             if (_missileSRB != null)

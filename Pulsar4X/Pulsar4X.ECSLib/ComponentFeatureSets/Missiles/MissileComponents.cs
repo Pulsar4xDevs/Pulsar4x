@@ -182,10 +182,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
 
 
-        public ElectronicsSuite(int guidenceType, int triggerType)
+        public ElectronicsSuite(int guidenceType)
         {
             GuidenceType = (GuidanceTypes)guidenceType;
-            TriggerType = (TriggerTypes)triggerType;
         }
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)

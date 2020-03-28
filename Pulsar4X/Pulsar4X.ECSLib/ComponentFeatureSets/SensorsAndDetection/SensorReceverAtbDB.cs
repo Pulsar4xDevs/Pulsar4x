@@ -59,16 +59,17 @@ namespace Pulsar4X.ECSLib
         public SensorReceverAtbDB(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)
         {
             //TODO:  should make this component invalid. 
-            if (bestSensitivity > 0)
+            if (bestSensitivity < 0)
             {
-                var ev = new Event("Sensitivity is" + bestSensitivity + " *Must* be a positiveNumber");
+                var ev = new Event("Sensitivity is" + bestSensitivity + " *Must* be a positiveNumber Sensitivity is the kilowatt threshhold");
                 StaticRefLib.EventLog.AddEvent(ev);
                 bestSensitivity = 0;
 
             }
-            if (bestSensitivity < worstSensitivity) 
+            if (bestSensitivity > worstSensitivity) 
             {
-                var ev = new Event("bestSensitivity " + bestSensitivity + " *Must* be < than worstSensitivity" + worstSensitivity + "(lower is better)");
+                var ev = new Event("bestSensitivity " + bestSensitivity + " *Must* be < than worstSensitivity" + worstSensitivity + 
+                                   "(lower is better) Sensitivity is the kilowatt threshhold");
                 StaticRefLib.EventLog.AddEvent(ev);
                 worstSensitivity = bestSensitivity;
             }

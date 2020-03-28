@@ -244,7 +244,7 @@
           "ResearchCostFormula": "[Mass] * 2",
           "CreditCostFormula": "[Mass]",
           "BuildPointCostFormula": "[Mass]",
-          "MountType": "PlanetInstallation, ShipComponent, ShipCargo, Fighter",
+          "MountType": "Missile",
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "ComponentAtbSDs": [
@@ -292,9 +292,6 @@
               "DescriptionFormula": "'How far from the ideal wavelength will this still detect a signal'",
               "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
               "MaxFormula": "500",
               "MinFormula": "1",
               "StepFormula": "1",
@@ -302,51 +299,43 @@
             },
             {
               "Name": "Sensitivity At Ideal Wavelength",
-              "Units": "Unknown",
-              "DescriptionFormula": "'From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0'",
+              "Units": "Kw",
+              "DescriptionFormula": "'Smallest signal this can detect at the ideal wavelength. From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0'",
               "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
               "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AttributeFormula": "10000 - (10 * Ability(0))"
+              "AttributeFormula": "10000 - (10 * Ability('Sensor Mass'))"
             },
             {
               "Name": "Detection Ability at Worst Wavelength",
-              "DescriptionFormula": "'From Tech TODO: tech needs including'",
+              "Units": "Kw",
+              "DescriptionFormula": "'Smallest signal this can detect at the worst wavelength. From Tech TODO: tech needs including'",
               "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
               "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
-                "Entries": []
-              },
               "AttributeFormula": "10000"
             },
             {
               "Name": "Resolution",
-              "Units": "Unknown",
+              "Units": "MegaPixel",
               "DescriptionFormula": "'Higher Resolution sensors are less likely to be affected by ECM'",
               "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "MaxFormula": "100",
-              "MinFormula": "1",
+              "MaxFormula": "1000",
+              "MinFormula": "0.1",
               "StepFormula": "1",
-              "AttributeFormula": "10"
+              "AttributeFormula": "1"
             },
             {
               "Name": "DatablobArguments",
               "DescriptionFormula": "'(int GuidanceTypeEnumValue, int TriggerType)'",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Guidance Type'))",
+              "AttributeFormula": "DataBlobArgs(Ability('Guidance Type'))",
               "AttributeType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite"
             },
             {
               "Name": "SensorDatablobArguments",
               "DescriptionFormula": "'(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)'",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Wavelength Width'), Ability('Sensitivity At Ideal Wavelength'), Ability('Detection Ability at Worst Wavelength'), Ability('Resolution'), Ability(6))",
+              "AttributeFormula": "DataBlobArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Wavelength Width'), Ability('Sensitivity At Ideal Wavelength'), Ability('Detection Ability at Worst Wavelength'), Ability('Resolution'), 3600)",
               "AttributeType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
             }
           ]
