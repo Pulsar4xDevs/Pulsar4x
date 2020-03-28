@@ -19,14 +19,18 @@ namespace Pulsar4X.ECSLib
         }*/
 
         private double? _targetCrossSection;
-        internal double TargetCrossSection
+        /// <summary>
+        /// Cross section in meters squared. 
+        /// </summary>
+        /// <exception cref="Exception"></exception>
+        internal double TargetCrossSection_msq
         {
             get
             {
                 if (_targetCrossSection != null)
                     return (double)_targetCrossSection;
                 else if (this.OwningEntity.HasDataBlob<MassVolumeDB>())
-                    return Math.PI * Math.Pow(this.OwningEntity.GetDataBlob<MassVolumeDB>().RadiusInKM, 2);
+                    return Math.PI * Math.Pow(this.OwningEntity.GetDataBlob<MassVolumeDB>().RadiusInM, 2);
                 else throw new Exception("Parent Entity does not have an MassVolumeDB");
             }
         }
@@ -35,7 +39,7 @@ namespace Pulsar4X.ECSLib
         //this will define how effective active sensors are, and will increase a ships detection when its closer to a star. 
         //key is frequency, value is 0.0-1.0 for that freqency. for most entites this will create a wave type spectrum. 
         //internal Dictionary<double, float> Reflectivity { get; private set; } = new Dictionary<double, float>();
-        internal double Reflectivity;
+        internal double Reflectivity = 0.9;
 
         /// <summary>
         /// This dictionary gets replaced frequently by SetReflectedEMSig()

@@ -39,21 +39,23 @@ namespace Pulsar4X.ECSLib
             int numberOfEmmitters = emmiters.Count;
             sensorSig.ReflectedEMSpectra.Clear();
 
-            PercentValue reflectionPercent = 0.1f; //TODO: this should be calculated from crossSection(size), distance, and a reflectivity value(stealth armor?/ other design factors?). 
-
+            //PercentValue reflectionPercent = 0.1f; //TODO: this should be calculated from crossSection(size), and a reflectivity value(stealth armor?/ other design factors?). 
+            var surfaceArea = sensorSig.TargetCrossSection_msq;
+            double reflectionCoefficent = surfaceArea * sensorSig.Reflectivity;
+            
             foreach (var emittingEntity in emmiters)
             {
                 if (emittingEntity != entity) // don't reflect our own emmision. 
                 {
-                    double distance = PositionDB.GetDistanceBetween_AU(position, emittingEntity.GetDataBlob<PositionDB>());
+                    double distance = PositionDB.GetDistanceBetween_m(position, emittingEntity.GetDataBlob<PositionDB>());
                     var emmissionDB = emittingEntity.GetDataBlob<SensorProfileDB>();
 
                     foreach (var emitedItem in emmissionDB.EmittedEMSpectra)
                     {
 
-                        var reflectedMagnatude = SensorProcessorTools.AttenuationCalc(emitedItem.Value, distance) * reflectionPercent;
+                        var reflectedMagnatude = SensorProcessorTools.AttenuationCalc(emitedItem.Value, distance) * reflectionCoefficent;
                         
-                        sensorSig.ReflectedEMSpectra.Add(emitedItem.Key, emitedItem.Value);
+                        sensorSig.ReflectedEMSpectra.Add(emitedItem.Key, reflectedMagnatude);
                     }
                 }
             }
