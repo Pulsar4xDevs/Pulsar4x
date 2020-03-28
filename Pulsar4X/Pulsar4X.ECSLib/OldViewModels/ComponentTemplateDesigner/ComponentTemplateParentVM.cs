@@ -113,7 +113,7 @@ namespace Pulsar4X.ECSLib
         {
             ComponentTemplateSD sd = new ComponentTemplateSD();
             sd.Name = SelectedComponent.Name;
-            sd.Description = SelectedComponent.Description;
+            sd.DescriptionFormula = SelectedComponent.Description;
             sd.ID = Guid.Parse(SelectedComponent.ID);
 
             sd.MassFormula = SelectedComponent.MassFormula;

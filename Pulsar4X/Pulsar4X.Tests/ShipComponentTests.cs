@@ -139,7 +139,7 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "Engine";
-            component.Description = "Moves a ship";
+            component.DescriptionFormula = "Moves a ship";
             component.ID = new Guid("E76BD999-ECD7-4511-AD41-6D0C59CA97E6");
 
             component.MassFormula = "Ability(0)";
@@ -162,9 +162,9 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateAttributeSD SizeFormula0 = new ComponentTemplateAttributeSD();
             SizeFormula0.Name = "Size";
-            SizeFormula0.Description = "Size of this engine in Tons";
+            SizeFormula0.DescriptionFormula = "Size of this engine in Tons";
             SizeFormula0.GuiHint = GuiHint.GuiSelectionMaxMin;
-            SizeFormula0.AbilityFormula = "250";
+            SizeFormula0.AttributeFormula = "250";
             SizeFormula0.MaxFormula = "2500";
             SizeFormula0.MinFormula = "1";
             SizeFormula0.StepFormula = "1";
@@ -172,7 +172,7 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateAttributeSD engineTypeAbility1 = new ComponentTemplateAttributeSD();
             engineTypeAbility1.Name = "Engine Type";
-            engineTypeAbility1.Description = "Type of engine Tech";
+            engineTypeAbility1.DescriptionFormula = "Type of engine Tech";
             engineTypeAbility1.GuiHint = GuiHint.GuiTechSelectionList;
             engineTypeAbility1.GuidDictionary = new Dictionary<object, string>
             {
@@ -190,15 +190,15 @@ namespace Pulsar4X.Tests
                 //new ID("9bb4d1c4-680f-4c98-b927-337654073575"),
                 //new ID("c9587310-f7dd-45d0-ac4c-b6f59a1e1897")
             };
-            engineTypeAbility1.AbilityFormula = "TechData('f3f10e56-9345-40cc-af42-342e7240355d')";
+            engineTypeAbility1.AttributeFormula = "TechData('f3f10e56-9345-40cc-af42-342e7240355d')";
 
             component.ComponentAtbSDs.Add(engineTypeAbility1);
 
             ComponentTemplateAttributeSD enginePowerEfficency2 = new ComponentTemplateAttributeSD();
             enginePowerEfficency2.Name = "Engine Consumption vs Power";
-            enginePowerEfficency2.Description = "More Powerfull engines are less efficent for a given size";
+            enginePowerEfficency2.DescriptionFormula = "More Powerfull engines are less efficent for a given size";
             enginePowerEfficency2.GuiHint = GuiHint.GuiSelectionMaxMin;
-            enginePowerEfficency2.AbilityFormula = "1";
+            enginePowerEfficency2.AttributeFormula = "1";
             enginePowerEfficency2.MaxFormula = "TechData('b8ef73c7-2ef0-445e-8461-1e0508958a0e')";
             enginePowerEfficency2.MinFormula = "TechData('08fa4c4b-0ddb-4b3a-9190-724d715694de')";
             enginePowerEfficency2.StepFormula = "0.1";
@@ -206,46 +206,46 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateAttributeSD enginePowerAbility3 = new ComponentTemplateAttributeSD();
             enginePowerAbility3.Name = "Engine Power";
-            enginePowerAbility3.Description = "Move Power for ship";
+            enginePowerAbility3.DescriptionFormula = "Move Power for ship";
             enginePowerAbility3.GuiHint = GuiHint.GuiTextDisplay;
-            enginePowerAbility3.AbilityFormula = "Ability(1) * [Mass] * Ability(2)";
+            enginePowerAbility3.AttributeFormula = "Ability(1) * [Mass] * Ability(2)";
             component.ComponentAtbSDs.Add(enginePowerAbility3);
 
             ComponentTemplateAttributeSD enginePowerDBArgs4 = new ComponentTemplateAttributeSD();
             enginePowerDBArgs4.Name = "Engine Powerdb";
-            enginePowerDBArgs4.Description = "Move Power for ship";
+            enginePowerDBArgs4.DescriptionFormula = "Move Power for ship";
             enginePowerDBArgs4.GuiHint = GuiHint.None;
-            enginePowerDBArgs4.AbilityDataBlobType = typeof(WarpDriveAtb).ToString();
-            enginePowerDBArgs4.AbilityFormula = "DataBlobArgs(Ability(3))";
+            enginePowerDBArgs4.AttributeType = typeof(WarpDriveAtb).ToString();
+            enginePowerDBArgs4.AttributeFormula = "DataBlobArgs(Ability(3))";
             component.ComponentAtbSDs.Add(enginePowerDBArgs4);
 
             ComponentTemplateAttributeSD fuelConsumptionTechMod5 = new ComponentTemplateAttributeSD();
             fuelConsumptionTechMod5.Name = "Fuel Consumption";
-            fuelConsumptionTechMod5.Description = "From Tech";
+            fuelConsumptionTechMod5.DescriptionFormula = "From Tech";
             fuelConsumptionTechMod5.GuiHint = GuiHint.None;
-            fuelConsumptionTechMod5.AbilityFormula = "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(2), 2.25)";
+            fuelConsumptionTechMod5.AttributeFormula = "TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc') * Pow(Ability(2), 2.25)";
             component.ComponentAtbSDs.Add(fuelConsumptionTechMod5);
 
             ComponentTemplateAttributeSD fuelConsumptionFinalCalc6 = new ComponentTemplateAttributeSD();
             fuelConsumptionFinalCalc6.Name = "Fuel Consumptioncalc";
-            fuelConsumptionFinalCalc6.Description = "Fuel Consumption Calc";
+            fuelConsumptionFinalCalc6.DescriptionFormula = "Fuel Consumption Calc";
             fuelConsumptionFinalCalc6.GuiHint = GuiHint.GuiTextDisplay;
-            fuelConsumptionFinalCalc6.AbilityFormula = "Ability(3) - Ability(3) * [Mass] * 0.002 * Ability(5)";
+            fuelConsumptionFinalCalc6.AttributeFormula = "Ability(3) - Ability(3) * [Mass] * 0.002 * Ability(5)";
             component.ComponentAtbSDs.Add(fuelConsumptionFinalCalc6);
 
             ComponentTemplateAttributeSD fuelConsumptionArgsDB7 = new ComponentTemplateAttributeSD();
             fuelConsumptionArgsDB7.Name = "Fuel Consumptiondb";
-            fuelConsumptionArgsDB7.Description = "";
+            fuelConsumptionArgsDB7.DescriptionFormula = "";
             fuelConsumptionArgsDB7.GuiHint = GuiHint.None;
-            fuelConsumptionArgsDB7.AbilityDataBlobType = typeof(ResourceConsumptionAtbDB).ToString();
-            fuelConsumptionArgsDB7.AbilityFormula = "DataBlobArgs(GuidString('33e6ac88-0235-4917-a7ff-35c8886aad3a'), Ability(6), 1)";
+            fuelConsumptionArgsDB7.AttributeType = typeof(ResourceConsumptionAtbDB).ToString();
+            fuelConsumptionArgsDB7.AttributeFormula = "DataBlobArgs(GuidString('33e6ac88-0235-4917-a7ff-35c8886aad3a'), Ability(6), 1)";
             component.ComponentAtbSDs.Add(fuelConsumptionArgsDB7);
 
             ComponentTemplateAttributeSD thermalReduction8 = new ComponentTemplateAttributeSD();
             thermalReduction8.Name = "Thermal Signature Reduction";
-            thermalReduction8.Description = "";
+            thermalReduction8.DescriptionFormula = "";
             thermalReduction8.GuiHint = GuiHint.GuiSelectionMaxMin;
-            thermalReduction8.AbilityFormula = "0";
+            thermalReduction8.AttributeFormula = "0";
             thermalReduction8.MinFormula = "0";
             thermalReduction8.MaxFormula = "0.5";
             thermalReduction8.StepFormula = "0.1";
@@ -253,17 +253,17 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateAttributeSD sensorSigDisplay9 = new ComponentTemplateAttributeSD();
             sensorSigDisplay9.Name = "Thermal Signature";
-            sensorSigDisplay9.Description = "";
+            sensorSigDisplay9.DescriptionFormula = "";
             sensorSigDisplay9.GuiHint = GuiHint.GuiTextDisplay;
-            sensorSigDisplay9.AbilityFormula = "Ability(3) * Ability(8)";
+            sensorSigDisplay9.AttributeFormula = "Ability(3) * Ability(8)";
             component.ComponentAtbSDs.Add(sensorSigDisplay9);
 
             ComponentTemplateAttributeSD sensorSigDBArgs10 = new ComponentTemplateAttributeSD();
             sensorSigDBArgs10.Name = "Sensor Signaturedb";
-            sensorSigDBArgs10.Description = "";
+            sensorSigDBArgs10.DescriptionFormula = "";
             sensorSigDBArgs10.GuiHint = GuiHint.None;
-            sensorSigDBArgs10.AbilityDataBlobType = typeof(SensorSignatureAtbDB).ToString();
-            sensorSigDBArgs10.AbilityFormula = "DataBlobArgs(Ability(9),0)";
+            sensorSigDBArgs10.AttributeType = typeof(SensorSignatureAtbDB).ToString();
+            sensorSigDBArgs10.AttributeFormula = "DataBlobArgs(Ability(9),0)";
             component.ComponentAtbSDs.Add(sensorSigDBArgs10);
             
             return component;
@@ -273,7 +273,7 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "Mine";
-            component.Description = "Mines Resources";
+            component.DescriptionFormula = "Mines Resources";
             component.ID = new Guid("F7084155-04C3-49E8-BF43-C7EF4BEFA550");
 
             component.MassFormula = "25000";
@@ -300,7 +300,7 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateAttributeSD mineAttribute = new ComponentTemplateAttributeSD();
             mineAttribute.Name = "MiningAmount";
-            mineAttribute.Description = "";
+            mineAttribute.DescriptionFormula = "";
             mineAttribute.GuiHint = GuiHint.None;
             mineAttribute.GuidDictionary = new Dictionary<object, string>
             {
@@ -317,8 +317,8 @@ namespace Pulsar4X.Tests
                 {new Guid("2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3"),"10"}
 
             };
-            mineAttribute.AbilityDataBlobType = typeof(MineResourcesAtbDB).ToString();
-            mineAttribute.AbilityFormula = "DataBlobArgs([GuidDict])";
+            mineAttribute.AttributeType = typeof(MineResourcesAtbDB).ToString();
+            mineAttribute.AttributeFormula = "DataBlobArgs([GuidDict])";
             component.ComponentAtbSDs.Add(mineAttribute);
             
             return component;
@@ -329,7 +329,7 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "ResearchLab";
-            component.Description = "Creates Research Points";
+            component.DescriptionFormula = "Creates Research Points";
             component.ID = new Guid("C203B7CF-8B41-4664-8291-D20DFE1119EC");
 
             component.MassFormula = "500000";
@@ -356,10 +356,10 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateAttributeSD researchPointsAttribute = new ComponentTemplateAttributeSD();
             researchPointsAttribute.Name = "RP Amount Per EconTick";
-            researchPointsAttribute.Description = "";
+            researchPointsAttribute.DescriptionFormula = "";
             researchPointsAttribute.GuiHint = GuiHint.None;
-            researchPointsAttribute.AbilityDataBlobType = typeof(ResearchPointsAtbDB).ToString();
-            researchPointsAttribute.AbilityFormula = "DataBlobArgs(20)";
+            researchPointsAttribute.AttributeType = typeof(ResearchPointsAtbDB).ToString();
+            researchPointsAttribute.AttributeFormula = "DataBlobArgs(20)";
             component.ComponentAtbSDs.Add(researchPointsAttribute);
 
             return component;
@@ -370,7 +370,7 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "Refinery";
-            component.Description = "Creates Research Points";
+            component.DescriptionFormula = "Creates Research Points";
             component.ID = new Guid("{90592586-0BD6-4885-8526-7181E08556B5}");
 
             component.MassFormula = "500000";
@@ -396,23 +396,23 @@ namespace Pulsar4X.Tests
             
             ComponentTemplateAttributeSD refinePointsAttribute = new ComponentTemplateAttributeSD();
             refinePointsAttribute.Name = "RP Amount Per EconTick";
-            refinePointsAttribute.Description = "";
+            refinePointsAttribute.DescriptionFormula = "";
             refinePointsAttribute.GuiHint = GuiHint.None;
-            refinePointsAttribute.AbilityDataBlobType = typeof(ResearchPointsAtbDB).ToString();
-            refinePointsAttribute.AbilityFormula = "100";
+            refinePointsAttribute.AttributeType = typeof(ResearchPointsAtbDB).ToString();
+            refinePointsAttribute.AttributeFormula = "100";
             component.ComponentAtbSDs.Add(refinePointsAttribute);
 
             ComponentTemplateAttributeSD refineJobsAttribute = new ComponentTemplateAttributeSD();
             refineJobsAttribute.Name = "RefineAbilitys";
-            refineJobsAttribute.Description = "";
+            refineJobsAttribute.DescriptionFormula = "";
             refineJobsAttribute.GuiHint = GuiHint.None;
             refineJobsAttribute.GuidDictionary = new Dictionary<object, string>
             {
                 { new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"),"0"},
                 { new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB"),"0"}
             };
-            refineJobsAttribute.AbilityDataBlobType = typeof(IndustryAtb).ToString();
-            refineJobsAttribute.AbilityFormula = "DataBlobArgs([GuidDict], Ability(0))";
+            refineJobsAttribute.AttributeType = typeof(IndustryAtb).ToString();
+            refineJobsAttribute.AttributeFormula = "DataBlobArgs([GuidDict], Ability(0))";
             component.ComponentAtbSDs.Add(refineJobsAttribute);
             return component;
         }
@@ -421,7 +421,7 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "Factory";
-            component.Description = "Constructs Facilities, Fighters Ammo and Components";
+            component.DescriptionFormula = "Constructs Facilities, Fighters Ammo and Components";
             component.ID = new Guid("{07817639-E0C6-43CD-B3DC-24ED15EFB4BA}");
 
             component.MassFormula = "500000";
@@ -450,43 +450,43 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateAttributeSD instalationConstructionAttribute = new ComponentTemplateAttributeSD();
             instalationConstructionAttribute.Name = "Instalation Construction Points";
-            instalationConstructionAttribute.Description = "";
+            instalationConstructionAttribute.DescriptionFormula = "";
             instalationConstructionAttribute.GuiHint = GuiHint.GuiTextDisplay;
-            instalationConstructionAttribute.AbilityFormula = "100";
+            instalationConstructionAttribute.AttributeFormula = "100";
             component.ComponentAtbSDs.Add(instalationConstructionAttribute);
 
             ComponentTemplateAttributeSD shipComponentsConstructionAttribute = new ComponentTemplateAttributeSD();
             shipComponentsConstructionAttribute.Name = "Component Construction Points";
-            shipComponentsConstructionAttribute.Description = "";
+            shipComponentsConstructionAttribute.DescriptionFormula = "";
             shipComponentsConstructionAttribute.GuiHint = GuiHint.GuiTextDisplay;
-            shipComponentsConstructionAttribute.AbilityFormula = "100";
+            shipComponentsConstructionAttribute.AttributeFormula = "100";
             component.ComponentAtbSDs.Add(shipComponentsConstructionAttribute);
 
 
             ComponentTemplateAttributeSD shipConstructionAttribute = new ComponentTemplateAttributeSD();
             shipConstructionAttribute.Name = "Ship Construction Points";
-            shipConstructionAttribute.Description = "";
+            shipConstructionAttribute.DescriptionFormula = "";
             shipConstructionAttribute.GuiHint = GuiHint.GuiTextDisplay;
-            shipConstructionAttribute.AbilityFormula = "100";
+            shipConstructionAttribute.AttributeFormula = "100";
             component.ComponentAtbSDs.Add(shipConstructionAttribute);
 
             ComponentTemplateAttributeSD fighterConstructionAttribute = new ComponentTemplateAttributeSD();
             fighterConstructionAttribute.Name = "Fighter Construction Points";
-            fighterConstructionAttribute.Description = "";
+            fighterConstructionAttribute.DescriptionFormula = "";
             fighterConstructionAttribute.GuiHint = GuiHint.GuiTextDisplay;
-            fighterConstructionAttribute.AbilityFormula = "100";
+            fighterConstructionAttribute.AttributeFormula = "100";
             component.ComponentAtbSDs.Add(fighterConstructionAttribute);
 
             ComponentTemplateAttributeSD ammoConstructionAttribute = new ComponentTemplateAttributeSD();
             ammoConstructionAttribute.Name = "Ordnance Construction Points";
-            ammoConstructionAttribute.Description = "";
+            ammoConstructionAttribute.DescriptionFormula = "";
             ammoConstructionAttribute.GuiHint = GuiHint.GuiTextDisplay;
-            ammoConstructionAttribute.AbilityFormula = "100";
+            ammoConstructionAttribute.AttributeFormula = "100";
             component.ComponentAtbSDs.Add(ammoConstructionAttribute);
 
             ComponentTemplateAttributeSD atbconstructor = new ComponentTemplateAttributeSD();
             atbconstructor.Name = "Construction Points";
-            atbconstructor.Description = "";
+            atbconstructor.DescriptionFormula = "";
             atbconstructor.GuiHint = GuiHint.None;
             atbconstructor.GuidDictionary = new Dictionary<object, string>() {
                 { "Installations", "Ability(0)" },
@@ -495,8 +495,8 @@ namespace Pulsar4X.Tests
                 { "Fighters", "Ability(3)" },
                 { "Ordnance", "Ability(4)" }
             };
-            atbconstructor.AbilityDataBlobType = typeof(IndustryAtb).ToString();
-            atbconstructor.AbilityFormula = "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.IndustryTypeID'))";
+            atbconstructor.AttributeType = typeof(IndustryAtb).ToString();
+            atbconstructor.AttributeFormula = "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.IndustryTypeID'))";
             component.ComponentAtbSDs.Add(atbconstructor);
 
             return component;
@@ -506,7 +506,7 @@ namespace Pulsar4X.Tests
         {
             ComponentTemplateSD component = new ComponentTemplateSD();
             component.Name = "General Storage";
-            component.Description = "Stores General Cargo";
+            component.DescriptionFormula = "Stores General Cargo";
             component.ID = new Guid("{30CD60F8-1DE3-4FAA-ACBA-0933EB84C199}");
 
             component.MassFormula = "500000";
@@ -532,31 +532,31 @@ namespace Pulsar4X.Tests
 
             ComponentTemplateAttributeSD genralCargoAttribute = new ComponentTemplateAttributeSD();
             genralCargoAttribute.Name = "Size";
-            genralCargoAttribute.Description = "";
+            genralCargoAttribute.DescriptionFormula = "";
             genralCargoAttribute.GuiHint = GuiHint.GuiTextDisplay;
-            genralCargoAttribute.AbilityFormula = "100";
+            genralCargoAttribute.AttributeFormula = "100";
             component.ComponentAtbSDs.Add(genralCargoAttribute);
 
             ComponentTemplateAttributeSD rate = new ComponentTemplateAttributeSD();
             rate.Name = "Transfer Rate";
-            rate.Description = "";
+            rate.DescriptionFormula = "";
             rate.GuiHint = GuiHint.GuiTextDisplay;
-            rate.AbilityFormula = "50000";
+            rate.AttributeFormula = "50000";
             component.ComponentAtbSDs.Add(rate);
             
             ComponentTemplateAttributeSD range = new ComponentTemplateAttributeSD();
             range.Name = "Transfer Dv Range";
-            range.Description = "";
+            range.DescriptionFormula = "";
             range.GuiHint = GuiHint.GuiTextDisplay;
-            range.AbilityFormula = "50000";
+            range.AttributeFormula = "50000";
             component.ComponentAtbSDs.Add(range);
             
             ComponentTemplateAttributeSD generalCargoCapacityAttribute = new ComponentTemplateAttributeSD();
             generalCargoCapacityAttribute.Name = "Construction Points";
-            generalCargoCapacityAttribute.Description = "";
+            generalCargoCapacityAttribute.DescriptionFormula = "";
             generalCargoCapacityAttribute.GuiHint = GuiHint.None;
-            generalCargoCapacityAttribute.AbilityDataBlobType = typeof(CargoStorageAtbDB).ToString();
-            generalCargoCapacityAttribute.AbilityFormula = "DataBlobArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(1), Ability(2))";
+            generalCargoCapacityAttribute.AttributeType = typeof(CargoStorageAtbDB).ToString();
+            generalCargoCapacityAttribute.AttributeFormula = "DataBlobArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(1), Ability(2))";
             component.ComponentAtbSDs.Add(generalCargoCapacityAttribute);
 
             return component;

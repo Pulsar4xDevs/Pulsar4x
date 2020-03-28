@@ -6,7 +6,7 @@
         "Key": "f7084155-04c3-49e8-bf43-c7ef4befa550",
         "Value": {
           "Name": "Mine",
-          "Description": "Mines Resources",
+          "DescriptionFormula": "'Mines Resources'",
           "ID": "f7084155-04c3-49e8-bf43-c7ef4befa550",
           "MassFormula": "25000",
           "VolumeFormula": "[Mass]",
@@ -33,7 +33,7 @@
           "ComponentAtbSDs": [
             {
               "Name": "MiningAmount",
-              "Description": "",
+              "DescriptionFormula": "''",
               "GuiHint": "None",
               "GuidDictionary": {
                 "Entries": [
@@ -111,8 +111,8 @@
                   }
                 ]
               },
-              "AbilityFormula": "DataBlobArgs([GuidDict])",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.MineResourcesAtbDB"
+              "AttributeFormula": "DataBlobArgs([GuidDict])",
+              "AttributeType": "Pulsar4X.ECSLib.MineResourcesAtbDB"
             }
           ]
         }
@@ -121,7 +121,7 @@
         "Key": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
         "Value": {
           "Name": "ResearchLab",
-          "Description": "Creates Research Points",
+          "DescriptionFormula": "'Creates Research Points'",
           "ID": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
           "MassFormula": "500000",
           "VolumeFormula": "[Mass]",
@@ -148,10 +148,10 @@
           "ComponentAtbSDs": [
             {
               "Name": "RP Amount Per EconTick",
-              "Description": "",
+              "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(20)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
+              "AttributeFormula": "DataBlobArgs(20)",
+              "AttributeType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
             }
           ]
         }
@@ -160,7 +160,7 @@
         "Key": "90592586-0bd6-4885-8526-7181e08556b5",
         "Value": {
           "Name": "Refinery",
-          "Description": "An installation designed to refine base minerals into materials",
+          "DescriptionFormula": "'An installation designed to refine base minerals into materials'",
           "ID": "90592586-0bd6-4885-8526-7181e08556b5",
           "MassFormula": "Ability('Size')",
           "VolumeFormula": "[Mass]",
@@ -187,22 +187,22 @@
           "ComponentAtbSDs": [
             {
               "Name": "Size",
-              "Description": "Size of this installation",
+              "DescriptionFormula": "'Size of this installation'",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "10000",
               "MinFormula": "100",
               "StepFormula": "50",
-              "AbilityFormula": "5000"
+              "AttributeFormula": "5000"
             },
             {
               "Name": "Refinery Points",
-              "Description": "",
+              "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AbilityFormula": "Ability('Size') * 0.1"
+              "AttributeFormula": "Ability('Size') * 0.1"
             },
             {
               "Name": "RefineAbilitys",
-              "Description": "",
+              "DescriptionFormula": "''",
               "GuiHint": "None",
               "GuidDictionary": {
                 "Entries":
@@ -213,8 +213,8 @@
                   }
                 ]
               },
-              "AbilityFormula": "DataBlobArgs([GuidDict])",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
+              "AttributeFormula": "DataBlobArgs([GuidDict])",
+              "AttributeType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
         }
@@ -223,7 +223,7 @@
         "Key": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
         "Value": {
           "Name": "Factory",
-          "Description": "Constructs Facilities, Fighters Ammo and Components",
+          "DescriptionFormula": "'Constructs Facilities, Fighters Ammo and Components'",
           "ID": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
           "MassFormula": "Ability('Size')",
           "VolumeFormula": "[Mass]",
@@ -250,39 +250,34 @@
           "ComponentAtbSDs": [
             {
               "Name": "Size",
-              "Description": "Size of this installation",
+              "DescriptionFormula": "'Size of this installation'",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "10000",
               "MinFormula": "100",
               "StepFormula": "50",
-              "AbilityFormula": "5000"
+              "AttributeFormula": "5000"
             },
             {
               "Name": "Component Construction Points",
-              "Description": "",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "[Mass] * 0.1"
+              "AttributeFormula": "[Mass] * 0.1"
             },            {
               "Name": "Installation Construction Points",
-              "Description": "",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "[Mass] * 0.1"
+              "AttributeFormula": "[Mass] * 0.1"
             },
             {
               "Name": "Fighter Construction Points",
-              "Description": "",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "0"
+              "AttributeFormula": "0"
             },
             {
               "Name": "Ordnance Construction Points",
-              "Description": "",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "[Mass] * 0.1"
+              "AttributeFormula": "[Mass] * 0.1"
             },
             {
               "Name": "Construction Points",
-              "Description": "",
               "GuiHint": "None",
               "GuidDictionary": {
                 "Entries":
@@ -301,8 +296,8 @@
                   }
                 ]
               },
-              "AbilityFormula": "DataBlobArgs([GuidDict])",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
+              "AttributeFormula": "DataBlobArgs([GuidDict])",
+              "AttributeType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
         }
@@ -311,7 +306,7 @@
         "Key": "0BD304FF-FDEA-493C-8979-15FE86B7123E",
         "Value": {
           "Name": "Space Port",
-          "Description": "Construction and launch facilities for ships",
+          "DescriptionFormula": "'Construction and launch facilities for ships'",
           "ID": "0BD304FF-FDEA-493C-8979-15FE86B7123E",
           "MassFormula": "500000",
           "VolumeFormula": "[Mass]",
@@ -338,25 +333,24 @@
           "ComponentAtbSDs": [
             {
               "Name": "Component Construction Points",
-              "Description": "",
+
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "1000"
+              "AttributeFormula": "1000"
             },
             {
               "Name": "Ship Assembly Points",
-              "Description": "",
+
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "1000"
+              "AttributeFormula": "1000"
             },
             {
               "Name": "Slip Size",
-              "Description": "Maximum volume of ship size this slip can work on",
+              "DescriptionFormula": "'Maximum volume of ship size this slip can work on'",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "10000"
+              "AttributeFormula": "10000"
             },
             {
               "Name": "db",
-              "Description": "",
               "GuiHint": "None",
               "GuidDictionary": {
                 "Entries":
@@ -371,8 +365,8 @@
                   }
                 ]
               },
-              "AbilityFormula": "DataBlobArgs([GuidDict], Ability('Slip Size'))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
+              "AttributeFormula": "DataBlobArgs([GuidDict], Ability('Slip Size'))",
+              "AttributeType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
         }
@@ -381,7 +375,7 @@
         "Key": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
         "Value": {
           "Name": "Infrastructure",
-          "Description": "Component and buildings needed to keep colonists alive on hostile worlds: currently non functional other than as cargospace",
+          "DescriptionFormula": "'Component and buildings needed to keep colonists alive on hostile worlds: currently non functional other than as cargospace'",
           "ID": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
           "MassFormula": "1000",
           "VolumeFormula": "[Mass]",
@@ -404,22 +398,21 @@
           "ComponentAtbSDs": [
             {
               "Name": "Support Colonists",
-              "Description": "Keeps colonists alive on hostile worlds",
+              "DescriptionFormula": "'Keeps colonists alive on hostile worlds'",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "500"
+              "AttributeFormula": "500"
             },
             {
               "Name": "Storage Amount",
-              "Description": "The amount of space that is dedicated to storage space. ",
+              "DescriptionFormula": "'The amount of space that is dedicated to storage space. '",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "500"
+              "AttributeFormula": "500"
             },
             {
               "Name": "DBargs",
-              "Description": "",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(Ability('Storage Amount'), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), 0 , 0)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
+              "AttributeFormula": "DataBlobArgs(Ability('Storage Amount'), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), 0 , 0)",
+              "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]
         }
@@ -428,7 +421,7 @@
         "Key": "30cd60f8-1de3-4faa-acba-0933eb84c199",
         "Value": {
           "Name": "General Storage",
-          "Description": "Stores General Cargo",
+          "DescriptionFormula": "'Stores General Cargo'",
           "ID": "30cd60f8-1de3-4faa-acba-0933eb84c199",
           "MassFormula": "Ability(0)",
           "VolumeFormula": "[Mass]",
@@ -455,7 +448,7 @@
           "ComponentAtbSDs": [
             {
               "Name": "Warehouse Size",
-              "Description": "",
+              "DescriptionFormula": "''",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
@@ -463,20 +456,20 @@
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AbilityFormula": "50000"
+              "AttributeFormula": "50000"
             },
             {
               "Name": "Size Efficency",
-              "Description": "The amount of tonnage taken up by racking, office space etc.",
+              "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "Ability(0) * 0.01"
+              "AttributeFormula": "Ability(0) * 0.01"
             },                      
             {
               "Name": "Cargo Transfer Rate",
-              "Description": "How much cargo can be transfered per hour in kg.",
+              "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
@@ -484,11 +477,11 @@
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AbilityFormula": "50000"
+              "AttributeFormula": "50000"
             },
             {
               "Name": "Transfer Range",
-              "Description": "How much Dv can be expended to transfer cargo",
+              "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
@@ -496,26 +489,25 @@
               "MaxFormula": "1000000",
               "MinFormula": "100",
               "StepFormula": "100",
-              "AbilityFormula": "50000"
+              "AttributeFormula": "50000"
             },
             {
               "Name": "Total Cargo Stored",
-              "Description": "The amount of cargo this can store.",
+              "DescriptionFormula": "'The amount of cargo this can store.'",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "Ability(0) - Ability(1) - Ability(2)"
+              "AttributeFormula": "Ability(0) - Ability(1) - Ability(2)"
             },
             {
               "Name": "DBargs",
-              "Description": "",
               "GuiHint": "None",
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "DataBlobArgs(Ability(4), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(2), Ability(3))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
+              "AttributeFormula": "DataBlobArgs(Ability(4), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(2), Ability(3))",
+              "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]
         }
@@ -524,7 +516,7 @@
         "Key": "e7ac4187-58e4-458b-9aea-c3e07fc993cb",
         "Value": {
           "Name": "Fuel Storage",
-          "Description": "Stores Fuel",
+          "DescriptionFormula": "'Stores Fuel'",
           "ID": "e7ac4187-58e4-458b-9aea-c3e07fc993cb",
           "MassFormula": "Ability(0)",
           "VolumeFormula": "[Mass]",
@@ -551,7 +543,7 @@
           "ComponentAtbSDs": [
             {
               "Name": "Tank Size",
-              "Description": "",
+              "DescriptionFormula": "'",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
@@ -559,34 +551,33 @@
               "MaxFormula": "1000000",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AbilityFormula": "50000"
+              "AttributeFormula": "50000"
             },
             {
               "Name": "Size Efficency",
-              "Description": "The amount of tonnage taken up by the tank and pumps.",
+              "DescriptionFormula": "'The amount of tonnage taken up by the tank and pumps.'",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "Ability(0) * 0.01"
+              "AttributeFormula": "Ability(0) * 0.01"
             },                      {
               "Name": "Total Fuel Stored",
-              "Description": "The amount of fuel this can store.",
+              "DescriptionFormula": "'The amount of fuel this can store.",
               "GuiHint": "GuiTextDisplay",
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "Ability(0) - Ability(1)"
+              "AttributeFormula": "Ability(0) - Ability(1)"
             },
             {
               "Name": "DBargs",
-              "Description": "",
               "GuiHint": "None",
               "GuidDictionary": {
                 "Entries": []
               },
-              "AbilityFormula": "DataBlobArgs(Ability(2), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), 0, 0)",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
+              "AttributeFormula": "DataBlobArgs(Ability(2), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), 0, 0)",
+              "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]
         }

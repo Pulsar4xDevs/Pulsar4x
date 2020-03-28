@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
     {
         private ComponentTemplateAttributeSD _templateSD;
         public string Name { get { return _templateSD.Name; } }
-        public string Description { get { return _templateSD.Description; } }
+
         public string Unit { get { return _templateSD.Unit; } }
         public GuiHint GuiHint { get { return _templateSD.GuiHint; } }
         public bool IsEnabled {
@@ -42,9 +42,14 @@ namespace Pulsar4X.ECSLib
             _templateSD = templateAtb;
             var staticData = StaticRefLib.StaticData;
 
-            if (_templateSD.AbilityFormula != null)
+            if (_templateSD.AttributeFormula != null)
             {
-                Formula = new ChainedExpression(_templateSD.AbilityFormula, this, factionTech, staticData);
+                Formula = new ChainedExpression(_templateSD.AttributeFormula, this, factionTech, staticData);
+            }
+
+            if (!string.IsNullOrEmpty(_templateSD.DescriptionFormula ))
+            {
+                DescriptionFormula = new ChainedExpression(_templateSD.DescriptionFormula, this, factionTech, staticData);
             }
 
             if (_templateSD.GuidDictionary != null )
@@ -75,9 +80,9 @@ namespace Pulsar4X.ECSLib
                 MinValueFormula = new ChainedExpression(_templateSD.MinFormula, this, factionTech, staticData);
                 StepValueFormula = new ChainedExpression(_templateSD.StepFormula, this, factionTech, staticData);
             }
-            if (_templateSD.AbilityDataBlobType != null)
+            if (_templateSD.AttributeType != null)
             {
-                DataBlobType = Type.GetType(_templateSD.AbilityDataBlobType);        
+                DataBlobType = Type.GetType(_templateSD.AttributeType);        
             }
 
             if (GuiHint == GuiHint.GuiEnumSelectionList)
@@ -104,6 +109,18 @@ namespace Pulsar4X.ECSLib
             if (GuiHint == GuiHint.GuiOrdnanceSelectionList)
             {
                 
+            }
+        }
+
+        internal ChainedExpression DescriptionFormula { get; set; }
+        public string Description
+        {
+            get
+            {
+                if (DescriptionFormula == null)
+                    return "";
+                else
+                    return DescriptionFormula.StrResult;
             }
         }
 
@@ -274,6 +291,33 @@ namespace Pulsar4X.ECSLib
                      return val;
                  default:
                      throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not a boolian value");
+
+                }
+            }
+        }
+        
+        internal string StrResult
+        {
+            get{
+                switch (Result)
+                {
+                    case null:
+                        Evaluate();
+                        if(Result is null)
+                            throw new Exception("Result type is unexpectedly null");
+                        else
+                            return StrResult;
+                    case string val:
+                        return val;
+                    default:
+                        try
+                        {
+                            return (string)Result;
+                        }
+                        catch
+                        {
+                            throw new Exception("Unexpected Result data Type " + Result.GetType() + " could not be cast to a string");
+                        }
 
                 }
             }

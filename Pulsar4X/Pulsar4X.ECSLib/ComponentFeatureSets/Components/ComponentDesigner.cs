@@ -178,7 +178,7 @@ namespace Pulsar4X.ECSLib
             var staticData = StaticRefLib.StaticData;
             TypeName = componentSD.Name;
             Name = componentSD.Name;
-            Description = componentSD.Description;
+            
             _design.ID = Guid.NewGuid();
             MassFormula = new ChainedExpression(componentSD.MassFormula, this, factionTech, staticData);
             VolumeFormula = new ChainedExpression(componentSD.VolumeFormula, this, factionTech, staticData);
@@ -193,6 +193,8 @@ namespace Pulsar4X.ECSLib
             _design.CargoTypeID = componentSD.CargoTypeID;
             if (componentSD.MountType.HasFlag(ComponentMountType.PlanetInstallation))
                 _design.GuiHints = ConstructableGuiHints.CanBeInstalled;
+            if(!string.IsNullOrEmpty(componentSD.DescriptionFormula))
+                DescriptionFormula = new ChainedExpression(componentSD.DescriptionFormula, this, factionTech, staticData);
 
             Dictionary<Guid, ChainedExpression> resourceCostForulas = new Dictionary<Guid, ChainedExpression>();
             //Dictionary<Guid, ChainedExpression> mineralCostFormulas = new Dictionary<Guid, ChainedExpression>();
@@ -334,13 +336,22 @@ namespace Pulsar4X.ECSLib
         public string Name 
         {             
             get { return _design.Name; }
-            set { _design.Name = value; } }
-        public string Description 
-        {             
-            get { return _design.Description; }
-            set { _design.Description = value; } 
+            set { _design.Name = value; } 
         }
 
+
+        internal ChainedExpression DescriptionFormula { get; set; }
+        
+        public string Description
+        {
+            get
+            {
+                if (DescriptionFormula == null)
+                    return "";
+                else
+                    return DescriptionFormula.StrResult;
+            }
+        }
 
         
 

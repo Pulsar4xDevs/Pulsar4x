@@ -6,7 +6,6 @@
         "Key": "57614ddb-0756-44cf-857b-8a6578493792",
         "Value": {
           "Name": "TestWeight",
-          "Description": "",
           "ID": "57614ddb-0756-44cf-857b-8a6578493792",
           "MassFormula": "Ability('Mass')",
           "VolumeFormula": "[Mass]",
@@ -30,7 +29,7 @@
             {
               "Name": "Mass",
               "Units": "kg",
-              "Description": "The mass of the weight",
+              "DescriptionFormula": "'The mass of the weight'",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
@@ -38,7 +37,7 @@
               "MaxFormula": "10000",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AbilityFormula": "150"
+              "AttributeFormula": "150"
             }
           ]
         }

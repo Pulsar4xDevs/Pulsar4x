@@ -260,7 +260,7 @@ namespace Pulsar4X.ECSLib
         public void SetDesignSD(ComponentTemplateSD designSD)
         {
             Name = designSD.Name;
-            Description = designSD.Description;
+            Description = designSD.DescriptionFormula;
             _ID = designSD.ID;
 
             MassFormula = designSD.MassFormula;

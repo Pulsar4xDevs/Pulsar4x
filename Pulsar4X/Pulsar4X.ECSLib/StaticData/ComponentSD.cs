@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
     public struct ComponentTemplateSD
     {
         public string Name;
-        public string Description;
+        public string DescriptionFormula;
         public Guid ID;
 
         public string MassFormula;
@@ -30,9 +30,9 @@ namespace Pulsar4X.ECSLib
     public struct ComponentTemplateAttributeSD
     {
         public string Name;
-        public string Description;
+        public string DescriptionFormula;
         public string Unit;
-        public GuiHint GuiHint; //if AbilityFormula uses AbilityArgs(), this should be none!
+        public GuiHint GuiHint; //if AttributeFormula uses AbilityArgs(), this should be none!
 
         public string GuiIsEnabledFormula; //if this attribute should be displayed/enabled
         //used if guihint is GuiSelectionList
@@ -50,8 +50,8 @@ namespace Pulsar4X.ECSLib
         
 
         //if guihint is selection list or minmax, this should point to a default value. 
-        public string AbilityFormula;
+        public string AttributeFormula;
 
-        public string AbilityDataBlobType;
+        public string AttributeType;
     }
 }

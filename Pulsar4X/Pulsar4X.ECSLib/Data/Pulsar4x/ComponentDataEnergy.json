@@ -6,7 +6,7 @@
         "Key": "97cf75a1-5ca3-4037-8832-4d81a89f97fa",
         "Value": {
           "Name": "Reactor",
-          "Description": "A non refuelable reactor, Generates power for a ship",
+          "DescriptionFormula": "'A non refuelable reactor, Generates power for a ship'",
           "ID": "97cf75a1-5ca3-4037-8832-4d81a89f97fa",
           "MassFormula": "Ability('Mass')",
           "VolumeFormula": "Ability('Mass')",
@@ -42,51 +42,51 @@
             {
               "Name": "Mass",
               "Units": "kg",
-              "Description": "Mass of the reactor",
+              "DescriptionFormula": "'Mass of the reactor'",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "25000",
               "MinFormula": "1000",
               "StepFormula": "1",
-              "AbilityFormula": "1500"
+              "AttributeFormula": "1500"
             },
             {
               "Name": "Power Output",
               "Units": "w",
-              "Description": "in w",
+              "DescriptionFormula": "'in w'",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "50000 * [Mass]"
+              "AttributeFormula": "50000 * [Mass]"
             },
             {
               "Name": "Fuel Consumption",
               "Units": "kg/s",
-              "Description": "Fuel Consumption kg per second at Max Output",
+              "DescriptionFormula": "'Fuel Consumption kg per second at Max Output'",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Power Output') * 0.0000001"
+              "AttributeFormula": "Ability('Power Output') * 0.0000001"
             },
             {
               "Name": "Lifetime",
               "Units": "s",
-              "Description": "How long this reactor will be useful for",
+              "DescriptionFormula": "'How long this reactor will be useful for'",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "87600",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AbilityFormula": "8760"
+              "AttributeFormula": "8760"
             },
             {
               "Name": "DB",
-              "Description": "",
+              "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(GuidString('978f67d9-62fb-4b3a-a12a-8626ac3cb91b'), Ability('Fuel Consumption'), GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Power Output'), Ability('Lifetime'))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnergyGenerationAtb"
+              "AttributeFormula": "DataBlobArgs(GuidString('978f67d9-62fb-4b3a-a12a-8626ac3cb91b'), Ability('Fuel Consumption'), GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Power Output'), Ability('Lifetime'))",
+              "AttributeType": "Pulsar4X.ECSLib.EnergyGenerationAtb"
             },
             {
               "Name": "Sensor Signature",
               "Units": "unknown",
-              "Description": "",
+              "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AbilityFormula": "Ability('Power Output')",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
+              "AttributeFormula": "Ability('Power Output')",
+              "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]
         }
@@ -96,7 +96,7 @@
         "Key": "1de23a8b-d44b-4e0f-bacd-5463a8eb939d",
         "Value": {
           "Name": "Battery Bank",
-          "Description": "Stores power for a ship",
+          "DescriptionFormula": "'Stores power for a ship'",
           "ID": "1de23a8b-d44b-4e0f-bacd-5463a8eb939d",
           "MassFormula": "Ability('Mass')",
           "VolumeFormula": "Ability('Mass')",
@@ -128,26 +128,26 @@
             {
               "Name": "Mass",
               "Units": "kg",
-              "Description": "Mass of the bank",
+              "DescriptionFormula": "'Mass of the bank'",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "25000",
               "MinFormula": "1000",
               "StepFormula": "1",
-              "AbilityFormula": "1500"
+              "AttributeFormula": "1500"
             },
             {
               "Name": "Energy Storage",
               "Units": "J",
-              "Description": "Energy capacity of this part",
+              "DescriptionFormula": "'Energy capacity of this part'",
               "GuiHint": "GuiTextDisplay",
-              "AbilityFormula": "Ability('Mass') * 500000"
+              "AttributeFormula": "Ability('Mass') * 500000"
             },
             {
               "Name": "DB",
-              "Description": "",
+              "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AbilityFormula": "DataBlobArgs(GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Energy Storage'))",
-              "AbilityDataBlobType": "Pulsar4X.ECSLib.EnergyStoreAtb"
+              "AttributeFormula": "DataBlobArgs(GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Energy Storage'))",
+              "AttributeType": "Pulsar4X.ECSLib.EnergyStoreAtb"
             }
           ]
         }

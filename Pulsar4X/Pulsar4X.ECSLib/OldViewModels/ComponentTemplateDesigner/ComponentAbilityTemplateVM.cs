@@ -212,13 +212,13 @@ namespace Pulsar4X.ECSLib
         public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentTemplateAttributeSD attributeSD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
         {
             Name = attributeSD.Name;
-            Description = attributeSD.Description;
+            Description = attributeSD.DescriptionFormula;
             SelectedGuiHint.SelectedIndex = (int)attributeSD.GuiHint;
-            if (attributeSD.AbilityDataBlobType != null)
+            if (attributeSD.AttributeType != null)
             {
-                AbilityDataBlobType = attributeSD.AbilityDataBlobType;
+                AbilityDataBlobType = attributeSD.AttributeType;
             }
-            AbilityFormula = attributeSD.AbilityFormula;
+            AbilityFormula = attributeSD.AttributeFormula;
             MinFormula = attributeSD.MinFormula;
             MaxFormula = attributeSD.MaxFormula;
             StepFormula = attributeSD.StepFormula;
@@ -257,8 +257,8 @@ namespace Pulsar4X.ECSLib
 
         private string _minMaxTTT = "In this mode the component designer will display a slider for the user to select a value between the min and max values.";
         private string _techSelectionTTT = "In this mode the component designer will display a combo box for the user to select from a list of tech, only tech researched will be shown.";
-        private string _textDisplayTTT = "In this mode the component designer will display the AbilityFormula";
-        private string _noneTTT = "In this mode the component designer will not display anything, used for; \r\nUse for hidden AbilityFormula calcs. \r\nUse in conjunction with Datablob type and args. \r\nUse with ItemDictionary and EnumDict(myEnum)";
+        private string _textDisplayTTT = "In this mode the component designer will display the AttributeFormula";
+        private string _noneTTT = "In this mode the component designer will not display anything, used for; \r\nUse for hidden AttributeFormula calcs. \r\nUse in conjunction with Datablob type and args. \r\nUse with ItemDictionary and EnumDict(myEnum)";
 
         private void DeleteMe()
         {
@@ -322,10 +322,10 @@ namespace Pulsar4X.ECSLib
         {
             ComponentTemplateAttributeSD sd = new ComponentTemplateAttributeSD();
             sd.Name = Name;
-            sd.Description = Description;
-            sd.AbilityDataBlobType = AbilityDataBlobType;
+            sd.DescriptionFormula = Description;
+            sd.AttributeType = AbilityDataBlobType;
             sd.GuiHint = SelectedGuiHint.GetKey();
-            sd.AbilityFormula = AbilityFormula;
+            sd.AttributeFormula = AbilityFormula;
             sd.MinFormula = MinFormula;
             sd.MaxFormula = MaxFormula;
             sd.StepFormula = StepFormula;
