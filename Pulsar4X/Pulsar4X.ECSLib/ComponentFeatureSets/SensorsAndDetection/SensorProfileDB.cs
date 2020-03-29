@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
         /// Cross section in meters squared. 
         /// </summary>
         /// <exception cref="Exception"></exception>
-        internal double TargetCrossSection_msq
+        public double TargetCrossSection_msq
         {
             get
             {
@@ -31,7 +31,8 @@ namespace Pulsar4X.ECSLib
                     return (double)_targetCrossSection;
                 else if (this.OwningEntity.HasDataBlob<MassVolumeDB>())
                     return Math.PI * Math.Pow(this.OwningEntity.GetDataBlob<MassVolumeDB>().RadiusInM, 2);
-                else throw new Exception("Parent Entity does not have an MassVolumeDB");
+                else return 0;
+                    //throw new Exception("Parent Entity does not have an MassVolumeDB");
             }
         }
 
@@ -45,7 +46,7 @@ namespace Pulsar4X.ECSLib
         /// This dictionary gets replaced frequently by SetReflectedEMSig()
         /// </summary>
         /// <value>The reflected EMS pectra.</value>
-        internal Dictionary<EMWaveForm, double> ReflectedEMSpectra { get; set; } = new Dictionary<EMWaveForm, double>();
+        public Dictionary<EMWaveForm, double> ReflectedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
         internal DateTime LastDatetimeOfReflectionSet = new DateTime();
         internal Vector3 LastPositionOfReflectionSet = new Vector3();
 
@@ -56,7 +57,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <key>defines the average and dropout wavelengths in nanometers</key>
         /// <value>the volume or magnatude of the spectra</value>
-        internal Dictionary<EMWaveForm, double> EmittedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
+        public Dictionary<EMWaveForm, double> EmittedEMSpectra { get; } = new Dictionary<EMWaveForm, double>();
 
         public SensorProfileDB() { }
 

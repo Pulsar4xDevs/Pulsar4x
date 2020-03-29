@@ -33,21 +33,29 @@ namespace Pulsar4X.ECSLib
     public class SensorReceverAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         [JsonProperty]
-        internal EMWaveForm RecevingWaveformCapabilty;
-        [JsonProperty]
+        public EMWaveForm RecevingWaveformCapabilty { get; internal set; }
+        
         /// <summary>
         /// Sensitivity at the ideal wavelength, lower is better, 0 is (imposible) best. should not be negitive. 
         /// </summary>
-        internal double BestSensitivity_kW;//sensitivity at ideal wavelength
         [JsonProperty]
+        public double BestSensitivity_kW { get; internal set; }//sensitivity at ideal wavelength
+        
         /// <summary>
         /// The sensitivity at worst detectable wavelengths, lower is better, should be higher than BestSensitivity_kW
         /// </summary>
-        internal double WorstSensitivity_kW;// sensitivity at worst detectable wavelengths
         [JsonProperty]
-        internal float Resolution; //will give more details on the target. low res will detect *something* but not *what*
+        public double WorstSensitivity_kW { get; internal set; } // sensitivity at worst detectable wavelengths
+        /// <summary>
+        /// In MegaPixels
+        /// </summary>
         [JsonProperty]
-        internal int ScanTime; //the time it takes to complete a full 360 degree sweep. 
+        public float Resolution { get; internal set; } //will give more details on the target. low res will detect *something* but not *what*
+        /// <summary>
+        /// In Seconds
+        /// </summary>
+        [JsonProperty]
+        public int ScanTime { get; internal set; } //the time it takes to complete a full 360 degree sweep. 
         //internal int Size; //basicly increases sensitivity at the cost of mass
 
 

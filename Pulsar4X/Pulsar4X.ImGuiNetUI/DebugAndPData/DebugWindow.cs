@@ -29,7 +29,11 @@ namespace Pulsar4X.SDL2UI
                 }
             }
         } 
+        
         private string _selectedEntityName;
+        
+        SensorReceverAtbDB _selectedReceverAtb;
+        
         SystemState _systemState;
         public SystemState systemState{get{return _systemState;} set{_systemState = value;}}
 
@@ -589,6 +593,8 @@ namespace Pulsar4X.SDL2UI
                                     }
                                 }
                             }
+
+
 
                         }
                     }

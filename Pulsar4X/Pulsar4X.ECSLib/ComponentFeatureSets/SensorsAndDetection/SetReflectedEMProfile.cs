@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Pulsar4X.ECSLib
 {
-    internal class SetReflectedEMProfile// : IHotloopProcessor
+    public class SetReflectedEMProfile// : IHotloopProcessor
     {
         /*
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(60);
@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
         }
         */
 
-        internal static void SetEntityProfile(Entity entity, DateTime atDate)
+        public static void SetEntityProfile(Entity entity, DateTime atDate)
         {
             var position = entity.GetDataBlob<PositionDB>();
             var sensorSig = entity.GetDataBlob<SensorProfileDB>();

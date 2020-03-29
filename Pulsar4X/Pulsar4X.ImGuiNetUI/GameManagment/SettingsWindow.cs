@@ -56,6 +56,12 @@ namespace Pulsar4X.SDL2UI
                     {
                         DebugWindow.GetInstance().ToggleActive();
                     }
+
+                    bool sensorActive = SensorDraw.GetInstance().GetActive();
+                    if (ImGui.Checkbox("Show Sensor Draw", ref sensorActive))
+                    {
+                        SensorDraw.GetInstance().ToggleActive();
+                    }
                     if (ImGui.Checkbox("Show Pulsar GUI Debug Window", ref debugActive))
                     {
                         DebugGUIWindow.GetInstance().ToggleActive();
