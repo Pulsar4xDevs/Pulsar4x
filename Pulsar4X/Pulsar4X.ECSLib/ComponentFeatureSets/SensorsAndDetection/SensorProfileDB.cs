@@ -30,7 +30,10 @@ namespace Pulsar4X.ECSLib
                 if (_targetCrossSection != null)
                     return (double)_targetCrossSection;
                 else if (this.OwningEntity.HasDataBlob<MassVolumeDB>())
-                    return Math.PI * Math.Pow(this.OwningEntity.GetDataBlob<MassVolumeDB>().RadiusInM, 2);
+                {
+                    _targetCrossSection = Math.PI * Math.Pow(this.OwningEntity.GetDataBlob<MassVolumeDB>().RadiusInM, 2);
+                    return (double)_targetCrossSection;
+                }
                 else return 0;
                     //throw new Exception("Parent Entity does not have an MassVolumeDB");
             }

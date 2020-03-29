@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
                 targetPosition = detectableEntity.GetDataBlob<PositionDB>();
             else throw new NotImplementedException("This might be a colony on a planet, not sure how I'll handle that yet");
  
-            var distance = PositionDB.GetDistanceBetween_AU(receverPos, targetPosition);
+            var distance = PositionDB.GetDistanceBetween_m(receverPos, targetPosition);
             SensorReturnValues detectionValues = DetectonQuality(receverDB, AttenuatedForDistance(sensorProfile, distance));
             SensorInfoDB sensorInfo;
             if (detectionValues.SignalStrength_kW > 0.0)

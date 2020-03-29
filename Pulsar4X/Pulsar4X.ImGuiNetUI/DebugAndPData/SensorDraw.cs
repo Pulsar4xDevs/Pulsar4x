@@ -12,7 +12,8 @@ namespace Pulsar4X.SDL2UI
         private string[] _potentialTargetNames;
         private int _targetIndex = -1;
         private Entity _targetEntity;
-
+        private SensorProfileDB _targetSensorProfile;
+        
         private SystemState _selectedStarSysState;
         private StarSystem _selectedStarSys => _selectedStarSysState.StarSystem;
 
@@ -96,9 +97,9 @@ namespace Pulsar4X.SDL2UI
                                     _recever[i + 1] = p1;
                                     _recever[i + 2] = p2;
 
-                                    if (x0_lowWave > lowestWave)
+                                    if (x0_lowWave < lowestWave)
                                         lowestWave = x0_lowWave;
-                                    if (x2_highWave < highestWave)
+                                    if (x2_highWave > highestWave)
                                         highestWave = x2_highWave;
                                     if (y0_2_ > lowestMag)
                                         lowestMag = y0_2_;
@@ -130,8 +131,11 @@ namespace Pulsar4X.SDL2UI
                         
                         ImGui.Text("lowest_x: " + lowestWave);
                         ImGui.Text("highest_x: " + highestWave);
-                        ImGui.Text("lowest_y" + highestMag);
-                        ImGui.Text("highest_y" + lowestMag);
+                        ImGui.Text("lowest_y" + lowestMag);
+                        ImGui.Text("highest_y" + highestMag);
+                        if(_targetSensorProfile != null)
+                            ImGui.Text("target cross section" + _targetSensorProfile.TargetCrossSection_msq);
+                        
                         
                         ImDrawListPtr draw_list = ImGui.GetWindowDrawList();
                         uint borderColour = ImGui.ColorConvertFloat4ToU32(new Vector4(50, 50, 50, 255));
@@ -198,11 +202,11 @@ namespace Pulsar4X.SDL2UI
 
                 void SetTargetData()
                 {
-                    var sensorProfile = _targetEntity.GetDataBlob<SensorProfileDB>();
-                    if (sensorProfile.ReflectedEMSpectra.Count == 0)
+                    _targetSensorProfile = _targetEntity.GetDataBlob<SensorProfileDB>();
+                    if (_targetSensorProfile.ReflectedEMSpectra.Count == 0)
                         SetReflectedEMProfile.SetEntityProfile(_targetEntity, _state.PrimarySystemDateTime);
-                    var emitted = sensorProfile.EmittedEMSpectra;
-                    var reflected = sensorProfile.ReflectedEMSpectra;
+                    var emitted = _targetSensorProfile.EmittedEMSpectra;
+                    var reflected = _targetSensorProfile.ReflectedEMSpectra;
 
                     _reflected = new Vector2[reflected.Count * 3];
                     _emmitted = new Vector2[emitted.Count * 3];
@@ -213,14 +217,26 @@ namespace Pulsar4X.SDL2UI
                         float mid = (float)waveformkvp.Key.WavelengthAverage_nm;
                         float high = (float)waveformkvp.Key.WavelengthMax_nm;
                         float magnatude = (float)waveformkvp.Value;
+                        if (float.IsInfinity(magnatude))
+                            magnatude = float.MaxValue;
                         
                         Vector2 p0 = new Vector2(low, 0);
                         Vector2 p1 = new Vector2(mid, magnatude);
-                        Vector2 p2 =  new Vector2(high, 0);
+                        Vector2 p2 = new Vector2(high, 0);
 
                         _reflected[i] = p0;
                         _reflected[i + 1] = p1;
                         _reflected[i + 2] = p2;
+
+
+
+                        if (low < lowestWave)
+                            lowestWave = low;
+                        if (high > highestWave)
+                            highestWave = high;
+                        if (magnatude > highestMag)
+                            highestMag = magnatude;
+                        
                     }
                     
                     i = 0;
@@ -230,6 +246,8 @@ namespace Pulsar4X.SDL2UI
                         float mid = (float)waveformkvp.Key.WavelengthAverage_nm;
                         float high = (float)waveformkvp.Key.WavelengthMax_nm;
                         float magnatude = (float)waveformkvp.Value;
+                        if (float.IsInfinity(magnatude))
+                            magnatude = float.MaxValue;
                         
                         Vector2 p0 = new Vector2(low, 0);
                         Vector2 p1 = new Vector2(mid, magnatude);
@@ -238,6 +256,13 @@ namespace Pulsar4X.SDL2UI
                         _emmitted[i] = p0;
                         _emmitted[i + 1] = p1;
                         _emmitted[i + 2] = p2;
+                        
+                        if (low < lowestWave)
+                            lowestWave = low;
+                        if (high > highestWave)
+                            highestWave = high;
+                        if (magnatude > highestMag)
+                            highestMag = magnatude;
                     }
                     
                 }
