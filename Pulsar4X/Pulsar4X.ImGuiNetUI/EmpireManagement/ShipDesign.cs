@@ -380,7 +380,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.NextColumn();
             ImGui.Text("Mass");
             ImGui.NextColumn();
-            ImGui.Text("Volume");
+            ImGui.Text("Volume_km3");
             ImGui.NextColumn();
             ImGui.Separator();
 
@@ -402,7 +402,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn();
                 ImGui.Text(design.Mass.ToString());
                 ImGui.NextColumn();
-                ImGui.Text(design.Volume.ToString());
+                ImGui.Text(design.Volume_m3.ToString());
                 ImGui.NextColumn();
 
             }

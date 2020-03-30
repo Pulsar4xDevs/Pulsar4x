@@ -598,8 +598,8 @@ namespace Pulsar4X.ECSLib
                 varNode.InnerText = massVolumeDB.RadiusInKM.ToString("N0");
                 bodyNode.AppendChild(varNode);
 
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Volume", "NS");
-                varNode.InnerText = massVolumeDB.Volume.ToString("N0");
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Volume_km3", "NS");
+                varNode.InnerText = massVolumeDB.Volume_km3.ToString("N0");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SurfaceGravity", "NS");

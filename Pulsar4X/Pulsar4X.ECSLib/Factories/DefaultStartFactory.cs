@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
             SystemBodyFactory _systemBodyFactory = new SystemBodyFactory(GalaxyGen);
 
             SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
-            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
+            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius_AU(2.2e14, Distance.KmToAU(11));
             NameDB halleysNameDB = new NameDB("testName");
             double halleysSemiMajAxis = 17.834; //AU
             double halleysEccentricity = 0.96714;

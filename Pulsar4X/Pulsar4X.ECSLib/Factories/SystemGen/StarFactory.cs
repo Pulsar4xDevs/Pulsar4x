@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
 
             starName += " " + (char)('A' + starIndex) + " " + spectralType + subDivision + luminosityClass;
 
-            MassVolumeDB starMassVolumeDB = MassVolumeDB.NewFromMassAndRadius(mass, radius);
+            MassVolumeDB starMassVolumeDB = MassVolumeDB.NewFromMassAndRadius_AU(mass, radius);
             StarInfoDB starInfoDB = new StarInfoDB {Age = age, Class = starClass, Luminosity = luminosity, SpectralType = spectralType, Temperature = temperature, LuminosityClass = luminosityClass, SpectralSubDivision = subDivision};
             PositionDB starPositionDB = new PositionDB(new Vector3(0,0,0), system.Guid);
             NameDB starNameDB = new NameDB(starName);
@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
                 double randomSelection = system.RNG.NextDouble();
 
                 // Generate the star's datablobs.
-                MassVolumeDB starMVDB = MassVolumeDB.NewFromMassAndRadius(
+                MassVolumeDB starMVDB = MassVolumeDB.NewFromMassAndRadius_AU(
                     GMath.SelectFromRange(_galaxyGen.Settings.StarMassBySpectralType[starType], randomSelection),
                     GMath.SelectFromRange(_galaxyGen.Settings.StarRadiusBySpectralType[starType], randomSelection));
                 

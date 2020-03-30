@@ -298,7 +298,7 @@ namespace Pulsar4X.ECSLib
             var tempDegreesC = starInfoDB.Temperature;
             var kelvin = tempDegreesC + 273.15;
             var wavelength = 2.9 * Math.Pow(10, 6) / kelvin;
-            var magnitudeInKW = starInfoDB.Luminosity * 3.827e23; //tempDegreesC / starMassVolumeDB.Volume; //maybe this should be lum / volume?
+            var magnitudeInKW = starInfoDB.Luminosity * 3.827e23; //tempDegreesC / starMassVolumeDB.Volume_km3; //maybe this should be lum / volume?
             EMWaveForm waveform = new EMWaveForm()
             {
                 WavelengthAverage_nm = wavelength,
@@ -325,7 +325,7 @@ namespace Pulsar4X.ECSLib
             var tempDegreesC = sysBodyInfoDB.BaseTemperature;
             var kelvin = tempDegreesC + 273.15;
             var wavelength = 2.9 * Math.Pow(10, 6) / kelvin;
-            var magnitude = tempDegreesC / massVolDB.Volume;
+            var magnitude = tempDegreesC / massVolDB.Volume_km3;
             EMWaveForm waveform = new EMWaveForm()
             {
                 WavelengthAverage_nm = wavelength,

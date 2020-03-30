@@ -59,7 +59,7 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
             SystemBodyInfoDB mercuryBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.068f }; //Albedo = 0.068f
-            MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
+            MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius_AU(3.3022E23, Distance.KmToAU(2439.7));
             NameDB mercuryNameDB = new NameDB("LOLXDWTF");
             double mercurySemiMajAxis = 0.387098;
             double mercuryEccentricity = 0.205630;
@@ -78,7 +78,7 @@ namespace Pulsar4X.ECSLib
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, mercuryBodyDB, mercuryMVDB);
 
             SystemBodyInfoDB venusBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.77f };
-            MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.KmToAU(6051.8));
+            MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius_AU(4.8676E24, Distance.KmToAU(6051.8));
             NameDB venusNameDB = new NameDB("AYLMAOROFL");
             double venusSemiMajAxis = 0.72333199;
             double venusEccentricity = 0.00677323;
@@ -94,7 +94,7 @@ namespace Pulsar4X.ECSLib
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, venusBodyDB, venusMVDB);
 
             SystemBodyInfoDB earthBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.306f };
-            MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius(5.9726E24, Distance.KmToAU(6378.1));
+            MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius_AU(5.9726E24, Distance.KmToAU(6378.1));
             NameDB earthNameDB = new NameDB("OMG");
             double earthSemiMajAxis = 1.00000011;
             double earthEccentricity = 0.01671022;
@@ -117,7 +117,7 @@ namespace Pulsar4X.ECSLib
 
 
             SystemBodyInfoDB lunaBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true };
-            MassVolumeDB lunaMVDB = MassVolumeDB.NewFromMassAndRadius(0.073E24, Distance.KmToAU(1738.14));
+            MassVolumeDB lunaMVDB = MassVolumeDB.NewFromMassAndRadius_AU(0.073E24, Distance.KmToAU(1738.14));
             NameDB lunaNameDB = new NameDB("NOWAY");
             double lunaSemiMajAxis = Distance.KmToAU(0.3844E6);
             double lunaEccentricity = 0.0549;
@@ -136,7 +136,7 @@ namespace Pulsar4X.ECSLib
 
 
             SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
-            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
+            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius_AU(2.2e14, Distance.KmToAU(11));
             NameDB halleysNameDB = new NameDB("ASSHOLE");
             double halleysSemiMajAxis = 17.834; //AU
             double halleysEccentricity = 0.96714;
@@ -176,7 +176,7 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
             SystemBodyInfoDB mercuryBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.068f }; //Albedo = 0.068f
-            MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
+            MassVolumeDB mercuryMVDB = MassVolumeDB.NewFromMassAndRadius_AU(3.3022E23, Distance.KmToAU(2439.7));
             NameDB mercuryNameDB = new NameDB("Mercury");
             double mercurySemiMajAxis = 0.387098;
             double mercuryEccentricity = 0.205630;
@@ -193,7 +193,7 @@ namespace Pulsar4X.ECSLib
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, mercuryBodyDB, mercuryMVDB);
 
             SystemBodyInfoDB venusBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.77f };
-            MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius(4.8676E24, Distance.KmToAU(6051.8));
+            MassVolumeDB venusMVDB = MassVolumeDB.NewFromMassAndRadius_AU(4.8676E24, Distance.KmToAU(6051.8));
             NameDB venusNameDB = new NameDB("Venus");
             double venusSemiMajAxis = 0.72333199;
             double venusEccentricity = 0.00677323;
@@ -209,7 +209,7 @@ namespace Pulsar4X.ECSLib
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, venusBodyDB, venusMVDB);
 
             SystemBodyInfoDB earthBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.306f };
-            MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius(5.9726E24, Distance.KmToAU(6378.1));
+            MassVolumeDB earthMVDB = MassVolumeDB.NewFromMassAndRadius_AU(5.9726E24, Distance.KmToAU(6378.1));
             NameDB earthNameDB = new NameDB("Earth");
             double earthSemiMajAxis = 1.00000011;
             double earthEccentricity = 0.01671022;
@@ -232,7 +232,7 @@ namespace Pulsar4X.ECSLib
 
 
             SystemBodyInfoDB lunaBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true };
-            MassVolumeDB lunaMVDB = MassVolumeDB.NewFromMassAndRadius(0.073E24, Distance.KmToAU(1738.14));
+            MassVolumeDB lunaMVDB = MassVolumeDB.NewFromMassAndRadius_AU(0.073E24, Distance.KmToAU(1738.14));
             NameDB lunaNameDB = new NameDB("Luna");
             double lunaSemiMajAxis = Distance.KmToAU(0.3844E6);
             double lunaEccentricity = 0.0549;
@@ -251,7 +251,7 @@ namespace Pulsar4X.ECSLib
 
 
             SystemBodyInfoDB marsBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo=0.25f };
-            MassVolumeDB marsMVDB = MassVolumeDB.NewFromMassAndRadius(0.64174E24, Distance.KmToAU(3396.2));
+            MassVolumeDB marsMVDB = MassVolumeDB.NewFromMassAndRadius_AU(0.64174E24, Distance.KmToAU(3396.2));
             NameDB marsNameDB = new NameDB("Mars");
             double marsSemiMajAxis = Distance.KmToAU(227.92E6);
             double marsEccentricity = 0.0934; //wiki says .0934
@@ -274,7 +274,7 @@ namespace Pulsar4X.ECSLib
 
 
             SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
-            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
+            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius_AU(2.2e14, Distance.KmToAU(11));
             NameDB halleysNameDB = new NameDB("Halleys Comet");
             double halleysSemiMajAxis = 17.834; //AU
             double halleysEccentricity = 0.96714;
@@ -363,7 +363,7 @@ namespace Pulsar4X.ECSLib
                 NameDB planetNameDB = new NameDB("planetE" + i);
 
                 SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
-                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
+                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius_AU(3.3022E23, Distance.KmToAU(2439.7));
                 PositionDB planetPositionDB = new PositionDB(sol.ID);
                 planetEccentricity = i * 2 / 16.0;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
@@ -386,7 +386,7 @@ namespace Pulsar4X.ECSLib
             {
                 NameDB planetNameDB = new NameDB("planetL" + i);
                 SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
-                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
+                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius_AU(3.3022E23, Distance.KmToAU(2439.7));
                 PositionDB planetPositionDB = new PositionDB(sol.ID);
                 planetLoP = i * 15;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
@@ -441,7 +441,7 @@ namespace Pulsar4X.ECSLib
                 NameDB planetNameDB = new NameDB("planet"+i);
 
                 SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
-                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
+                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius_AU(3.3022E23, Distance.KmToAU(2439.7));
                 PositionDB planetPositionDB = new PositionDB(system.Guid);
                 planetEccentricity = i / 16.0;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);
@@ -475,7 +475,7 @@ namespace Pulsar4X.ECSLib
             {
                 NameDB planetNameDB = new NameDB("planet"+i);
                 SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true };
-                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius(3.3022E23, Distance.KmToAU(2439.7));
+                MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius_AU(3.3022E23, Distance.KmToAU(2439.7));
                 PositionDB planetPositionDB = new PositionDB(system.Guid);
                 planetLoP = i * 15;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.Mass, planetMVDB.Mass, planetSemiMajAxis, planetEccentricity, planetInclination, planetLoAN, planetLoP, planetMeanLongd, GalaxyGen.Settings.J2000);

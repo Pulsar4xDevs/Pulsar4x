@@ -18,6 +18,9 @@ namespace Pulsar4X.ECSLib
         public int DesignVersion = 0;
         public bool IsObsolete = false;
         public int Mass { get; }
+        /// <summary>
+        /// m^3
+        /// </summary>
         public double Volume;
         public List<(ComponentDesign design, int count)> Components;
         public (ArmorSD type, float thickness) Armor;
@@ -60,7 +63,7 @@ namespace Pulsar4X.ECSLib
                 Mass += component.design.Mass * component.count;
                 CrewReq += component.design.CrewReq;
                 CreditCost += component.design.CreditCost;
-                
+                Volume += component.design.Volume_m3 * component.count;
                 if (ComponentCosts.ContainsKey(component.design.ID))
                 {
                     ComponentCosts[component.design.ID] = ComponentCosts[component.design.ID] + component.count;

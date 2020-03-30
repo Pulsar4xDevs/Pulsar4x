@@ -320,9 +320,10 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     MassVolumeDB mvdb = SelectedEntity.GetDataBlob<MassVolumeDB>();
                                     ImGui.Text("Mass " + mvdb.Mass + "Kg");
-                                    ImGui.Text("Volume " + mvdb.Volume + "Km^3");
+                                    ImGui.Text("Volume " + mvdb.Volume_km3 + " Km^3");
+                                    ImGui.Text("Volume " + mvdb.Volume_m3 + " m^3");
                                     ImGui.Text("Density " + mvdb.Density + "g/cm^3");
-                                    ImGui.Text("Radius " + mvdb.RadiusInAU + "Km");
+                                    ImGui.Text("Radius " + mvdb.RadiusInM + "m");
                                 }
 
                             }
@@ -573,10 +574,51 @@ namespace Pulsar4X.SDL2UI
                                 }
                             }
 
+                            if (_selectedEntity.HasDataBlob<SensorProfileDB>() && ImGui.CollapsingHeader("SensorProfile"))
+                            {
+                                var profile = _selectedEntity.GetDataBlob<SensorProfileDB>();
+                                ImGui.Text("Target CrossSection: " + profile.TargetCrossSection_msq + " m^2");
+                                ImGui.Text("Emitted Count: " + profile.EmittedEMSpectra.Count);
+                                ImGui.Text("Reflected Count: " + profile.ReflectedEMSpectra.Count);
+
+                                double highestMagnatude = 0;
+                                double atWavelength = 0;
+                                foreach (var kvp in profile.EmittedEMSpectra)
+                                {
+                                    if (kvp.Value > highestMagnatude)
+                                    {
+                                        highestMagnatude = kvp.Value;
+                                        atWavelength = kvp.Key.WavelengthAverage_nm;
+                                    }
+                                }
+                                
+                                ImGui.Text("Highest Emitted Signal: " + highestMagnatude + " kw");
+                                ImGui.Text("at wavelength : " + atWavelength + " nm");
+                                
+                                highestMagnatude = 0;
+                                atWavelength = 0;
+                                foreach (var kvp in profile.ReflectedEMSpectra)
+                                {
+                                    if (kvp.Value > highestMagnatude)
+                                    {
+                                        highestMagnatude = kvp.Value;
+                                        atWavelength = kvp.Key.WavelengthAverage_nm;
+                                    }
+                                }
+                                
+                                ImGui.Text("Highest Reflected Signal: " + highestMagnatude + " kw");
+                                ImGui.Text("at wavelength : " + atWavelength + " nm");
+                                
+                            }
                             
+                            
+
                             if (SelectedEntity.HasDataBlob<SensorInfoDB>())
                             {
                                 var actualEntity = SelectedEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
+                                
+                                
+                                
                                 if (actualEntity.IsValid && actualEntity.HasDataBlob<AsteroidDamageDB>())
                                 {
                                     var dmgDB = actualEntity.GetDataBlob<AsteroidDamageDB>();

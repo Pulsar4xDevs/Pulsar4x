@@ -475,7 +475,7 @@ namespace Pulsar4X.ECSLib
 
             _expression.Parameters["xMassx"] = new Expression("Mass"); //unknown string will force it to look in the NCalcPulsarParameters or something
             //see http://ncalc.codeplex.com/wikipage?title=parameters&referringTitle=Home (Dynamic Parameters)
-            _expression.Parameters["xVolumex"] = new Expression("Volume");
+            _expression.Parameters["xVolumex"] = new Expression("Volume_km3");
             _expression.Parameters["xCrewx"] = new Expression("Crew");
             _expression.Parameters["xHTKx"] = new Expression("HTK");
             _expression.Parameters["xResearchCostx"] = new Expression("ResearchCost");
@@ -502,7 +502,7 @@ namespace Pulsar4X.ECSLib
                     args.Result = _designer.MassValue;
                     break;
                 
-                case "Volume":
+                case "Volume_km3":
                 
                     MakeThisDependant(_designer.VolumeFormula);
                     args.Result = _designer.VolumeFormula;

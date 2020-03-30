@@ -107,10 +107,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         public static RawBmp CreateComponentByteArray(ComponentDesign componentDesign, byte typeID)
         {
             //1 pixel = 1iter resolution
-            var vol = componentDesign.Volume * 1000;
+            var vol = componentDesign.Volume_m3 * 1000;
 
             double floatdepth = Math.Pow(componentDesign.AspectRatio, (float)1 / 3);
-            double CSA = componentDesign.Volume / floatdepth;
+            double CSA = componentDesign.Volume_m3 / floatdepth;
             double floatwidth = Math.Sqrt(CSA) * (double)componentDesign.AspectRatio;
             int depth = (int)floatdepth;
             int width = (int)floatwidth;

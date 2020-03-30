@@ -153,7 +153,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.BeginTabItem("Cost");
                     
                     ImGui.Text("Mass");
-                    ImGui.Text("Volume");
+                    ImGui.Text("Volume_km3");
                     ImGui.Text("Crew Requred"); 
                     ImGui.Text("Cost");
                     ImGui.Text("Research Cost");
@@ -163,7 +163,7 @@ namespace Pulsar4X.SDL2UI
 
                     
                     ImGui.Text(Misc.StringifyMass(_componentDesigner.MassValue));
-                    ImGui.Text(Misc.StringifyVolume(_componentDesigner.VolumeValue));
+                    ImGui.Text(Misc.StringifyVolume(_componentDesigner.VolumeM3Value));
                     ImGui.Text(_componentDesigner.CrewReqValue.ToString());
                     ImGui.Text(_componentDesigner.CreditCostValue.ToString());
                     ImGui.Text(_componentDesigner.ResearchCostValue.ToString() + " RP");
