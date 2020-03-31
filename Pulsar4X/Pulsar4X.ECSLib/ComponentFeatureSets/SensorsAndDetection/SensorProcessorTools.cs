@@ -297,7 +297,8 @@ namespace Pulsar4X.ECSLib
 
             var tempDegreesC = starInfoDB.Temperature;
             var kelvin = tempDegreesC + 273.15;
-            var wavelength = 2.9 * Math.Pow(10, 6) / kelvin;
+            double b = 2898000; //Wien's displacement constant for nanometers.
+            var wavelength = b / kelvin; //Wien's displacement law https://en.wikipedia.org/wiki/Wien%27s_displacement_law
             var magnitudeInKW = starInfoDB.Luminosity * 3.827e23; //tempDegreesC / starMassVolumeDB.Volume_km3; //maybe this should be lum / volume?
             EMWaveForm waveform = new EMWaveForm()
             {
@@ -324,7 +325,8 @@ namespace Pulsar4X.ECSLib
         {
             var tempDegreesC = sysBodyInfoDB.BaseTemperature;
             var kelvin = tempDegreesC + 273.15;
-            var wavelength = 2.9 * Math.Pow(10, 6) / kelvin;
+            double b = 2898000; //Wien's displacement constant for nanometers.
+            var wavelength = b / kelvin; //Wien's displacement law https://en.wikipedia.org/wiki/Wien%27s_displacement_law
             var magnitude = tempDegreesC / massVolDB.Volume_km3;
             EMWaveForm waveform = new EMWaveForm()
             {

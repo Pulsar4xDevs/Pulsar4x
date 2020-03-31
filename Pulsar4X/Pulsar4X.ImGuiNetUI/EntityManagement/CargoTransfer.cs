@@ -135,7 +135,8 @@ namespace Pulsar4X.SDL2UI
             {
                 if (!_storageDatablob.StoredCargoTypes.ContainsKey(key))
                 {
-                    CargoResourceStores.Remove(_cargoResourceStoresDict[key]);
+                    var storvm = _cargoResourceStoresDict[key];
+                    CargoResourceStores.Remove(storvm);
                     _cargoResourceStoresDict.Remove(key);
                 }
             }

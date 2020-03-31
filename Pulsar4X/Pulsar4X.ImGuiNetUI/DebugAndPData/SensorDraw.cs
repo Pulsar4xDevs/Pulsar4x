@@ -25,7 +25,7 @@ namespace Pulsar4X.SDL2UI
         private double highestWave = 0;
         private double lowestMag = 0;
         private double highestMag = 0;
-        private double scalingFactor = 0.1;
+        private Vector2 scalingFactor = new Vector2(0.1f, 0.1f);
         private SensorDraw() 
         {
               
@@ -76,35 +76,46 @@ namespace Pulsar4X.SDL2UI
                             {
                                 _selectedReceverAtb = new SensorReceverAtbDB[recevers.Count];
                                 _recever = new Vector2[recevers.Count * 3];
+                                
+                                
+
+                                
                                 int i = 0;
                                 foreach (var recever in recevers)
                                 {
                                     _selectedReceverAtb[i] = recever.Design.GetAttribute<SensorReceverAtbDB>();
                                     
                                     
-                                    float x0_lowWave = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthMin_nm;
-                                    float x1_midWave = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthAverage_nm;
-                                    float x2_highWave = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthMax_nm;
+                                    float low = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthMin_nm;
+                                    float mid = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthAverage_nm;
+                                    float high = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthMax_nm;
 
-                                    float y0_2_ = (float)_selectedReceverAtb[i].WorstSensitivity_kW;
-                                    float y1_magnitude = (float)_selectedReceverAtb[i].BestSensitivity_kW;
+                                    float mag1 = (float)_selectedReceverAtb[i].WorstSensitivity_kW;
+                                    float mag2 = (float)_selectedReceverAtb[i].BestSensitivity_kW;
                                     
-                                    Vector2 p0 = new Vector2(x0_lowWave, y0_2_);
-                                    Vector2 p1 = new Vector2(x1_midWave, y1_magnitude);
-                                    Vector2 p2 =  new Vector2(x2_highWave, y0_2_);
+                                    Vector2 p0 = new Vector2(low, mag1);
+                                    Vector2 p1 = new Vector2(mid, mag2);
+                                    Vector2 p2 =  new Vector2(high, mag1);
 
                                     _recever[i] = p0;
                                     _recever[i + 1] = p1;
                                     _recever[i + 2] = p2;
 
-                                    if (x0_lowWave < lowestWave)
-                                        lowestWave = x0_lowWave;
-                                    if (x2_highWave > highestWave)
-                                        highestWave = x2_highWave;
-                                    if (y0_2_ > lowestMag)
-                                        lowestMag = y0_2_;
-                                    if (y1_magnitude > highestMag)
-                                        highestMag = y1_magnitude;
+                                    if (i == 0)
+                                    {                                    
+                                        lowestWave = low;
+                                        lowestMag = mag2;
+                                    }
+
+                                    if (low < lowestWave)
+                                        lowestWave = low;
+                                    if (high > highestWave)
+                                        highestWave = high;
+                                    
+                                    if (mag1 > highestMag)
+                                        highestMag = mag1;
+                                    if (mag2 < lowestMag)
+                                        lowestMag = mag2;
                                     i++;
                                 }
 
@@ -131,37 +142,51 @@ namespace Pulsar4X.SDL2UI
                         
                         ImGui.Text("lowest_x: " + lowestWave);
                         ImGui.Text("highest_x: " + highestWave);
-                        ImGui.Text("lowest_y" + lowestMag);
-                        ImGui.Text("highest_y" + highestMag);
+                        ImGui.Text("lowest_y: " + lowestMag);
+                        ImGui.Text("highest_y: " + highestMag);
                         if(_targetSensorProfile != null)
-                            ImGui.Text("target cross section" + _targetSensorProfile.TargetCrossSection_msq);
+                            ImGui.Text("target cross section: " + _targetSensorProfile.TargetCrossSection_msq);
                         
                         
                         ImDrawListPtr draw_list = ImGui.GetWindowDrawList();
                         uint borderColour = ImGui.ColorConvertFloat4ToU32(new Vector4(50, 50, 50, 255));
-                        uint receverColour = ImGui.ColorConvertFloat4ToU32(new Vector4(50, 200, 50, 255));
+                        
+                        uint receverColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0, 200, 0, 255));
+                        uint receverFill = ImGui.ColorConvertFloat4ToU32(new Vector4(0, 200, 0, 50));
                         uint reflectedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(200, 200, 50, 255));
+                        uint reflectedFill = ImGui.ColorConvertFloat4ToU32(new Vector4(200, 200, 50, 100));
                         uint emittedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(200, 40, 50, 255));
+                        uint emittedFill = ImGui.ColorConvertFloat4ToU32(new Vector4(200, 40, 50, 100));
+                        
                         Vector2 canvas_pos = ImGui.GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
                         Vector2 canvas_size = ImGui.GetContentRegionAvail();
                         Vector2 canvas_endPos = canvas_pos + canvas_size;
-                        
+                        Vector2 waveBounds = new Vector2((float)(highestWave - lowestWave),(float)( highestMag - lowestMag));
 
+                        scalingFactor.X = 1 / (waveBounds.X / canvas_size.X);
+                        scalingFactor.Y = 1 / (waveBounds.Y / canvas_size.Y);
+                        
+                        Vector2 translation = new Vector2
+                        (
+                            (float)(canvas_pos.X - lowestWave * scalingFactor.X), 
+                            (float)(canvas_pos.Y - lowestMag * scalingFactor.Y)  
+                        );
                         
                         draw_list.AddRect(canvas_pos, canvas_endPos, borderColour );
 
+                        
+                        
                         for (int i = 0; i < _recever.Length / 3; i++)
                         {
-
-                            float x0 = (float)(canvas_pos.X + _recever[i].X * scalingFactor);
-                            float y0 = (float)(canvas_pos.Y + _recever[i].Y * scalingFactor);
-                            float x1 = (float)(canvas_pos.X + _recever[i+1].X * scalingFactor);
-                            float y1 = (float)(canvas_pos.Y + _recever[i+1].Y * scalingFactor);
-                            float x2 = (float)(canvas_pos.X + _recever[i+2].X * scalingFactor);
-                            float y2 = (float)(canvas_pos.Y + _recever[i+2].Y * scalingFactor);
                             
-                            draw_list.AddLine(new Vector2(x0, y0), new Vector2(x1, y1), receverColour);
-                            draw_list.AddLine(new Vector2(x1, y1), new Vector2(x2, y2), receverColour);
+
+                            Vector2 p0 = translation + _recever[i] * scalingFactor;
+                            Vector2 p1 = translation + _recever[i+1] * scalingFactor;
+                            Vector2 p2 = translation + _recever[i+2] * scalingFactor;
+                            
+                            draw_list.AddLine(p0, p1, receverColour);
+                            draw_list.AddLine(p1, p2, receverColour);
+                            draw_list.AddTriangleFilled(p0, p1, p2, receverFill);
                         }
  
                         if(_reflected != null)
@@ -169,15 +194,13 @@ namespace Pulsar4X.SDL2UI
                             for (int i = 0; i < _reflected.Length / 3; i++)
                             {
 
-                                float x0 = (float)(canvas_pos.X + _reflected[i].X * scalingFactor);
-                                float y0 = (float)(canvas_pos.Y + _reflected[i].Y * scalingFactor);
-                                float x1 = (float)(canvas_pos.X + _reflected[i + 1].X * scalingFactor);
-                                float y1 = (float)(canvas_pos.Y + _reflected[i + 1].Y * scalingFactor);
-                                float x2 = (float)(canvas_pos.X + _reflected[i + 2].X * scalingFactor);
-                                float y2 = (float)(canvas_pos.Y + _reflected[i + 2].Y * scalingFactor);
-
-                                draw_list.AddLine(new Vector2(x0, y0), new Vector2(x1, y1), reflectedColour);
-                                draw_list.AddLine(new Vector2(x1, y1), new Vector2(x2, y2), reflectedColour);
+                                Vector2 p0 = translation +  _reflected[i] * scalingFactor;
+                                Vector2 p1 = translation + _reflected[i+1] * scalingFactor;
+                                Vector2 p2 = translation + _reflected[i+2] * scalingFactor;
+                            
+                                draw_list.AddLine(p0, p1, reflectedColour);
+                                draw_list.AddLine(p1, p2, reflectedColour);
+                                draw_list.AddTriangleFilled(p0, p1, p2, reflectedFill);
                             }
                         }
                         
@@ -186,15 +209,14 @@ namespace Pulsar4X.SDL2UI
                             for (int i = 0; i < _emmitted.Length / 3; i++)
                             {
 
-                                float x0 = (float)(canvas_pos.X + _emmitted[i].X * scalingFactor);
-                                float y0 = (float)(canvas_pos.Y + _emmitted[i].Y * scalingFactor);
-                                float x1 = (float)(canvas_pos.X + _emmitted[i + 1].X * scalingFactor);
-                                float y1 = (float)(canvas_pos.Y + _emmitted[i + 1].Y * scalingFactor);
-                                float x2 = (float)(canvas_pos.X + _emmitted[i + 2].X * scalingFactor);
-                                float y2 = (float)(canvas_pos.Y + _emmitted[i + 2].Y * scalingFactor);
 
-                                draw_list.AddLine(new Vector2(x0, y0), new Vector2(x1, y1), emittedColour);
-                                draw_list.AddLine(new Vector2(x1, y1), new Vector2(x2, y2), emittedColour);
+                                Vector2 p0 = translation + _emmitted[i] * scalingFactor;
+                                Vector2 p1 = translation + _emmitted[i+1] * scalingFactor;
+                                Vector2 p2 = translation + _emmitted[i+2] * scalingFactor;
+                            
+                                draw_list.AddLine(p0, p1, emittedColour);
+                                draw_list.AddLine(p1, p2, emittedColour);
+                                draw_list.AddTriangleFilled(p0, p1, p2, emittedFill);
                             }
                         }
 
@@ -203,7 +225,7 @@ namespace Pulsar4X.SDL2UI
                 void SetTargetData()
                 {
                     _targetSensorProfile = _targetEntity.GetDataBlob<SensorProfileDB>();
-                    if (_targetSensorProfile.ReflectedEMSpectra.Count == 0)
+                   // if (_targetSensorProfile.ReflectedEMSpectra.Count == 0)
                         SetReflectedEMProfile.SetEntityProfile(_targetEntity, _state.PrimarySystemDateTime);
                     var emitted = _targetSensorProfile.EmittedEMSpectra;
                     var reflected = _targetSensorProfile.ReflectedEMSpectra;

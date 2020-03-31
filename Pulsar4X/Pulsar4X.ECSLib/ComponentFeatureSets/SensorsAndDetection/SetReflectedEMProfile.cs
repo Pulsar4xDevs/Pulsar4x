@@ -52,8 +52,8 @@ namespace Pulsar4X.ECSLib
 
                     foreach (var emitedItem in emmissionDB.EmittedEMSpectra)
                     {
-
-                        var reflectedMagnatude = SensorProcessorTools.AttenuationCalc(emitedItem.Value, distance) * reflectionCoefficent;
+                        var attenuated = SensorProcessorTools.AttenuationCalc(emitedItem.Value, distance);
+                        var reflectedMagnatude = attenuated * reflectionCoefficent;
                         
                         sensorSig.ReflectedEMSpectra.Add(emitedItem.Key, reflectedMagnatude);
                     }

@@ -74,7 +74,7 @@ namespace Pulsar4X.ECSLib
         internal static MassVolumeDB NewFromMassAndRadius_AU(double mass, double radius_au)
         {
             var mvDB = new MassVolumeDB {Mass = mass, RadiusInAU = radius_au, Volume_km3 = CalculateVolume_Km3(radius_au)};
-            mvDB.Density = CalculateDensity2(mass, mvDB.Volume_m3);
+            mvDB.Density = CalculateDensity(mass, mvDB.Volume_m3);
 
             return mvDB;
         }
@@ -82,7 +82,7 @@ namespace Pulsar4X.ECSLib
         internal static MassVolumeDB NewFromMassAndRadius_m(double mass, double radius_m)
         {
             var mvDB = new MassVolumeDB {Mass = mass, RadiusInM = radius_m, Volume_m3 = CalculateVolume_m3(radius_m)};
-            mvDB.Density = CalculateDensity2(mass, mvDB.Volume_m3);
+            mvDB.Density = CalculateDensity(mass, mvDB.Volume_m3);
 
             return mvDB;
         }
@@ -108,7 +108,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         internal static MassVolumeDB NewFromMassAndVolume(double mass, double volume_m3)
         {
-            var density = CalculateDensity2(mass, volume_m3);
+            var density = CalculateDensity(mass, volume_m3);
             var rad = CalculateRadius_m(mass, density);
             var mvDB = new MassVolumeDB { Mass = mass, Volume_m3 = volume_m3, Density = density, RadiusInM = rad };
 
@@ -168,20 +168,12 @@ namespace Pulsar4X.ECSLib
         }
         
         /// <summary>
-        /// Calculate density from mass and volume
+        /// Calculate density from mass(kg) and volume(m^3)
         /// </summary>
         /// <param name="mass">Mass in Kg</param>
-        /// <param name="volume">Volume_km3 in Km^3</param>
+        /// <param name="volume">Volume in m^3</param>
         /// <returns>Density in g/cm^3</returns>
-        public static double CalculateDensity(double mass, double volume)
-        {
-            double densityinkg_m3 = mass / (volume * 1.0e9); // convert volume to meters cube now to make later conversions eaiser.
-
-            // now convert to g/cm^3
-            return densityinkg_m3 * 0.001;
-        }
-
-        public static double CalculateDensity2(double mass, double volume_m3)
+        public static double CalculateDensity(double mass, double volume_m3)
         {
             double densityinkg_m3 = mass / volume_m3; // convert volume to meters cube now to make later conversions eaiser.
 
