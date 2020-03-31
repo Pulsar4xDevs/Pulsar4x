@@ -18,9 +18,12 @@ namespace Pulsar4X.SDL2UI
         private StarSystem _selectedStarSys => _selectedStarSysState.StarSystem;
 
         private SensorReceverAtbDB[] _selectedReceverAtb;
-        private Vector2[] _recever;
-        private Vector2[] _reflected;
-        private Vector2[] _emmitted;
+        private Vector2[] _recevers;
+        private bool[] _drawRecvers;
+        private Vector2[] _reflecters;
+        private bool[] _drawReflectors;
+        private Vector2[] _emmitters;
+        private bool[] _drawEmmiters;
         private double lowestWave = 0;
         private double highestWave = 0;
         private double lowestMag = 0;
@@ -63,7 +66,11 @@ namespace Pulsar4X.SDL2UI
         
         internal override void Display()
         {
-            if (IsActive && _selectedEntitySate != null && ImGui.Begin("Sensor Display", ref IsActive))
+            //
+            if(!IsActive || _selectedEntitySate == null)
+                return;
+            ImGui.SetNextWindowSize(new Vector2(1500, 800));
+            if (ImGui.Begin("Sensor Display", ref IsActive))
             {
                 
                 if (_selectedEntity.HasDataBlob<SensorAbilityDB>())
@@ -75,10 +82,8 @@ namespace Pulsar4X.SDL2UI
                             if (_selectedEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceverAtbDB>(out var recevers))
                             {
                                 _selectedReceverAtb = new SensorReceverAtbDB[recevers.Count];
-                                _recever = new Vector2[recevers.Count * 3];
-                                
-                                
-
+                                _recevers = new Vector2[recevers.Count * 3];
+                                _drawRecvers = new bool[recevers.Count];
                                 
                                 int i = 0;
                                 foreach (var recever in recevers)
@@ -97,9 +102,9 @@ namespace Pulsar4X.SDL2UI
                                     Vector2 p1 = new Vector2(mid, mag2);
                                     Vector2 p2 =  new Vector2(high, mag1);
 
-                                    _recever[i] = p0;
-                                    _recever[i + 1] = p1;
-                                    _recever[i + 2] = p2;
+                                    _recevers[i] = p0;
+                                    _recevers[i + 1] = p1;
+                                    _recevers[i + 2] = p2;
 
                                     if (i == 0)
                                     {                                    
@@ -133,6 +138,9 @@ namespace Pulsar4X.SDL2UI
                             }
                         }
                         
+                        ImGui.Columns(2);
+                        ImGui.SetColumnWidth(0, 300);
+                        
                         if(ImGui.Combo("Targets", ref _targetIndex, _potentialTargetNames, _potentialTargetNames.Length))
                         {
                             _targetEntity = _potentialTargetEntities[_targetIndex];
@@ -151,15 +159,26 @@ namespace Pulsar4X.SDL2UI
                         ImDrawListPtr draw_list = ImGui.GetWindowDrawList();
                         uint borderColour = ImGui.ColorConvertFloat4ToU32(new Vector4(50, 50, 50, 255));
                         
-                        uint receverColour = ImGui.ColorConvertFloat4ToU32(new Vector4(0, 200, 0, 255));
+                        uint receverColour = ImGui.ColorConvertFloat4ToU32(new Vector4(50, 50, 50, 255));
                         uint receverFill = ImGui.ColorConvertFloat4ToU32(new Vector4(0, 200, 0, 50));
                         uint reflectedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(200, 200, 50, 255));
                         uint reflectedFill = ImGui.ColorConvertFloat4ToU32(new Vector4(200, 200, 50, 100));
                         uint emittedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(200, 40, 50, 255));
                         uint emittedFill = ImGui.ColorConvertFloat4ToU32(new Vector4(200, 40, 50, 100));
+
+
+                        WavInfo(_drawRecvers, _recevers);
+                        if(_reflecters != null)
+                            WavInfo(_drawReflectors, _reflecters);
+                        if(_emmitters != null)
+                            WavInfo(_drawEmmiters, _emmitters);
+                    
                         
-                        Vector2 canvas_pos = ImGui.GetCursorScreenPos();            // ImDrawList API uses screen coordinates!
+                        ImGui.NextColumn();
+                        Vector2 canvas_pos = ImGui.GetCursorScreenPos();
+                        //canvas_pos.X += 300;// ImDrawList API uses screen coordinates!
                         Vector2 canvas_size = ImGui.GetContentRegionAvail();
+                        //canvas_size.X -= 300;
                         Vector2 canvas_endPos = canvas_pos + canvas_size;
                         Vector2 waveBounds = new Vector2((float)(highestWave - lowestWave),(float)( highestMag - lowestMag));
 
@@ -172,31 +191,31 @@ namespace Pulsar4X.SDL2UI
                             (float)(canvas_pos.Y - lowestMag * scalingFactor.Y)  
                         );
                         
+                        
                         draw_list.AddRect(canvas_pos, canvas_endPos, borderColour );
-
                         
-                        
-                        for (int i = 0; i < _recever.Length / 3; i++)
+                        for (int i = 0; i < _recevers.Length / 3; i++)
                         {
                             
 
-                            Vector2 p0 = translation + _recever[i] * scalingFactor;
-                            Vector2 p1 = translation + _recever[i+1] * scalingFactor;
-                            Vector2 p2 = translation + _recever[i+2] * scalingFactor;
-                            
+                            Vector2 p0 = translation + _recevers[i] * scalingFactor;
+                            Vector2 p1 = translation + _recevers[i+1] * scalingFactor;
+                            Vector2 p2 = translation + _recevers[i+2] * scalingFactor;
+                            draw_list.AddTriangleFilled(p0, p1, p2, receverFill);
                             draw_list.AddLine(p0, p1, receverColour);
                             draw_list.AddLine(p1, p2, receverColour);
-                            draw_list.AddTriangleFilled(p0, p1, p2, receverFill);
+                            
+                            
                         }
  
-                        if(_reflected != null)
+                        if(_reflecters != null)
                         {
-                            for (int i = 0; i < _reflected.Length / 3; i++)
+                            for (int i = 0; i < _reflecters.Length / 3; i++)
                             {
 
-                                Vector2 p0 = translation +  _reflected[i] * scalingFactor;
-                                Vector2 p1 = translation + _reflected[i+1] * scalingFactor;
-                                Vector2 p2 = translation + _reflected[i+2] * scalingFactor;
+                                Vector2 p0 = translation +  _reflecters[i] * scalingFactor;
+                                Vector2 p1 = translation + _reflecters[i+1] * scalingFactor;
+                                Vector2 p2 = translation + _reflecters[i+2] * scalingFactor;
                             
                                 draw_list.AddLine(p0, p1, reflectedColour);
                                 draw_list.AddLine(p1, p2, reflectedColour);
@@ -204,15 +223,15 @@ namespace Pulsar4X.SDL2UI
                             }
                         }
                         
-                        if(_emmitted != null)
+                        if(_emmitters != null)
                         {
-                            for (int i = 0; i < _emmitted.Length / 3; i++)
+                            for (int i = 0; i < _emmitters.Length / 3; i++)
                             {
 
 
-                                Vector2 p0 = translation + _emmitted[i] * scalingFactor;
-                                Vector2 p1 = translation + _emmitted[i+1] * scalingFactor;
-                                Vector2 p2 = translation + _emmitted[i+2] * scalingFactor;
+                                Vector2 p0 = translation + _emmitters[i] * scalingFactor;
+                                Vector2 p1 = translation + _emmitters[i+1] * scalingFactor;
+                                Vector2 p2 = translation + _emmitters[i+2] * scalingFactor;
                             
                                 draw_list.AddLine(p0, p1, emittedColour);
                                 draw_list.AddLine(p1, p2, emittedColour);
@@ -220,6 +239,25 @@ namespace Pulsar4X.SDL2UI
                             }
                         }
 
+                }
+
+                void WavInfo(bool[] enabledArray, Vector2[] wavesArry)
+                {
+                    for (int i = 0; i < enabledArray.Length; i++)
+                    {
+                        ImGui.Checkbox("##recebool" + i, ref enabledArray[i]);
+                        ImGui.Text("minWav: " + wavesArry[i].X);
+                        ImGui.SameLine();
+                        ImGui.Text("minSen: " + wavesArry[i].Y);
+
+                        ImGui.Text("AvgWav: " + wavesArry[i + 1].X);
+                        ImGui.SameLine();
+                        ImGui.Text("MaxSen: " + wavesArry[i + 1].Y);
+
+                        ImGui.Text("maxWav: " + wavesArry[i + 2].X);
+                        ImGui.SameLine();
+                        ImGui.Text("minSen: " + wavesArry[i + 2].Y);
+                    }
                 }
 
                 void SetTargetData()
@@ -230,8 +268,10 @@ namespace Pulsar4X.SDL2UI
                     var emitted = _targetSensorProfile.EmittedEMSpectra;
                     var reflected = _targetSensorProfile.ReflectedEMSpectra;
 
-                    _reflected = new Vector2[reflected.Count * 3];
-                    _emmitted = new Vector2[emitted.Count * 3];
+                    _reflecters = new Vector2[reflected.Count * 3];
+                    _drawReflectors = new bool[reflected.Count];
+                    _emmitters = new Vector2[emitted.Count * 3];
+                    _drawEmmiters = new bool[emitted.Count];
                     int i = 0;
                     foreach (var waveformkvp in reflected)
                     {
@@ -246,9 +286,9 @@ namespace Pulsar4X.SDL2UI
                         Vector2 p1 = new Vector2(mid, magnatude);
                         Vector2 p2 = new Vector2(high, 0);
 
-                        _reflected[i] = p0;
-                        _reflected[i + 1] = p1;
-                        _reflected[i + 2] = p2;
+                        _reflecters[i] = p0;
+                        _reflecters[i + 1] = p1;
+                        _reflecters[i + 2] = p2;
 
 
 
@@ -275,9 +315,9 @@ namespace Pulsar4X.SDL2UI
                         Vector2 p1 = new Vector2(mid, magnatude);
                         Vector2 p2 =  new Vector2(high, 0);
 
-                        _emmitted[i] = p0;
-                        _emmitted[i + 1] = p1;
-                        _emmitted[i + 2] = p2;
+                        _emmitters[i] = p0;
+                        _emmitters[i + 1] = p1;
+                        _emmitters[i + 2] = p2;
                         
                         if (low < lowestWave)
                             lowestWave = low;

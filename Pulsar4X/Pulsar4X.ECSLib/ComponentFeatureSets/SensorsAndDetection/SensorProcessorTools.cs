@@ -278,12 +278,13 @@ namespace Pulsar4X.ECSLib
         /// Power per unit of area.
         /// note that this is *not* a decebel mesurment, decebels are mesured logrithmicaly. 
         /// </summary>
-        /// <returns>The calculate.</returns>
+        /// <returns>souce / (4 pi r^2)</returns>
         /// <param name="sourceValue">Source value.</param>
         /// <param name="distance">Distance.</param>
         public static double AttenuationCalc(double sourceValue, double distance)
         {
-            return sourceValue / 4 * Math.PI * Math.Pow(distance, 2);
+            // souce / (4 pi r^2)
+            return sourceValue / (4 * Math.PI * distance * distance);
         }
 
         /// <summary>
@@ -327,7 +328,13 @@ namespace Pulsar4X.ECSLib
             var kelvin = tempDegreesC + 273.15;
             double b = 2898000; //Wien's displacement constant for nanometers.
             var wavelength = b / kelvin; //Wien's displacement law https://en.wikipedia.org/wiki/Wien%27s_displacement_law
-            var magnitude = tempDegreesC / massVolDB.Volume_km3;
+
+
+            var cop = 5.670373E-8;
+            var emisivity = 1 - sysBodyInfoDB.Albedo;
+            var j = emisivity * cop * Math.Pow(kelvin, 4);
+            var surfaceArea = 4 * Math.PI * massVolDB.RadiusInM * massVolDB.RadiusInM;
+            var magnitude = j * surfaceArea * 0.001;
             EMWaveForm waveform = new EMWaveForm()
             {
                 WavelengthAverage_nm = wavelength,

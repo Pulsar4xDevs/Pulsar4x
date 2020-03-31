@@ -52,8 +52,17 @@ namespace Pulsar4X.ECSLib
 
                     foreach (var emitedItem in emmissionDB.EmittedEMSpectra)
                     {
+                        if(emitedItem.Value < 0)
+                            throw new Exception("Source should not be less than 0");
                         var attenuated = SensorProcessorTools.AttenuationCalc(emitedItem.Value, distance);
+                        if(attenuated > emitedItem.Value)
+                            throw new Exception("Attenuated value shoudl be less than source");
                         var reflectedMagnatude = attenuated * reflectionCoefficent;
+                        
+                        if(reflectedMagnatude > emitedItem.Value)
+                            throw new Exception("final magnitude shoudl not be more than source");
+                        if(reflectedMagnatude < 0)
+                            throw new Exception("Final magnitude should not be less than 0");
                         
                         sensorSig.ReflectedEMSpectra.Add(emitedItem.Key, reflectedMagnatude);
                     }
