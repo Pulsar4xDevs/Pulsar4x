@@ -50,7 +50,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     foreach (var smallBody in _state.StarSystemStates[_state.SelectedStarSysGuid].EntityStatesWithNames)
                     {
-                        if (smallBody.Value.BodyType == UserOrbitSettings.OrbitBodyType.Asteroid || smallBody.Value.BodyType == UserOrbitSettings.OrbitBodyType.Comet)
+                        if (smallBody.Value.IsSmallBody())
                         {
                             if (ImGui.SmallButton(smallBody.Value.Name))
                             {

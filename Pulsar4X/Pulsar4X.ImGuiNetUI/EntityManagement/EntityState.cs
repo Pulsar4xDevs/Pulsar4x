@@ -40,7 +40,14 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        
+        public bool IsSmallBody()
+        {
+            return this.BodyType == UserOrbitSettings.OrbitBodyType.Asteroid || this.BodyType == UserOrbitSettings.OrbitBodyType.Comet;
+        }
+
+
+
+
         public EntityState(SensorContact sensorContact)
         {
             Entity = sensorContact.ActualEntity;

@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Pulsar4X.ECSLib;
 using System.Numerics;
+using System.Collections.Generic;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -72,31 +73,38 @@ namespace Pulsar4X.SDL2UI
                         var _parentEntity = _SelectedEntity.GetDataBlob<PositionDB>().Parent;
                         bool _hasParentEntity = false;
                         SystemState _StarSystemState = _state.StarSystemStates[_state.SelectedStarSysGuid];
-                        if (_parentEntity != null){
+                        Dictionary<System.Guid, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
+                        if (_parentEntity != null)
+                        {
                             //checks if parent exists in the selected star system and has a name
                             //notice that parent can be any bodyType(ex. asteroid, comet, planet etc), unlike childrenEntities, which are more selectively displayed...
-                            if(_StarSystemState.EntityStatesWithNames.ContainsKey(_parentEntity.Guid)){
-                                var tempEntityState = _StarSystemState.EntityStatesWithNames[_parentEntity.Guid];
+                            if(_NamedEntityStates.ContainsKey(_parentEntity.Guid))
+                            {
+                                var tempEntityState = _NamedEntityStates[_parentEntity.Guid];
                                 _hasParentEntity = true;
-                                if(ImGui.SmallButton(tempEntityState.Name)){
-                                //if(ImGui.SmallButton(parentEntity.GetDataBlob<NameDB>().GetName(_state.Faction.ID))){
+                                if(ImGui.SmallButton(tempEntityState.Name))
+                                {
+                                    //if(ImGui.SmallButton(parentEntity.GetDataBlob<NameDB>().GetName(_state.Faction.ID))){
                                     _state.EntityClicked(_parentEntity.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
-                                //}
+                                    //}
                                 }
                             }
                         }
+
                         if(!_hasParentEntity)
                         {
                             ImGui.Text("(...No parent entity)");
                         }
                         bool hasChildrenEntities = false;
                         ImGui.Text("Children entities: ");
-                        foreach(var childEntity in _SelectedEntity.GetDataBlob<PositionDB>().Children){
+                        foreach(var childEntity in _SelectedEntity.GetDataBlob<PositionDB>().Children)
+                        {
                             //checks if child exists in the seclted star system and has name
-                            if(_StarSystemState.EntityStatesWithNames.ContainsKey(childEntity.Guid)){
-                                var tempEntityState = _StarSystemState.EntityStatesWithNames[childEntity.Guid];
+                            if(_NamedEntityStates.ContainsKey(childEntity.Guid))
+                            {
+                                var tempEntityState = _NamedEntityStates[childEntity.Guid];
                                 //only show child entities that arent comets or asteroids if the lastClickedEntity(parent entity) isnt either, if LastClickedEntity(parent entity) is either, then show them always
-                                if(_SelectedEntityState.BodyType == UserOrbitSettings.OrbitBodyType.Asteroid || _SelectedEntityState.BodyType == UserOrbitSettings.OrbitBodyType.Comet ||(tempEntityState.BodyType != UserOrbitSettings.OrbitBodyType.Asteroid && tempEntityState.BodyType != UserOrbitSettings.OrbitBodyType.Comet))
+                                if(_SelectedEntityState.IsSmallBody() && !tempEntityState.IsSmallBody())
                                 {
                                     hasChildrenEntities = true;
                                     if(ImGui.SmallButton(tempEntityState.Name)){
