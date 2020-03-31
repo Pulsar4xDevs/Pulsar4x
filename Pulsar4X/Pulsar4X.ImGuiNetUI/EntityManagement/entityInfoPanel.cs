@@ -53,8 +53,11 @@ namespace Pulsar4X.SDL2UI
                     }
 
 
+                    if (_SelectedEntity.HasDataBlob<MassVolumeDB>())
+                    {
+                        ImGui.Text("Volume: " + _SelectedEntity.GetDataBlob<MassVolumeDB>().Volume_km3 + " KM^3");
+                    }
 
-                    
 
                     ImGui.Text("Subject: " +  _SelectedEntityState.Name);
                     
