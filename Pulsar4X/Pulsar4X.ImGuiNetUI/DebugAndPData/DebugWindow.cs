@@ -6,6 +6,7 @@ using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.SDL2UI
@@ -319,11 +320,10 @@ namespace Pulsar4X.SDL2UI
                                 if (ImGui.CollapsingHeader("MassVolumeDB: ###MassVolDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     MassVolumeDB mvdb = SelectedEntity.GetDataBlob<MassVolumeDB>();
-                                    ImGui.Text("Mass " + mvdb.Mass + "Kg");
-                                    ImGui.Text("Volume " + mvdb.Volume_km3 + " Km^3");
-                                    ImGui.Text("Volume " + mvdb.Volume_m3 + " m^3");
+                                    ImGui.Text("Mass " + Misc.StringifyMass(mvdb.Mass));
+                                    ImGui.Text("Volume " + Misc.StringifyVelocity(mvdb.Volume_m3));
                                     ImGui.Text("Density " + mvdb.Density + "g/cm^3");
-                                    ImGui.Text("Radius " + mvdb.RadiusInM + "m");
+                                    ImGui.Text("Radius " + Misc.StringifyDistance(mvdb.RadiusInM));
                                 }
 
                             }
