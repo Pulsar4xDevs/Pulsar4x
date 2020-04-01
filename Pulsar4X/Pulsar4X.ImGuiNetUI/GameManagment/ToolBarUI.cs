@@ -90,6 +90,15 @@ namespace Pulsar4X.SDL2UI
                 //Opens the ruler menu
             };
             ToolButtons.Add(btn);
+            btn = new ToolbuttonData()
+            {
+                Picture = _state.SDLImageDictionary["Tree"],
+                TooltipText = "View objects in the system",
+                OnClick = new Action(SystemTreeViewer.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(SystemTreeViewer.GetInstance().GetActive)
+                //Display a tree with all objects in the system
+            };
+            ToolButtons.Add(btn);
 
 
 

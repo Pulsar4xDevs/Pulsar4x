@@ -125,6 +125,7 @@ namespace Pulsar4X.SDL2UI
             LoadImg("Pin", Path.Combine(rf, "PinIco.bmp"));
             LoadImg("Rename", Path.Combine(rf, "RenameIco.bmp"));
             LoadImg("Select", Path.Combine(rf, "SelectIco.bmp"));
+            LoadImg("Tree", Path.Combine(rf, "TreeIco.bmp"));
             /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
