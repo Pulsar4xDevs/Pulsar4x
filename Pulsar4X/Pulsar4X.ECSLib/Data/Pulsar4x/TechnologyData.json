@@ -436,6 +436,51 @@
           },
           "CostFormula": "(1 + [Level]) * 500"
         }
+      },
+      {
+        "Key": "E3B17143-D802-485C-A955-C9349B9FCBDA",
+        "Value": {
+          "Name": "Antenna Sensitivity",
+          "Description": "Improvements to antennas to increase the ability to pick up smaller signals from background noise",
+          "Category": "MissilesKineticWeapons",
+          "ID": "E3B17143-D802-485C-A955-C9349B9FCBDA",
+          "MaxLevel": 9,
+          "DataFormula": "0.1 - [Level] * 0.01",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 500"
+        }
+      },
+      {
+        "Key": "6F9AB80D-0331-47C0-9C5A-7586D06DE59D",
+        "Value": {
+          "Name": "Antenna Efficiency",
+          "Description": "Improvements to antennas increase the effective area of a sensor, allowing for greater sensitivity for a smaller size",
+          "Category": "MissilesKineticWeapons",
+          "ID": "6F9AB80D-0331-47C0-9C5A-7586D06DE59D",
+          "MaxLevel": 25,
+          "DataFormula": "0.75 + [Level] * 0.1",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 500"
+        }
+      },
+      {
+        "Key": "903CAED7-522B-40E5-8B65-72AFC099997E",
+        "Value": {
+          "Name": "Antenna Bandwidth",
+          "Description": "Improvements to antennas increase the max bandwidth of an antenna",
+          "Category": "MissilesKineticWeapons",
+          "ID": "903CAED7-522B-40E5-8B65-72AFC099997E",
+          "MaxLevel": 95,
+          "DataFormula": "500 + [Level] * 100",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 500"
+        }
       }
     ]
   }

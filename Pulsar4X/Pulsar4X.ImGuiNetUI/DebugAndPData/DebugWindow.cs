@@ -152,9 +152,15 @@ namespace Pulsar4X.SDL2UI
             {
                 if (ImGui.Begin("debug", ref IsActive))
                 {
+
+
+                    BorderGroup.BeginBorder("Info", ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
+                    
                     ImGui.Text(_state.PrimarySystemDateTime.ToString());
                     ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
-
+                    
+                    BorderGroup.EndBoarder();
+                    
                     if (ImGui.CollapsingHeader("Camera Functions", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
                         if (_state.Camera.IsPinnedToEntity)
@@ -179,9 +185,9 @@ namespace Pulsar4X.SDL2UI
                         
                         ImGui.Text("Cursor World Coordinate:");
                         var mouseWorldCoord = _state.Camera.MouseWorldCoordinate_m();
-                        ImGui.Text("x" + Misc.StringifyDistance(mouseWorldCoord.X));
+                        ImGui.Text("x" + Stringify.Distance(mouseWorldCoord.X));
                         ImGui.SameLine();
-                        ImGui.Text("y" + Misc.StringifyDistance(mouseWorldCoord.Y));
+                        ImGui.Text("y" + Stringify.Distance(mouseWorldCoord.Y));
                         var mouseWorldCoord_AU = _state.Camera.MouseWorldCoordinate_AU();
                         ImGui.Text("x" + mouseWorldCoord_AU.X + " AU");
                         ImGui.SameLine();
@@ -320,10 +326,10 @@ namespace Pulsar4X.SDL2UI
                                 if (ImGui.CollapsingHeader("MassVolumeDB: ###MassVolDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     MassVolumeDB mvdb = SelectedEntity.GetDataBlob<MassVolumeDB>();
-                                    ImGui.Text("Mass " + Misc.StringifyMass(mvdb.Mass));
-                                    ImGui.Text("Volume " + Misc.StringifyVelocity(mvdb.Volume_m3));
+                                    ImGui.Text("Mass " + Stringify.Mass(mvdb.Mass));
+                                    ImGui.Text("Volume " + Stringify.Velocity(mvdb.Volume_m3));
                                     ImGui.Text("Density " + mvdb.Density + "g/cm^3");
-                                    ImGui.Text("Radius " + Misc.StringifyDistance(mvdb.RadiusInM));
+                                    ImGui.Text("Radius " + Stringify.Distance(mvdb.RadiusInM));
                                 }
 
                             }
@@ -516,14 +522,14 @@ namespace Pulsar4X.SDL2UI
                                 var ntdb = _state.LastClickedEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
                                 if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    ImGui.Text("Manuver DV:" + Misc.StringifyDistance(nmdb.DeltaVForManuver_m.Length())+"/s");
+                                    ImGui.Text("Manuver DV:" + Stringify.Distance(nmdb.DeltaVForManuver_m.Length())+"/s");
                                     ImGui.Text("Parent Body: " + nmdb.SOIParent.GetDataBlob<NameDB>().DefaultName);
                                     ImGui.Text("Current Vector:");
-                                    ImGui.Text("X:" + Misc.StringifyDistance(nmdb.CurrentVector_ms.X)+"/s");
-                                    ImGui.Text("Y:" + Misc.StringifyDistance(nmdb.CurrentVector_ms.Y)+"/s");
-                                    ImGui.Text("Z:" + Misc.StringifyDistance(nmdb.CurrentVector_ms.Z)+"/s");
+                                    ImGui.Text("X:" + Stringify.Distance(nmdb.CurrentVector_ms.X)+"/s");
+                                    ImGui.Text("Y:" + Stringify.Distance(nmdb.CurrentVector_ms.Y)+"/s");
+                                    ImGui.Text("Z:" + Stringify.Distance(nmdb.CurrentVector_ms.Z)+"/s");
                                     
-                                    ImGui.Text("Remaining Dv:" + Misc.StringifyDistance( ntdb.DeltaV) + "/s");
+                                    ImGui.Text("Remaining Dv:" + Stringify.Distance( ntdb.DeltaV) + "/s");
                                     ImGui.Text("Exhaust Velocity: " + ntdb.ExhaustVelocity);
                                     ImGui.Text("BurnRate: " + ntdb.FuelBurnRate);
                                     ImGui.Text("Thrust: " + ntdb.ThrustInNewtons);
@@ -539,25 +545,25 @@ namespace Pulsar4X.SDL2UI
                                 if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     ImGui.Text("EntryPoint: ");
-                                    ImGui.Text("X:" + Misc.StringifyDistance(db.EntryPointAbsolute.X));
-                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.EntryPointAbsolute.Y));
-                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.EntryPointAbsolute.Z));
+                                    ImGui.Text("X:" + Stringify.Distance(db.EntryPointAbsolute.X));
+                                    ImGui.Text("Y:" + Stringify.Distance(db.EntryPointAbsolute.Y));
+                                    ImGui.Text("Z:" + Stringify.Distance(db.EntryPointAbsolute.Z));
                                     
                                     
                                     ImGui.Text("ExitPoint: ");
-                                    ImGui.Text("X:" + Misc.StringifyDistance(db.ExitPointAbsolute.X));
-                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.ExitPointAbsolute.Y));
-                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.ExitPointAbsolute.Z));
+                                    ImGui.Text("X:" + Stringify.Distance(db.ExitPointAbsolute.X));
+                                    ImGui.Text("Y:" + Stringify.Distance(db.ExitPointAbsolute.Y));
+                                    ImGui.Text("Z:" + Stringify.Distance(db.ExitPointAbsolute.Z));
                                     
                                     ImGui.Text("Relitive ExitPoint: ");
-                                    ImGui.Text("X:" + Misc.StringifyDistance(db.ExitPointRalitive.X));
-                                    ImGui.Text("Y:" + Misc.StringifyDistance(db.ExitPointRalitive.Y));
-                                    ImGui.Text("Z:" + Misc.StringifyDistance(db.ExitPointRalitive.Z));
+                                    ImGui.Text("X:" + Stringify.Distance(db.ExitPointRalitive.X));
+                                    ImGui.Text("Y:" + Stringify.Distance(db.ExitPointRalitive.Y));
+                                    ImGui.Text("Z:" + Stringify.Distance(db.ExitPointRalitive.Z));
                                     
                                     
                                     ImGui.Text("EDA " + db.PredictedExitTime.ToString());
                                     double distance = Distance.DistanceBetween(db.EntryPointAbsolute, db.ExitPointAbsolute);
-                                    ImGui.Text("Distance " + Misc.StringifyDistance(distance));
+                                    ImGui.Text("Distance " + Stringify.Distance(distance));
                                     ImGui.SameLine();
                                     var timeToTarget = db.PredictedExitTime - _state.PrimarySystemDateTime;
                                     ImGui.Text("Remaining TTT " + timeToTarget);

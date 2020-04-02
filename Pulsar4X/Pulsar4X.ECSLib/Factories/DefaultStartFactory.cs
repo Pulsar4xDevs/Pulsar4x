@@ -648,9 +648,9 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner sensor;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensor = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            sensor.ComponentDesignAttributes["Mass"].SetValueFromInput(500);  //size
-            sensor.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(600); //best wavelength
-            sensor.ComponentDesignAttributes["Detection Wavelength Width"].SetValueFromInput(250); //wavelength detection width 
+            sensor.ComponentDesignAttributes["Antenna Size"].SetValueFromInput(5.5);  //size
+            sensor.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(479); //best wavelength
+            sensor.ComponentDesignAttributes["Detection Bandwidth"].SetValueFromInput(200); //wavelength detection width 
             //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
             //[4] worst detection magnatude (not settable)
             sensor.ComponentDesignAttributes["Resolution"].SetValueFromInput(1);   //resolution
@@ -664,19 +664,20 @@ namespace Pulsar4X.ECSLib
 
         public static ComponentDesign FacPassiveSensor(Game game, Entity faction)
         {
-            ComponentDesigner sensorDesigner;
+            if (_sensorInstalation != null)
+                return _sensorInstalation;
+            ComponentDesigner sensor;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
-            sensorDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            sensorDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(5000);  //size
-            sensorDesigner.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(500); //best wavelength
-            sensorDesigner.ComponentDesignAttributes["Detection Wavelength Width"].SetValueFromInput(1000); //wavelength detection width 
-            //[3] best detection magnatude. (Not settable)
-            //[4] worst detection magnatude (not setta[ble)
-            sensorDesigner.ComponentDesignAttributes["Resolution"].SetValueFromInput(5);   //resolution
-            sensorDesigner.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
-            sensorDesigner.Name = "PassiveSensor-S500";
-            //return sensor.CreateDesign(faction);
-            _sensorInstalation = sensorDesigner.CreateDesign(faction);
+            sensor = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
+            sensor.ComponentDesignAttributes["Antenna Size"].SetValueFromInput(5000);  //size
+            sensor.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(600); //best wavelength
+            sensor.ComponentDesignAttributes["Detection Bandwidth"].SetValueFromInput(500); //wavelength detection width 
+            //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
+            //[4] worst detection magnatude (not settable)
+            sensor.ComponentDesignAttributes["Resolution"].SetValueFromInput(100);   //resolution
+            sensor.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
+            sensor.Name = "PassiveScannerInstalation";
+            _sensorInstalation = sensor.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_sensorInstalation.TechID);
             return _sensorInstalation;
 

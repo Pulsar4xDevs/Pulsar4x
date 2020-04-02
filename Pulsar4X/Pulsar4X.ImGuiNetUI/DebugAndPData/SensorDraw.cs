@@ -125,23 +125,22 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.BeginChild("stuff");
 
-                    ImGui.Text("Recevers: ");
-                    ImGui.PushID("recevers");
+                    BorderGroup.BeginBorder("Recevers:", borderColour);
                     DisplayWavInfo(_receverDat);
-                    ImGui.PopID();
+                    BorderGroup.EndBoarder();
+                    
                     if(_reflectDat != null)
                     {
-                        ImGui.PushID("reflectors");
-                        ImGui.Text("Reflectors:");
+                        BorderGroup.BeginBorder("Reflectors:", borderColour);
                         DisplayWavInfo(_reflectDat);
-                        ImGui.PopID();
+                        BorderGroup.EndBoarder();
+                        
                     }
                     if(_emmittrDat != null)
                     {
-                        ImGui.PushID("emmiters");
-                        ImGui.Text("Emmiters:");
+                        BorderGroup.BeginBorder("Emmiters:", borderColour);
                         DisplayWavInfo(_emmittrDat);
-                        ImGui.PopID();
+                        BorderGroup.EndBoarder();
                     }
                     ImGui.EndChild();
                     
@@ -169,12 +168,12 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Box From: " + p0);
                     ImGui.Text("Box To:   " + p1);
 
-                    DrawWav(_receverDat, receverColour);
+                    DrawWav(_receverDat, receverFill);
 
                     if(_reflectDat != null)
-                        DrawWav(_reflectDat, reflectedColour);
+                        DrawWav(_reflectDat, reflectedFill);
                     if(_emmittrDat != null)
-                        DrawWav(_emmittrDat, emittedColour);
+                        DrawWav(_emmittrDat, emittedFill);
 
                 }
 
@@ -222,16 +221,16 @@ namespace Pulsar4X.SDL2UI
 
                         ImGui.Text("MinWav: " + wavesArry.Points[i].p0 .X);
                         ImGui.SameLine();
-                        ImGui.Text("Magnitude: " + wavesArry.Points[i].p0.Y);
+                        ImGui.Text("Magnitude: " + Stringify.Power(wavesArry.Points[i].p0.Y));
 
                         ImGui.Text("AvgWav: " + wavesArry.Points[i].p1.X);
-                        ImGui.Text("Magnitude: " + wavesArry.Points[i].p1.Y);
+                        ImGui.Text("Magnitude: " + Stringify.Power(wavesArry.Points[i].p1.Y));
                         if(wavesArry.HasAtn)
-                            ImGui.Text("Attenuated Magnitude: " + wavesArry.Points[i].p3.Y);
+                            ImGui.Text("Attenuated Magnitude: " + Stringify.Power(wavesArry.Points[i].p3.Y));
 
                         ImGui.Text("MaxWav: " + wavesArry.Points[i].p2.X);
                         ImGui.SameLine();
-                        ImGui.Text("Magnitude: " + wavesArry.Points[i].p2.Y);
+                        ImGui.Text("Magnitude: " + Stringify.Power(wavesArry.Points[i].p2.Y));
                     }
                 }
                 
@@ -295,7 +294,7 @@ namespace Pulsar4X.SDL2UI
                                 if (mag2 > highestMag)
                                     highestMag = mag2;
                             }
-                            else if(dat.IsWaveDrawn[i].drawAtn)
+                            if(dat.IsWaveDrawn[i].drawAtn)
                             {
                                 if (mag3 > highestMag)
                                     highestMag = mag3;

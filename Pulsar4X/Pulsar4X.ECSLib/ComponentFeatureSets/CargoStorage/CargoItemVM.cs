@@ -30,15 +30,15 @@ namespace Pulsar4X.ECSLib
         }
         public string GetIncomingMass()
         {
-            return Misc.StringifyMass(ItemIncomingAmount * CargoableItem.Mass, "0.###"); 
+            return Stringify.Mass(ItemIncomingAmount * CargoableItem.Mass, "0.###"); 
         }
         public string GetOutgoingMass()
         {
-            return Misc.StringifyMass(ItemOutgoingAmount * CargoableItem.Mass, "0.###");
+            return Stringify.Mass(ItemOutgoingAmount * CargoableItem.Mass, "0.###");
         }
         public string GetStoredMass()
         {
-            return Misc.StringifyMass(_itemCount * CargoableItem.Mass, "0.###");
+            return Stringify.Mass(_itemCount * CargoableItem.Mass, "0.###");
         }
 
         private string _totalMass;
@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib
         private void setTotalMass()
         {
             double totalMass = _itemCount * CargoableItem.Mass;
-            TotalMass = Misc.StringifyMass(totalMass, "0.###");
+            TotalMass = Stringify.Mass(totalMass, "0.###");
         }
 
         public void Update(long itemCount)

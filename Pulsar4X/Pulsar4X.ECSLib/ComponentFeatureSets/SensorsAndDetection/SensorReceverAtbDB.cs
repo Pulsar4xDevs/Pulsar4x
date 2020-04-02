@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
         public SensorReceverAtbDB() { }
 
         //ParserConstrutor
-        public SensorReceverAtbDB(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)
+        public SensorReceverAtbDB(double peakWaveLength, double bandwidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)
         {
             //TODO:  should make this component invalid. 
             if (bestSensitivity < 0)
@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
                 StaticRefLib.EventLog.AddEvent(ev);
                 worstSensitivity = bestSensitivity;
             }
-            RecevingWaveformCapabilty = new EMWaveForm() { WavelengthMin_nm = peakWaveLength - waveLengthWidth, WavelengthAverage_nm = peakWaveLength, WavelengthMax_nm = peakWaveLength + waveLengthWidth };
+            RecevingWaveformCapabilty = new EMWaveForm() { WavelengthMin_nm = peakWaveLength - bandwidth * 0.5, WavelengthAverage_nm = peakWaveLength, WavelengthMax_nm = peakWaveLength + bandwidth * 0.5};
             BestSensitivity_kW = bestSensitivity;
             WorstSensitivity_kW = worstSensitivity;
             Resolution = (float)resolution;

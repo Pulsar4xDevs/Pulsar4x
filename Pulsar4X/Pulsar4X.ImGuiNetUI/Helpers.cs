@@ -9,6 +9,7 @@ namespace Pulsar4X.SDL2UI
     {
 
 
+
         public static Vector3 Color(byte r, byte g, byte b)
         {
             float rf = (1.0f / 255) * r;
@@ -23,6 +24,44 @@ namespace Pulsar4X.SDL2UI
         }
 
     }
+
+
+    public class BorderGroup
+    {
+        private static Vector2 _startPos;
+        private static Vector2 _labelSize;
+        private static uint _colour;
+        public static void BeginBorder(string label, uint colour)
+        {
+            ImGui.PushID(label);
+            _colour = colour;
+            _startPos = ImGui.GetCursorScreenPos();
+            _startPos.X -= 3;
+            _startPos.Y += ImGui.GetTextLineHeight() * 0.5f;
+            ImGui.Text(label);
+            _labelSize = ImGui.GetItemRectSize();
+        }
+
+        public static void EndBoarder()
+        { 
+            Vector2 size = new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetCursorScreenPos().Y - _startPos.Y);
+            //ImGui.get
+            ImDrawListPtr wdl = ImGui.GetWindowDrawList();
+
+            Vector2[] pts = new Vector2[6];
+            pts[0] = new Vector2(_startPos.X + 2, _startPos.Y);
+            pts[1] = _startPos; //top left
+            pts[2] = new Vector2(_startPos.X, _startPos.Y + size.Y); //bottom left
+            pts[3] = new Vector2(_startPos.X + size.X + 3, _startPos.Y + size.Y); //bottom right
+            pts[4] = new Vector2(_startPos.X + size.X + 3, _startPos.Y);
+            pts[5] = new Vector2(_startPos.X + _labelSize.X + 3, _startPos.Y);
+            wdl.AddPolyline(ref pts[0], pts.Length, _colour, false, 1.0f);
+            ImGui.PopID();
+
+        }
+    }
+    
+
 
     public static class DistanceDisplay
     {
@@ -49,7 +88,7 @@ namespace Pulsar4X.SDL2UI
 
         static string StringifyValue(double value, string format = "0.###")
         {
-            return ECSLib.Misc.StringifyDistance(value, format);
+            return ECSLib.Stringify.Distance(value, format);
         }
 
         public static void Display(string Id, double value, ValueType inputType, ref DisplayType displayType, ref string displayFormat )

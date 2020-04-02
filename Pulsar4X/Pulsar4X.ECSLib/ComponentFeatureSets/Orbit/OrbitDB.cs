@@ -228,7 +228,7 @@ namespace Pulsar4X.ECSLib
             var d = (pos - ralitivePos).Length();
             if (d > 1)
             {
-                var e = new Event(atDateTime, "Positional difference of " + Misc.StringifyDistance(d) + " when creating orbit from velocity");
+                var e = new Event(atDateTime, "Positional difference of " + Stringify.Distance(d) + " when creating orbit from velocity");
                 e.Entity = entity;
                 e.SystemGuid = entity.Manager.ManagerGuid;
                 e.EventType = EventType.Opps;

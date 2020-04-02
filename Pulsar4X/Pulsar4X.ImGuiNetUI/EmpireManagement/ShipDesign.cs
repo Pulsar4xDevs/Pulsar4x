@@ -547,13 +547,13 @@ namespace Pulsar4X.SDL2UI
 
             }
             designChanged = false;
-            ImGui.Text("Mass: " + Misc.StringifyMass(_massDry));
-            ImGui.Text("Total Thrust: " + Misc.StringifyThrust(_tn));
+            ImGui.Text("Mass: " + Stringify.Mass(_massDry));
+            ImGui.Text("Total Thrust: " + Stringify.Thrust(_tn));
             ImGui.Text("Thrust To Mass Ratio: " + _ttwr);
-            ImGui.Text("Fuel Capacity: " + Misc.StringifyMass(_fuelStore));
+            ImGui.Text("Fuel Capacity: " + Stringify.Mass(_fuelStore));
 
-            ImGui.Text("Delta V: " + Misc.StringifyVelocity(_dv));
-            ImGui.Text("Warp Speed:" + Misc.StringifyVelocity(_wspd));
+            ImGui.Text("Delta V: " + Stringify.Velocity(_dv));
+            ImGui.Text("Warp Speed:" + Stringify.Velocity(_wspd));
             ImGui.Text("Warp Bubble Creation: " + _wcc);
             ImGui.Text("Warp Bubble Sustain: " + _wsc);
             ImGui.Text("Warp Bubble Collapse: " + _wec);

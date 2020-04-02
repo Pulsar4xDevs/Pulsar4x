@@ -413,28 +413,28 @@ namespace Pulsar4X.SDL2UI
 
                         ImGui.Text("Apoapsis: ");
                         ImGui.SameLine();
-                        ImGui.Text(Misc.StringifyDistance(_apoapsis_m) + " (Alt: " + Misc.StringifyDistance(_apAlt) + ")");
+                        ImGui.Text(Stringify.Distance(_apoapsis_m) + " (Alt: " + Stringify.Distance(_apAlt) + ")");
 
                         ImGui.Text("Periapsis: ");
                         ImGui.SameLine();
-                        ImGui.Text(Misc.StringifyDistance(_periapsis_m) + " (Alt: " + Misc.StringifyDistance(_peAlt) + ")");
+                        ImGui.Text(Stringify.Distance(_periapsis_m) + " (Alt: " + Stringify.Distance(_peAlt) + ")");
 
                         ImGui.Text("DepartureSpeed: ");
                         //ImGui.SameLine();
-                        ImGui.Text( Misc.StringifyDistance( _departureOrbitalSpeed_m) + "/s");
+                        ImGui.Text( Stringify.Distance( _departureOrbitalSpeed_m) + "/s");
 
                         ImGui.Text("InsertionSpeed: ");
                         //ImGui.SameLine();
-                        ImGui.Text(Misc.StringifyDistance(_insertionOrbitalSpeed_m) + "/s");
+                        ImGui.Text(Stringify.Distance(_insertionOrbitalSpeed_m) + "/s");
 
 
 
 
                         ImGui.Text("Departure Vector: ");
                         //ImGui.SameLine();
-                        ImGui.Text("X: " + Misc.StringifyDistance(_departureOrbitalVelocity_m.X)+ "/s");
-                        ImGui.Text("Y: " + Misc.StringifyDistance(_departureOrbitalVelocity_m.Y)+ "/s");
-                        ImGui.Text("Z: " + Misc.StringifyDistance(_departureOrbitalVelocity_m.Z)+ "/s");
+                        ImGui.Text("X: " + Stringify.Distance(_departureOrbitalVelocity_m.X)+ "/s");
+                        ImGui.Text("Y: " + Stringify.Distance(_departureOrbitalVelocity_m.Y)+ "/s");
+                        ImGui.Text("Z: " + Stringify.Distance(_departureOrbitalVelocity_m.Z)+ "/s");
 
 
                         ImGui.Text("Departure Angle: ");
@@ -451,14 +451,14 @@ namespace Pulsar4X.SDL2UI
 */
 
                         ImGui.Text("Insertion Vector: ");
-                        ImGui.Text("X: " + Misc.StringifyDistance(_insertionOrbitalVelocity_m.X)+ "/s");
-                        ImGui.Text("Y: " + Misc.StringifyDistance(_insertionOrbitalVelocity_m.Y)+ "/s");
-                        ImGui.Text("Z: " + Misc.StringifyDistance(_insertionOrbitalVelocity_m.Z)+ "/s");
+                        ImGui.Text("X: " + Stringify.Distance(_insertionOrbitalVelocity_m.X)+ "/s");
+                        ImGui.Text("Y: " + Stringify.Distance(_insertionOrbitalVelocity_m.Y)+ "/s");
+                        ImGui.Text("Z: " + Stringify.Distance(_insertionOrbitalVelocity_m.Z)+ "/s");
 
                         ImGui.Text("Insertion Position: ");
-                        ImGui.Text("X: " + Misc.StringifyDistance(_targetInsertionPoint_m.X));
-                        ImGui.Text("Y: " + Misc.StringifyDistance(_targetInsertionPoint_m.Y));
-                        ImGui.Text("Z: " + Misc.StringifyDistance(_targetInsertionPoint_m.Z));
+                        ImGui.Text("X: " + Stringify.Distance(_targetInsertionPoint_m.X));
+                        ImGui.Text("Y: " + Stringify.Distance(_targetInsertionPoint_m.Y));
+                        ImGui.Text("Z: " + Stringify.Distance(_targetInsertionPoint_m.Z));
                         
                         ImGui.Text("LoAN: ");
                         ImGui.SameLine();
