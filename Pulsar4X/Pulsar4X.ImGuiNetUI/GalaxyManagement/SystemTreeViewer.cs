@@ -82,17 +82,14 @@ namespace Pulsar4X.SDL2UI
                 {
                     ImGuiTreeNodeFlags _TreeFlags;
                     if (_CurrentBody == _SelectedBody)
-                    {
-                        _TreeFlags = ImGuiTreeNodeFlags.Selected;
-                    }
+                        _TreeFlags = ImGuiTreeNodeFlags.Selected | ImGuiTreeNodeFlags.OpenOnArrow;
                     else
-                    {
-                        _TreeFlags = ImGuiTreeNodeFlags.None;
-                    }
-                    if (ImGui.TreeNodeEx(_NamedEntityStates[_CurrentBody.Guid].Name, _TreeFlags))
-                    {
-                        if (ImGui.Selectable(_NamedEntityStates[_CurrentBody.Guid].Name, _CurrentBody == _SelectedBody))//TODO Make tree items selectable
-                            _state.EntityClicked(_CurrentBody.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
+                        _TreeFlags = ImGuiTreeNodeFlags.OpenOnArrow;
+                    bool _Opened = ImGui.TreeNodeEx(_NamedEntityStates[_CurrentBody.Guid].Name, _TreeFlags);
+                    if(ImGui.IsItemClicked())
+                        _state.EntityClicked(_CurrentBody.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
+                    if (_Opened)
+                    {   
                         foreach (Entity _ChildBody in _ChildList)
                             TreeGen(_ChildBody, _SelectedBody);
                         ImGui.TreePop();
