@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
@@ -6,6 +7,16 @@ namespace Pulsar4X.SDL2UI
 {
     public class SensorDraw : PulsarGuiWindow
     {
+
+        public class WaveDrawData
+        {
+            public int Count { get { return Points.Length; } }
+            public bool HasAtn = false;
+            public (Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)[] Points = new (Vector2, Vector2, Vector2, Vector2)[0];
+            public (bool drawSrc,bool drawAtn)[] IsWaveDrawn = new (bool, bool)[0];
+            public uint[] _receverColours;
+        }
+        
         private EntityState _selectedEntitySate;
         private Entity _selectedEntity => _selectedEntitySate.Entity;
         private Entity[] _potentialTargetEntities;
@@ -21,17 +32,9 @@ namespace Pulsar4X.SDL2UI
 
         private ImDrawListPtr _draw_list;
         
-        private (Vector2 p0, Vector2 p1, Vector2 p2)[] _recevers = new (Vector2, Vector2, Vector2)[0];
-        private bool[] _drawRecvers = new bool[0];
-        private uint[] _receverColours;
-        
-        private (Vector2 p0, Vector2 p1, Vector2 p2)[] _reflecters = new (Vector2, Vector2, Vector2)[0];
-        private bool[] _drawReflectors = new bool[0];
-        private uint[] _reflectorColours;
-        
-        private (Vector2 p0, Vector2 p1, Vector2 p2)[] _emmitters = new (Vector2, Vector2, Vector2)[0];
-        private bool[] _drawEmmiters = new bool[0];
-        private uint[] _emmiterColours;
+        private WaveDrawData _receverDat;
+        private WaveDrawData _reflectDat;
+        private WaveDrawData _emmittrDat;
         
         private double lowestWave = 0;
         private double highestWave = 0;
@@ -120,26 +123,27 @@ namespace Pulsar4X.SDL2UI
                     uint emittedColour = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 0.0f, 0.25f, 1.0f));
                     uint emittedFill = ImGui.ColorConvertFloat4ToU32(new Vector4(1.0f, 0.0f, 0.25f, 0.5f));
 
+                    ImGui.BeginChild("stuff");
 
                     ImGui.Text("Recevers: ");
                     ImGui.PushID("recevers");
-                    WavInfo(_drawRecvers, _recevers);
+                    DisplayWavInfo(_receverDat);
                     ImGui.PopID();
-                    if(_reflecters != null)
+                    if(_reflectDat != null)
                     {
                         ImGui.PushID("reflectors");
                         ImGui.Text("Reflectors:");
-                        WavInfo(_drawReflectors, _reflecters);
+                        DisplayWavInfo(_reflectDat);
                         ImGui.PopID();
                     }
-                    if(_emmitters != null)
+                    if(_emmittrDat != null)
                     {
                         ImGui.PushID("emmiters");
                         ImGui.Text("Emmiters:");
-                        WavInfo(_drawEmmiters, _emmitters);
+                        DisplayWavInfo(_emmittrDat);
                         ImGui.PopID();
                     }
-                
+                    ImGui.EndChild();
                     
                     ImGui.NextColumn();
                     
@@ -165,69 +169,90 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Box From: " + p0);
                     ImGui.Text("Box To:   " + p1);
 
-                    DrawWav(_drawRecvers, _recevers, receverColour);
+                    DrawWav(_receverDat, receverColour);
 
-                    DrawWav(_drawReflectors, _reflecters, reflectedColour);
-
-                    DrawWav(_drawEmmiters, _emmitters, emittedColour);
+                    if(_reflectDat != null)
+                        DrawWav(_reflectDat, reflectedColour);
+                    if(_emmittrDat != null)
+                        DrawWav(_emmittrDat, emittedColour);
 
                 }
 
-                void DrawWav(bool[] enabledArray, (Vector2 p0, Vector2 p1, Vector2 p2)[] wavesArry, uint colour)
+    
+                
+                
+                void DrawWav(WaveDrawData wavesArry, uint colour)
                 {
-                    for (int i = 0; i < enabledArray.Length; i++)
+                    for (int i = 0; i < wavesArry.Count; i++)
                     {
-                        if (enabledArray[i])
+                        Vector2 p0 = _translation + wavesArry.Points[i].p0 * _scalingFactor;
+                        Vector2 p1 = _translation + wavesArry.Points[i].p1 * _scalingFactor;
+                        Vector2 p2 = _translation + wavesArry.Points[i].p2 * _scalingFactor;
+                        if (wavesArry.IsWaveDrawn[i].drawSrc)
                         {
-                            Vector2 p0 = _translation + wavesArry[i].p0 * _scalingFactor;
-                            Vector2 p1 = _translation + wavesArry[i].p1 * _scalingFactor;
-                            Vector2 p2 = _translation + wavesArry[i].p2 * _scalingFactor;
+
                             //_draw_list.AddLine(p0, p1, colour);
                             //_draw_list.AddLine(p1, p2, colour);
                             _draw_list.AddTriangleFilled(p0, p1, p2, colour);
                         }
-                    }
-                }
 
-                void WavInfo(bool[] enabledArray, (Vector2 p0, Vector2 p1, Vector2 p2)[] wavesArry)
-                {
-                    for (int i = 0; i < enabledArray.Length; i++)
-                    {
-                        if (ImGui.Checkbox("##drawbool" + i, ref enabledArray[i]))
+                        if (wavesArry.HasAtn && wavesArry.IsWaveDrawn[i].drawAtn)
                         {
-                            ResetBounds();
+                            Vector2 p3 = _translation + wavesArry.Points[i].p3 * _scalingFactor;
+                            _draw_list.AddTriangleFilled(p0, p3, p2, colour);
                         }
 
-                        ImGui.Text("MinWav: " + wavesArry[i].p0 .X);
-                        ImGui.SameLine();
-                        ImGui.Text("Magnitude: " + wavesArry[i].p0.Y);
+                    }
+                    
+                }
 
-                        ImGui.Text("AvgWav: " + wavesArry[i].p1.X);
-                        ImGui.SameLine();
-                        ImGui.Text("Magnitude: " + wavesArry[i].p1.Y);
+                void DisplayWavInfo(WaveDrawData wavesArry)
+                {
+                    for (int i = 0; i < wavesArry.Count; i++)
+                    {
+                        if(ImGui.Checkbox("Show Wave##drawbool" + i, ref wavesArry.IsWaveDrawn[i].drawSrc))
+                            ResetBounds();
 
-                        ImGui.Text("MaxWav: " + wavesArry[i].p2.X);
+                        if(wavesArry.HasAtn)
+                        { 
+                            ImGui.SameLine();
+                            if(ImGui.Checkbox("Show Attenuated Wave##drawbool" + i, ref wavesArry.IsWaveDrawn[i].drawAtn))
+                                ResetBounds();
+                        }
+
+                        ImGui.Text("MinWav: " + wavesArry.Points[i].p0 .X);
                         ImGui.SameLine();
-                        ImGui.Text("Magnitude: " + wavesArry[i].p2.Y);
+                        ImGui.Text("Magnitude: " + wavesArry.Points[i].p0.Y);
+
+                        ImGui.Text("AvgWav: " + wavesArry.Points[i].p1.X);
+                        ImGui.Text("Magnitude: " + wavesArry.Points[i].p1.Y);
+                        if(wavesArry.HasAtn)
+                            ImGui.Text("Attenuated Magnitude: " + wavesArry.Points[i].p3.Y);
+
+                        ImGui.Text("MaxWav: " + wavesArry.Points[i].p2.X);
+                        ImGui.SameLine();
+                        ImGui.Text("Magnitude: " + wavesArry.Points[i].p2.Y);
                     }
                 }
+                
+               
 
                 void ResetBounds()
                 {
-                    lowestWave = float.MaxValue;
-                    lowestMag = float.MaxValue;
-                    highestMag = 0;
-                    highestWave = 0;
-                    
+                    lowestWave = float.PositiveInfinity;
+                    lowestMag = float.PositiveInfinity;
+                    highestMag = float.NegativeInfinity;
+                    highestWave = float.NegativeInfinity;
 
-                    for (int i = 0; i < _drawRecvers.Length; i++)
+                    var dat = _receverDat;
+                    for (int i = 0; i < dat.Count; i++)
                     {
-                        if(_drawRecvers[i])
+                        if(dat.IsWaveDrawn[i].drawSrc)
                         {
-                            float low = _recevers[i].p0.X;
-                            float high = _recevers[i].p2.X;
-                            float mag1 = _recevers[i].p2.Y;
-                            float mag2 = _recevers[i].p1.Y;
+                            float low = dat.Points[i].p0.X;
+                            float high = dat.Points[i].p2.X;
+                            float mag1 = dat.Points[i].p0.Y; //recever highest value
+                            float mag2 = dat.Points[i].p1.Y; //recever lowest value
                             if (low < lowestWave)
                                 lowestWave = low;
                             if (high > highestWave)
@@ -239,56 +264,58 @@ namespace Pulsar4X.SDL2UI
                         }
                     }
 
-                    for (int i = 0; i < _drawReflectors.Length; i++)
-                    {
-                        if(_drawReflectors[i])
-                        {
-                            float low = _reflecters[i].p0.X;
-                            float high = _reflecters[i].p2.X;
-                            float mag1 = _reflecters[i].p0.Y;
-                            float mag2 = _reflecters[i].p1.Y;
+                    if(_reflectDat != null)
+                        ResetTargetBounds(_reflectDat);
+                    if(_emmittrDat != null)
+                        ResetTargetBounds(_emmittrDat);
+                }
 
-                            if (low < lowestWave)
-                                lowestWave = low;
-                            if (high > highestWave)
-                                highestWave = high;
-                            
-                            if (mag1 < lowestMag)
-                                lowestMag = mag1;
-                            if (mag2 > highestMag)
-                                highestMag = mag2;
-                        }
-                    }
-                    
-                    for (int i = 0; i < _drawEmmiters.Length; i++)
+                void ResetTargetBounds(WaveDrawData dat)
+                {
+                    for (int i = 0; i < dat.Count; i++)
                     {
-                        if(_drawEmmiters[i])
+                        if(dat.IsWaveDrawn[i].drawSrc || dat.IsWaveDrawn[i].drawAtn)
                         {
-                            float low = _emmitters[i].p0.X;
-                            float high = _emmitters[i].p2.X;
-                            float mag1 = _emmitters[i].p0.Y;
-                            float mag2 = _emmitters[i].p1.Y;
+                            float low = dat.Points[i].p0.X;
+                            float high = dat.Points[i].p2.X;
+                            float mag1 = dat.Points[i].p0.Y; //xmit lowest value prob 0
+                            float mag2 = dat.Points[i].p1.Y; //xmit highest value
+                            float mag3 = dat.Points[i].p3.Y; //xmit 2nd highest value
                             
                             if (low < lowestWave)
                                 lowestWave = low;
                             if (high > highestWave)
                                 highestWave = high;
                             
-                            if (mag1 < lowestMag)
+                            if (mag1 < lowestMag) //will likely be 0
                                 lowestMag = mag1;
-                            if (mag2 > highestMag)
-                                highestMag = mag2;
+                            
+                            if(dat.IsWaveDrawn[i].drawSrc)
+                            {
+                                if (mag2 > highestMag)
+                                    highestMag = mag2;
+                            }
+                            else if(dat.IsWaveDrawn[i].drawAtn)
+                            {
+                                if (mag3 > highestMag)
+                                    highestMag = mag3;
+                            }
                         }
                     }
                 }
+
+
 
                 void SetSensorData()
                 {                            
                     if (_selectedEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceverAtbDB>(out var recevers))
                     {
+                        _receverDat = new WaveDrawData();
+                        _receverDat.HasAtn = false;
+                        var points = _receverDat.Points = new (Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)[recevers.Count];
+                        _receverDat.IsWaveDrawn = new (bool drawSrc, bool drawAtn)[recevers.Count];
+                        
                         _selectedReceverAtb = new SensorReceverAtbDB[recevers.Count];
-                        _recevers = new (Vector2, Vector2, Vector2)[recevers.Count];
-                        _drawRecvers = new bool[recevers.Count];
                         
                         int i = 0;
                         foreach (var recever in recevers)
@@ -303,9 +330,9 @@ namespace Pulsar4X.SDL2UI
                             float mag1 = (float)_selectedReceverAtb[i].WorstSensitivity_kW;
                             float mag2 = (float)_selectedReceverAtb[i].BestSensitivity_kW;
                             
-                            _recevers[i].p0 = new Vector2(low, mag1);
-                            _recevers[i].p1 = new Vector2(mid, mag2);
-                            _recevers[i].p2 =  new Vector2(high, mag1);
+                            points[i].p0 = new Vector2(low, mag1);
+                            points[i].p1 = new Vector2(mid, mag2);
+                            points[i].p2 =  new Vector2(high, mag1);
                             i++;
                         }
                         
@@ -324,45 +351,44 @@ namespace Pulsar4X.SDL2UI
 
                 void SetTargetData()
                 {
+
                     _targetSensorProfile = _targetEntity.GetDataBlob<SensorProfileDB>();
                     SetReflectedEMProfile.SetEntityProfile(_targetEntity, _state.PrimarySystemDateTime);
                     var emitted = _targetSensorProfile.EmittedEMSpectra;
                     var reflected = _targetSensorProfile.ReflectedEMSpectra;
+                    var range = PositionDB.GetDistanceBetween_m(_selectedEntity.GetDataBlob<PositionDB>(), _targetEntity.GetDataBlob<PositionDB>());
 
-                    _reflecters = new (Vector2, Vector2, Vector2)[reflected.Count];
-                    _drawReflectors = new bool[reflected.Count];
-                    _emmitters = new (Vector2, Vector2, Vector2)[emitted.Count];
-                    _drawEmmiters = new bool[emitted.Count];
+                    _reflectDat = MakeTargetWavDat(reflected, range);
+                    _emmittrDat = MakeTargetWavDat(emitted, range);
+
+                }
+
+                WaveDrawData MakeTargetWavDat(Dictionary<EMWaveForm, double> wavsDict, double range)
+                {
+                    var wavDat = new WaveDrawData();
+                    wavDat.HasAtn = true;
+                    var datPts = wavDat.Points = new (Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)[wavsDict.Count];
+                    wavDat.IsWaveDrawn = new (bool drawSrc, bool drawAtn)[wavsDict.Count];
+
                     int i = 0;
-                    foreach (var waveformkvp in reflected)
+                    foreach (var waveformkvp in wavsDict)
                     {
                         float low = (float)waveformkvp.Key.WavelengthMin_nm;
                         float mid = (float)waveformkvp.Key.WavelengthAverage_nm;
                         float high = (float)waveformkvp.Key.WavelengthMax_nm;
                         float magnatude = (float)waveformkvp.Value;
+                        float atnmag = (float)SensorProcessorTools.AttenuationCalc(magnatude, range);
                         if (float.IsInfinity(magnatude))
                             magnatude = float.MaxValue;
                         
-                        _reflecters[i].p0 = new Vector2(low, 0);
-                        _reflecters[i].p1 = new Vector2(mid, magnatude);
-                        _reflecters[i].p2 = new Vector2(high, 0);
+                        datPts[i].p0 = new Vector2(low, 0);
+                        datPts[i].p1 = new Vector2(mid, magnatude);
+                        datPts[i].p2 = new Vector2(high, 0);
+                        datPts[i].p3 = new Vector2(mid, atnmag);
                         i++;
                     }
-                    
-                    i = 0;
-                    foreach (var waveformkvp in emitted)
-                    {
-                        float low = (float)waveformkvp.Key.WavelengthMin_nm;
-                        float mid = (float)waveformkvp.Key.WavelengthAverage_nm;
-                        float high = (float)waveformkvp.Key.WavelengthMax_nm;
-                        float magnatude = (float)waveformkvp.Value;
-                        if (float.IsInfinity(magnatude))
-                            magnatude = float.MaxValue;
-                        _emmitters[i].p0 = new Vector2(low, 0);
-                        _emmitters[i].p1 = new Vector2(mid, magnatude);
-                        _emmitters[i].p2 =  new Vector2(high, 0);
-                        i++;
-                    }
+
+                    return wavDat;
                 }
             }
         }

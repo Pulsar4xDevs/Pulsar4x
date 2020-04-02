@@ -72,7 +72,7 @@ namespace Pulsar4X.SDL2UI
                 
                 //Vector3 pnt = new Vector3(x1, y1, 0);
                 //pnt = mtx.Transform(pnt);
-                //_points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
+                //Points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
                 _points[i] = new PointD() { X = x2, Y = y2 };
                 angle += _segmentArcSweepRadians;
             }
@@ -116,7 +116,7 @@ namespace Pulsar4X.SDL2UI
 
             _ellipseStartArcAngleRadians = (float)(Math.Atan2(y2, x2));  //Atan2 returns a value between -180 and 180; 
 
-            //PointD pnt = _points.OrderBy(p => CalcDistance(p, new PointD() {x = pos.X, y = pos.Y })).First();
+            //PointD pnt = Points.OrderBy(p => CalcDistance(p, new PointD() {x = pos.X, y = pos.Y })).First();
 
             //get the indexPosition in the point array we want to start drawing from: this should be the segment where the planet is. 
             double unAdjustedIndex = (_ellipseStartArcAngleRadians / _segmentArcSweepRadians);

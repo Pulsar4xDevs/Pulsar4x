@@ -284,6 +284,8 @@ namespace Pulsar4X.ECSLib
         public static double AttenuationCalc(double sourceValue, double distance)
         {
             // souce / (4 pi r^2)
+            if (distance == 0)
+                return sourceValue;
             return sourceValue / (4 * Math.PI * distance * distance);
         }
 
