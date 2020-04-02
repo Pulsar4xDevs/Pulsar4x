@@ -45,6 +45,11 @@ namespace Pulsar4X.SDL2UI
             return this.BodyType == UserOrbitSettings.OrbitBodyType.Asteroid || this.BodyType == UserOrbitSettings.OrbitBodyType.Comet;
         }
 
+        public bool IsStar()
+        {
+            return this.BodyType == UserOrbitSettings.OrbitBodyType.Star;
+        }
+
 
 
 

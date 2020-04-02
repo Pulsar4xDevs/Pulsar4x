@@ -97,39 +97,32 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Resources\CargoIco.bmp" />
+    <None Remove="Resources\FireconIco.bmp" />
+    <None Remove="Resources\IndustryIco.bmp" />
     <None Remove="Resources\OneStep.bmp" />
     <None Remove="Resources\Pause.bmp" />
+    <None Remove="Resources\PinIco.bmp" />
     <None Remove="Resources\Play.bmp" />
+    <None Remove="Resources\PowerIco.bmp" />
     <None Remove="Resources\PulsarLogo.bmp" />
     <None Remove="Resources\PulsarLogo.png" />
     <None Remove="Libs\libcimgui.so" />
     <None Remove="Resources\CancelIco.bmp" />
     <None Remove="Resources\DnArrow.bmp" />
+    <None Remove="Resources\RenameIco.bmp" />
     <None Remove="Resources\RepeatIco.bmp" />
     <None Remove="Resources\RulerIco.bmp" />
+    <None Remove="Resources\SelectIco.bmp" />
+    <None Remove="Resources\TreeIco.bmp" />
     <None Remove="Resources\UpArrow.bmp" />
     <None Update="imgui.ini">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\CargoIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\FireconIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\IndustryIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\PinIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\ProggyClean.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\DejaVuSans.ttf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\PowerIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -160,10 +153,22 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\CargoIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\FireconIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\IndustryIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\OneStep.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Pause.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\PinIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Play.bmp">
@@ -181,11 +186,20 @@
     <Content Include="Resources\DnArrow.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\RenameIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\RepeatIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\RulerIco.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SelectIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\TreeIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\UpArrow.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -224,18 +238,17 @@
     <None Update="Resources\pulsaricon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Resources\RenameIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\SelectIco.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Resources\UpArrow.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="MapRendering\GalaxyMap.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\PowerIco.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <Target Name="GetGitHash" BeforeTargets="WriteGitHash" Condition="'$(BuildHash)' == ''">
