@@ -47,8 +47,18 @@ namespace Pulsar4X.SDL2UI
 
                     foreach (KeyValuePair<System.Guid, EntityState> Body in _NamedEntityStates)
                     {
-                        if (Body.Value.IsStar())
-                            TreeGen(Body.Value.Entity);
+                        if (Body.Value.IsStar()) 
+                        { 
+                            if(_state.LastClickedEntity != null)
+                            {
+                                TreeGen(Body.Value.Entity, _state.LastClickedEntity.Entity);
+                            }
+                            else
+                            {
+                                TreeGen(Body.Value.Entity, Body.Value.Entity);
+                            }
+                        }
+                            
 
                     }                  
 
@@ -59,7 +69,7 @@ namespace Pulsar4X.SDL2UI
             
         }
 
-        void TreeGen(Entity _CurrentBody)
+        void TreeGen(Entity _CurrentBody, Entity _SelectedBody)
         {
             SystemState _StarSystemState = _state.StarSystemStates[_state.SelectedStarSysGuid];
             Dictionary<System.Guid, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
@@ -70,18 +80,31 @@ namespace Pulsar4X.SDL2UI
 
                 if (_ChildList.Count > 0)
                 {
-                    if (ImGui.TreeNodeEx(_NamedEntityStates[_CurrentBody.Guid].Name))
+                    ImGuiTreeNodeFlags _TreeFlags;
+                    if (_CurrentBody == _SelectedBody)
                     {
+                        _TreeFlags = ImGuiTreeNodeFlags.Selected;
+                    }
+                    else
+                    {
+                        _TreeFlags = ImGuiTreeNodeFlags.None;
+                    }
+                    if (ImGui.TreeNodeEx(_NamedEntityStates[_CurrentBody.Guid].Name, _TreeFlags))
+                    {
+                        if (ImGui.Selectable(_NamedEntityStates[_CurrentBody.Guid].Name, _CurrentBody == _SelectedBody))//TODO Make tree items selectable
+                            _state.EntityClicked(_CurrentBody.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
                         foreach (Entity _ChildBody in _ChildList)
-                            TreeGen(_ChildBody);
+                            TreeGen(_ChildBody, _SelectedBody);
                         ImGui.TreePop();
                     }
+
+
                 }
                 else
                 {
-                    if (ImGui.SmallButton(_NamedEntityStates[_CurrentBody.Guid].Name))
+                    bool selected = _CurrentBody == _SelectedBody;                   
+                    if (ImGui.Selectable(_NamedEntityStates[_CurrentBody.Guid].Name, selected))
                         _state.EntityClicked(_CurrentBody.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
-
                 }
 
             }
