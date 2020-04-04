@@ -34,8 +34,7 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
            
-            ImGui.SetNextWindowSize(new Vector2(175, 225), ImGuiCond.Once);
-            if (ImGui.Begin("Objects In system", _flags))
+            if (IsActive && ImGui.Begin("System Tree", _flags))
             {
 
                 if (_state.StarSystemStates.ContainsKey(_state.SelectedStarSysGuid)){
