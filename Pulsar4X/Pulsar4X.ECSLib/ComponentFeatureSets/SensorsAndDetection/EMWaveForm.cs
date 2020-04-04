@@ -33,7 +33,20 @@ namespace Pulsar4X.ECSLib
         /// The max wavelength this will no longer emit at in nm
         /// </summary>
         public double WavelengthMax_nm;
+        public EMWaveForm()
+        {
+
+        }
+        public EMWaveForm(double _WavelengthAverage_nm, double _WavelengthMin_nm, double _WavelengthMax_nm)
+        {
+            WavelengthAverage_nm = _WavelengthAverage_nm;
+            WavelengthMin_nm = _WavelengthMin_nm;
+            WavelengthMax_nm = _WavelengthMax_nm;
+
+        }
     }
+
+
 
     /*
     public class EntityWaveforms

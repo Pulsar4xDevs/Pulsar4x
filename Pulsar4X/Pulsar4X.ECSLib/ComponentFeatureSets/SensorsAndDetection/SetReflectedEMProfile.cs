@@ -56,12 +56,21 @@ namespace Pulsar4X.ECSLib
                         var attenuated = SensorProcessorTools.AttenuationCalc(emitedItem.Value, distance);
                         var reflectedMagnatude = attenuated * reflectionCoefficent;
                         
-                        if(reflectedMagnatude > 0.001) //ignore it if the signal is less than a watt
-                            sensorSig.ReflectedEMSpectra.Add(emitedItem.Key, reflectedMagnatude);
-                        
-                        
+                        if(reflectedMagnatude > 0.001) //ignore it if the signal is less than a watt 
+                        {
+                            if (sensorSig.ReflectedEMSpectra.ContainsKey(emitedItem.Key))
+                            {
+                                sensorSig.ReflectedEMSpectra[emitedItem.Key] = sensorSig.ReflectedEMSpectra[emitedItem.Key] + reflectedMagnatude;
+                            }
+                            else
+                                sensorSig.ReflectedEMSpectra.Add(emitedItem.Key, reflectedMagnatude);
+                        }
+                            
+
+
+
                         //debug code:
-                        if(emitedItem.Value < 0)
+                        if (emitedItem.Value < 0)
                             throw new Exception("Source should not be less than 0");                        
                         if(attenuated > emitedItem.Value)
                             throw new Exception("Attenuated value shoudl be less than source");                       

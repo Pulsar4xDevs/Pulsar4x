@@ -427,7 +427,7 @@
               "Units": "Unknown",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Thrust'),0)",
+              "AttributeFormula": "DataBlobArgs(Ability('Thrust'), 0 , 0, 0)",
               "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]
