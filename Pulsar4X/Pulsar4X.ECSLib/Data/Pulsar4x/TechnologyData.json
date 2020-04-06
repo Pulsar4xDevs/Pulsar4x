@@ -445,7 +445,7 @@
           "Category": "MissilesKineticWeapons",
           "ID": "E3B17143-D802-485C-A955-C9349B9FCBDA",
           "MaxLevel": 9,
-          "DataFormula": "0.1 - [Level] * 0.01",
+          "DataFormula": "0.01 - [Level] * 0.001",
           "Requirements": {
             "List": []
           },

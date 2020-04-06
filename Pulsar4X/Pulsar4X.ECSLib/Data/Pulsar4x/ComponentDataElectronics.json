@@ -71,14 +71,14 @@
             },
             {
               "Name": "Sensitivity at Ideal Wavelength",
-              "Units": "Kw",
+              "Units": "W",
               "DescriptionFormula": "'Smallest signal this can detect at the ideal wavelength, lower is better.",
               "GuiHint": "GuiTextDisplay",
               "AttributeFormula": "TechData('E3B17143-D802-485C-A955-C9349B9FCBDA') / (Ability('Effective Size') * Ability('Effective Size') * Ability('Efficiency'))"
             },
             {
               "Name": "Sensitivity at Worst Wavelength",
-              "Units": "Kw",
+              "Units": "W",
               "DescriptionFormula": "'Smallest signal this can detect at the worst wavelength, lower is better.'",
               "GuiHint": "GuiTextDisplay",
               "AttributeFormula": "TechData('E3B17143-D802-485C-A955-C9349B9FCBDA') / (Ability('Effective Size') * Ability('Effective Size') * Ability('Efficiency') * 0.1)"

@@ -25,11 +25,9 @@ namespace Pulsar4X.ECSLib
             {
                 foreach (var recever in recevers)
                 {
-                    var ability = recever.GetAbilityState<SensorReceverAbility>();
-                    var attribute = recever.Design.GetAttribute<SensorReceverAtbDB>();
-
-                    //SensorReceverAtbDB receverDB = designEntity.GetDataBlob<SensorReceverAtbDB>();
-
+                    var sensorAbl = recever.GetAbilityState<SensorReceverAbility>();
+                    var sensorAtb = recever.Design.GetAttribute<SensorReceverAtbDB>();
+                    
                     FactionInfoDB factionInfo = faction.GetDataBlob<FactionInfoDB>();
 
 
@@ -38,28 +36,48 @@ namespace Pulsar4X.ECSLib
                         sensorMgr = new SystemSensorContacts(manager, faction);
                     else 
                         sensorMgr = manager.FactionSensorContacts[entity.FactionOwner];
+                    
 
-                    foreach (var detectableEntity in detectableEntitys)
+                    var detections = SensorProcessorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition_m, detectableEntitys, atDateTime, faction.Guid, true);
+                    SensorInfoDB sensorInfo;
+                    for (int i = 0; i < detections.Length; i++)
                     {
-                        //Entity detectableEntity = sensorProfile.OwningEntity;
-
-                        if (detectableEntity.FactionOwner != Guid.Empty)
+                        SensorProcessorTools.SensorReturnValues detectionValues;
+                        detectionValues = detections[i];
+                        var detectableEntity = detectableEntitys[i];    
+                        if (detectionValues.SignalStrength_kW > 0.0)
                         {
-                            if (detectableEntity.FactionOwner != faction.Guid)                        
+                            if (sensorMgr.SensorContactExists(detectableEntity.Guid))
                             {
-                                SensorProcessorTools.DetectEntites(sensorMgr, factionInfo,position, attribute, detectableEntity, atDateTime);
+                                //sensorInfo = knownContacts[detectableEntity.ID].GetDataBlob<SensorInfoDB>();
+                                sensorInfo = sensorMgr.GetSensorContact(detectableEntity.Guid).SensorInfo;
+                                sensorInfo.LatestDetectionQuality = detectionValues;
+                                sensorInfo.LastDetection = atDateTime;
+                                if (sensorInfo.HighestDetectionQuality.SignalQuality < detectionValues.SignalQuality)
+                                    sensorInfo.HighestDetectionQuality.SignalQuality = detectionValues.SignalQuality;
+
+                                if (sensorInfo.HighestDetectionQuality.SignalStrength_kW < detectionValues.SignalStrength_kW)
+                                    sensorInfo.HighestDetectionQuality.SignalStrength_kW = detectionValues.SignalStrength_kW;
+                                SensorEntityFactory.UpdateSensorContact(faction, sensorInfo);    
                             }
                             else
                             {
-                                //then the sensor profile belongs to the same faction as the recever. don't bother trying to detect it. 
+                                SensorContact contact = new SensorContact(faction, detectableEntity, atDateTime);
+                                sensorMgr.AddContact(contact);
+                                sensorAbl.CurrentContacts[detectableEntity.Guid] = detectionValues;
+
+                                //knownContacts.Add(detectableEntity.ID, SensorEntityFactory.UpdateSensorContact(receverFaction, sensorInfo)); moved this line to the SensorInfoDB constructor
                             }
+
                         }
-                        else
+                        else if (sensorMgr.SensorContactExists(detectableEntity.Guid) && sensorAbl.CurrentContacts.ContainsKey(detectableEntity.Guid))
                         {
-                            SensorProcessorTools.DetectEntites(sensorMgr, factionInfo, position, attribute, detectableEntity, atDateTime);
+                            sensorAbl.CurrentContacts.Remove(detectableEntity.Guid);
+                            sensorAbl.OldContacts[detectableEntity.Guid] = detectionValues;
                         }
                     }
-                    manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(attribute.ScanTime), this.TypeName, entity);
+                    
+                    manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(sensorAtb.ScanTime), this.TypeName, entity);
                 }
             }
         }

@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
             blobs.Add(orderableDB);
             MassVolumeDB mvDB = new MassVolumeDB();
             blobs.Add(mvDB);
-            PositionDB posDB = new PositionDB(0, 0, 0, planetEntity.Manager.ManagerGuid, planetEntity);
+            PositionDB posDB = new PositionDB(planetEntity.GetDataBlob<PositionDB>());
             blobs.Add(posDB);
             TeamsHousedDB th = new TeamsHousedDB();
             blobs.Add(th);

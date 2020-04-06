@@ -7,6 +7,42 @@ namespace Pulsar4X.ECSLib
 
     public static class SensorProcessorTools
     {
+
+        public static SensorReturnValues[] GetDetectedEntites(SensorReceverAtbDB sensorAtb, Vector3 position, List<Entity> detectableEntities, DateTime atDate, Guid factionOwner,  bool filterSameFaction = true)
+        {
+            SensorReturnValues[] detectionValues = new SensorReturnValues[detectableEntities.Count];
+            for (int i = 0; i < detectableEntities.Count; i++)
+            {
+                var detectableEntity = detectableEntities[i];
+                if (filterSameFaction && detectableEntity.FactionOwner == factionOwner)
+                    continue;
+                else 
+                {
+                    SensorProfileDB detectableProfile = detectableEntity.GetDataBlob<SensorProfileDB>();
+                    PositionDB detectablePosDB = detectableEntity.GetDataBlob<PositionDB>();
+                    if(detectablePosDB == null)
+                    {
+                        StaticRefLib.EventLog.AddEvent(new Event("Error: Attempt to get a sensor position on a positionless entity, ID: "+ detectableEntity.Guid));
+                        continue;
+                    }
+                    
+                    //TODO: check if the below actualy saves us anything. it might be better just to seperatly loop through each of the entites and set the reflection profiles every so often.. 
+                    TimeSpan timeSinceLastCalc = atDate - detectableProfile.LastDatetimeOfReflectionSet;
+                    double distanceSinceLastCalc = detectablePosDB.GetDistanceTo_m(detectableProfile.LastPositionOfReflectionSet);
+                    if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceSinceLastCalc > 5000) //TODO: move the time and distance numbers here to settings?
+                        SetReflectedEMProfile.SetEntityProfile(detectableEntity, atDate);
+
+                    var distance = detectablePosDB.GetDistanceTo_m(position);
+                    var attentuatedSignal = AttenuatedForDistance(detectableProfile, distance);
+                    SensorReturnValues detectionValue = DetectonQuality(sensorAtb, attentuatedSignal);
+                    //if(detectionValue.SignalStrength_kW > 0)
+                        detectionValues[i] = detectionValue;
+                }
+            }
+
+            return detectionValues;
+        }
+
         internal static void DetectEntites(SystemSensorContacts sensorMgr, FactionInfoDB factionInfo, PositionDB receverPos, SensorReceverAtbDB receverDB, Entity detectableEntity, DateTime atDate)
         {
             Entity receverFaction = sensorMgr.FactionEntity;
@@ -32,7 +68,7 @@ namespace Pulsar4X.ECSLib
             PositionDB targetPosition;
             if (detectableEntity.HasDataBlob<PositionDB>())
                 targetPosition = detectableEntity.GetDataBlob<PositionDB>();
-            else throw new NotImplementedException("This might be a colony on a planet, not sure how I'll handle that yet");
+            else throw new Exception("This Object does not have a position.");
  
             var distance = PositionDB.GetDistanceBetween_m(receverPos, targetPosition);
             SensorReturnValues detectionValues = DetectonQuality(receverDB, AttenuatedForDistance(sensorProfile, distance));
@@ -64,7 +100,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal static SensorReturnValues DetectonQuality(SensorReceverAtbDB recever, Dictionary<EMWaveForm, double> signalAtPosition)
+        public static SensorReturnValues DetectonQuality(SensorReceverAtbDB recever, Dictionary<EMWaveForm, double> signalAtPosition)
         {
             /*
              * Thoughts (spitballing):
@@ -205,7 +241,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Gets the line intersection.
         /// </summary>
-        /// <returns><c>true</c>, if line intersection was gotten, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c>, if lines intesect, <c>false</c> otherwise.</returns>
         /// <param name="p0_x">P0 x.</param>
         /// <param name="p0_y">P0 y.</param>
         /// <param name="p1_x">P1 x.</param>
@@ -245,10 +281,10 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        internal struct SensorReturnValues
+        public struct SensorReturnValues
         {
-            internal double SignalStrength_kW;
-            internal PercentValue SignalQuality;
+            public double SignalStrength_kW;
+            public PercentValue SignalQuality;
         }
 
         /// <summary>
@@ -257,7 +293,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>The for distance.</returns>
         /// <param name="emissionProfile">Emission.</param>
         /// <param name="distance">Distance.</param>
-        internal static Dictionary<EMWaveForm, double> AttenuatedForDistance(SensorProfileDB emissionProfile, double distance)
+        public static Dictionary<EMWaveForm, double> AttenuatedForDistance(SensorProfileDB emissionProfile, double distance)
         {
             var dict = new Dictionary<EMWaveForm, double>();
             foreach (var emitedItem in emissionProfile.EmittedEMSpectra)
@@ -303,12 +339,10 @@ namespace Pulsar4X.ECSLib
             double b = 2898000; //Wien's displacement constant for nanometers.
             var wavelength = b / kelvin; //Wien's displacement law https://en.wikipedia.org/wiki/Wien%27s_displacement_law
             var magnitudeInKW = starInfoDB.Luminosity * 3.827e23; //tempDegreesC / starMassVolumeDB.Volume_km3; //maybe this should be lum / volume?
-            EMWaveForm waveform = new EMWaveForm()
-            {
-                WavelengthAverage_nm = wavelength,
-                WavelengthMin_nm = wavelength - 300, //3k angstrom, semi arbitrary number pulled outa my ass from 10min of internet research. 
-                WavelengthMax_nm = wavelength + 600
-            };
+            
+            //-300, + 600, semi arbitrary number pulled outa my ass from 10min of internet research. 
+            EMWaveForm waveform = new EMWaveForm(wavelength - 300, wavelength, wavelength + 600);
+
 
             var emisionSignature = new SensorProfileDB() {
                 
@@ -337,12 +371,10 @@ namespace Pulsar4X.ECSLib
             var j = emisivity * cop * Math.Pow(kelvin, 4);
             var surfaceArea = 4 * Math.PI * massVolDB.RadiusInM * massVolDB.RadiusInM;
             var magnitude = j * surfaceArea * 0.001;
-            EMWaveForm waveform = new EMWaveForm()
-            {
-                WavelengthAverage_nm = wavelength,
-                WavelengthMin_nm = wavelength - 400, //4k angstrom, semi arbitrary number pulled outa my ass from 0min of internet research. 
-                WavelengthMax_nm = wavelength + 600
-            };
+            
+            //-400 & +600, semi arbitrary number pulled outa my ass from 0min of internet research. 
+            EMWaveForm waveform = new EMWaveForm(wavelength - 400, wavelength, wavelength + 600);
+
 
             profile.EmittedEMSpectra.Add(waveform, magnitude);//TODO this may need adjusting to make good balanced detections.
             profile.Reflectivity = sysBodyInfoDB.Albedo;

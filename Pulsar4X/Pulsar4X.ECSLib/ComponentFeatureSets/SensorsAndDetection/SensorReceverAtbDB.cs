@@ -9,12 +9,14 @@ namespace Pulsar4X.ECSLib
     public class SensorReceverAbility : ComponentAbilityState
     {
         [JsonProperty]
-        internal Dictionary<Guid, SensorInfoDB> KnownSensorContacts = new Dictionary<Guid, SensorInfoDB>();
+        public Dictionary<Guid, SensorProcessorTools.SensorReturnValues> CurrentContacts = new Dictionary<Guid, SensorProcessorTools.SensorReturnValues>();
+        public Dictionary<Guid, SensorProcessorTools.SensorReturnValues> OldContacts = new Dictionary<Guid, SensorProcessorTools.SensorReturnValues>();
     }
 
     public class SensorAbilityDB : BaseDataBlob
     {
-        
+        internal Dictionary<Guid, SensorProcessorTools.SensorReturnValues> CurrentContacts = new Dictionary<Guid, SensorProcessorTools.SensorReturnValues>();
+        internal Dictionary<Guid, SensorProcessorTools.SensorReturnValues> OldContacts = new Dictionary<Guid, SensorProcessorTools.SensorReturnValues>();
 
         public SensorAbilityDB()
         {
@@ -22,6 +24,8 @@ namespace Pulsar4X.ECSLib
 
         public SensorAbilityDB(SensorAbilityDB db)
         {
+            CurrentContacts = new Dictionary<Guid, SensorProcessorTools.SensorReturnValues>(db.CurrentContacts);
+            OldContacts = new Dictionary<Guid, SensorProcessorTools.SensorReturnValues>(db.OldContacts);
         }
 
         public override object Clone()
@@ -64,6 +68,15 @@ namespace Pulsar4X.ECSLib
         public SensorReceverAtbDB() { }
 
         //ParserConstrutor
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="peakWaveLength">nm</param>
+        /// <param name="bandwidth">nm</param>
+        /// <param name="bestSensitivity">watts</param>
+        /// <param name="worstSensitivity">watts</param>
+        /// <param name="resolution">mp</param>
+        /// <param name="scanTime">sec</param>
         public SensorReceverAtbDB(double peakWaveLength, double bandwidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)
         {
             //TODO:  should make this component invalid. 
@@ -81,13 +94,11 @@ namespace Pulsar4X.ECSLib
                 StaticRefLib.EventLog.AddEvent(ev);
                 worstSensitivity = bestSensitivity;
             }
-            RecevingWaveformCapabilty = new EMWaveForm() { WavelengthMin_nm = peakWaveLength - bandwidth * 0.5, WavelengthAverage_nm = peakWaveLength, WavelengthMax_nm = peakWaveLength + bandwidth * 0.5};
-            BestSensitivity_kW = bestSensitivity;
-            WorstSensitivity_kW = worstSensitivity;
+            RecevingWaveformCapabilty = new EMWaveForm(peakWaveLength - bandwidth * 0.5,peakWaveLength, peakWaveLength + bandwidth * 0.5);
+            BestSensitivity_kW = bestSensitivity * 0.001;
+            WorstSensitivity_kW = worstSensitivity * 0.001;
             Resolution = (float)resolution;
             ScanTime = (int)scanTime;
-
-
         }
 
         public SensorReceverAtbDB(SensorReceverAtbDB db)

@@ -230,6 +230,11 @@ namespace Pulsar4X.ECSLib
             return GetDistanceBetween_m(this, otherPos);
         }
 
+        public double GetDistanceTo_m(Vector3 otherPos)
+        {
+            return(AbsolutePosition_m - otherPos).Length();
+        }
+
         public double GetDistanceTo_AU(IPosition otherPos)
         {
             return GetDistanceBetween_AU(this, otherPos);

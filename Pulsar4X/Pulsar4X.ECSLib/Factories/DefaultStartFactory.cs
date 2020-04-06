@@ -670,8 +670,8 @@ namespace Pulsar4X.ECSLib
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensor = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
             sensor.ComponentDesignAttributes["Antenna Size"].SetValueFromInput(5000);  //size
-            sensor.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(600); //best wavelength
-            sensor.ComponentDesignAttributes["Detection Bandwidth"].SetValueFromInput(500); //wavelength detection width 
+            sensor.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(470); //best wavelength
+            sensor.ComponentDesignAttributes["Detection Bandwidth"].SetValueFromInput(250); //wavelength detection width 
             //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
             //[4] worst detection magnatude (not settable)
             sensor.ComponentDesignAttributes["Resolution"].SetValueFromInput(100);   //resolution
