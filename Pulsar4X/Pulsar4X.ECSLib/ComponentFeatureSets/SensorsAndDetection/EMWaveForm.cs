@@ -40,7 +40,6 @@ namespace Pulsar4X.ECSLib
             WavelengthAverage_nm = avg;
             WavelengthMax_nm = max;
         }
-        
     }
 
     /*
