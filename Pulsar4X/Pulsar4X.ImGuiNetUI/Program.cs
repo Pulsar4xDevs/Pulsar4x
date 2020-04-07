@@ -6,11 +6,10 @@ using ImGuiSDL2CS;
 using System.Drawing;
 using Pulsar4X.ECSLib;
 using System.Linq;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.SDL2UI.Combat;
 using Vector3 = System.Numerics.Vector3;
 
-
-//this comment is a test to see if github works(quartuxz)
 
 namespace Pulsar4X.SDL2UI
 {
@@ -46,7 +45,7 @@ namespace Pulsar4X.SDL2UI
         public PulsarMainWindow()
             : base("Pulsar4X")
         {
-
+            
             _state = new GlobalUIState(this);
             //_state.MainWinSize = this.Size;
             //_state.ShowMetrixWindow = true;

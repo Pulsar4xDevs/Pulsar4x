@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <Authors>Pulsar4XDevs</Authors>
     <Company>Pulsar4X</Company>
     <Product>Pulsar4x.Tests</Product>

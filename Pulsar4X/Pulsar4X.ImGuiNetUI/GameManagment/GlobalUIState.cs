@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.IO;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
@@ -126,6 +127,9 @@ namespace Pulsar4X.SDL2UI
             LoadImg("Rename", Path.Combine(rf, "RenameIco.bmp"));
             LoadImg("Select", Path.Combine(rf, "SelectIco.bmp"));
             LoadImg("Tree", Path.Combine(rf, "TreeIco.bmp"));
+
+            //DEBUG Code: (can be deleted);
+            DamageTools.LoadFromBitMap(Path.Combine(rf, "ImgTest.bmp"));
             /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
