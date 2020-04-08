@@ -270,7 +270,7 @@
     </PropertyGroup>
 
     <!-- write the hash to the temp file.-->
-    <Exec Command="git -C $(ProjectDir) describe --long --always --dirty &gt; $(VerFile)" />
+    <Exec Command="git describe --long --always --dirty &gt; $(VerFile)" />
 
     <!-- read the version into the GitVersion itemGroup-->
     <ReadLinesFromFile File="$(VerFile)">
