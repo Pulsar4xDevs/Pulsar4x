@@ -37,9 +37,12 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
     
     public class OrdnancePayloadAtb : IComponentDesignAttribute
     {
-
+        public TriggerTypes Trigger;
+        public double Mass;
         public OrdnancePayloadAtb(TriggerTypes trigger, double totalMass)
         {
+            Trigger = trigger;
+            Mass = totalMass;
         }
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
@@ -132,13 +135,13 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         {
         }
 
-        public OrdnanceDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (ArmorSD armorType, float thickness) armor)
+        public OrdnanceDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components)
         {
             faction.MissileDesigns.Add(ID, this);
             faction.IndustryDesigns[ID] = this;
             Name = name;
             Components = components;
-            Armor = armor;
+            
 
             
             foreach (var component in components)

@@ -42,6 +42,16 @@ namespace Pulsar4X.SDL2UI
             _labelSize = ImGui.GetItemRectSize();
         }
 
+        public static void BeginBorder(string label)
+        {
+            BeginBorder(label, ImGui.GetColorU32(ImGuiCol.Border)); 
+        }
+        
+        public static void BeginBorder(string label, ImGuiCol colorIdx)
+        {
+            BeginBorder(label, ImGui.GetColorU32(colorIdx)); 
+        }
+
         public static void EndBoarder()
         { 
             Vector2 size = new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetCursorScreenPos().Y - _startPos.Y);

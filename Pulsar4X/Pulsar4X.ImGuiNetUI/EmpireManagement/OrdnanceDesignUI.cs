@@ -17,19 +17,25 @@ namespace Pulsar4X.SDL2UI
 
         private float _missileSize = 1;
         
+        private List<ComponentDesign> _payloadTypes = new List<ComponentDesign>();
+        private OrdnancePayloadAtb _selectedPayload;
         private string[] _payload;
         private int _payloadSelectedIndex = 0;
-        private float _payloadPercent;
+        private int _payloadCount = 1;
         
+        List<ComponentDesign> _eleccPackTypes = new List<ComponentDesign>();
         private string[] _electronicsPackage;
         private int _electronicsSelectedIndex = 0;
         
-        private float _fuelPercent;       
+        private float _fuelKG;       
         
+        List<ComponentDesign> _engineTypes = new List<ComponentDesign>();
         private string[] _engineDesigns;
         private int _engineSelectedIndex = 0;
-        private int _engineCount;
+        private int _engineCount = 1;
 
+        private Dictionary<ComponentDesign, int>  _selectedComponentDesigns = new Dictionary<ComponentDesign, int>();
+        private double _totalMass;
         private OrdinanceDesignUI()
         {
             HardRefresh();
@@ -70,61 +76,61 @@ namespace Pulsar4X.SDL2UI
             
 
 
-            List<ComponentDesign> missilePayload = new List<ComponentDesign>();
-            List<ComponentDesign> missileSensors = new List<ComponentDesign>();
-            List<ComponentDesign> missileEngines = new List<ComponentDesign>();
+            _payloadTypes = new List<ComponentDesign>();
+            _eleccPackTypes = new List<ComponentDesign>();
+            _engineTypes = new List<ComponentDesign>();
             foreach (ComponentDesign cdes in componentDesigns.Values)
             {
                 if ((cdes.ComponentMountType & ComponentMountType.Missile) == ComponentMountType.Missile)
                 {
                     if (cdes.AttributesByType.ContainsKey(typeof(OrdnancePayloadAtb)))
                     {
-                        missilePayload.Add(cdes);
+                        _payloadTypes.Add(cdes);
                     }
                     if (cdes.AttributesByType.ContainsKey(typeof(OrdnanceExplosivePayload)))
                     {
-                        missilePayload.Add(cdes);
+                        _payloadTypes.Add(cdes);
                     }
                     if (cdes.AttributesByType.ContainsKey(typeof(OrdnanceShapedPayload)))
                     {
-                        missilePayload.Add(cdes);
+                        _payloadTypes.Add(cdes);
                     }
                     if (cdes.AttributesByType.ContainsKey(typeof(OrdnanceLaserPayload)))
                     {
-                        missilePayload.Add(cdes);
+                        _payloadTypes.Add(cdes);
                     }
                     if (cdes.AttributesByType.ContainsKey(typeof(OrdnanceSubmunitionsPayload)))
                     {
-                        missilePayload.Add(cdes);
+                        _payloadTypes.Add(cdes);
                     }
                     if (cdes.AttributesByType.ContainsKey(typeof(SensorReceverAtbDB)))
                     {
-                        missileSensors.Add(cdes);
+                        _eleccPackTypes.Add(cdes);
                     }
 
                     if (cdes.AttributesByType.ContainsKey(typeof(NewtonionThrustAtb)))
                     {
-                        missileEngines.Add(cdes);
+                        _engineTypes.Add(cdes);
                     }
 
                 }
             }
             
-            _payload = new string[missilePayload.Count];
+            _payload = new string[_payloadTypes.Count];
             i = 0;
-            foreach (var des in missilePayload)
+            foreach (var des in _payloadTypes)
             {
                 _payload[i] = des.Name;
             }
-            _electronicsPackage = new string[missileSensors.Count];
+            _electronicsPackage = new string[_eleccPackTypes.Count];
             i = 0;
-            foreach (var des in missileSensors)
+            foreach (var des in _eleccPackTypes)
             {
                 _electronicsPackage[i] = des.Name;
             }
-            _engineDesigns = new string[missileEngines.Count];
+            _engineDesigns = new string[_engineTypes.Count];
             i = 0;
-            foreach (var des in missileEngines)
+            foreach (var des in _engineTypes)
             {
                 _engineDesigns[i] = des.Name;
             }
@@ -135,29 +141,90 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            if (IsActive && ImGui.Begin("Ordinace Design"))
+            if (IsActive && ImGui.Begin("Ordnance Design"))
             {
                 ImGui.Combo("Current Designs", ref _payloadSelectedIndex, _currentDesignNames, _currentDesignNames.Length);
 
-                ImGui.SliderFloat("Missile Size", ref _missileSize, 1, 256);
+                ImGui.NewLine();
+                BorderGroup.BeginBorder("Payload:");
+                if (ImGui.Combo("Payload type", ref _payloadSelectedIndex, _payload, _payload.Length))
+                {
+                    _selectedPayload = _payloadTypes[_payloadSelectedIndex].GetAttribute<OrdnancePayloadAtb>();
+                    _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
+                    RefreshMass();
+                }
+                if(ImGui.SliderInt("Payload Count", ref _payloadCount, 1, 100))
+                {
+                    _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
+                    RefreshMass();
+                }
+                //ImGui.Text("Payload Trigger Type: " + _selectedPayload.Trigger);
+                BorderGroup.EndBoarder();
+                ImGui.NewLine();
                 
-                ImGui.Combo("Payload type", ref _payloadSelectedIndex, _payload, _payload.Length);
-                ImGui.SliderFloat("Payload", ref _payloadPercent, 0, 100);
+                BorderGroup.BeginBorder("Electronics Suite:");
+                if(ImGui.Combo("ElectronicsSuite", ref _electronicsSelectedIndex, _electronicsPackage, _electronicsPackage.Length))
+                {
+                    _selectedComponentDesigns[_eleccPackTypes[_electronicsSelectedIndex]] = 1;
+                    RefreshMass();
+                }
+                ImGui.Text("Size: ");
+                BorderGroup.EndBoarder();
                 
-                ImGui.Combo("ElectronicsSuite", ref _electronicsSelectedIndex, _electronicsPackage, _electronicsPackage.Length);
-                ImGui.Text("Size");             
+                ImGui.NewLine();
                 
-                ImGui.SliderFloat("Fuel", ref _fuelPercent, 0, 100);
-
-                ImGui.Combo("Engine Designs", ref _engineSelectedIndex, _engineDesigns, _engineDesigns.Length);
-                ImGui.SliderInt("Engine", ref _engineCount, 0, 256);
+                BorderGroup.BeginBorder("Engine:");
+                
+                if(ImGui.Combo("Engine Designs", ref _engineSelectedIndex, _engineDesigns, _engineDesigns.Length))
+                {
+                    _selectedComponentDesigns[_engineTypes[_engineSelectedIndex]] = _engineCount;
+                    RefreshMass();
+                }
+                if(ImGui.SliderInt("Engine Count", ref _engineCount, 1, 256))
+                {
+                    _selectedComponentDesigns[_engineTypes[_engineSelectedIndex]] = _engineCount;
+                    RefreshMass();
+                }
+                
+                if(ImGui.SliderFloat("Fuel Amount in Kg", ref _fuelKG, 0, 100))
+                {
+                    RefreshMass();
+                }
+                BorderGroup.EndBoarder();
+                
+                ImGui.NewLine();
+                ImGui.Text("Total Mass: " + _totalMass);
+                var enginedesign = _engineTypes[_engineSelectedIndex];
+                var atb = enginedesign.GetAttribute<NewtonionThrustAtb>();
+            
+                double burnRate = atb.FuelBurnRate * _engineCount;
+                double exaustVel = atb.ExhaustVelocity;
+                double thrustNewtons = burnRate * exaustVel;
+                double burnTime = _fuelKG / burnRate;
+                double dv = OrbitMath.TsiolkovskyRocketEquation(_totalMass, _totalMass - _fuelKG, exaustVel);
+                ImGui.Text("Burn Time: " + burnTime + "s");
+                ImGui.Text("Thrust: " + Stringify.Thrust(thrustNewtons));
+                ImGui.Text("DeltaV: " + Stringify.Velocity(dv));
                 
                 ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
                 NewDesignButton();
                 
             }
         }
-        
+
+        void RefreshMass()
+        {
+            _totalMass = 0;
+            foreach (var kvp in _selectedComponentDesigns)
+            {
+                _totalMass += kvp.Key.Mass * kvp.Value;
+            }
+
+            _totalMass += _fuelKG;
+
+
+        }
+
         internal void NewDesignButton()
         {
             if (ImGui.Button("Create Design"))
@@ -172,7 +239,13 @@ namespace Pulsar4X.SDL2UI
                             version = design.DesignVersion + 1;
                     }
                 }
-                //OrdnanceDesign missileDesign = new OrdnanceDesign(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, (_armor, _armorThickness));
+
+                List<(ComponentDesign, int)> misslcomponents = new List<(ComponentDesign, int)>();
+                foreach (var kvp in _selectedComponentDesigns)
+                {
+                    misslcomponents.Add((kvp.Key, kvp.Value));
+                }
+                OrdnanceDesign missileDesign = new OrdnanceDesign(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, misslcomponents);
                 //missileDesign.DesignVersion = version;
 
             }

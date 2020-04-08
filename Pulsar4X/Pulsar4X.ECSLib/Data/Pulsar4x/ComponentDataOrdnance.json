@@ -259,70 +259,96 @@
               "AttributeFormula": "0"
             },
             {
-              "Name": "Sensor Mass",
-              "Units": "kg",
-              "DescriptionFormula": "'Mass of this sensor'",
+              "Name": "Antenna Size",
               "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "Units": "m^2",
+              "DescriptionFormula": "'Gives an effective area of:  '",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
               "MaxFormula": "2500",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "10"
+              "AttributeFormula": "0.1"
             },
             {
-              "Name": "Ideal Detection Wavelength",
-              "Units": "nm",
-              "DescriptionFormula": "'The wavelength this sensor is most efficent at detecting'",
+              "Name": "Effective Size",
               "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "Units": "m^2",
+              "GuiHint": "None",
+              "AttributeFormula": "Ability('Antenna Size') * TechData('6F9AB80D-0331-47C0-9C5A-7586D06DE59D')"
+            },
+
+            {
+              "Name": "Ideal Detection Wavelength",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "Units": "nm",
+              "DescriptionFormula": "'The wavelength this sensor is most efficient at detecting'",
               "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
               "MaxFormula": "1e12",
               "MinFormula": "0.01",
               "StepFormula": "1",
-              "AttributeFormula": "600"
+              "AttributeFormula": "470"
             },
             {
-              "Name": "Detection Wavelength Width",
+              "Name": "Detection Bandwidth",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
               "Units": "nm",
               "DescriptionFormula": "'How far from the ideal wavelength will this still detect a signal'",
-              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
               "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "500",
+              "MaxFormula": "TechData('903CAED7-522B-40E5-8B65-72AFC099997E')",
               "MinFormula": "1",
               "StepFormula": "1",
-              "AttributeFormula": "250"
+              "AttributeFormula": "1"
             },
             {
-              "Name": "Sensitivity At Ideal Wavelength",
-              "Units": "Kw",
-              "DescriptionFormula": "'Smallest signal this can detect at the ideal wavelength. From Tech and size this will need adjusting. Tech needs including. lower value is better, but should never be <= 0'",
+              "Name": "Efficiency",
               "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "10000 - (10 * Ability('Sensor Mass'))"
+              "AttributeFormula": "1 / (Ability('Detection Bandwidth') / TechData('903CAED7-522B-40E5-8B65-72AFC099997E') )"
             },
             {
-              "Name": "Detection Ability at Worst Wavelength",
-              "Units": "Kw",
-              "DescriptionFormula": "'Smallest signal this can detect at the worst wavelength. From Tech TODO: tech needs including'",
+              "Name": "Sensitivity at Ideal Wavelength",
               "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "Units": "W",
+              "DescriptionFormula": "'Smallest signal this can detect at the ideal wavelength, lower is better.",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "10000"
+              "AttributeFormula": "TechData('E3B17143-D802-485C-A955-C9349B9FCBDA') / (Ability('Effective Size') * Ability('Effective Size') * Ability('Efficiency'))"
+            },
+            {
+              "Name": "Sensitivity at Worst Wavelength",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "Units": "W",
+              "DescriptionFormula": "'Smallest signal this can detect at the worst wavelength, lower is better.'",
+              "GuiHint": "GuiTextDisplay",
+              "AttributeFormula": "TechData('E3B17143-D802-485C-A955-C9349B9FCBDA') / (Ability('Effective Size') * Ability('Effective Size') * Ability('Efficiency') * 0.1)"
             },
             {
               "Name": "Resolution",
-              "Units": "MegaPixel",
-              "DescriptionFormula": "'Higher Resolution sensors are less likely to be affected by ECM'",
               "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "Units": "MegaPixel",
+              "DescriptionFormula": "'How much detail it can get from a detection. affects likelyhood of component detection etc. '",
               "GuiHint": "GuiSelectionMaxMin",
               "MaxFormula": "1000",
               "MinFormula": "0.1",
               "StepFormula": "1",
               "AttributeFormula": "1"
+            },
+            {
+              "Name": "Scan Time",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "Units": "s",
+              "DescriptionFormula": "'how long it takes to complete a full scan'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "86400",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AttributeFormula": "3600"
+            },
+            {
+              "Name": "Mass",
+              "Units": "kg",
+              "DescriptionFormula": "'Mass Calculation'",
+              "GuiHint": "None",
+              "AttributeFormula": "90 + 10 * Ability('Antenna Size') * Ability('Antenna Size')"
             },
             {
               "Name": "DatablobArguments",
@@ -333,9 +359,10 @@
             },
             {
               "Name": "SensorDatablobArguments",
-              "DescriptionFormula": "'(double peakWaveLength, double waveLengthWidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)'",
+              "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
+              "DescriptionFormula": "'(double peakWaveLength, double bandwidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)'",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Wavelength Width'), Ability('Sensitivity At Ideal Wavelength'), Ability('Detection Ability at Worst Wavelength'), Ability('Resolution'), 3600)",
+              "AttributeFormula": "DataBlobArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Bandwidth'), Ability('Sensitivity at Ideal Wavelength'), Ability('Sensitivity at Worst Wavelength'), Ability('Resolution'), Ability('Scan Time'))",
               "AttributeType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
             }
           ]
