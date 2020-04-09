@@ -99,6 +99,16 @@ namespace Pulsar4X.SDL2UI
                 //Display a tree with all objects in the system
             };
             ToolButtons.Add(btn);
+            btn = new ToolbuttonData()
+            {
+                Picture = _state.SDLImageDictionary["Tree"],
+                TooltipText = "View objects in the system",
+                OnClick = new Action(EntitySpawnWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive)
+                //Display a tree with all objects in the system
+            };
+            ToolButtons.Add(btn);
+
 
 
 
