@@ -529,9 +529,9 @@ namespace Pulsar4X.ECSLib
             ComponentTemplateSD srbSD = game.StaticData.ComponentTemplates[new Guid("BBC29A72-C4D3-4389-94DE-36C3BE3B7B0E")];
             suiteDesigner = new ComponentDesigner(srbSD, faction.GetDataBlob<FactionTechDB>());
             suiteDesigner.ComponentDesignAttributes["Guidance Type"].SetValueFromInput(2);
-            suiteDesigner.ComponentDesignAttributes["Sensor Mass"].SetValueFromInput(10);
-            suiteDesigner.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(600);
-            suiteDesigner.ComponentDesignAttributes["Detection Wavelength Width"].SetValueFromInput(100);
+            suiteDesigner.ComponentDesignAttributes["Antenna Size"].SetValueFromInput(10);
+            suiteDesigner.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(470);
+            suiteDesigner.ComponentDesignAttributes["Detection Bandwidth"].SetValueFromInput(2);
             suiteDesigner.ComponentDesignAttributes["Resolution"].SetValueFromInput(1);
             suiteDesigner.Name = "Passive Yellow 1MP ";
             _missileSuite = suiteDesigner.CreateDesign(faction);

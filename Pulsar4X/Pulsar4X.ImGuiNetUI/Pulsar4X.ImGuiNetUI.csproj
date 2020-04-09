@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net47</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\matia\source\repos\Pulsar4x\Pulsar4X\Backup2\</UpgradeBackupLocation>
@@ -125,29 +125,33 @@
     <None Update="Resources\DejaVuSans.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Remove="Libs\SDL2-CS.dll" />
+    <None Remove="Libs\sdl2\**" />
+    <None Remove="Libs\SDL2-CS.dll.config" />
+    <None Remove="Libs\SDL2-CS.pdb" />
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
-    <None Include="Libs\cimgui\linux-x64\cimgui.so" Visable="false">
+    <None Include="Libs\cimgui\linux-x64\cimgui.so">
       <Link>libcimgui.so</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <None Include="Libs\cimgui\win-x64\cimgui.dll" Visable="false">
+    <None Include="Libs\cimgui\win-x64\cimgui.dll">
       <Link>cimgui.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Libs\sdl2\win-x64\SDL2.dll" Visable="false">
+    <None Include="Libs\sdl2\win-x64\SDL2.dll">
       <Link>SDL2.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
-    <None Include="Libs\cimgui\osx-x64\cimgui.dylib" Visable="false">
+    <None Include="Libs\cimgui\osx-x64\cimgui.dylib">
       <Link>cimgui.dylib</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Libs\sdl2\win-x86\SDL2.dll" Visable="false">
+    <None Include="Libs\sdl2\win-x86\SDL2.dll">
       <Link>SDL2.dll</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -227,6 +231,10 @@
     <Content Include="Resources\DesignOrdnanceIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Remove="Resources\ImgTest.bmp" />
+    <Content Include="Resources\ImgTest.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="OrbitalWidgets\" />
@@ -244,11 +252,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="MapRendering\GalaxyMap.cs" />
+    <Compile Remove="Libs\sdl2\**" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\PowerIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="Libs\sdl2\**" />
   </ItemGroup>
 
   <Target Name="GetGitHash" BeforeTargets="WriteGitHash" Condition="'$(BuildHash)' == ''">
@@ -258,7 +270,7 @@
     </PropertyGroup>
 
     <!-- write the hash to the temp file.-->
-    <Exec Command="git -C $(ProjectDir) describe --long --always --dirty &gt; $(VerFile)" />
+    <Exec Command="git describe --long --always --dirty &gt; $(VerFile)" />
 
     <!-- read the version into the GitVersion itemGroup-->
     <ReadLinesFromFile File="$(VerFile)">

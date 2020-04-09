@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using Pulsar4X.Vectors;
@@ -60,33 +61,76 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             {0, new DamageResist() {IDCode = 0, HitPoints = 0}} //emptyspace
         };
 
+        struct Bitmap
+        {
+            public int Height;
+            public int Width;
+            public int Stride;
+            public byte[] PxArray;
+        }
+        
         public static RawBmp LoadFromBitMap(string file)
         {
+            
+            
             if(!File.Exists(file))
                 throw new FileNotFoundException();
-            Bitmap bmp = new Bitmap(file, true);
+
+            byte[] bmpBytes = File.ReadAllBytes(file);
+            (int offset,int size)[] headerDef = new (int,int)[12];
+            headerDef[0] = (0,2); //first two bytes should be BM in ascii
+            headerDef[1] = (2, 4); //size of bmp in bytes (whole file size)
+            headerDef[3] = (6, 2); //reserved creation application dependant
+            headerDef[4] = (6, 8); //reserved creaton applicaton dependant
+            headerDef[5] = (10, 4); //startAddressOf imageByteArray
+            //bitmapInfo:
+            headerDef[6] = (14, 4); //headerSize in bytes: should be 12?
+            headerDef[7] = (18, 4); //bmp width in px (ushort)
+            headerDef[8] = (22, 4); //bmp height in px (ushort)
+            headerDef[9] = (26, 2); //num of colour planes = 1
+            headerDef[10] = (28, 2); //bits per px, shoudl be our colour depth;
+            headerDef[11] = (34, 4); //image Size (raw bmp data)
+            byte[][] headerDat = new byte[12][];
+
+            for (int i = 0; i < headerDef.Length; i++)
+            {
+                int size = headerDef[i].size;
+                int offset = headerDef[i].offset;
+                headerDat[i] = new byte[headerDef[i].size];
+                for (int j = 0; j < size; j++)
+                {
+                    headerDat[i][j] = bmpBytes[offset + j];
+                }
+                
+            }
+
+            int filesize = BitConverter.ToInt32(headerDat[1]);
+            int start = BitConverter.ToInt16(headerDat[5]);
+            int width = BitConverter.ToInt16(headerDat[7]);
+            int height = BitConverter.ToInt16(headerDat[8]);
+            int depth = BitConverter.ToInt16(headerDat[10]) / 8;//we want depth in bytes. 
+            int sizeAry = BitConverter.ToUInt16(headerDat[11]); 
             
-            BitmapData lockData = bmp.LockBits(
-                new Rectangle(0, 0, bmp.Width, bmp.Height),
-                System.Drawing.Imaging.ImageLockMode.ReadWrite, 
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            //Note: the bmp is stored in memory above starting at the bottom left. 
             
             // Create an array to store image data
-            byte[] imageData = new byte[4 * bmp.Width * bmp.Height];
+            byte[] imageData = new byte[4 * width * height];
             // Use the Marshal class to copy image data
-            System.Runtime.InteropServices.Marshal.Copy(
-                lockData.Scan0, imageData, 0, imageData.Length);
-            bmp.UnlockBits(lockData);
-            byte[] imageData2 = new byte[4 * bmp.Width * bmp.Height];
+            Buffer.BlockCopy(bmpBytes, start, imageData, 0, sizeAry);
+            
+            //byte[] imageData2 = new byte[4 * width * height];
             RawBmp newBmp = new RawBmp()
             {
                 ByteArray = imageData,
-                Depth = 4,
-                Height = bmp.Height,
-                Width = bmp.Width,
-                Stride = 4 * bmp.Width
+                Depth = depth,
+                Height = height,
+                Width = width,
+                Stride = depth * width
             };
             return newBmp;
+            
+            
+            
         }
 
         public static Color FromByte(byte byteColor)
@@ -106,7 +150,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         
         public static RawBmp CreateComponentByteArray(ComponentDesign componentDesign, byte typeID)
         {
-            //1 pixel = 1iter resolution
+            //1 pixel = 1meter resolution
             var vol = componentDesign.Volume_m3 * 1000;
 
             double floatdepth = Math.Pow(componentDesign.AspectRatio, (float)1 / 3);
