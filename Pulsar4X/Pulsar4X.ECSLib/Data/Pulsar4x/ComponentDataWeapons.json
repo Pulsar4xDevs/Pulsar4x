@@ -310,6 +310,106 @@
             }
           ]
         }
+      },
+      {
+        "Key": "978DFA9E-411E-4B4F-A618-85D642927503",
+        "Value": {
+          "Name": "Missile Launcher",
+          "DescriptionFormula": "'A tube that houses missiles and launches them'",
+          "ID": "978DFA9E-411E-4B4F-A618-85D642927503",
+          "MassFormula": "Ability('Max Mass') * 1.5 ",
+          "VolumeFormula": "[Mass] * 0.5",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "1",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Mass]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass]",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Max Calibre",
+              "Units": "mm",
+              "DescriptionFormula": "'Maximum diameter of missile this can launch.'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "2500",
+              "MinFormula": "10",
+              "StepFormula": "1",
+              "AttributeFormula": "250"
+            },
+            {
+              "Name": "Max Length",
+              "Units": "Meters",
+              "DescriptionFormula": "'Maximum Length of missile this can launch'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AttributeFormula": "1"
+            },
+            {
+              "Name": "Max Mass",
+              "Units": "unknown",
+              "DescriptionFormula": "'Maximum Mass of missile this can launch'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100000",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AttributeFormula": "500"
+            },
+            {
+              "Name": "Auto Reloader Mass",
+              "Units": "Seconds",
+              "DescriptionFormula": "'Increases the mass of the weapon, but increases the rate of fire.'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "100",
+              "MinFormula": "0",
+              "StepFormula": "1",
+              "AttributeFormula": "60"
+            },
+            {
+              "Name": "Power Use",
+              "Units": "MJ",
+              "DescriptionFormula": "'In MegaJules.'",
+              "GuiHint": "None",
+              "AttributeFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * Ability('Calibre') * Ability('Length')"
+            },
+            {
+              "Name": "Power Efficency",
+              "Units": "unknown",
+              "GuiHint": "None",
+              "AttributeFormula": "45 + TechData('1167a255-b004-4a68-91af-1192169b5a37')"
+            },
+            {
+              "Name": "Launch Force",
+              "Units": "Newtons",
+              "GuiHint": "None",
+              "AttributeFormula": "Ability('Power Use')"
+            },
+            {
+              "Name": "ROF",
+              "Units": "Rounds/second",
+              "GuiHint": "None",
+              "AttributeFormula": "Ability('Auto Reloader Mass') / Ability('Max Mass')"
+            },
+            {
+              "Name": "dbargs",
+              "GuiHint": "None",
+              "AttributeFormula": "DataBlobArgs(Ability('Max Mass'), Ability('ROF'), Ability('Launch Force'))",
+              "AttributeType": "Pulsar4X.ECSLib.MissileLauncherAtb"
+            }
+            
+          ]
+        }
       }
     ]
   }

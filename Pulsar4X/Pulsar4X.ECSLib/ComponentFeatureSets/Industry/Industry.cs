@@ -163,7 +163,8 @@ namespace Pulsar4X.ECSLib.Industry
     {
         None,
         CanBeLaunched,
-        CanBeInstalled
+        CanBeInstalled,
+        IsOrdinance
     }
     public interface IConstrucableDesign
     {

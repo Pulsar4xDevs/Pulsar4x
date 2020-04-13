@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
@@ -112,7 +113,6 @@ namespace Pulsar4X.SDL2UI
                     {
                         _engineTypes.Add(cdes);
                     }
-
                 }
             }
             
@@ -134,9 +134,11 @@ namespace Pulsar4X.SDL2UI
             {
                 _engineDesigns[i] = des.Name;
             }
-
             
-
+            
+            _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
+            _selectedComponentDesigns[_eleccPackTypes[_electronicsSelectedIndex]] = 1;
+            RefreshMass();
         }
 
         internal override void Display()
@@ -149,7 +151,7 @@ namespace Pulsar4X.SDL2UI
                 BorderGroup.BeginBorder("Payload:");
                 if (ImGui.Combo("Payload type", ref _payloadSelectedIndex, _payload, _payload.Length))
                 {
-                    _selectedPayload = _payloadTypes[_payloadSelectedIndex].GetAttribute<OrdnancePayloadAtb>();
+                    //_selectedPayload = _payloadTypes[_payloadSelectedIndex].GetAttribute<OrdnancePayloadAtb>();
                     _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
                     RefreshMass();
                 }
@@ -158,6 +160,8 @@ namespace Pulsar4X.SDL2UI
                     _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
                     RefreshMass();
                 }
+                var whmass = _payloadTypes[_payloadSelectedIndex].Mass * _payloadCount;
+                ImGui.Text("Mass: " + Stringify.Mass(whmass));
                 //ImGui.Text("Payload Trigger Type: " + _selectedPayload.Trigger);
                 BorderGroup.EndBoarder();
                 ImGui.NewLine();
@@ -168,7 +172,8 @@ namespace Pulsar4X.SDL2UI
                     _selectedComponentDesigns[_eleccPackTypes[_electronicsSelectedIndex]] = 1;
                     RefreshMass();
                 }
-                ImGui.Text("Size: ");
+                var mass = _eleccPackTypes[_electronicsSelectedIndex].Mass;
+                ImGui.Text("Mass: " + Stringify.Mass(mass));
                 BorderGroup.EndBoarder();
                 
                 ImGui.NewLine();
@@ -177,7 +182,8 @@ namespace Pulsar4X.SDL2UI
                 
                 if(ImGui.Combo("Engine Designs", ref _engineSelectedIndex, _engineDesigns, _engineDesigns.Length))
                 {
-                    _selectedComponentDesigns[_engineTypes[_engineSelectedIndex]] = _engineCount;
+                    ComponentDesign engineDesign = _engineTypes[_engineSelectedIndex];
+                    _selectedComponentDesigns[engineDesign] = _engineCount;
                     RefreshMass();
                 }
                 if(ImGui.SliderInt("Engine Count", ref _engineCount, 1, 256))
@@ -185,15 +191,12 @@ namespace Pulsar4X.SDL2UI
                     _selectedComponentDesigns[_engineTypes[_engineSelectedIndex]] = _engineCount;
                     RefreshMass();
                 }
-                
-                if(ImGui.SliderFloat("Fuel Amount in Kg", ref _fuelKG, 0, 100))
-                {
-                    RefreshMass();
-                }
+                var emass = _engineTypes[_engineSelectedIndex].Mass * _engineCount;
+                ImGui.Text("Mass: " + Stringify.Mass(emass));
                 BorderGroup.EndBoarder();
                 
                 ImGui.NewLine();
-                ImGui.Text("Total Mass: " + _totalMass);
+                ImGui.Text("Total Mass: " + Stringify.Mass(_totalMass));
                 var enginedesign = _engineTypes[_engineSelectedIndex];
                 var atb = enginedesign.GetAttribute<NewtonionThrustAtb>();
             
@@ -218,11 +221,16 @@ namespace Pulsar4X.SDL2UI
             foreach (var kvp in _selectedComponentDesigns)
             {
                 _totalMass += kvp.Key.Mass * kvp.Value;
+                
             }
-
-            _totalMass += _fuelKG;
-
-
+            ComponentDesign engineDesign = _engineTypes[_engineSelectedIndex];
+            if (engineDesign.HasAttribute<CargoStorageAtbDB>())
+            {
+                if (engineDesign.TryGetAttribute(out CargoStorageAtbDB artb))
+                {
+                    _fuelKG = artb.StorageCapacity * _engineCount;
+                }
+            }
         }
 
         internal void NewDesignButton()
@@ -239,6 +247,7 @@ namespace Pulsar4X.SDL2UI
                             version = design.DesignVersion + 1;
                     }
                 }
+                
 
                 List<(ComponentDesign, int)> misslcomponents = new List<(ComponentDesign, int)>();
                 foreach (var kvp in _selectedComponentDesigns)

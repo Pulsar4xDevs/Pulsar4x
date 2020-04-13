@@ -125,6 +125,11 @@ namespace Pulsar4X.ECSLib
         [JsonConstructor]
         private NewtonMoveDB() { }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sphereOfInfluenceParent"></param>
+        /// <param name="velocity_ms">ParentRalitive Velocity</param>
         public NewtonMoveDB(Entity sphereOfInfluenceParent, Vector3 velocity_ms)
         {
             CurrentVector_ms = velocity_ms;

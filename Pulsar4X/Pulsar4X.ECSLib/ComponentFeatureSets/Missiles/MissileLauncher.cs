@@ -13,8 +13,14 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public int LauncherSize;
         public double ReloadRate;
         public double LaunchForce;
-        
-        
+
+
+        public MissileLauncherAtb()
+        {
+        }
+        public MissileLauncherAtb(double maxMissileWeight, double reloadRate, double launchForce)
+        {
+        }
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             throw new System.NotImplementedException();
