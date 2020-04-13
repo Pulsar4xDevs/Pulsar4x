@@ -40,6 +40,29 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        public int GetRank()
+        {
+            if (this.IsStar()) 
+            {
+                return 0;
+            }
+            else if(this.GetParent() == null) 
+            {
+                return 0;
+            }
+            else
+            {
+                EntityState _parententityState = new EntityState(this.GetParent());
+                return _parententityState.GetRank() + 1;
+            }
+        
+        }
+
+        public Entity GetParent()
+        {
+            return Entity.GetDataBlob<PositionDB>().Parent;
+        }
+
         public bool IsSmallBody()
         {
             return this.BodyType == UserOrbitSettings.OrbitBodyType.Asteroid || this.BodyType == UserOrbitSettings.OrbitBodyType.Comet;
