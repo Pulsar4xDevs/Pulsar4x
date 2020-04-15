@@ -26,11 +26,11 @@ namespace Pulsar4X.SDL2UI
         internal static ComponentDesignUI GetInstance()
         {
             ComponentDesignUI thisitem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(ComponentDesignUI)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(ComponentDesignUI)))
             {
                 thisitem = new ComponentDesignUI();
             }
-            thisitem = (ComponentDesignUI)_state.LoadedWindows[typeof(ComponentDesignUI)];
+            thisitem = (ComponentDesignUI)_uiState.LoadedWindows[typeof(ComponentDesignUI)];
 
             //TODO: pull this from faction info and have designables unlocked via tech.
             thisitem._designables = StaticRefLib.StaticData.ComponentTemplates.Values.ToArray();
@@ -60,10 +60,23 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushItemWidth(-1);
                 if (ImGui.ListBox("", ref _designType, _designTypes, _designTypes.Length, numelements))//Lists the possible comp types
                 {
-                    _openwindows.Add(new PartDesignUI(_designType, _state));
+                    _openwindows.Add(new PartDesignUI(_designType, _uiState));
                 }
                 ImGui.End();
             }
+        }
+
+        public override void OnGameTickChange(DateTime newDate)
+        {
+        }
+
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+        }
+
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            throw new NotImplementedException();
         }
     }
 }

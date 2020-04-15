@@ -35,13 +35,13 @@ namespace Pulsar4X.SDL2UI
         {
 
             PlanetaryWindow thisItem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(PlanetaryWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(PlanetaryWindow)))
             {
                 thisItem = new PlanetaryWindow(entity);
             }
             else
             {
-                thisItem = (PlanetaryWindow)_state.LoadedWindows[typeof(PlanetaryWindow)];
+                thisItem = (PlanetaryWindow)_uiState.LoadedWindows[typeof(PlanetaryWindow)];
                 thisItem.onEntityChange(entity);
             }
 

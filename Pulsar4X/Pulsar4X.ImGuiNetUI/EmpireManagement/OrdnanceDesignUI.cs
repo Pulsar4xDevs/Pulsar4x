@@ -45,12 +45,12 @@ namespace Pulsar4X.SDL2UI
         public static OrdinanceDesignUI GetInstance()
         {
             OrdinanceDesignUI thisitem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(OrdinanceDesignUI)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(OrdinanceDesignUI)))
             {
                 thisitem = new OrdinanceDesignUI();
             }
             else
-                thisitem = (OrdinanceDesignUI)_state.LoadedWindows[typeof(OrdinanceDesignUI)];
+                thisitem = (OrdinanceDesignUI)_uiState.LoadedWindows[typeof(OrdinanceDesignUI)];
             
             return thisitem;
             
@@ -58,8 +58,8 @@ namespace Pulsar4X.SDL2UI
 
         public void HardRefresh()
         {
-            var designs = _state.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns;
-            var componentDesigns = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns;
+            var designs = _uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns;
+            var componentDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns;
 
             foreach (var des in componentDesigns)
             {
@@ -254,7 +254,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     misslcomponents.Add((kvp.Key, kvp.Value));
                 }
-                OrdnanceDesign missileDesign = new OrdnanceDesign(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, misslcomponents);
+                OrdnanceDesign missileDesign = new OrdnanceDesign(_uiState.Faction.GetDataBlob<FactionInfoDB>(), strName, misslcomponents);
                 //missileDesign.DesignVersion = version;
 
             }

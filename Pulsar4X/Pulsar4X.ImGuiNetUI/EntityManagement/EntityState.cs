@@ -30,7 +30,7 @@ namespace Pulsar4X.SDL2UI
             }
             Position = entity.GetDataBlob<PositionDB>();
 
-            //Name = entity.GetDataBlob<NameDB>().GetName(_state.Faction);
+            //Name = entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
             StarSystem starSys = (StarSystem)entity.Manager;
             StarSysGuid = starSys.Guid;
             entity.ChangeEvent += On_entityChangeEvent;
@@ -81,7 +81,7 @@ namespace Pulsar4X.SDL2UI
             Entity = sensorContact.ActualEntity;
             Position = sensorContact.Position;
 
-            //Name = sensorContact.GetDataBlob<NameDB>().GetName(_state.Faction);
+            //Name = sensorContact.GetDataBlob<NameDB>().GetName(_uiState.Faction);
             StarSystem starSys = (StarSystem)Entity.Manager;
             StarSysGuid = starSys.Guid;
             sensorContact.ActualEntity.ChangeEvent += On_entityChangeEvent;

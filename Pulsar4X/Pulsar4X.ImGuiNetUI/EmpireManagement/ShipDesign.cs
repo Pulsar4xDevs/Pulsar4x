@@ -70,26 +70,21 @@ namespace Pulsar4X.SDL2UI
             int i = 0;
             foreach (var kvp in StaticRefLib.StaticData.ArmorTypes)
             {
-                var armorMat = _state.Game.StaticData.GetICargoable(kvp.Key);
+                var armorMat = _uiState.Game.StaticData.GetICargoable(kvp.Key);
                 _armorSelection.Add(kvp.Value);
                 
                 _armorNames[i]= armorMat.Name;
                 i++;
             }
             
-            
-            
-            
-
-
-            _state.Game.GamePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
-            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
+            _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
         }
 
-        private void GameLoopOnGameGlobalDateChangedEvent(DateTime newdate)
+        public override void OnSystemTickChange(DateTime newDateTime)
         {
             RefreshComponentDesigns();
-            _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
+            _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
+            //TODO: bleed over from mod data to get a default armor...
             _armor = StaticRefLib.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
             _armorThickness = 3;
         }
@@ -97,19 +92,19 @@ namespace Pulsar4X.SDL2UI
         internal static ShipDesignUI GetInstance()
         {
             ShipDesignUI thisitem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(ShipDesignUI)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(ShipDesignUI)))
             {
                 thisitem = new ShipDesignUI();
             }
             else
-                thisitem = (ShipDesignUI)_state.LoadedWindows[typeof(ShipDesignUI)];
+                thisitem = (ShipDesignUI)_uiState.LoadedWindows[typeof(ShipDesignUI)];
             
             return thisitem;
         }
 
         void RefreshComponentDesigns()
         {
-            _componentDesigns = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray();
+            _componentDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray();
             _componentNames = new string[_componentDesigns.Length];
             for (int i = 0; i < _componentDesigns.Length; i++)
             {
@@ -124,11 +119,11 @@ namespace Pulsar4X.SDL2UI
 
                 
 
-                if(_exsistingClasses.Count != _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList().Count)
+                if(_exsistingClasses.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList().Count)
                 {
-                    _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
+                    _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
                 }
-                if (_componentDesigns.Length != _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray().Length)
+                if (_componentDesigns.Length != _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray().Length)
                 {
                     RefreshComponentDesigns();
                 }
@@ -215,7 +210,7 @@ namespace Pulsar4X.SDL2UI
                             version = shipclass.DesignVersion + 1;
                     }
                 }
-                ShipDesign shipDesign = new ShipDesign(_state.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, (_armor, _armorThickness));
+                ShipDesign shipDesign = new ShipDesign(_uiState.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, (_armor, _armorThickness));
                 shipDesign.DesignVersion = version;
 
             }
@@ -433,7 +428,7 @@ namespace Pulsar4X.SDL2UI
         internal void GenImage()
         {
             EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, (_armor, _armorThickness));
-            _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _profile.DamageProfile, _imagecreated);
+            _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _profile.DamageProfile, _imagecreated);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;
             _imagecreated = true;

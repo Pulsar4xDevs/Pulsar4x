@@ -63,11 +63,11 @@ namespace Pulsar4X.SDL2UI.Combat
 
         public static DamageViewer GetInstance()
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(DamageViewer)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(DamageViewer)))
             {
                 return new DamageViewer();
             }
-            return (DamageViewer)_state.LoadedWindows[typeof(DamageViewer)];
+            return (DamageViewer)_uiState.LoadedWindows[typeof(DamageViewer)];
         }
 
         internal override void Display()
@@ -146,7 +146,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                     _profile.PlacementOrder.RemoveAt(_selectedComponentIndex);
                                     _profile.PlacementOrder.Insert(_selectedComponentIndex - 1, item);
                                     _rawShipImage = ComponentPlacement.CreateShipBmp(_profile);
-                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
+                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage);
                                 }
                             }
 
@@ -158,7 +158,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                     _profile.PlacementOrder.RemoveAt(_selectedComponentIndex);
                                     _profile.PlacementOrder.Insert(_selectedComponentIndex + 1, item);
                                     _rawShipImage = ComponentPlacement.CreateShipBmp(_profile);
-                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
+                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage);
                                 }
                             }
 
@@ -243,7 +243,7 @@ namespace Pulsar4X.SDL2UI.Combat
                         _showFrameNum++;
                         if (_showFrameNum > _damageFrames.Count -1)
                             _showFrameNum = 0;
-                        _showDmgFrametx = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _damageFrames[_showFrameNum]);
+                        _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
                     }
                     int h = _damageFrames[_showFrameNum].Height;
                     int w = _damageFrames[_showFrameNum].Width;

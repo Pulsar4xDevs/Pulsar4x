@@ -89,22 +89,20 @@ namespace Pulsar4X.SDL2UI
 
         internal static ChangeCurrentOrbitWindow GetInstance(EntityState entity)
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(ChangeCurrentOrbitWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(ChangeCurrentOrbitWindow)))
             {
                 return new ChangeCurrentOrbitWindow(entity);
             }
-            var instance = (ChangeCurrentOrbitWindow)_state.LoadedWindows[typeof(ChangeCurrentOrbitWindow)];
+            var instance = (ChangeCurrentOrbitWindow)_uiState.LoadedWindows[typeof(ChangeCurrentOrbitWindow)];
             if(instance.OrderingEntity != entity)
                 instance.OnEntityChange(entity);
-            _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent += instance.OnSystemDateTimeChange;
-
             return instance;
         }
 
         void OnEntityChange(EntityState entity)
         {
             OrderingEntity = entity;
-            _actionDateTime = _state.PrimarySystemDateTime;
+            _actionDateTime = _uiState.PrimarySystemDateTime;
             _orderEntityOrbit = entity.Entity.GetDataBlob<OrbitDB>();
 
             _massParentBody = _orderEntityOrbit.Parent.GetDataBlob<MassVolumeDB>().Mass;
@@ -135,7 +133,7 @@ namespace Pulsar4X.SDL2UI
                     if (_orbitWidget == null)
                     {
                         _orbitWidget = new OrbitOrderWiget(_orderEntityOrbit.Parent);
-                        _state.SelectedSysMapRender.UIWidgets.Add(nameof(OrbitOrderWiget), _orbitWidget);
+                        _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(OrbitOrderWiget), _orbitWidget);
                     }
 
 
@@ -154,7 +152,7 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        void OnSystemDateTimeChange(DateTime newDate)
+        public override void OnSystemTickChange(DateTime newDate)
         {
 
             if (_actionDateTime < newDate)
@@ -171,7 +169,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             NewtonThrustCommand.CreateCommand(
-                _state.Faction.Guid,
+                _uiState.Faction.Guid,
                 OrderingEntity.Entity,
                 _actionDateTime,
                 _deltaV_MS);
@@ -209,11 +207,9 @@ namespace Pulsar4X.SDL2UI
         internal void CloseWindow()
         {
             IsActive = false;
-            _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateTimeChange;
-
             if (_orbitWidget != null)
             {
-                _state.SelectedSysMapRender.UIWidgets.Remove(nameof(OrbitOrderWiget));
+                _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(OrbitOrderWiget));
                 _orbitWidget = null;
             }
 
@@ -221,7 +217,7 @@ namespace Pulsar4X.SDL2UI
     }
     
     
-        public class NewtonionOrderUI
+    public class NewtonionOrderUI
     {
 
         double _fuelToBurn = double.NaN;

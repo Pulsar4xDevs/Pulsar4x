@@ -15,7 +15,7 @@ using Vector3 = Pulsar4X.ECSLib.Vector3;
 namespace Pulsar4X.ImGuiNetUI.EntityManagement
 {
     
-    public class IndustryPannel2
+    public class IndustryPannel2 : UpdateWindowState
     {
         private Guid _factionID;
         private FactionInfoDB _factionInfoDB;
@@ -62,17 +62,10 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             //_job = job;
             _factionInfoDB = state.Faction.GetDataBlob<FactionInfoDB>();
             _factionID = state.Faction.Guid;
-
-
-
-            _selectedEntity.Manager.ManagerSubpulses.SystemDateChangedEvent += OnDatechange;
+            
             OnUpdate();
         }
-
-        void OnDatechange(DateTime newDate)
-        {
-            OnUpdate();
-        }
+        
 
         void OnUpdate()
         {
@@ -253,7 +246,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.SameLine();
             if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
             {
-                //new ConstructCancelJob(_state.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
+                //new ConstructCancelJob(_uiState.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
                 var cmd = IndustryOrder2.CreateCancelJobOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID);
 
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
@@ -371,5 +364,23 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.EndChild();
         }
 
+        public override bool GetActive()
+        {
+            return true;
+        }
+
+        public override void OnGameTickChange(DateTime newDate)
+        {
+        }
+
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+            OnUpdate();
+        }
+
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

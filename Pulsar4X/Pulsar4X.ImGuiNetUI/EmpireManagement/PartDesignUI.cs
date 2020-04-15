@@ -28,7 +28,7 @@ namespace Pulsar4X.SDL2UI
         //private TechSD[] _techSDs;
         private string[] _listNames;
         
-        //new internal static GlobalUIState _state;
+        //new internal static GlobalUIState _uiState;
 
         public PartDesignUI(int designType, GlobalUIState state)
         {

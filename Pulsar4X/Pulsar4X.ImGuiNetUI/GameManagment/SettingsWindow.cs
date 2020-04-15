@@ -19,23 +19,23 @@ namespace Pulsar4X.SDL2UI
         bool RalitiveOrbitVelocity;
         private SettingsWindow()
         {
-            _userOrbitSettingsMtx = _state.UserOrbitSettingsMtx;
+            _userOrbitSettingsMtx = _uiState.UserOrbitSettingsMtx;
 
 
 
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
-            IsThreaded = _state.Game.Settings.EnableMultiThreading;
-            EnforceSingleThread = _state.Game.Settings.EnforceSingleThread;
+            IsThreaded = _uiState.Game.Settings.EnableMultiThreading;
+            EnforceSingleThread = _uiState.Game.Settings.EnforceSingleThread;
             
             RalitiveOrbitVelocity = ECSLib.OrbitProcessor.UseRalitiveVelocity;
         }
         internal static SettingsWindow GetInstance()
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(SettingsWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(SettingsWindow)))
             {
                 return new SettingsWindow();
             }
-            return (SettingsWindow)_state.LoadedWindows[typeof(SettingsWindow)];
+            return (SettingsWindow)_uiState.LoadedWindows[typeof(SettingsWindow)];
         }
 
         internal override void Display()
@@ -73,12 +73,12 @@ namespace Pulsar4X.SDL2UI
                         PerformanceDisplay.GetInstance().ToggleActive();
                     }
 
-                    ImGui.Checkbox("Show ImguiMetrix", ref _state.ShowMetrixWindow);
-                    ImGui.Checkbox("Show ImgDebug", ref _state.ShowImgDbg);
-                    ImGui.Checkbox("DemoWindow", ref _state.ShowDemoWindow);
-                    if (ImGui.Checkbox("DamageWindow", ref _state.ShowDamageWindow))
+                    ImGui.Checkbox("Show ImguiMetrix", ref _uiState.ShowMetrixWindow);
+                    ImGui.Checkbox("Show ImgDebug", ref _uiState.ShowImgDbg);
+                    ImGui.Checkbox("DemoWindow", ref _uiState.ShowDemoWindow);
+                    if (ImGui.Checkbox("DamageWindow", ref _uiState.ShowDamageWindow))
                     {
-                        if (_state.ShowDamageWindow)
+                        if (_uiState.ShowDamageWindow)
                             DamageViewer.GetInstance().SetActive();
                         else
                             DamageViewer.GetInstance().SetActive(false);
@@ -90,16 +90,16 @@ namespace Pulsar4X.SDL2UI
                     {
                         if (ImGui.Checkbox("MultiThreaded", ref IsThreaded))
                         {
-                            _state.Game.Settings.EnableMultiThreading = IsThreaded;
+                            _uiState.Game.Settings.EnableMultiThreading = IsThreaded;
                         }
 
                         if (ImGui.Checkbox("EnforceSingleThread", ref EnforceSingleThread))
                         {
-                            _state.Game.Settings.EnforceSingleThread = EnforceSingleThread;
+                            _uiState.Game.Settings.EnforceSingleThread = EnforceSingleThread;
                             if (EnforceSingleThread)
                             {
                                 IsThreaded = false;
-                                _state.Game.Settings.EnableMultiThreading = false;
+                                _uiState.Game.Settings.EnableMultiThreading = false;
                             }
                         }
 
@@ -128,9 +128,9 @@ namespace Pulsar4X.SDL2UI
                             string typeStr = otype.ToString();
                             if (ImGui.TreeNode(typeStr ))
                             {
-                                float _nameZoomLevel = _state.DrawNameZoomLvl[(int)otype];
+                                float _nameZoomLevel = _uiState.DrawNameZoomLvl[(int)otype];
                                 ImGui.SliderFloat("Draw Names at Zoom: ", ref _nameZoomLevel, 0.01f, 10000f);
-                                _state.DrawNameZoomLvl[(int)otype] = _nameZoomLevel;
+                                _uiState.DrawNameZoomLvl[(int)otype] = _nameZoomLevel;
                                 for (int j = 0; j < (int)UserOrbitSettings.OrbitTrajectoryType.NumberOf; j++)
                                 {
 
@@ -148,12 +148,12 @@ namespace Pulsar4X.SDL2UI
 
                                         //TODO: make this a knob/dial? need to create a custom control: https://github.com/ocornut/imgui/issues/942
                                         if (ImGui.SliderAngle("Sweep Angle ##" + i + j, ref _userOrbitSettings.EllipseSweepRadians, 1f, 360f))
-                                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                            _uiState.SelectedSysMapRender.UpdateUserOrbitSettings();
 
                                         if (ImGui.SliderInt("Number Of Segments ##" + i + j, ref _arcSegments, 1, 255, _userOrbitSettings.NumberOfArcSegments.ToString()))
                                         {
                                             _userOrbitSettings.NumberOfArcSegments = (byte)_arcSegments;
-                                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                            _uiState.SelectedSysMapRender.UpdateUserOrbitSettings();
                                         }
 
                                         if (ImGui.ColorEdit3("Orbit Ring Colour ##" + i + j, ref _colour))
@@ -165,13 +165,13 @@ namespace Pulsar4X.SDL2UI
                                         if (ImGui.SliderInt("Max Alpha ##" + i + j, ref _maxAlpha, _minAlpha, 255, ""))
                                         {
                                             _userOrbitSettings.MaxAlpha = (byte)_maxAlpha;
-                                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                            _uiState.SelectedSysMapRender.UpdateUserOrbitSettings();
                                         }
 
                                         if (ImGui.SliderInt("Min Alpha  ##" + i + j, ref _minAlpha, 0, _maxAlpha, ""))
                                         {
                                             _userOrbitSettings.MinAlpha = (byte)_minAlpha;
-                                            _state.SelectedSysMapRender.UpdateUserOrbitSettings();
+                                            _uiState.SelectedSysMapRender.UpdateUserOrbitSettings();
                                         }
                                     } 
                                 }

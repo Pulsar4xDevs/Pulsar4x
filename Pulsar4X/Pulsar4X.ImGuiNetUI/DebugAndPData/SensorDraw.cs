@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
@@ -56,26 +57,26 @@ namespace Pulsar4X.SDL2UI
         internal static SensorDraw GetInstance()
         {
             SensorDraw instance;
-            if (!_state.LoadedWindows.ContainsKey(typeof(SensorDraw)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(SensorDraw)))
                 instance = new SensorDraw();
             else
             {
-                instance = (SensorDraw)_state.LoadedWindows[typeof(SensorDraw)];
-                if(_state.LastClickedEntity?.Entity != null)
-                    instance._selectedEntitySate = _state.LastClickedEntity;
+                instance = (SensorDraw)_uiState.LoadedWindows[typeof(SensorDraw)];
+                if(_uiState.LastClickedEntity?.Entity != null)
+                    instance._selectedEntitySate = _uiState.LastClickedEntity;
             }
             if(instance._selectedEntitySate != null)
             {
-                if (_state.LastClickedEntity?.Entity != null && instance._selectedEntity != _state.LastClickedEntity.Entity)
-                    instance._selectedEntitySate = _state.LastClickedEntity;
+                if (_uiState.LastClickedEntity?.Entity != null && instance._selectedEntity != _uiState.LastClickedEntity.Entity)
+                    instance._selectedEntitySate = _uiState.LastClickedEntity;
             }
             else
             {
-                if(_state.LastClickedEntity?.Entity != null)
-                    instance._selectedEntitySate = _state.LastClickedEntity;
+                if(_uiState.LastClickedEntity?.Entity != null)
+                    instance._selectedEntitySate = _uiState.LastClickedEntity;
             }
             
-            instance._selectedStarSysState = _state.StarSystemStates[_state.SelectedStarSysGuid];
+            instance._selectedStarSysState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             return instance;
         }
         
@@ -374,7 +375,7 @@ namespace Pulsar4X.SDL2UI
                     i = 0;
                     foreach (var target in tgts)
                     {
-                        string name = target.GetDataBlob<NameDB>().GetName(_state.Faction);
+                        string name = target.GetDataBlob<NameDB>().GetName(_uiState.Faction);
                         _potentialTargetNames[i] = name;
                         i++;
                     }
@@ -397,7 +398,7 @@ namespace Pulsar4X.SDL2UI
             {
 
                 _targetSensorProfile = _targetEntity.GetDataBlob<SensorProfileDB>();
-                SetReflectedEMProfile.SetEntityProfile(_targetEntity, _state.PrimarySystemDateTime);
+                SetReflectedEMProfile.SetEntityProfile(_targetEntity, _uiState.PrimarySystemDateTime);
                 var emitted = _targetSensorProfile.EmittedEMSpectra;
                 var reflected = _targetSensorProfile.ReflectedEMSpectra;
 
@@ -449,6 +450,21 @@ namespace Pulsar4X.SDL2UI
                 return wavDat;
             }
             
+        }
+
+        public override void OnGameTickChange(DateTime newDate)
+        {
+            
+        }
+
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+            
+        }
+
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Pulsar4X.SDL2UI
             ToolbuttonData btn = new ToolbuttonData()
             {
 
-                Picture = _state.SDLImageDictionary["DesComp"],
+                Picture = _uiState.SDLImageDictionary["DesComp"],
                 TooltipText = "Design a new component or facility",
                 OnClick = new Action(ComponentDesignUI.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(ComponentDesignUI.GetInstance().GetActive)
@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
 
             btn =  new ToolbuttonData()
             {
-                Picture = _state.SDLImageDictionary["DesShip"],
+                Picture = _uiState.SDLImageDictionary["DesShip"],
                 TooltipText = "Design a new Ship",
                 OnClick = new Action(ShipDesignUI.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(ShipDesignUI.GetInstance().GetActive)
@@ -56,7 +56,7 @@ namespace Pulsar4X.SDL2UI
             ToolButtons.Add(btn);
             btn =  new ToolbuttonData()
             {
-                Picture = _state.SDLImageDictionary["DesOrd"],
+                Picture = _uiState.SDLImageDictionary["DesOrd"],
                 TooltipText = "Design a Missile",
                 OnClick = new Action(OrdinanceDesignUI.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(OrdinanceDesignUI.GetInstance().GetActive)
@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
             ToolButtons.Add(btn);
             btn =  new ToolbuttonData()
             {
-                Picture = _state.SDLImageDictionary["Research"],
+                Picture = _uiState.SDLImageDictionary["Research"],
                 TooltipText = "Research",
                 OnClick = new Action(ResearchWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(ResearchWindow.GetInstance().GetActive)
@@ -74,7 +74,7 @@ namespace Pulsar4X.SDL2UI
             ToolButtons.Add(btn);
             btn = new ToolbuttonData()
             {
-                Picture = _state.SDLImageDictionary["GalMap"],
+                Picture = _uiState.SDLImageDictionary["GalMap"],
                 TooltipText = "Galaxy Browser",
                 OnClick = new Action(GalaxyWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(GalaxyWindow.GetInstance().GetActive)
@@ -83,7 +83,7 @@ namespace Pulsar4X.SDL2UI
             ToolButtons.Add(btn);
             btn = new ToolbuttonData()
             {
-                Picture = _state.SDLImageDictionary["Ruler"],
+                Picture = _uiState.SDLImageDictionary["Ruler"],
                 TooltipText = "Measure distance",
                 OnClick = new Action(DistanceRuler.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(DistanceRuler.GetInstance().GetActive)
@@ -92,7 +92,7 @@ namespace Pulsar4X.SDL2UI
             ToolButtons.Add(btn);
             btn = new ToolbuttonData()
             {
-                Picture = _state.SDLImageDictionary["Tree"],
+                Picture = _uiState.SDLImageDictionary["Tree"],
                 TooltipText = "View objects in the system",
                 OnClick = new Action(SystemTreeViewer.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(SystemTreeViewer.GetInstance().GetActive)
@@ -101,7 +101,7 @@ namespace Pulsar4X.SDL2UI
             ToolButtons.Add(btn);
             btn = new ToolbuttonData()
             {
-                Picture = _state.SDLImageDictionary["Tree"],
+                Picture = _uiState.SDLImageDictionary["Tree"],
                 TooltipText = "View objects in the system",
                 OnClick = new Action(EntitySpawnWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive)
@@ -116,11 +116,11 @@ namespace Pulsar4X.SDL2UI
 
         internal static ToolBarUI GetInstance()
         {
-            if (!PulsarGuiWindow._state.LoadedWindows.ContainsKey(typeof(ToolBarUI)))
+            if (!PulsarGuiWindow._uiState.LoadedWindows.ContainsKey(typeof(ToolBarUI)))
             {
                 return new ToolBarUI();
             }
-            return (ToolBarUI)PulsarGuiWindow._state.LoadedWindows[typeof(ToolBarUI)];
+            return (ToolBarUI)PulsarGuiWindow._uiState.LoadedWindows[typeof(ToolBarUI)];
         }
         
 

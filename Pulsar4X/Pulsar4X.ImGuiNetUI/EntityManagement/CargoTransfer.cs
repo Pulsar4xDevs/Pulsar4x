@@ -6,7 +6,7 @@ using Pulsar4X.ECSLib;
 namespace Pulsar4X.SDL2UI
 {
 
-    public class CargoListPannelSimple
+    public class CargoListPannelSimple: UpdateWindowState
     {
         StaticDataStore _staticData;
         EntityState _entityState;
@@ -19,16 +19,10 @@ namespace Pulsar4X.SDL2UI
             _staticData = staticData;
             _entityState = entity;
             _storageDatablob = entity.Entity.GetDataBlob<CargoStorageDB>();
-            entity.Entity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
-            
+
             Update();
         }
-
-        void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
-        {
-            Update();
-        }
-
+        
 
         public void Update()
         {
@@ -57,7 +51,6 @@ namespace Pulsar4X.SDL2UI
 
         public void Display()
         {
-            //Update();
             var width = ImGui.GetWindowWidth() * 0.5f;
             
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true, ImGuiWindowFlags.AlwaysAutoResize);
@@ -86,6 +79,26 @@ namespace Pulsar4X.SDL2UI
             ImGui.EndChild(); 
         }
 
+        public override bool GetActive()
+        {
+            return true;
+        }
+
+        public override void OnGameTickChange(DateTime newDate)
+        {
+        }
+
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+            Update();
+        }
+
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            throw new NotImplementedException();
+        }
+        
+        
     }
 
     public delegate void CargoItemSelectedHandler(CargoListPannelComplex cargoPannel);
@@ -105,14 +118,9 @@ namespace Pulsar4X.SDL2UI
             _entityState = entity;
             _storageDatablob = entity.Entity.GetDataBlob<CargoStorageDB>();
             HeadersIsOpenDict = headersOpenDict;
-            entity.Entity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
             Update();
         }
-
-        void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
-        {
-            Update();
-        }
+        
 
         public event CargoItemSelectedHandler CargoItemSelectedEvent;
 
@@ -298,7 +306,7 @@ namespace Pulsar4X.SDL2UI
         public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
         {
             CargoTransfer instance;
-            if (!_state.LoadedWindows.ContainsKey(typeof(CargoTransfer)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(CargoTransfer)))
             {
                 instance = new CargoTransfer
                 {
@@ -308,7 +316,7 @@ namespace Pulsar4X.SDL2UI
             }
             else
             {
-                instance = (CargoTransfer)_state.LoadedWindows[typeof(CargoTransfer)];
+                instance = (CargoTransfer)_uiState.LoadedWindows[typeof(CargoTransfer)];
                 if (instance._selectedEntityLeft != selectedEntity1)
                 {
                     instance._selectedEntityLeft = selectedEntity1;
@@ -426,16 +434,16 @@ namespace Pulsar4X.SDL2UI
 
             //create order for items to go to right
             CargoXferOrder.CreateCommand(
-                _state.Game,
-                _state.Faction,
+                _uiState.Game,
+                _uiState.Faction,
                 _selectedEntityLeft.Entity,
                 _selectedEntityRight.Entity, 
                 CargoListLeft.GetAllToMoveOut());
 
             //create order for items to go to left
             CargoXferOrder.CreateCommand(
-                _state.Game,
-                _state.Faction,
+                _uiState.Game,
+                _uiState.Faction,
                 _selectedEntityRight.Entity,
                 _selectedEntityLeft.Entity,
                 CargoListRight.GetAllToMoveOut());
