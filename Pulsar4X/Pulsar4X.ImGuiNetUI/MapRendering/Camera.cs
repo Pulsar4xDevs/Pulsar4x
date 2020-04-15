@@ -36,7 +36,7 @@ namespace Pulsar4X.SDL2UI
             }
 
         }
-        
+       
         public ECSLib.Vector3 CameraWorldPosition_m
         {
             get
@@ -80,6 +80,14 @@ namespace Pulsar4X.SDL2UI
             _viewPort = viewPort;
             //_viewPort.SizeChanged += _viewPort_SizeChanged;
 
+        }
+
+        public bool IsInViewm(ECSLib.Vector3 worldPos)
+        {
+            if (worldPos.X > 0 && worldPos.X < this.ViewPortSize.X && worldPos.Y > 0 && worldPos.Y < this.ViewPortSize.Y)
+                return true;
+            else
+                return false;
         }
 
         public void PinToEntity(Entity entity)
