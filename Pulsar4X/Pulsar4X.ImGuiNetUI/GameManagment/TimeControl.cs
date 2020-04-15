@@ -10,7 +10,7 @@ namespace Pulsar4X.SDL2UI
     public class TimeControl : PulsarGuiWindow
     {
         
-        ECSLib.MasterTimePulse _timeloop {get { return _state.Game.GamePulse; } }
+        ECSLib.MasterTimePulse _timeloop {get { return _uiState.Game.GamePulse; } }
 
         bool _isPaused = true;
         int _timeSpanValue = 1;
@@ -40,11 +40,11 @@ namespace Pulsar4X.SDL2UI
         }
         internal static TimeControl GetInstance()
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(TimeControl)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(TimeControl)))
             {
                 return new TimeControl();
             }
-            return (TimeControl)_state.LoadedWindows[typeof(TimeControl)];
+            return (TimeControl)_uiState.LoadedWindows[typeof(TimeControl)];
         }
 
         internal override void Display()
@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushStyleColor(ImGuiCol.HeaderActive, new Vector4(0, 0, 0, 0));
             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0, 0, 0, 0));
 
-            DateTime currenttime = _state.SelectedSystemTime;
+            DateTime currenttime = _uiState.SelectedSystemTime;
             if (ImGui.CollapsingHeader("", _xpanderFlags))//Let the user open up the the time frequency menu
                 _expanded = true;
             else
@@ -79,15 +79,15 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if (_isPaused == true)//When time is paused
             {
-                if (ImGui.ImageButton(_state.SDLImageDictionary["PlayImg"], new Vector2(16, 16)))//Provide a button to unpause
+                if (ImGui.ImageButton(_uiState.SDLImageDictionary["PlayImg"], new Vector2(16, 16)))//Provide a button to unpause
                     PausePlayPressed();
                 ImGui.SameLine();
-                if (ImGui.ImageButton(_state.SDLImageDictionary["OneStepImg"], new Vector2(16, 16)))//Provide a button to increment time
+                if (ImGui.ImageButton(_uiState.SDLImageDictionary["OneStepImg"], new Vector2(16, 16)))//Provide a button to increment time
                     OneStepPressed();
             }
             else//When time is running
             {
-                if (ImGui.ImageButton(_state.SDLImageDictionary["PauseImg"], new Vector2(16, 16)))//Provide a button to unpause time
+                if (ImGui.ImageButton(_uiState.SDLImageDictionary["PauseImg"], new Vector2(16, 16)))//Provide a button to unpause time
                     PausePlayPressed();
             }
             

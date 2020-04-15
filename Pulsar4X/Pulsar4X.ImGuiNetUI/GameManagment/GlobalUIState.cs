@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.SDL2UI;
 
@@ -45,8 +46,11 @@ namespace Pulsar4X.SDL2UI
 
         internal GalacticMapRender GalacticMap;
 
+        internal List<UpdateWindowState> UpdateableWindows = new List<UpdateWindowState>();
+        internal DateTime LastGameUpdateTime = new DateTime();
         internal StarSystem SelectedSystem { get { return StarSystemStates[SelectedStarSysGuid].StarSystem; } }
         internal DateTime SelectedSystemTime { get { return StarSystemStates[SelectedStarSysGuid].StarSystem.StarSysDateTime; } }
+        internal DateTime SelectedSysLastUpdateTime = new DateTime();
         internal Guid SelectedStarSysGuid { get { return GalacticMap.SelectedStarSysGuid; } }
         internal SystemMapRendering SelectedSysMapRender { get { return GalacticMap.SelectedSysMapRender; } }
         internal DateTime PrimarySystemDateTime; //= new DateTime();
@@ -81,7 +85,7 @@ namespace Pulsar4X.SDL2UI
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
             ViewPort = viewport;
-            PulsarGuiWindow._state = this;
+            PulsarGuiWindow._uiState = this;
             var windowPtr = viewport.Handle;
             SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_DRIVER, "opengl");
             //var surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
@@ -307,8 +311,29 @@ namespace Pulsar4X.SDL2UI
 
     }
 
+    public abstract class UpdateWindowState
+    {
+        internal static GlobalUIState _uiState;
+        public abstract bool GetActive();
+        
+        public abstract void OnGameTickChange(DateTime newDate);
+        public abstract void OnSystemTickChange(DateTime newDate);
 
-    public abstract class PulsarGuiWindow
+        public abstract void OnSelectedSystemChange(StarSystem newStarSys);
+
+        protected UpdateWindowState()
+        {
+            _uiState.UpdateableWindows.Add(this);
+        }
+
+        public void Deconstructor()
+        {
+            _uiState.UpdateableWindows.Remove(this);
+        }
+
+    }
+
+    public abstract class PulsarGuiWindow : UpdateWindowState
     {
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
         //internal bool IsLoaded;
@@ -316,8 +341,7 @@ namespace Pulsar4X.SDL2UI
         protected bool IsActive = false;
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
-        internal static GlobalUIState _state;
-        
+
         public void SetActive(bool ActiveVal = true)
         {
             IsActive = ActiveVal;
@@ -326,7 +350,7 @@ namespace Pulsar4X.SDL2UI
         {
             IsActive = !IsActive;
         }
-        public bool GetActive()
+        public override bool GetActive()
         {
             return IsActive;
         }
@@ -334,7 +358,7 @@ namespace Pulsar4X.SDL2UI
 
         protected PulsarGuiWindow()
         {
-                _state.LoadedWindows[this.GetType()] = this;
+            _uiState.LoadedWindows[this.GetType()] = this;
         }
 
 
@@ -363,18 +387,17 @@ namespace Pulsar4X.SDL2UI
 
         internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
 
-        internal void Destroy()
+        public override void OnGameTickChange(DateTime newDate)
         {
-            /*
-            IsLoaded = false;
-            var lastItem = _state.LoadedWindows[_state.LoadedWindows.Count - 1];
-            if (lastItem.StateIndex != _state.LoadedWindows.Count - 1)
-                throw new Exception("index error in window count");
-            _state.LoadedWindows.RemoveAt(lastItem.StateIndex);
-            _state.LoadedWindows[StateIndex] = lastItem;
-            */
         }
-
+        
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+        }
+        
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+        }
     }
 
     public abstract class NonUniquePulsarGuiWindow

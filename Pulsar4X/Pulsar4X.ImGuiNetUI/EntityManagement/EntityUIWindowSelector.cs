@@ -34,13 +34,13 @@ namespace Pulsar4X.SDL2UI
         {
 
             EntityUIWindowSelector thisItem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(EntityUIWindowSelector)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(EntityUIWindowSelector)))
             {
                 thisItem = new EntityUIWindowSelector();
             }
             else
             {
-                thisItem = (EntityUIWindowSelector)_state.LoadedWindows[typeof(EntityUIWindowSelector)];
+                thisItem = (EntityUIWindowSelector)_uiState.LoadedWindows[typeof(EntityUIWindowSelector)];
             }
 
 
@@ -59,10 +59,10 @@ namespace Pulsar4X.SDL2UI
             {
                 //check if ANY entity has been clicked
                 //if true, display all possible toolbar menu icons for it
-                if (_state.LastClickedEntity != null)
+                if (_uiState.LastClickedEntity != null)
                 {
                     //Gets the last clicked entity
-                    var _entityState = _state.LastClickedEntity;
+                    var _entityState = _uiState.LastClickedEntity;
 
                     ToolbuttonData btn;
 
@@ -72,7 +72,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             btn = new ToolbuttonData()
                             {   
-                                Picture = _state.SDLImageDictionary[PictureString],
+                                Picture = _uiState.SDLImageDictionary[PictureString],
                                 TooltipText = TooltipText,
                                 ClickType = T
                                 //Opens up the componet design menu
@@ -115,7 +115,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             ImGui.SameLine();
                             ImGui.PushID(iterations.ToString());
-                            if (EntityUIWindows.checkopenUIWindow(button.ClickType, _entityState, _state))//If the window is open
+                            if (EntityUIWindows.checkopenUIWindow(button.ClickType, _entityState, _uiState))//If the window is open
                             {
                                 ImGui.PushStyleColor(buttonidx, clickedcolour);//Have the button be "pressed"
                             }
@@ -125,7 +125,7 @@ namespace Pulsar4X.SDL2UI
                             }
                             if (ImGui.ImageButton(button.Picture, BtnSizes))
                             {
-                                EntityUIWindows.openUIWindow(button.ClickType, _entityState, _state);
+                                EntityUIWindows.openUIWindow(button.ClickType, _entityState, _uiState);
                             }
 
                             if (ImGui.IsItemHovered())
@@ -150,7 +150,7 @@ namespace Pulsar4X.SDL2UI
                         if (EntityUIWindows.checkIfCanOpenWindow(T,_entityState))
                         {
                             bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[T]);
-                            EntityUIWindows.openUIWindow(T, _entityState, _state, buttonresult);
+                            EntityUIWindows.openUIWindow(T, _entityState, _uiState, buttonresult);
                             if (ImGui.IsItemHovered())
                                 ImGui.SetTooltip(GlobalUIState.namesForMenus[T]);
                         }

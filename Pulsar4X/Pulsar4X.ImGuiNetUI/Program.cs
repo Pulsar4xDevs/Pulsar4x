@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Numerics;
 using SDL2;
 using ImGuiNET;
@@ -6,6 +7,7 @@ using ImGuiSDL2CS;
 using System.Drawing;
 using Pulsar4X.ECSLib;
 using System.Linq;
+using System.Threading;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.SDL2UI.Combat;
 using Vector3 = System.Numerics.Vector3;
@@ -19,6 +21,7 @@ namespace Pulsar4X.SDL2UI
         [STAThread]
         public static void Main()
         {
+            SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
             Instance = new PulsarMainWindow();
             Instance.Run();
             Instance.Dispose();
@@ -47,8 +50,8 @@ namespace Pulsar4X.SDL2UI
         {
             
             _state = new GlobalUIState(this);
-            //_state.MainWinSize = this.Size;
-            //_state.ShowMetrixWindow = true;
+            //_uiState.MainWinSize = this.Size;
+            //_uiState.ShowMetrixWindow = true;
             // Create any managed resources and set up the main game window here.
             /*
             _MemoryEditorData = new byte[1024];
@@ -61,7 +64,7 @@ namespace Pulsar4X.SDL2UI
             backColor = new Vector3(0 / 255f, 0 / 255f, 28 / 255f);
 
             _state.GalacticMap = new GalacticMapRender(this, _state);
-            //_state.MapRendering = new SystemMapRendering(this, _state);
+            //_uiState.MapRendering = new SystemMapRendering(this, _uiState);
 
 
             OnEvent = MyEventHandler;
@@ -88,7 +91,7 @@ namespace Pulsar4X.SDL2UI
             }
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 1)
             {
-                //_state.onFocusMoved();
+                //_uiState.onFocusMoved();
                 _state.Camera.IsGrabbingMap = false;
 
                 if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.  
@@ -163,7 +166,7 @@ namespace Pulsar4X.SDL2UI
             GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
 
             _state.GalacticMap.Draw();
-            //_state.MapRendering.Draw();
+            //_uiState.MapRendering.Draw();
 
             // Render ImGui on top of the rest. this eventualy calls overide void ImGuiLayout();
             base.ImGuiRender();
@@ -222,6 +225,35 @@ namespace Pulsar4X.SDL2UI
                 ImGui.ShowUserGuide();
             }
 
+            //update and refresh state for GameDateTimechange
+            if(StaticRefLib.Game != null)
+            {
+                DateTime curTime = StaticRefLib.CurrentDateTime;
+                if (curTime != _state.LastGameUpdateTime)
+                {
+                    foreach (var item in _state.UpdateableWindows)
+                    {
+                        if (item.GetActive() == true)
+                            item.OnGameTickChange(curTime);
+                    }
+
+                    _state.LastGameUpdateTime = curTime;
+                }
+
+                //update and refresh state for SystemDateTimechage
+                curTime = _state.SelectedSystemTime;
+                if (curTime != _state.SelectedSysLastUpdateTime)
+                {
+                    foreach (var item in _state.UpdateableWindows)
+                    {
+                        if (item.GetActive() == true)
+                            item.OnSystemTickChange(curTime);
+                    }
+
+                    _state.SelectedSysLastUpdateTime = curTime;
+                }
+            }
+            
             
             foreach (var item in _state.LoadedWindows.Values.ToArray())
             {

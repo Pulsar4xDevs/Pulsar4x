@@ -27,13 +27,13 @@ namespace Pulsar4X.SDL2UI
         {
 
             SmallBodyEntityInfoPanel thisItem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(SmallBodyEntityInfoPanel)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(SmallBodyEntityInfoPanel)))
             {
                 thisItem = new SmallBodyEntityInfoPanel();
             }
             else
             {
-                thisItem = (SmallBodyEntityInfoPanel)_state.LoadedWindows[typeof(SmallBodyEntityInfoPanel)];
+                thisItem = (SmallBodyEntityInfoPanel)_uiState.LoadedWindows[typeof(SmallBodyEntityInfoPanel)];
             }
 
 
@@ -46,15 +46,15 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive && ImGui.Begin("Small bodies:", ref IsActive, _flags))
             {
-                if (_state.StarSystemStates.ContainsKey(_state.SelectedStarSysGuid))
+                if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
                 {
-                    foreach (var smallBody in _state.StarSystemStates[_state.SelectedStarSysGuid].EntityStatesWithNames)
+                    foreach (var smallBody in _uiState.StarSystemStates[_uiState.SelectedStarSysGuid].EntityStatesWithNames)
                     {
                         if (smallBody.Value.IsSmallBody())
                         {
                             if (ImGui.SmallButton(smallBody.Value.Name))
                             {
-                                _state.EntityClicked(smallBody.Value.Entity.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
+                                _uiState.EntityClicked(smallBody.Value.Entity.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                             }
                         }
                     }

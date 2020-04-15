@@ -16,13 +16,13 @@ namespace Pulsar4X.SDL2UI
         internal static EntityInfoPanel GetInstance() {
 
             EntityInfoPanel thisItem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(EntityInfoPanel)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(EntityInfoPanel)))
             {
                 thisItem = new EntityInfoPanel();
             }
             else
             {
-                thisItem = (EntityInfoPanel)_state.LoadedWindows[typeof(EntityInfoPanel)];
+                thisItem = (EntityInfoPanel)_uiState.LoadedWindows[typeof(EntityInfoPanel)];
             }
              
 
@@ -38,15 +38,15 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.Begin("Currently selected", _flags))
             {
 
-                if (_state.LastClickedEntity != null && _state.StarSystemStates.ContainsKey(_state.SelectedStarSysGuid)){
+                if (_uiState.LastClickedEntity != null && _uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid)){
 
-                    EntityState _SelectedEntityState = _state.LastClickedEntity;
+                    EntityState _SelectedEntityState = _uiState.LastClickedEntity;
                     Entity _SelectedEntity = _SelectedEntityState.Entity;
 
 
-                    if (_state.PrimaryEntity != null)
+                    if (_uiState.PrimaryEntity != null)
                     {
-                        //ImGui.Text("Primary: " + _state.PrimaryEntity.Name);
+                        //ImGui.Text("Primary: " + _uiState.PrimaryEntity.Name);
                     }
                     else
                     {
@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.Text("Subject: " +  _SelectedEntityState.Name);
                     
-                    //ImGui.Text(""+_state.LastClickedEntity.);
+                    //ImGui.Text(""+_uiState.LastClickedEntity.);
                     //gets all children and parent nodes, displays their names and makes them clickable to navigate towards them.
 
                     
@@ -72,7 +72,7 @@ namespace Pulsar4X.SDL2UI
 
                         var _parentEntity = _SelectedEntity.GetDataBlob<PositionDB>().Parent;
                         bool _hasParentEntity = false;
-                        SystemState _StarSystemState = _state.StarSystemStates[_state.SelectedStarSysGuid];
+                        SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
                         Dictionary<System.Guid, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
                         if (_parentEntity != null)
                         {
@@ -84,8 +84,8 @@ namespace Pulsar4X.SDL2UI
                                 _hasParentEntity = true;
                                 if(ImGui.SmallButton(tempEntityState.Name))
                                 {
-                                    //if(ImGui.SmallButton(parentEntity.GetDataBlob<NameDB>().GetName(_state.Faction.ID))){
-                                    _state.EntityClicked(_parentEntity.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
+                                    //if(ImGui.SmallButton(parentEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction.ID))){
+                                    _uiState.EntityClicked(_parentEntity.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                                     //}
                                 }
                             }
@@ -108,7 +108,7 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     hasChildrenEntities = true;
                                     if(ImGui.SmallButton(tempEntityState.Name)){
-                                        _state.EntityClicked(childEntity.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
+                                        _uiState.EntityClicked(childEntity.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                                     }
                                 }
 

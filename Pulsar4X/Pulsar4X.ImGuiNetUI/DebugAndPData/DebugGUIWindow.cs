@@ -20,11 +20,11 @@ namespace Pulsar4X.SDL2UI
         internal static DebugGUIWindow GetInstance()
         {
             DebugGUIWindow instance;
-            if (!_state.LoadedWindows.ContainsKey(typeof(DebugGUIWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(DebugGUIWindow)))
                 instance = new DebugGUIWindow();
             else
             {
-                instance = (DebugGUIWindow)_state.LoadedWindows[typeof(DebugGUIWindow)];
+                instance = (DebugGUIWindow)_uiState.LoadedWindows[typeof(DebugGUIWindow)];
 
             }
 
@@ -49,11 +49,20 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.End();
             }
-
         }
 
 
+        public override void OnGameTickChange(DateTime newDate)
+        {
+        }
 
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+        }
 
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

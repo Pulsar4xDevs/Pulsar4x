@@ -25,13 +25,13 @@ namespace Pulsar4X.SDL2UI
         internal static EntitySpawnWindow GetInstance() {
 
             EntitySpawnWindow thisItem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(EntitySpawnWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(EntitySpawnWindow)))
             {
                 thisItem = new EntitySpawnWindow();
             }
             else
             {
-                thisItem = (EntitySpawnWindow)_state.LoadedWindows[typeof(EntitySpawnWindow)];
+                thisItem = (EntitySpawnWindow)_uiState.LoadedWindows[typeof(EntitySpawnWindow)];
             }
              
 
@@ -58,9 +58,9 @@ namespace Pulsar4X.SDL2UI
                 {
                     //ImGui.BeginChild("exsistingdesigns");
 
-                    if (_exsistingClasses == null || _exsistingClasses.Count != _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList().Count)
+                    if (_exsistingClasses == null || _exsistingClasses.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList().Count)
                     {
-                        _exsistingClasses = _state.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
+                        _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
                     }
 
                     for (int i = 0; i < _exsistingClasses.Count; i++)
@@ -70,9 +70,9 @@ namespace Pulsar4X.SDL2UI
                         if (ImGui.Selectable(name))
                         {
 
-                            Entity _spawnedship = ShipFactory.CreateShip(_exsistingClasses[i], _state.Faction, _state.LastClickedEntity.Entity, _state.SelectedSystem, Guid.NewGuid().ToString());
+                            Entity _spawnedship = ShipFactory.CreateShip(_exsistingClasses[i], _uiState.Faction, _uiState.LastClickedEntity.Entity, _uiState.SelectedSystem, Guid.NewGuid().ToString());
                             NewtonionMovementProcessor.CalcDeltaV(_spawnedship);
-                            //_state.SelectedSystem.SetDataBlob(_spawnedship.ID, new TransitableDB());
+                            //_uiState.SelectedSystem.SetDataBlob(_spawnedship.ID, new TransitableDB());
                             //var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
                             //StorageSpaceProcessor.AddCargo(_spawnedship.GetDataBlob<CargoStorageDB>(), rp1, 15000);
                         }
@@ -90,5 +90,17 @@ namespace Pulsar4X.SDL2UI
             
         }
 
+        public override void OnGameTickChange(DateTime newDate)
+        {
+        }
+
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+        }
+
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

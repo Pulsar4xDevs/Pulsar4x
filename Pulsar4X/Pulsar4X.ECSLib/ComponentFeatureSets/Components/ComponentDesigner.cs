@@ -88,39 +88,6 @@ namespace Pulsar4X.ECSLib
         public int CrewReq;
         public int IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
-        {
-            var colonyConstruction = industryEntity.GetDataBlob<IndustryAbilityDB>();
-            batchJob.NumberCompleted++;
-            batchJob.ResourcesRequired = designInfo.ResourceCosts;
-            
-            batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
-
-            
-            if (batchJob.InstallOn != null)
-            {
-                ComponentInstance specificComponent = new ComponentInstance((ComponentDesign)designInfo);
-                if (batchJob.InstallOn == industryEntity || StorageSpaceProcessor.HasEntity(storage, batchJob.InstallOn.GetDataBlob<CargoAbleTypeDB>()))
-                {
-                    EntityManipulation.AddComponentToEntity(batchJob.InstallOn, specificComponent);
-                    ReCalcProcessor.ReCalcAbilities(batchJob.InstallOn);
-                }
-            }
-            else
-            {
-                StorageSpaceProcessor.AddCargo(storage, (ComponentDesign)designInfo, 1);
-            }
-
-            if (batchJob.NumberCompleted == batchJob.NumberOrdered)
-            {
-                colonyConstruction.ProductionLines[productionLine].Jobs.Remove(batchJob);
-                if (batchJob.Auto)
-                {
-                    colonyConstruction.ProductionLines[productionLine].Jobs.Add(batchJob);
-                }
-            }
-        }
-
 
         public int CreditCost;
         
@@ -135,6 +102,40 @@ namespace Pulsar4X.ECSLib
         public float AspectRatio = 1f;
         public DamageResist DamageResistance;
         
+        
+        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+        {
+            var colonyConstruction = industryEntity.GetDataBlob<IndustryAbilityDB>();
+            batchJob.NumberCompleted++;
+            batchJob.ResourcesRequired = designInfo.ResourceCosts;
+
+            batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
+
+
+            if (batchJob.InstallOn != null)
+            {
+               ComponentInstance specificComponent = new ComponentInstance((ComponentDesign)designInfo);
+               if (batchJob.InstallOn == industryEntity || StorageSpaceProcessor.HasEntity(storage, batchJob.InstallOn.GetDataBlob<CargoAbleTypeDB>()))
+               {
+                   EntityManipulation.AddComponentToEntity(batchJob.InstallOn, specificComponent);
+                   ReCalcProcessor.ReCalcAbilities(batchJob.InstallOn);
+               }
+            }
+            else
+            {
+               StorageSpaceProcessor.AddCargo(storage, (ComponentDesign)designInfo, 1);
+            }
+
+            if (batchJob.NumberCompleted == batchJob.NumberOrdered)
+            {
+               colonyConstruction.ProductionLines[productionLine].Jobs.Remove(batchJob);
+               if (batchJob.Auto)
+               {
+                   colonyConstruction.ProductionLines[productionLine].Jobs.Add(batchJob);
+               }
+            }
+        }
+     
         public bool HasAttribute<T>()
             where T : IComponentDesignAttribute
         {

@@ -101,13 +101,18 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
     
     public class OrdnanceDesign : ICargoable, IConstrucableDesign, ISerializable
     {
-        public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;
+        public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.IsOrdinance;
         public Guid ID { get; } = Guid.NewGuid();
         public string Name { get; set; }
         public Guid CargoTypeID { get; }
         public int DesignVersion = 0;
         public bool IsObsolete = false;
         public int Mass { get; }
+        public double WetMass { get; }
+        public double DryMass { get; }
+        public double ExaustVelocity { get; }
+        public double BurnRate { get; }
+        
         public double Volume;
         public List<(ComponentDesign design, int count)> Components;
         public (ArmorSD type, float thickness) Armor;
@@ -141,9 +146,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             faction.IndustryDesigns[ID] = this;
             Name = name;
             Components = components;
-            
-
-            
+            CargoTypeID = new Guid("055E2026-20A4-4CFA-A8CA-A01915A48B5E"); //TODO! we're leaking softcode into hard code here.
+            BurnRate = 0;
+            Guid fuelType = Guid.Empty;
+            double fuelMass = 0;
             foreach (var component in components)
             {
                 //If the mounttype does not include missiles, it will just ignore the component and wont add it. 
@@ -160,9 +166,31 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                     {
                         ComponentCosts.Add(component.design.ID, component.count);
                     }
+
+                    if (component.design.TryGetAttribute<NewtonionThrustAtb>(out NewtonionThrustAtb thrAtb))
+                    {
+                        //thrusters should all be of the same type.
+                        ExaustVelocity = thrAtb.ExhaustVelocity;
+                        BurnRate += thrAtb.FuelBurnRate;
+                         fuelType = thrAtb.FuelType;
+                    }
                 }
             }
-            
+            foreach (var component in components)
+            {
+                //If the mounttype does not include missiles, it will just ignore the component and wont add it. 
+                if((component.design.ComponentMountType & ComponentMountType.Missile) == ComponentMountType.Missile)
+                {
+                    if (component.design.TryGetAttribute(out CargoStorageAtbDB cargoAtb))
+                    {
+                        if (cargoAtb.CargoTypeGuid == StaticRefLib.StaticData.GetICargoable(fuelType).CargoTypeID)
+                            fuelMass += cargoAtb.StorageCapacity;
+                    }
+                }
+            }
+
+            WetMass = Mass;
+            DryMass = Mass - fuelMass;
             
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);

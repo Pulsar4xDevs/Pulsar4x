@@ -38,36 +38,7 @@ namespace Pulsar4X.SDL2UI
         float _currentSFPS;
         int _systemRateIndex = 0;
         float[] _systemRates = new float[80];
-
-        public void OnGlobalDateChange(DateTime newDate)
-        {
-            _currentGFPS = (float)_state.Game.GamePulse.LastSubtickTime.TotalSeconds;
-
-            if (_currentGFPS > largestGFPS)
-            {
-                largestGFPS = _currentGFPS;
-                largestIndex = 0;
-            }
-            else if (largestIndex == _gameRates.Length)
-            {
-                largestGFPS = _currentGFPS;
-                foreach (var item in _gameRates)
-                {
-                    if (item > largestGFPS)
-                        largestGFPS = item;
-                }
-            }
-            else
-            {
-                largestIndex++;
-            }
-
-            _gameRates[_gameRateIndex] = _currentGFPS;
-            if (_gameRateIndex >= _gameRates.Length - 1)
-                _gameRateIndex = 0;
-            else
-                _gameRateIndex++;
-        }
+        
 
         private double ticks1;
         private double ms1;
@@ -81,7 +52,6 @@ namespace Pulsar4X.SDL2UI
         
         private PerformanceDisplay() 
         {
-            _state.Game.GamePulse.GameGlobalDateChangedEvent += OnGlobalDateChange;
             _dataBlobTypes = new Type[EntityManager.DataBlobTypes.Count];
             _dataBlobTypeStrings = new String[EntityManager.DataBlobTypes.Count];
 
@@ -96,13 +66,13 @@ namespace Pulsar4X.SDL2UI
         internal static PerformanceDisplay GetInstance()
         {
             PerformanceDisplay instance;
-            if (!_state.LoadedWindows.ContainsKey(typeof(PerformanceDisplay)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(PerformanceDisplay)))
                 instance = new PerformanceDisplay();
             else
             {
-                instance = (PerformanceDisplay)_state.LoadedWindows[typeof(PerformanceDisplay)];
+                instance = (PerformanceDisplay)_uiState.LoadedWindows[typeof(PerformanceDisplay)];
             }
-            instance._systemState = _state.StarSystemStates[_state.SelectedStarSysGuid];
+            instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             return instance;
         }
         
@@ -225,6 +195,46 @@ namespace Pulsar4X.SDL2UI
                     
                 }
             }
+        }
+
+        public override void OnGameTickChange(DateTime newDate)
+        {
+            _currentGFPS = (float)_uiState.Game.GamePulse.LastSubtickTime.TotalSeconds;
+
+            if (_currentGFPS > largestGFPS)
+            {
+                largestGFPS = _currentGFPS;
+                largestIndex = 0;
+            }
+            else if (largestIndex == _gameRates.Length)
+            {
+                largestGFPS = _currentGFPS;
+                foreach (var item in _gameRates)
+                {
+                    if (item > largestGFPS)
+                        largestGFPS = item;
+                }
+            }
+            else
+            {
+                largestIndex++;
+            }
+
+            _gameRates[_gameRateIndex] = _currentGFPS;
+            if (_gameRateIndex >= _gameRates.Length - 1)
+                _gameRateIndex = 0;
+            else
+                _gameRateIndex++;
+        }
+
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+            
+        }
+
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            throw new NotImplementedException();
         }
     }
 }

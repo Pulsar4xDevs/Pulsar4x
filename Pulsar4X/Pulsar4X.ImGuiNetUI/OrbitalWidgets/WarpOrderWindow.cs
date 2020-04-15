@@ -100,11 +100,11 @@ namespace Pulsar4X.SDL2UI
             if (OrderingEntityState.Entity.HasDataBlob<OrbitDB>())
             {
                 //_orbitWidget = new OrbitOrderWiget(OrderingEntity.Entity.GetDataBlob<OrbitDB>());
-                //_state.MapRendering.UIWidgets.Add(_orbitWidget);
+                //_uiState.MapRendering.UIWidgets.Add(_orbitWidget);
                 if (_moveWidget == null)
                 {
-                    _moveWidget = new WarpMoveOrderWidget(_state, OrderingEntityState.Entity);
-                    _state.SelectedSysMapRender.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
+                    _moveWidget = new WarpMoveOrderWidget(_uiState, OrderingEntityState.Entity);
+                    _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
 
                 }
             }
@@ -123,20 +123,19 @@ namespace Pulsar4X.SDL2UI
                 //{DoNothing,         PeriapsisPntSelected,   DoNothing,      GoBackState, }, //needsPeriapsis
                 {DoNothing,         DoNothing,              ActionCmd,      GoBackState, }  //needsActoning
             };
-
         }
 
         internal static WarpOrderWindow GetInstance(EntityState entity, bool SMMode = false)
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(WarpOrderWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(WarpOrderWindow)))
             {
                 return new WarpOrderWindow(entity, SMMode);
             }
-            var instance = (WarpOrderWindow)_state.LoadedWindows[typeof(WarpOrderWindow)];
+            var instance = (WarpOrderWindow)_uiState.LoadedWindows[typeof(WarpOrderWindow)];
             instance.OrderingEntityState = entity;
             instance.CurrentState = States.NeedsTarget;
-            instance._departureDateTime = _state.PrimarySystemDateTime;
-            _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent += instance.OnSystemDateTimeChange;
+            instance._departureDateTime = _uiState.PrimarySystemDateTime;
+            
             instance.EntitySelected();
             return instance;
         }
@@ -145,7 +144,7 @@ namespace Pulsar4X.SDL2UI
         void DoNothing() { return; }
         void EntitySelected() 
         { 
-            OrderingEntityState = _state.LastClickedEntity;
+            OrderingEntityState = _uiState.LastClickedEntity;
 
             if (OrderingEntityState.Entity.HasDataBlob<OrbitDB>())
             {
@@ -172,8 +171,8 @@ namespace Pulsar4X.SDL2UI
             _stdGravParamCurrentBody = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;
             if (_moveWidget == null)
             {
-                _moveWidget = new WarpMoveOrderWidget(_state, OrderingEntityState.Entity);
-                _state.SelectedSysMapRender.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
+                _moveWidget = new WarpMoveOrderWidget(_uiState, OrderingEntityState.Entity);
+                _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(_moveWidget), _moveWidget);
             }
             DepartureCalcs();
 
@@ -194,16 +193,16 @@ namespace Pulsar4X.SDL2UI
 
         void TargetSelected() 
         { 
-            TargetEntity = _state.LastClickedEntity;
+            TargetEntity = _uiState.LastClickedEntity;
 
-            _state.Camera.PinToEntity(TargetEntity.Entity);
+            _uiState.Camera.PinToEntity(TargetEntity.Entity);
             _targetRadiusAU = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInAU;
             _targetRadius_m = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInM;
 
             var soiWorldRad_AU = OrbitProcessor.GetSOI_AU(TargetEntity.Entity);
             _apMax = soiWorldRad_AU;
 
-            float soiViewUnits = _state.Camera.ViewDistance(soiWorldRad_AU);
+            float soiViewUnits = _uiState.Camera.ViewDistance(soiWorldRad_AU);
 
 
             _massTargetBody = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().Mass;
@@ -212,26 +211,26 @@ namespace Pulsar4X.SDL2UI
             InsertionCalcs();
 
 
-            System.Numerics.Vector2 viewPortSize = _state.Camera.ViewPortSize;
+            System.Numerics.Vector2 viewPortSize = _uiState.Camera.ViewPortSize;
             float windowLen = Math.Min(viewPortSize.X, viewPortSize.Y);
             if (soiViewUnits < windowLen * 0.5)
             {
                 //zoom so soi fills ~3/4 screen.
                 var soilenwanted = windowLen * 0.375;
-                _state.Camera.ZoomLevel = (float)(soilenwanted / _apMax) ; 
+                _uiState.Camera.ZoomLevel = (float)(soilenwanted / _apMax) ; 
             }
 
 
             if (_orbitWidget != null)
             {
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
-                _state.SelectedSysMapRender.UIWidgets[nameof(_orbitWidget)] = _orbitWidget;
+                _uiState.SelectedSysMapRender.UIWidgets[nameof(_orbitWidget)] = _orbitWidget;
  
             }
             else
             {
                 _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
-                _state.SelectedSysMapRender.UIWidgets.Add(nameof(_orbitWidget), _orbitWidget);
+                _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(_orbitWidget), _orbitWidget);
             }
             
 
@@ -243,7 +242,7 @@ namespace Pulsar4X.SDL2UI
             CurrentState = States.NeedsInsertionPoint;
         }
         void InsertionPntSelected() { 
-            //var transitLeavePnt = _state.LastWorldPointClicked;
+            //var transitLeavePnt = _uiState.LastWorldPointClicked;
             //var ralitiveLeavePnt =  transitLeavePnt - GetTargetPosition();
             //var distanceSelectedKM = Distance.MToKm(ralitiveLeavePnt.Length());
             _moveWidget.SetArrivalPosition(_targetInsertionPoint_m);
@@ -257,8 +256,8 @@ namespace Pulsar4X.SDL2UI
         {
 
             WarpMoveCommand.CreateCommand(
-                _state.Game,
-                _state.Faction,
+                _uiState.Game,
+                _uiState.Faction,
                 OrderingEntityState.Entity,
                 TargetEntity.Entity,
                 _targetInsertionPoint_m,
@@ -269,7 +268,7 @@ namespace Pulsar4X.SDL2UI
         }
         void ActionAddDB()
         {
-            _state.SpaceMasterVM.SMSetOrbitToEntity(OrderingEntityState.Entity, TargetEntity.Entity, PointDFunctions.Length(_orbitWidget.Periapsis), _state.PrimarySystemDateTime);
+            _uiState.SpaceMasterVM.SMSetOrbitToEntity(OrderingEntityState.Entity, TargetEntity.Entity, PointDFunctions.Length(_orbitWidget.Periapsis), _uiState.PrimarySystemDateTime);
             CloseWindow();
         }
 
@@ -281,7 +280,7 @@ namespace Pulsar4X.SDL2UI
 
         #region Stuff that happens when the system date changes goes here
 
-        void OnSystemDateTimeChange(DateTime newDate)
+        public override void OnSystemTickChange(DateTime newDate)
         {
 
             if (_departureDateTime < newDate)
@@ -327,7 +326,7 @@ namespace Pulsar4X.SDL2UI
             if (IsActive)
             {
                 var size = new Vector2(200, 100);
-                var pos = new Vector2(_state.MainWinSize.X / 2 - size.X / 2, _state.MainWinSize.Y / 2 - size.Y / 2);
+                var pos = new Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
 
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);
@@ -359,7 +358,7 @@ namespace Pulsar4X.SDL2UI
 
                                     var mousePos = ImGui.GetMousePos();
 
-                                    var mouseWorldPos = _state.Camera.MouseWorldCoordinate_m();
+                                    var mouseWorldPos = _uiState.Camera.MouseWorldCoordinate_m();
                                     _targetInsertionPoint_m = (mouseWorldPos - GetTargetPosition()); //ralitive to the target body
 
                                     _moveWidget.SetArrivalPosition(_targetInsertionPoint_m);
@@ -581,17 +580,16 @@ namespace Pulsar4X.SDL2UI
         {
             this.SetActive(false);
             CurrentState = States.NeedsEntity;
-            _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateTimeChange;
             _progradeDV = 0;
             _radialDV = 0;
             if (_orbitWidget != null)
             {
-                _state.SelectedSysMapRender.UIWidgets.Remove(nameof(_orbitWidget));
+                _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(_orbitWidget));
                 _orbitWidget = null;
             }
             if (_moveWidget != null)
             {
-                _state.SelectedSysMapRender.UIWidgets.Remove(nameof(_moveWidget));
+                _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(_moveWidget));
                 _moveWidget = null;
             }
         }

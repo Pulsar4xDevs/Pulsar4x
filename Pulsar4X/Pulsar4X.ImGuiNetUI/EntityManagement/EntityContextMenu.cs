@@ -19,7 +19,7 @@ namespace Pulsar4X.SDL2UI
         public EntityContextMenu(GlobalUIState state, Guid entityGuid)
         {
             _state = state;
-            //_state.OpenWindows.Add(this);
+            //_uiState.OpenWindows.Add(this);
             //IsActive = true;
             _entityState = state.StarSystemStates[state.SelectedStarSysGuid].EntityStatesWithNames[entityGuid];
 

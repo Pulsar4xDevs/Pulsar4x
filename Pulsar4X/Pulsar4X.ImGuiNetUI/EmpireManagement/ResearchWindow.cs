@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
         private ResearchWindow()
         {
             OnFactionChange();
-            _state.Game.GamePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent; 
+            _uiState.Game.GamePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent; 
         }
 
         private void GameLoopOnGameGlobalDateChangedEvent(DateTime newdate)
@@ -38,16 +38,16 @@ namespace Pulsar4X.SDL2UI
         internal static ResearchWindow GetInstance()
         {
             ResearchWindow thisitem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(ResearchWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(ResearchWindow)))
             {
                 thisitem = new ResearchWindow();
             }
-            thisitem = (ResearchWindow)_state.LoadedWindows[typeof(ResearchWindow)];
-            if (_state.LastClickedEntity != thisitem._currentEntity)
+            thisitem = (ResearchWindow)_uiState.LoadedWindows[typeof(ResearchWindow)];
+            if (_uiState.LastClickedEntity != thisitem._currentEntity)
             {
-                if (_state.LastClickedEntity.Entity.HasDataBlob<TeamsHousedDB>())
+                if (_uiState.LastClickedEntity.Entity.HasDataBlob<TeamsHousedDB>())
                 {
-                    thisitem.OnEntityChange(_state.LastClickedEntity);
+                    thisitem.OnEntityChange(_uiState.LastClickedEntity);
                 }
             }
 
@@ -58,7 +58,7 @@ namespace Pulsar4X.SDL2UI
 
         private void OnFactionChange()
         {
-            _factionTechDB = _state.Faction.GetDataBlob<FactionTechDB>();
+            _factionTechDB = _uiState.Faction.GetDataBlob<FactionTechDB>();
             _researchableTechs = _factionTechDB.GetResearchableTechs();
             _researchableTechsByGuid = _factionTechDB.GetResearchablesDic();
             _scienceTeams = _factionTechDB.AllScientists;
@@ -218,7 +218,7 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 ImGui.NextColumn();
-                ImGui.Text(_scienceTeams[i].atEntity.GetDataBlob<NameDB>().GetName(_state.Faction));
+                ImGui.Text(_scienceTeams[i].atEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction));
             }
             ImGui.EndChild();
 

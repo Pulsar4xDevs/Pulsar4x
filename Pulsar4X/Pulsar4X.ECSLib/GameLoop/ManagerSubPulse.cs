@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Reflection;
 using System.Diagnostics;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Pulsar4X.ECSLib
 {
@@ -262,7 +263,7 @@ namespace Pulsar4X.ECSLib
             //Event logevent = new Event(_systemLocalDateTime, "System Date Change", _entityManager.ID, null, null, null);
             //logevent.EventType = EventType.SystemDateChange;
             //_entityManager.Game.EventLog.AddEvent(logevent);
-
+            int threadID = Thread.CurrentThread.ManagedThreadId;
             SystemDateChangedEvent?.Invoke(StarSysDateTime);
         }
 

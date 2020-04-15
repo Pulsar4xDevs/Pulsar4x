@@ -448,14 +448,126 @@
               "AttributeFormula": "DataBlobArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
               "AttributeType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
             },
-
+            {
+              "Name": "Propellent Amount",
+              "Units": "Kg",
+              "DescriptionFormula": "'Solid Fuel'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AttributeFormula": "50"
+            },
+            {
+              "Name": "DBargs",
+              "GuiHint": "None",
+              "AttributeFormula": "DataBlobArgs(Ability('Propellent Amount'), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), 0, 0)",
+              "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
+            },
             {
               "Name": "Sensor Signature",
-              "Units": "Unknown",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Thrust'), 0 , 0, 0)",
+              "AttributeFormula": "DataBlobArgs(Ability('Thrust'), 811 , 400, 1400)",
               "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "11564F56-D52C-4A16-8434-C9BB50D8EB95",
+        "Value": {
+          "Name": "Ordnance Storage",
+          "DescriptionFormula": "'Stores Ordinance'",
+          "ID": "11564F56-D52C-4A16-8434-C9BB50D8EB95",
+          "MassFormula": "Ability(0)",
+          "VolumeFormula": "[Mass]",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "Ability(1) * 0.1",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Rack Size",
+              "DescriptionFormula": "''",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "100",
+              "StepFormula": "100",
+              "AttributeFormula": "50000"
+            },
+            {
+              "Name": "Size Efficency",
+              "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AttributeFormula": "Ability(0) * 0.01"
+            },
+            {
+              "Name": "Cargo Transfer Rate",
+              "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "100",
+              "StepFormula": "100",
+              "AttributeFormula": "50000"
+            },
+            {
+              "Name": "Transfer Range",
+              "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "100",
+              "StepFormula": "100",
+              "AttributeFormula": "50000"
+            },
+            {
+              "Name": "Total Cargo Stored",
+              "DescriptionFormula": "'The amount of cargo this can store.'",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AttributeFormula": "Ability(0) - Ability(1) - Ability(2)"
+            },
+            {
+              "Name": "DBargs",
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AttributeFormula": "DataBlobArgs(Ability(4), GuidString('055E2026-20A4-4CFA-A8CA-A01915A48B5E'), Ability(2), Ability(3))",
+              "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]
         }

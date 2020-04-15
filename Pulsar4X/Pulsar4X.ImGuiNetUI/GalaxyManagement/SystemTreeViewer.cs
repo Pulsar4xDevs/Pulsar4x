@@ -16,13 +16,13 @@ namespace Pulsar4X.SDL2UI
         internal static SystemTreeViewer GetInstance() {
 
             SystemTreeViewer thisItem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(SystemTreeViewer)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(SystemTreeViewer)))
             {
                 thisItem = new SystemTreeViewer();
             }
             else
             {
-                thisItem = (SystemTreeViewer)_state.LoadedWindows[typeof(SystemTreeViewer)];
+                thisItem = (SystemTreeViewer)_uiState.LoadedWindows[typeof(SystemTreeViewer)];
             }
              
 
@@ -37,9 +37,9 @@ namespace Pulsar4X.SDL2UI
             if (IsActive && ImGui.Begin("System Tree", _flags))
             {
 
-                if (_state.StarSystemStates.ContainsKey(_state.SelectedStarSysGuid)){
+                if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid)){
 
-                    SystemState _StarSystemState = _state.StarSystemStates[_state.SelectedStarSysGuid];
+                    SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
                     Dictionary<System.Guid, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
 
                     List<EntityState> _Stars = new List<EntityState>();
@@ -48,9 +48,9 @@ namespace Pulsar4X.SDL2UI
                     {
                         if (Body.Value.IsStar()) 
                         { 
-                            if(_state.LastClickedEntity != null)
+                            if(_uiState.LastClickedEntity != null)
                             {
-                                TreeGen(Body.Value.Entity, _state.LastClickedEntity.Entity);
+                                TreeGen(Body.Value.Entity, _uiState.LastClickedEntity.Entity);
                             }
                             else
                             {
@@ -70,7 +70,7 @@ namespace Pulsar4X.SDL2UI
 
         void TreeGen(Entity _CurrentBody, Entity _SelectedBody)
         {
-            SystemState _StarSystemState = _state.StarSystemStates[_state.SelectedStarSysGuid];
+            SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             Dictionary<System.Guid, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
             if (_NamedEntityStates.ContainsKey(_CurrentBody.Guid))
             {
@@ -86,7 +86,7 @@ namespace Pulsar4X.SDL2UI
                         _TreeFlags = ImGuiTreeNodeFlags.OpenOnArrow;
                     bool _Opened = ImGui.TreeNodeEx(_NamedEntityStates[_CurrentBody.Guid].Name, _TreeFlags);
                     if(ImGui.IsItemClicked())
-                        _state.EntityClicked(_CurrentBody.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
+                        _uiState.EntityClicked(_CurrentBody.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                     if (_Opened)
                     {   
                         foreach (Entity _ChildBody in _ChildList)
@@ -100,7 +100,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     bool selected = _CurrentBody == _SelectedBody;                   
                     if (ImGui.Selectable(_NamedEntityStates[_CurrentBody.Guid].Name, selected))
-                        _state.EntityClicked(_CurrentBody.Guid, _state.SelectedStarSysGuid, MouseButtons.Primary);
+                        _uiState.EntityClicked(_CurrentBody.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                 }
 
             }

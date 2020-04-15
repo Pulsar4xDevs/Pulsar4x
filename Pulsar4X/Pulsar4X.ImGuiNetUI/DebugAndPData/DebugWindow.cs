@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
                 if (_selectedEntity != value)
                 {
                     _selectedEntity = value;
-                    _selectedEntityName = SelectedEntity.GetDataBlob<NameDB>().GetName(_state.Faction);
+                    _selectedEntityName = SelectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
                     _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
                     OnSelectedEntityChanged();
                 }
@@ -65,18 +65,18 @@ namespace Pulsar4X.SDL2UI
         internal static DebugWindow GetInstance()
         {
             DebugWindow instance;
-            if (!_state.LoadedWindows.ContainsKey(typeof(DebugWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(DebugWindow)))
                 instance = new DebugWindow();
             else
             {
-                instance = (DebugWindow)_state.LoadedWindows[typeof(DebugWindow)];
+                instance = (DebugWindow)_uiState.LoadedWindows[typeof(DebugWindow)];
                 instance.RefreshFactionEntites();
-                if(_state.LastClickedEntity?.Entity != null)
-                    instance.SelectedEntity = _state.LastClickedEntity.Entity;
+                if(_uiState.LastClickedEntity?.Entity != null)
+                    instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
             }
-            if(_state.LastClickedEntity?.Entity != null && instance.SelectedEntity != _state.LastClickedEntity.Entity)
-                instance.SelectedEntity = _state.LastClickedEntity.Entity;
-            instance._systemState = _state.StarSystemStates[_state.SelectedStarSysGuid];
+            if(_uiState.LastClickedEntity?.Entity != null && instance.SelectedEntity != _uiState.LastClickedEntity.Entity)
+                instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
+            instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             return instance;
         }
 
@@ -84,12 +84,9 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetGameEvents()
         {
-            if (_state.Game != null)
+            if (_uiState.Game != null)
             {
-                _state.Game.GamePulse.GameGlobalDateChangedEvent += GameLoop_GameGlobalDateChangedEvent;
-                _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent += SystemSubpulse_SystemDateChangedEvent;
-                _state.EntityClickedEvent += _state_EntityClicked;
-                
+                _uiState.EntityClickedEvent += UIStateEntityClicked;
             }
         }
 
@@ -99,7 +96,7 @@ namespace Pulsar4X.SDL2UI
             if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
             {
                 var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                _dmgTxtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, dmgdb.DamageProfile);
+                _dmgTxtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile);
             }
             else if(_selectedEntity.HasDataBlob<SensorInfoDB>())
             {
@@ -108,7 +105,7 @@ namespace Pulsar4X.SDL2UI
                 if (actualEntity.IsValid && actualEntity.HasDataBlob<EntityDamageProfileDB>())
                 {
                     var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
-                    _dmgTxtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, dmgdb.DamageProfile);
+                    _dmgTxtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile);
                 }
             }
             else
@@ -116,7 +113,7 @@ namespace Pulsar4X.SDL2UI
             
         }
 
-        private void _state_EntityClicked(EntityState entityState, MouseButtons btn)
+        private void UIStateEntityClicked(EntityState entityState, MouseButtons btn)
         {
             if(btn == MouseButtons.Primary)
             {
@@ -124,23 +121,9 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        void GameLoop_GameGlobalDateChangedEvent(DateTime newDate)
-        {
-
-            //positions.Add(_state.LastClickedEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_AU);
-        }
 
         
-        void SystemSubpulse_SystemDateChangedEvent(DateTime newDate)
-        {
-            _dateChangeSinceLastFrame = true;
 
-            if (_systemState.EntitiesAdded.Count > 0 || _systemState.EntitysToBin.Count > 0)
-            {
-                RefreshFactionEntites();
-            }
-
-        }
 
         ECSLib.Vector3 pos = new ECSLib.Vector3();
         double truAnomoly = 0;
@@ -156,16 +139,16 @@ namespace Pulsar4X.SDL2UI
 
                     BorderGroup.BeginBorder("Info", ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
                     
-                    ImGui.Text(_state.PrimarySystemDateTime.ToString());
+                    ImGui.Text(_uiState.PrimarySystemDateTime.ToString());
                     ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
                     
                     BorderGroup.EndBoarder();
                     
                     if (ImGui.CollapsingHeader("Camera Functions", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
-                        if (_state.Camera.IsPinnedToEntity)
+                        if (_uiState.Camera.IsPinnedToEntity)
                         {
-                            var entyName = _systemState.EntityStatesWithNames[_state.Camera.PinnedEntityGuid].Name;
+                            var entyName = _systemState.EntityStatesWithNames[_uiState.Camera.PinnedEntityGuid].Name;
                             ImGui.Text("Camera is pinned to:");
                             ImGui.SameLine();
                             ImGui.Text(entyName);
@@ -175,7 +158,7 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("Camera is not pinned to an entity.");
                         }
                         
-                        ImGui.Text("Zoom: " + _state.Camera.ZoomLevel);
+                        ImGui.Text("Zoom: " + _uiState.Camera.ZoomLevel);
 
                         ImGui.Text("Raw Cursor Coordinate");
                         Vector2 mouseCoord = ImGui.GetMousePos();
@@ -184,31 +167,31 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("y: " + mouseCoord.Y);
                         
                         ImGui.Text("Cursor World Coordinate:");
-                        var mouseWorldCoord = _state.Camera.MouseWorldCoordinate_m();
+                        var mouseWorldCoord = _uiState.Camera.MouseWorldCoordinate_m();
                         ImGui.Text("x" + Stringify.Distance(mouseWorldCoord.X));
                         ImGui.SameLine();
                         ImGui.Text("y" + Stringify.Distance(mouseWorldCoord.Y));
-                        var mouseWorldCoord_AU = _state.Camera.MouseWorldCoordinate_AU();
+                        var mouseWorldCoord_AU = _uiState.Camera.MouseWorldCoordinate_AU();
                         ImGui.Text("x" + mouseWorldCoord_AU.X + " AU");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseWorldCoord_AU.Y + " AU");
 
                         ImGui.Text("Cursor View Coordinate:");
-                        var mouseViewCoord = _state.Camera.ViewCoordinate_m(mouseWorldCoord);
+                        var mouseViewCoord = _uiState.Camera.ViewCoordinate_m(mouseWorldCoord);
                         ImGui.Text("x" + mouseViewCoord.x + " p");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseViewCoord.y + " p");
-                        var mouseviewCoord_AU = _state.Camera.ViewCoordinate_AU(mouseWorldCoord_AU);
+                        var mouseviewCoord_AU = _uiState.Camera.ViewCoordinate_AU(mouseWorldCoord_AU);
                         ImGui.Text("x" + mouseviewCoord_AU.x + " p");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseviewCoord_AU.y + " p");
                     
                         ImGui.Text("Camrera WorldPosition");
-                        var camWorldCoord_m = _state.Camera.CameraWorldPosition_m;
+                        var camWorldCoord_m = _uiState.Camera.CameraWorldPosition_m;
                         ImGui.Text("x" + camWorldCoord_m.X + " m");
                         ImGui.SameLine();
                         ImGui.Text("y" + camWorldCoord_m.Y + " m");
-                        var camWorldCoord_AU = _state.Camera.CameraWorldPosition_AU;
+                        var camWorldCoord_AU = _uiState.Camera.CameraWorldPosition_AU;
                         ImGui.Text("x" + camWorldCoord_AU.X + " AU");
                         ImGui.SameLine();
                         ImGui.Text("y" + camWorldCoord_AU.Y + " AU");
@@ -225,9 +208,9 @@ namespace Pulsar4X.SDL2UI
 
                     if (ImGui.CollapsingHeader("GraphicTests", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
-                        var window = GraphicDebugWindow.GetWindow(_state);
+                        var window = GraphicDebugWindow.GetWindow(_uiState);
                         window.Display();
-                        window.Enable(true, _state);
+                        window.Enable(true, _uiState);
                     }
                     
 
@@ -245,8 +228,8 @@ namespace Pulsar4X.SDL2UI
                         ButtonBox();
                     }
                     
-                    ImGui.Text("Selected Star System: " + _state.SelectedStarSysGuid);
-                    ImGui.Text("Number Of Entites: " + _state.SelectedSystem.NumberOfEntites);
+                    ImGui.Text("Selected Star System: " + _uiState.SelectedStarSysGuid);
+                    ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.NumberOfEntites);
                     if(ImGui.CollapsingHeader("Log"))
                     {
                         ImGui.BeginChild("LogChild", new Vector2(800, 300), true);
@@ -345,10 +328,10 @@ namespace Pulsar4X.SDL2UI
                                         var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
                                         cir = new SimpleCircle(SelectedEntity.GetDataBlob<PositionDB>(), soiradius, colour);
 
-                                        _state.SelectedSysMapRender.UIWidgets.Add(nameof(cir), cir);
+                                        _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(cir), cir);
                                     }
                                     else
-                                        _state.SelectedSysMapRender.UIWidgets.Remove(nameof(cir));
+                                        _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(cir));
                                 }
 
                                 if (ImGui.CollapsingHeader("OrbitDB: ###OrbitDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
@@ -356,11 +339,11 @@ namespace Pulsar4X.SDL2UI
 
                                     OrbitDB orbitDB = SelectedEntity.GetDataBlob<OrbitDB>();
 
-                                    //if (_state.CurrentSystemDateTime != lastDate)
+                                    //if (_uiState.CurrentSystemDateTime != lastDate)
                                     //{
-                                    pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _state.PrimarySystemDateTime);
-                                        truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _state.PrimarySystemDateTime);
-                                        //lastDate = _state.PrimarySystemDateTime;
+                                    pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _uiState.PrimarySystemDateTime);
+                                        truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _uiState.PrimarySystemDateTime);
+                                        //lastDate = _uiState.PrimarySystemDateTime;
                                     //}
 
                                     ImGui.Text("x: " + pos.X);
@@ -372,7 +355,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion_DegreesSec + " in Deg/s");
                                     ImGui.Text("MeanVelocity: " + OrbitMath.MeanOrbitalVelocityInAU(orbitDB) + "Au/s");
                                     ImGui.Text("MeanVelocity: " + Distance.AuToKm( OrbitMath.MeanOrbitalVelocityInAU(orbitDB)) + "Km/s");
-                                    ImGui.Text("SOI Radius: " + Distance.AuToKm(OrbitProcessor.GetSOI_AU(_state.LastClickedEntity.Entity)));
+                                    ImGui.Text("SOI Radius: " + Distance.AuToKm(OrbitProcessor.GetSOI_AU(_uiState.LastClickedEntity.Entity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
                                     ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis_AU);
                                     ImGui.Text("Periapsis: " + Distance.AuToKm(orbitDB.Periapsis_AU).ToString("g3") + " Km");
@@ -435,13 +418,13 @@ namespace Pulsar4X.SDL2UI
                                         var y = soiradius * Math.Sin(θ);
                                         psoilin = new SimpleLine(parent.GetDataBlob<PositionDB>(), new PointD() { X = x, Y = y }, colour);
 
-                                        _state.SelectedSysMapRender.UIWidgets.Add(nameof(psoi), psoi);
-                                        _state.SelectedSysMapRender.UIWidgets.Add(nameof(psoilin), psoilin);
+                                        _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoi), psoi);
+                                        _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoilin), psoilin);
                                     }
                                     else
                                     {
-                                        _state.SelectedSysMapRender.UIWidgets.Remove(nameof(psoi));
-                                        _state.SelectedSysMapRender.UIWidgets.Remove(nameof(psoilin));
+                                        _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(psoi));
+                                        _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(psoilin));
                                     }
                                 }
 
@@ -455,16 +438,16 @@ namespace Pulsar4X.SDL2UI
                                     OrbitDB orbitDB = SelectedEntity.GetDataBlob<OrbitDB>();
                                     if (orbitDB != null)
                                     {
-                                        //string startRadian = _state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
-                                        //string startDegrees = Angle.ToDegrees(_state.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
+                                        //string startRadian = _uiState.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
+                                        //string startDegrees = Angle.ToDegrees(_uiState.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
                                         //ImGui.Text("StartAngleRadians: " + startRadian);
 
                                         //ImGui.Text("StartAngleDegrees: " + startDegrees);
                                         if (ImGui.CollapsingHeader("OrbitIconLines", ImGuiTreeNodeFlags.CollapsingHeader))
                                         {
-                                            var window = OrbitalDebugWindow.GetWindow(_state.LastClickedEntity);
+                                            var window = OrbitalDebugWindow.GetWindow(_uiState.LastClickedEntity);
                                             window.Display();
-                                            window.Enable(true, _state);
+                                            window.Enable(true, _uiState);
                                         }
                                     }
                                 }
@@ -518,8 +501,8 @@ namespace Pulsar4X.SDL2UI
                             }
                             if (SelectedEntity.HasDataBlob<NewtonMoveDB>())
                             {
-                                var nmdb = _state.LastClickedEntity.Entity.GetDataBlob<NewtonMoveDB>();
-                                var ntdb = _state.LastClickedEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
+                                var nmdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonMoveDB>();
+                                var ntdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
                                 if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     ImGui.Text("Manuver DV:" + Stringify.Distance(nmdb.DeltaVForManuver_m.Length())+"/s");
@@ -541,7 +524,7 @@ namespace Pulsar4X.SDL2UI
                             
                             if (SelectedEntity.HasDataBlob<WarpMovingDB>())
                             {
-                                var db = _state.LastClickedEntity.Entity.GetDataBlob<WarpMovingDB>();
+                                var db = _uiState.LastClickedEntity.Entity.GetDataBlob<WarpMovingDB>();
                                 if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     ImGui.Text("EntryPoint: ");
@@ -565,7 +548,7 @@ namespace Pulsar4X.SDL2UI
                                     double distance = Distance.DistanceBetween(db.EntryPointAbsolute, db.ExitPointAbsolute);
                                     ImGui.Text("Distance " + Stringify.Distance(distance));
                                     ImGui.SameLine();
-                                    var timeToTarget = db.PredictedExitTime - _state.PrimarySystemDateTime;
+                                    var timeToTarget = db.PredictedExitTime - _uiState.PrimarySystemDateTime;
                                     ImGui.Text("Remaining TTT " + timeToTarget);
                                     var totalTime = db.PredictedExitTime - db.EntryDateTime;
                                     ImGui.Text("Total TTT  " + totalTime);
@@ -574,7 +557,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("LastDateTime: ");
                                     ImGui.Text(db.LastProcessDateTime.ToString());
                                     ImGui.Text("Time Since Last: ");
-                                    var timelen = _state.PrimarySystemDateTime - db.LastProcessDateTime;
+                                    var timelen = _uiState.PrimarySystemDateTime - db.LastProcessDateTime;
                                     ImGui.Text(timelen.ToString());
 
                                 }
@@ -657,9 +640,9 @@ namespace Pulsar4X.SDL2UI
         void RefreshFactionEntites()
         {
             _factionOwnedEntites = new List<(string name, Entity entity)>();
-            foreach (var entity in _state.SelectedSystem.GetEntitiesByFaction(_state.Faction.Guid))
+            foreach (var entity in _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Guid))
             {
-                string name = entity.GetDataBlob<NameDB>().GetName(_state.Faction);
+                string name = entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
                 _factionOwnedEntites.Add((name, entity));
 
             }
@@ -897,7 +880,7 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.BeginChild("Buttons##bb", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
             ImGui.BeginGroup();
-            //if (ImGui.ImageButton(_state.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
+            //if (ImGui.ImageButton(_uiState.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
             if (ImGui.Button("^" + "##bb" + _bbSelectedIndex))
             {
                 (string name, int count) item = _listfoo[_bbSelectedIndex];
@@ -905,7 +888,7 @@ namespace Pulsar4X.SDL2UI
                 _listfoo.Insert(_bbSelectedIndex - 1, item);
                 _bbSelectedIndex--;
             }
-            //if (ImGui.ImageButton(_state.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
+            //if (ImGui.ImageButton(_uiState.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
             if (ImGui.Button("v" + "##bb" + _bbSelectedIndex))
             {
                 (string name, int count) item = _listfoo[_bbSelectedIndex];
@@ -915,7 +898,7 @@ namespace Pulsar4X.SDL2UI
             }
             ImGui.EndGroup();
             ImGui.SameLine();
-            //if (ImGui.ImageButton(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
+            //if (ImGui.ImageButton(_uiState.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
             if (ImGui.Button("+" + "##bb" + _bbSelectedIndex))
             {
                 //_refineryVM.CurrentJobSelectedItem.ChangeRepeat(!_refineryVM.CurrentJobSelectedItem.Repeat);
@@ -923,7 +906,7 @@ namespace Pulsar4X.SDL2UI
             }
         
             ImGui.SameLine();
-            //if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
+            //if (ImGui.ImageButton(_uiState.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
             if (ImGui.Button("-" + "##bb" + _bbSelectedIndex))
             {
                 //_refineryVM.CurrentJobSelectedItem.CancelJob();
@@ -940,8 +923,25 @@ namespace Pulsar4X.SDL2UI
             ImGui.PopStyleVar();
 
         }
+        
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+            _dateChangeSinceLastFrame = true;
 
+            if (_systemState.EntitiesAdded.Count > 0 || _systemState.EntitysToBin.Count > 0)
+            {
+                RefreshFactionEntites();
+            }
 
+        }
 
+        public override void OnGameTickChange(DateTime newDate)
+        {
+        }
+        
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

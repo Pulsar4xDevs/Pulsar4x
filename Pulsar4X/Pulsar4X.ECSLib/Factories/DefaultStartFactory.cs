@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing.Printing;
 using System.Security.Cryptography.X509Certificates;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.ECSLib
 {
@@ -26,6 +27,8 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _cargoCompartment;
         private static ComponentDesign _spacePort;
         private static ShipDesign _defaultShipDesign;
+        private static ComponentDesign _missileTube;
+        private static ComponentDesign _ordnanceStore;
         
 
         // this code is a test for multiple systems, worth mentioning it utterly failed, modularity is good when you have it huh.ç
@@ -219,7 +222,9 @@ namespace Pulsar4X.ECSLib
             DefaultFragPayload(game, factionEntity);
             DefaultMissileSRB(game, factionEntity);
             DefaultMissileSensors(game, factionEntity);
-            
+            DefaultMissileTube(game, factionEntity);
+            MissileDesign250(game, factionEntity);
+            ShipSmallOrdnanceStore(game, factionEntity);
             EntityManipulation.AddComponentToEntity(colonyEntity, mineDesign);
             EntityManipulation.AddComponentToEntity(colonyEntity, refinaryDesign);
             EntityManipulation.AddComponentToEntity(colonyEntity, labEntity);
@@ -271,6 +276,7 @@ namespace Pulsar4X.ECSLib
             StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
             StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             var elec = NameLookup.GetMaterialSD(game, "Electrical Energy");
             ship1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
@@ -387,8 +393,11 @@ namespace Pulsar4X.ECSLib
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
                 (_sensor_50, 1), 
-                (_laser, 4),     
+                (_laser, 2), 
                 (_fireControl, 2),
+                (DefaultMissileTube(game, faction),1),
+                (ShipSmallOrdnanceStore(game, faction), 2),
+                (ShipSmallCargo(game,faction), 1),
                 (_fuelTank_500, 2),
                 (_warpDrive, 4),
                 (_battery, 3),
@@ -420,6 +429,20 @@ namespace Pulsar4X.ECSLib
             var shipdesign = new ShipDesign(factionInfo, "Cargo Courier", components2, (plastic, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
+        }
+
+        public static OrdnanceDesign MissileDesign250(Game game, Entity faction)
+        {
+            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
+
+            List<(ComponentDesign, int)> components = new List<(ComponentDesign, int)>()
+            {
+                (DefaultFragPayload(game, faction), 1),
+                (DefaultMissileSensors(game, faction), 1),
+                (DefaultMissileSRB(game, faction), 1),
+            };
+            var design = new OrdnanceDesign(factionInfo, "Missile250", components);
+            return design;
         }
 
         public static ComponentDesign SpacePort(Entity faction)
@@ -546,11 +569,24 @@ namespace Pulsar4X.ECSLib
             ComponentTemplateSD srbSD = game.StaticData.ComponentTemplates[new Guid("9FDB2A15-4413-40A9-9229-19D05B3765FE")];
             srbDesigner = new ComponentDesigner(srbSD, faction.GetDataBlob<FactionTechDB>());
             srbDesigner.ComponentDesignAttributes["Engine Mass"].SetValueFromInput(1);
-            srbDesigner.ComponentDesignAttributes["Fuel Mass"].SetValueFromInput(199);
-            srbDesigner.Name = "SRB 200";
+            srbDesigner.ComponentDesignAttributes["Fuel Mass"].SetValueFromInput(234);
+            srbDesigner.Name = "SRB 235";
             _missileSRB = srbDesigner.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileSRB.TechID);
             return _missileSRB;
+        }
+        
+        public static ComponentDesign DefaultMissileTube(Game game, Entity faction)
+        {
+            if (_missileTube != null)
+                return _missileTube;
+            ComponentDesigner tubeDesigner;
+            ComponentTemplateSD tubeSD = game.StaticData.ComponentTemplates[new Guid("978DFA9E-411E-4B4F-A618-85D642927503")];
+            tubeDesigner = new ComponentDesigner(tubeSD, faction.GetDataBlob<FactionTechDB>());
+            tubeDesigner.Name = "MissileTube 500";
+            _missileTube = tubeDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileTube.TechID);
+            return _missileTube;
         }
 
         public static ComponentDesign DefaultBFC(Game game, Entity faction)
@@ -639,6 +675,21 @@ namespace Pulsar4X.ECSLib
             _cargoCompartment = cargoComponent.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_cargoCompartment.TechID);
             return _cargoCompartment;
+        }
+        public static ComponentDesign ShipSmallOrdnanceStore(Game game, Entity faction)
+        {
+            if (_ordnanceStore != null)
+                return _ordnanceStore;
+            ComponentDesigner cargoComponent;
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{11564F56-D52C-4A16-8434-C9BB50D8EB95}")];
+            cargoComponent = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
+            cargoComponent.ComponentDesignAttributes["Rack Size"].SetValueFromInput(2627); //5t component
+            cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(100);
+            cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
+            cargoComponent.Name = "OrdinanceRack-2.5t";
+            _ordnanceStore = cargoComponent.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_ordnanceStore.TechID);
+            return _ordnanceStore;
         }
 
         public static ComponentDesign ShipPassiveSensor(Game game, Entity faction)

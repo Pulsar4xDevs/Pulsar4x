@@ -192,7 +192,7 @@ namespace Pulsar4X.SDL2UI
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
 
-                    //TODO: implement this(moving a ship entity[_state.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
+                    //TODO: implement this(moving a ship entity[_uiState.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
                     if (T == typeof(JumpThroughJumpPointBlankMenuHelper))
                     {
 
