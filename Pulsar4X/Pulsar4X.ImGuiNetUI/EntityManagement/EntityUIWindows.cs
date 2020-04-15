@@ -2,6 +2,7 @@
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.SDL2UI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 
@@ -99,7 +100,7 @@ namespace Pulsar4X.SDL2UI
             else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
                 { return true; }
             //if entity can fire?
-            else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && T == typeof(WeaponTargetingControl))
+            else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && T == typeof(FireControl))
                 { return true; }
             //if entity can be renamed?
             else if (T == typeof(RenameWindow))
@@ -154,10 +155,10 @@ namespace Pulsar4X.SDL2UI
                     _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
                 }
                 //Menu is ficrecontrol menu
-                else if (T == typeof(WeaponTargetingControl))
+                else if (T == typeof(FireControl))
                 {
-                    var instance = WeaponTargetingControl.GetInstance(_entityState);
-                    instance.SetOrderEntity(_entityState);
+                    var instance = FireControl.GetInstance(_entityState);
+                    //instance.SetOrderEntity(_entityState);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
@@ -207,7 +208,7 @@ namespace Pulsar4X.SDL2UI
 
             if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(ChangeCurrentOrbitWindow)) returnval = ChangeCurrentOrbitWindow.GetInstance(_entityState).GetActive();
-            else if (T == typeof(WeaponTargetingControl)) returnval = WeaponTargetingControl.GetInstance(_entityState).GetActive();
+            else if (T == typeof(FireControl)) returnval = FireControl.GetInstance(_entityState).GetActive();
             else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(CargoTransfer)) returnval = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState).GetActive();
             else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState).GetActive();

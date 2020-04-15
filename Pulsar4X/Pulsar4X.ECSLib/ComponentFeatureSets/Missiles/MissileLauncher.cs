@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 {
     public class MissileLauncherAtb : IComponentDesignAttribute
     {
-        public int LauncherSize;
+        public double LauncherSize;
         public double ReloadRate;
         public double LaunchForce;
 
@@ -20,20 +20,29 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         }
         public MissileLauncherAtb(double maxMissileWeight, double reloadRate, double launchForce)
         {
+            LauncherSize = maxMissileWeight;
+            ReloadRate = reloadRate;
+            LaunchForce = launchForce;
         }
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            throw new System.NotImplementedException();
+            if (!componentInstance.HasAblity<WeaponState>())
+                componentInstance.SetAbilityState<WeaponState>(new WeaponState());
+            /*
+            if(!parentEntity.HasDataBlob<MissileLaunchersAbilityDB>())
+            {
+                var mla = new MissileLaunchersAbilityDB();
+                parentEntity.SetDataBlob(mla);
+            }*/
         }
     }
 
     public class MissileLaunchersAbilityDB : BaseDataBlob
     {
-        private MissileLauncherAtb[] Launchers;
-        private ShipDesign[] LoadedMissiles;
-        private Entity[] Targets;
-        
-        
+        public MissileLauncherAtb[] Launchers;
+        public ShipDesign[] LoadedMissiles;
+
+
         public override object Clone()
         {
             throw new System.NotImplementedException();

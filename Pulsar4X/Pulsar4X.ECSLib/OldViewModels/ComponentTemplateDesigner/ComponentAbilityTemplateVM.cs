@@ -289,7 +289,6 @@ namespace Pulsar4X.ECSLib
                 typeof(JumpPointStabilizationAtbDB).ToString(),
                 typeof(LifeSupportAtbDB).ToString(),
                 typeof(MineResourcesAtbDB).ToString(),
-                typeof(MissileLauncherAtbDB).ToString(),
                 typeof(MissileStorageAtbDB).ToString(),
                 typeof(MSPCapacityAtbDB).ToString(),
                 typeof(PassiveEMSensorAtbDB).ToString(),

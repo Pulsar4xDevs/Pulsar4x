@@ -2,6 +2,7 @@
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
@@ -50,7 +51,7 @@ namespace Pulsar4X.SDL2UI
             ContextButton(typeof(SelectPrimaryBlankMenuHelper));
             ContextButton(typeof(PinCameraBlankMenuHelper));
             ContextButton(typeof(RenameWindow));
-            ContextButton(typeof(WeaponTargetingControl));
+            ContextButton(typeof(FireControl));
             ContextButton(typeof(CargoTransfer));
             ContextButton(typeof(ColonyPanel));
             ContextButton(typeof(PlanetaryWindow));

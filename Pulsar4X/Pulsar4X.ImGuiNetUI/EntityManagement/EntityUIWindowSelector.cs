@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 namespace Pulsar4X.SDL2UI
@@ -96,7 +97,7 @@ namespace Pulsar4X.SDL2UI
                     NewCondtionalButton(typeof(PowerGen), "Power", "Shows power stats");
                     NewCondtionalButton(typeof(CargoTransfer), "Cargo", "Shows cargo");
                     NewCondtionalButton(typeof(ColonyPanel), "Industry", "Opens Industry menu");
-                    NewCondtionalButton(typeof(WeaponTargetingControl), "Firecon", "Opens firecontrol menu");
+                    NewCondtionalButton(typeof(FireControl), "Firecon", "Opens firecontrol menu");
                    
                     //Displays all buttons in a list
                     void PrintButtonList (ref List<ToolbuttonData> PrintButtons) {
