@@ -280,6 +280,8 @@ namespace Pulsar4X.ECSLib
                 _systemLocalDateTime = value;
                 if (StaticRefLib.SyncContext != null)
                     StaticRefLib.SyncContext.Post(InvokeDateChange, value);//marshal to the main (UI) thread, so the event is invoked on that thread.
+                //NOTE: the above marshaling does not apear to work correctly, it's possible for it to work, the context needs to be in an await state or something. 
+                //do not rely on the above being run on the main thread! (maybe we should remove the marshaling?)
                 else //if context is null, we're probibly running tests or headless.
                     InvokeDateChange(value); //in this case we're not going to marshal this. (event will fire on *THIS* thread)   
             }

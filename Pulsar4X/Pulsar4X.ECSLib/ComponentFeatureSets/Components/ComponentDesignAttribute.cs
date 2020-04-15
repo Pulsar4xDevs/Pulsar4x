@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
             }
         }
         
-        public Type DataBlobType;
+        public Type AttributeType;
 
         public Type EnumType;
         public int ListSelection;
@@ -82,7 +82,9 @@ namespace Pulsar4X.ECSLib
             }
             if (_templateSD.AttributeType != null)
             {
-                DataBlobType = Type.GetType(_templateSD.AttributeType);        
+                AttributeType = Type.GetType(_templateSD.AttributeType);   
+                if(AttributeType == null)
+                    throw new Exception("Attribute Type Error. Attribute type not found: " + _templateSD.AttributeType + ". Try checking the namespace.");
             }
 
             if (GuiHint == GuiHint.GuiEnumSelectionList)
@@ -188,7 +190,7 @@ namespace Pulsar4X.ECSLib
             StepValue = StepValueFormula.DResult;
         }
 
-        internal object[] DataBlobArgs { get; set; }
+        internal object[] AtbConstrArgs { get; set; }
     }
 
     public class ChainedExpression
@@ -708,12 +710,12 @@ namespace Pulsar4X.ECSLib
                     break;
 
                 //This sets the DatablobArgs. it's up to the user to ensure the right number of args for a specific datablob
-                //The datablob will be the one defined in designAbility.DataBlobType
+                //The datablob will be the one defined in designAbility.AttributeType
                 //TODO document blobs and what args they take!!
-                case "DataBlobArgs":
-                    if (_designAttribute.DataBlobType == null)
-                        throw new Exception("This Ability does not have a DataBlob defined! define a datablob for this ability!");
-                    //_designAbility.DataBlobArgs = new List<double>();
+                case "AtbConstrArgs":
+                    if (_designAttribute.AttributeType == null)
+                        throw new Exception( _designAttribute.Name +" does not have a type defined! define an AttributeType for this Attribute!");
+                    //_designAbility.AtbConstrArgs = new List<double>();
                     List<object> argList = new List<object>();
                     foreach (var argParam in args.Parameters)
                     {
@@ -723,7 +725,7 @@ namespace Pulsar4X.ECSLib
                         argList.Add(argExpression.Result);
                     }
 
-                    _designAttribute.DataBlobArgs = argList.ToArray();
+                    _designAttribute.AtbConstrArgs = argList.ToArray();
                     args.Result = argList;
                     break;
             }

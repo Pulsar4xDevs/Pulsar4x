@@ -116,7 +116,7 @@
               "DescriptionFormula": "''",
               "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 0, true, false)",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass0'), Ability('TNT Equivalent'), Ability('Frag Mass'), Ability('Frag Count'), Ability('Frag Cone Angle'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Trigger Type'), Ability('Mass0'), Ability('TNT Equivalent'), Ability('Frag Mass'), Ability('Frag Count'), Ability('Frag Cone Angle'))",
               "AttributeType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.OrdnanceExplosivePayload"
             },
             {
@@ -178,7 +178,7 @@
               "DescriptionFormula": "''",
               "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 1, true, false)",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass1'), Ability('TNT Equivalent'), Ability('Liner Radius'), Ability('Liner Cone Height'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Trigger Type'), Ability('Mass1'), Ability('TNT Equivalent'), Ability('Liner Radius'), Ability('Liner Cone Height'))",
               "AttributeType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.OrdnanceShapedPayload"
             },
             {
@@ -217,7 +217,7 @@
               "Name": "SubmDataBlob",
               "GuiIsEnabledFormula" : "if(Ability('Payload Type') = 2, true, false)",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Trigger Type'), Ability('Mass2'), Ability('Submunition Type'), Ability('Submunition Count'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Trigger Type'), Ability('Mass2'), Ability('Submunition Type'), Ability('Submunition Count'))",
               "AttributeType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.OrdnanceSubmunitionsPayload"
             }
           ]
@@ -354,7 +354,7 @@
               "Name": "DatablobArguments",
               "DescriptionFormula": "'(int GuidanceTypeEnumValue, int TriggerType)'",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Guidance Type'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Guidance Type'))",
               "AttributeType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.ElectronicsSuite"
             },
             {
@@ -362,7 +362,7 @@
               "GuiIsEnabledFormula" : "if(Ability('Guidance Type') = 2 || Ability('Guidance Type') = 3, true, false)",
               "DescriptionFormula": "'(double peakWaveLength, double bandwidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)'",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Bandwidth'), Ability('Sensitivity at Ideal Wavelength'), Ability('Sensitivity at Worst Wavelength'), Ability('Resolution'), Ability('Scan Time'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Bandwidth'), Ability('Sensitivity at Ideal Wavelength'), Ability('Sensitivity at Worst Wavelength'), Ability('Resolution'), Ability('Scan Time'))",
               "AttributeType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
             }
           ]
@@ -445,7 +445,7 @@
               "Name": "DataBlob",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
               "AttributeType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
             },
             {
@@ -464,14 +464,14 @@
             {
               "Name": "DBargs",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Propellent Amount'), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), 0, 0)",
+              "AttributeFormula": "AtbConstrArgs(Ability('Propellent Amount'), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), 0, 0)",
               "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             },
             {
               "Name": "Sensor Signature",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Thrust'), 811 , 400, 1400)",
+              "AttributeFormula": "AtbConstrArgs(Ability('Thrust'), 811 , 400, 1400)",
               "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]
@@ -566,7 +566,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AttributeFormula": "DataBlobArgs(Ability(4), GuidString('055E2026-20A4-4CFA-A8CA-A01915A48B5E'), Ability(2), Ability(3))",
+              "AttributeFormula": "AtbConstrArgs(Ability(4), GuidString('055E2026-20A4-4CFA-A8CA-A01915A48B5E'), Ability(2), Ability(3))",
               "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]

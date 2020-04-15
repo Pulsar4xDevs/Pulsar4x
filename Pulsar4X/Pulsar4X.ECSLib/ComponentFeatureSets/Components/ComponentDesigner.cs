@@ -270,15 +270,15 @@ namespace Pulsar4X.ECSLib
             EvalAll();
             foreach (var designAttribute in ComponentDesignAttributes.Values)
             {
-                if (designAttribute.DataBlobType != null && designAttribute.IsEnabled)
+                if (designAttribute.AttributeType != null && designAttribute.IsEnabled)
                 {
-                    if (designAttribute.DataBlobArgs == null)
+                    if (designAttribute.AtbConstrArgs == null)
                         designAttribute.SetValue();  //force recalc.
                                  
-                    object[] constructorArgs = designAttribute.DataBlobArgs;
+                    object[] constructorArgs = designAttribute.AtbConstrArgs;
                     try
                     {
-                        dynamic attrbute = (IComponentDesignAttribute)Activator.CreateInstance(designAttribute.DataBlobType, constructorArgs);
+                        dynamic attrbute = (IComponentDesignAttribute)Activator.CreateInstance(designAttribute.AttributeType, constructorArgs);
                         _design.AttributesByType[attrbute.GetType()] = attrbute;
                     }
                     catch (MissingMethodException e)
@@ -292,7 +292,7 @@ namespace Pulsar4X.ECSLib
                             i++;
                         }
                         
-                        string exstr = "The Attribute: " + designAttribute.DataBlobType + " was found, but the arguments did not match any constructors.\nThe given arguments are:\n"
+                        string exstr = "The Attribute: " + designAttribute.AttributeType + " was found, but the arguments did not match any constructors.\nThe given arguments are:\n"
                                        + argTypes 
                                        + "The full exception is as follows:\n" + e;
                         throw new Exception(exstr);

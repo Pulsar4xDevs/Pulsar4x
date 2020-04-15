@@ -62,7 +62,7 @@
               "Name": "DataBlob",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
               "AttributeType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
             },
 
@@ -71,7 +71,7 @@
               "Units": "unknown",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Thrust'), 0 , 0, 0)",
+              "AttributeFormula": "AtbConstrArgs(Ability('Thrust'), 0 , 0, 0)",
               "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]
@@ -153,14 +153,14 @@
             {
               "Name": "db",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('EnginePower'), GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Bubble Creation Energy Cost'), Ability('Bubble Sustain Energy Cost'), -Ability('Bubble Collapse Energy Returned'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('EnginePower'), GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Bubble Creation Energy Cost'), Ability('Bubble Sustain Energy Cost'), -Ability('Bubble Collapse Energy Returned'))",
               "AttributeType": "Pulsar4X.ECSLib.WarpDriveAtb"
             },
             {
               "Name": "Sensor Signature",
               "Units": "unknown",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('EnginePower'), 0 , 0, 0)",
+              "AttributeFormula": "AtbConstrArgs(Ability('EnginePower'), 0 , 0, 0)",
               "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]

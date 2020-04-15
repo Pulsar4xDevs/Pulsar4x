@@ -222,7 +222,7 @@
             {
               "Name": "dbargs",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Range'), Ability('Damage'), Ability('ReloadRate'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Range'), Ability('Damage'), Ability('ReloadRate'))",
               "AttributeType": "Pulsar4X.ECSLib.SimpleBeamWeaponAtbDB"
             }
           ]
@@ -305,8 +305,8 @@
             {
               "Name": "dbargs",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Calibre'), Ability('Rail Length'), Ability('Power Use'), Ability('Power Efficiency'), Ability('ROF'))",
-              "AttributeType": "Pulsar4X.ECSLib.RailGunAtb"
+              "AttributeFormula": "AtbConstrArgs(Ability('Calibre'), Ability('Rail Length'), Ability('Power Use'), Ability('Power Efficiency'), Ability('ROF'))",
+              "AttributeType": "Pulsar4X.ECSLib.ComponentFeatureSets.RailGun.RailGunAtb"
             }
           ]
         }
@@ -381,7 +381,7 @@
               "Units": "MJ",
               "DescriptionFormula": "'In MegaJules.'",
               "GuiHint": "None",
-              "AttributeFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * Ability('Calibre') * Ability('Length')"
+              "AttributeFormula": "TechData('7c23fd4d-6577-4fbe-b15e-77345558c804') * Ability('Max Calibre') * Ability('Max Length')"
             },
             {
               "Name": "Power Efficency",
@@ -404,8 +404,8 @@
             {
               "Name": "dbargs",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Max Mass'), Ability('ROF'), Ability('Launch Force'))",
-              "AttributeType": "Pulsar4X.ECSLib.MissileLauncherAtb"
+              "AttributeFormula": "AtbConstrArgs(Ability('Max Mass'), Ability('ROF'), Ability('Launch Force'))",
+              "AttributeType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.MissileLauncherAtb"
             }
             
           ]

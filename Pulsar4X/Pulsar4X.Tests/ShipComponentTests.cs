@@ -216,7 +216,7 @@ namespace Pulsar4X.Tests
             enginePowerDBArgs4.DescriptionFormula = "Move Power for ship";
             enginePowerDBArgs4.GuiHint = GuiHint.None;
             enginePowerDBArgs4.AttributeType = typeof(WarpDriveAtb).ToString();
-            enginePowerDBArgs4.AttributeFormula = "DataBlobArgs(Ability(3))";
+            enginePowerDBArgs4.AttributeFormula = "AtbConstrArgs(Ability(3))";
             component.ComponentAtbSDs.Add(enginePowerDBArgs4);
 
             ComponentTemplateAttributeSD fuelConsumptionTechMod5 = new ComponentTemplateAttributeSD();
@@ -238,7 +238,7 @@ namespace Pulsar4X.Tests
             fuelConsumptionArgsDB7.DescriptionFormula = "";
             fuelConsumptionArgsDB7.GuiHint = GuiHint.None;
             fuelConsumptionArgsDB7.AttributeType = typeof(ResourceConsumptionAtbDB).ToString();
-            fuelConsumptionArgsDB7.AttributeFormula = "DataBlobArgs(GuidString('33e6ac88-0235-4917-a7ff-35c8886aad3a'), Ability(6), 1)";
+            fuelConsumptionArgsDB7.AttributeFormula = "AtbConstrArgs(GuidString('33e6ac88-0235-4917-a7ff-35c8886aad3a'), Ability(6), 1)";
             component.ComponentAtbSDs.Add(fuelConsumptionArgsDB7);
 
             ComponentTemplateAttributeSD thermalReduction8 = new ComponentTemplateAttributeSD();
@@ -263,7 +263,7 @@ namespace Pulsar4X.Tests
             sensorSigDBArgs10.DescriptionFormula = "";
             sensorSigDBArgs10.GuiHint = GuiHint.None;
             sensorSigDBArgs10.AttributeType = typeof(SensorSignatureAtbDB).ToString();
-            sensorSigDBArgs10.AttributeFormula = "DataBlobArgs(Ability(9),0)";
+            sensorSigDBArgs10.AttributeFormula = "AtbConstrArgs(Ability(9),0)";
             component.ComponentAtbSDs.Add(sensorSigDBArgs10);
             
             return component;
@@ -318,7 +318,7 @@ namespace Pulsar4X.Tests
 
             };
             mineAttribute.AttributeType = typeof(MineResourcesAtbDB).ToString();
-            mineAttribute.AttributeFormula = "DataBlobArgs([GuidDict])";
+            mineAttribute.AttributeFormula = "AtbConstrArgs([GuidDict])";
             component.ComponentAtbSDs.Add(mineAttribute);
             
             return component;
@@ -359,7 +359,7 @@ namespace Pulsar4X.Tests
             researchPointsAttribute.DescriptionFormula = "";
             researchPointsAttribute.GuiHint = GuiHint.None;
             researchPointsAttribute.AttributeType = typeof(ResearchPointsAtbDB).ToString();
-            researchPointsAttribute.AttributeFormula = "DataBlobArgs(20)";
+            researchPointsAttribute.AttributeFormula = "AtbConstrArgs(20)";
             component.ComponentAtbSDs.Add(researchPointsAttribute);
 
             return component;
@@ -412,7 +412,7 @@ namespace Pulsar4X.Tests
                 { new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB"),"0"}
             };
             refineJobsAttribute.AttributeType = typeof(IndustryAtb).ToString();
-            refineJobsAttribute.AttributeFormula = "DataBlobArgs([GuidDict], Ability(0))";
+            refineJobsAttribute.AttributeFormula = "AtbConstrArgs([GuidDict], Ability(0))";
             component.ComponentAtbSDs.Add(refineJobsAttribute);
             return component;
         }
@@ -496,7 +496,7 @@ namespace Pulsar4X.Tests
                 { "Ordnance", "Ability(4)" }
             };
             atbconstructor.AttributeType = typeof(IndustryAtb).ToString();
-            atbconstructor.AttributeFormula = "DataBlobArgs(EnumDict('Pulsar4X.ECSLib.IndustryTypeID'))";
+            atbconstructor.AttributeFormula = "AtbConstrArgs(EnumDict('Pulsar4X.ECSLib.IndustryTypeID'))";
             component.ComponentAtbSDs.Add(atbconstructor);
 
             return component;
@@ -556,7 +556,7 @@ namespace Pulsar4X.Tests
             generalCargoCapacityAttribute.DescriptionFormula = "";
             generalCargoCapacityAttribute.GuiHint = GuiHint.None;
             generalCargoCapacityAttribute.AttributeType = typeof(CargoStorageAtbDB).ToString();
-            generalCargoCapacityAttribute.AttributeFormula = "DataBlobArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(1), Ability(2))";
+            generalCargoCapacityAttribute.AttributeFormula = "AtbConstrArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(1), Ability(2))";
             component.ComponentAtbSDs.Add(generalCargoCapacityAttribute);
 
             return component;

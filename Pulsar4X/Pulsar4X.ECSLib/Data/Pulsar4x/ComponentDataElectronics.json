@@ -114,7 +114,7 @@
               "Name": "DatablobArguments",
               "DescriptionFormula": "'(double peakWaveLength, double bandwidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)'",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Bandwidth'), Ability('Sensitivity at Ideal Wavelength'), Ability('Sensitivity at Worst Wavelength'), Ability('Resolution'), Ability('Scan Time'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Bandwidth'), Ability('Sensitivity at Ideal Wavelength'), Ability('Sensitivity at Worst Wavelength'), Ability('Resolution'), Ability('Scan Time'))",
               "AttributeType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
             }
           ]
@@ -210,7 +210,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AttributeFormula": "DataBlobArgs(Ability(0), Ability(1))",
+              "AttributeFormula": "AtbConstrArgs(Ability(0), Ability(1))",
               "AttributeType": "Pulsar4X.ECSLib.BeamFireControlAtbDB"
             }
           ]

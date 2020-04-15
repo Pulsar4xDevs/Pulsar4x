@@ -111,7 +111,7 @@
                   }
                 ]
               },
-              "AttributeFormula": "DataBlobArgs([GuidDict])",
+              "AttributeFormula": "AtbConstrArgs([GuidDict])",
               "AttributeType": "Pulsar4X.ECSLib.MineResourcesAtbDB"
             }
           ]
@@ -150,7 +150,7 @@
               "Name": "RP Amount Per EconTick",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(20)",
+              "AttributeFormula": "AtbConstrArgs(20)",
               "AttributeType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
             }
           ]
@@ -213,7 +213,7 @@
                   }
                 ]
               },
-              "AttributeFormula": "DataBlobArgs([GuidDict])",
+              "AttributeFormula": "AtbConstrArgs([GuidDict])",
               "AttributeType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
@@ -296,7 +296,7 @@
                   }
                 ]
               },
-              "AttributeFormula": "DataBlobArgs([GuidDict])",
+              "AttributeFormula": "AtbConstrArgs([GuidDict])",
               "AttributeType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
@@ -365,7 +365,7 @@
                   }
                 ]
               },
-              "AttributeFormula": "DataBlobArgs([GuidDict], Ability('Slip Size'))",
+              "AttributeFormula": "AtbConstrArgs([GuidDict], Ability('Slip Size'))",
               "AttributeType": "Pulsar4X.ECSLib.Industry.IndustryAtb"
             }
           ]
@@ -411,7 +411,7 @@
             {
               "Name": "DBargs",
               "GuiHint": "None",
-              "AttributeFormula": "DataBlobArgs(Ability('Storage Amount'), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), 0 , 0)",
+              "AttributeFormula": "AtbConstrArgs(Ability('Storage Amount'), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), 0 , 0)",
               "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]
@@ -506,7 +506,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AttributeFormula": "DataBlobArgs(Ability(4), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(2), Ability(3))",
+              "AttributeFormula": "AtbConstrArgs(Ability(4), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(2), Ability(3))",
               "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]
@@ -576,7 +576,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AttributeFormula": "DataBlobArgs(Ability(2), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), 0, 0)",
+              "AttributeFormula": "AtbConstrArgs(Ability(2), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), 0, 0)",
               "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             }
           ]
