@@ -33,6 +33,7 @@ namespace Pulsar4X.ECSLib
             if (!factionInfoDB.SensorContacts.ContainsKey(actualEntity.Guid))
                 factionInfoDB.SensorContacts.Add(actualEntity.Guid, this);
             actualEntity.ChangeEvent += ActualEntity_ChangeEvent;
+            Name = actualEntity.GetDataBlob<NameDB>().GetName(factionEntity);
         }
 
         void ActualEntity_ChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
