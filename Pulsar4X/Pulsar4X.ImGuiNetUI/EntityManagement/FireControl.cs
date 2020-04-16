@@ -17,8 +17,12 @@ namespace Pulsar4X.ImGuiNetUI
         //ComponentDesign[] _allWeaponDesigns = new ComponentDesign[0];
         //ComponentInstance[] _allWeaponInstances = new ComponentInstance[0];
         ComponentInstance[] _missileLaunchers = new ComponentInstance[0];
+        WeaponState[] _mlstates = new WeaponState[0];
         ComponentInstance[] _railGuns = new ComponentInstance[0];
+        WeaponState[] _rgstates = new WeaponState[0];
+        WeaponState[] _beamstates = new WeaponState[0];
         ComponentInstance[] _beamWpns = new ComponentInstance[0];
+        
         
         SensorContact[] _allSensorContacts = new SensorContact[0];
         string[] _ownEntityNames = new string[0];
@@ -105,15 +109,31 @@ namespace Pulsar4X.ImGuiNetUI
                 if (instancesDB.TryGetComponentsByAttribute<MissileLauncherAtb>(out var mlinstances))
                 {
                     _missileLaunchers = mlinstances.ToArray();
+                    _mlstates = new WeaponState[mlinstances.Count];
+                    for (int i = 0; i < mlinstances.Count; i++)
+                    {
+                        _mlstates[i] = mlinstances[i].GetAbilityState<WeaponState>();
+                    }
+                    
                 }
                 if (instancesDB.TryGetComponentsByAttribute<RailGunAtb>(out var railGuns))
                 {
                     _railGuns = railGuns.ToArray();
+                    _rgstates = new WeaponState[railGuns.Count];
+                    for (int i = 0; i < railGuns.Count; i++)
+                    {
+                        _rgstates[i] = railGuns[i].GetAbilityState<WeaponState>();
+                    }
                 }
 
                 if (instancesDB.TryGetComponentsByAttribute<SimpleBeamWeaponAtbDB>(out var beams))
                 {
                     _beamWpns = beams.ToArray();
+                    _beamstates = new WeaponState[beams.Count];
+                    for (int i = 0; i < beams.Count; i++)
+                    {
+                        _beamstates[i] = beams[i].GetAbilityState<WeaponState>();
+                    }
                 }
             }
             
@@ -218,7 +238,15 @@ namespace Pulsar4X.ImGuiNetUI
                 BorderGroup.BeginBorder("Missile Launchers:");
                 for (int i = 0; i < _missileLaunchers.Length; i++)
                 {
-                    ImGui.Text(_missileLaunchers[i].Name); 
+                    ImGui.Text(_missileLaunchers[i].Name);
+                    ImGui.Indent();
+                    for (int j = 0; j < _mlstates[i].WeaponStats.Length; j++)
+                    {
+                        var stat = _mlstates[i].WeaponStats[j];
+                        string str = stat.name + Stringify.Value(stat.value, stat.valueType);
+                        ImGui.Text(str);
+                    }
+                    ImGui.Unindent();
                     
                 }
                 BorderGroup.EndBoarder();
@@ -227,6 +255,14 @@ namespace Pulsar4X.ImGuiNetUI
                 for (int i = 0; i < _railGuns.Length; i++)
                 {
                     ImGui.Text(_railGuns[i].Name); 
+                    ImGui.Indent();
+                    for (int j = 0; j < _rgstates[i].WeaponStats.Length; j++)
+                    {
+                        var stat = _rgstates[i].WeaponStats[j];
+                        string str = stat.name + Stringify.Value(stat.value, stat.valueType);
+                        ImGui.Text(str);
+                    }
+                    ImGui.Unindent();
                     
                 }
                 BorderGroup.EndBoarder();
@@ -235,6 +271,14 @@ namespace Pulsar4X.ImGuiNetUI
                 for (int i = 0; i < _beamWpns.Length; i++)
                 {
                     ImGui.Text(_beamWpns[i].Name); 
+                    ImGui.Indent();
+                    for (int j = 0; j < _beamstates[i].WeaponStats.Length; j++)
+                    {
+                        var stat = _beamstates[i].WeaponStats[j];
+                        string str = stat.name + Stringify.Value(stat.value, stat.valueType);
+                        ImGui.Text(str);
+                    }
+                    ImGui.Unindent();
                     
                 }
                 BorderGroup.EndBoarder();

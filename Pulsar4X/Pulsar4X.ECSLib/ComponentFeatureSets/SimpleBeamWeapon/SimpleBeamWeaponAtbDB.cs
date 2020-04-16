@@ -47,7 +47,15 @@ namespace Pulsar4X.ECSLib
             }
            
             if (!componentInstance.HasAblity<WeaponState>())
-                componentInstance.SetAbilityState<WeaponState>(new WeaponState());
+            {
+                var wpnState = new WeaponState();
+                wpnState.WeaponType = "Beam";
+                wpnState.WeaponStats = new (string name, double value, ValueTypeStruct valueType)[3];
+                wpnState.WeaponStats[0] = ("Max Range:", MaxRange, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.BaseUnit));
+                wpnState.WeaponStats[1] = ("Damage:", DamageAmount, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Power, ValueTypeStruct.ValueSizes.BaseUnit));
+                wpnState.WeaponStats[2] = ("Rate Of Fire:", ReloadRate, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Number, ValueTypeStruct.ValueSizes.BaseUnit));
+                componentInstance.SetAbilityState<WeaponState>(wpnState);
+            }
             
 
         }

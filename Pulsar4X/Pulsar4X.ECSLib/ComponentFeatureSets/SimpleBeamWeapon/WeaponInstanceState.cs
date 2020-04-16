@@ -10,6 +10,10 @@ namespace Pulsar4X.ECSLib
         public DateTime CoolDown { get; internal set; }
         [JsonProperty]
         public bool ReadyToFire { get; internal set; }
+
+        public string WeaponType = "";
+        public (string name, double value, ValueTypeStruct valueType)[] WeaponStats;
+        
         [JsonProperty]
         private ComponentInstance _fireControl;
         public ComponentInstance FireControl

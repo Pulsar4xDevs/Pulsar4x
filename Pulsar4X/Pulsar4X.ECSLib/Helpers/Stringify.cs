@@ -2,9 +2,128 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
+    public struct ValueTypeStruct
+    {
+        public enum ValueTypes
+        {
+            Power,
+            Distance,
+            Volume, 
+            Mass,
+            Velocity,
+            Force,
+            Number,
+        }
+
+        public enum ValueSizes
+        {
+            Pico = -12,
+            Nano = -9,
+            Micro = -6,
+            Milli = - 3,
+            Centi = -2,
+            Deci = -1,
+            BaseUnit = 0,
+            Deca = 1,
+            Hecto = 2,
+            Kilo = 3,
+            Mega = 6,
+            Giga = 9,
+            Tera = 12,
+            
+        }
+
+        public ValueTypes ValueType;
+        public ValueSizes ValueSize;
+
+        public ValueTypeStruct(ValueTypes type, ValueSizes size)
+        {
+            ValueType = type;
+            ValueSize = size;
+        }
+
+    }
     public static class Stringify
     {
+
+        public static string Value(double amount, ValueTypeStruct valueType, string format = "0.###")
+        {
+            string str = "";
+            switch (valueType.ValueType)
+            {
+                case ValueTypeStruct.ValueTypes.Distance:
+                    str = Distance(amount * Math.Pow(10, (double)valueType.ValueSize), format);
+                    break;
+                case ValueTypeStruct.ValueTypes.Power:
+                    str = Power(amount * Math.Pow(10 * 0.01, (double)valueType.ValueSize), format);
+                    break;
+
+                case ValueTypeStruct.ValueTypes.Mass:
+                    str = Mass(amount * Math.Pow(10 * 0.01, (double)valueType.ValueSize), format);
+                    break;
+
+                case ValueTypeStruct.ValueTypes.Velocity:
+                    str = Velocity(amount * Math.Pow(10, (double)valueType.ValueSize), format);
+                    break;
+
+                case ValueTypeStruct.ValueTypes.Volume:
+                    str = Volume(amount * Math.Pow(10, (double)valueType.ValueSize), format);
+                    break;
+
+                case ValueTypeStruct.ValueTypes.Force:
+                    str = Thrust(amount * Math.Pow(10, (double)valueType.ValueSize), format);
+                    break;
+                case ValueTypeStruct.ValueTypes.Number:
+                    str = Numer(amount * Math.Pow(10, (double)valueType.ValueSize), format);
+                    break;
+
+            }
+
+            return str;
+        }
+        public static string Numer(double number,  string format = "0.###")
+        {
+
+            string stringCount = "0";
+            double absCnt = Math.Abs(number);
+            double cnt;
+            if (absCnt > 1.0e12)
+            {
+                cnt = number * 1.0e-12;
+                stringCount = cnt.ToString(format) + " T";
+            }
+            else if (absCnt > 1.0e9)
+            {
+                cnt = number * 1.0e-9;
+                stringCount = cnt.ToString(format) + " G";
+            }
+            else if (absCnt > 1.0e6)
+            {
+                cnt = number * 1.0e-6;
+                stringCount = cnt.ToString(format) + " k";
+            }
+            /*
+            else if (absCnt > 1.0e3)
+            {
+                cnt = number * 1.0e-3;
+                stringCount = cnt.ToString(format) + " h";
+            }*/
+            else if (absCnt > 1.0e-3)
+            {
+                stringCount = number.ToString(format);
+            }
+
+            
+            else if (absCnt > 1.0e-6)
+            {
+                cnt = number * 1.0e-3;
+                stringCount = cnt.ToString(format) + " m";
+            }
+
+            return stringCount;
+        }
         
+
         public static string Power(double amountInKw, string format = "0.###")
         {
             string stringPower = "0 Kw";

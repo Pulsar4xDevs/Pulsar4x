@@ -27,7 +27,15 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!componentInstance.HasAblity<WeaponState>())
-                componentInstance.SetAbilityState<WeaponState>(new WeaponState());
+            {
+                var wpnState = new WeaponState();
+                wpnState.WeaponType = "Missile Launcher";
+                wpnState.WeaponStats = new (string name, double value, ValueTypeStruct valueType)[3];
+                wpnState.WeaponStats[0] = ("Max Size:", LauncherSize, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.Milli));
+                wpnState.WeaponStats[1] = ("Launch Force:", LaunchForce, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Force, ValueTypeStruct.ValueSizes.BaseUnit));
+                wpnState.WeaponStats[2] = ("Rate Of Fire:", ReloadRate, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Number, ValueTypeStruct.ValueSizes.BaseUnit));
+                componentInstance.SetAbilityState<WeaponState>(wpnState);
+            }
             /*
             if(!parentEntity.HasDataBlob<MissileLaunchersAbilityDB>())
             {
