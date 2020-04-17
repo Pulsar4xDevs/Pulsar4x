@@ -871,7 +871,7 @@ namespace Pulsar4X.ECSLib
         internal static string GetWorkingDirectory()
         {
             // get list of default sub-directories:
-            string workingDirectory = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
+            string workingDirectory = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().Location).LocalPath);
             if (workingDirectory == null)
             {
                 throw new DirectoryNotFoundException("SerializationManager could not find/access the executable's directory.");
