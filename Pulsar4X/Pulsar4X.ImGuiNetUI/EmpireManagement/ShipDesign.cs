@@ -417,7 +417,7 @@ namespace Pulsar4X.SDL2UI
             }
             ImGui.Columns(1);
             ImGui.NextColumn();
-            ImGui.Text(selectedComponent.Description);
+            ImGui.Text(selectedComponent.Description ?? "");
 
             //ImGui.Text();
 
