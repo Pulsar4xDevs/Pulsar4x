@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
@@ -147,7 +148,16 @@ namespace Pulsar4X.ImGuiNetUI
             
 
         }
-        
+
+        void SetWeapons(Guid[] wpnsAssignd)
+        {
+            SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, _allFireControl[_fcIndex].ID, wpnsAssignd);
+        }
+
+        void SetTarget(Guid targetID)
+        {
+            SetTargetFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, _allFireControl[_fcIndex].ID, targetID);
+        }
 
         internal override void Display()
         {
@@ -176,10 +186,22 @@ namespace Pulsar4X.ImGuiNetUI
                     _c2type = C2Type.SetTarget;
                 }
 
-                for (int j = 0; j < _fcState[i].AssignedWeapons.Count; j++)
+                var wns = new List<ComponentInstance>( _fcState[i].AssignedWeapons);
+                for (int j = 0; j < wns.Count; j++)
                 {
-                    var wpn = _fcState[i].AssignedWeapons[j];
-                    ImGui.Text(wpn.Name);
+                    var wpn = wns[j];
+                    if (ImGui.SmallButton(wpn.Name))
+                    {
+                        
+                        wns.RemoveAt(j);
+                        Guid[] wnids = new Guid[wns.Count];
+                        for (int k = 0; k < wns.Count; k++)
+                        {
+                            wnids[k] = wns[k].ID;
+                        }
+                        SetWeapons(wnids);
+                    }
+
                 }
 
                 if (ImGui.Button("Assign Weapons"))
@@ -215,7 +237,11 @@ namespace Pulsar4X.ImGuiNetUI
                 for (int i = 0; i < _allSensorContacts.Length; i++)
                 {
                     var contact = _allSensorContacts[i];
-                    ImGui.SmallButton("Set");
+                    if (ImGui.SmallButton("Set"))
+                    {
+                        SetTarget(contact.ActualEntityGuid);
+                    }
+
                     ImGui.SameLine();
                     ImGui.Text(contact.Name);
                 }
@@ -238,7 +264,17 @@ namespace Pulsar4X.ImGuiNetUI
                 BorderGroup.BeginBorder("Missile Launchers:");
                 for (int i = 0; i < _missileLaunchers.Length; i++)
                 {
-                    ImGui.Text(_missileLaunchers[i].Name);
+                    if( ImGui.SmallButton(_missileLaunchers[i].Name + "##" + i))
+                    {
+                        var wns = new List<ComponentInstance>( _fcState[i].AssignedWeapons);
+                        Guid[] wnids = new Guid[wns.Count + 1];
+                        for (int k = 0; k < wns.Count; k++)
+                        {
+                            wnids[k] = wns[k].ID;
+                        }
+                        wnids[wns.Count] = _missileLaunchers[i].ID;
+                        SetWeapons(wnids);
+                    }
                     ImGui.Indent();
                     for (int j = 0; j < _mlstates[i].WeaponStats.Length; j++)
                     {
@@ -254,7 +290,18 @@ namespace Pulsar4X.ImGuiNetUI
                 BorderGroup.BeginBorder("Rail Guns:");
                 for (int i = 0; i < _railGuns.Length; i++)
                 {
-                    ImGui.Text(_railGuns[i].Name); 
+                    
+                    if( ImGui.SmallButton(_railGuns[i].Name + "##" + i))
+                    {
+                        var wns = new List<ComponentInstance>( _fcState[i].AssignedWeapons);
+                        Guid[] wnids = new Guid[wns.Count + 1];
+                        for (int k = 0; k < wns.Count; k++)
+                        {
+                            wnids[k] = wns[k].ID;
+                        }
+                        wnids[wns.Count] = _railGuns[i].ID;
+                        SetWeapons(wnids);
+                    }
                     ImGui.Indent();
                     for (int j = 0; j < _rgstates[i].WeaponStats.Length; j++)
                     {
@@ -270,7 +317,17 @@ namespace Pulsar4X.ImGuiNetUI
                 BorderGroup.BeginBorder("Beam Weapons:");
                 for (int i = 0; i < _beamWpns.Length; i++)
                 {
-                    ImGui.Text(_beamWpns[i].Name); 
+                    if( ImGui.SmallButton(_beamWpns[i].Name + "##" + i))
+                    {
+                        var wns = new List<ComponentInstance>( _fcState[i].AssignedWeapons);
+                        Guid[] wnids = new Guid[wns.Count + 1];
+                        for (int k = 0; k < wns.Count; k++)
+                        {
+                            wnids[k] = wns[k].ID;
+                        }
+                        wnids[wns.Count] = _beamWpns[i].ID;
+                        SetWeapons(wnids);
+                    }
                     ImGui.Indent();
                     for (int j = 0; j < _beamstates[i].WeaponStats.Length; j++)
                     {

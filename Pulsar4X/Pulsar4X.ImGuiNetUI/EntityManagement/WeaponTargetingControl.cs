@@ -243,7 +243,7 @@ namespace Pulsar4X.SDL2UI
                                     
                                     _unAssignedWeapons.Add(wpn);
                                     _selectedFCAssignedWeapons.Remove(wpn);
-                                    SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderingEntity.Guid, _selectedFCGuid, _selectedFCAssignedWeapons);
+                                    
                                 }
                             }
                             ImGui.EndGroup();
@@ -258,7 +258,7 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     _selectedFCAssignedWeapons.Add(wpn);
                                     _unAssignedWeapons.Remove(wpn);
-                                    SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderingEntity.Guid, _selectedFCGuid, _selectedFCAssignedWeapons);
+                                    SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderingEntity.Guid, _selectedFCGuid, _selectedFCAssignedWeapons.ToArray());
                                 }
                             }
                             ImGui.EndGroup();
