@@ -16,6 +16,8 @@ namespace Pulsar4X.ECSLib
             var instances = entity.GetDataBlob<ComponentInstancesDB>();
             var fireControl = entity.GetDataBlob<FireControlAbilityDB>();
             
+            
+            
             if(instances.TryGetComponentsByAttribute<SimpleBeamWeaponAtbDB>(out var wpnList))
             {
                 foreach (var wpn in wpnList)
