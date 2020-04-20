@@ -4,7 +4,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 {
     public class MissileProcessor
     {
-        public static void LaunchMissile(Entity launchingEntity, Entity targetEntity, MissileLauncherAtb launcherAtb, OrdnanceDesign missileDesign)
+        public static void LaunchMissile(Entity launchingEntity, Entity targetEntity, double launchForce, OrdnanceDesign missileDesign)
         {
 
             var atDatetime = launchingEntity.Manager.StarSysDateTime;
@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             int numMis = (int)StorageSpaceProcessor.GetAmount(cargo, missileDesign);
             if (numMis < 1)
                 return;
-            double launchSpeed = launcherAtb.LaunchForce / missileDesign.Mass;
+            double launchSpeed = launchForce / missileDesign.Mass;
             
             //missileDesign.
 

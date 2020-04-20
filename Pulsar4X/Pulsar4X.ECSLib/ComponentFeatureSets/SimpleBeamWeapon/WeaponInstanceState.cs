@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 
 namespace Pulsar4X.ECSLib
@@ -13,6 +14,9 @@ namespace Pulsar4X.ECSLib
 
         public string WeaponType = "";
         public (string name, double value, ValueTypeStruct valueType)[] WeaponStats;
+
+        public OrdnanceDesign OrdnanceDesign = null;
+        public int InernalMagCurAmount = 0;
         
         [JsonProperty]
         private ComponentInstance _fireControl;

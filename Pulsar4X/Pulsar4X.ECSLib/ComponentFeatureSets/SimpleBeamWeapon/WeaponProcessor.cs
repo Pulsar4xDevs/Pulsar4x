@@ -6,9 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.ECSLib
 {
+    
     public class WeaponProcessor : IInstanceProcessor
     {
         internal override void ProcessEntity(Entity entity, DateTime atDate)
@@ -18,9 +20,9 @@ namespace Pulsar4X.ECSLib
             
             
             
-            if(instances.TryGetComponentsByAttribute<SimpleBeamWeaponAtbDB>(out var wpnList))
+            if(instances.TryGetComponentsWithStates<WeaponState>(out var wpnList))
             {
-                foreach (var wpn in wpnList)
+                foreach (ComponentInstance wpn in wpnList)
                 {
                     var wpnState = wpn.GetAbilityState<WeaponState>();
                     if (wpn.IsEnabled && wpnState.CoolDown <= atDate)
@@ -39,7 +41,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
-
+        
    
 
         public static void FireBeamWeapons(ComponentInstance beamWeapon, DateTime atDate)
@@ -53,7 +55,7 @@ namespace Pulsar4X.ECSLib
                 fireControl.IsEngaging = false;
                 return;
             }
-
+            
             //var myPos = beamWeapon.GetDataBlob<ComponentInstanceData>().ParentEntity.GetDataBlob<PositionDB>();
             var targetPos = fireControl.Target.GetDataBlob<PositionDB>();
 
@@ -87,6 +89,290 @@ namespace Pulsar4X.ECSLib
 
         }
     }
+    
+    
+
+    public class HotWpnProcessor : IHotloopProcessor
+    {
+        public void Init(Game game)
+        {
+            
+        }
+
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            var blobs = manager.GetAllDataBlobsOfType<GenericFiringWeaponsDB>();
+            foreach (GenericFiringWeaponsDB blob in blobs)
+            {
+                ProcessReloadWeapon(blob);
+            }
+            foreach (GenericFiringWeaponsDB blob in blobs)
+            {
+                ProcessWeaponFire(blob);
+            }
+        }
+
+        public static void ProcessReloadWeapon(GenericFiringWeaponsDB firingWeapons)
+        {
+            for (int i = 0; i < firingWeapons.WpnIDs.Length; i++)
+            {
+                if (firingWeapons.InternalMagQty[i] < firingWeapons.InternalMagSizes[i])
+                {
+                    firingWeapons.InternalMagQty[i] += Math.Min(firingWeapons.ReloadAmountsPerSec[i], firingWeapons.InternalMagSizes[i]);
+                }
+
+                if (firingWeapons.InternalMagQty[i] >= firingWeapons.AmountPerShot[i] * firingWeapons.MinShotsPerfire[i])
+                {
+                    int numshots = firingWeapons.InternalMagQty[i] / firingWeapons.AmountPerShot[i];
+                    int depleteinternalMag = numshots * firingWeapons.AmountPerShot[i];
+                    firingWeapons.InternalMagQty[i] -= depleteinternalMag;
+                    firingWeapons.ShotsFiredThisTick[i] = numshots;
+                }
+            }
+        }
+
+        public static void ProcessWeaponFire(GenericFiringWeaponsDB firingWeapons)
+        {
+            for (int i = 0; i < firingWeapons.WpnIDs.Length; i++)
+            {
+                int shotsFired = firingWeapons.ShotsFiredThisTick[i];
+                firingWeapons.ShotsFiredThisTick[i] = 0;
+                var lunchEnt = firingWeapons.OwningEntity;
+                var tgtEnt = firingWeapons.FireControlStates[i].Target;
+                var force = firingWeapons.LaunchForces[i];
+                for (int j = 0; j < shotsFired; j++)
+                {
+                    firingWeapons.OrdnanceDesigns[i].CreateOrdnance(lunchEnt, tgtEnt, force);
+                }
+                
+                
+
+            }
+        }
+
+        public TimeSpan RunFrequency { get; } = TimeSpan.FromSeconds(1);
+        public TimeSpan FirstRunOffset { get; } = TimeSpan.Zero;
+        public Type GetParameterType { get; } = typeof(GenericFiringWeaponsDB);
+    }
+
+    public class GenericFiringWeaponsDB : BaseDataBlob
+    {
+
+        
+        public Guid[] WpnIDs = new Guid[0];
+        public int[] InternalMagSizes = new int[0];
+        public int[] InternalMagQty = new int[0];
+        public int[] ReloadAmountsPerSec = new int[0];
+        public int[] AmountPerShot = new int[0];
+        public int[] MinShotsPerfire = new int[0];
+
+        public int[] ShotsFiredThisTick = new int[0];
+
+        //public GenericWeaponAtb.WpnTypes[] WpnTypes = new GenericWeaponAtb.WpnTypes[0];
+        public OrdnanceDesign[] OrdnanceDesigns = new OrdnanceDesign[0];
+        public double[] LaunchForces = new double[0];
+        public FireControlAbilityState[] FireControlStates = new FireControlAbilityState[0];
+        
+        /// <summary>
+        /// Adds to exsisting weapons.
+        /// not thread safe.
+        /// </summary>
+        /// <param name="wpns"></param>
+        internal void AddWeapons(List<ComponentInstance> wpns)
+        {
+            int count = WpnIDs.Length + wpns.Count;
+            
+
+            Guid[] wpnIDs = new Guid[count];
+            int[] internalMagSizes = new int[count];
+            int[] internalMagQty = new int[count];
+            int[] reloadAmountsPerSec = new int[count];
+            int[] amountPerShot = new int[count];
+            int[] minShotsPerfire = new int[count];            
+            //GenericWeaponAtb.WpnTypes[] wpnTypes = new GenericWeaponAtb.WpnTypes[count];
+            OrdnanceDesign[] ordDes = new OrdnanceDesign[count];
+            double[] launchForce =  new double[count];
+            FireControlAbilityState[] fcStates = new FireControlAbilityState[count];
+            ShotsFiredThisTick = new int[count];
+            
+            if(WpnIDs.Length > 0)
+            {
+                Buffer.BlockCopy(WpnIDs, 0, wpnIDs, 0, count);
+                Buffer.BlockCopy(InternalMagSizes, 0, internalMagSizes, 0, count);
+                Buffer.BlockCopy(InternalMagQty, 0, internalMagQty, 0, count);
+                Buffer.BlockCopy(ReloadAmountsPerSec, 0, reloadAmountsPerSec, 0, count);
+                Buffer.BlockCopy(AmountPerShot, 0, amountPerShot, 0, count);
+                Buffer.BlockCopy(MinShotsPerfire, 0, minShotsPerfire, 0, count);
+            }
+            int offset = WpnIDs.Length;
+            for (int i = 0; i < count; i++)
+            {
+                GenericWeaponAtb wpnAtb = wpns[i].Design.GetAttribute<GenericWeaponAtb>();
+                var wpnState = wpns[i].GetAbilityState<WeaponState>();
+                
+                wpnIDs[i + offset] = wpns[i].ID;
+                internalMagSizes[i + offset] = wpnAtb.InternalMagSize;
+                internalMagQty[i + offset] = wpnState.InernalMagCurAmount; 
+                reloadAmountsPerSec[i + offset] = wpnAtb.ReloadAmountPerSec;
+                amountPerShot[i + offset] = wpnAtb.AmountPerShot;
+                minShotsPerfire[i + offset] = wpnAtb.MinShotsPerfire;
+
+                //wpnTypes[i + offset] = wpnAtb.WpnType;
+                fcStates[i + offset] = wpnState.FireControl.GetAbilityState<FireControlAbilityState>();
+                ordDes[i + offset] = wpnState.OrdnanceDesign;
+                if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
+                    launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
+                else
+                {
+                    launchForce[i] = 1;
+                }
+                ShotsFiredThisTick[i] = 0;
+            }
+
+            WpnIDs = wpnIDs;
+            InternalMagSizes = internalMagSizes;
+            InternalMagQty = internalMagQty;
+            ReloadAmountsPerSec = reloadAmountsPerSec;
+            AmountPerShot = amountPerShot;
+            MinShotsPerfire = minShotsPerfire;
+            //WpnTypes = wpnTypes;
+            FireControlStates = fcStates;
+            OrdnanceDesigns = ordDes;
+            LaunchForces = launchForce;
+        }
+
+        internal void RemoveWeapons(List<ComponentInstance> wpns)
+        {
+            Guid[] wpnToRemoveIDs = new Guid[wpns.Count];
+            bool[] keepOrRemove = new bool[WpnIDs.Length];
+            //List<int> removeIndexs;
+            for (int i = 0; i < wpns.Count; i++)
+            {
+                wpnToRemoveIDs[i] = wpns[i].ID;
+            }
+
+            for (int i = 0; i < WpnIDs.Length; i++)
+            {
+                keepOrRemove[i] = wpnToRemoveIDs.Contains(WpnIDs[i]);
+            }
+
+            int count = 0;
+            for (int i = 0; i < keepOrRemove.Length; i++)
+            {
+                if (keepOrRemove[i]) ;
+                count++;
+            }
+            
+            Guid[] wpnIDs = new Guid[count];
+            int[] internalMagSizes = new int[count];
+            int[] internalMagQty = new int[count];
+            int[] reloadAmountsPerSec = new int[count];
+            int[] amountPerShot = new int[count];
+            int[] minShotsPerfire = new int[count];            
+            //GenericWeaponAtb.WpnTypes[] wpnTypes = new GenericWeaponAtb.WpnTypes[count];
+            OrdnanceDesign[] ordDes = new OrdnanceDesign[count];
+            double[] launchForce =  new double[count];
+            FireControlAbilityState[] fcStates = new FireControlAbilityState[count];
+
+            if (count > 0)
+            {
+                int i = 0;
+                for (int j = 0; j < WpnIDs.Length; j++)
+                {
+                    if (keepOrRemove[j])
+                    {
+                        wpnIDs[i] = WpnIDs[j];
+                        internalMagSizes[i] = InternalMagSizes[j];
+                        internalMagQty[i] = InternalMagQty[j];
+                        reloadAmountsPerSec[i] = ReloadAmountsPerSec[j];
+                        amountPerShot[i] = AmountPerShot[j];
+                        minShotsPerfire[i] = MinShotsPerfire[j];
+                        ordDes[i] = OrdnanceDesigns[j];
+                        launchForce[i] = LaunchForces[j];
+                        fcStates[i] = FireControlStates[j];
+                    }
+                }
+            }
+            
+            WpnIDs = wpnIDs;
+            InternalMagSizes = internalMagSizes;
+            InternalMagQty = internalMagQty;
+            ReloadAmountsPerSec = reloadAmountsPerSec;
+            AmountPerShot = amountPerShot;
+            MinShotsPerfire = minShotsPerfire;
+            //WpnTypes = wpnTypes;
+            FireControlStates = fcStates;
+            OrdnanceDesigns = ordDes;
+            LaunchForces = launchForce;
+
+        }
+
+        /// <summary>
+        /// Sets weapons, this will remove exsisting. 
+        /// </summary>
+        /// <param name="wpns"></param>
+        internal void SetWeapons(List<ComponentInstance> wpns)
+        {
+            int count = wpns.Count;
+            
+            Guid[] wpnIDs = new Guid[count];
+            int[] internalMagSizes = new int[count];
+            int[] internalMagQty = new int[count];
+            int[] reloadAmountsPerSec = new int[count];
+            int[] amountPerShot = new int[count];
+            int[] minShotsPerfire = new int[count];  
+            //GenericWeaponAtb.WpnTypes[] wpnTypes = new GenericWeaponAtb.WpnTypes[count];
+            FireControlAbilityState[] fcStates = new FireControlAbilityState[count];
+            OrdnanceDesign[] ordDes = new OrdnanceDesign[count];
+            double[] launchForce = new double[count];
+            ShotsFiredThisTick = new int[count];
+            for (int i = 0; i < count; i++)
+            {
+                GenericWeaponAtb wpnAtb = wpns[i].Design.GetAttribute<GenericWeaponAtb>();
+                var wpnState = wpns[i].GetAbilityState<WeaponState>();
+                
+                wpnIDs[i] = wpns[i].ID;
+                internalMagSizes[i] = wpnAtb.InternalMagSize;
+                internalMagQty[i] = wpnState.InernalMagCurAmount; 
+                reloadAmountsPerSec[i] = wpnAtb.ReloadAmountPerSec;
+                amountPerShot[i] = wpnAtb.AmountPerShot;
+                minShotsPerfire[i] = wpnAtb.MinShotsPerfire;
+                //wpnTypes[i] = wpnAtb.WpnType;
+                fcStates[i] = wpnState.FireControl.GetAbilityState<FireControlAbilityState>();
+                ordDes[i] = wpnState.OrdnanceDesign;
+                if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
+                    launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
+                else
+                {
+                    launchForce[i] = 1;
+                }
+
+                ShotsFiredThisTick[i] = 0;
+            }
+
+            WpnIDs = wpnIDs;
+            InternalMagSizes = internalMagSizes;
+            InternalMagQty = internalMagQty;
+            ReloadAmountsPerSec = reloadAmountsPerSec;
+            AmountPerShot = amountPerShot;
+            MinShotsPerfire = minShotsPerfire;
+            //WpnTypes = wpnTypes;
+            FireControlStates = fcStates;
+            OrdnanceDesigns = ordDes;
+        }
+
+        public override object Clone()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
 
     public static class WeaponHelpers
     {

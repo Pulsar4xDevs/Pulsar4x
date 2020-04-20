@@ -86,4 +86,40 @@ namespace Pulsar4X.ECSLib
                 componentInstance.SetAbilityState<WeaponState>(new WeaponState());
         }
     }
+
+    public class GenericWeaponAtb : IComponentDesignAttribute
+    {
+        /*
+        public enum WpnTypes
+        {
+            Missile,
+            Beam,
+            Railgun
+        }
+*/
+        //public WpnTypes WpnType;
+        public int InternalMagSize;
+        public int ReloadAmountPerSec;
+        public int AmountPerShot;
+        public int MinShotsPerfire;
+        
+        private GenericWeaponAtb()
+        {
+        }
+
+        public GenericWeaponAtb(int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire)
+        {
+            InternalMagSize = magSize;
+            ReloadAmountPerSec = reloadPerSec;
+            AmountPerShot = amountPerShot;
+            MinShotsPerfire = minShotsPerfire;
+            //WpnType = type;
+        }
+
+        
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            
+        }
+    }
 }

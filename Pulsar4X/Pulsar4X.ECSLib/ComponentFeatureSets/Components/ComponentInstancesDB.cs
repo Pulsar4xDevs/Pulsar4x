@@ -30,14 +30,49 @@ namespace Pulsar4X.ECSLib
 
         internal readonly Dictionary<Guid, ComponentInstance> AllComponents = new Dictionary<Guid, ComponentInstance>();
         
+        /* Maybe flat arrays would be better? need to test see the mem size difference and speed difference.
+        private Guid[] _instanceIDArray = new Guid[0];
+        private ComponentInstance[] _instanceArray = new ComponentInstance[0];
+        private ComponentDesign[] _designsArray = new ComponentDesign[0];
+        private ComponentAbilityState[] _statesArray = new ComponentAbilityState[0];
+        */
+        
         public bool TryGetComponentsByAttribute<T>(out List<ComponentInstance> components)
             where T : IComponentDesignAttribute
         {
             return _ComponentsByAttribute.TryGetValue(typeof(T), out components);
         }
 
+        public bool TryGetComponentStates<T>(out List<ComponentAbilityState> componentStates)
+            where T : ComponentAbilityState
+        {
+            componentStates = new List<ComponentAbilityState>();
+            foreach (var comp in AllComponents.Values)
+            {
+                if( comp.TryGetAbilityState<T>(out T state))
+                    componentStates.Add(state);
+            }
+
+            if (componentStates.Count > 0)
+                return true;
+            return false;
+        }
         
-        
+        public bool TryGetComponentsWithStates<T>(out List<ComponentInstance> instances)
+            where T : ComponentAbilityState
+        {
+            instances = new List<ComponentInstance>();
+            foreach (var comp in AllComponents.Values)
+            {
+                if( comp.HasAblity<T>())
+                    instances.Add(comp);
+            }
+
+            if (instances.Count > 0)
+                return true;
+            return false;
+        }
+
         internal void AddComponentInstance(ComponentInstance instance)
         {
             AllComponents.Add(instance.ID, instance);

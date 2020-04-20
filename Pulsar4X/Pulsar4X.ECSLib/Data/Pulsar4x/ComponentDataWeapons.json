@@ -402,6 +402,13 @@
               "AttributeFormula": "Ability('Auto Reloader Mass') / Ability('Max Mass')"
             },
             {
+              "Name": "genericWpndbargs",
+              "DescriptionFormula": "'int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire, WpnTypes type",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(120, 1, 120, 1)",
+              "AttributeType": "Pulsar4X.ECSLib.GenericWeaponAtb"
+            },
+            {
               "Name": "dbargs",
               "GuiHint": "None",
               "AttributeFormula": "AtbConstrArgs(Ability('Max Mass'), Ability('ROF'), Ability('Launch Force'))",

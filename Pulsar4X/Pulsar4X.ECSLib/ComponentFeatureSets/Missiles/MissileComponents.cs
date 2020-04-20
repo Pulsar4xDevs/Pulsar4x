@@ -198,6 +198,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             IndustryPointCosts = Mass;
         }
 
+        public void CreateOrdnance(Entity launchingEntity, Entity tgtEntity,  double force)
+        {
+            MissileProcessor.LaunchMissile(launchingEntity, tgtEntity, force, this);
+        }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             throw new NotImplementedException();

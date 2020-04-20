@@ -229,12 +229,27 @@ namespace Pulsar4X.ECSLib
                 {
                     fcinstance.IsEngaging = true;
                     DateTime dateTimeNow = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
-                    foreach (var wpn in fcinstance.AssignedWeapons)
-                        StaticRefLib.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor),_entityCommanding,  dateTimeNow);
+                    GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
+                    if (blob == null)
+                    {
+                        blob = new GenericFiringWeaponsDB();
+                        _entityCommanding.SetDataBlob(blob);
+                    }
+                    blob.AddWeapons(fcinstance.AssignedWeapons);
+
+                    //StaticRefLib.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor),_entityCommanding,  dateTimeNow);
                 }
                 else if (IsFiring == FireModes.CeaseFire)
                 {
                     fcinstance.IsEngaging = false;
+                    GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
+                    if (blob != null)
+                    {
+                        blob.RemoveWeapons(fcinstance.AssignedWeapons);
+                        if(blob.WpnIDs.Length == 0)
+                            _entityCommanding.RemoveDataBlob<GenericFiringWeaponsDB>();
+                    }
+                    
                 }
                 IsRunning = true;
             }

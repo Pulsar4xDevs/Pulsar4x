@@ -45,6 +45,9 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Window Height: " + ImGui.GetContentRegionAvail().Y);
                     ImGui.Text("Window Width: " + ImGui.GetContentRegionAvail().X);
 
+                    string datetimenow = DateTime.Now.ToString();
+                    
+
                 }
 
                 ImGui.End();
