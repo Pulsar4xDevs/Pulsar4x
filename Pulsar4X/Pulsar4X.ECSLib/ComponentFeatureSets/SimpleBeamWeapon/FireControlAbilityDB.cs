@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
     {
         public Entity Target { get; internal set; }
 
-        public List<ComponentInstance> AssignedWeapons { get; internal set; } = new List<ComponentInstance>();
+        public List<ComponentInstance> AssignedWeapons { get; set; } = new List<ComponentInstance>();
 
         public bool IsEngaging { get; internal set; } = false;
 

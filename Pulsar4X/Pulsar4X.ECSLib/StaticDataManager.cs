@@ -135,6 +135,65 @@ namespace Pulsar4X.ECSLib
             }*/
         }
 
+        public static StaticDataStore GetStaticData(string dataDir)
+        {
+            StaticDataStore newStore = new StaticDataStore();//.Clone();
+            string curFileName = "";
+            JObject obj;
+            //try
+            {
+                string dataDirectory = Path.Combine(Path.Combine(SerializationManager.GetWorkingDirectory(), DataDirectory), dataDir);
+
+                // we start by looking for a version file, no version file, no load.
+
+                // now we can move on to looking for json files:
+                string[] jsonfiles = Directory.GetFiles(dataDirectory, "*.json");
+                string[] hjsonfiles = Directory.GetFiles(dataDirectory, "*.hjson");
+
+                if (jsonfiles.GetLength(0) < 1 && hjsonfiles.GetLength(0) < 1)
+                    return null;
+
+                foreach (string file in jsonfiles)
+                {
+                    curFileName = file;
+                    obj = Load(file);
+                    StoreObject(obj, newStore);
+                }
+                foreach (string file in hjsonfiles)
+                {
+                    curFileName = file;
+                    obj = Load(file);
+                    StoreObject(obj, newStore);
+                }
+
+
+
+                //Test the components formula for parsability
+                List<Guid> badComponents = new List<Guid>();
+                foreach (var componentKVP in newStore.ComponentTemplates)
+                {
+                    if (!ComponentParseCheck.IsParseable(componentKVP.Value, out var errors))
+                    {
+                        badComponents.Add(componentKVP.Key);
+                        foreach (var error in errors)
+                        {
+                            StaticRefLib.EventLog.AddEvent(Event.NewComponentParseError(componentKVP.Value.Name, error));
+                        }
+
+                    }
+                }
+
+                foreach (var componentID in badComponents)
+                {
+                    newStore.ComponentTemplates.Remove(componentID);
+                }
+
+            }
+
+
+            return newStore;
+        }
+
         /// <summary>
         /// Checks for a valid vinfo file in the specified directory, if the file is found it loads it and 
         /// checks that it is compatible with previously loaded data and the library.

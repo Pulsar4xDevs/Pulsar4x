@@ -11,6 +11,8 @@ namespace Pulsar4X.ECSLib
     [JsonObject]
     public class ShipDesign : ICargoable, IConstrucableDesign, ISerializable
     {
+
+
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;
         public Guid ID { get; } = Guid.NewGuid();
         public string Name { get; set; }
@@ -119,13 +121,31 @@ namespace Pulsar4X.ECSLib
             OrderableDB ordable = new OrderableDB();
             dataBlobs.Add(ordable);
             var ship = Entity.Create(starsys, ownerFaction.Guid, dataBlobs);
-            
+
+            StaticDataStore staticdata = StaticRefLib.StaticData;
+            ComponentDesigner fireControlDesigner;
+            ComponentDesign integratedfireControl;
+
+
+            ComponentTemplateSD bfcSD = staticdata.ComponentTemplates[new Guid("33fcd1f5-80ab-4bac-97be-dbcae19ab1a0")];
+            fireControlDesigner = new ComponentDesigner(bfcSD, ownerFaction.GetDataBlob<FactionTechDB>());
+            fireControlDesigner.Name = "Bridge Computer Systems";
+            fireControlDesigner.ComponentDesignAttributes["Range"].SetValueFromInput(0);
+            fireControlDesigner.ComponentDesignAttributes["Tracking Speed"].SetValueFromInput(0);
+            fireControlDesigner.ComponentDesignAttributes["Size vs Range"].SetValueFromInput(0);
+
+            //return fireControlDesigner.CreateDesign(faction);
+            integratedfireControl = fireControlDesigner.CreateDesign(ownerFaction);
+            ownerFaction.GetDataBlob<FactionTechDB>().IncrementLevel(integratedfireControl.TechID);
+
             //some DB's need tobe created after the entity.
             var namedb = new NameDB(ship.Guid.ToString());
             namedb.SetName(ownerFaction.Guid, shipName);
             OrbitDB orbit = OrbitDB.FromPosition(parent, ship, starsys.ManagerSubpulses.StarSysDateTime);
             ship.SetDataBlob(namedb);
             ship.SetDataBlob(orbit);
+
+            EntityManipulation.AddComponentToEntity(ship, integratedfireControl, 1);
 
             foreach (var item in shipDesign.Components)
             {
