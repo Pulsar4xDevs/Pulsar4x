@@ -244,20 +244,30 @@ namespace Pulsar4X.ImGuiNetUI
                 }
 
 
-                var wns = new List<ComponentInstance>( _fcState[i].AssignedWeapons);
-                for (int j = 0; j < wns.Count; j++)
+                
+                for (int j = 0; j < _fcState[i].AssignedWeapons.Count; j++)
                 {
-                    var wpn = wns[j];
+                    var wpn = _fcState[i].AssignedWeapons[j];
                     if (ImGui.SmallButton(wpn.Name))
                     {
                         
-                        wns.RemoveAt(j);
-                        Guid[] wnids = new Guid[wns.Count];
-                        for (int k = 0; k < wns.Count; k++)
+
+                        _fcState[i].AssignedWeapons.RemoveAt(j);
+                        Guid[] wnids = new Guid[_fcState[i].AssignedWeapons.Count];
+                        for (int k = 0; k < _fcState[i].AssignedWeapons.Count; k++)
                         {
-                            wnids[k] = wns[k].ID;
+                            wnids[k] = _fcState[i].AssignedWeapons[k].ID;
                         }
                         SetWeapons(wnids);
+
+                        foreach (WeaponState weapon in _allWeaponsstates)
+                        {
+                            if (weapon.WeaponComponentInstance == wpn)
+                            {
+                                weapon.FireControl = null;
+                            }
+                          
+                        }
                     }
 
                 }
