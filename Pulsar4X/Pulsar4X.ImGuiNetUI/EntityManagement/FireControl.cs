@@ -25,7 +25,7 @@ namespace Pulsar4X.ImGuiNetUI
         ComponentInstance[] _beamWpns = new ComponentInstance[0];
         List<WeaponState> _allWeaponsstates = new List<WeaponState>();
         List<ComponentInstance> _allWeaponsinstances = new List<ComponentInstance>();
-
+        
 
         SensorContact[] _allSensorContacts = new SensorContact[0];
         string[] _ownEntityNames = new string[0];
@@ -37,7 +37,10 @@ namespace Pulsar4X.ImGuiNetUI
         int[][] _assignedWeapons = new int[0][];
 
         string[] _fcTarget = new string[0];
-        
+        int _selectedfirecon = 0;
+
+
+
         private FireControl()
         {
             _flags = ImGuiWindowFlags.None;
@@ -211,17 +214,43 @@ namespace Pulsar4X.ImGuiNetUI
 
         void DisplayFC()
         {
-            for (int i = 0; i < _allFireControl.Length; i++)
+            if (_c2type == C2Type.SetTarget)
             {
-                BorderGroup.BeginBorder(_allFireControl[i].Name);
-                
-                ImGui.Text("Target: " + _fcTarget[i]);
-                ImGui.SameLine();
-                if (ImGui.SmallButton("Set New"))
+                ImGui.Text("Select Target for: " + _allFireControl[_selectedfirecon].Name);
+                if (ImGui.SmallButton("Weapon Assignment Mode"))
                 {
-                    _fcIndex = i;
+                    _fcIndex = _selectedfirecon;
+                    _c2type = C2Type.SetWeapons;
+                }
+            }
+            if (_c2type == C2Type.SetWeapons)
+            {
+                ImGui.Text("Select Weapns for: " + _allFireControl[_selectedfirecon].Name);
+                if (ImGui.SmallButton("Targeting Mode"))
+                {
+                    _fcIndex = _selectedfirecon;
                     _c2type = C2Type.SetTarget;
                 }
+            }
+
+
+
+            for (int i = 0; i < _allFireControl.Length; i++)
+            {
+                if (_selectedfirecon == i)
+                {
+                    BorderGroup.BeginBorder(_allFireControl[i].Name + " (Selected)");
+                }
+                else
+                {
+                    BorderGroup.BeginBorder(_allFireControl[i].Name);
+                    if (ImGui.SmallButton("Select"))
+                    {
+                        _selectedfirecon = i;
+                    }
+                }
+
+                ImGui.Text("Target: " + _fcTarget[i]);
                 if (_fcState[i].IsEngaging)
                 {
                     if (ImGui.Button("Cease Fire"))
@@ -272,11 +301,6 @@ namespace Pulsar4X.ImGuiNetUI
 
                 }
 
-                if (ImGui.Button("Assign Weapons"))
-                {
-                    _fcIndex = i;
-                    _c2type = C2Type.SetWeapons;
-                }
 
                 BorderGroup.EndBoarder();
                 
@@ -291,7 +315,7 @@ namespace Pulsar4X.ImGuiNetUI
             SetWeapons,
         }
         private int _fcIndex;
-        private C2Type _c2type;
+        private C2Type _c2type = C2Type.SetTarget;
         private bool _showOwnAsTarget;
         void Display2ndColomn()
         {
