@@ -149,6 +149,7 @@ namespace Pulsar4X.ImGuiNetUI
 
                 for (int i = 0; i < _allWeaponsstates.Count; i++)
                 {
+                    _allWeaponsstates[i].WeaponComponentInstance = _allWeaponsinstances[i];
                     _allWeaponsstates[i].FireControl = _allFireControl[0];
                 }
             }
@@ -238,11 +239,9 @@ namespace Pulsar4X.ImGuiNetUI
                 {
                     if (weapon.FireControl == _allFireControl[i])
                     {
-                        _fcState[i].AssignedWeapons.Add(_allWeaponsinstances[i]);
+                        _fcState[i].AssignedWeapons.Add(weapon.WeaponComponentInstance);
                     }
                 }
-
-                
 
 
                 var wns = new List<ComponentInstance>( _fcState[i].AssignedWeapons);
