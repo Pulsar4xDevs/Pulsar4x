@@ -122,7 +122,7 @@ namespace Pulsar4X.ECSLib
             dataBlobs.Add(ordable);
             var ship = Entity.Create(starsys, ownerFaction.Guid, dataBlobs);
 
-            StaticDataStore staticdata = StaticDataManager.GetStaticData("Pulsar4x");
+            StaticDataStore staticdata = StaticRefLib.StaticData;
             ComponentDesigner fireControlDesigner;
             ComponentDesign integratedfireControl;
 
