@@ -17,16 +17,16 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         internal static PowerGen GetInstance()
         {
             PowerGen instance;
-            if (!_state.LoadedWindows.ContainsKey(typeof(PowerGen)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(PowerGen)))
             {
-                instance = new PowerGen(_state.LastClickedEntity);
+                instance = new PowerGen(_uiState.LastClickedEntity);
             }
             else
-                instance = (PowerGen)_state.LoadedWindows[typeof(PowerGen)];
-            if(instance._entityState != _state.LastClickedEntity)
-                instance.SetEntity(_state.LastClickedEntity);
-            //instance._sysState = _state.StarSystemStates[_state.SelectedSystem.ID];
-            _state.SelectedSystem.ManagerSubpulses.SystemDateChangedEvent += instance.ManagerSubpulses_SystemDateChangedEvent;
+                instance = (PowerGen)_uiState.LoadedWindows[typeof(PowerGen)];
+            if(instance._entityState != _uiState.LastClickedEntity)
+                instance.SetEntity(_uiState.LastClickedEntity);
+            //instance._sysState = _uiState.StarSystemStates[_uiState.SelectedSystem.ID];
+            
 
 
             return instance;
@@ -52,21 +52,21 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
         }
 
-        private void ManagerSubpulses_SystemDateChangedEvent(DateTime newdate)
+        public override void OnSystemTickChange(DateTime newDateTime)
         {
             //if we are looking at this, then we should process it even if nothing has changed.
             if (IsActive && CanActive)
             {
-                if (_energyGenDB.dateTimeLastProcess != newdate)
-                    EnergyGenProcessor.EnergyGen(_entityState.Entity, newdate);
+                if (_energyGenDB.dateTimeLastProcess != newDateTime)
+                    EnergyGenProcessor.EnergyGen(_entityState.Entity, newDateTime);
             }
         }
 
 
         internal override void Display()
         {
-            if(_entityState != _state.LastClickedEntity)//If the selected entity has changed
-                SetEntity(_state.LastClickedEntity);
+            if(_entityState != _uiState.LastClickedEntity)//If the selected entity has changed
+                SetEntity(_uiState.LastClickedEntity);
             //If the player has activated the menu and there is a body that can be displayed show the menu
             if (IsActive && CanActive && ImGui.Begin("Power Display " + _entityState.Name, ref IsActive, _flags))
             {

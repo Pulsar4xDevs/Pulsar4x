@@ -21,7 +21,17 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            
+            if (!componentInstance.HasAblity<WeaponState>())
+            {
+                var wpnState = new WeaponState();
+                wpnState.WeaponType = "Rail Gun";
+                wpnState.WeaponStats = new (string name, double value, ValueTypeStruct valueType)[3];
+                wpnState.WeaponStats[0] = ("Calibre:", Calibre, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.Milli));
+                wpnState.WeaponStats[1] = ("Length:", Length, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.BaseUnit));
+                wpnState.WeaponStats[2] = ("Rate Of Fire:", RateOfFire, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Number, ValueTypeStruct.ValueSizes.BaseUnit));
+                wpnState.WeaponStats[3] = ("Power Use:", PowerUsePerShot, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Power, ValueTypeStruct.ValueSizes.BaseUnit));
+                componentInstance.SetAbilityState<WeaponState>(wpnState);
+            }
         }
     }
 
@@ -30,7 +40,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
     {
         public IWarhead Warhead;
         public float Calibre;
-        public float Weight;
+        public float Mass;
 
 
     }

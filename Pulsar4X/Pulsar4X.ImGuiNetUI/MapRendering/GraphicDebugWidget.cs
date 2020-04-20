@@ -72,7 +72,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.Text("y" + cameraWorldCoord.Y);
             /*
             ImGui.Text("Camera View Coordinate:");
-            var cameraViewCoord = _state.Camera.CameraViewCoordinate();
+            var cameraViewCoord = _uiState.Camera.CameraViewCoordinate();
             ImGui.Text("x" + cameraViewCoord.x);
             ImGui.SameLine();
             ImGui.Text("y" + cameraViewCoord.y);

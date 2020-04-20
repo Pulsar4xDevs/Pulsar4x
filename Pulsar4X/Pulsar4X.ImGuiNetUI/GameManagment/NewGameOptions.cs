@@ -37,11 +37,11 @@ namespace Pulsar4X.SDL2UI
         }
         internal static NewGameOptions GetInstance()
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(NewGameOptions)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(NewGameOptions)))
             {
                 return new NewGameOptions();
             }
-            return (NewGameOptions)_state.LoadedWindows[typeof(NewGameOptions)];
+            return (NewGameOptions)_uiState.LoadedWindows[typeof(NewGameOptions)];
         }
 
         ECSLib.NewGameSettings gameSettings = new ECSLib.NewGameSettings();
@@ -69,13 +69,17 @@ namespace Pulsar4X.SDL2UI
                         _selectedGameType = gameType.Standalone;
                     if (_selectedGameType == gameType.Nethost)
                         ImGui.InputText("Network Port", _netPortInputBuffer, 8);
-                    if (ImGui.Button("Create New Game!"))
+                    if (ImGui.Button("Create New Game!") || _uiState.debugnewgame)
+                    {
+                        _uiState.debugnewgame = false;
                         CreateNewGame();
+                    }
+                        
 
                     ImGui.End();
                 }
                 else
-                    MainMenuItems.GetInstance().IsActive = true;
+                    MainMenuItems.GetInstance().SetActive();
                 
             }
 
@@ -97,25 +101,25 @@ namespace Pulsar4X.SDL2UI
                 MasterSeed = _masterSeed
             };
 
-            _state.Game = new ECSLib.Game(gameSettings);
-            //_state.LoadedWindows.Add(new TimeControl(_state));
-            //_state.LoadedWindows.Remove(this);
-            ECSLib.FactionVM factionVM = new ECSLib.FactionVM(_state.Game);
-            _state.FactionUIState = factionVM;
+            _uiState.Game = new ECSLib.Game(gameSettings);
+            //_uiState.LoadedWindows.Add(new TimeControl(_uiState));
+            //_uiState.LoadedWindows.Remove(this);
+            ECSLib.FactionVM factionVM = new ECSLib.FactionVM(_uiState.Game);
+            _uiState.FactionUIState = factionVM;
 
             factionVM.CreateDefaultFaction(ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer), ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer));
 
-            _state.SetFaction(factionVM.FactionEntity);
-            //_state.MapRendering.SetSystem(factionVM.KnownSystems[0]);
-            //_state.MapRendering.SetSystem(factionVM);
-            _state.SetActiveSystem(factionVM.KnownSystems[0].Guid);
+            _uiState.SetFaction(factionVM.FactionEntity);
+            //_uiState.MapRendering.SetSystem(factionVM.KnownSystems[0]);
+            //_uiState.MapRendering.SetSystem(factionVM);
+            _uiState.SetActiveSystem(factionVM.KnownSystems[0].Guid);
             DebugWindow.GetInstance().SetGameEvents();
             IsActive = false;
             //we initialize window instances so that they get always displayed and automatically open after new game is created.
-            TimeControl.GetInstance().IsActive = true;
-            ToolBarUI.GetInstance().IsActive = true;
-            EntityUIWindowSelector.GetInstance().IsActive = true;
-            EntityInfoPanel.GetInstance().IsActive = true;
+            TimeControl.GetInstance().SetActive();
+            ToolBarUI.GetInstance().SetActive();
+            EntityUIWindowSelector.GetInstance().SetActive();
+            EntityInfoPanel.GetInstance().SetActive();
         }
     }
 }

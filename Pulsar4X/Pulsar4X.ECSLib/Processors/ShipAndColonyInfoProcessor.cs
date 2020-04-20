@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
             
             foreach (KeyValuePair<Guid, List<ComponentInstance>> instance in componentInstances.GetComponentsByDesigns())
             {                
-                var componentVolume = componentInstances.AllDesigns[instance.Key].Volume;
+                var componentVolume = componentInstances.AllDesigns[instance.Key].Volume_m3;
                 var componentTonnage = componentInstances.AllDesigns[instance.Key].Mass;
                 
                 foreach (var componentInstance in instance.Value)
@@ -41,9 +41,9 @@ namespace Pulsar4X.ECSLib
             shipInfo.InternalHTK = totalHTK;
             MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
             mvDB.Mass = totalTonnage;
-            mvDB.Volume = totalVolume;
+            mvDB.Volume_m3 = totalVolume;
             mvDB.Density = MassVolumeDB.CalculateDensity(totalTonnage, totalVolume);
-            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius(totalTonnage, mvDB.Density);
+            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius_Au(totalTonnage, mvDB.Density);
             
         }
     }

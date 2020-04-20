@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
-    
-    public class ShipDesign : ICargoable, IConstrucableDesign
+    [JsonObject]
+    public class ShipDesign : ICargoable, IConstrucableDesign, ISerializable
     {
+
+
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;
         public Guid ID { get; } = Guid.NewGuid();
         public string Name { get; set; }
@@ -16,9 +20,12 @@ namespace Pulsar4X.ECSLib
         public int DesignVersion = 0;
         public bool IsObsolete = false;
         public int Mass { get; }
+        /// <summary>
+        /// m^3
+        /// </summary>
         public double Volume;
         public List<(ComponentDesign design, int count)> Components;
-        public (string name, double density, float thickness) Armor;
+        public (ArmorSD type, float thickness) Armor;
         public Dictionary<Guid, int> ResourceCosts { get; internal set; } = new Dictionary<Guid, int>();
         public Dictionary<Guid, int> MineralCosts = new Dictionary<Guid, int>();
         public Dictionary<Guid, int> MaterialCosts = new Dictionary<Guid, int>();
@@ -39,10 +46,12 @@ namespace Pulsar4X.ECSLib
         public int CreditCost;
         public EntityDamageProfileDB DamageProfileDB;
 
+        [JsonConstructor]
+        internal ShipDesign()
+        {
+        }
 
-
-
-        public ShipDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (string name, double density, float thickness) armor)
+        public ShipDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (ArmorSD armorType, float thickness) armor)
         {
             faction.ShipDesigns.Add(ID, this);
             faction.IndustryDesigns[ID] = this;
@@ -56,7 +65,16 @@ namespace Pulsar4X.ECSLib
                 Mass += component.design.Mass * component.count;
                 CrewReq += component.design.CrewReq;
                 CreditCost += component.design.CreditCost;
-                ComponentCosts.Add(component.design.ID, component.count);
+                Volume += component.design.Volume_m3 * component.count;
+                if (ComponentCosts.ContainsKey(component.design.ID))
+                {
+                    ComponentCosts[component.design.ID] = ComponentCosts[component.design.ID] + component.count;
+                }
+                else
+                {
+                    ComponentCosts.Add(component.design.ID, component.count);
+                }
+
             }
             
             
@@ -64,6 +82,11 @@ namespace Pulsar4X.ECSLib
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             IndustryPointCosts = Mass;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            throw new NotImplementedException();
         }
     }
     public static class ShipFactory
@@ -98,13 +121,31 @@ namespace Pulsar4X.ECSLib
             OrderableDB ordable = new OrderableDB();
             dataBlobs.Add(ordable);
             var ship = Entity.Create(starsys, ownerFaction.Guid, dataBlobs);
-            
+
+            StaticDataStore staticdata = StaticRefLib.StaticData;
+            ComponentDesigner fireControlDesigner;
+            ComponentDesign integratedfireControl;
+
+
+            ComponentTemplateSD bfcSD = staticdata.ComponentTemplates[new Guid("33fcd1f5-80ab-4bac-97be-dbcae19ab1a0")];
+            fireControlDesigner = new ComponentDesigner(bfcSD, ownerFaction.GetDataBlob<FactionTechDB>());
+            fireControlDesigner.Name = "Bridge Computer Systems";
+            fireControlDesigner.ComponentDesignAttributes["Range"].SetValueFromInput(0);
+            fireControlDesigner.ComponentDesignAttributes["Tracking Speed"].SetValueFromInput(0);
+            fireControlDesigner.ComponentDesignAttributes["Size vs Range"].SetValueFromInput(0);
+
+            //return fireControlDesigner.CreateDesign(faction);
+            integratedfireControl = fireControlDesigner.CreateDesign(ownerFaction);
+            ownerFaction.GetDataBlob<FactionTechDB>().IncrementLevel(integratedfireControl.TechID);
+
             //some DB's need tobe created after the entity.
             var namedb = new NameDB(ship.Guid.ToString());
             namedb.SetName(ownerFaction.Guid, shipName);
             OrbitDB orbit = OrbitDB.FromPosition(parent, ship, starsys.ManagerSubpulses.StarSysDateTime);
             ship.SetDataBlob(namedb);
             ship.SetDataBlob(orbit);
+
+            EntityManipulation.AddComponentToEntity(ship, integratedfireControl, 1);
 
             foreach (var item in shipDesign.Components)
             {
@@ -118,8 +159,5 @@ namespace Pulsar4X.ECSLib
 
             return ship;
         }
-
-
-
     }
 }

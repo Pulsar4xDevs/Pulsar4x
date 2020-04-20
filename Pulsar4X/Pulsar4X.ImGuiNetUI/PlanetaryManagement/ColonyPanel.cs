@@ -26,20 +26,21 @@ namespace Pulsar4X.SDL2UI
             _selectedEntity = selectedEntity;
             _cargoList = new CargoListPannelSimple(staticData, selectedEntity);
             _staticData = staticData;
+            
         }
 
         public static ColonyPanel GetInstance(StaticDataStore staticData, EntityState selectedEntity)
         {
             ColonyPanel instance;
             if (selectedEntity.CmdRef == null)
-               selectedEntity.CmdRef = CommandReferences.CreateForEntity(_state.Game, selectedEntity.Entity);
-            if (!_state.LoadedWindows.ContainsKey(typeof(ColonyPanel)))
+               selectedEntity.CmdRef = CommandReferences.CreateForEntity(_uiState.Game, selectedEntity.Entity);
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(ColonyPanel)))
             {
                 instance = new ColonyPanel(staticData, selectedEntity);
                 instance.HardRefresh();
                 return instance;
             }
-            instance = (ColonyPanel)_state.LoadedWindows[typeof(ColonyPanel)];
+            instance = (ColonyPanel)_uiState.LoadedWindows[typeof(ColonyPanel)];
             if (instance._selectedEntity != selectedEntity)
             {
                 instance._selectedEntity = selectedEntity;
@@ -64,6 +65,7 @@ namespace Pulsar4X.SDL2UI
             //installation pannel (install constructed components
             if (IsActive)
             {
+                _flags = ImGuiWindowFlags.AlwaysAutoResize;
                 if (ImGui.Begin("Cargo", ref IsActive, _flags))
                 {
 
@@ -79,11 +81,11 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     ImGui.Text(item.ItemName);
                                     ImGui.SameLine();
-                                    ImGui.Text(item.ItemWeightPerUnit);
+                                    ImGui.Text(item.ItemMassPerUnit);
                                     ImGui.SameLine();
                                     ImGui.Text(item.NumberOfItems);
                                     ImGui.SameLine();
-                                    ImGui.Text(item.TotalWeight);
+                                    ImGui.Text(item.TotalMass);
 
                                 }
 
@@ -122,11 +124,11 @@ namespace Pulsar4X.SDL2UI
         
         internal void HardRefresh()
         {
-            _factionInfoDB = _state.Faction.GetDataBlob<FactionInfoDB>();
+            _factionInfoDB = _uiState.Faction.GetDataBlob<FactionInfoDB>();
             if (_selectedEntity.Entity.HasDataBlob<CargoStorageDB>())
             {
                 var storeDB = _selectedEntity.Entity.GetDataBlob<CargoStorageDB>();
-                _storeVM = new CargoStorageVM(_state.Game.StaticData, storeDB);
+                _storeVM = new CargoStorageVM(_uiState.Game.StaticData, storeDB);
                 _storeVM.SetUpdateListner(_selectedEntity.Entity.Manager.ManagerSubpulses);
 
             }
@@ -134,7 +136,7 @@ namespace Pulsar4X.SDL2UI
             if (_selectedEntity.Entity.HasDataBlob<IndustryAbilityDB>())
             {
                 _industryDB = _selectedEntity.Entity.GetDataBlob<IndustryAbilityDB>();
-                _industryPannel = new IndustryPannel2(_state, _selectedEntity.Entity, _industryDB);
+                _industryPannel = new IndustryPannel2(_uiState, _selectedEntity.Entity, _industryDB);
             }
             else
             {

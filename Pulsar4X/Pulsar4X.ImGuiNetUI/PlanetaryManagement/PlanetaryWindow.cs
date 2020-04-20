@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         {
             //_flags = ImGuiWindowFlags.NoCollapse;
 
-
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
             onEntityChange(entity);
            
         }
@@ -35,13 +35,13 @@ namespace Pulsar4X.SDL2UI
         {
 
             PlanetaryWindow thisItem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(PlanetaryWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(PlanetaryWindow)))
             {
                 thisItem = new PlanetaryWindow(entity);
             }
             else
             {
-                thisItem = (PlanetaryWindow)_state.LoadedWindows[typeof(PlanetaryWindow)];
+                thisItem = (PlanetaryWindow)_uiState.LoadedWindows[typeof(PlanetaryWindow)];
                 thisItem.onEntityChange(entity);
             }
 
@@ -74,9 +74,9 @@ namespace Pulsar4X.SDL2UI
                     case PlanetarySubWindows.generalInfo:
                         if(_lookedAtEntity.Entity.HasDataBlob<MassVolumeDB>()){
                             var tempMassVolume = _lookedAtEntity.Entity.GetDataBlob<MassVolumeDB>();
-                            ImGui.Text("radius: "+ECSLib.Misc.StringifyDistance(tempMassVolume.RadiusInM));
+                            ImGui.Text("radius: "+Stringify.Distance(tempMassVolume.RadiusInM));
                             ImGui.Text("mass: "+tempMassVolume.Mass.ToString() + " kg");
-                            ImGui.Text("volume: " +tempMassVolume.VolumeM3.ToString() + " m^3");
+                            ImGui.Text("volume: " +tempMassVolume.Volume_m3.ToString() + " m^3");
                             ImGui.Text("density: "+tempMassVolume.Density + " kg/m^3");
                         }
                         if (_lookedAtEntity.Entity.HasDataBlob<ColonyInfoDB>())

@@ -18,15 +18,17 @@ namespace Pulsar4X.SDL2UI
 
         public RenameWindow(EntityState entity)
         {
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
             reset(entity);
         }
+
         internal static RenameWindow GetInstance(EntityState entity)
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(RenameWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(RenameWindow)))
             {
                 return new RenameWindow(entity);
             }
-            var retval = (RenameWindow)_state.LoadedWindows[typeof(RenameWindow)];
+            var retval = (RenameWindow)_uiState.LoadedWindows[typeof(RenameWindow)];
             retval.reset(entity);
             return retval;
         }
@@ -48,7 +50,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         if(nameInputBuffer[0] != 0){//If the user has not entered an empty name
                         
-                            RenameCommand.CreateRenameCommand(_state.Game, _state.Faction, _entityState.Entity, nameString);
+                            RenameCommand.CreateRenameCommand(_uiState.Game, _uiState.Faction, _entityState.Entity, nameString);
                             _entityState.Name = nameString;//Rename the object
                             _entityState.NameIcon.NameString = nameString;//Rename the name of the object on the map
                             IsActive = false;//Close the window

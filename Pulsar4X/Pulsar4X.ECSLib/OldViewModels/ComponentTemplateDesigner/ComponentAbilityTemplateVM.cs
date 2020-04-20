@@ -206,27 +206,27 @@ namespace Pulsar4X.ECSLib
         /// Constructor for filled
         /// </summary>
         /// <param name="parent"></param>
-        /// <param name="abilitySD"></param>
+        /// <param name="attributeSD"></param>
         /// <param name="parentList"></param>
         /// <param name="staticData"></param>
-        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentTemplateAbilitySD abilitySD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
+        public ComponentAbilityTemplateVM(ComponentTemplateParentVM parent, ComponentTemplateAttributeSD attributeSD, ObservableCollection<ComponentAbilityTemplateVM> parentList, StaticDataStore staticData) : this(parent, parentList, staticData)
         {
-            Name = abilitySD.Name;
-            Description = abilitySD.Description;
-            SelectedGuiHint.SelectedIndex = (int)abilitySD.GuiHint;
-            if (abilitySD.AbilityDataBlobType != null)
+            Name = attributeSD.Name;
+            Description = attributeSD.DescriptionFormula;
+            SelectedGuiHint.SelectedIndex = (int)attributeSD.GuiHint;
+            if (attributeSD.AttributeType != null)
             {
-                AbilityDataBlobType = abilitySD.AbilityDataBlobType;
+                AbilityDataBlobType = attributeSD.AttributeType;
             }
-            AbilityFormula = abilitySD.AbilityFormula;
-            MinFormula = abilitySD.MinFormula;
-            MaxFormula = abilitySD.MaxFormula;
-            StepFormula = abilitySD.StepFormula;
-            //GuidDictionary = abilitySD.GuidDictionary;
+            AbilityFormula = attributeSD.AttributeFormula;
+            MinFormula = attributeSD.MinFormula;
+            MaxFormula = attributeSD.MaxFormula;
+            StepFormula = attributeSD.StepFormula;
+            //GuidDictionary = attributeSD.GuidDictionary;
             DictionaryVM<Guid, string> techSelected = new DictionaryVM<Guid, string>();
-            if (abilitySD.GuiHint == GuiHint.GuiTechSelectionList)
+            if (attributeSD.GuiHint == GuiHint.GuiTechSelectionList)
             {
-                foreach (var item in abilitySD.GuidDictionary)
+                foreach (var item in attributeSD.GuidDictionary)
                 {
                     techSelected.Add(Guid.Parse(item.Key.ToString()), _staticData.Techs[Guid.Parse(item.Key.ToString())].Name);
                 }
@@ -257,8 +257,8 @@ namespace Pulsar4X.ECSLib
 
         private string _minMaxTTT = "In this mode the component designer will display a slider for the user to select a value between the min and max values.";
         private string _techSelectionTTT = "In this mode the component designer will display a combo box for the user to select from a list of tech, only tech researched will be shown.";
-        private string _textDisplayTTT = "In this mode the component designer will display the AbilityFormula";
-        private string _noneTTT = "In this mode the component designer will not display anything, used for; \r\nUse for hidden AbilityFormula calcs. \r\nUse in conjunction with Datablob type and args. \r\nUse with ItemDictionary and EnumDict(myEnum)";
+        private string _textDisplayTTT = "In this mode the component designer will display the AttributeFormula";
+        private string _noneTTT = "In this mode the component designer will not display anything, used for; \r\nUse for hidden AttributeFormula calcs. \r\nUse in conjunction with Datablob type and args. \r\nUse with ItemDictionary and EnumDict(myEnum)";
 
         private void DeleteMe()
         {
@@ -289,7 +289,6 @@ namespace Pulsar4X.ECSLib
                 typeof(JumpPointStabilizationAtbDB).ToString(),
                 typeof(LifeSupportAtbDB).ToString(),
                 typeof(MineResourcesAtbDB).ToString(),
-                typeof(MissileLauncherAtbDB).ToString(),
                 typeof(MissileStorageAtbDB).ToString(),
                 typeof(MSPCapacityAtbDB).ToString(),
                 typeof(PassiveEMSensorAtbDB).ToString(),
@@ -318,14 +317,14 @@ namespace Pulsar4X.ECSLib
 
 
 
-        public ComponentTemplateAbilitySD CreateSD()
+        public ComponentTemplateAttributeSD CreateSD()
         {
-            ComponentTemplateAbilitySD sd = new ComponentTemplateAbilitySD();
+            ComponentTemplateAttributeSD sd = new ComponentTemplateAttributeSD();
             sd.Name = Name;
-            sd.Description = Description;
-            sd.AbilityDataBlobType = AbilityDataBlobType;
+            sd.DescriptionFormula = Description;
+            sd.AttributeType = AbilityDataBlobType;
             sd.GuiHint = SelectedGuiHint.GetKey();
-            sd.AbilityFormula = AbilityFormula;
+            sd.AttributeFormula = AbilityFormula;
             sd.MinFormula = MinFormula;
             sd.MaxFormula = MaxFormula;
             sd.StepFormula = StepFormula;

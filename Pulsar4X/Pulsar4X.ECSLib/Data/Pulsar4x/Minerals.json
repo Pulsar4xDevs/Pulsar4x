@@ -191,6 +191,53 @@
       },
 
       {
+        "Key":"A11ABDF3-C7DA-4DB2-9146-AEA0A5026B3E",
+        "Value": {
+          "Name": "Titanium",
+          "Description": "A naturally-occurring mineral in large deposits.",
+          "ID": "A11ABDF3-C7DA-4DB2-9146-AEA0A5026B3E",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "Mass": 1.0,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.2
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.3
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.3
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.2
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.6
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 1.0
+              }
+            ]
+          }
+        }
+      },
+
+      {
         "Key":"d6ebca8e-5a42-4664-a081-ca0190a6bb07",
         "Value": {
           "Name": "Lithium",

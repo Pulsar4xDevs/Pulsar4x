@@ -99,7 +99,7 @@ namespace Pulsar4X.ECSLib
                 if(player.HaltsOnEvent.ContainsKey(@event.EventType) && player.HaltsOnEvent[@event.EventType] == true)                 
                     // will future events ever be needed? if so, check timedate here as well
                     // and add a future halt interupt to the gameloop if it's a future event.
-                    _game.GameLoop.PauseTime(); //hit the pause button.
+                    _game.GamePulse.PauseTime(); //hit the pause button.
             }
         }
 

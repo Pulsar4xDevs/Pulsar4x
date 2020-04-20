@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
         public double SemiMajorAxis;        //a
         public double SemiMinorAxis;        //b
         public double Eccentricity;         //e
-        public double LinierEccentricity;   //ae
+        public double LinearEccentricity;   //ae
         public double Periapsis;            //q
         public double Apoapsis;             //Q
         public double LoAN;                 //Ω (upper case Omega)
@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
 
             ke.Apoapsis = EllipseMath.Apoapsis(eccentricity, semiMajorAxis);
             ke.Periapsis = EllipseMath.Periapsis(eccentricity, semiMajorAxis);
-            ke.LinierEccentricity = EllipseMath.LinierEccentricity(ke.Apoapsis, semiMajorAxis);
+            ke.LinearEccentricity = EllipseMath.LinearEccentricity(ke.Apoapsis, semiMajorAxis);
             ke.LoAN = longdOfAN;
             ke.AoP = argOfPeriaps;
             ke.Inclination = inclination;

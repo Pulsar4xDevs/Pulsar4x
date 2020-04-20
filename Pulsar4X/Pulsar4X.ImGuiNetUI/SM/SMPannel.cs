@@ -12,16 +12,16 @@ namespace Pulsar4X.SDL2UI
 
         private SMPannel() 
         {
-            _state.SpaceMasterVM = new SpaceMasterVM();
+            _uiState.SpaceMasterVM = new SpaceMasterVM();
         }
         //TODO auth of some kind. 
         public static SMPannel GetInstance()
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(SMPannel)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(SMPannel)))
             {
                 return new SMPannel();
             }
-            return (SMPannel)_state.LoadedWindows[typeof(SMPannel)];
+            return (SMPannel)_uiState.LoadedWindows[typeof(SMPannel)];
         }
 
         internal override void Display()
@@ -41,8 +41,8 @@ namespace Pulsar4X.SDL2UI
                     if (ImGui.Button("AddOrbit"))
                     {
                         var pannel = WarpOrderWindow.GetInstance(_selectedEntity, true);
-                        pannel.IsActive = true;
-                        _state.ActiveWindow = pannel;
+                        pannel.SetActive();
+                        _uiState.ActiveWindow = pannel;
                     }
 
                 }

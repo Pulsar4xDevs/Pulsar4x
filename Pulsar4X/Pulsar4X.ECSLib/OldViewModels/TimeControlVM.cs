@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
     {
         
         private GameVM _gameVM;
-        private TimeLoop _timeloop;
+        private MasterTimePulse _timeloop;
         public bool IsPaused { get; set; } = true;
         public int TickLength
         {
@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
         public void Initialise(GameVM gameVM)
         {
             _gameVM = gameVM;
-            _timeloop = gameVM.Game.GameLoop;
+            _timeloop = gameVM.Game.GamePulse;
 
             OnPropertyChanged(nameof(TickLength));
             OnPropertyChanged(nameof(TickMultiplier));

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing.Printing;
 using System.Security.Cryptography.X509Certificates;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.ECSLib
 {
@@ -13,6 +14,9 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _warpDrive;
         private static ComponentDesign _fuelTank_500;
         private static ComponentDesign _laser;
+        private static ComponentDesign _payload;
+        private static ComponentDesign _missileSRB;
+        private static ComponentDesign _missileSuite;
         private static ComponentDesign _sensor_50;
         private static ComponentDesign _sensorInstalation;
         private static ComponentDesign _fireControl;
@@ -23,6 +27,8 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _cargoCompartment;
         private static ComponentDesign _spacePort;
         private static ShipDesign _defaultShipDesign;
+        private static ComponentDesign _missileTube;
+        private static ComponentDesign _ordnanceStore;
         
 
         // this code is a test for multiple systems, worth mentioning it utterly failed, modularity is good when you have it huh.ç
@@ -43,7 +49,7 @@ namespace Pulsar4X.ECSLib
             SystemBodyFactory _systemBodyFactory = new SystemBodyFactory(GalaxyGen);
 
             SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
-            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius(2.2e14, Distance.KmToAU(11));
+            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius_AU(2.2e14, Distance.KmToAU(11));
             NameDB halleysNameDB = new NameDB("testName");
             double halleysSemiMajAxis = 17.834; //AU
             double halleysEccentricity = 0.96714;
@@ -78,7 +84,9 @@ namespace Pulsar4X.ECSLib
             FacPassiveSensor(game, factionEntity);
             DefaultFisionReactor(game, factionEntity);
             DefaultBatteryBank(game, factionEntity);
-
+            DefaultFragPayload(game, factionEntity);
+            DefaultMissileSRB(game, factionEntity);
+            DefaultMissileSensors(game, factionEntity);
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
             EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
@@ -211,7 +219,12 @@ namespace Pulsar4X.ECSLib
             FacPassiveSensor(game, factionEntity);
             DefaultFisionReactor(game, factionEntity);
             DefaultBatteryBank(game, factionEntity);
-            
+            DefaultFragPayload(game, factionEntity);
+            DefaultMissileSRB(game, factionEntity);
+            DefaultMissileSensors(game, factionEntity);
+            DefaultMissileTube(game, factionEntity);
+            MissileDesign250(game, factionEntity);
+            ShipSmallOrdnanceStore(game, factionEntity);
             EntityManipulation.AddComponentToEntity(colonyEntity, mineDesign);
             EntityManipulation.AddComponentToEntity(colonyEntity, refinaryDesign);
             EntityManipulation.AddComponentToEntity(colonyEntity, labEntity);
@@ -263,6 +276,7 @@ namespace Pulsar4X.ECSLib
             StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
             StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             var elec = NameLookup.GetMaterialSD(game, "Electrical Energy");
             ship1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
@@ -367,7 +381,8 @@ namespace Pulsar4X.ECSLib
                 (DefaultThrusterDesign(game, faction), 3),
                 
             };
-            _defaultShipDesign = new ShipDesign(factionInfo, "Ob'enn Dropship", components2, ("Polyprop", 1175f, 3));
+            ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            _defaultShipDesign = new ShipDesign(factionInfo, "Ob'enn Dropship", components2, (plastic, 3));
             _defaultShipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _defaultShipDesign.Armor);
             return _defaultShipDesign;
         }
@@ -378,15 +393,19 @@ namespace Pulsar4X.ECSLib
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
                 (_sensor_50, 1), 
-                (_laser, 4),     
+                (_laser, 2), 
                 (_fireControl, 2),
+                (DefaultMissileTube(game, faction),1),
+                (ShipSmallOrdnanceStore(game, faction), 2),
+                (ShipSmallCargo(game,faction), 1),
                 (_fuelTank_500, 2),
                 (_warpDrive, 4),
                 (_battery, 3),
                 (_reactor, 1),
                 (_thruster500, 4),
             };
-            var shipdesign = new ShipDesign(factionInfo, "Sanctum Adroit GunShip", components2, ("Polyprop", 1175f, 3));
+            ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            var shipdesign = new ShipDesign(factionInfo, "Sanctum Adroit GunShip", components2, (plastic, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
         }
@@ -406,9 +425,24 @@ namespace Pulsar4X.ECSLib
                 (_reactor, 1),
                 (_thruster500, 4),
             };
-            var shipdesign = new ShipDesign(factionInfo, "Cargo Courier", components2, ("Polyprop", 1175f, 3));
+            ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            var shipdesign = new ShipDesign(factionInfo, "Cargo Courier", components2, (plastic, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
+        }
+
+        public static OrdnanceDesign MissileDesign250(Game game, Entity faction)
+        {
+            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
+
+            List<(ComponentDesign, int)> components = new List<(ComponentDesign, int)>()
+            {
+                (DefaultFragPayload(game, faction), 1),
+                (DefaultMissileSensors(game, faction), 1),
+                (DefaultMissileSRB(game, faction), 1),
+            };
+            var design = new OrdnanceDesign(factionInfo, "Missile250", components);
+            return design;
         }
 
         public static ComponentDesign SpacePort(Entity faction)
@@ -433,7 +467,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("b12f50f6-ac68-4a49-b147-281a9bb34b9b")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(500); 
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(500); 
             engineDesigner.Name = "Thruster 500";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
    
@@ -451,7 +485,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("7d0b867f-e239-4b93-9b30-c6d4b769b5e4")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(1000); //size 500 = 2500 power
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1000); //size 500 = 2500 power
             engineDesigner.Name = "Alcuberi-White 500";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
    
@@ -491,6 +525,69 @@ namespace Pulsar4X.ECSLib
             return _laser;
 
         }
+        public static ComponentDesign DefaultFragPayload(Game game, Entity faction)
+        {
+            if (_payload != null)
+                return _payload;
+            ComponentDesigner payloadDesigner;
+            ComponentTemplateSD payloadSD = game.StaticData.ComponentTemplates[new Guid("DF9954A7-C5C5-4B49-965C-446B483DA2BE")];
+            payloadDesigner = new ComponentDesigner(payloadSD, faction.GetDataBlob<FactionTechDB>());
+            payloadDesigner.ComponentDesignAttributes["Trigger Type"].SetValueFromInput(2);
+            payloadDesigner.ComponentDesignAttributes["Payload Type"].SetValueFromInput(0);
+            payloadDesigner.ComponentDesignAttributes["Explosive Mass"].SetValueFromInput(2);
+            payloadDesigner.ComponentDesignAttributes["Frag Mass"].SetValueFromInput(0.1);
+            payloadDesigner.ComponentDesignAttributes["Frag Count"].SetValueFromInput(30);
+            payloadDesigner.ComponentDesignAttributes["Frag Cone Angle"].SetValueFromInput(180);
+            payloadDesigner.Name = "ProxFrag 5kg";
+            _payload = payloadDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_payload.TechID);
+            return _payload;
+        }
+        
+        public static ComponentDesign DefaultMissileSensors(Game game, Entity faction)
+        {
+            if (_missileSuite != null)
+                return _missileSuite;
+            ComponentDesigner suiteDesigner;
+            ComponentTemplateSD srbSD = game.StaticData.ComponentTemplates[new Guid("BBC29A72-C4D3-4389-94DE-36C3BE3B7B0E")];
+            suiteDesigner = new ComponentDesigner(srbSD, faction.GetDataBlob<FactionTechDB>());
+            suiteDesigner.ComponentDesignAttributes["Guidance Type"].SetValueFromInput(2);
+            suiteDesigner.ComponentDesignAttributes["Antenna Size"].SetValueFromInput(10);
+            suiteDesigner.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(470);
+            suiteDesigner.ComponentDesignAttributes["Detection Bandwidth"].SetValueFromInput(2);
+            suiteDesigner.ComponentDesignAttributes["Resolution"].SetValueFromInput(1);
+            suiteDesigner.Name = "Passive Yellow 1MP ";
+            _missileSuite = suiteDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileSuite.TechID);
+            return _missileSuite;
+        }
+        public static ComponentDesign DefaultMissileSRB(Game game, Entity faction)
+        {
+            if (_missileSRB != null)
+                return _missileSRB;
+            ComponentDesigner srbDesigner;
+            ComponentTemplateSD srbSD = game.StaticData.ComponentTemplates[new Guid("9FDB2A15-4413-40A9-9229-19D05B3765FE")];
+            srbDesigner = new ComponentDesigner(srbSD, faction.GetDataBlob<FactionTechDB>());
+            srbDesigner.ComponentDesignAttributes["Engine Mass"].SetValueFromInput(1);
+            srbDesigner.ComponentDesignAttributes["Fuel Mass"].SetValueFromInput(234);
+            srbDesigner.Name = "SRB 235";
+            _missileSRB = srbDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileSRB.TechID);
+            return _missileSRB;
+        }
+        
+        public static ComponentDesign DefaultMissileTube(Game game, Entity faction)
+        {
+            if (_missileTube != null)
+                return _missileTube;
+            ComponentDesigner tubeDesigner;
+            ComponentTemplateSD tubeSD = game.StaticData.ComponentTemplates[new Guid("978DFA9E-411E-4B4F-A618-85D642927503")];
+            tubeDesigner = new ComponentDesigner(tubeSD, faction.GetDataBlob<FactionTechDB>());
+            tubeDesigner.Name = "MissileTube 500";
+            _missileTube = tubeDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileTube.TechID);
+            return _missileTube;
+        }
 
         public static ComponentDesign DefaultBFC(Game game, Entity faction)
         {
@@ -527,7 +624,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{97cf75a1-5ca3-4037-8832-4d81a89f97fa}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            componentDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(1000);
+            componentDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1000);
             componentDesigner.Name = "Reactor15k";
             //return cargoInstalation.CreateDesign(faction);
             _reactor = componentDesigner.CreateDesign(faction);
@@ -540,7 +637,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{1de23a8b-d44b-4e0f-bacd-5463a8eb939d}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            componentDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(1000);
+            componentDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1000);
             componentDesigner.Name = "Battery900";
             //return cargoInstalation.CreateDesign(faction);
             _battery = componentDesigner.CreateDesign(faction);
@@ -579,6 +676,21 @@ namespace Pulsar4X.ECSLib
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_cargoCompartment.TechID);
             return _cargoCompartment;
         }
+        public static ComponentDesign ShipSmallOrdnanceStore(Game game, Entity faction)
+        {
+            if (_ordnanceStore != null)
+                return _ordnanceStore;
+            ComponentDesigner cargoComponent;
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{11564F56-D52C-4A16-8434-C9BB50D8EB95}")];
+            cargoComponent = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
+            cargoComponent.ComponentDesignAttributes["Rack Size"].SetValueFromInput(2627); //5t component
+            cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(100);
+            cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
+            cargoComponent.Name = "OrdinanceRack-2.5t";
+            _ordnanceStore = cargoComponent.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_ordnanceStore.TechID);
+            return _ordnanceStore;
+        }
 
         public static ComponentDesign ShipPassiveSensor(Game game, Entity faction)
         {
@@ -587,9 +699,9 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner sensor;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
             sensor = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            sensor.ComponentDesignAttributes["Sensor Size"].SetValueFromInput(500);  //size
-            sensor.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(600); //best wavelength
-            sensor.ComponentDesignAttributes["Detection Wavelength Width"].SetValueFromInput(250); //wavelength detection width 
+            sensor.ComponentDesignAttributes["Antenna Size"].SetValueFromInput(5.5);  //size
+            sensor.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(479); //best wavelength
+            sensor.ComponentDesignAttributes["Detection Bandwidth"].SetValueFromInput(200); //wavelength detection width 
             //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
             //[4] worst detection magnatude (not settable)
             sensor.ComponentDesignAttributes["Resolution"].SetValueFromInput(1);   //resolution
@@ -603,19 +715,20 @@ namespace Pulsar4X.ECSLib
 
         public static ComponentDesign FacPassiveSensor(Game game, Entity faction)
         {
-            ComponentDesigner sensorDesigner;
+            if (_sensorInstalation != null)
+                return _sensorInstalation;
+            ComponentDesigner sensor;
             ComponentTemplateSD template = NameLookup.GetTemplateSD(game, "PassiveSensor");
-            sensorDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            sensorDesigner.ComponentDesignAttributes["Sensor Size"].SetValueFromInput(5000);  //size
-            sensorDesigner.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(500); //best wavelength
-            sensorDesigner.ComponentDesignAttributes["Detection Wavelength Width"].SetValueFromInput(1000); //wavelength detection width 
-            //[3] best detection magnatude. (Not settable)
-            //[4] worst detection magnatude (not setta[ble)
-            sensorDesigner.ComponentDesignAttributes["Resolution"].SetValueFromInput(5);   //resolution
-            sensorDesigner.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
-            sensorDesigner.Name = "PassiveSensor-S500";
-            //return sensor.CreateDesign(faction);
-            _sensorInstalation = sensorDesigner.CreateDesign(faction);
+            sensor = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
+            sensor.ComponentDesignAttributes["Antenna Size"].SetValueFromInput(5000);  //size
+            sensor.ComponentDesignAttributes["Ideal Detection Wavelength"].SetValueFromInput(470); //best wavelength
+            sensor.ComponentDesignAttributes["Detection Bandwidth"].SetValueFromInput(250); //wavelength detection width 
+            //sensor.ComponentDesignAttributes[3].SetValueFromInput(10);  //best detection magnatude. (Not settable)
+            //[4] worst detection magnatude (not settable)
+            sensor.ComponentDesignAttributes["Resolution"].SetValueFromInput(100);   //resolution
+            sensor.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
+            sensor.Name = "PassiveScannerInstalation";
+            _sensorInstalation = sensor.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_sensorInstalation.TechID);
             return _sensorInstalation;
 

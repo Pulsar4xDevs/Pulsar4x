@@ -420,6 +420,14 @@ namespace Pulsar4X.ECSLib
             StaticRefLib.SetEventlog(eventLog);
             return eventLog;
         }
+
+        public static ShipDesign ImportDesign(Game game, Stream inputStream)
+        {
+            ShipDesign design = new ShipDesign();
+            design = Import(game, inputStream, design);
+            return design;
+        }
+
         private static TObj Import<TObj>([NotNull] Game game, [NotNull] Stream inputStream, [NotNull] TObj obj)
         {
             if (game == null)
@@ -590,8 +598,8 @@ namespace Pulsar4X.ECSLib
                 varNode.InnerText = massVolumeDB.RadiusInKM.ToString("N0");
                 bodyNode.AppendChild(varNode);
 
-                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Volume", "NS");
-                varNode.InnerText = massVolumeDB.Volume.ToString("N0");
+                varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Volume_km3", "NS");
+                varNode.InnerText = massVolumeDB.Volume_km3.ToString("N0");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SurfaceGravity", "NS");
@@ -863,7 +871,7 @@ namespace Pulsar4X.ECSLib
         internal static string GetWorkingDirectory()
         {
             // get list of default sub-directories:
-            string workingDirectory = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath);
+            string workingDirectory = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().Location).LocalPath);
             if (workingDirectory == null)
             {
                 throw new DirectoryNotFoundException("SerializationManager could not find/access the executable's directory.");

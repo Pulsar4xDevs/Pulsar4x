@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         [JsonProperty]
-        public TimeLoop GameLoop { get { return StaticRefLib.GameLoop; } }
+        public MasterTimePulse GamePulse { get { return StaticRefLib.GamePulse; } }
 
             [JsonProperty]
         internal GalaxyFactory GalaxyGen { get; private set; }
@@ -98,7 +98,7 @@ namespace Pulsar4X.ECSLib
             GalaxyGen = new GalaxyFactory(true, newGameSettings.MasterSeed);
 
             StaticRefLib.GameSettings = newGameSettings;
-            GameLoop.GameGlobalDateTime = newGameSettings.StartDateTime;
+            GamePulse.GameGlobalDateTime = newGameSettings.StartDateTime;
 
             // Load Static Data
             if (newGameSettings.DataSets != null)

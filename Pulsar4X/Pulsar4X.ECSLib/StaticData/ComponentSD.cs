@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
     public struct ComponentTemplateSD
     {
         public string Name;
-        public string Description;
+        public string DescriptionFormula;
         public Guid ID;
 
         public string MassFormula;
@@ -23,27 +23,35 @@ namespace Pulsar4X.ECSLib
         public ComponentMountType MountType;
         public Guid IndustryTypeID;
         public Guid CargoTypeID; //cargo TypeID from CargoTypeSD
-        public List<ComponentTemplateAbilitySD> ComponentAbilitySDs;
+        public List<ComponentTemplateAttributeSD> ComponentAtbSDs;
     }
 
     [StaticDataAttribute(false)]
-    public struct ComponentTemplateAbilitySD
+    public struct ComponentTemplateAttributeSD
     {
         public string Name;
-        public string Description;
-        public GuiHint GuiHint; //if AbilityFormula uses AbilityArgs(), this should be none!
+        public string DescriptionFormula;
+        public string Unit;
+        public GuiHint GuiHint; //if AttributeFormula uses AbilityArgs(), this should be none!
 
+        public string GuiIsEnabledFormula; //if this attribute should be displayed/enabled
         //used if guihint is GuiSelectionList
         public Dictionary<object, string> GuidDictionary;
 
+        public string EnumTypeName;
+        //public string[] EnumItems;
+        //public string[] EnumTechReq;
+        //public string[] EnumFormula;
+        
         //used if GuiHint is GuiMinMax
         public string MaxFormula;
         public string MinFormula;
-        public string StepFormula; 
+        public string StepFormula;
+        
 
         //if guihint is selection list or minmax, this should point to a default value. 
-        public string AbilityFormula;
+        public string AttributeFormula;
 
-        public string AbilityDataBlobType;
+        public string AttributeType;
     }
 }

@@ -770,8 +770,9 @@ namespace Pulsar4X.ECSLib
         /// Calculates the temperature of a body given its parent star and its distance from that star.
         /// @note For info on how the Temp. is calculated see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
         /// </summary>
+        /// <param name="distanceFromStar"> in AU! TODO: ChangeTo meters</param>
         /// <returns>Temperature in Degrees C</returns>
-        private static double CalculateBaseTemperatureOfBody(Entity star, StarInfoDB starInfo, double distanceFromStar)
+        public static double CalculateBaseTemperatureOfBody(Entity star, StarInfoDB starInfo, double distanceFromStar)
         {
             MassVolumeDB starMVDB = star.GetDataBlob<MassVolumeDB>();
             double temp = Temperature.ToKelvin(starInfo.Temperature);
@@ -779,6 +780,21 @@ namespace Pulsar4X.ECSLib
             return Temperature.ToCelsius(temp);
         }
 
+        /// <summary>
+        /// calculates the temprature of a planet using a time averaged distance from the star. NOTE! orbitDB needs to be a body to sun orbit!
+        /// </summary>
+        /// <param name="star"></param>
+        /// <param name="orbit">must be a body to sun orbit, ie for the moon, use earth's orbitDB</param>
+        /// <returns>temprature in degrees C</returns>
+        public static double CalculateBaseTemperatureOfBody(Entity star, OrbitDB orbit)
+        {
+            StarInfoDB starInfoDB = star.GetDataBlob<StarInfoDB>();
+            //https://cosmicreflections.skythisweek.info/2017/11/15/average-orbital-distance/
+            //time averaged distance = r = a(1+ e^2/2)
+            double averageDistanceFromStar = orbit.SemiMajorAxis * (1 + Math.Pow(orbit.Eccentricity, 2) / 2); 
+            return CalculateBaseTemperatureOfBody(star, starInfoDB, Distance.MToAU(averageDistanceFromStar));
+
+        }
 
         /// <summary>
         /// This function generate ruins for the specified system Body.

@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
     public delegate void DateChangedEventHandler(DateTime newDate);
 
     [JsonObject(MemberSerialization.OptIn)]
-    public class TimeLoop : IEquatable<TimeLoop>
+    public class MasterTimePulse : IEquatable<MasterTimePulse>
     {
         [JsonProperty]
         private SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>();
@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         Stopwatch _subpulseStopwatch = new Stopwatch();
         private Timer _timer = new Timer();
 
-        private Action<TimeLoop> runSystemProcesses = (TimeLoop obj) =>
+        private Action<MasterTimePulse> runSystemProcesses = (MasterTimePulse obj) =>
         {
             obj.DoProcessing(obj.GameGlobalDateTime + obj.Ticklength);
         };
@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
         /// Constructor
         /// </summary>
         /// <param name="game"></param>
-        internal TimeLoop(Game game)
+        internal MasterTimePulse(Game game)
         {
             
             _game = game;
@@ -256,7 +256,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        public bool Equals(TimeLoop other)
+        public bool Equals(MasterTimePulse other)
         {
             bool equality = false;
             if (GameGlobalDateTime.Equals(other.GameGlobalDateTime))

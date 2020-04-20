@@ -1,5 +1,7 @@
-﻿using ImGuiNET;
+﻿using System;
+using ImGuiNET;
 using System.Numerics;
+using Pulsar4X.ECSLib;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.SDL2UI
@@ -13,11 +15,11 @@ namespace Pulsar4X.SDL2UI
         private MainMenuItems(){}
         internal static MainMenuItems GetInstance()
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(MainMenuItems)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(MainMenuItems)))
             {
                 return new MainMenuItems();
             }
-            return (MainMenuItems)_state.LoadedWindows[typeof(MainMenuItems)];
+            return (MainMenuItems)_uiState.LoadedWindows[typeof(MainMenuItems)];
         }
 
 
@@ -26,28 +28,28 @@ namespace Pulsar4X.SDL2UI
             if (IsActive)
             {
                 Vector2 size = new Vector2(200, 100);
-                Vector2 pos = new Vector2(_state.MainWinSize.X / 2 - size.X / 2, _state.MainWinSize.Y / 2 - size.Y / 2);
+                Vector2 pos = new Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 10));
                 if (ImGui.Begin("Pulsar4X Main Menu", ref IsActive, _flags))
                 {
 
-                    if (ImGui.Button("Start a New Game", buttonSize))
+                    if (ImGui.Button("Start a New Game", buttonSize) || _uiState.debugnewgame)
                     {
-                        //_state.NewGameOptions.IsActive = true;
+                        //_uiState.NewGameOptions.IsActive = true;
                         var newgameoptions = NewGameOptions.GetInstance();
-                        newgameoptions.IsActive = true;
+                        newgameoptions.SetActive(true);
                         this.IsActive = false;
                     }
-                    if (_state.IsGameLoaded)
+                    if (_uiState.IsGameLoaded)
                     {
                         if (ImGui.Button("Save Current Game", buttonSize))
                             _saveGame = !_saveGame;
                         if (ImGui.Button("Options", buttonSize))
                         {
-                            SettingsWindow.GetInstance().IsActive = !SettingsWindow.GetInstance().IsActive;
-                            IsActive = false;
+                            SettingsWindow.GetInstance().ToggleActive();
+                            this.SetActive(false);
                         }
                     }
                     ImGui.Button("Resume a Current Game", buttonSize);
@@ -58,9 +60,9 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.Button("SM Mode", buttonSize))
                 {
                     var pannel = SMPannel.GetInstance();
-                    _state.ActiveWindow = pannel;
-                    pannel.IsActive = true;
-                    _state.EnableGameMaster();
+                    _uiState.ActiveWindow = pannel;
+                    pannel.SetActive();
+                    _uiState.EnableGameMaster();
                     this.IsActive = false;
                 }
                 //ImGui.GetForegroundDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
@@ -69,6 +71,19 @@ namespace Pulsar4X.SDL2UI
                 ImGui.End();
                 ImGui.PopStyleVar();
             }
+        }
+
+        public override void OnGameTickChange(DateTime newDate)
+        {
+        }
+
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+        }
+
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            throw new NotImplementedException();
         }
     }
 }

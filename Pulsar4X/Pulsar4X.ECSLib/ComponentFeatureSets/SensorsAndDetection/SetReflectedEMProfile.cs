@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Pulsar4X.ECSLib
 {
-    internal class SetReflectedEMProfile// : IHotloopProcessor
+    public class SetReflectedEMProfile// : IHotloopProcessor
     {
         /*
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(60);
@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
         }
         */
 
-        internal static void SetEntityProfile(Entity entity, DateTime atDate)
+        public static void SetEntityProfile(Entity entity, DateTime atDate)
         {
             var position = entity.GetDataBlob<PositionDB>();
             var sensorSig = entity.GetDataBlob<SensorProfileDB>();
@@ -39,21 +39,46 @@ namespace Pulsar4X.ECSLib
             int numberOfEmmitters = emmiters.Count;
             sensorSig.ReflectedEMSpectra.Clear();
 
-            PercentValue reflectionPercent = 0.1f; //TODO: this should be calculated from crossSection(size), distance, and a reflectivity value(stealth armor?/ other design factors?). 
-
+            //PercentValue reflectionPercent = 0.1f; //TODO: this should be calculated from crossSection(size), and a reflectivity value(stealth armor?/ other design factors?). 
+            var surfaceArea = sensorSig.TargetCrossSection_msq;
+            double reflectionCoefficent = surfaceArea * sensorSig.Reflectivity;
+            
             foreach (var emittingEntity in emmiters)
             {
                 if (emittingEntity != entity) // don't reflect our own emmision. 
                 {
-                    double distance = PositionDB.GetDistanceBetween_AU(position, emittingEntity.GetDataBlob<PositionDB>());
+                    double distance = PositionDB.GetDistanceBetween_m(position, emittingEntity.GetDataBlob<PositionDB>());
                     var emmissionDB = emittingEntity.GetDataBlob<SensorProfileDB>();
 
                     foreach (var emitedItem in emmissionDB.EmittedEMSpectra)
                     {
 
-                        var reflectedMagnatude = SensorProcessorTools.AttenuationCalc(emitedItem.Value, distance) * reflectionPercent;
+                        var attenuated = SensorProcessorTools.AttenuationCalc(emitedItem.Value, distance);
+                        var reflectedMagnatude = attenuated * reflectionCoefficent;
                         
-                        sensorSig.ReflectedEMSpectra.Add(emitedItem.Key, emitedItem.Value);
+                        if(reflectedMagnatude > 0.001) //ignore it if the signal is less than a watt 
+                        {
+                            if (sensorSig.ReflectedEMSpectra.ContainsKey(emitedItem.Key))
+                            {
+                                sensorSig.ReflectedEMSpectra[emitedItem.Key] = sensorSig.ReflectedEMSpectra[emitedItem.Key] + reflectedMagnatude;
+                            }
+                            else
+                                sensorSig.ReflectedEMSpectra.Add(emitedItem.Key, reflectedMagnatude);
+                        }
+                            
+
+
+
+                        //debug code:
+                        if (emitedItem.Value < 0)
+                            throw new Exception("Source should not be less than 0");                        
+                        if(attenuated > emitedItem.Value)
+                            throw new Exception("Attenuated value shoudl be less than source");                       
+                        if(reflectedMagnatude > emitedItem.Value)
+                            throw new Exception("final magnitude shoudl not be more than source");
+                        if(reflectedMagnatude < 0)
+                            throw new Exception("Final magnitude should not be less than 0");                       
+                        
                     }
                 }
             }

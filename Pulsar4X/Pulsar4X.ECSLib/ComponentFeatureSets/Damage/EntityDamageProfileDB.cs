@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 {
     public class EntityDamageProfileDB : BaseDataBlob
     {
-        public (string name, double density, float thickness) Armor;
+        public (ArmorSD armorType, float thickness) Armor;
         public List<(Guid id, int count)> PlacementOrder;
         public List<(Guid, RawBmp)> TypeBitmaps;
         
@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         }
     
         
-        public EntityDamageProfileDB(List<(ComponentDesign component, int count)> components, (string name, double density, float thickness) armor)
+        public EntityDamageProfileDB(List<(ComponentDesign component, int count)> components, (ArmorSD armorSD, float thickness) armor)
         {
             List<(Guid, RawBmp)> typeBitmap = new List<(Guid, RawBmp)>();
             List<(Guid id, int count)> placementOrder = new List<(Guid, int)>();

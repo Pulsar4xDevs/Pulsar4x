@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
+using Hjson;
 
 namespace Pulsar4X.ECSLib
 {
@@ -64,7 +65,7 @@ namespace Pulsar4X.ECSLib
             StaticDataStore newStore = game.StaticData;//.Clone();
             string curFileName = "";
             JObject obj;
-            try
+            //try
             {
                 string dataDirectory = Path.Combine(Path.Combine(SerializationManager.GetWorkingDirectory(), DataDirectory), dataDir);
 
@@ -76,12 +77,19 @@ namespace Pulsar4X.ECSLib
                 }
 
                 // now we can move on to looking for json files:
-                string[] files = Directory.GetFiles(dataDirectory, "*.json");
+                string[] jsonfiles = Directory.GetFiles(dataDirectory, "*.json");
+                string[] hjsonfiles = Directory.GetFiles(dataDirectory, "*.hjson");
 
-                if (files.GetLength(0) < 1)
+                if (jsonfiles.GetLength(0) < 1 && hjsonfiles.GetLength(0) < 1)
                     return;
 
-                foreach (string file in files)
+                foreach (string file in jsonfiles)
+                {
+                    curFileName = file;
+                    obj = Load(file);
+                    StoreObject(obj, newStore);
+                }
+                foreach (string file in hjsonfiles)
                 {
                     curFileName = file;
                     obj = Load(file);
@@ -116,7 +124,7 @@ namespace Pulsar4X.ECSLib
                 }
 
             }
-            
+            /*
             catch (Exception e)
             {
                 if (e.GetType() == typeof(JsonSerializationException) || e.GetType() == typeof(JsonReaderException))
@@ -124,7 +132,66 @@ namespace Pulsar4X.ECSLib
                 
 
                 throw;  // rethrow exception if not known ;)
+            }*/
+        }
+
+        public static StaticDataStore GetStaticData(string dataDir)
+        {
+            StaticDataStore newStore = new StaticDataStore();//.Clone();
+            string curFileName = "";
+            JObject obj;
+            //try
+            {
+                string dataDirectory = Path.Combine(Path.Combine(SerializationManager.GetWorkingDirectory(), DataDirectory), dataDir);
+
+                // we start by looking for a version file, no version file, no load.
+
+                // now we can move on to looking for json files:
+                string[] jsonfiles = Directory.GetFiles(dataDirectory, "*.json");
+                string[] hjsonfiles = Directory.GetFiles(dataDirectory, "*.hjson");
+
+                if (jsonfiles.GetLength(0) < 1 && hjsonfiles.GetLength(0) < 1)
+                    return null;
+
+                foreach (string file in jsonfiles)
+                {
+                    curFileName = file;
+                    obj = Load(file);
+                    StoreObject(obj, newStore);
+                }
+                foreach (string file in hjsonfiles)
+                {
+                    curFileName = file;
+                    obj = Load(file);
+                    StoreObject(obj, newStore);
+                }
+
+
+
+                //Test the components formula for parsability
+                List<Guid> badComponents = new List<Guid>();
+                foreach (var componentKVP in newStore.ComponentTemplates)
+                {
+                    if (!ComponentParseCheck.IsParseable(componentKVP.Value, out var errors))
+                    {
+                        badComponents.Add(componentKVP.Key);
+                        foreach (var error in errors)
+                        {
+                            StaticRefLib.EventLog.AddEvent(Event.NewComponentParseError(componentKVP.Value.Name, error));
+                        }
+
+                    }
+                }
+
+                foreach (var componentID in badComponents)
+                {
+                    newStore.ComponentTemplates.Remove(componentID);
+                }
+
             }
+
+
+            return newStore;
         }
 
         /// <summary>
@@ -186,13 +253,26 @@ namespace Pulsar4X.ECSLib
         private static JObject Load(string file)
         {
             JObject obj;
-            using (var sr = new StreamReader(file))
-            using (JsonReader reader = new JsonTextReader(sr))
-            {
-                obj = (JObject)Serializer.Deserialize(reader);
-            }
+
+            string hjsonobj = HjsonValue.Load(file).ToString();
+            obj = JObject.Parse(hjsonobj);
 
             return obj;
+
+            /*
+            //var stream = new MemoryStream();
+            //var writer = new StreamWriter(stream);
+            //writer.Write(hjsonobj);
+            //writer.Flush();
+            //stream.Position = 0;
+
+            //using (var sr = new StreamReader(stream))
+            //using (JsonReader reader = new JsonTextReader(sr))
+            //{
+            //    obj = (JObject)Serializer.Deserialize(reader);
+            //}
+            */
+
         }
 
         /// <summary>

@@ -18,6 +18,16 @@ namespace Pulsar4X.ECSLib
         public Dictionary<TeamTypes, List< TeamObject>> TeamsByType = new Dictionary<TeamTypes, List<TeamObject>>();
 
 
+        [JsonConstructor]
+        internal TeamsHousedDB()
+        {
+        }
+
+        internal TeamsHousedDB(TeamsHousedDB db)
+        {
+            TeamsByType = new Dictionary<TeamTypes, List<TeamObject>>(db.TeamsByType);
+        }
+
         public void AddTeam(TeamObject team)
         {
             if (!TeamsByType.ContainsKey(team.TeamType))
@@ -34,7 +44,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new TeamsHousedDB(this);
         }
     }
 

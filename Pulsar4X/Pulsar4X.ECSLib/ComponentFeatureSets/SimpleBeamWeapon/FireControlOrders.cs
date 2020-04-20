@@ -23,11 +23,11 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         private ComponentInstance _fireControlComponent;
 
-        public List<Guid> WeaponsAssigned = new List<Guid>();
+        public Guid[] WeaponsAssigned = new Guid[0];
         private List<ComponentInstance> _weaponsAssigned = new List<ComponentInstance>();
 
 
-        public static void CreateCommand(Game game, DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid fireControlGuid, List<Guid> weaponsAssigned)
+        public static void CreateCommand(Game game, DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid fireControlGuid, Guid[] weaponsAssigned)
         {
             var cmd = new SetWeaponsFireControlOrder()
             {

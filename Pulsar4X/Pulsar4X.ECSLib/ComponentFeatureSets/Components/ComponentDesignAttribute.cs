@@ -13,27 +13,123 @@ namespace Pulsar4X.ECSLib
         //void OnComponentDeInstalation(Entity ship, Entity component);
     }
 
-    public class ComponentDesignAtbData
-    {
-        public string Name;
-        public string Description;
-        public Type DataBlobType;
-        internal ComponentDesigner ParentComponent;
-        public double Value;
-    }
-
     public class ComponentDesignAttribute
     {
-        public string Name ="";
-        public string Description ="";
+        private ComponentTemplateAttributeSD _templateSD;
+        public string Name { get { return _templateSD.Name; } }
 
-        public GuiHint GuiHint;
-        public Type DataBlobType;
+        public string Unit { get { return _templateSD.Unit; } }
+        public GuiHint GuiHint { get { return _templateSD.GuiHint; } }
+        public bool IsEnabled {
+            get
+            {
+                if (IsEnabledFormula == null)
+                    return true;
+                IsEnabledFormula.Evaluate();
+                return IsEnabledFormula.BoolResult;
+            }
+        }
+        
+        public Type AttributeType;
+
+        public Type EnumType;
+        public int ListSelection;
         //public BaseDataBlob DataBlob;
         internal ComponentDesigner ParentComponent; 
-        public ComponentDesignAttribute(ComponentDesigner parentComponent)
+        public ComponentDesignAttribute(ComponentDesigner parentComponent, ComponentTemplateAttributeSD templateAtb, FactionTechDB factionTech)
         {
             ParentComponent = parentComponent;
+            _templateSD = templateAtb;
+            var staticData = StaticRefLib.StaticData;
+
+            if (_templateSD.AttributeFormula != null)
+            {
+                Formula = new ChainedExpression(_templateSD.AttributeFormula, this, factionTech, staticData);
+            }
+
+            if (!string.IsNullOrEmpty(_templateSD.DescriptionFormula ))
+            {
+                DescriptionFormula = new ChainedExpression(_templateSD.DescriptionFormula, this, factionTech, staticData);
+            }
+
+            if (_templateSD.GuidDictionary != null )
+            {
+                GuidDictionary = new Dictionary<object, ChainedExpression>();
+                if (GuiHint == GuiHint.GuiTechSelectionList)
+                {
+                    foreach (var kvp in _templateSD.GuidDictionary)
+                    {
+                        if (factionTech.ResearchedTechs.ContainsKey(Guid.Parse(kvp.Key.ToString())))
+                        {
+                            TechSD techSD = staticData.Techs[Guid.Parse(kvp.Key.ToString())];
+                            GuidDictionary.Add(kvp.Key, new ChainedExpression(ResearchProcessor.DataFormula(factionTech, techSD).ToString(), this, factionTech, staticData));                      
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var kvp in _templateSD.GuidDictionary)
+                    {
+                        GuidDictionary.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech, staticData));
+                    }
+                }
+            }
+            if (GuiHint == GuiHint.GuiSelectionMaxMin)
+            {
+                MaxValueFormula = new ChainedExpression(_templateSD.MaxFormula, this, factionTech, staticData);
+                MinValueFormula = new ChainedExpression(_templateSD.MinFormula, this, factionTech, staticData);
+                StepValueFormula = new ChainedExpression(_templateSD.StepFormula, this, factionTech, staticData);
+            }
+            if (_templateSD.AttributeType != null)
+            {
+                AttributeType = Type.GetType(_templateSD.AttributeType);   
+                if(AttributeType == null)
+                    throw new Exception("Attribute Type Error. Attribute type not found: " + _templateSD.AttributeType + ". Try checking the namespace.");
+            }
+
+            if (GuiHint == GuiHint.GuiEnumSelectionList)
+            {
+                MaxValueFormula = new ChainedExpression(_templateSD.MaxFormula, this, factionTech, staticData);
+                MinValueFormula = new ChainedExpression(_templateSD.MinFormula, this, factionTech, staticData);
+                StepValueFormula = new ChainedExpression(_templateSD.StepFormula, this, factionTech, staticData);
+                SetMax();
+                SetMin();
+                SetStep();
+                EnumType = Type.GetType(_templateSD.EnumTypeName);
+                if(EnumType == null)
+                    throw new Exception("EnumTypeName not found: " + _templateSD.EnumTypeName);
+                ListSelection = (int)Value;
+                //string[] names = Enum.GetNames(EnumType);
+            }
+
+            if (_templateSD.GuiIsEnabledFormula != null)
+            {
+                IsEnabledFormula = new ChainedExpression(_templateSD.GuiIsEnabledFormula, this, factionTech, staticData);
+                var ghint = GuiHint.GuiTextDisplay | GuiHint.GuiDisplayBool;
+            }
+
+            if (GuiHint == GuiHint.GuiOrdnanceSelectionList)
+            {
+                
+            }
+        }
+
+        internal ChainedExpression DescriptionFormula { get; set; }
+        public string Description
+        {
+            get
+            {
+                if (DescriptionFormula == null)
+                    return "";
+                else
+                    return DescriptionFormula.StrResult;
+            }
+        }
+
+        internal ChainedExpression IsEnabledFormula { get; set; }
+        public void RecalcIsEnabled()
+        {
+            IsEnabledFormula.Evaluate();
         }
 
         public Dictionary<object, ChainedExpression> GuidDictionary;
@@ -41,6 +137,11 @@ namespace Pulsar4X.ECSLib
         public void SetValueFromGuidList(Guid techguid)
         {
             Formula.ReplaceExpression("TechData('" + techguid + "')");
+        }
+        
+        public void SetValueFromComponentList(Guid componentID)
+        {
+            Formula.ReplaceExpression("'" + componentID + "'");
         }
 
         internal ChainedExpression Formula { get; set; }
@@ -89,7 +190,7 @@ namespace Pulsar4X.ECSLib
             StepValue = StepValueFormula.DResult;
         }
 
-        internal object[] DataBlobArgs { get; set; }
+        internal object[] AtbConstrArgs { get; set; }
     }
 
     public class ChainedExpression
@@ -176,6 +277,53 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+
+        internal bool BoolResult
+        {
+            get{
+                switch (Result)
+                {
+                 case null:
+                     Evaluate();
+                     if(Result is null)
+                        throw new Exception("Result type is unexpectedly null");
+                     else
+                         return BoolResult;
+                 case bool val:
+                     return val;
+                 default:
+                     throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not a boolian value");
+
+                }
+            }
+        }
+        
+        internal string StrResult
+        {
+            get{
+                switch (Result)
+                {
+                    case null:
+                        Evaluate();
+                        if(Result is null)
+                            throw new Exception("Result type is unexpectedly null");
+                        else
+                            return StrResult;
+                    case string val:
+                        return val;
+                    default:
+                        try
+                        {
+                            return (string)Result;
+                        }
+                        catch
+                        {
+                            throw new Exception("Unexpected Result data Type " + Result.GetType() + " could not be cast to a string");
+                        }
+
+                }
+            }
+        }
 
         /// <summary>
         /// Evaluates the expression and updates the Result.
@@ -329,7 +477,7 @@ namespace Pulsar4X.ECSLib
 
             _expression.Parameters["xMassx"] = new Expression("Mass"); //unknown string will force it to look in the NCalcPulsarParameters or something
             //see http://ncalc.codeplex.com/wikipage?title=parameters&referringTitle=Home (Dynamic Parameters)
-            _expression.Parameters["xVolumex"] = new Expression("Volume");
+            _expression.Parameters["xVolumex"] = new Expression("Volume_km3");
             _expression.Parameters["xCrewx"] = new Expression("Crew");
             _expression.Parameters["xHTKx"] = new Expression("HTK");
             _expression.Parameters["xResearchCostx"] = new Expression("ResearchCost");
@@ -356,7 +504,7 @@ namespace Pulsar4X.ECSLib
                     args.Result = _designer.MassValue;
                     break;
                 
-                case "Volume":
+                case "Volume_km3":
                 
                     MakeThisDependant(_designer.VolumeFormula);
                     args.Result = _designer.VolumeFormula;
@@ -456,7 +604,8 @@ namespace Pulsar4X.ECSLib
                     //TODO: maybe log this catch and throw the component out. (instead of throwing)
                     catch (KeyNotFoundException e)
                     {
-                        throw new Exception("Cannot find an ability named " + key + ". " + e);
+                        
+                        throw new Exception("Cannot find an ability named " + key + ", in " + _designer.Name + " " + e);
                     }
 
                     //TODO: the two catches below will be unnesiary once ComponentDesignAttributeList is gone.
@@ -561,12 +710,12 @@ namespace Pulsar4X.ECSLib
                     break;
 
                 //This sets the DatablobArgs. it's up to the user to ensure the right number of args for a specific datablob
-                //The datablob will be the one defined in designAbility.DataBlobType
+                //The datablob will be the one defined in designAbility.AttributeType
                 //TODO document blobs and what args they take!!
-                case "DataBlobArgs":
-                    if (_designAttribute.DataBlobType == null)
-                        throw new Exception("This Ability does not have a DataBlob defined! define a datablob for this ability!");
-                    //_designAbility.DataBlobArgs = new List<double>();
+                case "AtbConstrArgs":
+                    if (_designAttribute.AttributeType == null)
+                        throw new Exception( _designAttribute.Name +" does not have a type defined! define an AttributeType for this Attribute!");
+                    //_designAbility.AtbConstrArgs = new List<double>();
                     List<object> argList = new List<object>();
                     foreach (var argParam in args.Parameters)
                     {
@@ -576,7 +725,7 @@ namespace Pulsar4X.ECSLib
                         argList.Add(argExpression.Result);
                     }
 
-                    _designAttribute.DataBlobArgs = argList.ToArray();
+                    _designAttribute.AtbConstrArgs = argList.ToArray();
                     args.Result = argList;
                     break;
             }

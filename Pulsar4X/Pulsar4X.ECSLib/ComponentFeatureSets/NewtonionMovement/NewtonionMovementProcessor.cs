@@ -76,28 +76,29 @@ namespace Pulsar4X.ECSLib
 
                 Vector3 totalDVFromGrav = (gravForceVector / mass_Kg) * timeStepInSeconds;
                 
-                double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
-                double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
+                //double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
+                //double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
 
                 
                 Vector3 manuverDV = newtonMoveDB.DeltaVForManuver_m; //how much dv needed to complete the manuver.
+                Vector3 totalDVFromThrust = new Vector3(0,0,0);
                 
-                double dryMass = mass_Kg - newtonThrust.FuelBurnRate * timeStepInSeconds; //how much our ship weighs after a timestep of fuel is used.
-                //how much dv can we get in this timestep.
-                double deltaVThisStep = OrbitMath.TsiolkovskyRocketEquation(mass_Kg, dryMass, newtonThrust.ExhaustVelocity);
-                deltaVThisStep = Math.Min(manuverDV.Length(), deltaVThisStep); //don't use more Dv than what is called for.
-                deltaVThisStep = Math.Min(newtonThrust.DeltaV, deltaVThisStep); //check we've got the deltaV to spend.
+                if(manuverDV.Length() > 0)
+                {
+                    double dryMass = mass_Kg - newtonThrust.FuelBurnRate * timeStepInSeconds; //how much our ship weighs after a timestep of fuel is used.
+                    //how much dv can we get in this timestep.
+                    double deltaVThisStep = OrbitMath.TsiolkovskyRocketEquation(mass_Kg, dryMass, newtonThrust.ExhaustVelocity);
+                    deltaVThisStep = Math.Min(manuverDV.Length(), deltaVThisStep); //don't use more Dv than what is called for.
+                    deltaVThisStep = Math.Min(newtonThrust.DeltaV, deltaVThisStep); //check we've got the deltaV to spend.
+
+                    totalDVFromThrust = Vector3.Normalise(manuverDV) * deltaVThisStep;
+
+                    //remove the deltaV we're expending from the max (TODO: Remove fuel from cargo, change mass of ship)
+                    newtonThrust.DeltaV -= deltaVThisStep;
+                    //remove the vectorDV from the amount needed to fully complete the manuver. 
+                    newtonMoveDB.DeltaVForManuver_m -= totalDVFromThrust;
+                }
                 
-                Vector3 totalDVFromThrust = Vector3.Normalise(manuverDV) * deltaVThisStep;
-
-                //remove the deltaV we're expending from the max (TODO: Remove fuel from cargo, change mass of ship)
-                newtonThrust.DeltaV -= deltaVThisStep;
-                //remove the vectorDV from the amount needed to fully complete the manuver. 
-                newtonMoveDB.DeltaVForManuver_m -= totalDVFromThrust;
-                
-
-          
-
                 Vector3 totalDV = totalDVFromGrav + totalDVFromThrust;
                 Vector3 newVelocity = totalDV + newtonMoveDB.CurrentVector_ms;
 

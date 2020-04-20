@@ -16,23 +16,30 @@ namespace Pulsar4X.ECSLib
     ///  
     /// 
     /// because we're using this as a dictionary key in some places, it needs to be a class instead of a struct, 
-    /// or we could override the euality 
-    /// or  we could not use it as a key. 
+    /// or TODO: we should use and override IEquality and GetHashCode, and maybe use a struct as well.   
     /// </summary>
     public class EMWaveForm 
     {
         /// <summary>
         /// The wavelength average of this emmission in nm
         /// </summary>
-        public double WavelengthAverage_nm;
+        public readonly double WavelengthAverage_nm;
         /// <summary>
         /// The min wavelength this will no longer emit at in nm
         /// </summary>
-        public double WavelengthMin_nm;
+        public readonly double WavelengthMin_nm;
         /// <summary>
         /// The max wavelength this will no longer emit at in nm
         /// </summary>
-        public double WavelengthMax_nm;
+        public readonly double WavelengthMax_nm;
+
+
+        public EMWaveForm(double min, double avg, double max)
+        {
+            WavelengthMin_nm = min;
+            WavelengthAverage_nm = avg;
+            WavelengthMax_nm = max;
+        }
     }
 
     /*

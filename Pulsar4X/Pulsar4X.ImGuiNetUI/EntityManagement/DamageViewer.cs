@@ -63,11 +63,11 @@ namespace Pulsar4X.SDL2UI.Combat
 
         public static DamageViewer GetInstance()
         {
-            if (!_state.LoadedWindows.ContainsKey(typeof(DamageViewer)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(DamageViewer)))
             {
                 return new DamageViewer();
             }
-            return (DamageViewer)_state.LoadedWindows[typeof(DamageViewer)];
+            return (DamageViewer)_uiState.LoadedWindows[typeof(DamageViewer)];
         }
 
         internal override void Display()
@@ -85,7 +85,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             ComponentDesign thruster = new ComponentDesign();
                             thruster.ID = ID.NewGuid();
                             thruster.Connections = Connections.Front | Connections.Sides;
-                            thruster.Volume = 10;
+                            thruster.Volume_km3 = 10;
                             thruster.AspectRatio = 1;
                             thruster.DamageResistance = DamageTools.DamageResistsLookupTable[200];
 
@@ -93,14 +93,14 @@ namespace Pulsar4X.SDL2UI.Combat
                             ComponentDesign fuel = new ComponentDesign();
                             fuel.ID = ID.NewGuid();
                             fuel.Connections = Connections.Front | Connections.Sides | Connections.Back;
-                            fuel.Volume = 100;
+                            fuel.Volume_km3 = 100;
                             fuel.AspectRatio = 2f;
                             fuel.DamageResistance = DamageTools.DamageResistsLookupTable[100];
 
                             ComponentDesign lifeSuport = new ComponentDesign();
                             lifeSuport.ID = ID.NewGuid();
                             lifeSuport.Connections = Connections.Front | Connections.Sides | Connections.Back;
-                            lifeSuport.Volume = 5;
+                            lifeSuport.Volume_km3 = 5;
                             lifeSuport.AspectRatio = 1;
                             lifeSuport.DamageResistance = DamageTools.DamageResistsLookupTable[150];
 
@@ -108,7 +108,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             ComponentDesign cargo = new ComponentDesign();
                             cargo.ID = ID.NewGuid();
                             cargo.Connections = Connections.Front | Connections.Sides | Connections.Back;
-                            cargo.Volume = 100;
+                            cargo.Volume_km3 = 100;
                             cargo.AspectRatio = 0.5f;
                             cargo.DamageResistance = DamageTools.DamageResistsLookupTable[230];
 
@@ -146,7 +146,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                     _profile.PlacementOrder.RemoveAt(_selectedComponentIndex);
                                     _profile.PlacementOrder.Insert(_selectedComponentIndex - 1, item);
                                     _rawShipImage = ComponentPlacement.CreateShipBmp(_profile);
-                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
+                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage);
                                 }
                             }
 
@@ -158,7 +158,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                     _profile.PlacementOrder.RemoveAt(_selectedComponentIndex);
                                     _profile.PlacementOrder.Insert(_selectedComponentIndex + 1, item);
                                     _rawShipImage = ComponentPlacement.CreateShipBmp(_profile);
-                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _rawShipImage);
+                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage);
                                 }
                             }
 
@@ -169,7 +169,7 @@ namespace Pulsar4X.SDL2UI.Combat
                 /*
                 if (ImGui.CollapsingHeader("Create Component Profile"))
                 {
-                    if (ImGui.InputFloat("Volume", ref _componentProfile.Volume))
+                    if (ImGui.InputFloat("Volume_km3", ref _componentProfile.Volume_km3))
                     {
                     }
 
@@ -243,7 +243,7 @@ namespace Pulsar4X.SDL2UI.Combat
                         _showFrameNum++;
                         if (_showFrameNum > _damageFrames.Count -1)
                             _showFrameNum = 0;
-                        _showDmgFrametx = SDL2Helper.CreateSDLTexture(_state.rendererPtr, _damageFrames[_showFrameNum]);
+                        _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
                     }
                     int h = _damageFrames[_showFrameNum].Height;
                     int w = _damageFrames[_showFrameNum].Width;

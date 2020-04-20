@@ -11,11 +11,12 @@ using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
-    class  GalaxyWindow: PulsarGuiWindow
+    public class  GalaxyWindow : PulsarGuiWindow
     {
 
         private GalaxyWindow()
         {
+            
             //_flags = ImGuiWindowFlags.NoCollapse;
         }
 
@@ -25,18 +26,13 @@ namespace Pulsar4X.SDL2UI
         {
 
             GalaxyWindow thisItem;
-            if (!_state.LoadedWindows.ContainsKey(typeof(GalaxyWindow)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(GalaxyWindow)))
             {
                 thisItem = new GalaxyWindow();
             }
-            else
-            {
-                thisItem = (GalaxyWindow)_state.LoadedWindows[typeof(GalaxyWindow)];
-            }
-
+            thisItem = (GalaxyWindow)_uiState.LoadedWindows[typeof(GalaxyWindow)];
 
             return thisItem;
-
 
         }
 
@@ -46,22 +42,19 @@ namespace Pulsar4X.SDL2UI
             //ImGui.SetNextWindowSize();
             if (IsActive && ImGui.Begin("Galaxy Browser", ref IsActive, _flags))
             {
-                //if (ImGui.Begin("LOL",_flags))
-                //{
            
                 uint iterations = 0;
-                foreach (var starSystem in _state.StarSystemStates)
+                foreach (var starSystem in _uiState.StarSystemStates)
                 {
                     ImGui.PushID(iterations.ToString());
                     if (ImGui.SmallButton(starSystem.Value.StarSystem.NameDB.DefaultName))
                     {
-                        _state.SetActiveSystem(starSystem.Key);
+                        _uiState.SetActiveSystem(starSystem.Key);
                     }
                     ImGui.PopID();
                     iterations++;
                 }
                 ImGui.End();
-            //}
             }
         }
     }

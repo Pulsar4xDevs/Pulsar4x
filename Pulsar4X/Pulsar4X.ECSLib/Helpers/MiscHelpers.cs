@@ -7,64 +7,8 @@ namespace Pulsar4X.ECSLib
     public static class Misc
     {
 
-        public static string StringifyWeight(double amountInKg, string format = "0.###")
-        {
-            string stringWeight = "0 Kg";
-            if (amountInKg > 100000000)
-            {
-                amountInKg = amountInKg * 0.00000001;
-                stringWeight = amountInKg.ToString(format) + " MT";
-            }
-            else if (amountInKg > 100000)
-            {
-                amountInKg = amountInKg * 0.00001;
-                stringWeight = amountInKg.ToString(format) + " KT";
-            }
-            else if (amountInKg > 1000)
-            {
-                amountInKg = amountInKg * 0.001;
-                stringWeight = amountInKg.ToString(format) + " T";
-            }
 
-            else { stringWeight = amountInKg.ToString(format) + " Kg"; }
-
-            return stringWeight;
-        }
-
-        
-        public static string StringifyDistance(double length_m,  string format = "0.###")
-        {
-
-            string stringDistance = "0 m";
-            double abslen = Math.Abs(length_m);
-            double len;
-            if (abslen > 1.0e12)
-            {
-                len = length_m * 1.0e-12;
-                stringDistance = len.ToString(format) + " GKm";
-            }
-            else if (abslen > 1.0e9)
-            {
-                len = length_m * 1.0e-9;
-                stringDistance = len.ToString(format) + " MKm";
-            }
-            else if (abslen > 1.0e6)
-            {
-                len = length_m * 1.0e-6;
-                stringDistance = len.ToString(format) + " KKm";
-            }
-            else if (abslen > 1.0e3)
-            {
-                len = length_m * 0.001;
-                stringDistance = len.ToString(format) + " Km";
-            }
-            
-            else { stringDistance = length_m.ToString(format) + " m"; }
-
-            return stringDistance;
-        }
-
-        public static bool HasReqiredItems(Dictionary<Guid, int> stockpile, Dictionary<Guid, int> costs)
+        public static bool HasRequiredItems(Dictionary<Guid, int> stockpile, Dictionary<Guid, int> costs)
         {
             if (costs == null)
                 return true;
@@ -206,7 +150,7 @@ namespace Pulsar4X.ECSLib
     public static class ListExtension
     {
         [PublicAPI]
-        public static List<Entity> GetEntititiesWithDataBlob<TDataBlob>(this List<Entity> list) where TDataBlob : BaseDataBlob
+        public static List<Entity> GetEntitiesWithDataBlob<TDataBlob>(this List<Entity> list) where TDataBlob : BaseDataBlob
         {
             var retVal = new List<Entity>();
             foreach (Entity entity in list)

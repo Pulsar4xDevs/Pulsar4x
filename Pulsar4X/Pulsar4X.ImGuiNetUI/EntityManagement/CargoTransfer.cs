@@ -6,7 +6,7 @@ using Pulsar4X.ECSLib;
 namespace Pulsar4X.SDL2UI
 {
 
-    public class CargoListPannelSimple
+    public class CargoListPannelSimple: UpdateWindowState
     {
         StaticDataStore _staticData;
         EntityState _entityState;
@@ -19,15 +19,10 @@ namespace Pulsar4X.SDL2UI
             _staticData = staticData;
             _entityState = entity;
             _storageDatablob = entity.Entity.GetDataBlob<CargoStorageDB>();
-            entity.Entity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
+
             Update();
         }
-
-        void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
-        {
-            Update();
-        }
-
+        
 
         public void Update()
         {
@@ -56,10 +51,9 @@ namespace Pulsar4X.SDL2UI
 
         public void Display()
         {
-            //Update();
             var width = ImGui.GetWindowWidth() * 0.5f;
             
-            ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
+            ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true, ImGuiWindowFlags.AlwaysAutoResize);
             foreach (var storetype in CargoResourceStores)
             {
                 if (ImGui.CollapsingHeader(storetype.HeaderText + "###" + _entityState.Name + storetype.StorageTypeName, ImGuiTreeNodeFlags.CollapsingHeader))
@@ -73,11 +67,11 @@ namespace Pulsar4X.SDL2UI
                   
                         }
                         ImGui.SameLine();
-                        ImGui.Text(item.ItemWeightPerUnit);
+                        ImGui.Text(item.ItemMassPerUnit);
                         ImGui.SameLine();
                         ImGui.Text(item.NumberOfItems);
                         ImGui.SameLine();
-                        ImGui.Text(item.TotalWeight);
+                        ImGui.Text(item.TotalMass);
 
                     }
                 }
@@ -85,6 +79,26 @@ namespace Pulsar4X.SDL2UI
             ImGui.EndChild(); 
         }
 
+        public override bool GetActive()
+        {
+            return true;
+        }
+
+        public override void OnGameTickChange(DateTime newDate)
+        {
+        }
+
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+            Update();
+        }
+
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            throw new NotImplementedException();
+        }
+        
+        
     }
 
     public delegate void CargoItemSelectedHandler(CargoListPannelComplex cargoPannel);
@@ -104,14 +118,9 @@ namespace Pulsar4X.SDL2UI
             _entityState = entity;
             _storageDatablob = entity.Entity.GetDataBlob<CargoStorageDB>();
             HeadersIsOpenDict = headersOpenDict;
-            entity.Entity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulses_SystemDateChangedEvent;
             Update();
         }
-
-        void ManagerSubpulses_SystemDateChangedEvent(DateTime newDate)
-        {
-            Update();
-        }
+        
 
         public event CargoItemSelectedHandler CargoItemSelectedEvent;
 
@@ -134,7 +143,8 @@ namespace Pulsar4X.SDL2UI
             {
                 if (!_storageDatablob.StoredCargoTypes.ContainsKey(key))
                 {
-                    CargoResourceStores.Remove(_cargoResourceStoresDict[key]);
+                    var storvm = _cargoResourceStoresDict[key];
+                    CargoResourceStores.Remove(storvm);
                     _cargoResourceStoresDict.Remove(key);
                 }
             }
@@ -237,19 +247,19 @@ namespace Pulsar4X.SDL2UI
                             CargoItemSelectedEvent.Invoke(this);
                         }
                         ImGui.SameLine();
-                        ImGui.Text(item.ItemWeightPerUnit);
+                        ImGui.Text(item.ItemMassPerUnit);
                         ImGui.SameLine();
                         ImGui.Text(item.NumberOfItems);
                         ImGui.SameLine();
-                        ImGui.Text(item.TotalWeight);
+                        ImGui.Text(item.TotalMass);
 
                         ImGui.Text("+" + item.ItemIncomingAmount.ToString());
                         ImGui.SameLine();
-                        ImGui.Text(item.GetIncomingWeight());
+                        ImGui.Text(item.GetIncomingMass());
                         ImGui.SameLine();
                         ImGui.Text("-" + item.ItemOutgoingAmount.ToString());
                         ImGui.SameLine();
-                        ImGui.Text(item.GetOutgoungWeight());
+                        ImGui.Text(item.GetOutgoingMass());
 
                     }
                 }
@@ -296,7 +306,7 @@ namespace Pulsar4X.SDL2UI
         public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
         {
             CargoTransfer instance;
-            if (!_state.LoadedWindows.ContainsKey(typeof(CargoTransfer)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(CargoTransfer)))
             {
                 instance = new CargoTransfer
                 {
@@ -306,7 +316,7 @@ namespace Pulsar4X.SDL2UI
             }
             else
             {
-                instance = (CargoTransfer)_state.LoadedWindows[typeof(CargoTransfer)];
+                instance = (CargoTransfer)_uiState.LoadedWindows[typeof(CargoTransfer)];
                 if (instance._selectedEntityLeft != selectedEntity1)
                 {
                     instance._selectedEntityLeft = selectedEntity1;
@@ -387,13 +397,18 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+
+        // called when item on transfer screen is clicked
+        // ought to update currently selected item
         void OnCargoItemSelectedEvent(CargoListPannelComplex cargoPannel)
         {
             SelectedCargoPannel = cargoPannel;
             if (cargoPannel == CargoListLeft)
                 UnselectedCargoPannel = CargoListRight;
             else UnselectedCargoPannel = CargoListLeft;
-            UnselectedCargoPannel.SelectedCargoVM = null;
+
+            if(UnselectedCargoPannel != null)
+                UnselectedCargoPannel.SelectedCargoVM = null;
             
         }
 
@@ -419,19 +434,23 @@ namespace Pulsar4X.SDL2UI
 
             //create order for items to go to right
             CargoXferOrder.CreateCommand(
-                _state.Game,
-                _state.Faction,
+                _uiState.Game,
+                _uiState.Faction,
                 _selectedEntityLeft.Entity,
                 _selectedEntityRight.Entity, 
                 CargoListLeft.GetAllToMoveOut());
 
             //create order for items to go to left
             CargoXferOrder.CreateCommand(
-                _state.Game,
-                _state.Faction,
+                _uiState.Game,
+                _uiState.Faction,
                 _selectedEntityRight.Entity,
                 _selectedEntityLeft.Entity,
                 CargoListRight.GetAllToMoveOut());
+        }
+        public CargoTransfer()
+        {
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
         }
 
         internal override void Display()
@@ -449,7 +468,7 @@ namespace Pulsar4X.SDL2UI
 
                         if (SelectedCargoPannel != null && SelectedCargoPannel.SelectedCargoVM != null)
                         {
-                            if (UnselectedCargoPannel.CanStore(SelectedCargoPannel.SelectedCargoVM.CargoableItem.CargoTypeID))
+                            if (UnselectedCargoPannel != null && UnselectedCargoPannel.CanStore(SelectedCargoPannel.SelectedCargoVM.CargoableItem.CargoTypeID))
                             {
                                 if (ImGui.Button("x100"))
                                 { MoveItems(100); }

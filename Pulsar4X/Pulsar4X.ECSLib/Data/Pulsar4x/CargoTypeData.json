@@ -41,6 +41,14 @@
           "Description": "Cabins for people",
           "ID": "7e08074d-682c-4452-a45a-dc97968f53ca"
         }
+      },
+      {
+        "Key": "055E2026-20A4-4CFA-A8CA-A01915A48B5E",
+        "Value": {
+          "Name": "Ordnance",
+          "Description": "Storage for ammo, missiles etc",
+          "ID": "055E2026-20A4-4CFA-A8CA-A01915A48B5E"
+        }
       }
     ]
   }

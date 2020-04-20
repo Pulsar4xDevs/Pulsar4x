@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib
         public ColonyScreenVM(GameVM gameVM, Entity colonyEntity, StaticDataStore staticData)
         {
 
-            gameVM.Game.GameLoop.GameGlobalDateChangedEvent += GameVM_DateChangedEvent;
+            gameVM.Game.GamePulse.GameGlobalDateChangedEvent += GameVM_DateChangedEvent;
             _colonyEntity = colonyEntity;
             _colonyEntity.Manager.FindEntityByGuid(_colonyEntity.FactionOwner, out _factionEntity);
             _facilities = new ObservableCollection<FacilityVM>();

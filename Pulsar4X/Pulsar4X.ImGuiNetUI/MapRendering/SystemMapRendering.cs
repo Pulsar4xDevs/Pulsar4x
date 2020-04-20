@@ -46,7 +46,7 @@ namespace Pulsar4X.SDL2UI
         public byte MinAlpha = 0;
     }
 
-    internal class SystemMapRendering
+    internal class SystemMapRendering : UpdateWindowState
     {
         GlobalUIState _state;
         SystemSensorContacts _sensorMgr;
@@ -89,7 +89,6 @@ namespace Pulsar4X.SDL2UI
         {
             if (_sysState != null)
             {
-                _sysState.StarSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateChange;
                 _sysState.StarSystem.GetSensorContacts(_faction.Guid).Changes.Unsubscribe(_sensorChanges);
 
             }
@@ -102,7 +101,6 @@ namespace Pulsar4X.SDL2UI
             }
             var starSys = _sysState.StarSystem;
             _faction = _state.Faction;
-            starSys.ManagerSubpulses.SystemDateChangedEvent += OnSystemDateChange;
             _sensorMgr = starSys.GetSensorContacts(_faction.Guid);
             _sensorChanges = _sensorMgr.Changes.Subscribe();
 
@@ -124,7 +122,6 @@ namespace Pulsar4X.SDL2UI
         {
             if (_sysState != null)
             {
-                _sysState.StarSystem.ManagerSubpulses.SystemDateChangedEvent -= OnSystemDateChange;
                 _sysState.StarSystem.GetSensorContacts(_faction.Guid).Changes.Unsubscribe(_sensorChanges);
 
             }
@@ -138,10 +135,7 @@ namespace Pulsar4X.SDL2UI
 
 
             _faction = _state.Faction;
-
-
-
-            starSys.ManagerSubpulses.SystemDateChangedEvent += OnSystemDateChange;
+            
             _sensorMgr = starSys.GetSensorContacts(_faction.Guid);
 
 
@@ -151,7 +145,7 @@ namespace Pulsar4X.SDL2UI
                 AddIconable(entityItem);
             }
 
-            //_state.LastClickedEntity = _sysState.EntityStates.Values.ElementAt(0);
+            //_uiState.LastClickedEntity = _sysState.EntityStates.Values.ElementAt(0);
 
 
         }
@@ -225,42 +219,6 @@ namespace Pulsar4X.SDL2UI
             _nameIcons.TryRemove(entityGuid, out NameIcon nameIcon);
             _entityIcons.TryRemove(entityGuid, out IDrawData entityIcon);
             _orbitRings.TryRemove(entityGuid, out IDrawData orbitIcon);
-        }
-
-        void OnSystemDateChange(DateTime newDate)
-        {
-            _state.PrimarySystemDateTime = newDate;
-
-
-
-
-
-
-            foreach (var icon in UIWidgets.Values)
-            {
-                icon.OnPhysicsUpdate();
-            }
-            foreach (var icon in _orbitRings.Values)
-            {
-                icon.OnPhysicsUpdate();
-            }
-            foreach (var icon in _entityIcons.Values)
-            {
-
-                icon.OnPhysicsUpdate();
-            }
-            foreach (var icon in _moveIcons.Values.ToArray())
-            {
-                icon.OnPhysicsUpdate();
-            }
-            foreach (var icon in _nameIcons.Values)
-            {
-                icon.OnPhysicsUpdate();
-            }
-            foreach(var icon in SelectedEntityExtras)
-            {
-                icon.OnPhysicsUpdate();
-            }
         }
 
 
@@ -494,7 +452,7 @@ namespace Pulsar4X.SDL2UI
                 foreach (var item in _nameIcons.Values)
                 {
                     nameIcons.Add(item);
-                    //item.Draw(_state.rendererPtr, _state.Camera);
+                    //item.Draw(_uiState.rendererPtr, _uiState.Camera);
                 }
                 NameIcon.DrawAll(_state.rendererPtr, _state.Camera, nameIcons);
             }
@@ -532,6 +490,51 @@ namespace Pulsar4X.SDL2UI
                 item.OnFrameUpdate(matrix, _camera);
             foreach (var item in icons.Values)
                 item.Draw(rendererPtr, _camera);
+        }
+
+        public override bool GetActive()
+        {
+            return true;
+        }
+
+        public override void OnGameTickChange(DateTime newDate)
+        {
+            
+        }
+
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+            _state.PrimarySystemDateTime = newDate;
+
+            foreach (var icon in UIWidgets.Values)
+            {
+                icon.OnPhysicsUpdate();
+            }
+            foreach (var icon in _orbitRings.Values)
+            {
+                icon.OnPhysicsUpdate();
+            }
+            foreach (var icon in _entityIcons.Values)
+            {
+                icon.OnPhysicsUpdate();
+            }
+            foreach (var icon in _moveIcons.Values.ToArray())
+            {
+                icon.OnPhysicsUpdate();
+            }
+            foreach (var icon in _nameIcons.Values)
+            {
+                icon.OnPhysicsUpdate();
+            }
+            foreach(var icon in SelectedEntityExtras)
+            {
+                icon.OnPhysicsUpdate();
+            }
+        }
+
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+            SetSystem(newStarSys);
         }
     }
 }

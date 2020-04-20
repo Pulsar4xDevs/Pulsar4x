@@ -109,7 +109,7 @@ namespace Pulsar4X.SDL2UI
                     List<NameIcon> nameIcons = new List<NameIcon>();
                     foreach (var item in _nameIcons)
                     {
-                        //if(_state.StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames.ContainsKey(item.Key)){
+                        //if(_uiState.StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames.ContainsKey(item.Key)){
                         if(item.Key == _state.SelectedStarSysGuid){
                             nameIcons.Add(item.Value);
                         }
@@ -117,7 +117,7 @@ namespace Pulsar4X.SDL2UI
                        
                          
                         //}
-                        //item.Value.Draw(_state.rendererPtr, _state.Camera);
+                        //item.Value.Draw(_uiState.rendererPtr, _uiState.Camera);
                     }
                     NameIcon.DrawAll(_state.rendererPtr, _state.Camera, nameIcons);
                 }

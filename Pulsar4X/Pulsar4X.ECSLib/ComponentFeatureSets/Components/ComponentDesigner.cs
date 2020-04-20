@@ -7,13 +7,16 @@ using Pulsar4X.ECSLib.Industry;
 
 namespace Pulsar4X.ECSLib
 {
+    [Flags]
     public enum GuiHint
     {
-        None,
-        GuiTechSelectionList,
-        GuiSelectionMaxMin,
-        GuiTextDisplay
-        
+        None = 1,
+        GuiDisplayBool = 2,
+        GuiTechSelectionList = 4,
+        GuiSelectionMaxMin = 8,
+        GuiTextDisplay = 16,
+        GuiEnumSelectionList = 32,
+        GuiOrdnanceSelectionList = 64,
     }
 
     public static class ComponentParseCheck
@@ -80,44 +83,11 @@ namespace Pulsar4X.ECSLib
         public Guid TechID;
         public string TypeName; //ie the name in staticData. ie "Newtonion Thruster".
         public string Description;
-        public int Volume;
+        public int Volume_m3;
         public int HTK;
         public int CrewReq;
         public int IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
-        {
-            var colonyConstruction = industryEntity.GetDataBlob<IndustryAbilityDB>();
-            batchJob.NumberCompleted++;
-            batchJob.ResourcesRequired = designInfo.ResourceCosts;
-            
-            batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
-
-            
-            if (batchJob.InstallOn != null)
-            {
-                ComponentInstance specificComponent = new ComponentInstance((ComponentDesign)designInfo);
-                if (batchJob.InstallOn == industryEntity || StorageSpaceProcessor.HasEntity(storage, batchJob.InstallOn.GetDataBlob<CargoAbleTypeDB>()))
-                {
-                    EntityManipulation.AddComponentToEntity(batchJob.InstallOn, specificComponent);
-                    ReCalcProcessor.ReCalcAbilities(batchJob.InstallOn);
-                }
-            }
-            else
-            {
-                StorageSpaceProcessor.AddCargo(storage, (ComponentDesign)designInfo, 1);
-            }
-
-            if (batchJob.NumberCompleted == batchJob.NumberOrdered)
-            {
-                colonyConstruction.ProductionLines[productionLine].Jobs.Remove(batchJob);
-                if (batchJob.Auto)
-                {
-                    colonyConstruction.ProductionLines[productionLine].Jobs.Add(batchJob);
-                }
-            }
-        }
-
 
         public int CreditCost;
         
@@ -132,6 +102,40 @@ namespace Pulsar4X.ECSLib
         public float AspectRatio = 1f;
         public DamageResist DamageResistance;
         
+        
+        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+        {
+            var colonyConstruction = industryEntity.GetDataBlob<IndustryAbilityDB>();
+            batchJob.NumberCompleted++;
+            batchJob.ResourcesRequired = designInfo.ResourceCosts;
+
+            batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
+
+
+            if (batchJob.InstallOn != null)
+            {
+               ComponentInstance specificComponent = new ComponentInstance((ComponentDesign)designInfo);
+               if (batchJob.InstallOn == industryEntity || StorageSpaceProcessor.HasEntity(storage, batchJob.InstallOn.GetDataBlob<CargoAbleTypeDB>()))
+               {
+                   EntityManipulation.AddComponentToEntity(batchJob.InstallOn, specificComponent);
+                   ReCalcProcessor.ReCalcAbilities(batchJob.InstallOn);
+               }
+            }
+            else
+            {
+               StorageSpaceProcessor.AddCargo(storage, (ComponentDesign)designInfo, 1);
+            }
+
+            if (batchJob.NumberCompleted == batchJob.NumberOrdered)
+            {
+               colonyConstruction.ProductionLines[productionLine].Jobs.Remove(batchJob);
+               if (batchJob.Auto)
+               {
+                   colonyConstruction.ProductionLines[productionLine].Jobs.Add(batchJob);
+               }
+            }
+        }
+     
         public bool HasAttribute<T>()
             where T : IComponentDesignAttribute
         {
@@ -175,7 +179,7 @@ namespace Pulsar4X.ECSLib
             var staticData = StaticRefLib.StaticData;
             TypeName = componentSD.Name;
             Name = componentSD.Name;
-            Description = componentSD.Description;
+            
             _design.ID = Guid.NewGuid();
             MassFormula = new ChainedExpression(componentSD.MassFormula, this, factionTech, staticData);
             VolumeFormula = new ChainedExpression(componentSD.VolumeFormula, this, factionTech, staticData);
@@ -190,6 +194,8 @@ namespace Pulsar4X.ECSLib
             _design.CargoTypeID = componentSD.CargoTypeID;
             if (componentSD.MountType.HasFlag(ComponentMountType.PlanetInstallation))
                 _design.GuiHints = ConstructableGuiHints.CanBeInstalled;
+            if(!string.IsNullOrEmpty(componentSD.DescriptionFormula))
+                DescriptionFormula = new ChainedExpression(componentSD.DescriptionFormula, this, factionTech, staticData);
 
             Dictionary<Guid, ChainedExpression> resourceCostForulas = new Dictionary<Guid, ChainedExpression>();
             //Dictionary<Guid, ChainedExpression> mineralCostFormulas = new Dictionary<Guid, ChainedExpression>();
@@ -226,59 +232,10 @@ namespace Pulsar4X.ECSLib
            // MaterialCostFormulas = materalCostFormulas;
             //ComponentCostFormulas = componentCostForulas;
             
-            foreach (ComponentTemplateAbilitySD abilitySD in componentSD.ComponentAbilitySDs)
+            foreach (ComponentTemplateAttributeSD attrbSD in componentSD.ComponentAtbSDs)
             {
-                ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this);
-                
-                if(abilitySD.Name == null) //TODO: Log this, and don't use this component instead of throwing.
-                    throw new Exception("Bad Static Data. Ability name is null");
-                designAttribute.Name = abilitySD.Name;
-                
-                if (abilitySD.Description != null)
-                    designAttribute.Description = abilitySD.Description;
-                designAttribute.GuiHint = abilitySD.GuiHint;
-
-                if (abilitySD.AbilityFormula != null)
-                {
-                    designAttribute.Formula = new ChainedExpression(abilitySD.AbilityFormula, designAttribute, factionTech, staticData);
-                }
-
-                if (abilitySD.GuidDictionary != null )
-                {
-                    designAttribute.GuidDictionary = new Dictionary<object, ChainedExpression>();
-                    if (designAttribute.GuiHint == GuiHint.GuiTechSelectionList)
-                    {
-                        foreach (var kvp in abilitySD.GuidDictionary)
-                        {
-                            if (factionTech.ResearchedTechs.ContainsKey(Guid.Parse(kvp.Key.ToString())))
-                            {
-                                TechSD techSD = staticData.Techs[Guid.Parse(kvp.Key.ToString())];
-                                designAttribute.GuidDictionary.Add(kvp.Key, new ChainedExpression(ResearchProcessor.DataFormula(factionTech, techSD).ToString(), designAttribute, factionTech, staticData));                      
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach (var kvp in abilitySD.GuidDictionary)
-                        {
-                            designAttribute.GuidDictionary.Add(kvp.Key, new ChainedExpression(kvp.Value, designAttribute, factionTech, staticData));
-                        }
-                    }
-                }
-                if (designAttribute.GuiHint == GuiHint.GuiSelectionMaxMin)
-                {
-                    designAttribute.MaxValueFormula = new ChainedExpression(abilitySD.MaxFormula, designAttribute, factionTech, staticData);
-                    designAttribute.MinValueFormula = new ChainedExpression(abilitySD.MinFormula, designAttribute, factionTech, staticData);
-                    designAttribute.StepValueFormula = new ChainedExpression(abilitySD.StepFormula, designAttribute, factionTech, staticData);
-                }
-                if (abilitySD.AbilityDataBlobType != null)
-                {
-                    designAttribute.DataBlobType = Type.GetType(abilitySD.AbilityDataBlobType);        
-                }
-                
+                ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this, attrbSD, factionTech);
                 ComponentDesignAttributes.Add(designAttribute.Name, designAttribute);
-                
-                //TODO: get rid of this once json data is rewritten to use names instead of indexes
                 ComponentDesignAttributeList.Add(designAttribute);
             }
 
@@ -313,29 +270,33 @@ namespace Pulsar4X.ECSLib
             EvalAll();
             foreach (var designAttribute in ComponentDesignAttributes.Values)
             {
-                if (designAttribute.DataBlobType != null)
+                if (designAttribute.AttributeType != null && designAttribute.IsEnabled)
                 {
-                    if (designAttribute.DataBlobArgs == null)
+                    if (designAttribute.AtbConstrArgs == null)
                         designAttribute.SetValue();  //force recalc.
                                  
-                    object[] constructorArgs = designAttribute.DataBlobArgs;
+                    object[] constructorArgs = designAttribute.AtbConstrArgs;
                     try
                     {
-                        dynamic attrbute = (IComponentDesignAttribute)Activator.CreateInstance(designAttribute.DataBlobType, constructorArgs);
+                        dynamic attrbute = (IComponentDesignAttribute)Activator.CreateInstance(designAttribute.AttributeType, constructorArgs);
                         _design.AttributesByType[attrbute.GetType()] = attrbute;
                     }
                     catch (MissingMethodException e)
                     {
-                        string exstr = "The Attribute: " + designAttribute.DataBlobType + " was found, but the arguments did not match any constructors.\nThe given arguments are:\n" 
-                                       + designAttribute.DataBlobArgs + "\n" 
-                                       + constructorArgs + "\n" 
-                                       + "which are of type: " + constructorArgs.GetType() 
-                                       + "\nThe full exception is as follows:\n" + e;
+                        string argTypes = "";
+                        int i = 0;
+                        foreach (var arg in constructorArgs)
+                        {
+                            argTypes += arg.GetType() + ": " + constructorArgs[i].ToString() + ",\n";
+                            
+                            i++;
+                        }
+                        
+                        string exstr = "The Attribute: " + designAttribute.AttributeType + " was found, but the arguments did not match any constructors.\nThe given arguments are:\n"
+                                       + argTypes 
+                                       + "The full exception is as follows:\n" + e;
                         throw new Exception(exstr);
                     }
-
-                    
-                    
                 }
             }
 
@@ -376,14 +337,24 @@ namespace Pulsar4X.ECSLib
         public string Name 
         {             
             get { return _design.Name; }
-            set { _design.Name = value; } }
-        public string Description 
-        {             
-            get { return _design.Description; }
-            set { _design.Description = value; } 
+            set { _design.Name = value; } 
         }
 
 
+        internal ChainedExpression DescriptionFormula { get; set; }
+        
+        public string Description
+        {
+            get
+            {
+                if (DescriptionFormula == null)
+                    return "";
+                else
+                    return DescriptionFormula.StrResult;
+            }
+        }
+
+        
 
         public int MassValue
         {
@@ -396,12 +367,12 @@ namespace Pulsar4X.ECSLib
             _design.Mass = MassFormula.IntResult;
         }
 
-        public int VolumeValue { get { return _design.Volume; } }//TODO: check units are @SI UNITS kg/m^3
+        public int VolumeM3Value { get { return _design.Volume_m3; } }//TODO: check units are @SI UNITS kg/m^3
         internal ChainedExpression VolumeFormula { get; set; }
         public void SetVolume()
         {
             VolumeFormula.Evaluate();
-            _design.Volume = VolumeFormula.IntResult;
+            _design.Volume_m3 = VolumeFormula.IntResult;
         }
 
 

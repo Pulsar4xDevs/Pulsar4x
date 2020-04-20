@@ -85,8 +85,8 @@ namespace Pulsar4X.ECSLib
 
             foreach (var design in gameVM.CurrentFaction.GetDataBlob<FactionInfoDB>().MissileDesigns)
             {
-                Payload payload = new Payload(design.Value);
-                PayloadTypes.Add(payload, payload.Name);
+                //Payload payload = new Payload(design.Value);
+                //PayloadTypes.Add(payload, payload.Name);
             } 
 
         }

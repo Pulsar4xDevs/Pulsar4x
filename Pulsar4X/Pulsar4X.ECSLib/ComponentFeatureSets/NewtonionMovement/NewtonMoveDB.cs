@@ -86,9 +86,18 @@ namespace Pulsar4X.ECSLib
             FuelType = fuelType;
         }
 
+        public NewtonThrustAbilityDB(NewtonThrustAbilityDB db)
+        {
+            ThrustInNewtons = db.ThrustInNewtons;
+            ExhaustVelocity = db.ExhaustVelocity;
+            FuelType = db.FuelType;
+            FuelBurnRate = db.FuelBurnRate;
+            DeltaV = db.DeltaV;
+        }
+
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new NewtonThrustAbilityDB(this);
         }
     }
 
@@ -116,6 +125,11 @@ namespace Pulsar4X.ECSLib
         [JsonConstructor]
         private NewtonMoveDB() { }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sphereOfInfluenceParent"></param>
+        /// <param name="velocity_ms">ParentRalitive Velocity</param>
         public NewtonMoveDB(Entity sphereOfInfluenceParent, Vector3 velocity_ms)
         {
             CurrentVector_ms = velocity_ms;

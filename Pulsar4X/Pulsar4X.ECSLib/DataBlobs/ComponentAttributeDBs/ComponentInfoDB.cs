@@ -14,6 +14,7 @@ namespace Pulsar4X.ECSLib
         PlanetInstallation  = 1 << 2,
         PDC                 = 1 << 3,
         Fighter             = 1 << 4,
+        Missile             = 1 << 5,
     }
 
     public class ComponentInfoDB : BaseDataBlob

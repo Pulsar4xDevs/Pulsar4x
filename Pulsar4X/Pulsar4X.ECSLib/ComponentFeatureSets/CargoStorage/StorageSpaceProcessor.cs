@@ -215,7 +215,10 @@ namespace Pulsar4X.ECSLib
 
                     if (instance.HealthPercent() > 0.75)
                     {
-                        calculatedMaxStorage[atbdata.CargoTypeGuid] = atbdata.StorageCapacity;
+                        if(!calculatedMaxStorage.ContainsKey(atbdata.CargoTypeGuid))
+                            calculatedMaxStorage[atbdata.CargoTypeGuid] = atbdata.StorageCapacity;
+                        else
+                            calculatedMaxStorage[atbdata.CargoTypeGuid] += atbdata.StorageCapacity;
                         transferRate += atbdata.TransferRate;
                         transferRange += atbdata.TransferRange;
                         i++;
@@ -266,17 +269,23 @@ namespace Pulsar4X.ECSLib
                     newStore.FreeCapacityKg = validMaxCapacity;
                     storageDBStoredCargos.Add(cargoTypeID, newStore);                                        
                 }
+
                 
                 else if (storageDBStoredCargos[cargoTypeID].MaxCapacityKg != validMaxCapacity)
-                {    
-                    long usedSpace = storageDBStoredCargos[cargoTypeID].MaxCapacityKg - storageDBStoredCargos[cargoTypeID].FreeCapacityKg;
-                    
-                    storageDBStoredCargos[cargoTypeID].MaxCapacityKg = validMaxCapacity;
-
-                    if (!(usedSpace <= validMaxCapacity))
+                {
+                    CargoTypeStore typeStore = storageDBStoredCargos[cargoTypeID];
+                    if (typeStore.ItemsAndAmounts.Count == 0 && typeStore.SpecificEntites.Count == 0)
+                        typeStore.FreeCapacityKg = validMaxCapacity;
+                    else
                     {
-                        long overweight = usedSpace - validMaxCapacity;
-                        DropRandomCargo(storageDBStoredCargos[cargoTypeID], overweight);
+                        long usedSpace = typeStore.MaxCapacityKg - typeStore.FreeCapacityKg;
+                        typeStore.MaxCapacityKg = validMaxCapacity;
+
+                        if (!(usedSpace <= validMaxCapacity))
+                        {
+                            long overweight = usedSpace - validMaxCapacity;
+                            DropRandomCargo(typeStore, overweight);
+                        }
                     }
                 }
             }

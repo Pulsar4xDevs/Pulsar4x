@@ -6,13 +6,20 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.IO;
+using System.Runtime.CompilerServices;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
+
+    
 {
+    
+
     public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
     public class GlobalUIState
     {
+        public bool debugnewgame = true;
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
         internal static readonly Dictionary<Type, string> namesForMenus = new Dictionary<Type, string>{
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},
@@ -21,9 +28,9 @@ namespace Pulsar4X.SDL2UI
             {typeof(WeaponTargetingControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
-            {typeof(ColonyPanel), "econ"},
-            {typeof(GotoSystemBlankMenuHelper), "goto system"},
-            {typeof(SelectPrimaryBlankMenuHelper), "select as primary"},
+            {typeof(ColonyPanel), "Economy"},
+            {typeof(GotoSystemBlankMenuHelper), "Go to system"},
+            {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
             {typeof(PlanetaryWindow), "Planetary window"}
         };
         internal Game Game;
@@ -39,7 +46,11 @@ namespace Pulsar4X.SDL2UI
 
         internal GalacticMapRender GalacticMap;
 
+        internal List<UpdateWindowState> UpdateableWindows = new List<UpdateWindowState>();
+        internal DateTime LastGameUpdateTime = new DateTime();
         internal StarSystem SelectedSystem { get { return StarSystemStates[SelectedStarSysGuid].StarSystem; } }
+        internal DateTime SelectedSystemTime { get { return StarSystemStates[SelectedStarSysGuid].StarSystem.StarSysDateTime; } }
+        internal DateTime SelectedSysLastUpdateTime = new DateTime();
         internal Guid SelectedStarSysGuid { get { return GalacticMap.SelectedStarSysGuid; } }
         internal SystemMapRendering SelectedSysMapRender { get { return GalacticMap.SelectedSysMapRender; } }
         internal DateTime PrimarySystemDateTime; //= new DateTime();
@@ -53,6 +64,7 @@ namespace Pulsar4X.SDL2UI
         internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
 
         internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new Dictionary<Type, PulsarGuiWindow>();
+        internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new Dictionary<String, NonUniquePulsarGuiWindow>();
         internal PulsarGuiWindow ActiveWindow { get; set; }
 
         internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new List<List<UserOrbitSettings>>();
@@ -73,7 +85,7 @@ namespace Pulsar4X.SDL2UI
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
             ViewPort = viewport;
-            PulsarGuiWindow._state = this;
+            PulsarGuiWindow._uiState = this;
             var windowPtr = viewport.Handle;
             SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_DRIVER, "opengl");
             //var surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
@@ -94,7 +106,7 @@ namespace Pulsar4X.SDL2UI
 
             Camera = new Camera(viewport);
 
-            MainMenuItems.GetInstance().IsActive = true;
+            MainMenuItems.GetInstance().SetActive();
 
             string rf = "Resources";
             LoadImg("Logo", Path.Combine( rf,"PulsarLogo.bmp"));
@@ -107,6 +119,7 @@ namespace Pulsar4X.SDL2UI
             LoadImg("CancelImg", Path.Combine( rf,"CancelIco.bmp"));
             LoadImg("DesComp", Path.Combine(rf, "DesignComponentIco.bmp"));
             LoadImg("DesShip", Path.Combine(rf, "DesignShipIco.bmp"));
+            LoadImg("DesOrd", Path.Combine(rf, "DesignOrdnanceIco.bmp"));
             LoadImg("GalMap", Path.Combine(rf, "GalaxyMapIco.bmp"));
             LoadImg("Research", Path.Combine(rf, "ResearchIco.bmp"));
             LoadImg("Power", Path.Combine(rf, "PowerIco.bmp"));
@@ -117,6 +130,10 @@ namespace Pulsar4X.SDL2UI
             LoadImg("Pin", Path.Combine(rf, "PinIco.bmp"));
             LoadImg("Rename", Path.Combine(rf, "RenameIco.bmp"));
             LoadImg("Select", Path.Combine(rf, "SelectIco.bmp"));
+            LoadImg("Tree", Path.Combine(rf, "TreeIco.bmp"));
+
+            //DEBUG Code: (can be deleted);
+            DamageTools.LoadFromBitMap(Path.Combine(rf, "ImgTest.bmp"));
             /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
@@ -131,7 +148,7 @@ namespace Pulsar4X.SDL2UI
 
         private void deactivateAllClosableWindows(){
             foreach(var window in LoadedWindows){
-                window.Value.IsActive = false;
+                window.Value.SetActive(false);
             }
         }
 
@@ -294,16 +311,37 @@ namespace Pulsar4X.SDL2UI
 
     }
 
+    public abstract class UpdateWindowState
+    {
+        internal static GlobalUIState _uiState;
+        public abstract bool GetActive();
+        
+        public abstract void OnGameTickChange(DateTime newDate);
+        public abstract void OnSystemTickChange(DateTime newDate);
 
-    public abstract class PulsarGuiWindow
+        public abstract void OnSelectedSystemChange(StarSystem newStarSys);
+
+        protected UpdateWindowState()
+        {
+            _uiState.UpdateableWindows.Add(this);
+        }
+
+        public void Deconstructor()
+        {
+            _uiState.UpdateableWindows.Remove(this);
+        }
+
+    }
+
+    public abstract class PulsarGuiWindow : UpdateWindowState
     {
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
         //internal bool IsLoaded;
         internal bool CanActive = false;
-        internal bool IsActive = false;
+        protected bool IsActive = false;
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
-        internal static GlobalUIState _state;
+
         public void SetActive(bool ActiveVal = true)
         {
             IsActive = ActiveVal;
@@ -312,11 +350,15 @@ namespace Pulsar4X.SDL2UI
         {
             IsActive = !IsActive;
         }
+        public override bool GetActive()
+        {
+            return IsActive;
+        }
 
 
         protected PulsarGuiWindow()
         {
-             _state.LoadedWindows[this.GetType()] = this;
+            _uiState.LoadedWindows[this.GetType()] = this;
         }
 
 
@@ -345,16 +387,67 @@ namespace Pulsar4X.SDL2UI
 
         internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
 
+        public override void OnGameTickChange(DateTime newDate)
+        {
+        }
+        
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+        }
+        
+        public override void OnSelectedSystemChange(StarSystem newStarSys)
+        {
+        }
+    }
+
+    public abstract class NonUniquePulsarGuiWindow
+    {
+        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
+        internal bool CanActive = false;
+        internal bool IsActive = false;
+        internal string UniqueName = "test";
+        internal static GlobalUIState _state;
+
+        public void SetActive(bool ActiveVal = true)
+        {
+            IsActive = ActiveVal;
+        }
+        public void ToggleActive()
+        {
+            IsActive = !IsActive;
+        }
+        public bool GetActive()
+        {
+            return IsActive;
+        }
+
+        public void SetName(string Newname)
+        {
+            UniqueName = Newname;
+        }
+
+        public void StartDisplay()
+        {
+            _state.LoadedNonUniqueWindows[this.UniqueName] = this;
+        }
+
+
+        protected NonUniquePulsarGuiWindow()
+        {
+                
+        }
+
+
+        internal abstract void Display();
+
+        internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
+
+        internal virtual void EntitySelectedAsPrimary(EntityState entity) { }
+
+        internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
+
         internal void Destroy()
         {
-            /*
-            IsLoaded = false;
-            var lastItem = _state.LoadedWindows[_state.LoadedWindows.Count - 1];
-            if (lastItem.StateIndex != _state.LoadedWindows.Count - 1)
-                throw new Exception("index error in window count");
-            _state.LoadedWindows.RemoveAt(lastItem.StateIndex);
-            _state.LoadedWindows[StateIndex] = lastItem;
-            */
         }
 
     }

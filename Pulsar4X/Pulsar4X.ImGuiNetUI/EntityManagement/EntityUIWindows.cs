@@ -2,6 +2,7 @@
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.SDL2UI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 
@@ -52,10 +53,14 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            if(T == typeof(JumpThroughJumpPointBlankMenuHelper)){
-                if(checkIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state)){
-                    if(_state.PrimaryEntity != null){
-                        if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (ECSLib.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition_m, _entityState.Position.AbsolutePosition_m) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m)){
+            if(T == typeof(JumpThroughJumpPointBlankMenuHelper))
+            {
+                if(checkIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state))
+                {
+                    if(_state.PrimaryEntity != null)
+                    {
+                        if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (ECSLib.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition_m, _entityState.Position.AbsolutePosition_m) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m))
+                        {
                             return true;
                         }
                         else { return false; }
@@ -95,7 +100,7 @@ namespace Pulsar4X.SDL2UI
             else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
                 { return true; }
             //if entity can fire?
-            else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && T == typeof(WeaponTargetingControl))
+            else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && T == typeof(FireControl))
                 { return true; }
             //if entity can be renamed?
             else if (T == typeof(RenameWindow))
@@ -140,27 +145,27 @@ namespace Pulsar4X.SDL2UI
                 //if entity can warp
                 else if (T == typeof(WarpOrderWindow))
                 {
-                    WarpOrderWindow.GetInstance(_entityState).IsActive = true;
+                    WarpOrderWindow.GetInstance(_entityState).ToggleActive();
                     _state.ActiveWindow = WarpOrderWindow.GetInstance(_entityState);
                 }
                //Menu is change orbit menu
                 else if (T == typeof(ChangeCurrentOrbitWindow))
                 {
-                    ChangeCurrentOrbitWindow.GetInstance(_entityState).IsActive = true;
+                    ChangeCurrentOrbitWindow.GetInstance(_entityState).ToggleActive();
                     _state.ActiveWindow = ChangeCurrentOrbitWindow.GetInstance(_entityState);
                 }
                 //Menu is ficrecontrol menu
-                else if (T == typeof(WeaponTargetingControl))
+                else if (T == typeof(FireControl))
                 {
-                    var instance = WeaponTargetingControl.GetInstance(_entityState);
-                    instance.SetOrderEntity(_entityState);
-                    instance.IsActive = true;
+                    var instance = FireControl.GetInstance(_entityState);
+                    //instance.SetOrderEntity(_entityState);
+                    instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
                 //Menu is rename menu
                 else if (T == typeof(RenameWindow))
                 {
-                    RenameWindow.GetInstance(_entityState).IsActive = true;
+                    RenameWindow.GetInstance(_entityState).ToggleActive();
                     _state.ActiveWindow = RenameWindow.GetInstance(_entityState);
                     if(managesUIPopUps){
                         ImGui.CloseCurrentPopup();
@@ -171,29 +176,48 @@ namespace Pulsar4X.SDL2UI
                 else if (T == typeof(CargoTransfer))
                 {
                     var instance = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState);
-                    instance.IsActive = true;
+                    instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
                 //Menu is econ menu
                 else if (T == typeof(ColonyPanel))
                 {
                     var instance = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState);
-                    instance.IsActive = true;
+                    instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
                 //
-                if(T == typeof(PlanetaryWindow)){
+                if (T == typeof(PlanetaryWindow))
+                {
                     var instance = PlanetaryWindow.GetInstance(_entityState);
-                    instance.IsActive = true;
+                    instance.ToggleActive();
                     _state.ActiveWindow = instance;
-                
-                //TODO: implement this(moving a ship entity[_state.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
-                if(T == typeof(JumpThroughJumpPointBlankMenuHelper)){
 
+                    //TODO: implement this(moving a ship entity[_uiState.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
+                    if (T == typeof(JumpThroughJumpPointBlankMenuHelper))
+                    {
+
+                    }
                 }
             }
         }
+        public static bool checkopenUIWindow(Type T, EntityState _entityState, GlobalUIState _state)
+        {
+            //If the user has requested a menu be opened and if
+            bool returnval;
+
+            if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
+            else if (T == typeof(ChangeCurrentOrbitWindow)) returnval = ChangeCurrentOrbitWindow.GetInstance(_entityState).GetActive();
+            else if (T == typeof(FireControl)) returnval = FireControl.GetInstance(_entityState).GetActive();
+            else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
+            else if (T == typeof(CargoTransfer)) returnval = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState).GetActive();
+            else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState).GetActive();
+            else returnval = false;
+            return returnval;
+
+
+        }
     }
-}
+
 }
     
