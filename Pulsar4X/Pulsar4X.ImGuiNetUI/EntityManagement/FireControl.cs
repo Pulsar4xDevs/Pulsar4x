@@ -493,15 +493,31 @@ namespace Pulsar4X.ImGuiNetUI
                     
                     if (_storedOrdnance.ContainsKey(ordDes.ID))
                     {
+
+                        //ImGui.SameLine();
+                        //ImGui.Text(ordDes.Name);
+                        BorderGroup.BeginBorder(ordDes.Name);
+                        
+                        //ImGui.SameLine();
+                        ImGui.Text("Qty in magaziene: " + _storedOrdnance[ordDes.ID]);
+                        ImGui.Text("Mass: " + ordDes.WetMass);
+                        
+                        double burnRate = ordDes.BurnRate;
+                        double exaustVel = ordDes.ExaustVelocity;
+                        double thrustNewtons = burnRate * exaustVel;
+                        double burnTime = (ordDes.WetMass - ordDes.DryMass) / burnRate;
+                        double dv = OrbitMath.TsiolkovskyRocketEquation(ordDes.WetMass, ordDes.DryMass, exaustVel);
+                        ImGui.Text("Burn Time: " + burnTime + "s");
+                        ImGui.Text("Thrust: " + Stringify.Thrust(thrustNewtons));
+                        ImGui.Text("DeltaV: " + Stringify.Velocity(dv));
+                        
                         if (ImGui.SmallButton("Set"))
                         {
                             SetOrdnance(_missileLaunchers[_wpnIndex].ID, ordDes.ID);
                             _c2type = C2Type.SetWeapons;
                         }
-                        ImGui.SameLine();
-                        ImGui.Text(ordDes.Name);
-                        ImGui.SameLine();
-                        ImGui.Text("(" + _storedOrdnance[ordDes.ID] + ")");
+                        
+                        BorderGroup.EndBoarder();
                     }
                     else if (!_showOnlyCargoOrdnance)
                     {
@@ -514,6 +530,7 @@ namespace Pulsar4X.ImGuiNetUI
                         ImGui.Text(ordDes.Name);
                     }
                 }
+                BorderGroup.EndBoarder();
             }
         }
     }
