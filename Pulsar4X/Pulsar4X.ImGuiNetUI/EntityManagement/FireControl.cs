@@ -21,8 +21,20 @@ namespace Pulsar4X.ImGuiNetUI
         public class WeaponComponentInstance
         {
             public ComponentInstance WeaponInstance;
-            public ComponentInstance FirecontrolInstance;
             public WeaponState CurrentWeaponState;
+
+            public ComponentInstance FirecontrolInstance
+            {
+                get
+                {
+                    return CurrentWeaponState.Master;
+                }
+
+                set
+                {
+                    CurrentWeaponState.Master = FirecontrolInstance;
+                }
+            }
             public WeaponComponentInstance(ComponentInstance _WeaponInstance)
             {
                 WeaponInstance = _WeaponInstance;
@@ -160,8 +172,8 @@ namespace Pulsar4X.ImGuiNetUI
 
                 if (instancesDB.TryGetComponentsByAttribute<MissileLauncherAtb>(out var temp_missileLaunchers)) 
                 {
-                    for (int i = 0; i < temp_missileLaunchers.Count; i++)
-                        _missileLaunchers.Add(new WeaponComponentInstance(temp_missileLaunchers[i]));
+                    foreach (ComponentInstance missile in temp_missileLaunchers)
+                        _missileLaunchers.Add(new WeaponComponentInstance(missile));
                     _allWeaponsinstances.AddRange(_missileLaunchers.ToList());
                 }
                 if (instancesDB.TryGetComponentsByAttribute<RailGunAtb>(out var temp_railGuns)) 
