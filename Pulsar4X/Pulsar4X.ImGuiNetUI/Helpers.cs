@@ -67,7 +67,7 @@ namespace Pulsar4X.SDL2UI
             //ImGui.get
             ImDrawListPtr wdl = ImGui.GetWindowDrawList();
 
-            float by = _startPos[_nestIndex].Y + size.Y -_dentMulitpier * _nestIndex;
+            float by = _startPos[_nestIndex].Y + size.Y + _dentMulitpier -_dentMulitpier * _nestIndex;
             float rx = _startPos[_nestIndex].X + size.X - _dentMulitpier * _nestIndex;
             
             Vector2[] pts = new Vector2[6];
