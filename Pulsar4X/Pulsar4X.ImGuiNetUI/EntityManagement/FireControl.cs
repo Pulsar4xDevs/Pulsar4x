@@ -142,20 +142,23 @@ namespace Pulsar4X.ImGuiNetUI
 
 
 
-                if (instancesDB.TryGetComponentsByAttribute<MissileLauncherAtb>(out _missileLaunchers)) 
+                if (instancesDB.TryGetComponentsByAttribute<MissileLauncherAtb>(out var temp_missileLaunchers)) 
                 {
+                    _missileLaunchers = temp_missileLaunchers;
                     for (int i = 0; i < _missileLaunchers.Count; i++)
                         _missileLaunchers[i].CurrentWeaponState = _missileLaunchers[i].GetAbilityState<WeaponState>();
                     _allWeaponsinstances.AddRange(_missileLaunchers.ToList());
                 }
-                if (instancesDB.TryGetComponentsByAttribute<RailGunAtb>(out _railGuns)) 
+                if (instancesDB.TryGetComponentsByAttribute<RailGunAtb>(out var temp_railGuns)) 
                 {
+                    _railGuns = temp_railGuns;
                     foreach (ComponentInstance railgun in _railGuns)
                         railgun.CurrentWeaponState = railgun.GetAbilityState<WeaponState>();
                     _allWeaponsinstances.AddRange(_railGuns.ToList());
                 }
-                if (instancesDB.TryGetComponentsByAttribute<SimpleBeamWeaponAtbDB>(out _beamWpns)) 
+                if (instancesDB.TryGetComponentsByAttribute<SimpleBeamWeaponAtbDB>(out var temp_beamWpns)) 
                 {
+                    _beamWpns = temp_beamWpns;
                     for (int i = 0; i < _beamWpns.Count; i++)
                         _beamWpns[i].CurrentWeaponState = _beamWpns[i].GetAbilityState<WeaponState>();
                     _allWeaponsinstances.AddRange(_beamWpns.ToList());
