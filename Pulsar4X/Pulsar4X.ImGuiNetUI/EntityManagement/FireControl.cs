@@ -385,97 +385,108 @@ namespace Pulsar4X.ImGuiNetUI
         }
         void DisplayWeaponColumn()
         {
-            BorderGroup.BeginBorder("Missile Launchers:");
-            for (int i = 0; i < _missileLaunchers.Count; i++)
+            if (_missileLaunchers != null)
             {
-                if (ImGui.SmallButton(_missileLaunchers[i].Name + "##" + i))
+                BorderGroup.BeginBorder("Missile Launchers:");
+                for (int i = 0; i < _missileLaunchers.Count; i++)
                 {
-
-                    var wns = new List<ComponentInstance>(_fcState[i].AssignedWeapons);
-                    Guid[] wnids = new Guid[wns.Count + 1];
-                    for (int k = 0; k < wns.Count; k++)
+                    if (ImGui.SmallButton(_missileLaunchers[i].Name + "##" + i))
                     {
-                        wnids[k] = wns[k].ID;
+
+                        var wns = new List<ComponentInstance>(_fcState[i].AssignedWeapons);
+                        Guid[] wnids = new Guid[wns.Count + 1];
+                        for (int k = 0; k < wns.Count; k++)
+                        {
+                            wnids[k] = wns[k].ID;
+                        }
+                        wnids[wns.Count] = _missileLaunchers[i].ID;
+                        SetWeapons(wnids);
                     }
-                    wnids[wns.Count] = _missileLaunchers[i].ID;
-                    SetWeapons(wnids);
-                }
-                ImGui.Indent();
-                for (int j = 0; j < _missileLaunchers[i].CurrentWeaponState.WeaponStats.Length; j++)
-                {
-                    var stat = _missileLaunchers[i].CurrentWeaponState.WeaponStats[j];
-                    string str = stat.name + Stringify.Value(stat.value, stat.valueType);
-                    ImGui.Text(str);
-                }
+                    ImGui.Indent();
+                    for (int j = 0; j < _missileLaunchers[i].CurrentWeaponState.WeaponStats.Length; j++)
+                    {
+                        var stat = _missileLaunchers[i].CurrentWeaponState.WeaponStats[j];
+                        string str = stat.name + Stringify.Value(stat.value, stat.valueType);
+                        ImGui.Text(str);
+                    }
 
-                if (_missileLaunchers[i].CurrentWeaponState.AssignedOrdnanceDesign != null)
-                {
-                    string ordname = _missileLaunchers[i].CurrentWeaponState.AssignedOrdnanceDesign.Name;
-                    ImGui.Text("Assigned Ordnance: " + ordname);
-                }
+                    if (_missileLaunchers[i].CurrentWeaponState.AssignedOrdnanceDesign != null)
+                    {
+                        string ordname = _missileLaunchers[i].CurrentWeaponState.AssignedOrdnanceDesign.Name;
+                        ImGui.Text("Assigned Ordnance: " + ordname);
+                    }
 
-                if (ImGui.Button("Select Ordnance"))
-                {
-                    _wpnIndex = i;
-                    _c2type = C2Type.SetOrdnance;
-                }
-                ImGui.Unindent();
+                    if (ImGui.Button("Select Ordnance"))
+                    {
+                        _wpnIndex = i;
+                        _c2type = C2Type.SetOrdnance;
+                    }
+                    ImGui.Unindent();
 
+                }
+                BorderGroup.EndBoarder();
+                ImGui.NewLine();
             }
-            BorderGroup.EndBoarder();
-            ImGui.NewLine();
-            BorderGroup.BeginBorder("Rail Guns:");
-            for (int i = 0; i < _railGuns.Count; i++)
+
+            if (_railGuns != null)
             {
-
-                if (ImGui.SmallButton(_railGuns[i].Name + "##" + i))
+                BorderGroup.BeginBorder("Rail Guns:");
+                for (int i = 0; i < _railGuns.Count; i++)
                 {
-                    var wns = new List<ComponentInstance>(_fcState[i].AssignedWeapons);
-                    Guid[] wnids = new Guid[wns.Count + 1];
-                    for (int k = 0; k < wns.Count; k++)
+
+                    if (ImGui.SmallButton(_railGuns[i].Name + "##" + i))
                     {
-                        wnids[k] = wns[k].ID;
+                        var wns = new List<ComponentInstance>(_fcState[i].AssignedWeapons);
+                        Guid[] wnids = new Guid[wns.Count + 1];
+                        for (int k = 0; k < wns.Count; k++)
+                        {
+                            wnids[k] = wns[k].ID;
+                        }
+                        wnids[wns.Count] = _railGuns[i].ID;
+                        SetWeapons(wnids);
                     }
-                    wnids[wns.Count] = _railGuns[i].ID;
-                    SetWeapons(wnids);
-                }
-                ImGui.Indent();
-                for (int j = 0; j < _railGuns[i].CurrentWeaponState.WeaponStats.Length; j++)
-                {
-                    var stat = _railGuns[i].CurrentWeaponState.WeaponStats[j];
-                    string str = stat.name + Stringify.Value(stat.value, stat.valueType);
-                    ImGui.Text(str);
-                }
-                ImGui.Unindent();
+                    ImGui.Indent();
+                    for (int j = 0; j < _railGuns[i].CurrentWeaponState.WeaponStats.Length; j++)
+                    {
+                        var stat = _railGuns[i].CurrentWeaponState.WeaponStats[j];
+                        string str = stat.name + Stringify.Value(stat.value, stat.valueType);
+                        ImGui.Text(str);
+                    }
+                    ImGui.Unindent();
 
+                }
+                BorderGroup.EndBoarder();
+                ImGui.NewLine();
             }
-            BorderGroup.EndBoarder();
-            ImGui.NewLine();
-            BorderGroup.BeginBorder("Beam Weapons:");
-            for (int i = 0; i < _beamWpns.Count; i++)
+
+            if (_railGuns != null)
             {
-                if (ImGui.SmallButton(_beamWpns[i].Name + "##" + i))
+                BorderGroup.BeginBorder("Beam Weapons:");
+                for (int i = 0; i < _beamWpns.Count; i++)
                 {
-                    var wns = new List<ComponentInstance>(_fcState[i].AssignedWeapons);
-                    Guid[] wnids = new Guid[wns.Count + 1];
-                    for (int k = 0; k < wns.Count; k++)
+                    if (ImGui.SmallButton(_beamWpns[i].Name + "##" + i))
                     {
-                        wnids[k] = wns[k].ID;
+                        var wns = new List<ComponentInstance>(_fcState[i].AssignedWeapons);
+                        Guid[] wnids = new Guid[wns.Count + 1];
+                        for (int k = 0; k < wns.Count; k++)
+                        {
+                            wnids[k] = wns[k].ID;
+                        }
+                        wnids[wns.Count] = _beamWpns[i].ID;
+                        SetWeapons(wnids);
                     }
-                    wnids[wns.Count] = _beamWpns[i].ID;
-                    SetWeapons(wnids);
-                }
-                ImGui.Indent();
-                for (int j = 0; j < _beamWpns[i].CurrentWeaponState.WeaponStats.Length; j++)
-                {
-                    var stat = _beamWpns[i].CurrentWeaponState.WeaponStats[j];
-                    string str = stat.name + Stringify.Value(stat.value, stat.valueType);
-                    ImGui.Text(str);
-                }
-                ImGui.Unindent();
+                    ImGui.Indent();
+                    for (int j = 0; j < _beamWpns[i].CurrentWeaponState.WeaponStats.Length; j++)
+                    {
+                        var stat = _beamWpns[i].CurrentWeaponState.WeaponStats[j];
+                        string str = stat.name + Stringify.Value(stat.value, stat.valueType);
+                        ImGui.Text(str);
+                    }
+                    ImGui.Unindent();
 
+                }
+                BorderGroup.EndBoarder();
             }
-            BorderGroup.EndBoarder();
         }
 
         void DisplayAmmoColumn()
