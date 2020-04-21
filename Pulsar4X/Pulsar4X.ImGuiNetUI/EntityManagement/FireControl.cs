@@ -101,12 +101,16 @@ namespace Pulsar4X.ImGuiNetUI
             
             foreach (var cargoType in ctypes)
             {
-                var shipOrdnances = _orderEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes[cargoType].ItemsAndAmounts;
-                
-                foreach (var ordType in shipOrdnances.Values)
+                if (_orderEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes.ContainsKey(cargoType))
                 {
-                    _storedOrdnance[ordType.item.ID]= (int)ordType.amount;
+                    var shipOrdnances = _orderEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes[cargoType].ItemsAndAmounts;
+
+                    foreach (var ordType in shipOrdnances.Values)
+                    {
+                        _storedOrdnance[ordType.item.ID] = (int)ordType.amount;
+                    }
                 }
+
             }
         }
         
