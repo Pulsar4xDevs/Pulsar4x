@@ -313,10 +313,18 @@ namespace Pulsar4X.ImGuiNetUI
                 for (int j = 0; j < _fcState[i].AssignedWeapons.Count; j++)
                 {
                     var wpn = _fcState[i].AssignedWeapons[j];
+                    //ImGui.BeginDragDropSource();
+                    
                     if (ImGui.SmallButton(wpn.Name))
                     {
                         
-
+                    }
+                    //ImGui.SetDragDropPayload("weapon");
+                    //ImGui.EndDragDropSource();
+                    ImGui.SameLine();
+                    
+                    if (ImGui.SmallButton("X"))
+                    {
                         _fcState[i].AssignedWeapons.RemoveAt(j);
                         Guid[] wnids = new Guid[_fcState[i].AssignedWeapons.Count];
                         for (int k = 0; k < _fcState[i].AssignedWeapons.Count; k++)
@@ -331,7 +339,7 @@ namespace Pulsar4X.ImGuiNetUI
                             {
                                 weapon.FireControl = null;
                             }
-                          
+
                         }
                     }
 
