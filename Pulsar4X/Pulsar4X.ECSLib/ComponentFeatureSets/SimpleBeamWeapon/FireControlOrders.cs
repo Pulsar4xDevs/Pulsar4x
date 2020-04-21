@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
                 fcinstance.AssignedWeapons = _weaponsAssigned;
                 foreach (var wpn in _weaponsAssigned)
                 {
-                    wpn.Master = _fireControlComponent;
+                    wpn.GetAbilityState<WeaponState>().Master = _fireControlComponent;
                 }
                 IsRunning = true;
             }

@@ -60,27 +60,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int HTKMax { get; private set; }
 
-        [JsonProperty]
-        private ComponentInstance _master;
-        public ComponentInstance Master
-        {
-            get
-            {
-                return _master;
-            }
 
-            set
-            {
-                if (value == null)
-                    _master = null;
-                else if (value.HasAblity<FireControlAbilityState>())
-                    _master = value;
-                else
-                    _master = null;
-            }
-        }
 
-        public WeaponState CurrentWeaponState { get; set; }
 
 
 
@@ -143,7 +124,7 @@ namespace Pulsar4X.ECSLib
             HTKMax = design.HTK;
             CargoTypeID = design.CargoTypeID;
             Name = design.Name;
-            _master = null;
+
         }
 
 
@@ -157,8 +138,6 @@ namespace Pulsar4X.ECSLib
             HTKMax = instance.HTKMax;
             CargoTypeID = instance.CargoTypeID;
             Name = instance.Name;
-            _master = instance.Master;
-            CurrentWeaponState = instance.CurrentWeaponState;
 
         }
         

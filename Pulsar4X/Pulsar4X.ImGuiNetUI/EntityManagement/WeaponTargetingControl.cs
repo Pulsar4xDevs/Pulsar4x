@@ -84,7 +84,7 @@ namespace Pulsar4X.SDL2UI
                 string wpnname = weaponInstanace.GetName();
                 _weaponNames.Add(weaponInstanace.ID, wpnname);
                 //_weapons.Add(wpnname);
-                if (weaponInstanace.Master == null)
+                if (weaponInstanace.GetAbilityState<WeaponState>().Master == null)
                     _unAssignedWeapons.Add(weaponInstanace.ID);
             }
             foreach (var item in _uiState.SelectedSystem.GetSensorContacts(_uiState.Faction.Guid).GetAllContacts())

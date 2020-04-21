@@ -19,8 +19,26 @@ namespace Pulsar4X.ECSLib
 
         public OrdnanceDesign AssignedOrdnanceDesign = null;
         public int InernalMagCurAmount = 0;
-        
 
+        [JsonProperty]
+        private ComponentInstance _master;
+        public ComponentInstance Master
+        {
+            get
+            {
+                return _master;
+            }
+
+            set
+            {
+                if (value == null)
+                    _master = null;
+                else if (value.HasAblity<FireControlAbilityState>())
+                    _master = value;
+                else
+                    _master = null;
+            }
+        }
 
         public WeaponState()
         {
@@ -32,6 +50,7 @@ namespace Pulsar4X.ECSLib
         {
             CoolDown = db.CoolDown;
             ReadyToFire = db.ReadyToFire;
+            _master = db.Master;
             
         }
         
