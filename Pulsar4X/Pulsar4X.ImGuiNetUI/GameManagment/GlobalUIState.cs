@@ -8,6 +8,7 @@ using System.Numerics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
@@ -25,7 +26,7 @@ namespace Pulsar4X.SDL2UI
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},
             {typeof(WarpOrderWindow), "Warp to a new orbit"},
             {typeof(ChangeCurrentOrbitWindow), "Change current orbit"},
-            {typeof(WeaponTargetingControl), "Fire Control" },
+            {typeof(FireControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
             {typeof(ColonyPanel), "Economy"},
