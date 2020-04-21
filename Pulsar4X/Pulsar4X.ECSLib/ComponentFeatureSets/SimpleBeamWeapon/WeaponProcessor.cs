@@ -27,8 +27,8 @@ namespace Pulsar4X.ECSLib
                     var wpnState = wpn.GetAbilityState<WeaponState>();
                     if (wpn.IsEnabled && wpnState.CoolDown <= atDate)
                     {
-                        var fc = wpnState.FireControl;
-                        if (wpnState.FireControl != null)
+                        var fc = wpnState.WeaponComponentInstance.Master;
+                        if (wpnState.WeaponComponentInstance.Master != null)
                         {
                             var fcstate = fc.GetAbilityState<FireControlAbilityState>();
                             if (fcstate.IsEngaging)
@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
         {
             //TODO: all this needs to get re-written. 
             WeaponState stateInfo = beamWeapon.GetAbilityState<WeaponState>();
-            FireControlAbilityState fireControl = stateInfo.FireControl.GetAbilityState<FireControlAbilityState>();
+            FireControlAbilityState fireControl = stateInfo.WeaponComponentInstance.Master.GetAbilityState<FireControlAbilityState>();
             if(!fireControl.Target.IsValid)
             {
                 fireControl.Target = null;
@@ -226,7 +226,7 @@ namespace Pulsar4X.ECSLib
                 minShotsPerfire[i + offset] = wpnAtb.MinShotsPerfire;
 
                 //wpnTypes[i + offset] = wpnAtb.WpnType;
-                fcStates[i + offset] = wpnState.FireControl.GetAbilityState<FireControlAbilityState>();
+                fcStates[i + offset] = wpnState.WeaponComponentInstance.Master.GetAbilityState<FireControlAbilityState>();
                 ordDes[i + offset] = wpnState.AssignedOrdnanceDesign;
                 if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
                     launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
@@ -346,7 +346,7 @@ namespace Pulsar4X.ECSLib
                 amountPerShot[i] = wpnAtb.AmountPerShot;
                 minShotsPerfire[i] = wpnAtb.MinShotsPerfire;
                 //wpnTypes[i] = wpnAtb.WpnType;
-                fcStates[i] = wpnState.FireControl.GetAbilityState<FireControlAbilityState>();
+                fcStates[i] = wpnState.WeaponComponentInstance.Master.GetAbilityState<FireControlAbilityState>();
                 ordDes[i] = wpnState.AssignedOrdnanceDesign;
                 if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
                     launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
@@ -452,7 +452,7 @@ namespace Pulsar4X.ECSLib
         public static void SetWeaponToFC(ComponentInstance fireControlInstance, ComponentInstance weaponInstance)
         {
             if (fireControlInstance.HasAblity<FireControlAbilityState>() && weaponInstance.TryGetAbilityState<WeaponState>(out var wpnState))
-                wpnState.FireControl = fireControlInstance;
+                wpnState.WeaponComponentInstance.Master = fireControlInstance;
             else
                 throw new Exception("needs FireContInstanceAbilityDB on fireControlInstance, and WeaponStateDB on weaponInstance");
         }
@@ -460,7 +460,7 @@ namespace Pulsar4X.ECSLib
         public static void RemoveWeaponFromFC(ComponentInstance weaponInstance)
         {
             if (weaponInstance.TryGetAbilityState<WeaponState>(out var wpnState))
-                wpnState.FireControl = null;
+                wpnState.WeaponComponentInstance.Master = null;
             else
                 throw new Exception("needs WeaponStateDB on weaponInstance");
         }
