@@ -292,7 +292,7 @@ namespace Pulsar4X.ECSLib
                             i++;
                         }
                         
-                        string exstr = "The Attribute: " + designAttribute.AttributeType + " was found, but the arguments did not match any constructors.\nThe given arguments are:\n"
+                        string exstr = "The Attribute: " + designAttribute.AttributeType + " in "+ _design.Name + " was found, but the arguments did not match any constructors.\nThe given arguments are:\n"
                                        + argTypes 
                                        + "The full exception is as follows:\n" + e;
                         throw new Exception(exstr);

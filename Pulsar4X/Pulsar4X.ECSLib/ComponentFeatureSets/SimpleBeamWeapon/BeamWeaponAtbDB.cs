@@ -107,6 +107,22 @@ namespace Pulsar4X.ECSLib
         {
         }
 
+        /// <summary>
+        /// constructor for json, all values get cast to ints (not rounded)
+        /// </summary>
+        /// <param name="magSize"></param>
+        /// <param name="reloadPerSec"></param>
+        /// <param name="amountPerShot"></param>
+        /// <param name="minShotsPerfire"></param>
+        public GenericWeaponAtb(double magSize, double reloadPerSec, double amountPerShot, double minShotsPerfire)
+        {
+            InternalMagSize = (int)magSize;
+            ReloadAmountPerSec = (int)reloadPerSec;
+            AmountPerShot = (int)amountPerShot;
+            MinShotsPerfire = (int)minShotsPerfire;
+            //WpnType = type;
+        }
+        
         public GenericWeaponAtb(int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire)
         {
             InternalMagSize = magSize;

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.ECSLib
 {
@@ -273,6 +274,83 @@ namespace Pulsar4X.ECSLib
                     {
                         _fireControlComponent = fc;
 
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+    
+    public class SetOrdinanceToWpnOrder : EntityCommand
+    {
+        internal override int ActionLanes => 1;
+
+        internal override bool IsBlocking => false;
+
+        [JsonIgnore]
+        Entity _factionEntity;
+
+        Entity _entityCommanding;
+        internal override Entity EntityCommanding { get { return _entityCommanding; } }
+
+
+
+        [JsonProperty]
+        public Guid WeaponGuid;
+        [JsonIgnore]
+        private ComponentInstance _weaponInstance;
+
+        public Guid OrdnanceAssigned;
+        private OrdnanceDesign _ordnanceAssigned;
+
+
+        public static void CreateCommand(DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid weaponGuid, Guid ordnanceAssigned)
+        {
+            var game = StaticRefLib.Game;
+            var cmd = new SetOrdinanceToWpnOrder()
+            {
+                RequestingFactionGuid = factionGuid,
+                EntityCommandingGuid = orderEntity,
+                CreatedDate = starSysDate,
+                WeaponGuid = weaponGuid,
+                OrdnanceAssigned = ordnanceAssigned
+            };
+            game.OrderHandler.HandleOrder(cmd);
+        }
+
+
+
+        internal override void ActionCommand(Game game)
+        {
+            if (!IsRunning)
+            {
+                var wpnState = _weaponInstance.GetAbilityState<WeaponState>();
+                wpnState.AssignedOrdnanceDesign = _ordnanceAssigned;
+                IsRunning = true;
+            }
+        }
+
+        internal override bool IsFinished()
+        {
+            if (IsRunning)
+                return true;
+            return false;
+        }
+
+        internal override bool IsValidCommand(Game game)
+        {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+            {
+                var instancesdb = _entityCommanding.GetDataBlob<ComponentInstancesDB>();
+
+                if (instancesdb.AllComponents.TryGetValue(WeaponGuid, out ComponentInstance wpn))
+                {
+                    _ordnanceAssigned = _factionEntity.GetDataBlob<FactionInfoDB>().MissileDesigns[OrdnanceAssigned];
+                    if(wpn.TryGetAbilityState(out WeaponState wpnState))
+                    {
+                        _weaponInstance = wpn;
+                        wpnState.AssignedOrdnanceDesign = _ordnanceAssigned;
                         return true;
                     }
                 }

@@ -220,6 +220,13 @@
               "AttributeFormula": " Ability('Operating Temprature') * Ability('Operating Temprature') * Ability('Focal Length') * 0.000000001 * Ability('Target Wavelength') * ( 1 / Ability('Lens Diameter') ) "
             },
             {
+              "Name": "genericWpndbargs",
+              "DescriptionFormula": "'int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('Charge Period') * Ability('Power Input'), Ability('Power Input'), Ability('Pulse Energy'), 1)",
+              "AttributeType": "Pulsar4X.ECSLib.GenericWeaponAtb"
+            },
+            {
               "Name": "dbargs",
               "GuiHint": "None",
               "AttributeFormula": "AtbConstrArgs(Ability('Range'), Ability('Damage'), Ability('ReloadRate'))",
@@ -301,6 +308,13 @@
               "Units": "Rounds/unknown",
               "GuiHint": "None",
               "AttributeFormula": "Ability('Auto Reloader Mass') / Ability('Calibre')"
+            },
+            {
+              "Name": "genericWpndbargs",
+              "DescriptionFormula": "'int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire, WpnTypes type",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('ROF'), AtbConstrArgs(Ability('ROF'), 1, 1)",
+              "AttributeType": "Pulsar4X.ECSLib.GenericWeaponAtb"
             },
             {
               "Name": "dbargs",

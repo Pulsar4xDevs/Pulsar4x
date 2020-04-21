@@ -121,6 +121,8 @@ namespace Pulsar4X.ECSLib
         {
             for (int i = 0; i < firingWeapons.WpnIDs.Length; i++)
             {
+                if(firingWeapons.WpnIDs[i] == Guid.Empty)
+                    continue;//just incase a weapon gets removed from the array and leaves an empty spot. 
                 if (firingWeapons.InternalMagQty[i] < firingWeapons.InternalMagSizes[i])
                 {
                     firingWeapons.InternalMagQty[i] += Math.Min(firingWeapons.ReloadAmountsPerSec[i], firingWeapons.InternalMagSizes[i]);
@@ -147,7 +149,8 @@ namespace Pulsar4X.ECSLib
                 var force = firingWeapons.LaunchForces[i];
                 for (int j = 0; j < shotsFired; j++)
                 {
-                    firingWeapons.OrdnanceDesigns[i].CreateOrdnance(lunchEnt, tgtEnt, force);
+                    if(firingWeapons.OrdnanceDesigns[i]!= null)
+                        firingWeapons.OrdnanceDesigns[i].CreateOrdnance(lunchEnt, tgtEnt, force);
                 }
                 
                 
@@ -224,7 +227,7 @@ namespace Pulsar4X.ECSLib
 
                 //wpnTypes[i + offset] = wpnAtb.WpnType;
                 fcStates[i + offset] = wpnState.FireControl.GetAbilityState<FireControlAbilityState>();
-                ordDes[i + offset] = wpnState.OrdnanceDesign;
+                ordDes[i + offset] = wpnState.AssignedOrdnanceDesign;
                 if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
                     launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
                 else
@@ -344,7 +347,7 @@ namespace Pulsar4X.ECSLib
                 minShotsPerfire[i] = wpnAtb.MinShotsPerfire;
                 //wpnTypes[i] = wpnAtb.WpnType;
                 fcStates[i] = wpnState.FireControl.GetAbilityState<FireControlAbilityState>();
-                ordDes[i] = wpnState.OrdnanceDesign;
+                ordDes[i] = wpnState.AssignedOrdnanceDesign;
                 if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
                     launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
                 else

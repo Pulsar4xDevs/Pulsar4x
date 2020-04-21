@@ -25,7 +25,10 @@ namespace Pulsar4X.ImGuiNetUI
         ComponentInstance[] _beamWpns = new ComponentInstance[0];
         List<WeaponState> _allWeaponsstates = new List<WeaponState>();
         List<ComponentInstance> _allWeaponsinstances = new List<ComponentInstance>();
-        
+
+        OrdnanceDesign[] _allOrdnanceDesigns = new OrdnanceDesign[0];
+        Dictionary<Guid, int> _storedOrdnance = new Dictionary<Guid, int>();
+        private bool _showOnlyCargoOrdnance = true;
 
         SensorContact[] _allSensorContacts = new SensorContact[0];
         string[] _ownEntityNames = new string[0];
@@ -55,12 +58,16 @@ namespace Pulsar4X.ImGuiNetUI
             {
                 thisitem = new FireControl();
                 thisitem.HardRefresh(orderEntity);
+                thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
             }
             else
             {
                 thisitem = (FireControl)_uiState.LoadedWindows[typeof(FireControl)];
                 if(thisitem._orderEntityState != orderEntity)
+                {
                     thisitem.HardRefresh(orderEntity);
+                    thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
+                }
             }
             
             return thisitem;
@@ -80,6 +87,25 @@ namespace Pulsar4X.ImGuiNetUI
                     {
                         _fcTarget[i] = fcstate.Target.GetDataBlob<NameDB>().GetName(_orderEntity.FactionOwner);
                     }
+                }
+            }
+
+            _allOrdnanceDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns.Values.ToArray();
+            var ctypes = new List<Guid>(); //there are likely to be not very many of these, proibly only one.
+            foreach (var ordDes in _allOrdnanceDesigns)
+            {
+                if(!ctypes.Contains(ordDes.CargoTypeID))
+                    ctypes.Add(ordDes.CargoTypeID);
+            }
+
+            
+            foreach (var cargoType in ctypes)
+            {
+                var shipOrdnances = _orderEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes[cargoType].ItemsAndAmounts;
+                
+                foreach (var ordType in shipOrdnances.Values)
+                {
+                    _storedOrdnance[ordType.item.ID]= (int)ordType.amount;
                 }
             }
         }
@@ -162,6 +188,7 @@ namespace Pulsar4X.ImGuiNetUI
             var contacts = sysstate.SystemContacts;
             _allSensorContacts = contacts.GetAllContacts().ToArray();
             _ownEntites = sysstate.EntityStatesWithPosition.Values.ToArray();
+            
         }
 
         void OnFrameRefresh()
@@ -185,6 +212,11 @@ namespace Pulsar4X.ImGuiNetUI
         void SetWeapons(Guid[] wpnsAssignd)
         {
             SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, _allFireControl[_fcIndex].ID, wpnsAssignd);
+        }
+
+        void SetOrdnance(Guid wpnID, Guid ordnanceAssigned)
+        {
+            SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, wpnID, ordnanceAssigned);
         }
 
         void SetTarget(Guid targetID)
@@ -313,8 +345,10 @@ namespace Pulsar4X.ImGuiNetUI
             Nill,
             SetTarget,
             SetWeapons,
+            SetOrdnance,
         }
         private int _fcIndex;
+        private int _wpnIndex;
         private C2Type _c2type = C2Type.SetTarget;
         private bool _showOwnAsTarget;
         void Display2ndColomn()
@@ -378,6 +412,18 @@ namespace Pulsar4X.ImGuiNetUI
                         string str = stat.name + Stringify.Value(stat.value, stat.valueType);
                         ImGui.Text(str);
                     }
+
+                    if (_mlstates[i].AssignedOrdnanceDesign != null)
+                    {
+                        string ordname = _mlstates[i].AssignedOrdnanceDesign.Name;
+                        ImGui.Text("Assigned Ordnance: " + ordname);
+                    }
+
+                    if (ImGui.Button("Select Ordnance"))
+                    {
+                        _wpnIndex = i;
+                        _c2type = C2Type.SetOrdnance;
+                    }
                     ImGui.Unindent();
                     
                 }
@@ -435,6 +481,39 @@ namespace Pulsar4X.ImGuiNetUI
                     
                 }
                 BorderGroup.EndBoarder();
+            }
+
+            if (_c2type == C2Type.SetOrdnance)
+            {
+                BorderGroup.BeginBorder("Ordnance Availible:");
+                ImGui.Checkbox("Show Only Cargo", ref _showOnlyCargoOrdnance);
+                for (int i = 0; i < _allOrdnanceDesigns.Length; i++)
+                {
+                    var ordDes = _allOrdnanceDesigns[i];
+                    
+                    if (_storedOrdnance.ContainsKey(ordDes.ID))
+                    {
+                        if (ImGui.SmallButton("Set"))
+                        {
+                            SetOrdnance(_missileLaunchers[_wpnIndex].ID, ordDes.ID);
+                            _c2type = C2Type.SetWeapons;
+                        }
+                        ImGui.SameLine();
+                        ImGui.Text(ordDes.Name);
+                        ImGui.SameLine();
+                        ImGui.Text("(" + _storedOrdnance[ordDes.ID] + ")");
+                    }
+                    else if (!_showOnlyCargoOrdnance)
+                    {
+                        if (ImGui.SmallButton("Set"))
+                        {
+                            SetOrdnance(_missileLaunchers[_wpnIndex].ID, ordDes.ID);
+                            _c2type = C2Type.SetWeapons;
+                        }
+                        ImGui.SameLine();
+                        ImGui.Text(ordDes.Name);
+                    }
+                }
             }
         }
     }

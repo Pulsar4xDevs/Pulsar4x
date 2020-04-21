@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
         public ComponentInstance WeaponComponentInstance { get; set; }
         public (string name, double value, ValueTypeStruct valueType)[] WeaponStats;
 
-        public OrdnanceDesign OrdnanceDesign = null;
+        public OrdnanceDesign AssignedOrdnanceDesign = null;
         public int InernalMagCurAmount = 0;
         
         [JsonProperty]
