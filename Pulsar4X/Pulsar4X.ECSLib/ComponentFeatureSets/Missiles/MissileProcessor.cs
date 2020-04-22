@@ -34,9 +34,13 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             Vector3 launchVelocity = parentVelocity + tgtEstVector;
             
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
+            dataBlobs.Add(new ComponentInstancesDB());
             dataBlobs.Add((PositionDB)positionDB.Clone());
+            dataBlobs.Add(MassVolumeDB.NewFromMassAndVolume(missileDesign.WetMass, missileDesign.WetMass));
+            dataBlobs.Add(new NameDB("Missile", launchingEntity.FactionOwner, missileDesign.Name ));
 
             var newMissile = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
+            
             foreach (var tuple in missileDesign.Components)
             {
                 EntityManipulation.AddComponentToEntity(newMissile, tuple.design, tuple.count);

@@ -25,6 +25,11 @@ namespace Pulsar4X.ECSLib
             _names.Add(Guid.Empty, defaultName);
         }
 
+        public NameDB(string defaultName, Guid factionID, string factionsName)
+        {
+            _names.Add(factionID, factionsName);
+        }
+
         #region Cloning Interface.
 
         public NameDB(NameDB nameDB)

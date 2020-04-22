@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            throw new NotImplementedException();
+            
         }
     }
 
@@ -225,7 +225,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            throw new System.NotImplementedException();
+            
         }
     }
 

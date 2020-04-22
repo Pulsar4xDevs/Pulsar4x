@@ -205,7 +205,7 @@ namespace Pulsar4X.ECSLib
             
             if(WpnIDs.Length > 0)
             {
-                Buffer.BlockCopy(WpnIDs, 0, wpnIDs, 0, count);
+                Array.Copy(WpnIDs, wpnIDs, count); //we can't blockcopy a non primitive. 
                 Buffer.BlockCopy(InternalMagSizes, 0, internalMagSizes, 0, count);
                 Buffer.BlockCopy(InternalMagQty, 0, internalMagQty, 0, count);
                 Buffer.BlockCopy(ReloadAmountsPerSec, 0, reloadAmountsPerSec, 0, count);
