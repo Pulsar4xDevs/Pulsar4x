@@ -157,7 +157,6 @@ namespace Pulsar4X.ImGuiNetUI
 
         public void HardSetTargets()
         {
-            RefreshTargets();
             foreach (FirecontrolComponentInstance firecontrol in _allFirecontrols)
             {
 
@@ -178,6 +177,7 @@ namespace Pulsar4X.ImGuiNetUI
 
         public override void OnSystemTickChange(DateTime newdate)
         {
+            RefreshTargets();
             HardSetTargets();
 
             _allOrdnanceDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns.Values.ToArray();
@@ -204,6 +204,7 @@ namespace Pulsar4X.ImGuiNetUI
         
         void HardRefresh(EntityState orderEntity)
         {
+            RefreshTargets();
             _orderEntityState = orderEntity;
             if(orderEntity.DataBlobs.ContainsKey(typeof(FireControlAbilityDB)))
             {
