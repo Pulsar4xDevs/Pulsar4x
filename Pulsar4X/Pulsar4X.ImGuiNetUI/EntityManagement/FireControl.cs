@@ -136,6 +136,8 @@ namespace Pulsar4X.ImGuiNetUI
                 }
             }
             
+
+
             return thisitem;
         }
 
@@ -155,7 +157,7 @@ namespace Pulsar4X.ImGuiNetUI
         }
 
 
-        public void HardSetTargets()
+        public void UpdateTargets()
         {
             foreach (FirecontrolComponentInstance firecontrol in _allFirecontrols)
             {
@@ -177,8 +179,7 @@ namespace Pulsar4X.ImGuiNetUI
 
         public override void OnSystemTickChange(DateTime newdate)
         {
-            RefreshTargets();
-            HardSetTargets();
+            SoftRefresh();
 
             _allOrdnanceDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns.Values.ToArray();
             var ctypes = new List<Guid>(); //there are likely to be not very many of these, proibly only one.
@@ -201,7 +202,12 @@ namespace Pulsar4X.ImGuiNetUI
 
             }
         }
-        
+        void SoftRefresh()
+        {
+            RefreshTargets();
+            UpdateTargets();
+        }
+
         void HardRefresh(EntityState orderEntity)
         {
             RefreshTargets();
@@ -216,7 +222,7 @@ namespace Pulsar4X.ImGuiNetUI
                     _allFirecontrols = new List<FirecontrolComponentInstance>();
                     foreach (ComponentInstance Beamfirecontrol in fcinstances) 
                         NewFirecontrol(Beamfirecontrol);
-                    HardSetTargets();
+                    SoftRefresh();
                 }
 
                 _selectedfirecontrol = _allFirecontrols[0];
@@ -273,6 +279,7 @@ namespace Pulsar4X.ImGuiNetUI
                 }
                 SetWeapons(AssignedWeps.ToArray(), firecontrol.ID);
             }
+            SoftRefresh();
         }
 
         internal override void Display()
@@ -309,6 +316,7 @@ namespace Pulsar4X.ImGuiNetUI
                 if(ImGui.SmallButton("Weapon Assignment Mode"))
                 {
                     _c2type = C2Type.SetWeapons;
+                    SoftRefresh();
                 }
             }
             if (_c2type == C2Type.SetWeapons)
@@ -316,7 +324,7 @@ namespace Pulsar4X.ImGuiNetUI
                 ImGui.Text("Select Weapns for: " + _selectedfirecontrol.Name);
                 if(ImGui.SmallButton("Targeting Mode"))
                 {
-                    RefreshTargets();
+                    SoftRefresh();
                     _c2type = C2Type.SetTarget;
                 }
             }
@@ -577,7 +585,7 @@ namespace Pulsar4X.ImGuiNetUI
         void SetWeapons(Guid[] wpnsAssignd) { SetWeapons(wpnsAssignd, _allFirecontrols[0].ID); }
         void SetWeapons(Guid[] wpnsAssignd, Guid FirecontrolID) { SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, FirecontrolID, wpnsAssignd); }
         void SetOrdnance(Guid wpnID, Guid ordnanceAssigned) { SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, wpnID, ordnanceAssigned); }
-        void SetRefreshedTarget(Guid targetID) { RefreshTargets(); SetTarget(targetID); }
+        void SetRefreshedTarget(Guid targetID) { SoftRefresh(); SetTarget(targetID); }
         void SetTarget(Guid targetID) { SetTargetFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, _selectedfirecontrol.FirecontrolInstance.ID, targetID); }
         private void OpenFire(Guid fcID, SetOpenFireControlOrder.FireModes mode) { SetOpenFireControlOrder.CreateCmd(_uiState.Game, _uiState.Faction, _orderEntity, fcID, mode);}
 
