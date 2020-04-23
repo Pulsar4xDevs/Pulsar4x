@@ -139,27 +139,6 @@ namespace Pulsar4X.ImGuiNetUI
             return thisitem;
         }
 
-        int FindWepPos(Guid WeaponGuid) 
-        {
-            for (int i = 0; i < _allWeapons.Count; i++)
-            {
-                if (_allWeapons[i].ID == WeaponGuid)
-                    return i;
-            }
-
-            return -1;
-        }
-        int FindFirePos(Guid FirecontrolGuid)
-        {
-            for (int i = 0; i < _allFirecontrols.Count; i++)
-            {
-                if (_allFirecontrols[i].ID == FirecontrolGuid)
-                    return i;
-            }
-
-            return -1;
-        }
-
         
         void AssignWep(int WeaponID, int FirecontrolID)
         {
@@ -178,6 +157,7 @@ namespace Pulsar4X.ImGuiNetUI
 
         public void HardSetTargets()
         {
+            RefreshTargets();
             foreach (FirecontrolComponentInstance firecontrol in _allFirecontrols)
             {
 
@@ -188,9 +168,16 @@ namespace Pulsar4X.ImGuiNetUI
             }
         }
 
+        public void RefreshTargets()
+        {
+            var sysstate = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+            var contacts = sysstate.SystemContacts;
+            _allSensorContacts = contacts.GetAllContacts().ToArray();
+            _ownEntites = sysstate.EntityStatesWithPosition.Values.ToArray();
+        }
+
         public override void OnSystemTickChange(DateTime newdate)
         {
-
             HardSetTargets();
 
             _allOrdnanceDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns.Values.ToArray();
@@ -328,6 +315,7 @@ namespace Pulsar4X.ImGuiNetUI
                 ImGui.Text("Select Weapns for: " + _selectedfirecontrol.Name);
                 if(ImGui.SmallButton("Targeting Mode"))
                 {
+                    RefreshTargets();
                     _c2type = C2Type.SetTarget;
                 }
             }
@@ -439,7 +427,7 @@ namespace Pulsar4X.ImGuiNetUI
             foreach (SensorContact contact in _allSensorContacts)
             {
                 if (ImGui.SmallButton("Set ##sens" + contact.ActualEntityGuid))
-                    SetTarget(contact.ActualEntityGuid);
+                    SetRefreshedTarget(contact.ActualEntityGuid);
                 ImGui.SameLine();
                 ImGui.Text(contact.Name);
             }
@@ -449,7 +437,7 @@ namespace Pulsar4X.ImGuiNetUI
                 foreach (EntityState contact in _ownEntites)
                 {
                     if (ImGui.SmallButton("Set##own" + contact.Entity.Guid))
-                        SetTarget(contact.Entity.Guid);
+                        SetRefreshedTarget(contact.Entity.Guid);
                     ImGui.SameLine();
                     ImGui.Text(contact.Name);
                 }
@@ -588,6 +576,7 @@ namespace Pulsar4X.ImGuiNetUI
         void SetWeapons(Guid[] wpnsAssignd) { SetWeapons(wpnsAssignd, _allFirecontrols[0].ID); }
         void SetWeapons(Guid[] wpnsAssignd, Guid FirecontrolID) { SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, FirecontrolID, wpnsAssignd); }
         void SetOrdnance(Guid wpnID, Guid ordnanceAssigned) { SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, wpnID, ordnanceAssigned); }
+        void SetRefreshedTarget(Guid targetID) { RefreshTargets(); SetTarget(targetID); }
         void SetTarget(Guid targetID) { SetTargetFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, _selectedfirecontrol.FirecontrolInstance.ID, targetID); }
         private void OpenFire(Guid fcID, SetOpenFireControlOrder.FireModes mode) { SetOpenFireControlOrder.CreateCmd(_uiState.Game, _uiState.Faction, _orderEntity, fcID, mode);}
 
