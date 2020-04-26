@@ -82,6 +82,7 @@ namespace Pulsar4X.SDL2UI
 
 
         internal SpaceMasterVM SpaceMasterVM;
+        internal bool SMenabled = false;
 
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
@@ -193,6 +194,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void EnableGameMaster()
         {
+            SMenabled = true;
             StarSystemStates = new Dictionary<Guid, SystemState>();
             if(Game != null)
                 foreach (var system in Game.Systems)

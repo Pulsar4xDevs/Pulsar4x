@@ -24,6 +24,7 @@ namespace Pulsar4X.SDL2UI
             //Checks if window is open
             //Does not need to be intialized
             public Func<bool> GetActive;
+            public bool SmButton = false;
 
 
         }
@@ -51,15 +52,6 @@ namespace Pulsar4X.SDL2UI
                 TooltipText = "Design a new Ship",
                 OnClick = new Action(ShipDesignUI.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(ShipDesignUI.GetInstance().GetActive)
-                //Opens up the ship design menu
-            };
-            ToolButtons.Add(btn);
-            btn =  new ToolbuttonData()
-            {
-                Picture = _uiState.SDLImageDictionary["DesOrd"],
-                TooltipText = "Design a Missile",
-                OnClick = new Action(OrdinanceDesignUI.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(OrdinanceDesignUI.GetInstance().GetActive)
                 //Opens up the ship design menu
             };
             ToolButtons.Add(btn);
@@ -102,9 +94,10 @@ namespace Pulsar4X.SDL2UI
             btn = new ToolbuttonData()
             {
                 Picture = _uiState.SDLImageDictionary["Tree"],
-                TooltipText = "View objects in the system",
+                TooltipText = "Spawn ships and planets",
                 OnClick = new Action(EntitySpawnWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive)
+                GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive),
+                SmButton = true
                 //Display a tree with all objects in the system
             };
             ToolButtons.Add(btn);
@@ -163,6 +156,8 @@ namespace Pulsar4X.SDL2UI
                 //displays the default toolbar menu icons
                 foreach (var button in ToolButtons)//For each button
                 {
+                    if (button.SmButton == true && _uiState.SMenabled == false)
+                        break;
                     string id = iterations.ToString();
                     ImGui.PushID(id);
 
