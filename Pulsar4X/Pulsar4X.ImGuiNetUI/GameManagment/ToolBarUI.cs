@@ -32,7 +32,7 @@ namespace Pulsar4X.SDL2UI
         //constructs the toolbar with the given buttons
         private ToolBarUI()
         {
-            _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar;
+            _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
 
 
             ToolbuttonData btn = new ToolbuttonData()
@@ -127,15 +127,8 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            float xpad = 24;
-            float ypad = 16;
-            float x = _btnSize + xpad;
-            float y = (_btnSize + ypad) * ToolButtons.Count; 
 
-            
-            
 
-            ImGui.SetNextWindowSize(new Vector2(x,y ));
             if (ImGui.Begin("##Toolbar", _flags))
             {
                 
