@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System;
+using ImGuiNET;
 using Pulsar4X.ECSLib;
 using System.Numerics;
 using System.Collections.Generic;
@@ -7,9 +8,11 @@ namespace Pulsar4X.SDL2UI
 {
     public class EntityInfoPanel : PulsarGuiWindow
     {
+        private ComponentInstance[][] _componentInstances = new ComponentInstance[0][];
+        private Entity _selectedEntity;
 	    private EntityInfoPanel()
 	    {
-	        _flags =  ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize;
+	        _flags =  ImGuiWindowFlags.NoCollapse;// | ImGuiWindowFlags.AlwaysAutoResize;
         
         }
 
@@ -34,14 +37,18 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
            
-            ImGui.SetNextWindowSize(new Vector2(175, 225), ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new Vector2(264, 325), ImGuiCond.Once);
             if (ImGui.Begin("Currently selected", _flags))
             {
 
                 if (_uiState.LastClickedEntity != null && _uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid)){
 
                     EntityState _SelectedEntityState = _uiState.LastClickedEntity;
-                    Entity _SelectedEntity = _SelectedEntityState.Entity;
+                    if(_selectedEntity == null || _selectedEntity != _SelectedEntityState.Entity)
+                    {
+                        _selectedEntity = _SelectedEntityState.Entity;
+                        _componentInstances = ComponentsDisplay.CreateNewInstanceArray(_selectedEntity);
+                    }
 
 
                     if (_uiState.PrimaryEntity != null)
@@ -54,9 +61,9 @@ namespace Pulsar4X.SDL2UI
                     }
 
 
-                    if (_SelectedEntity.HasDataBlob<MassVolumeDB>())
+                    if (_selectedEntity.HasDataBlob<MassVolumeDB>())
                     {
-                        ImGui.Text("Volume: " + _SelectedEntity.GetDataBlob<MassVolumeDB>().Volume_km3 + " KM^3");
+                        ImGui.Text("Volume: " + _selectedEntity.GetDataBlob<MassVolumeDB>().Volume_km3 + " KM^3");
                     }
 
 
@@ -67,13 +74,13 @@ namespace Pulsar4X.SDL2UI
 
                     
 
-                    if(_SelectedEntity.HasDataBlob<PositionDB>()){
+                    if(_selectedEntity.HasDataBlob<PositionDB>()){
                         ImGui.Text("Parent entity: ");
 
-                        var _parentEntity = _SelectedEntity.GetDataBlob<PositionDB>().Parent;
+                        var _parentEntity = _selectedEntity.GetDataBlob<PositionDB>().Parent;
                         bool _hasParentEntity = false;
                         SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
-                        Dictionary<System.Guid, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
+                        Dictionary<Guid, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
                         if (_parentEntity != null)
                         {
                             //checks if parent exists in the selected star system and has a name
@@ -97,7 +104,7 @@ namespace Pulsar4X.SDL2UI
                         }
                         bool hasChildrenEntities = false;
                         ImGui.Text("Children entities: ");
-                        foreach(var childEntity in _SelectedEntity.GetDataBlob<PositionDB>().Children)
+                        foreach(var childEntity in _selectedEntity.GetDataBlob<PositionDB>().Children)
                         {
                             //checks if child exists in the seclted star system and has name
                             if(_NamedEntityStates.ContainsKey(childEntity.Guid))
@@ -117,6 +124,11 @@ namespace Pulsar4X.SDL2UI
                         if(!hasChildrenEntities){
                             ImGui.Text("(...No children entities)");
                         }
+
+                        if (_selectedEntity.HasDataBlob<ComponentInstancesDB>())
+                        {
+                            ComponentsDisplay.Display(_componentInstances);
+                        }
                     }
                 }else
                 {
@@ -129,6 +141,70 @@ namespace Pulsar4X.SDL2UI
                     SmallBodyEntityInfoPanel.GetInstance().SetActive();
                 }
                 ImGui.End();
+            }
+
+
+
+
+
+
+        }
+
+        public static class ComponentsDisplay
+        {
+            
+            
+            public static ComponentInstance[][] CreateNewInstanceArray(Entity selectedEntity)
+            {
+                var instancesDB = selectedEntity.GetDataBlob<ComponentInstancesDB>();
+                var componentsDict = instancesDB.ComponentsByDesign;
+                var instancesArray = new ComponentInstance[componentsDict.Count][];
+                int i = 0;
+                foreach (var desgnsLists in componentsDict.Values)
+                {
+                    instancesArray[i] = new ComponentInstance[desgnsLists.Count];
+                    for (int j = 0; j < desgnsLists.Count; j++)
+                    {
+                        instancesArray[i][j] = desgnsLists[j];
+                    }
+
+                    i++;
+                }
+
+                return instancesArray;
+            }
+
+
+            public static void Display(ComponentInstance[][] instancesArray)
+            {
+                BorderGroup.BeginBorder("Components:");
+                ImGui.Columns(3);
+                ImGui.SetColumnWidth(0, 164);
+                ImGui.SetColumnWidth(1, 42);
+                ImGui.SetColumnWidth(2, 42);
+                for (int i = 0; i < instancesArray.Length; i++)
+                {
+                    for (int j = 0; j < instancesArray[i].Length; j++)
+                    {
+                        var instance = instancesArray[i][j];
+                        string name = instance.Name;
+                        float health = 100 * instance.HealthPercent();
+                        
+                        ImGui.Text(name); 
+                        ImGui.NextColumn();
+                        
+                        ImGui.Text(health + "%%");
+                        
+                        ImGui.NextColumn();
+                        if(instance.IsEnabled)
+                            ImGui.Text("On");
+                        else
+                            ImGui.Text("Off");
+                        ImGui.NextColumn();
+                    }
+                }
+                ImGui.Columns(1);
+                BorderGroup.EndBoarder();
             }
         }
     }

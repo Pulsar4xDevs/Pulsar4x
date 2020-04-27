@@ -15,6 +15,7 @@ namespace Pulsar4X.SDL2UI
     /// </summary>
     public class SystemState
     {
+        private Entity _faction;
         internal StarSystem StarSystem;
         internal SystemSensorContacts SystemContacts;
         ConcurrentQueue<EntityChangeData> _sensorChanges = new ConcurrentQueue<EntityChangeData>();
@@ -34,7 +35,7 @@ namespace Pulsar4X.SDL2UI
             SystemContacts = system.GetSensorContacts(faction.Guid);
             _sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
-
+            _faction = faction;
             foreach (Entity entityItem in StarSystem.GetEntitiesByFaction(faction.Guid))
             {
                 if (entityItem.HasDataBlob<NameDB>())
@@ -115,12 +116,23 @@ namespace Pulsar4X.SDL2UI
                 switch (change.ChangeType)
                 {
                     case EntityChangeData.EntityChangeType.EntityAdded:
-                        if (change.Entity.IsValid && change.Entity.HasDataBlob<PositionDB>())
+                        var entityItem = change.Entity;
+                        if (entityItem.HasDataBlob<NameDB>())
                         {
-                            var entityState = new EntityState(change.Entity) { Name = "Unknown" };
-                            EntityStatesWithPosition.Add(change.Entity.Guid, entityState);
-                            EntitiesAdded.Add(change.Entity.Guid);
+                            var entityState = new EntityState(entityItem);// { Name = "Unknown" };
+                            entityState.Name = entityItem.GetDataBlob<NameDB>().GetName(_faction.Guid);
+                            EntityStatesWithNames.Add(entityItem.Guid, entityState);
+                            if (entityItem.HasDataBlob<PositionDB>())
+                            {
+                                EntityStatesWithPosition.Add(entityItem.Guid, entityState);
+                            }
+                            else if( entityItem.HasDataBlob<ColonyInfoDB>())
+                            {
+                                EntityStatesColonies.Add(entityItem.Guid, entityState);
+                            }
+
                         }
+                        
                         break;
                     //if an entity moves from one system to another, then this should be triggered, 
                     //currently Entity.ChangeEvent probibly does too, but we might have to tweak this. maybe add another enum? 

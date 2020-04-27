@@ -20,13 +20,13 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         internal readonly Dictionary<Guid, ComponentDesign> AllDesigns = new Dictionary<Guid, ComponentDesign>();
         [JsonIgnore]
-        internal readonly Dictionary<ComponentDesign, int> DesignsAndComponentCount = new Dictionary<ComponentDesign, int>();
+        public readonly Dictionary<ComponentDesign, int> DesignsAndComponentCount = new Dictionary<ComponentDesign, int>();
         [JsonIgnore] 
         Dictionary<Type, List<ComponentDesign>> _designsByAtbType = new Dictionary<Type, List<ComponentDesign>>();
         [JsonIgnore]
-        Dictionary<Guid, List<ComponentInstance>> _componentsByDesign = new Dictionary<Guid, List<ComponentInstance>>();
+        public Dictionary<Guid, List<ComponentInstance>> ComponentsByDesign = new Dictionary<Guid, List<ComponentInstance>>();
 
-        Dictionary<Type, List<ComponentInstance>> _ComponentsByAttribute = new Dictionary<Type, List<ComponentInstance>>();
+        public Dictionary<Type, List<ComponentInstance>> ComponentsByAttribute = new Dictionary<Type, List<ComponentInstance>>();
 
         internal readonly Dictionary<Guid, ComponentInstance> AllComponents = new Dictionary<Guid, ComponentInstance>();
         
@@ -36,11 +36,15 @@ namespace Pulsar4X.ECSLib
         private ComponentDesign[] _designsArray = new ComponentDesign[0];
         private ComponentAbilityState[] _statesArray = new ComponentAbilityState[0];
         */
-        
+        public Type[] GetAllAttributeTypes()
+        {
+            return ComponentsByAttribute.Keys.ToArray();
+        }
+
         public bool TryGetComponentsByAttribute<T>(out List<ComponentInstance> components)
             where T : IComponentDesignAttribute
         {
-            return _ComponentsByAttribute.TryGetValue(typeof(T), out components);
+            return ComponentsByAttribute.TryGetValue(typeof(T), out components);
         }
 
         public bool TryGetComponentStates<T>(out List<ComponentAbilityState> componentStates)
@@ -90,10 +94,10 @@ namespace Pulsar4X.ECSLib
             }
 
             //add the component instance to the dictionary if it's not already there. 
-            if (!_componentsByDesign.ContainsKey(design.ID))
-                _componentsByDesign.Add(design.ID, new List<ComponentInstance>());
-            if (!_componentsByDesign[design.ID].Contains(instance))
-                _componentsByDesign[design.ID].Add(instance);
+            if (!ComponentsByDesign.ContainsKey(design.ID))
+                ComponentsByDesign.Add(design.ID, new List<ComponentInstance>());
+            if (!ComponentsByDesign[design.ID].Contains(instance))
+                ComponentsByDesign[design.ID].Add(instance);
 
 
             
@@ -105,10 +109,10 @@ namespace Pulsar4X.ECSLib
 
             foreach (var atbkvp in instance.Design.AttributesByType)
             {
-                if(!_ComponentsByAttribute.ContainsKey(atbkvp.Key))
-                    _ComponentsByAttribute.Add(atbkvp.Key, new List<ComponentInstance>());
+                if(!ComponentsByAttribute.ContainsKey(atbkvp.Key))
+                    ComponentsByAttribute.Add(atbkvp.Key, new List<ComponentInstance>());
                     
-                _ComponentsByAttribute[atbkvp.Key].Add(instance);
+                ComponentsByAttribute[atbkvp.Key].Add(instance);
             }
         }
         
@@ -118,7 +122,7 @@ namespace Pulsar4X.ECSLib
             var design = instance.Design;
             AllDesigns.Remove(design.ID);
             AllComponents.Remove(instance.ID);
-            _componentsByDesign[design.ID].Remove(instance);
+            ComponentsByDesign[design.ID].Remove(instance);
 
             foreach (var atbkvp in design.AttributesByType)
             {
@@ -134,7 +138,7 @@ namespace Pulsar4X.ECSLib
             
             foreach (var atbkvp in instance.Design.AttributesByType)
             {
-                _ComponentsByAttribute[atbkvp.Key].Remove(instance);
+                ComponentsByAttribute[atbkvp.Key].Remove(instance);
                 
             }
         }
@@ -148,12 +152,12 @@ namespace Pulsar4X.ECSLib
         }
         internal List<ComponentInstance> GetComponentsBySpecificDesign(Guid designGuid)
         {
-            return _componentsByDesign[designGuid];
+            return ComponentsByDesign[designGuid];
         }
         internal Dictionary<Guid, List<ComponentInstance>> GetComponentsByDesigns()
         {
             Dictionary<Guid, List<ComponentInstance>> componentsByDesign = new Dictionary<Guid, List<ComponentInstance>>();
-            foreach (var designKVP in _componentsByDesign)
+            foreach (var designKVP in ComponentsByDesign)
             {
                 List<ComponentInstance> instances = new List<ComponentInstance>();
                 foreach (var instance in designKVP.Value)
@@ -170,7 +174,7 @@ namespace Pulsar4X.ECSLib
         
         internal int GetNumberOfComponentsOfDesign(Guid designGuid)
         {
-            return _componentsByDesign[designGuid].Count;
+            return ComponentsByDesign[designGuid].Count;
         }
 
         public ComponentInstancesDB()
@@ -182,7 +186,7 @@ namespace Pulsar4X.ECSLib
         {
             AllComponents = new Dictionary<Guid, ComponentInstance>(db.AllComponents);
             _designsByAtbType = new Dictionary<Type, List<ComponentDesign>>(db._designsByAtbType);
-            _componentsByDesign = new Dictionary<Guid, List<ComponentInstance>>(db._componentsByDesign);
+            ComponentsByDesign = new Dictionary<Guid, List<ComponentInstance>>(db.ComponentsByDesign);
 
         }
 
