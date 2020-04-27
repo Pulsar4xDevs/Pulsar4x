@@ -128,6 +128,7 @@ namespace Pulsar4X.SDL2UI
                         if (_selectedEntity.HasDataBlob<ComponentInstancesDB>())
                         {
                             ComponentsDisplay.Display(_componentInstances);
+                            ImGui.NewLine();
                         }
                     }
                 }else
@@ -157,6 +158,8 @@ namespace Pulsar4X.SDL2UI
             public static ComponentInstance[][] CreateNewInstanceArray(Entity selectedEntity)
             {
                 var instancesDB = selectedEntity.GetDataBlob<ComponentInstancesDB>();
+                if(instancesDB == null)
+                    return new ComponentInstance[0][];
                 var componentsDict = instancesDB.ComponentsByDesign;
                 var instancesArray = new ComponentInstance[componentsDict.Count][];
                 int i = 0;
