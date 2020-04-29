@@ -934,12 +934,15 @@ namespace Pulsar4X.SDL2UI
         private int _bloSelectedIndex = -1;
         void BorderListOptionsWiget()
         {
+            
+            
             string[] items = new string[_listfoo.Count];
             for (int i = 0; i < _listfoo.Count; i++)
             {
                 items[i] = _listfoo[i].name;
             }
-            BorderGroup.Begin("Border List Options: ");
+            ImGui.Indent(5);
+            BorderGroup.Begin("List Options: ");
             BorderListOptions.Begin("blo", items, ref _bloSelectedIndex, 64);
             if(_bloSelectedIndex >=0)
             {
@@ -976,7 +979,9 @@ namespace Pulsar4X.SDL2UI
             }
             
             BorderListOptions.End(64);
-            BorderGroup.End();
+            
+            BorderGroup.End(137);
+            ImGui.Unindent(5);
             
         }
 

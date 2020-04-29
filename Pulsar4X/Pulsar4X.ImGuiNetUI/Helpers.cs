@@ -98,7 +98,7 @@ namespace Pulsar4X.SDL2UI
         {
             
             ImGui.NextColumn();
-            ImGui.Columns(0); 
+            ImGui.Columns(1); 
             ImGui.Unindent(_dentMulitpier);
             
             _xright = _xcentr + width2ndColomn;
@@ -158,12 +158,17 @@ namespace Pulsar4X.SDL2UI
         }
 
         public static void End()
+        {
+            End(ImGui.GetContentRegionAvail().X);
+        }
+
+        public static void End(float width)
         { 
             ImGui.Unindent(_dentMulitpier * _nestIndex);
             _nestIndex--;
             var pos = ImGui.GetCursorScreenPos();
-            var regionAvail = ImGui.GetContentRegionAvail();
-            Vector2 size = new Vector2(regionAvail.X, pos.Y - _startPos[_nestIndex].Y);
+            
+            Vector2 size = new Vector2(width, pos.Y - _startPos[_nestIndex].Y);
             ImDrawListPtr wdl = ImGui.GetWindowDrawList();
 
             float by = _startPos[_nestIndex].Y + size.Y + _dentMulitpier -_dentMulitpier * _nestIndex;
