@@ -336,11 +336,11 @@ namespace Pulsar4X.ImGuiNetUI
 
                 if (_selectedfirecontrol.ID == firecontrol.ID)
                 {
-                    BorderGroup.BeginBorder(firecontrol.Name + " (Selected)");
+                    BorderGroup.Begin(firecontrol.Name + " (Selected)");
                 }
                 else
                 {
-                    BorderGroup.BeginBorder(firecontrol.Name);
+                    BorderGroup.Begin(firecontrol.Name);
                     
                     if (ImGui.SmallButton("Select"))
                     {
@@ -411,7 +411,7 @@ namespace Pulsar4X.ImGuiNetUI
                     }
                 }
 
-                BorderGroup.EndBoarder();
+                BorderGroup.End();
             }
             
         }
@@ -430,7 +430,7 @@ namespace Pulsar4X.ImGuiNetUI
 
         void DisplayTargetColumn()
         {
-            BorderGroup.BeginBorder("Set Target:");
+            BorderGroup.Begin("Set Target:");
             ImGui.Checkbox("Show Own", ref _showOwnAsTarget);
 
             foreach (SensorContact contact in _allSensorContacts)
@@ -453,13 +453,13 @@ namespace Pulsar4X.ImGuiNetUI
                     ImGui.Text(contact.Name);
                 }
             }
-            BorderGroup.EndBoarder();
+            BorderGroup.End();
         }
         void DisplayWeaponColumn()
         {
             if (_missileLaunchers != null)
             {
-                BorderGroup.BeginBorder("Missile Launchers:");
+                BorderGroup.Begin("Missile Launchers:");
                 foreach (WeaponComponentInstance missilelauncher in _missileLaunchers)
                 {
                     ComponentInstance missilelauncherinstance = missilelauncher.WeaponInstance;
@@ -487,13 +487,13 @@ namespace Pulsar4X.ImGuiNetUI
                     ImGui.Unindent();
 
                 }
-                BorderGroup.EndBoarder();
+                BorderGroup.End();
                 ImGui.NewLine();
             }
 
             if (_railGuns != null)
             {
-                BorderGroup.BeginBorder("Rail Guns:");
+                BorderGroup.Begin("Rail Guns:");
                 foreach (WeaponComponentInstance railgun in _railGuns)
                 {
                     ComponentInstance railguninstance = railgun.WeaponInstance;
@@ -508,13 +508,13 @@ namespace Pulsar4X.ImGuiNetUI
                     ImGui.Unindent();
 
                 }
-                BorderGroup.EndBoarder();
+                BorderGroup.End();
                 ImGui.NewLine();
             }
 
             if (_beamWpns != null)
             {
-                BorderGroup.BeginBorder("Beam Weapons:");
+                BorderGroup.Begin("Beam Weapons:");
                 foreach (WeaponComponentInstance laser in _beamWpns)
                 {
                     ComponentInstance laserinstance = laser.WeaponInstance;
@@ -531,13 +531,13 @@ namespace Pulsar4X.ImGuiNetUI
                     ImGui.Unindent();
 
                 }
-                BorderGroup.EndBoarder();
+                BorderGroup.End();
             }
         }
 
         void DisplayAmmoColumn()
         {
-            BorderGroup.BeginBorder("Ordnance Availible:");
+            BorderGroup.Begin("Ordnance Availible:");
             ImGui.Checkbox("Show Only Cargo", ref _showOnlyCargoOrdnance);
             foreach (OrdnanceDesign ordDes in _allOrdnanceDesigns)
             {
@@ -546,7 +546,7 @@ namespace Pulsar4X.ImGuiNetUI
 
                     //ImGui.SameLine();
                     //ImGui.Text(ordDes.Name);
-                    BorderGroup.BeginBorder(ordDes.Name);
+                    BorderGroup.Begin(ordDes.Name);
 
                     //ImGui.SameLine();
                     ImGui.Text("Qty in magaziene: " + _storedOrdnance[ordDes.ID]);
@@ -567,7 +567,7 @@ namespace Pulsar4X.ImGuiNetUI
                         _c2type = C2Type.SetWeapons;
                     }
 
-                    BorderGroup.EndBoarder();
+                    BorderGroup.End();
                 }
                 else if (!_showOnlyCargoOrdnance)
                 {
@@ -580,7 +580,7 @@ namespace Pulsar4X.ImGuiNetUI
                     ImGui.Text(ordDes.Name);
                 }
             }
-            BorderGroup.EndBoarder();
+            BorderGroup.End();
         }
 
 

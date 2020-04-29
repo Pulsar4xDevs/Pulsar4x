@@ -180,7 +180,7 @@ namespace Pulsar4X.SDL2UI
 
             public static void Display(ComponentInstance[][] instancesArray)
             {
-                BorderGroup.BeginBorder("Components:");
+                BorderGroup.Begin("Components:");
                 ImGui.Columns(3);
                 ImGui.SetColumnWidth(0, 164);
                 ImGui.SetColumnWidth(1, 42);
@@ -207,7 +207,7 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
                 ImGui.Columns(1);
-                BorderGroup.EndBoarder();
+                BorderGroup.End();
             }
         }
     }

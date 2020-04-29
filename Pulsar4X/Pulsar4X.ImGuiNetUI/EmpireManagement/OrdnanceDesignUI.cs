@@ -148,7 +148,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Combo("Current Designs", ref _payloadSelectedIndex, _currentDesignNames, _currentDesignNames.Length);
 
                 ImGui.NewLine();
-                BorderGroup.BeginBorder("Payload:");
+                BorderGroup.Begin("Payload:");
                 if (ImGui.Combo("Payload type", ref _payloadSelectedIndex, _payload, _payload.Length))
                 {
                     //_selectedPayload = _payloadTypes[_payloadSelectedIndex].GetAttribute<OrdnancePayloadAtb>();
@@ -163,10 +163,10 @@ namespace Pulsar4X.SDL2UI
                 var whmass = _payloadTypes[_payloadSelectedIndex].Mass * _payloadCount;
                 ImGui.Text("Mass: " + Stringify.Mass(whmass));
                 //ImGui.Text("Payload Trigger Type: " + _selectedPayload.Trigger);
-                BorderGroup.EndBoarder();
+                BorderGroup.End();
                 ImGui.NewLine();
                 
-                BorderGroup.BeginBorder("Electronics Suite:");
+                BorderGroup.Begin("Electronics Suite:");
                 if(ImGui.Combo("ElectronicsSuite", ref _electronicsSelectedIndex, _electronicsPackage, _electronicsPackage.Length))
                 {
                     _selectedComponentDesigns[_eleccPackTypes[_electronicsSelectedIndex]] = 1;
@@ -174,11 +174,11 @@ namespace Pulsar4X.SDL2UI
                 }
                 var mass = _eleccPackTypes[_electronicsSelectedIndex].Mass;
                 ImGui.Text("Mass: " + Stringify.Mass(mass));
-                BorderGroup.EndBoarder();
+                BorderGroup.End();
                 
                 ImGui.NewLine();
                 
-                BorderGroup.BeginBorder("Engine:");
+                BorderGroup.Begin("Engine:");
                 
                 if(ImGui.Combo("Engine Designs", ref _engineSelectedIndex, _engineDesigns, _engineDesigns.Length))
                 {
@@ -193,7 +193,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 var emass = _engineTypes[_engineSelectedIndex].Mass * _engineCount;
                 ImGui.Text("Mass: " + Stringify.Mass(emass));
-                BorderGroup.EndBoarder();
+                BorderGroup.End();
                 
                 ImGui.NewLine();
                 ImGui.Text("Total Mass: " + Stringify.Mass(_totalMass));

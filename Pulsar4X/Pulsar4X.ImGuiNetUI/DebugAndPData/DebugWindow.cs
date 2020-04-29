@@ -137,12 +137,13 @@ namespace Pulsar4X.SDL2UI
                 {
 
 
-                    BorderGroup.BeginBorder("Info", ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
+                    BorderGroup.Begin("Info", ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
                     
                     ImGui.Text(_uiState.PrimarySystemDateTime.ToString());
                     ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
                     
-                    BorderGroup.EndBoarder();
+                    BorderGroup.End();
+                    ImGui.NewLine();
                     
                     if (ImGui.CollapsingHeader("Camera Functions", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
@@ -226,6 +227,12 @@ namespace Pulsar4X.SDL2UI
                 
                         ImGui.Text("Buttons Group");
                         ButtonBox();
+                        
+                        ImGui.NewLine();
+                        //ImGui.Text("BorderListOptionsWidget");
+                        BorderListOptionsWiget();
+                        
+                        ImGui.NewLine();
                     }
                     
                     ImGui.Text("Selected Star System: " + _uiState.SelectedStarSysGuid);
@@ -923,7 +930,56 @@ namespace Pulsar4X.SDL2UI
             ImGui.PopStyleVar();
 
         }
-        
+
+        private int _bloSelectedIndex = -1;
+        void BorderListOptionsWiget()
+        {
+            string[] items = new string[_listfoo.Count];
+            for (int i = 0; i < _listfoo.Count; i++)
+            {
+                items[i] = _listfoo[i].name;
+            }
+            BorderGroup.Begin("Border List Options: ");
+            BorderListOptions.Begin("blo", items, ref _bloSelectedIndex, 64);
+            if(_bloSelectedIndex >=0)
+            {
+                if (ImGui.Button("^"))
+                {
+                    (string name, int count) item = _listfoo[_bloSelectedIndex];
+                    _listfoo.RemoveAt(_bloSelectedIndex);
+                    _listfoo.Insert(_bloSelectedIndex - 1, item);
+                    _bloSelectedIndex--;
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("v"))
+                {
+                    (string name, int count) item = _listfoo[_bloSelectedIndex];
+                    _listfoo.RemoveAt(_bloSelectedIndex);
+                    _listfoo.Insert(_bloSelectedIndex + 1, item);
+                    _bloSelectedIndex++;
+                }
+
+                ImGui.Text(_listfoo[_bloSelectedIndex].count.ToString());
+                ImGui.SameLine();
+                if (ImGui.Button("+"))
+                {
+
+                    _listfoo[_bloSelectedIndex] = (_listfoo[_bloSelectedIndex].name, _listfoo[_bloSelectedIndex].count + 1);
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("-"))
+                {
+                    _listfoo[_bloSelectedIndex] = (_listfoo[_bloSelectedIndex].name, _listfoo[_bloSelectedIndex].count - 1);
+                }
+            }
+            
+            BorderListOptions.End(64);
+            BorderGroup.End();
+            
+        }
+
         public override void OnSystemTickChange(DateTime newDate)
         {
             _dateChangeSinceLastFrame = true;

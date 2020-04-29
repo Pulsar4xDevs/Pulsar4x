@@ -135,31 +135,31 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.BeginChild("stuff");
 
-                    BorderGroup.BeginBorder("Recevers:", borderColour);
+                    BorderGroup.Begin("Recevers:", borderColour);
                     DisplayWavInfo(_receverDat);
-                    BorderGroup.EndBoarder();
+                    BorderGroup.End();
 
                     if (_reflectDat != null)
                     {
-                        BorderGroup.BeginBorder("Reflectors:", borderColour);
+                        BorderGroup.Begin("Reflectors:", borderColour);
                         DisplayWavInfo(_reflectDat);
-                        BorderGroup.EndBoarder();
+                        BorderGroup.End();
 
                     }
 
                     if (_emmittrDat != null)
                     {
-                        BorderGroup.BeginBorder("Emmiters:", borderColour);
+                        BorderGroup.Begin("Emmiters:", borderColour);
                         DisplayWavInfo(_emmittrDat);
-                        BorderGroup.EndBoarder();
+                        BorderGroup.End();
 
                     }
 
                     if (_detectedDat != null)
                     {
-                        BorderGroup.BeginBorder("Detected:", borderColour);
+                        BorderGroup.Begin("Detected:", borderColour);
                         DisplayWavInfo(_detectedDat);
-                        BorderGroup.EndBoarder();
+                        BorderGroup.End();
                     }
 
                     ImGui.EndChild();
