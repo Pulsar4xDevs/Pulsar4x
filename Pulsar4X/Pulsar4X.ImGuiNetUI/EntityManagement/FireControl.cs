@@ -25,15 +25,12 @@ namespace Pulsar4X.ImGuiNetUI
             public Guid ID { get { return WeaponInstance.ID; } }
             public ComponentInstance FirecontrolInstance
             {
-                get{ return CurrentWeaponState.Master; }
-
-                set{  CurrentWeaponState.Master = FirecontrolInstance; }
+                get{ return CurrentWeaponState.ParentState.ComponentInstance; }
             }
             public WeaponComponentInstance(ComponentInstance _WeaponInstance, int ID = 0) 
             {
                 WeaponInstance = _WeaponInstance;
                 CurrentWeaponState = _WeaponInstance.GetAbilityState<WeaponState>();
-                FirecontrolInstance = null;
                 LocalID = ID;
             }
         }

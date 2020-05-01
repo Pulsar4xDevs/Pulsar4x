@@ -68,6 +68,12 @@ namespace Pulsar4X.ECSLib
 
         public bool IsEngaging { get; internal set; } = false;
 
+        List<WeaponState> AssignedWeaponStates()
+        {
+            return GetChildrenOfType<WeaponState>();
+        }
+        
+
         public FireControlAbilityState(ComponentInstance componentInstance) : base(componentInstance)
         {
             

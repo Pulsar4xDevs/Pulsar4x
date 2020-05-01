@@ -24,7 +24,7 @@ namespace Pulsar4X.ECSLib
         public ComponentTreeHeirarchyAbilityState ParentState { get; private set; }
         public List<ComponentTreeHeirarchyAbilityState> ChildrenStates { get; private set; } = new List<ComponentTreeHeirarchyAbilityState>();
 
-        public ComponentInstance ComponentInstance;
+        public ComponentInstance ComponentInstance { get; private set; }
 
         public ComponentTreeHeirarchyAbilityState(ComponentInstance componentInstance)
         {
@@ -48,9 +48,7 @@ namespace Pulsar4X.ECSLib
         public BaseDataBlob ThisRelatedDatablob; 
         
         public InstancesDB ThisEntitesInstancesDB;
-        
-        public ComponentInstance ThisComponentInstance
-        
+                
         (call this from Set Parent, virtual would be empty, inherited classes would have something below eg)
         protected virtual void FilterParents(ComponentTreeHeirarchyAbilityState parentToSet) 
         {

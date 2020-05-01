@@ -47,10 +47,10 @@ namespace Pulsar4X.ECSLib
             return ComponentsByAttribute.TryGetValue(typeof(T), out components);
         }
 
-        public bool TryGetComponentStates<T>(out List<ComponentAbilityState> componentStates)
+        public bool TryGetComponentStates<T>(out List<T> componentStates)
             where T : ComponentAbilityState
         {
-            componentStates = new List<ComponentAbilityState>();
+            componentStates = new List<T>();
             foreach (var comp in AllComponents.Values)
             {
                 if( comp.TryGetAbilityState<T>(out T state))

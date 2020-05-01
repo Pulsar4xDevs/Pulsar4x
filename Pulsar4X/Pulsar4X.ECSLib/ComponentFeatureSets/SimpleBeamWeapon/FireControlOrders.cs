@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
         private ComponentInstance _fireControlComponent;
 
         public Guid[] WeaponsAssigned = new Guid[0];
-        private List<ComponentInstance> _weaponsAssigned = new List<ComponentInstance>();
+        private List<WeaponState> _weaponsAssigned = new List<WeaponState>();
 
 
         public static void CreateCommand(Game game, DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid fireControlGuid, Guid[] weaponsAssigned)
@@ -48,10 +48,10 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning)
             {
                 var fcinstance = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
-                fcinstance.AssignedWeapons = _weaponsAssigned;
+                
                 foreach (var wpn in _weaponsAssigned)
                 {
-                    wpn.GetAbilityState<WeaponState>().Master = _fireControlComponent;
+                    wpn.SetParent(fcinstance);
                 }
                 IsRunning = true;
             }
@@ -78,13 +78,13 @@ namespace Pulsar4X.ECSLib
                         
                         foreach (var wpnGuid in WeaponsAssigned)
                         {
-                            if (instancesdb.AllComponents.TryGetValue(wpnGuid, out var wpn))
+
+                            if (instancesdb.TryGetComponentStates<WeaponState>(out var wpns))
                             {
-                                if (wpn.HasAblity<WeaponState>())
-                                {
-                                    _weaponsAssigned.Add(wpn);
-                                }
+                                _weaponsAssigned = wpns;
                             }
+
+
                         }
                         return true;
                     }
