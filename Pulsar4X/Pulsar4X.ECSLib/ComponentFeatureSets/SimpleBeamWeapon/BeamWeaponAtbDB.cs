@@ -83,7 +83,7 @@ namespace Pulsar4X.ECSLib
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!componentInstance.HasAblity<WeaponState>())
-                componentInstance.SetAbilityState<WeaponState>(new WeaponState());
+                componentInstance.SetAbilityState<WeaponState>(new WeaponState(componentInstance));
         }
     }
 

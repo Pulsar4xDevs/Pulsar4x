@@ -11,9 +11,120 @@ namespace Pulsar4X.ECSLib
 
     public abstract class ComponentAbilityState
     {
+        //public ComponentInstance ComponentInstance;
+
+        //public ComponentAbilityState(ComponentInstance componentInstance)
+        //{
+        //   ComponentInstance = componentInstance;
+        //}
     }
 
+    public abstract class ComponentTreeHeirarchyAbilityState : ComponentAbilityState
+    {
+        public ComponentTreeHeirarchyAbilityState ParentState { get; private set; }
+        public List<ComponentTreeHeirarchyAbilityState> ChildrenStates { get; private set; } = new List<ComponentTreeHeirarchyAbilityState>();
 
+        public ComponentInstance ComponentInstance;
+
+        public ComponentTreeHeirarchyAbilityState(ComponentInstance componentInstance)
+        {
+            ComponentInstance = componentInstance;
+        }
+
+        public void SetParent(ComponentTreeHeirarchyAbilityState newParent)
+        {
+            if (ParentState != null)
+            {
+                ParentState.ChildrenStates.Remove(this);
+            }
+
+            ParentState = newParent;
+            if(newParent != null)
+                ParentState.ChildrenStates.Add(this);
+        }
+
+        /* some ideas, implement if actualy needed
+        
+        public BaseDataBlob ThisRelatedDatablob; 
+        
+        public InstancesDB ThisEntitesInstancesDB;
+        
+        public ComponentInstance ThisComponentInstance
+        
+        (call this from Set Parent, virtual would be empty, inherited classes would have something below eg)
+        protected virtual void FilterParents(ComponentTreeHeirarchyAbilityState parentToSet) 
+        {
+            Type T = typeof(FireControlAbilityState)
+            if(parentToSet is T)
+            {            
+                if (ParentState != null)
+                {
+                    ParentState.ChildrenStates.Remove(this);
+                }
+
+                ParentState = newParent;
+                if(newParent != null)
+                    ParentState.ChildrenStates.Add(this);
+            }
+            else
+                throw exception? fail silently? log?
+        }
+        
+        protected virtual void FilterChildren(ComponentTreeHeirarchyAbilityState childToAdd) 
+        {
+            if(childToAdd is T)
+                ChildrenState.Add(childToAdd);
+            else
+                throw exception? fail silently? log?
+        }
+        
+        
+        */
+
+        public ComponentTreeHeirarchyAbilityState GetRoot()
+        {
+            if (ParentState != null)
+                return ParentState.GetRoot();
+            else
+                return this;
+        }
+
+        
+        
+        public ComponentInstance GetRootInstance()
+        {
+            return GetRoot().ComponentInstance;
+        }
+
+        public List<ComponentTreeHeirarchyAbilityState> GetSiblings()
+        {
+            return ParentState.ChildrenStates;
+        }
+
+        /// <summary>
+        /// If parent is null, will return an empty list
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<T> GetSiblingsOfType<T>()
+            where T : ComponentTreeHeirarchyAbilityState
+        {
+            if(ParentState == null)
+                return new List<T>();
+            return ParentState.GetChildrenOfType<T>();
+        }
+
+        public List<T> GetChildrenOfType<T>() where T: ComponentTreeHeirarchyAbilityState
+        {
+            List<T> children = new List<T>();
+            foreach (var child in ChildrenStates)
+            {
+                if(child is T)
+                    children.Add((T)child);
+            }
+            return children;
+        }
+    }
 
     public class ComponentInstance : ICargoable
     {

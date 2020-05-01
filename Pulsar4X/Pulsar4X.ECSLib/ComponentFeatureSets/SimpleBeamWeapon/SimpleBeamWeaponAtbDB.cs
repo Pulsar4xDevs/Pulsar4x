@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
            
             if (!componentInstance.HasAblity<WeaponState>())
             {
-                var wpnState = new WeaponState();
+                var wpnState = new WeaponState(componentInstance);
                 wpnState.WeaponType = "Beam";
                 wpnState.WeaponStats = new (string name, double value, ValueTypeStruct valueType)[3];
                 wpnState.WeaponStats[0] = ("Max Range:", MaxRange, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.BaseUnit));

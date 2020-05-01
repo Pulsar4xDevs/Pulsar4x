@@ -5,7 +5,7 @@ using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.ECSLib
 {
-    public class WeaponState : ComponentAbilityState
+    public class WeaponState : ComponentTreeHeirarchyAbilityState
     {
         [JsonProperty]
         public DateTime CoolDown { get; internal set; }
@@ -20,37 +20,39 @@ namespace Pulsar4X.ECSLib
         public OrdnanceDesign AssignedOrdnanceDesign = null;
         public int InernalMagCurAmount = 0;
 
-        [JsonProperty]
-        private ComponentInstance _master;
         public ComponentInstance Master
         {
             get
             {
-                return _master;
+                return ParentState.GetRootInstance();
             }
 
             set
             {
-                if (value == null)
-                    _master = null;
-                else if (value.HasAblity<FireControlAbilityState>())
-                    _master = value;
-                else
-                    _master = null;
+                if (value.HasAblity<FireControlAbilityState>() )
+                {
+                    this.SetParent(value.GetAbilityState<FireControlAbilityState>());
+                }
+                else if (value == null)
+                {
+                    this.SetParent(null);
+                }
+
+                
             }
         }
 
-        public WeaponState()
+        public WeaponState(ComponentInstance componentInstance) : base(componentInstance)
         {
             
             
         }
 
-        public WeaponState(WeaponState db)
+        public WeaponState(WeaponState db): base(db.ComponentInstance)
         {
             CoolDown = db.CoolDown;
             ReadyToFire = db.ReadyToFire;
-            _master = db.Master;
+            Master = db.Master;
             
         }
         

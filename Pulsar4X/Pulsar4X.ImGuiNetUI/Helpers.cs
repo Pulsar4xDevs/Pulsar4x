@@ -52,6 +52,7 @@ namespace Pulsar4X.SDL2UI
             _ytop = ImGui.GetCursorScreenPos().Y;
             _xcentr = _xleft + width;
 
+            var vpad = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
 
             
             ImGui.Indent(_dentMulitpier);
@@ -66,8 +67,8 @@ namespace Pulsar4X.SDL2UI
                 
                 if(i == selected)
                 {   
-                    _yctr1 = pos.Y;
-                    _yctr2 = ImGui.GetCursorScreenPos().Y;
+                    _yctr1 = pos.Y - vpad * 0.5f;
+                    _yctr2 = _yctr1 + ImGui.GetTextLineHeightWithSpacing();
                 }
                 
             }
@@ -139,7 +140,7 @@ namespace Pulsar4X.SDL2UI
             
             _colour[_nestIndex] = colour;
             _startPos[_nestIndex] = ImGui.GetCursorScreenPos();
-            _startPos[_nestIndex].X -= 3;
+            _startPos[_nestIndex].X -= _dentMulitpier;
             _startPos[_nestIndex].Y += ImGui.GetTextLineHeight() * 0.5f;
             ImGui.Text(label);
             _labelSize[_nestIndex] = ImGui.GetItemRectSize();

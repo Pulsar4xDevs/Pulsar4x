@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         {
             if (!componentInstance.HasAblity<WeaponState>())
             {
-                var wpnState = new WeaponState();
+                var wpnState = new WeaponState(componentInstance);
                 wpnState.WeaponType = "Missile Launcher";
                 wpnState.WeaponStats = new (string name, double value, ValueTypeStruct valueType)[3];
                 wpnState.WeaponStats[0] = ("Max Size:", LauncherSize, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.Milli));

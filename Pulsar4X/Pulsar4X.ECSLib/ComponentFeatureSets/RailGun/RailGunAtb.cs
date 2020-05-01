@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
         {
             if (!componentInstance.HasAblity<WeaponState>())
             {
-                var wpnState = new WeaponState();
+                var wpnState = new WeaponState(componentInstance);
                 wpnState.WeaponType = "Rail Gun";
                 wpnState.WeaponStats = new (string name, double value, ValueTypeStruct valueType)[3];
                 wpnState.WeaponStats[0] = ("Calibre:", Calibre, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.Milli));

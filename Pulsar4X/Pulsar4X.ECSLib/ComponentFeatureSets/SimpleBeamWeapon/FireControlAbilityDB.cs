@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib
     /// Fire control instance ability state.
     /// This goes on each fire control component instance
     /// </summary>
-    public class FireControlAbilityState : ComponentAbilityState
+    public class FireControlAbilityState : ComponentTreeHeirarchyAbilityState
     {
         public Entity Target { get; internal set; }
 
@@ -68,9 +68,12 @@ namespace Pulsar4X.ECSLib
 
         public bool IsEngaging { get; internal set; } = false;
 
-        public FireControlAbilityState() { }
+        public FireControlAbilityState(ComponentInstance componentInstance) : base(componentInstance)
+        {
+            
+        }
 
-        public FireControlAbilityState(FireControlAbilityState db)
+        public FireControlAbilityState(FireControlAbilityState db) : base(db.ComponentInstance)
         {
             Target = db.Target;
             AssignedWeapons = new List<ComponentInstance>(db.AssignedWeapons);
