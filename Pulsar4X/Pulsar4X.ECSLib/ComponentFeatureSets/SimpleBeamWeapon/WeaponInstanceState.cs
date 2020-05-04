@@ -24,8 +24,6 @@ namespace Pulsar4X.ECSLib
 
         public WeaponState(ComponentInstance componentInstance) : base(componentInstance)
         {
-            Name = componentInstance.Design.Name;
-
         }
 
         public WeaponState(WeaponState db): base(db.ComponentInstance)

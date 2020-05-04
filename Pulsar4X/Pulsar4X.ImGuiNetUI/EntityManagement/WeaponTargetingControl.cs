@@ -190,9 +190,9 @@ namespace Pulsar4X.SDL2UI
                             _selectedItemIndex = selectable;
                             _selectedFCGuid = fc.ID;
                             _selectedFCAssignedWeapons = new List<Guid>();
-                            foreach (var item in fcAbility.AssignedWeapons)
+                            foreach (var item in fcAbility.ChildrenStates)
                             {
-                                _selectedFCAssignedWeapons.Add(item.ID);
+                                _selectedFCAssignedWeapons.Add(item.ComponentInstance.ID);
                             }
 
                         }

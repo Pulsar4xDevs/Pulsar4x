@@ -237,11 +237,11 @@ namespace Pulsar4X.ECSLib
                     GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
                     if (blob == null)
                     {
-                        blob = new GenericFiringWeaponsDB(fcState.AssignedWeapons);
+                        blob = new GenericFiringWeaponsDB(fcState.GetChildrenInstances());
                         _entityCommanding.SetDataBlob(blob);
                     }
                     else
-                        blob.AddWeapons(fcState.AssignedWeapons);
+                        blob.AddWeapons(fcState.GetChildrenInstances());
 
                     //StaticRefLib.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor),_entityCommanding,  dateTimeNow);
                 }
@@ -251,7 +251,7 @@ namespace Pulsar4X.ECSLib
                     GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
                     if (blob != null)
                     {
-                        blob.RemoveWeapons(fcState.AssignedWeapons);
+                        blob.RemoveWeapons(fcState.GetChildrenInstances());
                         if(blob.WpnIDs.Length == 0)
                             _entityCommanding.RemoveDataBlob<GenericFiringWeaponsDB>();
                     }

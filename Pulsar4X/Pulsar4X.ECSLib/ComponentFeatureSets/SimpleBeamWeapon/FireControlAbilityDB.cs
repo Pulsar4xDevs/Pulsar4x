@@ -89,7 +89,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public ComponentInstance[] AssignedWeapons = new ComponentInstance[0];
+        //public ComponentInstance[] AssignedWeapons {get{return GetChildrenOfType<WeaponState>()}}
 
         public bool IsEngaging { get; internal set; } = false;
 
@@ -102,13 +102,11 @@ namespace Pulsar4X.ECSLib
         public FireControlAbilityState(ComponentInstance componentInstance) : base(componentInstance)
         {
             _factionOwner = componentInstance.ParentInstances.OwningEntity.FactionOwner;
-            Name = componentInstance.Design.Name;
         }
 
         public FireControlAbilityState(FireControlAbilityState db) : base(db.ComponentInstance)
         {
             Target = db.Target;
-            AssignedWeapons =  (ComponentInstance[])db.AssignedWeapons.Clone();
             IsEngaging = db.IsEngaging;
         }
     }

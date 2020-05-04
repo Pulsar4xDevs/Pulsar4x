@@ -161,9 +161,9 @@ namespace Pulsar4X.ImGuiNetUI
                         }
                             
                         if(isDroppingSensorTarget)
-                            SetTarget(fc.ComponentInstance.ID, _allSensorContacts[_dragDropIndex].ActualEntityGuid);
+                            SetTarget(fc, _allSensorContacts[_dragDropIndex].ActualEntityGuid);
                         if(isDroppingOwnTarget)
-                            SetTarget(fc.ComponentInstance.ID, _ownEntites[_dragDropIndex].Entity.Guid);
+                            SetTarget(fc, _ownEntites[_dragDropIndex].Entity.Guid);
                         if (isDroppingWeapon)
                             SetWeapon(_allWeaponsStates[_dragDropIndex].ComponentInstance.ID, fc);
                         
@@ -376,15 +376,14 @@ namespace Pulsar4X.ImGuiNetUI
 
         void UnSetWeapon(Guid wpnID, FireControlAbilityState fcState)
         {
-            var curWpns = fcState.AssignedWeapons;
-            var newArry = new Guid[curWpns.Length];
+            var curWpnIDs = fcState.GetChildrenIDs();
+            var newArry = new Guid[curWpnIDs.Length];
             int j = 0;
-            for (int i = 0; i < curWpns.Length; i++)
+            for (int i = 0; i < curWpnIDs.Length; i++)
             {
-                var comp = curWpns[i];
-                if (comp.ID != wpnID)
+                if (curWpnIDs[i] != wpnID)
                 {
-                    newArry[j] = comp.ID;
+                    newArry[j] = curWpnIDs[i];
                     j++;
                 }
             }
@@ -393,14 +392,14 @@ namespace Pulsar4X.ImGuiNetUI
 
         void SetWeapon(Guid wpnID, FireControlAbilityState fcState)
         {
-            var curWpns = fcState.AssignedWeapons;
-            var newArry = new Guid[curWpns.Length + 1];
-            for (int i = 0; i < curWpns.Length; i++)
+            //var curWpns = fcState.AssignedWeapons;
+            var curWpnIDs = fcState.GetChildrenIDs();
+            var newArry = new Guid[curWpnIDs.Length + 1];
+            for (int i = 0; i < curWpnIDs.Length; i++)
             {
-                var comp = curWpns[i];
-                newArry[i] = comp.ID;
+                newArry[i] = curWpnIDs[i];
             }
-            newArry[curWpns.Length] = wpnID;
+            newArry[curWpnIDs.Length] = wpnID;
             SetWeapons(newArry, fcState.ComponentInstance.ID);
         }
         
@@ -415,8 +414,9 @@ namespace Pulsar4X.ImGuiNetUI
             SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, wpnID, ordnanceAssigned);
         }
 
-        void SetTarget(Guid targetID, Guid fcGuid)
+        void SetTarget(FireControlAbilityState fcState, Guid targetID)
         {
+            var fcGuid = fcState.ComponentInstance.ID;
             SetTargetFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, fcGuid, targetID);
         }
 
@@ -981,15 +981,15 @@ namespace Pulsar4X.ImGuiNetUI
 
         void UnSetWeapon(Guid wpnID, FireControlAbilityState fcState)
         {
-            var curWpns = fcState.AssignedWeapons;
-            var newArry = new Guid[curWpns.Length];
+            var curWpnIDs = fcState.GetChildrenIDs();
+            
+            var newArry = new Guid[curWpnIDs.Length];
             int j = 0;
-            for (int i = 0; i < curWpns.Length; i++)
+            for (int i = 0; i < curWpnIDs.Length; i++)
             {
-                var comp = curWpns[i];
-                if (comp.ID != wpnID)
+                if (curWpnIDs[i] != wpnID)
                 {
-                    newArry[j] = comp.ID;
+                    newArry[j] = curWpnIDs[i];
                     j++;
                 }
             }
@@ -998,14 +998,13 @@ namespace Pulsar4X.ImGuiNetUI
 
         void SetWeapon(Guid wpnID, FireControlAbilityState fcState)
         {
-            var curWpns = fcState.AssignedWeapons;
-            var newArry = new Guid[curWpns.Length + 1];
-            for (int i = 0; i < curWpns.Length; i++)
-            {
-                var comp = curWpns[i];
-                newArry[i] = comp.ID;
+            var curWpnIDs = fcState.GetChildrenIDs();
+            var newArry = new Guid[curWpnIDs.Length + 1];
+            for (int i = 0; i < curWpnIDs.Length; i++)
+            { 
+                newArry[i] = curWpnIDs[i];
             }
-            newArry[curWpns.Length] = wpnID;
+            newArry[curWpnIDs.Length] = wpnID;
             SetWeapons(newArry, fcState.ComponentInstance.ID);
         }
         

@@ -12,6 +12,17 @@ namespace Pulsar4X.ECSLib
     public abstract class ComponentAbilityState
     {
         public string Name { get; internal set; }
+
+        public Guid ID { get; private set; }
+        
+        public ComponentInstance ComponentInstance { get; private set; }
+        
+        public ComponentAbilityState(ComponentInstance componentInstance)
+        {
+            ComponentInstance = componentInstance;
+            Name = componentInstance.Design.Name;
+            ID = componentInstance.ID;
+        }
         //public ComponentInstance ComponentInstance;
 
         //public ComponentAbilityState(ComponentInstance componentInstance)
@@ -25,11 +36,11 @@ namespace Pulsar4X.ECSLib
         public ComponentTreeHeirarchyAbilityState ParentState { get; private set; }
         public List<ComponentTreeHeirarchyAbilityState> ChildrenStates { get; private set; } = new List<ComponentTreeHeirarchyAbilityState>();
 
-        public ComponentInstance ComponentInstance { get; private set; }
+        
 
-        public ComponentTreeHeirarchyAbilityState(ComponentInstance componentInstance)
+        public ComponentTreeHeirarchyAbilityState(ComponentInstance componentInstance) : base(componentInstance)
         {
-            ComponentInstance = componentInstance;
+            
         }
 
         public void SetParent(ComponentTreeHeirarchyAbilityState newParent)
@@ -122,6 +133,38 @@ namespace Pulsar4X.ECSLib
                     children.Add((T)child);
             }
             return children;
+        }
+        
+        public ComponentInstance[] GetChildrenInstances()
+        {
+            ComponentInstance[] instances = new ComponentInstance[ChildrenStates.Count];
+            for (int i = 0; i < ChildrenStates.Count; i++)
+            {
+                instances[i] = ChildrenStates[i].ComponentInstance;
+            }
+            return instances;
+        }
+        
+        public ComponentInstance[] GetChildrenInstancesOfType<T>() where T: ComponentTreeHeirarchyAbilityState
+        {
+            var childrenStates = GetChildrenOfType<T>();
+            ComponentInstance[] instances = new ComponentInstance[childrenStates.Count];
+            for (int i = 0; i < childrenStates.Count; i++)
+            {
+                instances[i] = childrenStates[i].ComponentInstance;
+            }
+            return instances;
+        }
+
+        public Guid[] GetChildrenIDs()
+        {
+            Guid[] ids = new Guid[ChildrenStates.Count];
+            for (int i = 0; i < ChildrenStates.Count; i++)
+            {
+                ids[i] = ChildrenStates[i].ID;
+            }
+
+            return ids;
         }
     }
 

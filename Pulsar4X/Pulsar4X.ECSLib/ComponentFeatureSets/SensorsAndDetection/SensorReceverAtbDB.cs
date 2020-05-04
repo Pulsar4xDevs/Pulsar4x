@@ -11,6 +11,10 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Dictionary<Guid, SensorProcessorTools.SensorReturnValues> CurrentContacts = new Dictionary<Guid, SensorProcessorTools.SensorReturnValues>();
         public Dictionary<Guid, SensorProcessorTools.SensorReturnValues> OldContacts = new Dictionary<Guid, SensorProcessorTools.SensorReturnValues>();
+
+        public SensorReceverAbility(ComponentInstance componentInstance) : base(componentInstance)
+        {
+        }
     }
 
     public class SensorAbilityDB : BaseDataBlob
@@ -119,7 +123,7 @@ namespace Pulsar4X.ECSLib
         {
             //we're cloning the design to the instance here. when we do another pass on the sensors we'll likely change this. 
             if (!componentInstance.HasAblity<SensorReceverAbility>())
-                componentInstance.SetAbilityState<SensorReceverAbility>(new SensorReceverAbility());//'this' should be the instance's designs db.
+                componentInstance.SetAbilityState<SensorReceverAbility>(new SensorReceverAbility(componentInstance));//'this' should be the instance's designs db.
             if (!parentEntity.HasDataBlob<SensorAbilityDB>())
             {
                 parentEntity.SetDataBlob(new SensorAbilityDB());
