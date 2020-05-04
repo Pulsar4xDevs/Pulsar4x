@@ -11,6 +11,7 @@ namespace Pulsar4X.ECSLib
 
     public abstract class ComponentAbilityState
     {
+        public string Name { get; internal set; }
         //public ComponentInstance ComponentInstance;
 
         //public ComponentAbilityState(ComponentInstance componentInstance)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
@@ -11,7 +12,429 @@ using System.Runtime.InteropServices;
 
 namespace Pulsar4X.ImGuiNetUI
 {
+
     public class FireControl : PulsarGuiWindow
+    {
+        private EntityState _orderEntityState;
+        private Entity _orderEntity => _orderEntityState.Entity;
+        SensorContact[] _allSensorContacts = new SensorContact[0];
+        string[] _ownEntityNames = new string[0];
+        EntityState[] _ownEntites = new EntityState[0];
+        private bool _showOwnAsTarget;
+
+        private Guid _factionID;
+        
+        private int _dragDropIndex;
+    
+        
+        private int _selectedFCIndex = -1;
+        private FireControlAbilityState[] _fcStates = new FireControlAbilityState[0];
+        private Vector2[] _fcSizes = new Vector2[0];
+        
+        private WeaponState[] _allWeaponsStates = new WeaponState[0];
+        private string[] _weaponNames = new string[0];
+        private WeaponState[] _unAssignedWeapons = new WeaponState[0];
+        private OrdnanceDesign[] _allOrdnanceDesigns = new OrdnanceDesign[0];
+        Dictionary<Guid, int> _storedOrdnance = new Dictionary<Guid, int>();
+        private bool _showOnlyCargoOrdnance = true;
+        
+        
+        private FireControl()
+        {
+            _flags = ImGuiWindowFlags.None;
+        }
+
+
+
+        public static FireControl GetInstance(EntityState orderEntity)
+        {
+            FireControl thisitem;
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(FireControl)))
+            {
+                thisitem = new FireControl();
+                thisitem.HardRefresh(orderEntity);
+                thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
+            }
+            else
+            {
+                thisitem = (FireControl)_uiState.LoadedWindows[typeof(FireControl)];
+                if(thisitem._orderEntityState != orderEntity)
+                {
+                    thisitem.HardRefresh(orderEntity);
+                    thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
+                }
+            }
+            
+            return thisitem;
+        }
+        
+                
+        internal override void Display()
+        {
+            if (!IsActive)
+                return;
+            
+            if (ImGui.Begin("Fire Control", ref IsActive, _flags))
+            {
+                for (int i = 0; i < _fcStates.Length; i++)
+                {
+                    var fc = _fcStates[i];
+                    ImGui.Columns(2);
+                    ImGui.SetColumnWidth(0, 400);
+
+                    var startPoint = ImGui.GetCursorPos();
+                    BorderGroup.Begin(fc.Name+"##"+i);
+                    //ImGui.BeginChild("fcddarea"+i) ;//("##fcddarea"+i, new Vector2(_fcSizes[i].X -2, _fcSizes[i].Y - 2), false);
+                    
+                    ImGui.Text(fc.TargetName);
+                    if(fc.Target != null)
+                    {
+                        if (fc.IsEngaging)
+                        {
+                            if (ImGui.Button("Cease Fire"))
+                                OpenFire(_fcStates[i].ComponentInstance.ID, SetOpenFireControlOrder.FireModes.CeaseFire);
+                        }
+                        else
+                        {
+                            if (ImGui.Button("Open Fire"))
+                                OpenFire(_fcStates[i].ComponentInstance.ID, SetOpenFireControlOrder.FireModes.OpenFire);
+                        }
+                    }
+                    foreach (var wpn in fc.GetChildrenOfType<WeaponState>())
+                    {
+                        ImGui.Selectable(WpnName(wpn));
+                        if (ImGui.BeginDragDropSource()) 
+                        {
+                            ImGui.Text(wpn.Name);
+                            unsafe 
+                            {
+                                int* tesnum = &i;
+                                ImGui.SetDragDropPayload("AssignWeapon", new IntPtr(tesnum), sizeof(int)) ;
+                                _dragDropIndex = i;
+                            }
+                            
+                            ImGui.EndDragDropSource();
+                        }
+
+                        if (ImGui.BeginDragDropTarget())
+                        {                        
+                            ImGuiPayloadPtr acceptPayload = ImGui.AcceptDragDropPayload("AssignOrdnance");
+                            bool isDroppingOrdnance = false;
+                            unsafe
+                            {
+                                isDroppingOrdnance = acceptPayload.NativePtr != null;
+                            }
+                        
+                            if(isDroppingOrdnance)
+                                SetOrdnance(fc.ComponentInstance.ID, _allOrdnanceDesigns[_dragDropIndex].ID);
+
+                        }
+
+                    }
+                    //ImGui.EndChild();
+                    BorderGroup.End(400);
+                    _fcSizes[i] = BorderGroup.GetSize;
+                    ImGui.SetCursorPos(startPoint);
+                    ImGui.InvisibleButton("fcddarea" + i, _fcSizes[i]);
+                    
+                    if (ImGui.BeginDragDropTarget())
+                    {
+                        var acceptPayload = ImGui.AcceptDragDropPayload("AssignSensorAsTarget");
+                        bool isDroppingSensorTarget = false;
+                        unsafe
+                        {
+                            isDroppingSensorTarget = acceptPayload.NativePtr != null;
+                        }
+                        
+                        acceptPayload = ImGui.AcceptDragDropPayload("AssignOwnAsTarget");
+                        bool isDroppingOwnTarget = false;
+                        unsafe
+                        {
+                            isDroppingOwnTarget = acceptPayload.NativePtr != null;
+                        }
+                        
+                        acceptPayload = ImGui.AcceptDragDropPayload("AssignWeapon");
+                        bool isDroppingWeapon = false;
+                        unsafe
+                        {
+                            isDroppingWeapon = acceptPayload.NativePtr != null;
+                        }
+                            
+                        if(isDroppingSensorTarget)
+                            SetTarget(fc.ComponentInstance.ID, _allSensorContacts[_dragDropIndex].ActualEntityGuid);
+                        if(isDroppingOwnTarget)
+                            SetTarget(fc.ComponentInstance.ID, _ownEntites[_dragDropIndex].Entity.Guid);
+                        if (isDroppingWeapon)
+                            SetWeapon(_allWeaponsStates[_dragDropIndex].ComponentInstance.ID, fc);
+                        
+
+
+                        ImGui.EndDragDropTarget();
+                        ImGui.NewLine();
+                    }
+                }
+                
+                BorderGroup.Begin("Un Assigned Weapons");
+                {
+                    for (int i = 0; i < _allWeaponsStates.Length; i++)
+                    {
+                        var wpn = _allWeaponsStates[i];
+                        
+
+                        
+                        if(wpn.ParentState == null)
+                        {
+                            ImGui.Selectable(_weaponNames[i] + "##" + wpn.ComponentInstance.ID);
+                            if (ImGui.BeginDragDropSource()) 
+                            {
+                                ImGui.Text(wpn.Name);
+                                unsafe 
+                                {
+                                    int* tesnum = &i;
+                                    ImGui.SetDragDropPayload("AssignWeapon", new IntPtr(tesnum), sizeof(int)) ;
+                                    _dragDropIndex = i;
+                                }
+                            
+                                ImGui.EndDragDropSource();
+                            }
+                            if (ImGui.BeginDragDropTarget())
+                            {
+                                ImGuiPayloadPtr acceptPayload = ImGui.AcceptDragDropPayload("AssignOrdnance");
+                                bool isDropping = false;
+                                unsafe
+                                {
+                                    isDropping = acceptPayload.NativePtr != null;
+                                }
+                        
+                                if(isDropping)
+                                    SetOrdnance(wpn.ComponentInstance.ID, _allOrdnanceDesigns[_dragDropIndex].ID);
+                            
+                                ImGui.EndDragDropTarget();
+                            }
+                        }
+                    }
+                }
+                BorderGroup.End();
+                
+                BorderGroup.Begin("Ordnance");
+                {
+                    for (int i = 0; i < _allOrdnanceDesigns.Length; i++)
+                    {
+                        var ord = _allOrdnanceDesigns[i];
+                        if(_storedOrdnance.ContainsKey(ord.ID))
+                        {
+                            ImGui.Selectable(ord.Name);
+                            if (ImGui.BeginDragDropSource()) 
+                            {
+                                ImGui.Selectable(ord.Name);
+                                unsafe 
+                                {
+                                    int* tesnum = &i;
+                                    ImGui.SetDragDropPayload("AssignOrdnance", new IntPtr(tesnum), sizeof(int)) ;
+                                    _dragDropIndex = i;
+                                }
+                            
+                                ImGui.EndDragDropSource();
+                            }
+                        }
+                    }
+                }
+                BorderGroup.End();
+                
+                ImGui.NextColumn();
+                DisplayTargetColumn();
+                
+            }
+        }
+        
+        void DisplayTargetColumn()
+        {
+            BorderGroup.Begin("Set Target:");
+            ImGui.Checkbox("Show Own", ref _showOwnAsTarget);
+
+            for (int i = 0; i < _allSensorContacts.Length; i++)
+            {
+                var contact = _allSensorContacts[i];
+                ImGui.Selectable(contact.Name);
+                if (ImGui.BeginDragDropSource()) 
+                {
+                    ImGui.Text(contact.Name);
+                    unsafe 
+                    {
+                        int* tesnum = &i;
+                        ImGui.SetDragDropPayload("AssignSensorAsTarget", new IntPtr(tesnum), sizeof(int)) ;
+                        _dragDropIndex = i;
+                    }
+                        
+                    ImGui.EndDragDropSource();
+                }
+            }
+
+            if (_showOwnAsTarget)
+            {
+                for (int i = 0; i < _ownEntites.Length; i++)
+                {
+                    var contact = _ownEntites[i];
+                    ImGui.Selectable(contact.Name);
+                    if (ImGui.BeginDragDropSource()) 
+                    {
+                        ImGui.Text(contact.Name);
+                        unsafe 
+                        {
+                            int* tesnum = &i;
+                            ImGui.SetDragDropPayload("AssignOwnAsTarget", new IntPtr(tesnum), sizeof(int)) ;
+                            _dragDropIndex = i;
+                        }
+                        
+                        ImGui.EndDragDropSource();
+                    }
+                }
+            }
+            BorderGroup.End();
+        }
+      
+        
+        void HardRefresh(EntityState orderEntity)
+        {
+            
+            _orderEntityState = orderEntity;
+            var instancesDB = orderEntity.Entity.GetDataBlob<ComponentInstancesDB>();
+            if(orderEntity.DataBlobs.ContainsKey(typeof(FireControlAbilityDB)))
+            {
+                if( instancesDB.TryGetStates<FireControlAbilityState>(out _fcStates))
+                {
+                    
+                }
+                _fcSizes = new Vector2[_fcStates.Length];
+            }
+
+            if (instancesDB.TryGetStates<WeaponState>(out _allWeaponsStates))
+            {
+                List<WeaponState> unassigned= new List<WeaponState>();
+                foreach (var wpn in _allWeaponsStates)
+                {
+                    unassigned.Add(wpn);
+                }
+
+                _unAssignedWeapons = unassigned.ToArray();
+            }
+
+            var sysstate = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+            var contacts = sysstate.SystemContacts;
+            _allSensorContacts = contacts.GetAllContacts().ToArray();
+            _ownEntites = sysstate.EntityStatesWithPosition.Values.ToArray();
+            
+
+
+        }
+
+        public override void OnSystemTickChange(DateTime newdate)
+        {
+            
+
+            _allOrdnanceDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns.Values.ToArray();
+            var ctypes = new List<Guid>(); //there are likely to be not very many of these, proibly only one.
+            foreach (var ordDes in _allOrdnanceDesigns)
+            {
+                if(!ctypes.Contains(ordDes.CargoTypeID))
+                    ctypes.Add(ordDes.CargoTypeID);
+            }
+
+            
+            foreach (var cargoType in ctypes)
+            {
+                if (_orderEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes.ContainsKey(cargoType))
+                {
+                    var shipOrdnances = _orderEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes[cargoType].ItemsAndAmounts;
+
+                    foreach (var ordType in shipOrdnances.Values)
+                        _storedOrdnance[ordType.item.ID] = (int)ordType.amount;
+                }
+
+            }
+
+            _weaponNames = new string[_allWeaponsStates.Length];
+            for (int i = 0; i < _allWeaponsStates.Length; i++)
+            {
+                var wpn = _allWeaponsStates[i];
+                _weaponNames[i] = WpnName(wpn);
+            }
+        }
+
+
+        string WpnName(WeaponState wpn)
+        {
+            var assOrdName = "";
+            string assOrdCount = "(0)";
+            if (wpn.AssignedOrdnanceDesign != null)
+            {
+                assOrdName = wpn.AssignedOrdnanceDesign.Name;
+                assOrdCount = "(" + _storedOrdnance[wpn.AssignedOrdnanceDesign.ID] + ")";
+            }
+            return wpn.Name + "\t" + assOrdName + assOrdCount;
+        }
+
+        void UnSetWeapon(Guid wpnID, FireControlAbilityState fcState)
+        {
+            var curWpns = fcState.AssignedWeapons;
+            var newArry = new Guid[curWpns.Length];
+            int j = 0;
+            for (int i = 0; i < curWpns.Length; i++)
+            {
+                var comp = curWpns[i];
+                if (comp.ID != wpnID)
+                {
+                    newArry[j] = comp.ID;
+                    j++;
+                }
+            }
+            SetWeapons(newArry, fcState.ComponentInstance.ID);
+        }
+
+        void SetWeapon(Guid wpnID, FireControlAbilityState fcState)
+        {
+            var curWpns = fcState.AssignedWeapons;
+            var newArry = new Guid[curWpns.Length + 1];
+            for (int i = 0; i < curWpns.Length; i++)
+            {
+                var comp = curWpns[i];
+                newArry[i] = comp.ID;
+            }
+            newArry[curWpns.Length] = wpnID;
+            SetWeapons(newArry, fcState.ComponentInstance.ID);
+        }
+        
+        
+        void SetWeapons(Guid[] wpnsAssignd, Guid firecontrolID)
+        {
+            SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, firecontrolID, wpnsAssignd);
+        }
+
+        void SetOrdnance(Guid wpnID, Guid ordnanceAssigned)
+        {
+            SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, wpnID, ordnanceAssigned);
+        }
+
+        void SetTarget(Guid targetID, Guid fcGuid)
+        {
+            SetTargetFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, fcGuid, targetID);
+        }
+
+        private void OpenFire(Guid fcID, SetOpenFireControlOrder.FireModes mode)
+        {
+            SetOpenFireControlOrder.CreateCmd(_uiState.Game, _uiState.Faction, _orderEntity, fcID, mode);
+        }
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    public class FireControl2 : PulsarGuiWindow
     {
         private EntityState _orderEntityState;
         private Entity _orderEntity { get { return _orderEntityState.Entity; } }
@@ -25,7 +448,12 @@ namespace Pulsar4X.ImGuiNetUI
             public Guid ID { get { return WeaponInstance.ID; } }
             public ComponentInstance FirecontrolInstance
             {
-                get{ return CurrentWeaponState.ParentState.ComponentInstance; }
+                get
+                {
+                    if (CurrentWeaponState.ParentState == null)
+                        return null;
+                    return CurrentWeaponState.ParentState.ComponentInstance;
+                }
             }
             public WeaponComponentInstance(ComponentInstance _WeaponInstance, int ID = 0) 
             {
@@ -108,25 +536,25 @@ namespace Pulsar4X.ImGuiNetUI
         //The follwing varibles are to be used only for drag + drop logic.
 
 
-        private FireControl()
+        private FireControl2()
         {
             _flags = ImGuiWindowFlags.None;
         }
 
 
 
-        public static FireControl GetInstance(EntityState orderEntity)
+        public static FireControl2 GetInstance(EntityState orderEntity)
         {
-            FireControl thisitem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(FireControl)))
+            FireControl2 thisitem;
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(FireControl2)))
             {
-                thisitem = new FireControl();
+                thisitem = new FireControl2();
                 thisitem.HardRefresh(orderEntity);
                 thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
             }
             else
             {
-                thisitem = (FireControl)_uiState.LoadedWindows[typeof(FireControl)];
+                thisitem = (FireControl2)_uiState.LoadedWindows[typeof(FireControl2)];
                 if(thisitem._orderEntityState != orderEntity)
                 {
                     thisitem.HardRefresh(orderEntity);
@@ -140,19 +568,7 @@ namespace Pulsar4X.ImGuiNetUI
         }
 
         
-        void AssignWep(int WeaponID, int FirecontrolID)
-        {
-            if (FirecontrolID < 0)
-                _allWeapons[WeaponID].CurrentWeaponState.Master = null;
-            else
-                _allWeapons[WeaponID].CurrentWeaponState.Master = _allFirecontrols[FirecontrolID].FirecontrolInstance;
-            SetFirecontrolWeps();
-        }
-        void AssignWep(int WeaponID)
-        {
-            _allWeapons[WeaponID].CurrentWeaponState.Master = _allFirecontrols[0].FirecontrolInstance;
-            SetFirecontrolWeps();
-        }
+
 
 
         public void UpdateTargets()
@@ -246,40 +662,21 @@ namespace Pulsar4X.ImGuiNetUI
                         _beamWpns.Add(NewWeapon(laser));
                     _allWeapons.AddRange(_beamWpns);
                 }
-
-
-                foreach (WeaponComponentInstance weapon in _allWeapons) 
-                    AssignWep(weapon.LocalID);
+                
             }
             
             var sysstate = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             var contacts = sysstate.SystemContacts;
             _allSensorContacts = contacts.GetAllContacts().ToArray();
             _ownEntites = sysstate.EntityStatesWithPosition.Values.ToArray();
-            SetFirecontrolWeps();
+            
 
 
         }
 
         void OnFrameRefresh() { }
 
-        private void SetFirecontrolWeps()
-        {
-            foreach(FirecontrolComponentInstance firecontrol in _allFirecontrols)
-            {
-                List<Guid> AssignedWeps = new List<Guid>();
-                foreach(WeaponComponentInstance weapon in _allWeapons)
-                {
-                    
-                    if (weapon.FirecontrolInstance != null && weapon.ID == firecontrol.ID)
-                        AssignedWeps.Add(weapon.ID);
-
-                }
-                SetWeapons(AssignedWeps.ToArray(), firecontrol.ID);
-            }
-            SoftRefresh();
-        }
-
+        
         internal override void Display()
         {
             if (!IsActive)
@@ -351,7 +748,7 @@ namespace Pulsar4X.ImGuiNetUI
                     ImGui.Button("Drop Here");
                     if (ImGui.BeginDragDropTarget())
                     {
-                        AssignWep(selectedwep, firecontrol.LocalID);
+                        SetWeapon(_allWeapons[selectedwep].ID, firecontrol.FirecontrolState);
                         dragdrop = false;
                         ImGui.EndDragDropTarget();
                     }
@@ -372,7 +769,7 @@ namespace Pulsar4X.ImGuiNetUI
 
                 FireControlAbilityState firecontrolstate = firecontrol.FirecontrolState;
 
-                firecontrol.FirecontrolState.AssignedWeapons = new List<ComponentInstance>();
+                
 
                 foreach(WeaponComponentInstance weapon in _allWeapons) 
                 {
@@ -403,8 +800,9 @@ namespace Pulsar4X.ImGuiNetUI
                         ImGui.SameLine();
 
                         if (ImGui.SmallButton("X"))
-                            AssignWep(weapon.LocalID, -1);
-
+                        {
+                            UnSetWeapon(weapon.ID, firecontrol.FirecontrolState);
+                        }
                     }
                 }
 
@@ -462,7 +860,7 @@ namespace Pulsar4X.ImGuiNetUI
                     ComponentInstance missilelauncherinstance = missilelauncher.WeaponInstance;
                     WeaponState missilelauncherstate = missilelauncher.CurrentWeaponState;
                     if (ImGui.SmallButton(missilelauncherinstance.Name + "##" + missilelauncherinstance.ID))
-                        AssignWep(missilelauncher.LocalID, _selectedfirecontrol.LocalID);
+                        SetWeapon(missilelauncher.ID, _selectedfirecontrol.FirecontrolState);
                     ImGui.Indent();
                     foreach (var stat in missilelauncherstate.WeaponStats)
                     {
@@ -498,7 +896,7 @@ namespace Pulsar4X.ImGuiNetUI
                     
 
                     if (ImGui.SmallButton(railguninstance.Name + "##" + railguninstance.ID))
-                        AssignWep(railgun.LocalID, _selectedfirecontrol.LocalID);
+                        SetWeapon(railgun.ID, _selectedfirecontrol.FirecontrolState);
                     ImGui.Indent();
                     foreach (var stat in railgunstate.WeaponStats)
                         ImGui.Text(stat.name + Stringify.Value(stat.value, stat.valueType));
@@ -518,7 +916,7 @@ namespace Pulsar4X.ImGuiNetUI
                     WeaponState laserstate = laser.CurrentWeaponState;
 
                     if (ImGui.SmallButton(laserinstance.Name + "##" + laserinstance.ID))
-                        AssignWep(laser.LocalID, _selectedfirecontrol.LocalID);
+                        SetWeapon(laser.ID, _selectedfirecontrol.FirecontrolState);
                     ImGui.Indent();
                     foreach (var stat in laserstate.WeaponStats)
                     {
@@ -581,16 +979,57 @@ namespace Pulsar4X.ImGuiNetUI
         }
 
 
-        void SetWeapons(Guid[] wpnsAssignd) { SetWeapons(wpnsAssignd, _allFirecontrols[0].ID); }
-        void SetWeapons(Guid[] wpnsAssignd, Guid FirecontrolID) { SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, FirecontrolID, wpnsAssignd); }
-        void SetOrdnance(Guid wpnID, Guid ordnanceAssigned) { SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, wpnID, ordnanceAssigned); }
+        void UnSetWeapon(Guid wpnID, FireControlAbilityState fcState)
+        {
+            var curWpns = fcState.AssignedWeapons;
+            var newArry = new Guid[curWpns.Length];
+            int j = 0;
+            for (int i = 0; i < curWpns.Length; i++)
+            {
+                var comp = curWpns[i];
+                if (comp.ID != wpnID)
+                {
+                    newArry[j] = comp.ID;
+                    j++;
+                }
+            }
+            SetWeapons(newArry, fcState.ComponentInstance.ID);
+        }
+
+        void SetWeapon(Guid wpnID, FireControlAbilityState fcState)
+        {
+            var curWpns = fcState.AssignedWeapons;
+            var newArry = new Guid[curWpns.Length + 1];
+            for (int i = 0; i < curWpns.Length; i++)
+            {
+                var comp = curWpns[i];
+                newArry[i] = comp.ID;
+            }
+            newArry[curWpns.Length] = wpnID;
+            SetWeapons(newArry, fcState.ComponentInstance.ID);
+        }
+        
+        
+        void SetWeapons(Guid[] wpnsAssignd, Guid firecontrolID)
+        {
+            SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, firecontrolID, wpnsAssignd);
+        }
+
+        void SetOrdnance(Guid wpnID, Guid ordnanceAssigned)
+        {
+            SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, wpnID, ordnanceAssigned);
+        }
 
         void SetTarget(Guid targetID)
         {
             SetTargetFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, _selectedfirecontrol.FirecontrolInstance.ID, targetID);
             UpdateTargets();
         }
-        private void OpenFire(Guid fcID, SetOpenFireControlOrder.FireModes mode) { SetOpenFireControlOrder.CreateCmd(_uiState.Game, _uiState.Faction, _orderEntity, fcID, mode);}
+
+        private void OpenFire(Guid fcID, SetOpenFireControlOrder.FireModes mode)
+        {
+            SetOpenFireControlOrder.CreateCmd(_uiState.Game, _uiState.Faction, _orderEntity, fcID, mode);
+        }
 
     }
 

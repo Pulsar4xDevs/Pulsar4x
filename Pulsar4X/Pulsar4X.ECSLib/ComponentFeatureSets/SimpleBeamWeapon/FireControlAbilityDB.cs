@@ -62,9 +62,34 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class FireControlAbilityState : ComponentTreeHeirarchyAbilityState
     {
-        public Entity Target { get; internal set; }
+        public Entity Target { get; private set; }
+        private NameDB _TargetNameDB;
 
-        public List<ComponentInstance> AssignedWeapons { get; set; } = new List<ComponentInstance>();
+        internal void SetTarget(Entity target)
+        {
+            Target = target;
+            if (target == null)
+                _TargetNameDB = null;
+            else
+                _TargetNameDB = target.GetDataBlob<NameDB>();
+            
+        }
+
+        private Guid _factionOwner;
+        public string TargetName
+        {
+            get
+            {
+                if (_TargetNameDB == null)
+                    return "No Target";
+                else
+                {
+                    return _TargetNameDB.GetName(_factionOwner);
+                }
+            }
+        }
+
+        public ComponentInstance[] AssignedWeapons = new ComponentInstance[0];
 
         public bool IsEngaging { get; internal set; } = false;
 
@@ -76,13 +101,14 @@ namespace Pulsar4X.ECSLib
 
         public FireControlAbilityState(ComponentInstance componentInstance) : base(componentInstance)
         {
-            
+            _factionOwner = componentInstance.ParentInstances.OwningEntity.FactionOwner;
+            Name = componentInstance.Design.Name;
         }
 
         public FireControlAbilityState(FireControlAbilityState db) : base(db.ComponentInstance)
         {
             Target = db.Target;
-            AssignedWeapons = new List<ComponentInstance>(db.AssignedWeapons);
+            AssignedWeapons =  (ComponentInstance[])db.AssignedWeapons.Clone();
             IsEngaging = db.IsEngaging;
         }
     }

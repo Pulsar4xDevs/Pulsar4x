@@ -27,11 +27,10 @@ namespace Pulsar4X.ECSLib
                     var wpnState = wpn.GetAbilityState<WeaponState>();
                     if (wpn.IsEnabled && wpnState.CoolDown <= atDate)
                     {
-                        var fc = wpnState.Master;
-                        if (wpnState.Master != null)
+                        var fc = (FireControlAbilityState)wpnState.ParentState;
+                        if (fc != null)
                         {
-                            var fcstate = fc.GetAbilityState<FireControlAbilityState>();
-                            if (fcstate.IsEngaging)
+                            if (fc.IsEngaging)
                             {
                                 wpnState.ReadyToFire = true;
                                 FireBeamWeapons(wpn, atDate);
@@ -48,10 +47,10 @@ namespace Pulsar4X.ECSLib
         {
             //TODO: all this needs to get re-written. 
             WeaponState stateInfo = beamWeapon.GetAbilityState<WeaponState>();
-            FireControlAbilityState fireControl = stateInfo.Master.GetAbilityState<FireControlAbilityState>();
+            FireControlAbilityState fireControl = (FireControlAbilityState)stateInfo.ParentState;
             if(!fireControl.Target.IsValid)
             {
-                fireControl.Target = null;
+                fireControl.SetTarget(null);
                 fireControl.IsEngaging = false;
                 return;
             }
@@ -180,15 +179,21 @@ namespace Pulsar4X.ECSLib
         public OrdnanceDesign[] OrdnanceDesigns = new OrdnanceDesign[0];
         public double[] LaunchForces = new double[0];
         public FireControlAbilityState[] FireControlStates = new FireControlAbilityState[0];
-        
+
+
+        internal GenericFiringWeaponsDB(ComponentInstance[] wpns)
+        {
+            SetWeapons(wpns);
+        }
+
         /// <summary>
         /// Adds to exsisting weapons.
         /// not thread safe.
         /// </summary>
         /// <param name="wpns"></param>
-        internal void AddWeapons(List<ComponentInstance> wpns)
+        internal void AddWeapons(ComponentInstance[] wpns)
         {
-            int count = WpnIDs.Length + wpns.Count;
+            int count = WpnIDs.Length + wpns.Length;
             
 
             Guid[] wpnIDs = new Guid[count];
@@ -226,7 +231,7 @@ namespace Pulsar4X.ECSLib
                 minShotsPerfire[i + offset] = wpnAtb.MinShotsPerfire;
 
                 //wpnTypes[i + offset] = wpnAtb.WpnType;
-                fcStates[i + offset] = wpnState.Master.GetAbilityState<FireControlAbilityState>();
+                fcStates[i + offset] = (FireControlAbilityState)wpnState.ParentState;
                 ordDes[i + offset] = wpnState.AssignedOrdnanceDesign;
                 if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
                     launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
@@ -249,12 +254,12 @@ namespace Pulsar4X.ECSLib
             LaunchForces = launchForce;
         }
 
-        internal void RemoveWeapons(List<ComponentInstance> wpns)
+        internal void RemoveWeapons(ComponentInstance[] wpns)
         {
-            Guid[] wpnToRemoveIDs = new Guid[wpns.Count];
+            Guid[] wpnToRemoveIDs = new Guid[wpns.Length];
             bool[] keepOrRemove = new bool[WpnIDs.Length];
             //List<int> removeIndexs;
-            for (int i = 0; i < wpns.Count; i++)
+            for (int i = 0; i < wpns.Length; i++)
             {
                 wpnToRemoveIDs[i] = wpns[i].ID;
             }
@@ -319,9 +324,9 @@ namespace Pulsar4X.ECSLib
         /// Sets weapons, this will remove exsisting. 
         /// </summary>
         /// <param name="wpns"></param>
-        internal void SetWeapons(List<ComponentInstance> wpns)
+        internal void SetWeapons(ComponentInstance[] wpns)
         {
-            int count = wpns.Count;
+            int count = wpns.Length;
             
             Guid[] wpnIDs = new Guid[count];
             int[] internalMagSizes = new int[count];
@@ -346,7 +351,7 @@ namespace Pulsar4X.ECSLib
                 amountPerShot[i] = wpnAtb.AmountPerShot;
                 minShotsPerfire[i] = wpnAtb.MinShotsPerfire;
                 //wpnTypes[i] = wpnAtb.WpnType;
-                fcStates[i] = wpnState.Master.GetAbilityState<FireControlAbilityState>();
+                fcStates[i] = (FireControlAbilityState)wpnState.ParentState;
                 ordDes[i] = wpnState.AssignedOrdnanceDesign;
                 if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
                     launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
@@ -444,33 +449,6 @@ namespace Pulsar4X.ECSLib
             bwDB.MaxDamage = maxDamage;
             bwDB.MaxRange = maxRange;
             bwDB.MaxTrackingSpeed = maxTrackingSpeed;
-        }
-    }
-
-    public static class FireControlProcessor
-    {
-        public static void SetWeaponToFC(ComponentInstance fireControlInstance, ComponentInstance weaponInstance)
-        {
-            if (fireControlInstance.HasAblity<FireControlAbilityState>() && weaponInstance.TryGetAbilityState<WeaponState>(out var wpnState))
-                wpnState.Master = fireControlInstance;
-            else
-                throw new Exception("needs FireContInstanceAbilityDB on fireControlInstance, and WeaponStateDB on weaponInstance");
-        }
-
-        public static void RemoveWeaponFromFC(ComponentInstance weaponInstance)
-        {
-            if (weaponInstance.TryGetAbilityState<WeaponState>(out var wpnState))
-                wpnState.Master = null;
-            else
-                throw new Exception("needs WeaponStateDB on weaponInstance");
-        }
-
-        public static void SetTarget(ComponentInstance fireControlInstance, Entity target)
-        {
-            if (fireControlInstance.TryGetAbilityState<FireControlAbilityState>(out var fcState))
-                fcState.Target = target;
-            else
-                throw new Exception("No FireContInstanceAbilityDB on entity");
         }
     }
 }

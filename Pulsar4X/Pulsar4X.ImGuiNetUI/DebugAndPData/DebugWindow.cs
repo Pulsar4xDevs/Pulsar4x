@@ -1062,7 +1062,7 @@ namespace Pulsar4X.SDL2UI
                 var getColomnOffset = ImGui.GetColumnOffset(1);
                 
                 var itemStartPos = new Vector2();
-
+                
 
                 var cursorScreenStartPos = _windowPos + getCursorStartPos;
                 

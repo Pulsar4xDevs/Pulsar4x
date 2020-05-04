@@ -76,6 +76,23 @@ namespace Pulsar4X.ECSLib
                 return true;
             return false;
         }
+        
+        public bool TryGetStates<T>(out T[] states)
+            where T : ComponentAbilityState
+        {
+            if (TryGetComponentsWithStates<T>(out var instances))
+            {
+                states = new T[instances.Count];
+                for (int i = 0; i < instances.Count; i++)
+                {
+                    states[i] = instances[i].GetAbilityState<T>();
+                }
+
+                return true;
+            }
+            states = new T[0];
+            return false;
+        }
 
         internal void AddComponentInstance(ComponentInstance instance)
         {

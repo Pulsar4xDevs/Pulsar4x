@@ -76,12 +76,16 @@ namespace Pulsar4X.ECSLib
                     {
                         _fireControlComponent = fc;
                         
-                        foreach (var wpnGuid in WeaponsAssigned)
+                        if (instancesdb.TryGetComponentStates<WeaponState>(out var wpns))
                         {
-
-                            if (instancesdb.TryGetComponentStates<WeaponState>(out var wpns))
+                            
+                            foreach (var wpnGuid in WeaponsAssigned)
                             {
-                                _weaponsAssigned = wpns;
+                                foreach (var wpnState in wpns)
+                                {
+                                    if (wpnState.ComponentInstance.ID == wpnGuid) 
+                                        _weaponsAssigned.Add(wpnState);
+                                }
                             }
 
 
@@ -137,7 +141,7 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                _fireControlComponent.GetAbilityState<FireControlAbilityState>().Target = _targetActualEntity;
+                _fireControlComponent.GetAbilityState<FireControlAbilityState>().SetTarget(_targetActualEntity);
             }
 
         }
@@ -225,28 +229,29 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                var fcinstance = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
+                var fcState = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
                 if (IsFiring == FireModes.OpenFire)
                 {
-                    fcinstance.IsEngaging = true;
+                    fcState.IsEngaging = true;
                     DateTime dateTimeNow = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
                     GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
                     if (blob == null)
                     {
-                        blob = new GenericFiringWeaponsDB();
+                        blob = new GenericFiringWeaponsDB(fcState.AssignedWeapons);
                         _entityCommanding.SetDataBlob(blob);
                     }
-                    blob.AddWeapons(fcinstance.AssignedWeapons);
+                    else
+                        blob.AddWeapons(fcState.AssignedWeapons);
 
                     //StaticRefLib.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor),_entityCommanding,  dateTimeNow);
                 }
                 else if (IsFiring == FireModes.CeaseFire)
                 {
-                    fcinstance.IsEngaging = false;
+                    fcState.IsEngaging = false;
                     GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
                     if (blob != null)
                     {
-                        blob.RemoveWeapons(fcinstance.AssignedWeapons);
+                        blob.RemoveWeapons(fcState.AssignedWeapons);
                         if(blob.WpnIDs.Length == 0)
                             _entityCommanding.RemoveDataBlob<GenericFiringWeaponsDB>();
                     }

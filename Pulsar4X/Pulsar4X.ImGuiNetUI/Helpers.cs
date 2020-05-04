@@ -134,6 +134,10 @@ namespace Pulsar4X.SDL2UI
         private static uint[] _colour = new uint[8];
         private static byte _nestIndex = 0;
         private static float _dentMulitpier = 3;
+        private static Vector2[] _size = new Vector2[8];
+
+        public static Vector2 GetSize => _size[_nestIndex];
+
         public static void Begin(string label, uint colour)
         {
             ImGui.PushID(label);
@@ -169,11 +173,11 @@ namespace Pulsar4X.SDL2UI
             _nestIndex--;
             var pos = ImGui.GetCursorScreenPos();
             
-            Vector2 size = new Vector2(width, pos.Y - _startPos[_nestIndex].Y);
+            _size[_nestIndex] = new Vector2(width, pos.Y - _startPos[_nestIndex].Y);
             ImDrawListPtr wdl = ImGui.GetWindowDrawList();
 
-            float by = _startPos[_nestIndex].Y + size.Y + _dentMulitpier -_dentMulitpier * _nestIndex;
-            float rx = _startPos[_nestIndex].X + size.X - _dentMulitpier * _nestIndex;
+            float by = _startPos[_nestIndex].Y + _size[_nestIndex].Y + _dentMulitpier -_dentMulitpier * _nestIndex;
+            float rx = _startPos[_nestIndex].X + _size[_nestIndex].X - _dentMulitpier * _nestIndex;
             
             Vector2[] pts = new Vector2[6];
             pts[0] = new Vector2(_startPos[_nestIndex].X + _dentMulitpier, _startPos[_nestIndex].Y);
