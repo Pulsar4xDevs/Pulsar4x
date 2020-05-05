@@ -92,11 +92,6 @@ namespace Pulsar4X.ECSLib
         //public ComponentInstance[] AssignedWeapons {get{return GetChildrenOfType<WeaponState>()}}
 
         public bool IsEngaging { get; internal set; } = false;
-
-        List<WeaponState> AssignedWeaponStates()
-        {
-            return GetChildrenOfType<WeaponState>();
-        }
         
 
         public FireControlAbilityState(ComponentInstance componentInstance) : base(componentInstance)

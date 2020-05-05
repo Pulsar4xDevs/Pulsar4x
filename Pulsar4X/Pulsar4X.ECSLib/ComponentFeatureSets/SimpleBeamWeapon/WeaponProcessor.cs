@@ -372,6 +372,7 @@ namespace Pulsar4X.ECSLib
             //WpnTypes = wpnTypes;
             FireControlStates = fcStates;
             OrdnanceDesigns = ordDes;
+            LaunchForces = launchForce;
         }
 
         public override object Clone()

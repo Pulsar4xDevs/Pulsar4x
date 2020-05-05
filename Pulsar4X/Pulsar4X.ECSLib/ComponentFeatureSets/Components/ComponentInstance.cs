@@ -43,6 +43,10 @@ namespace Pulsar4X.ECSLib
             
         }
 
+        /// <summary>
+        /// Sets the parent of this. (no need to set this as a child on the parent)
+        /// </summary>
+        /// <param name="newParent"></param>
         public void SetParent(ComponentTreeHeirarchyAbilityState newParent)
         {
             if (ParentState != null)
@@ -55,8 +59,29 @@ namespace Pulsar4X.ECSLib
                 ParentState.ChildrenStates.Add(this);
         }
 
-        /* some ideas, implement if actualy needed
-        
+        /// <summary>
+        /// Clears any exsisting children and sets children to the given list (no need to set parent on children seperately)
+        /// </summary>
+        /// <param name="children"></param>
+        public void SetChildren(ComponentTreeHeirarchyAbilityState[] children)
+        {
+            var oldChilders = new List<ComponentTreeHeirarchyAbilityState>(ChildrenStates);
+            ChildrenStates.Clear();
+            foreach (var child in children)
+            {
+                child.SetParent(this);
+            }
+
+            foreach (ComponentTreeHeirarchyAbilityState orphan in oldChilders)
+            {
+                orphan.SetParent(null);
+            }
+        }
+
+        /*
+         /// <summary>
+         ///some ideas, implement if actualy needed
+        /// </summary>
         public BaseDataBlob ThisRelatedDatablob; 
         
         public InstancesDB ThisEntitesInstancesDB;
@@ -89,6 +114,42 @@ namespace Pulsar4X.ECSLib
         }
         
         
+                /// <summary>
+        /// If parent is null, will return an empty list
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public List<T> GetSiblingsOfType<T>()
+            where T : ComponentTreeHeirarchyAbilityState
+        {
+            if(ParentState == null)
+                return new List<T>();
+            return ParentState.GetChildrenOfType<T>();
+        }
+        
+        
+        public List<T> GetChildrenOfType<T>() where T: ComponentTreeHeirarchyAbilityState
+        {
+            List<T> children = new List<T>();
+            foreach (var child in ChildrenStates)
+            {
+                if(child is T)
+                    children.Add((T)child);
+            }
+            return children;
+        }
+        
+        public ComponentInstance[] GetChildrenInstancesOfType<T>() where T: ComponentTreeHeirarchyAbilityState
+        {
+            var childrenStates = GetChildrenOfType<T>();
+            ComponentInstance[] instances = new ComponentInstance[childrenStates.Count];
+            for (int i = 0; i < childrenStates.Count; i++)
+            {
+                instances[i] = childrenStates[i].ComponentInstance;
+            }
+            return instances;
+        }
+        
         */
 
         public ComponentTreeHeirarchyAbilityState GetRoot()
@@ -110,30 +171,6 @@ namespace Pulsar4X.ECSLib
         {
             return ParentState.ChildrenStates;
         }
-
-        /// <summary>
-        /// If parent is null, will return an empty list
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public List<T> GetSiblingsOfType<T>()
-            where T : ComponentTreeHeirarchyAbilityState
-        {
-            if(ParentState == null)
-                return new List<T>();
-            return ParentState.GetChildrenOfType<T>();
-        }
-
-        public List<T> GetChildrenOfType<T>() where T: ComponentTreeHeirarchyAbilityState
-        {
-            List<T> children = new List<T>();
-            foreach (var child in ChildrenStates)
-            {
-                if(child is T)
-                    children.Add((T)child);
-            }
-            return children;
-        }
         
         public ComponentInstance[] GetChildrenInstances()
         {
@@ -145,16 +182,6 @@ namespace Pulsar4X.ECSLib
             return instances;
         }
         
-        public ComponentInstance[] GetChildrenInstancesOfType<T>() where T: ComponentTreeHeirarchyAbilityState
-        {
-            var childrenStates = GetChildrenOfType<T>();
-            ComponentInstance[] instances = new ComponentInstance[childrenStates.Count];
-            for (int i = 0; i < childrenStates.Count; i++)
-            {
-                instances[i] = childrenStates[i].ComponentInstance;
-            }
-            return instances;
-        }
 
         public Guid[] GetChildrenIDs()
         {
@@ -166,6 +193,8 @@ namespace Pulsar4X.ECSLib
 
             return ids;
         }
+        
+        
     }
 
     public class ComponentInstance : ICargoable
@@ -212,11 +241,7 @@ namespace Pulsar4X.ECSLib
         public int HTKRemaining { get; internal set; }
         [JsonProperty]
         public int HTKMax { get; private set; }
-
-
-
-
-
+        
 
         private Dictionary<Type, ComponentAbilityState> _instanceAbilities = new Dictionary<Type, ComponentAbilityState>();
 

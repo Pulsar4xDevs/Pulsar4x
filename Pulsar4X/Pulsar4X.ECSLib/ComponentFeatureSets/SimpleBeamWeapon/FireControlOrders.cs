@@ -47,12 +47,9 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
-                var fcinstance = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
+                var fcState = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
                 
-                foreach (var wpn in _weaponsAssigned)
-                {
-                    wpn.SetParent(fcinstance);
-                }
+                fcState.SetChildren(_weaponsAssigned.ToArray());
                 IsRunning = true;
             }
         }
