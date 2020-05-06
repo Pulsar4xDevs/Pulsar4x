@@ -76,37 +76,142 @@ namespace Pulsar4X.ImGuiNetUI
         {
             if (!IsActive)
                 return;
-
+            ImGui.SetNextWindowSize(new Vector2(600f, 400f), ImGuiCond.FirstUseEver);
             if (ImGui.Begin("Fire Control", ref IsActive, _flags))
             {
-                for (int i = 0; i < _fcStates.Length; i++)
+                ImGui.Columns(2);
+                ImGui.SetColumnWidth(0, 400);
+                DisplayFC();
+                
+                UnAssignedWeapons();
+                
+                ImGui.NewLine();
+
+                DisplayOrdnance();
+                
+                ImGui.NextColumn();
+                
+                DisplayTargetColumn();
+
+            }
+        }
+
+
+
+        void DisplayFC()
+        {
+            for (int i = 0; i < _fcStates.Length; i++)
+            {
+                var fc = _fcStates[i];
+
+
+                var startPoint = ImGui.GetCursorPos();
+                BorderGroup.Begin(fc.Name + "##" + i);
+                //ImGui.BeginChild("fcddarea"+i) ;//("##fcddarea"+i, new Vector2(_fcSizes[i].X -2, _fcSizes[i].Y - 2), false);
+
+                ImGui.Text(fc.TargetName);
+                if (fc.Target != null)
                 {
-                    var fc = _fcStates[i];
-                    ImGui.Columns(2);
-                    ImGui.SetColumnWidth(0, 400);
-
-                    var startPoint = ImGui.GetCursorPos();
-                    BorderGroup.Begin(fc.Name + "##" + i);
-                    //ImGui.BeginChild("fcddarea"+i) ;//("##fcddarea"+i, new Vector2(_fcSizes[i].X -2, _fcSizes[i].Y - 2), false);
-
-                    ImGui.Text(fc.TargetName);
-                    if (fc.Target != null)
+                    if (fc.IsEngaging)
                     {
-                        if (fc.IsEngaging)
+                        if (ImGui.Button("Cease Fire"))
+                            OpenFire(_fcStates[i].ComponentInstance.ID, SetOpenFireControlOrder.FireModes.CeaseFire);
+                    }
+                    else
+                    {
+                        if (ImGui.Button("Open Fire"))
+                            OpenFire(_fcStates[i].ComponentInstance.ID, SetOpenFireControlOrder.FireModes.OpenFire);
+                    }
+                }
+
+                foreach (var wpn in fc.ChildrenStates)
+                {
+                    ImGui.Selectable(_weaponNames[wpn.ID]);
+                    if (ImGui.BeginDragDropSource())
+                    {
+                        ImGui.Text(wpn.Name);
+                        unsafe
                         {
-                            if (ImGui.Button("Cease Fire"))
-                                OpenFire(_fcStates[i].ComponentInstance.ID, SetOpenFireControlOrder.FireModes.CeaseFire);
+                            int* tesnum = &i;
+                            ImGui.SetDragDropPayload("AssignWeapon", new IntPtr(tesnum), sizeof(int));
+                            _dragDropGuid = wpn.ID;
                         }
-                        else
-                        {
-                            if (ImGui.Button("Open Fire"))
-                                OpenFire(_fcStates[i].ComponentInstance.ID, SetOpenFireControlOrder.FireModes.OpenFire);
-                        }
+
+                        ImGui.EndDragDropSource();
                     }
 
-                    foreach (var wpn in fc.ChildrenStates)
+                    if (ImGui.BeginDragDropTarget())
                     {
-                        ImGui.Selectable(_weaponNames[wpn.ID]);
+                        ImGuiPayloadPtr acceptPayload = ImGui.AcceptDragDropPayload("AssignOrdnance");
+                        bool isDroppingOrdnance = false;
+                        unsafe
+                        {
+                            isDroppingOrdnance = acceptPayload.NativePtr != null;
+                        }
+
+                        if (isDroppingOrdnance)
+                            SetOrdnance((WeaponState)wpn, _dragDropGuid);
+
+                    }
+
+                }
+
+                //ImGui.EndChild();
+                BorderGroup.End();
+                _fcSizes[i] = BorderGroup.GetSize;
+                ImGui.SetCursorPos(startPoint);
+                ImGui.InvisibleButton("fcddarea" + i, _fcSizes[i]);
+
+                if (ImGui.BeginDragDropTarget())
+                {
+                    var acceptPayload = ImGui.AcceptDragDropPayload("AssignSensorAsTarget");
+                    bool isDroppingSensorTarget = false;
+                    unsafe
+                    {
+                        isDroppingSensorTarget = acceptPayload.NativePtr != null;
+                    }
+
+                    acceptPayload = ImGui.AcceptDragDropPayload("AssignOwnAsTarget");
+                    bool isDroppingOwnTarget = false;
+                    unsafe
+                    {
+                        isDroppingOwnTarget = acceptPayload.NativePtr != null;
+                    }
+
+                    acceptPayload = ImGui.AcceptDragDropPayload("AssignWeapon");
+                    bool isDroppingWeapon = false;
+                    unsafe
+                    {
+                        isDroppingWeapon = acceptPayload.NativePtr != null;
+                    }
+
+                    if (isDroppingSensorTarget)
+                        SetTarget(fc, _dragDropGuid);
+                    if (isDroppingOwnTarget)
+                        SetTarget(fc, _dragDropGuid);
+                    if (isDroppingWeapon)
+                        SetWeapon(_dragDropGuid, fc);
+                    ImGui.EndDragDropTarget();
+                }
+                ImGui.NewLine();
+            }
+            
+        }
+
+        void UnAssignedWeapons()
+        {
+            Vector2 unAssStartPos = ImGui.GetCursorPos();
+            BorderGroup.Begin("Un Assigned Weapons");
+            {
+                for (int i = 0; i < _allWeaponsStates.Length; i++)
+                {
+                    var wpn = _allWeaponsStates[i];
+
+
+
+                    if (wpn.ParentState == null)
+                    {
+                        ImGui.Selectable(_weaponNames[wpn.ID] + "##" + wpn.ComponentInstance.ID);
                         if (ImGui.BeginDragDropSource())
                         {
                             ImGui.Text(wpn.Name);
@@ -123,165 +228,75 @@ namespace Pulsar4X.ImGuiNetUI
                         if (ImGui.BeginDragDropTarget())
                         {
                             ImGuiPayloadPtr acceptPayload = ImGui.AcceptDragDropPayload("AssignOrdnance");
-                            bool isDroppingOrdnance = false;
+                            bool isDropping = false;
                             unsafe
                             {
-                                isDroppingOrdnance = acceptPayload.NativePtr != null;
+                                isDropping = acceptPayload.NativePtr != null;
                             }
 
-                            if (isDroppingOrdnance)
-                                SetOrdnance((WeaponState)wpn, _dragDropGuid);
+                            if (isDropping)
+                                SetOrdnance(wpn, _dragDropGuid);
 
+                            ImGui.EndDragDropTarget();
                         }
-
-                    }
-
-                    //ImGui.EndChild();
-                    BorderGroup.End(400);
-                    _fcSizes[i] = BorderGroup.GetSize;
-                    ImGui.SetCursorPos(startPoint);
-                    ImGui.InvisibleButton("fcddarea" + i, _fcSizes[i]);
-
-                    if (ImGui.BeginDragDropTarget())
-                    {
-                        var acceptPayload = ImGui.AcceptDragDropPayload("AssignSensorAsTarget");
-                        bool isDroppingSensorTarget = false;
-                        unsafe
-                        {
-                            isDroppingSensorTarget = acceptPayload.NativePtr != null;
-                        }
-
-                        acceptPayload = ImGui.AcceptDragDropPayload("AssignOwnAsTarget");
-                        bool isDroppingOwnTarget = false;
-                        unsafe
-                        {
-                            isDroppingOwnTarget = acceptPayload.NativePtr != null;
-                        }
-
-                        acceptPayload = ImGui.AcceptDragDropPayload("AssignWeapon");
-                        bool isDroppingWeapon = false;
-                        unsafe
-                        {
-                            isDroppingWeapon = acceptPayload.NativePtr != null;
-                        }
-
-                        if (isDroppingSensorTarget)
-                            SetTarget(fc, _dragDropGuid);
-                        if (isDroppingOwnTarget)
-                            SetTarget(fc, _dragDropGuid);
-                        if (isDroppingWeapon)
-                            SetWeapon(_dragDropGuid, fc);
-
-
-
-                        ImGui.EndDragDropTarget();
                     }
                 }
+            }
+            BorderGroup.End();
+            var unAssSize = BorderGroup.GetSize;
 
+            ImGui.SetCursorPos(unAssStartPos);
+            ImGui.InvisibleButton("unassDnDArea", unAssSize);
+
+            if (ImGui.BeginDragDropTarget())
+            {
+
+
+
+
+                var acceptPayload = ImGui.AcceptDragDropPayload("AssignWeapon");
+                bool isDroppingWeapon = false;
+                unsafe
+                {
+                    isDroppingWeapon = acceptPayload.NativePtr != null;
+                }
+
+                if (isDroppingWeapon)
+                    UnSetWeapon(_wpnDict[_dragDropGuid]);
+
+
+
+                ImGui.EndDragDropTarget();
                 ImGui.NewLine();
+            }
+        }
 
-                Vector2 unAssStartPos = ImGui.GetCursorPos();
-                BorderGroup.Begin("Un Assigned Weapons");
+        void DisplayOrdnance()
+        {
+            BorderGroup.Begin("Ordnance");
+            {
+                for (int i = 0; i < _allOrdnanceDesigns.Length; i++)
                 {
-                    for (int i = 0; i < _allWeaponsStates.Length; i++)
+                    var ord = _allOrdnanceDesigns[i];
+                    if (_storedOrdnance.ContainsKey(ord.ID))
                     {
-                        var wpn = _allWeaponsStates[i];
-
-
-
-                        if (wpn.ParentState == null)
-                        {
-                            ImGui.Selectable(_weaponNames[wpn.ID] + "##" + wpn.ComponentInstance.ID);
-                            if (ImGui.BeginDragDropSource())
-                            {
-                                ImGui.Text(wpn.Name);
-                                unsafe
-                                {
-                                    int* tesnum = &i;
-                                    ImGui.SetDragDropPayload("AssignWeapon", new IntPtr(tesnum), sizeof(int));
-                                    _dragDropGuid = wpn.ID;
-                                }
-
-                                ImGui.EndDragDropSource();
-                            }
-
-                            if (ImGui.BeginDragDropTarget())
-                            {
-                                ImGuiPayloadPtr acceptPayload = ImGui.AcceptDragDropPayload("AssignOrdnance");
-                                bool isDropping = false;
-                                unsafe
-                                {
-                                    isDropping = acceptPayload.NativePtr != null;
-                                }
-
-                                if (isDropping)
-                                    SetOrdnance(wpn, _dragDropGuid);
-
-                                ImGui.EndDragDropTarget();
-                            }
-                        }
-                    }
-                }
-                BorderGroup.End();
-                var unAssSize = BorderGroup.GetSize;
-
-                ImGui.SetCursorPos(unAssStartPos);
-                ImGui.InvisibleButton("unassDnDArea", unAssSize);
-
-                if (ImGui.BeginDragDropTarget())
-                {
-
-
-
-
-                    var acceptPayload = ImGui.AcceptDragDropPayload("AssignWeapon");
-                    bool isDroppingWeapon = false;
-                    unsafe
-                    {
-                        isDroppingWeapon = acceptPayload.NativePtr != null;
-                    }
-
-                    if (isDroppingWeapon)
-                        UnSetWeapon(_wpnDict[_dragDropGuid]);
-
-
-
-                    ImGui.EndDragDropTarget();
-                    ImGui.NewLine();
-                }
-
-
-
-
-                BorderGroup.Begin("Ordnance");
-                {
-                    for (int i = 0; i < _allOrdnanceDesigns.Length; i++)
-                    {
-                        var ord = _allOrdnanceDesigns[i];
-                        if (_storedOrdnance.ContainsKey(ord.ID))
+                        ImGui.Selectable(ord.Name);
+                        if (ImGui.BeginDragDropSource())
                         {
                             ImGui.Selectable(ord.Name);
-                            if (ImGui.BeginDragDropSource())
+                            unsafe
                             {
-                                ImGui.Selectable(ord.Name);
-                                unsafe
-                                {
-                                    int* tesnum = &i;
-                                    ImGui.SetDragDropPayload("AssignOrdnance", new IntPtr(tesnum), sizeof(int));
-                                    _dragDropGuid = ord.ID;
-                                }
-
-                                ImGui.EndDragDropSource();
+                                int* tesnum = &i;
+                                ImGui.SetDragDropPayload("AssignOrdnance", new IntPtr(tesnum), sizeof(int));
+                                _dragDropGuid = ord.ID;
                             }
+
+                            ImGui.EndDragDropSource();
                         }
                     }
                 }
-                BorderGroup.End();
-
-                ImGui.NextColumn();
-                DisplayTargetColumn();
-
             }
+            BorderGroup.End();
         }
 
         void DisplayTargetColumn()
