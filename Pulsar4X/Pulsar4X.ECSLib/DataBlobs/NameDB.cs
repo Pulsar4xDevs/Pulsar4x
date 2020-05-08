@@ -27,6 +27,7 @@ namespace Pulsar4X.ECSLib
 
         public NameDB(string defaultName, Guid factionID, string factionsName)
         {
+            _names.Add(Guid.Empty, defaultName);
             _names.Add(factionID, factionsName);
         }
 

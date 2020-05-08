@@ -57,7 +57,7 @@ namespace Pulsar4X.SDL2UI
 
             var listnerblobs = new List<int>();
             listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
-            AEntityChangeListner changeListner = new EntityChangeListner(StarSystem, faction, new List<int>());//, listnerblobs);
+            AEntityChangeListner changeListner = new EntityChangeListner(StarSystem, faction, listnerblobs);//, listnerblobs);
             _changeListner = changeListner;
 
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
@@ -117,6 +117,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     case EntityChangeData.EntityChangeType.EntityAdded:
                         var entityItem = change.Entity;
+                        EntitiesAdded.Add(change.Entity.Guid);
                         if (entityItem.HasDataBlob<NameDB>())
                         {
                             var entityState = new EntityState(entityItem);// { Name = "Unknown" };

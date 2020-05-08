@@ -356,9 +356,9 @@ namespace Pulsar4X.ECSLib
                     Datablob = db,
                     ChangeType = change
                 };
-                foreach (var item in EntityListners)
+                foreach (var listner in EntityListners)
                 {
-                    item.AddChange(changeData);
+                    listner.AddChange(changeData);
                 }
             }
 
