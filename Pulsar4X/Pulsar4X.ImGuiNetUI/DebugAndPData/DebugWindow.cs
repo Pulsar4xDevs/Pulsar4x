@@ -1123,6 +1123,30 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                         }
                     }
+                    else if (typeof(IDictionary).IsAssignableFrom(value.GetType()))
+                    {
+                        var items = (IDictionary)GetValue(memberInfo, obj);
+                        int itemsCount = items.Count;
+                        
+                        if (ImGui.TreeNode(memberInfo.Name))
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                            _numLines += itemsCount;
+                            foreach (var item in items)
+                            {
+                                RecursiveReflection(item);
+                            }
+                            ImGui.TreePop();
+                        }
+                        else
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                        }
+                    }
                     else
                     {
                         ImGui.Text(memberInfo.Name);
