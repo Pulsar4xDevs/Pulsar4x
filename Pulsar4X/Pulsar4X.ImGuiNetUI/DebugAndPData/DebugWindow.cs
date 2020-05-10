@@ -538,16 +538,14 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("Manuver DV:" + Stringify.Distance(nmdb.DeltaVForManuver_m.Length())+"/s");
                                     ImGui.Text("Parent Body: " + nmdb.SOIParent.GetDataBlob<NameDB>().DefaultName);
                                     ImGui.Text("Current Vector:");
-                                    ImGui.Text("X:" + Stringify.Distance(nmdb.CurrentVector_ms.X)+"/s");
-                                    ImGui.Text("Y:" + Stringify.Distance(nmdb.CurrentVector_ms.Y)+"/s");
-                                    ImGui.Text("Z:" + Stringify.Distance(nmdb.CurrentVector_ms.Z)+"/s");
-                                    
+                                    ImGui.Text("X:" + Stringify.Velocity(nmdb.CurrentVector_ms.X));
+                                    ImGui.Text("Y:" + Stringify.Velocity(nmdb.CurrentVector_ms.Y));
+                                    ImGui.Text("Z:" + Stringify.Velocity(nmdb.CurrentVector_ms.Z));
+                                    ImGui.Text("Speed: " + Stringify.Velocity(nmdb.CurrentVector_ms.Length()));
                                     ImGui.Text("Remaining Dv:" + Stringify.Distance( ntdb.DeltaV) + "/s");
                                     ImGui.Text("Exhaust Velocity: " + ntdb.ExhaustVelocity);
                                     ImGui.Text("BurnRate: " + ntdb.FuelBurnRate);
                                     ImGui.Text("Thrust: " + ntdb.ThrustInNewtons);
-                                    
-
                                 }
 
                             }
@@ -629,8 +627,43 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.Text("at wavelength : " + atWavelength + " nm");
                                 
                             }
-                            
-                            
+
+                            if (_selectedEntity.HasDataBlob<GenericFiringWeaponsDB>())
+                            {
+                                var db = _selectedEntity.GetDataBlob<GenericFiringWeaponsDB>();
+                                if (ImGui.CollapsingHeader("Firing Weapons"))
+                                {
+                                    for (int i = 0; i < db.WpnIDs.Length; i++)
+                                    {
+                                        float reloadAmount = db.InternalMagQty[i];
+                                        float reloadMax = db.InternalMagSizes[i];
+                                        float reloadPerShot = db.AmountPerShot[i];
+                                        float minShots = db.MinShotsPerfire[i];
+
+                                        float percFull = reloadAmount / reloadMax;
+                                        float percToFire = reloadAmount / (minShots * reloadPerShot);
+                                        float percPerSec = db.ReloadAmountsPerSec[i] / reloadMax ;
+                                        Vector2 pbsize = new Vector2(200, 5);
+
+                                        float maxShots = reloadMax / reloadPerShot;
+                                        ImGui.Text("Max shots per burst: " + maxShots);
+                                        ImGui.Text("Min shots per burst: " + minShots);
+                                        
+                                        ImGui.Text("Reload Amount Per Sec:" + db.ReloadAmountsPerSec[i]);
+                                        ImGui.Text("Reload Percent Per Sec:" + percPerSec);
+                                        
+                                        ImGui.Text("Reload Progress " + reloadAmount + "/" + reloadMax);
+                                        ImGui.ProgressBar(percFull, pbsize);
+                                        ImGui.Text("Reload Progress to min fire");
+                                        ImGui.ProgressBar(percToFire, pbsize);
+                                        
+                                        
+                                        var firingShots = db.ShotsFiredThisTick[i];
+                                        ImGui.Text("Firing " + firingShots + " this tick");
+                                        
+                                    }
+                                }
+                            }
 
                             if (SelectedEntity.HasDataBlob<SensorInfoDB>())
                             {
