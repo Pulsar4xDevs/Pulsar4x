@@ -30,16 +30,21 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             
             Vector3 parentVelocity = Entity.GetVelocity_m(launchingEntity, launchingEntity.Manager.StarSysDateTime);
 
-            Vector3 tgtEstVector = tgtEstPos.position - parentPosition; //future target position
-            Vector3 launchVelocity = parentVelocity + tgtEstVector;
+            Vector3 tgtEstVector = Vector3.Normalise( tgtEstPos.position - parentPosition); //normalised vector to predicted position
+            
+            Vector3 launchVelocity = parentVelocity + (tgtEstVector * launchSpeed);
+            
             var misslPositionDB = (PositionDB)parentPositionDB.Clone();
+            var newtmovedb = new NewtonMoveDB(misslPositionDB.Parent, launchVelocity);
+            newtmovedb.ActionOnDateTime = atDatetime;
+            newtmovedb.DeltaVForManuver_m = Vector3.Normalise(tgtEstPos.position) * dv;
             
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             dataBlobs.Add(new ComponentInstancesDB());
             dataBlobs.Add(misslPositionDB);
             dataBlobs.Add(MassVolumeDB.NewFromMassAndVolume(missileDesign.WetMass, missileDesign.WetMass));
             dataBlobs.Add(new NameDB("Missile", launchingEntity.FactionOwner, missileDesign.Name ));
-
+            dataBlobs.Add(newtmovedb);
             var newMissile = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
             
             foreach (var tuple in missileDesign.Components)
@@ -48,11 +53,6 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             }
             
             StorageSpaceProcessor.RemoveCargo(cargo, missileDesign, 1);
-            var thrusting = new NewtonMoveDB(misslPositionDB.Parent, launchVelocity);
-            thrusting.ActionOnDateTime = atDatetime;
-            thrusting.DeltaVForManuver_m = Vector3.Normalise(tgtEstPos.position) * dv;
-            newMissile.SetDataBlob(thrusting);
-            
         }
     }
 }
