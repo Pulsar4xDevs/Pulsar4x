@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -24,9 +25,11 @@ namespace Pulsar4X.SDL2UI
             {
                 if (_selectedEntity != value)
                 {
+                    
                     _selectedEntity = value;
                     _selectedEntityName = SelectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
                     _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
+                    _uiState.LastClickedEntity = _selectedEntityState;
                     OnSelectedEntityChanged();
                 }
             }
@@ -309,14 +312,15 @@ namespace Pulsar4X.SDL2UI
                             if (SelectedEntity.HasDataBlob<PositionDB>())
                             {
                                 var positiondb = SelectedEntity.GetDataBlob<PositionDB>();
-                                var posv4 = positiondb.AbsolutePosition_AU;
-                                ImGui.Text("x: " + posv4.X);
-                                ImGui.Text("y: " + posv4.Y);
-                                ImGui.Text("z: " + posv4.Z);
+                                var posAbs = positiondb.AbsolutePosition_m;
+                                ImGui.Text("x: " + Stringify.Distance(posAbs.X));
+                                ImGui.Text("y: " + Stringify.Distance(posAbs.Y));
+                                ImGui.Text("z: " + Stringify.Distance(posAbs.Z));
                                 if (positiondb.Parent != null)
                                 {
                                     ImGui.Text("Parent: " + positiondb.Parent.GetDataBlob<NameDB>().DefaultName);
-                                    ImGui.Text("Dist: " + Distance.AuToKm( positiondb.RelativePosition_AU.Length()));
+
+                                    ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition_m.Length()));
                                 }
                             }
                             
@@ -1030,7 +1034,9 @@ namespace Pulsar4X.SDL2UI
     public static class EntityInspector
     {
         private static int _selectedDB = -1;
-
+        //private static float _totalHeight;
+        private static int _numLines;
+        private static float _heightMultiplyer = ImGui.GetTextLineHeightWithSpacing();
         public static void Display(Entity entity)
         {
             var dblist = entity.DataBlobs;
@@ -1060,44 +1066,20 @@ namespace Pulsar4X.SDL2UI
         static void DBDisplay(BaseDataBlob dataBlob)
         {
             Type dbType = dataBlob.GetType();
-            PropertyInfo[] propertyInfos;
+
+            MemberInfo[] memberInfos = dbType.GetMembers();
             
-            propertyInfos = dbType.GetProperties();
-            FieldInfo[] fieldInfos;
-            fieldInfos = dbType.GetFields();
             
- 
-            int numlines = propertyInfos.Length + fieldInfos.Length;
-            float totalVerticalSpace = ImGui.GetTextLineHeightWithSpacing() * numlines;
-            
-            var size = new Vector2(ImGui.GetContentRegionAvail().X, totalVerticalSpace);
+            var _totalHeight = _numLines * _heightMultiplyer;
+            _numLines = memberInfos.Length;
+            var size = new Vector2(ImGui.GetContentRegionAvail().X, _totalHeight);
             
             ImGui.BeginChild("InnerColomns", size);
             
             ImGui.Columns(2);
-            
-            foreach (var property in propertyInfos)
-            {
-                ImGui.Text(property.Name);
-                ImGui.NextColumn();
-                var value = property.GetValue(dataBlob);
-                if(value != null)
-                    ImGui.Text(value.ToString());
-                else ImGui.Text("null");
-                ImGui.NextColumn();
-            }
 
-            foreach (var field in fieldInfos)
-            {
-                ImGui.Text(field.Name);
-                ImGui.NextColumn();
-                var value = field.GetValue(dataBlob);
-                if(value != null)
-                    ImGui.Text(value.ToString());
-                else ImGui.Text("null");
-                ImGui.NextColumn();
-                
-            }
+            RecursiveReflection(dataBlob);
+            
 
             ImGui.Columns(0);
             
@@ -1105,7 +1087,67 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        static void RecursiveReflection(object obj)
+        {
+            
+            Type objType = obj.GetType();
 
+            MemberInfo[] memberInfos = objType.GetMembers();
+            foreach (var memberInfo in memberInfos)
+            {
+                if (typeof(FieldInfo).IsAssignableFrom(memberInfo.GetType()) || typeof(PropertyInfo).IsAssignableFrom(memberInfo.GetType()))
+                {
+                    MemberTypes membertype = memberInfo.MemberType;
+                    object value = GetValue(memberInfo, obj);
+                    if (typeof(IList).IsAssignableFrom(value.GetType()))
+                    {
+                        var items = (IList)GetValue(memberInfo, obj);
+                        int itemsCount = items.Count;
+                        
+                        if (ImGui.TreeNode(memberInfo.Name))
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                            _numLines += itemsCount;
+                            foreach (var item in items)
+                            {
+                                RecursiveReflection(item);
+                            }
+                            ImGui.TreePop();
+                        }
+                        else
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                        }
+                    }
+                    else
+                    {
+                        ImGui.Text(memberInfo.Name);
+                        ImGui.NextColumn();
+                        //object value = memberInfo.GetValue(obj);
+                        if (value != null)
+                            ImGui.Text(value.ToString());
+                        else ImGui.Text("null");
+                        ImGui.NextColumn();
+                    }
+                }
+            }
+        }
+        
+        static object GetValue(this MemberInfo memberInfo, object forObject)
+        {
+            switch (memberInfo.MemberType)
+            {
+                case MemberTypes.Field:
+                    return ((FieldInfo)memberInfo).GetValue(forObject);
+                case MemberTypes.Property:
+                    return ((PropertyInfo)memberInfo).GetValue(forObject);
+                    
+            }
+            return "";
+        }
     }
-
 }
