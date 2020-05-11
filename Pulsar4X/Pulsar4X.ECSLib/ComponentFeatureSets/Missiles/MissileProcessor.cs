@@ -34,6 +34,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             
             Vector3 launchVelocity = parentVelocity + (tgtEstVector * launchSpeed);
             
+            
             var misslPositionDB = (PositionDB)parentPositionDB.Clone();
             var newtmovedb = new NewtonMoveDB(misslPositionDB.Parent, launchVelocity);
             newtmovedb.ActionOnDateTime = atDatetime;
@@ -51,8 +52,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             {
                 EntityManipulation.AddComponentToEntity(newMissile, tuple.design, tuple.count);
             }
+
+            newMissile.GetDataBlob<NewtonThrustAbilityDB>().DeltaV = dv;
             
-            StorageSpaceProcessor.RemoveCargo(cargo, missileDesign, 1);
+            StorageSpaceProcessor.RemoveCargo(cargo, missileDesign, 1); //remove missile from parent.
         }
     }
 }
