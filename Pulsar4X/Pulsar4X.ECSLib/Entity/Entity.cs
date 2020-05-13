@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
         // Index slot of this entity's datablobs in its EntityManager.
         internal int ID;
 
-        private string DebugDisplay => GetDataBlob<NameDB>()?.DefaultName ?? Guid.ToString();
+        private string DebugDisplay => GetDataBlob<NameDB>()?.OwnersName ?? Guid.ToString();
 
         [NotNull]
         [JsonIgnore]

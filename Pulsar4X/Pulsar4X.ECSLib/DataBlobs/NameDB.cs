@@ -5,7 +5,7 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
-    [DebuggerDisplay("{" + nameof(DefaultName) + "}")]
+    [DebuggerDisplay("{" + nameof(OwnersName) + "}")]
     public class NameDB : BaseDataBlob, ISensorCloneMethod, IGetValuesHash
     {
 
@@ -17,6 +17,16 @@ namespace Pulsar4X.ECSLib
 
         [PublicAPI]
         public string DefaultName => _names[Guid.Empty];
+
+        public string OwnersName
+        {
+            get
+            {
+                if (_names.ContainsKey(OwningEntity.FactionOwner))
+                    return _names[OwningEntity.FactionOwner];
+                else return DefaultName;
+            }
+        }
 
         public NameDB() { }
 
