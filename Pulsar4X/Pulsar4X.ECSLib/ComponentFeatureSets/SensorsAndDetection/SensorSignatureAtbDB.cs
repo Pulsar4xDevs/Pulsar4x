@@ -46,6 +46,9 @@ namespace Pulsar4X.ECSLib
             if (!parentEntity.HasDataBlob<SensorProfileDB>())
                 parentEntity.SetDataBlob(new SensorProfileDB());
 
+            if (PartWaveForm.WavelengthAverage_nm == 0)
+            {
+            }
 
             SensorProfileDB _PartSensorProfile = parentEntity.GetDataBlob<SensorProfileDB>();
 

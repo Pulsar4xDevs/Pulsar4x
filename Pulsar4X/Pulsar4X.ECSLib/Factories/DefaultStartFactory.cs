@@ -173,6 +173,8 @@ namespace Pulsar4X.ECSLib
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
 
+            Entity targetFaction = FactionFactory.CreateFaction(game, "OpFor");
+            
             var namedEntites = solSys.GetAllEntitiesWithDataBlob<NameDB>();
             foreach (var entity in namedEntites)
             {
@@ -265,7 +267,7 @@ namespace Pulsar4X.ECSLib
             ShipDesign shipDesign = DefaultShipDesign(game, factionEntity);
             ShipDesign gunShipDesign = GunShipDesign(game, factionEntity);
 
-            Entity ship1 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Serial Peacemaker");
+            Entity ship1 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Ensuing Calm");
             Entity ship3 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Touch-and-Go");
             Entity gunShip = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Prevailing Stillness");
@@ -284,8 +286,11 @@ namespace Pulsar4X.ECSLib
             ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             gunShip.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
-            
-            
+
+            Entity targetDrone1 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (22.5 * Math.PI / 180), "Target Drone1");
+            Entity targetDrone2 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (5 * Math.PI / 180), "Target Drone2");
+            StorageSpaceProcessor.AddCargo(targetDrone1.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            StorageSpaceProcessor.AddCargo(targetDrone2.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             
             NewtonionMovementProcessor.CalcDeltaV(ship1);
             NewtonionMovementProcessor.CalcDeltaV(ship2);
@@ -295,6 +300,8 @@ namespace Pulsar4X.ECSLib
             //StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
+            
+            
             
 
             double test_a = 0.5; //AU
@@ -406,6 +413,24 @@ namespace Pulsar4X.ECSLib
             };
             ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
             var shipdesign = new ShipDesign(factionInfo, "Sanctum Adroit GunShip", components2, (plastic, 3));
+            shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
+            return shipdesign;
+        }
+
+        public static ShipDesign TargetDrone(Game game, Entity faction)
+        {
+            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
+            List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
+            {
+                (_sensor_50, 1),
+                (_fuelTank_500, 2),
+                (_warpDrive, 4),
+                (_battery, 3),
+                (_reactor, 1),
+                (_thruster500, 4),
+            };
+            ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            var shipdesign = new ShipDesign(factionInfo, "TargetDrone", components2, (plastic, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
         }

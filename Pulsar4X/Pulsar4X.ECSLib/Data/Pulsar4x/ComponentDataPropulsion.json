@@ -155,13 +155,6 @@
               "GuiHint": "None",
               "AttributeFormula": "AtbConstrArgs(Ability('EnginePower'), GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Bubble Creation Energy Cost'), Ability('Bubble Sustain Energy Cost'), -Ability('Bubble Collapse Energy Returned'))",
               "AttributeType": "Pulsar4X.ECSLib.WarpDriveAtb"
-            },
-            {
-              "Name": "Sensor Signature",
-              "Units": "unknown",
-              "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('EnginePower'), 0 , 0, 0)",
-              "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]
         }

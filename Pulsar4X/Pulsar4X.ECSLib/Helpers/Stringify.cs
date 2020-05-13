@@ -229,7 +229,21 @@ namespace Pulsar4X.ECSLib
                 stringDistance = len.ToString(format) + " Km";
             }
             
-            else { stringDistance = length_m.ToString(format) + " m"; }
+            else if (abslen > 0.1)
+            {
+                stringDistance = length_m.ToString(format) + " m";
+            }
+            else if (abslen > 0.001)
+            {
+                len = length_m * 100;
+                stringDistance = len.ToString(format + "cm");
+            }
+
+            else
+            {
+                len = length_m * 1000;
+                stringDistance = len.ToString(format + "mm");
+            }
 
             return stringDistance;
         }

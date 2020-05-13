@@ -303,8 +303,13 @@ namespace Pulsar4X.ECSLib
             }
             foreach (var reflectedItem in emissionProfile.ReflectedEMSpectra)
             {
-                var reflectedValue = AttenuationCalc(reflectedItem.Value, distance);              
-                dict.Add(reflectedItem.Key, reflectedValue);
+                var reflectedValue = AttenuationCalc(reflectedItem.Value, distance); 
+                if(!dict.ContainsKey(reflectedItem.Key))
+                    dict.Add(reflectedItem.Key, reflectedValue);
+                else
+                {
+                    dict[reflectedItem.Key] += reflectedValue;
+                }
 
             }
             return dict;
@@ -316,13 +321,15 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <returns>souce / (4 pi r^2)</returns>
         /// <param name="sourceValue">Source value.</param>
-        /// <param name="distance">Distance.</param>
+        /// <param name="distance">Distance. must be > 0.3 or it'll just return the source value</param>
         public static double AttenuationCalc(double sourceValue, double distance)
         {
-            // souce / (4 pi r^2)
-            if (distance == 0)
-                return sourceValue;
-            return sourceValue / (4 * Math.PI * distance * distance);
+            // source / (4 pi r^2)
+            if (distance < 1) //if distance is too small, 4 pi r^2 ends up being < 1 
+                distance = 1;
+            
+            var value = sourceValue / (4 * Math.PI * distance * distance);
+            return value;
         }
 
         /// <summary>
