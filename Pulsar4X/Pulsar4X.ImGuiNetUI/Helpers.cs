@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Numerics;
+using System.Reflection;
 using ImGuiNET;
+using Pulsar4X.ECSLib;
 using Vector3 = System.Numerics.Vector3;
 
 namespace Pulsar4X.SDL2UI
@@ -130,6 +133,152 @@ namespace Pulsar4X.SDL2UI
             
             ImGui.PopID();
             
+        }
+    }
+
+
+    public static class EntityInspector
+    {
+        private static int _selectedDB = -1;
+        //private static float _totalHeight;
+        private static int _numLines;
+        private static float _heightMultiplyer = ImGui.GetTextLineHeightWithSpacing();
+        public static void Display(Entity entity)
+        {
+            var dblist = entity.DataBlobs;
+            string[] stArray = new string[dblist.Count];
+            for (int i = 0; i < dblist.Count; i++)
+            {
+                var db = dblist[i];
+                stArray[i] = db.GetType().ToString();
+
+            }
+            BorderListOptions.Begin("DataBlobs:", stArray, ref _selectedDB, 300f);
+
+            var p0 = ImGui.GetCursorPos();
+
+            if (_selectedDB >= dblist.Count)
+                _selectedDB = -1;
+            
+            if(_selectedDB >= 0)
+                DBDisplay(dblist[_selectedDB]);
+
+            var p1 = ImGui.GetCursorPos();
+            var size = new Vector2(ImGui.GetContentRegionAvail().X, p1.Y - p0.Y );
+            
+            BorderListOptions.End(size);
+        }
+
+        public static void DBDisplay(BaseDataBlob dataBlob)
+        {
+            Type dbType = dataBlob.GetType();
+
+            MemberInfo[] memberInfos = dbType.GetMembers();
+            
+            var _totalHeight = _numLines * _heightMultiplyer;
+            _numLines = memberInfos.Length;
+            var size = new Vector2(ImGui.GetContentRegionAvail().X, _totalHeight);
+            
+            ImGui.BeginChild("InnerColomns", size);
+            
+            ImGui.Columns(2);
+
+            RecursiveReflection(dataBlob);
+            
+
+            ImGui.Columns(0);
+            
+            ImGui.EndChild();
+
+        }
+
+        static void RecursiveReflection(object obj)
+        {
+            
+            Type objType = obj.GetType();
+
+            MemberInfo[] memberInfos = objType.GetMembers();
+            foreach (var memberInfo in memberInfos)
+            {
+                if (typeof(FieldInfo).IsAssignableFrom(memberInfo.GetType()) || typeof(PropertyInfo).IsAssignableFrom(memberInfo.GetType()))
+                {
+                    MemberTypes membertype = memberInfo.MemberType;
+                    object value = GetValue(memberInfo, obj);
+                    if(value == null)
+                        continue;
+                    if (typeof(IList).IsAssignableFrom(value.GetType()))
+                    {
+                        var items = (IList)GetValue(memberInfo, obj);
+                        int itemsCount = items.Count;
+                        
+                        if (ImGui.TreeNode(memberInfo.Name))
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                            _numLines += itemsCount;
+                            foreach (var item in items)
+                            {
+                                RecursiveReflection(item);
+                            }
+                            ImGui.TreePop();
+                        }
+                        else
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                        }
+                    }
+                    else if (typeof(IDictionary).IsAssignableFrom(value.GetType()))
+                    {
+                        var items = (IDictionary)GetValue(memberInfo, obj);
+                        int itemsCount = items.Count;
+                        
+                        if (ImGui.TreeNode(memberInfo.Name))
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                            _numLines += itemsCount;
+                            foreach (var item in items)
+                            {
+                                RecursiveReflection(item);
+                            }
+                            ImGui.TreePop();
+                        }
+                        else
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                        }
+                    }
+                    else
+                    {
+                        ImGui.Text(memberInfo.Name);
+                        ImGui.NextColumn();
+                        //object value = memberInfo.GetValue(obj);
+                        if (value != null)
+                            ImGui.Text(value.ToString());
+                        else ImGui.Text("null");
+                        ImGui.NextColumn();
+                    }
+                }
+            }
+        }
+        
+        static object GetValue(this MemberInfo memberInfo, object forObject)
+        {
+            switch (memberInfo.MemberType)
+            {
+                case MemberTypes.Field:
+                    return ((FieldInfo)memberInfo).GetValue(forObject);
+                case MemberTypes.Property:
+                    return ((PropertyInfo)memberInfo).GetValue(forObject);
+                    
+            }
+            return "";
         }
     }
 

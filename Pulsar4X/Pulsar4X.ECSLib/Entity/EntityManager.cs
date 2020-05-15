@@ -369,6 +369,11 @@ namespace Pulsar4X.ECSLib
 
         #region Public API Functions
 
+        public List<Entity> GetAllEntites()
+        {
+            return new List<Entity>(_entities);
+        }
+
         /// <summary>
         /// Returns a list of entities that have datablob type T.
         /// <para></para>
