@@ -248,7 +248,41 @@ namespace Pulsar4X.ECSLib
             return stringDistance;
         }
 
+        public static string DistanceSmall(double length_nm,  string format = "0.###")
+        {
 
+            string stringDistance = "0 m";
+            double abslen = Math.Abs(length_nm);
+            double len;
+            if (abslen > 1.0e9)
+            {
+                len = length_nm * 1.0e-9;
+                stringDistance = len.ToString(format) + " m";
+            }
+            else if (abslen > 1.0e7)
+            {
+                len = length_nm * 1.0e-7;
+                stringDistance = len.ToString(format) + " cm";
+            }
+            else if (abslen > 1.0e6)
+            {
+                len = length_nm * 1.0e-6;
+                stringDistance = len.ToString(format) + " mm";
+            }
+            else if (abslen > 1.0e3)
+            {
+                len = length_nm * 0.001;
+                stringDistance = len.ToString(format) + " um";
+            }
+            
+            else 
+            {
+                stringDistance = length_nm.ToString(format) + " nm";
+            }
+
+
+            return stringDistance;
+        }
         public static string Velocity(double velocity_m, string format = "0.##")
         {
             string stringVelocity = " 0 m/s";
