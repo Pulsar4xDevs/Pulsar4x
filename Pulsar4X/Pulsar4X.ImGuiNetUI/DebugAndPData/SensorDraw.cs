@@ -234,11 +234,11 @@ namespace Pulsar4X.SDL2UI
                             ResetBounds();
                     }
 
-                    ImGui.Text("MinWav: " + wavesArry.Points[i].p0 .X);
+                    ImGui.Text("MinWav: " + Stringify.DistanceSmall(wavesArry.Points[i].p0 .X));
                     ImGui.SameLine();
                     ImGui.Text("Magnitude: " + Stringify.Power(wavesArry.Points[i].p0.Y));
 
-                    ImGui.Text("AvgWav: " + wavesArry.Points[i].p1.X);
+                    ImGui.Text("AvgWav: " + Stringify.DistanceSmall(wavesArry.Points[i].p1.X));
                     
                     if(wavesArry.HasAtn)
                     {
@@ -253,7 +253,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("   "+Stringify.Power(wavesArry.Points[i].p1.Y));
                     }
                     
-                    ImGui.Text("MaxWav: " + wavesArry.Points[i].p2.X);
+                    ImGui.Text("MaxWav: " + Stringify.DistanceSmall(wavesArry.Points[i].p2.X));
                     ImGui.SameLine();
                     ImGui.Text("Magnitude: " + Stringify.Power(wavesArry.Points[i].p2.Y));
                 }

@@ -319,11 +319,11 @@ namespace Pulsar4X.SDL2UI
             var max = waveForm.WavelengthMax_nm;
             var hight = magnatude;
             
-            ImGui.Text(Stringify.Distance(min));
-            ImGui.Text(Stringify.Distance(avg));
+            ImGui.Text(Stringify.DistanceSmall(min));
+            ImGui.Text(Stringify.DistanceSmall(avg));
             ImGui.SameLine();
             ImGui.Text(Stringify.Power(hight));
-            ImGui.Text(Stringify.Distance(max));
+            ImGui.Text(Stringify.DistanceSmall(max));
         }
         
 
