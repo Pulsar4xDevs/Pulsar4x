@@ -34,6 +34,14 @@ namespace Pulsar4X.ECSLib
             PartWaveFormMag = _PartWaveFormMag_w;
         }
 
+        public SensorSignatureAtbDB(double temp_kelvin, double magnatude_watts)
+        {
+            double b = 2898000; //Wien's displacement constant for nanometers.
+            var wavelength = b / temp_kelvin; //Wien's displacement law https://en.wikipedia.org/wiki/Wien%27s_displacement_law
+            EMWaveForm waveform = new EMWaveForm(wavelength - 400, wavelength, wavelength + 600);
+            PartWaveForm = waveform;
+            PartWaveFormMag = magnatude_watts;
+        }
         //public SensorSignatureAtbDB(double _WavelengthAverage_nm, double _WavelengthMin_nm, double _WavelengthMax_nm, double _PartWaveFormMag_w) : this((int)_WavelengthAverage_nm, (int)_WavelengthMin_nm, (int)_WavelengthMax_nm, (int)_PartWaveFormMag_w) { }
 
         public object Clone()
