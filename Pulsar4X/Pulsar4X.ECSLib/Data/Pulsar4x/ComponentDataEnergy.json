@@ -85,7 +85,7 @@
               "Units": "unknown",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "Ability('Power Output')",
+              "AttributeFormula": "AtbConstrArgs(1700, Ability('Power Output') * 0.1 * [Mass])",
               "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]

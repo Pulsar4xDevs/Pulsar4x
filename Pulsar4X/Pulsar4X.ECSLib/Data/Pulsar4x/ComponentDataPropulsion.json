@@ -71,7 +71,7 @@
               "Units": "unknown",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Thrust'), 0 , 0, 0)",
+              "AttributeFormula": "AtbConstrArgs(3500, Ability('Thrust'))",
               "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
             }
           ]
