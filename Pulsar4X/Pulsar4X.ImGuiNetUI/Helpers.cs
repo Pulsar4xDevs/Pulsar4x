@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using ImGuiNET;
@@ -30,7 +31,27 @@ namespace Pulsar4X.SDL2UI
 
     public static class BorderListOptions
     {
+        struct BorderListState
+        {
+            internal Vector2 _labelSize;
+            internal  float _xleft;
+            internal  float _xcentr;
+            internal  float _xright;
+
+            internal  float _ytop;
+            internal  float _yctr1;
+            internal  float _yctr2;
+            internal  float _ybot;
         
+            internal  uint _colour;
+            
+            internal  float _lhHeight;
+        }
+        
+        private static BorderListState[] _states = new BorderListState[8];
+        private static float _dentMulitpier = 3;
+        private static int _nestIndex = 0;
+        /*
         private static Vector2 _labelSize = new Vector2();
         private static float _xleft;
         private static float _xcentr;
@@ -44,17 +65,20 @@ namespace Pulsar4X.SDL2UI
         private static uint _colour;
         private static float _dentMulitpier = 3;
         private static float _lhHeight;
+        */
+        
         public static void Begin(string id, string[] list, ref int selected, float width)
         {
             ImGui.PushID(id);
-            _colour = ImGui.GetColorU32(ImGuiCol.Border);
-            _labelSize = new Vector2( width, ImGui.GetTextLineHeight());
+            var state = new BorderListState();  
+            state._colour = ImGui.GetColorU32(ImGuiCol.Border);
+            state._labelSize = new Vector2( width, ImGui.GetTextLineHeight());
             ImGui.Columns(2, id, false);
             ImGui.SetColumnWidth(0, width);
             
-            _xleft = ImGui.GetCursorScreenPos().X;
-            _ytop = ImGui.GetCursorScreenPos().Y;
-            _xcentr = _xleft + width;
+            state._xleft = ImGui.GetCursorScreenPos().X;
+            state._ytop = ImGui.GetCursorScreenPos().Y;
+            state._xcentr = state._xleft + width;
 
             var vpad = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
 
@@ -71,23 +95,25 @@ namespace Pulsar4X.SDL2UI
                 
                 if(i == selected)
                 {   
-                    _yctr1 = pos.Y - vpad * 0.5f;
-                    _yctr2 = _yctr1 + ImGui.GetTextLineHeightWithSpacing();
+                    state._yctr1 = pos.Y - vpad * 0.5f;
+                    state._yctr2 = state._yctr1 + ImGui.GetTextLineHeightWithSpacing();
                 }
                 
             }
             
             
-            _ybot = ImGui.GetCursorScreenPos().Y;
-            _lhHeight = ImGui.GetContentRegionAvail().Y;
+            state._ybot = ImGui.GetCursorScreenPos().Y;
+            state._lhHeight = ImGui.GetContentRegionAvail().Y;
             //if nothing is selected we'll draw a line at the bottom instead of around one of the items:
             if(selected < 0)
             {
-                _yctr1 = _ybot;
-                _yctr2 = _ybot;
+                state._yctr1 = state._ybot;
+                state._yctr2 = state._ybot;
             }
             ImGui.NextColumn(); //set nextColomn so the imgui.items placed after this get put into the righthand side
-            ImGui.Indent(_dentMulitpier);
+            ImGui.Indent(_dentMulitpier * _nestIndex);
+            _states[_nestIndex] = state;
+            _nestIndex++;
         }
         /*
         public static void Begin(string id, ref int selected, string[] list)
@@ -102,6 +128,9 @@ namespace Pulsar4X.SDL2UI
 */
         public static void End(Vector2 sizeRight)
         {
+            ImGui.Unindent(_dentMulitpier * _nestIndex);
+            _nestIndex--;
+            var state = _states[_nestIndex];
             var winpos = ImGui.GetCursorPos();
             
             var rgnSize = ImGui.GetContentRegionAvail();
@@ -110,26 +139,26 @@ namespace Pulsar4X.SDL2UI
             var scpos = ImGui.GetCursorScreenPos();
             ImGui.Unindent(_dentMulitpier);
             
-            _xright = _xcentr + sizeRight.X;
+            state._xright = state._xcentr + sizeRight.X;
 
-            float boty = Math.Max(_ybot, _ytop + sizeRight.Y); //is the list bigger, or the items drawn after it.
+            float boty = Math.Max(state._ybot, state._ytop + sizeRight.Y); //is the list bigger, or the items drawn after it.
 
             ImDrawListPtr wdl = ImGui.GetWindowDrawList();
             
             
             Vector2[] pts = new Vector2[9];
-            pts[0] = new Vector2(_xleft, _yctr1);          //topleft of the selected item
-            pts[1] = new Vector2(_xleft, _yctr2);          //botomleft of the selected item
-            pts[2] = new Vector2(_xcentr, _yctr2);         //bottom rigth of selected item
-            pts[3] = new Vector2(_xcentr, boty);           //bottom left of rh colomn
-            pts[4] = new Vector2(_xright, boty);           //bottom Right
-            pts[5] = new Vector2(_xright, _ytop);          //top righht
-            pts[6] = new Vector2(_xcentr, _ytop);          //top mid
-            pts[7] = new Vector2(_xcentr, _yctr1);         //selected top right
+            pts[0] = new Vector2(state._xleft, state._yctr1);          //topleft of the selected item
+            pts[1] = new Vector2(state._xleft, state._yctr2);          //botomleft of the selected item
+            pts[2] = new Vector2(state._xcentr, state._yctr2);         //bottom rigth of selected item
+            pts[3] = new Vector2(state._xcentr, boty);           //bottom left of rh colomn
+            pts[4] = new Vector2(state._xright, boty);           //bottom Right
+            pts[5] = new Vector2(state._xright, state._ytop);          //top righht
+            pts[6] = new Vector2(state._xcentr, state._ytop);          //top mid
+            pts[7] = new Vector2(state._xcentr, state._yctr1);         //selected top right
             pts[8] = pts[0];                                    //selected top left
 
 
-            wdl.AddPolyline(ref pts[0], pts.Length, _colour, false, 1.0f);
+            wdl.AddPolyline(ref pts[0], pts.Length, state._colour, false, 1.0f);
             
             ImGui.PopID();
             
@@ -137,150 +166,7 @@ namespace Pulsar4X.SDL2UI
     }
 
 
-    public static class EntityInspector
-    {
-        private static int _selectedDB = -1;
-        //private static float _totalHeight;
-        private static int _numLines;
-        private static float _heightMultiplyer = ImGui.GetTextLineHeightWithSpacing();
-        public static void Display(Entity entity)
-        {
-            var dblist = entity.DataBlobs;
-            string[] stArray = new string[dblist.Count];
-            for (int i = 0; i < dblist.Count; i++)
-            {
-                var db = dblist[i];
-                stArray[i] = db.GetType().ToString();
 
-            }
-            BorderListOptions.Begin("DataBlobs:", stArray, ref _selectedDB, 300f);
-
-            var p0 = ImGui.GetCursorPos();
-
-            if (_selectedDB >= dblist.Count)
-                _selectedDB = -1;
-            
-            if(_selectedDB >= 0)
-                DBDisplay(dblist[_selectedDB]);
-
-            var p1 = ImGui.GetCursorPos();
-            var size = new Vector2(ImGui.GetContentRegionAvail().X, p1.Y - p0.Y );
-            
-            BorderListOptions.End(size);
-        }
-
-        public static void DBDisplay(BaseDataBlob dataBlob)
-        {
-            Type dbType = dataBlob.GetType();
-
-            MemberInfo[] memberInfos = dbType.GetMembers();
-            
-            var _totalHeight = _numLines * _heightMultiplyer;
-            _numLines = memberInfos.Length;
-            var size = new Vector2(ImGui.GetContentRegionAvail().X, _totalHeight);
-            
-            ImGui.BeginChild("InnerColomns", size);
-            
-            ImGui.Columns(2);
-
-            RecursiveReflection(dataBlob);
-            
-
-            ImGui.Columns(0);
-            
-            ImGui.EndChild();
-
-        }
-
-        static void RecursiveReflection(object obj)
-        {
-            
-            Type objType = obj.GetType();
-
-            MemberInfo[] memberInfos = objType.GetMembers();
-            foreach (var memberInfo in memberInfos)
-            {
-                if (typeof(FieldInfo).IsAssignableFrom(memberInfo.GetType()) || typeof(PropertyInfo).IsAssignableFrom(memberInfo.GetType()))
-                {
-                    MemberTypes membertype = memberInfo.MemberType;
-                    object value = GetValue(memberInfo, obj);
-                    if(value == null)
-                        continue;
-                    if (typeof(IList).IsAssignableFrom(value.GetType()))
-                    {
-                        var items = (IList)GetValue(memberInfo, obj);
-                        int itemsCount = items.Count;
-                        
-                        if (ImGui.TreeNode(memberInfo.Name))
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                            _numLines += itemsCount;
-                            foreach (var item in items)
-                            {
-                                RecursiveReflection(item);
-                            }
-                            ImGui.TreePop();
-                        }
-                        else
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                        }
-                    }
-                    else if (typeof(IDictionary).IsAssignableFrom(value.GetType()))
-                    {
-                        var items = (IDictionary)GetValue(memberInfo, obj);
-                        int itemsCount = items.Count;
-                        
-                        if (ImGui.TreeNode(memberInfo.Name))
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                            _numLines += itemsCount;
-                            foreach (var item in items)
-                            {
-                                RecursiveReflection(item);
-                            }
-                            ImGui.TreePop();
-                        }
-                        else
-                        {
-                            ImGui.NextColumn();
-                            ImGui.Text("Count: " + itemsCount);
-                            ImGui.NextColumn();
-                        }
-                    }
-                    else
-                    {
-                        ImGui.Text(memberInfo.Name);
-                        ImGui.NextColumn();
-                        //object value = memberInfo.GetValue(obj);
-                        if (value != null)
-                            ImGui.Text(value.ToString());
-                        else ImGui.Text("null");
-                        ImGui.NextColumn();
-                    }
-                }
-            }
-        }
-        
-        static object GetValue(this MemberInfo memberInfo, object forObject)
-        {
-            switch (memberInfo.MemberType)
-            {
-                case MemberTypes.Field:
-                    return ((FieldInfo)memberInfo).GetValue(forObject);
-                case MemberTypes.Property:
-                    return ((PropertyInfo)memberInfo).GetValue(forObject);
-                    
-            }
-            return "";
-        }
-    }
 
     public static class BorderGroup
     {

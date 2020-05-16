@@ -245,6 +245,11 @@ namespace Pulsar4X.ECSLib
 
         private Dictionary<Type, ComponentAbilityState> _instanceAbilities = new Dictionary<Type, ComponentAbilityState>();
 
+        public Dictionary<Type, ComponentAbilityState> GetAllStates()
+        {
+            return new Dictionary<Type, ComponentAbilityState>(_instanceAbilities);
+        }
+
         public bool HasAblity<T>()
             where T : ComponentAbilityState
         {

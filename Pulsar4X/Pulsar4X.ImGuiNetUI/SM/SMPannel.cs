@@ -118,10 +118,7 @@ namespace Pulsar4X.SDL2UI
 
                 if (_entityInspectorWindow)
                 {
-                    if (ImGui.Begin("Enitity Inspector", ref _entityInspectorWindow))
-                    {
-                        EntityInspector.Display(_selectedEntity);
-                    }
+                    EntityInspector.Begin(_selectedEntity);
                 }
 
 

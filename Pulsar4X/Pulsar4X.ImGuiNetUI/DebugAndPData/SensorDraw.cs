@@ -9,14 +9,7 @@ namespace Pulsar4X.SDL2UI
     public class SensorDraw : PulsarGuiWindow
     {
 
-        public class WaveDrawData
-        {
-            public int Count { get { return Points.Length; } }
-            public bool HasAtn = false;
-            public (Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)[] Points = new (Vector2, Vector2, Vector2, Vector2)[0];
-            public (bool drawSrc,bool drawAtn)[] IsWaveDrawn = new (bool, bool)[0];
-            public uint[] _receverColours;
-        }
+
         
         private EntityState _selectedEntitySate;
         private Entity _selectedEntity => _selectedEntitySate.Entity;
@@ -408,7 +401,7 @@ namespace Pulsar4X.SDL2UI
 
                 _reflectDat = MakeTargetWavDat(reflected, range);
                 _emmittrDat = MakeTargetWavDat(emitted, range);
-                //_attenuatedWaveForms =  SensorProcessorTools.AttenuatedForDistance(_targetSensorProfile, range);
+                _attenuatedWaveForms =  SensorProcessorTools.AttenuatedForDistance(_targetSensorProfile, range);
                 //_detectedDat = _selectedReceverAtb[0].
 
                 _targetDetectionQuality = new SensorProcessorTools.SensorReturnValues[_selectedReceverAtb.Length];
@@ -466,5 +459,14 @@ namespace Pulsar4X.SDL2UI
         {
             throw new NotImplementedException();
         }
+    }
+    
+    public class WaveDrawData
+    {
+        public int Count { get { return Points.Length; } }
+        public bool HasAtn = false;
+        public (Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)[] Points = new (Vector2, Vector2, Vector2, Vector2)[0];
+        public (bool drawSrc,bool drawAtn)[] IsWaveDrawn = new (bool, bool)[0];
+        public uint[] _receverColours;
     }
 }

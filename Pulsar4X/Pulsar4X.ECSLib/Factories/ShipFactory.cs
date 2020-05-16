@@ -104,14 +104,16 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateShip(ShipDesign shipDesign, Entity ownerFaction, Entity parent, double angleRad, string shipName = null)
         {
             Vector3 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            
             var distanceFromParent = parent.GetDataBlob<MassVolumeDB>().RadiusInM * 2;
-            double x = Math.Cos(angleRad);
-            double y = Math.Sin(angleRad);
-            position.X *= x;
-            position.Y *= y;
+
+            var x = distanceFromParent * Math.Cos(angleRad);
+            var y = distanceFromParent * Math.Sin(angleRad);
+            
+            var pos = new Vector3(position.X + x, position.Y + y, 0);
             
             StarSystem starsys = (StarSystem)parent.Manager;
-            return CreateShip(shipDesign, ownerFaction, position, parent, starsys, shipName);
+            return CreateShip(shipDesign, ownerFaction, pos, parent, starsys, shipName);
         }
         
         public static Entity CreateShip(ShipDesign shipDesign, Entity ownerFaction, Vector3 position, Entity parent, StarSystem starsys, string shipName = null)

@@ -287,8 +287,9 @@ namespace Pulsar4X.ECSLib
             gunShip.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
 
+            Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (0), "Target Drone0");
             Entity targetDrone1 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (22.5 * Math.PI / 180), "Target Drone1");
-            Entity targetDrone2 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (5 * Math.PI / 180), "Target Drone2");
+            Entity targetDrone2 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (45 * Math.PI / 180), "Target Drone2");
             StorageSpaceProcessor.AddCargo(targetDrone1.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(targetDrone2.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             
