@@ -204,6 +204,19 @@ namespace Pulsar4X.SDL2UI
             GalacticMap.SetFaction();
         }
 
+        internal void ToggleGameMaster()
+        {
+            if(SMenabled == true) 
+            {
+                SMenabled = false;
+            }
+            else
+            {
+                SMenabled = true;
+                EnableGameMaster();
+            }
+        }
+
         //checks wether any event changed the mouse position after a new mouse click, indicating the user is doing something else with the mouse as he was doing before.
         internal void onFocusMoved(){
             _lastContextMenuOpenedEntityGuid = Guid.Empty;

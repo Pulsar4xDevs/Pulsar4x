@@ -85,7 +85,7 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
             //selectedEntityData
-            if (ImGui.Begin("SM", ref IsActive, _flags))
+            if (_uiState.SMenabled && ImGui.Begin("SM", ref IsActive, _flags))
             {
 
 
