@@ -13,6 +13,7 @@ namespace Pulsar4X.SDL2UI
         private float _btnSize = 32;//Button size
         public Vector2 BtnSizes = new Vector2(32, 32);//Button size
         private List<ToolbuttonData> ToolButtons = new List<ToolbuttonData>();//Stores the data for each button
+        private List<ToolbuttonData> SMToolButtons = new List<ToolbuttonData>();//Stores the data for each button
 
         public class ToolbuttonData
         //data for a toolbar button, requires an SDL image(for Picture)
@@ -34,6 +35,7 @@ namespace Pulsar4X.SDL2UI
         {
             _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
 
+            
 
             ToolbuttonData btn = new ToolbuttonData()
             {
@@ -97,10 +99,18 @@ namespace Pulsar4X.SDL2UI
                 TooltipText = "Spawn ships and planets",
                 OnClick = new Action(EntitySpawnWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive),
-                SmButton = true
                 //Display a tree with all objects in the system
             };
-            ToolButtons.Add(btn);
+            SMToolButtons.Add(btn);
+            btn = new ToolbuttonData()
+            {
+                Picture = _uiState.SDLImageDictionary["Tree"],
+                TooltipText = "View SM debug info about a body",
+                OnClick = new Action(SMPannel.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(SMPannel.GetInstance().GetActive),
+                //Display a list of bodies with some info about them.
+            };
+            SMToolButtons.Add(btn);
 
 
 
@@ -128,10 +138,18 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
 
-
-            if (ImGui.Begin("##Toolbar", _flags))
+            DisplayButtons("##Toolbar", ToolButtons);
+            if (_uiState.SMenabled)
             {
-                
+                DisplayButtons("##SMToolbar", SMToolButtons);
+            }
+
+        }
+
+        void DisplayButtons(string name, List<ToolbuttonData> DisplayToolButtons)
+        {
+            if (ImGui.Begin(name, _flags))
+            {
 
                 uint unclickedcolor;
                 uint clickedcolour;
@@ -147,10 +165,8 @@ namespace Pulsar4X.SDL2UI
 
                 uint iterations = 0;
                 //displays the default toolbar menu icons
-                foreach (var button in ToolButtons)//For each button
+                foreach (var button in DisplayToolButtons)//For each button
                 {
-                    if (button.SmButton == true && _uiState.SMenabled == false)
-                        break;
                     string id = iterations.ToString();
                     ImGui.PushID(id);
 
@@ -182,7 +198,6 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.End();
             }
-
         }
     }
 }

@@ -62,7 +62,7 @@ namespace Pulsar4X.SDL2UI
                     var pannel = SMPannel.GetInstance();
                     _uiState.ActiveWindow = pannel;
                     pannel.SetActive();
-                    _uiState.EnableGameMaster();
+                    _uiState.ToggleGameMaster();
                     this.IsActive = false;
                 }
                 //ImGui.GetForegroundDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
