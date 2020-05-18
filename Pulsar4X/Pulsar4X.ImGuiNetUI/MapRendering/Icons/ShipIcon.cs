@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -263,5 +264,175 @@ namespace Pulsar4X.SDL2UI
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
             }
         }
+    }
+
+    public class ProjectileIcon : Icon
+    {
+        
+        ProjectileInfoDB _shipInfo;
+        OrbitDB _orbitDB;
+        NewtonMoveDB _newtonMoveDB;
+        WarpMovingDB _warpMoveDB;
+        float _lop;
+        Entity _entity;
+        private Shape _flame;
+        public ProjectileIcon(Entity entity) : base(entity.GetDataBlob<PositionDB>())
+        {
+            _shipInfo = entity.GetDataBlob<ProjectileInfoDB>();
+            
+            _entity = entity;
+            BasicShape();
+            NewtonFlame();
+            
+            if (entity.HasDataBlob<OrbitDB>())
+            {
+                _orbitDB = entity.GetDataBlob<OrbitDB>();
+                var i = _orbitDB.Inclination;
+                var aop = _orbitDB.ArgumentOfPeriapsis;
+                var loan = _orbitDB.LongitudeOfAscendingNode;
+                _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
+            }
+            else if(entity.HasDataBlob<NewtonMoveDB>())
+            {
+                _newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>(); 
+                Shapes.Add(_flame);
+            }
+            else if (entity.HasDataBlob<WarpMovingDB>())
+                _warpMoveDB = entity.GetDataBlob<WarpMovingDB>();
+
+            entity.ChangeEvent += Entity_ChangeEvent;
+
+
+
+            
+            OnPhysicsUpdate();
+        }
+
+        public ProjectileIcon(Vector3 position_m) : base(position_m)
+        {
+        }
+        
+        void Entity_ChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
+        {
+            if(changeType == EntityChangeData.EntityChangeType.DBAdded)
+            {
+                if (db is OrbitDB)
+                {
+                    _orbitDB = (OrbitDB)db;
+                    var i = _orbitDB.Inclination;
+                    var aop = _orbitDB.ArgumentOfPeriapsis;
+                    var loan = _orbitDB.LongitudeOfAscendingNode;
+                    _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
+                }
+                else if (db is NewtonMoveDB)
+                {
+                    _newtonMoveDB = (NewtonMoveDB)db;
+                    
+                    if(!Shapes.Contains(_flame))
+                        Shapes.Add(_flame);
+                }
+                else if (db is WarpMovingDB)
+                    _warpMoveDB = (WarpMovingDB)db;                    
+            }
+            else if (changeType == EntityChangeData.EntityChangeType.DBRemoved)
+            {
+                if (db is OrbitDB)
+                    _orbitDB = null;
+                if (db is NewtonMoveDB)
+                {
+                    _newtonMoveDB = null;
+                    if (Shapes.Contains(_flame))
+                        Shapes.Remove(_flame);
+                }
+                else if (db is WarpMovingDB)
+                    _warpMoveDB = null;
+            }
+        }
+        
+        void BasicShape()
+        {
+            byte r = 150;
+            byte g = 50;
+            byte b = 200;
+            byte a = 255;
+            PointD[] points = {
+                new PointD { X = 0, Y = 4 },
+                new PointD { X = 2, Y = -4 },
+                new PointD { X = 0, Y = 0 },
+                new PointD { X = -2, Y = -4 },
+                new PointD { X = 0, Y = 4 }
+            };
+
+            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            Shapes.Add(new Shape() {Points = points, Color = colour});
+        }
+
+        void NewtonFlame()
+        {
+            byte r = 150;
+            byte g = 50;
+            byte b = 0;
+            byte a = 200;
+            PointD[] points = {
+                new PointD { X = 0, Y = 0 },
+                new PointD { X = -2, Y = -2 },
+                new PointD { X = 0, Y = -5 },
+                new PointD { X = 2, Y = -2 },
+                new PointD { X = 0, Y = 0 }
+            };
+
+            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            _flame = new Shape() {Points = points, Color = colour};
+        }
+
+        public override void OnPhysicsUpdate()
+        {
+
+            DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
+            if (_orbitDB != null)
+            {
+                var headingVector = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(_orbitDB, atDateTime);
+                var heading = Math.Atan2(headingVector.Y, headingVector.X);
+                Heading = (float)heading;
+            }
+            else if(_newtonMoveDB != null)
+            {
+                Heading = (float)Math.Atan2(_newtonMoveDB.CurrentVector_ms.Y, _newtonMoveDB.CurrentVector_ms.X);
+                
+            }
+            else if (_warpMoveDB != null)
+            {
+                Heading = _warpMoveDB.Heading_Radians;
+            }
+
+        }
+
+        public override void OnFrameUpdate(Matrix matrix, Camera camera)
+        {
+
+            var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
+            var scaleMatrix = Matrix.NewScaleMatrix(Scale, Scale);
+            var rotateMatrix = Matrix.NewRotateMatrix(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
+
+            var shipMatrix = mirrorMatrix * scaleMatrix * rotateMatrix;
+
+            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
+
+            DrawShapes = new Shape[this.Shapes.Count];
+            for (int i = 0; i < Shapes.Count; i++)
+            {
+                var shape = Shapes[i];
+                PointD[] drawPoints = new PointD[shape.Points.Length];
+                for (int i2 = 0; i2 < shape.Points.Length; i2++)
+                {
+                    var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
+                    int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
+                    int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
+                    drawPoints[i2] = new PointD() { X = x, Y = y };
+                }
+                DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
+            }
+        }
+        
     }
 }

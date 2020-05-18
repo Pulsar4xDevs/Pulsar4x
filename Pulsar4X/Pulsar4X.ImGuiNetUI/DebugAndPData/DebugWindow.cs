@@ -689,7 +689,7 @@ namespace Pulsar4X.SDL2UI
                             }
 
 
-
+                            
                         }
                     }
                 }

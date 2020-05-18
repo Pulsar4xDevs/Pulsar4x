@@ -5,6 +5,7 @@ using System.Linq;
 using System.Collections.Concurrent;
 using Pulsar4X.ECSLib;
 using ImGuiSDL2CS;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using SDL2;
 
 
@@ -210,6 +211,11 @@ namespace Pulsar4X.SDL2UI
             if (entityItem.HasDataBlob<ShipInfoDB>())
             {
                 _entityIcons.TryAdd(entityItem.Guid, new ShipIcon(entityItem));
+            }
+
+            if (entityItem.HasDataBlob<ProjectileInfoDB>())
+            {
+                _entityIcons.TryAdd(entityItem.Guid, new ProjectileIcon(entityItem));
             }
 
         }

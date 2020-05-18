@@ -75,7 +75,7 @@ namespace Pulsar4X.ECSLib
             UpdateOrbit(root, rootPositionDB, toDate);
         }
 
-        private static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime toDate)
+        public static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime toDate)
         {
             var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
             var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);

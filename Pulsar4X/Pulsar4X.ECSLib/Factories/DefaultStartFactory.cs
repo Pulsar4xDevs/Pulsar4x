@@ -267,36 +267,40 @@ namespace Pulsar4X.ECSLib
             ShipDesign shipDesign = DefaultShipDesign(game, factionEntity);
             ShipDesign gunShipDesign = GunShipDesign(game, factionEntity);
 
-            Entity ship1 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Serial Peacemaker");
+            Entity gunShip0 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Ensuing Calm");
             Entity ship3 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Touch-and-Go");
-            Entity gunShip = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Prevailing Stillness");
+            Entity gunShip1 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Prevailing Stillness");
             Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), factionEntity, earth, solSys, "Planet Express Ship");
             var fuel = NameLookup.GetMaterialSD(game, "Sorium Fuel");
             var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
-            StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            StorageSpaceProcessor.AddCargo(gunShip0.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            StorageSpaceProcessor.AddCargo(gunShip0.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
             StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), rp1, 15000);
-            StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), rp1, 15000);
-            StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
+            StorageSpaceProcessor.AddCargo(gunShip1.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            StorageSpaceProcessor.AddCargo(gunShip1.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
             StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             var elec = NameLookup.GetMaterialSD(game, "Electrical Energy");
-            ship1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
-            gunShip.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            gunShip1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
 
-            Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (0), "Target Drone0");
+            Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (10 * Math.PI / 180), "Target Drone0");
             Entity targetDrone1 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (22.5 * Math.PI / 180), "Target Drone1");
             Entity targetDrone2 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (45 * Math.PI / 180), "Target Drone2");
+            targetDrone0.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone0");
+            targetDrone1.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone1");
+            targetDrone2.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone2");
             StorageSpaceProcessor.AddCargo(targetDrone1.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(targetDrone2.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             
-            NewtonionMovementProcessor.CalcDeltaV(ship1);
+            NewtonionMovementProcessor.CalcDeltaV(gunShip0);
             NewtonionMovementProcessor.CalcDeltaV(ship2);
             NewtonionMovementProcessor.CalcDeltaV(ship3);
-            NewtonionMovementProcessor.CalcDeltaV(gunShip);
+            NewtonionMovementProcessor.CalcDeltaV(gunShip1);
             NewtonionMovementProcessor.CalcDeltaV(courier);
             //StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
@@ -328,18 +332,18 @@ namespace Pulsar4X.ECSLib
             StaticRefLib.ProcessorManager.RunProcessOnEntity<OrbitDB>(ship3, 0);
 
             
-            gunShip.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector3(8.52699302490434E-05, 0, 0);
+            gunShip1.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector3(8.52699302490434E-05, 0, 0);
             //give the gunship a hypobolic orbit to test:
             //var orbit = OrbitDB.FromVector(earth, gunShip, new Vector4(0, velInAU, 0, 0), game.CurrentDateTime);
-            gunShip.RemoveDataBlob<OrbitDB>();
+            gunShip1.RemoveDataBlob<OrbitDB>();
             var nmdb = new NewtonMoveDB(earth, new Vector3(0, -10000.0, 0));
-            gunShip.SetDataBlob<NewtonMoveDB>(nmdb);
+            gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);
 
 
 
-            solSys.SetDataBlob(ship1.ID, new TransitableDB());
+            solSys.SetDataBlob(gunShip0.ID, new TransitableDB());
             solSys.SetDataBlob(ship2.ID, new TransitableDB());
-            solSys.SetDataBlob(gunShip.ID, new TransitableDB());
+            solSys.SetDataBlob(gunShip1.ID, new TransitableDB());
             solSys.SetDataBlob(courier.ID, new TransitableDB());
 
             //Entity ship = ShipFactory.CreateShip(shipDesign, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
@@ -594,8 +598,8 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner srbDesigner;
             ComponentTemplateSD srbSD = game.StaticData.ComponentTemplates[new Guid("9FDB2A15-4413-40A9-9229-19D05B3765FE")];
             srbDesigner = new ComponentDesigner(srbSD, faction.GetDataBlob<FactionTechDB>());
-            srbDesigner.ComponentDesignAttributes["Engine Mass"].SetValueFromInput(1);
-            srbDesigner.ComponentDesignAttributes["Fuel Mass"].SetValueFromInput(234);
+            srbDesigner.ComponentDesignAttributes["Engine Mass"].SetValueFromInput(10);
+            srbDesigner.ComponentDesignAttributes["Fuel Mass"].SetValueFromInput(225);
             srbDesigner.Name = "SRB 235";
             _missileSRB = srbDesigner.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileSRB.TechID);

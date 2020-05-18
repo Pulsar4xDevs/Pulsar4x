@@ -106,6 +106,19 @@ namespace Pulsar4X.ECSLib
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
             var blobs = manager.GetAllDataBlobsOfType<GenericFiringWeaponsDB>();
+            
+            //when firing weapons we need to have the parent in the right place.
+            //orbits don't update every subtick, so we update just this entity for this tick, if it's an orbiting entity.
+            foreach (var blob in blobs) 
+            {
+                var entity = blob.OwningEntity; //
+                if (entity.HasDataBlob<OrbitDB>())
+                {
+                    DateTime toDate = manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+                    OrbitProcessor.UpdateOrbit(entity, entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>(), toDate);
+                }
+            }
+
             foreach (GenericFiringWeaponsDB blob in blobs)
             {
                 ProcessReloadWeapon(blob);
@@ -139,6 +152,8 @@ namespace Pulsar4X.ECSLib
 
         public static void ProcessWeaponFire(GenericFiringWeaponsDB firingWeapons)
         {
+            
+            
             for (int i = 0; i < firingWeapons.WpnIDs.Length; i++)
             {
                 int shotsFired = firingWeapons.ShotsFiredThisTick[i];

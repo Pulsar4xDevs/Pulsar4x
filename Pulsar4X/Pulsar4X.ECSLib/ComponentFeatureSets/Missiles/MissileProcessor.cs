@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 {
@@ -41,6 +43,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             newtmovedb.DeltaVForManuver_m = Vector3.Normalise(tgtEstPos.position) * dv;
             
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
+            dataBlobs.Add(new ProjectileInfoDB(launchingEntity.Guid));
             dataBlobs.Add(new ComponentInstancesDB());
             dataBlobs.Add(misslPositionDB);
             dataBlobs.Add(MassVolumeDB.NewFromMassAndVolume(missileDesign.WetMass, missileDesign.WetMass));
@@ -56,6 +59,27 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             newMissile.GetDataBlob<NewtonThrustAbilityDB>().DeltaV = dv;
             
             StorageSpaceProcessor.RemoveCargo(cargo, missileDesign, 1); //remove missile from parent.
+        }
+    }
+
+    public class ProjectileInfoDB : BaseDataBlob
+    {
+        public Guid LaunchedBy = new Guid();
+
+
+        [JsonConstructor]
+        private ProjectileInfoDB()
+        {
+        }
+
+        public ProjectileInfoDB(Guid launchedBy)
+        {
+            LaunchedBy = launchedBy;
+        }
+
+        public override object Clone()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
