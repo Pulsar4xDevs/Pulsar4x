@@ -178,22 +178,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                     }
                 }
             }
-            /*
-            foreach (var component in components)
-            {
-                //If the mounttype does not include missiles, it will just ignore the component and wont add it. 
-                if((component.design.ComponentMountType & ComponentMountType.Missile) == ComponentMountType.Missile)
-                {
-                    if (component.design.TryGetAttribute(out CargoStorageAtbDB cargoAtb))
-                    {
-                        if (cargoAtb.CargoTypeGuid == StaticRefLib.StaticData.GetICargoable(fuelType).CargoTypeID)
-                            fuelMass += cargoAtb.StorageCapacity;
-                    }
-                }
-            }*/
 
-            WetMass = Mass;
-            DryMass = Mass - fuelMass;
+
+            WetMass = Mass + fuelMass;
+            DryMass = Mass;
             
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
