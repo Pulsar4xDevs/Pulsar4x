@@ -471,7 +471,8 @@ namespace Pulsar4X.ECSLib
                 (DefaultMissileSensors(game, faction), 1),
                 (DefaultMissileSRB(game, faction), 1),
             };
-            var design = new OrdnanceDesign(factionInfo, "Missile250", components);
+            double fuelkg = 225;
+            var design = new OrdnanceDesign(factionInfo, "Missile250", fuelkg, components);
             return design;
         }
 
@@ -599,7 +600,7 @@ namespace Pulsar4X.ECSLib
             ComponentTemplateSD srbSD = game.StaticData.ComponentTemplates[new Guid("9FDB2A15-4413-40A9-9229-19D05B3765FE")];
             srbDesigner = new ComponentDesigner(srbSD, faction.GetDataBlob<FactionTechDB>());
             srbDesigner.ComponentDesignAttributes["Engine Mass"].SetValueFromInput(10);
-            srbDesigner.ComponentDesignAttributes["Fuel Mass"].SetValueFromInput(225);
+            
             srbDesigner.Name = "SRB 235";
             _missileSRB = srbDesigner.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileSRB.TechID);

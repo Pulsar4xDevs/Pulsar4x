@@ -140,16 +140,18 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         {
         }
 
-        public OrdnanceDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components)
+        public OrdnanceDesign(FactionInfoDB faction, string name, double fuelAmountKG,  List<(ComponentDesign design, int count)> components)
         {
             faction.MissileDesigns.Add(ID, this);
             faction.IndustryDesigns[ID] = this;
             Name = name;
             Components = components;
-            CargoTypeID = new Guid("055E2026-20A4-4CFA-A8CA-A01915A48B5E"); //TODO! we're leaking softcode into hard code here.
+            
+            //TODO! we're leaking softcode into hard code here! this is the "ordnance" cargo type, tells us to store this missile in "ordnance" type cargo. 
+            CargoTypeID = new Guid("055E2026-20A4-4CFA-A8CA-A01915A48B5E"); 
             BurnRate = 0;
             Guid fuelType = Guid.Empty;
-            double fuelMass = 0;
+            double fuelMass = fuelAmountKG;
             foreach (var component in components)
             {
                 //If the mounttype does not include missiles, it will just ignore the component and wont add it. 
@@ -176,6 +178,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                     }
                 }
             }
+            /*
             foreach (var component in components)
             {
                 //If the mounttype does not include missiles, it will just ignore the component and wont add it. 
@@ -187,7 +190,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                             fuelMass += cargoAtb.StorageCapacity;
                     }
                 }
-            }
+            }*/
 
             WetMass = Mass;
             DryMass = Mass - fuelMass;

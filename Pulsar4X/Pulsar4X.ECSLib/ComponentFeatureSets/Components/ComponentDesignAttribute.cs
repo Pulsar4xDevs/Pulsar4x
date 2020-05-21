@@ -137,17 +137,20 @@ namespace Pulsar4X.ECSLib
         public void SetValueFromGuidList(Guid techguid)
         {
             Formula.ReplaceExpression("TechData('" + techguid + "')");
+            ParentComponent.SetAttributes();
         }
         
         public void SetValueFromComponentList(Guid componentID)
         {
             Formula.ReplaceExpression("'" + componentID + "'");
+            ParentComponent.SetAttributes();
         }
 
         internal ChainedExpression Formula { get; set; }
         public void SetValue()
         {
             Formula.Evaluate();
+            //ParentComponent.SetAttributes();
         }
 
         public void SetValueFromInput(double input)
@@ -162,7 +165,8 @@ namespace Pulsar4X.ECSLib
                 input = MaxValue;
             Formula.ReplaceExpression(input.ToString()); //prevents it being reset to the default value on Evaluate;
             Formula.Evaluate();//force dependants to recalc.
-            ParentComponent.EvalAll();// this recalcs mass etc. which don't seem to be dependants? TODO: mass, volume etc etc should get the dependant handle if needed.
+            ParentComponent.SetAttributes();
+            
         }
 
         public double Value { get { return Formula.DResult; } }

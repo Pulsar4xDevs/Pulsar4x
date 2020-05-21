@@ -198,39 +198,16 @@ namespace Pulsar4X.ECSLib
                 DescriptionFormula = new ChainedExpression(componentSD.DescriptionFormula, this, factionTech, staticData);
 
             Dictionary<Guid, ChainedExpression> resourceCostForulas = new Dictionary<Guid, ChainedExpression>();
-            //Dictionary<Guid, ChainedExpression> mineralCostFormulas = new Dictionary<Guid, ChainedExpression>();
-            //Dictionary<Guid, ChainedExpression> materalCostFormulas = new Dictionary<Guid, ChainedExpression>();
-            //Dictionary<Guid, ChainedExpression> componentCostForulas = new Dictionary<Guid, ChainedExpression>();
+
             foreach (var kvp in componentSD.ResourceCostFormula)
             {
-                /*
-                if (staticData.CargoGoods.IsMaterial(kvp.Key))
-                {
-                    materalCostFormulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech, staticData));
-                }
-                else if (staticData.ComponentTemplates.ContainsKey(kvp.Key))
-                {
-                    componentCostForulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech, staticData));
-                }
-                else if (staticData.CargoGoods.IsMineral(kvp.Key))
-                {
-                    mineralCostFormulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech, staticData));
-                }
-                else //TODO: log don't crash.
-                    throw new Exception("GUID object {" + kvp.Key + "} not found in materialCosting for " + this.TypeName + " This object needs to be either a mineral, material or component defined in the Data folder");
-                
-                */
                 if(staticData.CargoGoods.GetAny(kvp.Key) != null)
                     resourceCostForulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech));
                 else //TODO: log don't crash.
                     throw new Exception("GUID object {" + kvp.Key + "} not found in resourceCosting for " + this.TypeName + " This object needs to be either a mineral, material or component defined in the Data folder");
-
             }
 
             ResourceCostFormulas = resourceCostForulas;
-            //MineralCostFormulas = mineralCostFormulas;
-           // MaterialCostFormulas = materalCostFormulas;
-            //ComponentCostFormulas = componentCostForulas;
             
             foreach (ComponentTemplateAttributeSD attrbSD in componentSD.ComponentAtbSDs)
             {
@@ -243,37 +220,15 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        
-        /// <summary>
-        /// "Set" and returns the designdata
-        /// this also sets up a research item for the design,
-        /// and adds it to the factions designs.
-        /// </summary>
-        /// <returns></returns>
-        public ComponentDesign CreateDesign(Entity factionEntity)
+        public void SetAttributes()
         {
- 
-            FactionInfoDB faction = factionEntity.GetDataBlob<FactionInfoDB>();
-            
-            //set up the research
-            FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
-            TechSD tech = new TechSD();
-            tech.ID = Guid.NewGuid();
-            tech.Name = _design.Name + " Design Research";
-            tech.Description = "Research into building " + _design.Name;
-            tech.MaxLevel = 1;
-            tech.CostFormula = _design.ResearchCostValue.ToString();
-
-
-            _design.TechID = tech.ID;
-            factionTech.MakeResearchable(tech); //add it to researchable techs 
             EvalAll();
             foreach (var designAttribute in ComponentDesignAttributes.Values)
             {
                 if (designAttribute.AttributeType != null && designAttribute.IsEnabled)
                 {
-                    if (designAttribute.AtbConstrArgs == null)
-                        designAttribute.SetValue();  //force recalc.
+                    //if (designAttribute.AtbConstrArgs == null)
+                    designAttribute.SetValue();  //force recalc.
                                  
                     object[] constructorArgs = designAttribute.AtbConstrArgs;
                     try
@@ -299,6 +254,33 @@ namespace Pulsar4X.ECSLib
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// "Set" and returns the designdata
+        /// this also sets up a research item for the design,
+        /// and adds it to the factions designs.
+        /// </summary>
+        /// <returns></returns>
+        public ComponentDesign CreateDesign(Entity factionEntity)
+        {
+ 
+            FactionInfoDB faction = factionEntity.GetDataBlob<FactionInfoDB>();
+            
+            //set up the research
+            FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
+            TechSD tech = new TechSD();
+            tech.ID = Guid.NewGuid();
+            tech.Name = _design.Name + " Design Research";
+            tech.Description = "Research into building " + _design.Name;
+            tech.MaxLevel = 1;
+            tech.CostFormula = _design.ResearchCostValue.ToString();
+
+
+            _design.TechID = tech.ID;
+            factionTech.MakeResearchable(tech); //add it to researchable techs 
+            
+            SetAttributes();
 
             faction.InternalComponentDesigns[_design.ID] = _design;
             faction.IndustryDesigns[_design.ID] = _design;
@@ -317,15 +299,7 @@ namespace Pulsar4X.ECSLib
             SetResearchCost();
             SetBuildCost();
             SetResourceCosts();
-            /*
-            SetMineralCosts();
-            SetMaterialCosts();
-            SetComponentCosts();
-            
-            MineralCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
-            MaterialCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
-            ComponentCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
-            */
+
         }
 
         public string TypeName
@@ -486,7 +460,7 @@ namespace Pulsar4X.ECSLib
         }
         
         [Obsolete]//don't use this, TODO: get rid of this once json data is rewritten to use names instead of indexes
-        public List<ComponentDesignAttribute> ComponentDesignAttributeList = new List<ComponentDesignAttribute>();
+        internal List<ComponentDesignAttribute> ComponentDesignAttributeList = new List<ComponentDesignAttribute>();
         
         public Dictionary<string, ComponentDesignAttribute> ComponentDesignAttributes = new Dictionary<string, ComponentDesignAttribute>();
         public Dictionary<Type, IComponentDesignAttribute> Attributes
@@ -494,5 +468,22 @@ namespace Pulsar4X.ECSLib
             get { return _design.AttributesByType; }
         }
 
+        public T GetAttribute<T>() 
+            where T : IComponentDesignAttribute
+        {
+            return (T)_design.AttributesByType[typeof(T)];
+        }
+        
+        public bool TryGetAttribute<T>(out T attribute)
+            where T : IComponentDesignAttribute
+        {
+            if (Attributes.ContainsKey(typeof(T)))
+            {
+                attribute = (T)_design.AttributesByType[typeof(T)];
+                return true;
+            }
+            attribute = default(T);
+            return false;
+        }
     }
 }

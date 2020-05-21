@@ -313,7 +313,7 @@
               "Name": "genericWpndbargs",
               "DescriptionFormula": "'int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire, WpnTypes type",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('ROF'), AtbConstrArgs(Ability('ROF'), 1, 1)",
+              "AttributeFormula": "AtbConstrArgs(Ability('ROF'), 1, 1)",
               "AttributeType": "Pulsar4X.ECSLib.GenericWeaponAtb"
             },
             {
