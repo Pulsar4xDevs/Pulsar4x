@@ -54,7 +54,7 @@ namespace Pulsar4X.SDL2UI
         /// <param name="entity"></param>
         public static void DisplayDatablobs(Entity entity)
         {
-            if (_dataBlobs.Length < 1)
+            if (_dataBlobs.Length < 1 || _entityID != entity.Guid)
             {
                 Refresh(entity);
             }

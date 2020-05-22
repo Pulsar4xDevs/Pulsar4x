@@ -326,7 +326,7 @@ namespace Pulsar4X.SDL2UI
                             
                             if (ImGui.CollapsingHeader("DataBlob List"))
                             {
-                                EntityInspector.DisplayDatablobs(_selectedEntity);
+                                EntityInspector.DisplayDatablobs(SelectedEntity);
                                 ImGui.NewLine();
                             }
 

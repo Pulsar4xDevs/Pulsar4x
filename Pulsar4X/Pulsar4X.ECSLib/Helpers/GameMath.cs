@@ -641,7 +641,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="GravParamOfParent">Grav parameter of parent.</param>
         /// <param name="semiMajAxisCurrentBody">Semi maj axis current body.</param>
         /// <param name="semiMajAxisOfTarget">Semi maj axis of target.</param>
-        public static (double, double) Hohmann(double GravParamOfParent, double semiMajAxisCurrentBody, double semiMajAxisOfTarget)
+        public static (double burn1, double burn2) Hohmann(double GravParamOfParent, double semiMajAxisCurrentBody, double semiMajAxisOfTarget)
         {
             double semMajAxisOfHohman = semiMajAxisCurrentBody + semiMajAxisOfTarget;
             double velCurrentBody = Math.Sqrt(GravParamOfParent / semiMajAxisCurrentBody);
@@ -719,7 +719,37 @@ namespace Pulsar4X.ECSLib
 
             return intercept;
         }
+/*
+        public (double deltaV, double timeInSeconds)[] OrbitPhasingManuvers(OrbitDB orbit, double phaseAngle)
+        {
+            //https://en.wikipedia.org/wiki/Orbit_phasing
+            double orbitalPeriod = orbit.OrbitalPeriod.TotalSeconds;
+            double e = orbit.Eccentricity;
 
+            var wc1 = Math.Sqrt((1 - e) / (1 + 3));
+            var wc2 = Math.Tan(phaseAngle / 2);
+            
+            double E = 2 * Math.Atan(wc1 * wc2);
+
+            var wc3 = orbitalPeriod / Math.PI * 2;
+            var wc4 = e * Math.Sin(E);
+
+            double phaseTime = wc3 * (E - wc4);
+
+            double phaseOrbitPeriod = orbitalPeriod - phaseTime;
+
+            double sgp = orbit.GravitationalParameter_m3S2;
+
+            var wc5 = Math.Sqrt(sgp) * phaseOrbitPeriod;
+            var wc6 = wc5 / Math.PI * 2;
+            
+            double phaseOrbitSMA = wc6 * 2 / 3;
+            
+            
+
+
+        }
+*/
 
 
 

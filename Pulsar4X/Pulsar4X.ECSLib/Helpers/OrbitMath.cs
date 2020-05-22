@@ -131,7 +131,7 @@ namespace Pulsar4X.ECSLib
             return Vector3.Vector3FromDecimals(X, Y, Z);
         }
 
-        public static double CalculateStandardGravityParameter(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
+        public static double CalculateStandardGravityParameterInKm3S2(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
         {
             double sgpInKm3S2 = CalculateStandardGravityParameterInM3S2(bodyBeingOrbitedMassInKg, orbiterMassInKg) / Math.Pow(GameConstants.Units.KmPerAu, 3);
             return sgpInKm3S2;
@@ -478,7 +478,8 @@ namespace Pulsar4X.ECSLib
         /// <param name="semiMajAxis">Semi maj axis.</param>
         public static double InstantaneousOrbitalSpeed(double standardGravParameter, double distance, double semiMajAxis)
         {
-            var spd = Math.Sqrt(standardGravParameter * (2 / distance - 1 / semiMajAxis));
+            var foo = Math.Abs(2 / distance - 1 / semiMajAxis);
+            var spd = Math.Sqrt(standardGravParameter * foo);
             if (double.IsNaN(spd))
                 throw new Exception("Speed Result is NaN");
             return spd;
@@ -972,7 +973,7 @@ namespace Pulsar4X.ECSLib
             var lowOrbit = LowOrbitRadius(planetEntity);
             
             var exaustVelocity = 275;
-            var sgp = OrbitMath.CalculateStandardGravityParameter(payload, planetEntity.GetDataBlob<MassVolumeDB>().Mass);
+            var sgp = OrbitMath.CalculateStandardGravityParameterInKm3S2(payload, planetEntity.GetDataBlob<MassVolumeDB>().Mass);
             Vector3 pos = new Vector3(lowOrbit, 0, 0);
             
             var vel = OrbitMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
