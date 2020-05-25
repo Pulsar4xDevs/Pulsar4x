@@ -384,12 +384,13 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("TrueAnomaly: " + truAnomoly);
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion_DegreesSec + " in Deg/s");
                                     ImGui.Text("MeanVelocity: " + OrbitMath.MeanOrbitalVelocityInAU(orbitDB) + "Au/s");
-                                    ImGui.Text("MeanVelocity: " + Distance.AuToKm( OrbitMath.MeanOrbitalVelocityInAU(orbitDB)) + "Km/s");
-                                    ImGui.Text("SOI Radius: " + Distance.AuToKm(OrbitProcessor.GetSOI_AU(_uiState.LastClickedEntity.Entity)));
+                                    ImGui.Text("MeanVelocity: " + Stringify.Velocity( OrbitMath.MeanOrbitalVelocityInm(orbitDB)));
+                                    ImGui.Text("SOI Radius: " + Stringify.Distance(OrbitProcessor.GetSOI_m(SelectedEntity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
-                                    ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis_AU);
-                                    ImGui.Text("Periapsis: " + Distance.AuToKm(orbitDB.Periapsis_AU).ToString("g3") + " Km");
-                                    ImGui.Text("Appoapsis: " + Distance.AuToKm(orbitDB.Apoapsis_AU).ToString("g3") + " Km");
+                                    ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod.TotalSeconds);
+                                    ImGui.Text("SemiMajAxis: " + Stringify.Distance(orbitDB.SemiMajorAxis));
+                                    ImGui.Text("Periapsis: " + Stringify.Distance(orbitDB.Periapsis));
+                                    ImGui.Text("Appoapsis: " + Stringify.Distance(orbitDB.Apoapsis));
                                     if (orbitDB.Parent != null)
                                         ImGui.Text("Parent: " + orbitDB.Parent.GetDataBlob<NameDB>().DefaultName);
                                     if (orbitDB.Children.Count > 0)
@@ -535,7 +536,7 @@ namespace Pulsar4X.SDL2UI
                                 var ntdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
                                 if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    ImGui.Text("Manuver DV:" + Stringify.Distance(nmdb.DeltaVForManuver_m.Length())+"/s");
+                                    ImGui.Text("Manuver DV:" + Stringify.Distance(nmdb.DeltaVForManuver_FoRO_m.Length())+"/s");
                                     ImGui.Text("Parent Body: " + nmdb.SOIParent.GetDataBlob<NameDB>().DefaultName);
                                     ImGui.Text("Current Vector:");
                                     ImGui.Text("X:" + Stringify.Velocity(nmdb.CurrentVector_ms.X));

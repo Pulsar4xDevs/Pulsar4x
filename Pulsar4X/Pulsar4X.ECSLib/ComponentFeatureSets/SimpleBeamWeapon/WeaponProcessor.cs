@@ -90,7 +90,10 @@ namespace Pulsar4X.ECSLib
     }
     
     
-
+/// <summary>
+/// Currently this has some problems, it needs to be able to remove itself from an entity after the weapons are no longer firing and all weapons have been reloaded,
+/// or can't be reloaded due to lack of ordnance. currently it doesn't do this. 
+/// </summary>
     public class HotWpnProcessor : IHotloopProcessor
     {
         public void Init(Game game)
@@ -156,8 +159,10 @@ namespace Pulsar4X.ECSLib
                     int numshots = firingWeapons.InternalMagQty[i] / firingWeapons.AmountPerShot[i];
                     int depleteinternalMag = numshots * firingWeapons.AmountPerShot[i];
                     firingWeapons.InternalMagQty[i] -= depleteinternalMag;
-                    firingWeapons.ShotsFiredThisTick[i] = numshots;
+                    if(firingWeapons.FireControlStates[i].IsEngaging)
+                        firingWeapons.ShotsFiredThisTick[i] = numshots;
                 }
+                
             }
         }
 
@@ -198,7 +203,6 @@ namespace Pulsar4X.ECSLib
         public int[] ReloadAmountsPerSec = new int[0];
         public int[] AmountPerShot = new int[0];
         public int[] MinShotsPerfire = new int[0];
-
         public int[] ShotsFiredThisTick = new int[0];
 
         //public GenericWeaponAtb.WpnTypes[] WpnTypes = new GenericWeaponAtb.WpnTypes[0];
@@ -231,6 +235,7 @@ namespace Pulsar4X.ECSLib
             //GenericWeaponAtb.WpnTypes[] wpnTypes = new GenericWeaponAtb.WpnTypes[count];
             OrdnanceDesign[] ordDes = new OrdnanceDesign[count];
             double[] launchForce =  new double[count];
+            
             FireControlAbilityState[] fcStates = new FireControlAbilityState[count];
             ShotsFiredThisTick = new int[count];
             
@@ -280,6 +285,12 @@ namespace Pulsar4X.ECSLib
             LaunchForces = launchForce;
         }
 
+        
+        /// <summary>
+        /// This is broken and doesn't work, not sure I'm going to use it in it's current form anyway.
+        /// slated for removal?
+        /// </summary>
+        /// <param name="wpns"></param>
         internal void RemoveWeapons(ComponentInstance[] wpns)
         {
             Guid[] wpnToRemoveIDs = new Guid[wpns.Length];

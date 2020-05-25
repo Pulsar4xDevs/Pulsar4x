@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
 
             cmd._db = new NewtonMoveDB(parent, currentVel);
             cmd._db.ActionOnDateTime = actionDateTime;
-            cmd._db.DeltaVForManuver_m = expendDeltaV_m;
+            cmd._db.DeltaVForManuver_FoRO_m = expendDeltaV_m;
             
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         }
@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
 
         internal override bool IsFinished()
         {
-            if (IsRunning && _db.DeltaVForManuver_m.Length() <= 0)
+            if (IsRunning && _db.DeltaVForManuver_FoRO_m.Length() <= 0)
                 return true;
             else
                 return false;

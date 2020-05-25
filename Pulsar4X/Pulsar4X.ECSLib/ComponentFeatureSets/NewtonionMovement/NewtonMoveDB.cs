@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.Vectors;
 
@@ -105,14 +106,20 @@ namespace Pulsar4X.ECSLib
     {
         internal DateTime LastProcessDateTime = new DateTime();
         
-        public Vector3 DeltaVForManuver_m { get; internal set; }
-        public Vector3 DeltaVForManuver_AU
+        /// <summary>
+        /// Orbital Frame Of Reference: Y is prograde
+        /// </summary>
+        public Vector3 DeltaVForManuver_FoRO_m { get; internal set; }
+        /// <summary>
+        /// Orbital Frame Of Reference: Y is prograde
+        /// </summary>
+        public Vector3 DeltaVForManuver_FoRO_AU
         {
-            get { return Distance.MToAU(DeltaVForManuver_m); }
+            get { return Distance.MToAU(DeltaVForManuver_FoRO_m); }
         }
         public DateTime ActionOnDateTime { get; internal set; }
         
-        
+        public Queue<(Vector3 deltaV, DateTime nextManuverTime)> Manuvers = new Queue<(Vector3, DateTime)>();
 
         /// <summary>
         /// Parent ralitive velocity vector. 

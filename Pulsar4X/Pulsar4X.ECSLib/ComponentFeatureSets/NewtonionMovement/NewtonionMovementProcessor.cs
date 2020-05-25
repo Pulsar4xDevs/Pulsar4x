@@ -59,6 +59,9 @@ namespace Pulsar4X.ECSLib
             DateTime dateTimeFuture = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
             double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
 
+            
+                
+            
             double secondsToItterate = deltaT;
             while (secondsToItterate > 0) 
             {
@@ -80,9 +83,11 @@ namespace Pulsar4X.ECSLib
                 //double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
 
                 
-                Vector3 manuverDV = newtonMoveDB.DeltaVForManuver_m; //how much dv needed to complete the manuver.
+                Vector3 manuverDV = newtonMoveDB.DeltaVForManuver_FoRO_m; //how much dv needed to complete the manuver.
                 Vector3 totalDVFromThrust = new Vector3(0,0,0);
-                
+
+
+
                 if(manuverDV.Length() > 0)
                 {
                     double dryMass = mass_Kg - newtonThrust.FuelBurnRate * timeStepInSeconds; //how much our ship weighs after a timestep of fuel is used.
@@ -96,10 +101,19 @@ namespace Pulsar4X.ECSLib
                     //remove the deltaV we're expending from the max (TODO: Remove fuel from cargo, change mass of ship)
                     newtonThrust.DeltaV -= deltaVThisStep;
                     //remove the vectorDV from the amount needed to fully complete the manuver. 
-                    newtonMoveDB.DeltaVForManuver_m -= totalDVFromThrust;
+                    newtonMoveDB.DeltaVForManuver_FoRO_m -= totalDVFromThrust;
                 }
                 
-                Vector3 totalDV = totalDVFromGrav + totalDVFromThrust;
+                //convert orbital to global frame of reference for thrust direction
+                var curVector = Vector3.Normalise(newtonMoveDB.CurrentVector_ms);
+                Vector3 globalCoordDVFromThrust = new Vector3();
+                
+                //this is a complete hack, I don't knwo what I'm doing.
+                globalCoordDVFromThrust = curVector * totalDVFromThrust.Y;
+                
+                
+
+                Vector3 totalDV = totalDVFromGrav + globalCoordDVFromThrust;
                 Vector3 newVelocity = totalDV + newtonMoveDB.CurrentVector_ms;
 
                 newtonMoveDB.CurrentVector_ms = newVelocity;
@@ -145,7 +159,7 @@ namespace Pulsar4X.ECSLib
                     newtonMoveDB.CurrentVector_ms = parentRalitiveVector;
                 }
                 
-                if (newtonMoveDB.DeltaVForManuver_m.Length() <= 0) //if we've completed the manuver.
+                if (newtonMoveDB.DeltaVForManuver_FoRO_m.Length() <= 0) //if we've completed the manuver.
                 {
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
                     double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
@@ -206,7 +220,7 @@ namespace Pulsar4X.ECSLib
                 
                 double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
                 double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
-                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVForManuver_AU / maxAccelFromThrust; //per second
+                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVForManuver_FoRO_m / maxAccelFromThrust; //per second
 
                 Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
                 
@@ -253,7 +267,7 @@ namespace Pulsar4X.ECSLib
                 
                 double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
                 double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
-                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVForManuver_AU / maxAccelFromThrust; //per second
+                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVForManuver_FoRO_m / maxAccelFromThrust; //per second
 
                 Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
                 

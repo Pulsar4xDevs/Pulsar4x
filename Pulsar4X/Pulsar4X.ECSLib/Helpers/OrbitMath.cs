@@ -532,6 +532,14 @@ namespace Pulsar4X.ECSLib
             return peremeter  / orbitalPerodSeconds;
         }
 
+        public static double MeanOrbitalVelocityInm(OrbitDB orbit)
+        {
+            double a = orbit.SemiMajorAxis;
+            double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
+            double orbitalPerodSeconds = orbit.OrbitalPeriod.TotalSeconds;
+            double peremeter = Math.PI * (3* (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
+            return peremeter  / orbitalPerodSeconds;
+        }
 
         #endregion
 

@@ -246,13 +246,6 @@ namespace Pulsar4X.ECSLib
                 {
                     fcState.IsEngaging = false;
                     GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
-                    if (blob != null)
-                    {
-                        blob.RemoveWeapons(fcState.GetChildrenInstances());
-                        if(blob.WpnIDs.Length == 0)
-                            _entityCommanding.RemoveDataBlob<GenericFiringWeaponsDB>();
-                    }
-                    
                 }
                 IsRunning = true;
             }

@@ -719,8 +719,15 @@ namespace Pulsar4X.ECSLib
 
             return intercept;
         }
-/*
-        public (double deltaV, double timeInSeconds)[] OrbitPhasingManuvers(OrbitDB orbit, double phaseAngle)
+
+        /// <summary>
+        /// used to get manuvers to rendevus with an object in the same orbit, or advance our position in a given orbit.
+        /// </summary>
+        /// <param name="orbit"></param>
+        /// <param name="manuverTime">datetime the manuver should start (idealy at periapsis)</param>
+        /// <param name="phaseAngle">angle in radians between our position and the rendevous position</param>
+        /// <returns>an array of vector3(normal,prograde,radial) and seconds from first manuver. first seconds in array will be 0 </returns>
+        public static (Vector3 deltaV, double timeInSeconds)[] OrbitPhasingManuvers(OrbitDB orbit, DateTime manuverTime, double phaseAngle)
         {
             //https://en.wikipedia.org/wiki/Orbit_phasing
             double orbitalPeriod = orbit.OrbitalPeriod.TotalSeconds;
@@ -731,8 +738,8 @@ namespace Pulsar4X.ECSLib
             
             double E = 2 * Math.Atan(wc1 * wc2);
 
-            var wc3 = orbitalPeriod / Math.PI * 2;
-            var wc4 = e * Math.Sin(E);
+            double wc3 = orbitalPeriod / Math.PI * 2;
+            double wc4 = e * Math.Sin(E);
 
             double phaseTime = wc3 * (E - wc4);
 
@@ -740,21 +747,32 @@ namespace Pulsar4X.ECSLib
 
             double sgp = orbit.GravitationalParameter_m3S2;
 
-            var wc5 = Math.Sqrt(sgp) * phaseOrbitPeriod;
-            var wc6 = wc5 / Math.PI * 2;
+            //double phaseOrbitSMA0 = Math.Pow(Math.Sqrt(sgp) * phaseOrbitPeriod / (Math.PI * 2), (2.0 / 3.0)); //I think this one will be slightly slower
+            double phaseOrbitSMA = Math.Cbrt((sgp * phaseOrbitPeriod * phaseOrbitPeriod) / (4 * Math.PI * Math.PI));
             
-            double phaseOrbitSMA = wc6 * 2 / 3;
-            
-            
+            double phaseOrbitAppoaspis = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();// 
+            double phaseOrbitPeriapsis = phaseOrbitSMA * 2 - phaseOrbitAppoaspis;
 
 
+            double wc7 = Math.Sqrt( (phaseOrbitAppoaspis * phaseOrbitPeriapsis) / (phaseOrbitAppoaspis + phaseOrbitPeriapsis));
+            double wc8 = Math.Sqrt(2 * sgp);
+            double phaseOrbitAngularMomentum = wc8 * wc7;
+
+
+            double wc9 = Math.Sqrt( (orbit.Apoapsis * orbit.Periapsis) / (orbit.Apoapsis + orbit.Periapsis));
+            double wc10 = Math.Sqrt(2 * sgp);
+            double orbitAngularMomentum = wc9 * wc10;
+
+            double r = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();
+
+            double dv = phaseOrbitAngularMomentum / r - orbitAngularMomentum / r;
+
+            (Vector3, double)[] manuvers = new (Vector3, double)[2];
+            manuvers[0] = (new Vector3(0, -dv, 0), 0);
+            manuvers[1] = (new Vector3(0, dv, 0), phaseOrbitPeriod);
+            
+            return manuvers;
         }
-*/
-
-
-
-
-
     }
 
     /// <summary>
