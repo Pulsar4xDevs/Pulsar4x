@@ -36,17 +36,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             var tgtEstPos = tgtintercept.position + targetEntity.GetDataBlob<PositionDB>().RelativePosition_m;
             var vectorToTgt = Vector3.Normalise(tgtEstPos - parentPosRal);
             var launcherVector = vectorToTgt * launchSpeed;
-            
             Vector3 parentVelocity = Entity.GetVelocity_m(launchingEntity, launchingEntity.Manager.StarSysDateTime);
-
             var launchVelocity = parentVelocity + launcherVector;
-            
             var manuverDV = vectorToTgt * launchManuverDv;
-
             var misslPositionDB = (PositionDB)parentPositionDB.Clone();
-            var newtmovedb = new NewtonMoveDB(misslPositionDB.Parent, launchVelocity);
-            newtmovedb.ActionOnDateTime = atDatetime;
-            newtmovedb.DeltaVForManuver_FoRO_m = manuverDV; 
+
             
             
             //phaseManuver;
@@ -56,7 +50,14 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             var targetTrueAnomaly = OrbitProcessor.GetTrueAnomaly(targetOrbit, atDatetime);
             var phaseAngle = targetTrueAnomaly - launchTrueAnomaly;
             var manuvers = InterceptCalcs.OrbitPhasingManuvers(launchOrbit, atDatetime, phaseAngle);
-            newtmovedb.DeltaVForManuver_FoRO_m = manuvers[0].deltaV;
+            launcherVector = Vector3.Normalise(manuvers[0].deltaV) * launchSpeed;
+            launchVelocity = parentVelocity + launcherVector;
+            manuverDV = manuvers[0].deltaV - launcherVector;
+            
+            
+            var newtmovedb = new NewtonMoveDB(misslPositionDB.Parent, launchVelocity);
+            newtmovedb.ActionOnDateTime = atDatetime;
+            newtmovedb.DeltaVForManuver_FoRO_m = manuverDV; 
             
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             dataBlobs.Add(new ProjectileInfoDB(launchingEntity.Guid));

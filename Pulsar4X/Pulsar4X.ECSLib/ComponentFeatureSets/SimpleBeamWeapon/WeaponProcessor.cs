@@ -153,16 +153,30 @@ namespace Pulsar4X.ECSLib
                 {
                     firingWeapons.InternalMagQty[i] += Math.Min(firingWeapons.ReloadAmountsPerSec[i], firingWeapons.InternalMagSizes[i]);
                 }
-
+                //if it's reloaded enough to fire at least one shot.
                 if (firingWeapons.InternalMagQty[i] >= firingWeapons.AmountPerShot[i] * firingWeapons.MinShotsPerfire[i])
                 {
                     int numshots = firingWeapons.InternalMagQty[i] / firingWeapons.AmountPerShot[i];
                     int depleteinternalMag = numshots * firingWeapons.AmountPerShot[i];
                     firingWeapons.InternalMagQty[i] -= depleteinternalMag;
-                    if(firingWeapons.FireControlStates[i].IsEngaging)
+                    
+                    //if this is not attached to a fire control, 
+                    if (firingWeapons.FireControlStates[i] == null)
+                    {   //and is fully reloaded.
+                        if(firingWeapons.InternalMagQty[i] >= firingWeapons.InternalMagSizes[i]) 
+                            firingWeapons.RemoveWeapons(firingWeapons.WpnIDs[i]);//remove it from being processed every second.
+                    }
+                    //if it *is* attached to a firecontrol, and is firing. 
+                    else if(firingWeapons.FireControlStates[i].IsEngaging)
+                    { //then fire 
                         firingWeapons.ShotsFiredThisTick[i] = numshots;
+                    }
+                    // if it's attached to firecontrol, but not firing and is fully reloaded
+                    else if(firingWeapons.InternalMagQty[i] >= firingWeapons.InternalMagSizes[i]) 
+                    {   //remove it from being processed every second.
+                        firingWeapons.RemoveWeapons(firingWeapons.WpnIDs[i]);
+                    }
                 }
-                
             }
         }
 
@@ -284,34 +298,57 @@ namespace Pulsar4X.ECSLib
             OrdnanceDesigns = ordDes;
             LaunchForces = launchForce;
         }
-
+        
+        internal void RemoveWeapons(Guid wpnId)
+        {
+            ComponentInstance[] wpnInstances = new ComponentInstance[1];
+            wpnInstances[0]= OwningEntity.GetDataBlob<ComponentInstancesDB>().AllComponents[wpnId];
+            RemoveWeapons(wpnInstances);
+        }
+        
+        internal void RemoveWeapons(Guid[] wpnIds)
+        {
+            ComponentInstance[] wpnInstances = new ComponentInstance[wpnIds.Length];
+            for (int i = 0; i < wpnIds.Length; i++)
+            {
+                wpnInstances[i]= OwningEntity.GetDataBlob<ComponentInstancesDB>().AllComponents[wpnIds[i]];
+            }
+            RemoveWeapons(wpnInstances);
+        }
+        
         
         /// <summary>
-        /// This is broken and doesn't work, not sure I'm going to use it in it's current form anyway.
-        /// slated for removal?
+        /// removes weapons from the index. 
         /// </summary>
         /// <param name="wpns"></param>
         internal void RemoveWeapons(ComponentInstance[] wpns)
         {
-            Guid[] wpnToRemoveIDs = new Guid[wpns.Length];
-            bool[] keepOrRemove = new bool[WpnIDs.Length];
+            //Guid[] wpnToRemoveIDs = new Guid[wpns.Length];
+            //bool[] keepOrRemove = new bool[WpnIDs.Length];
+            List<(Guid id, int index)> wpnsToKeep = new List<(Guid, int)>();
             //List<int> removeIndexs;
-            for (int i = 0; i < wpns.Length; i++)
-            {
-                wpnToRemoveIDs[i] = wpns[i].ID;
-            }
-
+            
+            
+            
             for (int i = 0; i < WpnIDs.Length; i++)
             {
-                keepOrRemove[i] = wpnToRemoveIDs.Contains(WpnIDs[i]);
+                bool keep = true;
+                int j = 0;
+                foreach (var wpn in wpns)
+                {
+                    if (WpnIDs[i] == wpn.ID)
+                    {
+                        keep = false;
+                        var wpnState = wpn.GetAbilityState<WeaponState>();
+                        wpnState.InernalMagCurAmount = InternalMagQty[i];
+                        break;
+                    }
+                }
+                if(keep)
+                    wpnsToKeep.Add((WpnIDs[i], i));
             }
-
-            int count = 0;
-            for (int i = 0; i < keepOrRemove.Length; i++)
-            {
-                if (keepOrRemove[i]) ;
-                count++;
-            }
+            
+            int count = wpnsToKeep.Count;
             
             Guid[] wpnIDs = new Guid[count];
             int[] internalMagSizes = new int[count];
@@ -324,24 +361,21 @@ namespace Pulsar4X.ECSLib
             double[] launchForce =  new double[count];
             FireControlAbilityState[] fcStates = new FireControlAbilityState[count];
 
-            if (count > 0)
+            int newIndex = 0;
+            foreach (var wpn in wpnsToKeep)
             {
-                int i = 0;
-                for (int j = 0; j < WpnIDs.Length; j++)
-                {
-                    if (keepOrRemove[j])
-                    {
-                        wpnIDs[i] = WpnIDs[j];
-                        internalMagSizes[i] = InternalMagSizes[j];
-                        internalMagQty[i] = InternalMagQty[j];
-                        reloadAmountsPerSec[i] = ReloadAmountsPerSec[j];
-                        amountPerShot[i] = AmountPerShot[j];
-                        minShotsPerfire[i] = MinShotsPerfire[j];
-                        ordDes[i] = OrdnanceDesigns[j];
-                        launchForce[i] = LaunchForces[j];
-                        fcStates[i] = FireControlStates[j];
-                    }
-                }
+                int oldIndex = wpn.index;
+                wpnIDs[newIndex] = WpnIDs[oldIndex];
+                internalMagSizes[newIndex] = InternalMagSizes[oldIndex];
+                internalMagQty[newIndex] = InternalMagQty[oldIndex];
+                reloadAmountsPerSec[newIndex] = ReloadAmountsPerSec[oldIndex];
+                amountPerShot[newIndex] = AmountPerShot[oldIndex];
+                minShotsPerfire[newIndex] = MinShotsPerfire[oldIndex];
+                ordDes[newIndex] = OrdnanceDesigns[oldIndex];
+                launchForce[newIndex] = LaunchForces[oldIndex];
+                fcStates[newIndex] = FireControlStates[oldIndex];
+                
+                newIndex++;
             }
             
             WpnIDs = wpnIDs;
@@ -354,7 +388,6 @@ namespace Pulsar4X.ECSLib
             FireControlStates = fcStates;
             OrdnanceDesigns = ordDes;
             LaunchForces = launchForce;
-
         }
 
         /// <summary>
