@@ -748,13 +748,17 @@ namespace Pulsar4X.ECSLib
             double sgp = orbit.GravitationalParameter_m3S2;
 
             //double phaseOrbitSMA0 = Math.Pow(Math.Sqrt(sgp) * phaseOrbitPeriod / (Math.PI * 2), (2.0 / 3.0)); //I think this one will be slightly slower
-            double phaseOrbitSMA = Math.Cbrt((sgp * phaseOrbitPeriod * phaseOrbitPeriod) / (4 * Math.PI * Math.PI));
             
-            double phaseOrbitAppoaspis = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();// 
-            double phaseOrbitPeriapsis = phaseOrbitSMA * 2 - phaseOrbitAppoaspis;
+            //using the full Major axis here rather than semiMaj.
+            double phaseOrbitMA = 2 * Math.Cbrt((sgp * phaseOrbitPeriod * phaseOrbitPeriod) / (4 * Math.PI * Math.PI));
+            
+            
+            //one of these will be the periapsis, the other the appoapsis, depending on whether we're behind or ahead of the target.
+            double phaseOrbitApsis1 = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();// 
+            double phaseOrbitApsis2 = phaseOrbitMA - phaseOrbitApsis1;
 
 
-            double wc7 = Math.Sqrt( (phaseOrbitAppoaspis * phaseOrbitPeriapsis) / (phaseOrbitAppoaspis + phaseOrbitPeriapsis));
+            double wc7 = Math.Sqrt( (phaseOrbitApsis1 * phaseOrbitApsis2) / (phaseOrbitMA));
             double wc8 = Math.Sqrt(2 * sgp);
             double phaseOrbitAngularMomentum = wc8 * wc7;
 
@@ -768,8 +772,8 @@ namespace Pulsar4X.ECSLib
             double dv = phaseOrbitAngularMomentum / r - orbitAngularMomentum / r;
 
             (Vector3, double)[] manuvers = new (Vector3, double)[2];
-            manuvers[0] = (new Vector3(0, -dv, 0), 0);
-            manuvers[1] = (new Vector3(0, dv, 0), phaseOrbitPeriod);
+            manuvers[0] = (new Vector3(0, dv, 0), 0);
+            manuvers[1] = (new Vector3(0, -dv, 0), phaseOrbitPeriod);
             
             return manuvers;
         }
