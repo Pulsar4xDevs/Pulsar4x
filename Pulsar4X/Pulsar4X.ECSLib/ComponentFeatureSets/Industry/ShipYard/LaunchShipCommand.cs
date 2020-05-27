@@ -4,8 +4,8 @@ namespace Pulsar4X.ECSLib.Industry
 {
     public class LaunchShipCmd : EntityCommand
     {
-        internal override int ActionLanes => 1;
-        internal override bool IsBlocking => true;
+        public override int ActionLanes => 1;
+        public override bool IsBlocking => true;
 
         Entity _factionEntity;
         Entity _entityCommanding;
@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib.Industry
             }
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (_hasLaunched)
                 return true;

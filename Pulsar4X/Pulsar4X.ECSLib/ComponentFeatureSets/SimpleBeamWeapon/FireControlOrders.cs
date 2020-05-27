@@ -7,9 +7,9 @@ namespace Pulsar4X.ECSLib
 {
     public class SetWeaponsFireControlOrder : EntityCommand
     {
-        internal override int ActionLanes => 1;
+        public override int ActionLanes => 1;
 
-        internal override bool IsBlocking => false;
+        public override bool IsBlocking => false;
 
         [JsonIgnore]
         Entity _factionEntity;
@@ -54,7 +54,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (IsRunning)
                 return true;
@@ -97,9 +97,9 @@ namespace Pulsar4X.ECSLib
 
     public class SetTargetFireControlOrder : EntityCommand
     {
-        internal override int ActionLanes => 1;
+        public override int ActionLanes => 1;
 
-        internal override bool IsBlocking => false;
+        public override bool IsBlocking => false;
 
         [JsonIgnore]
         Entity _entityCommanding;
@@ -143,7 +143,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (IsRunning)
                 return true;
@@ -190,9 +190,9 @@ namespace Pulsar4X.ECSLib
             OpenFire,
             CeaseFire
         }
-        internal override int ActionLanes => 1;
+        public override int ActionLanes => 1;
 
-        internal override bool IsBlocking => false;
+        public override bool IsBlocking => false;
 
         [JsonIgnore]
         Entity _factionEntity;
@@ -251,7 +251,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (IsRunning)
                 return true;
@@ -279,9 +279,9 @@ namespace Pulsar4X.ECSLib
     
     public class SetOrdinanceToWpnOrder : EntityCommand
     {
-        internal override int ActionLanes => 1;
+        public override int ActionLanes => 1;
 
-        internal override bool IsBlocking => false;
+        public override bool IsBlocking => false;
 
         [JsonIgnore]
         Entity _factionEntity;
@@ -326,7 +326,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (IsRunning)
                 return true;

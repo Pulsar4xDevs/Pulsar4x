@@ -444,8 +444,8 @@ namespace Pulsar4X.ECSLib.Industry
         
         public short Delta { get; set; }
         
-        internal override int ActionLanes => 1; //blocks movement
-        internal override bool IsBlocking => true;
+        public override int ActionLanes => 1; //blocks movement
+        public override bool IsBlocking => true;
 
 
         private Entity _entityCommanding;
@@ -576,7 +576,7 @@ namespace Pulsar4X.ECSLib.Industry
             return false;
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (_job.Auto == false && _job.NumberCompleted == _job.NumberOrdered)
             {

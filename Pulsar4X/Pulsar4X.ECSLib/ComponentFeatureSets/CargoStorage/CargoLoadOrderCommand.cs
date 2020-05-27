@@ -11,8 +11,8 @@ namespace Pulsar4X.ECSLib
         public List<(ICargoable item, long amount)> ItemICargoablesToTransfer = new List<(ICargoable item, long amount)>();
         public Guid SendCargoToEntityGuid { get; set; }
 
-        internal override int ActionLanes => 1;
-        internal override bool IsBlocking => true;
+        public override int ActionLanes => 1;
+        public override bool IsBlocking => true;
 
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (_cargoTransferDB == null)
                 return false;
