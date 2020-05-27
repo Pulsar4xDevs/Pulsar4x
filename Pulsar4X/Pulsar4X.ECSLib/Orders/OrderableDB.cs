@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
     public class OrderableDB : BaseDataBlob
     {
 
-        private List<EntityCommand> ActionList = new List<EntityCommand>();
+        public List<EntityCommand> ActionList = new List<EntityCommand>();
 
         
         internal void ProcessOrderList()
@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
                     {
                         mask |= entityCommand.ActionLanes; //bitwise or
                     }
-                    if( atDatetime == entityCommand.ActionOnDate)
+                    if( atDatetime >= entityCommand.ActionOnDate)
                         entityCommand.ActionCommand();
                 }
                 if (entityCommand.IsFinished())
@@ -38,16 +38,16 @@ namespace Pulsar4X.ECSLib
         
         internal void AddCommandToList(EntityCommand command)
         {
-            if (command.ActionOnDate != null)
+            if (command.ActionOnDate > OwningEntity.StarSysDateTime)
             {
                 OwningEntity.Manager.ManagerSubpulses.AddEntityInterupt(command.ActionOnDate, nameof(OrderableProcessor), OwningEntity);
-                ActionList.Add(command);
             }
+            ActionList.Add(command);
         }
         
         public int Count => ActionList.Count;
 
-        public void RemoveAt(int index)
+        internal void RemoveAt(int index)
         {
             ActionList.RemoveAt(index);
         }

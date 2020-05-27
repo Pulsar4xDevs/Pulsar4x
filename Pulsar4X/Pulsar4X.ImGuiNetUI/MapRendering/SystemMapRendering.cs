@@ -269,9 +269,12 @@ namespace Pulsar4X.SDL2UI
 
                     if (changeData.Datablob is NewtonMoveDB)
                     {
-                        OrbitHypobolicIcon orb;
-                        orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
-                        _orbitRings.AddOrUpdate(changeData.Entity.Guid, orb, ((guid, data) => data = orb));
+                        if(entityState.Entity.HasDataBlob<NewtonMoveDB>()) //because sometimes it can be added and removed in a single tick. 
+                        {
+                            OrbitHypobolicIcon orb;
+                            orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                            _orbitRings.AddOrUpdate(changeData.Entity.Guid, orb, ((guid, data) => data = orb));
+                        }
                     }
                     //if (changeData.Datablob is NameDB)
                     //TextIconList[changeData.Entity.ID] = new TextIcon(changeData.Entity, _camera);

@@ -53,11 +53,16 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             launcherVector = Vector3.Normalise(manuvers[0].deltaV) * launchSpeed;
             launchVelocity = parentVelocity + launcherVector;
             manuverDV = manuvers[0].deltaV - launcherVector;
+            var orderabledb = new OrderableDB();
             
-            
+
             var newtmovedb = new NewtonMoveDB(misslPositionDB.Parent, launchVelocity);
             newtmovedb.ActionOnDateTime = atDatetime;
             newtmovedb.DeltaVForManuver_FoRO_m = manuverDV; 
+            
+            
+            
+            
             
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             dataBlobs.Add(new ProjectileInfoDB(launchingEntity.Guid));
@@ -66,6 +71,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             dataBlobs.Add(MassVolumeDB.NewFromMassAndVolume(missileDesign.WetMass, missileDesign.WetMass));
             dataBlobs.Add(new NameDB("Missile", launchingEntity.FactionOwner, missileDesign.Name ));
             dataBlobs.Add(newtmovedb);
+            dataBlobs.Add(orderabledb);
             var newMissile = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
             
             foreach (var tuple in missileDesign.Components)
@@ -74,6 +80,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             }
 
             newMissile.GetDataBlob<NewtonThrustAbilityDB>().DeltaV = totalDV;
+            DateTime futureDate = atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
+            Vector3 futureDV = manuvers[1].deltaV;
+            NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
+            
             
             StorageSpaceProcessor.RemoveCargo(cargo, missileDesign, 1); //remove missile from parent.
         }

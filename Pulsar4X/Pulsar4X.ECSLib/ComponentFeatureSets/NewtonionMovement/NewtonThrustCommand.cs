@@ -13,6 +13,7 @@ namespace Pulsar4X.ECSLib
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
+        private Vector3 _orbitRalitiveDeltaV;
         NewtonMoveDB _db;
 
         public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Vector3 expendDeltaV_m)
@@ -22,15 +23,13 @@ namespace Pulsar4X.ECSLib
                 RequestingFactionGuid = faction,
                 EntityCommandingGuid = orderEntity.Guid,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
+                _orbitRalitiveDeltaV = expendDeltaV_m,
+                ActionOnDate = actionDateTime
 
             };
 
-            var parent = Entity.GetSOIParentEntity(orderEntity);
-            var currentVel = Entity.GetVelocity_m(orderEntity, actionDateTime);
-
-            cmd._db = new NewtonMoveDB(parent, currentVel);
-            cmd._db.ActionOnDateTime = actionDateTime;
-            cmd._db.DeltaVForManuver_FoRO_m = expendDeltaV_m;
+            
+            
             
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         }
@@ -39,11 +38,15 @@ namespace Pulsar4X.ECSLib
         {
             if (!IsRunning)
             {
+                 var parent = Entity.GetSOIParentEntity(_entityCommanding);
+                 var currentVel = Entity.GetVelocity_m(_entityCommanding, ActionOnDate);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
                     _entityCommanding.RemoveDataBlob<OrbitDB>();
+                _db = new NewtonMoveDB(parent, currentVel);
+                _db.ActionOnDateTime = ActionOnDate;
+                _db.DeltaVForManuver_FoRO_m = _orbitRalitiveDeltaV;
                 _entityCommanding.SetDataBlob(_db);
                 IsRunning = true;
-
             }
         }
 

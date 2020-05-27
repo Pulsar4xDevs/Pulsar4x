@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    if(entityCommand.ActionOnDate == null)// new DateTime())
+                    if(entityCommand.EntityCommanding.StarSysDateTime >= entityCommand.ActionOnDate)
                         entityCommand.ActionCommand();
                     else
                     {

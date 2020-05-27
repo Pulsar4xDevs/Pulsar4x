@@ -36,7 +36,8 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = orderEntity,
                 CreatedDate = starSysDate,
                 FireControlGuid = fireControlGuid,
-                WeaponsAssigned = weaponsAssigned
+                WeaponsAssigned = weaponsAssigned,
+                UseActionLanes = false
             };
             game.OrderHandler.HandleOrder(cmd);
         }
@@ -100,7 +101,9 @@ namespace Pulsar4X.ECSLib
         public override int ActionLanes => 1;
 
         public override bool IsBlocking => false;
-
+        
+        
+        
         [JsonIgnore]
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
@@ -128,6 +131,7 @@ namespace Pulsar4X.ECSLib
                 CreatedDate = starSysDate,
                 FireControlGuid = fireControlGuid,
                 TargetSensorEntityGuid = targetGuid,
+                UseActionLanes = false,
             };
             game.OrderHandler.HandleOrder(cmd);
         }
