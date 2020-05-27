@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
     public class OrderableDB : BaseDataBlob
     {
 
-        public List<EntityCommand> ActionList = new List<EntityCommand>();
+        private List<EntityCommand> ActionList = new List<EntityCommand>();
 
         
         internal void ProcessOrderList()

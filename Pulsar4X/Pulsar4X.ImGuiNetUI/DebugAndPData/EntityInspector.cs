@@ -110,8 +110,8 @@ namespace Pulsar4X.SDL2UI
         {
             
             Type objType = obj.GetType();
-
-            MemberInfo[] memberInfos = objType.GetMembers();
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+            MemberInfo[] memberInfos = objType.GetMembers(flags);
             foreach (var memberInfo in memberInfos)
             {
                 if (typeof(FieldInfo).IsAssignableFrom(memberInfo.GetType()) || typeof(PropertyInfo).IsAssignableFrom(memberInfo.GetType()))
