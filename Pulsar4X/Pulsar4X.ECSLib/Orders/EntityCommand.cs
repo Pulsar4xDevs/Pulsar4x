@@ -31,13 +31,21 @@ namespace Pulsar4X.ECSLib
         /// <value>The created date.</value>
         public DateTime CreatedDate{ get; set; }
 
+        /// <summary>
+        /// This sets the datetime that the order should be actioned on (ie delayed from creation)
+        /// 
+        /// </summary>
+        [JsonProperty]
+        public DateTime ActionOnDate { get; set; }
+
         [JsonProperty]
         /// <summary>
         /// Gets or sets the datetime this command was actioned/processed by the server. 
         /// this may be needed by the client to ensure it stays in synch with the server. 
         /// </summary>
         /// <value>The actioned on date.</value>
-        public DateTime ActionedOnDate{ get; set; }
+        public DateTime ActionedOnDate { get; set; }
+
 
         internal abstract Entity EntityCommanding { get; }
 
@@ -50,7 +58,7 @@ namespace Pulsar4X.ECSLib
         /// Actions the command.
         /// </summary>
         /// <param name="game">Game.</param>
-        internal abstract void ActionCommand(Game game);
+        internal abstract void ActionCommand();
 
         public bool IsRunning { get; protected set; } = false;
         public abstract bool IsFinished(); 
@@ -127,7 +135,7 @@ namespace Pulsar4X.ECSLib
             game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand()
         {
             var namedb = _entityCommanding.GetDataBlob<NameDB>();
             namedb.SetName(_factionEntity.Guid, NewName);

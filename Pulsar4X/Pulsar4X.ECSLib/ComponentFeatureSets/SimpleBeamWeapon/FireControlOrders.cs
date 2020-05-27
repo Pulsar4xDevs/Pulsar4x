@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand()
         {
             if (!IsRunning)
             {
@@ -134,7 +134,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand()
         {
             if (!IsRunning)
             {
@@ -222,7 +222,7 @@ namespace Pulsar4X.ECSLib
             game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand()
         {
             if (!IsRunning)
             {
@@ -316,7 +316,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand()
         {
             if (!IsRunning)
             {

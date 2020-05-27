@@ -26,13 +26,18 @@ namespace Pulsar4X.ECSLib
             {
                 if (entityCommand.UseActionLanes)
                 {
-                    entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList.Add(entityCommand);
-                    var commandList = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList;
-                    OrderableProcessor.ProcessOrderList(Game, commandList);
+                    var orderableDB = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>();
+                    orderableDB.AddCommandToList(entityCommand);
+                    orderableDB.ProcessOrderList();
                 }
                 else
                 {
-                    entityCommand.ActionCommand(Game);
+                    if(entityCommand.ActionOnDate == null)// new DateTime())
+                        entityCommand.ActionCommand();
+                    else
+                    {
+                        entityCommand.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityCommand.ActionOnDate, nameof(OrderableProcessor), entityCommand.EntityCommanding);
+                    }
                 }
             }                            
         }

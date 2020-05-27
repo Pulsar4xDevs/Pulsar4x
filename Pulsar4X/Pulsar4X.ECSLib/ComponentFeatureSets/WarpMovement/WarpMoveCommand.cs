@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand()
         {
             if (!IsRunning)
             {

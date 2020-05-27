@@ -557,10 +557,9 @@ namespace Pulsar4X.Networking
                         SendEntityCommandAck(item, entityCommand.CmdID, true);
                     }
                 }
-
-                entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList.Add(entityCommand);
-                var commandList = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>().ActionList;
-                OrderableProcessor.ProcessOrderList(Game, commandList);
+                var orderableDB = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>();
+                orderableDB.AddCommandToList(entityCommand);
+                orderableDB.ProcessOrderList();
             }
         } 
 
