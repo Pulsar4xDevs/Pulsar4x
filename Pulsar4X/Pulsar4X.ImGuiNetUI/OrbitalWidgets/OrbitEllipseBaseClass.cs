@@ -60,6 +60,8 @@ namespace Pulsar4X.SDL2UI
             _mgr = entityState.Entity.Manager;
             _userOrbitSettingsMtx = settings;
             _orbitDB = entityState.Entity.GetDataBlob<OrbitDB>();
+            if (entityState.Entity.HasDataBlob<OrbitUpdateOftenDB>())
+                _orbitDB = entityState.Entity.GetDataBlob<OrbitUpdateOftenDB>();
             BodyPositionDB = entityState.Position; //entityState.Entity.GetDataBlob<PositionDB>();
             if (_orbitDB.Parent == null) //primary star
             {

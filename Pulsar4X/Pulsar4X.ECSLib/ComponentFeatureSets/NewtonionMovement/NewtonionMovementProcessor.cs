@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.ECSLib
 {
@@ -170,16 +171,25 @@ namespace Pulsar4X.ECSLib
                     
                     if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
                     {
-                        var newOrbit = OrbitDB.FromKeplerElements(
-                            parentEntity,
-                            mass_Kg, 
-                            kE,
-                            dateTime);
-                        entity.RemoveDataBlob<NewtonMoveDB>();
-                        entity.SetDataBlob(newOrbit);
-                        positionDB.SetParent(parentEntity);
-                        var newPos = OrbitProcessor.GetPosition_m(newOrbit, dateTime);
-                        positionDB.RelativePosition_m = newPos;
+                        if (entity.HasDataBlob<ProjectileInfoDB>()) //this feels a bit hacky.
+                        {
+                            var newOrbit = OrbitDB.FromKeplerElements(parentEntity, mass_Kg, kE, dateTime);
+                            var fastOrbit = new OrbitUpdateOftenDB(newOrbit);
+                            entity.RemoveDataBlob<NewtonMoveDB>();
+                            entity.SetDataBlob(fastOrbit);
+                            positionDB.SetParent(parentEntity);
+                            var newPos = OrbitProcessor.GetPosition_m(fastOrbit, dateTime);
+                            positionDB.RelativePosition_m = newPos;
+                        }
+                        else
+                        {
+                            var newOrbit = OrbitDB.FromKeplerElements(parentEntity, mass_Kg, kE, dateTime);
+                            entity.RemoveDataBlob<NewtonMoveDB>();
+                            entity.SetDataBlob(newOrbit);
+                            positionDB.SetParent(parentEntity);
+                            var newPos = OrbitProcessor.GetPosition_m(newOrbit, dateTime);
+                            positionDB.RelativePosition_m = newPos;
+                        }
                             
                     }
                     break;

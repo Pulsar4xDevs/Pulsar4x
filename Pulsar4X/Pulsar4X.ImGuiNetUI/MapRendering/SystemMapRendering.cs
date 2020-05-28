@@ -243,9 +243,16 @@ namespace Pulsar4X.SDL2UI
             {
                 if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
                 {
-                    if (changeData.Datablob is OrbitDB && changeData.Entity.GetDataBlob<OrbitDB>().Parent != null)
+                    if (changeData.Datablob is OrbitDB)
                     {
-                        if (!((OrbitDB)changeData.Datablob).IsStationary)
+                        OrbitDB orbit = changeData.Entity.GetDataBlob<OrbitDB>();
+                        if (changeData.Datablob is OrbitUpdateOftenDB)
+                            orbit = changeData.Entity.GetDataBlob<OrbitUpdateOftenDB>();
+                        if (orbit.Parent == null)
+                            continue;
+                        
+                        
+                        if (!orbit.IsStationary)
                         {
                             if (_sysState.EntityStatesWithPosition.ContainsKey(changeData.Entity.Guid))
                                 entityState = _sysState.EntityStatesWithPosition[changeData.Entity.Guid];

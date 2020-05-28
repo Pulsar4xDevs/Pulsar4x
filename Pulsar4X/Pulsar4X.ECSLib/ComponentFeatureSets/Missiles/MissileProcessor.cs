@@ -14,6 +14,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             Vector3 parentPosition = parentPositionDB.AbsolutePosition_m;
             var parentPosRal = parentPositionDB.RelativePosition_m;
             var tgtEntityOrbit = targetEntity.GetDataBlob<OrbitDB>();
+            if (targetEntity.HasDataBlob<OrbitUpdateOftenDB>())
+                tgtEntityOrbit = targetEntity.GetDataBlob<OrbitUpdateOftenDB>();
             
             //MissileLauncherAtb launcherAtb;
             CargoStorageDB cargo = launchingEntity.GetDataBlob<CargoStorageDB>();
@@ -45,9 +47,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             
             //phaseManuver;
             var launchOrbit = launchingEntity.GetDataBlob<OrbitDB>();
-            var targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
+            if (launchingEntity.HasDataBlob<OrbitUpdateOftenDB>())
+                launchOrbit = launchingEntity.GetDataBlob<OrbitUpdateOftenDB>();
+            
             var launchTrueAnomaly = OrbitProcessor.GetTrueAnomaly(launchOrbit, atDatetime);
-            var targetTrueAnomaly = OrbitProcessor.GetTrueAnomaly(targetOrbit, atDatetime);
+            var targetTrueAnomaly = OrbitProcessor.GetTrueAnomaly(tgtEntityOrbit, atDatetime);
             var phaseAngle = targetTrueAnomaly - launchTrueAnomaly;
             var manuvers = InterceptCalcs.OrbitPhasingManuvers(launchOrbit, atDatetime, phaseAngle);
             launcherVector = Vector3.Normalise(manuvers[0].deltaV) * launchSpeed;

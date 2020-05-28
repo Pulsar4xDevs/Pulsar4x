@@ -619,7 +619,7 @@ namespace Pulsar4X.ECSLib
             return OrbitMath.GetInterceptPosition_m(moverPos, spd_m, targetOrbit, atDateTime, offsetPosition);
         }
         
-        private class OrbitProcessorException : Exception
+        internal class OrbitProcessorException : Exception
         {
             public override string Message { get; }
             public Entity Entity { get; }
@@ -632,5 +632,72 @@ namespace Pulsar4X.ECSLib
         }
 
         #endregion
+    }
+
+
+
+    public class OrbitUpdateOftenProcessor : IHotloopProcessor
+    {
+        private static readonly int OrbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+        private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
+        private static readonly int StarInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
+        
+        
+        public TimeSpan RunFrequency => TimeSpan.FromSeconds(1);
+
+        public TimeSpan FirstRunOffset => TimeSpan.FromTicks(0);
+
+        public Type GetParameterType => typeof(OrbitUpdateOftenDB);
+
+
+        public void Init(Game game)
+        {
+            //nothing needed to do in this one. still need this function since it's required in the interface. 
+        }
+
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            var orbits = manager.GetAllDataBlobsOfType<OrbitUpdateOftenDB>();
+            DateTime toDate = manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            foreach (var orbit in orbits)
+            {
+                UpdateOrbit(orbit, toDate);
+            }
+        }
+
+        public static void UpdateOrbit(OrbitUpdateOftenDB entityOrbitDB, DateTime toDate)
+        {
+            
+            PositionDB entityPosition = entityOrbitDB.OwningEntity.GetDataBlob<PositionDB>(PositionTypeIndex);
+
+            //if(toDate.Minute > entityOrbitDB.OrbitalPeriod.TotalMinutes)
+
+            // Get our Parent-Relative coordinates.
+            try
+            {
+                Vector3 newPosition = OrbitProcessor.GetPosition_m(entityOrbitDB, toDate);
+
+                // Get our Absolute coordinates.
+                entityPosition.RelativePosition_m = newPosition;
+
+            }
+            catch (OrbitProcessor.OrbitProcessorException e)
+            {
+                var entity = e.Entity;
+                string name = "Un-Named";
+                if (entity.HasDataBlob<NameDB>())
+                    name = entity.GetDataBlob<NameDB>().OwnersName;
+                //Do NOT fail to the UI. There is NO data-corruption on this exception.
+                // In this event, we did NOT update our position.  
+                Event evt = new Event(StaticRefLib.CurrentDateTime, "Non Critical Position Exception thrown in OrbitProcessor for EntityItem " + name + " " + entity.Guid + " " + e.Message);
+                evt.EventType = EventType.Opps;
+                StaticRefLib.EventLog.AddEvent(evt);
+            }
+        }
     }
 }

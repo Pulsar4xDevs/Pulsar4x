@@ -363,6 +363,14 @@ namespace Pulsar4X.ECSLib
 
         public static Vector3 GetVelocity_m(Entity entity, DateTime atDateTime, bool ralitive = true)
         {
+            if (entity.HasDataBlob<OrbitUpdateOftenDB>())
+            {
+                if(ralitive)
+                    return OrbitProcessor.InstantaneousOrbitalVelocityVector_m(entity.GetDataBlob<OrbitUpdateOftenDB>(), atDateTime);
+                else
+                    return OrbitProcessor.AbsoluteOrbitalVector_m(entity.GetDataBlob<OrbitUpdateOftenDB>(), atDateTime);
+            }
+
             if (entity.HasDataBlob<OrbitDB>())
             {
                 if(ralitive)
