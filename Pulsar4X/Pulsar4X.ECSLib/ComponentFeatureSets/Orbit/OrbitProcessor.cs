@@ -638,10 +638,8 @@ namespace Pulsar4X.ECSLib
 
     public class OrbitUpdateOftenProcessor : IHotloopProcessor
     {
-        private static readonly int OrbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+        private static readonly int OrbitTypeIndex = EntityManager.GetTypeIndex<OrbitUpdateOftenDB>();
         private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
-        private static readonly int StarInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
-        
         
         public TimeSpan RunFrequency => TimeSpan.FromSeconds(1);
 
@@ -657,12 +655,14 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            throw new NotImplementedException();
+            var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>(OrbitTypeIndex);
+            DateTime toDate = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            UpdateOrbit(orbit, toDate);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            var orbits = manager.GetAllDataBlobsOfType<OrbitUpdateOftenDB>();
+            var orbits = manager.GetAllDataBlobsOfType<OrbitUpdateOftenDB>(OrbitTypeIndex);
             DateTime toDate = manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
             foreach (var orbit in orbits)
             {
@@ -674,17 +674,10 @@ namespace Pulsar4X.ECSLib
         {
             
             PositionDB entityPosition = entityOrbitDB.OwningEntity.GetDataBlob<PositionDB>(PositionTypeIndex);
-
-            //if(toDate.Minute > entityOrbitDB.OrbitalPeriod.TotalMinutes)
-
-            // Get our Parent-Relative coordinates.
             try
             {
                 Vector3 newPosition = OrbitProcessor.GetPosition_m(entityOrbitDB, toDate);
-
-                // Get our Absolute coordinates.
                 entityPosition.RelativePosition_m = newPosition;
-
             }
             catch (OrbitProcessor.OrbitProcessorException e)
             {
