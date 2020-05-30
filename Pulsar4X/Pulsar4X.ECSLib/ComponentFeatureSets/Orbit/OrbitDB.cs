@@ -336,7 +336,7 @@ namespace Pulsar4X.ECSLib
             var objPos = obj.GetDataBlob<PositionDB>();
             var ralpos = objPos.AbsolutePosition_m - parpos.AbsolutePosition_m;
             var r = ralpos.Length();
-            var i = Math.Atan2(r, ralpos.Z);
+            var i = Math.Atan2(ralpos.Z, r);
             var m0 = Math.Atan2(ralpos.Y, ralpos.X);
             var orbit = new OrbitDB(parent)
             {
