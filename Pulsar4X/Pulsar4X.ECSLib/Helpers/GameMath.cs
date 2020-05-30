@@ -733,15 +733,15 @@ namespace Pulsar4X.ECSLib
             double orbitalPeriod = orbit.OrbitalPeriod.TotalSeconds;
             double e = orbit.Eccentricity;
 
-            var wc1 = Math.Sqrt((1 - e) / (1 + 3));
+            var wc1 = Math.Sqrt((1 - e) / (1 + e));
             var wc2 = Math.Tan(phaseAngle / 2);
             
             double E = 2 * Math.Atan(wc1 * wc2);
 
-            double wc3 = orbitalPeriod / Math.PI * 2;
-            double wc4 = e * Math.Sin(E);
+            double wc3 = orbitalPeriod / (Math.PI * 2);
+            double wc4 = E - e * Math.Sin(E);
 
-            double phaseTime = wc3 * (E - wc4);
+            double phaseTime = wc3 * wc4;
 
             double phaseOrbitPeriod = orbitalPeriod - phaseTime;
 
