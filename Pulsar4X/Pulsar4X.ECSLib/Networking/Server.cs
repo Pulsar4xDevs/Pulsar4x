@@ -559,7 +559,7 @@ namespace Pulsar4X.Networking
                 }
                 var orderableDB = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>();
                 orderableDB.AddCommandToList(entityCommand);
-                orderableDB.ProcessOrderList();
+                orderableDB.ProcessOrderList(entityCommand.EntityCommanding.StarSysDateTime);
             }
         } 
 

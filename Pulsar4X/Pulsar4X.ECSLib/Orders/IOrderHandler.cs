@@ -28,12 +28,12 @@ namespace Pulsar4X.ECSLib
                 {
                     var orderableDB = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>();
                     orderableDB.AddCommandToList(entityCommand);
-                    orderableDB.ProcessOrderList();
+                    orderableDB.ProcessOrderList(entityCommand.EntityCommanding.StarSysDateTime);
                 }
                 else
                 {
                     if(entityCommand.EntityCommanding.StarSysDateTime >= entityCommand.ActionOnDate)
-                        entityCommand.ActionCommand();
+                        entityCommand.ActionCommand(entityCommand.EntityCommanding.StarSysDateTime);
                     else
                     {
                         entityCommand.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityCommand.ActionOnDate, nameof(OrderableProcessor), entityCommand.EntityCommanding);

@@ -32,42 +32,14 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             double launchManuverDv = OrbitMath.TsiolkovskyRocketEquation(missileDesign.WetMass, drymass, missileDesign.ExaustVelocity);
             double totalDV = OrbitMath.TsiolkovskyRocketEquation(missileDesign.WetMass, missileDesign.DryMass, missileDesign.ExaustVelocity);
             double speed = launchSpeed + launchManuverDv;
-            
-            //direct thrust to target
-            var tgtintercept = OrbitMath.GetInterceptPosition_m(parentPosition, speed, tgtEntityOrbit, atDatetime);
-            var tgtEstPos = tgtintercept.position + targetEntity.GetDataBlob<PositionDB>().RelativePosition_m;
-            var vectorToTgt = Vector3.Normalise(tgtEstPos - parentPosRal);
-            var launcherVector = vectorToTgt * launchSpeed;
-            Vector3 parentVelocity = Entity.GetVelocity_m(launchingEntity, launchingEntity.Manager.StarSysDateTime);
-            var launchVelocity = parentVelocity + launcherVector;
-            var manuverDV = vectorToTgt * launchManuverDv;
             var misslPositionDB = (PositionDB)parentPositionDB.Clone();
+            Vector3 parentVelocity = Entity.GetVelocity_m(launchingEntity, launchingEntity.Manager.StarSysDateTime);
+            
 
             
-            
-            //phaseManuver;
-            var launchOrbit = launchingEntity.GetDataBlob<OrbitDB>();
-            if (launchingEntity.HasDataBlob<OrbitUpdateOftenDB>())
-                launchOrbit = launchingEntity.GetDataBlob<OrbitUpdateOftenDB>();
-            
-            var launchTrueAnomaly = OrbitProcessor.GetTrueAnomaly(launchOrbit, atDatetime);
-            var targetTrueAnomaly = OrbitProcessor.GetTrueAnomaly(tgtEntityOrbit, atDatetime);
-            var phaseAngle = targetTrueAnomaly - launchTrueAnomaly;
-            var manuvers = InterceptCalcs.OrbitPhasingManuvers(launchOrbit, atDatetime, phaseAngle);
-            launcherVector = Vector3.Normalise(manuvers[0].deltaV) * launchSpeed;
-            launchVelocity = parentVelocity + launcherVector;
-            manuverDV = manuvers[0].deltaV - launcherVector;
             var orderabledb = new OrderableDB();
-            
+            var newtmovedb = new NewtonMoveDB(misslPositionDB.Parent, parentVelocity);
 
-            var newtmovedb = new NewtonMoveDB(misslPositionDB.Parent, launchVelocity);
-            newtmovedb.ActionOnDateTime = atDatetime;
-            newtmovedb.DeltaVForManuver_FoRO_m = manuverDV; 
-            
-            
-            
-            
-            
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             dataBlobs.Add(new ProjectileInfoDB(launchingEntity.Guid));
             dataBlobs.Add(new ComponentInstancesDB());
@@ -84,18 +56,65 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             }
 
             newMissile.GetDataBlob<NewtonThrustAbilityDB>().DeltaV = totalDV;
-            DateTime futureDate = atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-            Vector3 futureDV = manuvers[1].deltaV;
-            NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
+
+
+
+
+
+
+
+            bool directAttack = false;
             
+            
+            if(directAttack)
+            {
+                var tgtintercept = OrbitMath.GetInterceptPosition_m(parentPosition, speed, tgtEntityOrbit, atDatetime);
+                var tgtEstPos = tgtintercept.position + targetEntity.GetDataBlob<PositionDB>().RelativePosition_m;
+                 
+                var tgtCurPos = Entity.GetPosition_m(targetEntity, atDatetime);
+                   
+                var vectorToTgt = Vector3.Normalise(tgtCurPos - parentPosRal);
+                 
+                //var vectorToTgt = Vector3.Normalise(tgtEstPos - parentPosRal);
+                var launcherVector = vectorToTgt * launchSpeed;
+                 
+                 
+                var launchVelocity = parentVelocity + launcherVector;
+                var manuverDV = vectorToTgt * launchManuverDv;
+                 
+                launchVelocity = parentVelocity + launcherVector;
+                
+                ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, launchingEntity.StarSysDateTime, targetEntity);
+            }
+            else
+            {
+                var launchOrbit = launchingEntity.GetDataBlob<OrbitDB>();
+                if (launchingEntity.HasDataBlob<OrbitUpdateOftenDB>())
+                    launchOrbit = launchingEntity.GetDataBlob<OrbitUpdateOftenDB>();
+                
+                var launchTrueAnomaly = OrbitProcessor.GetTrueAnomaly(launchOrbit, atDatetime);
+                var targetTrueAnomaly = OrbitProcessor.GetTrueAnomaly(tgtEntityOrbit, atDatetime);
+                var phaseAngle = targetTrueAnomaly - launchTrueAnomaly;
+                var manuvers = InterceptCalcs.OrbitPhasingManuvers(launchOrbit, atDatetime, phaseAngle);
+                
+                
+                var manuverDV = manuvers[0].deltaV;
+                newtmovedb.ActionOnDateTime = atDatetime;
+                newtmovedb.DeltaVForManuver_FoRO_m = manuverDV;   
+                
+                DateTime futureDate = atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
+                Vector3 futureDV = manuvers[1].deltaV;
+                NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
+                ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate + TimeSpan.FromSeconds(1), targetEntity);
+            }
+            
+            
+
             
             StorageSpaceProcessor.RemoveCargo(cargo, missileDesign, 1); //remove missile from parent.
         }
 
-        public static void CalcIntercept(OrbitDB targetOrbit, OrbitDB myOrbit, double deltaV)
-        {
-            
-        }
+ 
     }
 
     public class ProjectileInfoDB : BaseDataBlob

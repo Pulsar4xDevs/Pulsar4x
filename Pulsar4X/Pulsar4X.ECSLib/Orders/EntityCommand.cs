@@ -58,7 +58,7 @@ namespace Pulsar4X.ECSLib
         /// Actions the command.
         /// </summary>
         /// <param name="game">Game.</param>
-        internal abstract void ActionCommand();
+        internal abstract void ActionCommand(DateTime atDateTime);
 
         public bool IsRunning { get; protected set; } = false;
         public abstract bool IsFinished(); 
@@ -135,7 +135,7 @@ namespace Pulsar4X.ECSLib
             game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand()
+        internal override void ActionCommand(DateTime atDateTime)
         {
             var namedb = _entityCommanding.GetDataBlob<NameDB>();
             namedb.SetName(_factionEntity.Guid, NewName);

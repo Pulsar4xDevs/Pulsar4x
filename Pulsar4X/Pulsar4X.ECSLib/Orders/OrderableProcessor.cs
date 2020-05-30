@@ -26,12 +26,14 @@ namespace Pulsar4X.ECSLib
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             OrderableDB orderableDB = entity.GetDataBlob<OrderableDB>();
-            orderableDB.ProcessOrderList();
+            DateTime atDateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            orderableDB.ProcessOrderList(atDateTime);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
             List<Entity> entitysWithCargoTransfers = manager.GetAllEntitiesWithDataBlob<OrderableDB>();
+            
             foreach (var entity in entitysWithCargoTransfers)
             {
                 ProcessEntity(entity, deltaSeconds);
@@ -41,7 +43,8 @@ namespace Pulsar4X.ECSLib
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
             OrderableDB orderableDB = entity.GetDataBlob<OrderableDB>();
-            orderableDB.ProcessOrderList();
+            
+            orderableDB.ProcessOrderList(atDateTime);
         }
     }
 }

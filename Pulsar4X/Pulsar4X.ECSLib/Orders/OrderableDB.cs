@@ -9,9 +9,9 @@ namespace Pulsar4X.ECSLib
         private List<EntityCommand> ActionList = new List<EntityCommand>();
 
         
-        internal void ProcessOrderList()
+        internal void ProcessOrderList(DateTime atDateTime)
         {
-            var atDatetime = OwningEntity.StarSysDateTime;
+            //var atDatetime = OwningEntity.StarSysDateTime;
             int mask = 1;
 
             int i = 0;
@@ -26,8 +26,8 @@ namespace Pulsar4X.ECSLib
                     {
                         mask |= entityCommand.ActionLanes; //bitwise or
                     }
-                    if( atDatetime >= entityCommand.ActionOnDate)
-                        entityCommand.ActionCommand();
+                    if( atDateTime >= entityCommand.ActionOnDate)
+                        entityCommand.ActionCommand(atDateTime);
                 }
                 if (entityCommand.IsFinished())
                     ActionList.RemoveAt(i);

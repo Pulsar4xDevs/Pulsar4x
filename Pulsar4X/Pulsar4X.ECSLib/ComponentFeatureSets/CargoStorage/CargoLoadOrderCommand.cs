@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib
         /// This creates a CargoTranferDB from the command, which does all the work.
         /// the command is to create and enqueue a CargoTransferDB.
         /// </summary>
-        internal override void ActionCommand()
+        internal override void ActionCommand(DateTime atDateTime)
         {
             if (!IsRunning)
             {

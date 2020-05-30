@@ -245,9 +245,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (changeData.Datablob is OrbitDB)
                     {
-                        OrbitDB orbit = changeData.Entity.GetDataBlob<OrbitDB>();
-                        if (changeData.Datablob is OrbitUpdateOftenDB)
-                            orbit = changeData.Entity.GetDataBlob<OrbitUpdateOftenDB>();
+                        OrbitDB orbit = (OrbitDB)changeData.Datablob;
                         if (orbit.Parent == null)
                             continue;
                         

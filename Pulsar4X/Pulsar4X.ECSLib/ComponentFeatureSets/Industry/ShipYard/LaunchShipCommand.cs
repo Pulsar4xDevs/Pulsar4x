@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib.Industry
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand()
+        internal override void ActionCommand(DateTime atDateTime)
         {
             if (!IsRunning)
             {

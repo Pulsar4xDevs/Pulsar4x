@@ -119,8 +119,6 @@ namespace Pulsar4X.ECSLib
         }
         public DateTime ActionOnDateTime { get; internal set; }
         
-        public Queue<(Vector3 deltaV, DateTime nextManuverTime)> Manuvers = new Queue<(Vector3, DateTime)>();
-
         /// <summary>
         /// Parent ralitive velocity vector. 
         /// </summary>
