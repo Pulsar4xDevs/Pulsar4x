@@ -74,9 +74,45 @@ namespace Pulsar4X.ECSLib
         /// in Kg/s
         /// </summary>
         public double FuelBurnRate = 0;
-
-        public double DeltaV = 0;
+        public double TotalFuel_kg { get; private set; }
         
+        /// <summary>
+        /// non fuel mass. will need updating when non fuel cargo is added/removed.
+        /// (should be the mass of the ship plus any cargo including fuel not usable by this ship).
+        /// </summary>
+        public double DryMass_kg { get; internal set; } 
+        public double DeltaV { get; private set; } = 0;
+
+        /// <summary>
+        /// removes fuel and correct amount of DV.
+        /// </summary>
+        /// <param name="fuel">in kg</param>
+        internal void BurnFuel(double fuel)
+        {
+            TotalFuel_kg -= fuel;
+            DeltaV = OrbitMath.TsiolkovskyRocketEquation(TotalFuel_kg, DryMass_kg, ExhaustVelocity);
+        }
+
+        /// <summary>
+        /// removes deltaV and correct amount of fuel.
+        /// </summary>
+        /// <param name="dv"></param>
+        internal void BurnDeltaV(double dv)
+        {
+            DeltaV -= dv;
+            TotalFuel_kg -= OrbitMath.TsiolkovskyFuelUse(TotalFuel_kg, ExhaustVelocity, dv);
+        }
+
+        /// <summary>
+        /// Adds fuel, and updates DeltaV.
+        /// </summary>
+        /// <param name="fuel"></param>
+        internal void AddFuel(double fuel)
+        {
+            TotalFuel_kg += fuel;
+            DeltaV = OrbitMath.TsiolkovskyRocketEquation(TotalFuel_kg, DryMass_kg, ExhaustVelocity);
+        }
+
         [JsonConstructor]
         private NewtonThrustAbilityDB()
         {
@@ -93,6 +129,8 @@ namespace Pulsar4X.ECSLib
             ExhaustVelocity = db.ExhaustVelocity;
             FuelType = db.FuelType;
             FuelBurnRate = db.FuelBurnRate;
+            DryMass_kg = db.DryMass_kg;
+            TotalFuel_kg = db.TotalFuel_kg;
             DeltaV = db.DeltaV;
         }
 

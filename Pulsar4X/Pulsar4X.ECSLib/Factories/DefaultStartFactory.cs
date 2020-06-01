@@ -297,11 +297,11 @@ namespace Pulsar4X.ECSLib
             StorageSpaceProcessor.AddCargo(targetDrone1.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(targetDrone2.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             
-            NewtonionMovementProcessor.CalcDeltaV(gunShip0);
-            NewtonionMovementProcessor.CalcDeltaV(ship2);
-            NewtonionMovementProcessor.CalcDeltaV(ship3);
-            NewtonionMovementProcessor.CalcDeltaV(gunShip1);
-            NewtonionMovementProcessor.CalcDeltaV(courier);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(gunShip0);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship2);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship3);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(gunShip1);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(courier);
             //StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);

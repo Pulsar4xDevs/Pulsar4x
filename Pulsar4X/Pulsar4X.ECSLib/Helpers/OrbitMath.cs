@@ -986,19 +986,37 @@ namespace Pulsar4X.ECSLib
         /// <param name="ve">ExhaustVelocity, not isp</param>
         public static double TsiolkovskyRocketEquation(double wetMass, double dryMass, double ve)
         {
-            
             double deltaV = ve * Math.Log(wetMass / dryMass);
             return deltaV;
         }
+        
+        /// <summary>
+        /// Tsiolkovsky's rocket equation.
+        /// </summary>
+        /// <param name="dryMass"></param>
+        /// <param name="ve">ExhaustVelocity, not isp</param>
+        /// <param name="deltaV">DeltaV to burn</param>
+        /// <returns>Fuel Cost</returns>
+        public static double TsiolkovskyFuelCost(double dryMass, double ve, double deltaV)
+        {
+            double wetMass = dryMass * Math.Exp(deltaV / ve);
+            double fuelUse = wetMass - dryMass;
+            return fuelUse;
+        }
 
-
+        /// <summary>
+        /// Tsiolkovsky's rocket equation.
+        /// </summary>
+        /// <param name="wetMass">fuel Availible</param>
+        /// <param name="ve">ExhaustVelocity, not isp</param>
+        /// <param name="deltaV">DeltaV to use</param>
+        /// <returns>Fuel to burn</returns>
         public static double TsiolkovskyFuelUse(double wetMass, double ve, double deltaV)
         {
-            
+            //Step by step math.
             //dv = ve * log(wet/dry)
             //dv / ve = log(wet/dry)
             //dv / log(wet/dry) = ve
-            //
             
             //double b = deltaV / ve;
             //double a = Math.Exp(b);
@@ -1040,12 +1058,7 @@ namespace Pulsar4X.ECSLib
             return lowOrbit;
         }
 
-        public static double TsiolkovskyFuelCost(double dryMass, double ve, double deltaV)
-        {
-            double wetMass = dryMass * Math.Exp(deltaV / ve);
-            double fuelUse = wetMass - dryMass;
-            return fuelUse;
-        }
+
 
         struct orbit
         {

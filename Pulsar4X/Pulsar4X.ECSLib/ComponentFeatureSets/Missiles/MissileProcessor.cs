@@ -55,7 +55,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 EntityManipulation.AddComponentToEntity(newMissile, tuple.design, tuple.count);
             }
 
-            newMissile.GetDataBlob<NewtonThrustAbilityDB>().DeltaV = totalDV;
+            var newtdb = newMissile.GetDataBlob<NewtonThrustAbilityDB>();
+            newtdb.DryMass_kg = missileDesign.Mass;
+            newtdb.AddFuel(missileDesign.WetMass - missileDesign.Mass);
 
 
 

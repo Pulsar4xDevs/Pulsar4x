@@ -79,6 +79,8 @@ namespace Pulsar4X.ECSLib
         NewtonThrustAbilityDB _newtonAbilityDB;
         private double _startDV;
         private double _startBurnTime;
+        private double _fuelBurnRate;
+        private double _totalFuel;
 
         public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
         {
@@ -100,7 +102,8 @@ namespace Pulsar4X.ECSLib
                 IsRunning = true;
                 _newtonAbilityDB = _entityCommanding.GetDataBlob<NewtonThrustAbilityDB>();
                 _startDV = _newtonAbilityDB.DeltaV;
-                
+                _fuelBurnRate = _newtonAbilityDB.FuelBurnRate;
+                _totalFuel = _newtonAbilityDB.TotalFuel_kg;
                 var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
                 var currentVel = Entity.GetVelocity_m(_entityCommanding, ActionOnDate);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
@@ -136,8 +139,42 @@ namespace Pulsar4X.ECSLib
                 //manuverVector.X = leadToTgt.X * -1;
                 manuverVector.Y = dvRemaining - Math.Abs(leadToTgt.X);
                 
+
+
+                var halfDV = _startDV * 0.5; //lets burn half the dv getting into a good intercept. 
+                var burnRate = _newtonAbilityDB.FuelBurnRate;
+                //var foo = OrbitMath.TsiolkovskyFuelUse(_totalFuel, )
+                //var burnTime = OrbitMath.TsiolkovskyFuelCost();
+                //var timeToAccelerate = halfDV
+                var positionVector = curOurRalState.pos - curTgtRalState.pos;
+                var distance = positionVector.Length();
+
+                //assuming we're on a simular orbit.
+                var timeToIntecept = distance / halfDV;
+                var futurePosition = Entity.GetPosition_m(_targetEntity, atDateTime + TimeSpan.FromSeconds(timeToIntecept));
+                
+                /*
+                double burnTime = (_totalFuel / _fuelBurnRate) * 0.8; //use 80% of fuel.
+                double drymass = (missileDesign.WetMass - missileDesign.DryMass) * 0.8;  //use 80% of fuel.
+                double launchManuverDv = OrbitMath.TsiolkovskyRocketEquation(missileDesign.WetMass, drymass, missileDesign.ExaustVelocity);
+                double totalDV = OrbitMath.TsiolkovskyRocketEquation(missileDesign.WetMass, missileDesign.DryMass, missileDesign.ExaustVelocity);
+                double speed = launchSpeed + launchManuverDv;
+            
+                var tgtintercept = OrbitMath.GetInterceptPosition_m(parentPosition, speed, tgtEntityOrbit, atDatetime);
+                */
+                var tgtEstPos = futurePosition- curOurRalState.pos;
+                
+                var vectorToTgt = Vector3.Normalise(tgtEstPos);
+            
+                manuverVector = OrbitMath.GlobalToOrbitVector(vectorToTgt * halfDV, curOurRalState.pos, curOurRalState.Velocity);
+
+
+
                 _newtonMovedb.DeltaVForManuver_FoRO_m = manuverVector;
-                _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(1), nameof(OrderableProcessor), _entityCommanding);
+                //_entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(1), nameof(OrderableProcessor), _entityCommanding);
+
+
+
             }
             else
             {

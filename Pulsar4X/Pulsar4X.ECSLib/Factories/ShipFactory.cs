@@ -169,7 +169,7 @@ namespace Pulsar4X.ECSLib
 
             if (ship.HasDataBlob<NewtonThrustAbilityDB>() && ship.HasDataBlob<CargoStorageDB>())
             {
-                NewtonionMovementProcessor.CalcDeltaV(ship);
+                NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship);
             }
 
             return ship;

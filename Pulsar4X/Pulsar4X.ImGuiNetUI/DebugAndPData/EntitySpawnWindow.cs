@@ -71,7 +71,7 @@ namespace Pulsar4X.SDL2UI
                         {
 
                             Entity _spawnedship = ShipFactory.CreateShip(_exsistingClasses[i], _uiState.Faction, _uiState.LastClickedEntity.Entity, _uiState.SelectedSystem, Guid.NewGuid().ToString());
-                            NewtonionMovementProcessor.CalcDeltaV(_spawnedship);
+                            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(_spawnedship);
                             //_uiState.SelectedSystem.SetDataBlob(_spawnedship.ID, new TransitableDB());
                             //var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
                             //StorageSpaceProcessor.AddCargo(_spawnedship.GetDataBlob<CargoStorageDB>(), rp1, 15000);
