@@ -447,7 +447,12 @@ namespace Pulsar4X.ECSLib
         {
             Vector3 vector = InstantaneousOrbitalVelocityVector_m(orbit, atDateTime);
             if(orbit.Parent != null)
-                vector += AbsoluteOrbitalVector_m((OrbitDB)orbit.ParentDB, atDateTime);
+            {
+                if (orbit is OrbitUpdateOftenDB)//this is a horrbile hack. very brittle. 
+                    vector += AbsoluteOrbitalVector_m(orbit.Parent.GetDataBlob<OrbitDB>(), atDateTime);
+                else
+                    vector += AbsoluteOrbitalVector_m((OrbitDB)orbit.ParentDB, atDateTime);
+            }
             return vector;
 
         }

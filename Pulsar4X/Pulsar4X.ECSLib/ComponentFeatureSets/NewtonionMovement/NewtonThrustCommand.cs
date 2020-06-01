@@ -75,7 +75,10 @@ namespace Pulsar4X.ECSLib
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
         private Entity _targetEntity;
-        NewtonMoveDB _db;
+        NewtonMoveDB _newtonMovedb;
+        NewtonThrustAbilityDB _newtonAbilityDB;
+        private double _startDV;
+        private double _startBurnTime;
 
         public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
         {
@@ -85,8 +88,7 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = orderEntity.Guid,
                 CreatedDate = orderEntity.StarSysDateTime,
                 _targetEntity = targetEntity,
-                ActionOnDate = actionDateTime
-
+                ActionOnDate = actionDateTime,
             };
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         }
@@ -96,71 +98,57 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning && atDateTime >= ActionOnDate)
             {
                 IsRunning = true;
+                _newtonAbilityDB = _entityCommanding.GetDataBlob<NewtonThrustAbilityDB>();
+                _startDV = _newtonAbilityDB.DeltaV;
                 
-              var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
-              var currentVel = Entity.GetVelocity_m(_entityCommanding, ActionOnDate);               
-              if(_entityCommanding.HasDataBlob<OrbitDB>())
-              _entityCommanding.RemoveDataBlob<OrbitDB>();
-              if(_entityCommanding.HasDataBlob<OrbitUpdateOftenDB>())
-              _entityCommanding.RemoveDataBlob<OrbitUpdateOftenDB>();
-  
-              _db = new NewtonMoveDB(soiParentEntity, currentVel);
-              _db.ActionOnDateTime = ActionOnDate;
-  
-              var curPos = Entity.GetPosition_m(_entityCommanding, atDateTime);
-              var soiParentPosition = Entity.GetPosition_m(soiParentEntity, atDateTime);
-              OrbitDB tgtEntityOrbit = _targetEntity.GetDataBlob<OrbitUpdateOftenDB>();
-              if (tgtEntityOrbit == null)
-              tgtEntityOrbit = _targetEntity.GetDataBlob<OrbitDB>();
-  
-              //var tgtintercept = OrbitMath.GetInterceptPosition_m(soiParentPosition, currentVel.Length(), tgtEntityOrbit, atDateTime);
-              //var tgtEstPos = tgtintercept.position + _targetEntity.GetDataBlob<PositionDB>().RelativePosition_m;
-              var tgtCurPos = Entity.GetPosition_m(_targetEntity, atDateTime);
-              
-              var vectorToTgt = Vector3.Normalise(tgtCurPos - curPos);
-              
-  
-              var newtonAbility = _entityCommanding.GetDataBlob<NewtonThrustAbilityDB>();
-              var dvTotal = newtonAbility.DeltaV;
-  
-              var manuverDV = vectorToTgt * dvTotal;
-  
-              _db.DeltaVForManuver_FoRO_m = manuverDV;
-              _entityCommanding.SetDataBlob(_db);              
-              _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(1), nameof(OrderableProcessor), _entityCommanding);
+                var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
+                var currentVel = Entity.GetVelocity_m(_entityCommanding, ActionOnDate);               
+                if(_entityCommanding.HasDataBlob<OrbitDB>())
+                _entityCommanding.RemoveDataBlob<OrbitDB>();
+                if(_entityCommanding.HasDataBlob<OrbitUpdateOftenDB>())
+                _entityCommanding.RemoveDataBlob<OrbitUpdateOftenDB>();
+                if (_entityCommanding.HasDataBlob<NewtonMoveDB>())
+                    _newtonMovedb = _entityCommanding.GetDataBlob<NewtonMoveDB>();
+                else
+                {
+                    var currentVel2 = Entity.GetRalitiveState(_entityCommanding).Velocity; 
+                    if(currentVel != currentVel2)
+                        throw new Exception("broken velcoticy, this needs to be in a test, not where I'm writing it.");
+                   _newtonMovedb = new NewtonMoveDB(soiParentEntity, currentVel); 
+                }
                 
+                _entityCommanding.SetDataBlob(_newtonMovedb);
+            }
+            if(_newtonAbilityDB.DeltaV > 0)
+            {
+                //var curOurAbsState = Entity.GetAbsoluteState(_entityCommanding);
+                //var curTgtAbsState = Entity.GetAbsoluteState(_targetEntity);
+                var curOurRalState = Entity.GetRalitiveState(_entityCommanding);
+                var curTgtRalState = Entity.GetRalitiveState(_targetEntity);
+                var dvRemaining = _newtonAbilityDB.DeltaV;
+                
+                var tgtVelocity = Entity.GetVelocity_m(_targetEntity, atDateTime, false);
+                //calculate the differencecs in velocity vectors.
+                Vector3 leadToTgt = (curTgtRalState.Velocity - curOurRalState.Velocity);
+                 
+                //convert the lead to an orbit ralitive (prograde Y) vector. 
+                var manuverVector = OrbitMath.GlobalToOrbitVector(leadToTgt, curOurRalState.pos, curOurRalState.Velocity);
+                //manuverVector.X = leadToTgt.X * -1;
+                manuverVector.Y = dvRemaining - Math.Abs(leadToTgt.X);
+                
+                _newtonMovedb.DeltaVForManuver_FoRO_m = manuverVector;
+                _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(1), nameof(OrderableProcessor), _entityCommanding);
             }
             else
             {
-                var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
-                var currentVel = Entity.GetVelocity_m(_entityCommanding, atDateTime);
-                var curPos = Entity.GetPosition_m(_entityCommanding, atDateTime);
-                var soiParentPosition = Entity.GetPosition_m(soiParentEntity, atDateTime);
-                OrbitDB tgtEntityOrbit = _targetEntity.GetDataBlob<OrbitUpdateOftenDB>();
-                if (tgtEntityOrbit == null)
-                    tgtEntityOrbit = _targetEntity.GetDataBlob<OrbitDB>();
-  
-                var tgtintercept = OrbitMath.GetInterceptPosition_m(soiParentPosition, currentVel.Length(), tgtEntityOrbit, ActionOnDate);
-                var tgtEstPos = tgtintercept.position + _targetEntity.GetDataBlob<PositionDB>().RelativePosition_m;
-                var vectorToTgt = Vector3.Normalise(tgtEstPos - curPos);
-
-                var newtonAbility = _entityCommanding.GetDataBlob<NewtonThrustAbilityDB>();
-                var dvTotal = newtonAbility.DeltaV;
-  
-                var manuverDV = vectorToTgt * dvTotal;
-                
-                _db.DeltaVForManuver_FoRO_m = manuverDV;
-                _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(1), nameof(OrderableProcessor), _entityCommanding);
+                _newtonMovedb.DeltaVForManuver_FoRO_m = new Vector3();
             }
-
-
-
             
         }
 
         public override bool IsFinished()
         {
-            if (IsRunning && _db.DeltaVForManuver_FoRO_m.Length() <= 0)
+            if (IsRunning && _newtonMovedb.DeltaVForManuver_FoRO_m.Length() <= 0)
                 return true;
             else
                 return false;

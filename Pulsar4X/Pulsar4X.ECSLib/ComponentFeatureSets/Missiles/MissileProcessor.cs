@@ -63,11 +63,12 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
 
 
-            bool directAttack = false;
+            bool directAttack = true;
             
             
             if(directAttack)
             {
+                /*
                 var tgtintercept = OrbitMath.GetInterceptPosition_m(parentPosition, speed, tgtEntityOrbit, atDatetime);
                 var tgtEstPos = tgtintercept.position + targetEntity.GetDataBlob<PositionDB>().RelativePosition_m;
                  
@@ -83,8 +84,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 var manuverDV = vectorToTgt * launchManuverDv;
                  
                 launchVelocity = parentVelocity + launcherVector;
-                
+                */
                 ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, launchingEntity.StarSysDateTime, targetEntity);
+                
             }
             else
             {

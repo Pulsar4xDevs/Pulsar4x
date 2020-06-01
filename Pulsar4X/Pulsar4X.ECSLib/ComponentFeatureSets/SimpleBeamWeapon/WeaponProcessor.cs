@@ -120,21 +120,6 @@ namespace Pulsar4X.ECSLib
                     var fastBlob = new OrbitUpdateOftenDB(entity.GetDataBlob<OrbitDB>());
                     entity.RemoveDataBlob<OrbitDB>();
                     entity.SetDataBlob(fastBlob);
-                    
-                    /*
-                    DateTime toDate = manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
-                    OrbitProcessor.UpdateOrbit(entity, entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>(), toDate);
-                    List<Entity> targets = new List<Entity>();
-                    for (int i = 0; i < blob.FireControlStates.Length; i++)
-                    {
-                        var tgt = blob.FireControlStates[i].Target;
-                        if(!targets.Contains(tgt))
-                            targets.Add(tgt);
-                    }
-                    foreach (var tgt in targets)
-                    {
-                        OrbitProcessor.UpdateOrbit(tgt, tgt.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>(), toDate);
-                    }*/
                 }
                 List<Entity> targets = new List<Entity>();
                 for (int i = 0; i < blob.FireControlStates.Length; i++)

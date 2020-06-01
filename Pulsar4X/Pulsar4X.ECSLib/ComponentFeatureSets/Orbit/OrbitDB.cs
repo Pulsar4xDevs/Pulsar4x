@@ -584,6 +584,9 @@ namespace Pulsar4X.ECSLib
         #endregion
     }
 
+    /// <summary>
+    /// This allows us to update an orbit fairly frequently, however it's a bit brittle, especialy where it interacts with treeheirarchy.
+    /// </summary>
     public class OrbitUpdateOftenDB : OrbitDB
     {
 
