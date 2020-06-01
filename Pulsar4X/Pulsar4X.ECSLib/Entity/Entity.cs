@@ -361,6 +361,81 @@ namespace Pulsar4X.ECSLib
             return positionDB.Parent;
         }
 
+        public static (Vector3 pos, Vector3 Velocity) GetRalitiveState(Entity entity)
+        {
+            var pos = entity.GetDataBlob<PositionDB>().RelativePosition_m;
+            if (entity.HasDataBlob<OrbitDB>())
+            {
+                var datetime = entity.StarSysDateTime;
+                var orbit = entity.GetDataBlob<OrbitDB>();
+                
+                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
+                return (pos, vel);
+            }
+            if (entity.HasDataBlob<OrbitUpdateOftenDB>())
+            {
+                var datetime = entity.StarSysDateTime;
+                var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>();
+                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
+                return (pos, vel);
+            }
+
+            if (entity.HasDataBlob<NewtonMoveDB>())
+            {
+                var move = entity.GetDataBlob<NewtonMoveDB>();
+                
+                var vel = move.CurrentVector_ms;
+                return (pos, vel);
+            }
+            else
+            {
+                throw new Exception("Entity has no velocity");
+            }
+        }
+        
+        public static (Vector3 pos, Vector3 Velocity) GetAbsoluteState(Entity entity)
+        {
+            var posdb = entity.GetDataBlob<PositionDB>();
+            var pos = posdb.AbsolutePosition_m;
+            if (entity.HasDataBlob<OrbitDB>())
+            {
+                var datetime = entity.StarSysDateTime;
+                var orbit = entity.GetDataBlob<OrbitDB>();
+                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
+                if (posdb.Parent != null)
+                {
+                    vel += GetAbsoluteState(posdb.Parent).Velocity;
+                }
+
+                return (pos, vel);
+            }
+            if (entity.HasDataBlob<OrbitUpdateOftenDB>())
+            {
+                var datetime = entity.StarSysDateTime;
+                var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>();
+                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
+                if (posdb.Parent != null)
+                {
+                    vel += GetAbsoluteState(posdb.Parent).Velocity;
+                }
+                return (pos, vel);
+            }
+
+            if (entity.HasDataBlob<NewtonMoveDB>())
+            {
+                var move = entity.GetDataBlob<NewtonMoveDB>();
+                var vel = move.CurrentVector_ms;
+                return (pos, vel);
+            }
+            else
+            {
+                throw new Exception("Entity has no velocity");
+            }
+        }
+        
+        
+        
+
         public static Vector3 GetVelocity_m(Entity entity, DateTime atDateTime, bool ralitive = true)
         {
             if (entity.HasDataBlob<OrbitUpdateOftenDB>())
@@ -380,7 +455,7 @@ namespace Pulsar4X.ECSLib
             }
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {
-                var vel = NewtonionMovementProcessor.GetPositon_m(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
+                var vel = NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
                 if (ralitive)
                     return vel;
                 else //recurse
@@ -416,9 +491,9 @@ namespace Pulsar4X.ECSLib
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {
                 if (ralitive)
-                    return  NewtonionMovementProcessor.GetPositon_m(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
+                    return  NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
                 else
-                    return NewtonionMovementProcessor.GetAbsulutePositon_m(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
+                    return NewtonionMovementProcessor.GetAbsoluteState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
                 
             }
             else if (entity.HasDataBlob<PositionDB>())
