@@ -197,7 +197,14 @@ namespace Pulsar4X.ECSLib
             newtonMoveDB.LastProcessDateTime = dateTimeFuture;
         }
 
-        public static (Vector3 pos, Vector3 vel)GetPositon_m(Entity entity, NewtonMoveDB newtonMoveDB, DateTime atDateTime)
+        /// <summary>
+        /// Gets the ralitive(To SOI parent) position and velocity for a given datetime. 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="newtonMoveDB"></param>
+        /// <param name="atDateTime"></param>
+        /// <returns>Positional and Velocity states</returns>
+        public static (Vector3 pos, Vector3 vel)GetRelativeState(Entity entity, NewtonMoveDB newtonMoveDB, DateTime atDateTime)
         {
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
@@ -244,7 +251,14 @@ namespace Pulsar4X.ECSLib
             return (newRalitive, velocity);
         }
         
-        public static (Vector3 pos, Vector3 vel) GetAbsulutePositon_m(Entity entity, NewtonMoveDB newtonMoveDB, DateTime atDateTime)
+        /// <summary>
+        /// Gets the absolute(global) position and velocity for a given datetime
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="newtonMoveDB"></param>
+        /// <param name="atDateTime"></param>
+        /// <returns>Positional and Velocity states</returns>
+        public static (Vector3 pos, Vector3 vel) GetAbsoluteState(Entity entity, NewtonMoveDB newtonMoveDB, DateTime atDateTime)
         {
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
