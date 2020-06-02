@@ -144,24 +144,21 @@ namespace Pulsar4X.ECSLib
                 var halfDV = _startDV * 0.5; //lets burn half the dv getting into a good intercept. 
                 var burnRate = _newtonAbilityDB.FuelBurnRate;
                 //var foo = OrbitMath.TsiolkovskyFuelUse(_totalFuel, )
-                //var burnTime = OrbitMath.TsiolkovskyFuelCost();
-                //var timeToAccelerate = halfDV
+                var fuelUse = OrbitMath.TsiolkovskyFuelCost(_newtonAbilityDB.TotalFuel_kg, _newtonAbilityDB.ExhaustVelocity, halfDV);
+                var burnTime = fuelUse / burnRate;
+                var acceleration = halfDV / burnTime;
                 var positionVector = curOurRalState.pos - curTgtRalState.pos;
-                var distance = positionVector.Length();
+                var distanceToTgt = positionVector.Length();
 
+                //not fully accurate since we're not calculating for jerk.
+                var distanceWhileAcclerating = 1.5 * acceleration * burnTime * burnTime;
                 //assuming we're on a simular orbit.
-                var timeToIntecept = distance / halfDV;
+                var closingSpeed = halfDV;
+                var timeAtFullVelocity = ((distanceToTgt - distanceWhileAcclerating) / closingSpeed);
+                
+                var timeToIntecept = timeAtFullVelocity + burnTime ;
                 var futurePosition = Entity.GetPosition_m(_targetEntity, atDateTime + TimeSpan.FromSeconds(timeToIntecept));
                 
-                /*
-                double burnTime = (_totalFuel / _fuelBurnRate) * 0.8; //use 80% of fuel.
-                double drymass = (missileDesign.WetMass - missileDesign.DryMass) * 0.8;  //use 80% of fuel.
-                double launchManuverDv = OrbitMath.TsiolkovskyRocketEquation(missileDesign.WetMass, drymass, missileDesign.ExaustVelocity);
-                double totalDV = OrbitMath.TsiolkovskyRocketEquation(missileDesign.WetMass, missileDesign.DryMass, missileDesign.ExaustVelocity);
-                double speed = launchSpeed + launchManuverDv;
-            
-                var tgtintercept = OrbitMath.GetInterceptPosition_m(parentPosition, speed, tgtEntityOrbit, atDatetime);
-                */
                 var tgtEstPos = futurePosition- curOurRalState.pos;
                 
                 var vectorToTgt = Vector3.Normalise(tgtEstPos);

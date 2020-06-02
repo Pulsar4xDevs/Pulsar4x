@@ -992,8 +992,10 @@ namespace Pulsar4X.ECSLib
         
         /// <summary>
         /// Tsiolkovsky's rocket equation.
+        /// use this to calculate the fuel cost of a given deltaV use.
+        /// you will need to know the mass of the ship "after" the burn for the "dryMass"
         /// </summary>
-        /// <param name="dryMass"></param>
+        /// <param name="dryMass">payload in kg</param>
         /// <param name="ve">ExhaustVelocity, not isp</param>
         /// <param name="deltaV">DeltaV to burn</param>
         /// <returns>Fuel Cost</returns>
@@ -1006,6 +1008,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Tsiolkovsky's rocket equation.
+        /// Use this to calculate the amount of fuel you will use when you know how much fuel you have availible.
         /// </summary>
         /// <param name="wetMass">fuel Availible</param>
         /// <param name="ve">ExhaustVelocity, not isp</param>
