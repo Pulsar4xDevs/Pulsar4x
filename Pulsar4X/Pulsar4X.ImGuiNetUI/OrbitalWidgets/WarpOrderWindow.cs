@@ -520,9 +520,9 @@ namespace Pulsar4X.SDL2UI
 
             
             if(OrbitProcessor.UseRalitiveVelocity)
-                _departureOrbitalVelocity_m = Entity.GetVelocity_m(OrderingEntityState.Entity, _departureDateTime, true);
+                _departureOrbitalVelocity_m = Entity.GetRalitiveFutureVelocity(OrderingEntityState.Entity, _departureDateTime);
             else
-                _departureOrbitalVelocity_m = Entity.GetVelocity_m(OrderingEntityState.Entity, _departureDateTime, false);
+                _departureOrbitalVelocity_m = Entity.GetAbsoluteFutureVelocity(OrderingEntityState.Entity, _departureDateTime);
             
             _departureOrbitalSpeed_m = _departureOrbitalVelocity_m.Length();
             _departureAngle = Math.Atan2(_departureOrbitalVelocity_m.Y, _departureOrbitalVelocity_m.X);

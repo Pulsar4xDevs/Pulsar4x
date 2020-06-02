@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             double totalDV = OrbitMath.TsiolkovskyRocketEquation(missileDesign.WetMass, missileDesign.DryMass, missileDesign.ExaustVelocity);
             double speed = launchSpeed + launchManuverDv;
             var misslPositionDB = (PositionDB)parentPositionDB.Clone();
-            Vector3 parentVelocity = Entity.GetVelocity_m(launchingEntity, launchingEntity.Manager.StarSysDateTime);
+            Vector3 parentVelocity = Entity.GetRalitiveFutureVelocity(launchingEntity, launchingEntity.StarSysDateTime);
             
 
             

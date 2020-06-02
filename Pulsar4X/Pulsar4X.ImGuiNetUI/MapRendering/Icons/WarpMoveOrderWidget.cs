@@ -108,7 +108,7 @@ namespace Pulsar4X.SDL2UI
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 
-            _transitLeavePositionRalitive_m = Entity.GetPosition_m(_movingEntity, _transitLeaveDateTime);
+            _transitLeavePositionRalitive_m = Entity.GetRalitiveFuturePosition(_movingEntity, _transitLeaveDateTime);
 
         }
 

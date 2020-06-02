@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning)
             {
                  var parent = Entity.GetSOIParentEntity(_entityCommanding);
-                 var currentVel = Entity.GetVelocity_m(_entityCommanding, ActionOnDate);               
+                 var currentVel = Entity.GetRalitiveFutureVelocity(_entityCommanding, ActionOnDate);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
                     _entityCommanding.RemoveDataBlob<OrbitDB>();
                 _db = new NewtonMoveDB(parent, currentVel);
@@ -97,7 +97,9 @@ namespace Pulsar4X.ECSLib
 
         internal override void ActionCommand(DateTime atDateTime)
         {
-            if (!IsRunning && atDateTime >= ActionOnDate)
+            if(atDateTime < ActionOnDate)
+                return;
+            if (!IsRunning)
             {
                 IsRunning = true;
                 _newtonAbilityDB = _entityCommanding.GetDataBlob<NewtonThrustAbilityDB>();
@@ -105,7 +107,7 @@ namespace Pulsar4X.ECSLib
                 _fuelBurnRate = _newtonAbilityDB.FuelBurnRate;
                 _totalFuel = _newtonAbilityDB.TotalFuel_kg;
                 var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
-                var currentVel = Entity.GetVelocity_m(_entityCommanding, ActionOnDate);               
+                var currentVel = Entity.GetRalitiveFutureVelocity(_entityCommanding, atDateTime);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
                 _entityCommanding.RemoveDataBlob<OrbitDB>();
                 if(_entityCommanding.HasDataBlob<OrbitUpdateOftenDB>())
@@ -114,10 +116,7 @@ namespace Pulsar4X.ECSLib
                     _newtonMovedb = _entityCommanding.GetDataBlob<NewtonMoveDB>();
                 else
                 {
-                    var currentVel2 = Entity.GetRalitiveState(_entityCommanding).Velocity; 
-                    if(currentVel != currentVel2)
-                        throw new Exception("broken velcoticy, this needs to be in a test, not where I'm writing it.");
-                   _newtonMovedb = new NewtonMoveDB(soiParentEntity, currentVel); 
+                    _newtonMovedb = new NewtonMoveDB(soiParentEntity, currentVel); 
                 }
                 
                 _entityCommanding.SetDataBlob(_newtonMovedb);
@@ -130,7 +129,7 @@ namespace Pulsar4X.ECSLib
                 var curTgtRalState = Entity.GetRalitiveState(_targetEntity);
                 var dvRemaining = _newtonAbilityDB.DeltaV;
                 
-                var tgtVelocity = Entity.GetVelocity_m(_targetEntity, atDateTime, false);
+                var tgtVelocity = Entity.GetAbsoluteFutureVelocity(_targetEntity, atDateTime);
                 //calculate the differencecs in velocity vectors.
                 Vector3 leadToTgt = (curTgtRalState.Velocity - curOurRalState.Velocity);
                  
@@ -142,28 +141,30 @@ namespace Pulsar4X.ECSLib
 
 
                 var halfDV = _startDV * 0.5; //lets burn half the dv getting into a good intercept. 
+                var dvUsed = _startDV - _newtonAbilityDB.DeltaV;
+                var dvToUse = halfDV - dvUsed;
                 var burnRate = _newtonAbilityDB.FuelBurnRate;
                 //var foo = OrbitMath.TsiolkovskyFuelUse(_totalFuel, )
                 var fuelUse = OrbitMath.TsiolkovskyFuelCost(_newtonAbilityDB.TotalFuel_kg, _newtonAbilityDB.ExhaustVelocity, halfDV);
                 var burnTime = fuelUse / burnRate;
-                var acceleration = halfDV / burnTime;
+                var acceleration = dvToUse / burnTime;
                 var positionVector = curOurRalState.pos - curTgtRalState.pos;
                 var distanceToTgt = positionVector.Length();
 
                 //not fully accurate since we're not calculating for jerk.
                 var distanceWhileAcclerating = 1.5 * acceleration * burnTime * burnTime;
                 //assuming we're on a simular orbit.
-                var closingSpeed = halfDV;
+                var closingSpeed = dvToUse;
                 var timeAtFullVelocity = ((distanceToTgt - distanceWhileAcclerating) / closingSpeed);
                 
                 var timeToIntecept = timeAtFullVelocity + burnTime ;
-                var futurePosition = Entity.GetPosition_m(_targetEntity, atDateTime + TimeSpan.FromSeconds(timeToIntecept));
+                var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, atDateTime + TimeSpan.FromSeconds(timeToIntecept));
                 
                 var tgtEstPos = futurePosition- curOurRalState.pos;
                 
                 var vectorToTgt = Vector3.Normalise(tgtEstPos);
             
-                manuverVector = OrbitMath.GlobalToOrbitVector(vectorToTgt * halfDV, curOurRalState.pos, curOurRalState.Velocity);
+                manuverVector = OrbitMath.GlobalToOrbitVector(vectorToTgt * dvToUse, curOurRalState.pos, curOurRalState.Velocity);
 
 
 

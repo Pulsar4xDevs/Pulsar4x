@@ -81,18 +81,16 @@ namespace Pulsar4X.ECSLib
         {
             ExitPointAbsolute = targetPosition_m;
             
-            Vector3 startPosAbsolute_m = Entity.GetPosition_m(thisEntity, thisEntity.StarSysDateTime, false);
-            Vector3 currentVec_m = Entity.GetVelocity_m(thisEntity, thisEntity.StarSysDateTime);
-                    
+            var startState = Entity.GetAbsoluteState(thisEntity);
             ExitPointAbsolute = targetPosition_m;
-            EntryPointAbsolute = startPosAbsolute_m;
+            EntryPointAbsolute = startState.pos;
             EntryDateTime = thisEntity.Manager.ManagerSubpulses.StarSysDateTime;
             ExitPointRalitive = Vector3.Zero;
             //PredictedExitTime = targetIntercept.atDateTime;
-            SavedNewtonionVector = currentVec_m;
+            SavedNewtonionVector = startState.Velocity;
             TargetEntity = null;
             
-            Heading_Radians = (float)Vector3.AngleBetween(startPosAbsolute_m, ExitPointAbsolute);
+            Heading_Radians = (float)Vector3.AngleBetween(startState.pos, ExitPointAbsolute);
             
             Heading_Radians = (float)Math.Atan2(targetPosition_m.Y, targetPosition_m.X);
         }
@@ -114,18 +112,16 @@ namespace Pulsar4X.ECSLib
                 thisEntity.StarSysDateTime
             );
             
-            Vector3 startPosAbsolute_m = Entity.GetPosition_m(thisEntity, thisEntity.StarSysDateTime, false);
-            Vector3 currentVec_m = Entity.GetVelocity_m(thisEntity, thisEntity.StarSysDateTime);
-                    
+            var startState = Entity.GetAbsoluteState(thisEntity);
             ExitPointAbsolute = targetIntercept.position + offsetPosition;
-            EntryPointAbsolute = startPosAbsolute_m;
+            EntryPointAbsolute = startState.pos;
             EntryDateTime = thisEntity.Manager.ManagerSubpulses.StarSysDateTime;
             ExitPointRalitive = offsetPosition;
             PredictedExitTime = targetIntercept.atDateTime;
-            SavedNewtonionVector = currentVec_m;
+            SavedNewtonionVector = startState.Velocity;
             TargetEntity = targetEntity;
             
-            Heading_Radians = (float)Vector3.AngleBetween(startPosAbsolute_m, ExitPointAbsolute);
+            Heading_Radians = (float)Vector3.AngleBetween(startState.pos, ExitPointAbsolute);
         }
         
         public WarpMovingDB(WarpMovingDB db)
