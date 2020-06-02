@@ -158,7 +158,9 @@ namespace Pulsar4X.ECSLib
                 var timeAtFullVelocity = ((distanceToTgt - distanceWhileAcclerating) / closingSpeed);
                 
                 var timeToIntecept = timeAtFullVelocity + burnTime ;
-                var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, atDateTime + TimeSpan.FromSeconds(timeToIntecept));
+                var timespanToIntercept = TimeSpan.FromSeconds(timeToIntecept);
+                DateTime futureDate = atDateTime + timespanToIntercept;
+                var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, futureDate);
                 
                 var tgtEstPos = futurePosition- curOurRalState.pos;
                 
