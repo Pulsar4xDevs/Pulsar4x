@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
@@ -243,33 +244,58 @@ namespace Pulsar4X.ECSLib
         /// <param name="wpns"></param>
         internal void AddWeapons(ComponentInstance[] wpns)
         {
-            int count = WpnIDs.Length + wpns.Length;
-            
 
+
+
+            //first check that the weapons to add don't already exsist in the blob.
+            List<ComponentInstance> weaponsToAdd = new List<ComponentInstance>();
+            foreach (var wpn in wpns)
+            {
+                bool add = true;
+                foreach (var wpnID in WpnIDs)
+                {
+                    if (wpn.ID == wpnID)
+                        add = false;
+                }
+                if(add)
+                    weaponsToAdd.Add(wpn);
+            }
+            if (weaponsToAdd.Count == 0)
+                return;
+            
+            int count = WpnIDs.Length + weaponsToAdd.Count;
+            int currentCount = WpnIDs.Length;
+            int addCount = weaponsToAdd.Count;
+            
+            
             Guid[] wpnIDs = new Guid[count];
             int[] internalMagSizes = new int[count];
             int[] internalMagQty = new int[count];
             int[] reloadAmountsPerSec = new int[count];
             int[] amountPerShot = new int[count];
-            int[] minShotsPerfire = new int[count];            
-            //GenericWeaponAtb.WpnTypes[] wpnTypes = new GenericWeaponAtb.WpnTypes[count];
+            int[] minShotsPerfire = new int[count];  
+            int[] shotsfireThisTick = new int[count];
             OrdnanceDesign[] ordDes = new OrdnanceDesign[count];
             double[] launchForce =  new double[count];
             
             FireControlAbilityState[] fcStates = new FireControlAbilityState[count];
-            ShotsFiredThisTick = new int[count];
+            
             
             if(WpnIDs.Length > 0)
             {
-                Array.Copy(WpnIDs, wpnIDs, count); //we can't blockcopy a non primitive. 
-                Buffer.BlockCopy(InternalMagSizes, 0, internalMagSizes, 0, count);
-                Buffer.BlockCopy(InternalMagQty, 0, internalMagQty, 0, count);
-                Buffer.BlockCopy(ReloadAmountsPerSec, 0, reloadAmountsPerSec, 0, count);
-                Buffer.BlockCopy(AmountPerShot, 0, amountPerShot, 0, count);
-                Buffer.BlockCopy(MinShotsPerfire, 0, minShotsPerfire, 0, count);
+                Array.Copy(WpnIDs, wpnIDs, currentCount); //we can't blockcopy a non primitive. 
+                Array.Copy(FireControlStates, fcStates, currentCount);
+                Array.Copy(OrdnanceDesigns, ordDes, currentCount);
+                Buffer.BlockCopy(InternalMagSizes, 0, internalMagSizes, 0, currentCount);
+                Buffer.BlockCopy(InternalMagQty, 0, internalMagQty, 0, currentCount);
+                Buffer.BlockCopy(ReloadAmountsPerSec, 0, reloadAmountsPerSec, 0, currentCount);
+                Buffer.BlockCopy(AmountPerShot, 0, amountPerShot, 0, currentCount);
+                Buffer.BlockCopy(MinShotsPerfire, 0, minShotsPerfire, 0, currentCount);
+                Buffer.BlockCopy(ShotsFiredThisTick, 0, shotsfireThisTick, 0, currentCount );
+                Buffer.BlockCopy(LaunchForces, 0, launchForce, 0, currentCount);
             }
-            int offset = WpnIDs.Length;
-            for (int i = 0; i < count; i++)
+            int offset = currentCount;
+            for (int i = 0; i < addCount; i++)
             {
                 GenericWeaponAtb wpnAtb = wpns[i].Design.GetAttribute<GenericWeaponAtb>();
                 var wpnState = wpns[i].GetAbilityState<WeaponState>();
@@ -280,17 +306,16 @@ namespace Pulsar4X.ECSLib
                 reloadAmountsPerSec[i + offset] = wpnAtb.ReloadAmountPerSec;
                 amountPerShot[i + offset] = wpnAtb.AmountPerShot;
                 minShotsPerfire[i + offset] = wpnAtb.MinShotsPerfire;
-
-                //wpnTypes[i + offset] = wpnAtb.WpnType;
                 fcStates[i + offset] = (FireControlAbilityState)wpnState.ParentState;
                 ordDes[i + offset] = wpnState.AssignedOrdnanceDesign;
+                shotsfireThisTick[i] = 0;
                 if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
                     launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
                 else
                 {
                     launchForce[i] = 1;
                 }
-                ShotsFiredThisTick[i] = 0;
+                
             }
 
             WpnIDs = wpnIDs;
@@ -299,9 +324,9 @@ namespace Pulsar4X.ECSLib
             ReloadAmountsPerSec = reloadAmountsPerSec;
             AmountPerShot = amountPerShot;
             MinShotsPerfire = minShotsPerfire;
-            //WpnTypes = wpnTypes;
             FireControlStates = fcStates;
             OrdnanceDesigns = ordDes;
+            ShotsFiredThisTick = shotsfireThisTick;
             LaunchForces = launchForce;
         }
         

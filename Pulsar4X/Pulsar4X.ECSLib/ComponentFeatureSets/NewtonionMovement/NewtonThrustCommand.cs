@@ -154,12 +154,12 @@ namespace Pulsar4X.ECSLib
                 //not fully accurate since we're not calculating for jerk.
                 var distanceWhileAcclerating = 1.5 * acceleration * burnTime * burnTime;
                 //assuming we're on a simular orbit.
-                var closingSpeed = dvToUse;
+                var closingSpeed = leadToTgt.Length() + dvToUse;
                 var timeAtFullVelocity = ((distanceToTgt - distanceWhileAcclerating) / closingSpeed);
                 
                 var timeToIntecept = timeAtFullVelocity + burnTime ;
                 var timespanToIntercept = TimeSpan.FromSeconds(timeToIntecept);
-                DateTime futureDate = atDateTime + timespanToIntercept;
+                DateTime futureDate = atDateTime + timespanToIntercept * 2;//Why do we get a closer intercept if we multipy this by two? idk, somethisn is still wrong with themath somewhere.
                 var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, futureDate);
                 
                 var tgtEstPos = futurePosition- curOurRalState.pos;
@@ -171,7 +171,7 @@ namespace Pulsar4X.ECSLib
 
 
                 _newtonMovedb.DeltaVForManuver_FoRO_m = manuverVector;
-                //_entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(1), nameof(OrderableProcessor), _entityCommanding);
+                _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(1), nameof(OrderableProcessor), _entityCommanding);
 
 
 
