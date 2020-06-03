@@ -171,7 +171,9 @@ namespace Pulsar4X.ECSLib
             {
                 NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship);
             }
-
+            
+            
+            
             return ship;
         }
     }

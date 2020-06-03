@@ -19,19 +19,24 @@ namespace Pulsar4X.ECSLib
         public (string name, double value, ValueTypeStruct valueType)[] WeaponStats;
 
         public OrdnanceDesign AssignedOrdnanceDesign = null;
-        public int InernalMagCurAmount = 0;
+        public int InternalMagCurAmount = 0;
         
 
         public WeaponState(ComponentInstance componentInstance) : base(componentInstance)
         {
+            //weapon starts loaded
+            InternalMagCurAmount = componentInstance.Design.GetAttribute<GenericWeaponAtb>().InternalMagSize;
         }
 
         public WeaponState(WeaponState db): base(db.ComponentInstance)
         {
             CoolDown = db.CoolDown;
             ReadyToFire = db.ReadyToFire;
-            
-            
+            WeaponComponentInstance = db.WeaponComponentInstance;
+            WeaponStats = db.WeaponStats;
+            AssignedOrdnanceDesign = db.AssignedOrdnanceDesign;
+            InternalMagCurAmount = db.InternalMagCurAmount;
+
         }
         
     }

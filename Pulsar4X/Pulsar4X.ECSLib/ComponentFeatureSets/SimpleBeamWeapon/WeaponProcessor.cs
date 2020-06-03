@@ -302,7 +302,7 @@ namespace Pulsar4X.ECSLib
                 
                 wpnIDs[i + offset] = wpns[i].ID;
                 internalMagSizes[i + offset] = wpnAtb.InternalMagSize;
-                internalMagQty[i + offset] = wpnState.InernalMagCurAmount; 
+                internalMagQty[i + offset] = wpnState.InternalMagCurAmount; 
                 reloadAmountsPerSec[i + offset] = wpnAtb.ReloadAmountPerSec;
                 amountPerShot[i + offset] = wpnAtb.AmountPerShot;
                 minShotsPerfire[i + offset] = wpnAtb.MinShotsPerfire;
@@ -371,7 +371,7 @@ namespace Pulsar4X.ECSLib
                     {
                         keep = false;
                         var wpnState = wpn.GetAbilityState<WeaponState>();
-                        wpnState.InernalMagCurAmount = InternalMagQty[i];
+                        wpnState.InternalMagCurAmount = InternalMagQty[i];
                         break;
                     }
                 }
@@ -447,7 +447,7 @@ namespace Pulsar4X.ECSLib
                 
                 wpnIDs[i] = wpns[i].ID;
                 internalMagSizes[i] = wpnAtb.InternalMagSize;
-                internalMagQty[i] = wpnState.InernalMagCurAmount; 
+                internalMagQty[i] = wpnState.InternalMagCurAmount; 
                 reloadAmountsPerSec[i] = wpnAtb.ReloadAmountPerSec;
                 amountPerShot[i] = wpnAtb.AmountPerShot;
                 minShotsPerfire[i] = wpnAtb.MinShotsPerfire;
