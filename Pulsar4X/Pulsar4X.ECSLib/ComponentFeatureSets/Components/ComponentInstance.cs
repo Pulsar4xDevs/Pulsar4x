@@ -67,15 +67,17 @@ namespace Pulsar4X.ECSLib
         {
             var oldChilders = new List<ComponentTreeHeirarchyAbilityState>(ChildrenStates);
             ChildrenStates.Clear();
+            foreach (ComponentTreeHeirarchyAbilityState orphan in oldChilders)
+            {
+                orphan.SetParent(null);
+            }         
+            
             foreach (var child in children)
             {
                 child.SetParent(this);
             }
 
-            foreach (ComponentTreeHeirarchyAbilityState orphan in oldChilders)
-            {
-                orphan.SetParent(null);
-            }
+
         }
 
         /*
