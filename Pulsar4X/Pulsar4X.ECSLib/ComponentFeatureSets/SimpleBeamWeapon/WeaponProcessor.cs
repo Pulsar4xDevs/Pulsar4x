@@ -148,45 +148,51 @@ namespace Pulsar4X.ECSLib
             {
                 ProcessWeaponFire(blob);
             }
+
+            foreach (var blob in blobs)
+            {
+                UpdateReloadState(blob);
+            }
         }
 
-        public static void ProcessReloadWeapon(GenericFiringWeaponsDB firingWeapons)
+        public static void ProcessReloadWeapon(GenericFiringWeaponsDB reloadingWeapons)
         {
-            for (int i = 0; i < firingWeapons.WpnIDs.Length; i++)
+            for (int i = 0; i < reloadingWeapons.WpnIDs.Length; i++)
             {
-                if(firingWeapons.WpnIDs[i] == Guid.Empty)
+                if(reloadingWeapons.WpnIDs[i] == Guid.Empty)
                     continue;//just incase a weapon gets removed from the array and leaves an empty spot. 
-                if (firingWeapons.InternalMagQty[i] < firingWeapons.InternalMagSizes[i])
+                if (reloadingWeapons.InternalMagQty[i] < reloadingWeapons.InternalMagSizes[i])
                 {
-                    firingWeapons.InternalMagQty[i] += Math.Min(firingWeapons.ReloadAmountsPerSec[i], firingWeapons.InternalMagSizes[i]);
+                    reloadingWeapons.InternalMagQty[i] += Math.Min(reloadingWeapons.ReloadAmountsPerSec[i], reloadingWeapons.InternalMagSizes[i]);
                 }
                 //if it's reloaded enough to fire at least one shot.
-                if (firingWeapons.InternalMagQty[i] >= firingWeapons.AmountPerShot[i] * firingWeapons.MinShotsPerfire[i])
+                if (reloadingWeapons.InternalMagQty[i] >= reloadingWeapons.AmountPerShot[i] * reloadingWeapons.MinShotsPerfire[i])
                 {
-                    int numshots = firingWeapons.InternalMagQty[i] / firingWeapons.AmountPerShot[i];
-                    int depleteinternalMag = numshots * firingWeapons.AmountPerShot[i];
-                    firingWeapons.InternalMagQty[i] -= depleteinternalMag;
+
                     
                     //if this is not attached to a fire control, 
-                    if (firingWeapons.FireControlStates[i] == null)
+                    if (reloadingWeapons.FireControlStates[i] == null)
                     {   //and is fully reloaded.
-                        if(firingWeapons.InternalMagQty[i] >= firingWeapons.InternalMagSizes[i]) 
-                            firingWeapons.RemoveWeapons(firingWeapons.WpnIDs[i]);//remove it from being processed every second.
+                        if(reloadingWeapons.InternalMagQty[i] >= reloadingWeapons.InternalMagSizes[i]) 
+                            reloadingWeapons.RemoveWeapons(reloadingWeapons.WpnIDs[i]);//remove it from being processed every second.
                     }
                     //if it *is* attached to a firecontrol, and is firing. 
-                    else if(firingWeapons.FireControlStates[i].IsEngaging)
+                    else if(reloadingWeapons.FireControlStates[i].IsEngaging)
                     { //then fire 
-                        firingWeapons.ShotsFiredThisTick[i] = numshots;
+                        int numshots = reloadingWeapons.InternalMagQty[i] / reloadingWeapons.AmountPerShot[i];
+                        reloadingWeapons.ShotsFiredThisTick[i] = numshots;
+                        int depleteinternalMag = numshots * reloadingWeapons.AmountPerShot[i];
+                        reloadingWeapons.InternalMagQty[i] -= depleteinternalMag;
                     }
                     // if it's attached to firecontrol, but not firing and is fully reloaded
-                    else if(firingWeapons.InternalMagQty[i] >= firingWeapons.InternalMagSizes[i]) 
+                    else if(reloadingWeapons.InternalMagQty[i] >= reloadingWeapons.InternalMagSizes[i]) 
                     {   //remove it from being processed every second.
-                        firingWeapons.RemoveWeapons(firingWeapons.WpnIDs[i]);
+                        reloadingWeapons.RemoveWeapons(reloadingWeapons.WpnIDs[i]);
                     }
                 }
             }
         }
-
+        
         public static void ProcessWeaponFire(GenericFiringWeaponsDB firingWeapons)
         {
             
@@ -206,6 +212,28 @@ namespace Pulsar4X.ECSLib
                 
                 
 
+            }
+        }
+
+        /// <summary>
+        /// updates the non hot process data (which is what the ui reads) for reload state.
+        /// this feels a bit janky, would it be better to just include the weapon states in the hot datablob? (GenericFiringWeaponsDB)
+        /// </summary>
+        /// <param name="reloadingWeapons"></param>
+        public static void UpdateReloadState(GenericFiringWeaponsDB reloadingWeapons)
+        {
+            var entity = reloadingWeapons.OwningEntity;
+
+            if (entity.GetDataBlob<ComponentInstancesDB>().TryGetStates<WeaponState>(out var wpnStates))
+            {
+                for (int i = 0; i < reloadingWeapons.WpnIDs.Length; i++)
+                {
+                    foreach (var wpnState in wpnStates)
+                    {
+                        if(wpnState.ID == reloadingWeapons.WpnIDs[i])
+                            wpnState.InternalMagCurAmount = reloadingWeapons.InternalMagQty[i];
+                    }
+                }
             }
         }
 
