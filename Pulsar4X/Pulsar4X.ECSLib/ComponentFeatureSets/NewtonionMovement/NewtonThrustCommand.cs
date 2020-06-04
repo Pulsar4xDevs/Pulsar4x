@@ -158,7 +158,11 @@ namespace Pulsar4X.ECSLib
                 var timeAtFullVelocity = ((distanceToTgt - distanceWhileAcclerating) / closingSpeed);
                 
                 var timeToIntecept = timeAtFullVelocity + burnTime ;
-                var timespanToIntercept = TimeSpan.FromSeconds(timeToIntecept);
+                TimeSpan timespanToIntercept = TimeSpan.MaxValue;
+                if (timeToIntecept * 10000000 <= long.MaxValue)
+                {
+                    timespanToIntercept = TimeSpan.FromSeconds(timeToIntecept);
+                }
                 DateTime futureDate = atDateTime + timespanToIntercept * 2;//Why do we get a closer intercept if we multipy this by two? idk, somethisn is still wrong with themath somewhere.
                 var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, futureDate);
                 
@@ -173,7 +177,7 @@ namespace Pulsar4X.ECSLib
                 _newtonMovedb.DeltaVForManuver_FoRO_m = manuverVector;
                 _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(1), nameof(OrderableProcessor), _entityCommanding);
 
-
+                //I think the accuracy problem we're getting now is we're calculating the time to target *now* gettinf a future position for *that* time.. which will now have a different time to target.
 
             }
             else

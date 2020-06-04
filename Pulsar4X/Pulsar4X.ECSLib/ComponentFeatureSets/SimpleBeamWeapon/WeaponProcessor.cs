@@ -195,8 +195,6 @@ namespace Pulsar4X.ECSLib
         
         public static void ProcessWeaponFire(GenericFiringWeaponsDB firingWeapons)
         {
-            
-            
             for (int i = 0; i < firingWeapons.WpnIDs.Length; i++)
             {
                 int shotsFired = firingWeapons.ShotsFiredThisTick[i];
@@ -209,9 +207,6 @@ namespace Pulsar4X.ECSLib
                     if(firingWeapons.OrdnanceDesigns[i]!= null)
                         firingWeapons.OrdnanceDesigns[i].CreateOrdnance(lunchEnt, tgtEnt, force);
                 }
-                
-                
-
             }
         }
 

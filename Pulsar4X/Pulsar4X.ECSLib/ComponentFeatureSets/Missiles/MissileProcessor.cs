@@ -121,6 +121,35 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
  
     }
 
+    public static class BeamWeapnProcessor
+    {
+        public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, double beamVelocity)
+        {
+            var ourState = Entity.GetRalitiveState(launchingEntity);
+            var tgtState = Entity.GetRalitiveState(targetEntity);
+            
+            Vector3 leadToTgt = (tgtState.Velocity - ourState.Velocity);
+            Vector3 vectorToTgt = (tgtState.pos = ourState.pos);
+            var distanceToTgt = vectorToTgt.Length();
+            var timeToTarget = distanceToTgt / beamVelocity;
+            var futureDate = launchingEntity.StarSysDateTime + TimeSpan.FromSeconds(timeToTarget);
+            var futurePosition = Entity.GetAbsoluteFuturePosition(targetEntity, futureDate);
+
+
+            var startPos = (PositionDB)launchingEntity.GetDataBlob<PositionDB>().Clone();
+            
+            List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
+            dataBlobs.Add(new ProjectileInfoDB(launchingEntity.Guid));
+            dataBlobs.Add(new ComponentInstancesDB());
+            dataBlobs.Add(startPos);
+            dataBlobs.Add(new NameDB("Beam", launchingEntity.FactionOwner, "beam" ));
+
+            var newbeam = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
+
+            
+        }
+    }
+
     public class ProjectileInfoDB : BaseDataBlob
     {
         public Guid LaunchedBy = new Guid();
