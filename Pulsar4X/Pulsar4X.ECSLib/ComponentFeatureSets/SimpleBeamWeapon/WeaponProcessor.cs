@@ -204,8 +204,7 @@ namespace Pulsar4X.ECSLib
                 var force = firingWeapons.LaunchForces[i];
                 for (int j = 0; j < shotsFired; j++)
                 {
-                    if(firingWeapons.OrdnanceDesigns[i]!= null)
-                        firingWeapons.OrdnanceDesigns[i].CreateOrdnance(lunchEnt, tgtEnt, force);
+                    firingWeapons.FireInstructions[i].FireWeapon(lunchEnt, tgtEnt);
                 }
             }
         }
@@ -223,7 +222,7 @@ namespace Pulsar4X.ECSLib
             {
                 for (int i = 0; i < reloadingWeapons.WpnIDs.Length; i++)
                 {
-                    foreach (var wpnState in wpnStates)
+                    foreach (WeaponState wpnState in wpnStates)
                     {
                         if(wpnState.ID == reloadingWeapons.WpnIDs[i])
                             wpnState.InternalMagCurAmount = reloadingWeapons.InternalMagQty[i];
@@ -250,7 +249,7 @@ namespace Pulsar4X.ECSLib
         public int[] ShotsFiredThisTick = new int[0];
 
         //public GenericWeaponAtb.WpnTypes[] WpnTypes = new GenericWeaponAtb.WpnTypes[0];
-        public OrdnanceDesign[] OrdnanceDesigns = new OrdnanceDesign[0];
+        public IFireWeaponInstr[] FireInstructions = new IFireWeaponInstr[0];
         public double[] LaunchForces = new double[0];
         public FireControlAbilityState[] FireControlStates = new FireControlAbilityState[0];
 
@@ -298,7 +297,7 @@ namespace Pulsar4X.ECSLib
             int[] amountPerShot = new int[count];
             int[] minShotsPerfire = new int[count];  
             int[] shotsfireThisTick = new int[count];
-            OrdnanceDesign[] ordDes = new OrdnanceDesign[count];
+            IFireWeaponInstr[] fireInstr = new IFireWeaponInstr[count];
             double[] launchForce =  new double[count];
             
             FireControlAbilityState[] fcStates = new FireControlAbilityState[count];
@@ -308,7 +307,7 @@ namespace Pulsar4X.ECSLib
             {
                 Array.Copy(WpnIDs, wpnIDs, currentCount); //we can't blockcopy a non primitive. 
                 Array.Copy(FireControlStates, fcStates, currentCount);
-                Array.Copy(OrdnanceDesigns, ordDes, currentCount);
+                Array.Copy(FireInstructions, fireInstr, currentCount);
                 Buffer.BlockCopy(InternalMagSizes, 0, internalMagSizes, 0, currentCount);
                 Buffer.BlockCopy(InternalMagQty, 0, internalMagQty, 0, currentCount);
                 Buffer.BlockCopy(ReloadAmountsPerSec, 0, reloadAmountsPerSec, 0, currentCount);
@@ -330,7 +329,7 @@ namespace Pulsar4X.ECSLib
                 amountPerShot[i + offset] = wpnAtb.AmountPerShot;
                 minShotsPerfire[i + offset] = wpnAtb.MinShotsPerfire;
                 fcStates[i + offset] = (FireControlAbilityState)wpnState.ParentState;
-                ordDes[i + offset] = wpnState.AssignedOrdnanceDesign;
+                fireInstr[i + offset] = wpnState.FireWeaponInstructions;
                 shotsfireThisTick[i] = 0;
                 if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
                     launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
@@ -348,7 +347,7 @@ namespace Pulsar4X.ECSLib
             AmountPerShot = amountPerShot;
             MinShotsPerfire = minShotsPerfire;
             FireControlStates = fcStates;
-            OrdnanceDesigns = ordDes;
+            FireInstructions = fireInstr;
             ShotsFiredThisTick = shotsfireThisTick;
             LaunchForces = launchForce;
         }
@@ -411,7 +410,7 @@ namespace Pulsar4X.ECSLib
             int[] amountPerShot = new int[count];
             int[] minShotsPerfire = new int[count];            
             //GenericWeaponAtb.WpnTypes[] wpnTypes = new GenericWeaponAtb.WpnTypes[count];
-            OrdnanceDesign[] ordDes = new OrdnanceDesign[count];
+            IFireWeaponInstr[] fireInstr = new IFireWeaponInstr[count];
             double[] launchForce =  new double[count];
             FireControlAbilityState[] fcStates = new FireControlAbilityState[count];
 
@@ -425,7 +424,7 @@ namespace Pulsar4X.ECSLib
                 reloadAmountsPerSec[newIndex] = ReloadAmountsPerSec[oldIndex];
                 amountPerShot[newIndex] = AmountPerShot[oldIndex];
                 minShotsPerfire[newIndex] = MinShotsPerfire[oldIndex];
-                ordDes[newIndex] = OrdnanceDesigns[oldIndex];
+                fireInstr[newIndex] = FireInstructions[oldIndex];
                 launchForce[newIndex] = LaunchForces[oldIndex];
                 fcStates[newIndex] = FireControlStates[oldIndex];
                 
@@ -440,7 +439,7 @@ namespace Pulsar4X.ECSLib
             MinShotsPerfire = minShotsPerfire;
             //WpnTypes = wpnTypes;
             FireControlStates = fcStates;
-            OrdnanceDesigns = ordDes;
+            FireInstructions = fireInstr;
             LaunchForces = launchForce;
         }
 
@@ -460,7 +459,7 @@ namespace Pulsar4X.ECSLib
             int[] minShotsPerfire = new int[count];  
             //GenericWeaponAtb.WpnTypes[] wpnTypes = new GenericWeaponAtb.WpnTypes[count];
             FireControlAbilityState[] fcStates = new FireControlAbilityState[count];
-            OrdnanceDesign[] ordDes = new OrdnanceDesign[count];
+            IFireWeaponInstr[] fireInstr = new IFireWeaponInstr[count];
             double[] launchForce = new double[count];
             ShotsFiredThisTick = new int[count];
             for (int i = 0; i < count; i++)
@@ -476,7 +475,7 @@ namespace Pulsar4X.ECSLib
                 minShotsPerfire[i] = wpnAtb.MinShotsPerfire;
                 //wpnTypes[i] = wpnAtb.WpnType;
                 fcStates[i] = (FireControlAbilityState)wpnState.ParentState;
-                ordDes[i] = wpnState.AssignedOrdnanceDesign;
+                fireInstr[i] = wpnState.FireWeaponInstructions;
                 if (wpns[i].Design.HasAttribute<MissileLauncherAtb>())
                     launchForce[i] = wpns[i].Design.GetAttribute<MissileLauncherAtb>().LaunchForce;
                 else
@@ -495,7 +494,7 @@ namespace Pulsar4X.ECSLib
             MinShotsPerfire = minShotsPerfire;
             //WpnTypes = wpnTypes;
             FireControlStates = fcStates;
-            OrdnanceDesigns = ordDes;
+            FireInstructions = fireInstr;
             LaunchForces = launchForce;
         }
 

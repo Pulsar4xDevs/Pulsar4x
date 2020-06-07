@@ -325,7 +325,7 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning)
             {
                 var wpnState = _weaponInstance.GetAbilityState<WeaponState>();
-                wpnState.AssignedOrdnanceDesign = _ordnanceAssigned;
+                wpnState.FireWeaponInstructions.AssignOrdnance(_ordnanceAssigned);
                 IsRunning = true;
             }
         }
@@ -349,8 +349,7 @@ namespace Pulsar4X.ECSLib
                     if(wpn.TryGetAbilityState(out WeaponState wpnState))
                     {
                         _weaponInstance = wpn;
-                        wpnState.AssignedOrdnanceDesign = _ordnanceAssigned;
-                        return true;
+                        return wpnState.FireWeaponInstructions.CanLoadOrdnance(_ordnanceAssigned);
                     }
                 }
             }

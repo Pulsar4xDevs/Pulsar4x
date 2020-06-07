@@ -434,10 +434,10 @@ namespace Pulsar4X.ImGuiNetUI
 
                 var assOrdName = "";
                 string assOrdCount = "(0)";
-                if (wpn.AssignedOrdnanceDesign != null)
+                if (wpn.FireWeaponInstructions.TryGetOrdnance(out var ordnanceDesign))
                 {
-                    assOrdName = wpn.AssignedOrdnanceDesign.Name;
-                    assOrdCount = "(" + _storedOrdnance[wpn.AssignedOrdnanceDesign.ID] + ")";
+                    assOrdName = ordnanceDesign.Name;
+                    assOrdCount = "(" + _storedOrdnance[ordnanceDesign.ID] + ")";
                 }
 
                 _weaponNames[wpn.ID] = wpn.Name + "\t" + assOrdName + assOrdCount;

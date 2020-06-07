@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.ECSLib
 {
@@ -14,7 +15,7 @@ namespace Pulsar4X.ECSLib
         Railgun,
     }
 
-    public class BeamWeaponAtbDB : BaseDataBlob, IComponentDesignAttribute
+    public class BeamWeaponAtbDB : BaseDataBlob, IComponentDesignAttribute, IFireWeaponInstr
     {
         /// <summary>
         /// Max range of this weapon. Measured in KM.
@@ -83,7 +84,27 @@ namespace Pulsar4X.ECSLib
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!componentInstance.HasAblity<WeaponState>())
-                componentInstance.SetAbilityState<WeaponState>(new WeaponState(componentInstance));
+                componentInstance.SetAbilityState<WeaponState>(new WeaponState(componentInstance, this));
+        }
+
+        public bool CanLoadOrdnance(OrdnanceDesign ordnanceDesign)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool AssignOrdnance(OrdnanceDesign ordnanceDesign)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool TryGetOrdnance(out OrdnanceDesign ordnanceDesign)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void FireWeapon(Entity launchingEntity, Entity tgtEntity)
+        {
+            throw new System.NotImplementedException();
         }
     }
 
