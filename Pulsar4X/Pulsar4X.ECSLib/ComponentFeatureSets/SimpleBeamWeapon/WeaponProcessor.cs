@@ -202,10 +202,9 @@ namespace Pulsar4X.ECSLib
                 var lunchEnt = firingWeapons.OwningEntity;
                 var tgtEnt = firingWeapons.FireControlStates[i].Target;
                 var force = firingWeapons.LaunchForces[i];
-                for (int j = 0; j < shotsFired; j++)
-                {
-                    firingWeapons.FireInstructions[i].FireWeapon(lunchEnt, tgtEnt);
-                }
+
+                firingWeapons.FireInstructions[i].FireWeapon(lunchEnt, tgtEnt, shotsFired);
+                
             }
         }
 

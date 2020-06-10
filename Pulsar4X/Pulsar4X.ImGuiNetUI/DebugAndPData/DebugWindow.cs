@@ -28,7 +28,12 @@ namespace Pulsar4X.SDL2UI
                     
                     _selectedEntity = value;
                     _selectedEntityName = SelectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
-                    _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
+                    if(_systemState.EntityStatesWithNames.ContainsKey(_selectedEntity.Guid))
+                        _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
+                    else
+                    {
+                        _selectedEntityState = null;
+                    }
                     _uiState.LastClickedEntity = _selectedEntityState;
                     OnSelectedEntityChanged();
                 }
@@ -51,6 +56,8 @@ namespace Pulsar4X.SDL2UI
         private IntPtr _dmgTxtr;
         
         List<(string name, Entity entity)> _factionOwnedEntites = new List<(string name, Entity entity)>();
+        List<(string name, Entity entity, string faction)> _allEntites = new List<(string name, Entity entity, string faction)>(); 
+        
         
         private List<(string name, int count)> _listfoo = new List<(string, int)>()
         {
@@ -295,13 +302,19 @@ namespace Pulsar4X.SDL2UI
                     }
                     if (ImGui.CollapsingHeader("Entity List"))
                     {
-                        for (int i = 0; i < _factionOwnedEntites.Count; i++)
+                        ImGui.Columns(2);
+                        for (int i = 0; i < _allEntites.Count; i++)
                         {
-                            if (ImGui.Selectable(_factionOwnedEntites[i].name + "##" + i))
+                            if (ImGui.Selectable(_allEntites[i].name + "##" + i))
                             {
-                                SelectedEntity = _factionOwnedEntites[i].entity;
+                                SelectedEntity = _allEntites[i].entity;
                             }
+                            ImGui.NextColumn();
+                            ImGui.Text(_allEntites[i].faction);
+                            ImGui.NextColumn();
+                            
                         }
+                        ImGui.Columns(1);
                     }
                     if (SelectedEntity != null && SelectedEntity.IsValid)
                     {
@@ -461,7 +474,7 @@ namespace Pulsar4X.SDL2UI
 
                             }
                             
-                            if (_selectedEntityState.OrbitIcon != null)
+                            if (_selectedEntityState != null && _selectedEntityState.OrbitIcon != null)
                             {
 
                                 if (ImGui.CollapsingHeader("OrbitIcon: ###OrbitIconHeader", ImGuiTreeNodeFlags.CollapsingHeader))
@@ -704,14 +717,27 @@ namespace Pulsar4X.SDL2UI
         void RefreshFactionEntites()
         {
             _factionOwnedEntites = new List<(string name, Entity entity)>();
-            foreach (var entity in _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Guid))
+            var factionEntites = _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Guid);
+            foreach (var entity in factionEntites)
             {
                 string name = entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
                 _factionOwnedEntites.Add((name, entity));
-
             }
-
             
+            _allEntites = new List<(string name, Entity entity, string faction)>();
+            foreach (var entity in _uiState.SelectedSystem.GetAllEntites())
+            {
+                string name = entity.Guid.ToString();
+                if(entity.HasDataBlob<NameDB>())
+                    name = entity.GetDataBlob<NameDB>().OwnersName;
+                string factionOwner = Guid.Empty.ToString();
+                if(entity.FactionOwner != Guid.Empty)
+                {
+                    Entity factionEntity = StaticRefLib.Game.GlobalManager.GetGlobalEntityByGuid(entity.FactionOwner);
+                    factionOwner = factionEntity.GetDataBlob<NameDB>().OwnersName;
+                }
+                _allEntites.Add((name, entity, factionOwner));
+            }
         }
         
                 private int _hvSelectedIndex = -1;

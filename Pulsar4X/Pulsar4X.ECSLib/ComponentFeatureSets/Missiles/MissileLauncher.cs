@@ -47,9 +47,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             return AssignedOrdnance != null;
         }
 
-        public void FireWeapon(Entity launchingEntity, Entity tgtEntity)
+        public void FireWeapon(Entity launchingEntity, Entity tgtEntity, int count)
         {
-            MissileProcessor.LaunchMissile(launchingEntity, tgtEntity, LaunchForce, AssignedOrdnance);
+            MissileProcessor.LaunchMissile(launchingEntity, tgtEntity, LaunchForce, AssignedOrdnance, count);
         }
         
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)

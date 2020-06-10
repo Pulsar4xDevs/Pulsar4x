@@ -189,8 +189,11 @@ namespace Pulsar4X.ECSLib
         private void DoProcessing(DateTime targetDateTime)
         {
             _isProcessing = true;
-            _timer.Stop();
-            _timer.Start(); //reset timer
+            if(_timer.Enabled)
+            {
+                _timer.Stop();
+                _timer.Start(); //reset timer
+            }
             _stopwatch.Start(); //start the processor loop stopwatch
             _isOvertime = false;
 

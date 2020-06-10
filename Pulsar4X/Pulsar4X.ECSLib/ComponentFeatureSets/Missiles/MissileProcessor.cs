@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 {
     public class MissileProcessor
     {
-        public static void LaunchMissile(Entity launchingEntity, Entity targetEntity, double launchForce, OrdnanceDesign missileDesign)
+        public static void LaunchMissile(Entity launchingEntity, Entity targetEntity, double launchForce, OrdnanceDesign missileDesign, int count)
         {
 
             var atDatetime = launchingEntity.Manager.StarSysDateTime;
@@ -40,12 +40,20 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             var orderabledb = new OrderableDB();
             var newtmovedb = new NewtonMoveDB(misslPositionDB.Parent, parentVelocity);
 
+            string defaultName = "Missile";
+            string factionsName = missileDesign.Name;
+            if (count > 1)
+            {
+                defaultName += " x" + count;
+                factionsName += " x" + count;
+            }
+
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
-            dataBlobs.Add(new ProjectileInfoDB(launchingEntity.Guid));
+            dataBlobs.Add(new ProjectileInfoDB(launchingEntity.Guid, count));
             dataBlobs.Add(new ComponentInstancesDB());
             dataBlobs.Add(misslPositionDB);
             dataBlobs.Add(MassVolumeDB.NewFromMassAndVolume(missileDesign.WetMass, missileDesign.WetMass));
-            dataBlobs.Add(new NameDB("Missile", launchingEntity.FactionOwner, missileDesign.Name ));
+            dataBlobs.Add(new NameDB(defaultName, launchingEntity.FactionOwner,  factionsName));
             dataBlobs.Add(newtmovedb);
             dataBlobs.Add(orderabledb);
             var newMissile = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
@@ -58,12 +66,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             var newtdb = newMissile.GetDataBlob<NewtonThrustAbilityDB>();
             newtdb.DryMass_kg = missileDesign.Mass;
             newtdb.AddFuel(missileDesign.WetMass - missileDesign.Mass);
-
-
-
-
-
-
+            
 
             bool directAttack = true;
             
@@ -112,80 +115,26 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate + TimeSpan.FromSeconds(1), targetEntity);
             }
             
-            
-
-            
             StorageSpaceProcessor.RemoveCargo(cargo, missileDesign, 1); //remove missile from parent.
         }
-
- 
     }
 
-    public static class BeamWeapnProcessor
-    {
-        public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, double beamVelocity, double beamLen)
-        {
-            var ourState = Entity.GetRalitiveState(launchingEntity);
-            var tgtState = Entity.GetRalitiveState(targetEntity);
-            
-            Vector3 leadToTgt = (tgtState.Velocity - ourState.Velocity);
-            Vector3 vectorToTgt = (tgtState.pos = ourState.pos);
-            var distanceToTgt = vectorToTgt.Length();
-            var timeToTarget = distanceToTgt / beamVelocity;
-            var futureDate = launchingEntity.StarSysDateTime + TimeSpan.FromSeconds(timeToTarget);
-            var futurePosition = Entity.GetAbsoluteFuturePosition(targetEntity, futureDate);
-            var ourAbsPos = Entity.GetAbsoluteFuturePosition(launchingEntity, futureDate);
-            var absVector = Vector3.Normalise(futurePosition - ourAbsPos) * beamVelocity;
-            var startPos = (PositionDB)launchingEntity.GetDataBlob<PositionDB>().Clone();
-            var beamInfo = new BeamInfoDB(launchingEntity.Guid);
-            beamInfo.Positions = new Vector3[2];
-            beamInfo.Positions[0] = startPos.AbsolutePosition_m + absVector * beamLen;
-            beamInfo.Positions[1] = startPos.AbsolutePosition_m;
-            beamInfo.VelocityVector = absVector;
-            
-            List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
-            dataBlobs.Add(beamInfo);
-            dataBlobs.Add(new ComponentInstancesDB());
-            dataBlobs.Add(startPos);
-            dataBlobs.Add(new NameDB("Beam", launchingEntity.FactionOwner, "Beam" ));
 
-            var newbeam = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
-
-            
-        }
-    }
-
-    public class BeamInfoDB : BaseDataBlob
-    {
-        public Guid FiredBy;
-        public Vector3 VelocityVector;
-        public Vector3[] Positions;
-
-
-        public BeamInfoDB(Guid launchedBy)
-        {
-            FiredBy = launchedBy;
-        }
-
-        public override object Clone()
-        {
-            throw new NotImplementedException();
-        }
-    }
 
     public class ProjectileInfoDB : BaseDataBlob
     {
         public Guid LaunchedBy = new Guid();
-
+        public int Count = 1;
 
         [JsonConstructor]
         private ProjectileInfoDB()
         {
         }
 
-        public ProjectileInfoDB(Guid launchedBy)
+        public ProjectileInfoDB(Guid launchedBy, int count)
         {
             LaunchedBy = launchedBy;
+            Count = count;
         }
 
         public override object Clone()

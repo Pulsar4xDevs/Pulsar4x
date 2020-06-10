@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
 
         public bool TryGetOrdnance(out OrdnanceDesign ordnanceDesign);
         
-        public void FireWeapon(Entity launchingEntity, Entity tgtEntity);
+        public void FireWeapon(Entity launchingEntity, Entity tgtEntity, int count);
     }
 
 

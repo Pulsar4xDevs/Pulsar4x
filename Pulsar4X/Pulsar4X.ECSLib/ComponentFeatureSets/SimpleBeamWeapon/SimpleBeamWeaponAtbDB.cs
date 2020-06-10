@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.ECSLib
@@ -54,10 +55,10 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
-        public void FireWeapon(Entity launchingEntity, Entity tgtEntity)
+        public void FireWeapon(Entity launchingEntity, Entity tgtEntity, int count)
         {
             var beamSpeed = 299792458;//299792458 is speed of light.
-            var beamLen = 0.5;
+            var beamLen = count * 0.1;
             BeamWeapnProcessor.FireBeamWeapon(launchingEntity, tgtEntity, beamSpeed, beamLen);
         }
         

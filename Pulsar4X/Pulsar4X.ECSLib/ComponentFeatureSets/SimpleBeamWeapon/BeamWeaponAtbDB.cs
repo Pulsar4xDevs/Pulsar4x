@@ -102,7 +102,7 @@ namespace Pulsar4X.ECSLib
             throw new System.NotImplementedException();
         }
 
-        public void FireWeapon(Entity launchingEntity, Entity tgtEntity)
+        public void FireWeapon(Entity launchingEntity, Entity tgtEntity, int count)
         {
             throw new System.NotImplementedException();
         }

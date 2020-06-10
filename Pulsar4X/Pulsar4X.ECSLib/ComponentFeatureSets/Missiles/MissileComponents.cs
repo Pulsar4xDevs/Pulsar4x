@@ -188,11 +188,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             IndustryPointCosts = Mass;
         }
-
-        public void CreateOrdnance(Entity launchingEntity, Entity tgtEntity,  double force)
-        {
-            MissileProcessor.LaunchMissile(launchingEntity, tgtEntity, force, this);
-        }
+        
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
