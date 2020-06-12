@@ -25,47 +25,55 @@ namespace Pulsar4X.ECSLib
         {
             errors = new List<(string formula,string error)>();
             var factionTech = new FactionTechDB();
-
-            var designer = new ComponentDesigner(componentSD, factionTech);
-
-            List<ChainedExpression> allExpressions = new List<ChainedExpression>()
+            ComponentDesigner designer;
+            try
             {
-                designer.MassFormula,
-                designer.VolumeFormula,
-                designer.CrewFormula,
-                designer.HTKFormula,
-                designer.ResearchCostFormula,
-                designer.BuildCostFormula,
-                designer.CreditCostFormula
-            };
-            allExpressions.AddRange(designer.ResourceCostFormulas.Values);
-            //allExpressions.AddRange(designer.MineralCostFormulas.Values);
-            //allExpressions.AddRange(designer.MaterialCostFormulas.Values);
-            //allExpressions.AddRange(designer.ComponentCostFormulas.Values);
-            foreach (var value in designer.ComponentDesignAttributes.Values)
-            {
-                allExpressions.Add(value.Formula);
-                if(value.MaxValueFormula != null)
-                    allExpressions.Add(value.MaxValueFormula);
-                if(value.MinValueFormula != null)
-                    allExpressions.Add(value.MinValueFormula);
-                if(value.StepValueFormula != null)
-                    allExpressions.Add(value.StepValueFormula);
-            }
-
-            foreach (var expression in allExpressions)
-            {
-                if (expression == null)
+                designer = new ComponentDesigner(componentSD, factionTech);
+                
+                List<ChainedExpression> allExpressions = new List<ChainedExpression>()
                 {
-                    errors.Add(("Null Value", "Unexpected Null Value for Formula"));
+                    designer.MassFormula,
+                    designer.VolumeFormula,
+                    designer.CrewFormula,
+                    designer.HTKFormula,
+                    designer.ResearchCostFormula,
+                    designer.BuildCostFormula,
+                    designer.CreditCostFormula
+                };
+                allExpressions.AddRange(designer.ResourceCostFormulas.Values);
+                
+                //allExpressions.AddRange(designer.MineralCostFormulas.Values);
+                //allExpressions.AddRange(designer.MaterialCostFormulas.Values);
+                //allExpressions.AddRange(designer.ComponentCostFormulas.Values);
+                foreach (var value in designer.ComponentDesignAttributes.Values)
+                {
+                    allExpressions.Add(value.Formula);
+                    if(value.MaxValueFormula != null)
+                        allExpressions.Add(value.MaxValueFormula);
+                    if(value.MinValueFormula != null)
+                        allExpressions.Add(value.MinValueFormula);
+                    if(value.StepValueFormula != null)
+                        allExpressions.Add(value.StepValueFormula);
                 }
 
-                else if (expression.HasErrors())
+                foreach (var expression in allExpressions)
                 {
-                    errors.Add((expression.RawExpressionString, expression.Error()));
+                    if (expression == null)
+                    {
+                        errors.Add(("Null Value", "Unexpected Null Value for Formula"));
+                    }
+
+                    else if (expression.HasErrors())
+                    {
+                        errors.Add((expression.RawExpressionString, expression.Error()));
+                    }
                 }
             }
-
+            catch (Exception e)
+            {
+                string errorMessage = "Malformed ComponentTemplate, this error happened before the specific formula could be found ";
+                errors.Add(("", errorMessage));
+            }
             return (errors.Count == 0);
         }
     }
