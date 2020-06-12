@@ -157,7 +157,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            var foo = camera.ViewCoordinate_AU(WorldPosition_AU);
+            var foo = camera.ViewCoordinate_m(WorldPosition_m);
             var vsp = new PointD
             {
                 X = foo.x,
@@ -171,9 +171,7 @@ namespace Pulsar4X.SDL2UI
             //first index in the drawPoints is the position of the body
             var translated = matrix.TransformD(_bodyRalitivePos.X, _bodyRalitivePos.Y);
             _drawPoints[0] = new SDL.SDL_Point() { x = (int)(vsp.X + translated.X), y = (int)(vsp.Y + translated.Y) };
-
-
-
+            
             for (int i = 1; i < _numberOfDrawSegments; i++)
             {
                 if (index < _numberOfArcSegments - 1)
@@ -181,27 +179,9 @@ namespace Pulsar4X.SDL2UI
                     index++;
                 else
                     index = 0;
-/*
-                if (IsRetrogradeOrbit) 
-                {
-                    if (index < _numberOfArcSegments - 1)
 
-                        index++;
-                    else
-                        index = 0;
-                }
-                else if ( index > 0)
-                {
-                    index--;
-                }
-                else
-                    index = _numberOfArcSegments -1;
-*/
                 translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
 
-                //translate everything to viewscreen & camera positions
-                //int x = (int)(ViewScreenPos.x + translated.X + camerapoint.x);
-                //int y = (int)(ViewScreenPos.y + translated.Y + camerapoint.y);
                 int x = (int)(vsp.X + translated.X);
                 int y = (int)(vsp.Y + translated.Y);
 

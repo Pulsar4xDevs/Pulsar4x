@@ -279,7 +279,7 @@ namespace Pulsar4X.SDL2UI
             _bc.OnFrameUpdate(matrix, camera);
             UpdateElements();
 
-            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
 
             Matrix nonZoomMatrix = Matrix.NewMirrorMatrix(true, false);
 

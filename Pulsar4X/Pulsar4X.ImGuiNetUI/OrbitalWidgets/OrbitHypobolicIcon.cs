@@ -154,7 +154,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
 
             _drawPoints = new SDL.SDL_Point[_numberOfPoints];
 
@@ -163,9 +163,6 @@ namespace Pulsar4X.SDL2UI
 
                 PointD translated = matrix.TransformD(_points[i].X, _points[i].Y); //add zoom transformation. 
 
-                //translate everything to viewscreen & camera positions
-                //int x = (int)(ViewScreenPos.x + translated.X + camerapoint.x);
-                //int y = (int)(ViewScreenPos.y + translated.Y + camerapoint.y);
                 int x = (int)(ViewScreenPos.x + translated.X);
                 int y = (int)(ViewScreenPos.y + translated.Y);
 

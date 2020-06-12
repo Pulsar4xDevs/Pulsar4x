@@ -160,7 +160,8 @@ namespace Pulsar4X.SDL2UI
                     
                     if (ImGui.CollapsingHeader("Camera Functions", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
-                        if (_uiState.Camera.IsPinnedToEntity)
+                        var cam = _uiState.Camera;
+                        if (cam.IsPinnedToEntity)
                         {
                             var entyName = _systemState.EntityStatesWithNames[_uiState.Camera.PinnedEntityGuid].Name;
                             ImGui.Text("Camera is pinned to:");
@@ -172,7 +173,7 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("Camera is not pinned to an entity.");
                         }
                         
-                        ImGui.Text("Zoom: " + _uiState.Camera.ZoomLevel);
+                        ImGui.Text("Zoom: " + cam.ZoomLevel);
 
                         ImGui.Text("Raw Cursor Coordinate");
                         Vector2 mouseCoord = ImGui.GetMousePos();
@@ -181,31 +182,33 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("y: " + mouseCoord.Y);
                         
                         ImGui.Text("Cursor World Coordinate:");
-                        var mouseWorldCoord = _uiState.Camera.MouseWorldCoordinate_m();
+                        var mouseWorldCoord = cam.MouseWorldCoordinate_m();
                         ImGui.Text("x" + Stringify.Distance(mouseWorldCoord.X));
                         ImGui.SameLine();
                         ImGui.Text("y" + Stringify.Distance(mouseWorldCoord.Y));
-                        var mouseWorldCoord_AU = _uiState.Camera.MouseWorldCoordinate_AU();
+                        var mouseWorldCoord_AU = cam.MouseWorldCoordinate_AU();
                         ImGui.Text("x" + mouseWorldCoord_AU.X + " AU");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseWorldCoord_AU.Y + " AU");
 
                         ImGui.Text("Cursor View Coordinate:");
-                        var mouseViewCoord = _uiState.Camera.ViewCoordinate_m(mouseWorldCoord);
+                        ImGui.Text("(WorldCoord - CameraWorldPos) * zoomLevel + viewportCenter");
+                        ImGui.Text("(" + mouseWorldCoord.X + "-" + cam.CameraWorldPosition_m.X + ") *" + cam.ZoomLevel + "+" + cam.ViewPortCenter.X);
+                        var mouseViewCoord = cam.ViewCoordinate_m(mouseWorldCoord);
                         ImGui.Text("x" + mouseViewCoord.x + " p");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseViewCoord.y + " p");
-                        var mouseviewCoord_AU = _uiState.Camera.ViewCoordinate_AU(mouseWorldCoord_AU);
+                        var mouseviewCoord_AU = cam.ViewCoordinate_AU(mouseWorldCoord_AU);
                         ImGui.Text("x" + mouseviewCoord_AU.x + " p");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseviewCoord_AU.y + " p");
                     
                         ImGui.Text("Camrera WorldPosition");
-                        var camWorldCoord_m = _uiState.Camera.CameraWorldPosition_m;
+                        var camWorldCoord_m = cam.CameraWorldPosition_m;
                         ImGui.Text("x" + camWorldCoord_m.X + " m");
                         ImGui.SameLine();
                         ImGui.Text("y" + camWorldCoord_m.Y + " m");
-                        var camWorldCoord_AU = _uiState.Camera.CameraWorldPosition_AU;
+                        var camWorldCoord_AU = cam.CameraWorldPosition_AU;
                         ImGui.Text("x" + camWorldCoord_AU.X + " AU");
                         ImGui.SameLine();
                         ImGui.Text("y" + camWorldCoord_AU.Y + " AU");
