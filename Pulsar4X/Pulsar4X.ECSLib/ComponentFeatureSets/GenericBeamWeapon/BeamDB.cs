@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             }
         }
         
-        public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, double beamVelocity, double beamLen)
+        public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, double beamVelocity, double beamLenInSeconds)
         {
             var ourState = Entity.GetRalitiveState(launchingEntity);
             var tgtState = Entity.GetRalitiveState(targetEntity);
@@ -49,19 +49,21 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             var futureDate = launchingEntity.StarSysDateTime + TimeSpan.FromSeconds(timeToTarget);
             var futurePosition = Entity.GetAbsoluteFuturePosition(targetEntity, futureDate);
             var ourAbsPos = Entity.GetAbsoluteFuturePosition(launchingEntity, futureDate);
-            var absVector = Vector3.Normalise(futurePosition - ourAbsPos) * beamVelocity;
+            var normVector = Vector3.Normalise(futurePosition - ourAbsPos);
+            var absVector =  normVector * beamVelocity;
             var startPos = (PositionDB)launchingEntity.GetDataBlob<PositionDB>().Clone();
             var beamInfo = new BeamInfoDB(launchingEntity.Guid);
+            var beamlenInMeters = beamLenInSeconds * 299792458;
             beamInfo.Positions = new Vector3[2];
-            beamInfo.Positions[0] = startPos.AbsolutePosition_m + absVector * beamLen;
-            beamInfo.Positions[1] = startPos.AbsolutePosition_m;
+            beamInfo.Positions[0] = startPos.AbsolutePosition_m ;
+            beamInfo.Positions[1] = startPos.AbsolutePosition_m - normVector * beamlenInMeters;
             beamInfo.VelocityVector = absVector;
             
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             dataBlobs.Add(beamInfo);
             //dataBlobs.Add(new ComponentInstancesDB());
             dataBlobs.Add(startPos);
-            dataBlobs.Add(new NameDB("Beam", launchingEntity.FactionOwner, "Beam" ));
+            //dataBlobs.Add(new NameDB("Beam", launchingEntity.FactionOwner, "Beam" ));
 
             var newbeam = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
         }

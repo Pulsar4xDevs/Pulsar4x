@@ -18,6 +18,9 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int ReloadRate { get; internal set; }
 
+        public double LenPerPulseInSeconds = 1;
+        public int NumPulsePerSecond = 1;
+        
         public SimpleBeamWeaponAtbDB() { }
 
         public SimpleBeamWeaponAtbDB(double maxRange, double damageAmount, double reloadRate)
@@ -58,7 +61,7 @@ namespace Pulsar4X.ECSLib
         public void FireWeapon(Entity launchingEntity, Entity tgtEntity, int count)
         {
             var beamSpeed = 299792458;//299792458 is speed of light.
-            var beamLen = count * 0.1;
+            var beamLen = Math.Min(1, count * LenPerPulseInSeconds); //our beam can't be longer than the time period.
             BeamWeapnProcessor.FireBeamWeapon(launchingEntity, tgtEntity, beamSpeed, beamLen);
         }
         

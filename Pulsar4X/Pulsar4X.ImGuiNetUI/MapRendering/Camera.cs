@@ -178,21 +178,31 @@ namespace Pulsar4X.SDL2UI
         /// <summary>
         /// Returns the Distance in view-Coordinates
         /// </summary>
-        /// <param name="dist"></param>
+        /// <param name="dist_AU"></param>
         /// <returns></returns>
-        public float ViewDistance(double dist)
+        public float ViewDistance(double dist_AU)
         {
-            return (float)(dist * ZoomLevel);
+            return (float)(dist_AU * ZoomLevel);
         }
 
         /// <summary>
         /// Returns the Distance in World-Coordinates
         /// </summary>
-        /// <param name="dist"></param>
+        /// <param name="dist"> in Pixels</param>
         /// <returns></returns>
-        public double WorldDistance(float dist)
+        public double WorldDistance_AU(float dist)
         {
             return dist / ZoomLevel;
+        }
+        
+        /// <summary>
+        /// Returns the Distance in World-Coordinates
+        /// </summary>
+        /// <param name="dist"> in Pixels</param>
+        /// <returns></returns>
+        public double WorldDistance_m(float dist)
+        {
+            return Distance.AuToMt(dist / ZoomLevel);
         }
 
         /// <summary>

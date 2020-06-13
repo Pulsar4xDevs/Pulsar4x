@@ -472,33 +472,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-
-            /*
-            var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
-            var scaleMatrix = Matrix.NewScaleMatrix(Scale, Scale);
-
-            var shipMatrix = mirrorMatrix * scaleMatrix;
-
-            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
-
-            int numPoints = _beamInfo.Positions.Length;
-            DrawShapes = new Shape[numPoints];
-            for (int i = 0; i < numPoints; i++)
-            {
-                ;
-                PointD[] drawPoints = new PointD[numPoints];
-                
-                for (int i2 = 0; i2 < numPoints; i2++)
-                {
-                    var tranlsatedPoint = shipMatrix.TransformD(_beamInfo.Positions[i2].X, _beamInfo.Positions[i2].Y);
-                    int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
-                    int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
-                    drawPoints[i2] = new PointD() { X = x, Y = y };
-                }
-                DrawShapes[i] = new Shape() { Points = drawPoints, Color = new SDL.SDL_Color(){r = 255, g = 0, b = 0, a = 255} };
-            }
-            */
-
+            
             var p0 = camera.ViewCoordinate_m(_beamInfo.Positions[0]);
             var p1 = camera.ViewCoordinate_m(_beamInfo.Positions[1]);
             
@@ -506,7 +480,7 @@ namespace Pulsar4X.SDL2UI
             var s1 = new Shape();
             s1.Points = new PointD[2];
             s1.Points[0] = new PointD() {X = p0.x, Y = p0.y};
-            s1.Points[0] = new PointD() {X = p1.x, Y = p1.y};
+            s1.Points[1] = new PointD() {X = p1.x, Y = p1.y};
             var clr = new SDL.SDL_Color()
             {
                 r = 200,
