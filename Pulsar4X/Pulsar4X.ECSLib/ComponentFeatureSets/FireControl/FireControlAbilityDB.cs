@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
                     FireControlInstances.Add(fc);
                 }
             }
-            if (instancesDB.TryGetComponentsByAttribute<SimpleBeamWeaponAtbDB>(out var weaponInstances))
+            if (instancesDB.TryGetComponentsByAttribute<GenericBeamWeaponAtbDB>(out var weaponInstances))
             {
                 foreach (var gun in weaponInstances)
                 {

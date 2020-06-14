@@ -230,7 +230,7 @@
               "Name": "dbargs",
               "GuiHint": "None",
               "AttributeFormula": "AtbConstrArgs(Ability('Range'), Ability('Damage'), Ability('ReloadRate'))",
-              "AttributeType": "Pulsar4X.ECSLib.SimpleBeamWeaponAtbDB"
+              "AttributeType": "Pulsar4X.ECSLib.GenericBeamWeaponAtbDB"
             }
           ]
         }

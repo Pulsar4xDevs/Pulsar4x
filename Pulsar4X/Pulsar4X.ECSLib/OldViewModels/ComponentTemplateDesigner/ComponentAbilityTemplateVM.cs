@@ -275,7 +275,6 @@ namespace Pulsar4X.ECSLib
             {
                 typeof(ActiveSensorAtbDB).ToString(),
                 typeof(BeamFireControlAtbDB).ToString(),
-                typeof(BeamWeaponAtbDB).ToString(),
                 typeof(CargoStorageAtbDB).ToString(),
                 typeof(CloakAtbDB).ToString(),
                 typeof(CommandAtbDB).ToString(),
@@ -296,7 +295,7 @@ namespace Pulsar4X.ECSLib
                 typeof(PopulationSupportAtbDB).ToString(),
                 typeof(ResearchPointsAtbDB).ToString(),
                 typeof(SensorSignatureAtbDB).ToString(),
-                typeof(SimpleBeamWeaponAtbDB).ToString(),
+                typeof(GenericBeamWeaponAtbDB).ToString(),
                 typeof(StandardShieldAtbDB).ToString()
             };
 

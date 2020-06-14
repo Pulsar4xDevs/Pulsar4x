@@ -71,7 +71,7 @@ namespace Pulsar4X.ECSLib
             }
             catch (Exception e)
             {
-                string errorMessage = "Malformed ComponentTemplate, this error happened before the specific formula could be found ";
+                string errorMessage = "Malformed ComponentTemplate, this error happened before the specific formula could be found \r\n " + e.Message;
                 errors.Add(("", errorMessage));
             }
             return (errors.Count == 0);

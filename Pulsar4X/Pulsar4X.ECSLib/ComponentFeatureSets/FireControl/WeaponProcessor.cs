@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib
 
             //TODO chance to hit
             //int damageAmount = 10;//TODO damageAmount calc
-            var designAtb = beamWeapon.Design.GetAttribute<SimpleBeamWeaponAtbDB>();
+            var designAtb = beamWeapon.Design.GetAttribute<GenericBeamWeaponAtbDB>();
             int damageAmount = designAtb.DamageAmount; // TODO: Better damage calculation
 
             double range = 1000;// myPos.GetDistanceTo_AU(targetPos);
@@ -502,76 +502,5 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
     }
-
-
-
-    public static class WeaponHelpers
-    {
-
-
-
-
-        public static void RecalcBeamWeapons(Entity ship)
-        {
-            var instancesDB = ship.GetDataBlob<ComponentInstancesDB>();
-
-            var beamWeaponEntites = instancesDB.GetDesignsByType(typeof(BeamWeaponAtbDB));
-            //List<KeyValuePair<Entity, PrIwObsList<Entity>>> beamWeaponEntities = instancesDB.SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<BeamWeaponAtbDB>()).ToList();
-            List<Entity>fireControlEntities = new List<Entity>();
-
-            BeamWeaponsDB bwDB;
-
-            int numFireControls = 0 ;
-            int numBeamWeapons = 0;
-            int totalDamage = 0;
-            int maxDamage = 0;
-            int maxRange = 0;
-            int maxTrackingSpeed = 0;
-
-
-            foreach (var beamWeapon in beamWeaponEntites)
-            {
-                //var design = beamWeapon.GetDataBlob<ComponentInstanceData>().Design;
-
-
-            }
-
-            /*
-            foreach (KeyValuePair<Entity, PrIwObsList<Entity>> beamWeaponTemplate in beamWeaponEntities)
-            {
-                foreach(Entity beamWeapon in beamWeaponTemplate.Value)
-                {
-                    WeaponStateDB state = beamWeapon.GetDataBlob<WeaponStateDB>();
-                    BeamWeaponAtbDB bwAtb = beamWeapon.GetDataBlob<BeamWeaponAtbDB>();
-                    BeamFireControlAtbDB fcAtb = state.FireControl.GetDataBlob<BeamFireControlAtbDB>();
-
-                    if (!fireControlEntities.Contains(state.FireControl)) 
-                        fireControlEntities.Add(state.FireControl);
-
-                    numBeamWeapons++;
-                    totalDamage += bwAtb.BaseDamage; // How is damage at any range calculated?
-                    if (bwAtb.BaseDamage > maxDamage)
-                        maxDamage = bwAtb.BaseDamage;
-                    if (bwAtb.MaxRange > maxRange)
-                        if (fcAtb.Range > bwAtb.MaxRange)
-                            maxRange = bwAtb.MaxRange;
-                        else if(fcAtb.Range > maxRange)
-                            maxRange = fcAtb.Range;
-
-                    if (fcAtb.TrackingSpeed > maxTrackingSpeed)
-                        maxTrackingSpeed = fcAtb.TrackingSpeed;
-                }
-            }*/
-            numFireControls = fireControlEntities.Count;
-
-            bwDB = ship.GetDataBlob<BeamWeaponsDB>();
-
-            bwDB.NumFireControls = numFireControls;
-            bwDB.NumBeamWeapons = numBeamWeapons;
-            bwDB.TotalDamage = totalDamage;
-            bwDB.MaxDamage = maxDamage;
-            bwDB.MaxRange = maxRange;
-            bwDB.MaxTrackingSpeed = maxTrackingSpeed;
-        }
-    }
+    
 }

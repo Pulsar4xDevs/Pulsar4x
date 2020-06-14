@@ -9,7 +9,7 @@ using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.ECSLib
 {
-    public class SimpleBeamWeaponAtbDB : BaseDataBlob, IComponentDesignAttribute, IFireWeaponInstr
+    public class GenericBeamWeaponAtbDB : BaseDataBlob, IComponentDesignAttribute, IFireWeaponInstr
     {
         [JsonProperty]
         public double MaxRange { get; internal set; }
@@ -19,18 +19,17 @@ namespace Pulsar4X.ECSLib
         public int ReloadRate { get; internal set; }
 
         public double LenPerPulseInSeconds = 1;
-        public int NumPulsePerSecond = 1;
         
-        public SimpleBeamWeaponAtbDB() { }
+        public GenericBeamWeaponAtbDB() { }
 
-        public SimpleBeamWeaponAtbDB(double maxRange, double damageAmount, double reloadRate)
+        public GenericBeamWeaponAtbDB(double maxRange, double damageAmount, double reloadRate)
         {
             MaxRange = maxRange;
             DamageAmount = (int)damageAmount;
             ReloadRate = (int)reloadRate;
         }
 
-        public SimpleBeamWeaponAtbDB(SimpleBeamWeaponAtbDB db)
+        public GenericBeamWeaponAtbDB(GenericBeamWeaponAtbDB db)
         {
             MaxRange = db.MaxRange;
             DamageAmount = db.DamageAmount;
@@ -39,7 +38,7 @@ namespace Pulsar4X.ECSLib
 
         public override object Clone()
         {
-            return new SimpleBeamWeaponAtbDB(this);
+            return new GenericBeamWeaponAtbDB(this);
         }
 
         public bool CanLoadOrdnance(OrdnanceDesign ordnanceDesign)
