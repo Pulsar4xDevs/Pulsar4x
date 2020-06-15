@@ -145,7 +145,11 @@ namespace Pulsar4X.ECSLib
                 var dvToUse = halfDV - dvUsed;
                 var burnRate = _newtonAbilityDB.FuelBurnRate;
                 //var foo = OrbitMath.TsiolkovskyFuelUse(_totalFuel, )
-                var fuelUse = OrbitMath.TsiolkovskyFuelCost(_newtonAbilityDB.TotalFuel_kg, _newtonAbilityDB.ExhaustVelocity, halfDV);
+                var fuelUse = OrbitMath.TsiolkovskyFuelCost(
+                    _newtonAbilityDB.TotalFuel_kg, 
+                    _newtonAbilityDB.ExhaustVelocity, 
+                    halfDV//pretty sure this should be dvToUse, but that's giving me a silent crash. 
+                    );
                 var burnTime = fuelUse / burnRate;
                 var acceleration = dvToUse / burnTime;
                 var positionVector = curOurRalState.pos - curTgtRalState.pos;
@@ -186,7 +190,34 @@ namespace Pulsar4X.ECSLib
             }
             
         }
+/*
+        void ManuverVectorToTarget(double dvToUse, Vector3 ourPos, Vector3 ourVelocity, Vector3 targetVelocity,  DateTime atDateTime)
+        {
+            var distanceToTgt = positionVector.Length();
+            //not fully accurate since we're not calculating for jerk.
+            var distanceWhileAcclerating = 1.5 * acceleration * burnTime * burnTime;
+            
+            
+            Vector3 leadToTgt = targetVelocity - ourVelocity;
+            
+            var closingSpeed = leadToTgt.Length() + dvToUse;
+            var timeAtFullVelocity = ((distanceToTgt - distanceWhileAcclerating) / closingSpeed);
 
+            var timeToIntecept = timeAtFullVelocity + burnTime ;
+            TimeSpan timespanToIntercept = TimeSpan.MaxValue;
+            if (timeToIntecept * 10000000 <= long.MaxValue)
+            {
+                timespanToIntercept = TimeSpan.FromSeconds(timeToIntecept);
+            }
+            DateTime futureDate = atDateTime + timespanToIntercept * 2;//Why do we get a closer intercept if we multipy this by two? idk, somethisn is still wrong with themath somewhere.
+            var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, futureDate);
+
+            var tgtEstPos = futurePosition - ourPos;
+            var vectorToTgt = Vector3.Normalise(tgtEstPos);
+            var manuverVector = OrbitMath.GlobalToOrbitVector(vectorToTgt * dvToUse, ourPos, ourVelocity);
+
+        }
+*/
         public override bool IsFinished()
         {
             if (IsRunning && _newtonMovedb.DeltaVForManuver_FoRO_m.Length() <= 0)
