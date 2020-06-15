@@ -48,6 +48,7 @@ namespace Pulsar4X.ECSLib
 
         private bool _isProcessing = false;
         private bool _isOvertime = false;
+        private object _lockObj = new object();
         private Game _game;
         /// <summary>
         /// length of time it took to process the last DoProcess
@@ -175,12 +176,16 @@ namespace Pulsar4X.ECSLib
         {
             if (!_isProcessing)
             {   
-
+                //int[] foo = new int[1];
+                //foo[2] = 0;//do we get an exception here? nope, no we dont.
                 DoProcessing(GameGlobalDateTime + Ticklength); //run DoProcessing if we're not already processing
             }
             else
             {
-                _isOvertime = true; //if we're processing, then processing it taking longer than the sim speed
+                lock (_lockObj)
+                {
+                   _isOvertime = true; //if we're processing, then processing it taking longer than the sim speed 
+                }
             }
         }
 
@@ -188,14 +193,18 @@ namespace Pulsar4X.ECSLib
 
         private void DoProcessing(DateTime targetDateTime)
         {
-            _isProcessing = true;
+            lock (_lockObj) 
+            {//would it be better to just put this whole function within this lock?
+                _isProcessing = true;
+                _isOvertime = false; 
+            }
+            
             if(_timer.Enabled)
             {
                 _timer.Stop();
-                _timer.Start(); //reset timer
+                _timer.Start(); //reset timer so we're counting from 0
             }
-            _stopwatch.Start(); //start the processor loop stopwatch
-            _isOvertime = false;
+            _stopwatch.Start(); //start the processor loop stopwatch (performance counter)
 
             //check for global interupts
             //_targetDateTime = GameGlobalDateTime + Ticklength;
@@ -225,7 +234,10 @@ namespace Pulsar4X.ECSLib
             LastProcessingTime = _stopwatch.Elapsed; //how long the processing took
             _stopwatch.Reset();
 
-            _isProcessing = false;
+            lock (_lockObj)
+            {
+                _isProcessing = false;
+            }
         }
 
         private DateTime ProcessNextInterupt(DateTime maxDateTime)
