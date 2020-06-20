@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            BeamMovePhysics(entity.GetDataBlob<BeamInfoDB>());
+            BeamMovePhysics(entity.GetDataBlob<BeamInfoDB>(), deltaSeconds);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             var dbs = manager.GetAllDataBlobsOfType<BeamInfoDB>();
             foreach (BeamInfoDB db in dbs)
             { 
-                BeamMovePhysics(db);
+                BeamMovePhysics(db, deltaSeconds);
             }
         }
 
@@ -28,12 +28,15 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
         public TimeSpan FirstRunOffset { get; } = TimeSpan.FromSeconds(0);
         public Type GetParameterType { get; } = typeof(BeamInfoDB);
 
-        public static void BeamMovePhysics(BeamInfoDB beamInfo)
+        public static void BeamMovePhysics(BeamInfoDB beamInfo, int seconds)
         {
-            beamInfo.PosDB.AbsolutePosition_m += beamInfo.VelocityVector;
-            for (int i = 0; i < beamInfo.Positions.Length; i++)
+            for (int i = 0; i < seconds; i++)
             {
-                beamInfo.Positions[i] += beamInfo.VelocityVector;
+                beamInfo.PosDB.AbsolutePosition_m += beamInfo.VelocityVector;
+                for (int j = 0; j < beamInfo.Positions.Length; j++)
+                {
+                    beamInfo.Positions[j] += beamInfo.VelocityVector;
+                }
             }
         }
         
@@ -66,6 +69,66 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             //dataBlobs.Add(new NameDB("Beam", launchingEntity.FactionOwner, "Beam" ));
 
             var newbeam = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
+        }
+        
+        Vector3 LeadVector(
+            double dvToUse, 
+            double burnTime, 
+            Entity targetEntity,
+            (Vector3 pos, Vector3 Velocity) ourState, 
+            (Vector3 pos, Vector3 Velocity) tgtState, 
+            DateTime atDateTime )
+        {
+            var distanceToTgt = (ourState.pos - tgtState.pos).Length();
+            var tgtBearing = tgtState.pos - ourState.pos;
+            
+            Vector3 leadToTgt = tgtState.Velocity - ourState.Velocity;
+            var closingSpeed = leadToTgt.Length() ;
+            double newttt = distanceToTgt / closingSpeed;
+            double oldttt = 0;
+            int itterations = 0;
+            
+            while (Math.Abs(newttt - oldttt) > 1) //itterate till we get a solution that's less than a second difference from last.
+            {
+                oldttt = newttt;
+
+                TimeSpan timespanToIntercept = TimeSpan.MaxValue;
+                if (newttt * 10000000 <= long.MaxValue)
+                {
+                    timespanToIntercept = TimeSpan.FromSeconds(newttt);
+                }
+                DateTime futureDate = atDateTime + timespanToIntercept;
+                var futurePosition = Entity.GetRalitiveFuturePosition(targetEntity, futureDate);
+                    
+                tgtBearing = futurePosition - ourState.pos;
+                distanceToTgt = (tgtBearing).Length();
+
+                leadToTgt = tgtState.Velocity - ourState.Velocity;
+                closingSpeed = leadToTgt.Length() ;
+                newttt = distanceToTgt / closingSpeed;
+                
+                itterations++;
+
+            }
+            
+            var vectorToTgt = Vector3.Normalise(tgtBearing);
+            var deltaVVector = vectorToTgt * dvToUse;
+            
+            Vector3 manuverVector = OrbitMath.GlobalToOrbitVector(
+                deltaVVector, 
+                ourState.pos, 
+                ourState.Velocity);
+            //So now I'm thrusting in the direction of the target's future position,
+            //not thrusting in a direction that'll get me to that position.
+            return vectorToTgt * dvToUse;//manuverVector; 
+        }
+        
+        double TimeToTarget(double distanceToTgt, Vector3 ourVelocity, Vector3 targetVelocity)
+        {
+            Vector3 leadToTgt = targetVelocity - ourVelocity;
+            var closingSpeed = leadToTgt.Length() ;
+            var timeToTarget = distanceToTgt / closingSpeed;
+            return timeToTarget;
         }
     }
 

@@ -175,9 +175,7 @@ namespace Pulsar4X.ECSLib
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (!_isProcessing)
-            {   
-                //int[] foo = new int[1];
-                //foo[2] = 0;//do we get an exception here? nope, no we dont.
+            {
                 DoProcessing(GameGlobalDateTime + Ticklength); //run DoProcessing if we're not already processing
             }
             else

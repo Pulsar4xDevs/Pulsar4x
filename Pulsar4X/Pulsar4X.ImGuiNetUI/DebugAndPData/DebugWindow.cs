@@ -338,6 +338,11 @@ namespace Pulsar4X.SDL2UI
 
                                     ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition_m.Length()));
                                 }
+
+                                var ralitiveState = Entity.GetRalitiveState(SelectedEntity);
+                                ImGui.Text("Ralitive Velocity: " + ralitiveState.Velocity);
+                                ImGui.Text("Ralitive Speed: " + Stringify.Velocity(ralitiveState.Velocity.Length()));
+                                
                             }
                             
                             if (ImGui.CollapsingHeader("DataBlob List"))
@@ -362,7 +367,7 @@ namespace Pulsar4X.SDL2UI
                                 }
 
                             }
-                            if (SelectedEntity.HasDataBlob<OrbitDB>())
+                            if (SelectedEntity.HasDataBlob<OrbitDB>() || SelectedEntity.HasDataBlob<OrbitUpdateOftenDB>())
                             {
 
                                 if (ImGui.Checkbox("Draw SOI", ref _drawSOI))
@@ -383,8 +388,11 @@ namespace Pulsar4X.SDL2UI
                                 if (ImGui.CollapsingHeader("OrbitDB: ###OrbitDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
 
+                                    
                                     OrbitDB orbitDB = SelectedEntity.GetDataBlob<OrbitDB>();
-
+                                    
+                                    if(orbitDB == null)
+                                        orbitDB = SelectedEntity.GetDataBlob<OrbitUpdateOftenDB>();
                                     //if (_uiState.CurrentSystemDateTime != lastDate)
                                     //{
                                     pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _uiState.PrimarySystemDateTime);
@@ -401,6 +409,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion_DegreesSec + " in Deg/s");
                                     ImGui.Text("MeanVelocity: " + OrbitMath.MeanOrbitalVelocityInAU(orbitDB) + "Au/s");
                                     ImGui.Text("MeanVelocity: " + Stringify.Velocity( OrbitMath.MeanOrbitalVelocityInm(orbitDB)));
+                                    
                                     ImGui.Text("SOI Radius: " + Stringify.Distance(OrbitProcessor.GetSOI_m(SelectedEntity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod.TotalSeconds);
@@ -723,7 +732,11 @@ namespace Pulsar4X.SDL2UI
             var factionEntites = _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Guid);
             foreach (var entity in factionEntites)
             {
-                string name = entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
+                string name = entity.Guid.ToString();
+                if(entity.HasDataBlob<NameDB>())
+                {
+                    name = entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
+                }
                 _factionOwnedEntites.Add((name, entity));
             }
             

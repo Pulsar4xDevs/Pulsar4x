@@ -365,6 +365,11 @@ namespace Pulsar4X.ImGuiNetUI
 
                 _fcSizes = new Vector2[_fcStates.Length];
             }
+            else
+            {
+                IsActive = false;
+                return;
+            }
 
 
             if (instancesDB.TryGetStates<WeaponState>(out _allWeaponsStates))
@@ -374,26 +379,14 @@ namespace Pulsar4X.ImGuiNetUI
                     _wpnDict[wpn.ID] = wpn;
                 }
             }
-            /*
-            List<WeaponState> unassigned= new List<WeaponState>();
-                foreach (var wpn in _allWeaponsStates)
-                {
-                    _wpnDict[wpn.ID] = wpn;
-                    if(wpn.ParentState == null)
-                        unassigned.Add(wpn);
-                }
-
-                _unAssignedWeapons = unassigned.ToArray();
-            }
-            */
-
+            
             var sysstate = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             var contacts = sysstate.SystemContacts;
             _allSensorContacts = contacts.GetAllContacts().ToArray();
             _ownEntites = sysstate.EntityStatesWithPosition.Values.ToArray();
-
-
-
+            RefreshWpnNamesCashe();
+            RefreshReloadStateCashe();
+            
         }
 
         public override void OnSystemTickChange(DateTime newdate)
@@ -421,15 +414,16 @@ namespace Pulsar4X.ImGuiNetUI
 
             }
 
-            UpdateWpnNamesCashe();
+            RefreshWpnNamesCashe();
             RefreshReloadStateCashe();
         }
         
-        void UpdateWpnNamesCashe()
+        void RefreshWpnNamesCashe()
         {
-
+            _weaponNames = new Dictionary<Guid, string>();
             for (int i = 0; i < _allWeaponsStates.Length; i++)
             {
+                
                 var wpn = _allWeaponsStates[i];
 
                 var assOrdName = "";
@@ -501,7 +495,8 @@ namespace Pulsar4X.ImGuiNetUI
         void SetOrdnance(WeaponState wpn, Guid ordnanceAssigned)
         {
             SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, wpn.ID, ordnanceAssigned);
-            UpdateWpnNamesCashe(); //refresh this or it wont show the change till after a systemtick. 
+            RefreshWpnNamesCashe(); //refresh this or it wont show the change till after a systemtick. 
+            RefreshReloadStateCashe();
         }
 
         void SetTarget(FireControlAbilityState fcState, Guid targetID)

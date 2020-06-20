@@ -121,12 +121,13 @@ namespace Pulsar4X.ECSLib
                 
                 _entityCommanding.SetDataBlob(_newtonMovedb);
             }
-            if(_newtonAbilityDB.DeltaV > 0)
+            var halfDV = _startDV * 0.5; //lets burn half the dv getting into a good intercept. 
+            var dvUsed = _startDV - _newtonAbilityDB.DeltaV;
+            var dvToUse = halfDV - dvUsed;
+            if(dvToUse > 0)
             {
-                //var curOurAbsState = Entity.GetAbsoluteState(_entityCommanding);
-                //var curTgtAbsState = Entity.GetAbsoluteState(_targetEntity);
-                var curOurRalState = Entity.GetRalitiveState(_entityCommanding);
-                var curTgtRalState = Entity.GetRalitiveState(_targetEntity);
+                (Vector3 pos, Vector3 Velocity) curOurRalState = Entity.GetRalitiveState(_entityCommanding);
+                (Vector3 pos, Vector3 Velocity) curTgtRalState = Entity.GetRalitiveState(_targetEntity);
                 var dvRemaining = _newtonAbilityDB.DeltaV;
                 
                 var tgtVelocity = Entity.GetAbsoluteFutureVelocity(_targetEntity, atDateTime);
@@ -138,51 +139,20 @@ namespace Pulsar4X.ECSLib
                 //manuverVector.X = leadToTgt.X * -1;
                 manuverVector.Y = dvRemaining - Math.Abs(leadToTgt.X);
                 
-
-
-                var halfDV = _startDV * 0.5; //lets burn half the dv getting into a good intercept. 
-                var dvUsed = _startDV - _newtonAbilityDB.DeltaV;
-                var dvToUse = halfDV - dvUsed;
                 var burnRate = _newtonAbilityDB.FuelBurnRate;
                 //var foo = OrbitMath.TsiolkovskyFuelUse(_totalFuel, )
                 var fuelUse = OrbitMath.TsiolkovskyFuelCost(
                     _newtonAbilityDB.TotalFuel_kg, 
                     _newtonAbilityDB.ExhaustVelocity, 
-                    halfDV//pretty sure this should be dvToUse, but that's giving me a silent crash. 
+                    dvToUse//pretty sure this should be dvToUse, but that's giving me a silent crash. 
                     );
                 var burnTime = fuelUse / burnRate;
-                var acceleration = dvToUse / burnTime;
-                var positionVector = curOurRalState.pos - curTgtRalState.pos;
-                var distanceToTgt = positionVector.Length();
-
-                //not fully accurate since we're not calculating for jerk.
-                var distanceWhileAcclerating = 1.5 * acceleration * burnTime * burnTime;
-                //assuming we're on a simular orbit.
-                var closingSpeed = leadToTgt.Length() + dvToUse;
-                var timeAtFullVelocity = ((distanceToTgt - distanceWhileAcclerating) / closingSpeed);
                 
-                var timeToIntecept = timeAtFullVelocity + burnTime ;
-                TimeSpan timespanToIntercept = TimeSpan.MaxValue;
-                if (timeToIntecept * 10000000 <= long.MaxValue)
-                {
-                    timespanToIntercept = TimeSpan.FromSeconds(timeToIntecept);
-                }
-                DateTime futureDate = atDateTime + timespanToIntercept * 2;//Why do we get a closer intercept if we multipy this by two? idk, somethisn is still wrong with themath somewhere.
-                var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, futureDate);
-                
-                var tgtEstPos = futurePosition- curOurRalState.pos;
-                
-                var vectorToTgt = Vector3.Normalise(tgtEstPos);
-            
-                manuverVector = OrbitMath.GlobalToOrbitVector(vectorToTgt * dvToUse, curOurRalState.pos, curOurRalState.Velocity);
-
-
+                manuverVector = ManuverVector(dvToUse, burnTime, curOurRalState, curTgtRalState, atDateTime);
 
                 _newtonMovedb.DeltaVForManuver_FoRO_m = manuverVector;
-                _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(1), nameof(OrderableProcessor), _entityCommanding);
-
-                //I think the accuracy problem we're getting now is we're calculating the time to target *now* gettinf a future position for *that* time.. which will now have a different time to target.
-
+                _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(5), nameof(OrderableProcessor), _entityCommanding);
+                
             }
             else
             {
@@ -190,34 +160,76 @@ namespace Pulsar4X.ECSLib
             }
             
         }
-/*
-        void ManuverVectorToTarget(double dvToUse, Vector3 ourPos, Vector3 ourVelocity, Vector3 targetVelocity,  DateTime atDateTime)
+
+        Vector3 ManuverVector(
+            double dvToUse, 
+            double burnTime, 
+            (Vector3 pos, Vector3 Velocity) ourState, 
+            (Vector3 pos, Vector3 Velocity) tgtState, 
+            DateTime atDateTime )
         {
-            var distanceToTgt = positionVector.Length();
+            var distanceToTgt = (ourState.pos - tgtState.pos).Length();
+            var tgtBearing = tgtState.pos - ourState.pos;
+
+            double newttt = TimeToTarget(dvToUse, burnTime, distanceToTgt, ourState.Velocity, tgtState.Velocity);
+            int itterations = 0;
+            double oldttt = double.PositiveInfinity;
+            while (oldttt > newttt && Math.Abs(newttt - oldttt) > 1) //itterate till we get a solution that's less than a second difference from last.
+            {
+                oldttt = newttt;
+
+                TimeSpan timespanToIntercept = TimeSpan.MaxValue;
+                if (newttt * 10000000 <= long.MaxValue)
+                {
+                    timespanToIntercept = TimeSpan.FromSeconds(newttt);
+                }
+                DateTime futureDate = atDateTime + timespanToIntercept;
+                var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, futureDate);
+                    
+                tgtBearing = futurePosition - ourState.pos;
+                distanceToTgt = (tgtBearing).Length();
+
+                newttt = TimeToTarget(dvToUse, burnTime, distanceToTgt, ourState.Velocity, tgtState.Velocity);
+                itterations++;
+
+            }
+            
+            var vectorToTgt = Vector3.Normalise(tgtBearing);
+            var deltaVVector = vectorToTgt * dvToUse;
+            
+            Vector3 manuverVector = OrbitMath.GlobalToOrbitVector(
+                deltaVVector, 
+                ourState.pos, 
+                ourState.Velocity);
+            //So now I'm thrusting in the direction of the target's future position,
+            //not thrusting in a direction that'll get me to that position.
+            return vectorToTgt * dvToUse;//manuverVector; 
+        }
+
+
+        double TimeToTarget(double dvToUse, double burnTime, double distanceToTgt, Vector3 ourVelocity, Vector3 targetVelocity)
+        {
+            
+            double acceleration = dvToUse / burnTime;
             //not fully accurate since we're not calculating for jerk.
             var distanceWhileAcclerating = 1.5 * acceleration * burnTime * burnTime;
-            
-            
-            Vector3 leadToTgt = targetVelocity - ourVelocity;
-            
-            var closingSpeed = leadToTgt.Length() + dvToUse;
-            var timeAtFullVelocity = ((distanceToTgt - distanceWhileAcclerating) / closingSpeed);
-
-            var timeToIntecept = timeAtFullVelocity + burnTime ;
-            TimeSpan timespanToIntercept = TimeSpan.MaxValue;
-            if (timeToIntecept * 10000000 <= long.MaxValue)
+            double timeToTarget;
+            if(distanceWhileAcclerating >  distanceToTgt)
             {
-                timespanToIntercept = TimeSpan.FromSeconds(timeToIntecept);
+                distanceWhileAcclerating = distanceToTgt;
+                timeToTarget = Math.Sqrt(distanceToTgt / (1.5 * acceleration));
             }
-            DateTime futureDate = atDateTime + timespanToIntercept * 2;//Why do we get a closer intercept if we multipy this by two? idk, somethisn is still wrong with themath somewhere.
-            var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, futureDate);
+            else
+            {
+                Vector3 leadToTgt = targetVelocity - ourVelocity;
+                var closingSpeed = leadToTgt.Length() + dvToUse;
+                var timeAtFullVelocity = ((distanceToTgt - distanceWhileAcclerating) / closingSpeed);
+                timeToTarget = timeAtFullVelocity + burnTime ;
+            }
 
-            var tgtEstPos = futurePosition - ourPos;
-            var vectorToTgt = Vector3.Normalise(tgtEstPos);
-            var manuverVector = OrbitMath.GlobalToOrbitVector(vectorToTgt * dvToUse, ourPos, ourVelocity);
-
+            return timeToTarget;
         }
-*/
+
         public override bool IsFinished()
         {
             if (IsRunning && _newtonMovedb.DeltaVForManuver_FoRO_m.Length() <= 0)
@@ -236,4 +248,177 @@ namespace Pulsar4X.ECSLib
     }
 
 
+    
+    
+    public class Thrust90ToTargetCmd : EntityCommand
+    {
+        public override int ActionLanes => 1;
+        public override bool IsBlocking => true;
+
+        Entity _factionEntity;
+        Entity _entityCommanding;
+        private OrdnanceDesign _missileDesign;
+        internal override Entity EntityCommanding { get { return _entityCommanding; } }
+
+        private Entity _targetEntity;
+        NewtonMoveDB _newtonMovedb;
+        NewtonThrustAbilityDB _newtonAbilityDB;
+        private double _startDV;
+        private double _startBurnTime;
+        private double _fuelBurnRate;
+        private double _totalFuel;
+
+        public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
+        {
+            var cmd = new Thrust90ToTargetCmd()
+            {
+                RequestingFactionGuid = faction,
+                EntityCommandingGuid = orderEntity.Guid,
+                CreatedDate = orderEntity.StarSysDateTime,
+                _targetEntity = targetEntity,
+                ActionOnDate = actionDateTime,
+            };
+            StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+        }
+
+        internal override void ActionCommand(DateTime atDateTime)
+        {
+            if(atDateTime < ActionOnDate)
+                return;
+            if (!IsRunning)
+            {
+                IsRunning = true;
+                _newtonAbilityDB = _entityCommanding.GetDataBlob<NewtonThrustAbilityDB>();
+                _startDV = _newtonAbilityDB.DeltaV;
+                _fuelBurnRate = _newtonAbilityDB.FuelBurnRate;
+                _totalFuel = _newtonAbilityDB.TotalFuel_kg;
+                var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
+                var currentVel = Entity.GetRalitiveFutureVelocity(_entityCommanding, atDateTime);               
+                if(_entityCommanding.HasDataBlob<OrbitDB>())
+                _entityCommanding.RemoveDataBlob<OrbitDB>();
+                if(_entityCommanding.HasDataBlob<OrbitUpdateOftenDB>())
+                _entityCommanding.RemoveDataBlob<OrbitUpdateOftenDB>();
+                if (_entityCommanding.HasDataBlob<NewtonMoveDB>())
+                    _newtonMovedb = _entityCommanding.GetDataBlob<NewtonMoveDB>();
+                else
+                {
+                    _newtonMovedb = new NewtonMoveDB(soiParentEntity, currentVel); 
+                }
+                
+                _entityCommanding.SetDataBlob(_newtonMovedb);
+            }
+            var halfDV = _startDV * 0.5; //lets burn half the dv getting into a good intercept. 
+            var dvUsed = _startDV - _newtonAbilityDB.DeltaV;
+            var dvToUse = halfDV - dvUsed;
+            if(dvToUse > 0)
+            {
+                (Vector3 pos, Vector3 Velocity) curOurRalState = Entity.GetRalitiveState(_entityCommanding);
+                (Vector3 pos, Vector3 Velocity) curTgtRalState = Entity.GetRalitiveState(_targetEntity);
+                var dvRemaining = _newtonAbilityDB.DeltaV;
+
+                Vector3 vectorToTgtFromPrograde = OrbitMath.GlobalToOrbitVector(
+                    curTgtRalState.pos, 
+                    curOurRalState.pos, 
+                    curOurRalState.Velocity);
+
+                var vttnorm = Vector3.Normalise(vectorToTgtFromPrograde);
+                
+
+
+
+
+            }
+            else
+            {
+                _newtonMovedb.DeltaVForManuver_FoRO_m = new Vector3();
+            }
+            
+        }
+
+        Vector3 ManuverVector(
+            double dvToUse, 
+            double burnTime, 
+            (Vector3 pos, Vector3 Velocity) ourState, 
+            (Vector3 pos, Vector3 Velocity) tgtState, 
+            DateTime atDateTime )
+        {
+            var distanceToTgt = (ourState.pos - tgtState.pos).Length();
+            var tgtBearing = tgtState.pos - ourState.pos;
+            var timeToIntecept = TimeToTarget(dvToUse, burnTime, distanceToTgt, ourState.Velocity, tgtState.Velocity);
+            double newttt = 0;
+            int itterations = 0;
+            var oldttt = timeToIntecept;
+            while (Math.Abs(newttt - oldttt) > 1) //itterate till we get a solution that's less than a second difference from last.
+            {
+                oldttt = newttt;
+
+                TimeSpan timespanToIntercept = TimeSpan.MaxValue;
+                if (timeToIntecept * 10000000 <= long.MaxValue)
+                {
+                    timespanToIntercept = TimeSpan.FromSeconds(timeToIntecept);
+                }
+                DateTime futureDate = atDateTime + timespanToIntercept;
+                var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, futureDate);
+                    
+                tgtBearing = futurePosition - ourState.pos;
+                distanceToTgt = (tgtBearing).Length();
+
+                newttt = TimeToTarget(dvToUse, burnTime, distanceToTgt, ourState.Velocity, tgtState.Velocity);
+                itterations++;
+
+            }
+            
+            var vectorToTgt = Vector3.Normalise(tgtBearing);
+            var deltaVVector = vectorToTgt * dvToUse;
+            
+            Vector3 manuverVector = OrbitMath.GlobalToOrbitVector(
+                deltaVVector, 
+                ourState.pos, 
+                ourState.Velocity);
+            //So now I'm thrusting in the direction of the target's future position,
+            //not thrusting in a direction that'll get me to that position.
+            return vectorToTgt * dvToUse;//manuverVector; 
+        }
+
+
+        double TimeToTarget(double dvToUse, double burnTime, double distanceToTgt, Vector3 ourVelocity, Vector3 targetVelocity)
+        {
+            
+            double acceleration = dvToUse / burnTime;
+            //not fully accurate since we're not calculating for jerk.
+            var distanceWhileAcclerating = 1.5 * acceleration * burnTime * burnTime;
+            double timeToTarget;
+            if(distanceWhileAcclerating >  distanceToTgt)
+            {
+                distanceWhileAcclerating = distanceToTgt;
+                timeToTarget = Math.Sqrt(distanceToTgt / (1.5 * acceleration));
+            }
+            else
+            {
+                Vector3 leadToTgt = targetVelocity - ourVelocity;
+                var closingSpeed = leadToTgt.Length() + dvToUse;
+                var timeAtFullVelocity = ((distanceToTgt - distanceWhileAcclerating) / closingSpeed);
+                timeToTarget = timeAtFullVelocity + burnTime ;
+            }
+
+            return timeToTarget;
+        }
+
+        public override bool IsFinished()
+        {
+            if (IsRunning && _newtonMovedb.DeltaVForManuver_FoRO_m.Length() <= 0)
+                return true;
+            else
+                return false;
+        }
+
+        internal override bool IsValidCommand(Game game)
+        {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+                return true;
+            else
+                return false;
+        }
+    }
+    
 }
