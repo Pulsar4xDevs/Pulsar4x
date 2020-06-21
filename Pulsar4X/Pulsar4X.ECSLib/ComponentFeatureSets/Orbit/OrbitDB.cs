@@ -531,6 +531,25 @@ namespace Pulsar4X.ECSLib
             CalculateExtendedParameters();
         }
 
+        public KeplerElements GetElements()
+        {
+            KeplerElements ke = new KeplerElements();
+            ke.SemiMajorAxis = SemiMajorAxis;                                            //a
+            ke.SemiMinorAxis = SemiMajorAxis * Math.Sqrt(1 - Eccentricity * Eccentricity);//b
+            ke.Eccentricity = Eccentricity;                                              //e
+            ke.Periapsis = Periapsis;                                                    //q
+            ke.Apoapsis = Apoapsis;                                                      //Q
+            ke.LoAN = LongitudeOfAscendingNode;                                          //Ω (upper case Omega)
+            ke.AoP = ArgumentOfPeriapsis;                                                //ω (lower case omega)
+            ke.Inclination = Inclination;                                                //i
+            ke.MeanMotion = MeanMotion;                                                  //n
+            ke.MeanAnomalyAtEpoch = MeanAnomalyAtEpoch;                                  //M0
+            ke.Epoch = Epoch;
+            ke.LinearEccentricity = Eccentricity * SemiMajorAxis;                       //ae
+            //ke.TrueAnomalyAtEpoch  ;   //ν or f or  θ
+            return ke;
+        }
+
         public override object Clone()
         {
             return new OrbitDB(this);

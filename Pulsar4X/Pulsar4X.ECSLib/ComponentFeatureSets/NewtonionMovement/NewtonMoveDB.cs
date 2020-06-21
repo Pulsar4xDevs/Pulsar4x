@@ -191,5 +191,16 @@ namespace Pulsar4X.ECSLib
         {
             return new NewtonMoveDB(this);
         }
+        
+        public KeplerElements GetElements()
+        {
+            // if there is not a change in Dv then the kepler elements wont have changed, it might be better to store them?
+            double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().Mass;
+            var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, ParentMass);
+            var pos = OwningEntity.GetDataBlob<PositionDB>().RelativePosition_m;
+            var dateTime = OwningEntity.StarSysDateTime;
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, CurrentVector_ms, dateTime);
+            return ke;
+        }
     }
 }

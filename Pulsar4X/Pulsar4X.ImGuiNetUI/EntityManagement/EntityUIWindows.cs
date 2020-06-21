@@ -49,13 +49,13 @@ namespace Pulsar4X.SDL2UI
     {
         //checks if given menu can be opened for given entity
         [PublicAPI]
-        internal static bool checkIfCanOpenWindow(Type T, EntityState _entityState, GlobalUIState _state)
+        internal static bool CheckIfCanOpenWindow(Type T, EntityState _entityState, GlobalUIState _state)
         {
 
 
             if(T == typeof(JumpThroughJumpPointBlankMenuHelper))
             {
-                if(checkIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state))
+                if(CheckIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state))
                 {
                     if(_state.PrimaryEntity != null)
                     {
@@ -71,7 +71,7 @@ namespace Pulsar4X.SDL2UI
             }
             else { return false; }
         }
-        internal static bool checkIfCanOpenWindow(Type T, EntityState _entityState)
+        internal static bool CheckIfCanOpenWindow(Type T, EntityState _entityState)
         {
             //Checks if the power gen menu can be opened
             if (_entityState.Entity.HasDataBlob<EnergyGenAbilityDB>() && T == typeof(PowerGen))
@@ -99,6 +99,8 @@ namespace Pulsar4X.SDL2UI
             //if entity can move
             else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
                 { return true; }
+            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(NavWindow))
+            { return true; }
             //if entity can fire?
             else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && T == typeof(FireControl))
                 { return true; }
@@ -120,7 +122,7 @@ namespace Pulsar4X.SDL2UI
         //type parameter is the type of window opened, first parameter indicates wether the window should be opened, second parameter is EntityState for the entity using the window
         //(or window using the entity?) third is the GlobalUIState and fourth indicates wether this function should manage closing preopened pop-ups(mostly utility for EntityContextMenu class[should be set to true when this is used in it])
         [PublicAPI]
-        internal static void openUIWindow(Type T, EntityState _entityState , GlobalUIState _state , bool open = true, bool managesUIPopUps = false)
+        internal static void OpenUIWindow(Type T, EntityState _entityState , GlobalUIState _state , bool open = true, bool managesUIPopUps = false)
         {
             if (open)
             {
@@ -186,6 +188,13 @@ namespace Pulsar4X.SDL2UI
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
+                else if (T == typeof(NavWindow))
+                {
+                    var instance = NavWindow.GetInstance(_entityState);
+                    instance.ToggleActive();
+                    _state.ActiveWindow = instance;
+                }
+
                 //
                 if (T == typeof(PlanetaryWindow))
                 {
@@ -201,7 +210,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
         }
-        public static bool checkopenUIWindow(Type T, EntityState _entityState, GlobalUIState _state)
+        public static bool CheckOpenUIWindow(Type T, EntityState _entityState, GlobalUIState _state)
         {
             //If the user has requested a menu be opened and if
             bool returnval;
@@ -212,6 +221,7 @@ namespace Pulsar4X.SDL2UI
             else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(CargoTransfer)) returnval = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState).GetActive();
             else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState).GetActive();
+            else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
             else returnval = false;
             return returnval;
 

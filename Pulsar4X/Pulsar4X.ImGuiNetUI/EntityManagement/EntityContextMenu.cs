@@ -3,6 +3,7 @@ using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ImGuiNetUI;
+using Pulsar4X.ImGuiNetUI.EntityManagement;
 using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
@@ -36,11 +37,11 @@ namespace Pulsar4X.SDL2UI
             void ContextButton(Type T)
             {
                 //Creates a context button if it is valid
-                if(EntityUIWindows.checkIfCanOpenWindow(T, _entityState)){
+                if(EntityUIWindows.CheckIfCanOpenWindow(T, _entityState)){
                 bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[T]);
                     {
 
-                        EntityUIWindows.openUIWindow(T, _entityState, _state, buttonresult ,true);
+                        EntityUIWindows.OpenUIWindow(T, _entityState, _state, buttonresult ,true);
 
                     }
                 
@@ -58,7 +59,7 @@ namespace Pulsar4X.SDL2UI
             ContextButton(typeof(GotoSystemBlankMenuHelper));
             ContextButton(typeof(WarpOrderWindow));
             ContextButton(typeof(ChangeCurrentOrbitWindow));
-
+            ContextButton(typeof(NavWindow));
             ImGui.EndGroup();
 
         }

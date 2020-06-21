@@ -9,6 +9,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ImGuiNetUI;
+using Pulsar4X.ImGuiNetUI.EntityManagement;
 using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
@@ -32,7 +33,8 @@ namespace Pulsar4X.SDL2UI
             {typeof(ColonyPanel), "Economy"},
             {typeof(GotoSystemBlankMenuHelper), "Go to system"},
             {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
-            {typeof(PlanetaryWindow), "Planetary window"}
+            {typeof(PlanetaryWindow), "Planetary window"},
+            {typeof(NavWindow), "Nav Window"}
         };
         internal Game Game;
         internal FactionVM FactionUIState;

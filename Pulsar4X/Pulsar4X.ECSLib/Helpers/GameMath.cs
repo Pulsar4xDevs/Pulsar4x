@@ -638,23 +638,29 @@ namespace Pulsar4X.ECSLib
         /// Hohmann the specified GravParamOfParent, semiMajAxisCurrentBody and semiMajAxisOfTarget.
         /// </summary>
         /// <returns>Dv burn1 prograde, Dv burn2 retrograde</returns>
-        /// <param name="GravParamOfParent">Grav parameter of parent.</param>
+        /// <param name="StandardGravParam">Grav parameter of parent.</param>
         /// <param name="semiMajAxisCurrentBody">Semi maj axis current body.</param>
         /// <param name="semiMajAxisOfTarget">Semi maj axis of target.</param>
-        public static (double burn1, double burn2) Hohmann(double GravParamOfParent, double semiMajAxisCurrentBody, double semiMajAxisOfTarget)
+        public static (Vector3 burn1, double timeInSeconds)[] Hohmann(double StandardGravParam, double semiMajAxisCurrentBody, double semiMajAxisOfTarget)
         {
             double semMajAxisOfHohman = semiMajAxisCurrentBody + semiMajAxisOfTarget;
-            double velCurrentBody = Math.Sqrt(GravParamOfParent / semiMajAxisCurrentBody);
-            double velTarg = Math.Sqrt(GravParamOfParent / semiMajAxisOfTarget);
+            double velCurrentBody = Math.Sqrt(StandardGravParam / semiMajAxisCurrentBody);
+            double velTarg = Math.Sqrt(StandardGravParam / semiMajAxisOfTarget);
 
-            double velOfHohmannAtPeriapsis = Math.Sqrt(2 * (-GravParamOfParent / semMajAxisOfHohman + GravParamOfParent / semiMajAxisCurrentBody));
+            double velOfHohmannAtPeriapsis = Math.Sqrt(2 * (-StandardGravParam / semMajAxisOfHohman + StandardGravParam / semiMajAxisCurrentBody));
 
-            double velOfHohmannAtApoaxis = Math.Sqrt(2 * (-GravParamOfParent / semMajAxisOfHohman + GravParamOfParent / semiMajAxisOfTarget));
+            double velOfHohmannAtApoaxis = Math.Sqrt(2 * (-StandardGravParam / semMajAxisOfHohman + StandardGravParam / semiMajAxisOfTarget));
 
             double deltaVBurn1 = velOfHohmannAtPeriapsis - velCurrentBody;
             double deltaVBurn2 = velOfHohmannAtApoaxis - velTarg;
-
-            return (deltaVBurn1, deltaVBurn2);
+            
+            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajAxisOfTarget, 3) / StandardGravParam);
+            double timeToSecondBurn = orbitalPeriod * 0.5;
+            
+            var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
+            manuvers[0] = (new Vector3(0, deltaVBurn1, 0), 0);
+            manuvers[1] = (new Vector3(0, -deltaVBurn2, 0), timeToSecondBurn);
+            return manuvers;
         }
 
         /// <summary>
