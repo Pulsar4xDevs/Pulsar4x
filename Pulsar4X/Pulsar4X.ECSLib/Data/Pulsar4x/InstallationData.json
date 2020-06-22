@@ -543,7 +543,7 @@
           "ComponentAtbSDs": [
             {
               "Name": "Tank Size",
-              "DescriptionFormula": "'",
+              "DescriptionFormula": "''",
               "GuiHint": "GuiSelectionMaxMin",
               "GuidDictionary": {
                 "Entries": []
