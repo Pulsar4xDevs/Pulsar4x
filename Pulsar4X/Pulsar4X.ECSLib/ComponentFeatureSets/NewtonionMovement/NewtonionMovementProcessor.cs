@@ -321,7 +321,7 @@ namespace Pulsar4X.ECSLib
             var cargo = parentEntity.GetDataBlob<CargoStorageDB>();
             var fuelAmount = StorageSpaceProcessor.GetAmount(cargo, fuel);
             db.DryMass_kg = wetmass - fuelAmount;
-            db.AddFuel(fuelAmount);
+            db.SetFuel(fuelAmount);
         }
 
 

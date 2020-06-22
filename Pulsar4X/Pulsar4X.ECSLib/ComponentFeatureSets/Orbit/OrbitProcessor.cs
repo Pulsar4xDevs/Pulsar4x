@@ -134,6 +134,11 @@ namespace Pulsar4X.ECSLib
 
             return GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
         }
+        
+        public static Vector3 GetPosition_m(KeplerElements orbit, DateTime time)
+        {
+            return GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
+        }
 
         /// <summary>
         /// Calculates the root ralitive cartesian coordinate of an orbit for a given time.
@@ -216,6 +221,31 @@ namespace Pulsar4X.ECSLib
             return Math.Atan2(y, x);
             */
         }
+        
+        public static double GetTrueAnomaly(KeplerElements orbit, DateTime time)
+        {
+            TimeSpan timeSinceEpoch = time - orbit.Epoch;
+
+            // Don't attempt to calculate large timeframes.
+            while (timeSinceEpoch.TotalSeconds > orbit.OrbitalPeriod && orbit.OrbitalPeriod != 0)
+            {
+                double years = timeSinceEpoch.TotalSeconds / orbit.OrbitalPeriod;
+                timeSinceEpoch -= TimeSpan.FromSeconds(years * orbit.OrbitalPeriod);
+                orbit.Epoch += TimeSpan.FromSeconds(years * orbit.OrbitalPeriod);
+            }
+
+            double m0 = orbit.MeanAnomalyAtEpoch;
+            double n = orbit.MeanMotion;
+            double currentMeanAnomaly = OrbitMath.GetMeanAnomalyFromTime(m0, n, timeSinceEpoch.TotalSeconds);
+
+            double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
+            return OrbitMath.TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
+            /*
+            var x = Math.Cos(eccentricAnomaly) - orbit.Eccentricity;
+            var y = Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity) * Math.Sin(eccentricAnomaly);
+            return Math.Atan2(y, x);
+            */
+        }
 
         /// <summary>
         /// Calculates the cartesian coordinates (relative to it's parent) of an orbit for a given angle.
@@ -271,6 +301,25 @@ namespace Pulsar4X.ECSLib
 
             return new Vector3(x, y, z) * radius;
         }
+        
+        public static Vector3 GetPosition_m(KeplerElements orbit, double trueAnomaly)
+        {
+            // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
+            double radius = orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
+
+            double incl = orbit.Inclination;
+
+            //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
+            double lofAN = orbit.LoAN;
+            //double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
+            double angleFromLoAN = trueAnomaly + orbit.AoP;
+
+            double x = Math.Cos(lofAN) * Math.Cos(angleFromLoAN) - Math.Sin(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
+            double y = Math.Sin(lofAN) * Math.Cos(angleFromLoAN) + Math.Cos(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
+            double z = Math.Sin(incl) * Math.Sin(angleFromLoAN);
+
+            return new Vector3(x, y, z) * radius;
+        }
 
         /// <summary>
         /// Calculates the current Eccentric Anomaly given certain orbital parameters.
@@ -319,6 +368,50 @@ namespace Pulsar4X.ECSLib
             return e[i - 1];
         }
 
+        /// <summary>
+        /// Calculates the current Eccentric Anomaly given certain orbital parameters.
+        /// </summary>
+        public static double GetEccentricAnomaly(KeplerElements orbit, double currentMeanAnomaly)
+        {
+            //Kepler's Equation
+            const int numIterations = 1000;
+            var e = new double[numIterations];
+            const double epsilon = 1E-12; // Plenty of accuracy.
+            int i = 0;
+
+            if (orbit.Eccentricity > 0.8)
+            {
+                e[i] = Math.PI;
+            }
+            else
+            {
+                e[i] = currentMeanAnomaly;
+            }
+
+            do
+            {
+                // Newton's Method.
+                /*					 E(n) - e sin(E(n)) - M(t)
+                 * E(n+1) = E(n) - ( ------------------------- )
+                 *					      1 - e cos(E(n)
+                 * 
+                 * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
+                 * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
+                */
+                e[i + 1] = e[i] - (e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i]));
+                i++;
+            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i + 1 < numIterations);
+
+            if (i + 1 >= numIterations)
+            {
+                Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly from kepler Elements.");
+                gameEvent.EventType = EventType.Opps;
+                StaticRefLib.EventLog.AddEvent(gameEvent);
+            }
+
+            return e[i - 1];
+        }
+        
         /// <summary>
         /// Untested.
         /// Gets the Eccentric Anomaly for a hyperbolic trajectory.

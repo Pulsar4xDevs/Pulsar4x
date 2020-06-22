@@ -100,7 +100,7 @@ namespace Pulsar4X.ECSLib
         internal void BurnDeltaV(double dv)
         {
             DeltaV -= dv;
-            TotalFuel_kg -= OrbitMath.TsiolkovskyFuelUse(TotalFuel_kg, ExhaustVelocity, dv);
+            TotalFuel_kg -= OrbitMath.TsiolkovskyFuelUse(DryMass_kg + TotalFuel_kg, ExhaustVelocity, dv);
         }
 
         /// <summary>
@@ -110,7 +110,17 @@ namespace Pulsar4X.ECSLib
         internal void AddFuel(double fuel)
         {
             TotalFuel_kg += fuel;
-            DeltaV = OrbitMath.TsiolkovskyRocketEquation(TotalFuel_kg, DryMass_kg, ExhaustVelocity);
+            DeltaV = OrbitMath.TsiolkovskyRocketEquation(DryMass_kg + TotalFuel_kg, DryMass_kg, ExhaustVelocity);
+        }
+        
+        /// <summary>
+        /// Sets a given amount of fuel, and updates DeltaV.
+        /// </summary>
+        /// <param name="fuel"></param>
+        internal void SetFuel(double fuel)
+        {
+            TotalFuel_kg = fuel;
+            DeltaV = OrbitMath.TsiolkovskyRocketEquation(DryMass_kg + TotalFuel_kg, DryMass_kg, ExhaustVelocity);
         }
 
         [JsonConstructor]

@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
             var newtdb = newMissile.GetDataBlob<NewtonThrustAbilityDB>();
             newtdb.DryMass_kg = missileDesign.Mass;
-            newtdb.AddFuel(missileDesign.WetMass - missileDesign.Mass);
+            newtdb.SetFuel(missileDesign.WetMass - missileDesign.Mass);
             
 
             bool directAttack = true;

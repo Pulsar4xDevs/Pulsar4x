@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
@@ -10,10 +11,27 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
     public class NavWindow : PulsarGuiWindow
     {
         private Entity _orderEntity;
-        OrbitDB _ourOrbit;
+        //OrbitDB _ourOrbit;
+        private double _sgp;
+        private KeplerElements _currentKE;
+        private NewtonThrustAbilityDB _newtonThrust;
+
+        private double _totalDV
+        {
+            get { return _newtonThrust.DeltaV; }
+        }
+        
+        private double _totalDVUsage = 0;
+        
+        
+        
         float _phaseAngle = 0;
         private DateTime _minDateTime;
         DateTime _atDatetime;
+        
+        Entity[] _siblingEntities = new Entity[0];
+        string[] _siblingNames = new string[0];
+        private int _selectedSibling = -1;
         
         private NavWindow(Entity orderEntity)
         {
@@ -28,7 +46,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             if (!_uiState.LoadedWindows.ContainsKey(typeof(NavWindow)))
             {
                 thisitem = new NavWindow(orderEntity.Entity);
-                //thisitem.HardRefresh(orderEntity);
+                thisitem.HardRefresh(orderEntity);
                 thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
             }
             else
@@ -37,12 +55,36 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 if (thisitem._orderEntity != orderEntity.Entity)
                 {
                     thisitem._orderEntity = orderEntity.Entity;
-                    //thisitem.HardRefresh(orderEntity);
+                    thisitem.HardRefresh(orderEntity);
                     thisitem.OnSystemTickChange(_uiState.SelectedSystemTime);
                 }
             }
 
             return thisitem;
+        }
+
+        private void HardRefresh(EntityState orderEntity)
+        {
+            _orderEntity = orderEntity.Entity;
+            _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
+            var myMass = _orderEntity.GetDataBlob<MassVolumeDB>().Mass;
+            var parentMass = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<MassVolumeDB>().Mass;
+            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+
+            _siblingEntities = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<PositionDB>().Children.ToArray();
+            List<string> names = new List<string>();
+            foreach (var entity in _siblingEntities)
+            {
+                //TODO: this is going to show *all* entities, not just the ones this faction can see.
+                //going to need to come up with a way to get this data. (filtering for this should be done in the engine not ui)
+                string name = entity.GetDataBlob<NameDB>().GetName(_orderEntity.FactionOwner);
+                names.Add(name);
+            }
+
+            _siblingNames = names.ToArray();
+            
+            OnSystemTickChange(orderEntity.Entity.StarSysDateTime);
+            
         }
 
         public override void OnSystemTickChange(DateTime newDate)
@@ -52,10 +94,15 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             {
                 _atDatetime = _minDateTime;
             }
-
-            _ourOrbit = _orderEntity.GetDataBlob<OrbitDB>();
+            if (_orderEntity.HasDataBlob<OrbitDB>())
+                _currentKE = _orderEntity.GetDataBlob<OrbitDB>().GetElements();
+            else if (_orderEntity.HasDataBlob<OrbitUpdateOftenDB>())
+                _currentKE = _orderEntity.GetDataBlob<OrbitUpdateOftenDB>().GetElements();
+            else if (_orderEntity.HasDataBlob<OrbitDB>())
+                _currentKE = _orderEntity.GetDataBlob<NewtonMoveDB>().GetElements();            
+            
             if (_targetSMA == 0)
-                _targetSMA = (float)_ourOrbit.SemiMajorAxis;
+                _targetSMA = (float)_currentKE.SemiMajorAxis;
         }
 
 
@@ -95,14 +142,20 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     _navMode = NavMode.PorkChopPlot;
                 }
                 BorderGroup.End();
-
+                ImGui.NewLine();
+                ImGui.Text("TotalDV: " + Stringify.Velocity(_totalDV));
                 switch (_navMode)
-                {
+                {                    
+                    case NavMode.Thrust:
+                    {
+                        DisplayThrustMode();
+                        break;
+                    }
                     case NavMode.PhaseChange:
                         DisplayPhaseChangeMode();
                         break;
                     case NavMode.HohmannTransfer:
-                        DisplayPhaseChangeMode();
+                        DisplayHohmannMode();
                         break;
                     case NavMode.None:
                         break;
@@ -113,14 +166,14 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
         }
 
-        private float _maxDV;
+        
         private float _radialDV;
         private float _progradeDV;
         void DisplayThrustMode()
         {
             bool changes = false;
-            float maxprogradeDV = (float)(_maxDV - Math.Abs(_radialDV));
-            float maxradialDV = (float)(_maxDV - Math.Abs(_progradeDV));
+            float maxprogradeDV = (float)(_totalDV - Math.Abs(_radialDV));
+            float maxradialDV = (float)(_totalDV - Math.Abs(_progradeDV));
                         
             if (ImGui.SliderFloat("Prograde DV", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
             {
@@ -144,18 +197,55 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         void DisplayPhaseChangeMode()
         {
             ImGui.SliderAngle("PhaseAngle", ref _phaseAngle);
-            (Vector3 deltaV, double timeInSeconds)[] manuvers = InterceptCalcs.OrbitPhasingManuvers(_ourOrbit, _atDatetime, _phaseAngle);
+            var manuvers = InterceptCalcs.OrbitPhasingManuvers(_currentKE, _sgp, _atDatetime, _phaseAngle);
+            
+            
+            double totalManuverDV = 0;
+            foreach (var manuver in manuvers)
+            {
+                ImGui.Text(manuver.deltaV.Length() + "Dv");
+                totalManuverDV += manuver.deltaV.Length();
+            }
+            ImGui.Text("Total DV for all manuvers: " + Stringify.Velocity(totalManuverDV));
         }
 
         private float _targetSMA = 0;
+        
         void DisplayHohmannMode()
         {
-            double mySMA = _ourOrbit.SemiMajorAxis;
+            double mySMA = _currentKE.SemiMajorAxis;
             float smaMin = 1;
             float smaMax = float.MaxValue;
-            var sgp = _ourOrbit.GravitationalParameter_m3S2;
+            
+            if(ImGui.Combo("Target Object", ref _selectedSibling, _siblingNames, _siblingNames.Length  ))
+            {
+                Entity selectedSib = _siblingEntities[_selectedSibling];
+                if(selectedSib.HasDataBlob<OrbitDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitDB>().SemiMajorAxis;
+                if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
+                if(selectedSib.HasDataBlob<NewtonMoveDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
+            }
+
             ImGui.SliderFloat("Target SemiMajorAxis", ref _targetSMA, smaMin, smaMax);
-            var manuvers = InterceptCalcs.Hohmann(sgp, mySMA, _targetSMA);
+            var manuvers = InterceptCalcs.Hohmann(_sgp, mySMA, _targetSMA);
+
+            
+            
+            double totalManuverDV = 0;
+            foreach (var manuver in manuvers)
+            {
+                ImGui.Text(manuver.deltaV.Length() + "Dv");
+                totalManuverDV += manuver.deltaV.Length();
+            }
+            
+            if(totalManuverDV > _totalDV)
+                ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total DV for all manuvers: " + Stringify.Velocity(totalManuverDV));
+            else
+                ImGui.Text("Total DV for all manuvers: " + Stringify.Velocity(totalManuverDV));
+            
+            
         }
     }
 }

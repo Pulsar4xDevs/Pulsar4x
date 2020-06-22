@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
         public double MeanMotion;           //n
         public double MeanAnomalyAtEpoch;   //M0
         public double TrueAnomalyAtEpoch;   //ν or f or  θ
-        //public double Period              //P
+        public double OrbitalPeriod;        //P
         //public double EccentricAnomaly    //E
         public DateTime Epoch;                //
     }
@@ -108,6 +108,7 @@ namespace Pulsar4X.ECSLib
             ke.MeanMotion = meanMotion;
             ke.MeanAnomalyAtEpoch = meanAnomaly;
             ke.TrueAnomalyAtEpoch = trueAnomaly;
+            ke.OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajorAxis, 3) / standardGravParam);
             ke.Epoch = epoch; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
             //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
 
@@ -986,6 +987,8 @@ namespace Pulsar4X.ECSLib
         /// <param name="ve">ExhaustVelocity, not isp</param>
         public static double TsiolkovskyRocketEquation(double wetMass, double dryMass, double ve)
         {
+            if (wetMass == 0)
+                return 0;
             double deltaV = ve * Math.Log(wetMass / dryMass);
             return deltaV;
         }
