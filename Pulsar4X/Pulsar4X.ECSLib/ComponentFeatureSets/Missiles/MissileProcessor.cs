@@ -68,7 +68,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             newtdb.SetFuel(missileDesign.WetMass - missileDesign.Mass);
             
 
-            bool directAttack = true;
+            bool directAttack = false;
             
             
             if(directAttack)
@@ -106,13 +106,14 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 
                 
                 var manuverDV = manuvers[0].deltaV;
-                newtmovedb.ActionOnDateTime = atDatetime;
-                newtmovedb.DeltaVForManuver_FoRO_m = manuverDV;   
+                //newtmovedb.ActionOnDateTime = atDatetime;
+                //newtmovedb.DeltaVForManuver_FoRO_m = manuverDV;   
+                NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, atDatetime, manuverDV);
                 
                 DateTime futureDate = atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
                 Vector3 futureDV = manuvers[1].deltaV;
                 NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
-                ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate + TimeSpan.FromSeconds(1), targetEntity);
+                //ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate + TimeSpan.FromSeconds(1), targetEntity);
             }
             
             StorageSpaceProcessor.RemoveCargo(cargo, missileDesign, 1); //remove missile from parent.

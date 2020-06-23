@@ -131,10 +131,14 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("Count: " + itemsCount);
                             ImGui.NextColumn();
                             _numLines += itemsCount;
-                            foreach (var item in items)
+                            lock (items)//TODO: IDK the best way to fix this.
                             {
-                                RecursiveReflection(item);
+                                foreach (var item in items)  
+                                {
+                                    RecursiveReflection(item);
+                                }
                             }
+
                             ImGui.TreePop();
                         }
                         else
@@ -155,10 +159,14 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("Count: " + itemsCount);
                             ImGui.NextColumn();
                             _numLines += itemsCount;
-                            foreach (var item in items)
+                            lock (items) //TODO: IDK the best way to fix this.
                             {
-                                RecursiveReflection(item);
+                                foreach (var item in items)
+                                {
+                                    RecursiveReflection(item);
+                                }
                             }
+
                             ImGui.TreePop();
                         }
                         else

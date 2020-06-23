@@ -59,7 +59,7 @@ namespace ImGuiSDL2CS {
                 string rf = "Resources";
                 ImFontAtlasPtr fontAtlas = ImGui.GetIO().Fonts;
                 var builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
-                builder.AddText("Ωων");
+                builder.AddText("ΩωνΔθ");
                 //builder.AddRanges(fontAtlas.GetGlyphRangesDefault());
                 builder.BuildRanges(out ImVector ranges);
                 fontAtlas.AddFontFromFileTTF(Path.Combine(rf, "ProggyClean.ttf"), 13);

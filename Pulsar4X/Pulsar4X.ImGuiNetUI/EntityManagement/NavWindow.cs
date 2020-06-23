@@ -25,7 +25,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         
         
         
-        float _phaseAngle = 0;
+        float _phaseAngleRadians = 0;
         private DateTime _minDateTime;
         DateTime _atDatetime;
         
@@ -112,6 +112,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             Thrust,
             HohmannTransfer,
             PhaseChange,
+            HighDVIntercept,
             PorkChopPlot
         }
 
@@ -137,13 +138,17 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 {
                     _navMode = NavMode.PhaseChange;
                 }
+                if (ImGui.Button("High Δv Intercept"))
+                {
+                    _navMode = NavMode.HighDVIntercept;
+                }
                 if (ImGui.Button("Porkchop Plot"))
                 {
                     _navMode = NavMode.PorkChopPlot;
                 }
                 BorderGroup.End();
                 ImGui.NewLine();
-                ImGui.Text("TotalDV: " + Stringify.Velocity(_totalDV));
+                ImGui.Text("Availible Δv: " + Stringify.Velocity(_totalDV));
                 switch (_navMode)
                 {                    
                     case NavMode.Thrust:
@@ -175,12 +180,12 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             float maxprogradeDV = (float)(_totalDV - Math.Abs(_radialDV));
             float maxradialDV = (float)(_totalDV - Math.Abs(_progradeDV));
                         
-            if (ImGui.SliderFloat("Prograde DV", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
+            if (ImGui.SliderFloat("Prograde Δv", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
             {
                 //Calcs();
                 changes = true;
             }
-            if (ImGui.SliderFloat("Radial DV", ref _radialDV, -maxradialDV, maxradialDV))
+            if (ImGui.SliderFloat("Radial Δv", ref _radialDV, -maxradialDV, maxradialDV))
             {
                 //Calcs();
                 changes = true;
@@ -196,17 +201,31 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         void DisplayPhaseChangeMode()
         {
-            ImGui.SliderAngle("PhaseAngle", ref _phaseAngle);
-            var manuvers = InterceptCalcs.OrbitPhasingManuvers(_currentKE, _sgp, _atDatetime, _phaseAngle);
+            ImGui.SliderAngle("PhaseAngle", ref _phaseAngleRadians);
+      
+            var manuvers = InterceptCalcs.OrbitPhasingManuvers(_currentKE, _sgp, _atDatetime, _phaseAngleRadians);
             
             
             double totalManuverDV = 0;
             foreach (var manuver in manuvers)
             {
-                ImGui.Text(manuver.deltaV.Length() + "Dv");
+                ImGui.Text(manuver.deltaV.Length() + "Δv");
                 totalManuverDV += manuver.deltaV.Length();
+                ImGui.Text("Seconds: " + manuver.timeInSeconds);
             }
-            ImGui.Text("Total DV for all manuvers: " + Stringify.Velocity(totalManuverDV));
+
+            ImGui.Text("Total Δv");
+            ImGui.SameLine();
+            ImGui.Text("for all manuvers: " + Stringify.Velocity(totalManuverDV));
+
+
+            
+            if (ImGui.Button("Make it so"))
+            {
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, _atDatetime, manuvers[0].deltaV);
+                DateTime futureDate = _atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, futureDate, manuvers[1].deltaV);
+            }
         }
 
         private float _targetSMA = 0;
@@ -215,7 +234,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             double mySMA = _currentKE.SemiMajorAxis;
             float smaMin = 1;
-            float smaMax = float.MaxValue;
+            float smaMax = (float)OrbitProcessor.GetSOI_m( Entity.GetSOIParentEntity(_orderEntity));
             
             if(ImGui.Combo("Target Object", ref _selectedSibling, _siblingNames, _siblingNames.Length  ))
             {
@@ -236,16 +255,36 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             double totalManuverDV = 0;
             foreach (var manuver in manuvers)
             {
-                ImGui.Text(manuver.deltaV.Length() + "Dv");
+                ImGui.Text(manuver.deltaV.Length() + "Δv");
                 totalManuverDV += manuver.deltaV.Length();
             }
             
             if(totalManuverDV > _totalDV)
-                ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total DV for all manuvers: " + Stringify.Velocity(totalManuverDV));
+                ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
             else
-                ImGui.Text("Total DV for all manuvers: " + Stringify.Velocity(totalManuverDV));
+                ImGui.Text("Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
             
+            if (ImGui.Button("Make it so"))
+            {
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, _atDatetime, manuvers[0].deltaV);
+                DateTime futureDate = _atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, futureDate, manuvers[1].deltaV);
+            }
             
+        }
+
+        void DisplayHighDVIntercept()
+        {
+            if(ImGui.Combo("Target Object", ref _selectedSibling, _siblingNames, _siblingNames.Length  ))
+            {
+                Entity selectedSib = _siblingEntities[_selectedSibling];
+                if(selectedSib.HasDataBlob<OrbitDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitDB>().SemiMajorAxis;
+                if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
+                if(selectedSib.HasDataBlob<NewtonMoveDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
+            }
         }
     }
 }

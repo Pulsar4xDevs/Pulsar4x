@@ -76,7 +76,9 @@ namespace Pulsar4X.SDL2UI
                 _armorNames[i]= armorMat.Name;
                 i++;
             }
-            
+            //TODO: bleed over from mod data to get a default armor...
+            _armor = StaticRefLib.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            _armorThickness = 3;
             _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
         }
 
@@ -84,9 +86,7 @@ namespace Pulsar4X.SDL2UI
         {
             RefreshComponentDesigns();
             _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
-            //TODO: bleed over from mod data to get a default armor...
-            _armor = StaticRefLib.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
-            _armorThickness = 3;
+
         }
 
         internal static ShipDesignUI GetInstance()
