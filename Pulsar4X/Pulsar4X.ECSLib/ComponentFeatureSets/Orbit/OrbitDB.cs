@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public double GravitationalParameterAU { get; protected set; }
 
-        public double SOI_m { get; protected set; }
+        public double SOI_m { get; protected set; } = double.MaxValue;
         
         
         /// <summary>

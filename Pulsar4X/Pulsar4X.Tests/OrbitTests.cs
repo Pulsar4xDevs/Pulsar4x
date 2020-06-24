@@ -466,34 +466,38 @@ namespace Pulsar4X.Tests
             Entity parentEntity = TestingUtilities.BasicEarth(mgr);
 
             PositionDB pos1 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
-            BaseDataBlob[] objBlobs1 = new BaseDataBlob[3];
+            var newt1 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ DeltaVForManuver_FoRO_m = new Vector3(0,1,0)};
+            BaseDataBlob[] objBlobs1 = new BaseDataBlob[4];
             objBlobs1[0] = pos1;
             objBlobs1[1] = new MassVolumeDB() { Mass = 10000 };
-            objBlobs1[2] = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0));
+            objBlobs1[2] = new NewtonThrustAbilityDB(mgr.ManagerGuid);
+            objBlobs1[3] = newt1;
             Entity objEntity1 = new Entity(mgr, objBlobs1);
             
             
             PositionDB pos2 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
-            BaseDataBlob[] objBlobs2 = new BaseDataBlob[3];
+            var newt2 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ DeltaVForManuver_FoRO_m = new Vector3(0,1,0)};
+            BaseDataBlob[] objBlobs2 = new BaseDataBlob[4];
             objBlobs2[0] = pos2;
             objBlobs2[1] = new MassVolumeDB() { Mass = 10000 };
-            objBlobs2[2] = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0));
+            objBlobs2[2] = new NewtonThrustAbilityDB(mgr.ManagerGuid);
+            objBlobs2[3] = newt2;
             Entity objEntity2 = new Entity(mgr, objBlobs2);
 
             var seconds = 100;
             for (int i = 0; i < seconds; i++)
             {
                 NewtonionMovementProcessor.NewtonMove(objEntity1, 1);
+                
+                //this is a hacky way to allow us to increment each second,
+                //since the above method looks at the manager datetime and we're not updating that.
+                newt1.LastProcessDateTime -= TimeSpan.FromSeconds(1);
             }
             NewtonionMovementProcessor.NewtonMove(objEntity2, seconds);
-            var distance1 = Distance.AuToKm(pos1.AbsolutePosition_AU.Length());
-            var distance2 = Distance.AuToKm(pos2.AbsolutePosition_AU.Length());
-
-            //this test is currently failing and I'm unsure why. right now the code is using a 1s timestep so it should come out exact...
-            //it looks ok graphicaly though so I'm not *too* conserned about this one right now. 
+            var distance1 = (pos1.RelativePosition_m.Length());
+            var distance2 = (pos2.RelativePosition_m.Length());
+            
             Assert.AreEqual(distance1, distance2); //if we put the variable timstep which is related to the speed of the object in we'll have to give this a delta
-
-
         }
     }
 }
