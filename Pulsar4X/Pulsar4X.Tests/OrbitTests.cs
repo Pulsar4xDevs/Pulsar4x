@@ -255,13 +255,13 @@ namespace Pulsar4X.Tests
             Vector3 velocity = new Vector3() { X = Distance.KmToM(0), Y = Distance.KmToM(1) }; //passes
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
-            velocity = new Vector3() { X = Distance.KmToM(0), Y = -Distance.KmToAU(2) }; //fails
+            velocity = new Vector3() { X = Distance.KmToM(0), Y = -Distance.KmToM(2) }; //fails
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
-            velocity = new Vector3() { X = Distance.KmToM(1), Y = Distance.KmToAU(0) }; //fails
+            velocity = new Vector3() { X = Distance.KmToM(1), Y = Distance.KmToM(0) }; //fails
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
-            velocity = new Vector3() { X = Distance.KmToM(-1), Y = Distance.KmToAU(0) }; //fails
+            velocity = new Vector3() { X = Distance.KmToM(-1), Y = Distance.KmToM(0) }; //fails
             TestOrbitDBFromVectors(parentMass, objMass, position, velocity);
 
         }
@@ -273,11 +273,11 @@ namespace Pulsar4X.Tests
 
             return true;
         }
-        public void TestOrbitDBFromVectors(double parentMass, double objMass, Vector3 position, Vector3 velocity)
+        public void TestOrbitDBFromVectors(double parentMass, double objMass, Vector3 position_InMeters, Vector3 velocity_InMetersSec)
         {
             double angleΔ = 0.0000000001;
             double sgp_m = OrbitMath.CalculateStandardGravityParameterInM3S2(objMass, parentMass);
-            KeplerElements ke = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position, velocity, new DateTime());
+            KeplerElements ke_m = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position_InMeters, velocity_InMetersSec, new DateTime());
 
             Game game = new Game();
             EntityManager man = new EntityManager(game, false);
@@ -289,31 +289,31 @@ namespace Pulsar4X.Tests
             Entity parentEntity = new Entity(man, parentblobs);
 
 
-            OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp_m, position, velocity, new DateTime());
-            Vector3 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
+            OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp_m, position_InMeters, velocity_InMetersSec, new DateTime());
+            Vector3 resultPos_AU = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
 
             //check LoAN
             var objLoAN = objOrbit.LongitudeOfAscendingNode;
-            var keLoAN = ke.LoAN;
+            var keLoAN = ke_m.LoAN;
             var loANDifference = objLoAN - keLoAN;
             Assert.AreEqual(keLoAN, objLoAN, angleΔ);
 
             //check AoP
             var objAoP = objOrbit.ArgumentOfPeriapsis;
-            var keAoP = ke.AoP;
+            var keAoP = ke_m.AoP;
             var difference = objAoP - keAoP;
             Assert.AreEqual(keAoP, objAoP, angleΔ);
 
 
             //check MeanAnomalyAtEpoch
             var objM0 = objOrbit.MeanAnomalyAtEpoch;
-            var keM0 = ke.MeanAnomalyAtEpoch;
+            var keM0 = ke_m.MeanAnomalyAtEpoch;
             Assert.AreEqual(keM0, objM0, angleΔ);
             Assert.AreEqual(objM0, OrbitMath.GetMeanAnomalyFromTime(objM0, objOrbit.MeanMotion_DegreesSec, 0), "meanAnomalyError");
 
             //checkEpoch
             var objEpoch = objOrbit.Epoch;
-            var keEpoch = ke.Epoch;
+            var keEpoch = ke_m.Epoch;
             Assert.AreEqual(keEpoch, objEpoch);
 
             
@@ -331,14 +331,14 @@ namespace Pulsar4X.Tests
             //check trueAnomaly 
             var orbTrueAnom = OrbitProcessor.GetTrueAnomaly(objOrbit, new DateTime());
             var orbtaDeg = Angle.ToDegrees(orbTrueAnom);
-            var differenceInRadians = orbTrueAnom - ke.TrueAnomalyAtEpoch;
+            var differenceInRadians = orbTrueAnom - ke_m.TrueAnomalyAtEpoch;
             var differenceInDegrees = Angle.ToDegrees(differenceInRadians);
-            if (ke.TrueAnomalyAtEpoch != orbTrueAnom) 
+            if (ke_m.TrueAnomalyAtEpoch != orbTrueAnom) 
             { 
 
-                Vector3 eccentVector = OrbitMath.EccentricityVector(sgp_m, position, velocity);
-                var tacalc1 = OrbitMath.TrueAnomaly(eccentVector, position, velocity);
-                var tacalc2 = OrbitMath.TrueAnomaly(sgp_m, position, velocity);
+                Vector3 eccentVector = OrbitMath.EccentricityVector(sgp_m, position_InMeters, velocity_InMetersSec);
+                var tacalc1 = OrbitMath.TrueAnomaly(eccentVector, position_InMeters, velocity_InMetersSec);
+                var tacalc2 = OrbitMath.TrueAnomaly(sgp_m, position_InMeters, velocity_InMetersSec);
 
                 var diffa = differenceInDegrees;
                 var diffb = Angle.ToDegrees(orbTrueAnom - tacalc1);
@@ -347,50 +347,50 @@ namespace Pulsar4X.Tests
                 var ketaDeg = Angle.ToDegrees(tacalc1);
             }
 
-            Assert.AreEqual(0, Angle.DifferenceBetweenRadians(ke.TrueAnomalyAtEpoch, orbTrueAnom), angleΔ,
+            Assert.AreEqual(0, Angle.DifferenceBetweenRadians(ke_m.TrueAnomalyAtEpoch, orbTrueAnom), angleΔ,
                 "more than " + angleΔ + " radians difference, at " + differenceInRadians + " \n " +
                 "(more than " + Angle.ToDegrees(angleΔ) + " degrees difference at " + differenceInDegrees + ")" + " \n " +
-                "ke Angle: " + ke.TrueAnomalyAtEpoch + " obj Angle: " + orbTrueAnom + " \n " +
-                "ke Angle: " + Angle.ToDegrees(ke.TrueAnomalyAtEpoch) + " obj Angle: " + Angle.ToDegrees(orbTrueAnom));
+                "ke Angle: " + ke_m.TrueAnomalyAtEpoch + " obj Angle: " + orbTrueAnom + " \n " +
+                "ke Angle: " + Angle.ToDegrees(ke_m.TrueAnomalyAtEpoch) + " obj Angle: " + Angle.ToDegrees(orbTrueAnom));
                 
-            Assert.AreEqual(ke.Eccentricity, objOrbit.Eccentricity);
-            Assert.AreEqual(ke.SemiMajorAxis, objOrbit.SemiMajorAxis);
+            Assert.AreEqual(ke_m.Eccentricity, objOrbit.Eccentricity);
+            Assert.AreEqual(ke_m.SemiMajorAxis, objOrbit.SemiMajorAxis);
 
 
-            var lenke1 = ke.SemiMajorAxis * 2;
-            var lenke2 = ke.Apoapsis + ke.Periapsis;
-            Assert.AreEqual(lenke1, lenke2, 1.0E-10);
-            var lendb1 = objOrbit.SemiMajorAxis_AU * 2;
-            var lendb2 = objOrbit.Apoapsis_AU + objOrbit.Periapsis_AU;
-            Assert.AreEqual(lendb1, lendb2, 1.0E-10 );
-            Assert.AreEqual(lenke1, lendb1, 1.0E-10 );
-            Assert.AreEqual(lenke2, lendb2, 1.0E-10 );
+            var majAxisLenke = ke_m.SemiMajorAxis * 2;
+            var majAxisLenke2 = ke_m.Apoapsis + ke_m.Periapsis;
+            Assert.AreEqual(majAxisLenke, majAxisLenke2, 1.0E-10);
+            var majAxisLendb = objOrbit.SemiMajorAxis * 2;
+            var majAxisLendb2 = objOrbit.Apoapsis + objOrbit.Periapsis;
+            Assert.AreEqual(majAxisLendb, majAxisLendb2, 1.0E-6 );
+            Assert.AreEqual(majAxisLenke, majAxisLendb, 1.0E-10 );
+            Assert.AreEqual(majAxisLenke2, majAxisLendb2, 1.0E-6 );
 
 
 
-            var ke_apkm = Distance.AuToKm(ke.Apoapsis);
-            var db_apkm = Distance.AuToKm(objOrbit.Apoapsis_AU);
-            var differnce = ke_apkm - db_apkm;
-            Assert.AreEqual(ke.Apoapsis, objOrbit.Apoapsis_AU, 1.0E-10 );
-            Assert.AreEqual(ke.Periapsis, objOrbit.Periapsis_AU, 1.0E-10 );
+            var ke_apm = ke_m.Apoapsis;
+            var db_apm = objOrbit.Apoapsis;
+            var differnce = ke_apm - db_apm;
+            Assert.AreEqual(ke_m.Apoapsis, objOrbit.Apoapsis, 1.0E-6 );
+            Assert.AreEqual(ke_m.Periapsis, objOrbit.Periapsis, 1.0E-6 );
 
-            Vector3 posKM = Distance.AuToKm(position);
-            Vector3 resultKM = Distance.AuToKm(resultPos);
+            Vector3 pos_m = position_InMeters;
+            Vector3 result_m = Distance.AuToMt(resultPos_AU);
 
-            double keslr = EllipseMath.SemiLatusRectum(ke.SemiMajorAxis, ke.Eccentricity);
-            double keradius = OrbitMath.RadiusAtAngle(ke.TrueAnomalyAtEpoch, keslr, ke.Eccentricity);
-            Vector3 kemathPos = OrbitMath.GetRalitivePosition(ke.LoAN, ke.AoP, ke.Inclination, ke.TrueAnomalyAtEpoch, keradius);
-            Vector3 kemathPosKM = Distance.AuToKm(kemathPos);
-            Assert.AreEqual(kemathPosKM.Length(), posKM.Length(), 0.01);
+            double keslr = EllipseMath.SemiLatusRectum(ke_m.SemiMajorAxis, ke_m.Eccentricity);
+            double keradius = OrbitMath.RadiusAtAngle(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);
+            Vector3 kemathPos = OrbitMath.GetRalitivePosition(ke_m.LoAN, ke_m.AoP, ke_m.Inclination, ke_m.TrueAnomalyAtEpoch, keradius);
+            
+            Assert.AreEqual(kemathPos.Length(), pos_m.Length(), 0.02);
 
-            Assert.AreEqual(posKM.Length(), resultKM.Length(), 0.01, "TA: " + orbtaDeg);
-            Assert.AreEqual(posKM.X, resultKM.X, 0.01, "TA: " + orbtaDeg);
-            Assert.AreEqual(posKM.Y, resultKM.Y, 0.01, "TA: " + orbtaDeg);
-            Assert.AreEqual(posKM.Z, resultKM.Z, 0.01, "TA: " + orbtaDeg);
+            Assert.AreEqual(pos_m.Length(), result_m.Length(), 0.02, "TA: " + orbtaDeg);
+            Assert.AreEqual(pos_m.X, result_m.X, 0.01, "TA: " + orbtaDeg);
+            Assert.AreEqual(pos_m.Y, result_m.Y, 0.01, "TA: " + orbtaDeg);
+            Assert.AreEqual(pos_m.Z, result_m.Z, 0.01, "TA: " + orbtaDeg);
 
-            if (velocity.Z == 0)
+            if (velocity_InMetersSec.Z == 0)
             {
-                Assert.IsTrue(ke.Inclination == 0);
+                Assert.IsTrue(ke_m.Inclination == 0);
                 Assert.IsTrue(objOrbit.Inclination_Degrees == 0);
             }
 
@@ -465,19 +465,19 @@ namespace Pulsar4X.Tests
             EntityManager mgr = new EntityManager(game, false);
             Entity parentEntity = TestingUtilities.BasicEarth(mgr);
 
-            PositionDB pos1 = new PositionDB(mgr.ManagerGuid) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
+            PositionDB pos1 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
             BaseDataBlob[] objBlobs1 = new BaseDataBlob[3];
             objBlobs1[0] = pos1;
             objBlobs1[1] = new MassVolumeDB() { Mass = 10000 };
             objBlobs1[2] = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0));
-      
             Entity objEntity1 = new Entity(mgr, objBlobs1);
-            PositionDB pos2 = new PositionDB(mgr.ManagerGuid) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
+            
+            
+            PositionDB pos2 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
             BaseDataBlob[] objBlobs2 = new BaseDataBlob[3];
             objBlobs2[0] = pos2;
             objBlobs2[1] = new MassVolumeDB() { Mass = 10000 };
             objBlobs2[2] = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0));
-            
             Entity objEntity2 = new Entity(mgr, objBlobs2);
 
             var seconds = 100;

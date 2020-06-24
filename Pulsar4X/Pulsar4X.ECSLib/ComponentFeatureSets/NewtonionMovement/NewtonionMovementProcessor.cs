@@ -106,7 +106,10 @@ namespace Pulsar4X.ECSLib
                 }
                 
                 //convert orbital to global frame of reference for thrust direction
-                Vector3 globalCoordDVFromThrust = OrbitMath.OrbitToGlobalVector(totalDVFromThrust, positionDB.RelativePosition_m, newtonMoveDB.CurrentVector_ms);
+                Vector3 globalCoordDVFromThrust = OrbitMath.OrbitToGlobalVector(
+                    totalDVFromThrust, 
+                    positionDB.RelativePosition_m, 
+                    newtonMoveDB.CurrentVector_ms);
                 
                 
 

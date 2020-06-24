@@ -247,8 +247,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
             }
 
+            //TODO this should be radius from orbiting body not major axies.  
             ImGui.SliderFloat("Target SemiMajorAxis", ref _targetSMA, smaMin, smaMax);
-            var manuvers = InterceptCalcs.Hohmann(_sgp, mySMA, _targetSMA);
+            var manuvers = InterceptCalcs.Hohmann2(_sgp, mySMA, _targetSMA);
 
             
             

@@ -207,10 +207,10 @@ namespace Pulsar4X.SDL2UI
             Vector3 angularVelocity = Vector3.Cross(pos, (Vector3)vel);
             Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
             
-            _aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, (Vector3)vel, pos);
-            _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis2(pos, _orbitDB.Inclination, _loan, _trueAnom);
+            //_aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, (Vector3)vel, pos);
+            _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis(pos, _orbitDB.Inclination, _loan, _trueAnom);
             //_aopFromCalc3 = OrbitMath.GetArgumentOfPeriapsis3(nodeVector, ecvec, pos, (Vector3)vel, _loan);
-            _aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(_orbitDB.Inclination, ecvec, nodeVector);
+            //_aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(_orbitDB.Inclination, ecvec, nodeVector);
             
             _bodyPosPnt = new PointD()
             {
@@ -1112,12 +1112,12 @@ namespace Pulsar4X.SDL2UI
 
 
 
-            _aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, (Vector3)vel, pos);
+            //_aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, (Vector3)vel, pos);
             _aopItem_FromCalc1.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 90, -6, _loan, _aopFromCalc1, 128);
             _aopItem_FromCalc1.DataItem = Angle.ToDegrees(_aopFromCalc1);
             _aopItem_FromCalc1.DataString = Angle.ToDegrees(_aopFromCalc1).ToString() + "°";
             
-            _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis2(pos, _orbitDB.Inclination, _loan, _trueAnom);
+            _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis(pos, _orbitDB.Inclination, _loan, _trueAnom);
             _aopItem_FromCalc2.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 93, -6, _loan, _aopFromCalc2, 128);
             _aopItem_FromCalc2.DataItem = Angle.ToDegrees(_aopFromCalc2);
             _aopItem_FromCalc2.DataString = Angle.ToDegrees(_aopFromCalc2).ToString() + "°";
@@ -1127,7 +1127,7 @@ namespace Pulsar4X.SDL2UI
             _aopItem_FromCalc3.DataItem = Angle.ToDegrees(_aopFromCalc3);
             _aopItem_FromCalc3.DataString = Angle.ToDegrees(_aopFromCalc3).ToString() + "°";
 */
-            _aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(_orbitDB.Inclination, ecvec, nodeVector);
+            //_aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(_orbitDB.Inclination, ecvec, nodeVector);
             _aopItem_FromCalc4.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 99, -6, _loan, _aopFromCalc4, 128);
             _aopItem_FromCalc4.DataItem = Angle.ToDegrees(_aopFromCalc4);
             _aopItem_FromCalc4.DataString = Angle.ToDegrees(_aopFromCalc4).ToString() + "°";

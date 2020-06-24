@@ -88,7 +88,7 @@ namespace Pulsar4X.ECSLib
 
             
             double trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
-            double argOfPeriaps = GetArgumentOfPeriapsis2(position, inclination, longdOfAN, trueAnomaly);
+            double argOfPeriaps = GetArgumentOfPeriapsis(position, inclination, longdOfAN, trueAnomaly);
             var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
             
 
@@ -168,9 +168,17 @@ namespace Pulsar4X.ECSLib
 
         #region ArgumentOfPeriapsis
         
-        
+        /// <summary>
+        /// DO NOT USE! Gives wrong results in testing, needs fixing.
+        /// </summary>
+        /// <param name="nodeVector"></param>
+        /// <param name="eccentricityVector"></param>
+        /// <param name="pos"></param>
+        /// <param name="vel"></param>
+        /// <returns></returns>
         public static double GetArgumentOfPeriapsis1(Vector3 nodeVector, Vector3 eccentricityVector, Vector3 pos, Vector3 vel)
         {
+            throw new Exception("Broken Math Function, This function shoudl not be used.");
             double aop;
             if (nodeVector.Length() == 0)
             {
@@ -192,7 +200,7 @@ namespace Pulsar4X.ECSLib
             return aop;
         }
         
-        public static double GetArgumentOfPeriapsis2(Vector3 pos, double incl, double loAN, double trueAnomaly)
+        public static double GetArgumentOfPeriapsis(Vector3 pos, double incl, double loAN, double trueAnomaly)
         {
             double Sw = 0;
             double Rx = pos.X;
@@ -213,9 +221,16 @@ namespace Pulsar4X.ECSLib
             return W;
         }   
 
-        
+        /// <summary>
+        /// DO NOT USE! Gives wrong results in testing, needs fixing.
+        /// </summary>
+        /// <param name="inclination"></param>
+        /// <param name="eccentricityVector"></param>
+        /// <param name="nodeVector"></param>
+        /// <returns></returns>
         public static double GetArgumentOfPeriapsis3(double inclination, Vector3 eccentricityVector, Vector3 nodeVector)
         {
+            throw new Exception("Broken Math Function, This function shoudl not be used.");
             double aoP = 0;
             double e = eccentricityVector.Length();
             if(Math.Abs(inclination) < Epsilon)

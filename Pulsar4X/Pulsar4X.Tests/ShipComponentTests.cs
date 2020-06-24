@@ -79,7 +79,7 @@ namespace Pulsar4X.Tests
                     ability.SetValue();
             }
 
-            designer.ComponentDesignAttributes["Mass"].SetValueFromInput(250);
+            designer.ComponentDesignAttributes["Size"].SetValueFromInput(250);
 
             ComponentDesign engineDesign = designer.CreateDesign(_faction);
 
@@ -114,7 +114,7 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD cargo = GeneralCargo();
 
             ComponentDesigner cargoDesigner = new ComponentDesigner(cargo, _faction.GetDataBlob<FactionTechDB>());
-            cargoDesigner.ComponentDesignAttributes["Mass"].SetValue();
+            cargoDesigner.ComponentDesignAttributes["Size"].SetValue();
  
             ComponentDesign cargoDesign = cargoDesigner.CreateDesign(_faction);
             
