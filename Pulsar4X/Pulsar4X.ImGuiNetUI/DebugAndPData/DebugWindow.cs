@@ -219,8 +219,8 @@ namespace Pulsar4X.SDL2UI
                     
                     
                     ImGui.Text("Special Chars");
-                    ImGui.Text("Proggy clean is crsp but these chars are blury, Ω, ω, ν");
-                    //ImGui.Text("this text is fine, Ω, ω, ν "+"this text is not blury");
+                    ImGui.Text("Proggy clean is crisp but these chars are blury, Ω, ω, ν, Δ, θ");
+                    ImGui.Text("this text is fine, Ω, ω, ν but this text is blury");
 
 
                     if (ImGui.CollapsingHeader("GraphicTests", ImGuiTreeNodeFlags.CollapsingHeader))
@@ -486,29 +486,6 @@ namespace Pulsar4X.SDL2UI
 
                             }
                             
-                            if (_selectedEntityState != null && _selectedEntityState.OrbitIcon != null)
-                            {
-
-                                if (ImGui.CollapsingHeader("OrbitIcon: ###OrbitIconHeader", ImGuiTreeNodeFlags.CollapsingHeader))
-                                {
-                                    OrbitDB orbitDB = SelectedEntity.GetDataBlob<OrbitDB>();
-                                    if (orbitDB != null)
-                                    {
-                                        //string startRadian = _uiState.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
-                                        //string startDegrees = Angle.ToDegrees(_uiState.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
-                                        //ImGui.Text("StartAngleRadians: " + startRadian);
-
-                                        //ImGui.Text("StartAngleDegrees: " + startDegrees);
-                                        if (ImGui.CollapsingHeader("OrbitIconLines", ImGuiTreeNodeFlags.CollapsingHeader))
-                                        {
-                                            var window = OrbitalDebugWindow.GetWindow(_uiState.LastClickedEntity);
-                                            window.Display();
-                                            window.Enable(true, _uiState);
-                                        }
-                                    }
-                                }
-
-                            }
 
                             if (SelectedEntity.HasDataBlob<EnergyGenAbilityDB>())
                             {

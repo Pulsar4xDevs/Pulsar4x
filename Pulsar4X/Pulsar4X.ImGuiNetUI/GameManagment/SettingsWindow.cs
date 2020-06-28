@@ -2,6 +2,7 @@
 using ImGuiNET;
 using System.Numerics;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib;
 using Pulsar4X.SDL2UI.Combat;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
@@ -17,6 +18,9 @@ namespace Pulsar4X.SDL2UI
         bool IsThreaded;
         private bool EnforceSingleThread;
         bool RalitiveOrbitVelocity;
+
+        private OrbitalDebugWindow _orbitalDebugWindow;
+        
         private SettingsWindow()
         {
             _userOrbitSettingsMtx = _uiState.UserOrbitSettingsMtx;
@@ -28,6 +32,9 @@ namespace Pulsar4X.SDL2UI
             EnforceSingleThread = _uiState.Game.Settings.EnforceSingleThread;
             
             RalitiveOrbitVelocity = ECSLib.OrbitProcessor.UseRalitiveVelocity;
+
+            _orbitalDebugWindow = OrbitalDebugWindow.GetInstance();
+
         }
         internal static SettingsWindow GetInstance()
         {
@@ -55,6 +62,15 @@ namespace Pulsar4X.SDL2UI
                     if (ImGui.Checkbox("Show Pulsar Debug Window", ref debugActive))
                     {
                         DebugWindow.GetInstance().ToggleActive();
+                    }
+
+                    if(_uiState.LastClickedEntity != null && _uiState.LastClickedEntity.Entity.HasDataBlob<OrbitDB>())
+                    {
+                        bool orbitDebugActive = _orbitalDebugWindow.GetActive();
+                        if (ImGui.Checkbox("Show Orbit Debug Lines", ref orbitDebugActive))
+                        {
+                            OrbitalDebugWindow.GetInstance().ToggleActive();
+                        }
                     }
 
                     bool sensorActive = SensorDraw.GetInstance().GetActive();

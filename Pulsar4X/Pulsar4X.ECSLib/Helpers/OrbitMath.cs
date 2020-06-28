@@ -211,7 +211,9 @@ namespace Pulsar4X.ECSLib
             var Cw = (Rx * Math.Cos(loAN) + Ry * Math.Sin(loAN)) / R;
 
             if (incl == 0 || incl == Math.PI)
-            { Sw = (Ry * Math.Cos(loAN) - Rx * Math.Sin(loAN)) / R; }
+            {
+                Sw = (Ry * Math.Cos(loAN) - Rx * Math.Sin(loAN)) / R;
+            }
             else
             { Sw = Rz / (R * Math.Sin(incl)); }
 
