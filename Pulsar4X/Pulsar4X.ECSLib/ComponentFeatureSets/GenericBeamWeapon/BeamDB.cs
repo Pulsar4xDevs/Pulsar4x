@@ -114,13 +114,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             var vectorToTgt = Vector3.Normalise(tgtBearing);
             var deltaVVector = vectorToTgt * dvToUse;
             
-            Vector3 manuverVector = OrbitMath.GlobalToOrbitVector(
-                deltaVVector, 
-                ourState.pos, 
-                ourState.Velocity);
-            //So now I'm thrusting in the direction of the target's future position,
-            //not thrusting in a direction that'll get me to that position.
-            return vectorToTgt * dvToUse;//manuverVector; 
+            return vectorToTgt * dvToUse;
         }
         
         double TimeToTarget(double distanceToTgt, Vector3 ourVelocity, Vector3 targetVelocity)

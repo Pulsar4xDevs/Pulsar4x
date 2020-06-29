@@ -82,6 +82,8 @@ namespace Pulsar4X.ECSLib
         private double _fuelBurnRate;
         private double _totalFuel;
 
+        private double _soiParentMass;
+        
         public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
         {
             var cmd = new ThrustToTargetCmd()
@@ -107,6 +109,7 @@ namespace Pulsar4X.ECSLib
                 _fuelBurnRate = _newtonAbilityDB.FuelBurnRate;
                 _totalFuel = _newtonAbilityDB.TotalFuel_kg;
                 var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
+                _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().Mass;
                 var currentVel = Entity.GetRalitiveFutureVelocity(_entityCommanding, atDateTime);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
                 _entityCommanding.RemoveDataBlob<OrbitDB>();
@@ -126,8 +129,8 @@ namespace Pulsar4X.ECSLib
             var dvToUse = halfDV - dvUsed;
             if(dvToUse > 0)
             {
-                (Vector3 pos, Vector3 Velocity) curOurRalState = Entity.GetRalitiveState(_entityCommanding);
-                (Vector3 pos, Vector3 Velocity) curTgtRalState = Entity.GetRalitiveState(_targetEntity);
+                (Vector3 Position, Vector3 Velocity) curOurRalState = Entity.GetRalitiveState(_entityCommanding);
+                (Vector3 Position, Vector3 Velocity) curTgtRalState = Entity.GetRalitiveState(_targetEntity);
                 var dvRemaining = _newtonAbilityDB.DeltaV;
                 
                 var tgtVelocity = Entity.GetAbsoluteFutureVelocity(_targetEntity, atDateTime);
@@ -135,10 +138,9 @@ namespace Pulsar4X.ECSLib
                 Vector3 leadToTgt = (curTgtRalState.Velocity - curOurRalState.Velocity);
                  
                 //convert the lead to an orbit ralitive (prograde Y) vector. 
-                var manuverVector = OrbitMath.GlobalToOrbitVector(leadToTgt, curOurRalState.pos, curOurRalState.Velocity);
-                //manuverVector.X = leadToTgt.X * -1;
-                manuverVector.Y = dvRemaining - Math.Abs(leadToTgt.X);
-                
+                //var manuverVector = OrbitMath.GlobalToOrbitVector(leadToTgt, curOurRalState.Position, curOurRalState.Velocity);
+
+
                 var burnRate = _newtonAbilityDB.FuelBurnRate;
                 //var foo = OrbitMath.TsiolkovskyFuelUse(_totalFuel, )
                 var fuelUse = OrbitMath.TsiolkovskyFuelCost(
@@ -148,7 +150,7 @@ namespace Pulsar4X.ECSLib
                     );
                 var burnTime = fuelUse / burnRate;
                 
-                manuverVector = ManuverVector(dvToUse, burnTime, curOurRalState, curTgtRalState, atDateTime);
+                var manuverVector = ManuverVector(dvToUse, burnTime, curOurRalState, curTgtRalState, atDateTime);
 
                 _newtonMovedb.DeltaVForManuver_FoRO_m = manuverVector;
                 _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(5), nameof(OrderableProcessor), _entityCommanding);
@@ -164,12 +166,12 @@ namespace Pulsar4X.ECSLib
         Vector3 ManuverVector(
             double dvToUse, 
             double burnTime, 
-            (Vector3 pos, Vector3 Velocity) ourState, 
-            (Vector3 pos, Vector3 Velocity) tgtState, 
+            (Vector3 Position, Vector3 Velocity) ourState, 
+            (Vector3 Position, Vector3 Velocity) tgtState, 
             DateTime atDateTime )
         {
-            var distanceToTgt = (ourState.pos - tgtState.pos).Length();
-            var tgtBearing = tgtState.pos - ourState.pos;
+            var distanceToTgt = (ourState.Position - tgtState.Position).Length();
+            var tgtBearing = tgtState.Position - ourState.Position;
 
             double newttt = TimeToTarget(dvToUse, burnTime, distanceToTgt, ourState.Velocity, tgtState.Velocity);
             int itterations = 0;
@@ -186,7 +188,7 @@ namespace Pulsar4X.ECSLib
                 DateTime futureDate = atDateTime + timespanToIntercept;
                 var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, futureDate);
                     
-                tgtBearing = futurePosition - ourState.pos;
+                tgtBearing = futurePosition - ourState.Position;
                 distanceToTgt = (tgtBearing).Length();
 
                 newttt = TimeToTarget(dvToUse, burnTime, distanceToTgt, ourState.Velocity, tgtState.Velocity);
@@ -197,10 +199,24 @@ namespace Pulsar4X.ECSLib
             var vectorToTgt = Vector3.Normalise(tgtBearing);
             var deltaVVector = vectorToTgt * dvToUse;
             
+            /*
             Vector3 manuverVector = OrbitMath.GlobalToOrbitVector(
                 deltaVVector, 
-                ourState.pos, 
+                ourState.Position, 
                 ourState.Velocity);
+            
+            
+            
+            var myMass = _newtonAbilityDB.DryMass_kg + _newtonAbilityDB.TotalFuel_kg;
+            var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, _soiParentMass);
+            
+            var manuverVector = OrbitMath.ParentToProgradeVector(
+                sgp, 
+                deltaVVector, 
+                ourState.Position, 
+                ourState.Velocity);
+             */
+            
             //So now I'm thrusting in the direction of the target's future position,
             //not thrusting in a direction that'll get me to that position.
             return vectorToTgt * dvToUse;//manuverVector; 
@@ -267,7 +283,8 @@ namespace Pulsar4X.ECSLib
         private double _startBurnTime;
         private double _fuelBurnRate;
         private double _totalFuel;
-
+        private double _soiParentMass;
+        
         public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
         {
             var cmd = new Thrust90ToTargetCmd()
@@ -293,6 +310,7 @@ namespace Pulsar4X.ECSLib
                 _fuelBurnRate = _newtonAbilityDB.FuelBurnRate;
                 _totalFuel = _newtonAbilityDB.TotalFuel_kg;
                 var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
+                _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().Mass;
                 var currentVel = Entity.GetRalitiveFutureVelocity(_entityCommanding, atDateTime);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
                 _entityCommanding.RemoveDataBlob<OrbitDB>();
@@ -316,15 +334,18 @@ namespace Pulsar4X.ECSLib
                 (Vector3 pos, Vector3 Velocity) curTgtRalState = Entity.GetRalitiveState(_targetEntity);
                 var dvRemaining = _newtonAbilityDB.DeltaV;
 
-                Vector3 vectorToTgtFromPrograde = OrbitMath.GlobalToOrbitVector(
+
+                var myMass = _newtonAbilityDB.DryMass_kg + _newtonAbilityDB.TotalFuel_kg;
+                var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, _soiParentMass);
+            
+                var vectorToTgtFromPrograde = OrbitMath.ParentToProgradeVector(
+                    sgp, 
                     curTgtRalState.pos, 
                     curOurRalState.pos, 
                     curOurRalState.Velocity);
-
-                var vttnorm = Vector3.Normalise(vectorToTgtFromPrograde);
                 
-
-
+                
+                var vttnorm = Vector3.Normalise(vectorToTgtFromPrograde);
 
 
             }
@@ -338,12 +359,12 @@ namespace Pulsar4X.ECSLib
         Vector3 ManuverVector(
             double dvToUse, 
             double burnTime, 
-            (Vector3 pos, Vector3 Velocity) ourState, 
-            (Vector3 pos, Vector3 Velocity) tgtState, 
+            (Vector3 Position, Vector3 Velocity) ourState, 
+            (Vector3 Position, Vector3 Velocity) tgtState, 
             DateTime atDateTime )
         {
-            var distanceToTgt = (ourState.pos - tgtState.pos).Length();
-            var tgtBearing = tgtState.pos - ourState.pos;
+            var distanceToTgt = (ourState.Position - tgtState.Position).Length();
+            var tgtBearing = tgtState.Position - ourState.Position;
             var timeToIntecept = TimeToTarget(dvToUse, burnTime, distanceToTgt, ourState.Velocity, tgtState.Velocity);
             double newttt = 0;
             int itterations = 0;
@@ -360,7 +381,7 @@ namespace Pulsar4X.ECSLib
                 DateTime futureDate = atDateTime + timespanToIntercept;
                 var futurePosition = Entity.GetRalitiveFuturePosition(_targetEntity, futureDate);
                     
-                tgtBearing = futurePosition - ourState.pos;
+                tgtBearing = futurePosition - ourState.Position;
                 distanceToTgt = (tgtBearing).Length();
 
                 newttt = TimeToTarget(dvToUse, burnTime, distanceToTgt, ourState.Velocity, tgtState.Velocity);
@@ -371,10 +392,17 @@ namespace Pulsar4X.ECSLib
             var vectorToTgt = Vector3.Normalise(tgtBearing);
             var deltaVVector = vectorToTgt * dvToUse;
             
-            Vector3 manuverVector = OrbitMath.GlobalToOrbitVector(
+            /*
+            
+            var myMass = _newtonAbilityDB.DryMass_kg + _newtonAbilityDB.TotalFuel_kg;
+            var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, _soiParentMass);
+            
+            var manuverVector = OrbitMath.ParentToProgradeVector(
+                sgp, 
                 deltaVVector, 
-                ourState.pos, 
+                ourState.Position, 
                 ourState.Velocity);
+            */
             //So now I'm thrusting in the direction of the target's future position,
             //not thrusting in a direction that'll get me to that position.
             return vectorToTgt * dvToUse;//manuverVector; 
