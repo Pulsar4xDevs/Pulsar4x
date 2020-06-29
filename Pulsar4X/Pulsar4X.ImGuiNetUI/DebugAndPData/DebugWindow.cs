@@ -10,6 +10,7 @@ using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Vector2 = System.Numerics.Vector2;
+using Vector3 = Pulsar4X.ECSLib.Vector3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -343,6 +344,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.Text("Ralitive Velocity: " + ralitiveState.Velocity);
                                 ImGui.Text("Ralitive Speed: " + Stringify.Velocity(ralitiveState.Velocity.Length()));
                                 
+                                
                             }
                             
                             if (ImGui.CollapsingHeader("DataBlob List"))
@@ -426,7 +428,23 @@ namespace Pulsar4X.SDL2UI
                                         }
 
                                     }
-                                                
+                                    
+                                    
+                                    
+                                    var ralitiveState = Entity.GetRalitiveState(SelectedEntity);
+                                    //var globalvec = OrbitMath.OrbitToGlobalVector(ralitiveState.Velocity, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                    var progradeVec = new Vector3(0, 100, 0);
+                                    //var thrustvec = OrbitMath.OrbitToGlobalVector(progradeVec, pos, ralitiveState.Velocity);
+                                    //var thrustvec2 = OrbitMath.OrbitToGlobalVector(progradeVec, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                    var thrustvec3 = OrbitMath.ProgradeToParentVector(progradeVec, truAnomoly, orbitDB.ArgumentOfPeriapsis, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                    var thrustvec4 = OrbitMath.ProgradeToParentVector(orbitDB.GravitationalParameter_m3S2, progradeVec, pos, ralitiveState.Velocity);
+                                    ImGui.Text("stateVec: " + ralitiveState.Velocity);
+                                    //ImGui.Text("globalVec: " + globalvec);
+                                    //ImGui.Text("thrustvec: " + thrustvec);
+                                    //ImGui.Text("thrustvec2: " + thrustvec2);
+                                    ImGui.Text("thrustvec3: " + thrustvec3);
+                                    ImGui.Text("trhustvec4: " + thrustvec4);
+
                                 }
                             }
 

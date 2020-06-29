@@ -414,39 +414,45 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public static Vector3 OrbitToGlobalVector(Vector3 orbitLocal, double loAN, double inclination)
+        public static Vector3 ProgradeToParentVector(Vector3 prograde, double trueAnomaly, double aop,  double loAN, double inclination)
         {
-            var mtxLoAN = Matrix3d.IDRotateZ(loAN);
-            var mtxincl = Matrix3d.IDRotateX(-inclination);
+            var mtxTruA = Matrix3d.IDRotateZ(-trueAnomaly);
+            var mtxaop = Matrix3d.IDRotateZ(-aop);
+            var mtxLoAN = Matrix3d.IDRotateZ(-loAN);
+            var mtxincl = Matrix3d.IDRotateX(inclination);
             
-            var mtx = mtxLoAN * mtxincl;
+            var mtx = mtxLoAN * mtxincl * mtxTruA * mtxaop;
             
-            var transformedVector = mtx.Transform(orbitLocal);
+            var transformedVector = mtx.Transform(prograde);
             return transformedVector;
         }
-
-        public static Vector3 OrbitToGlobalVector(Vector3 orbitLocal, Vector3 position, Vector3 currentVelocityVector)
+        public static Vector3 ProgradeToParentVector(double sgp, Vector3 orbitLocalVec, Vector3 position, Vector3 currentVelocityVector)
         {
             Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
             Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
             var loAN = CalculateLongitudeOfAscendingNode(nodeVector);
+            var trueAnomaly = OrbitMath.TrueAnomaly(sgp, position, currentVelocityVector);
+            
             double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
             if (double.IsNaN(inclination))
                 inclination = 0;
-            return OrbitToGlobalVector(orbitLocal, loAN, inclination);
+            var aop = OrbitMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
+            
+            return ProgradeToParentVector(orbitLocalVec, trueAnomaly, aop, loAN, inclination);
         }
+        
 
-        public static Vector3 GlobalToOrbitVector(Vector3 orbitLocal, double loAN, double inclination)
+        public static Vector3 GlobalToOrbitVector(Vector3 globalVector, double loAN, double inclination)
         {
             var mtxLoAN = Matrix3d.IDRotateZ(-loAN);
             var mtxincl = Matrix3d.IDRotateX(inclination);
             
             var mtx = mtxLoAN * mtxincl;
             
-            var transformedVector = mtx.Transform(orbitLocal);
+            var transformedVector = mtx.Transform(globalVector);
             return transformedVector;
         }
-        public static Vector3 GlobalToOrbitVector(Vector3 orbitLocal, Vector3 position, Vector3 currentVelocityVector)
+        public static Vector3 GlobalToOrbitVector(Vector3 globalVector, Vector3 position, Vector3 currentVelocityVector)
         {
             Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
             Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
@@ -454,7 +460,7 @@ namespace Pulsar4X.ECSLib
             double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
             if (double.IsNaN(inclination))
                 inclination = 0;
-            return GlobalToOrbitVector(orbitLocal, loAN, inclination);
+            return GlobalToOrbitVector(globalVector, loAN, inclination);
         }
 
         /// <summary>

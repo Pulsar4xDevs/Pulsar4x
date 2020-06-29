@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib
             DateTime dateTimeFuture = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
             double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
 
-            
+            double sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(mass_Kg, parentMass_kg);
                 
             
             double secondsToItterate = deltaT;
@@ -105,9 +105,8 @@ namespace Pulsar4X.ECSLib
                     newtonMoveDB.DeltaVForManuver_FoRO_m -= totalDVFromThrust;
                 }
                 
-                //convert orbital to global frame of reference for thrust direction
-                Vector3 globalCoordDVFromThrust = OrbitMath.OrbitToGlobalVector(
-                    totalDVFromThrust, 
+                //convert prograde to global frame of reference for thrust direction
+                Vector3 globalCoordDVFromThrust = OrbitMath.ProgradeToParentVector(sgp, totalDVFromThrust,  
                     positionDB.RelativePosition_m, 
                     newtonMoveDB.CurrentVector_ms);
                 
@@ -150,7 +149,7 @@ namespace Pulsar4X.ECSLib
 
 
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
-                    double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
+                    //double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
                     var kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posRalitiveToNewParent, parentRalitiveVector, dateTime);
 
                     positionDB.SetParent(newParent);
@@ -162,7 +161,7 @@ namespace Pulsar4X.ECSLib
                 if (newtonMoveDB.DeltaVForManuver_FoRO_m.Length() <= 0) //if we've completed the manuver.
                 {
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
-                    double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
+                    //double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
                     
                     KeplerElements kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, positionDB.RelativePosition_m, newtonMoveDB.CurrentVector_ms, dateTime);
 
