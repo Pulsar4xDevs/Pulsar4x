@@ -387,6 +387,25 @@ namespace Pulsar4X.ECSLib
                 var vel = move.CurrentVector_ms;
                 return (pos, vel);
             }
+
+            if (entity.HasDataBlob<ColonyInfoDB>())
+            {
+                var daylen = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().LengthOfDay.TotalSeconds;
+                var radius = pos.Length();
+                var d = 2 * Math.PI * radius;
+                var speed = d / daylen;
+                
+                Vector3 vel = new Vector3(0, speed, 0);
+                
+                var posAngle = Math.Atan2(pos.Y, pos.X);
+                var mtx = Matrix3d.IDRotateZ(posAngle + (Math.PI * 0.5));
+
+                
+            
+                Vector3 transformedVector = mtx.Transform(vel);
+                return (pos, transformedVector);
+
+            }
             else
             {
                 throw new Exception("Entity has no velocity");

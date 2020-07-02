@@ -228,7 +228,7 @@ namespace Pulsar4X.ECSLib
             
             //transfer rate and ranges are averaged. 
             cargoStorageDB.TransferRateInKgHr = (int)(transferRate / i);
-            cargoStorageDB.TransferRangeDv = (transferRange / i);
+            cargoStorageDB.TransferRangeDv_kms = (transferRange / i);
 
             
 

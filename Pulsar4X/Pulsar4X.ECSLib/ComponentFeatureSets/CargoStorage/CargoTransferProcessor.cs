@@ -7,10 +7,9 @@ namespace Pulsar4X.ECSLib
     {
 
 
-        public TimeSpan RunFrequency {
-            get {
-                return TimeSpan.FromHours(1);
-            }
+        public TimeSpan RunFrequency
+        {
+            get { return TimeSpan.FromHours(1); }
         }
 
         public TimeSpan FirstRunOffset => TimeSpan.FromHours(0);
@@ -27,7 +26,7 @@ namespace Pulsar4X.ECSLib
             CargoTransferDB datablob = entity.GetDataBlob<CargoTransferDB>();
             OrbitDB orbitDB = entity.GetDataBlob<OrbitDB>();
 
-            if (datablob.DistanceBetweenEntitys <= 100)//todo: this is going to have to be based of mass or something, ie being further away from a colony on a planet is ok, but two ships should be close. 
+            if (datablob.DistanceBetweenEntitys <= 100) //todo: this is going to have to be based of mass or something, ie being further away from a colony on a planet is ok, but two ships should be close. 
             {
                 for (int i = 0; i < datablob.ItemsLeftToTransfer.Count; i++)
                 {
@@ -41,23 +40,23 @@ namespace Pulsar4X.ECSLib
                     if (!datablob.CargoToDB.StoredCargoTypes.ContainsKey(cargoTypeID))
                         datablob.CargoToDB.StoredCargoTypes.Add(cargoTypeID, new CargoTypeStore());
 
-                    var toCargoTypeStore = datablob.CargoToDB.StoredCargoTypes[cargoTypeID];        //reference to the cargoType store we're pushing to.
-                    var toCargoItemAndAmount = toCargoTypeStore.ItemsAndAmounts;                //reference to dictionary holding the cargo we want to send too
-                    var fromCargoTypeStore = datablob.CargoFromDB.StoredCargoTypes[cargoTypeID];    //reference to the cargoType store we're pulling from.
-                    var fromCargoItemAndAmount = fromCargoTypeStore.ItemsAndAmounts;            //reference to dictionary we want to pull cargo from. 
+                    var toCargoTypeStore = datablob.CargoToDB.StoredCargoTypes[cargoTypeID]; //reference to the cargoType store we're pushing to.
+                    var toCargoItemAndAmount = toCargoTypeStore.ItemsAndAmounts; //reference to dictionary holding the cargo we want to send too
+                    var fromCargoTypeStore = datablob.CargoFromDB.StoredCargoTypes[cargoTypeID]; //reference to the cargoType store we're pulling from.
+                    var fromCargoItemAndAmount = fromCargoTypeStore.ItemsAndAmounts; //reference to dictionary we want to pull cargo from. 
 
                     long totalweightToTransfer = itemMassPerUnit * amountToXfer;
-                    long weightToTransferThisTick = Math.Min(totalweightToTransfer, datablob.TransferRateInKG * deltaSeconds);          //only the amount that can be transfered in this timeframe. 
+                    long weightToTransferThisTick = Math.Min(totalweightToTransfer, datablob.TransferRateInKG * deltaSeconds); //only the amount that can be transfered in this timeframe. 
 
                     weightToTransferThisTick = Math.Min(weightToTransferThisTick, toCargoTypeStore.FreeCapacityKg); //check cargo to has enough weight capacity
 
-                    long numberXfered = weightToTransferThisTick / itemMassPerUnit;//get the number of items from the mass transferable
+                    long numberXfered = weightToTransferThisTick / itemMassPerUnit; //get the number of items from the mass transferable
                     numberXfered = Math.Min(numberXfered, fromCargoItemAndAmount[cargoItem.ID].amount); //check from has enough to send. 
 
                     weightToTransferThisTick = numberXfered * itemMassPerUnit;
 
                     if (!toCargoItemAndAmount.ContainsKey(cargoItem.ID))
-                        toCargoItemAndAmount.Add(cargoItem.ID,(cargoItem, numberXfered));
+                        toCargoItemAndAmount.Add(cargoItem.ID, (cargoItem, numberXfered));
                     else
                     {
                         long totalTo = toCargoItemAndAmount[cargoItem.ID].amount + numberXfered;
@@ -71,16 +70,16 @@ namespace Pulsar4X.ECSLib
                     fromCargoTypeStore.FreeCapacityKg += weightToTransferThisTick;
                     datablob.ItemsLeftToTransfer[i] = (cargoItem, amountToXfer - numberXfered);
                 }
-            } 
+            }
         }
 
         internal static void FirstRun(Entity entity)
         {
             CargoTransferDB datablob = entity.GetDataBlob<CargoTransferDB>();
 
-            double? dv;
-            if(entity.HasDataBlob<OrbitDB>() && datablob.CargoToEntity.HasDataBlob<OrbitDB>())
-                dv = CalcDVDifferenceKmPerSecond(entity.GetDataBlob<OrbitDB>(), datablob.CargoToEntity.GetDataBlob<OrbitDB>());
+            double? dv_mps;
+            if (entity.HasDataBlob<OrbitDB>() && datablob.CargoToEntity.HasDataBlob<OrbitDB>())
+                dv_mps = CalcDVDifference(entity, datablob.CargoToEntity);
             else
             {
                 OrbitDB orbitDB;
@@ -88,14 +87,16 @@ namespace Pulsar4X.ECSLib
                 {
                     orbitDB = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<OrbitDB>();
                 }
-                else//if (datablob.CargoToEntity.HasDataBlob<ColonyInfoDB>())
+                else //if (datablob.CargoToEntity.HasDataBlob<ColonyInfoDB>())
                 {
-                    orbitDB = datablob.CargoToEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<OrbitDB>(); 
+                    orbitDB = datablob.CargoToEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<OrbitDB>();
                 }
-                dv = Distance.AuToKm( OrbitMath.MeanOrbitalVelocityInAU(orbitDB));
+
+                dv_mps = OrbitMath.MeanOrbitalVelocityInm(orbitDB);
             }
-            if (dv != null)
-                datablob.TransferRateInKG = CalcTransferRate((double)dv, datablob.CargoFromDB, datablob.CargoToDB);
+
+            if (dv_mps != null)
+                datablob.TransferRateInKG = CalcTransferRate((double)dv_mps, datablob.CargoFromDB, datablob.CargoToDB);
         }
 
         /// <summary>
@@ -125,30 +126,68 @@ namespace Pulsar4X.ECSLib
                 return Distance.AuToKm((double)dv);
         }
 
-        /// <summary>
+        public static double CalcDVDifference(Entity entity1, Entity entity2)
+        {
+            double dvDif = 0;
+
+            Entity parent;
+            double parentMass;
+            double sgp;
+            double r1;
+            double r2;
+            
+            Entity soi1 = Entity.GetSOIParentEntity(entity1);
+            Entity soi2 = Entity.GetSOIParentEntity(entity2);
+            
+            
+            if(soi1 == soi2)
+            {
+                parent = soi1;
+                parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
+                sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(0, parentMass);
+                
+                
+                var state1 = Entity.GetRalitiveState(entity1);
+                var state2 = Entity.GetRalitiveState(entity2);
+                r1 = state1.pos.Length();
+                r2 = state2.pos.Length();
+            }
+            else
+            {
+                StaticRefLib.EventLog.AddEvent(new Event("Cargo calc failed, entities must have same soi parent"));
+                return double.PositiveInfinity;
+            }
+
+            var hohmann = InterceptCalcs.Hohmann(sgp, r1, r2);
+            return dvDif = hohmann[0].deltaV.Length() + hohmann[1].deltaV.Length();
+
+
+        }
+
+    /// <summary>
         /// Calculates the transfer rate.
         /// </summary>
         /// <returns>The transfer rate.</returns>
-        /// <param name="dvDifferenceKmPerSecond">Dv difference in Km/s</param>
+        /// <param name="dvDifference_mps">Dv difference in Km/s</param>
         /// <param name="from">From.</param>
         /// <param name="to">To.</param>
-        public static int CalcTransferRate(double dvDifferenceKmPerSecond, CargoStorageDB from, CargoStorageDB to)
+        public static int CalcTransferRate(double dvDifference_mps, CargoStorageDB from, CargoStorageDB to)
         {
             //var from = transferDB.CargoFromDB;
             //var to = transferDB.CargoToDB;
-            var fromRange = from.TransferRangeDv;
-            var toRange = to.TransferRangeDv;
+            var fromDVRange = from.TransferRangeDv_kms;
+            var toDVRange = to.TransferRangeDv_kms;
 
             double maxRange;
             double maxXferAtMaxRange;
-            double bestXferRange = Math.Min(from.TransferRangeDv, to.TransferRangeDv);
+            double bestXferRange_ms = Math.Min(fromDVRange, toDVRange);
             double maxXferAtBestRange = from.TransferRateInKgHr + to.TransferRateInKgHr;
 
             double transferRate;
 
-            if (from.TransferRangeDv > to.TransferRangeDv)
+            if (from.TransferRangeDv_kms > to.TransferRangeDv_kms)
             {
-                maxRange = from.TransferRangeDv;
+                maxRange = fromDVRange;
                 if (from.TransferRateInKgHr > to.TransferRateInKgHr)
                     maxXferAtMaxRange = from.TransferRateInKgHr;
                 else
@@ -156,16 +195,16 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                maxRange = to.TransferRangeDv;
+                maxRange = toDVRange;
                 if (to.TransferRateInKgHr > from.TransferRateInKgHr)
                     maxXferAtMaxRange = to.TransferRateInKgHr;
                 else
                     maxXferAtMaxRange = from.TransferRateInKgHr;
             }
 
-            if (dvDifferenceKmPerSecond < bestXferRange)
+            if (dvDifference_mps < bestXferRange_ms)
                 transferRate = (int)maxXferAtBestRange;
-            else if (dvDifferenceKmPerSecond < maxRange)
+            else if (dvDifference_mps < maxRange)
                 transferRate = (int)maxXferAtMaxRange;
             else
                 transferRate = 0;

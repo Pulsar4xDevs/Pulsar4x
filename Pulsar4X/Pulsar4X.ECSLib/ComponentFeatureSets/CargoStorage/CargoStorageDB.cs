@@ -24,12 +24,19 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <value>The transfer rate in Kg/h</value>
         public int TransferRateInKgHr { get; set; } = 500;
+
         /// <summary>
         /// Gets or sets the transfer range dv.
         /// </summary>
         /// <value>DeltaV in Km/s</value>
-        public double TransferRangeDv { get; set; } = 0.1; 
+        public double TransferRangeDv_kms
+        {
+            get { return TransferRangeDv_mps * 0.01; }
+            set { TransferRangeDv_mps = value * 1000; }
+        }
 
+        public double TransferRangeDv_mps { get; set; } = 100;
+    
         public CargoStorageDB()
         {
         }

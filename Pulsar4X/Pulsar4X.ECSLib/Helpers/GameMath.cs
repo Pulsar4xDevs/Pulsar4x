@@ -635,6 +635,7 @@ namespace Pulsar4X.ECSLib
     public static class InterceptCalcs
     {
         /// <summary>
+        /// THIS NEEDS TESTING.
         /// Hohmann the specified GravParamOfParent, semiMajAxisCurrentBody and semiMajAxisOfTarget.
         /// </summary>
         /// <returns>two burns with a time in seconds for the second burn</returns>
@@ -664,6 +665,13 @@ namespace Pulsar4X.ECSLib
         }
 
 
+        /// <summary>
+        /// Hohmann transfer manuver. 
+        /// </summary>
+        /// <param name="sgp"></param>
+        /// <param name="r1">radius from parent</param>
+        /// <param name="r2">radius from parent</param>
+        /// <returns>a tuple containing two manuvers with a time in seconds delay for second manuver</returns>
         public static (Vector3 deltaV, double timeInSeconds)[] Hohmann2(double sgp, double r1, double r2)
         {
             var wca1 = Math.Sqrt(sgp / r1);

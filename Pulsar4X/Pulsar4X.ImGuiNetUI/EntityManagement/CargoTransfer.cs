@@ -231,7 +231,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
             ImGui.Text(_entityState.Name);
             ImGui.Text("Transfer Rate: " + _storageDatablob.TransferRateInKgHr);
-            ImGui.Text("At DeltaV < " + _storageDatablob.TransferRangeDv + " Km/s");
+            ImGui.Text("At DeltaV < " + _storageDatablob.TransferRangeDv_kms + " Km/s");
             foreach (var storetype in CargoResourceStores)
             {
                 ImGui.SetNextTreeNodeOpen(HeadersIsOpenDict[storetype.TypeID]);
@@ -375,12 +375,15 @@ namespace Pulsar4X.SDL2UI
             OrbitDB leftOrbit;
             if (!_selectedEntityLeft.Entity.HasDataBlob<OrbitDB>()) 
             {
-                dvDif = Distance.AuToKm(OrbitMath.MeanOrbitalVelocityInAU(_selectedEntityRight.Entity.GetDataBlob<OrbitDB>()));
+                dvDif = OrbitMath.MeanOrbitalVelocityInm(_selectedEntityRight.Entity.GetDataBlob<OrbitDB>());
             }
             else
             {
                 leftOrbit = _selectedEntityLeft.Entity.GetDataBlob<OrbitDB>();
-                dvDif = CargoTransferProcessor.CalcDVDifferenceKmPerSecond(leftOrbit, _selectedEntityRight.Entity.GetDataBlob<OrbitDB>()); }
+                //dvDif = CargoTransferProcessor.CalcDVDifferenceKmPerSecond(leftOrbit, _selectedEntityRight.Entity.GetDataBlob<OrbitDB>()); 
+                dvDif = CargoTransferProcessor.CalcDVDifference(_selectedEntityLeft.Entity, _selectedEntityRight.Entity);
+            }
+
             if (dvDif == null)
             {
                 _transferRate = 0;
@@ -389,7 +392,7 @@ namespace Pulsar4X.SDL2UI
             {
                 var cargoDBLeft = _selectedEntityLeft.Entity.GetDataBlob<CargoStorageDB>();
                 var cargoDBRight = _selectedEntityRight.Entity.GetDataBlob<CargoStorageDB>();
-                _dvMaxDiff = Math.Max(cargoDBLeft.TransferRangeDv, cargoDBRight.TransferRangeDv);
+                _dvMaxDiff = Math.Max(cargoDBLeft.TransferRangeDv_kms, cargoDBRight.TransferRangeDv_kms);
                 _dvDifference = (double)dvDif;
                 _transferRate = CargoTransferProcessor.CalcTransferRate(_dvDifference,
                     cargoDBLeft,
