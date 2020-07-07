@@ -77,8 +77,10 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
 
         public event EntityClickedEventHandler EntityClickedEvent;
+        
         internal EntityState LastClickedEntity = null;
-        internal EntityState PrimaryEntity = null;
+        
+        internal EntityState PrimaryEntity { get; private set; }
         internal ECSLib.Vector3 LastWorldPointClicked_m { get; set; }
 
 
@@ -288,9 +290,6 @@ namespace Pulsar4X.SDL2UI
                             
                     }
                 }
-                   
-                   
-                    
             }
                 
 
@@ -315,18 +314,17 @@ namespace Pulsar4X.SDL2UI
 
             if (ActiveWindow != null)
                 ActiveWindow.EntityClicked(StarSystemStates[starSys].EntityStatesWithNames[entityGuid], button);
-            OnEntitySelected();
-        }
 
-        void OnEntitySelected()
-        {
             SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
             if(LastClickedEntity.DebugOrbitOrder != null)
             {
                 SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
             }
-        }
 
+            if(ActiveWindow == null || ActiveWindow.ClickedEntityIsPrimary)
+                PrimaryEntity = LastClickedEntity;
+
+        }
     }
 
     public abstract class UpdateWindowState
@@ -359,7 +357,8 @@ namespace Pulsar4X.SDL2UI
         protected bool IsActive = false;
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
-
+        public bool ClickedEntityIsPrimary = true;
+        
         public void SetActive(bool ActiveVal = true)
         {
             IsActive = ActiveVal;
@@ -380,6 +379,7 @@ namespace Pulsar4X.SDL2UI
         }
 
 
+        
 
         /*An example of how the constructor should be for a derived class. 
          * 

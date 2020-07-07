@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
+using NUnit.Framework.Constraints;
 using Pulsar4X.ECSLib;
 namespace Pulsar4X.SDL2UI
 {
@@ -107,6 +108,7 @@ namespace Pulsar4X.SDL2UI
         StaticDataStore _staticData;
         EntityState _entityState;
         CargoStorageDB _storageDatablob;
+
         Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
         public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
         public CargoItemVM SelectedCargoVM = null;
@@ -276,7 +278,7 @@ namespace Pulsar4X.SDL2UI
         StaticDataStore _staticData;
         EntityState _selectedEntityLeft;
         EntityState _selectedEntityRight;
-
+        
         CargoListPannelComplex _cargoList1;
         CargoListPannelComplex CargoListLeft
         {
@@ -299,53 +301,68 @@ namespace Pulsar4X.SDL2UI
         bool _hasCargoAbilityLeft;
         bool _hasCargoAbilityRight;
         Dictionary<Guid, bool> headersOpenDict = new Dictionary<Guid, bool>();
-
+        
         int _transferRate = 0;
         double _dvDifference;
         double _dvMaxDiff;
+        
+        private CargoTransfer()
+        {
+            _flags = ImGuiWindowFlags.AlwaysAutoResize;
+            ClickedEntityIsPrimary = false;
+        }
+        
         public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
         {
+            
             CargoTransfer instance;
             if (!_uiState.LoadedWindows.ContainsKey(typeof(CargoTransfer)))
             {
                 instance = new CargoTransfer
                 {
                     _staticData = staticData,
-                    _selectedEntityLeft = selectedEntity1
+                    _selectedEntityLeft = _uiState.PrimaryEntity
                 };
+                instance.HardRefresh();
             }
             else
             {
                 instance = (CargoTransfer)_uiState.LoadedWindows[typeof(CargoTransfer)];
-                if (instance._selectedEntityLeft != selectedEntity1)
+                if (instance._selectedEntityLeft != _uiState.PrimaryEntity)
                 {
-                    instance._selectedEntityLeft = selectedEntity1;
-                    instance.headersOpenDict = new Dictionary<Guid, bool>();
-                    instance.SelectedCargoPannel = null;
-                    instance.UnselectedCargoPannel = null;
-                } 
+                    instance.HardRefresh();
+                }
             }
-            if (instance._selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
-            {
-                instance.CargoListLeft = new CargoListPannelComplex(staticData, selectedEntity1, instance.headersOpenDict);
-                instance._hasCargoAbilityLeft = true;
-            }
-            else
-                instance._hasCargoAbilityLeft = false;
-                
 
-            if (instance._selectedEntityRight != null && instance._selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
-            {
-                if (!instance._hasCargoAbilityRight)
-                    instance.CargoListRight = new CargoListPannelComplex(staticData, instance._selectedEntityRight, instance.headersOpenDict);
-                instance._hasCargoAbilityRight = true;
-            }
-            else
-                instance._hasCargoAbilityRight = false;
             return instance;
         }
 
 
+        void HardRefresh()
+        {
+            _selectedEntityLeft = _uiState.PrimaryEntity;
+            if(_selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
+            {
+                CargoListLeft = new CargoListPannelComplex(_staticData, _selectedEntityLeft, headersOpenDict);
+                _hasCargoAbilityLeft = true;
+            }
+            else
+                _hasCargoAbilityLeft = false;
+            
+            
+            if (_uiState.PrimaryEntity != _uiState.LastClickedEntity)
+            {
+                _selectedEntityRight = _uiState.LastClickedEntity;
+                if (_selectedEntityRight != null && _selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
+                {
+                    if (!_hasCargoAbilityRight)
+                        CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight, headersOpenDict);
+                    _hasCargoAbilityRight = true;
+                }
+                else
+                    _hasCargoAbilityRight = false;
+            }
+        }
 
         internal void Set2ndCargo(EntityState entity)
         {
@@ -451,10 +468,7 @@ namespace Pulsar4X.SDL2UI
                 _selectedEntityLeft.Entity,
                 CargoListRight.GetAllToMoveOut());
         }
-        public CargoTransfer()
-        {
-            _flags = ImGuiWindowFlags.AlwaysAutoResize;
-        }
+
 
         internal override void Display()
         {
@@ -492,6 +506,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.SameLine();
                         if (_hasCargoAbilityRight)
                         {
+                            
                             CargoListRight.Display();
                             ImGui.Text("DeltaV Difference Km/s: " + _dvDifference);
                             ImGui.Text("Max DeltaV Difference Km/s: " + _dvMaxDiff);
