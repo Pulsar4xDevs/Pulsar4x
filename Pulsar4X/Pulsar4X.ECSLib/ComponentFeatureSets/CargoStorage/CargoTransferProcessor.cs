@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib
 
             double? dv_mps;
             if (entity.HasDataBlob<OrbitDB>() && datablob.CargoToEntity.HasDataBlob<OrbitDB>())
-                dv_mps = CalcDVDifference(entity, datablob.CargoToEntity);
+                dv_mps = CalcDVDifference_m(entity, datablob.CargoToEntity);
             else
             {
                 OrbitDB orbitDB;
@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
                 return Distance.AuToKm((double)dv);
         }
 
-        public static double CalcDVDifference(Entity entity1, Entity entity2)
+        public static double CalcDVDifference_m(Entity entity1, Entity entity2)
         {
             double dvDif = 0;
 

@@ -184,6 +184,13 @@ namespace Pulsar4X.ECSLib
             this.SystemGuid = positionDB.SystemGuid;
         }
 
+        public PositionDB(Vector3 ralitivePos_m, Entity SOIParent) : base(SOIParent)
+        {
+            SystemGuid = SOIParent.Manager.ManagerGuid;
+            RelativePosition_m = ralitivePos_m;
+        }
+
+        
         [UsedImplicitly]
         private PositionDB() : this(Guid.Empty) { }
 

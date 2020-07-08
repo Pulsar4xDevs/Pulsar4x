@@ -321,7 +321,7 @@ namespace Pulsar4X.SDL2UI
                 SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
             }
 
-            if(ActiveWindow == null || ActiveWindow.ClickedEntityIsPrimary)
+            if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
                 PrimaryEntity = LastClickedEntity;
 
         }

@@ -233,7 +233,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
             ImGui.Text(_entityState.Name);
             ImGui.Text("Transfer Rate: " + _storageDatablob.TransferRateInKgHr);
-            ImGui.Text("At DeltaV < " + _storageDatablob.TransferRangeDv_kms + " Km/s");
+            ImGui.Text("At DeltaV < " + Stringify.Velocity(_storageDatablob.TransferRangeDv_mps));
             foreach (var storetype in CargoResourceStores)
             {
                 ImGui.SetNextTreeNodeOpen(HeadersIsOpenDict[storetype.TypeID]);
@@ -303,8 +303,8 @@ namespace Pulsar4X.SDL2UI
         Dictionary<Guid, bool> headersOpenDict = new Dictionary<Guid, bool>();
         
         int _transferRate = 0;
-        double _dvDifference;
-        double _dvMaxDiff;
+        double _dvDifference_ms;
+        double _dvMaxRangeDiff_ms;
         
         private CargoTransfer()
         {
@@ -398,7 +398,7 @@ namespace Pulsar4X.SDL2UI
             {
                 leftOrbit = _selectedEntityLeft.Entity.GetDataBlob<OrbitDB>();
                 //dvDif = CargoTransferProcessor.CalcDVDifferenceKmPerSecond(leftOrbit, _selectedEntityRight.Entity.GetDataBlob<OrbitDB>()); 
-                dvDif = CargoTransferProcessor.CalcDVDifference(_selectedEntityLeft.Entity, _selectedEntityRight.Entity);
+                dvDif = CargoTransferProcessor.CalcDVDifference_m(_selectedEntityLeft.Entity, _selectedEntityRight.Entity);
             }
 
             if (dvDif == null)
@@ -409,9 +409,9 @@ namespace Pulsar4X.SDL2UI
             {
                 var cargoDBLeft = _selectedEntityLeft.Entity.GetDataBlob<CargoStorageDB>();
                 var cargoDBRight = _selectedEntityRight.Entity.GetDataBlob<CargoStorageDB>();
-                _dvMaxDiff = Math.Max(cargoDBLeft.TransferRangeDv_kms, cargoDBRight.TransferRangeDv_kms);
-                _dvDifference = (double)dvDif;
-                _transferRate = CargoTransferProcessor.CalcTransferRate(_dvDifference,
+                _dvMaxRangeDiff_ms = Math.Max(cargoDBLeft.TransferRangeDv_mps, cargoDBRight.TransferRangeDv_mps);
+                _dvDifference_ms = (double)dvDif;
+                _transferRate = CargoTransferProcessor.CalcTransferRate(_dvDifference_ms,
                     cargoDBLeft,
                     cargoDBRight);
             }
@@ -508,8 +508,8 @@ namespace Pulsar4X.SDL2UI
                         {
                             
                             CargoListRight.Display();
-                            ImGui.Text("DeltaV Difference Km/s: " + _dvDifference);
-                            ImGui.Text("Max DeltaV Difference Km/s: " + _dvMaxDiff);
+                            ImGui.Text("DeltaV Difference: " + Stringify.Velocity(_dvDifference_ms));
+                            ImGui.Text("Max DeltaV Difference: " + Stringify.Velocity(_dvMaxRangeDiff_ms));
                             ImGui.Text("Transfer Rate Kg/h: " + _transferRate);
                             
                         }

@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
             //installation pannel (install constructed components
             if (IsActive)
             {
-                _flags = ImGuiWindowFlags.AlwaysAutoResize;
+                //_flags = ImGuiWindowFlags.AlwaysAutoResize;
                 if (ImGui.Begin("Cargo", ref IsActive, _flags))
                 {
 
