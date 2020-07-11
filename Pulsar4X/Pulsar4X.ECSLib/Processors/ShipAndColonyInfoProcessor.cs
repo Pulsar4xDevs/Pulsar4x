@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
             if (shipInfo.Tonnage != totalTonnage)
             {
                 shipInfo.Tonnage = totalTonnage;
-                if(shipEntity.HasDataBlob<NewtonThrustAbilityDB>())
+                if(shipEntity.HasDataBlob<WarpAbilityDB>())
                     ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(shipEntity);
             }
             shipInfo.InternalHTK = totalHTK;

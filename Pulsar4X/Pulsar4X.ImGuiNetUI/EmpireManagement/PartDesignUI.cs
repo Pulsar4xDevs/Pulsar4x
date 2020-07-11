@@ -380,6 +380,42 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.NewLine();
         }
+
+        static void GuiHintTextSelectionFormula(ComponentDesignAttribute attribute)
+        {
+            
+            Dictionary<string, ChainedExpression> dict = new Dictionary<string, ChainedExpression>();
+
+            _listNames = new string[dict.Count];
+            
+            int i = 0;
+            foreach (var kvp in attribute.GuidDictionary)
+            {
+                _listNames[i] = (string)kvp.Key;
+            }
+            
+            if (compactmod)
+            {
+                ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
+                ImGui.NewLine();
+            }
+            else
+            {
+                ImGui.TextWrapped(attribute.Name + ":");
+                ImGui.SameLine();
+                ImGui.TextWrapped(attribute.Description);
+                ImGui.NewLine();
+            }
+            
+            ImGui.TextWrapped(attribute.Value.ToString());
+
+            if (ImGui.Combo("Select", ref attribute.ListSelection, _listNames, _listNames.Length))
+            {
+                var key = _listNames[attribute.ListSelection];
+                var value = attribute.GuidDictionary[key];
+                attribute.SetValueFromDictionaryExpression(_listNames[attribute.ListSelection]);
+            }
+        }
     }
 }
 

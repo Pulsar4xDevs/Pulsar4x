@@ -56,6 +56,28 @@
         }
       },
       {
+        "Key": "55FA0D2E-0BC7-44F5-A292-B593F2248C3B",
+        "Value": {
+          "Name": "Methalox",
+          "Description": "Highly refined Methane and Oxygen rocket fuel",
+          "ID": "55FA0D2E-0BC7-44F5-A292-B593F2248C3B",
+          "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
+          "Mass": 0.554,
+          "MineralsRequired": {
+            "List": [
+              {
+                "Key": "5eadda1f-43aa-44be-bdb4-395441a33f14",
+                "Value": 1
+              }
+            ]
+          },
+          "IndustryPointCosts": 10,
+          "IndustryTypeID": "265B36EE-BAED-4F92-9AEC-BC8A7EA0DF1F",
+          "WealthCost": 3,
+          "OutputAmount": 2
+        }
+      },
+      {
         "Key": "207af637-95a0-4b89-ac4a-6d66a81cfb2f",
         "Value": {
           "Name": "Plastics",

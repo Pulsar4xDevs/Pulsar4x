@@ -5,13 +5,13 @@
       {
         "Key": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
         "Value": {
-          "Name": "Liquid Fuel Rocket Engine",
+          "Name": "RP1 Rocket Engine",
           "DescriptionFormula": "'A Newtonian Thruster'",
           "ID": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
           "MassFormula": "Ability('Mass')",
           "VolumeFormula": "Ability('Mass')",
           "HTKFormula": "Max(1, [Mass] / 100)",
-          "CrewReqFormula": "[Mass]",
+          "CrewReqFormula": "0",
           "ResourceCostFormula": {
             "Entries": [
               {
@@ -63,6 +63,81 @@
               "DescriptionFormula": "''",
               "GuiHint": "None",
               "AttributeFormula": "AtbConstrArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
+              "AttributeType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
+            },
+
+            {
+              "Name": "Sensor Signature",
+              "Units": "unknown",
+              "DescriptionFormula": "''",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(3500, Ability('Thrust'))",
+              "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "B03FE82F-EE70-4A9A-AC61-5A7D44A3364E",
+        "Value": {
+          "Name": "Methalox Rocket Engine",
+          "DescriptionFormula": "'A Newtonian Thruster'",
+          "ID": "B03FE82F-EE70-4A9A-AC61-5A7D44A3364E",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "0",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "05dce711-8846-488a-b0f3-57fd7924b268",
+                "Value": "[Mass] * 8"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 0.5",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo, Fighter",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Mass",
+              "Units": "kg",
+              "DescriptionFormula": "'Mass of this engine'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "TechData('b056576a-124e-41c5-afcd-27d1f0bf6f4e')",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AttributeFormula": "500"
+            },
+            {
+              "Name": "Exhaust Velocity",
+              "Units": "m/s",
+              "DescriptionFormula": "'Specific Impulse in m/s, can be increased by research'",
+              "GuiHint": "GuiTextDisplay",
+              "AttributeFormula": "3700 * TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
+            },
+            {
+              "Name": "Fuel Consumption",
+              "Units": "kg/s",
+              "DescriptionFormula": "'Fuel Consumption per second'",
+              "GuiHint": "GuiTextDisplay",
+              "AttributeFormula": "Ability('Mass') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
+            },
+            {
+              "Name": "Thrust",
+              "Units": "N",
+              "DescriptionFormula": "'The maximum thrust output of this engine'",
+              "GuiHint": "GuiTextDisplay",
+              "AttributeFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
+            },
+            {
+              "Name": "DataBlob",
+              "DescriptionFormula": "''",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('Exhaust Velocity'), GuidString('55FA0D2E-0BC7-44F5-A292-B593F2248C3B'), Ability('Fuel Consumption'))",
               "AttributeType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
             },
 

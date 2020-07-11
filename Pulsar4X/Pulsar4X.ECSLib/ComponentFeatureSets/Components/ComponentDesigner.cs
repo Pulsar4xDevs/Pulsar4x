@@ -17,6 +17,7 @@ namespace Pulsar4X.ECSLib
         GuiTextDisplay = 16,
         GuiEnumSelectionList = 32,
         GuiOrdnanceSelectionList = 64,
+        GuiTextSelectionFormula = 128,
     }
 
     public static class ComponentParseCheck

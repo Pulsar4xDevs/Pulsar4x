@@ -134,6 +134,13 @@ namespace Pulsar4X.ECSLib
 
         public Dictionary<object, ChainedExpression> GuidDictionary;
 
+        public void SetValueFromDictionaryExpression(string key)
+        {
+            //Formula.ReplaceExpression(GuidDictionary[key].Result.ToString());
+            Formula = GuidDictionary[key];
+            ParentComponent.SetAttributes();
+        }
+
         public void SetValueFromGuidList(Guid techguid)
         {
             Formula.ReplaceExpression("TechData('" + techguid + "')");

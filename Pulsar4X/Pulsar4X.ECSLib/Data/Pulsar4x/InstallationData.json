@@ -581,6 +581,86 @@
             }
           ]
         }
+      },
+      {
+        "Key": "3528600E-3A1C-488C-BAE6-60251D1156AB",
+        "Value": {
+          "Name": "Spherical Fuel Storage",
+          "DescriptionFormula": "'Stores Fuel'",
+          "ID": "3528600E-3A1C-488C-BAE6-60251D1156AB",
+          "MassFormula": "Ability(0)",
+          "VolumeFormula": "[Mass]",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "Ability(1)",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Mass]"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "[Mass]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Tank Volume",
+              "DescriptionFormula": "'The Volume of this tank'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AttributeFormula": "50000"
+            },
+            {
+              "Name": "Tank Radius",
+              "DescriptionFormula": "'The radius of this tank.'",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AttributeFormula": "Pow(3 * (Ability('Tank Volume') / (4 * [Pi]) ), 1/3)"
+            },
+            {
+              "Name": "Dry Weight",
+              "DescriptionFormula": "'The weight of the empty tank'",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AttributeFormula": "(4 * [Pi] * Ability('Tank Radius') * Ability('Tank Radius')) * 23.5 "
+            },
+            {
+              "Name": "Total Fuel Stored",
+              "DescriptionFormula": "'The amount of fuel this can store.",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AttributeFormula": "Ability(0) - Ability(1)"
+            },
+            {
+              "Name": "DBargs",
+              "GuiHint": "None",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AttributeFormula": "AtbConstrArgs(Ability(2), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), 0, 0)",
+              "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
+            }
+          ]
+        }
       }
     ]
   }

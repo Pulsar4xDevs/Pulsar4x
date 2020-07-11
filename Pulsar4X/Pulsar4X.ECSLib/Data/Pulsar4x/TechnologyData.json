@@ -157,7 +157,7 @@
         "Value": {
           "Name": "LOX / Hydrocarbon Maximum Size",
           "Description": "Research into better cooling allows larger engine sizes",
-          "ID": "fa2736ed-d0bf-44a5-bc00-d25d3adaa23c",
+          "ID": "b056576a-124e-41c5-afcd-27d1f0bf6f4e",
           "MaxLevel": 10,
           "DataFormula": "8000 + [Level] * 250",
           "Category": "PowerAndPropulsion",
