@@ -10,6 +10,7 @@
           "ID": "5eadda1f-43aa-44be-bdb4-395441a33f14",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
           "Mass": 1.0,
+          "Density": 900,
           "Abundance": {
             "List": [
               {
@@ -57,6 +58,7 @@
           "ID": "c8a64019-aef4-4453-bd9b-36b26b0e9684",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
           "Mass": 1.0,
+          "Density": 7870,
           "Abundance": {
             "List": [
               {
@@ -104,6 +106,7 @@
           "ID": "d554fb70-bd28-459c-a1b3-d7b2019f685a",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
           "Mass": 1.0,
+          "Density": 2700,
           "Abundance": {
             "List": [
               {
@@ -151,6 +154,7 @@
           "ID": "66f15e2f-7a24-4ff6-9b68-03fcd93686f9",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
           "Mass": 1.0,
+          "Density": 8940,
           "Abundance": {
             "List": [
               {
@@ -198,6 +202,7 @@
           "ID": "A11ABDF3-C7DA-4DB2-9146-AEA0A5026B3E",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
           "Mass": 1.0,
+          "Density": 4540,
           "Abundance": {
             "List": [
               {
@@ -245,6 +250,7 @@
           "ID": "d6ebca8e-5a42-4664-a081-ca0190a6bb07",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
           "Mass": 1.0,
+          "Density": 535,
           "Abundance": {
             "List": [
               {
@@ -292,6 +298,7 @@
           "ID": "236b3092-29ca-4924-8c70-d09441757a30",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
           "Mass": 1.0,
+          "Density": 7200,
           "Abundance": {
             "List": [
               {
@@ -338,6 +345,7 @@
           "ID": "b084913d-385c-49e1-9877-56e805014ab0",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
           "Mass": 1.0,
+          "Density": 18800,
           "Abundance": {
             "List": [
               {

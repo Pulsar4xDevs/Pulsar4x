@@ -11,6 +11,8 @@ namespace Pulsar4X.ECSLib
         private readonly DateTime _loadTime;
         private readonly List<Event> _events = new List<Event>();
         private readonly Dictionary<Player, List<Event>> _newEvents = new Dictionary<Player, List<Event>>();
+        //private readonly Dictionary<FactionInfoDB, List<Event>> _newEvents = new Dictionary<FactionInfoDB, List<Event>>();
+        //todo: get rid of player, use factions instead.
 
         private Player SpaceMaster => _game.SpaceMaster;
 
@@ -103,9 +105,21 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        internal void AddPlayerEntityErrorEvent(Entity entity, string message)
+        {
+            Event newEvent = new Event(message);
+            newEvent.ConcernedPlayers.Add(entity.FactionOwner);
+            newEvent.Time = entity.StarSysDateTime;
+            _events.Add(newEvent);
+            //_newEvents[entity.FactionOwner]
+            
+
+
+
+        }
 
         /// <summary>
-        /// whats this for? what's it doing? document ffs.
+        /// checks if the given player should be aware of this event. 
         /// </summary>
         /// <param name="event"></param>
         /// <param name="player"></param>

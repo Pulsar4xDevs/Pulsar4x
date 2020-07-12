@@ -591,7 +591,7 @@ namespace Pulsar4X.ECSLib
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Density", "NS");
-                varNode.InnerText = massVolumeDB.Density.ToString("N4");
+                varNode.InnerText = massVolumeDB.Density_gcm.ToString("N4");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Radius", "NS");

@@ -106,7 +106,7 @@ namespace Pulsar4X.ECSLib
             var newTotal = storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID].amount - amount;
             storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] = (item, newTotal);
             //FreeCapacity is *MASS*
-            storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacityKg += item.Mass * amount; 
+            storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacityKg += (long)(item.Density * amount); 
         }
 
 
@@ -142,7 +142,7 @@ namespace Pulsar4X.ECSLib
                 storeDB.StoredCargoTypes[item.CargoTypeID].ItemsAndAmounts[item.ID] = (item, total);
             }
             //FreeCapacity is *MASS*
-            storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacityKg -= item.Mass * amount; 
+            storeDB.StoredCargoTypes[item.CargoTypeID].FreeCapacityKg -= (long)(item.Density * amount); 
         }
 
         internal static bool HasEntity(CargoStorageDB storeDB, CargoAbleTypeDB item)        
@@ -179,7 +179,7 @@ namespace Pulsar4X.ECSLib
             {
                 var itemAmounts = typeStore.ItemsAndAmounts[indexes[i]];
                 long amountStored = itemAmounts.amount;
-                int itemMass = itemAmounts.item.Mass;
+                int itemMass = (int)itemAmounts.item.Density;
                 long totalMass = amountStored * itemMass;
                 long removeMass = Math.Min(totalMass, massToLoose);
                 long removeAmount = removeMass / itemMass;
@@ -294,11 +294,11 @@ namespace Pulsar4X.ECSLib
         public static CargoCapacityCheckResult GetAvailableSpace(CargoStorageDB storeDB, Guid itemGuid, ICargoDefinitionsLibrary library)
         {
             var cargoDefinition = library.GetOther(itemGuid);
-            if (cargoDefinition.Mass == 0)
+            if (cargoDefinition.Density == 0)
                 return new CargoCapacityCheckResult(itemGuid, long.MaxValue, long.MaxValue);
 
             return new CargoCapacityCheckResult(itemGuid, 
-                storeDB.StoredCargoTypes[cargoDefinition.CargoTypeID].FreeCapacityKg / cargoDefinition.Mass,
+                (long)(storeDB.StoredCargoTypes[cargoDefinition.CargoTypeID].FreeCapacityKg * cargoDefinition.Density),
                 storeDB.StoredCargoTypes[cargoDefinition.CargoTypeID].FreeCapacityKg);
         }
 

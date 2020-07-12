@@ -42,8 +42,8 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
             mvDB.Mass = totalTonnage;
             mvDB.Volume_m3 = totalVolume;
-            mvDB.Density = MassVolumeDB.CalculateDensity(totalTonnage, totalVolume);
-            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius_Au(totalTonnage, mvDB.Density);
+            mvDB.Density_gcm = MassVolumeDB.CalculateDensity(totalTonnage, totalVolume);
+            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius_Au(totalTonnage, mvDB.Density_gcm);
             
         }
     }

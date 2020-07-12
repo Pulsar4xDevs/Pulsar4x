@@ -630,7 +630,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AttributeFormula": "Pow(3 * (Ability('Tank Volume') / (4 * [Pi]) ), 1/3)"
+              "AttributeFormula": "Pow(3 * (Ability('Tank Volume') / (4 * Pi) ), 1/3)"
             },
             {
               "Name": "Dry Weight",
@@ -639,7 +639,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AttributeFormula": "(4 * [Pi] * Ability('Tank Radius') * Ability('Tank Radius')) * 23.5 "
+              "AttributeFormula": "(4 * Pi * Ability('Tank Radius') * Ability('Tank Radius')) * 23.5 "
             },
             {
               "Name": "Total Fuel Stored",

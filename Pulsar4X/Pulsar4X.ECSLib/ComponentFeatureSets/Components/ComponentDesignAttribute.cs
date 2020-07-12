@@ -510,6 +510,10 @@ namespace Pulsar4X.ECSLib
 
             switch (name)
             {
+                case "Pi":
+                    args.Result = Math.PI;
+                    break;
+                
                 case "Mass":
                     MakeThisDependant(_designer.MassFormula);
                     args.Result = _designer.MassValue;
@@ -520,7 +524,6 @@ namespace Pulsar4X.ECSLib
                     MakeThisDependant(_designer.VolumeFormula);
                     args.Result = _designer.VolumeFormula;
                     break;
-                
                 case "Crew":
                     MakeThisDependant(_designer.CrewFormula);
                     args.Result = _designer.CrewReqValue;

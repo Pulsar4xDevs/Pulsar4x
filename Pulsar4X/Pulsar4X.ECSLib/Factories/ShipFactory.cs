@@ -20,6 +20,8 @@ namespace Pulsar4X.ECSLib
         public int DesignVersion = 0;
         public bool IsObsolete = false;
         public int Mass { get; }
+        public double Density { get; }
+
         /// <summary>
         /// m^3
         /// </summary>

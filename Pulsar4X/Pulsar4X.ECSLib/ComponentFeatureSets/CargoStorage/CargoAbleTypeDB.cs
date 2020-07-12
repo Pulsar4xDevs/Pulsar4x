@@ -30,7 +30,12 @@ namespace Pulsar4X.ECSLib
         public int Mass {
             get { return (int)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().Mass); } //TODO: could a storable item ever be too large for an int? this assumes that won't happen.
         }
-        
+
+        public double Density
+        {
+            get { return OwningEntity.GetDataBlob<MassVolumeDB>().Density_kgm; }
+        }
+
         /// <summary>
         /// This should be set to true if the item has become damaged or in any other way needs to maintain state 
         /// </summary>

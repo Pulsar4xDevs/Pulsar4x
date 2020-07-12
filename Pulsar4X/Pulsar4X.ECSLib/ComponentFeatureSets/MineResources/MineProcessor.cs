@@ -44,7 +44,7 @@ namespace Pulsar4X.ECSLib
             {
                 ICargoable mineral = _minerals[kvp.Key];
                 Guid cargoTypeID = mineral.CargoTypeID;
-                int itemMassPerUnit = mineral.Mass;
+                double itemMassPerUnit = mineral.Density;
                 
                 
                 double accessability = planetMinerals[kvp.Key].Accessibility;
@@ -53,11 +53,11 @@ namespace Pulsar4X.ECSLib
                 
                 long freeCapacity = stockpile.StoredCargoTypes[mineral.CargoTypeID].FreeCapacityKg;
 
-                long weightMinableThisTick = itemMassPerUnit * amountMinableThisTick;
+                long weightMinableThisTick = (long)itemMassPerUnit * amountMinableThisTick;
                 weightMinableThisTick = Math.Min(weightMinableThisTick, freeCapacity);  
                 
                 int actualAmountToMineThisTick = (int)(weightMinableThisTick / itemMassPerUnit);                                         //get the number of items from the mass transferable
-                long actualweightMinaedThisTick = actualAmountToMineThisTick * itemMassPerUnit;
+                long actualweightMinaedThisTick = (long)(actualAmountToMineThisTick * itemMassPerUnit);
 
                 StorageSpaceProcessor.AddCargo(stockpile, mineral, actualAmountToMineThisTick);
       

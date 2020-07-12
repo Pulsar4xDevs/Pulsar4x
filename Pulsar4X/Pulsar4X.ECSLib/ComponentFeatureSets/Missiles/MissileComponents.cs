@@ -108,6 +108,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public int DesignVersion = 0;
         public bool IsObsolete = false;
         public int Mass { get; }
+        /// <summary>
+        /// Wet Density;
+        /// </summary>
+        public double Density { get; }
         public double WetMass { get; }
         public double DryMass { get; }
         public double ExaustVelocity { get; }
@@ -182,6 +186,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
             WetMass = Mass + fuelMass;
             DryMass = Mass;
+            Density = WetMass / 1000;
             
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);

@@ -164,6 +164,11 @@ namespace Pulsar4X.ECSLib
         {
             get { return _teamSize * 100; }
         }
+
+        public double Density
+        {
+            get { return _teamSize * 985; } //avg density of a human. 
+        }
     }
 
     public class Scientist : TeamObject

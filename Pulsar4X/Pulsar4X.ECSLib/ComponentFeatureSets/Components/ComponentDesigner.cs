@@ -87,12 +87,13 @@ namespace Pulsar4X.ECSLib
         
         public Guid CargoTypeID { get; internal set; }
         public int Mass { get; internal set; }
-        
+        public double Density { get; internal set; }
+
         public int ResearchCostValue;
         public Guid TechID;
         public string TypeName; //ie the name in staticData. ie "Newtonion Thruster".
         public string Description;
-        public int Volume_m3;
+        public int Volume_m3 = 1;
         public int HTK;
         public int CrewReq;
         public int IndustryPointCosts { get; set; }
@@ -348,6 +349,7 @@ namespace Pulsar4X.ECSLib
         {
             MassFormula.Evaluate();
             _design.Mass = MassFormula.IntResult;
+            _design.Density = _design.Mass / _design.Volume_m3;
         }
 
         public int VolumeM3Value { get { return _design.Volume_m3; } }//TODO: check units are @SI UNITS kg/m^3
@@ -356,6 +358,7 @@ namespace Pulsar4X.ECSLib
         {
             VolumeFormula.Evaluate();
             _design.Volume_m3 = VolumeFormula.IntResult;
+            _design.Density = _design.Mass / _design.Volume_m3;
         }
 
 

@@ -15,7 +15,10 @@ namespace Pulsar4X.ECSLib
         Guid ID { get; }
         string Name { get; }
         Guid CargoTypeID { get;  }
-        int Mass { get;  }
+        /// <summary>
+        /// In Kg/M^3
+        /// </summary>
+        double Density { get; }
     }
 
     [StaticData(true, IDPropertyName = "ID")]

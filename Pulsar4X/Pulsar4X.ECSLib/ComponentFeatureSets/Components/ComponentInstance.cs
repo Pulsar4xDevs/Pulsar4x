@@ -211,7 +211,12 @@ namespace Pulsar4X.ECSLib
         {
             get { return Design.Mass; }
         }
-        
+
+        public double Density
+        {
+            get { return Design.Density; }
+        }
+
         #endregion
 
         /// <summary>

@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
                     long amountToXfer = itemsToXfer.amount;
 
                     Guid cargoTypeID = cargoItem.CargoTypeID;
-                    int itemMassPerUnit = cargoItem.Mass;
+                    double itemMassPerUnit = cargoItem.Density;
 
                     if (!datablob.CargoToDB.StoredCargoTypes.ContainsKey(cargoTypeID))
                         datablob.CargoToDB.StoredCargoTypes.Add(cargoTypeID, new CargoTypeStore());
@@ -45,15 +45,15 @@ namespace Pulsar4X.ECSLib
                     var fromCargoTypeStore = datablob.CargoFromDB.StoredCargoTypes[cargoTypeID]; //reference to the cargoType store we're pulling from.
                     var fromCargoItemAndAmount = fromCargoTypeStore.ItemsAndAmounts; //reference to dictionary we want to pull cargo from. 
 
-                    long totalweightToTransfer = itemMassPerUnit * amountToXfer;
-                    long weightToTransferThisTick = Math.Min(totalweightToTransfer, datablob.TransferRateInKG * deltaSeconds); //only the amount that can be transfered in this timeframe. 
+                    double totalweightToTransfer = itemMassPerUnit * amountToXfer;
+                    double weightToTransferThisTick = Math.Min(totalweightToTransfer, datablob.TransferRateInKG * deltaSeconds); //only the amount that can be transfered in this timeframe. 
 
                     weightToTransferThisTick = Math.Min(weightToTransferThisTick, toCargoTypeStore.FreeCapacityKg); //check cargo to has enough weight capacity
 
-                    long numberXfered = weightToTransferThisTick / itemMassPerUnit; //get the number of items from the mass transferable
+                    long numberXfered = (long)(weightToTransferThisTick / itemMassPerUnit); //get the number of items from the mass transferable
                     numberXfered = Math.Min(numberXfered, fromCargoItemAndAmount[cargoItem.ID].amount); //check from has enough to send. 
 
-                    weightToTransferThisTick = numberXfered * itemMassPerUnit;
+                    weightToTransferThisTick = (long)(numberXfered * itemMassPerUnit);
 
                     if (!toCargoItemAndAmount.ContainsKey(cargoItem.ID))
                         toCargoItemAndAmount.Add(cargoItem.ID, (cargoItem, numberXfered));
@@ -63,11 +63,11 @@ namespace Pulsar4X.ECSLib
                         toCargoItemAndAmount[cargoItem.ID] = (cargoItem, totalTo);
                     }
 
-                    toCargoTypeStore.FreeCapacityKg -= weightToTransferThisTick;
+                    toCargoTypeStore.FreeCapacityKg -= (long)weightToTransferThisTick;
 
                     long totalFrom = toCargoItemAndAmount[cargoItem.ID].amount - numberXfered;
                     fromCargoItemAndAmount[cargoItem.ID] = (cargoItem, totalFrom);
-                    fromCargoTypeStore.FreeCapacityKg += weightToTransferThisTick;
+                    fromCargoTypeStore.FreeCapacityKg += (long)weightToTransferThisTick;
                     datablob.ItemsLeftToTransfer[i] = (cargoItem, amountToXfer - numberXfered);
                 }
             }
