@@ -362,7 +362,7 @@ namespace Pulsar4X.SDL2UI
                                 if (ImGui.CollapsingHeader("MassVolumeDB: ###MassVolDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     MassVolumeDB mvdb = SelectedEntity.GetDataBlob<MassVolumeDB>();
-                                    ImGui.Text("Mass " + Stringify.Mass(mvdb.Mass));
+                                    ImGui.Text("Mass " + Stringify.Mass(mvdb.MassDry));
                                     ImGui.Text("Volume " + Stringify.Velocity(mvdb.Volume_m3));
                                     ImGui.Text("Density " + mvdb.Density_gcm + "g/cm^3");
                                     ImGui.Text("Radius " + Stringify.Distance(mvdb.RadiusInM));
@@ -464,8 +464,8 @@ namespace Pulsar4X.SDL2UI
                                         var soiradius = OrbitProcessor.GetSOI_AU(parent);
                                         var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
                                         psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
-                                        var pmass = parent.GetDataBlob<MassVolumeDB>().Mass;
-                                        var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().Mass;
+                                        var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;
+                                        var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().MassDry;
 
                                         var sgp = GameConstants.Science.GravitationalConstant * (pmass + mymass) / 3.347928976e33;
                                         var vel = Distance.KmToAU(cnmve.CurrentVector_ms);

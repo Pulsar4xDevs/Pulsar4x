@@ -109,7 +109,7 @@ namespace Pulsar4X.ECSLib
                 _fuelBurnRate = _newtonAbilityDB.FuelBurnRate;
                 _totalFuel = _newtonAbilityDB.TotalFuel_kg;
                 var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
-                _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().Mass;
+                _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().MassDry;
                 var currentVel = Entity.GetRalitiveFutureVelocity(_entityCommanding, atDateTime);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
                 _entityCommanding.RemoveDataBlob<OrbitDB>();
@@ -310,7 +310,7 @@ namespace Pulsar4X.ECSLib
                 _fuelBurnRate = _newtonAbilityDB.FuelBurnRate;
                 _totalFuel = _newtonAbilityDB.TotalFuel_kg;
                 var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
-                _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().Mass;
+                _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().MassDry;
                 var currentVel = Entity.GetRalitiveFutureVelocity(_entityCommanding, atDateTime);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
                 _entityCommanding.RemoveDataBlob<OrbitDB>();

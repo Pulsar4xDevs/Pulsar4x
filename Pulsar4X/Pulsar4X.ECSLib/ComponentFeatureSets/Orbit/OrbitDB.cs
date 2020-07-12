@@ -191,8 +191,8 @@ namespace Pulsar4X.ECSLib
         /// <param name="velocity_m">Velocity in meters.</param>
         public static OrbitDB FromVelocity_m(Entity parent, Entity entity, Vector3 velocity_m, DateTime atDateTime)
         {
-            var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
-            var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+            var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
+            var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
 
             //var epoch1 = parent.Manager.ManagerSubpulses.StarSysDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
 
@@ -279,7 +279,7 @@ namespace Pulsar4X.ECSLib
                 MeanAnomalyAtEpoch = ke.MeanAnomalyAtEpoch,
                 Epoch = atDateTime,
 
-                _parentMass = parent.GetDataBlob<MassVolumeDB>().Mass,
+                _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
                 _myMass = myMass
 
             };
@@ -312,7 +312,7 @@ namespace Pulsar4X.ECSLib
                 MeanAnomalyAtEpoch = ke.MeanAnomalyAtEpoch,
                 Epoch = atDateTime,
 
-                _parentMass = parent.GetDataBlob<MassVolumeDB>().Mass,
+                _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
                 _myMass = myMass
 
             };
@@ -348,8 +348,8 @@ namespace Pulsar4X.ECSLib
                 MeanAnomalyAtEpoch = m0,
                 Epoch = atDatetime,
 
-                _parentMass = parent.GetDataBlob<MassVolumeDB>().Mass,
-                _myMass = obj.GetDataBlob<MassVolumeDB>().Mass
+                _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
+                _myMass = obj.GetDataBlob<MassVolumeDB>().MassDry
                 
             };
             orbit.IsStationary = false;

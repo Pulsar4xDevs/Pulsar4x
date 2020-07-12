@@ -124,7 +124,7 @@ namespace Pulsar4X.ECSLib
                     _stars.Add(starVM);
                 if(!_starDictionary.ContainsKey(star.Guid))
                     _starDictionary.Add(star.Guid, starVM);
-                if (star.GetDataBlob<MassVolumeDB>().Mass > parentStar.GetDataBlob<MassVolumeDB>().Mass)
+                if (star.GetDataBlob<MassVolumeDB>().MassDry > parentStar.GetDataBlob<MassVolumeDB>().MassDry)
                 {
                     parentStar = star;
                     parentstarVM = starVM;

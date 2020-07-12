@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib
             {
                 numJumpPoints++;
 
-                jpChance = baseJPChance + (starMVDB.Mass / GameConstants.Units.SolarMassInKG);
+                jpChance = baseJPChance + (starMVDB.MassDry / GameConstants.Units.SolarMassInKG);
 
                 if (jpChance > 90)
                 {

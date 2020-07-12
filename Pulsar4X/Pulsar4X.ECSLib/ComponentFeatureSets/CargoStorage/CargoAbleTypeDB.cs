@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
 
         [JsonIgnore]
         public int Mass {
-            get { return (int)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().Mass); } //TODO: could a storable item ever be too large for an int? this assumes that won't happen.
+            get { return (int)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().MassDry); } //TODO: could a storable item ever be too large for an int? this assumes that won't happen.
         }
 
         public double Density

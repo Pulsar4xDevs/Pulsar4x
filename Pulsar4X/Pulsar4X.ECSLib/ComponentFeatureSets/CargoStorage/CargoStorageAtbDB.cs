@@ -72,22 +72,19 @@ namespace Pulsar4X.ECSLib
             }
         }
     }
+    
 
-    public class CargoTransferAtbDB : IComponentDesignAttribute
-    {
-        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class VolumeStorageAtbDB : IComponentDesignAttribute
+    public class VolumeStorageAtb : IComponentDesignAttribute
     {
         public Guid StoreTypeID;
         public double MaxVolume;
-        
-        
-        
+
+        public VolumeStorageAtb(Guid storeTypeID, double maxVolume)
+        {
+            StoreTypeID = storeTypeID;
+            MaxVolume = maxVolume;
+        }
+
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!parentEntity.HasDataBlob<VolumeStorageDB>())
@@ -101,13 +98,36 @@ namespace Pulsar4X.ECSLib
                 if (db.TypeStores.ContainsKey(StoreTypeID))
                 {
                     db.TypeStores[StoreTypeID].MaxVolume += MaxVolume;
+                    db.TypeStores[StoreTypeID].FreeVolume += MaxVolume;
                 }
                 else
                 {
                     db.TypeStores.Add(StoreTypeID, new TypeStore(MaxVolume));
                 }
             }
-            
+        }
+    }
+
+    public class StorageTransferRateAtbDB : IComponentDesignAttribute
+    {
+        /// <summary>
+        /// Gets or sets the transfer rate.
+        /// </summary>
+        /// <value>The transfer rate in Kg/h</value>
+        public int TransferRate_kgh { get; internal set; }
+        /// <summary>
+        /// Gets or sets the transfer range.
+        /// </summary>
+        /// <value>DeltaV in m/s, Low Earth Orbit is about 10000m/s</value>
+        public double TransferRange_ms { get; internal set; }
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if (!parentEntity.HasDataBlob<VolumeStorageDB>())
+            {
+                var newdb = new VolumeStorageDB();
+                parentEntity.SetDataBlob(newdb);
+            }
+            StorageSpaceProcessor.RecalcVolumeCapacityAndRates(parentEntity);
         }
     }
 
@@ -123,19 +143,19 @@ namespace Pulsar4X.ECSLib
         public double TransferRangeDv_mps { get; set; } = 100;
 
         [JsonConstructor]
-        VolumeStorageDB()
+        internal VolumeStorageDB()
         {
         }
 
-        public VolumeStorageDB(Guid type, double maxStor)
+        public VolumeStorageDB(Guid type, double maxVolume)
         {
-            TypeStores.Add(type, new TypeStore(maxStor));
+            TypeStores.Add(type, new TypeStore(maxVolume));
         }
 
 
 
         /// <summary>
-        /// Add or remove cargo by volume.
+        /// Add or remove cargo by volume. ignores transfer rate.
         /// </summary>
         /// <param name="cargoItem"></param>
         /// <param name="volume">negitive to remove cargo</param>
@@ -159,7 +179,7 @@ namespace Pulsar4X.ECSLib
             }
             
             double newStorAmount = Math.Clamp(volume + volStored, 0, store.MaxVolume);
-            double volChanged = volStored - newStorAmount;
+            double volChanged = volStored + newStorAmount;
             
             if (newStorAmount == 0)
                 store.CurrentStore.Remove(cargoItem.ID);
@@ -167,13 +187,13 @@ namespace Pulsar4X.ECSLib
                 store.CurrentStore[cargoItem.ID] = newStorAmount;
 
             var massChanged = cargoItem.Density * volChanged;
-            store.FreeVolume += volChanged;
+            store.FreeVolume -= volChanged;
             TotalStoredMass += massChanged;
             return volChanged;
         }
 
         /// <summary>
-        /// Add or removes cargo from storage
+        /// Add or removes cargo from storage, ignores transfer rate.
         /// </summary>
         /// <param name="cargoItem"></param>
         /// <param name="mass">negitive to remove</param>
@@ -185,11 +205,33 @@ namespace Pulsar4X.ECSLib
             return cargoItem.Density * volChanged;
         }
 
-        
-        
+
+        public double GetVolumeAmount(ICargoable cargoItem)
+        {
+            if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
+                return 0;
+            if (!TypeStores[cargoItem.CargoTypeID].CurrentStore.ContainsKey(cargoItem.ID))
+                return 0;
+            return TypeStores[cargoItem.CargoTypeID].CurrentStore[cargoItem.ID];
+        }
+
+        public double GetMassAmount(ICargoable caroItem)
+        {
+            double volAmount = GetVolumeAmount(caroItem);
+            return caroItem.Density * volAmount;
+        }
+
+        public VolumeStorageDB(VolumeStorageDB db)
+        {
+            TypeStores = new Dictionary<Guid, TypeStore>(db.TypeStores);
+            TotalStoredMass = db.TotalStoredMass;
+            TransferRangeDv_mps = db.TransferRangeDv_mps;
+            TransferRateInKgHr = db.TransferRateInKgHr;
+        }
+
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new VolumeStorageDB(this);
         }
     }
 

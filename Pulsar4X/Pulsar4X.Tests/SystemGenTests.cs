@@ -34,12 +34,12 @@ namespace Pulsar4X.Tests
             if (stars.Count > 1)
             {
                 Entity rootStar = stars[0].GetDataBlob<OrbitDB>().Root;
-                double highestMass = rootStar.GetDataBlob<MassVolumeDB>().Mass;
+                double highestMass = rootStar.GetDataBlob<MassVolumeDB>().MassDry;
                 Entity highestMassStar = rootStar;
                 foreach (Entity star in stars)
                 {
                     var massDB = star.GetDataBlob<MassVolumeDB>();
-                    if (massDB.Mass > highestMass)
+                    if (massDB.MassDry > highestMass)
                         highestMassStar = star;
                 }
 

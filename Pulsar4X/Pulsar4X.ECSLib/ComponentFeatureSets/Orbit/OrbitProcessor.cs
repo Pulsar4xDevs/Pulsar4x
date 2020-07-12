@@ -632,9 +632,9 @@ namespace Pulsar4X.ECSLib
             {
                 var semiMajAxis = orbitDB.SemiMajorAxis_AU;
 
-                var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+                var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
 
-                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
+                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().MassDry;
 
                 return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
             }
@@ -649,9 +649,9 @@ namespace Pulsar4X.ECSLib
             {
                 var semiMajAxis = orbitDB.SemiMajorAxis;
 
-                var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+                var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
 
-                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
+                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().MassDry;
 
                 return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
             }

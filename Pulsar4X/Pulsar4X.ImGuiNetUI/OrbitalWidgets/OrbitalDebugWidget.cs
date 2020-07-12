@@ -190,8 +190,8 @@ namespace Pulsar4X.SDL2UI
             var parentEntity = Entity.GetSOIParentEntity(_entity);
             _positionDB = parentEntity.GetDataBlob<PositionDB>();
 
-            var parentMass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
-            var myMass = _entity.GetDataBlob<MassVolumeDB>().Mass;
+            var parentMass = parentEntity.GetDataBlob<MassVolumeDB>().MassDry;
+            var myMass = _entity.GetDataBlob<MassVolumeDB>().MassDry;
             _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass); 
 
             EntityGuid = entityState.Entity.Guid;

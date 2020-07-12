@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
             NewtonMoveDB newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
-            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().Mass;
+            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
             var manager = entity.Manager;
@@ -143,7 +143,7 @@ namespace Pulsar4X.ECSLib
                         var parentVelocity = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().CurrentVector_ms;
                         parentRalitiveVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
                     }
-                    parentMass_kg = newParent.GetDataBlob<MassVolumeDB>().Mass;
+                    parentMass_kg = newParent.GetDataBlob<MassVolumeDB>().MassDry;
                     
                     Vector3 posRalitiveToNewParent = positionDB.AbsolutePosition_m - newParent.GetDataBlob<PositionDB>().AbsolutePosition_m;
 
@@ -212,7 +212,7 @@ namespace Pulsar4X.ECSLib
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
             DateTime dateTimeNow = entity.StarSysDateTime;
             TimeSpan timeDelta = atDateTime - dateTimeNow;
-            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().Mass;
+            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
             Vector3 newRalitive = positionDB.RelativePosition_m;
@@ -266,7 +266,7 @@ namespace Pulsar4X.ECSLib
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
             DateTime dateTimeNow = entity.StarSysDateTime;
             TimeSpan timeDelta = atDateTime - dateTimeNow;
-            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().Mass;
+            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
             Vector3 newAbsolute = positionDB.AbsolutePosition_m;
@@ -318,12 +318,22 @@ namespace Pulsar4X.ECSLib
             var ft = db.FuelType;
             var ev = db.ExhaustVelocity;
             
-            var wetmass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
+            db.DryMass_kg = parentEntity.GetDataBlob<MassVolumeDB>().MassDry; 
             ProcessedMaterialSD fuel = StaticRefLib.StaticData.CargoGoods.GetMaterials()[ft];
-            var cargo = parentEntity.GetDataBlob<CargoStorageDB>();
-            var fuelAmount = StorageSpaceProcessor.GetAmount(cargo, fuel);
-            db.DryMass_kg = wetmass - fuelAmount;
-            db.SetFuel(fuelAmount);
+
+            double fuelMass = 0;
+            if(parentEntity.HasDataBlob<VolumeStorageDB>())
+            {
+                var cargo = parentEntity.GetDataBlob<VolumeStorageDB>();
+                fuelMass = cargo.GetMassAmount(fuel);
+            }
+            else if (parentEntity.HasDataBlob<CargoStorageDB>()) //TODO: this can be removed once CargoStorageDB is gone.
+            {
+                var cargo = parentEntity.GetDataBlob<CargoStorageDB>();
+                fuelMass = StorageSpaceProcessor.GetAmount(cargo, fuel); 
+            }
+            
+            db.SetFuel(fuelMass);
         }
 
 

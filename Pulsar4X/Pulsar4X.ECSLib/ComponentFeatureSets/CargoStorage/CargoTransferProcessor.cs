@@ -143,7 +143,7 @@ namespace Pulsar4X.ECSLib
             if(soi1 == soi2)
             {
                 parent = soi1;
-                parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
+                parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
                 sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(0, parentMass);
                 
                 

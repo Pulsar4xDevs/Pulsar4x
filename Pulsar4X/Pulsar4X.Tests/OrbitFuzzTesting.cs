@@ -20,7 +20,7 @@ namespace Pulsar4X.Tests
              OrbitDB.FromAsteroidFormat //circular orbit.
                  (
                  parentBody, 
-                 parentMassDB.Mass, 
+                 parentMassDB.MassDry, 
                  1000, 
                  1, 
                  0, 
@@ -35,7 +35,7 @@ namespace Pulsar4X.Tests
             (
              OrbitDB.FromAsteroidFormat( //elliptical orbit
                  parentBody, 
-                 parentMassDB.Mass, 
+                 parentMassDB.MassDry, 
                  2.2e14,          //halleysBodyMass
                  17.834,     //halleysSemiMajAxis 
                  0.96714,     //halleysEccentricity
@@ -49,7 +49,7 @@ namespace Pulsar4X.Tests
             (
              OrbitDB.FromAsteroidFormat( //elliptical 2d retrograde orbit. 
                  parentBody, 
-                 parentMassDB.Mass, 
+                 parentMassDB.MassDry, 
                  2.2e14,             //halleysBodyMass
                  17.834,         //halleysSemiMajAxis , 
                  0.96714,         //halleysEccentricity
@@ -63,7 +63,7 @@ namespace Pulsar4X.Tests
             (
              OrbitDB.FromAsteroidFormat( //elliptical 3d orbit. 
                  parentBody, 
-                 parentMassDB.Mass, 
+                 parentMassDB.MassDry, 
                  2.2e14,            //halleysBodyMass
                  17.834,     //halleysSemiMajAxis , 
                  0.96714,     //halleysEccentricity
@@ -77,7 +77,7 @@ namespace Pulsar4X.Tests
             (
              OrbitDB.FromAsteroidFormat( //elliptical retrograde 3d orbit. 
                  parentBody, 
-                 parentMassDB.Mass, 
+                 parentMassDB.MassDry, 
                  2.2e14,            //halleysBodyMass
                  17.834,     //halleysSemiMajAxis , 
                  0.96714,     //halleysEccentricity

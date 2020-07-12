@@ -14,6 +14,9 @@ namespace Pulsar4X.ECSLib
         /// in m/s
         /// </summary>
         public double ExhaustVelocity;
+        /// <summary>
+        /// this is a specific mineral/refined materal etc, rather than a cargo type
+        /// </summary>
         public Guid FuelType;
         
         /// <summary>
@@ -187,7 +190,7 @@ namespace Pulsar4X.ECSLib
         {
             CurrentVector_ms = velocity_ms;
             SOIParent = sphereOfInfluenceParent;
-            ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().Mass;
+            ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().MassDry;
             LastProcessDateTime = sphereOfInfluenceParent.Manager.ManagerSubpulses.StarSysDateTime;
         }
         public NewtonMoveDB(NewtonMoveDB db)
@@ -205,7 +208,7 @@ namespace Pulsar4X.ECSLib
         public KeplerElements GetElements()
         {
             // if there is not a change in Dv then the kepler elements wont have changed, it might be better to store them?
-            double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().Mass;
+            double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().MassDry;
             var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, ParentMass);
             var pos = OwningEntity.GetDataBlob<PositionDB>().RelativePosition_m;
             var dateTime = OwningEntity.StarSysDateTime;

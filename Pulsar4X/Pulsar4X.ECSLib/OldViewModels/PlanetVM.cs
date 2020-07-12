@@ -630,7 +630,7 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException("massVolumeDB");
             }
 
-            Mass = massVolumeDB.Mass;
+            Mass = massVolumeDB.MassDry;
             Density = massVolumeDB.Density_gcm;
             Radius = massVolumeDB.RadiusInAU;
             Volume = massVolumeDB.Volume_km3;

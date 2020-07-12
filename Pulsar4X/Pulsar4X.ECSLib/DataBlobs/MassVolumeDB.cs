@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
         /// Mass in KG of this entity.
         /// </summary>
         [JsonProperty]
-        public double Mass { get; internal set; }
+        public double MassDry { get; internal set; }
 
         /// <summary>
         /// Volume_km3 of this entity in Km^3.
@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib
         /// Measure on the gravity of a planet at its surface.
         /// In Earth Gravities (Gs).
         /// </summary>
-        public double SurfaceGravity => GMath.GetStandardGravitationAttraction(Mass, RadiusInKM * 1000);
+        public double SurfaceGravity => GMath.GetStandardGravitationAttraction(MassDry, RadiusInKM * 1000);
 
         public MassVolumeDB()
         {
@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         internal static MassVolumeDB NewFromMassAndRadius_AU(double mass, double radius_au)
         {
-            var mvDB = new MassVolumeDB {Mass = mass, RadiusInAU = radius_au, Volume_km3 = CalculateVolume_Km3(radius_au)};
+            var mvDB = new MassVolumeDB {MassDry = mass, RadiusInAU = radius_au, Volume_km3 = CalculateVolume_Km3(radius_au)};
             mvDB.Density_gcm = CalculateDensity(mass, mvDB.Volume_m3);
 
             return mvDB;
@@ -87,7 +87,7 @@ namespace Pulsar4X.ECSLib
         
         internal static MassVolumeDB NewFromMassAndRadius_m(double mass, double radius_m)
         {
-            var mvDB = new MassVolumeDB {Mass = mass, RadiusInM = radius_m, Volume_m3 = CalculateVolume_m3(radius_m)};
+            var mvDB = new MassVolumeDB {MassDry = mass, RadiusInM = radius_m, Volume_m3 = CalculateVolume_m3(radius_m)};
             mvDB.Density_gcm = CalculateDensity(mass, mvDB.Volume_m3);
 
             return mvDB;
@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         internal static MassVolumeDB NewFromMassAndDensity(double mass, double density)
         {
-            var mvDB = new MassVolumeDB {Mass = mass, Density_gcm = density, Volume_km3 = CalculateVolume_Km3_FromMassAndDesity(mass, density), RadiusInAU = CalculateRadius_Au(mass, density)};
+            var mvDB = new MassVolumeDB {MassDry = mass, Density_gcm = density, Volume_km3 = CalculateVolume_Km3_FromMassAndDesity(mass, density), RadiusInAU = CalculateRadius_Au(mass, density)};
 
             return mvDB;
         }
@@ -116,14 +116,14 @@ namespace Pulsar4X.ECSLib
         {
             var density = CalculateDensity(mass, volume_m3);
             var rad = CalculateRadius_m(mass, density);
-            var mvDB = new MassVolumeDB { Mass = mass, Volume_m3 = volume_m3, Density_gcm = density, RadiusInM = rad };
+            var mvDB = new MassVolumeDB { MassDry = mass, Volume_m3 = volume_m3, Density_gcm = density, RadiusInM = rad };
 
             return mvDB;
         }
 
         public MassVolumeDB(MassVolumeDB massVolumeDB)
         {
-            Mass = massVolumeDB.Mass;
+            MassDry = massVolumeDB.MassDry;
             Density_gcm = massVolumeDB.Density_gcm;
             RadiusInAU = massVolumeDB.RadiusInAU;
             Volume_km3 = massVolumeDB.Volume_km3;
@@ -227,7 +227,7 @@ namespace Pulsar4X.ECSLib
         void Update(MassVolumeDB origionalDB, SensorInfoDB sensorInfo)
         {
             //TODO: add rand from sensorInfo. 
-            Mass = origionalDB.Mass;
+            MassDry = origionalDB.MassDry;
             Density_gcm = origionalDB.Density_gcm;
             RadiusInAU = origionalDB.RadiusInAU;
             Volume_km3 = origionalDB.Volume_km3;
@@ -235,7 +235,7 @@ namespace Pulsar4X.ECSLib
 
         public int GetValueCompareHash(int hash = 17)
         {
-            hash = Misc.ValueHash(Mass, hash);
+            hash = Misc.ValueHash(MassDry, hash);
             hash = Misc.ValueHash(Density_gcm);
             hash = Misc.ValueHash(RadiusInAU);
             hash = Misc.ValueHash(Volume_km3);

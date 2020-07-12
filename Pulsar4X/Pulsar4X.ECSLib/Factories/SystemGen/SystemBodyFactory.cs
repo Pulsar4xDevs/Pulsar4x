@@ -54,7 +54,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // Mass Multiplier
-            double starMassRatio = GMath.GetPercentage(starMassInfo.Mass, _galaxyGen.Settings.StarMassBySpectralType[starInfo.SpectralType]);
+            double starMassRatio = GMath.GetPercentage(starMassInfo.MassDry, _galaxyGen.Settings.StarMassBySpectralType[starInfo.SpectralType]);
 
             // Star type Multiplier.
             double starSpectralTypeRatio = _galaxyGen.Settings.StarSpectralTypePlanetGenerationRatio[starInfo.SpectralType];
@@ -210,7 +210,7 @@ namespace Pulsar4X.ECSLib
             double argumentOfPeriapsis = system.RNG.NextDouble() * 360;
             double meanAnomaly = system.RNG.NextDouble() * 360;
 
-            comet.SetDataBlob(new OrbitDB(star, starMVDB.Mass, cometMVDB.Mass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode,
+            comet.SetDataBlob(new OrbitDB(star, starMVDB.MassDry, cometMVDB.MassDry, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode,
                                             argumentOfPeriapsis, meanAnomaly, currentDateTime));
         }
 
@@ -307,7 +307,7 @@ namespace Pulsar4X.ECSLib
             foreach (ProtoEntity body in bodies)
             {
                 MassVolumeDB bodyMVDB = body.GetDataBlob<MassVolumeDB>();
-                totalBandMass += bodyMVDB.Mass;
+                totalBandMass += bodyMVDB.MassDry;
             }
 
             // Prepare the loop variables.
@@ -332,14 +332,14 @@ namespace Pulsar4X.ECSLib
                 if (bodyOrbit.Apoapsis_AU <= bandLimits.Min && bodyOrbit.Apoapsis_AU > insideApoapsis)
                 {
                     insideApoapsis = bodyOrbit.Apoapsis_AU;
-                    insideMass = bodyMass.Mass;
+                    insideMass = bodyMass.MassDry;
                 }
                 // Otherwise, find if the current systemBody is within the bandLimit
                 // and is in a lower orbit than the previous outsideOrbit.
                 else if (bodyOrbit.Periapsis_AU >= bandLimits.Max && bodyOrbit.Periapsis_AU < outsidePeriapsis)
                 {
                     outsidePeriapsis = bodyOrbit.Periapsis_AU;
-                    outsideMass = bodyMass.Mass;
+                    outsideMass = bodyMass.MassDry;
                 }
                 // Note, we build our insideOrbit and outsideOrbits, then we try to build orbits between insideOrbit and outsideOrbit.
                 // If there's only one body, but it's right INSIDE the bandLimits, then our insideOrbit will be very close to our bandLimit,
@@ -354,10 +354,10 @@ namespace Pulsar4X.ECSLib
                 MassVolumeDB currentMVDB = currentBody.GetDataBlob<MassVolumeDB>();
 
                 // Limit the orbit to the ratio of object mass and remaining distance.
-                double massRatio = currentMVDB.Mass / remainingBandMass;
+                double massRatio = currentMVDB.MassDry / remainingBandMass;
                 double maxDistance = remainingDistance * massRatio + minDistance;
                 // We'll either find this orbit, or eject it, so this body is no longer part of remaining mass.
-                remainingBandMass -= currentMVDB.Mass;
+                remainingBandMass -= currentMVDB.MassDry;
 
                 // Do the heavy math to find the orbit.
                 OrbitDB currentOrbit = FindClearOrbit(system, parent, currentBody, insideApoapsis, outsidePeriapsis, insideMass, outsideMass, minDistance, maxDistance, currentDateTime);
@@ -371,7 +371,7 @@ namespace Pulsar4X.ECSLib
                 }
                 currentBody.SetDataBlob(currentOrbit);
 
-                insideMass = currentMVDB.Mass;
+                insideMass = currentMVDB.MassDry;
                 insideApoapsis = currentOrbit.Apoapsis_AU;
             }
         }
@@ -382,10 +382,10 @@ namespace Pulsar4X.ECSLib
         private OrbitDB FindClearOrbit(StarSystem system, Entity parent, ProtoEntity body, double insideApoapsis, double outsidePeriapsis, double insideMass, double outsideMass, double minDistance, double maxDistance, DateTime currentDateTime)
         {
             MassVolumeDB parentMVDB = parent.GetDataBlob<MassVolumeDB>();
-            double parentMass = parentMVDB.Mass;
+            double parentMass = parentMVDB.MassDry;
 
             MassVolumeDB myMVDB = body.GetDataBlob<MassVolumeDB>();
-            double myMass = myMVDB.Mass;
+            double myMass = myMVDB.MassDry;
 
             // Adjust minDistance
             double gravAttractionInsiderNumerator = GameConstants.Science.GravitationalConstant * myMass * insideMass;
@@ -509,7 +509,7 @@ namespace Pulsar4X.ECSLib
             // The MaxNoOfMoonsByPlanetType
             // And a random number for randomness.
             MassVolumeDB parentMVDB = parent.GetDataBlob<MassVolumeDB>();
-            double massRatioOfParent = parentMVDB.Mass / _galaxyGen.Settings.SystemBodyMassByType[parentBodyDB.BodyType].Max;
+            double massRatioOfParent = parentMVDB.MassDry / _galaxyGen.Settings.SystemBodyMassByType[parentBodyDB.BodyType].Max;
             double moonGenChance = massRatioOfParent * system.RNG.NextDouble() * _galaxyGen.Settings.MaxNoOfMoonsByPlanetType[parentBodyDB.BodyType];
             moonGenChance = GMath.Clamp(moonGenChance, 1, _galaxyGen.Settings.MaxNoOfMoonsByPlanetType[parentBodyDB.BodyType]);
             int numMoons = (int)Math.Round(moonGenChance);
@@ -525,7 +525,7 @@ namespace Pulsar4X.ECSLib
                 
                 // Enforce GalaxyFactory mass limits.
                 MinMaxStruct moonMassMinMax = _galaxyGen.Settings.SystemBodyMassByType[newMoonBodyDB.BodyType];
-                double maxRelativeMass = parentMVDB.Mass * _galaxyGen.Settings.MaxMoonMassRelativeToParentBody;
+                double maxRelativeMass = parentMVDB.MassDry * _galaxyGen.Settings.MaxMoonMassRelativeToParentBody;
                 if (maxRelativeMass < moonMassMinMax.Max)
                 {
                     moonMassMinMax.Max = maxRelativeMass;
@@ -561,7 +561,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB referenceOrbit = body.GetDataBlob<OrbitDB>();
 
             int asteroidCount = 1;
-            while (beltMVDB.Mass > 0)
+            while (beltMVDB.MassDry > 0)
             {
                 ProtoEntity newProtoBody = CreateBaseBody();
                 Entity newBody = Entity.Create(system, Guid.Empty, newProtoBody);
@@ -586,7 +586,7 @@ namespace Pulsar4X.ECSLib
                 FinalizeSystemBodyDB(staticData, system, newBody);
                 FinalizeNameDB(newBody, referenceOrbit.Parent, bodyCount, "-A" + asteroidCount.ToString());
 
-                beltMVDB.Mass -= mvDB.Mass;
+                beltMVDB.MassDry -= mvDB.MassDry;
                 asteroidCount++;
             }
 
@@ -637,7 +637,7 @@ namespace Pulsar4X.ECSLib
             // now Create the orbit:
             MassVolumeDB parentMVDB = referenceOrbit.Parent.GetDataBlob<MassVolumeDB>();
             MassVolumeDB myMVDB = newBody.GetDataBlob<MassVolumeDB>();
-            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(referenceOrbit.Parent, parentMVDB.Mass, myMVDB.Mass, semiMajorAxis, eccentricity, inclination,
+            OrbitDB newOrbit = OrbitDB.FromAsteroidFormat(referenceOrbit.Parent, parentMVDB.MassDry, myMVDB.MassDry, semiMajorAxis, eccentricity, inclination,
                                                     longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, _galaxyGen.Settings.J2000);
             newBody.SetDataBlob(newOrbit);
             newBody.GetDataBlob<PositionDB>().SetParent(newOrbit.Parent);
@@ -748,7 +748,7 @@ namespace Pulsar4X.ECSLib
             // this planet has some plate tectonics:
             // the following should give us a number between 0 and 1 for most bodies. Earth has a number of 0.217...
             // we converge in billion years instead of years (otherwise we get tiny numbers).
-            double tectonicsChance = bodyMass.Mass / GameConstants.Units.EarthMassInKG / starInfo.Age * 100000000;
+            double tectonicsChance = bodyMass.MassDry / GameConstants.Units.EarthMassInKG / starInfo.Age * 100000000;
             tectonicsChance = GMath.Clamp(tectonicsChance, 0, 1);
 
             TectonicActivity t;
@@ -846,7 +846,7 @@ namespace Pulsar4X.ECSLib
             var bodyMass = body.GetDataBlob<MassVolumeDB>();
 
             // get the mass ratio for this body to earth:
-            double massRatio = bodyMass.Mass / GameConstants.Units.EarthMassInKG;
+            double massRatio = bodyMass.MassDry / GameConstants.Units.EarthMassInKG;
             double genChance = massRatio * system.RNG.NextDouble();
             double genChanceThreshold = _galaxyGen.Settings.MineralGenerationChanceByBodyType[bodyInfo.BodyType];
 
@@ -928,14 +928,14 @@ namespace Pulsar4X.ECSLib
             bodyDB.Albedo = (float)GMath.SelectFromRange(_galaxyGen.Settings.PlanetAlbedoByType[bodyDB.BodyType], system.RNG.NextDouble());
 
             // Atmo modifer is used to determine how thick the atmosphere should be, higher = thicker.
-            double atmoModifer = _galaxyGen.Settings.AtmosphereGenerationModifier[bodyDB.BodyType] * (mvDB.Mass / GameConstants.Units.EarthMassInKG);
+            double atmoModifer = _galaxyGen.Settings.AtmosphereGenerationModifier[bodyDB.BodyType] * (mvDB.MassDry / GameConstants.Units.EarthMassInKG);
             double atmoGenChance = GMath.Clamp(atmoModifer, 0, 1); // used to detmine if we should haver an atmosphere at all.
 
             if (atmoGenChance > system.RNG.NextDouble())
             {
                 // we can generate an atmosphere!
                 // first we should decide how thick it should be:
-                double newATM = GenAtmosphereThickness(mvDB.Mass, bodyDB, orbit, atmoModifer, system.RNG.NextDouble());
+                double newATM = GenAtmosphereThickness(mvDB.MassDry, bodyDB, orbit, atmoModifer, system.RNG.NextDouble());
 
                 // set an initial surface temp to the base temp, adjusted for albedo:
                 atmoDB.SurfaceTemperature = atmoDB.SurfaceTemperature = bodyDB.BaseTemperature * (1 - bodyDB.Albedo);

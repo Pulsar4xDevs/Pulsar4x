@@ -190,6 +190,82 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        internal static void RecalcVolumeCapacityAndRates(Entity parentEntity)
+        {
+            
+            VolumeStorageDB cargoStorageDB = parentEntity.GetDataBlob<VolumeStorageDB>();
+            //Dictionary<Guid, CargoTypeStore> storageDBStoredCargos = cargoStorageDB.StoredCargoTypes;
+
+            Dictionary<Guid, double> calculatedMaxStorage = new Dictionary<Guid, double>();
+
+            var instancesDB = parentEntity.GetDataBlob<ComponentInstancesDB>();
+
+            double transferRate = 0;
+            double transferRange = 0; 
+            
+            
+            
+            if( instancesDB.TryGetComponentsByAttribute<VolumeStorageAtb>(out var componentInstances))
+            {
+                
+                foreach (var instance in componentInstances)
+                {
+                    var design = instance.Design;
+                    var atbdata = design.GetAttribute<VolumeStorageAtb>();
+
+                    if (instance.HealthPercent() > 0.75)
+                    {
+                        if(!calculatedMaxStorage.ContainsKey(atbdata.StoreTypeID))
+                            calculatedMaxStorage[atbdata.StoreTypeID] = atbdata.MaxVolume;
+                        else
+                            calculatedMaxStorage[atbdata.StoreTypeID] += atbdata.MaxVolume;
+                    }
+                }
+            }
+
+            foreach (var kvp in calculatedMaxStorage)
+            {
+                
+                if(!cargoStorageDB.TypeStores.ContainsKey(kvp.Key))
+                    cargoStorageDB.TypeStores.Add(kvp.Key, new TypeStore(kvp.Value));
+                
+                else
+                {
+                    var stor = cargoStorageDB.TypeStores[kvp.Key];
+                    var dif = kvp.Value - stor.MaxVolume;
+                    stor.FreeVolume += dif;
+                    stor.MaxVolume += dif;
+                    if (stor.FreeVolume < 0)
+                    {
+                        throw new NotImplementedException("need to code random dropping of cargo, this shoudl only happen due to damage or cargo components getting removed");
+                    }                  
+                    
+                }
+
+            }
+            
+            
+            int i = 0;
+            if (instancesDB.TryGetComponentsByAttribute<StorageTransferRateAtbDB>(out var componentTransferInstances))
+            {
+                foreach (var instance in componentInstances)
+                {
+                    var design = instance.Design;
+                    var atbdata = design.GetAttribute<StorageTransferRateAtbDB>();
+
+                    if (instance.HealthPercent() > 0.75)
+                    {
+                        transferRate += atbdata.TransferRate_kgh;
+                        transferRange += atbdata.TransferRange_ms;
+                        i++;
+                    }
+                }
+
+                cargoStorageDB.TransferRateInKgHr = (int)(transferRate / i);
+                cargoStorageDB.TransferRangeDv_mps = transferRange / i;
+            }
+
+        }
 
         internal static void ReCalcCapacity(Entity parentEntity)
         {
@@ -229,7 +305,6 @@ namespace Pulsar4X.ECSLib
             //transfer rate and ranges are averaged. 
             cargoStorageDB.TransferRateInKgHr = (int)(transferRate / i);
             cargoStorageDB.TransferRangeDv_kms = (transferRange / i);
-
             
 
             //List<KeyValuePair<Entity, PrIwObsList<Entity>>> storageComponents = parentEntity.GetDataBlob<ComponentInstancesDB>().SpecificInstances.GetInternalDictionary().Where(item => item.Key.HasDataBlob<CargoStorageAtbDB>()).ToList();

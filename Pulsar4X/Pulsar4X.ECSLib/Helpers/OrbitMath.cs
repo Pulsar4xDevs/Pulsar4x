@@ -1117,7 +1117,7 @@ namespace Pulsar4X.ECSLib
             var lowOrbit = LowOrbitRadius(planetEntity);
             
             var exaustVelocity = 275;
-            var sgp = OrbitMath.CalculateStandardGravityParameterInKm3S2(payload, planetEntity.GetDataBlob<MassVolumeDB>().Mass);
+            var sgp = OrbitMath.CalculateStandardGravityParameterInKm3S2(payload, planetEntity.GetDataBlob<MassVolumeDB>().MassDry);
             Vector3 pos = new Vector3(lowOrbit, 0, 0);
             
             var vel = OrbitMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);

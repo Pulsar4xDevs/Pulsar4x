@@ -21,7 +21,7 @@ namespace Pulsar4X.Tests
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
             parentblobs[0] = new PositionDB(man.ManagerGuid) { X_AU = 0, Y_AU = 0, Z_AU = 0 };
-            parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
+            parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
             double sgp_m = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
@@ -284,7 +284,7 @@ namespace Pulsar4X.Tests
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
             parentblobs[0] = new PositionDB(man.ManagerGuid) { X_AU = 0, Y_AU = 0, Z_AU = 0 };
-            parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
+            parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
 
@@ -416,7 +416,7 @@ namespace Pulsar4X.Tests
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
             parentblobs[0] = new PositionDB(mgr.ManagerGuid) { X_AU = 0, Y_AU = 0, Z_AU = 0 };
-            parentblobs[1] = new MassVolumeDB() { Mass = parentMass };
+            parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(mgr, parentblobs);
 
@@ -474,7 +474,7 @@ namespace Pulsar4X.Tests
             var newt1 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ DeltaVForManuver_FoRO_m = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs1 = new BaseDataBlob[4];
             objBlobs1[0] = pos1;
-            objBlobs1[1] = new MassVolumeDB() { Mass = 10000 };
+            objBlobs1[1] = new MassVolumeDB() { MassDry = 10000 };
             objBlobs1[2] = new NewtonThrustAbilityDB(mgr.ManagerGuid);
             objBlobs1[3] = newt1;
             Entity objEntity1 = new Entity(mgr, objBlobs1);
@@ -484,7 +484,7 @@ namespace Pulsar4X.Tests
             var newt2 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ DeltaVForManuver_FoRO_m = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs2 = new BaseDataBlob[4];
             objBlobs2[0] = pos2;
-            objBlobs2[1] = new MassVolumeDB() { Mass = 10000 };
+            objBlobs2[1] = new MassVolumeDB() { MassDry = 10000 };
             objBlobs2[2] = new NewtonThrustAbilityDB(mgr.ManagerGuid);
             objBlobs2[3] = newt2;
             Entity objEntity2 = new Entity(mgr, objBlobs2);

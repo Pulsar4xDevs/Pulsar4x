@@ -583,11 +583,11 @@ namespace Pulsar4X.ECSLib
             if (massVolumeDB != null)
             {
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MassInKG", "NS");
-                varNode.InnerText = massVolumeDB.Mass.ToString("N0");
+                varNode.InnerText = massVolumeDB.MassDry.ToString("N0");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MassInEarthMasses", "NS");
-                varNode.InnerText = (massVolumeDB.Mass / GameConstants.Units.EarthMassInKG).ToString("N2");
+                varNode.InnerText = (massVolumeDB.MassDry / GameConstants.Units.EarthMassInKG).ToString("N2");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Density", "NS");

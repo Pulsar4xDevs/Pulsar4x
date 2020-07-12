@@ -288,7 +288,8 @@ namespace Pulsar4X.ECSLib
             StorageSpaceProcessor.AddCargo(gunShip1.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(gunShip1.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
             StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), rp1, 15000);
-            StorageSpaceProcessor.AddCargo(cargoShip.GetDataBlob<CargoStorageDB>(), methalox, 1200000);
+            //StorageSpaceProcessor.AddCargo(cargoShip.GetDataBlob<CargoStorageDB>(), methalox, 1200000);
+            var amnt = cargoShip.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(methalox, 1200000);
             var elec = NameLookup.GetMaterialSD(game, "Electrical Energy");
             gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
@@ -311,6 +312,7 @@ namespace Pulsar4X.ECSLib
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship3);
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(gunShip1);
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(courier);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(cargoShip);
             //NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(courier);
             //StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
             //StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
@@ -325,8 +327,8 @@ namespace Pulsar4X.ECSLib
             double test_loan = 0;   //°
             double test_aop = 0;    //°
             double test_M0 = 0;     //°
-            double test_bodyMass = ship2.GetDataBlob<MassVolumeDB>().Mass;
-            OrbitDB testOrbtdb_ship2 = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().Mass, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
+            double test_bodyMass = ship2.GetDataBlob<MassVolumeDB>().MassDry;
+            OrbitDB testOrbtdb_ship2 = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().MassDry, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
             ship2.RemoveDataBlob<OrbitDB>();
             ship2.SetDataBlob(testOrbtdb_ship2);
             ship2.GetDataBlob<PositionDB>().SetParent(solStar);
@@ -335,7 +337,7 @@ namespace Pulsar4X.ECSLib
             test_a = 0.51;
             test_i = 180;
             test_aop = 0;
-            OrbitDB testOrbtdb_ship3 = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().Mass, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
+            OrbitDB testOrbtdb_ship3 = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().MassDry, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
             ship3.RemoveDataBlob<OrbitDB>();
             ship3.SetDataBlob(testOrbtdb_ship3);
             ship3.GetDataBlob<PositionDB>().SetParent(solStar);
@@ -602,9 +604,9 @@ namespace Pulsar4X.ECSLib
             if (_fuelTank_1200000 != null)
                 return _fuelTank_1200000;
             ComponentDesigner fuelTankDesigner;
-            ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("E7AC4187-58E4-458B-9AEA-C3E07FC993CB")];
+            ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("3528600E-3A1C-488C-BAE6-60251D1156AB")];
             fuelTankDesigner = new ComponentDesigner(tankSD, faction.GetDataBlob<FactionTechDB>());
-            fuelTankDesigner.ComponentDesignAttributes["Tank Size"].SetValueFromInput(605000);
+            fuelTankDesigner.ComponentDesignAttributes["Tank Volume"].SetValueFromInput(2500);
             fuelTankDesigner.Name = "Tank-1200t";
             _fuelTank_1200000 = fuelTankDesigner.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_1200000.TechID);

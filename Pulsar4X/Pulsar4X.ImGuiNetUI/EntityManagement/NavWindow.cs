@@ -67,8 +67,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             _orderEntity = orderEntity.Entity;
             _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
-            var myMass = _orderEntity.GetDataBlob<MassVolumeDB>().Mass;
-            var parentMass = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<MassVolumeDB>().Mass;
+            var myMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
+            var parentMass = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<MassVolumeDB>().MassDry;
             _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
 
             _siblingEntities = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<PositionDB>().Children.ToArray();
