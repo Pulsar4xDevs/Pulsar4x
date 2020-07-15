@@ -108,7 +108,7 @@ namespace Pulsar4X.SDL2UI
             else if (T == typeof(RenameWindow))
                 { return true; }
             //if entity can target
-            else if (_entityState.Entity.HasDataBlob<CargoStorageDB>() && T == typeof(CargoTransfer))
+            else if (_entityState.Entity.HasDataBlob<VolumeStorageDB>() && T == typeof(CargoTransfer))
                 { return true; }
             //if entity can mine || refine || build
             else if (_entityState.Entity.HasDataBlob<ColonyInfoDB>() && T == typeof(ColonyPanel))

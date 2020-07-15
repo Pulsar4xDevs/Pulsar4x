@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
@@ -11,15 +12,15 @@ namespace Pulsar4X.SDL2UI
     {
         StaticDataStore _staticData;
         EntityState _entityState;
-        CargoStorageDB _storageDatablob;
-        Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
-        public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
-        public CargoItemVM SelectedItem = null;
+        VolumeStorageDB _volStorageDB;
+        Dictionary<Guid, TypeStore> _stores = new Dictionary<Guid, TypeStore>();
+        
         public CargoListPannelSimple(StaticDataStore staticData, EntityState entity)
         {
             _staticData = staticData;
             _entityState = entity;
-            _storageDatablob = entity.Entity.GetDataBlob<CargoStorageDB>();
+
+            _volStorageDB = entity.Entity.GetDataBlob<VolumeStorageDB>();
 
             Update();
         }
@@ -27,25 +28,20 @@ namespace Pulsar4X.SDL2UI
 
         public void Update()
         {
-            foreach (var kvp in _storageDatablob.StoredCargoTypes)
+            //we do a deep copy clone so as to avoid a thread collision when we loop through.
+            var newDict = new Dictionary<Guid, TypeStore>();
+            
+            ICollection ic = _volStorageDB.TypeStores;
+            lock (ic.SyncRoot)
             {
-                if (!_cargoResourceStoresDict.ContainsKey(kvp.Key))
+                foreach (var kvp in _volStorageDB.TypeStores)
                 {
-                    var newCargoTypeStoreVM = new CargoTypeStoreVM(_staticData, kvp.Key, kvp.Value);
-                    _cargoResourceStoresDict.Add(kvp.Key, newCargoTypeStoreVM);
-                    CargoResourceStores.Add(newCargoTypeStoreVM);
+                    newDict.Add(kvp.Key, kvp.Value.Clone());
                 }
-                _cargoResourceStoresDict[kvp.Key].Update();
             }
 
-            foreach (var key in _cargoResourceStoresDict.Keys.ToArray())
-            {
-                if (!_storageDatablob.StoredCargoTypes.ContainsKey(key))
-                {
-                    CargoResourceStores.Remove(_cargoResourceStoresDict[key]);
-                    _cargoResourceStoresDict.Remove(key);
-                }
-            }
+            _stores = newDict;
+            
         }
 
 
@@ -55,28 +51,49 @@ namespace Pulsar4X.SDL2UI
             var width = ImGui.GetWindowWidth() * 0.5f;
             
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true, ImGuiWindowFlags.AlwaysAutoResize);
-            foreach (var storetype in CargoResourceStores)
+            foreach (var typeStore in _stores)
             {
-                if (ImGui.CollapsingHeader(storetype.HeaderText + "###" + _entityState.Name + storetype.StorageTypeName, ImGuiTreeNodeFlags.CollapsingHeader))
+                CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
+                var freeVolume = typeStore.Value.FreeVolume;
+                var maxVolume = typeStore.Value.MaxVolume;
+                var storedVolume = maxVolume - freeVolume;
+                
+                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free";
+                ImGui.PushID(_entityState.Entity.Guid.ToString());
+                if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
                 {
-
-                    foreach (CargoItemVM item in storetype.CargoItems.ToArray())
+                    ImGui.Columns(3);
+                    ImGui.Text("Item");
+                    ImGui.NextColumn();
+                    ImGui.Text("Count");
+                    ImGui.NextColumn();
+                    ImGui.Text("Total Mass");
+                    ImGui.NextColumn();
+                    ImGui.Separator();
+                    foreach (var cargoType in typeStore.Value.CurrentStore)
                     {
-                        if(ImGui.Selectable(item.ItemName))
+                        ICargoable ctype = _staticData.CargoGoods.GetAny(cargoType.Key);
+                        var cname = ctype.Name;
+                        var volumeStored = cargoType.Value;
+                        var volumePerItem = ctype.Mass / ctype.Density;
+                        var massStored = cargoType.Value * ctype.Density;
+                        var itemsStored = massStored / ctype.Mass;
+                        if (ImGui.Selectable(cname))
                         {
-                            SelectedItem = item;
-                  
                         }
-                        ImGui.SameLine();
-                        ImGui.Text(item.ItemMassPerUnit);
-                        ImGui.SameLine();
-                        ImGui.Text(item.NumberOfItems);
-                        ImGui.SameLine();
-                        ImGui.Text(item.TotalMass);
 
+                        ImGui.NextColumn();
+                        ImGui.Text(Stringify.Number(itemsStored));
+                        ImGui.NextColumn();
+                        ImGui.Text(Stringify.Mass(massStored));
+                        ImGui.NextColumn();
                     }
+
+                    ImGui.Columns(1);
                 }
             }
+            
+            
             ImGui.EndChild(); 
         }
 
@@ -107,18 +124,19 @@ namespace Pulsar4X.SDL2UI
     {
         StaticDataStore _staticData;
         EntityState _entityState;
-        CargoStorageDB _storageDatablob;
-
-        Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
-        public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
-        public CargoItemVM SelectedCargoVM = null;
+        VolumeStorageDB _volStorageDB;
+        Dictionary<Guid, TypeStore> _stores = new Dictionary<Guid, TypeStore>();
+        Dictionary<ICargoable, int> _cargoToMove = new Dictionary<ICargoable, int>();
+        //Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
+        //public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
+        public ICargoable selectedCargo;
         internal Dictionary<Guid,bool> HeadersIsOpenDict { get; set; }
 
         public CargoListPannelComplex(StaticDataStore staticData, EntityState entity, Dictionary<Guid,bool> headersOpenDict)
         {
             _staticData = staticData;
             _entityState = entity;
-            _storageDatablob = entity.Entity.GetDataBlob<CargoStorageDB>();
+            _volStorageDB = entity.Entity.GetDataBlob<VolumeStorageDB>();
             HeadersIsOpenDict = headersOpenDict;
             Update();
         }
@@ -128,37 +146,29 @@ namespace Pulsar4X.SDL2UI
 
         public void Update()
         {
-            foreach (var kvp in _storageDatablob.StoredCargoTypes)
+            //we do a deep copy clone so as to avoid a thread collision when we loop through.
+            var newDict = new Dictionary<Guid, TypeStore>();
+            
+            ICollection ic = _volStorageDB.TypeStores;
+            lock (ic.SyncRoot)
             {
-                if (!_cargoResourceStoresDict.ContainsKey(kvp.Key))
+                foreach (var kvp in _volStorageDB.TypeStores)
                 {
-                    var newCargoTypeStoreVM = new CargoTypeStoreVM(_staticData, kvp.Key, kvp.Value);
-                    _cargoResourceStoresDict.Add(kvp.Key, newCargoTypeStoreVM);
-                    CargoResourceStores.Add(newCargoTypeStoreVM);
+                    newDict.Add(kvp.Key, kvp.Value.Clone());
                 }
-                _cargoResourceStoresDict[kvp.Key].Update();
-                if (!HeadersIsOpenDict.ContainsKey(kvp.Key))
-                    HeadersIsOpenDict[kvp.Key] = false;
             }
 
-            foreach (var key in _cargoResourceStoresDict.Keys.ToArray())
-            {
-                if (!_storageDatablob.StoredCargoTypes.ContainsKey(key))
-                {
-                    var storvm = _cargoResourceStoresDict[key];
-                    CargoResourceStores.Remove(storvm);
-                    _cargoResourceStoresDict.Remove(key);
-                }
-            }
+            _stores = newDict;
         }
 
-        internal List<(Guid,long)> GetAllToMoveOut()
+        internal List<(Guid,int)> GetAllToMoveOut()
         {
-            List<(Guid,long)> listToMove = new List<(Guid,long)>();
+            List<(Guid,int)> listToMove = new List<(Guid,int)>();
 
-            foreach (var item in _cargoResourceStoresDict.Values)
+            foreach (var item in _cargoToMove)
             {
-                listToMove.AddRange(item.ItemsToMoveOut());
+                if(item.Value < 0)
+                    listToMove.Add((item.Key.ID, item.Value));
             }
 
             return listToMove; 
@@ -166,47 +176,37 @@ namespace Pulsar4X.SDL2UI
 
         internal bool CanStore(Guid cargoTypeID)
         {
-            return _cargoResourceStoresDict.ContainsKey(cargoTypeID);
+            return _stores.ContainsKey(cargoTypeID);
+            
         }
 
-        internal void AddUICargoIn(ICargoable cargoItem, long itemCount)
+        internal void AddUICargoIn(ICargoable cargoItem, int itemCount)
         {
-            CargoTypeStoreVM store;
-            if (_cargoResourceStoresDict.ContainsKey(cargoItem.CargoTypeID))
+            ICargoable store;
+            if (_stores.ContainsKey(cargoItem.CargoTypeID))
             {
-                store = _cargoResourceStoresDict[cargoItem.CargoTypeID];
-                CargoItemVM item = store.GetOrAddItemVM(cargoItem);
-                item.ItemIncomingAmount += itemCount;
+                if(!_cargoToMove.ContainsKey(cargoItem))
+                    _cargoToMove.Add(cargoItem, itemCount);
+                else
+                    _cargoToMove[cargoItem] += itemCount;
             }
 
         }
+        
 
-        internal void AddUICargoOut(ICargoable cargoItem, long itemCount)
+        internal double AmountMassInStoreAndMove(Guid typeID, Guid cargoID)
         {
-            CargoTypeStoreVM store;
-            if (_cargoResourceStoresDict.ContainsKey(cargoItem.CargoTypeID))
+            double amount = 0;
+            if (_stores.ContainsKey(typeID))
             {
-                store = _cargoResourceStoresDict[cargoItem.CargoTypeID];
-                CargoItemVM item = store.GetItemVM(cargoItem.ID);
-                if(item.ItemIncomingAmount > 0)
-                {
-                    var amount = Math.Min(itemCount, item.ItemIncomingAmount);
-                    item.ItemIncomingAmount -= amount;
-                    itemCount -= amount;
-                }
-                item.ItemOutgoingAmount += itemCount;
-            }
+                ICargoable cargoitem = _staticData.GetICargoable(cargoID);
+                int massUnit = cargoitem.Mass;
+                var volumeStored = _stores[typeID].CurrentStore[cargoID];
+                var massStored = cargoitem.Density * volumeStored;
 
+                var massToMove = _cargoToMove[cargoitem];
 
-        }
-
-        internal long AmountInStoreAndMove(Guid typeID, Guid cargoID)
-        {
-            long amount = 0;
-            if (_cargoResourceStoresDict.ContainsKey(typeID))
-            {
-                CargoTypeStoreVM store = _cargoResourceStoresDict[typeID];
-                amount = store.GetItemVM(cargoID).ItemsTotal;
+                amount = massStored + massToMove;
             }
 
             return amount;
@@ -216,11 +216,9 @@ namespace Pulsar4X.SDL2UI
 
         internal bool HasCargoInStore(ICargoable cargoItem)
         {
-
-            if (_cargoResourceStoresDict.ContainsKey(cargoItem.CargoTypeID))
+            if (_stores.ContainsKey(cargoItem.CargoTypeID))
             {
-                CargoTypeStoreVM store = _cargoResourceStoresDict[cargoItem.CargoTypeID];
-                return store.ContainsItem(cargoItem.ID); 
+                return _stores[cargoItem.CargoTypeID].CurrentStore.ContainsKey(cargoItem.ID);
             }
             return false;
         }
@@ -232,42 +230,56 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
             ImGui.Text(_entityState.Name);
-            ImGui.Text("Transfer Rate: " + _storageDatablob.TransferRateInKgHr);
-            ImGui.Text("At DeltaV < " + Stringify.Velocity(_storageDatablob.TransferRangeDv_mps));
-            foreach (var storetype in CargoResourceStores)
+            ImGui.Text("Transfer Rate: " + _volStorageDB.TransferRateInKgHr);
+            ImGui.Text("At DeltaV < " + Stringify.Velocity(_volStorageDB.TransferRangeDv_mps));
+
+            foreach (var typeStore in _stores)
             {
-                ImGui.SetNextTreeNodeOpen(HeadersIsOpenDict[storetype.TypeID]);
-                if (ImGui.CollapsingHeader(storetype.HeaderText + "###" + _entityState.Name + storetype.StorageTypeName, ImGuiTreeNodeFlags.CollapsingHeader))
+                CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
+                var freeVolume = typeStore.Value.FreeVolume;
+                var maxVolume = typeStore.Value.MaxVolume;
+                var storedVolume = maxVolume - freeVolume;
+                
+                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free";
+                ImGui.PushID(_entityState.Entity.Guid.ToString());
+                if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
                 {
-                    HeadersIsOpenDict[storetype.TypeID] = true;
-                    foreach (CargoItemVM item in storetype.CargoItems)
+                    ImGui.Columns(3);
+                    ImGui.Text("Item");
+                    ImGui.NextColumn();
+                    ImGui.Text("Count");
+                    ImGui.NextColumn();
+                    ImGui.Text("Total Mass");
+                    ImGui.NextColumn();
+                    ImGui.Separator();
+
+                    foreach (var cargoType in typeStore.Value.CurrentStore.ToArray())
                     {
-                        bool isSelected = SelectedCargoVM == item;
-                        if (ImGui.Selectable(item.ItemName, isSelected))
+                        ICargoable ctype = _staticData.CargoGoods.GetAny(cargoType.Key);
+                        var cname = ctype.Name;
+                        var volumeStored = cargoType.Value;
+                        var volumePerItem = ctype.Mass / ctype.Density;
+                        var massStored = cargoType.Value * ctype.Density;
+                        var itemsStored = massStored / ctype.Mass;
+                        bool isSelected = selectedCargo == ctype;
+                        if (ImGui.Selectable(cname, isSelected))
                         {
-                            SelectedCargoVM = item;
+                            selectedCargo = ctype;
                             CargoItemSelectedEvent.Invoke(this);
                         }
-                        ImGui.SameLine();
-                        ImGui.Text(item.ItemMassPerUnit);
-                        ImGui.SameLine();
-                        ImGui.Text(item.NumberOfItems);
-                        ImGui.SameLine();
-                        ImGui.Text(item.TotalMass);
 
-                        ImGui.Text("+" + item.ItemIncomingAmount.ToString());
-                        ImGui.SameLine();
-                        ImGui.Text(item.GetIncomingMass());
-                        ImGui.SameLine();
-                        ImGui.Text("-" + item.ItemOutgoingAmount.ToString());
-                        ImGui.SameLine();
-                        ImGui.Text(item.GetOutgoingMass());
-
+                        ImGui.NextColumn();
+                        ImGui.Text(Stringify.Number(itemsStored));
+                        ImGui.NextColumn();
+                        ImGui.Text(Stringify.Mass(massStored));
+                        ImGui.NextColumn();
                     }
+
+                    ImGui.Columns(1);
                 }
-                else
-                    HeadersIsOpenDict[storetype.TypeID] = false;
             }
+            
+            
             ImGui.EndChild();
         }
 
@@ -341,7 +353,7 @@ namespace Pulsar4X.SDL2UI
         void HardRefresh()
         {
             _selectedEntityLeft = _uiState.PrimaryEntity;
-            if(_selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
+            if(_selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
             {
                 CargoListLeft = new CargoListPannelComplex(_staticData, _selectedEntityLeft, headersOpenDict);
                 _hasCargoAbilityLeft = true;
@@ -353,7 +365,7 @@ namespace Pulsar4X.SDL2UI
             if (_uiState.PrimaryEntity != _uiState.LastClickedEntity)
             {
                 _selectedEntityRight = _uiState.LastClickedEntity;
-                if (_selectedEntityRight != null && _selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
+                if (_selectedEntityRight != null && _selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
                 {
                     if (!_hasCargoAbilityRight)
                         CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight, headersOpenDict);
@@ -366,10 +378,10 @@ namespace Pulsar4X.SDL2UI
 
         internal void Set2ndCargo(EntityState entity)
         {
-            if (_selectedEntityLeft.Entity.HasDataBlob<CargoStorageDB>())
+            if (_selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
             {
                 _selectedEntityRight = entity;
-                if (entity.Entity.HasDataBlob<CargoStorageDB>())
+                if (entity.Entity.HasDataBlob<VolumeStorageDB>())
                 {
                     CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight, headersOpenDict);
 
@@ -407,8 +419,8 @@ namespace Pulsar4X.SDL2UI
             }
             else
             {
-                var cargoDBLeft = _selectedEntityLeft.Entity.GetDataBlob<CargoStorageDB>();
-                var cargoDBRight = _selectedEntityRight.Entity.GetDataBlob<CargoStorageDB>();
+                var cargoDBLeft = _selectedEntityLeft.Entity.GetDataBlob<VolumeStorageDB>();
+                var cargoDBRight = _selectedEntityRight.Entity.GetDataBlob<VolumeStorageDB>();
                 _dvMaxRangeDiff_ms = Math.Max(cargoDBLeft.TransferRangeDv_mps, cargoDBRight.TransferRangeDv_mps);
                 _dvDifference_ms = (double)dvDif;
                 _transferRate = CargoTransferProcessor.CalcTransferRate(_dvDifference_ms,
@@ -428,7 +440,7 @@ namespace Pulsar4X.SDL2UI
             else UnselectedCargoPannel = CargoListLeft;
 
             if(UnselectedCargoPannel != null)
-                UnselectedCargoPannel.SelectedCargoVM = null;
+                UnselectedCargoPannel.selectedCargo = null;
             
         }
 
@@ -441,12 +453,12 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void MoveItems(long amount)
+        private void MoveItems(int amount)
         {
-            var selectedCargoVM = SelectedCargoPannel.SelectedCargoVM;
-            var selectedCargoItem = selectedCargoVM.CargoableItem;
-            SelectedCargoPannel.AddUICargoOut(selectedCargoVM.CargoableItem, amount);
-            UnselectedCargoPannel.AddUICargoIn(selectedCargoVM.CargoableItem, amount);
+            var selectedCargoVM = SelectedCargoPannel.selectedCargo;
+            var selectedCargoItem = SelectedCargoPannel.selectedCargo;
+            SelectedCargoPannel.AddUICargoIn(selectedCargoItem, -amount);
+            UnselectedCargoPannel.AddUICargoIn(selectedCargoItem, amount);
         }
 
         private void ActionXferOrder()
@@ -483,9 +495,9 @@ namespace Pulsar4X.SDL2UI
                         ImGui.BeginChild("xfer", new System.Numerics.Vector2(100, 200));
                         ImGui.Text("Transfer");
 
-                        if (SelectedCargoPannel != null && SelectedCargoPannel.SelectedCargoVM != null)
+                        if (SelectedCargoPannel != null && SelectedCargoPannel.selectedCargo != null)
                         {
-                            if (UnselectedCargoPannel != null && UnselectedCargoPannel.CanStore(SelectedCargoPannel.SelectedCargoVM.CargoableItem.CargoTypeID))
+                            if (UnselectedCargoPannel != null && UnselectedCargoPannel.CanStore(SelectedCargoPannel.selectedCargo.CargoTypeID))
                             {
                                 if (ImGui.Button("x100"))
                                 { MoveItems(100); }

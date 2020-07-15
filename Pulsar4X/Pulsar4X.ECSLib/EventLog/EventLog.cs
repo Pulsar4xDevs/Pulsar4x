@@ -112,10 +112,15 @@ namespace Pulsar4X.ECSLib
             newEvent.Time = entity.StarSysDateTime;
             _events.Add(newEvent);
             //_newEvents[entity.FactionOwner]
-            
-
-
-
+        }
+        internal void AddGameEntityErrorEvent(Entity entity, string message)
+        {
+            Event newEvent = new Event(message);
+            newEvent.ConcernedPlayers.Add(entity.FactionOwner);
+            newEvent.Time = entity.StarSysDateTime;
+            newEvent.EventType = EventType.Opps;
+            _events.Add(newEvent);
+            //_newEvents[entity.FactionOwner]
         }
 
         /// <summary>

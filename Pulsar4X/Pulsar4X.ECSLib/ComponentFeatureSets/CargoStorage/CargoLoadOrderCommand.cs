@@ -6,9 +6,9 @@ namespace Pulsar4X.ECSLib
 {
     public class CargoXferOrder:EntityCommand
     {
-        public List<(Guid ID, long amount)> ItemsGuidsToTransfer;
+        public List<(Guid ID, int amount)> ItemsGuidsToTransfer;
         [JsonIgnore]
-        public List<(ICargoable item, long amount)> ItemICargoablesToTransfer = new List<(ICargoable item, long amount)>();
+        public List<(ICargoable item, int amount)> ItemICargoablesToTransfer = new List<(ICargoable item, int amount)>();
         public Guid SendCargoToEntityGuid { get; set; }
 
         public override int ActionLanes => 1;
@@ -24,7 +24,7 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         Entity sendToEntity;
 
-        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(Guid ID, long amount)> itemsToMove )
+        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(Guid ID, int amount)> itemsToMove )
         {
             var cmd = new CargoXferOrder()
             {
@@ -36,9 +36,9 @@ namespace Pulsar4X.ECSLib
             };
             game.OrderHandler.HandleOrder(cmd);
         }
-        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
+        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, int amount)> itemsToMove )
         {
-            List<(Guid item,long amount)> itemGuidAmounts = new List<(Guid, long)>();
+            List<(Guid item,int amount)> itemGuidAmounts = new List<(Guid, int)>();
             foreach (var tup in itemsToMove)
             {
                 itemGuidAmounts.Add((tup.item.ID, tup.amount));
@@ -66,9 +66,9 @@ namespace Pulsar4X.ECSLib
             {
                 _cargoTransferDB = new CargoTransferDB();
                 _cargoTransferDB.CargoToEntity = sendToEntity;
-                _cargoTransferDB.CargoToDB = sendToEntity.GetDataBlob<CargoStorageDB>();
+                _cargoTransferDB.CargoToDB = sendToEntity.GetDataBlob<VolumeStorageDB>();
                 _cargoTransferDB.CargoFromEntity = EntityCommanding;
-                _cargoTransferDB.CargoFromDB = EntityCommanding.GetDataBlob<CargoStorageDB>();
+                _cargoTransferDB.CargoFromDB = EntityCommanding.GetDataBlob<VolumeStorageDB>();
 
                 _cargoTransferDB.ItemsLeftToTransfer = ItemICargoablesToTransfer;
                 _cargoTransferDB.OrderedToTransfer = ItemICargoablesToTransfer;

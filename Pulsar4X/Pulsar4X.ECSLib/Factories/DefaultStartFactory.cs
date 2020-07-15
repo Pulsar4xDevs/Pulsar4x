@@ -29,7 +29,7 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _battery;
         private static ComponentDesign _cargoHold;
         private static ComponentDesign _cargoCompartment;
-        private static ComponentDesign _spacePort;
+        private static ComponentDesign _shipYard;
         private static ComponentDesign _missileTube;
         private static ComponentDesign _ordnanceStore;
         private static ShipDesign _defaultShipDesign;
@@ -247,23 +247,25 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(marsColony, _cargoInstalation);
             
             EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
-            EntityManipulation.AddComponentToEntity(colonyEntity, SpacePort(factionEntity));
+            EntityManipulation.AddComponentToEntity(colonyEntity, ShipYard(factionEntity));
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
 
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             var rawSorium = NameLookup.GetMineralSD(game, "Sorium");
-            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), rawSorium, 5000);
-            var iron = NameLookup.GetMineralSD(game, "Iron");
-            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), iron, 5000);
-            var hydrocarbon = NameLookup.GetMineralSD(game, "Hydrocarbons");
-            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), hydrocarbon, 5000);
-            var stainless = NameLookup.GetMaterialSD(game, "Stainless Steel");
-            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), stainless, 1000);
-            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
-
             
-
+            var iron = NameLookup.GetMineralSD(game, "Iron");
+            colonyEntity.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(iron, 5000);
+            
+            var hydrocarbon = NameLookup.GetMineralSD(game, "Hydrocarbons");
+            colonyEntity.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(hydrocarbon, 5000);
+            
+            var stainless = NameLookup.GetMaterialSD(game, "Stainless Steel");
+            colonyEntity.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(iron, 1000);
+            
+            
+            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
+            
             //test systems
             //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateEccTest(game).ID);
             //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateLongitudeTest(game).ID);
@@ -288,11 +290,7 @@ namespace Pulsar4X.ECSLib
             var hydrolox = NameLookup.GetMaterialSD(game, "Hydrolox");
             //StorageSpaceProcessor.AddCargo(gunShip0.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(gunShip0.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
-            StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), rp1, 15000);
-            StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), rp1, 15000);
-            StorageSpaceProcessor.AddCargo(gunShip1.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             StorageSpaceProcessor.AddCargo(gunShip1.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
-            StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), rp1, 15000);
             //StorageSpaceProcessor.AddCargo(cargoShip.GetDataBlob<CargoStorageDB>(), methalox, 1200000);
             
             gunShip0.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
@@ -528,17 +526,17 @@ namespace Pulsar4X.ECSLib
             return design;
         }
 
-        public static ComponentDesign SpacePort(Entity faction)
+        public static ComponentDesign ShipYard(Entity faction)
         {
-            if (_spacePort != null)
-                return _spacePort;
+            if (_shipYard != null)
+                return _shipYard;
             ComponentDesigner spacePortDesigner;
             ComponentTemplateSD spaceportSD = StaticRefLib.StaticData.ComponentTemplates[new Guid("0BD304FF-FDEA-493C-8979-15FE86B7123E")];
             spacePortDesigner = new ComponentDesigner(spaceportSD, faction.GetDataBlob<FactionTechDB>());
-            spacePortDesigner.Name = "Space Port";
-            _spacePort = spacePortDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_spacePort.TechID);
-            return _spacePort;
+            spacePortDesigner.Name = "Ship Yard";
+            _shipYard = spacePortDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_shipYard.TechID);
+            return _shipYard;
         }
 
         public static ComponentDesign DefaultThrusterDesign(Game game, Entity faction)
@@ -767,7 +765,7 @@ namespace Pulsar4X.ECSLib
         public static ComponentDesign DefaultCargoInstalation(Game game, Entity faction)
         {
             ComponentDesigner componentDesigner;
-            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{B8239721-B60E-4C11-8E45-5F64F6BA5FA5}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
             componentDesigner.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000000);
             componentDesigner.Name = "CargoInstalation1";
@@ -808,7 +806,7 @@ namespace Pulsar4X.ECSLib
             if (_cargoHold != null)
                 return _cargoHold;
             ComponentDesigner cargoComponent;
-            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{B8239721-B60E-4C11-8E45-5F64F6BA5FA5}")];
             cargoComponent = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
             cargoComponent.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(5000); //5t component
             cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(500);
@@ -824,7 +822,7 @@ namespace Pulsar4X.ECSLib
             if (_cargoCompartment != null)
                 return _cargoCompartment;
             ComponentDesigner cargoComponent;
-            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{B8239721-B60E-4C11-8E45-5F64F6BA5FA5}")];
             cargoComponent = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
             cargoComponent.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000); //5t component
             cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(500);

@@ -19,6 +19,11 @@ namespace Pulsar4X.ECSLib
         /// In Kg/M^3
         /// </summary>
         double Density { get; }
+        
+        /// <summary>
+        /// The smallest unit mass. 1 for most minerals etc. 
+        /// </summary>
+        int Mass { get; }
     }
 
     [StaticData(true, IDPropertyName = "ID")]

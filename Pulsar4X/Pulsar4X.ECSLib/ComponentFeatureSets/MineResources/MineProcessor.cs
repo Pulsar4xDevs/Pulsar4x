@@ -38,28 +38,37 @@ namespace Pulsar4X.ECSLib
             Dictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<MiningDB>().MineingRate;
             Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().Minerals;
             
-            CargoStorageDB stockpile = colonyEntity.GetDataBlob<CargoStorageDB>();
+            VolumeStorageDB stockpile = colonyEntity.GetDataBlob<VolumeStorageDB>();
             float mineBonuses = 1;//colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
             foreach (var kvp in mineRates)
             {
                 ICargoable mineral = _minerals[kvp.Key];
                 Guid cargoTypeID = mineral.CargoTypeID;
-                double itemMassPerUnit = mineral.Density;
-                
+                double itemMassPerUnit = mineral.Mass;
+                double volumeMassPerUnit = mineral.Mass / mineral.Density;
                 
                 double accessability = planetMinerals[kvp.Key].Accessibility;
                 double actualRate = kvp.Value * mineBonuses * accessability;
                 int amountMinableThisTick = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
-                
-                long freeCapacity = stockpile.StoredCargoTypes[mineral.CargoTypeID].FreeCapacityKg;
 
-                long weightMinableThisTick = (long)itemMassPerUnit * amountMinableThisTick;
-                weightMinableThisTick = Math.Min(weightMinableThisTick, freeCapacity);  
+                if(!stockpile.TypeStores.ContainsKey(mineral.CargoTypeID))
+                    continue; //can't store this mineral
+                double freeCapacity = stockpile.TypeStores[mineral.CargoTypeID].FreeVolume; //stockpile.StoredCargoTypes[mineral.CargoTypeID].FreeCapacityKg;
+
+                double weightMinableThisTick = itemMassPerUnit * amountMinableThisTick;
+                double volumeMineableThisTick = weightMinableThisTick / mineral.Density;
+                
+                volumeMineableThisTick = Math.Min(volumeMineableThisTick, freeCapacity);
+                
+                weightMinableThisTick = volumeMineableThisTick * mineral.Density;
+
+                
                 
                 int actualAmountToMineThisTick = (int)(weightMinableThisTick / itemMassPerUnit);                                         //get the number of items from the mass transferable
-                long actualweightMinaedThisTick = (long)(actualAmountToMineThisTick * itemMassPerUnit);
-
-                StorageSpaceProcessor.AddCargo(stockpile, mineral, actualAmountToMineThisTick);
+                long actualweightMinedThisTick = (long)(actualAmountToMineThisTick * itemMassPerUnit);
+                stockpile.AddRemoveCargoByMass(mineral, actualweightMinedThisTick);
+                ///StorageSpaceProcessor.AddCargo(stockpile, mineral, actualAmountToMineThisTick);
+                
       
                 MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];
                 int newAmount = mineralDeposit.Amount -= actualAmountToMineThisTick;

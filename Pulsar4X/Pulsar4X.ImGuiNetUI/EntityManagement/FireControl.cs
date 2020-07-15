@@ -404,6 +404,8 @@ namespace Pulsar4X.ImGuiNetUI
 
             foreach (var cargoType in ctypes)
             {
+                if(!_orderEntity.HasDataBlob<CargoStorageDB>())
+                    continue;
                 if (_orderEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes.ContainsKey(cargoType))
                 {
                     var shipOrdnances = _orderEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes[cargoType].ItemsAndAmounts;

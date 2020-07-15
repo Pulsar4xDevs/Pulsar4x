@@ -12,14 +12,14 @@ namespace Pulsar4X.ECSLib
 
         internal Entity CargoFromEntity { get; set; }
         [JsonIgnore]
-        internal CargoStorageDB CargoFromDB { get; set; }
+        internal VolumeStorageDB CargoFromDB { get; set; }
 
         internal Entity CargoToEntity { get; set; }
         [JsonIgnore]
-        internal CargoStorageDB CargoToDB { get; set; }
+        internal VolumeStorageDB CargoToDB { get; set; }
 
-        internal List<(ICargoable item, long amount)> OrderedToTransfer { get; set; }
-        internal List<(ICargoable item, long amount)> ItemsLeftToTransfer;
+        internal List<(ICargoable item, int amount)> OrderedToTransfer { get; set; }
+        internal List<(ICargoable item, int amount)> ItemsLeftToTransfer;
 
         internal double DistanceBetweenEntitys { get; set; }
         internal int TransferRateInKG { get; set; } = 1000;

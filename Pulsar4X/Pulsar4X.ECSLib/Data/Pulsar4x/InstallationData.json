@@ -305,7 +305,7 @@
       {
         "Key": "0BD304FF-FDEA-493C-8979-15FE86B7123E",
         "Value": {
-          "Name": "Space Port",
+          "Name": "Ship Yard",
           "DescriptionFormula": "'Construction and launch facilities for ships'",
           "ID": "0BD304FF-FDEA-493C-8979-15FE86B7123E",
           "MassFormula": "500000",
@@ -418,11 +418,73 @@
         }
       },
       {
-        "Key": "30cd60f8-1de3-4faa-acba-0933eb84c199",
+        "Key": "BBBB5B64-9EFA-467F-8437-F7CF45A1B4BB",
+        "Value": {
+          "Name": "Space Port",
+          "DescriptionFormula": "'Facilities for transfering cargo'",
+          "ID": "BBBB5B64-9EFA-467F-8437-F7CF45A1B4BB",
+          "MassFormula": "500000",
+          "VolumeFormula": "[Mass]",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "1000000",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Cargo Transfer Rate",
+              "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "100",
+              "StepFormula": "100",
+              "AttributeFormula": "50000"
+            },
+            {
+              "Name": "Transfer Range",
+              "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "100",
+              "StepFormula": "100",
+              "AttributeFormula": "50000"
+            },
+            {
+              "Name": "db",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+              "AttributeType": "Pulsar4X.ECSLib.StorageTransferRateAtbDB"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "B8239721-B60E-4C11-8E45-5F64F6BA5FA5",
         "Value": {
           "Name": "General Storage",
           "DescriptionFormula": "'Stores General Cargo'",
-          "ID": "30cd60f8-1de3-4faa-acba-0933eb84c199",
+          "ID": "B8239721-B60E-4C11-8E45-5F64F6BA5FA5",
           "MassFormula": "Ability(0)",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "[Mass]",
@@ -465,7 +527,7 @@
               "GuidDictionary": {
                 "Entries": []
               },
-              "AttributeFormula": "Ability(0) * 0.01"
+              "AttributeFormula": "Ability('Warehouse Size') * 0.01"
             },                      
             {
               "Name": "Cargo Transfer Rate",
@@ -492,22 +554,16 @@
               "AttributeFormula": "50000"
             },
             {
-              "Name": "Total Cargo Stored",
-              "DescriptionFormula": "'The amount of cargo this can store.'",
-              "GuiHint": "GuiTextDisplay",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AttributeFormula": "Ability(0) - Ability(1) - Ability(2)"
-            },
-            {
               "Name": "DBargs",
               "GuiHint": "None",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AttributeFormula": "AtbConstrArgs(Ability(4), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(2), Ability(3))",
-              "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
+              "AttributeFormula": "AtbConstrArgs(GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability('Warehouse Size'))",
+              "AttributeType": "Pulsar4X.ECSLib.VolumeStorageAtb"
+            },
+            {
+              "Name": "db",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+              "AttributeType": "Pulsar4X.ECSLib.StorageTransferRateAtbDB"
             }
           ]
         }
@@ -625,6 +681,104 @@
               "Name": "DBargs",
               "GuiHint": "None",
               "AttributeFormula": "AtbConstrArgs(GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), Ability('Tank Volume'))",
+              "AttributeType": "Pulsar4X.ECSLib.VolumeStorageAtb"
+            }
+          ]
+        }
+      },
+      {
+        "Key": "B2E9B32A-C760-4E30-9819-77871C920B9B",
+        "Value": {
+          "Name": "Planetary Spaceport Complex",
+          "DescriptionFormula": "'A generic does everything space facility'",
+          "ID": "B2E9B32A-C760-4E30-9819-77871C920B9B",
+          "MassFormula": "Ability(0)",
+          "VolumeFormula": "[Mass]",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "Ability(1) * 0.1",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Warehouse Size",
+              "DescriptionFormula": "''",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "100",
+              "StepFormula": "100",
+              "AttributeFormula": "50000"
+            },
+            {
+              "Name": "Size Efficency",
+              "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AttributeFormula": "Ability(0) * 0.01"
+            },
+            {
+              "Name": "Cargo Transfer Rate",
+              "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "100",
+              "StepFormula": "100",
+              "AttributeFormula": "50000"
+            },
+            {
+              "Name": "Transfer Range",
+              "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "1000000",
+              "MinFormula": "100",
+              "StepFormula": "100",
+              "AttributeFormula": "50000"
+            },
+            {
+              "Name": "Total Cargo Stored",
+              "DescriptionFormula": "'The volume of cargo this can store.'",
+              "GuiHint": "GuiTextDisplay",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "AttributeFormula": "Ability(0) - Ability(1) - Ability(2)"
+            },
+            {
+              "Name": "DBargsTransfer",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+              "AttributeType": "Pulsar4X.ECSLib.StorageTransferRateAtbDB"
+            },
+            {
+              "Name": "DBargsStorage",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability('Total Cargo Stored'))",
               "AttributeType": "Pulsar4X.ECSLib.VolumeStorageAtb"
             }
           ]

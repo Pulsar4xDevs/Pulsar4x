@@ -23,54 +23,42 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            CargoTransferDB datablob = entity.GetDataBlob<CargoTransferDB>();
-            OrbitDB orbitDB = entity.GetDataBlob<OrbitDB>();
-
-            if (datablob.DistanceBetweenEntitys <= 100) //todo: this is going to have to be based of mass or something, ie being further away from a colony on a planet is ok, but two ships should be close. 
+            CargoTransferDB transferDB = entity.GetDataBlob<CargoTransferDB>();
+            
+            for (int i = 0; i < transferDB.ItemsLeftToTransfer.Count; i++)
             {
-                for (int i = 0; i < datablob.ItemsLeftToTransfer.Count; i++)
+                (ICargoable item, long amount) itemsToXfer = transferDB.ItemsLeftToTransfer[i];
+                ICargoable cargoItem = itemsToXfer.item;
+                long amountToXfer = itemsToXfer.amount;
+
+                Guid cargoTypeID = cargoItem.CargoTypeID;
+                double itemMassPerUnit = cargoItem.Density;
+
+                if (!transferDB.CargoToDB.TypeStores.ContainsKey(cargoTypeID))
                 {
-                    (ICargoable item, long amount) itemsToXfer = datablob.ItemsLeftToTransfer[i];
-                    ICargoable cargoItem = itemsToXfer.item;
-                    long amountToXfer = itemsToXfer.amount;
-
-                    Guid cargoTypeID = cargoItem.CargoTypeID;
-                    double itemMassPerUnit = cargoItem.Density;
-
-                    if (!datablob.CargoToDB.StoredCargoTypes.ContainsKey(cargoTypeID))
-                        datablob.CargoToDB.StoredCargoTypes.Add(cargoTypeID, new CargoTypeStore());
-
-                    var toCargoTypeStore = datablob.CargoToDB.StoredCargoTypes[cargoTypeID]; //reference to the cargoType store we're pushing to.
-                    var toCargoItemAndAmount = toCargoTypeStore.ItemsAndAmounts; //reference to dictionary holding the cargo we want to send too
-                    var fromCargoTypeStore = datablob.CargoFromDB.StoredCargoTypes[cargoTypeID]; //reference to the cargoType store we're pulling from.
-                    var fromCargoItemAndAmount = fromCargoTypeStore.ItemsAndAmounts; //reference to dictionary we want to pull cargo from. 
-
-                    double totalweightToTransfer = itemMassPerUnit * amountToXfer;
-                    double weightToTransferThisTick = Math.Min(totalweightToTransfer, datablob.TransferRateInKG * deltaSeconds); //only the amount that can be transfered in this timeframe. 
-
-                    weightToTransferThisTick = Math.Min(weightToTransferThisTick, toCargoTypeStore.FreeCapacityKg); //check cargo to has enough weight capacity
-
-                    long numberXfered = (long)(weightToTransferThisTick / itemMassPerUnit); //get the number of items from the mass transferable
-                    numberXfered = Math.Min(numberXfered, fromCargoItemAndAmount[cargoItem.ID].amount); //check from has enough to send. 
-
-                    weightToTransferThisTick = (long)(numberXfered * itemMassPerUnit);
-
-                    if (!toCargoItemAndAmount.ContainsKey(cargoItem.ID))
-                        toCargoItemAndAmount.Add(cargoItem.ID, (cargoItem, numberXfered));
-                    else
-                    {
-                        long totalTo = toCargoItemAndAmount[cargoItem.ID].amount + numberXfered;
-                        toCargoItemAndAmount[cargoItem.ID] = (cargoItem, totalTo);
-                    }
-
-                    toCargoTypeStore.FreeCapacityKg -= (long)weightToTransferThisTick;
-
-                    long totalFrom = toCargoItemAndAmount[cargoItem.ID].amount - numberXfered;
-                    fromCargoItemAndAmount[cargoItem.ID] = (cargoItem, totalFrom);
-                    fromCargoTypeStore.FreeCapacityKg += (long)weightToTransferThisTick;
-                    datablob.ItemsLeftToTransfer[i] = (cargoItem, amountToXfer - numberXfered);
+                    string errmsg = "This entity cannot store this type of cargo";
+                    StaticRefLib.EventLog.AddGameEntityErrorEvent(entity, errmsg);
                 }
+
+                var toCargoTypeStore = transferDB.CargoToDB.TypeStores[cargoTypeID]; //reference to the cargoType store we're pushing to.
+                var toCargoItemAndAmount = toCargoTypeStore.CurrentStore; //reference to dictionary holding the cargo we want to send too
+                var fromCargoTypeStore = transferDB.CargoFromDB.TypeStores[cargoTypeID]; //reference to the cargoType store we're pulling from.
+                var fromCargoItemAndAmount = fromCargoTypeStore.CurrentStore; //reference to dictionary we want to pull cargo from. 
+
+                double totalweightToTransfer = itemMassPerUnit * amountToXfer;
+                double weightToTransferThisTick = Math.Min(totalweightToTransfer, transferDB.TransferRateInKG * deltaSeconds); //only the amount that can be transfered in this timeframe. 
+
+                int countToTransferThisTick = (int)(weightToTransferThisTick / itemMassPerUnit);
+                
+                var amountFrom = transferDB.CargoFromDB.RemoveCargoByUnit(cargoItem, countToTransferThisTick);
+                var amountTo = transferDB.CargoToDB.AddCargoByUnit(cargoItem, countToTransferThisTick);
+                //TODO: this wont handle objects that have a larger unit mass than the availible transferRate
+                if(amountTo != amountFrom)
+                    throw new Exception("something went wrong here");
+                
+                transferDB.ItemsLeftToTransfer[i] = (cargoItem, amountTo);
             }
+            
         }
 
         internal static void FirstRun(Entity entity)
@@ -171,12 +159,12 @@ namespace Pulsar4X.ECSLib
         /// <param name="dvDifference_mps">Dv difference in Km/s</param>
         /// <param name="from">From.</param>
         /// <param name="to">To.</param>
-        public static int CalcTransferRate(double dvDifference_mps, CargoStorageDB from, CargoStorageDB to)
+        public static int CalcTransferRate(double dvDifference_mps, VolumeStorageDB from, VolumeStorageDB to)
         {
             //var from = transferDB.CargoFromDB;
             //var to = transferDB.CargoToDB;
-            var fromDVRange = from.TransferRangeDv_kms;
-            var toDVRange = to.TransferRangeDv_kms;
+            var fromDVRange = from.TransferRangeDv_mps;
+            var toDVRange = to.TransferRangeDv_mps;
 
             double maxRange;
             double maxXferAtMaxRange;
@@ -185,7 +173,7 @@ namespace Pulsar4X.ECSLib
 
             double transferRate;
 
-            if (from.TransferRangeDv_kms > to.TransferRangeDv_kms)
+            if (from.TransferRangeDv_mps > to.TransferRangeDv_mps)
             {
                 maxRange = fromDVRange;
                 if (from.TransferRateInKgHr > to.TransferRateInKgHr)

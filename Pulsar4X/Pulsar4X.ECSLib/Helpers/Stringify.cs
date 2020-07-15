@@ -74,14 +74,14 @@ namespace Pulsar4X.ECSLib
                     str = Thrust(amount * Math.Pow(10, (double)valueType.ValueSize), format);
                     break;
                 case ValueTypeStruct.ValueTypes.Number:
-                    str = Numer(amount * Math.Pow(10, (double)valueType.ValueSize), format);
+                    str = Number(amount * Math.Pow(10, (double)valueType.ValueSize), format);
                     break;
 
             }
 
             return str;
         }
-        public static string Numer(double number,  string format = "0.###")
+        public static string Number(double number,  string format = "0.###")
         {
 
             string stringCount = "0";

@@ -251,8 +251,10 @@ namespace Pulsar4X.ECSLib
                 foreach (var instance in componentInstances)
                 {
                     var design = instance.Design;
+                    if(!design.HasAttribute<StorageTransferRateAtbDB>())
+                        continue;
+                    
                     var atbdata = design.GetAttribute<StorageTransferRateAtbDB>();
-
                     if (instance.HealthPercent() > 0.75)
                     {
                         transferRate += atbdata.TransferRate_kgh;
