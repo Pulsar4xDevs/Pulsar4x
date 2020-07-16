@@ -9,8 +9,8 @@
           "Description": "Refined Iron",
           "ID": "05dce711-8846-488a-b0f3-57fd7924b268",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
-          "Mass": 1.0,
-          "Density": 8000,
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.000125,
           "MineralsRequired": {
             "List": [
               {
@@ -41,8 +41,8 @@
           "Description": "RP1 and Oxygen at a mix of 0.52:1 by volume",
           "ID": "8a4a3569-df2e-4090-9752-50ff137cef6a",
           "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
-          "Mass": 1,
-          "Density": 1058.55,
+          "MassPerUnit": 1,
+          "VolumePerUnit": 0.0009446885,
           "MineralsRequired": {
             "List": [
               {
@@ -64,8 +64,8 @@
           "Description": "Highly refined Methane and Oxygen rocket fuel at a mix of 0.7:1 by volume",
           "ID": "55FA0D2E-0BC7-44F5-A292-B593F2248C3B",
           "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
-          "Mass": 1,
-          "Density": 837.869,
+          "MassPerUnit": 1,
+          "VolumePerUnit": 0.001193504,
           "MineralsRequired": {
             "List": [
               {
@@ -87,8 +87,8 @@
           "Description": "Hydrogen and Oxygen rocket fuel at a mix of 2.7:1 by volume",
           "ID": "A2AAF059-ED97-409D-883E-88DE918F6985",
           "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
-          "Mass": 1,
-          "Density": 360,
+          "MassPerUnit": 1,
+          "VolumePerUnit": 0.002777778,
           "MineralsRequired": {
             "List": [
               {
@@ -110,8 +110,8 @@
           "Description": "Rendered from Hydrocarbons",
           "ID": "207af637-95a0-4b89-ac4a-6d66a81cfb2f",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
-          "Mass": 1,
-          "Density": 940,
+          "MassPerUnit": 1,
+          "VolumePerUnit": 0.0010638298,
           "MineralsRequired": {
             "List": [
               {
@@ -133,8 +133,8 @@
           "Description": "Fuel for reactors",
           "ID": "978f67d9-62fb-4b3a-a12a-8626ac3cb91b",
           "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
-          "Mass": 1.0,
-          "Density": 18800,
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.0000531915,
           "MineralsRequired": {
             "List": [
               {
@@ -156,8 +156,8 @@
           "Description": "Electrical Energy",
           "ID": "50AA0079-71A0-477A-8082-8D31212BFBA7",
           "CargoTypeID": "44A3373D-E57E-47AD-90ED-1AA378B59694",
-          "Mass": 0.0,
-          "Density": 0,
+          "MassPerUnit": 0.0,
+          "VolumePerUnit": 0,
           "MineralsRequired": {
             "List": [
               {
@@ -180,8 +180,8 @@
           "Description": "Fuel for SpaceShips",
           "ID": "33e6ac88-0235-4917-a7ff-35c8886aad3a",
           "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
-          "Mass": 1,
-          "Density": 1000,
+          "MassPerUnit": 1,
+          "VolumePerUnit": 0.001,
           "MineralsRequired": {
             "List": [
               {
@@ -204,8 +204,8 @@
           "Description": "A mix of Duranium and refined fuel to test Refinerys",
           "ID": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
           "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
-          "Mass": 1.0,
-          "Density": 900,
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.0011111,
           "MineralsRequired": {
             "List": [
               {
