@@ -51,7 +51,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = mineralCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "RandomMineral_" + i.ToString(),
                     Description = "A random mineral."
                 };
@@ -65,7 +65,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = otherCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "AThing_" + i.ToString()
                 };
                 otherJunk.Add(randomCargoThing);
@@ -103,7 +103,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = materialCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "RandomMaterial_" + i.ToString(),
                     Description = "A random material."
                 };
@@ -117,7 +117,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = otherCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "AThing_" + i.ToString()
                 };
                 otherJunk.Add(randomCargoThing);
@@ -155,7 +155,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = materialCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "RandomMaterial_" + i.ToString(),
                     Description = "A random material."
                 };
@@ -169,7 +169,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = otherCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "AThing_" + i.ToString()
                 };
                 otherJunk.Add(randomCargoThing);
@@ -316,7 +316,7 @@ namespace Pulsar4X.Tests
                 Description = "Tastes like carpal tunnel and time.",
                 ID = Guid.NewGuid(),
                 CargoTypeID = Guid.NewGuid(),
-                Mass = 1
+                MassPerUnit = 1
             };
 
             return cookies;
@@ -330,7 +330,7 @@ namespace Pulsar4X.Tests
                 Description = "A pile of heavy rocks. Very useful. Trust me.",
                 ID = Guid.NewGuid(),
                 CargoTypeID = Guid.NewGuid(),
-                Mass = 10
+                MassPerUnit = 10
             };
 
             return rock;
@@ -345,7 +345,8 @@ namespace Pulsar4X.Tests
 
         public Guid CargoTypeID { get; set; }
 
-        public int Mass { get; set; }
+        public int MassPerUnit { get; set; }
+        public double VolumePerUnit { get; }
         public double Density { get; set; }
     }
 }

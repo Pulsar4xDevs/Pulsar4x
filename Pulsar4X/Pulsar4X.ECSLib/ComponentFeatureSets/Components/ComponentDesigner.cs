@@ -86,18 +86,22 @@ namespace Pulsar4X.ECSLib
         public string Name { get; internal set; } //player defined name. ie "5t 2kn Thruster".
         
         public Guid CargoTypeID { get; internal set; }
-        public int Mass { get; internal set; }
+        public int MassPerUnit { get; internal set; }
+
+        public double VolumePerUnit { get; internal set; }
+
         public double Density { get; internal set; }
 
         public int ResearchCostValue;
         public Guid TechID;
         public string TypeName; //ie the name in staticData. ie "Newtonion Thruster".
         public string Description;
-        public int Volume_m3 = 1;
+        //public int Volume_m3 = 1;
         public int HTK;
         public int CrewReq;
         public int IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
+
 
         public int CreditCost;
         
@@ -113,7 +117,7 @@ namespace Pulsar4X.ECSLib
         public DamageResist DamageResistance;
         
         
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         {
             var colonyConstruction = industryEntity.GetDataBlob<IndustryAbilityDB>();
             batchJob.NumberCompleted++;
@@ -133,7 +137,8 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-               StorageSpaceProcessor.AddCargo(storage, (ComponentDesign)designInfo, 1);
+                storage.AddCargoByUnit((ComponentDesign)designInfo, 1);
+               //StorageSpaceProcessor.AddCargo(storage, (ComponentDesign)designInfo, 1);
             }
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
@@ -342,23 +347,23 @@ namespace Pulsar4X.ECSLib
 
         public int MassValue
         {
-            get { return _design.Mass; }
+            get { return _design.MassPerUnit; }
         }
         internal ChainedExpression MassFormula { get; set; }
         public void SetMass()
         {
             MassFormula.Evaluate();
-            _design.Mass = MassFormula.IntResult;
-            _design.Density = _design.Mass / _design.Volume_m3;
+            _design.MassPerUnit = MassFormula.IntResult;
+            _design.Density = _design.MassPerUnit / _design.VolumePerUnit;
         }
 
-        public int VolumeM3Value { get { return _design.Volume_m3; } }//TODO: check units are @SI UNITS kg/m^3
+        public double VolumeM3Value { get { return _design.VolumePerUnit; } }//TODO: check units are @SI UNITS kg/m^3
         internal ChainedExpression VolumeFormula { get; set; }
         public void SetVolume()
         {
             VolumeFormula.Evaluate();
-            _design.Volume_m3 = VolumeFormula.IntResult;
-            _design.Density = _design.Mass / _design.Volume_m3;
+            _design.VolumePerUnit = VolumeFormula.IntResult;
+            _design.Density = _design.MassPerUnit / _design.VolumePerUnit;
         }
 
 

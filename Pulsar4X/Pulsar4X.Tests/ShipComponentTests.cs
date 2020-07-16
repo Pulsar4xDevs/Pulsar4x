@@ -83,7 +83,7 @@ namespace Pulsar4X.Tests
 
             ComponentDesign engineDesign = designer.CreateDesign(_faction);
 
-            Assert.AreEqual(250, engineDesign.Mass);
+            Assert.AreEqual(250, engineDesign.MassPerUnit);
 
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(componentTemplateSD.ID, componentTemplateSD);

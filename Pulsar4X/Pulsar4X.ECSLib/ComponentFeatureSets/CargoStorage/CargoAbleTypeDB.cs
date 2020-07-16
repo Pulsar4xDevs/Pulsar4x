@@ -27,14 +27,11 @@ namespace Pulsar4X.ECSLib
         }
 
         [JsonIgnore]
-        public int Mass {
-            get { return (int)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().MassDry); } //TODO: could a storable item ever be too large for an int? this assumes that won't happen.
-        }
+        public int MassPerUnit => (int)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().MassDry); //TODO: could a storable item ever be too large for an int? this assumes that won't happen.
 
-        public double Density
-        {
-            get { return OwningEntity.GetDataBlob<MassVolumeDB>().Density_kgm; }
-        }
+        public double VolumePerUnit => OwningEntity.GetDataBlob<MassVolumeDB>().Volume_m3;
+
+        public double Density => OwningEntity.GetDataBlob<MassVolumeDB>().Density_kgm;
 
         /// <summary>
         /// This should be set to true if the item has become damaged or in any other way needs to maintain state 

@@ -19,13 +19,14 @@ namespace Pulsar4X.ECSLib
         public Guid CargoTypeID { get; }
         public int DesignVersion = 0;
         public bool IsObsolete = false;
-        public int Mass { get; }
+        public int MassPerUnit { get; }
+        public double VolumePerUnit { get; }
         public double Density { get; }
 
         /// <summary>
         /// m^3
         /// </summary>
-        public double Volume;
+        //public double Volume;
         public List<(ComponentDesign design, int count)> Components;
         public (ArmorSD type, float thickness) Armor;
         public Dictionary<Guid, int> ResourceCosts { get; internal set; } = new Dictionary<Guid, int>();
@@ -39,10 +40,10 @@ namespace Pulsar4X.ECSLib
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ship Assembly"
         public Guid IndustryTypeID { get; } = new Guid("91823C5B-A71A-4364-A62C-489F0183EFB5");
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+
+        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         { 
             var industrydb = industryEntity.GetDataBlob<IndustryAbilityDB>();
-            
         }
 
         public int CreditCost;
@@ -64,10 +65,10 @@ namespace Pulsar4X.ECSLib
             
             foreach (var component in components)
             {
-                Mass += component.design.Mass * component.count;
+                MassPerUnit += component.design.MassPerUnit * component.count;
                 CrewReq += component.design.CrewReq;
                 CreditCost += component.design.CreditCost;
-                Volume += component.design.Volume_m3 * component.count;
+                VolumePerUnit += component.design.VolumePerUnit * component.count;
                 if (ComponentCosts.ContainsKey(component.design.ID))
                 {
                     ComponentCosts[component.design.ID] = ComponentCosts[component.design.ID] + component.count;
@@ -83,7 +84,7 @@ namespace Pulsar4X.ECSLib
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
-            IndustryPointCosts = Mass;
+            IndustryPointCosts = MassPerUnit;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -127,7 +128,7 @@ namespace Pulsar4X.ECSLib
             
             var shipinfo = new ShipInfoDB();
             dataBlobs.Add(shipinfo);
-            var mvdb = MassVolumeDB.NewFromMassAndVolume(shipDesign.Mass, shipDesign.Volume);
+            var mvdb = MassVolumeDB.NewFromMassAndVolume(shipDesign.MassPerUnit, shipDesign.VolumePerUnit);
             dataBlobs.Add(mvdb);
             PositionDB posdb = new PositionDB(Distance.MToAU(position), starsys.Guid, parent);
             dataBlobs.Add(posdb);

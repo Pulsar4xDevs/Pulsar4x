@@ -375,7 +375,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.NextColumn();
             ImGui.Text("Mass");
             ImGui.NextColumn();
-            ImGui.Text("Volume_km3");
+            ImGui.Text("Volume_m3");
             ImGui.NextColumn();
             ImGui.Separator();
 
@@ -395,9 +395,9 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 ImGui.NextColumn();
-                ImGui.Text(design.Mass.ToString());
+                ImGui.Text(design.MassPerUnit.ToString());
                 ImGui.NextColumn();
-                ImGui.Text(design.Volume_m3.ToString());
+                ImGui.Text(Stringify.Volume(design.VolumePerUnit));
                 ImGui.NextColumn();
 
             }
@@ -474,7 +474,7 @@ namespace Pulsar4X.SDL2UI
 
                 foreach (var component in _shipComponents)
                 {
-                    mass += component.design.Mass * component.count;
+                    mass += component.design.MassPerUnit * component.count;
                     if (component.design.HasAttribute<NewtonionThrustAtb>())
                     {
                         var atb = component.design.GetAttribute<NewtonionThrustAtb>();

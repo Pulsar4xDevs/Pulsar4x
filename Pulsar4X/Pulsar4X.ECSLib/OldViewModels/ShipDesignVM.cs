@@ -102,7 +102,7 @@ namespace Pulsar4X.ECSLib
         private ComponentDesign _designDB;
 
         public string Name { get; private set ; }
-        public float Size { get { return _designDB.Mass; } }
+        public float Size { get { return _designDB.MassPerUnit; } }
         public int CrewReq { get { return _designDB.CreditCost; } }
 
         public int AbilityAmount { get; protected set; }

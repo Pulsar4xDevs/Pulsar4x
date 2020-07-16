@@ -107,7 +107,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public Guid CargoTypeID { get; }
         public int DesignVersion = 0;
         public bool IsObsolete = false;
-        public int Mass { get; }
+        public int MassPerUnit { get; }
+        public double VolumePerUnit { get; }
+
         /// <summary>
         /// Wet Density;
         /// </summary>
@@ -131,7 +133,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ordinance Construction"
         public Guid IndustryTypeID { get; } = new Guid("5ADBF620-3740-4FD7-98BE-E8670D58945F");
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+
+        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         { 
             var industrydb = industryEntity.GetDataBlob<IndustryAbilityDB>();
         }
@@ -161,7 +164,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 //If the mounttype does not include missiles, it will just ignore the component and wont add it. 
                 if((component.design.ComponentMountType & ComponentMountType.Missile) == ComponentMountType.Missile)
                 {
-                    Mass += component.design.Mass * component.count;
+                    MassPerUnit += component.design.MassPerUnit * component.count;
                     CreditCost += component.design.CreditCost;
 
                     if (ComponentCosts.ContainsKey(component.design.ID))
@@ -184,14 +187,14 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             }
 
 
-            WetMass = Mass + fuelMass;
-            DryMass = Mass;
+            WetMass = MassPerUnit + fuelMass;
+            DryMass = MassPerUnit;
             Density = WetMass / 1000;
             
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
-            IndustryPointCosts = Mass;
+            IndustryPointCosts = MassPerUnit;
         }
         
 

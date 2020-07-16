@@ -21,8 +21,8 @@ namespace Pulsar4X.ECSLib
             
             foreach (KeyValuePair<Guid, List<ComponentInstance>> instance in componentInstances.GetComponentsByDesigns())
             {                
-                var componentVolume = componentInstances.AllDesigns[instance.Key].Volume_m3;
-                var componentTonnage = componentInstances.AllDesigns[instance.Key].Mass;
+                var componentVolume = componentInstances.AllDesigns[instance.Key].VolumePerUnit;
+                var componentTonnage = componentInstances.AllDesigns[instance.Key].MassPerUnit;
                 
                 foreach (var componentInstance in instance.Value)
                 {

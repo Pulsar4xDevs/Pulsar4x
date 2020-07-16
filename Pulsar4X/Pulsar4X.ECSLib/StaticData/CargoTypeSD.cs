@@ -23,7 +23,9 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The smallest unit mass. 1 for most minerals etc. 
         /// </summary>
-        int Mass { get; }
+        int MassPerUnit { get; }
+        
+        double VolumePerUnit { get; }
     }
 
     [StaticData(true, IDPropertyName = "ID")]

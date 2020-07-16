@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             
             
             
-            double launchSpeed = launchForce / missileDesign.Mass;
+            double launchSpeed = launchForce / missileDesign.MassPerUnit;
             
             double burnTime = ((missileDesign.WetMass - missileDesign.DryMass) / missileDesign.BurnRate) * 0.8; //use 80% of fuel.
             double drymass = (missileDesign.WetMass - missileDesign.DryMass) * 0.8;  //use 80% of fuel.
@@ -64,8 +64,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             }
 
             var newtdb = newMissile.GetDataBlob<NewtonThrustAbilityDB>();
-            newtdb.DryMass_kg = missileDesign.Mass;
-            newtdb.SetFuel(missileDesign.WetMass - missileDesign.Mass);
+            newtdb.DryMass_kg = missileDesign.MassPerUnit;
+            newtdb.SetFuel(missileDesign.WetMass - missileDesign.MassPerUnit);
             
 
             bool directAttack = false;

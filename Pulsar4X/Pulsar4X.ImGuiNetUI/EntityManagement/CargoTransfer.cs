@@ -70,14 +70,14 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Total Mass");
                     ImGui.NextColumn();
                     ImGui.Separator();
-                    foreach (var cargoType in typeStore.Value.CurrentStore)
+                    foreach (var cargoType in typeStore.Value.CurrentStoreInUnits)
                     {
                         ICargoable ctype = _staticData.CargoGoods.GetAny(cargoType.Key);
                         var cname = ctype.Name;
                         var volumeStored = cargoType.Value;
-                        var volumePerItem = ctype.Mass / ctype.Density;
+                        var volumePerItem = ctype.MassPerUnit / ctype.Density;
                         var massStored = cargoType.Value * ctype.Density;
-                        var itemsStored = massStored / ctype.Mass;
+                        var itemsStored = massStored / ctype.MassPerUnit;
                         if (ImGui.Selectable(cname))
                         {
                         }
@@ -200,8 +200,8 @@ namespace Pulsar4X.SDL2UI
             if (_stores.ContainsKey(typeID))
             {
                 ICargoable cargoitem = _staticData.GetICargoable(cargoID);
-                int massUnit = cargoitem.Mass;
-                var volumeStored = _stores[typeID].CurrentStore[cargoID];
+                int massUnit = cargoitem.MassPerUnit;
+                var volumeStored = _stores[typeID].CurrentStoreInUnits[cargoID];
                 var massStored = cargoitem.Density * volumeStored;
 
                 var massToMove = _cargoToMove[cargoitem];
@@ -218,7 +218,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (_stores.ContainsKey(cargoItem.CargoTypeID))
             {
-                return _stores[cargoItem.CargoTypeID].CurrentStore.ContainsKey(cargoItem.ID);
+                return _stores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID);
             }
             return false;
         }
@@ -253,14 +253,14 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     ImGui.Separator();
 
-                    foreach (var cargoType in typeStore.Value.CurrentStore.ToArray())
+                    foreach (var cargoType in typeStore.Value.CurrentStoreInUnits.ToArray())
                     {
                         ICargoable ctype = _staticData.CargoGoods.GetAny(cargoType.Key);
                         var cname = ctype.Name;
                         var volumeStored = cargoType.Value;
-                        var volumePerItem = ctype.Mass / ctype.Density;
+                        var volumePerItem = ctype.MassPerUnit / ctype.Density;
                         var massStored = cargoType.Value * ctype.Density;
-                        var itemsStored = massStored / ctype.Mass;
+                        var itemsStored = massStored / ctype.MassPerUnit;
                         bool isSelected = selectedCargo == ctype;
                         if (ImGui.Selectable(cname, isSelected))
                         {

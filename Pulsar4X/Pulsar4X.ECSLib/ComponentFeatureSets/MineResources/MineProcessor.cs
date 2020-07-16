@@ -44,8 +44,8 @@ namespace Pulsar4X.ECSLib
             {
                 ICargoable mineral = _minerals[kvp.Key];
                 Guid cargoTypeID = mineral.CargoTypeID;
-                double itemMassPerUnit = mineral.Mass;
-                double volumeMassPerUnit = mineral.Mass / mineral.Density;
+                double itemMassPerUnit = mineral.MassPerUnit;
+                double volumeMassPerUnit = mineral.MassPerUnit / mineral.Density;
                 
                 double accessability = planetMinerals[kvp.Key].Accessibility;
                 double actualRate = kvp.Value * mineBonuses * accessability;

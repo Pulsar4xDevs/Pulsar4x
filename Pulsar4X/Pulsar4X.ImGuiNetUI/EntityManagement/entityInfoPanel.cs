@@ -63,7 +63,7 @@ namespace Pulsar4X.SDL2UI
 
                     if (_selectedEntity.HasDataBlob<MassVolumeDB>())
                     {
-                        ImGui.Text("Volume: " + _selectedEntity.GetDataBlob<MassVolumeDB>().Volume_km3 + " KM^3");
+                        ImGui.Text("Volume: " + Stringify.Volume(_selectedEntity.GetDataBlob<MassVolumeDB>().Volume_m3 ));
                     }
 
 
@@ -71,8 +71,6 @@ namespace Pulsar4X.SDL2UI
                     
                     //ImGui.Text(""+_uiState.LastClickedEntity.);
                     //gets all children and parent nodes, displays their names and makes them clickable to navigate towards them.
-
-                    
 
                     if(_selectedEntity.HasDataBlob<PositionDB>()){
                         ImGui.Text("Parent entity: ");

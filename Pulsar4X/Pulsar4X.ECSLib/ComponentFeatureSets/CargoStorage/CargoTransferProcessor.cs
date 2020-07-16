@@ -41,9 +41,9 @@ namespace Pulsar4X.ECSLib
                 }
 
                 var toCargoTypeStore = transferDB.CargoToDB.TypeStores[cargoTypeID]; //reference to the cargoType store we're pushing to.
-                var toCargoItemAndAmount = toCargoTypeStore.CurrentStore; //reference to dictionary holding the cargo we want to send too
+                var toCargoItemAndAmount = toCargoTypeStore.CurrentStoreInUnits; //reference to dictionary holding the cargo we want to send too
                 var fromCargoTypeStore = transferDB.CargoFromDB.TypeStores[cargoTypeID]; //reference to the cargoType store we're pulling from.
-                var fromCargoItemAndAmount = fromCargoTypeStore.CurrentStore; //reference to dictionary we want to pull cargo from. 
+                var fromCargoItemAndAmount = fromCargoTypeStore.CurrentStoreInUnits; //reference to dictionary we want to pull cargo from. 
 
                 double totalweightToTransfer = itemMassPerUnit * amountToXfer;
                 double weightToTransferThisTick = Math.Min(totalweightToTransfer, transferDB.TransferRateInKG * deltaSeconds); //only the amount that can be transfered in this timeframe. 

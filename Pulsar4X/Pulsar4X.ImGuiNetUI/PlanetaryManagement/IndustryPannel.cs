@@ -273,7 +273,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         var planet = _selectedEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
                         var lowOrbit = planet.GetDataBlob<MassVolumeDB>().RadiusInM * 0.33333;
                     
-                        var mass = s.Mass;
+                        var mass = s.MassPerUnit;
                     
                         var fuelCost = OrbitMath.FuelCostToLowOrbit(planet, mass);
 

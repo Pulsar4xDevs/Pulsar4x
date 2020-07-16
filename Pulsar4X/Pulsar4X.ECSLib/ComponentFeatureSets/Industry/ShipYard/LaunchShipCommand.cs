@@ -52,13 +52,13 @@ namespace Pulsar4X.ECSLib.Industry
                         {
                             var planet = _entityCommanding.GetDataBlob<ColonyInfoDB>().PlanetEntity;
                             
-                            FuelCost = OrbitMath.FuelCostToLowOrbit(planet, design.Mass);
+                            FuelCost = OrbitMath.FuelCostToLowOrbit(planet, design.MassPerUnit);
                             targetPosition = new Vector3(0, OrbitMath.LowOrbitRadius(planet), 0);
                             IsRunning = true;
                         }
                         else
                         {
-                            FuelCost = OrbitMath.TsiolkovskyFuelCost(design.Mass, 275, 1);
+                            FuelCost = OrbitMath.TsiolkovskyFuelCost(design.MassPerUnit, 275, 1);
                             //targetOrbit = (OrbitDB)_entityCommanding.GetDataBlob<OrbitDB>().Clone();
                             targetPosition = _entityCommanding.GetDataBlob<PositionDB>().RelativePosition_m;
                             IsRunning = true;

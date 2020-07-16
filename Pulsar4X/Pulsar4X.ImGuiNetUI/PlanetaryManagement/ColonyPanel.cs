@@ -13,7 +13,7 @@ namespace Pulsar4X.SDL2UI
     public class ColonyPanel : PulsarGuiWindow
     {
         EntityState _selectedEntity;
-        CargoStorageVM _storeVM;
+        //CargoStorageVM _storeVM;
         private FactionInfoDB _factionInfoDB;
 
         private IndustryAbilityDB _industryDB;
@@ -68,54 +68,12 @@ namespace Pulsar4X.SDL2UI
                 //_flags = ImGuiWindowFlags.AlwaysAutoResize;
                 if (ImGui.Begin("Cargo", ref IsActive, _flags))
                 {
-
-                    if (_storeVM != null)
-                    {
-                        /*
-                        ImGui.BeginGroup();
-                        foreach (var storetype in _storeVM.CargoResourceStores)
-                        {
-                            if (ImGui.CollapsingHeader(storetype.HeaderText + "###" + storetype.StorageTypeName, ImGuiTreeNodeFlags.CollapsingHeader))
-                            {
-                                foreach (var item in storetype.CargoItems)
-                                {
-                                    ImGui.Text(item.ItemName);
-                                    ImGui.SameLine();
-                                    ImGui.Text(item.ItemMassPerUnit);
-                                    ImGui.SameLine();
-                                    ImGui.Text(item.NumberOfItems);
-                                    ImGui.SameLine();
-                                    ImGui.Text(item.TotalMass);
-
-                                }
-
-                            }
-                        }
-                        ImGui.EndGroup();
-                        */
-                        _cargoList.Display();                       
-                    }
+                    _cargoList.Display();
 
                     if (_industryPannel != null)// && ImGui.CollapsingHeader("Refinary Points: " + _industryDB.ConstructionPoints))
                     {
                         _industryPannel.Display();
                     }
-                    /*
-
-                    if (_refinaryIndustryPannel != null && ImGui.CollapsingHeader("Refinary Points: " + _refineDB.ConstructionPoints))
-                    {
-                        _refinaryIndustryPannel.Display();
-                    }
-
-                    if (_construcIndustryPannel != null && ImGui.CollapsingHeader("Construction Points: " + _constrDB.ConstructionPoints))
-                    {
-                        _construcIndustryPannel.Display();
-                    }
-                    
-                    if (_shipYardIndustryPannel != null && ImGui.CollapsingHeader("Construction Points: " + _shipYardDB.ConstructionPoints))
-                    {
-                        _shipYardIndustryPannel.Display();
-                    }*/
                 }
                 ImGui.End();
             }
@@ -125,13 +83,7 @@ namespace Pulsar4X.SDL2UI
         internal void HardRefresh()
         {
             _factionInfoDB = _uiState.Faction.GetDataBlob<FactionInfoDB>();
-            if (_selectedEntity.Entity.HasDataBlob<CargoStorageDB>())
-            {
-                var storeDB = _selectedEntity.Entity.GetDataBlob<CargoStorageDB>();
-                _storeVM = new CargoStorageVM(_uiState.Game.StaticData, storeDB);
-                _storeVM.SetUpdateListner(_selectedEntity.Entity.Manager.ManagerSubpulses);
 
-            }
 
             if (_selectedEntity.Entity.HasDataBlob<IndustryAbilityDB>())
             {
@@ -145,25 +97,7 @@ namespace Pulsar4X.SDL2UI
             }
             
             _cargoList = new CargoListPannelSimple(_staticData, _selectedEntity);
-
-            /*
-            lock (_factionInfoDB.ComponentDesigns)
-            {
-                int num = _factionInfoDB.ComponentDesigns.Count;
-                _constructableDesigns = new ComponentDesign[num];
-                _constructablesNames = new string[num]; 
-                _constructablesIDs = new Guid[num];
-                int i = 0;
-                foreach (var design in _factionInfoDB.ComponentDesigns)
-                {
-                    _constructableDesigns[i] = design.Value;
-                    _constructablesIDs[i] = design.Key;
-                    _constructablesNames[i] = design.Value.Name;
-                    i++;
-                }
-
-                
-            }*/
+            
 
         }
 

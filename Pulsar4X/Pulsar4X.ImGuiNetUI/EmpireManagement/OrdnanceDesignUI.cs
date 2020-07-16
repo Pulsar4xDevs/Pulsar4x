@@ -177,7 +177,7 @@ namespace Pulsar4X.SDL2UI
                     _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
                     RefreshMass();
                 }
-                var whmass = _payloadTypes[_payloadSelectedIndex].Mass * _payloadCount;
+                var whmass = _payloadTypes[_payloadSelectedIndex].MassPerUnit * _payloadCount;
                 ImGui.Text("Mass: " + Stringify.Mass(whmass));
                 //ImGui.Text("Payload Trigger Type: " + _selectedPayload.Trigger);
                 BorderGroup.End();
@@ -189,7 +189,7 @@ namespace Pulsar4X.SDL2UI
                     _selectedComponentDesigns[_eleccPackTypes[_electronicsSelectedIndex]] = 1;
                     RefreshMass();
                 }
-                var mass = _eleccPackTypes[_electronicsSelectedIndex].Mass;
+                var mass = _eleccPackTypes[_electronicsSelectedIndex].MassPerUnit;
                 ImGui.Text("Mass: " + Stringify.Mass(mass));
                 BorderGroup.End();
                 
@@ -250,7 +250,7 @@ namespace Pulsar4X.SDL2UI
             _totalMass = 0;
             foreach (var kvp in _selectedComponentDesigns)
             {
-                _totalMass += kvp.Key.Mass * kvp.Value;
+                _totalMass += kvp.Key.MassPerUnit * kvp.Value;
                 
             }
 
