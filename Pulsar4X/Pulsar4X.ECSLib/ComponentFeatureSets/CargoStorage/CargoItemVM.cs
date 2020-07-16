@@ -23,22 +23,22 @@ namespace Pulsar4X.ECSLib
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string ItemName { get { return CargoableItem.Name; } }
-        public string ItemMassPerUnit { get { return CargoableItem.Density.ToString(); } }
+        public string ItemMassPerUnit { get { return CargoableItem.MassPerUnit.ToString(); } }
         private string _noOfItems;
         public string NumberOfItems {
             get { return _noOfItems; } set { _noOfItems = value; OnPropertyChanged(); }
         }
         public string GetIncomingMass()
         {
-            return Stringify.Mass(ItemIncomingAmount * CargoableItem.Density, "0.###"); 
+            return Stringify.Mass(ItemIncomingAmount * CargoableItem.MassPerUnit, "0.###"); 
         }
         public string GetOutgoingMass()
         {
-            return Stringify.Mass(ItemOutgoingAmount * CargoableItem.Density, "0.###");
+            return Stringify.Mass(ItemOutgoingAmount * CargoableItem.MassPerUnit, "0.###");
         }
         public string GetStoredMass()
         {
-            return Stringify.Mass(_itemCount * CargoableItem.Density, "0.###");
+            return Stringify.Mass(_itemCount * CargoableItem.MassPerUnit, "0.###");
         }
 
         private string _totalMass;
@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib
 
         private void setTotalMass()
         {
-            double totalMass = _itemCount * CargoableItem.Density;
+            double totalMass = _itemCount * CargoableItem.MassPerUnit;
             TotalMass = Stringify.Mass(totalMass, "0.###");
         }
 

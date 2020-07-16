@@ -251,7 +251,7 @@ namespace Pulsar4X.ECSLib
                 return 0;
             }
             
-            double volumePerUnit = cargoItem.MassPerUnit / cargoItem.Density;
+            double volumePerUnit = cargoItem.VolumePerUnit;
             double totalVolume = volumePerUnit * count;
             TypeStore store = TypeStores[cargoItem.CargoTypeID];
 
@@ -285,7 +285,7 @@ namespace Pulsar4X.ECSLib
                 return 0;
             }
             
-            double volumePerUnit = cargoItem.MassPerUnit / cargoItem.Density;
+            double volumePerUnit = cargoItem.VolumePerUnit;
             double totalVolume = volumePerUnit * count;
             TypeStore store = TypeStores[cargoItem.CargoTypeID];
             if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
@@ -309,10 +309,10 @@ namespace Pulsar4X.ECSLib
                 return 0;
             if (!TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
                 return 0;
-            return TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID] * (cargoItem.MassPerUnit / cargoItem.Density);
+            return TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID] * cargoItem.VolumePerUnit;
         }
 
-        public double GetMassAmount(ICargoable cargoItem)
+        public double GetMassStored(ICargoable cargoItem)
         {
             if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
                 return 0;
@@ -360,7 +360,12 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public double GetFreeMass(ICargoable cargoItem)
         {
-            return FreeVolume * cargoItem.Density;
+            return (FreeVolume / cargoItem.VolumePerUnit) * cargoItem.MassPerUnit;
+        }
+
+        public int GetFreeUnitSpace(ICargoable cargoItem)
+        {
+            return (int)(FreeVolume / cargoItem.VolumePerUnit);
         }
 
         public TypeStore Clone()

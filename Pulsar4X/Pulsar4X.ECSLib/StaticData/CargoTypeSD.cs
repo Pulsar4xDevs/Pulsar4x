@@ -15,11 +15,7 @@ namespace Pulsar4X.ECSLib
         Guid ID { get; }
         string Name { get; }
         Guid CargoTypeID { get;  }
-        /// <summary>
-        /// In Kg/M^3
-        /// </summary>
-        double Density { get; }
-        
+
         /// <summary>
         /// The smallest unit mass. 1 for most minerals etc. 
         /// </summary>

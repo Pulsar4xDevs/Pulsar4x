@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
                 long amountToXfer = itemsToXfer.amount;
 
                 Guid cargoTypeID = cargoItem.CargoTypeID;
-                double itemMassPerUnit = cargoItem.Density;
+                double itemMassPerUnit = cargoItem.MassPerUnit;
 
                 if (!transferDB.CargoToDB.TypeStores.ContainsKey(cargoTypeID))
                 {

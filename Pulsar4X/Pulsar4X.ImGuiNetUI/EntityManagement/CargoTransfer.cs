@@ -75,9 +75,9 @@ namespace Pulsar4X.SDL2UI
                         ICargoable ctype = _staticData.CargoGoods.GetAny(cargoType.Key);
                         var cname = ctype.Name;
                         var volumeStored = cargoType.Value;
-                        var volumePerItem = ctype.MassPerUnit / ctype.Density;
-                        var massStored = cargoType.Value * ctype.Density;
-                        var itemsStored = massStored / ctype.MassPerUnit;
+                        var volumePerItem = ctype.VolumePerUnit;
+                        var massStored = cargoType.Value * ctype.MassPerUnit;
+                        var itemsStored = typeStore.Value.CurrentStoreInUnits[ctype.ID];
                         if (ImGui.Selectable(cname))
                         {
                         }
@@ -86,6 +86,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(Stringify.Number(itemsStored));
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Mass(massStored));
+                        ImGui.SetTooltip(Stringify.Volume(volumeStored));
                         ImGui.NextColumn();
                     }
 
@@ -200,12 +201,8 @@ namespace Pulsar4X.SDL2UI
             if (_stores.ContainsKey(typeID))
             {
                 ICargoable cargoitem = _staticData.GetICargoable(cargoID);
-                int massUnit = cargoitem.MassPerUnit;
-                var volumeStored = _stores[typeID].CurrentStoreInUnits[cargoID];
-                var massStored = cargoitem.Density * volumeStored;
-
+                var massStored = cargoitem.MassPerUnit * _stores[typeID].CurrentStoreInUnits[cargoID];
                 var massToMove = _cargoToMove[cargoitem];
-
                 amount = massStored + massToMove;
             }
 
@@ -258,8 +255,8 @@ namespace Pulsar4X.SDL2UI
                         ICargoable ctype = _staticData.CargoGoods.GetAny(cargoType.Key);
                         var cname = ctype.Name;
                         var volumeStored = cargoType.Value;
-                        var volumePerItem = ctype.MassPerUnit / ctype.Density;
-                        var massStored = cargoType.Value * ctype.Density;
+                        var volumePerItem = ctype.VolumePerUnit;
+                        var massStored = cargoType.Value * ctype.MassPerUnit;
                         var itemsStored = massStored / ctype.MassPerUnit;
                         bool isSelected = selectedCargo == ctype;
                         if (ImGui.Selectable(cname, isSelected))

@@ -292,10 +292,10 @@ namespace Pulsar4X.Tests
             var library = new CargoDefinitionsLibrary();
             library.LoadOtherDefinitions(new List<ICargoable>() { rocks });
 
-            var rockPile = new CargoStorageDB();
-            rockPile.StoredCargoTypes.Add(rocks.CargoTypeID, new CargoTypeStore() { MaxCapacityKg = 35007, FreeCapacityKg = 32154 });
-            rockPile.StoredCargoTypes.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99998, FreeCapacityKg = 99997 });
-            rockPile.StoredCargoTypes.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99996, FreeCapacityKg = 99995 });
+            var rockPile = new VolumeStorageDB();
+            rockPile.TypeStores.Add(rocks.CargoTypeID, new TypeStore() { MaxCapacityKg = 35007, FreeCapacityKg = 32154 });
+            rockPile.TypeStores.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99998, FreeCapacityKg = 99997 });
+            rockPile.TypeStores.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99996, FreeCapacityKg = 99995 });
 
             var canStoreThisManyItems = StorageSpaceProcessor.GetAvailableSpace(rockPile, rocks.ID, library);
             Assert.AreEqual(3215, canStoreThisManyItems.FreeCapacityItem);
