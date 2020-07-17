@@ -1,10 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
+    /*
     public class CargoStorageAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         /// <summary>
@@ -72,7 +74,7 @@ namespace Pulsar4X.ECSLib
             }
         }
     }
-    
+    */
 
     public class VolumeStorageAtb : IComponentDesignAttribute
     {
@@ -322,6 +324,37 @@ namespace Pulsar4X.ECSLib
             return TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID] * cargoItem.MassPerUnit;
         }
 
+        /// <summary>
+        /// Will randomly dump cargo if volume to remove is more than the free volume.
+        /// TODO: should be psudorandom.
+        /// TODO: should create an entity in space depending on type of cargo. 
+        /// </summary>
+        /// <param name="typeID">cargo typeID</param>
+        /// <param name="volumeChange">positive to add volume, negitive to remove volume</param>
+        public void ChangeMaxVolume(Guid typeID, double volumeChange)
+        {
+            var type = TypeStores[typeID];
+            type.MaxVolume += volumeChange;
+            type.FreeVolume += volumeChange;
+            
+            if(type.FreeVolume < 0)
+            {
+                Random prng = new Random(); //todo: grab seed from parent entity (or entity manager?) system for this is not yet implemented
+                var indexlist = type.CurrentStoreInUnits.Keys.ToList();
+                while (type.FreeVolume < 0)
+                {
+                    var prngIndex = prng.Next(0, type.CurrentStoreInUnits.Count - 1);
+                    var cargoID = indexlist[prngIndex];
+                    ICargoable cargoItem = StaticRefLib.StaticData.GetICargoable(cargoID);
+                    var volPerUnit = cargoItem.VolumePerUnit;
+                    var unitsStored = type.CurrentStoreInUnits[cargoID];
+                    var volumeRemoved = AddRemoveCargoByVolume(cargoItem, volumeChange);
+                    type.FreeVolume += volumeRemoved;
+                    indexlist.Remove(cargoID);
+                }
+            }
+        }
+
         public VolumeStorageDB(VolumeStorageDB db)
         {
             TypeStores = new Dictionary<Guid, TypeStore>();
@@ -367,6 +400,7 @@ namespace Pulsar4X.ECSLib
         {
             return (int)(FreeVolume / cargoItem.VolumePerUnit);
         }
+        
 
         public TypeStore Clone()
         {

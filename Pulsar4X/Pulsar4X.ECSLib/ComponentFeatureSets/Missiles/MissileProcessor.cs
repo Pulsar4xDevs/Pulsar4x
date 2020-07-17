@@ -18,8 +18,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 tgtEntityOrbit = targetEntity.GetDataBlob<OrbitUpdateOftenDB>();
             
             //MissileLauncherAtb launcherAtb;
-            CargoStorageDB cargo = launchingEntity.GetDataBlob<CargoStorageDB>();
-            int numMis = (int)StorageSpaceProcessor.GetAmount(cargo, missileDesign);
+            VolumeStorageDB cargo = launchingEntity.GetDataBlob<VolumeStorageDB>();
+            
+            int numMis = cargo.TypeStores[missileDesign.CargoTypeID].CurrentStoreInUnits[missileDesign.ID];
             if (numMis < 1)
                 return;
             
@@ -115,8 +116,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
                 //ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate + TimeSpan.FromSeconds(1), targetEntity);
             }
-            
-            StorageSpaceProcessor.RemoveCargo(cargo, missileDesign, 1); //remove missile from parent.
+
+            cargo.RemoveCargoByUnit(missileDesign, 1); //remove missile from parent.
         }
     }
 

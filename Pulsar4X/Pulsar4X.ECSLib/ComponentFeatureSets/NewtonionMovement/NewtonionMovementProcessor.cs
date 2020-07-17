@@ -327,11 +327,7 @@ namespace Pulsar4X.ECSLib
                 var cargo = parentEntity.GetDataBlob<VolumeStorageDB>();
                 fuelMass = cargo.GetMassStored(fuel);
             }
-            else if (parentEntity.HasDataBlob<CargoStorageDB>()) //TODO: this can be removed once CargoStorageDB is gone.
-            {
-                var cargo = parentEntity.GetDataBlob<CargoStorageDB>();
-                fuelMass = StorageSpaceProcessor.GetAmount(cargo, fuel); 
-            }
+
             
             db.SetFuel(fuelMass);
         }

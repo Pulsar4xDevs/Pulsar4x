@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -391,8 +392,6 @@ namespace Pulsar4X.ImGuiNetUI
 
         public override void OnSystemTickChange(DateTime newdate)
         {
-
-
             _allOrdnanceDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns.Values.ToArray();
             var ctypes = new List<Guid>(); //there are likely to be not very many of these, proibly only one.
             foreach (var ordDes in _allOrdnanceDesigns)
@@ -400,20 +399,21 @@ namespace Pulsar4X.ImGuiNetUI
                 if (!ctypes.Contains(ordDes.CargoTypeID))
                     ctypes.Add(ordDes.CargoTypeID);
             }
-
-
+            
             foreach (var cargoType in ctypes)
             {
-                if(!_orderEntity.HasDataBlob<CargoStorageDB>())
+                if(!_orderEntity.HasDataBlob<VolumeStorageDB>())
                     continue;
-                if (_orderEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes.ContainsKey(cargoType))
+                if (_orderEntity.GetDataBlob<VolumeStorageDB>().TypeStores.ContainsKey(cargoType))
                 {
-                    var shipOrdnances = _orderEntity.GetDataBlob<CargoStorageDB>().StoredCargoTypes[cargoType].ItemsAndAmounts;
+                    ICollection shipOrdnances = _orderEntity.GetDataBlob<VolumeStorageDB>().TypeStores[cargoType].CurrentStoreInUnits;
 
-                    foreach (var ordType in shipOrdnances.Values)
-                        _storedOrdnance[ordType.item.ID] = (int)ordType.amount;
+                    lock (shipOrdnances.SyncRoot)
+                    {
+                        foreach (KeyValuePair<Guid, int> ordType in shipOrdnances)
+                            _storedOrdnance[ordType.Key] = ordType.Value;
+                    }
                 }
-
             }
 
             RefreshWpnNamesCashe();

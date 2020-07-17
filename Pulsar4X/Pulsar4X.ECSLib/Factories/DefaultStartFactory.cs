@@ -288,11 +288,9 @@ namespace Pulsar4X.ECSLib
             var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
             var methalox = NameLookup.GetMaterialSD(game, "Methalox");
             var hydrolox = NameLookup.GetMaterialSD(game, "Hydrolox");
-            //StorageSpaceProcessor.AddCargo(gunShip0.GetDataBlob<CargoStorageDB>(), rp1, 15000);
-            StorageSpaceProcessor.AddCargo(gunShip0.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
-            StorageSpaceProcessor.AddCargo(gunShip1.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
-            //StorageSpaceProcessor.AddCargo(cargoShip.GetDataBlob<CargoStorageDB>(), methalox, 1200000);
-            
+
+
+   
             gunShip0.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
             gunShip1.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
             ship2.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
@@ -300,6 +298,8 @@ namespace Pulsar4X.ECSLib
             courier.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(hydrolox, 50000);
             starship.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(methalox, 1200000);
             
+            gunShip0.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);
+            gunShip1.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);    
             
             var elec = NameLookup.GetMaterialSD(game, "Electrical Energy");
             gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;

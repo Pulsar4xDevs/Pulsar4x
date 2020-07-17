@@ -5,7 +5,7 @@ using System.Dynamic;
 
 namespace Pulsar4X.ECSLib
 {
-
+/*
     /// <summary>
     /// Contains info on a ships cargo capacity.
     /// TODO: is it going to be easier to store items flat, 
@@ -86,5 +86,5 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Dictionary<Guid,List<Entity>> SpecificEntites { get; } = new Dictionary<Guid, List<Entity>>();
         
-    }
+    }*/
 }

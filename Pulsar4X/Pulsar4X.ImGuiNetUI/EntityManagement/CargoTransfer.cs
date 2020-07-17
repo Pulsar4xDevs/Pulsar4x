@@ -250,18 +250,18 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     ImGui.Separator();
 
-                    foreach (var cargoType in typeStore.Value.CurrentStoreInUnits.ToArray())
+                    foreach (var cargoItemKvp in typeStore.Value.CurrentStoreInUnits.ToArray())
                     {
-                        ICargoable ctype = _staticData.CargoGoods.GetAny(cargoType.Key);
-                        var cname = ctype.Name;
-                        var volumeStored = cargoType.Value;
-                        var volumePerItem = ctype.VolumePerUnit;
-                        var massStored = cargoType.Value * ctype.MassPerUnit;
-                        var itemsStored = massStored / ctype.MassPerUnit;
-                        bool isSelected = selectedCargo == ctype;
+                        ICargoable cargoItem = _staticData.GetICargoable(cargoItemKvp.Key);
+                        var cname = cargoItem.Name;
+                        var volumeStored = cargoItemKvp.Value;
+                        var volumePerItem = cargoItem.VolumePerUnit;
+                        var massStored = cargoItemKvp.Value * cargoItem.MassPerUnit;
+                        var itemsStored = massStored / cargoItem.MassPerUnit;
+                        bool isSelected = selectedCargo == cargoItem;
                         if (ImGui.Selectable(cname, isSelected))
                         {
-                            selectedCargo = ctype;
+                            selectedCargo = cargoItem;
                             CargoItemSelectedEvent.Invoke(this);
                         }
 

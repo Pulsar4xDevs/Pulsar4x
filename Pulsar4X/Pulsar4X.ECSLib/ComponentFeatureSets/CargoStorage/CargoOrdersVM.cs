@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
 
         List<Entity> _selectableEntites { get; set; }
 
-        public CargoStorageVM LoadFromCargoVM { get; set; } 
+        //public CargoStorageVM LoadFromCargoVM { get; set; } 
 
         List<ICargoable> _selectableCargos { get; set; } 
 

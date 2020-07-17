@@ -507,11 +507,11 @@ namespace Pulsar4X.SDL2UI
                         estor += atb.MaxStore * component.count;
                     }
 
-                    if (component.design.HasAttribute<CargoStorageAtbDB>())
+                    if (component.design.HasAttribute<VolumeStorageAtb>())
                     {
-                        var atb = component.design.GetAttribute<CargoStorageAtbDB>();
-                        var typeid = atb.CargoTypeGuid;
-                        var amount = atb.StorageCapacity * component.count;
+                        var atb = component.design.GetAttribute<VolumeStorageAtb>();
+                        var typeid = atb.StoreTypeID;
+                        var amount = atb.MaxVolume * component.count;
                         if (!cstore.ContainsKey(typeid))
                             cstore.Add(typeid, amount);
                         else

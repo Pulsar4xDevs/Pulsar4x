@@ -525,13 +525,16 @@
               "AttributeFormula": "Ability(0) - Ability(1) - Ability(2)"
             },
             {
-              "Name": "DBargs",
+              "Name": "DBargsStor",
               "GuiHint": "None",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AttributeFormula": "AtbConstrArgs(Ability(4), GuidString('055E2026-20A4-4CFA-A8CA-A01915A48B5E'), Ability(2), Ability(3))",
-              "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
+              "AttributeFormula": "AtbConstrArgs(GuidString('055E2026-20A4-4CFA-A8CA-A01915A48B5E'), Ability('Total Cargo Stored'))",
+              "AttributeType": "Pulsar4X.ECSLib.VolumeStorageAtb"
+            },
+            {
+              "Name": "DBArgsXfer",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+              "AttributeType": "Pulsar4X.ECSLib.StorageTransferRateAtbDB"
             }
           ]
         }
