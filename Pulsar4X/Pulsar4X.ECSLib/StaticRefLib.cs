@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Pulsar4X.ECSLib
@@ -7,6 +8,7 @@ namespace Pulsar4X.ECSLib
     {
         public static Game Game { get; private set; }
         public static StaticDataStore StaticData { get; internal set; }
+        public static Dictionary<Guid, ICargoable> AllICargoableDesigns;
         internal static ProcessorManager ProcessorManager { get; private set; }
         public static DateTime CurrentDateTime { get { return GamePulse.GameGlobalDateTime; } }
         public static EventLog EventLog { get; private set; }

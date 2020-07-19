@@ -107,8 +107,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public Guid CargoTypeID { get; }
         public int DesignVersion = 0;
         public bool IsObsolete = false;
-        public int MassPerUnit { get; }
-        public double VolumePerUnit { get; }
+        public int MassPerUnit { get; set; }
+        public double VolumePerUnit { get; set; }
 
         /// <summary>
         /// Wet Density;
@@ -159,12 +159,15 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             BurnRate = 0;
             Guid fuelType = Guid.Empty;
             double fuelMass = fuelAmountKG;
+            double mass = 0;
+            double vol = 0;
             foreach (var component in components)
             {
                 //If the mounttype does not include missiles, it will just ignore the component and wont add it. 
                 if((component.design.ComponentMountType & ComponentMountType.Missile) == ComponentMountType.Missile)
                 {
-                    MassPerUnit += component.design.MassPerUnit * component.count;
+                    mass += component.design.MassPerUnit * component.count;
+                    vol += component.design.VolumePerUnit * component.count;
                     CreditCost += component.design.CreditCost;
 
                     if (ComponentCosts.ContainsKey(component.design.ID))
@@ -187,14 +190,16 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             }
 
 
-            WetMass = MassPerUnit + fuelMass;
-            DryMass = MassPerUnit;
+            WetMass = mass + fuelMass;
+            DryMass = mass;
             Density = WetMass / 1000;
             
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
-            IndustryPointCosts = MassPerUnit;
+            IndustryPointCosts = (int)mass;
+            MassPerUnit = (int)WetMass;
+            VolumePerUnit = vol;
         }
         
 

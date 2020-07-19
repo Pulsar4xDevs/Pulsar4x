@@ -40,7 +40,6 @@ namespace Pulsar4X.ECSLib
         public ushort OutputAmount;
         public Guid CargoTypeID { get; set; }
         public int MassPerUnit { get; set; }
-        public double VolumePerUnit { get; }
-        public double Density { get; set; }
+        public double VolumePerUnit { get; set; }
     }
 }

@@ -34,6 +34,7 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _ordnanceStore;
         private static ShipDesign _defaultShipDesign;
         private static ShipDesign _spaceXStarShipDesign;
+        private static OrdnanceDesign _missile;
         
 
         // this code is a test for multiple systems, worth mentioning it utterly failed, modularity is good when you have it huh.ç
@@ -295,7 +296,7 @@ namespace Pulsar4X.ECSLib
             gunShip1.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
             ship2.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
             ship3.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
-            courier.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(hydrolox, 50000);
+            var count = courier.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(hydrolox, 50000);
             starship.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(methalox, 1200000);
             
             gunShip0.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);
@@ -513,6 +514,8 @@ namespace Pulsar4X.ECSLib
 
         public static OrdnanceDesign MissileDesign250(Game game, Entity faction)
         {
+            if (_missile != null)
+                return _missile;
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
 
             List<(ComponentDesign, int)> components = new List<(ComponentDesign, int)>()
@@ -522,8 +525,8 @@ namespace Pulsar4X.ECSLib
                 (DefaultMissileSRB(game, faction), 1),
             };
             double fuelkg = 225;
-            var design = new OrdnanceDesign(factionInfo, "Missile250", fuelkg, components);
-            return design;
+            _missile = new OrdnanceDesign(factionInfo, "Missile250", fuelkg, components);
+            return _missile;
         }
 
         public static ComponentDesign ShipYard(Entity faction)

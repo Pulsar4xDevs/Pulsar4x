@@ -72,7 +72,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Separator();
                     foreach (var cargoType in typeStore.Value.CurrentStoreInUnits)
                     {
-                        ICargoable ctype = _staticData.CargoGoods.GetAny(cargoType.Key);
+                        ICargoable ctype = typeStore.Value.Cargoables[cargoType.Key];
                         var cname = ctype.Name;
                         var volumeStored = cargoType.Value;
                         var volumePerItem = ctype.VolumePerUnit;
@@ -200,7 +200,7 @@ namespace Pulsar4X.SDL2UI
             double amount = 0;
             if (_stores.ContainsKey(typeID))
             {
-                ICargoable cargoitem = _staticData.GetICargoable(cargoID);
+                ICargoable cargoitem = _stores[typeID].Cargoables[cargoID];
                 var massStored = cargoitem.MassPerUnit * _stores[typeID].CurrentStoreInUnits[cargoID];
                 var massToMove = _cargoToMove[cargoitem];
                 amount = massStored + massToMove;
@@ -252,7 +252,13 @@ namespace Pulsar4X.SDL2UI
 
                     foreach (var cargoItemKvp in typeStore.Value.CurrentStoreInUnits.ToArray())
                     {
-                        ICargoable cargoItem = _staticData.GetICargoable(cargoItemKvp.Key);
+                        ICargoable cargoItem = _stores[typeStore.Key].Cargoables[cargoItemKvp.Key];
+                        if (cargoItem == null)
+                        {
+                            FactionInfoDB factionInfoDB;
+                            //factionInfoDB.
+                        }
+
                         var cname = cargoItem.Name;
                         var volumeStored = cargoItemKvp.Value;
                         var volumePerItem = cargoItem.VolumePerUnit;

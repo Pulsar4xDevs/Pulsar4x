@@ -181,17 +181,20 @@ namespace Pulsar4X.ECSLib
             }
             TypeStore store = TypeStores[cargoItem.CargoTypeID];
             
-            double unitsToTryStore = cargoItem.VolumePerUnit * volume;
+            double unitsToTryStore = volume / cargoItem.VolumePerUnit;
             double unitsStorable = store.FreeVolume / cargoItem.VolumePerUnit;
 
             int unitsStoring = (int)Math.Min(unitsToTryStore, unitsStorable);
             double volumeStoring = unitsStoring * cargoItem.VolumePerUnit;
             double massStoring = unitsStoring * cargoItem.MassPerUnit;
 
-            if(store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
-                store.CurrentStoreInUnits[cargoItem.ID] += unitsStoring;
-            else
+            if(!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
+            {
                 store.CurrentStoreInUnits.Add(cargoItem.ID, unitsStoring);
+                store.Cargoables.Add(cargoItem.ID, cargoItem);
+            }
+            else
+                store.CurrentStoreInUnits[cargoItem.ID] += unitsStoring;
             
             store.FreeVolume -= volumeStoring;
             TotalStoredMass += massStoring;
@@ -225,10 +228,13 @@ namespace Pulsar4X.ECSLib
             double volumeStoring = unitsStoring * cargoItem.VolumePerUnit;
             double massStoring = unitsStoring * cargoItem.MassPerUnit;
             
-            if(store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
-                store.CurrentStoreInUnits[cargoItem.ID] += unitsStoring;
-            else
+            if(!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
+            {
                 store.CurrentStoreInUnits.Add(cargoItem.ID, unitsStoring);
+                store.Cargoables.Add(cargoItem.ID, cargoItem);
+            }
+            else
+                store.CurrentStoreInUnits[cargoItem.ID] += unitsStoring;
             
             store.FreeVolume -= volumeStoring;
             TotalStoredMass += massStoring;
@@ -257,10 +263,13 @@ namespace Pulsar4X.ECSLib
             double totalVolume = volumePerUnit * count;
             TypeStore store = TypeStores[cargoItem.CargoTypeID];
 
-            int amountToAdd = (int)(Math.Min(totalVolume, store.FreeVolume) / cargoItem.MassPerUnit);
+            int amountToAdd = (int)(Math.Min(totalVolume, store.FreeVolume) / cargoItem.VolumePerUnit);
             
             if(!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
+            {
                 store.CurrentStoreInUnits.Add(cargoItem.ID, amountToAdd);
+                store.Cargoables.Add(cargoItem.ID, cargoItem);
+            }
             else
                 store.CurrentStoreInUnits[cargoItem.ID] += amountToAdd;
 
@@ -296,12 +305,16 @@ namespace Pulsar4X.ECSLib
             int amountInStore = store.CurrentStoreInUnits[cargoItem.ID];
             int amountToRemove = Math.Min(count, amountInStore);
             
-            
             store.CurrentStoreInUnits[cargoItem.ID] -= amountToRemove;
-
             store.FreeVolume += amountToRemove * volumePerUnit;
             TotalStoredMass -= amountToRemove * cargoItem.MassPerUnit;
 
+            if (store.CurrentStoreInUnits[cargoItem.ID] == 0)
+            {
+                store.CurrentStoreInUnits.Remove(cargoItem.ID);
+                store.Cargoables.Remove(cargoItem.ID);
+            }
+            
             return amountToRemove;
         }
 
@@ -378,7 +391,7 @@ namespace Pulsar4X.ECSLib
         public double MaxVolume;
         public double FreeVolume;
         public Dictionary<Guid,int> CurrentStoreInUnits = new Dictionary<Guid, int>();
-
+        public Dictionary<Guid, ICargoable> Cargoables =  new Dictionary<Guid, ICargoable>();
         public TypeStore(double maxVolume)
         {
             MaxVolume = maxVolume;
@@ -407,6 +420,7 @@ namespace Pulsar4X.ECSLib
             TypeStore clone = new TypeStore(MaxVolume);
             clone.FreeVolume = FreeVolume;
             clone.CurrentStoreInUnits = new Dictionary<Guid, int>(CurrentStoreInUnits);
+            clone.Cargoables = new Dictionary<Guid, ICargoable>(Cargoables);
             return clone;
         }
 
