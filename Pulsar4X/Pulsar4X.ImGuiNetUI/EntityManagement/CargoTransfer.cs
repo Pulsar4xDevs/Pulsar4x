@@ -21,10 +21,15 @@ namespace Pulsar4X.SDL2UI
             _entityState = entity;
 
             _volStorageDB = entity.Entity.GetDataBlob<VolumeStorageDB>();
-
+            _entityState.Entity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulsesOnSystemDateChangedEvent;
             Update();
         }
-        
+
+        private void ManagerSubpulsesOnSystemDateChangedEvent(DateTime newdate)
+        {
+            Update();
+        }
+
 
         public void Update()
         {
@@ -45,7 +50,7 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-
+        
         public void Display()
         {
             var width = ImGui.GetWindowWidth() * 0.5f;
@@ -139,6 +144,7 @@ namespace Pulsar4X.SDL2UI
             _entityState = entity;
             _volStorageDB = entity.Entity.GetDataBlob<VolumeStorageDB>();
             HeadersIsOpenDict = headersOpenDict;
+            
             Update();
         }
         
@@ -325,6 +331,7 @@ namespace Pulsar4X.SDL2UI
         {
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             ClickedEntityIsPrimary = false;
+            
         }
         
         public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
@@ -352,6 +359,13 @@ namespace Pulsar4X.SDL2UI
             return instance;
         }
 
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+            if(_cargoList1!= null) 
+                _cargoList1.Update();
+            if(_cargoList2 != null) 
+                _cargoList2.Update();
+        }
 
         void HardRefresh()
         {

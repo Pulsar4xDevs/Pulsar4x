@@ -403,16 +403,16 @@ namespace Pulsar4X.Tests
             testEntity.SetDataBlob(new PositionDB(0, 0, 0, Guid.Empty), EntityManager.GetTypeIndex<PositionDB>());
 
             Assert.True(testEntity.HasDataBlob<OrbitDB>(), "This entity should have an OrbitDB");
-            Assert.False(testEntity.HasDataBlob<CargoStorageDB>(), "This entity should NOT have a CargoStorageDB");
+            Assert.False(testEntity.HasDataBlob<VolumeStorageDB>(), "This entity should NOT have a VolumeStorageDB");
 
             int typeIndex_OrbitDB;
             Assert.True(EntityManager.TryGetTypeIndex(typeof(OrbitDB), out typeIndex_OrbitDB), "We should be able to find the type index for OrbitDB");
 
             int typeIndex_CargoStorageDB;
-            Assert.True(EntityManager.TryGetTypeIndex(typeof(CargoStorageDB), out typeIndex_CargoStorageDB), "We should be able to find the type index for CargoStorageDB");
+            Assert.True(EntityManager.TryGetTypeIndex(typeof(VolumeStorageDB), out typeIndex_CargoStorageDB), "We should be able to find the type index for CargoStorageDB");
 
             Assert.True(testEntity.HasDataBlob<OrbitDB>(), "This entity should have an OrbitDB");
-            Assert.False(testEntity.HasDataBlob<CargoStorageDB>(), "This entity should NOT have a CargoStorageDB");
+            Assert.False(testEntity.HasDataBlob<VolumeStorageDB>(), "This entity should NOT have a CargoStorageDB");
 
             Assert.True(testEntity.HasDataBlob(typeIndex_OrbitDB), "This entity should have an OrbitDB by index");
             Assert.False(testEntity.HasDataBlob(typeIndex_CargoStorageDB), "This entity should NOT have a CargoStorageDB by index" );

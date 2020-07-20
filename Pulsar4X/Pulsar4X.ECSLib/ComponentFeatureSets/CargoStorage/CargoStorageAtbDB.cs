@@ -172,9 +172,9 @@ namespace Pulsar4X.ECSLib
         internal double AddRemoveCargoByVolume(ICargoable cargoItem, double volume)
         {
             //check we're actualy capable of 
-            var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
             if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
             {
+                var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
                 string errString = "Can't add or remove " + cargoItem.Name + " because this entity cannot even store " + type.Name + " types of cargo";
                 StaticRefLib.EventLog.AddPlayerEntityErrorEvent(OwningEntity, errString);
                 return 0;
@@ -211,9 +211,10 @@ namespace Pulsar4X.ECSLib
         internal double AddRemoveCargoByMass(ICargoable cargoItem, double mass)
         {
             //check we're actualy capable of 
-            var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
+            
             if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
             {
+                var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
                 string errString = "Can't add or remove " + cargoItem.Name + " because this entity cannot even store " + type.Name + " types of cargo";
                 StaticRefLib.EventLog.AddPlayerEntityErrorEvent(OwningEntity, errString);
                 return 0;
@@ -251,9 +252,10 @@ namespace Pulsar4X.ECSLib
         internal int AddCargoByUnit(ICargoable cargoItem, int count)
         {
             //check we're actualy capable of 
-            var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
+            
             if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
             {
+                var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
                 string errString = "Can't add or remove " + cargoItem.Name + " because this entity cannot even store " + type.Name + " types of cargo";
                 StaticRefLib.EventLog.AddPlayerEntityErrorEvent(OwningEntity, errString);
                 return 0;
@@ -288,9 +290,9 @@ namespace Pulsar4X.ECSLib
         internal int RemoveCargoByUnit(ICargoable cargoItem, int count)
         {
             //check we're actualy capable of 
-            var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
             if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
             {
+                var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
                 string errString = "Can't add or remove " + cargoItem.Name + " because this entity cannot even store " + type.Name + " types of cargo";
                 StaticRefLib.EventLog.AddPlayerEntityErrorEvent(OwningEntity, errString);
                 return 0;
@@ -335,6 +337,16 @@ namespace Pulsar4X.ECSLib
                 return 0;
 
             return TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID] * cargoItem.MassPerUnit;
+        }
+
+        public double GetUnitsStored(ICargoable cargoItem)
+        {
+            if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
+                return 0;
+            if (!TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
+                return 0;
+
+            return TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID];
         }
 
         /// <summary>
