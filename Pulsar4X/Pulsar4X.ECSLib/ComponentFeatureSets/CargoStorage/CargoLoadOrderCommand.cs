@@ -23,19 +23,7 @@ namespace Pulsar4X.ECSLib
         Entity factionEntity;
         [JsonIgnore]
         Entity sendToEntity;
-
-        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(Guid ID, int amount)> itemsToMove )
-        {
-            var cmd = new CargoXferOrder()
-            {
-                RequestingFactionGuid = faction.Guid,
-                EntityCommandingGuid = cargoFromEntity.Guid,
-                CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                SendCargoToEntityGuid = cargoToEntity.Guid,
-                ItemsGuidsToTransfer = itemsToMove
-            };
-            game.OrderHandler.HandleOrder(cmd);
-        }
+        
         public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, int amount)> itemsToMove )
         {
             List<(Guid item,int amount)> itemGuidAmounts = new List<(Guid, int)>();
@@ -49,7 +37,8 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = cargoFromEntity.Guid,
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 SendCargoToEntityGuid = cargoToEntity.Guid,
-                ItemsGuidsToTransfer = itemGuidAmounts
+                ItemsGuidsToTransfer = itemGuidAmounts,
+                ItemICargoablesToTransfer = itemsToMove
             };
             game.OrderHandler.HandleOrder(cmd);
         }
@@ -81,11 +70,7 @@ namespace Pulsar4X.ECSLib
 
         private void GetItemsToTransfer(StaticDataStore staticData)
         {
-            foreach (var tup in ItemsGuidsToTransfer)
-            {
-                //(ICargoable)game.StaticData.FindDataObjectUsingID(ItemToTransfer);
-                ItemICargoablesToTransfer.Add((staticData.GetICargoable(tup.ID), tup.amount));
-            }
+
         }
 
         internal override bool IsValidCommand(Game game)
@@ -94,7 +79,6 @@ namespace Pulsar4X.ECSLib
             {
                 if (game.GlobalManager.FindEntityByGuid(SendCargoToEntityGuid, out sendToEntity))
                 {
-                    GetItemsToTransfer(game.StaticData);//should I try catch this? nah it's unlikely to be bad here. 
                     return true;
                 }
             }

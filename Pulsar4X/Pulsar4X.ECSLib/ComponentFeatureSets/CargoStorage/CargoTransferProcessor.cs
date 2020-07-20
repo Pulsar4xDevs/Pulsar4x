@@ -45,18 +45,19 @@ namespace Pulsar4X.ECSLib
                 var fromCargoTypeStore = transferDB.CargoFromDB.TypeStores[cargoTypeID]; //reference to the cargoType store we're pulling from.
                 var fromCargoItemAndAmount = fromCargoTypeStore.CurrentStoreInUnits; //reference to dictionary we want to pull cargo from. 
 
-                double totalweightToTransfer = itemMassPerUnit * amountToXfer;
-                double weightToTransferThisTick = Math.Min(totalweightToTransfer, transferDB.TransferRateInKG * deltaSeconds); //only the amount that can be transfered in this timeframe. 
+                //the transfer speed is mass based, not unit based. 
+                double totalMassToTransfer = itemMassPerUnit * amountToXfer;
+                double massToTransferThisTick = Math.Min(totalMassToTransfer, transferDB.TransferRateInKG * deltaSeconds); //only the amount that can be transfered in this timeframe. 
 
-                int countToTransferThisTick = (int)(weightToTransferThisTick / itemMassPerUnit);
+                int countToTransferThisTick = (int)(massToTransferThisTick / itemMassPerUnit);
                 
                 var amountFrom = transferDB.CargoFromDB.RemoveCargoByUnit(cargoItem, countToTransferThisTick);
                 var amountTo = transferDB.CargoToDB.AddCargoByUnit(cargoItem, countToTransferThisTick);
                 //TODO: this wont handle objects that have a larger unit mass than the availible transferRate
                 if(amountTo != amountFrom)
                     throw new Exception("something went wrong here");
-                
-                transferDB.ItemsLeftToTransfer[i] = (cargoItem, amountTo);
+                var newAmount = transferDB.ItemsLeftToTransfer[i].amount - amountTo;
+                transferDB.ItemsLeftToTransfer[i] = (cargoItem, newAmount);
             }
             
         }

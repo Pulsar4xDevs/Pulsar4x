@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
 using NUnit.Framework.Constraints;
 using Pulsar4X.ECSLib;
@@ -133,6 +134,7 @@ namespace Pulsar4X.SDL2UI
         VolumeStorageDB _volStorageDB;
         Dictionary<Guid, TypeStore> _stores = new Dictionary<Guid, TypeStore>();
         Dictionary<ICargoable, int> _cargoToMove = new Dictionary<ICargoable, int>();
+        
         //Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
         //public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
         public ICargoable selectedCargo;
@@ -168,14 +170,14 @@ namespace Pulsar4X.SDL2UI
             _stores = newDict;
         }
 
-        internal List<(Guid,int)> GetAllToMoveOut()
+        internal List<(ICargoable,int)> GetAllToMoveOut()
         {
-            List<(Guid,int)> listToMove = new List<(Guid,int)>();
+            List<(ICargoable,int)> listToMove = new List<(ICargoable,int)>();
 
             foreach (var item in _cargoToMove)
             {
                 if(item.Value < 0)
-                    listToMove.Add((item.Key.ID, item.Value));
+                    listToMove.Add((item.Key, item.Value * -1));
             }
 
             return listToMove; 
@@ -207,9 +209,9 @@ namespace Pulsar4X.SDL2UI
             if (_stores.ContainsKey(typeID))
             {
                 ICargoable cargoitem = _stores[typeID].Cargoables[cargoID];
-                var massStored = cargoitem.MassPerUnit * _stores[typeID].CurrentStoreInUnits[cargoID];
-                var massToMove = _cargoToMove[cargoitem];
-                amount = massStored + massToMove;
+                var unitsStored = _volStorageDB.GetUnitsStored(cargoitem);
+                var unitsToMove = _cargoToMove[cargoitem];
+                amount = unitsStored + unitsToMove;
             }
 
             return amount;
@@ -266,10 +268,11 @@ namespace Pulsar4X.SDL2UI
                         }
 
                         var cname = cargoItem.Name;
-                        var volumeStored = cargoItemKvp.Value;
+                        var unitsStored = cargoItemKvp.Value;
                         var volumePerItem = cargoItem.VolumePerUnit;
-                        var massStored = cargoItemKvp.Value * cargoItem.MassPerUnit;
-                        var itemsStored = massStored / cargoItem.MassPerUnit;
+                        var volumeStored = _volStorageDB.GetVolumeStored(cargoItem);
+                        var massStored = _volStorageDB.GetMassStored(cargoItem);
+                        
                         bool isSelected = selectedCargo == cargoItem;
                         if (ImGui.Selectable(cname, isSelected))
                         {
@@ -278,7 +281,19 @@ namespace Pulsar4X.SDL2UI
                         }
 
                         ImGui.NextColumn();
-                        ImGui.Text(Stringify.Number(itemsStored));
+                        ImGui.Text(Stringify.Number(unitsStored));
+
+                        if (_cargoToMove.ContainsKey(cargoItem))
+                        {
+                            var unitsMoving = _cargoToMove[cargoItem];
+                            string text = Stringify.Number(unitsMoving);
+                            ImGui.SameLine();
+                            if(unitsMoving > 0)
+                                ImGui.TextColored(new Vector4(0.5f, 1, 0.5f, 1), text);
+                            else
+                                ImGui.TextColored(new Vector4(1f, 0.5f, 0.5f, 1), text);
+                        }
+                        
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Mass(massStored));
                         ImGui.NextColumn();
@@ -472,7 +487,6 @@ namespace Pulsar4X.SDL2UI
 
         private void MoveItems(int amount)
         {
-            var selectedCargoVM = SelectedCargoPannel.selectedCargo;
             var selectedCargoItem = SelectedCargoPannel.selectedCargo;
             SelectedCargoPannel.AddUICargoIn(selectedCargoItem, -amount);
             UnselectedCargoPannel.AddUICargoIn(selectedCargoItem, amount);
