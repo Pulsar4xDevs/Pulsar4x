@@ -49,11 +49,13 @@ namespace Pulsar4X.ECSLib
                 double totalMassToTransfer = itemMassPerUnit * amountToXfer;
                 double massToTransferThisTick = Math.Min(totalMassToTransfer, transferDB.TransferRateInKG * deltaSeconds); //only the amount that can be transfered in this timeframe. 
 
+                //TODO: this wont handle objects that have a larger unit mass than the availible transferRate,
+                //but maybe that makes for a game mechanic
                 int countToTransferThisTick = (int)(massToTransferThisTick / itemMassPerUnit);
                 
                 var amountFrom = transferDB.CargoFromDB.RemoveCargoByUnit(cargoItem, countToTransferThisTick);
                 var amountTo = transferDB.CargoToDB.AddCargoByUnit(cargoItem, countToTransferThisTick);
-                //TODO: this wont handle objects that have a larger unit mass than the availible transferRate
+                
                 if(amountTo != amountFrom)
                     throw new Exception("something went wrong here");
                 var newAmount = transferDB.ItemsLeftToTransfer[i].amount - amountTo;
@@ -64,56 +66,12 @@ namespace Pulsar4X.ECSLib
 
         internal static void FirstRun(Entity entity)
         {
-            CargoTransferDB datablob = entity.GetDataBlob<CargoTransferDB>();
-
-            double? dv_mps;
-            if (entity.HasDataBlob<OrbitDB>() && datablob.CargoToEntity.HasDataBlob<OrbitDB>())
-                dv_mps = CalcDVDifference_m(entity, datablob.CargoToEntity);
-            else
-            {
-                OrbitDB orbitDB;
-                if (entity.HasDataBlob<ColonyInfoDB>())
-                {
-                    orbitDB = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<OrbitDB>();
-                }
-                else //if (datablob.CargoToEntity.HasDataBlob<ColonyInfoDB>())
-                {
-                    orbitDB = datablob.CargoToEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<OrbitDB>();
-                }
-
-                dv_mps = OrbitMath.MeanOrbitalVelocityInm(orbitDB);
-            }
-
-            if (dv_mps != null)
-                datablob.TransferRateInKG = CalcTransferRate((double)dv_mps, datablob.CargoFromDB, datablob.CargoToDB);
+            CargoTransferDB transferDB = entity.GetDataBlob<CargoTransferDB>();
+            double dv_mps = CalcDVDifference_m(entity, transferDB.CargoToEntity);    
+            var rate = CalcTransferRate(dv_mps, transferDB.CargoFromDB, transferDB.CargoToDB);
+            transferDB.TransferRateInKG = rate;
         }
-
-        /// <summary>
-        /// Calculates the DVD ifference.
-        /// </summary>
-        /// <returns>The delaV Difference in Km/s, null if not in imediate orbit</returns>
-        public static double? CalcDVDifferenceKmPerSecond(OrbitDB orbitDBFrom, OrbitDB orbitDBTo)
-        {
-            Entity toEntity = orbitDBTo.OwningEntity;
-            double? dv = null;
-            if (orbitDBFrom.Parent == toEntity) //Cargo going up the gravity well
-            {
-                dv = OrbitMath.MeanOrbitalVelocityInAU(orbitDBFrom);
-            }
-            else if (orbitDBFrom.Children.Contains(toEntity)) //Cargo going down the gravity well
-            {
-                dv = OrbitMath.MeanOrbitalVelocityInAU(orbitDBTo);
-            }
-            else if (orbitDBFrom.Parent == toEntity.GetDataBlob<OrbitDB>().Parent) //cargo going between objects orbiting the same body
-            {
-                dv = Math.Abs(OrbitMath.MeanOrbitalVelocityInAU(orbitDBFrom) - OrbitMath.MeanOrbitalVelocityInAU(orbitDBTo));
-            }
-
-            if (dv == null)
-                return dv;
-            else
-                return Distance.AuToKm((double)dv);
-        }
+        
 
         public static double CalcDVDifference_m(Entity entity1, Entity entity2)
         {

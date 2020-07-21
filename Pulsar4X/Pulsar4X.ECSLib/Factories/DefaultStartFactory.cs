@@ -249,8 +249,10 @@ namespace Pulsar4X.ECSLib
             
             EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
             EntityManipulation.AddComponentToEntity(colonyEntity, ShipYard(factionEntity));
+            EntityManipulation.AddComponentToEntity(colonyEntity, _ordnanceStore, 10);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
+            var earthCargo = colonyEntity.GetDataBlob<VolumeStorageDB>();
 
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             var rawSorium = NameLookup.GetMineralSD(game, "Sorium");
@@ -263,7 +265,8 @@ namespace Pulsar4X.ECSLib
             
             var stainless = NameLookup.GetMaterialSD(game, "Stainless Steel");
             colonyEntity.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(iron, 1000);
-            
+            colonyEntity.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(_missile, 100);
+            colonyEntity.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(_merlin, 5);
             
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
             
@@ -290,7 +293,9 @@ namespace Pulsar4X.ECSLib
             var methalox = NameLookup.GetMaterialSD(game, "Methalox");
             var hydrolox = NameLookup.GetMaterialSD(game, "Hydrolox");
 
-
+            earthCargo.AddCargoByUnit(rp1, 10000);
+            earthCargo.AddCargoByUnit(methalox, 10000);
+            earthCargo.AddCargoByUnit(hydrolox, 10000);
    
             gunShip0.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
             gunShip1.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);

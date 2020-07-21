@@ -230,10 +230,8 @@ namespace Pulsar4X.SDL2UI
 
         public void Display()
         {
-
-            var width = ImGui.GetWindowWidth() * 0.5f;
-
-            ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true);
+            
+            ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(260, 200), true);
             ImGui.Text(_entityState.Name);
             ImGui.Text("Transfer Rate: " + _volStorageDB.TransferRateInKgHr);
             ImGui.Text("At DeltaV < " + Stringify.Velocity(_volStorageDB.TransferRangeDv_mps));
@@ -432,8 +430,12 @@ namespace Pulsar4X.SDL2UI
 
         void CalcTransferRate()
         {
+            
             double? dvDif;
             OrbitDB leftOrbit;
+            //TODO: the logic here has places where it's going to break, needs fixing. 
+            //I think I'm checking if it's a colony here?
+            //but I'm not checking for NewtonMoveDB or OrbitUpdateOftenDB
             if (!_selectedEntityLeft.Entity.HasDataBlob<OrbitDB>()) 
             {
                 dvDif = OrbitMath.MeanOrbitalVelocityInm(_selectedEntityRight.Entity.GetDataBlob<OrbitDB>());
@@ -441,7 +443,6 @@ namespace Pulsar4X.SDL2UI
             else
             {
                 leftOrbit = _selectedEntityLeft.Entity.GetDataBlob<OrbitDB>();
-                //dvDif = CargoTransferProcessor.CalcDVDifferenceKmPerSecond(leftOrbit, _selectedEntityRight.Entity.GetDataBlob<OrbitDB>()); 
                 dvDif = CargoTransferProcessor.CalcDVDifference_m(_selectedEntityLeft.Entity, _selectedEntityRight.Entity);
             }
 
