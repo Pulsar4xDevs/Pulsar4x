@@ -134,6 +134,9 @@ namespace Pulsar4X.SDL2UI
         VolumeStorageDB _volStorageDB;
         Dictionary<Guid, TypeStore> _stores = new Dictionary<Guid, TypeStore>();
         Dictionary<ICargoable, int> _cargoToMove = new Dictionary<ICargoable, int>();
+        Dictionary<ICargoable, int> _cargoToMoveUI = new Dictionary<ICargoable, int>();
+        Dictionary<ICargoable, int> _cargoToMoveOrders = new Dictionary<ICargoable, int>();
+        Dictionary<ICargoable, int> _cargoToMoveDatablob = new Dictionary<ICargoable, int>();
         
         //Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
         //public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
@@ -166,21 +169,61 @@ namespace Pulsar4X.SDL2UI
                     newDict.Add(kvp.Key, kvp.Value.Clone());
                 }
             }
-
             _stores = newDict;
+            
+            
+            if (_entityState.Entity.HasDataBlob<CargoTransferDB>())
+            {
+                var itemsToXfer = _entityState.Entity.GetDataBlob<CargoTransferDB>().GetItemsToTransfer();
+                var newxferDict = new Dictionary<ICargoable, int>();
+                foreach (var tuple in itemsToXfer)
+                {
+                    newxferDict.Add(tuple.item, tuple.unitCount);
+                }
+                _cargoToMoveDatablob = newxferDict;
+            }
+
+            if (_entityState.Entity.HasDataBlob<OrderableDB>())
+            {
+                var orders = _entityState.Entity.GetDataBlob<OrderableDB>().GetActionList();
+                var newxferDict = new Dictionary<ICargoable, int>(); 
+                foreach (var order in orders)
+                {
+                    if (order is CargoXferOrder)
+                    {
+                        var xferOrder = (CargoXferOrder)order;
+                        foreach (var tuple in xferOrder.ItemICargoablesToTransfer)
+                        {
+                            if (!newxferDict.ContainsKey(tuple.item))
+                                newxferDict.Add(tuple.item, tuple.amount);
+                            else
+                                newxferDict[tuple.item] += tuple.amount;
+                        }
+                    }
+                }
+
+                _cargoToMoveOrders = newxferDict;
+            }
+            UpdateTotalMoving();
+
         }
 
         internal List<(ICargoable,int)> GetAllToMoveOut()
         {
             List<(ICargoable,int)> listToMove = new List<(ICargoable,int)>();
 
-            foreach (var item in _cargoToMove)
+            foreach (var item in _cargoToMoveUI)
             {
                 if(item.Value < 0)
                     listToMove.Add((item.Key, item.Value * -1));
             }
-
             return listToMove; 
+        }
+
+        internal void ClearUINumbers()
+        {
+            _cargoToMoveUI = new Dictionary<ICargoable, int>();
+            Update();
         }
 
         internal bool CanStore(Guid cargoTypeID)
@@ -191,33 +234,41 @@ namespace Pulsar4X.SDL2UI
 
         internal void AddUICargoIn(ICargoable cargoItem, int itemCount)
         {
-            ICargoable store;
-            if (_stores.ContainsKey(cargoItem.CargoTypeID))
-            {
-                if(!_cargoToMove.ContainsKey(cargoItem))
-                    _cargoToMove.Add(cargoItem, itemCount);
-                else
-                    _cargoToMove[cargoItem] += itemCount;
-            }
+            if(!_cargoToMoveUI.ContainsKey(cargoItem))
+                _cargoToMoveUI.Add(cargoItem, itemCount);
+            else
+                _cargoToMoveUI[cargoItem] += itemCount;
+            UpdateTotalMoving();
 
         }
-        
 
-        internal double AmountMassInStoreAndMove(Guid typeID, Guid cargoID)
+        public void UpdateTotalMoving()
         {
-            double amount = 0;
-            if (_stores.ContainsKey(typeID))
+            var newDict = new Dictionary<ICargoable, int>();
+            foreach (var kvp in _cargoToMoveDatablob)
             {
-                ICargoable cargoitem = _stores[typeID].Cargoables[cargoID];
-                var unitsStored = _volStorageDB.GetUnitsStored(cargoitem);
-                var unitsToMove = _cargoToMove[cargoitem];
-                amount = unitsStored + unitsToMove;
+                if(!newDict.ContainsKey(kvp.Key))
+                    newDict.Add(kvp.Key, kvp.Value);
+                else
+                    newDict[kvp.Key] += kvp.Value;
             }
-
-            return amount;
+            foreach (var kvp in _cargoToMoveOrders)
+            {
+                if(!newDict.ContainsKey(kvp.Key))
+                    newDict.Add(kvp.Key, kvp.Value);
+                else
+                    newDict[kvp.Key] += kvp.Value;
+            }
+            foreach (var kvp in _cargoToMoveUI)
+            {
+                if(!newDict.ContainsKey(kvp.Key))
+                    newDict.Add(kvp.Key, kvp.Value);
+                else
+                    newDict[kvp.Key] += kvp.Value;
+            }
+            _cargoToMove = newDict;
         }
 
-        
 
         internal bool HasCargoInStore(ICargoable cargoItem)
         {
@@ -280,16 +331,35 @@ namespace Pulsar4X.SDL2UI
 
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Number(unitsStored));
-
+                        
+                        
                         if (_cargoToMove.ContainsKey(cargoItem))
                         {
                             var unitsMoving = _cargoToMove[cargoItem];
                             string text = Stringify.Number(unitsMoving);
                             ImGui.SameLine();
+
+                            float blue = 0f;
+                            if (_cargoToMoveDatablob.ContainsKey(cargoItem))
+                            {
+                                if (_cargoToMoveDatablob[cargoItem] != 0)
+                                    blue = 0.25f;
+                            }
+                            if (_cargoToMoveOrders.ContainsKey(cargoItem))
+                            {
+                                if (_cargoToMoveOrders[cargoItem] != 0)
+                                    blue = 0.5f;
+                            }
+                            if (_cargoToMoveUI.ContainsKey(cargoItem))
+                            {
+                                if (_cargoToMoveUI[cargoItem] != 0)
+                                    blue = 0.75f;
+                            }
+
                             if(unitsMoving > 0)
-                                ImGui.TextColored(new Vector4(0.5f, 1, 0.5f, 1), text);
+                                ImGui.TextColored(new Vector4(0.5f, 1, blue, 1), text);
                             else
-                                ImGui.TextColored(new Vector4(1f, 0.5f, 0.5f, 1), text);
+                                ImGui.TextColored(new Vector4(1f, 0.5f, blue, 1), text);
                         }
                         
                         ImGui.NextColumn();
@@ -374,10 +444,13 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnSystemTickChange(DateTime newDate)
         {
-            if(_cargoList1!= null) 
-                _cargoList1.Update();
-            if(_cargoList2 != null) 
-                _cargoList2.Update();
+            if(IsActive) //lets not update unless the window is actualy being displayed.
+            {
+                if (_cargoList1 != null)
+                    _cargoList1.Update();
+                if (_cargoList2 != null)
+                    _cargoList2.Update();
+            }
         }
 
         void HardRefresh()
@@ -511,6 +584,9 @@ namespace Pulsar4X.SDL2UI
                 _selectedEntityRight.Entity,
                 _selectedEntityLeft.Entity,
                 CargoListRight.GetAllToMoveOut());
+            
+            CargoListLeft.ClearUINumbers();
+            CargoListRight.ClearUINumbers();
         }
 
 
