@@ -9,14 +9,7 @@ namespace Pulsar4X.SDL2UI
     public class SensorDraw : PulsarGuiWindow
     {
 
-        public class WaveDrawData
-        {
-            public int Count { get { return Points.Length; } }
-            public bool HasAtn = false;
-            public (Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)[] Points = new (Vector2, Vector2, Vector2, Vector2)[0];
-            public (bool drawSrc,bool drawAtn)[] IsWaveDrawn = new (bool, bool)[0];
-            public uint[] _receverColours;
-        }
+
         
         private EntityState _selectedEntitySate;
         private Entity _selectedEntity => _selectedEntitySate.Entity;
@@ -135,31 +128,31 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.BeginChild("stuff");
 
-                    BorderGroup.BeginBorder("Recevers:", borderColour);
+                    BorderGroup.Begin("Recevers:", borderColour);
                     DisplayWavInfo(_receverDat);
-                    BorderGroup.EndBoarder();
+                    BorderGroup.End();
 
                     if (_reflectDat != null)
                     {
-                        BorderGroup.BeginBorder("Reflectors:", borderColour);
+                        BorderGroup.Begin("Reflectors:", borderColour);
                         DisplayWavInfo(_reflectDat);
-                        BorderGroup.EndBoarder();
+                        BorderGroup.End();
 
                     }
 
                     if (_emmittrDat != null)
                     {
-                        BorderGroup.BeginBorder("Emmiters:", borderColour);
+                        BorderGroup.Begin("Emmiters:", borderColour);
                         DisplayWavInfo(_emmittrDat);
-                        BorderGroup.EndBoarder();
+                        BorderGroup.End();
 
                     }
 
                     if (_detectedDat != null)
                     {
-                        BorderGroup.BeginBorder("Detected:", borderColour);
+                        BorderGroup.Begin("Detected:", borderColour);
                         DisplayWavInfo(_detectedDat);
-                        BorderGroup.EndBoarder();
+                        BorderGroup.End();
                     }
 
                     ImGui.EndChild();
@@ -241,11 +234,11 @@ namespace Pulsar4X.SDL2UI
                             ResetBounds();
                     }
 
-                    ImGui.Text("MinWav: " + wavesArry.Points[i].p0 .X);
+                    ImGui.Text("MinWav: " + Stringify.DistanceSmall(wavesArry.Points[i].p0 .X));
                     ImGui.SameLine();
                     ImGui.Text("Magnitude: " + Stringify.Power(wavesArry.Points[i].p0.Y));
 
-                    ImGui.Text("AvgWav: " + wavesArry.Points[i].p1.X);
+                    ImGui.Text("AvgWav: " + Stringify.DistanceSmall(wavesArry.Points[i].p1.X));
                     
                     if(wavesArry.HasAtn)
                     {
@@ -260,7 +253,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("   "+Stringify.Power(wavesArry.Points[i].p1.Y));
                     }
                     
-                    ImGui.Text("MaxWav: " + wavesArry.Points[i].p2.X);
+                    ImGui.Text("MaxWav: " + Stringify.DistanceSmall(wavesArry.Points[i].p2.X));
                     ImGui.SameLine();
                     ImGui.Text("Magnitude: " + Stringify.Power(wavesArry.Points[i].p2.Y));
                 }
@@ -408,7 +401,7 @@ namespace Pulsar4X.SDL2UI
 
                 _reflectDat = MakeTargetWavDat(reflected, range);
                 _emmittrDat = MakeTargetWavDat(emitted, range);
-                //_attenuatedWaveForms =  SensorProcessorTools.AttenuatedForDistance(_targetSensorProfile, range);
+                _attenuatedWaveForms =  SensorProcessorTools.AttenuatedForDistance(_targetSensorProfile, range);
                 //_detectedDat = _selectedReceverAtb[0].
 
                 _targetDetectionQuality = new SensorProcessorTools.SensorReturnValues[_selectedReceverAtb.Length];
@@ -466,5 +459,14 @@ namespace Pulsar4X.SDL2UI
         {
             throw new NotImplementedException();
         }
+    }
+    
+    public class WaveDrawData
+    {
+        public int Count { get { return Points.Length; } }
+        public bool HasAtn = false;
+        public (Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)[] Points = new (Vector2, Vector2, Vector2, Vector2)[0];
+        public (bool drawSrc,bool drawAtn)[] IsWaveDrawn = new (bool, bool)[0];
+        public uint[] _receverColours;
     }
 }

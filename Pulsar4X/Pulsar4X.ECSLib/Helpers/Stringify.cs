@@ -74,14 +74,14 @@ namespace Pulsar4X.ECSLib
                     str = Thrust(amount * Math.Pow(10, (double)valueType.ValueSize), format);
                     break;
                 case ValueTypeStruct.ValueTypes.Number:
-                    str = Numer(amount * Math.Pow(10, (double)valueType.ValueSize), format);
+                    str = Number(amount * Math.Pow(10, (double)valueType.ValueSize), format);
                     break;
 
             }
 
             return str;
         }
-        public static string Numer(double number,  string format = "0.###")
+        public static string Number(double number,  string format = "0.###")
         {
 
             string stringCount = "0";
@@ -229,12 +229,60 @@ namespace Pulsar4X.ECSLib
                 stringDistance = len.ToString(format) + " Km";
             }
             
-            else { stringDistance = length_m.ToString(format) + " m"; }
+            else if (abslen > 0.1)
+            {
+                stringDistance = length_m.ToString(format) + " m";
+            }
+            else if (abslen > 0.001)
+            {
+                len = length_m * 100;
+                stringDistance = len.ToString(format + "cm");
+            }
+
+            else
+            {
+                len = length_m * 1000;
+                stringDistance = len.ToString(format + "mm");
+            }
 
             return stringDistance;
         }
 
+        public static string DistanceSmall(double length_nm,  string format = "0.###")
+        {
 
+            string stringDistance = "0 m";
+            double abslen = Math.Abs(length_nm);
+            double len;
+            if (abslen > 1.0e9)
+            {
+                len = length_nm * 1.0e-9;
+                stringDistance = len.ToString(format) + " m";
+            }
+            else if (abslen > 1.0e7)
+            {
+                len = length_nm * 1.0e-7;
+                stringDistance = len.ToString(format) + " cm";
+            }
+            else if (abslen > 1.0e6)
+            {
+                len = length_nm * 1.0e-6;
+                stringDistance = len.ToString(format) + " mm";
+            }
+            else if (abslen > 1.0e3)
+            {
+                len = length_nm * 0.001;
+                stringDistance = len.ToString(format) + " um";
+            }
+            
+            else 
+            {
+                stringDistance = length_nm.ToString(format) + " nm";
+            }
+
+
+            return stringDistance;
+        }
         public static string Velocity(double velocity_m, string format = "0.##")
         {
             string stringVelocity = " 0 m/s";

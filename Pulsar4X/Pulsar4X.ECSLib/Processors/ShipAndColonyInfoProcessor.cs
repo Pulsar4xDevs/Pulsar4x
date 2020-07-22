@@ -21,8 +21,8 @@ namespace Pulsar4X.ECSLib
             
             foreach (KeyValuePair<Guid, List<ComponentInstance>> instance in componentInstances.GetComponentsByDesigns())
             {                
-                var componentVolume = componentInstances.AllDesigns[instance.Key].Volume_m3;
-                var componentTonnage = componentInstances.AllDesigns[instance.Key].Mass;
+                var componentVolume = componentInstances.AllDesigns[instance.Key].VolumePerUnit;
+                var componentTonnage = componentInstances.AllDesigns[instance.Key].MassPerUnit;
                 
                 foreach (var componentInstance in instance.Value)
                 {
@@ -35,15 +35,15 @@ namespace Pulsar4X.ECSLib
             if (shipInfo.Tonnage != totalTonnage)
             {
                 shipInfo.Tonnage = totalTonnage;
-                if(shipEntity.HasDataBlob<NewtonThrustAbilityDB>())
+                if(shipEntity.HasDataBlob<WarpAbilityDB>())
                     ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(shipEntity);
             }
             shipInfo.InternalHTK = totalHTK;
             MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
-            mvDB.Mass = totalTonnage;
+            mvDB.MassDry = totalTonnage;
             mvDB.Volume_m3 = totalVolume;
-            mvDB.Density = MassVolumeDB.CalculateDensity(totalTonnage, totalVolume);
-            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius_Au(totalTonnage, mvDB.Density);
+            mvDB.Density_gcm = MassVolumeDB.CalculateDensity(totalTonnage, totalVolume);
+            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius_Au(totalTonnage, mvDB.Density_gcm);
             
         }
     }

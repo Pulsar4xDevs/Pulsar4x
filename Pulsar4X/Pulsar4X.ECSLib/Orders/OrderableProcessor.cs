@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace Pulsar4X.ECSLib
 {
     
-    public class OrderableProcessor : IHotloopProcessor
+    public class OrderableProcessor : IInstanceProcessor , IHotloopProcessor
     {
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
 
@@ -26,41 +26,25 @@ namespace Pulsar4X.ECSLib
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             OrderableDB orderableDB = entity.GetDataBlob<OrderableDB>();
-            ProcessOrderList(_game, orderableDB.ActionList);
+            DateTime atDateTime = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            orderableDB.ProcessOrderList(atDateTime);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
             List<Entity> entitysWithCargoTransfers = manager.GetAllEntitiesWithDataBlob<OrderableDB>();
+            
             foreach (var entity in entitysWithCargoTransfers)
             {
                 ProcessEntity(entity, deltaSeconds);
             }
         }
 
-        internal static void ProcessOrderList(Game game, List<EntityCommand> actionList)
+        internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
-            int mask = 1;
-
-            int i = 0;
-            while (i < actionList.Count)
-            {
-                var item = actionList[i];
-
-
-                if ((mask & item.ActionLanes) == item.ActionLanes) //bitwise and
-                {
-                    if (item.IsBlocking)
-                    {
-                        mask |= item.ActionLanes; //bitwise or
-                    }
-                    item.ActionCommand(game);
-                }
-                if (item.IsFinished())
-                    actionList.RemoveAt(i);
-                else
-                    i++;
-            }
+            OrderableDB orderableDB = entity.GetDataBlob<OrderableDB>();
+            
+            orderableDB.ProcessOrderList(atDateTime);
         }
     }
 }

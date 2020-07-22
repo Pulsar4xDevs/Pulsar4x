@@ -6,10 +6,10 @@ namespace Pulsar4X.ECSLib
     public abstract class EntityCommand
     {
         [JsonProperty]
-        internal Guid CmdID { get; set; } = Guid.NewGuid();
-        internal bool UseActionLanes = true;
-        internal abstract int ActionLanes { get;  }
-        internal abstract bool IsBlocking { get; }
+        public Guid CmdID { get; internal set; } = Guid.NewGuid();
+        public bool UseActionLanes = true;
+        public abstract int ActionLanes { get;  }
+        public abstract bool IsBlocking { get; }
 
         [JsonProperty]
         /// <summary>
@@ -29,7 +29,14 @@ namespace Pulsar4X.ECSLib
         /// Gets or sets the datetime this command was created by the player/client. 
         /// </summary>
         /// <value>The created date.</value>
-        internal DateTime CreatedDate{ get; set; }
+        public DateTime CreatedDate{ get; set; }
+
+        /// <summary>
+        /// This sets the datetime that the order should be actioned on (ie delayed from creation)
+        /// 
+        /// </summary>
+        [JsonProperty]
+        public DateTime ActionOnDate { get; set; }
 
         [JsonProperty]
         /// <summary>
@@ -37,7 +44,8 @@ namespace Pulsar4X.ECSLib
         /// this may be needed by the client to ensure it stays in synch with the server. 
         /// </summary>
         /// <value>The actioned on date.</value>
-        internal DateTime ActionedOnDate{ get; set; }
+        public DateTime ActionedOnDate { get; set; }
+
 
         internal abstract Entity EntityCommanding { get; }
 
@@ -50,10 +58,10 @@ namespace Pulsar4X.ECSLib
         /// Actions the command.
         /// </summary>
         /// <param name="game">Game.</param>
-        internal abstract void ActionCommand(Game game);
+        internal abstract void ActionCommand(DateTime atDateTime);
 
         public bool IsRunning { get; protected set; } = false;
-        internal abstract bool IsFinished(); 
+        public abstract bool IsFinished(); 
     }
 
     public static class CommandHelpers
@@ -103,9 +111,9 @@ namespace Pulsar4X.ECSLib
     public class RenameCommand : EntityCommand
     {
         
-        internal override int ActionLanes => 0;
+        public override int ActionLanes => 0;
 
-        internal override bool IsBlocking => false;
+        public override bool IsBlocking => false;
         Entity _factionEntity;
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
@@ -127,14 +135,14 @@ namespace Pulsar4X.ECSLib
             game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand(DateTime atDateTime)
         {
             var namedb = _entityCommanding.GetDataBlob<NameDB>();
             namedb.SetName(_factionEntity.Guid, NewName);
             _isFinished = true;
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             return _isFinished;
         }

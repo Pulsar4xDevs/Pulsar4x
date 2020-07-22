@@ -51,7 +51,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = mineralCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "RandomMineral_" + i.ToString(),
                     Description = "A random mineral."
                 };
@@ -65,7 +65,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = otherCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "AThing_" + i.ToString()
                 };
                 otherJunk.Add(randomCargoThing);
@@ -103,7 +103,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = materialCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "RandomMaterial_" + i.ToString(),
                     Description = "A random material."
                 };
@@ -117,7 +117,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = otherCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "AThing_" + i.ToString()
                 };
                 otherJunk.Add(randomCargoThing);
@@ -155,7 +155,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = materialCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "RandomMaterial_" + i.ToString(),
                     Description = "A random material."
                 };
@@ -169,7 +169,7 @@ namespace Pulsar4X.Tests
                 {
                     ID = Guid.NewGuid(),
                     CargoTypeID = otherCargoTypeId,
-                    Mass = 1000,
+                    MassPerUnit = 1000,
                     Name = "AThing_" + i.ToString()
                 };
                 otherJunk.Add(randomCargoThing);
@@ -196,117 +196,45 @@ namespace Pulsar4X.Tests
             Assert.IsNull(library.GetAny(Guid.NewGuid()));
         }
 
+    
+
+
+
+
+
+
         [Test]
-        public void StorageSpaceProcessor_When_AskedToCheckIfItHasACargoTypeThatItDoesnotHave_Should_ReturnFalse()
+        public void VolumeStorage_BasicChecks()
         {
             var cookies = SetupCookieTradeGood();
 
-            var cookiePile = new CargoStorageDB();
+            var cookiePile = new VolumeStorageDB();
+            cookiePile.TypeStores.Add(cookies.CargoTypeID, new TypeStore(100));
+            var added = cookiePile.AddCargoByUnit(cookies, 99);
+            
+            
+            var storedCookies = cookiePile.GetUnitsStored(cookies);
+            var storedCookieMass = cookiePile.GetMassStored(cookies);
+            var storedCookieVolume = cookiePile.GetVolumeStored(cookies);
 
-            var cookieCheck = new Dictionary<ICargoable, int>
-            {
-                { cookies, 1 }
-            };
 
-            var hasCookies = StorageSpaceProcessor.HasRequiredItems(cookiePile, cookieCheck);
+            Assert.AreEqual( 99, added);
+            Assert.AreEqual( 99, storedCookies);
+            Assert.AreEqual(99, storedCookieMass);
+            Assert.AreEqual(99, storedCookieVolume);
+            
+            var addMore = cookiePile.AddCargoByUnit(cookies, 100);
+            var storedCookies2 = cookiePile.GetUnitsStored(cookies);
+            var storedCookieMass2 = cookiePile.GetMassStored(cookies);
+            var storedCookieVolume2 = cookiePile.GetVolumeStored(cookies);
+            Assert.AreEqual(1, addMore);
+            Assert.AreEqual( 100, storedCookies2);
+            Assert.AreEqual(100, storedCookieMass2);
+            Assert.AreEqual(100, storedCookieVolume2);
 
-            Assert.IsFalse(hasCookies);
         }
 
-        [Test]
-        public void StorageSpaceProcessor_When_AskedToCheckIfItHasASpecificItemThatItDoesnotHave_Should_ReturnFalse()
-        {
-            var cookies = SetupCookieTradeGood();
-            var biscuits = SetupCookieTradeGood();
-            biscuits.CargoTypeID = cookies.CargoTypeID;
 
-            var cookiePile = new CargoStorageDB();
-            cookiePile.StoredCargoTypes.Add(cookies.CargoTypeID, new CargoTypeStore() { MaxCapacityKg = 9999999999999, FreeCapacityKg = 9999999999999 });
-            StorageSpaceProcessor.AddCargo(cookiePile, biscuits, 1);
-
-            var cookieCheck = new Dictionary<ICargoable, int>
-            {
-                { cookies, 1 }
-            };
-
-            var hasCookies = StorageSpaceProcessor.HasRequiredItems(cookiePile, cookieCheck);
-
-            Assert.IsFalse(hasCookies);
-        }
-
-        [Test]
-        public void StorageSpaceProcessor_When_AskedToCheckIfItHasCargoThatItDoesnotHaveEnoughOf_Should_ReturnFalse()
-        {
-            var cookies = SetupCookieTradeGood();
-
-            var cookiePile = new CargoStorageDB();
-            cookiePile.StoredCargoTypes.Add(cookies.CargoTypeID, new CargoTypeStore() { MaxCapacityKg = 9999999999999, FreeCapacityKg = 9999999999999 });
-            StorageSpaceProcessor.AddCargo(cookiePile, cookies, 6);
-
-            var cookieCheck = new Dictionary<ICargoable, int>
-            {
-                { cookies, 7 }
-            };
-            var hasCookies = StorageSpaceProcessor.HasRequiredItems(cookiePile, cookieCheck);
-            Assert.IsFalse(hasCookies);
-        }
-
-        [Test]
-        public void StorageSpaceProcessor_When_AskedToCheckIfItHasCargoThatItHasExactlyEnoughOf_Should_ReturnTrue()
-        {
-            var cookies = SetupCookieTradeGood();
-
-            var cookiePile = new CargoStorageDB();
-            cookiePile.StoredCargoTypes.Add(cookies.CargoTypeID, new CargoTypeStore() { MaxCapacityKg = 9999999999999, FreeCapacityKg = 9999999999999 });
-            StorageSpaceProcessor.AddCargo(cookiePile, cookies, 7);
-
-            var cookieCheck = new Dictionary<ICargoable, int>
-            {
-                { cookies, 7 }
-            };
-            var hasCookies = StorageSpaceProcessor.HasRequiredItems(cookiePile, cookieCheck);
-            Assert.IsTrue(hasCookies);
-        }
-
-        [Test]
-        public void StorageSpaceProcessor_When_AskedToCheckIfItHasCargoThatItHasMoreTHanEnoughOf_Should_ReturnTrue()
-        {
-            var cookies = SetupCookieTradeGood();
-
-            var cookiePile = new CargoStorageDB();
-            cookiePile.StoredCargoTypes.Add(cookies.CargoTypeID, new CargoTypeStore() { MaxCapacityKg = 9999999999999, FreeCapacityKg = 9999999999999 });
-            StorageSpaceProcessor.AddCargo(cookiePile, cookies, 99);
-
-            var cookieCheck = new Dictionary<ICargoable, int>
-            {
-                { cookies, 7 }
-            };
-            var hasCookies = StorageSpaceProcessor.HasRequiredItems(cookiePile, cookieCheck);
-            Assert.IsTrue(hasCookies);
-        }
-
-        [Test]
-        public void StorageSpaceProcessor_When_AskedToCheckAvailableStorageSpace_Should_ReturnCorrectAnswerForTheRequestedCargoItem()
-        {
-            var rocks = SetupRockTradeGood();
-            var library = new CargoDefinitionsLibrary();
-            library.LoadOtherDefinitions(new List<ICargoable>() { rocks });
-
-            var rockPile = new CargoStorageDB();
-            rockPile.StoredCargoTypes.Add(rocks.CargoTypeID, new CargoTypeStore() { MaxCapacityKg = 35007, FreeCapacityKg = 32154 });
-            rockPile.StoredCargoTypes.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99998, FreeCapacityKg = 99997 });
-            rockPile.StoredCargoTypes.Add(Guid.NewGuid(), new CargoTypeStore() { MaxCapacityKg = 99996, FreeCapacityKg = 99995 });
-
-            var canStoreThisManyItems = StorageSpaceProcessor.GetAvailableSpace(rockPile, rocks.ID, library);
-            Assert.AreEqual(3215, canStoreThisManyItems.FreeCapacityItem);
-            Assert.AreEqual(32154, canStoreThisManyItems.FreeCapacityKg);
-
-            StorageSpaceProcessor.AddCargo(rockPile, rocks, 215);
-
-            canStoreThisManyItems = StorageSpaceProcessor.GetAvailableSpace(rockPile, rocks.ID, library);
-            Assert.AreEqual(3000, canStoreThisManyItems.FreeCapacityItem);
-            Assert.AreEqual(30004, canStoreThisManyItems.FreeCapacityKg);
-        }
 
         private ProcessedMaterialSD SetupCookieTradeGood()
         {
@@ -316,7 +244,8 @@ namespace Pulsar4X.Tests
                 Description = "Tastes like carpal tunnel and time.",
                 ID = Guid.NewGuid(),
                 CargoTypeID = Guid.NewGuid(),
-                Mass = 1
+                MassPerUnit = 1,
+                VolumePerUnit = 1//these are some really really big cookies. 
             };
 
             return cookies;
@@ -330,7 +259,8 @@ namespace Pulsar4X.Tests
                 Description = "A pile of heavy rocks. Very useful. Trust me.",
                 ID = Guid.NewGuid(),
                 CargoTypeID = Guid.NewGuid(),
-                Mass = 10
+                MassPerUnit = 10,
+                VolumePerUnit = 0.0001,
             };
 
             return rock;
@@ -345,6 +275,8 @@ namespace Pulsar4X.Tests
 
         public Guid CargoTypeID { get; set; }
 
-        public int Mass { get; set; }
+        public int MassPerUnit { get; set; }
+        public double VolumePerUnit { get; }
+        public double Density { get; set; }
     }
 }

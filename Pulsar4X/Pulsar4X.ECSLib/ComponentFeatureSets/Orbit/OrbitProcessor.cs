@@ -75,7 +75,7 @@ namespace Pulsar4X.ECSLib
             UpdateOrbit(root, rootPositionDB, toDate);
         }
 
-        private static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime toDate)
+        public static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime toDate)
         {
             var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
             var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
@@ -132,6 +132,11 @@ namespace Pulsar4X.ECSLib
                 return new Vector3(0, 0, 0);
             }
 
+            return GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
+        }
+        
+        public static Vector3 GetPosition_m(KeplerElements orbit, DateTime time)
+        {
             return GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
         }
 
@@ -216,6 +221,31 @@ namespace Pulsar4X.ECSLib
             return Math.Atan2(y, x);
             */
         }
+        
+        public static double GetTrueAnomaly(KeplerElements orbit, DateTime time)
+        {
+            TimeSpan timeSinceEpoch = time - orbit.Epoch;
+
+            // Don't attempt to calculate large timeframes.
+            while (timeSinceEpoch.TotalSeconds > orbit.OrbitalPeriod && orbit.OrbitalPeriod != 0)
+            {
+                double years = timeSinceEpoch.TotalSeconds / orbit.OrbitalPeriod;
+                timeSinceEpoch -= TimeSpan.FromSeconds(years * orbit.OrbitalPeriod);
+                orbit.Epoch += TimeSpan.FromSeconds(years * orbit.OrbitalPeriod);
+            }
+
+            double m0 = orbit.MeanAnomalyAtEpoch;
+            double n = orbit.MeanMotion;
+            double currentMeanAnomaly = OrbitMath.GetMeanAnomalyFromTime(m0, n, timeSinceEpoch.TotalSeconds);
+
+            double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
+            return OrbitMath.TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
+            /*
+            var x = Math.Cos(eccentricAnomaly) - orbit.Eccentricity;
+            var y = Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity) * Math.Sin(eccentricAnomaly);
+            return Math.Atan2(y, x);
+            */
+        }
 
         /// <summary>
         /// Calculates the cartesian coordinates (relative to it's parent) of an orbit for a given angle.
@@ -271,6 +301,25 @@ namespace Pulsar4X.ECSLib
 
             return new Vector3(x, y, z) * radius;
         }
+        
+        public static Vector3 GetPosition_m(KeplerElements orbit, double trueAnomaly)
+        {
+            // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
+            double radius = orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
+
+            double incl = orbit.Inclination;
+
+            //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
+            double lofAN = orbit.LoAN;
+            //double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
+            double angleFromLoAN = trueAnomaly + orbit.AoP;
+
+            double x = Math.Cos(lofAN) * Math.Cos(angleFromLoAN) - Math.Sin(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
+            double y = Math.Sin(lofAN) * Math.Cos(angleFromLoAN) + Math.Cos(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
+            double z = Math.Sin(incl) * Math.Sin(angleFromLoAN);
+
+            return new Vector3(x, y, z) * radius;
+        }
 
         /// <summary>
         /// Calculates the current Eccentric Anomaly given certain orbital parameters.
@@ -319,6 +368,50 @@ namespace Pulsar4X.ECSLib
             return e[i - 1];
         }
 
+        /// <summary>
+        /// Calculates the current Eccentric Anomaly given certain orbital parameters.
+        /// </summary>
+        public static double GetEccentricAnomaly(KeplerElements orbit, double currentMeanAnomaly)
+        {
+            //Kepler's Equation
+            const int numIterations = 1000;
+            var e = new double[numIterations];
+            const double epsilon = 1E-12; // Plenty of accuracy.
+            int i = 0;
+
+            if (orbit.Eccentricity > 0.8)
+            {
+                e[i] = Math.PI;
+            }
+            else
+            {
+                e[i] = currentMeanAnomaly;
+            }
+
+            do
+            {
+                // Newton's Method.
+                /*					 E(n) - e sin(E(n)) - M(t)
+                 * E(n+1) = E(n) - ( ------------------------- )
+                 *					      1 - e cos(E(n)
+                 * 
+                 * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
+                 * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
+                */
+                e[i + 1] = e[i] - (e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i]));
+                i++;
+            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i + 1 < numIterations);
+
+            if (i + 1 >= numIterations)
+            {
+                Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly from kepler Elements.");
+                gameEvent.EventType = EventType.Opps;
+                StaticRefLib.EventLog.AddEvent(gameEvent);
+            }
+
+            return e[i - 1];
+        }
+        
         /// <summary>
         /// Untested.
         /// Gets the Eccentric Anomaly for a hyperbolic trajectory.
@@ -447,7 +540,12 @@ namespace Pulsar4X.ECSLib
         {
             Vector3 vector = InstantaneousOrbitalVelocityVector_m(orbit, atDateTime);
             if(orbit.Parent != null)
-                vector += AbsoluteOrbitalVector_m((OrbitDB)orbit.ParentDB, atDateTime);
+            {
+                if (orbit is OrbitUpdateOftenDB)//this is a horrbile hack. very brittle. 
+                    vector += AbsoluteOrbitalVector_m(orbit.Parent.GetDataBlob<OrbitDB>(), atDateTime);
+                else
+                    vector += AbsoluteOrbitalVector_m((OrbitDB)orbit.ParentDB, atDateTime);
+            }
             return vector;
 
         }
@@ -534,9 +632,9 @@ namespace Pulsar4X.ECSLib
             {
                 var semiMajAxis = orbitDB.SemiMajorAxis_AU;
 
-                var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+                var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
 
-                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
+                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().MassDry;
 
                 return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
             }
@@ -551,9 +649,9 @@ namespace Pulsar4X.ECSLib
             {
                 var semiMajAxis = orbitDB.SemiMajorAxis;
 
-                var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+                var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
 
-                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().Mass;
+                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().MassDry;
 
                 return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
             }
@@ -614,12 +712,12 @@ namespace Pulsar4X.ECSLib
         /// <param name="atDateTime">Datetime of transit start</param>
         public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition_m(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
         {
-            Vector3 moverPos = Entity.GetPosition_m(mover, atDateTime, false);
+            Vector3 moverPos = Entity.GetAbsoluteFuturePosition(mover, atDateTime);
             double spd_m = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
             return OrbitMath.GetInterceptPosition_m(moverPos, spd_m, targetOrbit, atDateTime, offsetPosition);
         }
         
-        private class OrbitProcessorException : Exception
+        internal class OrbitProcessorException : Exception
         {
             public override string Message { get; }
             public Entity Entity { get; }
@@ -632,5 +730,65 @@ namespace Pulsar4X.ECSLib
         }
 
         #endregion
+    }
+
+
+
+    public class OrbitUpdateOftenProcessor : IHotloopProcessor
+    {
+        private static readonly int OrbitTypeIndex = EntityManager.GetTypeIndex<OrbitUpdateOftenDB>();
+        private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
+        
+        public TimeSpan RunFrequency => TimeSpan.FromSeconds(1);
+
+        public TimeSpan FirstRunOffset => TimeSpan.FromTicks(0);
+
+        public Type GetParameterType => typeof(OrbitUpdateOftenDB);
+
+
+        public void Init(Game game)
+        {
+            //nothing needed to do in this one. still need this function since it's required in the interface. 
+        }
+
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>(OrbitTypeIndex);
+            DateTime toDate = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            UpdateOrbit(orbit, toDate);
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            var orbits = manager.GetAllDataBlobsOfType<OrbitUpdateOftenDB>(OrbitTypeIndex);
+            DateTime toDate = manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
+            foreach (var orbit in orbits)
+            {
+                UpdateOrbit(orbit, toDate);
+            }
+        }
+
+        public static void UpdateOrbit(OrbitUpdateOftenDB entityOrbitDB, DateTime toDate)
+        {
+            
+            PositionDB entityPosition = entityOrbitDB.OwningEntity.GetDataBlob<PositionDB>(PositionTypeIndex);
+            try
+            {
+                Vector3 newPosition = OrbitProcessor.GetPosition_m(entityOrbitDB, toDate);
+                entityPosition.RelativePosition_m = newPosition;
+            }
+            catch (OrbitProcessor.OrbitProcessorException e)
+            {
+                var entity = e.Entity;
+                string name = "Un-Named";
+                if (entity.HasDataBlob<NameDB>())
+                    name = entity.GetDataBlob<NameDB>().OwnersName;
+                //Do NOT fail to the UI. There is NO data-corruption on this exception.
+                // In this event, we did NOT update our position.  
+                Event evt = new Event(StaticRefLib.CurrentDateTime, "Non Critical Position Exception thrown in OrbitProcessor for EntityItem " + name + " " + entity.Guid + " " + e.Message);
+                evt.EventType = EventType.Opps;
+                StaticRefLib.EventLog.AddEvent(evt);
+            }
+        }
     }
 }

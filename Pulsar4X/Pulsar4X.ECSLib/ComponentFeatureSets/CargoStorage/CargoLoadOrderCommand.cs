@@ -6,13 +6,13 @@ namespace Pulsar4X.ECSLib
 {
     public class CargoXferOrder:EntityCommand
     {
-        public List<(Guid ID, long amount)> ItemsGuidsToTransfer;
+        public List<(Guid ID, int amount)> ItemsGuidsToTransfer;
         [JsonIgnore]
-        public List<(ICargoable item, long amount)> ItemICargoablesToTransfer = new List<(ICargoable item, long amount)>();
+        public List<(ICargoable item, int amount)> ItemICargoablesToTransfer = new List<(ICargoable item, int amount)>();
         public Guid SendCargoToEntityGuid { get; set; }
 
-        internal override int ActionLanes => 1;
-        internal override bool IsBlocking => true;
+        public override int ActionLanes => 1;
+        public override bool IsBlocking => true;
 
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
@@ -23,22 +23,10 @@ namespace Pulsar4X.ECSLib
         Entity factionEntity;
         [JsonIgnore]
         Entity sendToEntity;
-
-        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(Guid ID, long amount)> itemsToMove )
+        
+        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, int amount)> itemsToMove )
         {
-            var cmd = new CargoXferOrder()
-            {
-                RequestingFactionGuid = faction.Guid,
-                EntityCommandingGuid = cargoFromEntity.Guid,
-                CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                SendCargoToEntityGuid = cargoToEntity.Guid,
-                ItemsGuidsToTransfer = itemsToMove
-            };
-            game.OrderHandler.HandleOrder(cmd);
-        }
-        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
-        {
-            List<(Guid item,long amount)> itemGuidAmounts = new List<(Guid, long)>();
+            List<(Guid item,int amount)> itemGuidAmounts = new List<(Guid, int)>();
             foreach (var tup in itemsToMove)
             {
                 itemGuidAmounts.Add((tup.item.ID, tup.amount));
@@ -49,7 +37,8 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = cargoFromEntity.Guid,
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 SendCargoToEntityGuid = cargoToEntity.Guid,
-                ItemsGuidsToTransfer = itemGuidAmounts
+                ItemsGuidsToTransfer = itemGuidAmounts,
+                ItemICargoablesToTransfer = itemsToMove
             };
             game.OrderHandler.HandleOrder(cmd);
         }
@@ -60,15 +49,15 @@ namespace Pulsar4X.ECSLib
         /// This creates a CargoTranferDB from the command, which does all the work.
         /// the command is to create and enqueue a CargoTransferDB.
         /// </summary>
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand(DateTime atDateTime)
         {
             if (!IsRunning)
             {
                 _cargoTransferDB = new CargoTransferDB();
                 _cargoTransferDB.CargoToEntity = sendToEntity;
-                _cargoTransferDB.CargoToDB = sendToEntity.GetDataBlob<CargoStorageDB>();
+                _cargoTransferDB.CargoToDB = sendToEntity.GetDataBlob<VolumeStorageDB>();
                 _cargoTransferDB.CargoFromEntity = EntityCommanding;
-                _cargoTransferDB.CargoFromDB = EntityCommanding.GetDataBlob<CargoStorageDB>();
+                _cargoTransferDB.CargoFromDB = EntityCommanding.GetDataBlob<VolumeStorageDB>();
 
                 _cargoTransferDB.ItemsLeftToTransfer = ItemICargoablesToTransfer;
                 _cargoTransferDB.OrderedToTransfer = ItemICargoablesToTransfer;
@@ -81,11 +70,7 @@ namespace Pulsar4X.ECSLib
 
         private void GetItemsToTransfer(StaticDataStore staticData)
         {
-            foreach (var tup in ItemsGuidsToTransfer)
-            {
-                //(ICargoable)game.StaticData.FindDataObjectUsingID(ItemToTransfer);
-                ItemICargoablesToTransfer.Add((staticData.GetICargoable(tup.ID), tup.amount));
-            }
+
         }
 
         internal override bool IsValidCommand(Game game)
@@ -94,14 +79,13 @@ namespace Pulsar4X.ECSLib
             {
                 if (game.GlobalManager.FindEntityByGuid(SendCargoToEntityGuid, out sendToEntity))
                 {
-                    GetItemsToTransfer(game.StaticData);//should I try catch this? nah it's unlikely to be bad here. 
                     return true;
                 }
             }
             return false;
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (_cargoTransferDB == null)
                 return false;

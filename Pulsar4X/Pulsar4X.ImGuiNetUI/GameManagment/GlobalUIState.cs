@@ -8,6 +8,8 @@ using System.Numerics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.ImGuiNetUI;
+using Pulsar4X.ImGuiNetUI.EntityManagement;
 using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
@@ -25,13 +27,14 @@ namespace Pulsar4X.SDL2UI
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},
             {typeof(WarpOrderWindow), "Warp to a new orbit"},
             {typeof(ChangeCurrentOrbitWindow), "Change current orbit"},
-            {typeof(WeaponTargetingControl), "Fire Control" },
+            {typeof(FireControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
             {typeof(ColonyPanel), "Economy"},
             {typeof(GotoSystemBlankMenuHelper), "Go to system"},
             {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
-            {typeof(PlanetaryWindow), "Planetary window"}
+            {typeof(PlanetaryWindow), "Planetary window"},
+            {typeof(NavWindow), "Nav Window"}
         };
         internal Game Game;
         internal FactionVM FactionUIState;
@@ -74,13 +77,16 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
 
         public event EntityClickedEventHandler EntityClickedEvent;
+        
         internal EntityState LastClickedEntity = null;
-        internal EntityState PrimaryEntity = null;
+        
+        internal EntityState PrimaryEntity { get; private set; }
         internal ECSLib.Vector3 LastWorldPointClicked_m { get; set; }
 
 
 
         internal SpaceMasterVM SpaceMasterVM;
+        internal bool SMenabled = false;
 
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
@@ -192,6 +198,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void EnableGameMaster()
         {
+            SMenabled = true;
             StarSystemStates = new Dictionary<Guid, SystemState>();
             if(Game != null)
                 foreach (var system in Game.Systems)
@@ -199,6 +206,19 @@ namespace Pulsar4X.SDL2UI
                     StarSystemStates[system.Key] = SystemState.GetMasterState(system.Value);
                 }
             GalacticMap.SetFaction();
+        }
+
+        internal void ToggleGameMaster()
+        {
+            if(SMenabled == true) 
+            {
+                SMenabled = false;
+            }
+            else
+            {
+                SMenabled = true;
+                EnableGameMaster();
+            }
         }
 
         //checks wether any event changed the mouse position after a new mouse click, indicating the user is doing something else with the mouse as he was doing before.
@@ -258,7 +278,7 @@ namespace Pulsar4X.SDL2UI
                     //var distanceBetweenMouseAndEntity = Math.Sqrt(Math.Pow(closestEntity.GetDataBlob<PositionDB>().AbsolutePosition_m - worldCoord,2) + Math.Pow(entityPositionInScreenPixels.Y- mousePosInPixels.Y,2));
                     //int distComp = (int)Math.Sqrt(Math.Pow(50,2)/2);
 
-                    if(closestEntityDistInM <= closestEntity.GetDataBlob<MassVolumeDB>().RadiusInM || Camera.WorldDistance(minPixelRadius) >=  Distance.MToAU(closestEntityDistInM)){
+                    if(closestEntityDistInM <= closestEntity.GetDataBlob<MassVolumeDB>().RadiusInM || Camera.WorldDistance_AU(minPixelRadius) >=  Distance.MToAU(closestEntityDistInM)){
                         ImGui.Begin("--crash fixer--(this menu`s whole purpose is preventing a ImGui global state related game crash)");
                            
                         EntityClicked(closestEntity.Guid, SelectedStarSysGuid, button);
@@ -270,9 +290,6 @@ namespace Pulsar4X.SDL2UI
                             
                     }
                 }
-                   
-                   
-                    
             }
                 
 
@@ -297,18 +314,17 @@ namespace Pulsar4X.SDL2UI
 
             if (ActiveWindow != null)
                 ActiveWindow.EntityClicked(StarSystemStates[starSys].EntityStatesWithNames[entityGuid], button);
-            OnEntitySelected();
-        }
 
-        void OnEntitySelected()
-        {
             SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
             if(LastClickedEntity.DebugOrbitOrder != null)
             {
                 SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
             }
-        }
 
+            if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
+                PrimaryEntity = LastClickedEntity;
+
+        }
     }
 
     public abstract class UpdateWindowState
@@ -341,7 +357,8 @@ namespace Pulsar4X.SDL2UI
         protected bool IsActive = false;
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
-
+        public bool ClickedEntityIsPrimary = true;
+        
         public void SetActive(bool ActiveVal = true)
         {
             IsActive = ActiveVal;
@@ -362,6 +379,7 @@ namespace Pulsar4X.SDL2UI
         }
 
 
+        
 
         /*An example of how the constructor should be for a derived class. 
          * 

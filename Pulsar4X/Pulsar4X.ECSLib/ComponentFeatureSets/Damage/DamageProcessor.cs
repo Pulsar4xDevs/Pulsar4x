@@ -188,11 +188,11 @@ namespace Pulsar4X.ECSLib
 
             //const double massDefault = 1.5e+12; //150 B tonnes?
             const double massThreshold = 1.5e+9; //150 M tonnes?
-            if (ADB.Mass > massThreshold)
+            if (ADB.MassDry > massThreshold)
             {
                 //spawn new asteroids. call the asteroid factory?
 
-                double newMass = ADB.Mass * 0.4; //add a random factor into this? do we care? will mass be printed to the player?
+                double newMass = ADB.MassDry * 0.4; //add a random factor into this? do we care? will mass be printed to the player?
 
                 OrbitDB origOrbit = Asteroid.GetDataBlob<OrbitDB>();
                 PositionDB pDB = Asteroid.GetDataBlob<PositionDB>();

@@ -1,14 +1,15 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.ECSLib
 {
     public class SetWeaponsFireControlOrder : EntityCommand
     {
-        internal override int ActionLanes => 1;
+        public override int ActionLanes => 1;
 
-        internal override bool IsBlocking => false;
+        public override bool IsBlocking => false;
 
         [JsonIgnore]
         Entity _factionEntity;
@@ -24,7 +25,7 @@ namespace Pulsar4X.ECSLib
         private ComponentInstance _fireControlComponent;
 
         public Guid[] WeaponsAssigned = new Guid[0];
-        private List<ComponentInstance> _weaponsAssigned = new List<ComponentInstance>();
+        private List<WeaponState> _weaponsAssigned = new List<WeaponState>();
 
 
         public static void CreateCommand(Game game, DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid fireControlGuid, Guid[] weaponsAssigned)
@@ -35,28 +36,26 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = orderEntity,
                 CreatedDate = starSysDate,
                 FireControlGuid = fireControlGuid,
-                WeaponsAssigned = weaponsAssigned
+                WeaponsAssigned = weaponsAssigned,
+                UseActionLanes = false
             };
             game.OrderHandler.HandleOrder(cmd);
         }
 
 
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand(DateTime atDateTime)
         {
             if (!IsRunning)
             {
-                var fcinstance = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
-                fcinstance.AssignedWeapons = _weaponsAssigned;
-                foreach (var wpn in _weaponsAssigned)
-                {
-                    wpn.GetAbilityState<WeaponState>().FireControl = _fireControlComponent;
-                }
+                var fcState = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
+                
+                fcState.SetChildren(_weaponsAssigned.ToArray());
                 IsRunning = true;
             }
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (IsRunning)
                 return true;
@@ -75,15 +74,19 @@ namespace Pulsar4X.ECSLib
                     {
                         _fireControlComponent = fc;
                         
-                        foreach (var wpnGuid in WeaponsAssigned)
+                        if (instancesdb.TryGetComponentStates<WeaponState>(out var wpns))
                         {
-                            if (instancesdb.AllComponents.TryGetValue(wpnGuid, out var wpn))
+                            
+                            foreach (var wpnGuid in WeaponsAssigned)
                             {
-                                if (wpn.HasAblity<WeaponState>())
+                                foreach (var wpnState in wpns)
                                 {
-                                    _weaponsAssigned.Add(wpn);
+                                    if (wpnState.ComponentInstance.ID == wpnGuid) 
+                                        _weaponsAssigned.Add(wpnState);
                                 }
                             }
+
+
                         }
                         return true;
                     }
@@ -95,10 +98,12 @@ namespace Pulsar4X.ECSLib
 
     public class SetTargetFireControlOrder : EntityCommand
     {
-        internal override int ActionLanes => 1;
+        public override int ActionLanes => 1;
 
-        internal override bool IsBlocking => false;
-
+        public override bool IsBlocking => false;
+        
+        
+        
         [JsonIgnore]
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
@@ -126,22 +131,23 @@ namespace Pulsar4X.ECSLib
                 CreatedDate = starSysDate,
                 FireControlGuid = fireControlGuid,
                 TargetSensorEntityGuid = targetGuid,
+                UseActionLanes = false,
             };
             game.OrderHandler.HandleOrder(cmd);
         }
 
 
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand(DateTime atDateTime)
         {
             if (!IsRunning)
             {
-                _fireControlComponent.GetAbilityState<FireControlAbilityState>().Target = _targetActualEntity;
+                _fireControlComponent.GetAbilityState<FireControlAbilityState>().SetTarget(_targetActualEntity);
             }
 
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (IsRunning)
                 return true;
@@ -188,9 +194,9 @@ namespace Pulsar4X.ECSLib
             OpenFire,
             CeaseFire
         }
-        internal override int ActionLanes => 1;
+        public override int ActionLanes => 1;
 
-        internal override bool IsBlocking => false;
+        public override bool IsBlocking => false;
 
         [JsonIgnore]
         Entity _factionEntity;
@@ -220,27 +226,36 @@ namespace Pulsar4X.ECSLib
             game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand(DateTime atDateTime)
         {
             if (!IsRunning)
             {
-                var fcinstance = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
+                var fcState = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
                 if (IsFiring == FireModes.OpenFire)
                 {
-                    fcinstance.IsEngaging = true;
+                    fcState.IsEngaging = true;
                     DateTime dateTimeNow = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
-                    foreach (var wpn in fcinstance.AssignedWeapons)
-                        StaticRefLib.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor),_entityCommanding,  dateTimeNow);
+                    GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
+                    if (blob == null)
+                    {
+                        blob = new GenericFiringWeaponsDB(fcState.GetChildrenInstances());
+                        _entityCommanding.SetDataBlob(blob);
+                    }
+                    else
+                        blob.AddWeapons(fcState.GetChildrenInstances());
+
+                    //StaticRefLib.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor),_entityCommanding,  dateTimeNow);
                 }
                 else if (IsFiring == FireModes.CeaseFire)
                 {
-                    fcinstance.IsEngaging = false;
+                    fcState.IsEngaging = false;
+                    GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
                 }
                 IsRunning = true;
             }
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (IsRunning)
                 return true;
@@ -259,6 +274,82 @@ namespace Pulsar4X.ECSLib
                         _fireControlComponent = fc;
 
                         return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+    
+    public class SetOrdinanceToWpnOrder : EntityCommand
+    {
+        public override int ActionLanes => 1;
+
+        public override bool IsBlocking => false;
+
+        [JsonIgnore]
+        Entity _factionEntity;
+
+        Entity _entityCommanding;
+        internal override Entity EntityCommanding { get { return _entityCommanding; } }
+
+
+
+        [JsonProperty]
+        public Guid WeaponGuid;
+        [JsonIgnore]
+        private ComponentInstance _weaponInstance;
+
+        public Guid OrdnanceAssigned;
+        private OrdnanceDesign _ordnanceAssigned;
+
+
+        public static void CreateCommand(DateTime starSysDate, Guid factionGuid, Guid orderEntity, Guid weaponGuid, Guid ordnanceAssigned)
+        {
+            var game = StaticRefLib.Game;
+            var cmd = new SetOrdinanceToWpnOrder()
+            {
+                RequestingFactionGuid = factionGuid,
+                EntityCommandingGuid = orderEntity,
+                CreatedDate = starSysDate,
+                WeaponGuid = weaponGuid,
+                OrdnanceAssigned = ordnanceAssigned
+            };
+            game.OrderHandler.HandleOrder(cmd);
+        }
+
+
+
+        internal override void ActionCommand(DateTime atDateTime)
+        {
+            if (!IsRunning)
+            {
+                var wpnState = _weaponInstance.GetAbilityState<WeaponState>();
+                wpnState.FireWeaponInstructions.AssignOrdnance(_ordnanceAssigned);
+                IsRunning = true;
+            }
+        }
+
+        public override bool IsFinished()
+        {
+            if (IsRunning)
+                return true;
+            return false;
+        }
+
+        internal override bool IsValidCommand(Game game)
+        {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+            {
+                var instancesdb = _entityCommanding.GetDataBlob<ComponentInstancesDB>();
+
+                if (instancesdb.AllComponents.TryGetValue(WeaponGuid, out ComponentInstance wpn))
+                {
+                    _ordnanceAssigned = _factionEntity.GetDataBlob<FactionInfoDB>().MissileDesigns[OrdnanceAssigned];
+                    if(wpn.TryGetAbilityState(out WeaponState wpnState))
+                    {
+                        _weaponInstance = wpn;
+                        return wpnState.FireWeaponInstructions.CanLoadOrdnance(_ordnanceAssigned);
                     }
                 }
             }

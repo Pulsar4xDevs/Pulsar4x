@@ -160,9 +160,19 @@ namespace Pulsar4X.ECSLib
             get { return LeaderName; }
         }
         public Guid CargoTypeID { get; set; } = new Guid("7e08074d-682c-4452-a45a-dc97968f53ca");
-        public int Mass
+        public int MassPerUnit
         {
             get { return _teamSize * 100; }
+        }
+
+        public double VolumePerUnit
+        {
+            get { return 0.065 * _teamSize; }
+        }
+
+        public double Density
+        {
+            get { return _teamSize * 985; } //avg density of a human. 
         }
     }
 

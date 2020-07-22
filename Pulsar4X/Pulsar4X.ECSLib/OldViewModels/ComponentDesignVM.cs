@@ -164,7 +164,7 @@ namespace Pulsar4X.ECSLib
 
                         designAbility.SetMax();
                         designAbility.SetMin();
-                        designAbility.SetValue();
+                        //designAbility.SetValue();
                         designAbility.SetStep();
                         minMaxSliderVM.Name = Name;
                         minMaxSliderVM.MaxValue = MaxValue;

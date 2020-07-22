@@ -102,16 +102,16 @@ namespace Pulsar4X.ECSLib
             // The root star must be the most massive. Find it.
             Entity rootStar = stars[0];
 
-            double rootStarMass = rootStar.GetDataBlob<MassVolumeDB>().Mass;
+            double rootStarMass = rootStar.GetDataBlob<MassVolumeDB>().MassDry;
 
             foreach (Entity currentStar in stars)
             {
-                double currentStarMass = currentStar.GetDataBlob<MassVolumeDB>().Mass;
+                double currentStarMass = currentStar.GetDataBlob<MassVolumeDB>().MassDry;
 
                 if (rootStarMass < currentStarMass)
                 {
                     rootStar = currentStar;
-                    rootStarMass = rootStar.GetDataBlob<MassVolumeDB>().Mass;
+                    rootStarMass = rootStar.GetDataBlob<MassVolumeDB>().MassDry;
                 }
             }
 
@@ -149,7 +149,7 @@ namespace Pulsar4X.ECSLib
                 double sma = minDistance * Math.Pow(system.RNG.NextDouble(), 3);
                 double eccentricity = Math.Pow(system.RNG.NextDouble() * 0.8, 3);
 
-                OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.Mass, currentStar.GetDataBlob<MassVolumeDB>().Mass, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, currentDateTime);
+                OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.MassDry, currentStar.GetDataBlob<MassVolumeDB>().MassDry, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, currentDateTime);
                 currentStar.SetDataBlob(currentOrbit);
                 currentStar.GetDataBlob<PositionDB>().SetParent(currentOrbit.Parent);
                 previousStar = currentStar;
@@ -195,7 +195,7 @@ namespace Pulsar4X.ECSLib
             StarInfoDB starData = new StarInfoDB {// for star age we will make it proportional to the inverse of the stars mass ratio (for that type of star).
                 // while this will produce the same age for the same mass/type of star the chances of getting the same
                 // mass/type are tiny. Tho there will still be the obvious inverse relationship here.
-                Age = (1 - starMVDB.Mass / _galaxyGen.Settings.StarMassBySpectralType[spectralType].Max) * maxStarAge,
+                Age = (1 - starMVDB.MassDry / _galaxyGen.Settings.StarMassBySpectralType[spectralType].Max) * maxStarAge,
                 SpectralType = spectralType,
                 Temperature = (uint)Math.Round(GMath.SelectFromRange(_galaxyGen.Settings.StarTemperatureBySpectralType[spectralType], randomSelection)),
                 Luminosity = (float)GMath.SelectFromRange(_galaxyGen.Settings.StarLuminosityBySpectralType[spectralType], randomSelection)

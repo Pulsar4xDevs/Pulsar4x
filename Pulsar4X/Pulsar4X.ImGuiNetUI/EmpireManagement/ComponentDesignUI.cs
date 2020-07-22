@@ -48,8 +48,9 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
             if (IsActive && ImGui.Begin("Component Design", ref IsActive, _flags))
-            {             
-
+            {
+                if (ImGui.Button("Design Missile"))
+                    OrdinanceDesignUI.GetInstance().ToggleActive();
                 int numelements = Convert.ToInt32((ImGui.GetContentRegionAvail().Y - 20) / 17);  
                 if (numelements < 4) {
                     numelements = 4;

@@ -45,7 +45,7 @@ namespace Pulsar4X.SDL2UI
             myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
             _userOrbitSettingsMtx = settings;
             var parentMass = entityState.Entity.GetDataBlob<NewtonMoveDB>().ParentMass;
-            var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().Mass;
+            var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             _sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
 
@@ -73,7 +73,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void CreatePointArray()
         {
-            _dv = _newtonMoveDB.DeltaVForManuver_m.Length();
+            _dv = _newtonMoveDB.DeltaVForManuver_FoRO_m.Length();
             Vector3 vel = Distance.MToAU(_newtonMoveDB.CurrentVector_ms);
             Vector3 pos = myPosDB.RelativePosition_AU;
             Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
@@ -154,7 +154,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
 
             _drawPoints = new SDL.SDL_Point[_numberOfPoints];
 
@@ -163,9 +163,6 @@ namespace Pulsar4X.SDL2UI
 
                 PointD translated = matrix.TransformD(_points[i].X, _points[i].Y); //add zoom transformation. 
 
-                //translate everything to viewscreen & camera positions
-                //int x = (int)(ViewScreenPos.x + translated.X + camerapoint.x);
-                //int y = (int)(ViewScreenPos.y + translated.Y + camerapoint.y);
                 int x = (int)(ViewScreenPos.x + translated.X);
                 int y = (int)(ViewScreenPos.y + translated.Y);
 
@@ -177,7 +174,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            if (_dv != _newtonMoveDB.DeltaVForManuver_m.Length())
+            if (_dv != _newtonMoveDB.DeltaVForManuver_FoRO_m.Length())
                 CreatePointArray();
             
             

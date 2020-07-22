@@ -11,11 +11,12 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, int> ResourceCosts { get; } = new Dictionary<Guid, int>();
         public int IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+        
+        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             ProcessedMaterialSD material = (ProcessedMaterialSD)designInfo;
-            StorageSpaceProcessor.AddCargo(storage, material, material.OutputAmount); //and add the product to the stockpile                        
+            storage.AddCargoByUnit(material, OutputAmount);
             batchJob.ProductionPointsLeft = material.IndustryPointCosts; //and reset the points left for the next job in the batch.
             
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
@@ -28,8 +29,6 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-
-
         public string Description;
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.None;
         public Guid ID { get; set; }
@@ -40,6 +39,7 @@ namespace Pulsar4X.ECSLib
         public ushort WealthCost;
         public ushort OutputAmount;
         public Guid CargoTypeID { get; set; }
-        public int Mass { get; set; }
+        public int MassPerUnit { get; set; }
+        public double VolumePerUnit { get; set; }
     }
 }

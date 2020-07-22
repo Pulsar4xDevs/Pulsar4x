@@ -1,6 +1,8 @@
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
+
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
 {
-    public class RailGunAtb : IComponentDesignAttribute
+    public class RailGunAtb : IComponentDesignAttribute, IFireWeaponInstr
     {
 
         public float Calibre;            //mm
@@ -23,7 +25,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
         {
             if (!componentInstance.HasAblity<WeaponState>())
             {
-                var wpnState = new WeaponState();
+                var wpnState = new WeaponState(componentInstance, this);
                 wpnState.WeaponType = "Rail Gun";
                 wpnState.WeaponStats = new (string name, double value, ValueTypeStruct valueType)[3];
                 wpnState.WeaponStats[0] = ("Calibre:", Calibre, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Distance, ValueTypeStruct.ValueSizes.Milli));
@@ -32,6 +34,31 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
                 wpnState.WeaponStats[3] = ("Power Use:", PowerUsePerShot, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Power, ValueTypeStruct.ValueSizes.BaseUnit));
                 componentInstance.SetAbilityState<WeaponState>(wpnState);
             }
+        }
+
+        public bool CanLoadOrdnance(OrdnanceDesign ordnanceDesign)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public bool AssignOrdnance(OrdnanceDesign ordnanceDesign)
+        {
+            if (CanLoadOrdnance(ordnanceDesign))
+            {
+                //AssignedOrdnance = ordnanceDesign;
+                return true;
+            }
+            else return false;
+        }
+
+        public bool TryGetOrdnance(out OrdnanceDesign ordnanceDesign)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void FireWeapon(Entity launchingEntity, Entity tgtEntity, int count)
+        {
+            throw new System.NotImplementedException();
         }
     }
 

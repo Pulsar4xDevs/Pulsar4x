@@ -38,38 +38,44 @@ namespace Pulsar4X.ECSLib
             Dictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<MiningDB>().MineingRate;
             Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().Minerals;
             
-            CargoStorageDB stockpile = colonyEntity.GetDataBlob<CargoStorageDB>();
+            VolumeStorageDB stockpile = colonyEntity.GetDataBlob<VolumeStorageDB>();
             float mineBonuses = 1;//colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
             foreach (var kvp in mineRates)
             {
                 ICargoable mineral = _minerals[kvp.Key];
                 Guid cargoTypeID = mineral.CargoTypeID;
-                int itemMassPerUnit = mineral.Mass;
-                
-                
+                double itemMassPerUnit = mineral.MassPerUnit;
+
                 double accessability = planetMinerals[kvp.Key].Accessibility;
                 double actualRate = kvp.Value * mineBonuses * accessability;
-                int amountMinableThisTick = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
-                
-                long freeCapacity = stockpile.StoredCargoTypes[mineral.CargoTypeID].FreeCapacityKg;
+                int unitsMinableThisTick = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
 
-                long weightMinableThisTick = itemMassPerUnit * amountMinableThisTick;
-                weightMinableThisTick = Math.Min(weightMinableThisTick, freeCapacity);  
+                if(!stockpile.TypeStores.ContainsKey(mineral.CargoTypeID))
+                {
+                    var type = StaticRefLib.StaticData.CargoTypes[mineral.CargoTypeID];
+                    string erstr = "We didn't mine a potential " + unitsMinableThisTick + " of " + mineral.Name + " because we have no way to store " + type.Name + " cargo.";
+                       StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity, erstr);
+                       continue; //can't store this mineral
+                }
                 
-                int actualAmountToMineThisTick = (int)(weightMinableThisTick / itemMassPerUnit);                                         //get the number of items from the mass transferable
-                long actualweightMinaedThisTick = actualAmountToMineThisTick * itemMassPerUnit;
+                var unitsMinedThisTick = stockpile.AddCargoByUnit(mineral, unitsMinableThisTick);
 
-                StorageSpaceProcessor.AddCargo(stockpile, mineral, actualAmountToMineThisTick);
-      
+                if (unitsMinableThisTick > unitsMinedThisTick)
+                {
+                    var dif = unitsMinableThisTick - unitsMinedThisTick;
+                    var type = StaticRefLib.StaticData.CargoTypes[mineral.CargoTypeID];
+                    string erstr = "We didn't mine a potential " + dif + " of " + mineral.Name + " because we don't have enough space to store it.";
+                    StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity, erstr);
+                }
+
                 MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];
-                int newAmount = mineralDeposit.Amount -= actualAmountToMineThisTick;
+                int newAmount = mineralDeposit.Amount -= unitsMinedThisTick;
 
                 accessability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
                 double newAccess = GMath.Clamp(accessability, 0.1, mineralDeposit.Accessibility);
 
                 mineralDeposit.Amount = newAmount;
                 mineralDeposit.Accessibility = newAccess;
-                
             }
         }
 

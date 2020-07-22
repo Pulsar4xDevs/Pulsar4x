@@ -5,6 +5,8 @@ using System.Linq;
 using System.Collections.Concurrent;
 using Pulsar4X.ECSLib;
 using ImGuiSDL2CS;
+using Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using SDL2;
 
 
@@ -212,6 +214,16 @@ namespace Pulsar4X.SDL2UI
                 _entityIcons.TryAdd(entityItem.Guid, new ShipIcon(entityItem));
             }
 
+            if (entityItem.HasDataBlob<ProjectileInfoDB>())
+            {
+                _entityIcons.TryAdd(entityItem.Guid, new ProjectileIcon(entityItem));
+            }
+
+            if (entityItem.HasDataBlob<BeamInfoDB>())
+            {
+                _entityIcons.TryAdd(entityItem.Guid, new BeamIcon(entityItem));
+            }
+
         }
 
         void RemoveIconable(Guid entityGuid)
@@ -237,9 +249,14 @@ namespace Pulsar4X.SDL2UI
             {
                 if (changeData.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
                 {
-                    if (changeData.Datablob is OrbitDB && changeData.Entity.GetDataBlob<OrbitDB>().Parent != null)
+                    if (changeData.Datablob is OrbitDB)
                     {
-                        if (!((OrbitDB)changeData.Datablob).IsStationary)
+                        OrbitDB orbit = (OrbitDB)changeData.Datablob;
+                        if (orbit.Parent == null)
+                            continue;
+                        
+                        
+                        if (!orbit.IsStationary)
                         {
                             if (_sysState.EntityStatesWithPosition.ContainsKey(changeData.Entity.Guid))
                                 entityState = _sysState.EntityStatesWithPosition[changeData.Entity.Guid];
@@ -263,9 +280,12 @@ namespace Pulsar4X.SDL2UI
 
                     if (changeData.Datablob is NewtonMoveDB)
                     {
-                        OrbitHypobolicIcon orb;
-                        orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
-                        _orbitRings.AddOrUpdate(changeData.Entity.Guid, orb, ((guid, data) => data = orb));
+                        if(entityState.Entity.HasDataBlob<NewtonMoveDB>()) //because sometimes it can be added and removed in a single tick. 
+                        {
+                            OrbitHypobolicIcon orb;
+                            orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                            _orbitRings.AddOrUpdate(changeData.Entity.Guid, orb, ((guid, data) => data = orb));
+                        }
                     }
                     //if (changeData.Datablob is NameDB)
                     //TextIconList[changeData.Entity.ID] = new TextIcon(changeData.Entity, _camera);

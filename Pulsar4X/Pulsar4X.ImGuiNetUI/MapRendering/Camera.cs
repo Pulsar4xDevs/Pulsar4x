@@ -66,6 +66,7 @@ namespace Pulsar4X.SDL2UI
 
         public Vector2 ViewPortSize { get { return _viewPort.Size; } }
         public float ZoomLevel { get; set; } = 200;
+        public double ZoomLevel_m { get; set; } = 1.496e11 / 200;
         public float zoomSpeed { get; set; } = 1.25f;
 
         public ImGuiSDL2CSWindow _viewPort;
@@ -111,8 +112,9 @@ namespace Pulsar4X.SDL2UI
 
         public Point ViewCoordinate_m(ECSLib.Vector3 worldCoord_m)
         {
-            int x = (int)((Distance.MToAU( worldCoord_m.X) - CameraWorldPosition_m.X) * ZoomLevel + ViewPortCenter.X);
-            int y = -(int)((Distance.MToAU(worldCoord_m.Y) - CameraWorldPosition_m.Y) * ZoomLevel - ViewPortCenter.Y);
+            //we're converting to AU here because zoom works best at AU...
+            int x = (int)(Distance.MToAU( worldCoord_m.X - CameraWorldPosition_m.X) * ZoomLevel + ViewPortCenter.X);
+            int y = -(int)(Distance.MToAU(worldCoord_m.Y - CameraWorldPosition_m.Y) * ZoomLevel - ViewPortCenter.Y);
             Point viewCoord = new Point() { x = x, y = y };
 
             return viewCoord;
@@ -176,21 +178,31 @@ namespace Pulsar4X.SDL2UI
         /// <summary>
         /// Returns the Distance in view-Coordinates
         /// </summary>
-        /// <param name="dist"></param>
+        /// <param name="dist_AU"></param>
         /// <returns></returns>
-        public float ViewDistance(double dist)
+        public float ViewDistance(double dist_AU)
         {
-            return (float)(dist * ZoomLevel);
+            return (float)(dist_AU * ZoomLevel);
         }
 
         /// <summary>
         /// Returns the Distance in World-Coordinates
         /// </summary>
-        /// <param name="dist"></param>
+        /// <param name="dist"> in Pixels</param>
         /// <returns></returns>
-        public double WorldDistance(float dist)
+        public double WorldDistance_AU(float dist)
         {
             return dist / ZoomLevel;
+        }
+        
+        /// <summary>
+        /// Returns the Distance in World-Coordinates
+        /// </summary>
+        /// <param name="dist"> in Pixels</param>
+        /// <returns></returns>
+        public double WorldDistance_m(float dist)
+        {
+            return Distance.AuToMt(dist / ZoomLevel);
         }
 
         /// <summary>

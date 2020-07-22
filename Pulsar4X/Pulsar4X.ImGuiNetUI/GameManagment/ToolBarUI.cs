@@ -13,6 +13,7 @@ namespace Pulsar4X.SDL2UI
         private float _btnSize = 32;//Button size
         public Vector2 BtnSizes = new Vector2(32, 32);//Button size
         private List<ToolbuttonData> ToolButtons = new List<ToolbuttonData>();//Stores the data for each button
+        private List<ToolbuttonData> SMToolButtons = new List<ToolbuttonData>();//Stores the data for each button
 
         public class ToolbuttonData
         //data for a toolbar button, requires an SDL image(for Picture)
@@ -24,6 +25,7 @@ namespace Pulsar4X.SDL2UI
             //Checks if window is open
             //Does not need to be intialized
             public Func<bool> GetActive;
+            public bool SmButton = false;
 
 
         }
@@ -31,8 +33,9 @@ namespace Pulsar4X.SDL2UI
         //constructs the toolbar with the given buttons
         private ToolBarUI()
         {
-            _flags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar;
+            _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
 
+            
 
             ToolbuttonData btn = new ToolbuttonData()
             {
@@ -51,15 +54,6 @@ namespace Pulsar4X.SDL2UI
                 TooltipText = "Design a new Ship",
                 OnClick = new Action(ShipDesignUI.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(ShipDesignUI.GetInstance().GetActive)
-                //Opens up the ship design menu
-            };
-            ToolButtons.Add(btn);
-            btn =  new ToolbuttonData()
-            {
-                Picture = _uiState.SDLImageDictionary["DesOrd"],
-                TooltipText = "Design a Missile",
-                OnClick = new Action(OrdinanceDesignUI.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(OrdinanceDesignUI.GetInstance().GetActive)
                 //Opens up the ship design menu
             };
             ToolButtons.Add(btn);
@@ -102,12 +96,21 @@ namespace Pulsar4X.SDL2UI
             btn = new ToolbuttonData()
             {
                 Picture = _uiState.SDLImageDictionary["Tree"],
-                TooltipText = "View objects in the system",
+                TooltipText = "Spawn ships and planets",
                 OnClick = new Action(EntitySpawnWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive)
+                GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive),
                 //Display a tree with all objects in the system
             };
-            ToolButtons.Add(btn);
+            SMToolButtons.Add(btn);
+            btn = new ToolbuttonData()
+            {
+                Picture = _uiState.SDLImageDictionary["Tree"],
+                TooltipText = "View SM debug info about a body",
+                OnClick = new Action(SMPannel.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(SMPannel.GetInstance().GetActive),
+                //Display a list of bodies with some info about them.
+            };
+            SMToolButtons.Add(btn);
 
 
 
@@ -134,18 +137,19 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            float xpad = 24;
-            float ypad = 16;
-            float x = _btnSize + xpad;
-            float y = (_btnSize + ypad) * ToolButtons.Count; 
 
-            
-            
-
-            ImGui.SetNextWindowSize(new Vector2(x,y ));
-            if (ImGui.Begin("##Toolbar", _flags))
+            DisplayButtons("##Toolbar", ToolButtons);
+            if (_uiState.SMenabled)
             {
-                
+                DisplayButtons("##SMToolbar", SMToolButtons);
+            }
+
+        }
+
+        void DisplayButtons(string name, List<ToolbuttonData> DisplayToolButtons)
+        {
+            if (ImGui.Begin(name, _flags))
+            {
 
                 uint unclickedcolor;
                 uint clickedcolour;
@@ -161,7 +165,7 @@ namespace Pulsar4X.SDL2UI
 
                 uint iterations = 0;
                 //displays the default toolbar menu icons
-                foreach (var button in ToolButtons)//For each button
+                foreach (var button in DisplayToolButtons)//For each button
                 {
                     string id = iterations.ToString();
                     ImGui.PushID(id);
@@ -194,7 +198,6 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.End();
             }
-
         }
     }
 }

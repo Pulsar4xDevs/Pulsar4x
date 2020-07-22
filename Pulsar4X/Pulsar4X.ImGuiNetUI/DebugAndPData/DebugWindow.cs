@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
-
+using System.Reflection;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Vector2 = System.Numerics.Vector2;
+using Vector3 = Pulsar4X.ECSLib.Vector3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -23,9 +26,16 @@ namespace Pulsar4X.SDL2UI
             {
                 if (_selectedEntity != value)
                 {
+                    
                     _selectedEntity = value;
                     _selectedEntityName = SelectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
-                    _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
+                    if(_systemState.EntityStatesWithNames.ContainsKey(_selectedEntity.Guid))
+                        _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
+                    else
+                    {
+                        _selectedEntityState = null;
+                    }
+                    _uiState.LastClickedEntity = _selectedEntityState;
                     OnSelectedEntityChanged();
                 }
             }
@@ -47,6 +57,8 @@ namespace Pulsar4X.SDL2UI
         private IntPtr _dmgTxtr;
         
         List<(string name, Entity entity)> _factionOwnedEntites = new List<(string name, Entity entity)>();
+        List<(string name, Entity entity, string faction)> _allEntites = new List<(string name, Entity entity, string faction)>(); 
+        
         
         private List<(string name, int count)> _listfoo = new List<(string, int)>()
         {
@@ -57,6 +69,8 @@ namespace Pulsar4X.SDL2UI
             ("Item5", 1)
             
         };
+
+        private bool _showSizesDemo = false;
         
         private DebugWindow() 
         {
@@ -137,16 +151,18 @@ namespace Pulsar4X.SDL2UI
                 {
 
 
-                    BorderGroup.BeginBorder("Info", ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
+                    BorderGroup.Begin("Info", ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
                     
                     ImGui.Text(_uiState.PrimarySystemDateTime.ToString());
                     ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
                     
-                    BorderGroup.EndBoarder();
+                    BorderGroup.End();
+                    ImGui.NewLine();
                     
                     if (ImGui.CollapsingHeader("Camera Functions", ImGuiTreeNodeFlags.CollapsingHeader))
                     {
-                        if (_uiState.Camera.IsPinnedToEntity)
+                        var cam = _uiState.Camera;
+                        if (cam.IsPinnedToEntity)
                         {
                             var entyName = _systemState.EntityStatesWithNames[_uiState.Camera.PinnedEntityGuid].Name;
                             ImGui.Text("Camera is pinned to:");
@@ -158,7 +174,7 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("Camera is not pinned to an entity.");
                         }
                         
-                        ImGui.Text("Zoom: " + _uiState.Camera.ZoomLevel);
+                        ImGui.Text("Zoom: " + cam.ZoomLevel);
 
                         ImGui.Text("Raw Cursor Coordinate");
                         Vector2 mouseCoord = ImGui.GetMousePos();
@@ -167,31 +183,33 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("y: " + mouseCoord.Y);
                         
                         ImGui.Text("Cursor World Coordinate:");
-                        var mouseWorldCoord = _uiState.Camera.MouseWorldCoordinate_m();
+                        var mouseWorldCoord = cam.MouseWorldCoordinate_m();
                         ImGui.Text("x" + Stringify.Distance(mouseWorldCoord.X));
                         ImGui.SameLine();
                         ImGui.Text("y" + Stringify.Distance(mouseWorldCoord.Y));
-                        var mouseWorldCoord_AU = _uiState.Camera.MouseWorldCoordinate_AU();
+                        var mouseWorldCoord_AU = cam.MouseWorldCoordinate_AU();
                         ImGui.Text("x" + mouseWorldCoord_AU.X + " AU");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseWorldCoord_AU.Y + " AU");
 
                         ImGui.Text("Cursor View Coordinate:");
-                        var mouseViewCoord = _uiState.Camera.ViewCoordinate_m(mouseWorldCoord);
+                        ImGui.Text("(WorldCoord - CameraWorldPos) * zoomLevel + viewportCenter");
+                        ImGui.Text("(" + mouseWorldCoord.X + "-" + cam.CameraWorldPosition_m.X + ") *" + cam.ZoomLevel + "+" + cam.ViewPortCenter.X);
+                        var mouseViewCoord = cam.ViewCoordinate_m(mouseWorldCoord);
                         ImGui.Text("x" + mouseViewCoord.x + " p");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseViewCoord.y + " p");
-                        var mouseviewCoord_AU = _uiState.Camera.ViewCoordinate_AU(mouseWorldCoord_AU);
+                        var mouseviewCoord_AU = cam.ViewCoordinate_AU(mouseWorldCoord_AU);
                         ImGui.Text("x" + mouseviewCoord_AU.x + " p");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseviewCoord_AU.y + " p");
                     
                         ImGui.Text("Camrera WorldPosition");
-                        var camWorldCoord_m = _uiState.Camera.CameraWorldPosition_m;
+                        var camWorldCoord_m = cam.CameraWorldPosition_m;
                         ImGui.Text("x" + camWorldCoord_m.X + " m");
                         ImGui.SameLine();
                         ImGui.Text("y" + camWorldCoord_m.Y + " m");
-                        var camWorldCoord_AU = _uiState.Camera.CameraWorldPosition_AU;
+                        var camWorldCoord_AU = cam.CameraWorldPosition_AU;
                         ImGui.Text("x" + camWorldCoord_AU.X + " AU");
                         ImGui.SameLine();
                         ImGui.Text("y" + camWorldCoord_AU.Y + " AU");
@@ -202,8 +220,8 @@ namespace Pulsar4X.SDL2UI
                     
                     
                     ImGui.Text("Special Chars");
-                    ImGui.Text("Proggy clean is crsp but these chars are blury, Ω, ω, ν");
-                    //ImGui.Text("this text is fine, Ω, ω, ν "+"this text is not blury");
+                    ImGui.Text("Proggy clean is crisp but these chars are blury, Ω, ω, ν, Δ, θ");
+                    ImGui.Text("this text is fine, Ω, ω, ν but this text is blury");
 
 
                     if (ImGui.CollapsingHeader("GraphicTests", ImGuiTreeNodeFlags.CollapsingHeader))
@@ -212,7 +230,11 @@ namespace Pulsar4X.SDL2UI
                         window.Display();
                         window.Enable(true, _uiState);
                     }
-                    
+
+
+                    ImGui.Checkbox("Sizes Demo", ref _showSizesDemo);
+                    if(_showSizesDemo)
+                        SizesDemo.Display();
 
                     if (ImGui.CollapsingHeader("UI Examples"))
                     {
@@ -226,6 +248,12 @@ namespace Pulsar4X.SDL2UI
                 
                         ImGui.Text("Buttons Group");
                         ButtonBox();
+                        
+                        ImGui.NewLine();
+                        //ImGui.Text("BorderListOptionsWidget");
+                        BorderListOptionsWiget();
+                        
+                        ImGui.NewLine();
                     }
                     
                     ImGui.Text("Selected Star System: " + _uiState.SelectedStarSysGuid);
@@ -278,45 +306,70 @@ namespace Pulsar4X.SDL2UI
                     }
                     if (ImGui.CollapsingHeader("Entity List"))
                     {
-                        for (int i = 0; i < _factionOwnedEntites.Count; i++)
+                        ImGui.Columns(2);
+                        for (int i = 0; i < _allEntites.Count; i++)
                         {
-                            if (ImGui.Selectable(_factionOwnedEntites[i].name + "##" + i))
+                            if (ImGui.Selectable(_allEntites[i].name + "##" + i))
                             {
-                                SelectedEntity = _factionOwnedEntites[i].entity;
+                                SelectedEntity = _allEntites[i].entity;
                             }
+                            ImGui.NextColumn();
+                            ImGui.Text(_allEntites[i].faction);
+                            ImGui.NextColumn();
+                            
                         }
+                        ImGui.Columns(1);
                     }
                     if (SelectedEntity != null && SelectedEntity.IsValid)
                     {
                         if (ImGui.CollapsingHeader("Selected Entity: " + _selectedEntityName + "###NameHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                         {
+
                             ImGui.Text(SelectedEntity.Guid.ToString());
                             if (SelectedEntity.HasDataBlob<PositionDB>())
                             {
                                 var positiondb = SelectedEntity.GetDataBlob<PositionDB>();
-                                var posv4 = positiondb.AbsolutePosition_AU;
-                                ImGui.Text("x: " + posv4.X);
-                                ImGui.Text("y: " + posv4.Y);
-                                ImGui.Text("z: " + posv4.Z);
+                                var posAbs = positiondb.AbsolutePosition_m;
+                                ImGui.Text("x: " + Stringify.Distance(posAbs.X));
+                                ImGui.Text("y: " + Stringify.Distance(posAbs.Y));
+                                ImGui.Text("z: " + Stringify.Distance(posAbs.Z));
                                 if (positiondb.Parent != null)
                                 {
                                     ImGui.Text("Parent: " + positiondb.Parent.GetDataBlob<NameDB>().DefaultName);
-                                    ImGui.Text("Dist: " + Distance.AuToKm( positiondb.RelativePosition_AU.Length()));
+
+                                    ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition_m.Length()));
                                 }
+
+                                var ralitiveState = Entity.GetRalitiveState(SelectedEntity);
+                                ImGui.Text("Ralitive Velocity: " + ralitiveState.Velocity);
+                                ImGui.Text("Ralitive Speed: " + Stringify.Velocity(ralitiveState.Velocity.Length()));
+                                
+                                
                             }
+                            
+                            if (ImGui.CollapsingHeader("DataBlob List"))
+                            {
+                                EntityInspector.DisplayDatablobs(SelectedEntity);
+                                ImGui.NewLine();
+                            }
+
+
+                            
+                            
+
                             if (SelectedEntity.HasDataBlob<MassVolumeDB>())
                             {
                                 if (ImGui.CollapsingHeader("MassVolumeDB: ###MassVolDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
                                     MassVolumeDB mvdb = SelectedEntity.GetDataBlob<MassVolumeDB>();
-                                    ImGui.Text("Mass " + Stringify.Mass(mvdb.Mass));
+                                    ImGui.Text("Mass " + Stringify.Mass(mvdb.MassDry));
                                     ImGui.Text("Volume " + Stringify.Velocity(mvdb.Volume_m3));
-                                    ImGui.Text("Density " + mvdb.Density + "g/cm^3");
+                                    ImGui.Text("Density " + mvdb.Density_gcm + "g/cm^3");
                                     ImGui.Text("Radius " + Stringify.Distance(mvdb.RadiusInM));
                                 }
 
                             }
-                            if (SelectedEntity.HasDataBlob<OrbitDB>())
+                            if (SelectedEntity.HasDataBlob<OrbitDB>() || SelectedEntity.HasDataBlob<OrbitUpdateOftenDB>())
                             {
 
                                 if (ImGui.Checkbox("Draw SOI", ref _drawSOI))
@@ -337,8 +390,11 @@ namespace Pulsar4X.SDL2UI
                                 if (ImGui.CollapsingHeader("OrbitDB: ###OrbitDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
 
+                                    
                                     OrbitDB orbitDB = SelectedEntity.GetDataBlob<OrbitDB>();
-
+                                    
+                                    if(orbitDB == null)
+                                        orbitDB = SelectedEntity.GetDataBlob<OrbitUpdateOftenDB>();
                                     //if (_uiState.CurrentSystemDateTime != lastDate)
                                     //{
                                     pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _uiState.PrimarySystemDateTime);
@@ -354,12 +410,14 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("TrueAnomaly: " + truAnomoly);
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion_DegreesSec + " in Deg/s");
                                     ImGui.Text("MeanVelocity: " + OrbitMath.MeanOrbitalVelocityInAU(orbitDB) + "Au/s");
-                                    ImGui.Text("MeanVelocity: " + Distance.AuToKm( OrbitMath.MeanOrbitalVelocityInAU(orbitDB)) + "Km/s");
-                                    ImGui.Text("SOI Radius: " + Distance.AuToKm(OrbitProcessor.GetSOI_AU(_uiState.LastClickedEntity.Entity)));
+                                    ImGui.Text("MeanVelocity: " + Stringify.Velocity( OrbitMath.MeanOrbitalVelocityInm(orbitDB)));
+                                    
+                                    ImGui.Text("SOI Radius: " + Stringify.Distance(OrbitProcessor.GetSOI_m(SelectedEntity)));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
-                                    ImGui.Text("SemiMajAxis: " + orbitDB.SemiMajorAxis_AU);
-                                    ImGui.Text("Periapsis: " + Distance.AuToKm(orbitDB.Periapsis_AU).ToString("g3") + " Km");
-                                    ImGui.Text("Appoapsis: " + Distance.AuToKm(orbitDB.Apoapsis_AU).ToString("g3") + " Km");
+                                    ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod.TotalSeconds);
+                                    ImGui.Text("SemiMajAxis: " + Stringify.Distance(orbitDB.SemiMajorAxis));
+                                    ImGui.Text("Periapsis: " + Stringify.Distance(orbitDB.Periapsis));
+                                    ImGui.Text("Appoapsis: " + Stringify.Distance(orbitDB.Apoapsis));
                                     if (orbitDB.Parent != null)
                                         ImGui.Text("Parent: " + orbitDB.Parent.GetDataBlob<NameDB>().DefaultName);
                                     if (orbitDB.Children.Count > 0)
@@ -370,7 +428,23 @@ namespace Pulsar4X.SDL2UI
                                         }
 
                                     }
-                                                
+                                    
+                                    
+                                    
+                                    var ralitiveState = Entity.GetRalitiveState(SelectedEntity);
+                                    //var globalvec = OrbitMath.OrbitToGlobalVector(ralitiveState.Velocity, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                    var progradeVec = new Vector3(0, 100, 0);
+                                    //var thrustvec = OrbitMath.OrbitToGlobalVector(progradeVec, pos, ralitiveState.Velocity);
+                                    //var thrustvec2 = OrbitMath.OrbitToGlobalVector(progradeVec, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                    var thrustvec3 = OrbitMath.ProgradeToParentVector(progradeVec, truAnomoly, orbitDB.ArgumentOfPeriapsis, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                    var thrustvec4 = OrbitMath.ProgradeToParentVector(orbitDB.GravitationalParameter_m3S2, progradeVec, pos, ralitiveState.Velocity);
+                                    ImGui.Text("stateVec: " + ralitiveState.Velocity);
+                                    //ImGui.Text("globalVec: " + globalvec);
+                                    //ImGui.Text("thrustvec: " + thrustvec);
+                                    //ImGui.Text("thrustvec2: " + thrustvec2);
+                                    ImGui.Text("thrustvec3: " + thrustvec3);
+                                    ImGui.Text("trhustvec4: " + thrustvec4);
+
                                 }
                             }
 
@@ -390,8 +464,8 @@ namespace Pulsar4X.SDL2UI
                                         var soiradius = OrbitProcessor.GetSOI_AU(parent);
                                         var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
                                         psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
-                                        var pmass = parent.GetDataBlob<MassVolumeDB>().Mass;
-                                        var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().Mass;
+                                        var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;
+                                        var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().MassDry;
 
                                         var sgp = GameConstants.Science.GravitationalConstant * (pmass + mymass) / 3.347928976e33;
                                         var vel = Distance.KmToAU(cnmve.CurrentVector_ms);
@@ -430,29 +504,6 @@ namespace Pulsar4X.SDL2UI
 
                             }
                             
-                            if (_selectedEntityState.OrbitIcon != null)
-                            {
-
-                                if (ImGui.CollapsingHeader("OrbitIcon: ###OrbitIconHeader", ImGuiTreeNodeFlags.CollapsingHeader))
-                                {
-                                    OrbitDB orbitDB = SelectedEntity.GetDataBlob<OrbitDB>();
-                                    if (orbitDB != null)
-                                    {
-                                        //string startRadian = _uiState.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians.ToString();
-                                        //string startDegrees = Angle.ToDegrees(_uiState.LastClickedEntity.OrbitIcon._ellipseStartArcAngleRadians).ToString();
-                                        //ImGui.Text("StartAngleRadians: " + startRadian);
-
-                                        //ImGui.Text("StartAngleDegrees: " + startDegrees);
-                                        if (ImGui.CollapsingHeader("OrbitIconLines", ImGuiTreeNodeFlags.CollapsingHeader))
-                                        {
-                                            var window = OrbitalDebugWindow.GetWindow(_uiState.LastClickedEntity);
-                                            window.Display();
-                                            window.Enable(true, _uiState);
-                                        }
-                                    }
-                                }
-
-                            }
 
                             if (SelectedEntity.HasDataBlob<EnergyGenAbilityDB>())
                             {
@@ -505,19 +556,18 @@ namespace Pulsar4X.SDL2UI
                                 var ntdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
                                 if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    ImGui.Text("Manuver DV:" + Stringify.Distance(nmdb.DeltaVForManuver_m.Length())+"/s");
+                                    ImGui.Text("Manuver Vector: " + nmdb.DeltaVForManuver_FoRO_m);
+                                    ImGui.Text("Total Manuver DV: " + Stringify.Distance(nmdb.DeltaVForManuver_FoRO_m.Length())+"/s");
                                     ImGui.Text("Parent Body: " + nmdb.SOIParent.GetDataBlob<NameDB>().DefaultName);
                                     ImGui.Text("Current Vector:");
-                                    ImGui.Text("X:" + Stringify.Distance(nmdb.CurrentVector_ms.X)+"/s");
-                                    ImGui.Text("Y:" + Stringify.Distance(nmdb.CurrentVector_ms.Y)+"/s");
-                                    ImGui.Text("Z:" + Stringify.Distance(nmdb.CurrentVector_ms.Z)+"/s");
-                                    
+                                    ImGui.Text("X:" + Stringify.Velocity(nmdb.CurrentVector_ms.X));
+                                    ImGui.Text("Y:" + Stringify.Velocity(nmdb.CurrentVector_ms.Y));
+                                    ImGui.Text("Z:" + Stringify.Velocity(nmdb.CurrentVector_ms.Z));
+                                    ImGui.Text("Speed: " + Stringify.Velocity(nmdb.CurrentVector_ms.Length()));
                                     ImGui.Text("Remaining Dv:" + Stringify.Distance( ntdb.DeltaV) + "/s");
                                     ImGui.Text("Exhaust Velocity: " + ntdb.ExhaustVelocity);
                                     ImGui.Text("BurnRate: " + ntdb.FuelBurnRate);
                                     ImGui.Text("Thrust: " + ntdb.ThrustInNewtons);
-                                    
-
                                 }
 
                             }
@@ -599,8 +649,43 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.Text("at wavelength : " + atWavelength + " nm");
                                 
                             }
-                            
-                            
+
+                            if (_selectedEntity.HasDataBlob<GenericFiringWeaponsDB>())
+                            {
+                                var db = _selectedEntity.GetDataBlob<GenericFiringWeaponsDB>();
+                                if (ImGui.CollapsingHeader("Firing Weapons"))
+                                {
+                                    for (int i = 0; i < db.WpnIDs.Length; i++)
+                                    {
+                                        float reloadAmount = db.InternalMagQty[i];
+                                        float reloadMax = db.InternalMagSizes[i];
+                                        float reloadPerShot = db.AmountPerShot[i];
+                                        float minShots = db.MinShotsPerfire[i];
+
+                                        float percFull = reloadAmount / reloadMax;
+                                        float percToFire = reloadAmount / (minShots * reloadPerShot);
+                                        float percPerSec = db.ReloadAmountsPerSec[i] / reloadMax ;
+                                        Vector2 pbsize = new Vector2(200, 5);
+
+                                        float maxShots = reloadMax / reloadPerShot;
+                                        ImGui.Text("Max shots per burst: " + maxShots);
+                                        ImGui.Text("Min shots per burst: " + minShots);
+                                        
+                                        ImGui.Text("Reload Amount Per Sec:" + db.ReloadAmountsPerSec[i]);
+                                        ImGui.Text("Reload Percent Per Sec:" + percPerSec);
+                                        
+                                        ImGui.Text("Reload Progress " + reloadAmount + "/" + reloadMax);
+                                        ImGui.ProgressBar(percFull, pbsize);
+                                        ImGui.Text("Reload Progress to min fire");
+                                        ImGui.ProgressBar(percToFire, pbsize);
+                                        
+                                        
+                                        var firingShots = db.ShotsFiredThisTick[i];
+                                        ImGui.Text("Firing " + firingShots + " this tick");
+                                        
+                                    }
+                                }
+                            }
 
                             if (SelectedEntity.HasDataBlob<SensorInfoDB>())
                             {
@@ -626,7 +711,7 @@ namespace Pulsar4X.SDL2UI
                             }
 
 
-
+                            
                         }
                     }
                 }
@@ -640,14 +725,31 @@ namespace Pulsar4X.SDL2UI
         void RefreshFactionEntites()
         {
             _factionOwnedEntites = new List<(string name, Entity entity)>();
-            foreach (var entity in _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Guid))
+            var factionEntites = _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Guid);
+            foreach (var entity in factionEntites)
             {
-                string name = entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
+                string name = entity.Guid.ToString();
+                if(entity.HasDataBlob<NameDB>())
+                {
+                    name = entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
+                }
                 _factionOwnedEntites.Add((name, entity));
-
             }
-
             
+            _allEntites = new List<(string name, Entity entity, string faction)>();
+            foreach (var entity in _uiState.SelectedSystem.GetAllEntites())
+            {
+                string name = entity.Guid.ToString();
+                if(entity.HasDataBlob<NameDB>())
+                    name = entity.GetDataBlob<NameDB>().OwnersName;
+                string factionOwner = Guid.Empty.ToString();
+                if(entity.FactionOwner != Guid.Empty)
+                {
+                    Entity factionEntity = StaticRefLib.Game.GlobalManager.GetGlobalEntityByGuid(entity.FactionOwner);
+                    factionOwner = factionEntity.GetDataBlob<NameDB>().OwnersName;
+                }
+                _allEntites.Add((name, entity, factionOwner));
+            }
         }
         
                 private int _hvSelectedIndex = -1;
@@ -923,7 +1025,63 @@ namespace Pulsar4X.SDL2UI
             ImGui.PopStyleVar();
 
         }
-        
+
+        private int _bloSelectedIndex = -1;
+        void BorderListOptionsWiget()
+        {
+            
+            
+            string[] items = new string[_listfoo.Count];
+            for (int i = 0; i < _listfoo.Count; i++)
+            {
+                items[i] = _listfoo[i].name;
+            }
+            ImGui.Indent(5);
+            BorderGroup.Begin("List Options: ");
+            BorderListOptions.Begin("blo", items, ref _bloSelectedIndex, 64);
+            var s1 = ImGui.GetCursorPos();
+            if(_bloSelectedIndex >=0)
+            {
+                if (ImGui.Button("^"))
+                {
+                    (string name, int count) item = _listfoo[_bloSelectedIndex];
+                    _listfoo.RemoveAt(_bloSelectedIndex);
+                    _listfoo.Insert(_bloSelectedIndex - 1, item);
+                    _bloSelectedIndex--;
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("v"))
+                {
+                    (string name, int count) item = _listfoo[_bloSelectedIndex];
+                    _listfoo.RemoveAt(_bloSelectedIndex);
+                    _listfoo.Insert(_bloSelectedIndex + 1, item);
+                    _bloSelectedIndex++;
+                }
+
+                ImGui.Text(_listfoo[_bloSelectedIndex].count.ToString());
+                ImGui.SameLine();
+                if (ImGui.Button("+"))
+                {
+
+                    _listfoo[_bloSelectedIndex] = (_listfoo[_bloSelectedIndex].name, _listfoo[_bloSelectedIndex].count + 1);
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("-"))
+                {
+                    _listfoo[_bloSelectedIndex] = (_listfoo[_bloSelectedIndex].name, _listfoo[_bloSelectedIndex].count - 1);
+                }
+            }
+
+            var s2 = ImGui.GetCursorPos();
+            BorderListOptions.End(s2-s1);
+            
+            BorderGroup.End(137);
+            ImGui.Unindent(5);
+            
+        }
+
         public override void OnSystemTickChange(DateTime newDate)
         {
             _dateChangeSinceLastFrame = true;

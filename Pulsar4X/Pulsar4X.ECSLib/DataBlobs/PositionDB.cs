@@ -157,9 +157,15 @@ namespace Pulsar4X.ECSLib
             SystemGuid = systemGuid;
         }
 
-        public PositionDB(Vector3 pos, Guid systemGuid, Entity parent = null) : base(parent)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="absolutePos_AU"></param>
+        /// <param name="systemGuid"></param>
+        /// <param name="parent"></param>
+        public PositionDB(Vector3 absolutePos_AU, Guid systemGuid, Entity parent = null) : base(parent)
         {
-            AbsolutePosition_AU = pos;
+            AbsolutePosition_AU = absolutePos_AU;
             SystemGuid = systemGuid;
         }
 
@@ -178,6 +184,13 @@ namespace Pulsar4X.ECSLib
             this.SystemGuid = positionDB.SystemGuid;
         }
 
+        public PositionDB(Vector3 ralitivePos_m, Entity SOIParent) : base(SOIParent)
+        {
+            SystemGuid = SOIParent.Manager.ManagerGuid;
+            RelativePosition_m = ralitivePos_m;
+        }
+
+        
         [UsedImplicitly]
         private PositionDB() : this(Guid.Empty) { }
 

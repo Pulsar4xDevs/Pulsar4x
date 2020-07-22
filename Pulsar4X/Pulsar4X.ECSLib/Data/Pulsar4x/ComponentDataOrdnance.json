@@ -374,7 +374,7 @@
           "Name": "Missile SRB",
           "DescriptionFormula": "'A Newtonian Thruster'",
           "ID": "9FDB2A15-4413-40A9-9229-19D05B3765FE",
-          "MassFormula": "Ability('Engine Mass') + Ability('Fuel Mass')",
+          "MassFormula": "Ability('Engine Mass')",
           "VolumeFormula": "[Mass]",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "0",
@@ -404,21 +404,11 @@
               "AttributeFormula": "5"
             },
             {
-              "Name": "Fuel Mass",
-              "Units": "kg",
-              "DescriptionFormula": "'Mass of the fuel'",
-              "GuiHint": "GuiSelectionMaxMin",
-              "MaxFormula": "1000000",
-              "MinFormula": "1",
-              "StepFormula": "1",
-              "AttributeFormula": "500"
-            },
-            {
               "Name": "Exhaust Velocity",
               "Units": "m/s",
               "DescriptionFormula": "'Specific Impulse in m/s, can be increased by research (todo)'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "2500"
+              "AttributeFormula": "4000"
             },
             {
               "Name": "Fuel Consumption",
@@ -435,37 +425,11 @@
               "AttributeFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
             },
             {
-              "Name": "Burn Time",
-              "Units": "s",
-              "DescriptionFormula": "'Fuel Consumption per second'",
-              "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Fuel Mass') / Ability('Fuel Consumption')"
-            },
-            {
               "Name": "DataBlob",
               "DescriptionFormula": "''",
               "GuiHint": "None",
               "AttributeFormula": "AtbConstrArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
               "AttributeType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
-            },
-            {
-              "Name": "Propellent Amount",
-              "Units": "Kg",
-              "DescriptionFormula": "'Solid Fuel'",
-              "GuiHint": "GuiSelectionMaxMin",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "MaxFormula": "1000000",
-              "MinFormula": "1",
-              "StepFormula": "1",
-              "AttributeFormula": "50"
-            },
-            {
-              "Name": "DBargs",
-              "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Propellent Amount'), GuidString('d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77'), 0, 0)",
-              "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
             },
             {
               "Name": "Sensor Signature",
@@ -561,13 +525,16 @@
               "AttributeFormula": "Ability(0) - Ability(1) - Ability(2)"
             },
             {
-              "Name": "DBargs",
+              "Name": "DBargsStor",
               "GuiHint": "None",
-              "GuidDictionary": {
-                "Entries": []
-              },
-              "AttributeFormula": "AtbConstrArgs(Ability(4), GuidString('055E2026-20A4-4CFA-A8CA-A01915A48B5E'), Ability(2), Ability(3))",
-              "AttributeType": "Pulsar4X.ECSLib.CargoStorageAtbDB"
+              "AttributeFormula": "AtbConstrArgs(GuidString('055E2026-20A4-4CFA-A8CA-A01915A48B5E'), Ability('Total Cargo Stored'))",
+              "AttributeType": "Pulsar4X.ECSLib.VolumeStorageAtb"
+            },
+            {
+              "Name": "DBArgsXfer",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+              "AttributeType": "Pulsar4X.ECSLib.StorageTransferRateAtbDB"
             }
           ]
         }

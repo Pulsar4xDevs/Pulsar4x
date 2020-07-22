@@ -635,26 +635,59 @@ namespace Pulsar4X.ECSLib
     public static class InterceptCalcs
     {
         /// <summary>
+        /// THIS NEEDS TESTING.
         /// Hohmann the specified GravParamOfParent, semiMajAxisCurrentBody and semiMajAxisOfTarget.
         /// </summary>
-        /// <returns>Dv burn1 prograde, Dv burn2 retrograde</returns>
-        /// <param name="GravParamOfParent">Grav parameter of parent.</param>
-        /// <param name="semiMajAxisCurrentBody">Semi maj axis current body.</param>
-        /// <param name="semiMajAxisOfTarget">Semi maj axis of target.</param>
-        public static (double, double) Hohmann(double GravParamOfParent, double semiMajAxisCurrentBody, double semiMajAxisOfTarget)
+        /// <returns>two burns with a time in seconds for the second burn</returns>
+        /// <param name="sgp">Grav parameter of parent.</param>
+        /// <param name="semiMajAxisCurrent">semiMajor axis now</param>
+        /// <param name="semiMajAxisOfTarget">target semiMajorAxis</param>
+        public static (Vector3 deltaV, double timeInSeconds)[] Hohmann(double sgp, double semiMajAxisCurrent, double semiMajAxisOfTarget)
         {
-            double semMajAxisOfHohman = semiMajAxisCurrentBody + semiMajAxisOfTarget;
-            double velCurrentBody = Math.Sqrt(GravParamOfParent / semiMajAxisCurrentBody);
-            double velTarg = Math.Sqrt(GravParamOfParent / semiMajAxisOfTarget);
+            double xferOrbitSMA = semiMajAxisCurrent + semiMajAxisOfTarget;
+            double velCurrentBody = Math.Sqrt(sgp / semiMajAxisCurrent);
+            double velTarg = Math.Sqrt(sgp / semiMajAxisOfTarget);
 
-            double velOfHohmannAtPeriapsis = Math.Sqrt(2 * (-GravParamOfParent / semMajAxisOfHohman + GravParamOfParent / semiMajAxisCurrentBody));
+            double xferVelAtPeriapsis = Math.Sqrt(2 * (-sgp / xferOrbitSMA + sgp / semiMajAxisCurrent));
 
-            double velOfHohmannAtApoaxis = Math.Sqrt(2 * (-GravParamOfParent / semMajAxisOfHohman + GravParamOfParent / semiMajAxisOfTarget));
+            double xferVelAtApoaxis = Math.Sqrt(2 * (-sgp / xferOrbitSMA + sgp / semiMajAxisOfTarget));
 
-            double deltaVBurn1 = velOfHohmannAtPeriapsis - velCurrentBody;
-            double deltaVBurn2 = velOfHohmannAtApoaxis - velTarg;
+            double deltaVBurn1 = xferVelAtPeriapsis - velCurrentBody;
+            double deltaVBurn2 = xferVelAtApoaxis - velTarg;
 
-            return (deltaVBurn1, deltaVBurn2);
+            double xferOrbitPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(xferOrbitSMA, 3) / sgp);
+            double timeToSecondBurn = xferOrbitPeriod * 0.5;
+
+            var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
+            manuvers[0] = (new Vector3(0, deltaVBurn1, 0), 0);
+            manuvers[1] = (new Vector3(0, deltaVBurn2, 0), timeToSecondBurn);
+            return manuvers;
+        }
+
+
+        /// <summary>
+        /// Hohmann transfer manuver. 
+        /// </summary>
+        /// <param name="sgp"></param>
+        /// <param name="r1">radius from parent</param>
+        /// <param name="r2">radius from parent</param>
+        /// <returns>a tuple containing two manuvers with a time in seconds delay for second manuver</returns>
+        public static (Vector3 deltaV, double timeInSeconds)[] Hohmann2(double sgp, double r1, double r2)
+        {
+            var wca1 = Math.Sqrt(sgp / r1);
+            var wca2 = Math.Sqrt((2 * r2) / (r1 + r2)) - 1;
+            var dva = wca1 * wca2;
+
+            var wcb2 = Math.Sqrt(sgp / r2);
+            var wcb3 = 1 - Math.Sqrt((2 * r1) / (r1 + r2));
+            var dvb = wcb2 * wcb3;
+
+            var timeTo2ndBurn = Math.PI * Math.Sqrt((Math.Pow(r1 + r2, 3)) / (8 * sgp));
+            
+            var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
+            manuvers[0] = (new Vector3(0, dva, 0), 0);
+            manuvers[1] = (new Vector3(0, dvb, 0), timeTo2ndBurn);
+            return manuvers;
         }
 
         /// <summary>
@@ -720,11 +753,114 @@ namespace Pulsar4X.ECSLib
             return intercept;
         }
 
+        /// <summary>
+        /// used to get manuvers to rendevus with an object in the same orbit, or advance our position in a given orbit.
+        /// </summary>
+        /// <param name="orbit"></param>
+        /// <param name="manuverTime">datetime the manuver should start (idealy at periapsis)</param>
+        /// <param name="phaseAngle">angle in radians between our position and the rendevous position</param>
+        /// <returns>an array of vector3(normal,prograde,radial) and seconds from first manuver. first seconds in array will be 0 </returns>
+        public static (Vector3 deltaV, double timeInSeconds)[] OrbitPhasingManuvers(KeplerElements orbit, double sgp, DateTime manuverTime, double phaseAngle)
+        {
+            //https://en.wikipedia.org/wiki/Orbit_phasing
+            double orbitalPeriod = orbit.OrbitalPeriod;
+            double e = orbit.Eccentricity;
+
+            var wc1 = Math.Sqrt((1 - e) / (1 + e));
+            var wc2 = Math.Tan(phaseAngle / 2);
+            
+            double E = 2 * Math.Atan(wc1 * wc2);
+
+            double wc3 = orbitalPeriod / (Math.PI * 2);
+            double wc4 = E - e * Math.Sin(E);
+
+            double phaseTime = wc3 * wc4;
+
+            double phaseOrbitPeriod = orbitalPeriod - phaseTime;
+
+            
+
+            //double phaseOrbitSMA0 = Math.Pow(Math.Sqrt(sgp) * phaseOrbitPeriod / (Math.PI * 2), (2.0 / 3.0)); //I think this one will be slightly slower
+            
+            //using the full Major axis here rather than semiMaj.
+            double phaseOrbitMA = 2 * Math.Cbrt((sgp * phaseOrbitPeriod * phaseOrbitPeriod) / (4 * Math.PI * Math.PI));
+            
+            
+            //one of these will be the periapsis, the other the appoapsis, depending on whether we're behind or ahead of the target.
+            double phaseOrbitApsis1 = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();// 
+            double phaseOrbitApsis2 = phaseOrbitMA - phaseOrbitApsis1;
 
 
+            double wc7 = Math.Sqrt( (phaseOrbitApsis1 * phaseOrbitApsis2) / (phaseOrbitMA));
+            double wc8 = Math.Sqrt(2 * sgp);
+            double phaseOrbitAngularMomentum = wc8 * wc7;
 
 
+            double wc9 = Math.Sqrt( (orbit.Apoapsis * orbit.Periapsis) / (orbit.Apoapsis + orbit.Periapsis));
+            double wc10 = Math.Sqrt(2 * sgp);
+            double orbitAngularMomentum = wc9 * wc10;
 
+            double r = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();
+
+            double dv = phaseOrbitAngularMomentum / r - orbitAngularMomentum / r;
+
+            (Vector3, double)[] manuvers = new (Vector3, double)[2];
+            manuvers[0] = (new Vector3(0, dv, 0), 0);
+            manuvers[1] = (new Vector3(0, -dv, 0), phaseOrbitPeriod);
+            
+            return manuvers;
+        }
+        
+        public static (Vector3 deltaV, double timeInSeconds)[] OrbitPhasingManuvers(OrbitDB orbit, DateTime manuverTime, double phaseAngle)
+        {
+            //https://en.wikipedia.org/wiki/Orbit_phasing
+            double orbitalPeriod = orbit.OrbitalPeriod.TotalSeconds;
+            double e = orbit.Eccentricity;
+
+            var wc1 = Math.Sqrt((1 - e) / (1 + e));
+            var wc2 = Math.Tan(phaseAngle / 2);
+            
+            double E = 2 * Math.Atan(wc1 * wc2);
+
+            double wc3 = orbitalPeriod / (Math.PI * 2);
+            double wc4 = E - e * Math.Sin(E);
+
+            double phaseTime = wc3 * wc4;
+
+            double phaseOrbitPeriod = orbitalPeriod - phaseTime;
+
+            double sgp = orbit.GravitationalParameter_m3S2;
+
+            //double phaseOrbitSMA0 = Math.Pow(Math.Sqrt(sgp) * phaseOrbitPeriod / (Math.PI * 2), (2.0 / 3.0)); //I think this one will be slightly slower
+            
+            //using the full Major axis here rather than semiMaj.
+            double phaseOrbitMA = 2 * Math.Cbrt((sgp * phaseOrbitPeriod * phaseOrbitPeriod) / (4 * Math.PI * Math.PI));
+            
+            
+            //one of these will be the periapsis, the other the appoapsis, depending on whether we're behind or ahead of the target.
+            double phaseOrbitApsis1 = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();// 
+            double phaseOrbitApsis2 = phaseOrbitMA - phaseOrbitApsis1;
+
+
+            double wc7 = Math.Sqrt( (phaseOrbitApsis1 * phaseOrbitApsis2) / (phaseOrbitMA));
+            double wc8 = Math.Sqrt(2 * sgp);
+            double phaseOrbitAngularMomentum = wc8 * wc7;
+
+
+            double wc9 = Math.Sqrt( (orbit.Apoapsis * orbit.Periapsis) / (orbit.Apoapsis + orbit.Periapsis));
+            double wc10 = Math.Sqrt(2 * sgp);
+            double orbitAngularMomentum = wc9 * wc10;
+
+            double r = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();
+
+            double dv = phaseOrbitAngularMomentum / r - orbitAngularMomentum / r;
+
+            (Vector3, double)[] manuvers = new (Vector3, double)[2];
+            manuvers[0] = (new Vector3(0, dv, 0), 0);
+            manuvers[1] = (new Vector3(0, -dv, 0), phaseOrbitPeriod);
+            
+            return manuvers;
+        }
     }
 
     /// <summary>

@@ -69,7 +69,7 @@ namespace Pulsar4X.SDL2UI
 
                     void NewButton(Type T,  string PictureString, string TooltipText, List<ToolbuttonData> ButtonList) {
                         //Creates a buttton if it is usuable in this situation
-                        if (EntityUIWindows.checkIfCanOpenWindow(T, _entityState))
+                        if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState))
                         {
                             btn = new ToolbuttonData()
                             {   
@@ -116,7 +116,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             ImGui.SameLine();
                             ImGui.PushID(iterations.ToString());
-                            if (EntityUIWindows.checkopenUIWindow(button.ClickType, _entityState, _uiState))//If the window is open
+                            if (EntityUIWindows.CheckOpenUIWindow(button.ClickType, _entityState, _uiState))//If the window is open
                             {
                                 ImGui.PushStyleColor(buttonidx, clickedcolour);//Have the button be "pressed"
                             }
@@ -126,7 +126,7 @@ namespace Pulsar4X.SDL2UI
                             }
                             if (ImGui.ImageButton(button.Picture, BtnSizes))
                             {
-                                EntityUIWindows.openUIWindow(button.ClickType, _entityState, _uiState);
+                                EntityUIWindows.OpenUIWindow(button.ClickType, _entityState, _uiState);
                             }
 
                             if (ImGui.IsItemHovered())
@@ -148,10 +148,10 @@ namespace Pulsar4X.SDL2UI
                     void ActionButton(Type T)
                     {
                     //Makes a small button if it is usable in this situation
-                        if (EntityUIWindows.checkIfCanOpenWindow(T,_entityState))
+                        if (EntityUIWindows.CheckIfCanOpenWindow(T,_entityState))
                         {
                             bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[T]);
-                            EntityUIWindows.openUIWindow(T, _entityState, _uiState, buttonresult);
+                            EntityUIWindows.OpenUIWindow(T, _entityState, _uiState, buttonresult);
                             if (ImGui.IsItemHovered())
                                 ImGui.SetTooltip(GlobalUIState.namesForMenus[T]);
                         }

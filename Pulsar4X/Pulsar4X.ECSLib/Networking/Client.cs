@@ -533,10 +533,9 @@ namespace Pulsar4X.Networking
             EntityCommand cmd = CommandsAwaitingServerAproval[cmdID];
             if (isValid && cmd.IsValidCommand(Game))
             {
-                
-                cmd.EntityCommanding.GetDataBlob<OrderableDB>().ActionList.Add(cmd);
-                var commandList = cmd.EntityCommanding.GetDataBlob<OrderableDB>().ActionList;
-                OrderableProcessor.ProcessOrderList(Game, commandList);
+                var orderableDB = cmd.EntityCommanding.GetDataBlob<OrderableDB>();
+                orderableDB.AddCommandToList(cmd);
+                orderableDB.ProcessOrderList(cmd.EntityCommanding.StarSysDateTime);
             }
             else
             {

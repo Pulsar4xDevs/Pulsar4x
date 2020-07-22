@@ -9,7 +9,7 @@ namespace Pulsar4X.SDL2UI
         //PositionDB _positionDB;
         Vector3 _translateStartPoint = new Vector3();
         Vector3 _translateEndPoint = new Vector3();
-        Vector3 _currentPosition = new Vector3();
+        Vector3 _currentPosition_au = new Vector3();
         public byte Red = 255;
         public byte Grn = 255;
         public byte Blu = 0;
@@ -35,17 +35,17 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            _currentPosition = _positionDB.AbsolutePosition_AU; 
+            _currentPosition_au = _positionDB.AbsolutePosition_AU; 
 
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
             _drawPoints = new SDL.SDL_Point[2];
 
 
-            var translated = matrix.Transform(_currentPosition.X, _currentPosition.Y);
+            var translated = matrix.Transform(_currentPosition_au.X, _currentPosition_au.Y);
             int x = (int)(ViewScreenPos.x + translated.x);
             int y = (int)(ViewScreenPos.y + translated.y);
             _drawPoints[0] = new SDL.SDL_Point() { x = x, y = y };

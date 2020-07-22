@@ -14,14 +14,14 @@ namespace Pulsar4X.ECSLib
         public double SemiMajorAxis_AU
         {
             get { return Distance.MToAU(SemiMajorAxis);}
-            private set { SemiMajorAxis = Distance.AuToMt(value); }
+            protected set { SemiMajorAxis = Distance.AuToMt(value); }
         }
         
         /// <summary>
         /// Stored in Meters
         /// </summary>
         [JsonProperty]
-        public double SemiMajorAxis { get; private set; }
+        public double SemiMajorAxis { get; protected set; }
         
         
         /// <summary>
@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [PublicAPI]
         [JsonProperty]
-        public double Eccentricity { get; private set; }
+        public double Eccentricity { get; protected set; }
 
         /// <summary>
         /// Angle between the orbit and the flat reference plane.
@@ -41,13 +41,13 @@ namespace Pulsar4X.ECSLib
         public double Inclination_Degrees
         {
             get { return Angle.ToDegrees(Inclination);}
-            private set { Inclination = Angle.ToRadians(value); }
+            protected set { Inclination = Angle.ToRadians(value); }
         }
         
         /// <summary>
         /// i in radians
         /// </summary>
-        public double Inclination { get; private set; }
+        public double Inclination { get; protected set; }
         
         /// <summary>
         /// Horizontal orientation of the point where the orbit crosses
@@ -58,13 +58,13 @@ namespace Pulsar4X.ECSLib
         public double LongitudeOfAscendingNode_Degrees 
         {
             get { return Angle.ToDegrees(LongitudeOfAscendingNode);}
-            private set { LongitudeOfAscendingNode = Angle.ToRadians(value); }
+            protected set { LongitudeOfAscendingNode = Angle.ToRadians(value); }
         }
 
         /// <summary>
         /// LoAN in radians
         /// </summary>
-        public double LongitudeOfAscendingNode { get; private set; }
+        public double LongitudeOfAscendingNode { get; protected set; }
         
         
         /// <summary>
@@ -75,14 +75,14 @@ namespace Pulsar4X.ECSLib
         public double ArgumentOfPeriapsis_Degrees        
         {
             get { return Angle.ToDegrees(ArgumentOfPeriapsis);}
-            private set { ArgumentOfPeriapsis = Angle.ToRadians(value); }
+            protected set { ArgumentOfPeriapsis = Angle.ToRadians(value); }
         }
 
 
         /// <summary>
         /// AoP in radians
         /// </summary>
-        public  double ArgumentOfPeriapsis { get; private set; }
+        public  double ArgumentOfPeriapsis { get; protected set; }
         
         
         /// <summary>
@@ -95,10 +95,10 @@ namespace Pulsar4X.ECSLib
         public double MeanAnomalyAtEpoch_Degrees        
         {
             get { return Angle.ToDegrees(MeanAnomalyAtEpoch);}
-            private set { MeanAnomalyAtEpoch = Angle.ToRadians(value); }
+            protected set { MeanAnomalyAtEpoch = Angle.ToRadians(value); }
         }
 
-        public double MeanAnomalyAtEpoch { get; private set; }
+        public double MeanAnomalyAtEpoch { get; protected set; }
         
         /// <summary>
         /// reference time. Orbital parameters are stored relative to this reference.
@@ -109,17 +109,17 @@ namespace Pulsar4X.ECSLib
 
         
         
-        public double GravitationalParameter_m3S2 { get; private set; }
+        public double GravitationalParameter_m3S2 { get; protected set; }
         
         /// <summary>
         /// 2-Body gravitational parameter of system in km^3/s^2
         /// </summary>
         [PublicAPI]
-        public double GravitationalParameter_Km3S2 { get; private set; }
+        public double GravitationalParameter_Km3S2 { get; protected set; }
         [PublicAPI]
-        public double GravitationalParameterAU { get; private set; }
+        public double GravitationalParameterAU { get; protected set; }
 
-        public double SOI_m { get; private set; }
+        public double SOI_m { get; protected set; } = double.MaxValue;
         
         
         /// <summary>
@@ -140,7 +140,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// In Radians/Sec
         /// </summary>
-        public double MeanMotion { get; private set; }
+        public double MeanMotion { get; protected set; }
 
         
         
@@ -175,9 +175,9 @@ namespace Pulsar4X.ECSLib
         public bool IsStationary { get; private set; } = false;
 
         [JsonProperty]
-        private double _parentMass;
+        internal double _parentMass;
         [JsonProperty]
-        private double _myMass;
+        internal double _myMass;
 
         #region Construction Interface
 
@@ -191,8 +191,8 @@ namespace Pulsar4X.ECSLib
         /// <param name="velocity_m">Velocity in meters.</param>
         public static OrbitDB FromVelocity_m(Entity parent, Entity entity, Vector3 velocity_m, DateTime atDateTime)
         {
-            var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
-            var myMass = entity.GetDataBlob<MassVolumeDB>().Mass;
+            var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
+            var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
 
             //var epoch1 = parent.Manager.ManagerSubpulses.StarSysDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
 
@@ -279,7 +279,7 @@ namespace Pulsar4X.ECSLib
                 MeanAnomalyAtEpoch = ke.MeanAnomalyAtEpoch,
                 Epoch = atDateTime,
 
-                _parentMass = parent.GetDataBlob<MassVolumeDB>().Mass,
+                _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
                 _myMass = myMass
 
             };
@@ -312,7 +312,7 @@ namespace Pulsar4X.ECSLib
                 MeanAnomalyAtEpoch = ke.MeanAnomalyAtEpoch,
                 Epoch = atDateTime,
 
-                _parentMass = parent.GetDataBlob<MassVolumeDB>().Mass,
+                _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
                 _myMass = myMass
 
             };
@@ -336,7 +336,7 @@ namespace Pulsar4X.ECSLib
             var objPos = obj.GetDataBlob<PositionDB>();
             var ralpos = objPos.AbsolutePosition_m - parpos.AbsolutePosition_m;
             var r = ralpos.Length();
-            var i = Math.Atan2(r, ralpos.Z);
+            var i = Math.Atan2(ralpos.Z, r);
             var m0 = Math.Atan2(ralpos.Y, ralpos.X);
             var orbit = new OrbitDB(parent)
             {
@@ -348,8 +348,8 @@ namespace Pulsar4X.ECSLib
                 MeanAnomalyAtEpoch = m0,
                 Epoch = atDatetime,
 
-                _parentMass = parent.GetDataBlob<MassVolumeDB>().Mass,
-                _myMass = obj.GetDataBlob<MassVolumeDB>().Mass
+                _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
+                _myMass = obj.GetDataBlob<MassVolumeDB>().MassDry
                 
             };
             orbit.IsStationary = false;
@@ -451,6 +451,25 @@ namespace Pulsar4X.ECSLib
         {
             IsStationary = false;
         }
+        
+        public OrbitDB(OrbitUpdateOftenDB orbit) : base(orbit.Parent)
+        {
+            if (orbit.IsStationary)
+            {
+                IsStationary = true;
+                return;
+            }
+
+            SemiMajorAxis = orbit.SemiMajorAxis;
+            Eccentricity = orbit.Eccentricity;
+            Inclination = orbit.Inclination;
+            LongitudeOfAscendingNode = orbit.LongitudeOfAscendingNode;
+            ArgumentOfPeriapsis = orbit.ArgumentOfPeriapsis;
+            MeanAnomalyAtEpoch = orbit.MeanAnomalyAtEpoch;
+            _parentMass = orbit._parentMass;
+            _myMass = orbit._myMass;
+            Epoch = orbit.Epoch;
+        }
 
         public OrbitDB(OrbitDB toCopy)
             : base(toCopy.Parent)
@@ -473,7 +492,7 @@ namespace Pulsar4X.ECSLib
         }
         #endregion
 
-        private void CalculateExtendedParameters()
+        protected void CalculateExtendedParameters()
         {
             if (IsStationary)
             {
@@ -510,6 +529,27 @@ namespace Pulsar4X.ECSLib
         private void OnDeserialized(StreamingContext context)
         {
             CalculateExtendedParameters();
+        }
+
+        public KeplerElements GetElements()
+        {
+            KeplerElements ke = new KeplerElements();
+            ke.SemiMajorAxis = SemiMajorAxis;                                            //a
+            ke.SemiMinorAxis = SemiMajorAxis * Math.Sqrt(1 - Eccentricity * Eccentricity);//b
+            ke.Eccentricity = Eccentricity;                                              //e
+            ke.Periapsis = Periapsis;                                                    //q
+            ke.Apoapsis = Apoapsis;                                                      //Q
+            ke.LoAN = LongitudeOfAscendingNode;                                          //Ω (upper case Omega)
+            ke.AoP = ArgumentOfPeriapsis;                                                //ω (lower case omega)
+            ke.Inclination = Inclination;                                                //i
+            ke.MeanMotion = MeanMotion;                                                  //n
+            ke.MeanAnomalyAtEpoch = MeanAnomalyAtEpoch;                                  //M0
+            ke.Epoch = Epoch;
+            ke.LinearEccentricity = Eccentricity * SemiMajorAxis;                        //ae
+            ke.OrbitalPeriod = OrbitalPeriod.TotalSeconds;
+            
+            //ke.TrueAnomalyAtEpoch  ;   //ν or f or  θ
+            return ke;
         }
 
         public override object Clone()
@@ -563,5 +603,32 @@ namespace Pulsar4X.ECSLib
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// This allows us to update an orbit fairly frequently, however it's a bit brittle, especialy where it interacts with treeheirarchy.
+    /// </summary>
+    public class OrbitUpdateOftenDB : OrbitDB
+    {
+
+        [JsonConstructor]
+        private OrbitUpdateOftenDB()
+        {
+        }
+
+        public OrbitUpdateOftenDB(OrbitDB orbit) : base(orbit.Parent)
+        {
+            SemiMajorAxis = orbit.SemiMajorAxis;
+            Eccentricity = orbit.Eccentricity;
+            Inclination = orbit.Inclination;
+            LongitudeOfAscendingNode = orbit.LongitudeOfAscendingNode;
+            ArgumentOfPeriapsis = orbit.ArgumentOfPeriapsis;
+            MeanAnomalyAtEpoch = orbit.MeanAnomalyAtEpoch;
+            _parentMass = orbit._parentMass;
+            _myMass = orbit._myMass;
+            Epoch = orbit.Epoch;
+            CalculateExtendedParameters();
+        }
+
     }
 }

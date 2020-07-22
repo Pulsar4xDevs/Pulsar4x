@@ -39,7 +39,7 @@ namespace Pulsar4X.ECSLib
             var name = new NameDB("Ellie");
             var AsteroidDmg = new AsteroidDamageDB();
             AsteroidDmg.FractureChance = new PercentValue(0.75f);
-            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.Density, massVolume.RadiusInM, 50);
+            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.Density_gcm, massVolume.RadiusInM, 50);
             var sensorPfil = new SensorProfileDB();
 
             planetInfo.SupportsPopulations = false;
@@ -50,8 +50,8 @@ namespace Pulsar4X.ECSLib
 
 
             var parent = target.GetDataBlob<OrbitDB>().Parent;
-            var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
-            var myMass = massVolume.Mass;
+            var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
+            var myMass = massVolume.MassDry;
 
             double sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
             OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
@@ -96,7 +96,7 @@ namespace Pulsar4X.ECSLib
             var name = new NameDB("Ellie");
             var AsteroidDmg = new AsteroidDamageDB();
             AsteroidDmg.FractureChance = new PercentValue(0.75f);
-            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.Density, massVolume.RadiusInM, 50);
+            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.Density_gcm, massVolume.RadiusInM, 50);
             var sensorPfil = new SensorProfileDB();
 
             planetInfo.SupportsPopulations = false;
@@ -104,8 +104,8 @@ namespace Pulsar4X.ECSLib
 
 
             var parent = origOrbit.Parent;
-            var parentMass = parent.GetDataBlob<MassVolumeDB>().Mass;
-            var myMass = massVolume.Mass;
+            var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
+            var myMass = massVolume.MassDry;
 
             double sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
             //OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, position, velocity, atDateTime);

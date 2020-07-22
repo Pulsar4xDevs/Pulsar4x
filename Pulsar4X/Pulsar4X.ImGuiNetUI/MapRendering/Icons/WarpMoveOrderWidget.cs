@@ -108,7 +108,7 @@ namespace Pulsar4X.SDL2UI
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 
-            _transitLeavePositionRalitive_m = Entity.GetPosition_m(_movingEntity, _transitLeaveDateTime);
+            _transitLeavePositionRalitive_m = Entity.GetRalitiveFuturePosition(_movingEntity, _transitLeaveDateTime);
 
         }
 
@@ -120,8 +120,8 @@ namespace Pulsar4X.SDL2UI
                 _arriveIcon.OnFrameUpdate(matrix, camera);
                 _linePoints = new SDL_Point[2];
 
-                var dvsp = camera.ViewCoordinate_AU(_departIcon.WorldPosition_AU);
-                var avsp = camera.ViewCoordinate_AU(_arriveIcon.WorldPosition_AU);
+                var dvsp = camera.ViewCoordinate_m(_departIcon.WorldPosition_m);
+                var avsp = camera.ViewCoordinate_m(_arriveIcon.WorldPosition_m);
                 _linePoints[0] = dvsp;
 
                 //SDL_Point arrive = matrix.Transform(_arriveIcon.WorldPosition_m.X, _arriveIcon.WorldPosition_m.Y);
@@ -313,10 +313,7 @@ namespace Pulsar4X.SDL2UI
             }
             Shapes[0] = _progradeArrow;
             
-            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
-            
-            var vcm = camera.ViewCoordinate_m(WorldPosition_m);
-            var vcau = camera.ViewCoordinate_AU(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
             
             var mirrorMtx = Matrix.NewMirrorMatrix(true, false);
             var scaleMtx = Matrix.NewScaleMatrix(Scale, Scale);

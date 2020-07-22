@@ -178,7 +178,7 @@ namespace Pulsar4X.ECSLib.Industry
         int IndustryPointCosts { get; }
         Guid IndustryTypeID { get; }
         
-        void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo);
+        void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo);
 
     }
 
@@ -324,7 +324,7 @@ namespace Pulsar4X.ECSLib.Industry
 
         internal static void ConstructStuff(Entity industryEntity)
         {
-            CargoStorageDB stockpile = industryEntity.GetDataBlob<CargoStorageDB>();
+            VolumeStorageDB stockpile = industryEntity.GetDataBlob<VolumeStorageDB>();
             Entity faction;
             industryEntity.Manager.FindEntityByGuid(industryEntity.FactionOwner, out faction);
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
@@ -397,7 +397,7 @@ namespace Pulsar4X.ECSLib.Industry
             }
         }
         
-        internal static void ConsumeResources(CargoStorageDB fromCargo, ref IDictionary<Guid, int> toUse)
+        internal static void ConsumeResources(VolumeStorageDB fromCargo, ref IDictionary<Guid, int> toUse)
         {   
             foreach (KeyValuePair<Guid, int> kvp in toUse.ToArray())
             {             
@@ -405,18 +405,18 @@ namespace Pulsar4X.ECSLib.Industry
                 
                 Guid cargoTypeID = cargoItem.CargoTypeID;
                 int amountUsedThisTick = 0;
-                if (fromCargo.StoredCargoTypes.ContainsKey(cargoTypeID))
+                if (fromCargo.TypeStores.ContainsKey(cargoTypeID))
                 {
-                    if (fromCargo.StoredCargoTypes[cargoTypeID].ItemsAndAmounts.ContainsKey(cargoItem.ID))
+                    if (fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
                     {
-                        amountUsedThisTick = Math.Min((int)fromCargo.StoredCargoTypes[cargoTypeID].ItemsAndAmounts[cargoItem.ID].amount, kvp.Value);
+                        amountUsedThisTick = Math.Min((int)fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits[cargoItem.ID], kvp.Value);
                     }
                 }
 
                 if (amountUsedThisTick > 0)
                 {
-                    StorageSpaceProcessor.RemoveCargo(fromCargo, cargoItem, amountUsedThisTick);
-                    toUse[kvp.Key] -= amountUsedThisTick;
+                    int used = fromCargo.RemoveCargoByUnit(cargoItem, amountUsedThisTick);
+                    toUse[kvp.Key] -= used;
                 }
             }         
         }
@@ -444,8 +444,8 @@ namespace Pulsar4X.ECSLib.Industry
         
         public short Delta { get; set; }
         
-        internal override int ActionLanes => 1; //blocks movement
-        internal override bool IsBlocking => true;
+        public override int ActionLanes => 1; //blocks movement
+        public override bool IsBlocking => true;
 
 
         private Entity _entityCommanding;
@@ -527,7 +527,7 @@ namespace Pulsar4X.ECSLib.Industry
         }
         
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand(DateTime atDateTime)
         {
             if (!IsRunning)
             {
@@ -576,7 +576,7 @@ namespace Pulsar4X.ECSLib.Industry
             return false;
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (_job.Auto == false && _job.NumberCompleted == _job.NumberOrdered)
             {

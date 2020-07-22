@@ -79,11 +79,11 @@ namespace Pulsar4X.Tests
                     ability.SetValue();
             }
 
-            designer.ComponentDesignAttributes["Mass"].SetValueFromInput(250);
+            designer.ComponentDesignAttributes["Size"].SetValueFromInput(250);
 
             ComponentDesign engineDesign = designer.CreateDesign(_faction);
 
-            Assert.AreEqual(250, engineDesign.Mass);
+            Assert.AreEqual(250, engineDesign.MassPerUnit);
 
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(componentTemplateSD.ID, componentTemplateSD);
@@ -114,18 +114,18 @@ namespace Pulsar4X.Tests
             ComponentTemplateSD cargo = GeneralCargo();
 
             ComponentDesigner cargoDesigner = new ComponentDesigner(cargo, _faction.GetDataBlob<FactionTechDB>());
-            cargoDesigner.ComponentDesignAttributes["Mass"].SetValue();
+            cargoDesigner.ComponentDesignAttributes["Size"].SetValue();
  
             ComponentDesign cargoDesign = cargoDesigner.CreateDesign(_faction);
             
-            bool hasAttribute = cargoDesign.TryGetAttribute<CargoStorageAtbDB>(out var attributeDB);
+            bool hasAttribute = cargoDesign.TryGetAttribute<VolumeStorageAtb>(out var attributeDB);
             Assert.IsTrue(hasAttribute);
             
 
             
-            CargoTypeSD cargotype = _game.StaticData.CargoTypes[attributeDB.CargoTypeGuid];
+            CargoTypeSD cargotype = _game.StaticData.CargoTypes[attributeDB.StoreTypeID];
 
-            Assert.AreEqual(100, attributeDB.StorageCapacity);
+            Assert.AreEqual(100, attributeDB.MaxVolume);
 
             Dictionary<Guid, ComponentTemplateSD> componentsDict = new Dictionary<Guid, ComponentTemplateSD>();
             componentsDict.Add(cargo.ID, cargo);
@@ -555,7 +555,7 @@ namespace Pulsar4X.Tests
             generalCargoCapacityAttribute.Name = "Construction Points";
             generalCargoCapacityAttribute.DescriptionFormula = "";
             generalCargoCapacityAttribute.GuiHint = GuiHint.None;
-            generalCargoCapacityAttribute.AttributeType = typeof(CargoStorageAtbDB).ToString();
+            generalCargoCapacityAttribute.AttributeType = typeof(VolumeStorageAtb).ToString();
             generalCargoCapacityAttribute.AttributeFormula = "AtbConstrArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(1), Ability(2))";
             component.ComponentAtbSDs.Add(generalCargoCapacityAttribute);
 

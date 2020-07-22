@@ -4,8 +4,8 @@ namespace Pulsar4X.ECSLib.Industry
 {
     public class LaunchShipCmd : EntityCommand
     {
-        internal override int ActionLanes => 1;
-        internal override bool IsBlocking => true;
+        public override int ActionLanes => 1;
+        public override bool IsBlocking => true;
 
         Entity _factionEntity;
         Entity _entityCommanding;
@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib.Industry
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand(DateTime atDateTime)
         {
             if (!IsRunning)
             {
@@ -52,13 +52,13 @@ namespace Pulsar4X.ECSLib.Industry
                         {
                             var planet = _entityCommanding.GetDataBlob<ColonyInfoDB>().PlanetEntity;
                             
-                            FuelCost = OrbitMath.FuelCostToLowOrbit(planet, design.Mass);
+                            FuelCost = OrbitMath.FuelCostToLowOrbit(planet, design.MassPerUnit);
                             targetPosition = new Vector3(0, OrbitMath.LowOrbitRadius(planet), 0);
                             IsRunning = true;
                         }
                         else
                         {
-                            FuelCost = OrbitMath.TsiolkovskyFuelCost(design.Mass, 275, 1);
+                            FuelCost = OrbitMath.TsiolkovskyFuelCost(design.MassPerUnit, 275, 1);
                             //targetOrbit = (OrbitDB)_entityCommanding.GetDataBlob<OrbitDB>().Clone();
                             targetPosition = _entityCommanding.GetDataBlob<PositionDB>().RelativePosition_m;
                             IsRunning = true;
@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib.Industry
             }
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if (_hasLaunched)
                 return true;

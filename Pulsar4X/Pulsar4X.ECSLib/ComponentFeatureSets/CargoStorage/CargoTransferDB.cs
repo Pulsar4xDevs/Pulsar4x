@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -12,19 +13,31 @@ namespace Pulsar4X.ECSLib
 
         internal Entity CargoFromEntity { get; set; }
         [JsonIgnore]
-        internal CargoStorageDB CargoFromDB { get; set; }
+        internal VolumeStorageDB CargoFromDB { get; set; }
 
         internal Entity CargoToEntity { get; set; }
         [JsonIgnore]
-        internal CargoStorageDB CargoToDB { get; set; }
+        internal VolumeStorageDB CargoToDB { get; set; }
 
-        internal List<(ICargoable item, long amount)> OrderedToTransfer { get; set; }
-        internal List<(ICargoable item, long amount)> ItemsLeftToTransfer;
+        internal List<(ICargoable item, int amount)> OrderedToTransfer { get; set; }
+        internal List<(ICargoable item, int amount)> ItemsLeftToTransfer;
 
         internal double DistanceBetweenEntitys { get; set; }
         internal int TransferRateInKG { get; set; } = 1000;
 
-
+        /// <summary>
+        /// Threadsafe gets items left to transfer. don't call this every ui frame!
+        /// (or you could cause deadlock slowdowns with the processing)
+        /// </summary>
+        /// <returns></returns>
+        public List<(ICargoable item, int unitCount)> GetItemsToTransfer()
+        {
+            ICollection ic = ItemsLeftToTransfer;
+            lock (ic.SyncRoot) 
+            {
+                return new List<(ICargoable item, int unitCount)>(ItemsLeftToTransfer);
+            }
+        }
 
         public CargoTransferDB()
         {

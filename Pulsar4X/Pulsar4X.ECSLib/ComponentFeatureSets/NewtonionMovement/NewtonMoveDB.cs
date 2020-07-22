@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.Vectors;
 
@@ -13,6 +14,9 @@ namespace Pulsar4X.ECSLib
         /// in m/s
         /// </summary>
         public double ExhaustVelocity;
+        /// <summary>
+        /// this is a specific mineral/refined materal etc, rather than a cargo type
+        /// </summary>
         public Guid FuelType;
         
         /// <summary>
@@ -73,9 +77,55 @@ namespace Pulsar4X.ECSLib
         /// in Kg/s
         /// </summary>
         public double FuelBurnRate = 0;
-
-        public double DeltaV = 0;
+        public double TotalFuel_kg { get; private set; }
         
+        /// <summary>
+        /// non fuel mass. will need updating when non fuel cargo is added/removed.
+        /// (should be the mass of the ship plus any cargo including fuel not usable by this ship).
+        /// </summary>
+        public double DryMass_kg { get; internal set; } 
+        public double DeltaV { get; private set; } = 0;
+
+        /// <summary>
+        /// removes fuel and correct amount of DV.
+        /// </summary>
+        /// <param name="fuel">in kg</param>
+        internal void BurnFuel(double fuel)
+        {
+            TotalFuel_kg -= fuel;
+            DeltaV = OrbitMath.TsiolkovskyRocketEquation(TotalFuel_kg, DryMass_kg, ExhaustVelocity);
+        }
+
+        /// <summary>
+        /// removes deltaV and correct amount of fuel.
+        /// </summary>
+        /// <param name="dv"></param>
+        internal void BurnDeltaV(double dv)
+        {
+            DeltaV -= dv;
+            TotalFuel_kg -= OrbitMath.TsiolkovskyFuelUse(DryMass_kg + TotalFuel_kg, ExhaustVelocity, dv);
+        }
+
+        /// <summary>
+        /// Adds fuel, and updates DeltaV.
+        /// </summary>
+        /// <param name="fuel"></param>
+        internal void AddFuel(double fuel)
+        {
+            TotalFuel_kg += fuel;
+            DeltaV = OrbitMath.TsiolkovskyRocketEquation(DryMass_kg + TotalFuel_kg, DryMass_kg, ExhaustVelocity);
+        }
+        
+        /// <summary>
+        /// Sets a given amount of fuel, and updates DeltaV.
+        /// </summary>
+        /// <param name="fuel"></param>
+        internal void SetFuel(double fuel)
+        {
+            TotalFuel_kg = fuel;
+            DeltaV = OrbitMath.TsiolkovskyRocketEquation(DryMass_kg + TotalFuel_kg, DryMass_kg, ExhaustVelocity);
+        }
+
         [JsonConstructor]
         private NewtonThrustAbilityDB()
         {
@@ -92,6 +142,8 @@ namespace Pulsar4X.ECSLib
             ExhaustVelocity = db.ExhaustVelocity;
             FuelType = db.FuelType;
             FuelBurnRate = db.FuelBurnRate;
+            DryMass_kg = db.DryMass_kg;
+            TotalFuel_kg = db.TotalFuel_kg;
             DeltaV = db.DeltaV;
         }
 
@@ -105,15 +157,19 @@ namespace Pulsar4X.ECSLib
     {
         internal DateTime LastProcessDateTime = new DateTime();
         
-        public Vector3 DeltaVForManuver_m { get; internal set; }
-        public Vector3 DeltaVForManuver_AU
+        /// <summary>
+        /// Orbital Frame Of Reference: Y is prograde
+        /// </summary>
+        public Vector3 DeltaVForManuver_FoRO_m { get; internal set; }
+        /// <summary>
+        /// Orbital Frame Of Reference: Y is prograde
+        /// </summary>
+        public Vector3 DeltaVForManuver_FoRO_AU
         {
-            get { return Distance.MToAU(DeltaVForManuver_m); }
+            get { return Distance.MToAU(DeltaVForManuver_FoRO_m); }
         }
         public DateTime ActionOnDateTime { get; internal set; }
         
-        
-
         /// <summary>
         /// Parent ralitive velocity vector. 
         /// </summary>
@@ -134,7 +190,7 @@ namespace Pulsar4X.ECSLib
         {
             CurrentVector_ms = velocity_ms;
             SOIParent = sphereOfInfluenceParent;
-            ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().Mass;
+            ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().MassDry;
             LastProcessDateTime = sphereOfInfluenceParent.Manager.ManagerSubpulses.StarSysDateTime;
         }
         public NewtonMoveDB(NewtonMoveDB db)
@@ -147,6 +203,17 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new NewtonMoveDB(this);
+        }
+        
+        public KeplerElements GetElements()
+        {
+            // if there is not a change in Dv then the kepler elements wont have changed, it might be better to store them?
+            double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().MassDry;
+            var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, ParentMass);
+            var pos = OwningEntity.GetDataBlob<PositionDB>().RelativePosition_m;
+            var dateTime = OwningEntity.StarSysDateTime;
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, CurrentVector_ms, dateTime);
+            return ke;
         }
     }
 }

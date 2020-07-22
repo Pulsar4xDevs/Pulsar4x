@@ -76,7 +76,9 @@ namespace Pulsar4X.SDL2UI
                 _armorNames[i]= armorMat.Name;
                 i++;
             }
-            
+            //TODO: bleed over from mod data to get a default armor...
+            _armor = StaticRefLib.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            _armorThickness = 3;
             _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
         }
 
@@ -84,9 +86,7 @@ namespace Pulsar4X.SDL2UI
         {
             RefreshComponentDesigns();
             _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
-            //TODO: bleed over from mod data to get a default armor...
-            _armor = StaticRefLib.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
-            _armorThickness = 3;
+
         }
 
         internal static ShipDesignUI GetInstance()
@@ -375,7 +375,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.NextColumn();
             ImGui.Text("Mass");
             ImGui.NextColumn();
-            ImGui.Text("Volume_km3");
+            ImGui.Text("Volume_m3");
             ImGui.NextColumn();
             ImGui.Separator();
 
@@ -395,9 +395,9 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 ImGui.NextColumn();
-                ImGui.Text(design.Mass.ToString());
+                ImGui.Text(design.MassPerUnit.ToString());
                 ImGui.NextColumn();
-                ImGui.Text(design.Volume_m3.ToString());
+                ImGui.Text(Stringify.Volume(design.VolumePerUnit));
                 ImGui.NextColumn();
 
             }
@@ -474,7 +474,7 @@ namespace Pulsar4X.SDL2UI
 
                 foreach (var component in _shipComponents)
                 {
-                    mass += component.design.Mass * component.count;
+                    mass += component.design.MassPerUnit * component.count;
                     if (component.design.HasAttribute<NewtonionThrustAtb>())
                     {
                         var atb = component.design.GetAttribute<NewtonionThrustAtb>();
@@ -507,11 +507,11 @@ namespace Pulsar4X.SDL2UI
                         estor += atb.MaxStore * component.count;
                     }
 
-                    if (component.design.HasAttribute<CargoStorageAtbDB>())
+                    if (component.design.HasAttribute<VolumeStorageAtb>())
                     {
-                        var atb = component.design.GetAttribute<CargoStorageAtbDB>();
-                        var typeid = atb.CargoTypeGuid;
-                        var amount = atb.StorageCapacity * component.count;
+                        var atb = component.design.GetAttribute<VolumeStorageAtb>();
+                        var typeid = atb.StoreTypeID;
+                        var amount = atb.MaxVolume * component.count;
                         if (!cstore.ContainsKey(typeid))
                             cstore.Add(typeid, amount);
                         else

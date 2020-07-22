@@ -10,9 +10,13 @@ namespace Pulsar4X.ECSLib
 {
     public static class DefaultStartFactory
     {
-        private static ComponentDesign _thruster500;
+        private static ComponentDesign _merlin;
+        private static ComponentDesign _f1;
+        private static ComponentDesign _raptor;
+        private static ComponentDesign _rs25;
         private static ComponentDesign _warpDrive;
-        private static ComponentDesign _fuelTank_500;
+        private static ComponentDesign _fuelTank_1000;
+        private static ComponentDesign _fuelTank_2500;
         private static ComponentDesign _laser;
         private static ComponentDesign _payload;
         private static ComponentDesign _missileSRB;
@@ -25,10 +29,12 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _battery;
         private static ComponentDesign _cargoHold;
         private static ComponentDesign _cargoCompartment;
-        private static ComponentDesign _spacePort;
-        private static ShipDesign _defaultShipDesign;
+        private static ComponentDesign _shipYard;
         private static ComponentDesign _missileTube;
         private static ComponentDesign _ordnanceStore;
+        private static ShipDesign _defaultShipDesign;
+        private static ShipDesign _spaceXStarShipDesign;
+        private static OrdnanceDesign _missile;
         
 
         // this code is a test for multiple systems, worth mentioning it utterly failed, modularity is good when you have it huh.ç
@@ -173,6 +179,8 @@ namespace Pulsar4X.ECSLib
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
 
+            Entity targetFaction = FactionFactory.CreateFaction(game, "OpFor");
+            
             var namedEntites = solSys.GetAllEntitiesWithDataBlob<NameDB>();
             foreach (var entity in namedEntites)
             {
@@ -208,8 +216,12 @@ namespace Pulsar4X.ECSLib
             ResearchProcessor.CheckRequrements(factionTech);
             
             DefaultThrusterDesign(game, factionEntity);
+            F1ThrusterDesign(game, factionEntity);
+            RaptorThrusterDesign(game, factionEntity);
+            RS25ThrusterDesign(game, factionEntity);
             DefaultWarpDesign(game, factionEntity);
             DefaultFuelTank(game, factionEntity);
+            LargeFuelTank(game, factionEntity);
             DefaultCargoInstalation(game, factionEntity);
             DefaultSimpleLaser(game, factionEntity);
             DefaultBFC(game, factionEntity);
@@ -230,29 +242,34 @@ namespace Pulsar4X.ECSLib
             EntityManipulation.AddComponentToEntity(colonyEntity, labEntity);
             EntityManipulation.AddComponentToEntity(colonyEntity, facEntity);
            
-            EntityManipulation.AddComponentToEntity(colonyEntity, _fuelTank_500);
+            EntityManipulation.AddComponentToEntity(colonyEntity, _fuelTank_1000);
             
             EntityManipulation.AddComponentToEntity(colonyEntity, _cargoInstalation);
             EntityManipulation.AddComponentToEntity(marsColony, _cargoInstalation);
             
             EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
-            EntityManipulation.AddComponentToEntity(colonyEntity, SpacePort(factionEntity));
+            EntityManipulation.AddComponentToEntity(colonyEntity, ShipYard(factionEntity));
+            EntityManipulation.AddComponentToEntity(colonyEntity, _ordnanceStore, 10);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
+            var earthCargo = colonyEntity.GetDataBlob<VolumeStorageDB>();
 
             colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             var rawSorium = NameLookup.GetMineralSD(game, "Sorium");
-            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), rawSorium, 5000);
-            var iron = NameLookup.GetMineralSD(game, "Iron");
-            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), iron, 5000);
-            var hydrocarbon = NameLookup.GetMineralSD(game, "Hydrocarbons");
-            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), hydrocarbon, 5000);
-            var stainless = NameLookup.GetMaterialSD(game, "Stainless Steel");
-            StorageSpaceProcessor.AddCargo(colonyEntity.GetDataBlob<CargoStorageDB>(), stainless, 1000);
-            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
-
             
-
+            var iron = NameLookup.GetMineralSD(game, "Iron");
+            colonyEntity.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(iron, 5000);
+            
+            var hydrocarbon = NameLookup.GetMineralSD(game, "Hydrocarbons");
+            colonyEntity.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(hydrocarbon, 5000);
+            
+            var stainless = NameLookup.GetMaterialSD(game, "Stainless Steel");
+            colonyEntity.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(iron, 1000);
+            colonyEntity.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(_missile, 100);
+            colonyEntity.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(_merlin, 5);
+            
+            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
+            
             //test systems
             //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateEccTest(game).ID);
             //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateLongitudeTest(game).ID);
@@ -265,36 +282,59 @@ namespace Pulsar4X.ECSLib
             ShipDesign shipDesign = DefaultShipDesign(game, factionEntity);
             ShipDesign gunShipDesign = GunShipDesign(game, factionEntity);
 
-            Entity ship1 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Serial Peacemaker");
+            Entity gunShip0 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Ensuing Calm");
             Entity ship3 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Touch-and-Go");
-            Entity gunShip = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Prevailing Stillness");
+            Entity gunShip1 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Prevailing Stillness");
             Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), factionEntity, earth, solSys, "Planet Express Ship");
+            Entity starship = ShipFactory.CreateShip(SpaceXStarShip(game, factionEntity), factionEntity, earth, solSys, "SN10");
             var fuel = NameLookup.GetMaterialSD(game, "Sorium Fuel");
             var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
-            StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), rp1, 15000);
-            StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), rp1, 15000);
-            StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), rp1, 15000);
-            StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), rp1, 15000);
-            StorageSpaceProcessor.AddCargo(gunShip.GetDataBlob<CargoStorageDB>(), MissileDesign250(game, factionEntity), 20);
-            StorageSpaceProcessor.AddCargo(courier.GetDataBlob<CargoStorageDB>(), rp1, 15000);
+            var methalox = NameLookup.GetMaterialSD(game, "Methalox");
+            var hydrolox = NameLookup.GetMaterialSD(game, "Hydrolox");
+
+            earthCargo.AddCargoByUnit(rp1, 10000);
+            earthCargo.AddCargoByUnit(methalox, 10000);
+            earthCargo.AddCargoByUnit(hydrolox, 10000);
+   
+            gunShip0.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
+            gunShip1.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
+            ship2.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
+            ship3.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
+            var count = courier.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(hydrolox, 50000);
+            starship.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(methalox, 1200000);
+            
+            gunShip0.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);
+            gunShip1.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);    
+            
             var elec = NameLookup.GetMaterialSD(game, "Electrical Energy");
-            ship1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
-            gunShip.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            gunShip1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             
             
+            Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (10 * Math.PI / 180), "Target Drone0");
+            Entity targetDrone1 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (22.5 * Math.PI / 180), "Target Drone1");
+            Entity targetDrone2 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (45 * Math.PI / 180), "Target Drone2");
+            targetDrone0.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone0");
+            targetDrone1.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone1");
+            targetDrone2.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone2");
+
+            targetDrone1.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 1000);
+            targetDrone2.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 1000);
+
             
-            NewtonionMovementProcessor.CalcDeltaV(ship1);
-            NewtonionMovementProcessor.CalcDeltaV(ship2);
-            NewtonionMovementProcessor.CalcDeltaV(ship3);
-            NewtonionMovementProcessor.CalcDeltaV(gunShip);
-            NewtonionMovementProcessor.CalcDeltaV(courier);
-            //StorageSpaceProcessor.AddCargo(ship1.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
-            //StorageSpaceProcessor.AddCargo(ship2.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
-            //StorageSpaceProcessor.AddCargo(ship3.GetDataBlob<CargoStorageDB>(), fuel, 200000000000);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(gunShip0);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship2);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship3);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(gunShip1);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(courier);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(starship);
+
+            
+            
             
 
             double test_a = 0.5; //AU
@@ -303,8 +343,8 @@ namespace Pulsar4X.ECSLib
             double test_loan = 0;   //°
             double test_aop = 0;    //°
             double test_M0 = 0;     //°
-            double test_bodyMass = ship2.GetDataBlob<MassVolumeDB>().Mass;
-            OrbitDB testOrbtdb_ship2 = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().Mass, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
+            double test_bodyMass = ship2.GetDataBlob<MassVolumeDB>().MassDry;
+            OrbitDB testOrbtdb_ship2 = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().MassDry, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
             ship2.RemoveDataBlob<OrbitDB>();
             ship2.SetDataBlob(testOrbtdb_ship2);
             ship2.GetDataBlob<PositionDB>().SetParent(solStar);
@@ -313,25 +353,25 @@ namespace Pulsar4X.ECSLib
             test_a = 0.51;
             test_i = 180;
             test_aop = 0;
-            OrbitDB testOrbtdb_ship3 = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().Mass, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
+            OrbitDB testOrbtdb_ship3 = OrbitDB.FromAsteroidFormat(solStar, solStar.GetDataBlob<MassVolumeDB>().MassDry, test_bodyMass, test_a, test_e, test_i, test_loan, test_aop, test_M0, StaticRefLib.CurrentDateTime);
             ship3.RemoveDataBlob<OrbitDB>();
             ship3.SetDataBlob(testOrbtdb_ship3);
             ship3.GetDataBlob<PositionDB>().SetParent(solStar);
             StaticRefLib.ProcessorManager.RunProcessOnEntity<OrbitDB>(ship3, 0);
 
             
-            gunShip.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector3(8.52699302490434E-05, 0, 0);
+            gunShip1.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector3(8.52699302490434E-05, 0, 0);
             //give the gunship a hypobolic orbit to test:
             //var orbit = OrbitDB.FromVector(earth, gunShip, new Vector4(0, velInAU, 0, 0), game.CurrentDateTime);
-            gunShip.RemoveDataBlob<OrbitDB>();
+            gunShip1.RemoveDataBlob<OrbitDB>();
             var nmdb = new NewtonMoveDB(earth, new Vector3(0, -10000.0, 0));
-            gunShip.SetDataBlob<NewtonMoveDB>(nmdb);
+            gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);
 
 
 
-            solSys.SetDataBlob(ship1.ID, new TransitableDB());
+            solSys.SetDataBlob(gunShip0.ID, new TransitableDB());
             solSys.SetDataBlob(ship2.ID, new TransitableDB());
-            solSys.SetDataBlob(gunShip.ID, new TransitableDB());
+            solSys.SetDataBlob(gunShip1.ID, new TransitableDB());
             solSys.SetDataBlob(courier.ID, new TransitableDB());
 
             //Entity ship = ShipFactory.CreateShip(shipDesign, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
@@ -387,6 +427,33 @@ namespace Pulsar4X.ECSLib
             return _defaultShipDesign;
         }
 
+        public static ShipDesign SpaceXStarShip(Game game, Entity faction)
+        {
+            /*
+             * targetStats:
+             * dry mass: 120,000 kg
+             * gross mass: 1,320,000 kg
+             * propellent mass: 1,200,000 kg max
+             * 6.9 Dv
+             * 3,700 isp in vac
+             */
+            if (_spaceXStarShipDesign != null)
+                return _spaceXStarShipDesign;
+            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
+            List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
+            {
+                (ShipPassiveSensor(game, faction), 1),
+                (ShipSmallCargo(game, faction), 1),
+                (LargeFuelTank(game, faction), 1),
+                (RaptorThrusterDesign(game, faction), 3), //3 for vac
+                
+            };
+            ArmorSD stainless = game.StaticData.ArmorTypes[new Guid("05dce711-8846-488a-b0f3-57fd7924b268")];
+            _defaultShipDesign = new ShipDesign(factionInfo, "Starship", components2, (stainless, 3));
+            _defaultShipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _defaultShipDesign.Armor);
+            return _defaultShipDesign;
+        }
+
         public static ShipDesign GunShipDesign(Game game, Entity faction)
         {
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
@@ -398,14 +465,32 @@ namespace Pulsar4X.ECSLib
                 (DefaultMissileTube(game, faction),1),
                 (ShipSmallOrdnanceStore(game, faction), 2),
                 (ShipSmallCargo(game,faction), 1),
-                (_fuelTank_500, 2),
+                (_fuelTank_1000, 2),
                 (_warpDrive, 4),
                 (_battery, 3),
                 (_reactor, 1),
-                (_thruster500, 4),
+                (_merlin, 4),
             };
             ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
             var shipdesign = new ShipDesign(factionInfo, "Sanctum Adroit GunShip", components2, (plastic, 3));
+            shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
+            return shipdesign;
+        }
+
+        public static ShipDesign TargetDrone(Game game, Entity faction)
+        {
+            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
+            List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
+            {
+                (_sensor_50, 1),
+                (_fuelTank_1000, 2),
+                (_warpDrive, 4),
+                (_battery, 3),
+                (_reactor, 1),
+                (_merlin, 4),
+            };
+            ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            var shipdesign = new ShipDesign(factionInfo, "TargetDrone", components2, (plastic, 3));
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
         }
@@ -418,12 +503,13 @@ namespace Pulsar4X.ECSLib
                 (DefaultSimpleLaser(game, faction), 1),     
                 (DefaultBFC(game, faction), 1),        
                 (_sensor_50, 1),    
-                (DefaultFuelTank(game, faction), 2),
+                (_fuelTank_2500, 1),
+                (_fuelTank_2500, 1),
                 (_cargoHold, 1),   
                 (_warpDrive, 4),
                 (_battery, 3),
                 (_reactor, 1),
-                (_thruster500, 4),
+                (_rs25, 4),
             };
             ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
             var shipdesign = new ShipDesign(factionInfo, "Cargo Courier", components2, (plastic, 3));
@@ -433,6 +519,8 @@ namespace Pulsar4X.ECSLib
 
         public static OrdnanceDesign MissileDesign250(Game game, Entity faction)
         {
+            if (_missile != null)
+                return _missile;
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
 
             List<(ComponentDesign, int)> components = new List<(ComponentDesign, int)>()
@@ -441,41 +529,103 @@ namespace Pulsar4X.ECSLib
                 (DefaultMissileSensors(game, faction), 1),
                 (DefaultMissileSRB(game, faction), 1),
             };
-            var design = new OrdnanceDesign(factionInfo, "Missile250", components);
-            return design;
+            double fuelkg = 225;
+            _missile = new OrdnanceDesign(factionInfo, "Missile250", fuelkg, components);
+            return _missile;
         }
 
-        public static ComponentDesign SpacePort(Entity faction)
+        public static ComponentDesign ShipYard(Entity faction)
         {
-            if (_spacePort != null)
-                return _spacePort;
+            if (_shipYard != null)
+                return _shipYard;
             ComponentDesigner spacePortDesigner;
             ComponentTemplateSD spaceportSD = StaticRefLib.StaticData.ComponentTemplates[new Guid("0BD304FF-FDEA-493C-8979-15FE86B7123E")];
             spacePortDesigner = new ComponentDesigner(spaceportSD, faction.GetDataBlob<FactionTechDB>());
-            spacePortDesigner.Name = "Space Port";
-            _spacePort = spacePortDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_spacePort.TechID);
-            return _spacePort;
+            spacePortDesigner.Name = "Ship Yard";
+            _shipYard = spacePortDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_shipYard.TechID);
+            return _shipYard;
         }
 
         public static ComponentDesign DefaultThrusterDesign(Game game, Entity faction)
         {
-            if (_thruster500 != null)
-                return _thruster500;
+            if (_merlin != null)
+                return _merlin;
             
             ComponentDesigner engineDesigner;
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("b12f50f6-ac68-4a49-b147-281a9bb34b9b")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(500); 
-            engineDesigner.Name = "Thruster 500";
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(630); 
+            engineDesigner.Name = "Merlin";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
    
-            _thruster500 = engineDesigner.CreateDesign(faction);
+            _merlin = engineDesigner.CreateDesign(faction);
             
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_thruster500.TechID);
-            return _thruster500;
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_merlin.TechID);
+            return _merlin;
         }
+        
+        public static ComponentDesign F1ThrusterDesign(Game game, Entity faction)
+        {
+            if (_f1 != null)
+                return _f1;
+            
+            ComponentDesigner engineDesigner;
+
+            ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("b12f50f6-ac68-4a49-b147-281a9bb34b9b")];
+            engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(18500); 
+            engineDesigner.Name = "F1";
+            //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
+   
+            _f1 = engineDesigner.CreateDesign(faction);
+            
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_f1.TechID);
+            return _f1;
+        }
+        
+        public static ComponentDesign RaptorThrusterDesign(Game game, Entity faction)
+        {
+            if (_raptor != null)
+                return _raptor;
+            
+            ComponentDesigner engineDesigner;
+
+            ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("B03FE82F-EE70-4A9A-AC61-5A7D44A3364E")];
+            engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1500); 
+            engineDesigner.Name = "Raptor";
+            //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
+   
+            _raptor = engineDesigner.CreateDesign(faction);
+            
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_raptor.TechID);
+            return _raptor;
+        }
+        
+        public static ComponentDesign RS25ThrusterDesign(Game game, Entity faction)
+        {
+            if (_rs25 != null)
+                return _rs25;
+            
+            ComponentDesigner engineDesigner;
+
+            ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("A0F3E5BB-0AA6-41D0-9873-5A7AC9080B69")];
+            engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(3527); 
+            engineDesigner.Name = "RS-25";
+            //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
+   
+            _rs25 = engineDesigner.CreateDesign(faction);
+            
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_rs25.TechID);
+            return _rs25;
+        }
+
+        
+        
+        
         public static ComponentDesign DefaultWarpDesign(Game game, Entity faction)
         {
             if (_warpDrive != null)
@@ -497,16 +647,30 @@ namespace Pulsar4X.ECSLib
 
         public static ComponentDesign DefaultFuelTank(Game game, Entity faction)
         {
-            if (_fuelTank_500 != null)
-                return _fuelTank_500;
+            if (_fuelTank_1000 != null)
+                return _fuelTank_1000;
             ComponentDesigner fuelTankDesigner;
-            ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("E7AC4187-58E4-458B-9AEA-C3E07FC993CB")];
+            ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("3528600E-3A1C-488C-BAE6-60251D1156AB")];
             fuelTankDesigner = new ComponentDesigner(tankSD, faction.GetDataBlob<FactionTechDB>());
-            fuelTankDesigner.ComponentDesignAttributes["Tank Size"].SetValueFromInput(2500);
-            fuelTankDesigner.Name = "Tank-500";
-            _fuelTank_500 = fuelTankDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_500.TechID);
-            return _fuelTank_500;
+            fuelTankDesigner.ComponentDesignAttributes["Tank Volume"].SetValueFromInput(1000);
+            fuelTankDesigner.Name = "Tank-2500";
+            _fuelTank_1000 = fuelTankDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_1000.TechID);
+            return _fuelTank_1000;
+        }
+        
+        public static ComponentDesign LargeFuelTank(Game game, Entity faction)
+        {
+            if (_fuelTank_2500 != null)
+                return _fuelTank_2500;
+            ComponentDesigner fuelTankDesigner;
+            ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("3528600E-3A1C-488C-BAE6-60251D1156AB")];
+            fuelTankDesigner = new ComponentDesigner(tankSD, faction.GetDataBlob<FactionTechDB>());
+            fuelTankDesigner.ComponentDesignAttributes["Tank Volume"].SetValueFromInput(2500);
+            fuelTankDesigner.Name = "Tank-1200t";
+            _fuelTank_2500 = fuelTankDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_2500.TechID);
+            return _fuelTank_2500;
         }
 
         public static ComponentDesign DefaultSimpleLaser(Game game, Entity faction)
@@ -568,8 +732,8 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner srbDesigner;
             ComponentTemplateSD srbSD = game.StaticData.ComponentTemplates[new Guid("9FDB2A15-4413-40A9-9229-19D05B3765FE")];
             srbDesigner = new ComponentDesigner(srbSD, faction.GetDataBlob<FactionTechDB>());
-            srbDesigner.ComponentDesignAttributes["Engine Mass"].SetValueFromInput(1);
-            srbDesigner.ComponentDesignAttributes["Fuel Mass"].SetValueFromInput(234);
+            srbDesigner.ComponentDesignAttributes["Engine Mass"].SetValueFromInput(10);
+            
             srbDesigner.Name = "SRB 235";
             _missileSRB = srbDesigner.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileSRB.TechID);
@@ -609,7 +773,7 @@ namespace Pulsar4X.ECSLib
         public static ComponentDesign DefaultCargoInstalation(Game game, Entity faction)
         {
             ComponentDesigner componentDesigner;
-            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{B8239721-B60E-4C11-8E45-5F64F6BA5FA5}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
             componentDesigner.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000000);
             componentDesigner.Name = "CargoInstalation1";
@@ -650,7 +814,7 @@ namespace Pulsar4X.ECSLib
             if (_cargoHold != null)
                 return _cargoHold;
             ComponentDesigner cargoComponent;
-            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{B8239721-B60E-4C11-8E45-5F64F6BA5FA5}")];
             cargoComponent = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
             cargoComponent.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(5000); //5t component
             cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(500);
@@ -666,7 +830,7 @@ namespace Pulsar4X.ECSLib
             if (_cargoCompartment != null)
                 return _cargoCompartment;
             ComponentDesigner cargoComponent;
-            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{30cd60f8-1de3-4faa-acba-0933eb84c199}")];
+            ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{B8239721-B60E-4C11-8E45-5F64F6BA5FA5}")];
             cargoComponent = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
             cargoComponent.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000); //5t component
             cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(500);

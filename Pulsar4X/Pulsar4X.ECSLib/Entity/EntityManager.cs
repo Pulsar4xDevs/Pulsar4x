@@ -356,9 +356,9 @@ namespace Pulsar4X.ECSLib
                     Datablob = db,
                     ChangeType = change
                 };
-                foreach (var item in EntityListners)
+                foreach (var listner in EntityListners)
                 {
-                    item.AddChange(changeData);
+                    listner.AddChange(changeData);
                 }
             }
 
@@ -368,6 +368,11 @@ namespace Pulsar4X.ECSLib
         }
 
         #region Public API Functions
+
+        public List<Entity> GetAllEntites()
+        {
+            return new List<Entity>(_entities);
+        }
 
         /// <summary>
         /// Returns a list of entities that have datablob type T.

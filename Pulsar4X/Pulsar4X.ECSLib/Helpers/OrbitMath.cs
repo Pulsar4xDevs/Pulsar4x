@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
         public double MeanMotion;           //n
         public double MeanAnomalyAtEpoch;   //M0
         public double TrueAnomalyAtEpoch;   //ν or f or  θ
-        //public double Period              //P
+        public double OrbitalPeriod;        //P
         //public double EccentricAnomaly    //E
         public DateTime Epoch;                //
     }
@@ -88,7 +88,7 @@ namespace Pulsar4X.ECSLib
 
             
             double trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
-            double argOfPeriaps = GetArgumentOfPeriapsis2(position, inclination, longdOfAN, trueAnomaly);
+            double argOfPeriaps = GetArgumentOfPeriapsis(position, inclination, longdOfAN, trueAnomaly);
             var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
             
 
@@ -108,6 +108,7 @@ namespace Pulsar4X.ECSLib
             ke.MeanMotion = meanMotion;
             ke.MeanAnomalyAtEpoch = meanAnomaly;
             ke.TrueAnomalyAtEpoch = trueAnomaly;
+            ke.OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajorAxis, 3) / standardGravParam);
             ke.Epoch = epoch; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
             //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
 
@@ -131,7 +132,7 @@ namespace Pulsar4X.ECSLib
             return Vector3.Vector3FromDecimals(X, Y, Z);
         }
 
-        public static double CalculateStandardGravityParameter(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
+        public static double CalculateStandardGravityParameterInKm3S2(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
         {
             double sgpInKm3S2 = CalculateStandardGravityParameterInM3S2(bodyBeingOrbitedMassInKg, orbiterMassInKg) / Math.Pow(GameConstants.Units.KmPerAu, 3);
             return sgpInKm3S2;
@@ -167,9 +168,17 @@ namespace Pulsar4X.ECSLib
 
         #region ArgumentOfPeriapsis
         
-        
+        /// <summary>
+        /// DO NOT USE! Gives wrong results in testing, needs fixing.
+        /// </summary>
+        /// <param name="nodeVector"></param>
+        /// <param name="eccentricityVector"></param>
+        /// <param name="pos"></param>
+        /// <param name="vel"></param>
+        /// <returns></returns>
         public static double GetArgumentOfPeriapsis1(Vector3 nodeVector, Vector3 eccentricityVector, Vector3 pos, Vector3 vel)
         {
+            throw new Exception("Broken Math Function, This function shoudl not be used.");
             double aop;
             if (nodeVector.Length() == 0)
             {
@@ -191,7 +200,7 @@ namespace Pulsar4X.ECSLib
             return aop;
         }
         
-        public static double GetArgumentOfPeriapsis2(Vector3 pos, double incl, double loAN, double trueAnomaly)
+        public static double GetArgumentOfPeriapsis(Vector3 pos, double incl, double loAN, double trueAnomaly)
         {
             double Sw = 0;
             double Rx = pos.X;
@@ -202,7 +211,9 @@ namespace Pulsar4X.ECSLib
             var Cw = (Rx * Math.Cos(loAN) + Ry * Math.Sin(loAN)) / R;
 
             if (incl == 0 || incl == Math.PI)
-            { Sw = (Ry * Math.Cos(loAN) - Rx * Math.Sin(loAN)) / R; }
+            {
+                Sw = (Ry * Math.Cos(loAN) - Rx * Math.Sin(loAN)) / R;
+            }
             else
             { Sw = Rz / (R * Math.Sin(incl)); }
 
@@ -212,9 +223,16 @@ namespace Pulsar4X.ECSLib
             return W;
         }   
 
-        
+        /// <summary>
+        /// DO NOT USE! Gives wrong results in testing, needs fixing.
+        /// </summary>
+        /// <param name="inclination"></param>
+        /// <param name="eccentricityVector"></param>
+        /// <param name="nodeVector"></param>
+        /// <returns></returns>
         public static double GetArgumentOfPeriapsis3(double inclination, Vector3 eccentricityVector, Vector3 nodeVector)
         {
+            throw new Exception("Broken Math Function, This function shoudl not be used.");
             double aoP = 0;
             double e = eccentricityVector.Length();
             if(Math.Abs(inclination) < Epsilon)
@@ -395,7 +413,102 @@ namespace Pulsar4X.ECSLib
             return transformedVector;
 
         }
+
+        /// <summary>
+        /// Converts a prograde ralitive (Y is prograde, x is radial, z is normal) to it's parent ralitive vector
+        /// (ie psudo north east south west)
+        /// </summary>
+        /// <param name="progradeVector"></param>
+        /// <param name="trueAnomaly"></param>
+        /// <param name="aop"></param>
+        /// <param name="loAN"></param>
+        /// <param name="inclination"></param>
+        /// <returns></returns>
+        public static Vector3 ProgradeToParentVector(Vector3 progradeVector, double trueAnomaly, double aop,  double loAN, double inclination)
+        {
+            var mtxTruA = Matrix3d.IDRotateZ(-trueAnomaly);
+            var mtxaop = Matrix3d.IDRotateZ(-aop);
+            var mtxLoAN = Matrix3d.IDRotateZ(-loAN);
+            var mtxincl = Matrix3d.IDRotateX(inclination);
+            
+            var mtx = mtxLoAN * mtxincl * mtxTruA * mtxaop;
+            
+            var transformedVector = mtx.Transform(progradeVector);
+            return transformedVector;
+        }
         
+        /// <summary>
+        /// Converts a prograde ralitive (Y is prograde, x is radial, z is normal) to it's parent ralitive vector
+        /// (ie psudo north east south west)
+        /// </summary>
+        /// <param name="sgp"></param>
+        /// <param name="progradeVector"></param>
+        /// <param name="position"></param>
+        /// <param name="currentVelocityVector"></param>
+        /// <returns></returns>
+        public static Vector3 ProgradeToParentVector(double sgp, Vector3 progradeVector, Vector3 position, Vector3 currentVelocityVector)
+        {
+            Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
+            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+            var loAN = CalculateLongitudeOfAscendingNode(nodeVector);
+            var trueAnomaly = OrbitMath.TrueAnomaly(sgp, position, currentVelocityVector);
+            
+            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
+            if (double.IsNaN(inclination))
+                inclination = 0;
+            var aop = OrbitMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
+            
+            return ProgradeToParentVector(progradeVector, trueAnomaly, aop, loAN, inclination);
+        }
+
+        
+        /// <summary>
+        /// Converts parent to prograde vector
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <param name="trueAnomaly"></param>
+        /// <param name="aop"></param>
+        /// <param name="loAN"></param>
+        /// <param name="inclination"></param>
+        /// <returns></returns>
+        public static Vector3 ParentToProgradeVector(Vector3 vector, double trueAnomaly, double aop,  double loAN, double inclination)
+        {
+            var mtxTruA = Matrix3d.IDRotateZ(trueAnomaly);
+            var mtxaop = Matrix3d.IDRotateZ(aop);
+            var mtxLoAN = Matrix3d.IDRotateZ(loAN);
+            var mtxincl = Matrix3d.IDRotateX(-inclination);
+            
+            var mtx = mtxaop * mtxTruA * mtxincl * mtxLoAN    ;
+            
+            var transformedVector = mtx.Transform(vector);
+            return transformedVector;
+        }
+
+        /// <summary>
+        /// Converts parent to prograde vector
+        /// </summary>
+        /// <param name="sgp"></param>
+        /// <param name="orbitLocalVec"></param>
+        /// <param name="position"></param>
+        /// <param name="currentVelocityVector"></param>
+        /// <returns></returns>
+        public static Vector3 ParentToProgradeVector(double sgp, Vector3 orbitLocalVec, Vector3 position, Vector3 currentVelocityVector)
+        {
+            Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
+            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+            var loAN = CalculateLongitudeOfAscendingNode(nodeVector);
+            var trueAnomaly = OrbitMath.TrueAnomaly(sgp, position, currentVelocityVector);
+            
+            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
+            if (double.IsNaN(inclination))
+                inclination = 0;
+            var aop = OrbitMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
+            
+            return ParentToProgradeVector(orbitLocalVec, trueAnomaly, aop, loAN, inclination);
+        }
+        
+
+
         /// <summary>
         /// Instantanious Orbital Velocity
         /// </summary>
@@ -478,7 +591,8 @@ namespace Pulsar4X.ECSLib
         /// <param name="semiMajAxis">Semi maj axis.</param>
         public static double InstantaneousOrbitalSpeed(double standardGravParameter, double distance, double semiMajAxis)
         {
-            var spd = Math.Sqrt(standardGravParameter * (2 / distance - 1 / semiMajAxis));
+            var foo = Math.Abs(2 / distance - 1 / semiMajAxis);
+            var spd = Math.Sqrt(standardGravParameter * foo);
             if (double.IsNaN(spd))
                 throw new Exception("Speed Result is NaN");
             return spd;
@@ -531,6 +645,14 @@ namespace Pulsar4X.ECSLib
             return peremeter  / orbitalPerodSeconds;
         }
 
+        public static double MeanOrbitalVelocityInm(OrbitDB orbit)
+        {
+            double a = orbit.SemiMajorAxis;
+            double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
+            double orbitalPerodSeconds = orbit.OrbitalPeriod.TotalSeconds;
+            double peremeter = Math.PI * (3* (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
+            return peremeter  / orbitalPerodSeconds;
+        }
 
         #endregion
 
@@ -934,19 +1056,42 @@ namespace Pulsar4X.ECSLib
         /// <param name="ve">ExhaustVelocity, not isp</param>
         public static double TsiolkovskyRocketEquation(double wetMass, double dryMass, double ve)
         {
-            
+            if (wetMass == 0)
+                return 0;
             double deltaV = ve * Math.Log(wetMass / dryMass);
             return deltaV;
         }
+        
+        /// <summary>
+        /// Tsiolkovsky's rocket equation.
+        /// use this to calculate the fuel cost of a given deltaV use.
+        /// you will need to know the mass of the ship "after" the burn for the "dryMass"
+        /// </summary>
+        /// <param name="dryMass">payload in kg</param>
+        /// <param name="ve">ExhaustVelocity, not isp</param>
+        /// <param name="deltaV">DeltaV to burn</param>
+        /// <returns>Fuel Cost</returns>
+        public static double TsiolkovskyFuelCost(double dryMass, double ve, double deltaV)
+        {
+            double wetMass = dryMass * Math.Exp(deltaV / ve);
+            double fuelUse = wetMass - dryMass;
+            return fuelUse;
+        }
 
-
+        /// <summary>
+        /// Tsiolkovsky's rocket equation.
+        /// Use this to calculate the amount of fuel you will use when you know how much fuel you have availible.
+        /// </summary>
+        /// <param name="wetMass">fuel Availible</param>
+        /// <param name="ve">ExhaustVelocity, not isp</param>
+        /// <param name="deltaV">DeltaV to use</param>
+        /// <returns>Fuel to burn</returns>
         public static double TsiolkovskyFuelUse(double wetMass, double ve, double deltaV)
         {
-            
+            //Step by step math.
             //dv = ve * log(wet/dry)
             //dv / ve = log(wet/dry)
             //dv / log(wet/dry) = ve
-            //
             
             //double b = deltaV / ve;
             //double a = Math.Exp(b);
@@ -972,7 +1117,7 @@ namespace Pulsar4X.ECSLib
             var lowOrbit = LowOrbitRadius(planetEntity);
             
             var exaustVelocity = 275;
-            var sgp = OrbitMath.CalculateStandardGravityParameter(payload, planetEntity.GetDataBlob<MassVolumeDB>().Mass);
+            var sgp = OrbitMath.CalculateStandardGravityParameterInKm3S2(payload, planetEntity.GetDataBlob<MassVolumeDB>().MassDry);
             Vector3 pos = new Vector3(lowOrbit, 0, 0);
             
             var vel = OrbitMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
@@ -988,12 +1133,7 @@ namespace Pulsar4X.ECSLib
             return lowOrbit;
         }
 
-        public static double TsiolkovskyFuelCost(double dryMass, double ve, double deltaV)
-        {
-            double wetMass = dryMass * Math.Exp(deltaV / ve);
-            double fuelUse = wetMass - dryMass;
-            return fuelUse;
-        }
+
 
         struct orbit
         {

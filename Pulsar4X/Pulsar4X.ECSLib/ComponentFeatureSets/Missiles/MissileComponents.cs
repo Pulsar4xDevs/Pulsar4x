@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            throw new NotImplementedException();
+            
         }
     }
 
@@ -107,7 +107,13 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public Guid CargoTypeID { get; }
         public int DesignVersion = 0;
         public bool IsObsolete = false;
-        public int Mass { get; }
+        public int MassPerUnit { get; set; }
+        public double VolumePerUnit { get; set; }
+
+        /// <summary>
+        /// Wet Density;
+        /// </summary>
+        public double Density { get; }
         public double WetMass { get; }
         public double DryMass { get; }
         public double ExaustVelocity { get; }
@@ -127,7 +133,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ordinance Construction"
         public Guid IndustryTypeID { get; } = new Guid("5ADBF620-3740-4FD7-98BE-E8670D58945F");
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+
+        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         { 
             var industrydb = industryEntity.GetDataBlob<IndustryAbilityDB>();
         }
@@ -140,22 +147,27 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         {
         }
 
-        public OrdnanceDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components)
+        public OrdnanceDesign(FactionInfoDB faction, string name, double fuelAmountKG,  List<(ComponentDesign design, int count)> components)
         {
             faction.MissileDesigns.Add(ID, this);
             faction.IndustryDesigns[ID] = this;
             Name = name;
             Components = components;
-            CargoTypeID = new Guid("055E2026-20A4-4CFA-A8CA-A01915A48B5E"); //TODO! we're leaking softcode into hard code here.
+            
+            //TODO! we're leaking softcode into hard code here! this is the "ordnance" cargo type, tells us to store this missile in "ordnance" type cargo. 
+            CargoTypeID = new Guid("055E2026-20A4-4CFA-A8CA-A01915A48B5E"); 
             BurnRate = 0;
             Guid fuelType = Guid.Empty;
-            double fuelMass = 0;
+            double fuelMass = fuelAmountKG;
+            double mass = 0;
+            double vol = 0;
             foreach (var component in components)
             {
                 //If the mounttype does not include missiles, it will just ignore the component and wont add it. 
                 if((component.design.ComponentMountType & ComponentMountType.Missile) == ComponentMountType.Missile)
                 {
-                    Mass += component.design.Mass * component.count;
+                    mass += component.design.MassPerUnit * component.count;
+                    vol += component.design.VolumePerUnit * component.count;
                     CreditCost += component.design.CreditCost;
 
                     if (ComponentCosts.ContainsKey(component.design.ID))
@@ -176,27 +188,20 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                     }
                 }
             }
-            foreach (var component in components)
-            {
-                //If the mounttype does not include missiles, it will just ignore the component and wont add it. 
-                if((component.design.ComponentMountType & ComponentMountType.Missile) == ComponentMountType.Missile)
-                {
-                    if (component.design.TryGetAttribute(out CargoStorageAtbDB cargoAtb))
-                    {
-                        if (cargoAtb.CargoTypeGuid == StaticRefLib.StaticData.GetICargoable(fuelType).CargoTypeID)
-                            fuelMass += cargoAtb.StorageCapacity;
-                    }
-                }
-            }
 
-            WetMass = Mass;
-            DryMass = Mass - fuelMass;
+
+            WetMass = mass + fuelMass;
+            DryMass = mass;
+            Density = WetMass / 1000;
             
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
-            IndustryPointCosts = Mass;
+            IndustryPointCosts = (int)mass;
+            MassPerUnit = (int)WetMass;
+            VolumePerUnit = vol;
         }
+        
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -220,7 +225,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            throw new System.NotImplementedException();
+            
         }
     }
 

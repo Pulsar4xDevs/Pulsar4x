@@ -40,21 +40,65 @@ namespace Pulsar4X.ECSLib
             sensorSig.ReflectedEMSpectra.Clear();
 
             //PercentValue reflectionPercent = 0.1f; //TODO: this should be calculated from crossSection(size), and a reflectivity value(stealth armor?/ other design factors?). 
-            var surfaceArea = sensorSig.TargetCrossSection_msq;
-            double reflectionCoefficent = surfaceArea * sensorSig.Reflectivity;
+            //var surfaceArea = sensorSig.TargetCrossSection_msq;
+
+            double tRad = 500;
+            if (entity.HasDataBlob<MassVolumeDB>())
+                tRad = entity.GetDataBlob<MassVolumeDB>().RadiusInM;
+            
+            
+            
+            
+            
             
             foreach (var emittingEntity in emmiters)
             {
                 if (emittingEntity != entity) // don't reflect our own emmision. 
                 {
                     double distance = PositionDB.GetDistanceBetween_m(position, emittingEntity.GetDataBlob<PositionDB>());
+                    if (distance < 1)
+                        distance = 1;
+                    
+                    var drad = Math.Sin(tRad / distance);
+                    var srad = Math.Sin(drad) * tRad;
+                    var surfaceArea = Math.PI * srad * srad;
+                    double reflectionCoefficent = surfaceArea * sensorSig.Reflectivity;
+                    
+                    
                     var emmissionDB = emittingEntity.GetDataBlob<SensorProfileDB>();
 
                     foreach (var emitedItem in emmissionDB.EmittedEMSpectra)
                     {
 
-                        var attenuated = SensorProcessorTools.AttenuationCalc(emitedItem.Value, distance);
+                        var attenuated = SensorProcessorTools.AttenuationCalc(emitedItem.Value, distance);//per meter^2
                         var reflectedMagnatude = attenuated * reflectionCoefficent;
+                        
+                        
+                        //debug code:
+                        if (emitedItem.Value < 0)
+                            throw new Exception("Source should not be less than 0");                        
+                        if(attenuated > emitedItem.Value)
+                            throw new Exception("Attenuated value shoudl be less than source");                       
+                        if(reflectedMagnatude > emitedItem.Value)
+                        {
+                            var source = Stringify.Power(emitedItem.Value);
+                            var reflec = Stringify.Power(reflectedMagnatude);
+                            var dist = Stringify.Distance(distance);
+                            var surface = Stringify.Distance(surfaceArea);
+                            var dif = Stringify.Power(emitedItem.Value - reflectedMagnatude);
+                            //throw new Exception("final magnitude shoudl not be more than source");
+                            //TODO: there's got to be a better way of calculating this. for now I'm just going to hack it.
+
+                            reflectedMagnatude = emitedItem.Value * sensorSig.Reflectivity;
+
+                        }
+                        if(reflectedMagnatude < 0)
+                            throw new Exception("Final magnitude should not be less than 0");                          
+                        
+                        
+                        
+                        
+                        
                         
                         if(reflectedMagnatude > 0.001) //ignore it if the signal is less than a watt 
                         {
@@ -69,15 +113,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-                        //debug code:
-                        if (emitedItem.Value < 0)
-                            throw new Exception("Source should not be less than 0");                        
-                        if(attenuated > emitedItem.Value)
-                            throw new Exception("Attenuated value shoudl be less than source");                       
-                        if(reflectedMagnatude > emitedItem.Value)
-                            throw new Exception("final magnitude shoudl not be more than source");
-                        if(reflectedMagnatude < 0)
-                            throw new Exception("Final magnitude should not be less than 0");                       
+                     
                         
                     }
                 }

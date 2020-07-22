@@ -7,8 +7,8 @@ namespace Pulsar4X.ECSLib
     public class WarpMoveCommand : EntityCommand
     {
 
-        internal override int ActionLanes => 1;
-        internal override bool IsBlocking => true;
+        public override int ActionLanes => 1;
+        public override bool IsBlocking => true;
 
         [JsonProperty]
         public Guid TargetEntityGuid { get; set; }
@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
-        internal override void ActionCommand(Game game)
+        internal override void ActionCommand(DateTime atDateTime)
         {
             if (!IsRunning)
             {
@@ -100,7 +100,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal override bool IsFinished()
+        public override bool IsFinished()
         {
             if(_db != null)
                 return _db.IsAtTarget;

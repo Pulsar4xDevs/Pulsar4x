@@ -15,7 +15,13 @@ namespace Pulsar4X.ECSLib
         Guid ID { get; }
         string Name { get; }
         Guid CargoTypeID { get;  }
-        int Mass { get;  }
+
+        /// <summary>
+        /// The smallest unit mass. 1 for most minerals etc. 
+        /// </summary>
+        int MassPerUnit { get; }
+        
+        double VolumePerUnit { get; }
     }
 
     [StaticData(true, IDPropertyName = "ID")]

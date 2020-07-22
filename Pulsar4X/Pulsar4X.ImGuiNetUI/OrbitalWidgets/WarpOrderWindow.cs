@@ -148,7 +148,7 @@ namespace Pulsar4X.SDL2UI
 
             if (OrderingEntityState.Entity.HasDataBlob<OrbitDB>())
             {
-                _massCurrentBody = Entity.GetSOIParentEntity(OrderingEntityState.Entity).GetDataBlob<MassVolumeDB>().Mass;
+                _massCurrentBody = Entity.GetSOIParentEntity(OrderingEntityState.Entity).GetDataBlob<MassVolumeDB>().MassDry;
             }
             else
             {
@@ -167,7 +167,7 @@ namespace Pulsar4X.SDL2UI
             //else if(OrderingEntity.Entity.HasDataBlob<newton>())
             CurrentState = States.NeedsTarget;
             
-            _massOrderingEntity = OrderingEntityState.Entity.GetDataBlob<MassVolumeDB>().Mass;
+            _massOrderingEntity = OrderingEntityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             _stdGravParamCurrentBody = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;
             if (_moveWidget == null)
             {
@@ -205,7 +205,7 @@ namespace Pulsar4X.SDL2UI
             float soiViewUnits = _uiState.Camera.ViewDistance(soiWorldRad_AU);
 
 
-            _massTargetBody = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().Mass;
+            _massTargetBody = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             _stdGravParamTargetBody_m = OrbitMath.CalculateStandardGravityParameterInM3S2(_massOrderingEntity, _massTargetBody);
             
             InsertionCalcs();
@@ -520,9 +520,9 @@ namespace Pulsar4X.SDL2UI
 
             
             if(OrbitProcessor.UseRalitiveVelocity)
-                _departureOrbitalVelocity_m = Entity.GetVelocity_m(OrderingEntityState.Entity, _departureDateTime, true);
+                _departureOrbitalVelocity_m = Entity.GetRalitiveFutureVelocity(OrderingEntityState.Entity, _departureDateTime);
             else
-                _departureOrbitalVelocity_m = Entity.GetVelocity_m(OrderingEntityState.Entity, _departureDateTime, false);
+                _departureOrbitalVelocity_m = Entity.GetAbsoluteFutureVelocity(OrderingEntityState.Entity, _departureDateTime);
             
             _departureOrbitalSpeed_m = _departureOrbitalVelocity_m.Length();
             _departureAngle = Math.Atan2(_departureOrbitalVelocity_m.Y, _departureOrbitalVelocity_m.X);

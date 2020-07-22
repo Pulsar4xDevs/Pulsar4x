@@ -19,11 +19,14 @@ namespace Pulsar4X.ECSLib
         public Guid CargoTypeID { get; }
         public int DesignVersion = 0;
         public bool IsObsolete = false;
-        public int Mass { get; }
+        public int MassPerUnit { get; }
+        public double VolumePerUnit { get; }
+        public double Density { get; }
+
         /// <summary>
         /// m^3
         /// </summary>
-        public double Volume;
+        //public double Volume;
         public List<(ComponentDesign design, int count)> Components;
         public (ArmorSD type, float thickness) Armor;
         public Dictionary<Guid, int> ResourceCosts { get; internal set; } = new Dictionary<Guid, int>();
@@ -37,10 +40,10 @@ namespace Pulsar4X.ECSLib
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ship Assembly"
         public Guid IndustryTypeID { get; } = new Guid("91823C5B-A71A-4364-A62C-489F0183EFB5");
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+
+        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         { 
             var industrydb = industryEntity.GetDataBlob<IndustryAbilityDB>();
-            
         }
 
         public int CreditCost;
@@ -62,10 +65,10 @@ namespace Pulsar4X.ECSLib
             
             foreach (var component in components)
             {
-                Mass += component.design.Mass * component.count;
+                MassPerUnit += component.design.MassPerUnit * component.count;
                 CrewReq += component.design.CrewReq;
                 CreditCost += component.design.CreditCost;
-                Volume += component.design.Volume_m3 * component.count;
+                VolumePerUnit += component.design.VolumePerUnit * component.count;
                 if (ComponentCosts.ContainsKey(component.design.ID))
                 {
                     ComponentCosts[component.design.ID] = ComponentCosts[component.design.ID] + component.count;
@@ -81,7 +84,7 @@ namespace Pulsar4X.ECSLib
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
-            IndustryPointCosts = Mass;
+            IndustryPointCosts = MassPerUnit;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -101,6 +104,21 @@ namespace Pulsar4X.ECSLib
             return CreateShip(shipDesign, ownerFaction, position, parent, starsys, shipName);
         }
 
+        public static Entity CreateShip(ShipDesign shipDesign, Entity ownerFaction, Entity parent, double angleRad, string shipName = null)
+        {
+            Vector3 position = parent.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            
+            var distanceFromParent = parent.GetDataBlob<MassVolumeDB>().RadiusInM * 2;
+
+            var x = distanceFromParent * Math.Cos(angleRad);
+            var y = distanceFromParent * Math.Sin(angleRad);
+            
+            var pos = new Vector3(position.X + x, position.Y + y, 0);
+            
+            StarSystem starsys = (StarSystem)parent.Manager;
+            return CreateShip(shipDesign, ownerFaction, pos, parent, starsys, shipName);
+        }
+        
         public static Entity CreateShip(ShipDesign shipDesign, Entity ownerFaction, Vector3 position, Entity parent, StarSystem starsys, string shipName = null)
         {
 
@@ -110,7 +128,7 @@ namespace Pulsar4X.ECSLib
             
             var shipinfo = new ShipInfoDB();
             dataBlobs.Add(shipinfo);
-            var mvdb = MassVolumeDB.NewFromMassAndVolume(shipDesign.Mass, shipDesign.Volume);
+            var mvdb = MassVolumeDB.NewFromMassAndVolume(shipDesign.MassPerUnit, shipDesign.VolumePerUnit);
             dataBlobs.Add(mvdb);
             PositionDB posdb = new PositionDB(Distance.MToAU(position), starsys.Guid, parent);
             dataBlobs.Add(posdb);
@@ -152,11 +170,13 @@ namespace Pulsar4X.ECSLib
                 EntityManipulation.AddComponentToEntity(ship, item.design, item.count);
             }
 
-            if (ship.HasDataBlob<NewtonThrustAbilityDB>() && ship.HasDataBlob<CargoStorageDB>())
+            if (ship.HasDataBlob<NewtonThrustAbilityDB>())
             {
-                NewtonionMovementProcessor.CalcDeltaV(ship);
+                NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship);
             }
-
+            
+            
+            
             return ship;
         }
     }

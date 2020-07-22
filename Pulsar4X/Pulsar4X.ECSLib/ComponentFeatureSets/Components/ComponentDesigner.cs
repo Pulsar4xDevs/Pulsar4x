@@ -17,6 +17,7 @@ namespace Pulsar4X.ECSLib
         GuiTextDisplay = 16,
         GuiEnumSelectionList = 32,
         GuiOrdnanceSelectionList = 64,
+        GuiTextSelectionFormula = 128,
     }
 
     public static class ComponentParseCheck
@@ -25,47 +26,55 @@ namespace Pulsar4X.ECSLib
         {
             errors = new List<(string formula,string error)>();
             var factionTech = new FactionTechDB();
-
-            var designer = new ComponentDesigner(componentSD, factionTech);
-
-            List<ChainedExpression> allExpressions = new List<ChainedExpression>()
+            ComponentDesigner designer;
+            try
             {
-                designer.MassFormula,
-                designer.VolumeFormula,
-                designer.CrewFormula,
-                designer.HTKFormula,
-                designer.ResearchCostFormula,
-                designer.BuildCostFormula,
-                designer.CreditCostFormula
-            };
-            allExpressions.AddRange(designer.ResourceCostFormulas.Values);
-            //allExpressions.AddRange(designer.MineralCostFormulas.Values);
-            //allExpressions.AddRange(designer.MaterialCostFormulas.Values);
-            //allExpressions.AddRange(designer.ComponentCostFormulas.Values);
-            foreach (var value in designer.ComponentDesignAttributes.Values)
-            {
-                allExpressions.Add(value.Formula);
-                if(value.MaxValueFormula != null)
-                    allExpressions.Add(value.MaxValueFormula);
-                if(value.MinValueFormula != null)
-                    allExpressions.Add(value.MinValueFormula);
-                if(value.StepValueFormula != null)
-                    allExpressions.Add(value.StepValueFormula);
-            }
-
-            foreach (var expression in allExpressions)
-            {
-                if (expression == null)
+                designer = new ComponentDesigner(componentSD, factionTech);
+                
+                List<ChainedExpression> allExpressions = new List<ChainedExpression>()
                 {
-                    errors.Add(("Null Value", "Unexpected Null Value for Formula"));
+                    designer.MassFormula,
+                    designer.VolumeFormula,
+                    designer.CrewFormula,
+                    designer.HTKFormula,
+                    designer.ResearchCostFormula,
+                    designer.BuildCostFormula,
+                    designer.CreditCostFormula
+                };
+                allExpressions.AddRange(designer.ResourceCostFormulas.Values);
+                
+                //allExpressions.AddRange(designer.MineralCostFormulas.Values);
+                //allExpressions.AddRange(designer.MaterialCostFormulas.Values);
+                //allExpressions.AddRange(designer.ComponentCostFormulas.Values);
+                foreach (var value in designer.ComponentDesignAttributes.Values)
+                {
+                    allExpressions.Add(value.Formula);
+                    if(value.MaxValueFormula != null)
+                        allExpressions.Add(value.MaxValueFormula);
+                    if(value.MinValueFormula != null)
+                        allExpressions.Add(value.MinValueFormula);
+                    if(value.StepValueFormula != null)
+                        allExpressions.Add(value.StepValueFormula);
                 }
 
-                else if (expression.HasErrors())
+                foreach (var expression in allExpressions)
                 {
-                    errors.Add((expression.RawExpressionString, expression.Error()));
+                    if (expression == null)
+                    {
+                        errors.Add(("Null Value", "Unexpected Null Value for Formula"));
+                    }
+
+                    else if (expression.HasErrors())
+                    {
+                        errors.Add((expression.RawExpressionString, expression.Error()));
+                    }
                 }
             }
-
+            catch (Exception e)
+            {
+                string errorMessage = "Malformed ComponentTemplate, this error happened before the specific formula could be found \r\n " + e.Message;
+                errors.Add(("", errorMessage));
+            }
             return (errors.Count == 0);
         }
     }
@@ -77,17 +86,22 @@ namespace Pulsar4X.ECSLib
         public string Name { get; internal set; } //player defined name. ie "5t 2kn Thruster".
         
         public Guid CargoTypeID { get; internal set; }
-        public int Mass { get; internal set; }
-        
+        public int MassPerUnit { get; internal set; }
+
+        public double VolumePerUnit { get; internal set; }
+
+        public double Density { get; internal set; }
+
         public int ResearchCostValue;
         public Guid TechID;
         public string TypeName; //ie the name in staticData. ie "Newtonion Thruster".
         public string Description;
-        public int Volume_m3;
+        //public int Volume_m3 = 1;
         public int HTK;
         public int CrewReq;
         public int IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
+
 
         public int CreditCost;
         
@@ -103,7 +117,7 @@ namespace Pulsar4X.ECSLib
         public DamageResist DamageResistance;
         
         
-        public void OnConstructionComplete(Entity industryEntity, CargoStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         {
             var colonyConstruction = industryEntity.GetDataBlob<IndustryAbilityDB>();
             batchJob.NumberCompleted++;
@@ -123,7 +137,8 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-               StorageSpaceProcessor.AddCargo(storage, (ComponentDesign)designInfo, 1);
+                storage.AddCargoByUnit((ComponentDesign)designInfo, 1);
+               //StorageSpaceProcessor.AddCargo(storage, (ComponentDesign)designInfo, 1);
             }
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
@@ -198,39 +213,16 @@ namespace Pulsar4X.ECSLib
                 DescriptionFormula = new ChainedExpression(componentSD.DescriptionFormula, this, factionTech, staticData);
 
             Dictionary<Guid, ChainedExpression> resourceCostForulas = new Dictionary<Guid, ChainedExpression>();
-            //Dictionary<Guid, ChainedExpression> mineralCostFormulas = new Dictionary<Guid, ChainedExpression>();
-            //Dictionary<Guid, ChainedExpression> materalCostFormulas = new Dictionary<Guid, ChainedExpression>();
-            //Dictionary<Guid, ChainedExpression> componentCostForulas = new Dictionary<Guid, ChainedExpression>();
+
             foreach (var kvp in componentSD.ResourceCostFormula)
             {
-                /*
-                if (staticData.CargoGoods.IsMaterial(kvp.Key))
-                {
-                    materalCostFormulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech, staticData));
-                }
-                else if (staticData.ComponentTemplates.ContainsKey(kvp.Key))
-                {
-                    componentCostForulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech, staticData));
-                }
-                else if (staticData.CargoGoods.IsMineral(kvp.Key))
-                {
-                    mineralCostFormulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech, staticData));
-                }
-                else //TODO: log don't crash.
-                    throw new Exception("GUID object {" + kvp.Key + "} not found in materialCosting for " + this.TypeName + " This object needs to be either a mineral, material or component defined in the Data folder");
-                
-                */
                 if(staticData.CargoGoods.GetAny(kvp.Key) != null)
                     resourceCostForulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech));
                 else //TODO: log don't crash.
                     throw new Exception("GUID object {" + kvp.Key + "} not found in resourceCosting for " + this.TypeName + " This object needs to be either a mineral, material or component defined in the Data folder");
-
             }
 
             ResourceCostFormulas = resourceCostForulas;
-            //MineralCostFormulas = mineralCostFormulas;
-           // MaterialCostFormulas = materalCostFormulas;
-            //ComponentCostFormulas = componentCostForulas;
             
             foreach (ComponentTemplateAttributeSD attrbSD in componentSD.ComponentAtbSDs)
             {
@@ -243,7 +235,42 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        
+        public void SetAttributes()
+        {
+            EvalAll();
+            foreach (var designAttribute in ComponentDesignAttributes.Values)
+            {
+                if (designAttribute.AttributeType != null && designAttribute.IsEnabled)
+                {
+                    //if (designAttribute.AtbConstrArgs == null)
+                    designAttribute.SetValue();  //force recalc.
+                                 
+                    object[] constructorArgs = designAttribute.AtbConstrArgs;
+                    try
+                    {
+                        dynamic attrbute = (IComponentDesignAttribute)Activator.CreateInstance(designAttribute.AttributeType, constructorArgs);
+                        _design.AttributesByType[attrbute.GetType()] = attrbute;
+                    }
+                    catch (MissingMethodException e)
+                    {
+                        string argTypes = "";
+                        int i = 0;
+                        foreach (var arg in constructorArgs)
+                        {
+                            argTypes += arg.GetType() + ": " + constructorArgs[i].ToString() + ",\n";
+                            
+                            i++;
+                        }
+                        
+                        string exstr = "The Attribute: " + designAttribute.AttributeType + " in "+ _design.Name + " was found, but the arguments did not match any constructors.\nThe given arguments are:\n"
+                                       + argTypes 
+                                       + "The full exception is as follows:\n" + e;
+                        throw new Exception(exstr);
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// "Set" and returns the designdata
         /// this also sets up a research item for the design,
@@ -267,38 +294,8 @@ namespace Pulsar4X.ECSLib
 
             _design.TechID = tech.ID;
             factionTech.MakeResearchable(tech); //add it to researchable techs 
-            EvalAll();
-            foreach (var designAttribute in ComponentDesignAttributes.Values)
-            {
-                if (designAttribute.AttributeType != null && designAttribute.IsEnabled)
-                {
-                    if (designAttribute.AtbConstrArgs == null)
-                        designAttribute.SetValue();  //force recalc.
-                                 
-                    object[] constructorArgs = designAttribute.AtbConstrArgs;
-                    try
-                    {
-                        dynamic attrbute = (IComponentDesignAttribute)Activator.CreateInstance(designAttribute.AttributeType, constructorArgs);
-                        _design.AttributesByType[attrbute.GetType()] = attrbute;
-                    }
-                    catch (MissingMethodException e)
-                    {
-                        string argTypes = "";
-                        int i = 0;
-                        foreach (var arg in constructorArgs)
-                        {
-                            argTypes += arg.GetType() + ": " + constructorArgs[i].ToString() + ",\n";
-                            
-                            i++;
-                        }
-                        
-                        string exstr = "The Attribute: " + designAttribute.AttributeType + " was found, but the arguments did not match any constructors.\nThe given arguments are:\n"
-                                       + argTypes 
-                                       + "The full exception is as follows:\n" + e;
-                        throw new Exception(exstr);
-                    }
-                }
-            }
+            
+            SetAttributes();
 
             faction.InternalComponentDesigns[_design.ID] = _design;
             faction.IndustryDesigns[_design.ID] = _design;
@@ -317,15 +314,7 @@ namespace Pulsar4X.ECSLib
             SetResearchCost();
             SetBuildCost();
             SetResourceCosts();
-            /*
-            SetMineralCosts();
-            SetMaterialCosts();
-            SetComponentCosts();
-            
-            MineralCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
-            MaterialCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
-            ComponentCostValues.ToList().ForEach(x => _design.ResourceCosts[x.Key] = x.Value);
-            */
+
         }
 
         public string TypeName
@@ -358,21 +347,23 @@ namespace Pulsar4X.ECSLib
 
         public int MassValue
         {
-            get { return _design.Mass; }
+            get { return _design.MassPerUnit; }
         }
         internal ChainedExpression MassFormula { get; set; }
         public void SetMass()
         {
             MassFormula.Evaluate();
-            _design.Mass = MassFormula.IntResult;
+            _design.MassPerUnit = MassFormula.IntResult;
+            _design.Density = _design.MassPerUnit / _design.VolumePerUnit;
         }
 
-        public int VolumeM3Value { get { return _design.Volume_m3; } }//TODO: check units are @SI UNITS kg/m^3
+        public double VolumeM3Value { get { return _design.VolumePerUnit; } }//TODO: check units are @SI UNITS kg/m^3
         internal ChainedExpression VolumeFormula { get; set; }
         public void SetVolume()
         {
             VolumeFormula.Evaluate();
-            _design.Volume_m3 = VolumeFormula.IntResult;
+            _design.VolumePerUnit = VolumeFormula.IntResult;
+            _design.Density = _design.MassPerUnit / _design.VolumePerUnit;
         }
 
 
@@ -486,7 +477,7 @@ namespace Pulsar4X.ECSLib
         }
         
         [Obsolete]//don't use this, TODO: get rid of this once json data is rewritten to use names instead of indexes
-        public List<ComponentDesignAttribute> ComponentDesignAttributeList = new List<ComponentDesignAttribute>();
+        internal List<ComponentDesignAttribute> ComponentDesignAttributeList = new List<ComponentDesignAttribute>();
         
         public Dictionary<string, ComponentDesignAttribute> ComponentDesignAttributes = new Dictionary<string, ComponentDesignAttribute>();
         public Dictionary<Type, IComponentDesignAttribute> Attributes
@@ -494,5 +485,22 @@ namespace Pulsar4X.ECSLib
             get { return _design.AttributesByType; }
         }
 
+        public T GetAttribute<T>() 
+            where T : IComponentDesignAttribute
+        {
+            return (T)_design.AttributesByType[typeof(T)];
+        }
+        
+        public bool TryGetAttribute<T>(out T attribute)
+            where T : IComponentDesignAttribute
+        {
+            if (Attributes.ContainsKey(typeof(T)))
+            {
+                attribute = (T)_design.AttributesByType[typeof(T)];
+                return true;
+            }
+            attribute = default(T);
+            return false;
+        }
     }
 }
