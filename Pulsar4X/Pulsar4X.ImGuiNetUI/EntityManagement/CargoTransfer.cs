@@ -189,9 +189,9 @@ namespace Pulsar4X.SDL2UI
                 var newxferDict = new Dictionary<ICargoable, int>(); 
                 foreach (var order in orders)
                 {
-                    if (order is CargoXferOrder)
+                    if (order is CargoUnloadToOrder)
                     {
-                        var xferOrder = (CargoXferOrder)order;
+                        var xferOrder = (CargoUnloadToOrder)order;
                         foreach (var tuple in xferOrder.ItemICargoablesToTransfer)
                         {
                             if (!newxferDict.ContainsKey(tuple.item))
@@ -570,16 +570,14 @@ namespace Pulsar4X.SDL2UI
         {
 
             //create order for items to go to right
-            CargoXferOrder.CreateCommand(
-                _uiState.Game,
+            CargoUnloadToOrder.CreateCommand(
                 _uiState.Faction,
                 _selectedEntityLeft.Entity,
                 _selectedEntityRight.Entity, 
                 CargoListLeft.GetAllToMoveOut());
 
             //create order for items to go to left
-            CargoXferOrder.CreateCommand(
-                _uiState.Game,
+            CargoUnloadToOrder.CreateCommand(
                 _uiState.Faction,
                 _selectedEntityRight.Entity,
                 _selectedEntityLeft.Entity,

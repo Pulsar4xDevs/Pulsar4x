@@ -10,6 +10,8 @@ namespace Pulsar4X.ECSLib
         public override int ActionLanes => 1;
 
         public override bool IsBlocking => false;
+        public override string Name { get; } = "Fire Control Set Weapons";
+        public override string Details { get; } = "";
 
         [JsonIgnore]
         Entity _factionEntity;
@@ -102,6 +104,8 @@ namespace Pulsar4X.ECSLib
 
         public override bool IsBlocking => false;
         
+        public override string Name { get; } = "Fire Control Set Target";
+        public override string Details { get; } = "";
         
         
         [JsonIgnore]
@@ -194,6 +198,16 @@ namespace Pulsar4X.ECSLib
             OpenFire,
             CeaseFire
         }
+        
+        
+        public override string Name { get; } = "Fire Control Set Firemode";
+        public override string Details {
+            get
+            {
+                return IsFiring.ToString();
+            }
+        } 
+        
         public override int ActionLanes => 1;
 
         public override bool IsBlocking => false;
@@ -283,6 +297,10 @@ namespace Pulsar4X.ECSLib
     
     public class SetOrdinanceToWpnOrder : EntityCommand
     {
+        
+        public override string Name { get; } = "Fire Control Set Ordnance";
+        public override string Details { get; } = "";
+        
         public override int ActionLanes => 1;
 
         public override bool IsBlocking => false;

@@ -9,6 +9,15 @@ namespace Pulsar4X.ECSLib
     {
         public override int ActionLanes => 1;
         public override bool IsBlocking => true;
+        public override string Name { get; } = "Nav: Thrust";
+
+        public override string Details
+        {
+            get
+            {
+                return "Expend + " + Stringify.Velocity(_orbitRalitiveDeltaV.Length()) + "Δv";
+            }
+        }
 
         Entity _factionEntity;
         Entity _entityCommanding;
@@ -66,6 +75,18 @@ namespace Pulsar4X.ECSLib
 
     public class ThrustToTargetCmd : EntityCommand
     {
+        
+        public override string Name { get; } = "Nav: Intercept/Collide with target";
+
+        public override string Details
+        {
+            get
+            {
+                string targetName = _targetEntity.GetDataBlob<NameDB>().GetName(_factionEntity);
+                return "Attempting intercept on + " + targetName + ", with " + Stringify.Velocity(_newtonAbilityDB.DeltaV) + "Δv remaining.";
+            }
+        }
+        
         public override int ActionLanes => 1;
         public override bool IsBlocking => true;
 
@@ -265,9 +286,23 @@ namespace Pulsar4X.ECSLib
 
 
     
-    
+    /// <summary>
+    /// This was an alternate attempt to intecept by aplying thrust 90 degrees to the current direction of travel...
+    /// or something. never fully completed. Delete?
+    /// </summary>
     public class Thrust90ToTargetCmd : EntityCommand
     {
+        public override string Name { get; } = "Nav: Intercept/Collide with target";
+
+        public override string Details
+        {
+            get
+            {
+                string targetName = _targetEntity.GetDataBlob<NameDB>().GetName(_factionEntity);
+                return "Attempting intercept on + " + targetName + ", with " + Stringify.Velocity(_newtonAbilityDB.DeltaV) + "Δv remaining.";
+            }
+        }
+        
         public override int ActionLanes => 1;
         public override bool IsBlocking => true;
 

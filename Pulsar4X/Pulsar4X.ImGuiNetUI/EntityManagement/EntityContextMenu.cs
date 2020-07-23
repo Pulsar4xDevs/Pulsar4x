@@ -60,6 +60,7 @@ namespace Pulsar4X.SDL2UI
             ContextButton(typeof(WarpOrderWindow));
             ContextButton(typeof(ChangeCurrentOrbitWindow));
             ContextButton(typeof(NavWindow));
+            ContextButton(typeof(OrdersUI));
             ImGui.EndGroup();
 
         }

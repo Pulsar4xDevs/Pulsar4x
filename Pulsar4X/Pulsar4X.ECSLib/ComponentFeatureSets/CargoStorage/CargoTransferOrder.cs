@@ -4,8 +4,10 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class CargoXferOrder:EntityCommand
+    public class CargoUnloadToOrder:EntityCommand
     {
+         
+        
         public List<(Guid ID, int amount)> ItemsGuidsToTransfer;
         [JsonIgnore]
         public List<(ICargoable item, int amount)> ItemICargoablesToTransfer = new List<(ICargoable item, int amount)>();
@@ -13,6 +15,18 @@ namespace Pulsar4X.ECSLib
 
         public override int ActionLanes => 1;
         public override bool IsBlocking => true;
+        
+        public override string Name { get; } = "Cargo Transfer";
+        public override string Details
+        {
+            get
+            {
+                string fromEntityName = _entityCommanding.GetDataBlob<NameDB>().GetName(factionEntity);
+                string toEntityName = sendToEntity.GetDataBlob<NameDB>().GetName(factionEntity);
+                string detailStr = "From " + fromEntityName + " To " + toEntityName;
+                return detailStr;
+            }
+        }
 
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
@@ -24,14 +38,14 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         Entity sendToEntity;
         
-        public static void CreateCommand(Game game, Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, int amount)> itemsToMove )
+        public static void CreateCommand(Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, int amount)> itemsToMove )
         {
             List<(Guid item,int amount)> itemGuidAmounts = new List<(Guid, int)>();
             foreach (var tup in itemsToMove)
             {
                 itemGuidAmounts.Add((tup.item.ID, tup.amount));
             }
-            var cmd = new CargoXferOrder()
+            var cmd = new CargoUnloadToOrder()
             {
                 RequestingFactionGuid = faction.Guid,
                 EntityCommandingGuid = cargoFromEntity.Guid,
@@ -40,7 +54,8 @@ namespace Pulsar4X.ECSLib
                 ItemsGuidsToTransfer = itemGuidAmounts,
                 ItemICargoablesToTransfer = itemsToMove
             };
-            game.OrderHandler.HandleOrder(cmd);
+            StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+            
         }
 
         /// <summary>
@@ -68,10 +83,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private void GetItemsToTransfer(StaticDataStore staticData)
-        {
 
-        }
 
         internal override bool IsValidCommand(Game game)
         {
@@ -103,10 +115,63 @@ namespace Pulsar4X.ECSLib
             }
             return amount;
          }
+    }
+    
+    public class CargoLoadFromOrder : EntityCommand
+    {
+        public CargoUnloadToOrder Order;
+        public override int ActionLanes { get; }
+        public override bool IsBlocking { get; }
+        public override string Name { get; } = "Cargo Transfer";
 
-        //public CargoXferOrder(Entity entityCommanding, Entity loadFromEntity, List<Tuple<ID,long>> typesAndAmounts )
-        //{
+        public override string Details
+        {
+            get { return Order.Details; }
+        }
 
-        //}
+        internal override Entity EntityCommanding { get; }
+        internal override bool IsValidCommand(Game game)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void CreateCommand(Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, int amount)> itemsToMove )
+        {
+            List<(Guid item,int amount)> itemGuidAmounts = new List<(Guid, int)>();
+            foreach (var tup in itemsToMove)
+            {
+                itemGuidAmounts.Add((tup.item.ID, tup.amount));
+            }
+            var unloadcmd = new CargoUnloadToOrder()
+            {
+                RequestingFactionGuid = faction.Guid,
+                EntityCommandingGuid = cargoFromEntity.Guid,
+                CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
+                SendCargoToEntityGuid = cargoToEntity.Guid,
+                ItemsGuidsToTransfer = itemGuidAmounts,
+                ItemICargoablesToTransfer = itemsToMove
+            };
+
+            var loadCmd = new CargoLoadFromOrder()
+            {
+                RequestingFactionGuid = faction.Guid,
+                EntityCommandingGuid = cargoFromEntity.Guid,
+                CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
+                Order = unloadcmd
+            };
+            StaticRefLib.Game.OrderHandler.HandleOrder(loadCmd);
+        }
+        
+        
+        internal override void ActionCommand(DateTime atDateTime)
+        {
+            //this needs to happen on a given trigger,ie a finished move command.
+            throw new NotImplementedException();
+        }
+
+        public override bool IsFinished()
+        {
+            return Order.IsFinished();
+        }
     }
 }

@@ -34,7 +34,8 @@ namespace Pulsar4X.SDL2UI
             {typeof(GotoSystemBlankMenuHelper), "Go to system"},
             {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
             {typeof(PlanetaryWindow), "Planetary window"},
-            {typeof(NavWindow), "Nav Window"}
+            {typeof(NavWindow), "Nav Window"},
+            {typeof(OrdersUI), "Orders Window"}
         };
         internal Game Game;
         internal FactionVM FactionUIState;

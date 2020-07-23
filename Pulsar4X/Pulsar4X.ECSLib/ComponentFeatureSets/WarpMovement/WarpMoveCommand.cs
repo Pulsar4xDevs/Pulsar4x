@@ -7,6 +7,17 @@ namespace Pulsar4X.ECSLib
     public class WarpMoveCommand : EntityCommand
     {
 
+        public override string Name { get; } = "Nav: Warp Move";
+
+        public override string Details
+        {
+            get
+            {
+                string targetName = _targetEntity.GetDataBlob<NameDB>().GetName(_factionEntity);
+                return "Warp to + " + Stringify.Distance(TargetOffsetPosition_m.Length()) + " from " + targetName;
+            }
+        }
+        
         public override int ActionLanes => 1;
         public override bool IsBlocking => true;
 

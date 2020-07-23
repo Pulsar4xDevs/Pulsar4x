@@ -6,6 +6,8 @@ namespace Pulsar4X.ECSLib.Industry
     {
         public override int ActionLanes => 1;
         public override bool IsBlocking => true;
+        public override string Name { get; } = "Launch Ship From Storage";
+        public override string Details { get; } = "";
 
         Entity _factionEntity;
         Entity _entityCommanding;

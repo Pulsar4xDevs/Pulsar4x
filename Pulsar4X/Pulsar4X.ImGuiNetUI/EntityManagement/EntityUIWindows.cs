@@ -116,6 +116,8 @@ namespace Pulsar4X.SDL2UI
             else if(_entityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship && T == typeof(PlanetaryWindow)) {
                 return true;
             }
+            else if (_entityState.Entity.HasDataBlob<OrderableDB>() && T == typeof(OrdersUI))
+                return true;
             else {return false;}
         }
         // use type PinCameraBlankMenuHelper to pin camara, should use checkIfCanOpenWindow with type before trying to open a given window
@@ -194,6 +196,12 @@ namespace Pulsar4X.SDL2UI
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
+                else if (T == typeof(OrdersUI))
+                {
+                    var instance = OrdersUI.GetInstance(_entityState);
+                    instance.ToggleActive();
+                    _state.ActiveWindow = instance;
+                }
 
                 //
                 if (T == typeof(PlanetaryWindow))
@@ -222,6 +230,7 @@ namespace Pulsar4X.SDL2UI
             else if (T == typeof(CargoTransfer)) returnval = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState).GetActive();
             else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState).GetActive();
             else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
+            else if (T == typeof(OrdersUI)) returnval = OrdersUI.GetInstance(_entityState).GetActive();
             else returnval = false;
             return returnval;
 

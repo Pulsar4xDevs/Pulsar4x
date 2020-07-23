@@ -428,6 +428,17 @@ namespace Pulsar4X.ECSLib.Industry
     public class IndustryOrder2:EntityCommand 
     {
 
+        public override string Name
+        {
+            get
+            {
+                return "Industry: " + OrderType.ToString();
+            }
+        }
+
+
+        public override string Details { get; } = "Instant";
+
         public enum OrderTypeEnum
         {
             NewJob,

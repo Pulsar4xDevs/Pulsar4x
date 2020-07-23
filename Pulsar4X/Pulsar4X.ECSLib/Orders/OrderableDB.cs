@@ -54,6 +54,7 @@ namespace Pulsar4X.ECSLib
 
         public List<EntityCommand> GetActionList()
         {
+            //do I need a lock here?
             return new List<EntityCommand>( ActionList );
         }
         public OrderableDB()

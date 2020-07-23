@@ -11,6 +11,9 @@ namespace Pulsar4X.ECSLib
         public abstract int ActionLanes { get;  }
         public abstract bool IsBlocking { get; }
 
+        public abstract string Name { get; }
+        public abstract string Details { get; }
+        
         [JsonProperty]
         /// <summary>
         /// This is the faction that has requested the command. 
@@ -114,6 +117,8 @@ namespace Pulsar4X.ECSLib
         public override int ActionLanes => 0;
 
         public override bool IsBlocking => false;
+        public override string Name { get; } = "Rename";
+        public override string Details { get; } = "Renames This Entity";
         Entity _factionEntity;
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
