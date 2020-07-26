@@ -233,7 +233,39 @@ namespace Pulsar4X.SDL2UI
             
         }
     }
-    
+
+    public static class Switch
+    {
+        //private static int _intState = 0;
+        public static bool Switch2State(string label, ref bool state, string leftState = "Off", string rightState = "On")
+        {
+            int intState = Convert.ToInt32(state);
+            string strstate = leftState;
+            if (state == true)
+                strstate = rightState;
+            var txtWid = Math.Max(ImGui.CalcTextSize(leftState).X, ImGui.CalcTextSize(rightState).X);
+            ImGui.PushItemWidth(txtWid * 3);
+            var cpos = ImGui.GetCursorPos();
+            if(ImGui.SliderInt(label,ref intState, 0, 1, "" ))
+            {
+                state = Convert.ToBoolean(intState);
+                return true;
+            }
+            Vector2 recSize = ImGui.GetItemRectSize();
+            float x = cpos.X  + 2 + (intState * (txtWid -4) * 2);
+            float y = (float)(cpos.Y + recSize.Y * 0.5 - ImGui.GetTextLineHeight() * 0.5);
+            ImGui.SetCursorPos(new Vector2(x, y));
+            ImGui.Text(strstate);
+            ImGui.PopItemWidth();
+            
+
+            return false;
+        }
+        
+        
+        
+    }
+
     public static class SizesDemo
     {
         enum FrameOfReference : byte

@@ -113,7 +113,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             HohmannTransfer,
             PhaseChange,
             HighDVIntercept,
-            PorkChopPlot
+            PorkChopPlot,
+            EscapeSOI
         }
 
         private NavMode _navMode = NavMode.None;
@@ -146,6 +147,12 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 {
                     _navMode = NavMode.PorkChopPlot;
                 }
+
+                if (ImGui.Button("Escape SOI"))
+                {
+                    _navMode = NavMode.EscapeSOI;
+                }
+
                 BorderGroup.End();
                 ImGui.NewLine();
                 ImGui.Text("Availible Δv: " + Stringify.Velocity(_totalDV));
@@ -161,6 +168,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         break;
                     case NavMode.HohmannTransfer:
                         DisplayHohmannMode();
+                        break;
+                    case NavMode.EscapeSOI:
+                        DisplayEscapeSOI();
                         break;
                     case NavMode.None:
                         break;
@@ -286,6 +296,58 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 if(selectedSib.HasDataBlob<NewtonMoveDB>())
                     _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
             }
+        }
+
+        private bool _EscapeVelocityHigh = true; 
+        void DisplayEscapeSOI()
+        {
+            var period = _orderEntity.GetDataBlob<OrbitDB>().OrbitalPeriod.TotalSeconds;
+            var orbitDB = _orderEntity.GetDataBlob<OrbitDB>();
+            var parentState = Entity.GetRalitiveState(Entity.GetSOIParentEntity(_orderEntity));
+            var parentAngle = Math.Atan2(parentState.pos.Y, parentState.pos.X);
+            
+            double orbitalPeriod = orbitDB.OrbitalPeriod.TotalSeconds;
+            double e = orbitDB.Eccentricity;
+
+            var wc1 = Math.Sqrt((1 - e) / (1 + e));
+            var wc2 = Math.Tan(parentAngle / 2);
+            
+            double E = 2 * Math.Atan(wc1 * wc2);
+
+            double wc3 = orbitalPeriod / (Math.PI * 2);
+            double wc4 = E - e * Math.Sin(E);
+
+            double phaseTime = wc3 * wc4;
+
+
+
+            Switch.Switch2State("Escape:", ref _EscapeVelocityHigh, "Low", "High");
+
+            double secondsToManuver = phaseTime;
+            if (!_EscapeVelocityHigh)
+                secondsToManuver += period * 0.5;
+                
+            double mySMA = _currentKE.SemiMajorAxis;
+            //double escapeSMA = 
+            var manuverDateTime = _atDatetime + TimeSpan.FromSeconds(secondsToManuver);
+            var manuverPos = Entity.GetRalitiveFuturePosition(_orderEntity, manuverDateTime);
+            var manuverVel = Entity.GetRalitiveFutureVelocity(_orderEntity, manuverDateTime);
+            var soi = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<OrbitDB>().SOI_m;
+            var manuver = InterceptCalcs.Hohmann2(_sgp, manuverPos.Length(), soi)[0];
+
+
+            manuver.deltaV.Y += 1;
+            var totalManuverDV = manuver.deltaV.Length();
+            if(totalManuverDV > _totalDV)
+                ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
+            else
+                ImGui.Text("Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
+            
+            if (ImGui.Button("Make it so"))
+            {
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, manuverDateTime, manuver.deltaV);
+            }
+
         }
     }
 }
