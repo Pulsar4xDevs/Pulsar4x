@@ -38,6 +38,8 @@ namespace Pulsar4X.SDL2UI
 
         public OrbitHypobolicIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonMoveDB>().SOIParent.GetDataBlob<PositionDB>())
         {
+            BodyType = entityState.BodyType;
+            TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             _mgr = entityState.Entity.Manager;
             _newtonMoveDB = entityState.Entity.GetDataBlob<NewtonMoveDB>();
             parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
