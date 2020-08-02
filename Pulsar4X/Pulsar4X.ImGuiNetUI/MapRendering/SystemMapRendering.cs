@@ -181,8 +181,10 @@ namespace Pulsar4X.SDL2UI
             if (entityItem.HasDataBlob<NewtonMoveDB>())
             {
                 var hyp = entityItem.GetDataBlob<NewtonMoveDB>();
-                OrbitHypobolicIcon orb;
-                orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                Icon orb;
+                //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                //NewtonMoveIcon 
+                orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
                 _orbitRings.TryAdd(entityItem.Guid, orb);
             }
 
@@ -282,8 +284,9 @@ namespace Pulsar4X.SDL2UI
                     {
                         if(entityState.Entity.HasDataBlob<NewtonMoveDB>()) //because sometimes it can be added and removed in a single tick. 
                         {
-                            OrbitHypobolicIcon orb;
-                            orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                            Icon orb;
+                            //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                            orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
                             _orbitRings.AddOrUpdate(changeData.Entity.Guid, orb, ((guid, data) => data = orb));
                         }
                     }

@@ -60,17 +60,25 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void UpdateUserSettings()
         {
-            //if this happens, we need to rebuild the whole set of points. 
+            
+            
+         
+            //if this is the case, we need to rebuild the whole set of points. 
             if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
             {
                 _numberOfArcSegments = _userSettings.NumberOfArcSegments;
+                _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
+                _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
+                _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
+                _numberOfPoints = _numberOfDrawSegments + 1;
                 CreatePointArray();
             }
-
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
             _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
             _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
-            _numberOfPoints = _numberOfDrawSegments + 1;
+            _numberOfPoints = _numberOfDrawSegments + 1;   
+            
+
         }
 
         internal void CreatePointArray()
@@ -84,6 +92,12 @@ namespace Pulsar4X.SDL2UI
             double v = vel.Length();
             double a = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
             double b = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
+            if (double.IsNaN(b)) //eccentricity is close enough to 0 to cause e * e -1 to = -1 (and sqrt(-1) then = i)
+            {
+                b = a;
+                e = 0;
+            }
+
             double linierEccentricity = e * a;
             double soi = OrbitProcessor.GetSOI_AU(_newtonMoveDB.SOIParent);
 
