@@ -58,18 +58,15 @@ namespace ImGuiSDL2CS {
             {
                 string rf = "Resources";
                 
-                ImFontConfig* rawPtr = ImGuiNative.ImFontConfig_ImFontConfig();
-                ImFontConfigPtr config = new ImFontConfigPtr(rawPtr);
-                config.PixelSnapH = true;
-                
-                
                 ImFontAtlasPtr fontAtlas = ImGui.GetIO().Fonts;
-                var builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
+                ImFontConfigPtr config = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
+                ImFontGlyphRangesBuilderPtr builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
+                
                 builder.AddText("ΩωΝνΔδθΘ"); //Omega, Nu, Delta, Theta (UPPER and lower cases)
-                //builder.AddText("ΩωνΔθ");
                 //builder.AddRanges(fontAtlas.GetGlyphRangesDefault());
                 builder.BuildRanges(out ImVector ranges);
                 
+                config.PixelSnapH = true;
                 fontAtlas.AddFontFromFileTTF(Path.Combine(rf, "ProggyClean.ttf"), 13, config);
                 config.MergeMode = true;
                 fontAtlas.AddFontFromFileTTF(Path.Combine(rf, "DejaVuSans.ttf"), 13, config, ranges.Data);
