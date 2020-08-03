@@ -209,7 +209,10 @@ namespace Pulsar4X.ECSLib
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, makemake);
 
             Entity eris = Factories.SystemGen.SolEntities.Eris(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
-            _systemBodyFactory.MineralGeneration(game.StaticData, sol, makemake);
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, eris);
+
+            Entity ceres = Factories.SystemGen.SolEntities.Ceres(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, ceres);
 
             // Comets
             Entity halleysComet = Factories.SystemGen.SolEntities.HalleysComet(game, sol, sun, new System.DateTime(1994, 2, 17), new SensorProfileDB());

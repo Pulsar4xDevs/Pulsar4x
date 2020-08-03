@@ -125,6 +125,10 @@ namespace Pulsar4X.Tests
             // Eris
             var eris = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Eris"));
             Assert.IsNotNull(eris);
+
+            // Ceres
+            var ceres = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Ceres"));
+            Assert.IsNotNull(ceres);
         }
 
         [Test]
