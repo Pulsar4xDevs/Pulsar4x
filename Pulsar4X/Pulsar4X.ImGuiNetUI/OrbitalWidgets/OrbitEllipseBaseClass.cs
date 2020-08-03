@@ -1,5 +1,6 @@
 ﻿using System;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using ImGuiNET;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace Pulsar4X.SDL2UI
         protected EntityManager _mgr;
         protected OrbitDB _orbitDB;
         internal IPosition BodyPositionDB;
-        protected PointD _bodyRalitivePos;
+        protected PointD _bodyrelativePos;
         internal float SemiMaj;
         internal float SemiMinor;
         protected float _loP_Degrees; //longditudeOfPeriapsis (loan + aop) 

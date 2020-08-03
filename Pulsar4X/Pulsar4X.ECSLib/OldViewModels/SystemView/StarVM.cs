@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -84,7 +85,7 @@ namespace Pulsar4X.ECSLib
         private TimeSpan _year;
 
         /// <summary>
-        /// Ralitive to parent orbit.
+        /// relative to parent orbit.
         /// </summary>
         public Vector3 Position
         {
@@ -98,7 +99,7 @@ namespace Pulsar4X.ECSLib
         private Vector3 _position;
 
         /// <summary>
-        /// 2d cartisian position ralitive to ancestor star (ancestor should be 0,0). 
+        /// 2d cartisian position relative to ancestor star (ancestor should be 0,0). 
         /// </summary>
         public Vector3 SystemPosition
         {

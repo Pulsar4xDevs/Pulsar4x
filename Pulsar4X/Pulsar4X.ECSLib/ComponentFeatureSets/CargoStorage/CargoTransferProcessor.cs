@@ -94,8 +94,8 @@ namespace Pulsar4X.ECSLib
                 sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(0, parentMass);
                 
                 
-                var state1 = Entity.GetRalitiveState(entity1);
-                var state2 = Entity.GetRalitiveState(entity2);
+                var state1 = Entity.GetrelativeState(entity1);
+                var state2 = Entity.GetrelativeState(entity2);
                 r1 = state1.pos.Length();
                 r2 = state2.pos.Length();
             }

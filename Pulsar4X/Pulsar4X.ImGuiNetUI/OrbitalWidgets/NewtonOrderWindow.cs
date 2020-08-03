@@ -1,11 +1,7 @@
 ﻿using System;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
-using Pulsar4X.Vectors;
-using Vector2 = Pulsar4X.Vectors.Vector2;
-
-//using System.Numerics;
-
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -24,11 +20,11 @@ namespace Pulsar4X.SDL2UI
         DateTime _actionDateTime;
 
         //double _origionalOrbitalSpeed = double.NaN;
-        Vector3 _orbitalVelocityAtChange_m = ECSLib.Vector3.NaN;
+        Vector3 _orbitalVelocityAtChange_m = Orbital.Vector3.NaN;
         double _origionalAngle = double.NaN;
 
         double _newOrbitalSpeed_m = double.NaN;
-        Vector3 _newOrbitalVelocity_m = ECSLib.Vector3.NaN;
+        Vector3 _newOrbitalVelocity_m = Orbital.Vector3.NaN;
         double _newAngle = double.NaN;
 
         double _massOrderingEntity = double.NaN;
@@ -182,7 +178,7 @@ namespace Pulsar4X.SDL2UI
        
             //double x = (_radialDV * Math.Cos(_origionalAngle)) - (_progradeDV * Math.Sin(_origionalAngle));
             //double y = (_radialDV * Math.Sin(_origionalAngle)) + (_progradeDV * Math.Cos(_origionalAngle));
-            _deltaV_MS = _newtonUI.DeltaV; //new ECSLib.Vector3(x, y, 0);
+            _deltaV_MS = _newtonUI.DeltaV; //new Orbital.Vector3(x, y, 0);
 
 
             _newOrbitalVelocity_m = _orbitalVelocityAtChange_m + _deltaV_MS;
@@ -197,7 +193,7 @@ namespace Pulsar4X.SDL2UI
             _orbitWidget.SetParametersFromKeplerElements(_ke_m, _positonAtChange_m);
 
             /*
-            var sgpCBAU = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);
+            var sgpCBAU = UniversalConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);
             var ralPosCBAU = OrderingEntity.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
             var smaCurrOrbtAU = OrderingEntity.Entity.GetDataBlob<OrbitDB>().SemiMajorAxis;
             var velAU = OrbitProcessor.PreciseOrbitalVector(sgpCBAU, ralPosCBAU, smaCurrOrbtAU);

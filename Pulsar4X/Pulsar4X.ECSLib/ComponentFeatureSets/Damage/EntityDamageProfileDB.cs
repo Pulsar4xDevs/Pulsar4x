@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
-using Pulsar4X.Vectors;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 {

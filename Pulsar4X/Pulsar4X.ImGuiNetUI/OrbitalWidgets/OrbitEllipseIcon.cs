@@ -1,5 +1,6 @@
 ﻿using System;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using ImGuiNET;
 using System.Collections.Generic;
@@ -133,13 +134,13 @@ namespace Pulsar4X.SDL2UI
         {
 
             Vector3 pos = BodyPositionDB.RelativePosition_AU; 
-            _bodyRalitivePos = new PointD() { X = pos.X, Y = pos.Y };
+            _bodyrelativePos = new PointD() { X = pos.X, Y = pos.Y };
 
-            double minDist = CalcDistance(_bodyRalitivePos, _points[_index]);
+            double minDist = CalcDistance(_bodyrelativePos, _points[_index]);
 
             for (int i =0; i < _points.Count(); i++)
             {
-                double dist = CalcDistance(_bodyRalitivePos, _points[i]);
+                double dist = CalcDistance(_bodyrelativePos, _points[i]);
                 if (dist < minDist)
                 {
                     minDist = dist;
@@ -169,7 +170,7 @@ namespace Pulsar4X.SDL2UI
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
 
             //first index in the drawPoints is the position of the body
-            var translated = matrix.TransformD(_bodyRalitivePos.X, _bodyRalitivePos.Y);
+            var translated = matrix.TransformD(_bodyrelativePos.X, _bodyrelativePos.Y);
             _drawPoints[0] = new SDL.SDL_Point() { x = (int)(vsp.X + translated.X), y = (int)(vsp.Y + translated.Y) };
             
             for (int i = 1; i < _numberOfDrawSegments; i++)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -361,7 +362,7 @@ namespace Pulsar4X.ECSLib
             return positionDB.Parent;
         }
 
-        public static (Vector3 pos, Vector3 Velocity) GetRalitiveState(Entity entity)
+        public static (Vector3 pos, Vector3 Velocity) GetrelativeState(Entity entity)
         {
             var pos = entity.GetDataBlob<PositionDB>().RelativePosition_m;
             if (entity.HasDataBlob<OrbitDB>())
@@ -457,9 +458,9 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="atDateTime"></param>
-        /// <returns>Velocity in m/s ralitive to SOI parent</returns>
+        /// <returns>Velocity in m/s relative to SOI parent</returns>
         /// <exception cref="Exception"></exception>
-        public static Vector3 GetRalitiveFutureVelocity(Entity entity, DateTime atDateTime)
+        public static Vector3 GetrelativeFutureVelocity(Entity entity, DateTime atDateTime)
         {
             
             if (entity.HasDataBlob<OrbitDB>())
@@ -524,7 +525,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="atDateTime"></param>
         /// <returns>In Meters</returns>
         /// <exception cref="Exception"> if entity doesn't have one of the correct datablobs</exception>
-        public static Vector3 GetRalitiveFuturePosition(Entity entity, DateTime atDateTime)
+        public static Vector3 GetrelativeFuturePosition(Entity entity, DateTime atDateTime)
         {
             if (entity.HasDataBlob<OrbitDB>())
             {

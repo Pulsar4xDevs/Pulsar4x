@@ -5,6 +5,7 @@ using System.Drawing.Printing;
 using System.Security.Cryptography.X509Certificates;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {

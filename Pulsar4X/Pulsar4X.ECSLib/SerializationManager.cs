@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using Pulsar4X.Orbital;
 using Formatting = Newtonsoft.Json.Formatting;
 
 namespace Pulsar4X.ECSLib
@@ -587,7 +588,7 @@ namespace Pulsar4X.ECSLib
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MassInEarthMasses", "NS");
-                varNode.InnerText = (massVolumeDB.MassDry / GameConstants.Units.EarthMassInKG).ToString("N2");
+                varNode.InnerText = (massVolumeDB.MassDry / UniversalConstants.Units.EarthMassInKG).ToString("N2");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Density", "NS");

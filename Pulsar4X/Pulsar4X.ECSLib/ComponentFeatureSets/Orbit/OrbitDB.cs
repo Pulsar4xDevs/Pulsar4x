@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -199,13 +200,13 @@ namespace Pulsar4X.ECSLib
             //var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), atDateTime); //need to use the parent position at the epoch
             var posdb = entity.GetDataBlob<PositionDB>();
             posdb.SetParent(parent);
-            var ralitivePos = posdb.RelativePosition_m;//entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
-            if (ralitivePos.Length() > OrbitProcessor.GetSOI_m(parent))
+            var relativePos = posdb.RelativePosition_m;//entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
+            if (relativePos.Length() > OrbitProcessor.GetSOI_m(parent))
                 throw new Exception("Entity not in target SOI");
 
-            //var sgp = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
-            var sgp_m = GMath.StandardGravitationalParameter(myMass + parentMass);
-            var ke_m = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, ralitivePos, velocity_m, atDateTime);
+            //var sgp = UniversalConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
+            var sgp_m = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
+            var ke_m = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, relativePos, velocity_m, atDateTime);
 
             
             OrbitDB orbit = new OrbitDB(parent)
@@ -225,7 +226,7 @@ namespace Pulsar4X.ECSLib
             orbit.CalculateExtendedParameters();
 
             var pos = OrbitProcessor.GetPosition_m(orbit, atDateTime);
-            var d = (pos - ralitivePos).Length();
+            var d = (pos - relativePos).Length();
             if (d > 1)
             {
                 var e = new Event(atDateTime, "Positional difference of " + Stringify.Distance(d) + " when creating orbit from velocity");
@@ -265,7 +266,7 @@ namespace Pulsar4X.ECSLib
         {
             if (position_m.Length() > OrbitProcessor.GetSOI_AU(parent))
                 throw new Exception("Entity not in target SOI");
-            //var sgp  = GameConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
+            //var sgp  = UniversalConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position_m, velocity_m, atDateTime);
             
             
@@ -500,9 +501,9 @@ namespace Pulsar4X.ECSLib
             }
             // Calculate extended parameters.
             // http://en.wikipedia.org/wiki/Standard_gravitational_parameter#Two_bodies_orbiting_each_other
-            GravitationalParameter_Km3S2 = GMath.GravitationalParameter_Km3s2(_parentMass + _myMass); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
-            GravitationalParameterAU = GMath.GrabitiationalParameter_Au3s2(_parentMass + _myMass);// (149597870700 * 149597870700 * 149597870700);
-            GravitationalParameter_m3S2 = GMath.StandardGravitationalParameter(_parentMass + _myMass);
+            GravitationalParameter_Km3S2 = GeneralMath.GravitationalParameter_Km3s2(_parentMass + _myMass); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
+            GravitationalParameterAU = GeneralMath.GravitiationalParameter_Au3s2(_parentMass + _myMass);// (149597870700 * 149597870700 * 149597870700);
+            GravitationalParameter_m3S2 = GeneralMath.StandardGravitationalParameter(_parentMass + _myMass);
 
             double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(Distance.AuToKm(SemiMajorAxis_AU), 3) / (GravitationalParameter_Km3S2));
             if (orbitalPeriod * 10000000 > long.MaxValue)

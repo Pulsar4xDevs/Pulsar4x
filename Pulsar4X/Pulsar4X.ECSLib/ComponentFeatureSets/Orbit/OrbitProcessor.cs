@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Pulsar4X.Vectors;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
     /// True Anomaly, is calculated using the Eccentric Anomaly this is the angle from the parent (or focal point of the ellipse) to the body. 
     /// With the true anomaly, we can then use trig to calculate the position.  
     /// </summary>
-    public class OrbitProcessor : IHotloopProcessor
+    public class OrbitProcessor : OrbitProcessorBase, IHotloopProcessor
     {
         /// <summary>
         /// TypeIndexes for several dataBlobs used frequently by this processor.
@@ -23,10 +23,10 @@ namespace Pulsar4X.ECSLib
         private static readonly int StarInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="T:Pulsar4X.ECSLib.OrbitProcessor"/> use ralitive velocity.
+        /// Gets or sets a value indicating whether this <see cref="T:Pulsar4X.ECSLib.OrbitProcessor"/> use relative velocity.
         /// </summary>
-        /// <value><c>true</c> if use ralitive velocity; otherwise, uses absolute <c>false</c>.</value>
-        public static bool UseRalitiveVelocity { get; set; } = true;
+        /// <value><c>true</c> if use relative velocity; otherwise, uses absolute <c>false</c>.</value>
+        public static bool UserelativeVelocity { get; set; } = true;
 
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(5);
 
@@ -141,7 +141,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Calculates the root ralitive cartesian coordinate of an orbit for a given time.
+        /// Calculates the root relative cartesian coordinate of an orbit for a given time.
         /// </summary>
         /// <param name="orbit">OrbitDB to calculate position from.</param>
         /// <param name="time">Time position desired from.</param>
@@ -467,7 +467,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Gets the orbital vector, will be either Absolute or Ralitive depending on static bool UseRalitiveVelocity
+        /// Gets the orbital vector, will be either Absolute or relative depending on static bool UserelativeVelocity
         /// </summary>
         /// <returns>The orbital vector.</returns>
         /// <param name="orbit">Orbit.</param>
@@ -476,7 +476,7 @@ namespace Pulsar4X.ECSLib
         {
 
 
-            if (UseRalitiveVelocity)
+            if (UserelativeVelocity)
             {
                 return InstantaneousOrbitalVelocityVector_AU(orbit, atDateTime);
             }
@@ -487,14 +487,14 @@ namespace Pulsar4X.ECSLib
         }
         
         /// <summary>
-        /// Gets the orbital vector, will be either Absolute or Ralitive depending on static bool UseRalitiveVelocity
+        /// Gets the orbital vector, will be either Absolute or relative depending on static bool UserelativeVelocity
         /// </summary>
         /// <returns>The orbital vector.</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
         public static Vector3 GetOrbitalVector_m(OrbitDB orbit, DateTime atDateTime)
         {
-            if (UseRalitiveVelocity)
+            if (UserelativeVelocity)
             {
                 return InstantaneousOrbitalVelocityVector_m(orbit, atDateTime);
             }
@@ -506,7 +506,7 @@ namespace Pulsar4X.ECSLib
 
         public static Vector3 GetOrbitalInsertionVector_m(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
         {
-            if (UseRalitiveVelocity)
+            if (UserelativeVelocity)
                 return departureVelocity;
             else
             {
@@ -518,7 +518,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The orbital vector.
         /// </summary>
-        /// <returns>The orbital vector, ralitive to the root object (ie sun)</returns>
+        /// <returns>The orbital vector, relative to the root object (ie sun)</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
         public static Vector3 AbsoluteOrbitalVector_AU(OrbitDB orbit, DateTime atDateTime)       
@@ -533,7 +533,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The orbital vector.
         /// </summary>
-        /// <returns>The orbital vector, ralitive to the root object (ie sun)</returns>
+        /// <returns>The orbital vector, relative to the root object (ie sun)</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
         public static Vector3 AbsoluteOrbitalVector_m(OrbitDB orbit, DateTime atDateTime)       
@@ -576,9 +576,9 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Parent ralitive velocity vector. 
+        /// Parent relative velocity vector. 
         /// </summary>
-        /// <returns>The orbital vector ralitive to the parent</returns>
+        /// <returns>The orbital vector relative to the parent</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
         public static Vector3 InstantaneousOrbitalVelocityVector_AU(OrbitDB orbit, DateTime atDateTime)
@@ -598,9 +598,9 @@ namespace Pulsar4X.ECSLib
         }
         
         /// <summary>
-        /// Parent ralitive velocity vector. 
+        /// Parent relative velocity vector. 
         /// </summary>
-        /// <returns>The orbital vector ralitive to the parent</returns>
+        /// <returns>The orbital vector relative to the parent</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
         public static Vector3 InstantaneousOrbitalVelocityVector_m(OrbitDB orbit, DateTime atDateTime)

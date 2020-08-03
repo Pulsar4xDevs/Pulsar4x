@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
 {
@@ -42,8 +43,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
         
         public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, double beamVelocity, double beamLenInSeconds)
         {
-            var ourState = Entity.GetRalitiveState(launchingEntity);
-            var tgtState = Entity.GetRalitiveState(targetEntity);
+            var ourState = Entity.GetrelativeState(launchingEntity);
+            var tgtState = Entity.GetrelativeState(targetEntity);
             
             Vector3 leadToTgt = (tgtState.Velocity - ourState.Velocity);
             Vector3 vectorToTgt = (tgtState.pos = ourState.pos);
@@ -98,7 +99,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                     timespanToIntercept = TimeSpan.FromSeconds(newttt);
                 }
                 DateTime futureDate = atDateTime + timespanToIntercept;
-                var futurePosition = Entity.GetRalitiveFuturePosition(targetEntity, futureDate);
+                var futurePosition = Entity.GetrelativeFuturePosition(targetEntity, futureDate);
                     
                 tgtBearing = futurePosition - ourState.pos;
                 distanceToTgt = (tgtBearing).Length();

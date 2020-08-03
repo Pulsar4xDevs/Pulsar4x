@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -184,10 +185,10 @@ namespace Pulsar4X.ECSLib
             this.SystemGuid = positionDB.SystemGuid;
         }
 
-        public PositionDB(Vector3 ralitivePos_m, Entity SOIParent) : base(SOIParent)
+        public PositionDB(Vector3 relativePos_m, Entity SOIParent) : base(SOIParent)
         {
             SystemGuid = SOIParent.Manager.ManagerGuid;
-            RelativePosition_m = ralitivePos_m;
+            RelativePosition_m = relativePos_m;
         }
 
         

@@ -69,7 +69,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void CompareLoadedGameWithOrigional() //TODO do this after a few game ticks and check the comparitiveTests again. 
+        public void CompareLoadedGameWithOriginal() //TODO do this after a few game ticks and check the comparitiveTests again. 
         {
             //create a new game
             Game newGame = TestingUtilities.CreateTestUniverse(10, _testTime, true);
@@ -95,16 +95,16 @@ namespace Pulsar4X.Tests
          void ComparitiveTests(Game origional, Game loadedGame)
         {
             
-            StarSystem firstOrigional = origional.Systems.First().Value;
+            StarSystem firstOriginal = origional.Systems.First().Value;
             StarSystem firstLoaded = loadedGame.Systems.First().Value;
 
-            Assert.AreEqual(firstOrigional.Guid, firstLoaded.Guid);
-            Assert.AreEqual(firstOrigional.NameDB.DefaultName, firstLoaded.NameDB.DefaultName);
+            Assert.AreEqual(firstOriginal.Guid, firstLoaded.Guid);
+            Assert.AreEqual(firstOriginal.NameDB.DefaultName, firstLoaded.NameDB.DefaultName);
   
             Assert.AreEqual(origional.GamePulse, loadedGame.GamePulse);
 
-            Assert.AreEqual(firstOrigional.ManagerSubpulses.GetTotalNumberOfProceses(), firstLoaded.ManagerSubpulses.GetTotalNumberOfProceses());
-            Assert.AreEqual(firstOrigional.ManagerSubpulses.GetInteruptDateTimes(), firstLoaded.ManagerSubpulses.GetInteruptDateTimes());
+            Assert.AreEqual(firstOriginal.ManagerSubpulses.GetTotalNumberOfProceses(), firstLoaded.ManagerSubpulses.GetTotalNumberOfProceses());
+            Assert.AreEqual(firstOriginal.ManagerSubpulses.GetInteruptDateTimes(), firstLoaded.ManagerSubpulses.GetInteruptDateTimes());
         }
 
 

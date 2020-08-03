@@ -85,6 +85,10 @@
     <PackageReference Include="ncalc" Version="1.3.8" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NUnit" Version="3.10.1" />
+    <Compile Remove="Helpers\EllipseMath.cs" />
+    <Compile Remove="Helpers\Matrix3d.cs" />
+    <Compile Remove="Helpers\Vector2.cs" />
+    <Compile Remove="Helpers\Vector3.cs" />
     <Compile Remove="Properties\AssemblyInfo.cs" />
     <Compile Remove="ComponentFeatureSets\Rendering\RenderingInfoDB.cs" />
     <Compile Remove="ComponentFeatureSets\Components\ComponentAtbParser.cs" />
@@ -155,11 +159,15 @@
     <Folder Include="DataBlobs\ComponentInstanceDBs\" />
     <Folder Include="Factories\ShipComponents\" />
     <Folder Include="ComponentFeatureSets\NewtonionMovement\" />
+    <Folder Include="Factories\SystemGen\SolEntities\Asteroids\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Data\Pulsar4x\ComponentDataOrdnance.json" />
     <Content Include="Data\Pulsar4x\ComponentDataOrdnance.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pulsar4X.OrbitalMath\Pulsar4X.Orbital.csproj" />
   </ItemGroup>
 </Project>

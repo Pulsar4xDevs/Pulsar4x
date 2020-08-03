@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using Pulsar4X.SDL2UI;
-using Vector3 = Pulsar4X.ECSLib.Vector3;
+using Vector2 = System.Numerics.Vector2;
+using Vector3 = Pulsar4X.Orbital.Vector3;
 
 namespace Pulsar4X.ImGuiNetUI.EntityManagement
 {
@@ -303,7 +305,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             var period = _orderEntity.GetDataBlob<OrbitDB>().OrbitalPeriod.TotalSeconds;
             var orbitDB = _orderEntity.GetDataBlob<OrbitDB>();
-            var parentState = Entity.GetRalitiveState(Entity.GetSOIParentEntity(_orderEntity));
+            var parentState = Entity.GetrelativeState(Entity.GetSOIParentEntity(_orderEntity));
             var parentAngle = Math.Atan2(parentState.pos.Y, parentState.pos.X);
             
             double orbitalPeriod = orbitDB.OrbitalPeriod.TotalSeconds;
@@ -330,8 +332,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             double mySMA = _currentKE.SemiMajorAxis;
             //double escapeSMA = 
             var manuverDateTime = _atDatetime + TimeSpan.FromSeconds(secondsToManuver);
-            var manuverPos = Entity.GetRalitiveFuturePosition(_orderEntity, manuverDateTime);
-            var manuverVel = Entity.GetRalitiveFutureVelocity(_orderEntity, manuverDateTime);
+            var manuverPos = Entity.GetrelativeFuturePosition(_orderEntity, manuverDateTime);
+            var manuverVel = Entity.GetrelativeFutureVelocity(_orderEntity, manuverDateTime);
             var soi = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<OrbitDB>().SOI_m;
             var manuver = InterceptCalcs.Hohmann2(_sgp, manuverPos.Length(), soi)[0];
 

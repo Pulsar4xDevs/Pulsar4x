@@ -51,6 +51,7 @@ namespace Pulsar4X.ECSLib
             RNG = new Random(seed);
             game.Systems.Add(Guid, this);
         }
+
         internal StarSystem(Game game, string name, int seed, Guid systemID): base(game, false)
         {
             NameDB = new NameDB(name);
