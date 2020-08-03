@@ -78,17 +78,17 @@ namespace Pulsar4X.Tests
             var mercury = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Mercury"));
             Assert.IsNotNull(mercury);
 
-            // Earth
+            // Venus
             var venus = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Venus"));
             Assert.IsNotNull(venus);
+
+            // Earth
+            var earth = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Earth"));
+            Assert.IsNotNull(earth);
 
             // Luna
             var luna = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Luna"));
             Assert.IsNotNull(luna);
-
-            // Earth
-            var planet = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Earth"));
-            Assert.IsNotNull(planet);
 
             // Mars
             var mars = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Mars"));

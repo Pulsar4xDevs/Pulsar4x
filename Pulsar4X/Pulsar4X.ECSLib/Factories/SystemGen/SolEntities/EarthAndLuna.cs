@@ -52,6 +52,7 @@ namespace Pulsar4X.ECSLib.Factories.SystemGen
             double moonSemiMajorAxisAU = Distance.KmToAU(0.3844E6);
             double moonEccentricity = 0.0549;
             double moonEclipticInclination = 0; // 5.1
+
             // Next three values are unimportant. Luna's LoAN and AoP regress/progress by one revolution every 18.6/8.85 years respectively.
             // Our orbit code it not advanced enough to deal with LoAN/AoP regression/progression. 
             double moonLoAN = 125.08;
