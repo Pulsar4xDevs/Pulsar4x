@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
-using Vector3 = Pulsar4X.ECSLib.Vector3;
+using Vector3 = Pulsar4X.Orbital.Vector3;
 
 namespace Pulsar4X.SDL2UI
 {

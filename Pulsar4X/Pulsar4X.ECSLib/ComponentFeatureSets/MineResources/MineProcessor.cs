@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -72,7 +73,7 @@ namespace Pulsar4X.ECSLib
                 int newAmount = mineralDeposit.Amount -= unitsMinedThisTick;
 
                 accessability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
-                double newAccess = GMath.Clamp(accessability, 0.1, mineralDeposit.Accessibility);
+                double newAccess = GeneralMath.Clamp(accessability, 0.1, mineralDeposit.Accessibility);
 
                 mineralDeposit.Amount = newAmount;
                 mineralDeposit.Accessibility = newAccess;

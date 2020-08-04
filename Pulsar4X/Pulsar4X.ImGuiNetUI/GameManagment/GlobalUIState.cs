@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using System;
 using System.Collections.Generic;
@@ -82,7 +83,7 @@ namespace Pulsar4X.SDL2UI
         internal EntityState LastClickedEntity = null;
         
         internal EntityState PrimaryEntity { get; private set; }
-        internal ECSLib.Vector3 LastWorldPointClicked_m { get; set; }
+        internal Orbital.Vector3 LastWorldPointClicked_m { get; set; }
 
 
 
@@ -228,7 +229,7 @@ namespace Pulsar4X.SDL2UI
         }
 
         //checks wether the planet icon is clicked
-        internal void MapClicked(ECSLib.Vector3 worldCoord, MouseButtons button)
+        internal void MapClicked(Orbital.Vector3 worldCoord, MouseButtons button)
         {
 
             
@@ -404,7 +405,7 @@ namespace Pulsar4X.SDL2UI
 
         internal virtual void EntitySelectedAsPrimary(EntityState entity){ }
 
-        internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
+        internal virtual void MapClicked(Orbital.Vector3 worldPos_m, MouseButtons button) { }
 
         public override void OnGameTickChange(DateTime newDate)
         {
@@ -463,7 +464,7 @@ namespace Pulsar4X.SDL2UI
 
         internal virtual void EntitySelectedAsPrimary(EntityState entity) { }
 
-        internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
+        internal virtual void MapClicked(Orbital.Vector3 worldPos_m, MouseButtons button) { }
 
         internal void Destroy()
         {

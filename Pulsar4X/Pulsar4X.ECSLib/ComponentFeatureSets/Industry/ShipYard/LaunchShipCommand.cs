@@ -1,4 +1,5 @@
 using System;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib.Industry
 {

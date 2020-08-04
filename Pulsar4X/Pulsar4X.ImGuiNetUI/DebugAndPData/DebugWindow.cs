@@ -9,8 +9,9 @@ using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
+using Pulsar4X.Orbital;
 using Vector2 = System.Numerics.Vector2;
-using Vector3 = Pulsar4X.ECSLib.Vector3;
+using Vector3 = Pulsar4X.Orbital.Vector3;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -139,7 +140,7 @@ namespace Pulsar4X.SDL2UI
         
 
 
-        ECSLib.Vector3 pos = new ECSLib.Vector3();
+        Orbital.Vector3 pos = new Orbital.Vector3();
         double truAnomoly = 0;
 
         internal override void Display()
@@ -340,9 +341,9 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition_m.Length()));
                                 }
 
-                                var ralitiveState = Entity.GetRalitiveState(SelectedEntity);
-                                ImGui.Text("Ralitive Velocity: " + ralitiveState.Velocity);
-                                ImGui.Text("Ralitive Speed: " + Stringify.Velocity(ralitiveState.Velocity.Length()));
+                                var relativeState = Entity.GetRelativeState(SelectedEntity);
+                                ImGui.Text("relative Velocity: " + relativeState.Velocity);
+                                ImGui.Text("relative Speed: " + Stringify.Velocity(relativeState.Velocity.Length()));
                                 
                                 
                             }
@@ -431,14 +432,14 @@ namespace Pulsar4X.SDL2UI
                                     
                                     
                                     
-                                    var ralitiveState = Entity.GetRalitiveState(SelectedEntity);
-                                    //var globalvec = OrbitMath.OrbitToGlobalVector(ralitiveState.Velocity, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                    var relativeState = Entity.GetRelativeState(SelectedEntity);
+                                    //var globalvec = OrbitMath.OrbitToGlobalVector(relativeState.Velocity, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
                                     var progradeVec = new Vector3(0, 100, 0);
-                                    //var thrustvec = OrbitMath.OrbitToGlobalVector(progradeVec, pos, ralitiveState.Velocity);
+                                    //var thrustvec = OrbitMath.OrbitToGlobalVector(progradeVec, pos, relativeState.Velocity);
                                     //var thrustvec2 = OrbitMath.OrbitToGlobalVector(progradeVec, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
                                     var thrustvec3 = OrbitMath.ProgradeToParentVector(progradeVec, truAnomoly, orbitDB.ArgumentOfPeriapsis, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
-                                    var thrustvec4 = OrbitMath.ProgradeToParentVector(orbitDB.GravitationalParameter_m3S2, progradeVec, pos, ralitiveState.Velocity);
-                                    ImGui.Text("stateVec: " + ralitiveState.Velocity);
+                                    var thrustvec4 = OrbitMath.ProgradeToParentVector(orbitDB.GravitationalParameter_m3S2, progradeVec, pos, relativeState.Velocity);
+                                    ImGui.Text("stateVec: " + relativeState.Velocity);
                                     //ImGui.Text("globalVec: " + globalvec);
                                     //ImGui.Text("thrustvec: " + thrustvec);
                                     //ImGui.Text("thrustvec2: " + thrustvec2);
@@ -467,7 +468,7 @@ namespace Pulsar4X.SDL2UI
                                         var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;
                                         var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().MassDry;
 
-                                        var sgp = GameConstants.Science.GravitationalConstant * (pmass + mymass) / 3.347928976e33;
+                                        var sgp = UniversalConstants.Science.GravitationalConstant * (pmass + mymass) / 3.347928976e33;
                                         var vel = Distance.KmToAU(cnmve.CurrentVector_ms);
                                         var cpos = myPos.RelativePosition_AU;
                                         var eccentVector = OrbitMath.EccentricityVector(sgp, cpos, vel);
@@ -536,7 +537,7 @@ namespace Pulsar4X.SDL2UI
   
                                     ImGui.Text("Max Speed: " + warpDB.MaxSpeed);
                                     ImGui.Text("CurrentVector: " + warpDB.CurrentVectorMS);
-                                    ImGui.Text("Current Speed: " + ECSLib.Vector3.Magnitude( warpDB.CurrentVectorMS));
+                                    ImGui.Text("Current Speed: " + Orbital.Vector3.Magnitude( warpDB.CurrentVectorMS));
                                     
                                     
                                     //ImGui.Text("Energy type: " + warpDB.EnergyType);
@@ -589,9 +590,9 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("Z:" + Stringify.Distance(db.ExitPointAbsolute.Z));
                                     
                                     ImGui.Text("Relitive ExitPoint: ");
-                                    ImGui.Text("X:" + Stringify.Distance(db.ExitPointRalitive.X));
-                                    ImGui.Text("Y:" + Stringify.Distance(db.ExitPointRalitive.Y));
-                                    ImGui.Text("Z:" + Stringify.Distance(db.ExitPointRalitive.Z));
+                                    ImGui.Text("X:" + Stringify.Distance(db.ExitPointrelative.X));
+                                    ImGui.Text("Y:" + Stringify.Distance(db.ExitPointrelative.Y));
+                                    ImGui.Text("Z:" + Stringify.Distance(db.ExitPointrelative.Z));
                                     
                                     
                                     ImGui.Text("EDA " + db.PredictedExitTime.ToString());

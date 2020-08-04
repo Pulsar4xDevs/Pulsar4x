@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.Tests
 {
@@ -114,7 +115,7 @@ namespace Pulsar4X.Tests
             if (sma < (double)decimal.MaxValue)
             {
                 decimal smad = (decimal)sma;
-                E = GMath.Sqrt(1 - (decimal)p / smad);
+                E = GeneralMath.Sqrt(1 - (decimal)p / smad);
 
                 decimal PlusMinus = smad * E;
                 Periapsis = (double)(smad - PlusMinus);
@@ -379,7 +380,7 @@ namespace Pulsar4X.Tests
 
             double keslr = EllipseMath.SemiLatusRectum(ke_m.SemiMajorAxis, ke_m.Eccentricity);
             double keradius = OrbitMath.RadiusAtAngle(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);
-            Vector3 kemathPos = OrbitMath.GetRalitivePosition(ke_m.LoAN, ke_m.AoP, ke_m.Inclination, ke_m.TrueAnomalyAtEpoch, keradius);
+            Vector3 kemathPos = OrbitMath.GetRelativePosition(ke_m.LoAN, ke_m.AoP, ke_m.Inclination, ke_m.TrueAnomalyAtEpoch, keradius);
             
             Assert.AreEqual(kemathPos.Length(), pos_m.Length(), 0.02);
 

@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {

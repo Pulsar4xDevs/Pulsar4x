@@ -1,12 +1,14 @@
 ﻿using Newtonsoft.Json;
+using Pulsar4X.Orbital;
+
 namespace Pulsar4X.ECSLib
 {
     public class SensorPositionDB : BaseDataBlob, IPosition
     {
         internal DataFrom GetDataFrom = DataFrom.Parent;
         public PositionDB ActualEntityPositionDB; //the detected actual entity
-        public PositionDB ParentPositionDB; //detected actual entity positional parent for ralitive positions.
-        public Vector3 MemoryRalitivePosition_m;
+        public PositionDB ParentPositionDB; //detected actual entity positional parent for relative positions.
+        public Vector3 MemoryrelativePosition_m;
         internal Vector3 AcuracyOffset = new Vector3();
 
         public Vector3 AbsolutePosition_AU
@@ -23,7 +25,7 @@ namespace Pulsar4X.ECSLib
                 if (GetDataFrom == DataFrom.Sensors)
                     return ActualEntityPositionDB.AbsolutePosition_m + AcuracyOffset;
                 else
-                    return ParentPositionDB.AbsolutePosition_m + MemoryRalitivePosition_m; 
+                    return ParentPositionDB.AbsolutePosition_m + MemoryrelativePosition_m; 
             } 
         }
 
@@ -41,7 +43,7 @@ namespace Pulsar4X.ECSLib
                 if (GetDataFrom == DataFrom.Sensors)
                     return ActualEntityPositionDB.RelativePosition_m + AcuracyOffset;
                 else
-                    return MemoryRalitivePosition_m;
+                    return MemoryrelativePosition_m;
             }
         }
 
@@ -61,7 +63,7 @@ namespace Pulsar4X.ECSLib
         public SensorPositionDB(SensorPositionDB toClone)
         {
             GetDataFrom = toClone.GetDataFrom;
-            MemoryRalitivePosition_m = toClone.MemoryRalitivePosition_m;
+            MemoryrelativePosition_m = toClone.MemoryrelativePosition_m;
         }
 
         public override object Clone()

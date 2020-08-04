@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// most of this is adapted from: https://crackstation.net/hashing-security.htm#aspsourcecode 
     /// https://github.com/defuse/password-hashing
-    /// Origional Author: Taylor Hornby "defuse"
+    /// Original Author: Taylor Hornby "defuse"
     /// BSD 2-clause "Simplified" License
     /// </summary>
     public static class AuthProcessor

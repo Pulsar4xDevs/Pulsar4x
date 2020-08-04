@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pulsar4X.Orbital;
+using System;
 using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
@@ -22,8 +23,8 @@ namespace Pulsar4X.ECSLib
             
             var jpPositionLimits = new MinMaxStruct(ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType].Min, ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType].Max);
 
-            jpPositionDB.X_AU = GMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
-            jpPositionDB.Y_AU = GMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
+            jpPositionDB.X_AU = GeneralMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
+            jpPositionDB.Y_AU = GeneralMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
 
             // Randomly flip the position sign to allow negative values.
             if (system.RNG.Next(0, 100) < 50)
@@ -62,7 +63,7 @@ namespace Pulsar4X.ECSLib
             {
                 numJumpPoints++;
 
-                jpChance = baseJPChance + (starMVDB.MassDry / GameConstants.Units.SolarMassInKG);
+                jpChance = baseJPChance + (starMVDB.MassDry / UniversalConstants.Units.SolarMassInKG);
 
                 if (jpChance > 90)
                 {

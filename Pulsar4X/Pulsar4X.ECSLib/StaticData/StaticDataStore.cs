@@ -30,6 +30,32 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public WeightedList<AtmosphericGasSD> AtmosphericGases = new WeightedList<AtmosphericGasSD>();
 
+        public AtmosphericGasSD GetAtmosGasByName(string name)
+        {
+            foreach (var gas in AtmosphericGases)
+            {
+                if (gas.Value.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return gas.Value;
+                }
+            }
+
+            throw new Exception("Atmospheric Gas " + name + " Not Found.");
+        }
+
+        public AtmosphericGasSD GetAtmosGasBySymbol(string chemicalSymbol)
+        {
+            foreach (var gas in AtmosphericGases)
+            {
+                if (gas.Value.ChemicalSymbol.Equals(chemicalSymbol, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return gas.Value;
+                }
+            }
+
+            throw new Exception("Atmospheric Gas with symbol " + chemicalSymbol + " Not Found.");
+        }
+
         /// <summary>
         /// List which stores all the Commander Name themes.
         /// </summary>

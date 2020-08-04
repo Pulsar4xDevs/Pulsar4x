@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -65,7 +66,7 @@ namespace Pulsar4X.ECSLib
         /// Measure on the gravity of a planet at its surface.
         /// In Earth Gravities (Gs).
         /// </summary>
-        public double SurfaceGravity => GMath.GetStandardGravitationAttraction(MassDry, RadiusInKM * 1000);
+        public double SurfaceGravity => GeneralMath.GetStandardGravitationAttraction(MassDry, RadiusInKM * 1000);
 
         public MassVolumeDB()
         {

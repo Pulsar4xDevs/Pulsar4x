@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -21,12 +22,12 @@ namespace Pulsar4X.SDL2UI
     public class Icon : IDrawData
     {
         protected ECSLib.IPosition _positionDB;
-        protected ECSLib.Vector3 _worldPosition_m { get; set; }
-        public ECSLib.Vector3 WorldPosition_AU
+        protected Orbital.Vector3 _worldPosition_m { get; set; }
+        public Orbital.Vector3 WorldPosition_AU
         {
             get { return Distance.MToAU(WorldPosition_m); }
         }
-        public ECSLib.Vector3 WorldPosition_m
+        public Orbital.Vector3 WorldPosition_m
         {
             get 
             { 
@@ -194,12 +195,12 @@ namespace Pulsar4X.SDL2UI
         Shape _shape;
         Shape _drawShape;
         protected ECSLib.IPosition _positionDB;
-        protected ECSLib.Vector3 _worldPosition;
+        protected Orbital.Vector3 _worldPosition;
         public SDL.SDL_Point ViewScreenPos;
 
         bool positionByDB;
 
-        public ECSLib.Vector3 WorldPosition
+        public Orbital.Vector3 WorldPosition
         {
             get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
