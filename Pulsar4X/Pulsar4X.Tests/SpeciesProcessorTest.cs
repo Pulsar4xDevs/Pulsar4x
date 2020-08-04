@@ -154,13 +154,10 @@ namespace Pulsar4X.Tests
             double expectedCost;
             string gasSym;
 
-            Dictionary<string, AtmosphericGasSD> lowToxicGases, highToxicGases, benignGases;
-            AtmosphericGasSD oxygenGas;
-
-            lowToxicGases = new Dictionary<string, AtmosphericGasSD>();
-            highToxicGases = new Dictionary<string, AtmosphericGasSD>();
-            benignGases = new Dictionary<string, AtmosphericGasSD>();
-            oxygenGas = new AtmosphericGasSD();
+            var lowToxicGases = new Dictionary<string, AtmosphericGasSD>();
+            var highToxicGases = new Dictionary<string, AtmosphericGasSD>();
+            var benignGases = new Dictionary<string, AtmosphericGasSD>();
+            AtmosphericGasSD oxygenGas = new AtmosphericGasSD();
 
             //Separate all the gases into the lists above
             foreach (KeyValuePair<string, AtmosphericGasSD> kvp in _gasDictionary)
@@ -170,7 +167,7 @@ namespace Pulsar4X.Tests
                     lowToxicGases.Add(gasSym, kvp.Value);
                 else if (gasSym == "Cl2" || gasSym == "F2" || gasSym == "Br2" || gasSym == "I2")
                     highToxicGases.Add(gasSym, kvp.Value);
-                else if (gasSym == "O")
+                else if (gasSym == "O2")
                     oxygenGas = kvp.Value;
                 else
                     benignGases.Add(gasSym, kvp.Value);
@@ -313,9 +310,9 @@ namespace Pulsar4X.Tests
                 atmoGasses.Clear();
                 
                 // Keep atmosphere breathable
-                atmoGasses.Add(_gasDictionary["N"], (float)(2.0f * i));
+                atmoGasses.Add(_gasDictionary["N2"], (float)(2.0f * i));
                 totalPressure = 2.0f * i;
-                atmoGasses.Add(_gasDictionary["O"], 0.1f);
+                atmoGasses.Add(_gasDictionary["O2"], 0.1f);
                 totalPressure += 0.1f;
 
                     
@@ -394,8 +391,8 @@ namespace Pulsar4X.Tests
                     AtmosphereDB testAtmosphereDB;
                     atmoGasses.Clear();
 
-                    atmoGasses.Add(_gasDictionary["N"], i * 0.1f);
-                    atmoGasses.Add(_gasDictionary["O"], j * 0.1f);
+                    atmoGasses.Add(_gasDictionary["N2"], i * 0.1f);
+                    atmoGasses.Add(_gasDictionary["O2"], j * 0.1f);
 
                     testAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                     testPlanet = setAtmosphere(testAtmosphereDB);
@@ -434,8 +431,8 @@ namespace Pulsar4X.Tests
             Entity resultPlanet;
             Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
 
-            atmoGasses.Add(_gasDictionary["N"], 0.79f);
-            atmoGasses.Add(_gasDictionary["O"], 0.20f);
+            atmoGasses.Add(_gasDictionary["N2"], 0.79f);
+            atmoGasses.Add(_gasDictionary["O2"], 0.20f);
             atmoGasses.Add(_gasDictionary["Ar"], 0.01f);
             AtmosphereDB atmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
             resultPlanet = setAtmosphere(atmosphereDB);

@@ -12,6 +12,7 @@ namespace Pulsar4X.ECSLib
             cost = Math.Max(cost, ColonyPressureCost(planet, species));
             cost = Math.Max(cost, ColonyTemperatureCost(planet, species));
             cost = Math.Max(cost, ColonyGasCost(planet, species));
+            cost = Math.Max(cost, ColonyToxicityCost(planet, species));
 
             if (!ColonyGravityIsHabitible(planet, species))
                 return -1.0; // invalid - cannot create colony here
@@ -141,7 +142,7 @@ namespace Pulsar4X.ECSLib
             {
                 string symbol = kvp.Key.ChemicalSymbol;
                 totalPressure += kvp.Value;
-                if (symbol == "O")
+                if (symbol == "O2")
                     O2Pressure = kvp.Value;
             }
 
