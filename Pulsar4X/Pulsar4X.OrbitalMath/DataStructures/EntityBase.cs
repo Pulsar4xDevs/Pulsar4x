@@ -10,7 +10,7 @@ namespace Pulsar4X.Orbital
 
         public KeplerElements Orbit { get; set; }
 
-        public VolumetricElements Volumetric { get; set; }
+        public double DryMassInKG { get; set; }
 
         public Vector3 PositionInMetres { get; set; }
 
