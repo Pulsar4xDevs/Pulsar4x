@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.Tests
 {

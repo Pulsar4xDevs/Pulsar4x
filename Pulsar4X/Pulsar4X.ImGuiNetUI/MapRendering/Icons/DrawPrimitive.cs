@@ -448,7 +448,7 @@ namespace Pulsar4X.SDL2UI
     }
     public static class PointDFunctions
     {
-        public static PointD NewFrom(ECSLib.Vector3 vector3)
+        public static PointD NewFrom(Orbital.Vector3 vector3)
         {
             return new PointD() { X = vector3.X, Y = vector3.Y };
         }

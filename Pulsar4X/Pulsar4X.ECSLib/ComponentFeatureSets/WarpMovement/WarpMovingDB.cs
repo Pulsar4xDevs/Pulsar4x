@@ -2,7 +2,7 @@
 using System.Data.SqlClient;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using Pulsar4X.Vectors;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib
         public Vector3 TranslateExitPoint_AU => Distance.MToAU(ExitPointAbsolute);
 
         [JsonProperty]
-        public Vector3 ExitPointRalitive { get; internal set; }
+        public Vector3 ExitPointrelative { get; internal set; }
 
         [JsonProperty]
         public float Heading_Radians { get; internal set; }
@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
             ExitPointAbsolute = targetPosition_m;
             EntryPointAbsolute = startState.pos;
             EntryDateTime = thisEntity.Manager.ManagerSubpulses.StarSysDateTime;
-            ExitPointRalitive = Vector3.Zero;
+            ExitPointrelative = Vector3.Zero;
             //PredictedExitTime = targetIntercept.atDateTime;
             SavedNewtonionVector = startState.Velocity;
             TargetEntity = null;
@@ -100,7 +100,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="targetPositiondb"></param>
         /// <param name="offsetPosition">normaly you want to move to a position next to the entity, this is
-        /// a position ralitive to the entity you're wanting to move to</param>
+        /// a position relative to the entity you're wanting to move to</param>
         public WarpMovingDB(Entity thisEntity, Entity targetEntity, Vector3 offsetPosition)
         {
             if(!targetEntity.HasDataBlob<OrbitDB>())
@@ -116,7 +116,7 @@ namespace Pulsar4X.ECSLib
             ExitPointAbsolute = targetIntercept.position + offsetPosition;
             EntryPointAbsolute = startState.pos;
             EntryDateTime = thisEntity.Manager.ManagerSubpulses.StarSysDateTime;
-            ExitPointRalitive = offsetPosition;
+            ExitPointrelative = offsetPosition;
             PredictedExitTime = targetIntercept.atDateTime;
             SavedNewtonionVector = startState.Velocity;
             TargetEntity = targetEntity;

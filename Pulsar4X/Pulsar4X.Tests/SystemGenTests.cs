@@ -2,6 +2,7 @@
 using Pulsar4X.ECSLib;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.Tests
 {
@@ -22,7 +23,8 @@ namespace Pulsar4X.Tests
         [Description("Creates and tests a single star system")]
         public void CreateAndFillStarSystem()
         {
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
+            var startDate = new DateTime(2050, 1, 1);
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSystem(_game, "Argon Prime", 12345); // Keeping with the X3 theme :P
@@ -30,22 +32,103 @@ namespace Pulsar4X.Tests
             // lets test that the stars generated okay:
             List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>(_smAuthToken);
             Assert.IsNotEmpty(stars);
+            Assert.AreEqual(stars.Count, 1);
 
-            if (stars.Count > 1)
-            {
-                Entity rootStar = stars[0].GetDataBlob<OrbitDB>().Root;
-                double highestMass = rootStar.GetDataBlob<MassVolumeDB>().MassDry;
-                Entity highestMassStar = rootStar;
-                foreach (Entity star in stars)
-                {
-                    var massDB = star.GetDataBlob<MassVolumeDB>();
-                    if (massDB.MassDry > highestMass)
-                        highestMassStar = star;
-                }
+            StarInfoDB argonPrimeA = stars[0].GetDataBlob<StarInfoDB>();
+            Assert.AreEqual(argonPrimeA.Age, 173752610.02727583);
+            Assert.AreEqual(argonPrimeA.Class, "F0-V");
+            Assert.AreEqual(argonPrimeA.EcoSphereRadius, 2.3878481355737571);
+            Assert.AreEqual(argonPrimeA.Luminosity, 4.2116780281066895);
+            Assert.AreEqual(argonPrimeA.LuminosityClass, LuminosityClass.V);
+            Assert.AreEqual(argonPrimeA.MaxHabitableRadius, 2.8189647598333742);
+            Assert.AreEqual(argonPrimeA.MinHabitableRadius, 1.9567315113141397);
+            Assert.AreEqual(argonPrimeA.SpectralSubDivision, 0);
+            Assert.AreEqual(argonPrimeA.SpectralType, SpectralType.F);
+            Assert.AreEqual(argonPrimeA.Temperature, 7162);
 
-                // the first star in the system should have the highest mass:
-                Assert.AreSame(rootStar, highestMassStar);
-            }
+            List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken);
+            Assert.IsNotEmpty(systemBodies);
+            Assert.AreEqual(systemBodies.Count, 16);
+        }
+
+
+        [Test]
+        [Description("Creates and tests the Sol star system")]
+        public void CreateAndFillSolStarSystem()
+        {
+            var startDate = new DateTime(2050, 1, 1);
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
+            StarSystemFactory ssf = new StarSystemFactory(_game);
+            var system = ssf.CreateSol(_game);
+
+            // lets test that the stars generated okay:
+            List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>(_smAuthToken);
+            Assert.IsNotEmpty(stars);
+            Assert.AreEqual(stars.Count, 1);
+
+            StarInfoDB sol = stars[0].GetDataBlob<StarInfoDB>();
+
+            List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken);
+            Assert.IsNotEmpty(systemBodies);
+
+            List<SystemBodyInfoDB> bodies = system.GetAllDataBlobsOfType<SystemBodyInfoDB>();
+
+            // Mercury
+            var mercury = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Mercury"));
+            Assert.IsNotNull(mercury);
+
+            // Venus
+            var venus = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Venus"));
+            Assert.IsNotNull(venus);
+
+            // Earth
+            var earth = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Earth"));
+            Assert.IsNotNull(earth);
+
+            // Luna
+            var luna = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Luna"));
+            Assert.IsNotNull(luna);
+
+            // Mars
+            var mars = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Mars"));
+            Assert.IsNotNull(mars);
+
+            // Jupiter
+            var jupiter = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Jupiter"));
+            Assert.IsNotNull(jupiter);
+
+            // Saturn
+            var saturn = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Saturn"));
+            Assert.IsNotNull(saturn);
+
+            // Uranus
+            var uranus = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Uranus"));
+            Assert.IsNotNull(uranus);
+
+            // Neptune
+            var neptune = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Neptune"));
+            Assert.IsNotNull(neptune);
+
+            // Pluto
+            var pluto = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Pluto"));
+            Assert.IsNotNull(pluto);
+
+            // Haumea
+            var haumea = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Haumea"));
+            Assert.IsNotNull(haumea);
+
+            // Makemake
+            var makemake = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Makemake"));
+            Assert.IsNotNull(makemake);
+
+            // Eris
+            var eris = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Eris"));
+            Assert.IsNotNull(eris);
+
+            // Ceres
+            var ceres = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Ceres"));
+            Assert.IsNotNull(ceres);
         }
 
         [Test]
@@ -138,7 +221,7 @@ namespace Pulsar4X.Tests
             {
                 double d = statisticalSpreadList[index];
 
-                Console.WriteLine($"Number of systems with {index} JumpPoints: {d} ({d / (double)numSystems * 100d}% of all systems)");
+                Assert.Pass($"Number of systems with {index} JumpPoints: {d} ({d / (double)numSystems * 100d}% of all systems)");
             }
         }
 }

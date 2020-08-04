@@ -335,7 +335,7 @@ namespace Pulsar4X.Networking
             else
             {
                 Messages.Add("Warning! Unmatched Faction Hash");
-                Messages.Add("OrigionalfactionHash: " + hash.ToString());
+                Messages.Add("OriginalfactionHash: " + hash.ToString());
                 printEntityHashInfo(factionEntity);
             }
 
@@ -435,7 +435,7 @@ namespace Pulsar4X.Networking
                     name = entity.Guid.ToString();
                 Messages.Add("Warning! Unmatched Entity Hash for: " + name);
                 Messages.Add("This is likely due to an incorrect IValueCompare implemenation on a datablob");
-                Messages.Add("Origional Entity Hash: " + hash.ToString());
+                Messages.Add("Original Entity Hash: " + hash.ToString());
                 printEntityHashInfo(entity);
             }
 

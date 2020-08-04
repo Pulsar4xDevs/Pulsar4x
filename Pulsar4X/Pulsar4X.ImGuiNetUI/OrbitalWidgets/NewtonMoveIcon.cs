@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -58,10 +59,10 @@ namespace Pulsar4X.SDL2UI
             _userOrbitSettingsMtx = settings;
             var parentMass = entityState.Entity.GetDataBlob<NewtonMoveDB>().ParentMass;
             var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
-            var _sgp1 = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
+            var _sgp1 = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
             _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
-            _sgpAU = GMath.GrabitiationalParameter_Au3s2(parentMass + myMass);
+            _sgpAU = GeneralMath.GravitiationalParameter_Au3s2(parentMass + myMass);
             _ke = _newtonMoveDB.GetElements();
             
             
@@ -292,9 +293,9 @@ namespace Pulsar4X.SDL2UI
 
             int index = _index;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
-            var _bodyRalitivePos = _positionDB.RelativePosition_AU;
+            var _bodyrelativePos = _positionDB.RelativePosition_AU;
             //first index in the drawPoints is the position of the body
-            var translated = matrix.TransformD(_bodyRalitivePos.X, _bodyRalitivePos.Y);
+            var translated = matrix.TransformD(_bodyrelativePos.X, _bodyrelativePos.Y);
             _drawPoints[0] = new SDL.SDL_Point() { x = (int)(vsp.X + translated.X), y = (int)(vsp.Y + translated.Y) };
             
             for (int i = 1; i < _numberOfDrawSegments; i++)

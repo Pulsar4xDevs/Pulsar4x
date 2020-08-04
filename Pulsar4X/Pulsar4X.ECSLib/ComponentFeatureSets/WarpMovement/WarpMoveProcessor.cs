@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -15,7 +16,7 @@ namespace Pulsar4X.ECSLib
     /// Ship enters a non newtonion translation state
     /// in this state, the ship is unaffected by it's previous newtonion vector & gravity
     /// Acceleration is instant.
-    /// Speed is shown ralitive to the parent star.  
+    /// Speed is shown relative to the parent star.  
     /// Cannot change its direction or speed untill exit.  
     /// An exit should be able to be forced prematurly, but this should come at a cost.
     /// An exit should be able to be forced by outside (enemy) forces. *
@@ -39,7 +40,7 @@ namespace Pulsar4X.ECSLib
     /// 
     /// I considered tying the non-newtonion speed vector to actual still space,
     /// but finding how fast the sun is actualy moving proved difficult, 
-    /// many websites just added speeds of galaxy + solarsystem together and ignored the ralitive vectors. 
+    /// many websites just added speeds of galaxy + solarsystem together and ignored the relative vectors. 
     /// one site I found sugested 368 ± 2 km/s 
     /// this might not be terrible, however if we gave max speeds of that number, 
     /// we'd be able to travel 368 km/s in one direction, and none in the oposite direction.
@@ -143,7 +144,7 @@ namespace Pulsar4X.ECSLib
                 var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
                 positionDB.SetParent(moveDB.TargetEntity);
                 //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
-                positionDB.RelativePosition_m = moveDB.ExitPointRalitive;
+                positionDB.RelativePosition_m = moveDB.ExitPointrelative;
                 
                 SetOrbitHere(entity, positionDB, moveDB, dateTimeFuture);
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);

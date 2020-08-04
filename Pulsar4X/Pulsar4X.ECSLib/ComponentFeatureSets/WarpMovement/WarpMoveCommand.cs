@@ -1,6 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {

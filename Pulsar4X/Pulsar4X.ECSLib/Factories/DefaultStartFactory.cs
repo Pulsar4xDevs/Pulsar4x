@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Printing;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -44,31 +46,10 @@ namespace Pulsar4X.ECSLib
             StarSystemFactory starfac = new StarSystemFactory(game);
             StarSystem solSys = starfac.CreateSol(game);
             //sol.ManagerSubpulses.Init(sol);
-            Entity earth = solSys.Entities[3]; //should be fourth entity created 
+            Entity earth = solSys.Entities.FirstOrDefault(x => x.GetDataBlob<NameDB>().DefaultName.Equals("Earth")); //should be fourth entity created 
             //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
-
-
-            /*
-            GalaxyFactory GalaxyGen = game.GalaxyGen;
-            SystemBodyFactory _systemBodyFactory = new SystemBodyFactory(GalaxyGen);
-
-            SystemBodyInfoDB halleysBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Comet, SupportsPopulations = false, Albedo = 0.04f  }; //Albedo = 0.04f 
-            MassVolumeDB halleysMVDB = MassVolumeDB.NewFromMassAndRadius_AU(2.2e14, Distance.KmToAU(11));
-            NameDB halleysNameDB = new NameDB("testName");
-            double halleysSemiMajAxis = 17.834; //AU
-            double halleysEccentricity = 0.96714;
-            double halleysInclination = 180; //162.26° note retrograde orbit.
-            double halleysLoAN = 58.42; //°
-            double halleysAoP = 111.33;//°
-            double halleysMeanAnomaly = 38.38;//°
-            OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(solSys.Entities[0], solSys.Entities[0].GetDataBlob<MassVolumeDB>().Mass, halleysMVDB.Mass, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
-            PositionDB halleysPositionDB = new PositionDB(0,0,0, solSys.ID, solSys.Entities[0]); // + earthPositionDB.AbsolutePosition_AU, sol.ID);
-            SensorProfileDB sensorProfile = new SensorProfileDB();
-            Entity halleysComet = new Entity(solSys, new List<BaseDataBlob> { halleysPositionDB, halleysNameDB });
-            //_systemBodyFactory.MineralGeneration(game.StaticData, solSys, halleysComet);
-            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, halleysBodyDB, halleysMVDB);*/
 
             var namedEntites = solSys.GetAllEntitiesWithDataBlob<NameDB>();
             foreach (var entity in namedEntites)

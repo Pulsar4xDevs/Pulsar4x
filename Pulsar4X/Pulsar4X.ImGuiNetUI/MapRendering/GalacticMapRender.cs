@@ -67,8 +67,8 @@ namespace Pulsar4X.SDL2UI
                 _nameIcons[item.Key] = nameIcon;
                 var x = (startR + radInc * i) * Math.Sin(startangle - angleIncrease * i);
                 var y = (startR + radInc * i) * Math.Cos(startangle - angleIncrease * i);
-                starIcon.WorldPosition_m = new ECSLib.Vector3(x, y, 0);
-                nameIcon.WorldPosition_m = new ECSLib.Vector3(x, y, 0);
+                starIcon.WorldPosition_m = new Orbital.Vector3(x, y, 0);
+                nameIcon.WorldPosition_m = new Orbital.Vector3(x, y, 0);
                 map.GalacticMapPosition.X = x;
                 map.GalacticMapPosition.Y = y;
                 i++;

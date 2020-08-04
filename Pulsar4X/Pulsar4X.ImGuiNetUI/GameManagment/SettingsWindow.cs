@@ -17,7 +17,7 @@ namespace Pulsar4X.SDL2UI
 
         bool IsThreaded;
         private bool EnforceSingleThread;
-        bool RalitiveOrbitVelocity;
+        bool relativeOrbitVelocity;
 
         private OrbitalDebugWindow _orbitalDebugWindow;
         
@@ -31,7 +31,7 @@ namespace Pulsar4X.SDL2UI
             IsThreaded = _uiState.Game.Settings.EnableMultiThreading;
             EnforceSingleThread = _uiState.Game.Settings.EnforceSingleThread;
             
-            RalitiveOrbitVelocity = ECSLib.OrbitProcessor.UseRalitiveVelocity;
+            relativeOrbitVelocity = ECSLib.OrbitProcessor.UserelativeVelocity;
 
             _orbitalDebugWindow = OrbitalDebugWindow.GetInstance();
 
@@ -119,14 +119,14 @@ namespace Pulsar4X.SDL2UI
                             }
                         }
 
-                        if (ImGui.Checkbox("Translate Uses Ralitive Velocity", ref RalitiveOrbitVelocity))
+                        if (ImGui.Checkbox("Translate Uses relative Velocity", ref relativeOrbitVelocity))
                         {
-                            ECSLib.OrbitProcessor.UseRalitiveVelocity = RalitiveOrbitVelocity;
+                            ECSLib.OrbitProcessor.UserelativeVelocity = relativeOrbitVelocity;
                         }
                         if (ImGui.IsItemHovered())
                         { 
-                            if (RalitiveOrbitVelocity)
-                                ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using a vector ralitive to it's origin parent");
+                            if (relativeOrbitVelocity)
+                                ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using a vector relative to it's origin parent");
                             else
                                 ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using the absolute Vector (ie raltive to the root'sun'");
                         }

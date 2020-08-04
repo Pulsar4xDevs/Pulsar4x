@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.Tests
 {

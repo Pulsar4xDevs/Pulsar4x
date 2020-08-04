@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -225,7 +226,7 @@ namespace Pulsar4X.ECSLib
             
             var output = _energyGenDB.TotalOutputMax - _energyGenDB.Demand;
             
-            output = GMath.Clamp(output, -stored, freestore);
+            output = GeneralMath.Clamp(output, -stored, freestore);
             _energyGenDB.EnergyStored[energyType] += output;
 
             if (output > 0)

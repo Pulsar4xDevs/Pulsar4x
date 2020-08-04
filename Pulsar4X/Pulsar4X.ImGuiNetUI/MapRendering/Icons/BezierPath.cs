@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI

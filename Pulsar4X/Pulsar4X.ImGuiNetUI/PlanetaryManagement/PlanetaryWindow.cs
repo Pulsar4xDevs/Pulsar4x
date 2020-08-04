@@ -52,7 +52,7 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        internal override void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button)
+        internal override void MapClicked(Orbital.Vector3 worldPos_m, MouseButtons button)
         {
 
         }

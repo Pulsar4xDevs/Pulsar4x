@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.Industry;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using Pulsar4X.Vectors;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -171,7 +171,7 @@ namespace Pulsar4X.ECSLib
         public DateTime ActionOnDateTime { get; internal set; }
         
         /// <summary>
-        /// Parent ralitive velocity vector. 
+        /// Parent relative velocity vector. 
         /// </summary>
         public Vector3 CurrentVector_ms { get; internal set; }
 
@@ -185,7 +185,7 @@ namespace Pulsar4X.ECSLib
         /// 
         /// </summary>
         /// <param name="sphereOfInfluenceParent"></param>
-        /// <param name="velocity_ms">ParentRalitive Velocity</param>
+        /// <param name="velocity_ms">Parentrelative Velocity</param>
         public NewtonMoveDB(Entity sphereOfInfluenceParent, Vector3 velocity_ms)
         {
             CurrentVector_ms = velocity_ms;

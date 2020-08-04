@@ -346,7 +346,6 @@ namespace Pulsar4X.Tests
             delegate { StaticDataManager.LoadData("MalformedData", game); });
             Assert.That(ex.Message, Is.EqualTo("Error while loading static data: Bad Json provided in directory: MalformedData"));
 
-
             // now ,lets try for a directory that does not exist.
             Assert.Throws<DirectoryNotFoundException>(
             delegate { StaticDataManager.LoadData("DoesNotExist", game); });
