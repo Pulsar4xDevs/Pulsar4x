@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using static SDL2.SDL;
 
@@ -28,8 +29,8 @@ namespace Pulsar4X.SDL2UI
 
         PositionDB _targetPositionDB;
 
-        Vector3 _transitLeavePositionRalitive_m; //ralitive to the parentBody
-        private Vector3 _transitArriveRalitivePos_m { get; set; }
+        Vector3 _transitLeavePositionrelative_m; //relative to the parentBody
+        private Vector3 _transitArriverelativePos_m { get; set; }
         private Vector3 _transitArriveAbsolutePos_m { get; set; }
 
         SDL_Point[] _linePoints;
@@ -71,18 +72,18 @@ namespace Pulsar4X.SDL2UI
             _targetPositionDB = _targetEntity.GetDataBlob<PositionDB>();
 
             _arriveIcon = TransitIcon.CreateArriveIcon(_targetPositionDB);
-            //these are ralitive to thier respective bodies, for the initial default, copying the position shoul be fine.
+            //these are relative to thier respective bodies, for the initial default, copying the position shoul be fine.
             //however a better default would djust the distance from the target to get a circular orbit and
             //check if it's above minimum and that the resulting orbit is within soi 
             _arriveIcon.ProgradeAngle = _departIcon.ProgradeAngle; 
             OnPhysicsUpdate();
         }
 
-        public void SetArrivalPosition(Vector3 ralitiveWorldPosition_m)
+        public void SetArrivalPosition(Vector3 relativeWorldPosition_m)
         {
-            _transitArriveRalitivePos_m = ralitiveWorldPosition_m;
-            _transitArriveAbsolutePos_m = _targetPositionDB.AbsolutePosition_m + _transitArriveRalitivePos_m;
-            _arriveIcon.SetTransitPositon(_transitArriveRalitivePos_m);
+            _transitArriverelativePos_m = relativeWorldPosition_m;
+            _transitArriveAbsolutePos_m = _targetPositionDB.AbsolutePosition_m + _transitArriverelativePos_m;
+            _arriveIcon.SetTransitPositon(_transitArriverelativePos_m);
         }
 
 
@@ -90,7 +91,7 @@ namespace Pulsar4X.SDL2UI
         public void SetDepartureProgradeAngle(double angle)
         {
             _departIcon.ProgradeAngle = angle;
-            _departIcon.SetTransitPositon(_transitLeavePositionRalitive_m);
+            _departIcon.SetTransitPositon(_transitLeavePositionrelative_m);
 
         }
         public void SetArivalProgradeAngle(double angle)
@@ -98,7 +99,7 @@ namespace Pulsar4X.SDL2UI
             if (_arriveIcon != null)
             {
                 _arriveIcon.ProgradeAngle = angle;
-                _arriveIcon.SetTransitPositon(_transitArriveRalitivePos_m);
+                _arriveIcon.SetTransitPositon(_transitArriverelativePos_m);
             }
         }
 
@@ -108,7 +109,7 @@ namespace Pulsar4X.SDL2UI
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 
-            _transitLeavePositionRalitive_m = Entity.GetRalitiveFuturePosition(_movingEntity, _transitLeaveDateTime);
+            _transitLeavePositionrelative_m = Entity.GetRelativeFuturePosition(_movingEntity, _transitLeaveDateTime);
 
         }
 
@@ -278,10 +279,10 @@ namespace Pulsar4X.SDL2UI
         /// <summary>
         /// Sets the transit postion.
         /// </summary>
-        /// <param name="transitPositionRalitive_m">Transit position offset, this is the world position ralitive to the parent body</param>
-        public void SetTransitPositon(Vector3 transitPositionRalitive_m)
+        /// <param name="transitPositionrelative_m">Transit position offset, this is the world position relative to the parent body</param>
+        public void SetTransitPositon(Vector3 transitPositionrelative_m)
         {
-            _worldPosition_m = transitPositionRalitive_m;
+            _worldPosition_m = transitPositionrelative_m;
             
             OnPhysicsUpdate();
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using ImGuiNET;
 using System.Collections.Generic;
@@ -292,7 +293,7 @@ namespace Pulsar4X.SDL2UI
             float alpha = MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
-                var au = 1;//GameConstants.Units.MetersPerAu;
+                var au = 1;//UniversalConstants.Units.MetersPerAu;
                 int x1 = (int)(_drawPoints[i].x * au);
                 int y1 = (int)(_drawPoints[i].y * au);
                 int x2 = (int)(_drawPoints[i + 1].x * au);

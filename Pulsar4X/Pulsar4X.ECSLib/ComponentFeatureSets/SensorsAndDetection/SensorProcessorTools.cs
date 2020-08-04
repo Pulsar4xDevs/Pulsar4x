@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {

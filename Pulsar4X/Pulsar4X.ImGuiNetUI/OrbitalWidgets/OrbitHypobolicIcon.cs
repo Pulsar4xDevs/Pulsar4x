@@ -1,5 +1,6 @@
 ﻿using System;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using System.Linq;
 using System.Collections.Generic;
@@ -48,7 +49,7 @@ namespace Pulsar4X.SDL2UI
             _userOrbitSettingsMtx = settings;
             var parentMass = entityState.Entity.GetDataBlob<NewtonMoveDB>().ParentMass;
             var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
-            _sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
+            _sgp = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
 
             UpdateUserSettings();
@@ -195,13 +196,13 @@ namespace Pulsar4X.SDL2UI
             
             
             Vector3 pos = myPosDB.RelativePosition_AU;
-            var ralitivePos = new PointD() { X = pos.X, Y = pos.Y };
+            var relativePos = new PointD() { X = pos.X, Y = pos.Y };
 
-            double minDist = PointDFunctions.Length(PointDFunctions.Sub(ralitivePos, _points[_index]));
+            double minDist = PointDFunctions.Length(PointDFunctions.Sub(relativePos, _points[_index]));
 
             for (int i = 0; i < _points.Count(); i++)
             {
-                double dist = PointDFunctions.Length(PointDFunctions.Sub(ralitivePos, _points[i]));
+                double dist = PointDFunctions.Length(PointDFunctions.Sub(relativePos, _points[i]));
                 if (dist < minDist)
                 {
                     minDist = dist;

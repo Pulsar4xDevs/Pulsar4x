@@ -5,7 +5,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
-using Pulsar4X.Vectors;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 {

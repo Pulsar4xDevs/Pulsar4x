@@ -1,5 +1,6 @@
 ﻿using System;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using System.Collections.Generic;
 
@@ -18,7 +19,7 @@ namespace Pulsar4X.SDL2UI
             var massVol = entity.GetDataBlob<MassVolumeDB>();
             _bodyRadiusAU = massVol.RadiusInAU;
 
-            double calcTemp = GMath.Clamp(_tempK, 1000, 40000);
+            double calcTemp = GeneralMath.Clamp(_tempK, 1000, 40000);
             calcTemp = calcTemp / 100;
 
             //Red

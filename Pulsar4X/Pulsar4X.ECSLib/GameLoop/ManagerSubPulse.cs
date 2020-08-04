@@ -493,8 +493,8 @@ namespace Pulsar4X.ECSLib
             int deltaSeconds = (int)span.TotalSeconds;
             if (QueuedProcesses.ContainsKey(nextInteruptDateTime))
             {
-
-                foreach(var systemProcess in QueuedProcesses[nextInteruptDateTime].SystemProcessors)
+                var qp = QueuedProcesses[nextInteruptDateTime];
+                foreach (var systemProcess in qp.SystemProcessors)
                 {
                     _processStopwatch.Restart();
                     CurrentProcess = systemProcess.ToString();
@@ -507,7 +507,8 @@ namespace Pulsar4X.ECSLib
                     _detailedProcessTimes[pname].Add(_processStopwatch.ElapsedTicks);
                     AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
                 }
-                foreach(var instanceProcessSet in QueuedProcesses[nextInteruptDateTime].InstanceProcessors)
+
+                foreach(var instanceProcessSet in qp.InstanceProcessors)
                 {
                     var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
                     _processStopwatch.Restart();
@@ -524,6 +525,7 @@ namespace Pulsar4X.ECSLib
                         _detailedProcessTimes.Add(pname, new List<double>());
                     _detailedProcessTimes[pname].Add(_processStopwatch.ElapsedTicks);
                 }
+
                 QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 
             }
             StarSysDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent                   

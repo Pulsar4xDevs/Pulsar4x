@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
     public struct Shape
     {
         public SDL.SDL_Color Color;    //could change due to entity changes. 
-        public PointD[] Points; //ralitive to the IconPosition. could change with entity changes. 
+        public PointD[] Points; //relative to the IconPosition. could change with entity changes. 
     }
 
     public class MutableShape

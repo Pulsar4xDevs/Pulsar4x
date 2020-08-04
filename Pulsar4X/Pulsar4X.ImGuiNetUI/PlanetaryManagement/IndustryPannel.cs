@@ -9,7 +9,7 @@ using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.Industry;
 using Pulsar4X.SDL2UI;
 using SDL2;
-using Vector3 = Pulsar4X.ECSLib.Vector3;
+using Vector3 = Pulsar4X.Orbital.Vector3;
 
 
 namespace Pulsar4X.ImGuiNetUI.EntityManagement

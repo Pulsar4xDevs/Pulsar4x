@@ -2,6 +2,7 @@
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.SDL2UI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
@@ -59,7 +60,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     if(_state.PrimaryEntity != null)
                     {
-                        if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (ECSLib.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition_m, _entityState.Position.AbsolutePosition_m) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m))
+                        if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (Orbital.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition_m, _entityState.Position.AbsolutePosition_m) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m))
                         {
                             return true;
                         }

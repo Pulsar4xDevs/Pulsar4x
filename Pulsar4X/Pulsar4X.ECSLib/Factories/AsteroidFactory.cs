@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -107,7 +108,7 @@ namespace Pulsar4X.ECSLib
             var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             var myMass = massVolume.MassDry;
 
-            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
+            double sgp = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
             //OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, position, velocity, atDateTime);
             //OrbitDB orbit = (OrbitDB)origOrbit.Clone();
             OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, origOrbit.SemiMajorAxis_AU, 
