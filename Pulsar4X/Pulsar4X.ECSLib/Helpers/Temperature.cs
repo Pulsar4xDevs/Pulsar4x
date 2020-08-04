@@ -1,4 +1,6 @@
-﻿namespace Pulsar4X.Orbital
+﻿using Pulsar4X.Orbital;
+
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Small helper class for Temperature unit conversions
