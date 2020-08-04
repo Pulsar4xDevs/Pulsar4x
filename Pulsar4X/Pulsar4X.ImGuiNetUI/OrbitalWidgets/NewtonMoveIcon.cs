@@ -267,18 +267,27 @@ namespace Pulsar4X.SDL2UI
             //translate to position
             //resize from m to au
             //resize for zoom
+            /*
             var screenPos = camera.ViewCoordinate_m(WorldPosition_m); //focal point 
-            var translate = Matrix3d.IDTranslate(screenPos.x, screenPos.y, 1);
+            var translate = Matrix3d.IDTranslate(screenPos.x, screenPos.y, 0);
             var scaleToAu = Matrix3d.IDScale(6.6859E-12, 6.6859E-12, 6.6859E-12);
             var scaleToZoom = Matrix3d.IDScale(camera.ZoomLevel, camera.ZoomLevel, camera.ZoomLevel);
-            var mtx = scaleToAu * scaleToZoom * translate; 
+            var mtx = scaleToAu * scaleToZoom * translate;
+            */
+            var trns = Matrix.NewTranslateMatrix(WorldPosition_AU.X, WorldPosition_AU.Y);
+            //var trnc = Matrix.NewTranslateMatrix(camera.)
+            var scAU = Matrix.NewScaleMatrix(6.6859E-12, 6.6859E-12);
+            var scZm = Matrix.NewScaleMatrix(camera.ZoomLevel, camera.ZoomLevel);
+            var mtx2 = scAU * scZm * trns;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
-                var point = mtx.Transform(new Vector3(_points[i].X, _points[i].Y, 1));
-                int x = (int)Math.Round(point.X);
-                int y = (int)Math.Round(point.Y);
-                _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
+                //var point = mtx.Transform(new Vector3(_points[i].X, _points[i].Y, 1));
+                //int x = (int)Math.Round(point.X);
+                //int y = (int)Math.Round(point.Y);
+                //_drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };                
+                
+                _drawPoints[i] = mtx2.Transform(_points[i].X, _points[i].Y);
             }
             
             /*

@@ -101,10 +101,10 @@ namespace Pulsar4X.ECSLib
         {
             return new Matrix3d()
             {
-                X = new double[4] {0, 0, 0, 0 },
-                Y = new double[4] {0, 0, 0, 0 },
-                Z = new double[4] {0, 0, 0, 0 }, 
-                W = new double[4] {x, y, z, 1 }
+                X = new double[4] {1, 0, 0, 0 },
+                Y = new double[4] {0, 1, 0, 0 },
+                Z = new double[4] {x, y, z, 0 }, 
+                W = new double[4] {0, 0, 0, 1 }
             };
         }
 
