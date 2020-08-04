@@ -305,7 +305,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             var period = _orderEntity.GetDataBlob<OrbitDB>().OrbitalPeriod.TotalSeconds;
             var orbitDB = _orderEntity.GetDataBlob<OrbitDB>();
-            var parentState = Entity.GetrelativeState(Entity.GetSOIParentEntity(_orderEntity));
+            var parentState = Entity.GetRelativeState(Entity.GetSOIParentEntity(_orderEntity));
             var parentAngle = Math.Atan2(parentState.pos.Y, parentState.pos.X);
             
             double orbitalPeriod = orbitDB.OrbitalPeriod.TotalSeconds;
@@ -332,8 +332,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             double mySMA = _currentKE.SemiMajorAxis;
             //double escapeSMA = 
             var manuverDateTime = _atDatetime + TimeSpan.FromSeconds(secondsToManuver);
-            var manuverPos = Entity.GetrelativeFuturePosition(_orderEntity, manuverDateTime);
-            var manuverVel = Entity.GetrelativeFutureVelocity(_orderEntity, manuverDateTime);
+            var manuverPos = Entity.GetRelativeFuturePosition(_orderEntity, manuverDateTime);
+            var manuverVel = Entity.GetRelativeFutureVelocity(_orderEntity, manuverDateTime);
             var soi = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<OrbitDB>().SOI_m;
             var manuver = InterceptCalcs.Hohmann2(_sgp, manuverPos.Length(), soi)[0];
 

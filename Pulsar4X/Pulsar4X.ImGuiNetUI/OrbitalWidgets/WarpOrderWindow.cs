@@ -521,7 +521,7 @@ namespace Pulsar4X.SDL2UI
 
             
             if(OrbitProcessor.UserelativeVelocity)
-                _departureOrbitalVelocity_m = Entity.GetrelativeFutureVelocity(OrderingEntityState.Entity, _departureDateTime);
+                _departureOrbitalVelocity_m = Entity.GetRelativeFutureVelocity(OrderingEntityState.Entity, _departureDateTime);
             else
                 _departureOrbitalVelocity_m = Entity.GetAbsoluteFutureVelocity(OrderingEntityState.Entity, _departureDateTime);
             

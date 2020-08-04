@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning)
             {
                  var parent = Entity.GetSOIParentEntity(_entityCommanding);
-                 var currentVel = Entity.GetrelativeFutureVelocity(_entityCommanding, ActionOnDate);               
+                 var currentVel = Entity.GetRelativeFutureVelocity(_entityCommanding, ActionOnDate);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
                     _entityCommanding.RemoveDataBlob<OrbitDB>();
                 _db = new NewtonMoveDB(parent, currentVel);
@@ -131,7 +131,7 @@ namespace Pulsar4X.ECSLib
                 _totalFuel = _newtonAbilityDB.TotalFuel_kg;
                 var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
                 _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().MassDry;
-                var currentVel = Entity.GetrelativeFutureVelocity(_entityCommanding, atDateTime);               
+                var currentVel = Entity.GetRelativeFutureVelocity(_entityCommanding, atDateTime);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
                 _entityCommanding.RemoveDataBlob<OrbitDB>();
                 if(_entityCommanding.HasDataBlob<OrbitUpdateOftenDB>())
@@ -150,8 +150,8 @@ namespace Pulsar4X.ECSLib
             var dvToUse = halfDV - dvUsed;
             if(dvToUse > 0)
             {
-                (Vector3 Position, Vector3 Velocity) curOurRalState = Entity.GetrelativeState(_entityCommanding);
-                (Vector3 Position, Vector3 Velocity) curTgtRalState = Entity.GetrelativeState(_targetEntity);
+                (Vector3 Position, Vector3 Velocity) curOurRalState = Entity.GetRelativeState(_entityCommanding);
+                (Vector3 Position, Vector3 Velocity) curTgtRalState = Entity.GetRelativeState(_targetEntity);
                 var dvRemaining = _newtonAbilityDB.DeltaV;
                 
                 var tgtVelocity = Entity.GetAbsoluteFutureVelocity(_targetEntity, atDateTime);
@@ -207,7 +207,7 @@ namespace Pulsar4X.ECSLib
                     timespanToIntercept = TimeSpan.FromSeconds(newttt);
                 }
                 DateTime futureDate = atDateTime + timespanToIntercept;
-                var futurePosition = Entity.GetrelativeFuturePosition(_targetEntity, futureDate);
+                var futurePosition = Entity.GetRelativeFuturePosition(_targetEntity, futureDate);
                     
                 tgtBearing = futurePosition - ourState.Position;
                 distanceToTgt = (tgtBearing).Length();
@@ -346,7 +346,7 @@ namespace Pulsar4X.ECSLib
                 _totalFuel = _newtonAbilityDB.TotalFuel_kg;
                 var soiParentEntity = Entity.GetSOIParentEntity(_entityCommanding);
                 _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().MassDry;
-                var currentVel = Entity.GetrelativeFutureVelocity(_entityCommanding, atDateTime);               
+                var currentVel = Entity.GetRelativeFutureVelocity(_entityCommanding, atDateTime);               
                 if(_entityCommanding.HasDataBlob<OrbitDB>())
                 _entityCommanding.RemoveDataBlob<OrbitDB>();
                 if(_entityCommanding.HasDataBlob<OrbitUpdateOftenDB>())
@@ -365,8 +365,8 @@ namespace Pulsar4X.ECSLib
             var dvToUse = halfDV - dvUsed;
             if(dvToUse > 0)
             {
-                (Vector3 pos, Vector3 Velocity) curOurRalState = Entity.GetrelativeState(_entityCommanding);
-                (Vector3 pos, Vector3 Velocity) curTgtRalState = Entity.GetrelativeState(_targetEntity);
+                (Vector3 pos, Vector3 Velocity) curOurRalState = Entity.GetRelativeState(_entityCommanding);
+                (Vector3 pos, Vector3 Velocity) curTgtRalState = Entity.GetRelativeState(_targetEntity);
                 var dvRemaining = _newtonAbilityDB.DeltaV;
 
 
@@ -414,7 +414,7 @@ namespace Pulsar4X.ECSLib
                     timespanToIntercept = TimeSpan.FromSeconds(timeToIntecept);
                 }
                 DateTime futureDate = atDateTime + timespanToIntercept;
-                var futurePosition = Entity.GetrelativeFuturePosition(_targetEntity, futureDate);
+                var futurePosition = Entity.GetRelativeFuturePosition(_targetEntity, futureDate);
                     
                 tgtBearing = futurePosition - ourState.Position;
                 distanceToTgt = (tgtBearing).Length();

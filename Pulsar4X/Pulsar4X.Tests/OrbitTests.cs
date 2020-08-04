@@ -380,7 +380,7 @@ namespace Pulsar4X.Tests
 
             double keslr = EllipseMath.SemiLatusRectum(ke_m.SemiMajorAxis, ke_m.Eccentricity);
             double keradius = OrbitMath.RadiusAtAngle(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);
-            Vector3 kemathPos = OrbitMath.GetrelativePosition(ke_m.LoAN, ke_m.AoP, ke_m.Inclination, ke_m.TrueAnomalyAtEpoch, keradius);
+            Vector3 kemathPos = OrbitMath.GetRelativePosition(ke_m.LoAN, ke_m.AoP, ke_m.Inclination, ke_m.TrueAnomalyAtEpoch, keradius);
             
             Assert.AreEqual(kemathPos.Length(), pos_m.Length(), 0.02);
 

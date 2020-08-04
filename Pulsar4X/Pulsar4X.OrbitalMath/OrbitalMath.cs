@@ -798,7 +798,7 @@ namespace Pulsar4X.Orbital
         }
 
 
-        public static Vector3 GetrelativePosition(double lofAN, double aoP, double incl, double trueAnomaly, double radius)
+        public static Vector3 GetRelativePosition(double lofAN, double aoP, double incl, double trueAnomaly, double radius)
         {
             double angle = trueAnomaly + aoP;
             double x = Math.Cos(lofAN) * Math.Cos(angle) - Math.Sin(lofAN) * Math.Sin(angle) * Math.Cos(incl);
