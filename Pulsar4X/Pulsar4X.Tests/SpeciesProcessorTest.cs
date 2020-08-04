@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
-using System.Diagnostics;
 
 namespace Pulsar4X.Tests
 {
@@ -154,26 +151,31 @@ namespace Pulsar4X.Tests
             double expectedCost;
             string gasSym;
 
-            Dictionary<string, AtmosphericGasSD> lowToxicGases, highToxicGases, benignGases;
-            AtmosphericGasSD oxygenGas;
-
-            lowToxicGases = new Dictionary<string, AtmosphericGasSD>();
-            highToxicGases = new Dictionary<string, AtmosphericGasSD>();
-            benignGases = new Dictionary<string, AtmosphericGasSD>();
-            oxygenGas = new AtmosphericGasSD();
+            var lowToxicGases = new Dictionary<string, AtmosphericGasSD>();
+            var highToxicGases = new Dictionary<string, AtmosphericGasSD>();
+            var benignGases = new Dictionary<string, AtmosphericGasSD>();
+            AtmosphericGasSD oxygenGas = new AtmosphericGasSD();
 
             //Separate all the gases into the lists above
             foreach (KeyValuePair<string, AtmosphericGasSD> kvp in _gasDictionary)
             {
                 gasSym = kvp.Key;
-                if (gasSym == "H2" || gasSym == "CH4" || gasSym == "NH3" || gasSym == "CO" || gasSym == "NO" || gasSym == "H2S" || gasSym == "NO2" || gasSym == "SO2")
-                    lowToxicGases.Add(gasSym, kvp.Value);
-                else if (gasSym == "Cl2" || gasSym == "F2" || gasSym == "Br2" || gasSym == "I2")
+                if (kvp.Value.IsHighlyToxic)
+                {
                     highToxicGases.Add(gasSym, kvp.Value);
-                else if (gasSym == "O")
+                }
+                else if (kvp.Value.IsToxic)
+                {
+                    lowToxicGases.Add(gasSym, kvp.Value);
+                }
+                else if (gasSym == "O2")
+                {
                     oxygenGas = kvp.Value;
+                }
                 else
+                {
                     benignGases.Add(gasSym, kvp.Value);
+                }
             }
 
             // @todo: set up two nested loops - one for list of species, one for list of gases
@@ -286,8 +288,50 @@ namespace Pulsar4X.Tests
 
 
             //Toxic Gasses(CC = 2): Hydrogen(H2), Methane(CH4), Ammonia(NH3), Carbon Monoxide(CO), Nitrogen Monoxide(NO), Hydrogen Sulfide(H2S), Nitrogen Dioxide(NO2), Sulfur Dioxide(SO2)
+
             //Toxic Gasses(CC = 3): Chlorine(Cl2), Florine(F2), Bromine(Br2), and Iodine(I2)
-            //Toxic Gasses at 30% or greater of atm: Oxygen(O2) *
+
+
+            //Toxic Gasses at trigger high colony cost when meeting their toxicity threshold. *
+            var gasesThatCanBecomeToxic = _gasDictionary.Values.Where(x => x.IsToxicAtPercentage.HasValue).ToList();
+            if (gasesThatCanBecomeToxic.Any())
+            {
+                var firstBenignGas = _gasDictionary.Values.FirstOrDefault(x => !x.IsToxic && !x.IsHighlyToxic && !x.IsToxicAtPercentage.HasValue);
+                Assert.IsNotNull(firstBenignGas, "No Benign Gases Available To Enable Testing");
+
+                foreach (AtmosphericGasSD gasUnderTest in gasesThatCanBecomeToxic)
+                {
+                    var toxicityLevel = gasUnderTest.IsToxicAtPercentage.Value / 100.0f;
+
+                    // Test when gas under test is Exactly on the Toxicity Threshold
+                    expectedCost = 2.0;
+                    atmoGasses.Clear();
+                    atmoGasses.Add(firstBenignGas, 1.0f - toxicityLevel);
+                    atmoGasses.Add(gasUnderTest, toxicityLevel);
+                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
+                    _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
+                    Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+
+                    // Test when gas under test is Less than on the Toxicity Threshold
+                    expectedCost = gasUnderTest.ChemicalSymbol.Equals("O2") ? 1 : 2;
+                    atmoGasses.Clear();
+                    atmoGasses.Add(firstBenignGas, 1.0f - toxicityLevel + 0.01f);
+                    atmoGasses.Add(gasUnderTest, toxicityLevel - 0.01f);
+                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
+                    _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
+                    Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+
+
+                    // Test when gas under test is Over the Toxicity Threshold
+                    expectedCost = 2.0;
+                    atmoGasses.Clear();
+                    atmoGasses.Add(firstBenignGas, 1.0f - toxicityLevel - 0.01f);
+                    atmoGasses.Add(gasUnderTest, toxicityLevel + 0.01f);
+                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
+                    _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
+                    Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                }
+            }
 
 
             Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
@@ -313,9 +357,9 @@ namespace Pulsar4X.Tests
                 atmoGasses.Clear();
                 
                 // Keep atmosphere breathable
-                atmoGasses.Add(_gasDictionary["N"], (float)(2.0f * i));
+                atmoGasses.Add(_gasDictionary["N2"], (float)(2.0f * i));
                 totalPressure = 2.0f * i;
-                atmoGasses.Add(_gasDictionary["O"], 0.1f);
+                atmoGasses.Add(_gasDictionary["O2"], 0.1f);
                 totalPressure += 0.1f;
 
                     
@@ -394,8 +438,8 @@ namespace Pulsar4X.Tests
                     AtmosphereDB testAtmosphereDB;
                     atmoGasses.Clear();
 
-                    atmoGasses.Add(_gasDictionary["N"], i * 0.1f);
-                    atmoGasses.Add(_gasDictionary["O"], j * 0.1f);
+                    atmoGasses.Add(_gasDictionary["N2"], i * 0.1f);
+                    atmoGasses.Add(_gasDictionary["O2"], j * 0.1f);
 
                     testAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                     testPlanet = setAtmosphere(testAtmosphereDB);
@@ -434,8 +478,8 @@ namespace Pulsar4X.Tests
             Entity resultPlanet;
             Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
 
-            atmoGasses.Add(_gasDictionary["N"], 0.79f);
-            atmoGasses.Add(_gasDictionary["O"], 0.20f);
+            atmoGasses.Add(_gasDictionary["N2"], 0.79f);
+            atmoGasses.Add(_gasDictionary["O2"], 0.20f);
             atmoGasses.Add(_gasDictionary["Ar"], 0.01f);
             AtmosphereDB atmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
             resultPlanet = setAtmosphere(atmosphereDB);
