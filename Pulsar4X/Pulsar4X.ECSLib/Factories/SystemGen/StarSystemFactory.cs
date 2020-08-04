@@ -181,14 +181,29 @@ namespace Pulsar4X.ECSLib
 
             Entity earth = Factories.SystemGen.SolEntities.Earth(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.HomeworldMineralGeneration(game.StaticData, sol, earth);
+            #region Earth Moon
             Entity luna = Factories.SystemGen.SolEntities.Luna(game, sol, sun, earth, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, luna);
+            #endregion
 
             Entity mars = Factories.SystemGen.SolEntities.Mars(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, mars);
 
             Entity jupiter = Factories.SystemGen.SolEntities.Jupiter(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, jupiter);
+            #region Jupiter Moons
+            Entity io = Factories.SystemGen.SolEntities.Io(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, io);
+
+            Entity europa = Factories.SystemGen.SolEntities.Europa(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, europa);
+
+            Entity ganymede = Factories.SystemGen.SolEntities.Ganymede(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, ganymede);
+
+            Entity callisto = Factories.SystemGen.SolEntities.Callisto(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, callisto);
+            #endregion
 
             Entity saturn = Factories.SystemGen.SolEntities.Saturn(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, saturn);
