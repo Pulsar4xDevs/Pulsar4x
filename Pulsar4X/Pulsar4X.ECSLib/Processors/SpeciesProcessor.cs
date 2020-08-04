@@ -12,6 +12,7 @@ namespace Pulsar4X.ECSLib
             cost = Math.Max(cost, ColonyPressureCost(planet, species));
             cost = Math.Max(cost, ColonyTemperatureCost(planet, species));
             cost = Math.Max(cost, ColonyGasCost(planet, species));
+            cost = Math.Max(cost, ColonyToxicityCost(planet, species));
 
             if (!ColonyGravityIsHabitible(planet, species))
                 return -1.0; // invalid - cannot create colony here
@@ -42,7 +43,6 @@ namespace Pulsar4X.ECSLib
         private static double ColonyToxicityCost(Entity planet, SpeciesDB species)
         {
             double cost = 1.0;
-            double O2Pressure = 0.0;
             double totalPressure = 0.0;
             SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
@@ -53,22 +53,28 @@ namespace Pulsar4X.ECSLib
             {
                 string symbol = kvp.Key.ChemicalSymbol;
                 totalPressure += kvp.Value;
-                if(kvp.Key.IsToxic)
-                {
-                    //Toxic Gasses(CC = 2): Hydrogen(H2), Methane(CH4), Ammonia(NH3), Carbon Monoxide(CO), Nitrogen Monoxide(NO), Hydrogen Sulfide(H2S), Nitrogen Dioxide(NO2), Sulfur Dioxide(SO2)
-                    //Toxic Gasses(CC = 3): Chlorine(Cl2), Florine(F2), Bromine(Br2), and Iodine(I2)
-                    //Toxic Gasses at 30% or greater of atm: Oxygen(O2) *
 
-                    if (symbol == "H2" || symbol == "CH4" || symbol == "NH3" || symbol == "CO" || symbol == "NO" || symbol == "H2S" || symbol == "NO2" || symbol == "SO2")
-                        cost = Math.Max(cost, 2.0);
-                    if (symbol == "Cl2" || symbol == "F2" || symbol == "Br2" || symbol == "I2")
-                        cost = Math.Max(cost, 3.0);
-                }
-                if (symbol == "O")
+                if (kvp.Key.IsHighlyToxic)
                 {
-                    O2Pressure = kvp.Value;
+                    cost = Math.Max(cost, 3.0);
                 }
-                                    
+                else if (kvp.Key.IsToxic)
+                {
+                    cost = Math.Max(cost, 2.0);
+                }                               
+            }
+
+            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
+            {
+                if (kvp.Key.IsToxicAtPercentage.HasValue)
+                {
+                    var percentageOfAtmosphere = Math.Round(kvp.Value / totalPressure * 100.0f, 4);
+                    // if current % of atmosphere for this gas is over toxicity threshold
+                    if (percentageOfAtmosphere >= kvp.Key.IsToxicAtPercentage.Value)
+                    {
+                        cost = Math.Max(cost, 2.0);
+                    }
+                }
             }
 
             return cost;
@@ -141,7 +147,7 @@ namespace Pulsar4X.ECSLib
             {
                 string symbol = kvp.Key.ChemicalSymbol;
                 totalPressure += kvp.Value;
-                if (symbol == "O")
+                if (symbol == "O2")
                     O2Pressure = kvp.Value;
             }
 
