@@ -19,6 +19,16 @@
         public bool IsToxic;
 
         /// <summary>
+        /// Indicates weither or not the gas is highly toxic for the purpos of colony cost.
+        /// </summary>
+        public bool IsHighlyToxic;
+
+        /// <summary>
+        /// Indicates at what percent of atmosphere this gas becomes toxic for the purpos of colony cost.
+        /// </summary>
+        public float? IsToxicAtPercentage;
+
+        /// <summary>
         /// The point at which the gas boils, i.e. goes from being a liqued to a gas.
         /// </summary>
         public double BoilingPoint;
