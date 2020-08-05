@@ -193,31 +193,31 @@ namespace Pulsar4X.ECSLib
             UpdateDatablob(sensorInfo.DetectedEntity.GetDataBlob<SystemBodyInfoDB>(), sensorInfo);
         }
 
-        void UpdateDatablob(SystemBodyInfoDB origionalDB, SensorInfoDB sensorInfo)
+        void UpdateDatablob(SystemBodyInfoDB originalDB, SensorInfoDB sensorInfo)
         {
             Random rng = new Random(); //TODO: rand should be deterministic. 
             float accuracy = sensorInfo.HighestDetectionQuality.SignalQuality;
 
             if (sensorInfo.HighestDetectionQuality.SignalQuality > 0.20)
-                BodyType = origionalDB.BodyType;
+                BodyType = originalDB.BodyType;
             else
                 BodyType = BodyType.Unknown;
             if (sensorInfo.HighestDetectionQuality.SignalQuality > 0.80)
-                Tectonics = origionalDB.Tectonics;
+                Tectonics = originalDB.Tectonics;
             else
                 Tectonics = TectonicActivity.Unknown;
             //TODO: #SensorClone, #TMI more random to the rest of it.
-            var tilt = SensorProcessorTools.RndSigmoid(origionalDB.AxialTilt, accuracy, rng);
+            var tilt = SensorProcessorTools.RndSigmoid(originalDB.AxialTilt, accuracy, rng);
             AxialTilt = (float)tilt;
-            MagneticField = origionalDB.MagneticField;
-            BaseTemperature = origionalDB.BaseTemperature;
-            RadiationLevel = origionalDB.RadiationLevel;
-            AtmosphericDust = origionalDB.AtmosphericDust;
-            SupportsPopulations = origionalDB.SupportsPopulations;
-            LengthOfDay = origionalDB.LengthOfDay;
-            Gravity = origionalDB.Gravity;
-            Minerals = new Dictionary<Guid, MineralDepositInfo>(origionalDB.Minerals); //This really needs to be handled properly
-            Colonies = new List<Entity>(origionalDB.Colonies); //this needs to only have owned colonies and sensor entites of unowned colonies.
+            MagneticField = originalDB.MagneticField;
+            BaseTemperature = originalDB.BaseTemperature;
+            RadiationLevel = originalDB.RadiationLevel;
+            AtmosphericDust = originalDB.AtmosphericDust;
+            SupportsPopulations = originalDB.SupportsPopulations;
+            LengthOfDay = originalDB.LengthOfDay;
+            Gravity = originalDB.Gravity;
+            Minerals = new Dictionary<Guid, MineralDepositInfo>(originalDB.Minerals); //This really needs to be handled properly
+            Colonies = new List<Entity>(originalDB.Colonies); //this needs to only have owned colonies and sensor entites of unowned colonies.
         }
 
         public int GetValueCompareHash(int hash = 17)
@@ -236,9 +236,9 @@ namespace Pulsar4X.ECSLib
             return hash;
         }
 
-        SystemBodyInfoDB(SystemBodyInfoDB origionalDB, SensorInfoDB sensorInfo)
+        SystemBodyInfoDB(SystemBodyInfoDB originalDB, SensorInfoDB sensorInfo)
         {
-            UpdateDatablob(origionalDB, sensorInfo);
+            UpdateDatablob(originalDB, sensorInfo);
         }
     }
 }

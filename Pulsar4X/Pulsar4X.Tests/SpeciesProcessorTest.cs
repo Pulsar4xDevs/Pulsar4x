@@ -428,6 +428,8 @@ namespace Pulsar4X.Tests
 
             Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
 
+            var nitrogen = _gasDictionary["N2"];
+            var oxygen = _gasDictionary["O2"];
             for (int i = 0; i < 40; i++)
             {
                 for (int j = 0; j < 20 ; j++)
@@ -438,10 +440,10 @@ namespace Pulsar4X.Tests
                     AtmosphereDB testAtmosphereDB;
                     atmoGasses.Clear();
 
-                    atmoGasses.Add(_gasDictionary["N2"], i * 0.1f);
-                    atmoGasses.Add(_gasDictionary["O2"], j * 0.1f);
+                    atmoGasses.Add(nitrogen, i * 0.1f);
+                    atmoGasses.Add(oxygen, j * 0.1f);
 
-                    testAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
+                    testAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
                     testPlanet = setAtmosphere(testAtmosphereDB);
 
                     if (i + j == 0)
@@ -451,7 +453,7 @@ namespace Pulsar4X.Tests
 
                     if (j < 1|| j > 3)
                         expected = 2.0;
-                    else if (oRatio <= 0.30f && j >= 1)
+                    else if ((oRatio <= 0.30f && j >= 1) && oRatio < (oxygen.IsToxicAtPercentage / 100.0f))
                         expected = 1.0;
                     else
                         expected = 2.0;

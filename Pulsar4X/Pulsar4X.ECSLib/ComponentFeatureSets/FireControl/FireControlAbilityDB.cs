@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public List<ComponentInstance> WeaponInstances = new List<ComponentInstance>();
 
-
+        [JsonConstructor]
         public FireControlAbilityDB()
         {
         }
@@ -35,25 +35,28 @@ namespace Pulsar4X.ECSLib
         }
 
         // JSON deserialization callback.
-        [OnDeserialized]
-        private void Deserialized(StreamingContext context)
-        {
-            var instancesDB = OwningEntity.GetDataBlob<ComponentInstancesDB>();
-            if (instancesDB.TryGetComponentsByAttribute<BeamFireControlAtbDB>(out var fireControlInstances))
-            {
-                foreach (var fc in fireControlInstances)
-                {
-                    FireControlInstances.Add(fc);
-                }
-            }
-            if (instancesDB.TryGetComponentsByAttribute<GenericBeamWeaponAtbDB>(out var weaponInstances))
-            {
-                foreach (var gun in weaponInstances)
-                {
-                    WeaponInstances.Add(gun);
-                }
-            }
-        }
+        //[OnDeserialized]
+        //private void Deserialized(StreamingContext context)
+        //{
+        //    try
+        //    {
+        //        var instancesDB = OwningEntity.GetDataBlob<ComponentInstancesDB>();
+        //        if (instancesDB.TryGetComponentsByAttribute<BeamFireControlAtbDB>(out var fireControlInstances))
+        //        {
+        //            foreach (var fc in fireControlInstances)
+        //            {
+        //                FireControlInstances.Add(fc);
+        //            }
+        //        }
+        //        if (instancesDB.TryGetComponentsByAttribute<GenericBeamWeaponAtbDB>(out var weaponInstances))
+        //        {
+        //            foreach (var gun in weaponInstances)
+        //            {
+        //                WeaponInstances.Add(gun);
+        //            }
+        //        }
+        //    } catch (Exception ex) { }
+        //}
     }
 
     /// <summary>

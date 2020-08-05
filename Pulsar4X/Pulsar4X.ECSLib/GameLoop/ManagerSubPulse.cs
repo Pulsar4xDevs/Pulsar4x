@@ -100,13 +100,12 @@ namespace Pulsar4X.ECSLib
                     {
                         if (game.GlobalManager.FindEntityByGuid(entityGuid, out Entity entity)) //might be a better way to do this, can we get the manager from here and just search localy?
                         {
-
                             InstanceProcessors[typeName].Add(entity);
                         }
                         else
                         {
                             // Entity has not been deserialized.
-                            throw new Exception("Unfound Entity Exception, possibly this entity hasn't been deseralised yet?"); //I *think* we'll have the entitys all deseralised for this manager at this point...
+                            // throw new Exception("Unfound Entity Exception, possibly this entity hasn't been deseralised yet?"); //I *think* we'll have the entitys all deseralised for this manager at this point...
                         }
                     }
                 }
