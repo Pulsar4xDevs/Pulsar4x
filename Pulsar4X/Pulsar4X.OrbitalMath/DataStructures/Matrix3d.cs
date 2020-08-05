@@ -101,9 +101,9 @@ namespace Pulsar4X.Orbital
         {
             return new Matrix3d()
             {
-                X = new double[4] { 0, 0, 0, 0 },
-                Y = new double[4] { 0, 0, 0, 0 },
-                Z = new double[4] { 0, 0, 0, 0 },
+                X = new double[4] { 1, 0, 0, 0 },
+                Y = new double[4] { 0, 1, 0, 0 },
+                Z = new double[4] { 0, 0, 1, 0 },
                 W = new double[4] { x, y, z, 1 }
             };
         }
@@ -168,10 +168,19 @@ namespace Pulsar4X.Orbital
             }
             return value;
         }
+        
 
         public Vector3 Transform(Vector3 vector)
         {
             //multiply a 4x4 matrx by a 3x1 vector;
+            /*
+            return new Vector3()
+            {
+                X = X[0] * vector.X + Y[0] * vector.Y + Z[0] * vector.Z + W[0] * 1,
+                Y = X[1] * vector.X + Y[1] * vector.Y + Z[1] * vector.Z + W[1] * 1,
+                Z = X[2] * vector.X + Y[2] * vector.Y + Z[2] * vector.Z + W[2] * 1
+            };
+            */
             return new Vector3()
             {
                 X = MultiplyRowbyColomn(this, vector, 0),

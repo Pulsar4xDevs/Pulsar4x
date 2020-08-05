@@ -243,9 +243,9 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
-            var scaleMatrix = Matrix.NewScaleMatrix(Scale, Scale);
-            var rotateMatrix = Matrix.NewRotateMatrix(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
+            var mirrorMatrix = Matrix.IDMirror(true, false);
+            var scaleMatrix = Matrix.IDScale(Scale, Scale);
+            var rotateMatrix = Matrix.IDRotate(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
 
             var shipMatrix = mirrorMatrix * scaleMatrix * rotateMatrix;
 
@@ -412,9 +412,9 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
-            var scaleMatrix = Matrix.NewScaleMatrix(Scale, Scale);
-            var rotateMatrix = Matrix.NewRotateMatrix(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
+            var mirrorMatrix = Matrix.IDMirror(true, false);
+            var scaleMatrix = Matrix.IDScale(Scale, Scale);
+            var rotateMatrix = Matrix.IDRotate(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
 
             var shipMatrix = mirrorMatrix * scaleMatrix * rotateMatrix;
 

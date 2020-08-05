@@ -270,8 +270,8 @@ namespace Pulsar4X.SDL2UI
         /// <returns>The zoom matrix.</returns>
         public Matrix GetZoomMatrix()
         {
-            var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
-            var scaleMtx = Matrix.NewScaleMatrix(ZoomLevel, ZoomLevel);
+            var mirrorMatrix = Matrix.IDMirror(true, false);
+            var scaleMtx = Matrix.IDScale(ZoomLevel, ZoomLevel);
             return mirrorMatrix * scaleMtx;
         }
 
@@ -279,7 +279,7 @@ namespace Pulsar4X.SDL2UI
         {
             int x = (int)((0 - CameraWorldPosition_AU.X) * ZoomLevel + ViewPortCenter.X);
             int y = -(int)((0 - CameraWorldPosition_AU.Y) * ZoomLevel - ViewPortCenter.Y);
-            return Matrix.NewTranslateMatrix(x, y);
+            return Matrix.IDTranslate(x, y);
         }
 
 

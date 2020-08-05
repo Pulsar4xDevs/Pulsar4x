@@ -281,7 +281,7 @@ namespace Pulsar4X.SDL2UI
 
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
 
-            Matrix nonZoomMatrix = Matrix.NewMirrorMatrix(true, false);
+            Matrix nonZoomMatrix = Matrix.IDMirror(true, false);
 
             DrawComplexShapes = new List<ComplexShape>() { };
 
@@ -320,9 +320,9 @@ namespace Pulsar4X.SDL2UI
 
 
             PointD[] mtxArwPts = new PointD[_mtxArwItem.Shape.Points.Length];
-            var mm = Matrix.NewMirrorMatrix(MtxArwMirrorX, MtxArwMirrorY);
-            var mr = Matrix.NewRotateMatrix(MtxArwAngle);
-            var ms = Matrix.NewScaleMatrix(MtxArwScaleX, MtxArwScaleY);
+            var mm = Matrix.IDMirror(MtxArwMirrorX, MtxArwMirrorY);
+            var mr = Matrix.IDRotate(MtxArwAngle);
+            var ms = Matrix.IDScale(MtxArwScaleX, MtxArwScaleY);
             var tl = mm * ms * mr;
             for (int i = 0; i < _mtxArwItem.Shape.Points.Length; i++)
             {
