@@ -45,35 +45,27 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestShipCreation()
         {
-
-            ComponentDesigner engineDesigner;// = DefaultStartFactory.DefaultEngineDesign(_game, _faction);
-      
             //_engineSD = NameLookup.GetTemplateSD(_game, "Alcubierre Warp Drive");
+            //ComponentDesigner engineDesigner = DefaultStartFactory.DefaultEngineDesign(_game, _faction);
             //engineDesigner = new ComponentDesigner(_engineSD, _faction.GetDataBlob<FactionTechDB>());
             //engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(5); //size = 25 power.
-            
-            
-            
             //_engineComponentDesign = engineDesigner.CreateDesign(_faction);
-            _engineComponentDesign = DefaultStartFactory.DefaultWarpDesign(_game, _faction);
-            
+
+            _engineComponentDesign = DefaultStartFactory.DefaultWarpDesign(_game, _faction);      
             
             _shipDesign = DefaultStartFactory.DefaultShipDesign(_game, _faction);
             _ship = ShipFactory.CreateShip(_shipDesign, _faction, _sol, _starSystem, "Testship");
-
-            
+                        
             ComponentInstancesDB instancesdb = _ship.GetDataBlob<ComponentInstancesDB>();
             instancesdb.TryGetComponentsByAttribute<WarpDriveAtb>(out var instances1);
-            int origionalEngineNumber = instances1.Count;
-            
-
+            int originalEngineNumber = instances1.Count;
 
             WarpAbilityDB warpAbility = _ship.GetDataBlob<WarpAbilityDB>();
             ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
 
             WarpDriveAtb warpAtb = _engineComponentDesign.GetAttribute<WarpDriveAtb>();
             double warpPower = warpAtb.WarpPower;
-            Assert.AreEqual(warpPower * origionalEngineNumber , warpAbility.TotalWarpPower, "Incorrect TotalEnginePower");
+            Assert.AreEqual(warpPower * originalEngineNumber , warpAbility.TotalWarpPower, "Incorrect TotalEnginePower");
             float tonnage1 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
             int expectedSpeed1 = ShipMovementProcessor.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage1);
             Assert.AreEqual(expectedSpeed1, warpAbility.MaxSpeed, "Incorrect Max Speed");
@@ -82,7 +74,7 @@ namespace Pulsar4X.Tests
             EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign);
             instancesdb.TryGetComponentsByAttribute<WarpDriveAtb>(out var instances2);
             int add2engineNumber = instances2.Count;
-            Assert.AreEqual(origionalEngineNumber + 1, add2engineNumber);            
+            Assert.AreEqual(originalEngineNumber + 1, add2engineNumber);            
             
 
             Assert.AreEqual(warpPower * add2engineNumber, warpAbility.TotalWarpPower, "Incorrect TotalEnginePower 2nd engine added");

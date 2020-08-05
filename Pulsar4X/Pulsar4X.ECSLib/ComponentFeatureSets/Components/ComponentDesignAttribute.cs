@@ -446,7 +446,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// it's better to use the string version of this, as that will store the origional string.
+        /// it's better to use the string version of this, as that will store the original string.
         /// </summary>
         /// <param name="expression"></param>
         internal void ReplaceExpression(Expression expression)
