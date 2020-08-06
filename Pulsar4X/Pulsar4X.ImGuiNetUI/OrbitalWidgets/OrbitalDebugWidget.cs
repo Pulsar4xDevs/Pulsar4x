@@ -1238,7 +1238,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
-            Matrix nonZoomMatrix = Matrix.NewMirrorMatrix(true, false);
+            Matrix nonZoomMatrix = Matrix.IDMirror(true, false);
  
             _drawComplexShapes = new List<ComplexShape>() {};
 

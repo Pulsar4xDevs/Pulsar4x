@@ -1,21 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using Pulsar4X.Orbital;
-using SDL2;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.Orbital
 {
-
-    
-    public class Matrix
+    public class Matrix2d
     {
         double[] X = new double[3] { 1, 0, 0 };
         double[] Y = new double[3] { 0, 1, 0};
-        double[] Z = new double[3] {0, 0, 1};
+        double[] Z = new double[3] { 0, 0, 1};
 
-        public static Matrix IDScale(double scaleX, double scaleY)
+        public static Matrix2d IDScale(double scaleX, double scaleY)
         {
-            Matrix matrix = new Matrix()
+            Matrix2d matrix = new Matrix2d()
             {
                 X = new double[3] { scaleX, 0, 0 },
                 Y = new double[3] { 0, scaleY, 0 },
@@ -24,9 +20,9 @@ namespace Pulsar4X.SDL2UI
             return matrix;
         }
 
-        public static Matrix IDTranslate(double translateX, double tranlsateY)
+        public static Matrix2d IDTranslate(double translateX, double tranlsateY)
         {
-            Matrix matrix = new Matrix()
+            Matrix2d matrix = new Matrix2d()
             {
                 X = new double[3] { 1, 0, 0},
                 Y = new double[3] { 0, 1, 0 },
@@ -36,9 +32,9 @@ namespace Pulsar4X.SDL2UI
             
         }
 
-        public static Matrix IDMirror(bool x, bool y)
+        public static Matrix2d IDMirror(bool x, bool y)
         {
-            Matrix matrix = new Matrix();
+            Matrix2d matrix = new Matrix2d();
             if (y)
                 matrix.X = new double[3] { -1, 0, 0 };
             if (x)
@@ -48,9 +44,9 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        public static Matrix IDRotate(double radians)
+        public static Matrix2d IDRotate(double radians)
         {
-            Matrix matrix = new Matrix()
+            Matrix2d matrix = new Matrix2d()
             {
                 X = new double[3] { Math.Cos(radians), -Math.Sin(radians), 0 },
                 Y = new double[3] { Math.Sin(radians), Math.Cos(radians), 0 },
@@ -59,31 +55,31 @@ namespace Pulsar4X.SDL2UI
             return matrix;
         }
 
-        public static Matrix IDRotate90Deg()
+        public static Matrix2d IDRotate90Deg()
         {
-            Matrix matrix = new Matrix()
+            Matrix2d matrix = new Matrix2d()
             {
                 X = new double[3] { 0, -1, 0 },
-                Y = new double[3] { 1, 0, 0 },
-                Z = new double[3] {0, 0, 1},
+                Y = new double[3] { 1, 0, 0  },
+                Z = new double[3] { 0, 0, 1  },
             };
             return matrix;
         }
 
-        public static Matrix IDRotate180Deg()
+        public static Matrix2d IDRotate180Deg()
         {
-            Matrix matrix = new Matrix()
+            Matrix2d matrix = new Matrix2d()
             {
-                X = new double[3] { -1, 0, 0 },
-                Y = new double[3] { 0, -1, 0 },
-                Z = new double[3] {0, 0, 1},
+                X = new double[3] { -1,  0, 0 },
+                Y = new double[3] {  0, -1, 0 },
+                Z = new double[3] {  0,  0, 1},
             };
             return matrix;
         }
 
-        public static Matrix IDRotate270Deg()
+        public static Matrix2d IDRotate270Deg()
         {
-            Matrix matrix = new Matrix()
+            Matrix2d matrix = new Matrix2d()
             {
                 X = new double[3] { 0, 1, 0 },
                 Y = new double[3] { -1, 0, 0 },
@@ -92,9 +88,9 @@ namespace Pulsar4X.SDL2UI
             return matrix;
         }
 
-        public static Matrix operator *(Matrix matrixA, Matrix matrixB)
+        public static Matrix2d operator *(Matrix2d matrixA, Matrix2d matrixB)
         {
-            Matrix newMatrix = new Matrix();
+            Matrix2d newMatrix = new Matrix2d();
             newMatrix.X[0] = matrixA.X[0] * matrixB.X[0] + matrixA.X[1] * matrixB.Y[0] + matrixA.X[2] * matrixB.Z[0];
             newMatrix.X[1] = matrixA.X[0] * matrixB.X[1] + matrixA.X[1] * matrixB.Y[1] + matrixA.X[2] * matrixB.Z[1];
             newMatrix.X[2] = matrixA.X[0] * matrixB.X[2] + matrixA.X[1] * matrixB.Y[2] + matrixA.X[2] * matrixB.Z[2];
@@ -109,63 +105,30 @@ namespace Pulsar4X.SDL2UI
             return newMatrix;
         }
 
-        public SDL.SDL_Point Transform(double itemx, double itemy)
+
+
+        public Vector2 Transform(Vector2 point)
         {
-            SDL.SDL_Point newPoint = new SDL.SDL_Point();
-            var newPointd = TransformD(itemx, itemy);
-            newPoint.x = (int)newPointd.X;
-            newPoint.y = (int)newPointd.Y;
-            return newPoint;
+            return Transform(point.X, point.Y); 
         }
 
-        public Vector2 TransformVector2(double itemx, double itemy)
+        public Vector2 Transform(double itemx, double itemy)
         {
             Vector2 newpoint2 = new Vector2();
             newpoint2.X = X[0] * itemx + Y[0] * itemy + Z[0] * 1;
             newpoint2.Y = X[1] * itemx + Y[1] * itemy + Z[1] * 1;
-            return newpoint2;
-        }
-        public Vector2 TransformVector2(Vector2 vector)
-        {
-            Vector2 newpoint2 = new Vector2();
-            newpoint2.X = X[0] * vector.X + Y[0] * vector.Y + Z[0] * 1;
-            newpoint2.Y = X[1] * vector.X + Y[1] * vector.Y + Z[1] * 1;
+            
             return newpoint2;
         }
 
-        public PointD TransformD(PointD point)
-        {
-            return TransformD(point.X, point.Y); 
-        }
 
-        public PointD TransformD(double itemx, double itemy)
+        public Vector2[] Transform(ICollection<Vector2> points)
         {
-            PointD newpoint2 = new PointD();
-            newpoint2.X = X[0] * itemx + Y[0] * itemy + Z[0] * 1;
-            newpoint2.Y = X[1] * itemx + Y[1] * itemy + Z[1] * 1;
-            return newpoint2;
-        }
-
-        public SDL.SDL_Point[] Transform(ICollection<SDL.SDL_Point> points)
-        {
-            SDL.SDL_Point[] newPoints = new SDL.SDL_Point[points.Count];
+            Vector2[] newPoints = new Vector2[points.Count];
             int i = 0;
             foreach (var item in points)
             {
-                newPoints[i] = Transform(item.x, item.y);
-                i++;
-            }
-            return newPoints;
-        }
-
-
-        public PointD[] Transform(ICollection<PointD> points)
-        {
-            PointD[] newPoints = new PointD[points.Count];
-            int i = 0;
-            foreach (var item in points)
-            {
-                newPoints[i] = TransformD(item);
+                newPoints[i] = Transform(item);
                 i++;
             }
             return newPoints;

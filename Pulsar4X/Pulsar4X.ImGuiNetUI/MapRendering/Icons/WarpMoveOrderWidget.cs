@@ -254,7 +254,7 @@ namespace Pulsar4X.SDL2UI
                 arrowPoints.Add(new PointD() { X = x, Y = y });
             }
             */
-            var rotate270 = Matrix.New270DegreeMatrix();
+            var rotate270 = Matrix.IDRotate270Deg();
             _arrow = new PointD[arrowPoints.Length];
             for (int i = 0; i < _arrow.Length; i++)
             {
@@ -306,7 +306,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             //rotate the progradeArrow.
-            Matrix rotate = Matrix.NewRotateMatrix(ProgradeAngle);
+            Matrix rotate = Matrix.IDRotate(ProgradeAngle);
             _progradeArrow.Points = new PointD[_arrow.Length];
             for (int i = 0; i < _arrow.Length; i++)
             {
@@ -316,8 +316,8 @@ namespace Pulsar4X.SDL2UI
             
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
             
-            var mirrorMtx = Matrix.NewMirrorMatrix(true, false);
-            var scaleMtx = Matrix.NewScaleMatrix(Scale, Scale);
+            var mirrorMtx = Matrix.IDMirror(true, false);
+            var scaleMtx = Matrix.IDScale(Scale, Scale);
             Matrix nonZoomMatrix = mirrorMtx * scaleMtx;
 
             DrawShapes = new Shape[this.Shapes.Count];
