@@ -5,24 +5,38 @@ using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using SDL2;
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage;
 
 namespace Pulsar4X.SDL2UI
 {
     class PlanetaryWindow : PulsarGuiWindow
     {
+        private readonly List<MineralSD> _mineralDefinitions = null;
+        private readonly int _maxMineralNameLength = 0;
+        private const string _amountFormat = "###,###,###,###,###,###,##0";
+
         private enum PlanetarySubWindows{
-        generalInfo, installations
+            generalInfo, 
+            installations,
+            mineralDeposits
         }
         private EntityState _lookedAtEntity;
+
         private PlanetarySubWindows _selectedSubWindow = PlanetarySubWindows.generalInfo;
 
         private PlanetaryWindow(EntityState entity)
         {
+            if (_mineralDefinitions == null) {
+                _mineralDefinitions = _uiState.Game.StaticData.CargoGoods.GetMineralsList();
+                _maxMineralNameLength = _mineralDefinitions.Max(x => x.Name.Length);
+            }
             //_flags = ImGuiWindowFlags.NoCollapse;
 
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             onEntityChange(entity);
-           
         }
 
 
@@ -60,55 +74,119 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
             ImGui.SetNextWindowSize(new Vector2(400,400),ImGuiCond.Once);
-            if (IsActive == true && ImGui.Begin("Planetary window: "+_lookedAtEntity.Name, ref IsActive, _flags))
+            if (IsActive == true && ImGui.Begin("Planetary Window: " + _lookedAtEntity.Name, ref IsActive, _flags))
             {
-                if(ImGui.SmallButton("general info")){
-                    _selectedSubWindow = PlanetarySubWindows.generalInfo;
-                }
-                ImGui.SameLine();
-                if(ImGui.SmallButton("installations")){
-                    _selectedSubWindow = PlanetarySubWindows.installations;
-                }
+                RenderTabOptions();
+
                 ImGui.BeginChild("data");
                 switch(_selectedSubWindow){
                     case PlanetarySubWindows.generalInfo:
-                        if(_lookedAtEntity.Entity.HasDataBlob<MassVolumeDB>()){
-                            var tempMassVolume = _lookedAtEntity.Entity.GetDataBlob<MassVolumeDB>();
-                            ImGui.Text("radius: "+Stringify.Distance(tempMassVolume.RadiusInM));
-                            ImGui.Text("mass: "+tempMassVolume.MassDry.ToString() + " kg");
-                            ImGui.Text("volume: " +tempMassVolume.Volume_m3.ToString() + " m^3");
-                            ImGui.Text("density: "+tempMassVolume.Density_gcm + " kg/m^3");
-                        }
-                        if (_lookedAtEntity.Entity.HasDataBlob<ColonyInfoDB>())
-                        {
-                            ColonyInfoDB tempColonyInfo = _lookedAtEntity.Entity.GetDataBlob<ColonyInfoDB>();
-                            ImGui.Text("populations: ");
-                            foreach(var popPerSpecies in tempColonyInfo.Population){
-                                ImGui.Text(popPerSpecies.Value.ToString()+" of species: ");
-                                ImGui.SameLine();
-                                if(popPerSpecies.Key.HasDataBlob<NameDB>()){
-                                    ImGui.Text(popPerSpecies.Key.GetDataBlob<NameDB>().DefaultName);
-                                }else {
-                                    ImGui.Text("unknown.");
-                                }
-                            }
-                        }
-                        if(_lookedAtEntity.Entity.HasDataBlob<InstallationsDB>()){
-                            InstallationsDB tempInstallations = _lookedAtEntity.Entity.GetDataBlob<InstallationsDB>();
-                    
-                        }
-                   
-                    
-                    break;
+                        RenderGeneralInfo();
+                        break;
                     case PlanetarySubWindows.installations:
-                    break;
+                        RenderInstallations();
+                        break;
+                    case PlanetarySubWindows.mineralDeposits:
+                        RenderMineralDeposits();
+                        break;
                     default:
-                    break;
+                        break;
                 }
                 ImGui.EndChild();
                 ImGui.End();
             }
 
+        }
+
+        private void RenderTabOptions()
+        {
+            if (ImGui.SmallButton("General Info"))
+            {
+                _selectedSubWindow = PlanetarySubWindows.generalInfo;
+            }
+
+            if (_lookedAtEntity.Entity.HasDataBlob<InstallationsDB>())
+            {
+                ImGui.SameLine();
+                if (ImGui.SmallButton("Installations"))
+                {
+                    _selectedSubWindow = PlanetarySubWindows.installations;
+                }
+            }
+
+            if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>() && _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>().Minerals.Any())
+            {
+                ImGui.SameLine();
+                if (ImGui.SmallButton("Mineral Deposits"))
+                {
+                    _selectedSubWindow = PlanetarySubWindows.mineralDeposits;
+                }
+            }
+        }
+
+        private void RenderGeneralInfo()
+        {
+            if (_lookedAtEntity.Entity.HasDataBlob<MassVolumeDB>())
+            {
+                var tempMassVolume = _lookedAtEntity.Entity.GetDataBlob<MassVolumeDB>();
+                ImGui.Text("Radius: " + Stringify.Distance(tempMassVolume.RadiusInM));
+                ImGui.Text("Mass: " + tempMassVolume.MassDry.ToString() + " kg");
+                ImGui.Text("Volume: " + tempMassVolume.Volume_m3.ToString() + " m^3");
+                ImGui.Text("Density: " + tempMassVolume.Density_gcm + " kg/m^3");
+            }
+
+            if (_lookedAtEntity.Entity.HasDataBlob<ColonyInfoDB>())
+            {
+                ImGui.Text("---");
+                ColonyInfoDB tempColonyInfo = _lookedAtEntity.Entity.GetDataBlob<ColonyInfoDB>();
+                ImGui.Text("Populations: ");
+                foreach (var popPerSpecies in tempColonyInfo.Population)
+                {
+                    ImGui.Text("  " + Stringify.Quantity(popPerSpecies.Value, "0.0##" ,true) + " of species: ");
+                    ImGui.SameLine();
+                    if (popPerSpecies.Key.HasDataBlob<NameDB>())
+                    {
+                        ImGui.Text(popPerSpecies.Key.GetDataBlob<NameDB>().DefaultName);
+                    }
+                    else
+                    {
+                        ImGui.Text("unknown.");
+                    }
+                }
+            }
+        }
+
+        private void RenderInstallations()
+        {
+            if (_lookedAtEntity.Entity.HasDataBlob<InstallationsDB>())
+            {
+                InstallationsDB tempInstallations = _lookedAtEntity.Entity.GetDataBlob<InstallationsDB>();
+            }
+        }
+
+        private void RenderMineralDeposits()
+        {
+            if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>())
+            {
+                SystemBodyInfoDB systemBodyInfo = _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>();
+                var deposits = systemBodyInfo.Minerals;
+                if (deposits.Any())
+                {
+                    var maxMineralQuantity = systemBodyInfo.Minerals.Values.Max(x => x.Amount).ToString(_amountFormat).Length;
+                    ImGui.Text("Mineral".PadRight(_maxMineralNameLength + 5) + "Available".PadLeft(maxMineralQuantity + 2) + "Accessibility".PadLeft(16));
+
+                    foreach (var key in systemBodyInfo.Minerals.Keys)
+                    {
+                        var mineralData = _mineralDefinitions.FirstOrDefault(x => x.ID == key);
+                        if (mineralData != null)
+                        {
+                            var mineralValues = systemBodyInfo.Minerals[key];
+
+                            ImGui.Text(mineralData.Name.PadRight(_maxMineralNameLength + 5) + mineralValues.Amount.ToString(_amountFormat).PadLeft(maxMineralQuantity + 2) + mineralValues.Accessibility.ToString("0.00").PadLeft(16));
+                        }
+                    }
+                }
+            }
         }
     }
 }
