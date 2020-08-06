@@ -142,9 +142,11 @@ namespace Pulsar4X.SDL2UI
 */
             //first we calculate the position, 
 
+            //make it an odd number of points
             if (_numberOfPoints % 2 == 0)
                 _numberOfPoints += 1;
             int ctrIndex = _numberOfPoints / 2;
+            
             double dtheta = thetaMax / (ctrIndex - 1);
             double fooA = Math.Cosh(dtheta);
             double fooB = (a / b) * Math.Sinh(dtheta);
@@ -152,33 +154,38 @@ namespace Pulsar4X.SDL2UI
             double xn = a;
             double yn = 0;
 
-            var points = new PointD[ctrIndex + 1];
-            points[0] = new PointD() { X = xn, Y = yn };
-            for (int i = 1; i < ctrIndex + 1; i++)
+            //first create a list of points for one side of the raw hyperbol
+            var points = new PointD[ctrIndex];
+            points[0] = new PointD() { X = xn, Y = yn }; //periapsis
+            for (int i = 1; i < ctrIndex; i++)
             {
                 var lastx = xn;
                 var lasty = yn;
                 xn = fooA * lastx + fooB * lasty;
                 yn = fooC * lastx + fooA * lasty;
-                points[i] = new PointD() { X = xn, Y = yn };
+                points[i] = new PointD() { X = -xn, Y = yn };
             }
 
 
+            //now translate and rotate it into place, and mirror. 
+            var mtxtr = Matrix.IDTranslate(a, 0);
+            var mtxrt = Matrix.IDRotate(_lop);
+            var mtx = mtxtr * mtxrt;
+            var mtxmr = mtx * Matrix.IDMirror(true, false);
+            
+            
             _points = new PointD[_numberOfPoints];
+            _points[ctrIndex] = mtx.TransformD(points[0]); //periapsis
 
-
-            for (int i = 0; i < points.Length ; i++)
+            
+            int j = ctrIndex;
+            int k = ctrIndex;
+            for (int i = 0; i < ctrIndex ; i++)
             {
-                _points[i] = new PointD()
-                {
-                    X = -points[i].X,
-                    Y = -points[i].Y,
-                };
-                _points[i + ctrIndex] = new PointD()
-                {
-                    X = points[i].X,
-                    Y = points[i].Y,
-                };
+                _points[j] = mtx.TransformD(points[i]);
+                _points[k] = mtxmr.TransformD(points[i]);
+                j++;
+                k--;
             }
             
             /*
@@ -269,12 +276,12 @@ namespace Pulsar4X.SDL2UI
             //resize from m to au
             //resize for zoom
 
-            var trns = Matrix.IDTranslate(WorldPosition_AU.X, WorldPosition_AU.Y);
+            //var trns = Matrix.IDTranslate(WorldPosition_AU.X, WorldPosition_AU.Y);
             var foo = camera.ViewCoordinate_m(WorldPosition_m);
             var trns2 = Matrix.IDTranslate(foo.x, foo.y);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
-            var mtx2 = scAU * scZm * trns2;
+            var mtx2 = scAU * scZm *  trns2;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
