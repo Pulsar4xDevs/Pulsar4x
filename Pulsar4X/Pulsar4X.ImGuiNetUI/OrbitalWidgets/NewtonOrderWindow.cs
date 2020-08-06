@@ -19,9 +19,9 @@ namespace Pulsar4X.SDL2UI
 
         DateTime _actionDateTime;
 
-        //double _origionalOrbitalSpeed = double.NaN;
+        //double _originalOrbitalSpeed = double.NaN;
         Vector3 _orbitalVelocityAtChange_m = Orbital.Vector3.NaN;
-        double _origionalAngle = double.NaN;
+        double _originalAngle = double.NaN;
 
         double _newOrbitalSpeed_m = double.NaN;
         Vector3 _newOrbitalVelocity_m = Orbital.Vector3.NaN;
@@ -108,7 +108,7 @@ namespace Pulsar4X.SDL2UI
             _positonAtChange_m = OrbitProcessor.GetPosition_m(_orderEntityOrbit, _actionDateTime);
             var velAtChange2d = OrbitProcessor.GetOrbitalVector_m(_orderEntityOrbit, _actionDateTime);
             _orbitalVelocityAtChange_m = new Vector3(velAtChange2d.X, velAtChange2d.Y, 0);
-            _origionalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
+            _originalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
 
             
             var newtondb = entity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
@@ -157,7 +157,7 @@ namespace Pulsar4X.SDL2UI
                 _positonAtChange_m = OrbitProcessor.GetPosition_m(_orderEntityOrbit, _actionDateTime);
                 var vector2 = OrbitProcessor.GetOrbitalVector_m(_orderEntityOrbit, _actionDateTime);
                 _orbitalVelocityAtChange_m = new Vector3(vector2.X, vector2.Y,0);
-                _origionalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
+                _originalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
             }
         }
 
@@ -176,8 +176,8 @@ namespace Pulsar4X.SDL2UI
         void Calcs()
         {
        
-            //double x = (_radialDV * Math.Cos(_origionalAngle)) - (_progradeDV * Math.Sin(_origionalAngle));
-            //double y = (_radialDV * Math.Sin(_origionalAngle)) + (_progradeDV * Math.Cos(_origionalAngle));
+            //double x = (_radialDV * Math.Cos(_originalAngle)) - (_progradeDV * Math.Sin(_originalAngle));
+            //double y = (_radialDV * Math.Sin(_originalAngle)) + (_progradeDV * Math.Cos(_originalAngle));
             _deltaV_MS = _newtonUI.DeltaV; //new Orbital.Vector3(x, y, 0);
 
 

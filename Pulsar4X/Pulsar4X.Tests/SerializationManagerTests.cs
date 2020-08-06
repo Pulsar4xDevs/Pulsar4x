@@ -87,21 +87,20 @@ namespace Pulsar4X.Tests
             Game loadedGame = SerializationManager.ImportGame(File);
 
             //run some tests
-            ComparitiveTests(newGame, loadedGame );
-
+            ComparitiveTests(newGame, loadedGame);
         }
 
 
-         void ComparitiveTests(Game origional, Game loadedGame)
+        void ComparitiveTests(Game original, Game loadedGame)
         {
             
-            StarSystem firstOriginal = origional.Systems.First().Value;
+            StarSystem firstOriginal = original.Systems.First().Value;
             StarSystem firstLoaded = loadedGame.Systems.First().Value;
 
             Assert.AreEqual(firstOriginal.Guid, firstLoaded.Guid);
             Assert.AreEqual(firstOriginal.NameDB.DefaultName, firstLoaded.NameDB.DefaultName);
   
-            Assert.AreEqual(origional.GamePulse, loadedGame.GamePulse);
+            Assert.AreEqual(original.GamePulse, loadedGame.GamePulse);
 
             Assert.AreEqual(firstOriginal.ManagerSubpulses.GetTotalNumberOfProceses(), firstLoaded.ManagerSubpulses.GetTotalNumberOfProceses());
             Assert.AreEqual(firstOriginal.ManagerSubpulses.GetInteruptDateTimes(), firstLoaded.ManagerSubpulses.GetInteruptDateTimes());
@@ -156,39 +155,46 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void StarSystemImportExport()
+        public void TestProceduralStarSystemImportExport()
         {
-            _game = TestingUtilities.CreateTestUniverse(10);
+            _game = TestingUtilities.CreateTestUniverse(1);
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
 
             Assert.NotNull(_game);
 
-            // Choose a procedural system.
+            // Test each procedural system.
             List<StarSystem> systems = _game.GetSystems(_smAuthToken);
-            var rand = new Random();
-            int systemIndex = rand.Next(systems.Count - 1);
-            StarSystem system = systems[systemIndex];
-
-            ImportExportSystem(system);
-
-            //Now do the same thing, but with Sol.
-            DefaultStartFactory.DefaultHumans(_game, "Humans");
-
-            systems = _game.GetSystems(_smAuthToken);
-            system = systems[systems.Count - 1];
-            ImportExportSystem(system);
-
+            ImportExportSystem(systems.First(), "Procedural");
         }
-        private void ImportExportSystem(StarSystem system)
+
+        [Test]
+        public void SolStarSystemImportExport()
+        {
+            _game = TestingUtilities.CreateTestUniverse(1, true);
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
+
+            Assert.NotNull(_game);
+
+            //Test with Sol.
+            List<StarSystem> systems = _game.GetSystems(_smAuthToken);
+            ImportExportSystem(systems.First(), "Sol");
+        }
+
+        private void ImportExportSystem(StarSystem system, string testFileSuffix = "")
         {
 
             //TODO: need to be able to export a system that will only save systemBodies. 
             //for a generated one, just saving the seed should suffice. 
             //for a created one we'll have to do more. 
             //also need to be able to export a players view of a system. but that would likely be a different function altogether. 
-            SerializationManager.Export(_game, "testSystemExport", system);
+            var filename = "testSystemExport" + testFileSuffix + ".json";
+            SerializationManager.Export(_game, filename, system);
             string jsonString = SerializationManager.Export(_game, system);
+
             int entityCount = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken).Count;
+            int nameCount = system.GetAllEntitiesWithDataBlob<NameDB>(_smAuthToken).Count;
+            int orbitCount = system.GetAllEntitiesWithDataBlob<OrbitDB>(_smAuthToken).Count;
+
             _game = TestingUtilities.CreateTestUniverse(0);
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
 
@@ -197,6 +203,8 @@ namespace Pulsar4X.Tests
 
             // See that the entities were imported.
             Assert.AreEqual(entityCount, importedSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken).Count);
+            Assert.AreEqual(nameCount, importedSystem.GetAllEntitiesWithDataBlob<NameDB>(_smAuthToken).Count);
+            Assert.AreEqual(orbitCount, importedSystem.GetAllEntitiesWithDataBlob<OrbitDB>(_smAuthToken).Count);
 
             // Ensure the system was added to the game's system list.
             List<StarSystem> systems = _game.GetSystems(_smAuthToken);

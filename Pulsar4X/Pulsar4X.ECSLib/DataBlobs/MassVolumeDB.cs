@@ -225,13 +225,13 @@ namespace Pulsar4X.ECSLib
             Update(sensorInfo.DetectedEntity.GetDataBlob<MassVolumeDB>(), sensorInfo);
         }
 
-        void Update(MassVolumeDB origionalDB, SensorInfoDB sensorInfo)
+        void Update(MassVolumeDB originalDB, SensorInfoDB sensorInfo)
         {
             //TODO: add rand from sensorInfo. 
-            MassDry = origionalDB.MassDry;
-            Density_gcm = origionalDB.Density_gcm;
-            RadiusInAU = origionalDB.RadiusInAU;
-            Volume_km3 = origionalDB.Volume_km3;
+            MassDry = originalDB.MassDry;
+            Density_gcm = originalDB.Density_gcm;
+            RadiusInAU = originalDB.RadiusInAU;
+            Volume_km3 = originalDB.Volume_km3;
         }
 
         public int GetValueCompareHash(int hash = 17)

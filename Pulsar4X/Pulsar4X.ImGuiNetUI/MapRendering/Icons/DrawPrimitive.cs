@@ -119,7 +119,7 @@ namespace Pulsar4X.SDL2UI
                 lastY = drawY;
             }
 
-            SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a); //set the colour back to what it was origionaly
+            SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a); //set the colour back to what it was originaly
             SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
     }
@@ -429,8 +429,8 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            //set the colour and blendmode back to what it was origionaly.
-            SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a); //set the colour back to what it was origionaly
+            //set the colour and blendmode back to what it was originaly.
+            SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a); //set the colour back to what it was originaly
             SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
     }

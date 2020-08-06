@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib
             StaticDataStore newStore = game.StaticData;//.Clone();
             string curFileName = "";
             JObject obj;
-            //try
+            try
             {
                 string dataDirectory = Path.Combine(Path.Combine(SerializationManager.GetWorkingDirectory(), DataDirectory), dataDir);
 
@@ -124,15 +124,15 @@ namespace Pulsar4X.ECSLib
                 }
 
             }
-            /*
+            
             catch (Exception e)
             {
-                if (e.GetType() == typeof(JsonSerializationException) || e.GetType() == typeof(JsonReaderException))
-                    throw new StaticDataLoadException("Bad Json provided in directory: " + curFileName , e);
+                if (e.GetType() == typeof(JsonSerializationException) || e.GetType() == typeof(JsonReaderException) || e.GetType() == typeof(ArgumentException))
+                    throw new StaticDataLoadException("Bad Json provided in directory: " + dataDir , e);
                 
 
                 throw;  // rethrow exception if not known ;)
-            }*/
+            }
         }
 
         public static StaticDataStore GetStaticData(string dataDir)

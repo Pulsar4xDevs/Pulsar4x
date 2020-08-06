@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.Orbital;
 
-namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
+namespace Pulsar4X.ECSLib
 {
     public class EntityDamageProfileDB : BaseDataBlob
     {
@@ -12,8 +13,6 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         public List<(Guid id, int count)> PlacementOrder;
         public List<(Guid, RawBmp)> TypeBitmaps;
         
-        
-
         //public List<(int index, int size)> Bulkheads; maybe connect armor/skin at these points.
         //if we get around to doing technical stuff like being able to break a ship into two pieces,
         //and having longditudinal structural parts...
