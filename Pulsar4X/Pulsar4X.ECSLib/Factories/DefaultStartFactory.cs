@@ -35,6 +35,7 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _missileTube;
         private static ComponentDesign _ordnanceStore;
         private static ShipDesign _defaultShipDesign;
+        private static ShipDesign _gunshipDesign;
         private static ShipDesign _spaceXStarShipDesign;
         private static OrdnanceDesign _missile;
         
@@ -290,9 +291,9 @@ namespace Pulsar4X.ECSLib
             
             var elec = NameLookup.GetMaterialSD(game, "Electrical Energy");
             gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
-            ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
-            ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             gunShip1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            //ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             
             
@@ -430,32 +431,34 @@ namespace Pulsar4X.ECSLib
                 
             };
             ArmorSD stainless = game.StaticData.ArmorTypes[new Guid("05dce711-8846-488a-b0f3-57fd7924b268")];
-            _defaultShipDesign = new ShipDesign(factionInfo, "Starship", components2, (stainless, 3));
-            _defaultShipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _defaultShipDesign.Armor);
-            return _defaultShipDesign;
+            _spaceXStarShipDesign = new ShipDesign(factionInfo, "Starship", components2, (stainless, 3));
+            _spaceXStarShipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _spaceXStarShipDesign.Armor);
+            return _spaceXStarShipDesign;
         }
 
         public static ShipDesign GunShipDesign(Game game, Entity faction)
         {
+            if (_gunshipDesign != null)
+                return _gunshipDesign;
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
-                (_sensor_50, 1), 
-                (_laser, 2), 
-                (_fireControl, 2),
+                (ShipPassiveSensor(game, faction), 1), 
+                (DefaultSimpleLaser(game, faction), 2), 
+                (DefaultBFC(game, faction), 1),
                 (DefaultMissileTube(game, faction),1),
                 (ShipSmallOrdnanceStore(game, faction), 2),
                 (ShipSmallCargo(game,faction), 1),
-                (_fuelTank_1000, 2),
-                (_warpDrive, 4),
-                (_battery, 3),
-                (_reactor, 1),
-                (_merlin, 4),
+                (DefaultFuelTank(game, faction), 2),
+                (DefaultWarpDesign(game, faction), 4),
+                (DefaultBatteryBank(game, faction), 3),
+                (DefaultFisionReactor(game, faction), 1),
+                (DefaultThrusterDesign(game, faction), 4),
             };
             ArmorSD plastic = game.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
-            var shipdesign = new ShipDesign(factionInfo, "Sanctum Adroit GunShip", components2, (plastic, 3));
-            shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
-            return shipdesign;
+            _gunshipDesign = new ShipDesign(factionInfo, "Sanctum Adroit GunShip", components2, (plastic, 3));
+            _gunshipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _gunshipDesign.Armor);
+            return _gunshipDesign;
         }
 
         public static ShipDesign TargetDrone(Game game, Entity faction)
