@@ -44,7 +44,12 @@ namespace Pulsar4X.SDL2UI
             var entityState = _uiState.LastClickedEntity;
             bool wasActive = IsActive;
             IsActive = wasActive;
-            _debugWidget = new OrbitalDebugWidget(entityState);
+            if(entityState.Entity.HasDataBlob<OrbitDB>() || entityState.Entity.HasDataBlob<OrbitUpdateOftenDB>() || entityState.Entity.HasDataBlob<NewtonMoveDB>())
+                _debugWidget = new OrbitalDebugWidget(entityState);
+            else
+            {
+                IsActive = false;
+            }
         }
 
 
