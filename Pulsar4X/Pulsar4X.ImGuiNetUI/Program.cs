@@ -134,7 +134,7 @@ namespace Pulsar4X.SDL2UI
                 if (e.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
                 {
                     MainMenuItems mainMenu = MainMenuItems.GetInstance();
-                    mainMenu.SetActive();
+                    mainMenu.ToggleActive();
                 }
             }
 
