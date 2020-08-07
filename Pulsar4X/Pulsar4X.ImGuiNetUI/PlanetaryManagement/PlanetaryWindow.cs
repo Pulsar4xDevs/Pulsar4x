@@ -16,7 +16,7 @@ namespace Pulsar4X.SDL2UI
     {
         private readonly List<MineralSD> _mineralDefinitions = null;
         private readonly int _maxMineralNameLength = 0;
-        private const string _amountFormat = "###,###,###,###,###,###,##0";
+        private const string _amountFormat = "#,###,###,###,###,###,##0";   // big enough to render 64 integers
 
         private enum PlanetarySubWindows{
             generalInfo, 
@@ -166,25 +166,36 @@ namespace Pulsar4X.SDL2UI
 
         private void RenderMineralDeposits()
         {
+            var headerRow = new KeyValuePair<string, TextAlign>[3];
+            headerRow[0] = new KeyValuePair<string, TextAlign>("Mineral", TextAlign.Left);
+            headerRow[1] = new KeyValuePair<string, TextAlign>("Available", TextAlign.Center);
+            headerRow[2] = new KeyValuePair<string, TextAlign>("Accessibility", TextAlign.Right);
+
             if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>())
             {
                 SystemBodyInfoDB systemBodyInfo = _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>();
-                var deposits = systemBodyInfo.Minerals;
+                var deposits = systemBodyInfo.Minerals.Where(x => x.Value.Amount > 0);
                 if (deposits.Any())
                 {
                     var maxMineralQuantity = systemBodyInfo.Minerals.Values.Max(x => x.Amount).ToString(_amountFormat).Length;
-                    ImGui.Text("Mineral".PadRight(_maxMineralNameLength + 5) + "Available".PadLeft(maxMineralQuantity + 2) + "Accessibility".PadLeft(16));
 
+                    List<string[]> rowData = new List<string[]>();
                     foreach (var key in systemBodyInfo.Minerals.Keys)
                     {
                         var mineralData = _mineralDefinitions.FirstOrDefault(x => x.ID == key);
                         if (mineralData != null)
                         {
                             var mineralValues = systemBodyInfo.Minerals[key];
+                            var row = new string[3];
+                            row[0] = mineralData.Name;
+                            row[1] = mineralValues.Amount.ToString(_amountFormat);
+                            row[2] = mineralValues.Accessibility.ToString("0.00");
 
-                            ImGui.Text(mineralData.Name.PadRight(_maxMineralNameLength + 5) + mineralValues.Amount.ToString(_amountFormat).PadLeft(maxMineralQuantity + 2) + mineralValues.Accessibility.ToString("0.00").PadLeft(16));
+                            rowData.Add(row);
                         }
                     }
+
+                    Helpers.RenderImgUITextTable(headerRow, rowData);
                 }
             }
         }

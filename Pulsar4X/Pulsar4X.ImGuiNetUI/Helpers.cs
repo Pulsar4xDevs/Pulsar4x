@@ -1,17 +1,72 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using ImGuiNET;
+using NUnit.Framework;
 using Pulsar4X.ECSLib;
 using Vector3 = System.Numerics.Vector3;
 
 namespace Pulsar4X.SDL2UI
 {
+    public enum TextAlign
+    {
+        Left,
+        Center,
+        Right
+    }
+
     public static class Helpers
     {
+        public static void RenderImgUITextTable(KeyValuePair<string, TextAlign>[] headings, List<string[]> data)
+        {
+            List<int> maxLengthOfDataByColumn = new List<int>();
+            for (int i = 0; i < headings.Length; i++)
+                maxLengthOfDataByColumn.Add(headings[i].Key.Length);
 
+            foreach (var row in data)
+            {
+                for (int i = 0; i < row.Length; i++)
+                    maxLengthOfDataByColumn[i] = Math.Max(row[i].Length, maxLengthOfDataByColumn[i]);
+            }
+
+            // Draw Header Line
+            string headerLine = "";
+            for (int i = 0; i < headings.Length; i++)
+            {
+                headerLine += GetByAlignmentAndMaxLength(headings[i].Key, maxLengthOfDataByColumn[i], headings[i].Value);
+            }
+            ImGui.Text(headerLine);
+
+            foreach (var row in data)
+            {
+                string rowLine = "";
+                for (int i = 0; i < row.Length; i++)
+                {
+                    rowLine += GetByAlignmentAndMaxLength(row[i], maxLengthOfDataByColumn[i], headings[i].Value);
+                }
+                ImGui.Text(rowLine);
+            }
+        }
+
+        private static string GetByAlignmentAndMaxLength(string value, int maxDataLength, TextAlign alignment)
+        {
+            if (alignment == TextAlign.Left)
+                return value.PadRight(maxDataLength + 1);
+
+            if (alignment == TextAlign.Right)
+                return value.PadLeft(maxDataLength + 1);
+
+            // alignment == TextAlign.Center)
+            if (maxDataLength % 2 == 1)
+                maxDataLength++;
+
+            int diffInLength = maxDataLength + 2 - value.Length;
+
+            return value.PadLeft(value.Length + (diffInLength / 2)).PadRight(maxDataLength + 2);
+        }
 
 
         public static Vector3 Color(byte r, byte g, byte b)
