@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using NCalc;
 using NCalc.Domain;
 
@@ -15,6 +16,8 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentDesignAttribute
     {
+        private readonly CultureInfo _toStringCulture = new CultureInfo("en-GB");
+
         private ComponentTemplateAttributeSD _templateSD;
         public string Name { get { return _templateSD.Name; } }
 
@@ -162,7 +165,6 @@ namespace Pulsar4X.ECSLib
 
         public void SetValueFromInput(double input)
         {
-
             Debug.Assert(GuiHint != GuiHint.GuiTextDisplay || GuiHint != GuiHint.None, Name + " is not an editable value");
             SetMin();
             SetMax();
@@ -170,10 +172,9 @@ namespace Pulsar4X.ECSLib
                 input = MinValue;
             else if (input > MaxValue)
                 input = MaxValue;
-            Formula.ReplaceExpression(input.ToString()); //prevents it being reset to the default value on Evaluate;
-            Formula.Evaluate();//force dependants to recalc.
+            Formula.ReplaceExpression(input.ToString(_toStringCulture));    //prevents it being reset to the default value on Evaluate;
+            Formula.Evaluate();                                             //force dependants to recalc.
             ParentComponent.SetAttributes();
-            
         }
 
         public double Value { get { return Formula.DResult; } }
