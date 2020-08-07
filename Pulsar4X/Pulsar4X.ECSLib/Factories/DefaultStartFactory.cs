@@ -293,7 +293,7 @@ namespace Pulsar4X.ECSLib
             gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             gunShip1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
-            //ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             
             
@@ -342,11 +342,11 @@ namespace Pulsar4X.ECSLib
             StaticRefLib.ProcessorManager.RunProcessOnEntity<OrbitDB>(ship3, 0);
 
             
-            gunShip1.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector3(8.52699302490434E-05, 0, 0);
+            gunShip1.GetDataBlob<PositionDB>().RelativePosition_AU = new Vector3(0, -8.52699302490434E-05, 0);
             //give the gunship a hypobolic orbit to test:
             //var orbit = OrbitDB.FromVector(earth, gunShip, new Vector4(0, velInAU, 0, 0), game.CurrentDateTime);
             gunShip1.RemoveDataBlob<OrbitDB>();
-            var nmdb = new NewtonMoveDB(earth, new Vector3(0, -10000.0, 0));
+            var nmdb = new NewtonMoveDB(earth, new Vector3(-10000.0, 0, 0));
             gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);
 
 

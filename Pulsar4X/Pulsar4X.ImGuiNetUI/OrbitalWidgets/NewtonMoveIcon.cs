@@ -110,8 +110,7 @@ namespace Pulsar4X.SDL2UI
             Vector3 vel = _newtonMoveDB.CurrentVector_ms;
             Vector3 pos = myPosDB.RelativePosition_m;
             //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
-            Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
-            double e1 = eccentVector.Length();
+
             
             double e = _ke.Eccentricity; 
             double r = pos.Length();
@@ -121,7 +120,8 @@ namespace Pulsar4X.SDL2UI
 
             double a1 = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
             double b1 = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
-            
+           Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
+           double e1 = eccentVector.Length();         
 
             double linierEccentricity = e * a;
             double soi = OrbitProcessor.GetSOI_m(_newtonMoveDB.SOIParent);
@@ -131,17 +131,17 @@ namespace Pulsar4X.SDL2UI
 
             double p = EllipseMath.SemiLatusRectum(a, e);
             double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, e));
-            double thetaMax = angleToSOIPoint;// - _lop;
-/*
-            double maxX = soi * Math.Cos(angleToSOIPoint);
-            maxX = maxX - a + linierEccentricity;
-            double barA = maxX / a;
-            double barB = barA * barA - 1;
-            double barC = Math.Sqrt(barB);
-            double thetaMax = Math.Log(barA + barC);
-*/
-            //first we calculate the position, 
+            double p1 = EllipseMath.SemiLatusRectum(a1, e1);
+            double ang1 = Math.Abs(OrbitalMath.AngleAtRadus(soi, p1, e1));
+            
+            //the angle used in the calculation is not from the focal point, but from the center( x=a y=0)
+            //angleToSOIPoint however is from the focal point so we need to translate from that frame of reference to one from the center. 
 
+            double y = Math.Abs(Math.Sin(angleToSOIPoint) * soi);
+            double x = Math.Abs(Math.Cos(angleToSOIPoint) * soi);
+            double x2 = linierEccentricity + x;
+            double thetaMax = Math.Atan2(y, x2);
+            
             //make it an odd number of points
             if (_numberOfPoints % 2 == 0)
                 _numberOfPoints += 1;
@@ -155,9 +155,9 @@ namespace Pulsar4X.SDL2UI
             double yn = 0;
 
             //first create a list of points for one side of the raw hyperbol
-            var points = new PointD[ctrIndex];
-            points[0] = new PointD() { X = xn, Y = yn }; //periapsis
-            for (int i = 1; i < ctrIndex; i++)
+            var points = new PointD[ctrIndex + 1];
+            points[0] = new PointD() { X = -xn, Y = yn }; //periapsis
+            for (int i = 1; i < ctrIndex + 1; i++)
             {
                 var lastx = xn;
                 var lasty = yn;
@@ -168,55 +168,26 @@ namespace Pulsar4X.SDL2UI
 
 
             //now translate and rotate it into place, and mirror. 
-            var mtxtr = Matrix.IDTranslate(a, 0);
+            var mtxtr = Matrix.IDTranslate(linierEccentricity, 0);
             var mtxrt = Matrix.IDRotate(_lop);
             var mtx = mtxtr * mtxrt;
-            var mtxmr = mtx * Matrix.IDMirror(true, false);
+            var mtxmr =  Matrix.IDMirror(true, false) * mtx;
             
             
             _points = new PointD[_numberOfPoints];
             _points[ctrIndex] = mtx.TransformD(points[0]); //periapsis
-
             
-            int j = ctrIndex;
-            int k = ctrIndex;
-            for (int i = 0; i < ctrIndex ; i++)
+            
+            int j = ctrIndex + 1;
+            int k = ctrIndex - 1;
+            for (int i = 1; i < ctrIndex + 1; i++)
             {
                 _points[j] = mtx.TransformD(points[i]);
                 _points[k] = mtxmr.TransformD(points[i]);
                 j++;
                 k--;
             }
-            
-            /*
-            _points[ctrIndex] = new PointD()
-            {
-                
-                X = ((points[0].X - linierEccentricity )* Math.Cos(_lop)) - (points[0].Y * Math.Sin(_lop)),
-                Y = ((points[0].X - linierEccentricity) * Math.Sin(_lop)) + (points[0].Y * Math.Cos(_lop))
-            };
-            for (int i = 1; i < ctrIndex + 1; i++)
-            {
-                double x = points[i].X - linierEccentricity; //adjust for the focal point
-                double ya = points[i].Y;
-                double yb = -points[i].Y;
-                double x2a = (x * Math.Cos(_lop)) - (ya * Math.Sin(_lop)); //rotate to loan
-                double y2a = (x * Math.Sin(_lop)) + (ya * Math.Cos(_lop));
-                double x2b = (x * Math.Cos(_lop)) - (yb * Math.Sin(_lop));
-                double y2b = (x * Math.Sin(_lop)) + (yb * Math.Cos(_lop));
-                _points[ctrIndex + i] = new PointD()
-                {
-                    X = x2a,
-                    Y = y2a 
-                };
 
-                _points[ctrIndex - i] = new PointD()
-                {
-                    X = x2b,
-                    Y = y2b
-                };
-            }
-            */
         }
 
         private void CreateEllipsePoints()
@@ -272,54 +243,20 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            //translate to position
-            //resize from m to au
+            
+            //resize from m to au because zoom is au
             //resize for zoom
-
-            //var trns = Matrix.IDTranslate(WorldPosition_AU.X, WorldPosition_AU.Y);
+            //translate to position
             var foo = camera.ViewCoordinate_m(WorldPosition_m);
-            var trns2 = Matrix.IDTranslate(foo.x, foo.y);
+            var trns = Matrix.IDTranslate(foo.x, foo.y);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
-            var mtx2 = scAU * scZm *  trns2;
+            var mtrx = scAU * scZm *  trns;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
-                _drawPoints[i] = mtx2.Transform(_points[i].X, _points[i].Y);
+                _drawPoints[i] = mtrx.Transform(_points[i].X, _points[i].Y);
             }
-            
-            /*
-            var foo = camera.ViewCoordinate_m(WorldPosition_m);
-            var vsp = new PointD
-            {
-                X = foo.x,
-                Y = foo.y
-            };
-
-
-            int index = _index;
-            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
-            var _bodyrelativePos = _positionDB.RelativePosition_AU;
-            //first index in the drawPoints is the position of the body
-            var translated = matrix.TransformD(_bodyrelativePos.X, _bodyrelativePos.Y);
-            _drawPoints[0] = new SDL.SDL_Point() { x = (int)(vsp.X + translated.X), y = (int)(vsp.Y + translated.Y) };
-            
-            for (int i = 1; i < _numberOfDrawSegments; i++)
-            {
-                if (index < _numberOfArcSegments - 1)
-
-                    index++;
-                else
-                    index = 0;
-
-                translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
-
-                int x = (int)(vsp.X + translated.X);
-                int y = (int)(vsp.Y + translated.Y);
-
-                _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
-            }
-            */
         }
         
         public override void Draw(IntPtr rendererPtr, Camera camera)
@@ -330,7 +267,7 @@ namespace Pulsar4X.SDL2UI
             float alpha = _userSettings.MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
-                SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up. 
+                SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creeping up. 
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i +1].y);
                 alpha -= _alphaChangeAmount; 
             }
