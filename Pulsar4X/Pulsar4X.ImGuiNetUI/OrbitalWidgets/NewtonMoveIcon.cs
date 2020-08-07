@@ -90,6 +90,17 @@ namespace Pulsar4X.SDL2UI
         }
 
 
+        public override void OnPhysicsUpdate()
+        {
+            if (_newtonMoveDB.OwningEntity == null)
+                return;
+            var ke = _newtonMoveDB.GetElements();
+            if (ke.Eccentricity != _ke.Eccentricity)
+            {
+                _ke = ke;
+                CreatePointArray();
+            }
+        }
 
         internal void CreatePointArray()
         {
@@ -201,7 +212,7 @@ namespace Pulsar4X.SDL2UI
             double dTheta = 2 * Math.PI / (_numberOfPoints - 1);
             
             double ct = Math.Cos(_lop);
-            double st = Math.Sign(_lop);
+            double st = Math.Sin(_lop);
             double cdp = Math.Cos(dTheta);
             double sdp = Math.Sin(dTheta);
             double fooA = cdp + sdp * st * ct * (a / b - b / a);
@@ -213,16 +224,12 @@ namespace Pulsar4X.SDL2UI
 
             double x = a * ct;
             double y = a * st;
-
-            //this is the offset ie the distance between focal and center.
-            double xc1 = a *  Math.Sin(_lop) - linierEccentricity; //we add the focal distance so the focal point is "center"
-            double yc1 = b * Math.Cos(_lop);
-            var coslop = 1 * Math.Cos(_lop);
-            var sinlop = 1 * Math.Sin(_lop);
-            //and then rotate it to the longditude of periapsis.
-            double xc = (xc1 * coslop) - (yc1 * sinlop);
-            double yc = (xc1 * sinlop) + (yc1 * coslop);
-
+            
+            //we want the focal point of the ellipse to be at the 'center'  
+            //linier ecccentricity is the offset ie the distance between focal and center.
+            //we have to rotate the offset since we're already rotating the ellipse above.
+            double xc = Math.Cos(_lop) * -linierEccentricity;
+            double yc = Math.Sin(_lop) * -linierEccentricity;
             
             _points = new PointD[_numberOfPoints];
 

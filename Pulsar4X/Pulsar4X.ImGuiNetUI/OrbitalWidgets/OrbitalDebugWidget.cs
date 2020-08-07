@@ -97,7 +97,10 @@ namespace Pulsar4X.SDL2UI
     {
         //OrbitIcon orbitIcon;
         KeplerElements _keplerElements;
-        IPosition _bodyPosition;
+        IPosition _bodyPosition
+        {
+            get { return _positionDB; }
+        }
         internal Guid EntityGuid;
 
         PointD _f1;
@@ -164,13 +167,11 @@ namespace Pulsar4X.SDL2UI
 
         private Entity _entity;
         
-        public OrbitalDebugWidget(EntityState entityState) : base(entityState.OrbitIcon.BodyPositionDB)
+        public OrbitalDebugWidget(EntityState entityState) : base(Entity.GetSOIParentPositionDB(entityState.Entity))
         {
-            var orbitIcon = entityState.OrbitIcon;
-            _bodyPosition = orbitIcon.BodyPositionDB;
-
-            
             _entity = entityState.Entity;
+
+            var orbitIcon = entityState.OrbitIcon;
             
             
             if (_entity.HasDataBlob<OrbitDB>() || _entity.HasDataBlob<OrbitUpdateOftenDB>())
