@@ -383,11 +383,14 @@ namespace Pulsar4X.ImGuiNetUI
             
             var sysstate = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             var contacts = sysstate.SystemContacts;
-            _allSensorContacts = contacts.GetAllContacts().ToArray();
+            _allSensorContacts = new SensorContact[0];
+            if (contacts != null)
+            {
+                _allSensorContacts = contacts.GetAllContacts().ToArray();
+            }
             _ownEntites = sysstate.EntityStatesWithPosition.Values.ToArray();
             RefreshWpnNamesCashe();
-            RefreshReloadStateCashe();
-            
+            RefreshReloadStateCashe();           
         }
 
         public override void OnSystemTickChange(DateTime newdate)
