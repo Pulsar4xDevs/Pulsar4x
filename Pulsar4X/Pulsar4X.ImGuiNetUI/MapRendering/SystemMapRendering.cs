@@ -106,18 +106,14 @@ namespace Pulsar4X.SDL2UI
             _sensorMgr = starSys.GetSensorContacts(_faction.Guid);
             _sensorChanges = _sensorMgr.Changes.Subscribe();
 
-
-
             _state.SetActiveSystem(starSys.Guid);
 
-
-            foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
+            foreach (var entityItem in _sysState.EntityStatesWithPosition.Values.OrderBy(x => x.Position.AbsolutePosition_AU).ToList())
             {
                 AddIconable(entityItem);
             }
 
             _state.LastClickedEntity = _sysState.EntityStatesWithPosition.Values.ElementAt(0);
-
         }
 
         internal void SetSystem(StarSystem starSys)
@@ -162,7 +158,6 @@ namespace Pulsar4X.SDL2UI
                 _nameIcons.TryAdd(entityItem.Guid, new NameIcon(entityState, _state));
             }
 
-
             if (entityItem.HasDataBlob<OrbitDB>())
             {
                 var orbitDB = entityItem.GetDataBlob<OrbitDB>();
@@ -192,25 +187,12 @@ namespace Pulsar4X.SDL2UI
             {
                 _entityIcons.TryAdd(entityItem.Guid, new StarIcon(entityItem));
             }
+
             if (entityItem.HasDataBlob<SystemBodyInfoDB>())
             {
                 _entityIcons.TryAdd(entityItem.Guid, new SysBodyIcon(entityItem));
-                if (entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies.Count > 0)
-                {
-                    foreach (var colony in entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies)
-                    {
-                        _nameIcons[entityItem.Guid].AddSubName(colony);
-                        _sysState.EntityStatesWithPosition[entityItem.Guid].NameIcon = _nameIcons[entityItem.Guid];
-                        /*
-                        IconEntityStates.Add(colony.ID, new EntityState(colony)
-                        {
-
-                            Name = _nameIcons[entityItem.ID].SubNames[colony.ID],
-                            NameIcon = _nameIcons[entityItem.ID]
-                        });*/
-                    }
-                }
             }
+
             if (entityItem.HasDataBlob<ShipInfoDB>())
             {
                 _entityIcons.TryAdd(entityItem.Guid, new ShipIcon(entityItem));
