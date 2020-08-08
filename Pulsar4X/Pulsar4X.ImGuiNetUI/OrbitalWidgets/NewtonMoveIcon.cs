@@ -217,7 +217,7 @@ namespace Pulsar4X.SDL2UI
             double sdp = Math.Sin(dTheta);
             double fooA = cdp + sdp * st * ct * (a / b - b / a);
             double fooB = -sdp * ((b * st) * (b * st) + ((a * ct) * (a * ct))) / (a * b);
-            double fooC = sdp * ((b * st) * (b * st) + ((a * ct) * (a * ct))) / (a * b);
+            double fooC = sdp * ((b * ct) * (b * ct) + ((a * st) * (a * st))) / (a * b);
             double fooD = cdp + sdp * st * ct * (b / a - a / b);
             fooD -= (fooC * fooB) / fooA;
             fooC = fooC / fooA;
