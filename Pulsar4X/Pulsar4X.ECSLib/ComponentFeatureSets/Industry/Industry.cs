@@ -121,9 +121,9 @@ namespace Pulsar4X.ECSLib.Industry
         Guid ID { get;  }
         string Name { get;  } //player defined name. ie "5t 2kn Thruster".
 
-        Dictionary<Guid, int> ResourceCosts { get; }
+        Dictionary<Guid, long> ResourceCosts { get; }
 
-        int IndustryPointCosts { get; }
+        long IndustryPointCosts { get; }
         Guid IndustryTypeID { get; }
         
         void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo);
@@ -137,11 +137,11 @@ namespace Pulsar4X.ECSLib.Industry
         public Guid ItemGuid { get; protected set; }
         public ushort NumberOrdered { get; internal set; }
         public ushort NumberCompleted { get; internal set; }
-        public int ProductionPointsLeft { get; internal set; }
-        public int ProductionPointsCost { get; protected set; }
+        public long ProductionPointsLeft { get; internal set; }
+        public long ProductionPointsCost { get; protected set; }
         public bool Auto { get; internal set; }
 
-        public Dictionary<Guid, int> ResourcesRequired { get; internal set; } = new Dictionary<Guid, int>();
+        public Dictionary<Guid, long> ResourcesRequired { get; internal set; } = new Dictionary<Guid, long>();
         
         
         public JobBase()
@@ -311,16 +311,16 @@ namespace Pulsar4X.ECSLib.Industry
                         //gather availible resorces for this job.
                         //right now we take all the resources we can, for an individual item in the batch. 
                         //even if we're taking more than we can use in this turn, we're using/storing it. 
-                        IDictionary<Guid, int> resourceCosts = batchJob.ResourcesRequired;
+                        IDictionary<Guid, long> resourceCosts = batchJob.ResourcesRequired;
                         //Note: this is editing batchjob.ResourcesRequired variable. 
                         ConsumeResources(stockpile, ref resourceCosts);
                         //we calculate the difference between the design resources and the amount of resources we've squirreled away. 
                     
                         
                         // this is the total of the resources that we don't have access to for this item. 
-                        int unusableResourceSum = resourceCosts.Sum(item => item.Value);
+                        var unusableResourceSum = resourceCosts.Sum(item => item.Value);
                         // this is the total resources that can be used on this item. 
-                        int useableResourcePoints = resourceSum - unusableResourceSum;
+                        var useableResourcePoints = resourceSum - unusableResourceSum;
                         
                         pointsToUse = Math.Min(industryPointsRemaining[designInfo.IndustryTypeID], batchJob.ProductionPointsLeft);
                         pointsToUse = Math.Min(pointsToUse, useableResourcePoints * pointPerResource);
@@ -345,25 +345,25 @@ namespace Pulsar4X.ECSLib.Industry
             }
         }
         
-        internal static void ConsumeResources(VolumeStorageDB fromCargo, ref IDictionary<Guid, int> toUse)
+        internal static void ConsumeResources(VolumeStorageDB fromCargo, ref IDictionary<Guid, long> toUse)
         {   
-            foreach (KeyValuePair<Guid, int> kvp in toUse.ToArray())
+            foreach (KeyValuePair<Guid, long> kvp in toUse.ToArray())
             {             
                 ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);//fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(kvp.Key);
                 
                 Guid cargoTypeID = cargoItem.CargoTypeID;
-                int amountUsedThisTick = 0;
+                long amountUsedThisTick = 0;
                 if (fromCargo.TypeStores.ContainsKey(cargoTypeID))
                 {
                     if (fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
                     {
-                        amountUsedThisTick = Math.Min((int)fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits[cargoItem.ID], kvp.Value);
+                        amountUsedThisTick = Math.Min(fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits[cargoItem.ID], kvp.Value);
                     }
                 }
 
                 if (amountUsedThisTick > 0)
                 {
-                    int used = fromCargo.RemoveCargoByUnit(cargoItem, amountUsedThisTick);
+                    long used = fromCargo.RemoveCargoByUnit(cargoItem, amountUsedThisTick);
                     toUse[kvp.Key] -= used;
                 }
             }         

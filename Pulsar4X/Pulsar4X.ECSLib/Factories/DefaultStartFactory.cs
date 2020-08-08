@@ -156,7 +156,7 @@ namespace Pulsar4X.ECSLib
             StarSystem solSys = starfac.CreateSol(game);
             //sol.ManagerSubpulses.Init(sol);
             Entity solStar = solSys.Entities[0];
-            Entity earth = solSys.Entities[3]; //should be fourth entity created 
+            Entity earth = NameLookup.GetFirstEntityWithName(solSys, "Earth"); //should be fourth entity created 
             //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
@@ -176,7 +176,6 @@ namespace Pulsar4X.ECSLib
             ComponentTemplateSD mineSD = game.StaticData.ComponentTemplates[new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550")];
             ComponentDesigner mineDesigner = new ComponentDesigner(mineSD, factionEntity.GetDataBlob<FactionTechDB>());
             ComponentDesign mineDesign = mineDesigner.CreateDesign(factionEntity);
-
 
             ComponentTemplateSD RefinerySD = game.StaticData.ComponentTemplates[new Guid("90592586-0BD6-4885-8526-7181E08556B5")];
             ComponentDesigner refineryDesigner = new ComponentDesigner(RefinerySD, factionEntity.GetDataBlob<FactionTechDB>());

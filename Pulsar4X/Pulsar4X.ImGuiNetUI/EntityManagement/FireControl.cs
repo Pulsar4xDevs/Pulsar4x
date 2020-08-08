@@ -40,7 +40,7 @@ namespace Pulsar4X.ImGuiNetUI
         private Dictionary<Guid, (float reload, float min, float max)> _reloadState = new Dictionary<Guid, (float reload, float min, float max)>();
         //private WeaponState[] _unAssignedWeapons = new WeaponState[0];
         private OrdnanceDesign[] _allOrdnanceDesigns = new OrdnanceDesign[0];
-        Dictionary<Guid, int> _storedOrdnance = new Dictionary<Guid, int>();
+        Dictionary<Guid, long> _storedOrdnance = new Dictionary<Guid, long>();
         private bool _showOnlyCargoOrdnance = true;
 
 

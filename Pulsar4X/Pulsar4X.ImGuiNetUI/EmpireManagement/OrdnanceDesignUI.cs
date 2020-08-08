@@ -31,7 +31,7 @@ namespace Pulsar4X.SDL2UI
         private int _electronicsSelectedIndex = 0;
         
         private float _fuelKG;
-        private int _thrusterSizeKG;
+        private long _thrusterSizeKG;
         ComponentTemplateSD[] _engineTemplates = new ComponentTemplateSD[0];
         private string[] _engineTypeNames = new string[0];
         private ComponentDesigner _engineDesigner;

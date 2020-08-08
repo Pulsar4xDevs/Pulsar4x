@@ -86,27 +86,27 @@ namespace Pulsar4X.ECSLib
         public string Name { get; internal set; } //player defined name. ie "5t 2kn Thruster".
         
         public Guid CargoTypeID { get; internal set; }
-        public int MassPerUnit { get; internal set; }
+        public long MassPerUnit { get; internal set; }
 
         public double VolumePerUnit { get; internal set; }
 
         public double Density { get; internal set; }
 
-        public int ResearchCostValue;
+        public long ResearchCostValue;
         public Guid TechID;
         public string TypeName; //ie the name in staticData. ie "Newtonion Thruster".
         public string Description;
         //public int Volume_m3 = 1;
         public int HTK;
         public int CrewReq;
-        public int IndustryPointCosts { get; set; }
+        public long IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
 
 
         public int CreditCost;
         
         //public int ResearchCostValue;
-        public Dictionary<Guid, int> ResourceCosts { get; internal set; } = new Dictionary<Guid, int>();
+        public Dictionary<Guid, long> ResourceCosts { get; internal set; } = new Dictionary<Guid, long>();
 
         public ComponentMountType ComponentMountType;
         //public List<ComponentDesignAtbData> ComponentDesignAttributes;
@@ -345,7 +345,7 @@ namespace Pulsar4X.ECSLib
 
         
 
-        public int MassValue
+        public long MassValue
         {
             get { return _design.MassPerUnit; }
         }
@@ -353,7 +353,7 @@ namespace Pulsar4X.ECSLib
         public void SetMass()
         {
             MassFormula.Evaluate();
-            _design.MassPerUnit = MassFormula.IntResult;
+            _design.MassPerUnit = MassFormula.LongResult;
             _design.Density = _design.MassPerUnit / _design.VolumePerUnit;
         }
 
@@ -362,7 +362,7 @@ namespace Pulsar4X.ECSLib
         public void SetVolume()
         {
             VolumeFormula.Evaluate();
-            _design.VolumePerUnit = VolumeFormula.IntResult;
+            _design.VolumePerUnit = VolumeFormula.LongResult;
             _design.Density = _design.MassPerUnit / _design.VolumePerUnit;
         }
 
@@ -383,31 +383,31 @@ namespace Pulsar4X.ECSLib
             _design.CrewReq = CrewFormula.IntResult;
         }
 
-        public int ResearchCostValue { get { return _design.ResearchCostValue; } }
+        public long ResearchCostValue { get { return _design.ResearchCostValue; } }
         internal ChainedExpression ResearchCostFormula { get; set; }
         public void SetResearchCost()
         {
             ResearchCostFormula.Evaluate();
-            _design.ResearchCostValue = ResearchCostFormula.IntResult;
+            _design.ResearchCostValue = ResearchCostFormula.LongResult;
         }
 
-        public int IndustryPointCostsValue { get { return _design.IndustryPointCosts; } }
+        public long IndustryPointCostsValue { get { return _design.IndustryPointCosts; } }
         internal ChainedExpression BuildCostFormula { get; set; }
         public void SetBuildCost()
         {
             BuildCostFormula.Evaluate();
-            _design.IndustryPointCosts = BuildCostFormula.IntResult;
+            _design.IndustryPointCosts = BuildCostFormula.LongResult;
         }
 
-        public Dictionary<Guid, int> ResourceCostValues => _design.ResourceCosts;
+        public Dictionary<Guid, long> ResourceCostValues => _design.ResourceCosts;
         internal Dictionary<Guid, ChainedExpression> ResourceCostFormulas { get; set; }
         public void SetResourceCosts()
         {
-            Dictionary<Guid,int> dict = new Dictionary<Guid, int>();
+            Dictionary<Guid, long> dict = new Dictionary<Guid, long>();
             foreach (var kvp in ResourceCostFormulas)
             {
                 kvp.Value.Evaluate();
-                dict.Add(kvp.Key, kvp.Value.IntResult);  
+                dict.Add(kvp.Key, kvp.Value.LongResult);  
             }
             _design.ResourceCosts = dict;
         }

@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The smallest unit mass. 1 for most minerals etc. 
         /// </summary>
-        int MassPerUnit { get; }
+        long MassPerUnit { get; }
         
         double VolumePerUnit { get; }
     }
