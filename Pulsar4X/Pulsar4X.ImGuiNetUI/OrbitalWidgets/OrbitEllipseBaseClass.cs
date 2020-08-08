@@ -8,15 +8,11 @@ using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
-    interface IOrbitIcon
-    {
-        void UpdateUserSettings();
-    }
 
     /// <summary>
     /// A Collection of Shapes which will make up an icon.
     /// </summary>
-    public abstract class OrbitIconBase : Icon
+    public abstract class OrbitIconBase : Icon, IUpdateUserSettings
     {
         #region Static properties
         protected EntityManager _mgr;

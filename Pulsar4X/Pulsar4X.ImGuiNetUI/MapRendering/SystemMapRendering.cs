@@ -220,9 +220,12 @@ namespace Pulsar4X.SDL2UI
 
         public void UpdateUserOrbitSettings()
         {
-            foreach (OrbitEllipseIcon item in _orbitRings.Values)
+            foreach (var item in _orbitRings.Values)
             {
-                item.UpdateUserSettings();
+                if(item is IUpdateUserSettings foo)
+                {
+                    foo.UpdateUserSettings();
+                }
             }
         }
 

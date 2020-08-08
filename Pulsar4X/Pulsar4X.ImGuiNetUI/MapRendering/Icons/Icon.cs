@@ -14,7 +14,10 @@ namespace Pulsar4X.SDL2UI
         void Draw(IntPtr rendererPtr, Camera camera);
     }
 
-
+    public interface IUpdateUserSettings
+    {
+        void UpdateUserSettings();
+    }
 
     /// <summary>
     /// A Collection of Shapes which will make up an icon. 
