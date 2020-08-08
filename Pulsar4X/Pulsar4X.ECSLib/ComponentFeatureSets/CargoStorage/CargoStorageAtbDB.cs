@@ -184,17 +184,19 @@ namespace Pulsar4X.ECSLib
             double unitsToTryStore = volume / cargoItem.VolumePerUnit;
             double unitsStorable = store.FreeVolume / cargoItem.VolumePerUnit;
 
-            int unitsStoring = (int)Math.Min(unitsToTryStore, unitsStorable);
+            long unitsStoring = (long)Math.Min(unitsToTryStore, unitsStorable);
             double volumeStoring = unitsStoring * cargoItem.VolumePerUnit;
             double massStoring = unitsStoring * cargoItem.MassPerUnit;
 
-            if(!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
+            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
             {
                 store.CurrentStoreInUnits.Add(cargoItem.ID, unitsStoring);
                 store.Cargoables.Add(cargoItem.ID, cargoItem);
             }
             else
+            {
                 store.CurrentStoreInUnits[cargoItem.ID] += unitsStoring;
+            }
             
             store.FreeVolume -= volumeStoring;
             TotalStoredMass += massStoring;
@@ -225,17 +227,19 @@ namespace Pulsar4X.ECSLib
             double unitsToTryStore = cargoItem.MassPerUnit * mass;
             double unitsStorable = store.FreeVolume / cargoItem.VolumePerUnit;
 
-            int unitsStoring = (int)Math.Min(unitsToTryStore, unitsStorable);
+            long unitsStoring = Convert.ToInt64(Math.Min(unitsToTryStore, unitsStorable));
             double volumeStoring = unitsStoring * cargoItem.VolumePerUnit;
             double massStoring = unitsStoring * cargoItem.MassPerUnit;
-            
-            if(!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
+
+            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
             {
                 store.CurrentStoreInUnits.Add(cargoItem.ID, unitsStoring);
                 store.Cargoables.Add(cargoItem.ID, cargoItem);
             }
             else
+            {
                 store.CurrentStoreInUnits[cargoItem.ID] += unitsStoring;
+            }
             
             store.FreeVolume -= volumeStoring;
             TotalStoredMass += massStoring;
@@ -249,7 +253,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="cargoItem"></param>
         /// <param name="count"></param>
         /// <returns>amount succesfully added</returns>
-        internal int AddCargoByUnit(ICargoable cargoItem, int count)
+        internal long AddCargoByUnit(ICargoable cargoItem, long count)
         {
             //check we're actualy capable of 
             
@@ -262,18 +266,28 @@ namespace Pulsar4X.ECSLib
             }
             
             double volumePerUnit = cargoItem.VolumePerUnit;
+            if (volumePerUnit == 0.0)
+            {
+                var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
+                string errString = "Can't add or remove " + cargoItem.Name + " because it does not have a volumetric value.";
+                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(OwningEntity, errString);
+                return 0;
+            }
+
             double totalVolume = volumePerUnit * count;
             TypeStore store = TypeStores[cargoItem.CargoTypeID];
 
-            int amountToAdd = (int)(Math.Min(totalVolume, store.FreeVolume) / cargoItem.VolumePerUnit);
-            
-            if(!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
+            long amountToAdd = (long)(Math.Min(totalVolume, store.FreeVolume) / cargoItem.VolumePerUnit);
+
+            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
             {
                 store.CurrentStoreInUnits.Add(cargoItem.ID, amountToAdd);
                 store.Cargoables.Add(cargoItem.ID, cargoItem);
             }
             else
+            {
                 store.CurrentStoreInUnits[cargoItem.ID] += amountToAdd;
+            }
 
             store.FreeVolume -= amountToAdd * volumePerUnit;
             TotalStoredMass += amountToAdd * cargoItem.MassPerUnit;
@@ -287,7 +301,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="cargoItem"></param>
         /// <param name="count"></param>
         /// <returns>amount successfuly removed</returns>
-        internal int RemoveCargoByUnit(ICargoable cargoItem, int count)
+        internal long RemoveCargoByUnit(ICargoable cargoItem, long count)
         {
             //check we're actualy capable of 
             if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
@@ -302,10 +316,12 @@ namespace Pulsar4X.ECSLib
             double totalVolume = volumePerUnit * count;
             TypeStore store = TypeStores[cargoItem.CargoTypeID];
             if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
+            {
                 return 0;
+            }
             
-            int amountInStore = store.CurrentStoreInUnits[cargoItem.ID];
-            int amountToRemove = Math.Min(count, amountInStore);
+            long amountInStore = store.CurrentStoreInUnits[cargoItem.ID];
+            long amountToRemove = Math.Min(count, amountInStore);
             
             store.CurrentStoreInUnits[cargoItem.ID] -= amountToRemove;
             store.FreeVolume += amountToRemove * volumePerUnit;
@@ -323,30 +339,34 @@ namespace Pulsar4X.ECSLib
         public double GetVolumeStored(ICargoable cargoItem)
         {
             if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
-                return 0;
+                return 0.0;
             if (!TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
-                return 0;
-            return TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID] * cargoItem.VolumePerUnit;
+                return 0.0;
+            long units = Math.Max(0, TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID]);
+
+            return units * cargoItem.VolumePerUnit;
         }
 
         public double GetMassStored(ICargoable cargoItem)
         {
             if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
-                return 0;
+                return 0.0;
             if (!TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
-                return 0;
+                return 0.0;
+            long units = Math.Max(0, TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID]);
 
-            return TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID] * cargoItem.MassPerUnit;
+            return units * cargoItem.MassPerUnit;
         }
 
-        public double GetUnitsStored(ICargoable cargoItem)
+        public long GetUnitsStored(ICargoable cargoItem)
         {
             if (!TypeStores.ContainsKey(cargoItem.CargoTypeID))
                 return 0;
             if (!TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
                 return 0;
+            long units = Math.Max(0, TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID]);
 
-            return TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID];
+            return units;
         }
 
         /// <summary>
@@ -372,7 +392,7 @@ namespace Pulsar4X.ECSLib
                     var cargoID = indexlist[prngIndex];
                     ICargoable cargoItem = StaticRefLib.StaticData.GetICargoable(cargoID);
                     var volPerUnit = cargoItem.VolumePerUnit;
-                    var unitsStored = type.CurrentStoreInUnits[cargoID];
+                    long unitsStored = type.CurrentStoreInUnits[cargoID];
                     var volumeRemoved = AddRemoveCargoByVolume(cargoItem, volumeChange);
                     type.FreeVolume += volumeRemoved;
                     indexlist.Remove(cargoID);
@@ -402,7 +422,7 @@ namespace Pulsar4X.ECSLib
     {
         public double MaxVolume;
         public double FreeVolume;
-        public Dictionary<Guid,int> CurrentStoreInUnits = new Dictionary<Guid, int>();
+        public Dictionary<Guid, long> CurrentStoreInUnits = new Dictionary<Guid, long>();
         public Dictionary<Guid, ICargoable> Cargoables =  new Dictionary<Guid, ICargoable>();
         public TypeStore(double maxVolume)
         {
@@ -431,7 +451,7 @@ namespace Pulsar4X.ECSLib
         {
             TypeStore clone = new TypeStore(MaxVolume);
             clone.FreeVolume = FreeVolume;
-            clone.CurrentStoreInUnits = new Dictionary<Guid, int>(CurrentStoreInUnits);
+            clone.CurrentStoreInUnits = new Dictionary<Guid, long>(CurrentStoreInUnits);
             clone.Cargoables = new Dictionary<Guid, ICargoable>(Cargoables);
             return clone;
         }

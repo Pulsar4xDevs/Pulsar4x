@@ -8,8 +8,8 @@ namespace Pulsar4X.ECSLib
     public class ProcessedMaterialSD : ICargoable, IConstrucableDesign
     {
         public string Name { get; set; }
-        public Dictionary<Guid, int> ResourceCosts { get; } = new Dictionary<Guid, int>();
-        public int IndustryPointCosts { get; set; }
+        public Dictionary<Guid, long> ResourceCosts { get; } = new Dictionary<Guid, long>();
+        public long IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
         
         public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
@@ -33,13 +33,13 @@ namespace Pulsar4X.ECSLib
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.None;
         public Guid ID { get; set; }
 
-        public Dictionary<Guid, int> MineralsRequired;
-        public Dictionary<Guid, int> MaterialsRequired;
+        public Dictionary<Guid, long> MineralsRequired;
+        public Dictionary<Guid, long> MaterialsRequired;
 
         public ushort WealthCost;
         public ushort OutputAmount;
         public Guid CargoTypeID { get; set; }
-        public int MassPerUnit { get; set; }
+        public long MassPerUnit { get; set; }
         public double VolumePerUnit { get; set; }
     }
 }

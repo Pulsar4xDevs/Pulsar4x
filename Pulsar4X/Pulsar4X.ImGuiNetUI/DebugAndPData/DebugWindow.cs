@@ -449,7 +449,7 @@ namespace Pulsar4X.SDL2UI
                                 }
                             }
 
-                            if (SelectedEntity.HasDataBlob< NewtonMoveDB>())
+                            if (SelectedEntity.HasDataBlob<NewtonMoveDB>())
                             {
                                 if (ImGui.Checkbox("Draw Parent SOI", ref _drawParentSOI))
                                 {

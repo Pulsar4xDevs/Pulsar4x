@@ -8,9 +8,9 @@ namespace Pulsar4X.ECSLib
     {
          
         
-        public List<(Guid ID, int amount)> ItemsGuidsToTransfer;
+        public List<(Guid ID, long amount)> ItemsGuidsToTransfer;
         [JsonIgnore]
-        public List<(ICargoable item, int amount)> ItemICargoablesToTransfer = new List<(ICargoable item, int amount)>();
+        public List<(ICargoable item, long amount)> ItemICargoablesToTransfer = new List<(ICargoable item, long amount)>();
         public Guid SendCargoToEntityGuid { get; set; }
 
         public override int ActionLanes => 1;
@@ -38,9 +38,9 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         Entity sendToEntity;
         
-        public static void CreateCommand(Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, int amount)> itemsToMove )
+        public static void CreateCommand(Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
         {
-            List<(Guid item,int amount)> itemGuidAmounts = new List<(Guid, int)>();
+            List<(Guid item, long amount)> itemGuidAmounts = new List<(Guid, long)>();
             foreach (var tup in itemsToMove)
             {
                 itemGuidAmounts.Add((tup.item.ID, tup.amount));
@@ -135,9 +135,9 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
 
-        public static void CreateCommand(Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, int amount)> itemsToMove )
+        public static void CreateCommand(Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
         {
-            List<(Guid item,int amount)> itemGuidAmounts = new List<(Guid, int)>();
+            List<(Guid item, long amount)> itemGuidAmounts = new List<(Guid, long)>();
             foreach (var tup in itemsToMove)
             {
                 itemGuidAmounts.Add((tup.item.ID, tup.amount));

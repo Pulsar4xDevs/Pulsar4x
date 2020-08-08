@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
         }
 
         [JsonIgnore]
-        public int MassPerUnit => (int)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().MassDry); //TODO: could a storable item ever be too large for an int? this assumes that won't happen.
+        public long MassPerUnit => (long)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().MassDry); 
 
         public double VolumePerUnit => OwningEntity.GetDataBlob<MassVolumeDB>().Volume_m3;
 

@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             //MissileLauncherAtb launcherAtb;
             VolumeStorageDB cargo = launchingEntity.GetDataBlob<VolumeStorageDB>();
             
-            int numMis = cargo.TypeStores[missileDesign.CargoTypeID].CurrentStoreInUnits[missileDesign.ID];
+            long numMis = cargo.TypeStores[missileDesign.CargoTypeID].CurrentStoreInUnits[missileDesign.ID];
             if (numMis < 1)
                 return;
             

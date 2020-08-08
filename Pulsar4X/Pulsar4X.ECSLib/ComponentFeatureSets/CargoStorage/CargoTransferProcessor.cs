@@ -51,14 +51,14 @@ namespace Pulsar4X.ECSLib
 
                 //TODO: this wont handle objects that have a larger unit mass than the availible transferRate,
                 //but maybe that makes for a game mechanic
-                int countToTransferThisTick = (int)(massToTransferThisTick / itemMassPerUnit);
+                long countToTransferThisTick = (long)(massToTransferThisTick / itemMassPerUnit);
                 
-                var amountFrom = transferDB.CargoFromDB.RemoveCargoByUnit(cargoItem, countToTransferThisTick);
-                var amountTo = transferDB.CargoToDB.AddCargoByUnit(cargoItem, countToTransferThisTick);
+                long amountFrom = transferDB.CargoFromDB.RemoveCargoByUnit(cargoItem, countToTransferThisTick);
+                long amountTo = transferDB.CargoToDB.AddCargoByUnit(cargoItem, countToTransferThisTick);
                 
                 if(amountTo != amountFrom)
                     throw new Exception("something went wrong here");
-                var newAmount = transferDB.ItemsLeftToTransfer[i].amount - amountTo;
+                long newAmount = transferDB.ItemsLeftToTransfer[i].amount - amountTo;
                 transferDB.ItemsLeftToTransfer[i] = (cargoItem, newAmount);
             }
             

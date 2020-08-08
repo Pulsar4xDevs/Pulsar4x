@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib
     
         private void MineResources(Entity colonyEntity)
         {
-            Dictionary<Guid, int> mineRates = colonyEntity.GetDataBlob<MiningDB>().MineingRate;
+            Dictionary<Guid, long> mineRates = colonyEntity.GetDataBlob<MiningDB>().MineingRate;
             Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().Minerals;
             
             VolumeStorageDB stockpile = colonyEntity.GetDataBlob<VolumeStorageDB>();
@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
 
                 double accessability = planetMinerals[kvp.Key].Accessibility;
                 double actualRate = kvp.Value * mineBonuses * accessability;
-                int unitsMinableThisTick = (int)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
+                var unitsMinableThisTick = (long)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
 
                 if(!stockpile.TypeStores.ContainsKey(mineral.CargoTypeID))
                 {
@@ -63,14 +63,14 @@ namespace Pulsar4X.ECSLib
 
                 if (unitsMinableThisTick > unitsMinedThisTick)
                 {
-                    var dif = unitsMinableThisTick - unitsMinedThisTick;
+                    long dif = unitsMinableThisTick - unitsMinedThisTick;
                     var type = StaticRefLib.StaticData.CargoTypes[mineral.CargoTypeID];
                     string erstr = "We didn't mine a potential " + dif + " of " + mineral.Name + " because we don't have enough space to store it.";
                     StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity, erstr);
                 }
 
                 MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];
-                int newAmount = mineralDeposit.Amount -= unitsMinedThisTick;
+                long newAmount = mineralDeposit.Amount -= unitsMinedThisTick;
 
                 accessability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
                 double newAccess = GeneralMath.Clamp(accessability, 0.1, mineralDeposit.Accessibility);
@@ -87,7 +87,7 @@ namespace Pulsar4X.ECSLib
         internal static void CalcMaxRate(Entity colonyEntity)
         {
 
-            Dictionary<Guid,int> rates = new Dictionary<Guid, int>();
+            Dictionary<Guid, long> rates = new Dictionary<Guid, long>();
             var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
 
             if (instancesDB.TryGetComponentsByAttribute<MineResourcesAtbDB>(out var instances))
@@ -99,7 +99,7 @@ namespace Pulsar4X.ECSLib
      
                     foreach (var item in designInfo.ResourcesPerEconTick)
                     {
-                        rates.SafeValueAdd(item.Key, (int)(item.Value * healthPercent)); 
+                        rates.SafeValueAdd(item.Key, Convert.ToInt64(item.Value * healthPercent)); 
                     }
                 }
             }

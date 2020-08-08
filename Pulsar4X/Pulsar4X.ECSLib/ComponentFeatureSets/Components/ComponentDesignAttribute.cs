@@ -252,6 +252,8 @@ namespace Pulsar4X.ECSLib
                         return (int)val; 
                     case float val:
                         return (int)val;
+                    case long val:
+                        return Convert.ToInt32(val);
                     case int val:
                         return val;
                     default:
@@ -260,6 +262,38 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
+
+        /// <summary>
+        /// Returns Result as a Long. note that if the result was a double you will loose the fraction (ie 1.8 will be 1)
+        /// Getting this will fire the Evaluate if Result is null (but won't know if it's old)
+        /// </summary>
+        internal long LongResult
+        {
+            get
+            {
+                switch (Result)
+                {
+                    case null:
+                        Evaluate();
+                        if (Result is null)
+                            throw new Exception("Result type is unexpectedly null");
+                        else
+                            return LongResult;
+                    case double val:
+                        return (long)val;
+                    case float val:
+                        return (long)val;
+                    case int val:
+                        return Convert.ToInt64(val);
+                    case long val:
+                        return val;
+                    default:
+                        throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not double or long");
+
+                }
+            }
+        }
+
         /// <summary>
         /// Returns Result as a double
         /// Getting this will fire the Evaluate if Result is null (but won't know if its old)

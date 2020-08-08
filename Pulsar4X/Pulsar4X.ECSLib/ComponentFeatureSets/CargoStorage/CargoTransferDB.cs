@@ -19,8 +19,8 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         internal VolumeStorageDB CargoToDB { get; set; }
 
-        internal List<(ICargoable item, int amount)> OrderedToTransfer { get; set; }
-        internal List<(ICargoable item, int amount)> ItemsLeftToTransfer;
+        internal List<(ICargoable item, long amount)> OrderedToTransfer { get; set; }
+        internal List<(ICargoable item, long amount)> ItemsLeftToTransfer;
 
         internal double DistanceBetweenEntitys { get; set; }
         internal int TransferRateInKG { get; set; } = 1000;
@@ -30,12 +30,12 @@ namespace Pulsar4X.ECSLib
         /// (or you could cause deadlock slowdowns with the processing)
         /// </summary>
         /// <returns></returns>
-        public List<(ICargoable item, int unitCount)> GetItemsToTransfer()
+        public List<(ICargoable item, long unitCount)> GetItemsToTransfer()
         {
             ICollection ic = ItemsLeftToTransfer;
             lock (ic.SyncRoot) 
             {
-                return new List<(ICargoable item, int unitCount)>(ItemsLeftToTransfer);
+                return new List<(ICargoable item, long unitCount)>(ItemsLeftToTransfer);
             }
         }
 

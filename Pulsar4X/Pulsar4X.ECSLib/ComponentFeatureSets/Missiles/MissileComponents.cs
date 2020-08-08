@@ -107,7 +107,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public Guid CargoTypeID { get; }
         public int DesignVersion = 0;
         public bool IsObsolete = false;
-        public int MassPerUnit { get; set; }
+        public long MassPerUnit { get; set; }
         public double VolumePerUnit { get; set; }
 
         /// <summary>
@@ -122,13 +122,13 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public double Volume;
         public List<(ComponentDesign design, int count)> Components;
         public (ArmorSD type, float thickness) Armor;
-        public Dictionary<Guid, int> ResourceCosts { get; internal set; } = new Dictionary<Guid, int>();
-        public Dictionary<Guid, int> MineralCosts = new Dictionary<Guid, int>();
-        public Dictionary<Guid, int> MaterialCosts = new Dictionary<Guid, int>();
-        public Dictionary<Guid, int> ComponentCosts = new Dictionary<Guid, int>();
-        public Dictionary<Guid, int> ShipInstanceCost = new Dictionary<Guid, int>();
+        public Dictionary<Guid, long> ResourceCosts { get; internal set; } = new Dictionary<Guid, long>();
+        public Dictionary<Guid, long> MineralCosts = new Dictionary<Guid, long>();
+        public Dictionary<Guid, long> MaterialCosts = new Dictionary<Guid, long>();
+        public Dictionary<Guid, long> ComponentCosts = new Dictionary<Guid, long>();
+        public Dictionary<Guid, long> ShipInstanceCost = new Dictionary<Guid, long>();
         public int CrewReq;
-        public int IndustryPointCosts { get; }
+        public long IndustryPointCosts { get; }
         
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ordinance Construction"

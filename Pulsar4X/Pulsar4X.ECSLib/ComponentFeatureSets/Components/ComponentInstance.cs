@@ -207,7 +207,7 @@ namespace Pulsar4X.ECSLib
         public Guid ID { get; }
         public string Name { get; }
         public Guid CargoTypeID { get; }
-        public int MassPerUnit
+        public long MassPerUnit
         {
             get { return Design.MassPerUnit; }
         }
