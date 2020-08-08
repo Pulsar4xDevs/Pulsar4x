@@ -157,22 +157,15 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-
+            //resize for zoom
+            //translate to position
             var foo = camera.ViewCoordinate_m(WorldPosition_m);
-            var vsp = new PointD
-            {
-                X = foo.x,
-                Y = foo.y
-            };
-
-
-            int index = _index;
+            var trns = Matrix.IDTranslate(foo.x, foo.y);
+            //var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
+            var mtrx = matrix * trns;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
-
-            //first index in the drawPoints is the position of the body
-            var translated = matrix.TransformD(_bodyrelativePos.X, _bodyrelativePos.Y);
-            _drawPoints[0] = new SDL.SDL_Point() { x = (int)(vsp.X + translated.X), y = (int)(vsp.Y + translated.Y) };
-            
+            int index = _index;      
+            _drawPoints[0] = mtrx.Transform(_bodyrelativePos.X, _bodyrelativePos.Y);
             for (int i = 1; i < _numberOfDrawSegments; i++)
             {
                 if (index < _numberOfArcSegments - 1)
@@ -180,13 +173,7 @@ namespace Pulsar4X.SDL2UI
                     index++;
                 else
                     index = 0;
-
-                translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
-
-                int x = (int)(vsp.X + translated.X);
-                int y = (int)(vsp.Y + translated.Y);
-
-                _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
+                _drawPoints[i] = mtrx.Transform(_points[index].X, _points[index].Y);
             }
         }
 
