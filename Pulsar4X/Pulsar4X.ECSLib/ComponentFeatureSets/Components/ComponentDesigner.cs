@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.Industry;
 
@@ -110,6 +111,8 @@ namespace Pulsar4X.ECSLib
 
         public ComponentMountType ComponentMountType;
         //public List<ComponentDesignAtbData> ComponentDesignAttributes;
+
+        [JsonIgnore]
         public Dictionary<Type, IComponentDesignAttribute> AttributesByType = new Dictionary<Type, IComponentDesignAttribute>();
 
         public Connections Connections = 0;

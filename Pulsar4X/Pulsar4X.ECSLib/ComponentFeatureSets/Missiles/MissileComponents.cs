@@ -205,7 +205,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            throw new NotImplementedException();
+            info.AddValue(nameof(WetMass), WetMass);
+            info.AddValue(nameof(DryMass), DryMass);
+            info.AddValue(nameof(Density), Density);
         }
     }
     public class ElectronicsSuite : IComponentDesignAttribute

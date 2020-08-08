@@ -22,7 +22,6 @@ namespace Pulsar4X.SDL2UI
             //_flags = ImGuiWindowFlags.NoCollapse;
         }
 
-
         internal static ComponentDesignUI GetInstance()
         {
             ComponentDesignUI thisitem;
@@ -43,23 +42,16 @@ namespace Pulsar4X.SDL2UI
             return thisitem;
         }
 
-
-
         internal override void Display()
         {
             if (IsActive && ImGui.Begin("Component Design", ref IsActive, _flags))
             {
                 if (ImGui.Button("Design Missile"))
                     OrdinanceDesignUI.GetInstance().ToggleActive();
-                int numelements = Convert.ToInt32((ImGui.GetContentRegionAvail().Y - 20) / 17);  
-                if (numelements < 4) {
-                    numelements = 4;
-                }
-                else if (numelements > _designTypes.Length) {
-                    numelements = _designTypes.Length;
-                }
+                int numelements = Math.Min(Math.Max(4, Convert.ToInt32((ImGui.GetContentRegionAvail().Y - 20) / 17)), _designTypes.Length);
+                
                 ImGui.PushItemWidth(-1);
-                if (ImGui.ListBox("", ref _designType, _designTypes, _designTypes.Length, numelements))//Lists the possible comp types
+                if (ImGui.ListBox("", ref _designType, _designTypes, _designTypes.Length, numelements))     //Lists the possible comp types
                 {
                     _openwindows.Add(new PartDesignUI(_designType, _uiState));
                 }

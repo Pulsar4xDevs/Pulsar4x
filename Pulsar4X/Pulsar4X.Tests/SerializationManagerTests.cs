@@ -93,7 +93,6 @@ namespace Pulsar4X.Tests
 
         void ComparitiveTests(Game original, Game loadedGame)
         {
-            
             StarSystem firstOriginal = original.Systems.First().Value;
             StarSystem firstLoaded = loadedGame.Systems.First().Value;
 
@@ -104,6 +103,14 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(firstOriginal.ManagerSubpulses.GetTotalNumberOfProceses(), firstLoaded.ManagerSubpulses.GetTotalNumberOfProceses());
             Assert.AreEqual(firstOriginal.ManagerSubpulses.GetInteruptDateTimes(), firstLoaded.ManagerSubpulses.GetInteruptDateTimes());
+
+            Assert.AreEqual(original.GlobalManager.NumberOfGlobalEntites, loadedGame.GlobalManager.NumberOfGlobalEntites);
+
+            var originalEntitiesList = original.GlobalManager.Entities.Where(x => x != null).ToList();
+            var loadedEntitiesList = loadedGame.GlobalManager.Entities.Where(x => x != null).ToList();
+
+            Assert.AreEqual(originalEntitiesList.Count, loadedEntitiesList.Count);
+            Assert.AreEqual(originalEntitiesList.Select(x => x.Guid).OrderBy(x => x).ToList(), loadedEntitiesList.Select(x => x.Guid).OrderBy(x => x).ToList());
         }
 
 

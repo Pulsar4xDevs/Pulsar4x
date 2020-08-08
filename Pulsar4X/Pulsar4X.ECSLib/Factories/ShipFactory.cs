@@ -12,17 +12,17 @@ namespace Pulsar4X.ECSLib
     [JsonObject]
     public class ShipDesign : ICargoable, IConstrucableDesign, ISerializable
     {
-
-
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;
-        public Guid ID { get; } = Guid.NewGuid();
+        public Guid ID { get; private set; } = Guid.NewGuid();
         public string Name { get; set; }
         public Guid CargoTypeID { get; }
         public int DesignVersion = 0;
         public bool IsObsolete = false;
-        public long MassPerUnit { get; }
-        public double VolumePerUnit { get; }
+        public long MassPerUnit { get; private set; }
+        public double VolumePerUnit { get; private set; }
         public double Density { get; }
+
+        private Guid _factionGuid;
 
         /// <summary>
         /// m^3
@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, long> ComponentCosts = new Dictionary<Guid, long>();
         public Dictionary<Guid, long> ShipInstanceCost = new Dictionary<Guid, long>();
         public int CrewReq;
-        public long IndustryPointCosts { get; }
+        public long IndustryPointCosts { get; private set; }
         
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ship Assembly"
@@ -57,12 +57,31 @@ namespace Pulsar4X.ECSLib
 
         public ShipDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (ArmorSD armorType, float thickness) armor)
         {
+            _factionGuid = faction.OwningEntity.Guid;
             faction.ShipDesigns.Add(ID, this);
             faction.IndustryDesigns[ID] = this;
+            Initialise(name, components, armor);
+        }
+
+        public ShipDesign(SerializationInfo info, StreamingContext context)
+        {
+            if (info == null) 
+                throw new ArgumentNullException("info");
+
+            ID = (Guid)info.GetValue(nameof(ID), typeof(Guid));
+            _factionGuid = (Guid)info.GetValue(nameof(_factionGuid), typeof(Guid));
+            var name = (string)info.GetValue(nameof(Name), typeof(string));
+            var components = (List<(ComponentDesign design, int count)>)info.GetValue(nameof(Components), typeof(List<(ComponentDesign design, int count)>));
+            var armor = ((ArmorSD armorType, float thickness))info.GetValue(nameof(Armor), typeof((ArmorSD armorType, float thickness)));
+
+            Initialise(name, components, armor);
+        }
+
+        public void Initialise(string name, List<(ComponentDesign design, int count)> components, (ArmorSD armorType, float thickness) armor)
+        {
             Name = name;
             Components = components;
             Armor = armor;
-
             
             foreach (var component in components)
             {
@@ -90,9 +109,14 @@ namespace Pulsar4X.ECSLib
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            throw new NotImplementedException();
+            info.AddValue(nameof(ID), ID);
+            info.AddValue(nameof(Name), Name);
+            info.AddValue(nameof(_factionGuid), _factionGuid);
+            info.AddValue(nameof(Armor), Armor);
+            info.AddValue(nameof(Components), Components);
         }
     }
+
     public static class ShipFactory
     {
         
