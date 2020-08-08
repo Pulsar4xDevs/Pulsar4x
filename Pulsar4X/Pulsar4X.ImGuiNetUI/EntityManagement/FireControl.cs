@@ -413,7 +413,7 @@ namespace Pulsar4X.ImGuiNetUI
 
                     lock (shipOrdnances.SyncRoot)
                     {
-                        foreach (KeyValuePair<Guid, int> ordType in shipOrdnances)
+                        foreach (KeyValuePair<Guid, long> ordType in shipOrdnances)
                             _storedOrdnance[ordType.Key] = ordType.Value;
                     }
                 }
