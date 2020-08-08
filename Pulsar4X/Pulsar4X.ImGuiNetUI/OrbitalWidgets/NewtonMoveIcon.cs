@@ -13,7 +13,7 @@ namespace Pulsar4X.SDL2UI
     ///  fixed number of points and maximum inscribed area"
     /// by L.R. Smith
     /// </summary>
-    public class NewtonMoveIcon : Icon
+    public class NewtonMoveIcon : Icon, IUpdateUserSettings
     {
         protected EntityManager _mgr;
         NewtonMoveDB _newtonMoveDB;
@@ -209,7 +209,7 @@ namespace Pulsar4X.SDL2UI
             double linierEccentricity = _ke.Eccentricity * a;
             double _lop = _ke.AoP + _ke.LoAN;            
             
-            double dTheta = 2 * Math.PI / (_numberOfPoints - 1);
+            double dTheta = _userSettings.EllipseSweepRadians / (_numberOfPoints - 1);
             
             double ct = Math.Cos(_lop);
             double st = Math.Sin(_lop);
