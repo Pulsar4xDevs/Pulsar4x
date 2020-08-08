@@ -19,8 +19,8 @@ namespace Pulsar4X.Tests
         {
             var startDate = new DateTime(2050, 1, 1);
             _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
-            _game.Settings.EnableMultiThreading = false;
-            _game.Settings.EnforceSingleThread = true;
+            _game.Settings.EnableMultiThreading = true;
+            _game.Settings.EnforceSingleThread = false;
 
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
 
@@ -89,7 +89,13 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(1800, earthColony.OwningEntity.GetDataBlob<MiningDB>().MineingRate.Sum(x => x.Value));
 
             _game.GamePulse.Ticklength = TimeSpan.FromHours(24);
+            var targetDate = _game.GamePulse.GameGlobalDateTime.AddHours(24);
             _game.GamePulse.TimeStep();     // Jump forward 1 day
+
+            while (_game.GamePulse.GameGlobalDateTime < targetDate)
+            {
+                // wait timeStep to finish
+            }
 
             bodies = _game.GetSystems(_smAuthToken).First().GetAllDataBlobsOfType<SystemBodyInfoDB>();
             earth = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Earth"));

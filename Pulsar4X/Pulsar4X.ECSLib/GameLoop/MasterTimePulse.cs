@@ -43,10 +43,10 @@ namespace Pulsar4X.ECSLib
             _timer.Interval = _tickInterval.TotalMilliseconds * _timeMultiplier;
         } }
 
-
         public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(3600);
 
         private bool _isProcessing = false;
+
         private bool _isOvertime = false;
         private object _lockObj = new object();
         private Game _game;
@@ -67,8 +67,10 @@ namespace Pulsar4X.ECSLib
 
             GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
         }
+
         [JsonProperty]
         private DateTime _gameGlobalDateTime;
+
         public DateTime GameGlobalDateTime
         {
             get { return _gameGlobalDateTime; }
@@ -93,7 +95,6 @@ namespace Pulsar4X.ECSLib
         /// <param name="game"></param>
         internal MasterTimePulse(Game game)
         {
-            
             _game = game;
             _timer.Interval = _tickInterval.TotalMilliseconds;
             _timer.Enabled = false;
@@ -124,13 +125,14 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public void TimeStep()
         {
-            
-            //DoProcessing(GameGlobalDateTime + Ticklength);
-            
+            if (_isProcessing) 
+                return;
+
             Task tsk = Task.Run(() => DoProcessing(GameGlobalDateTime + Ticklength));
+
             if (_game.Settings.EnforceSingleThread)
                 tsk.Wait();
-            //tsk.Start();
+
             _timer.Stop();
         }
 
@@ -139,11 +141,14 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public void TimeStep(DateTime toDate)
         {
-            //DoProcessing(toDate);
+            if (_isProcessing) 
+                return;
+
             Task tsk = Task.Run(() => DoProcessing(toDate));
+
             if (_game.Settings.EnforceSingleThread)
                 tsk.Wait();
-            //tsk.Start();
+
             _timer.Stop();
         }
 
@@ -213,17 +218,23 @@ namespace Pulsar4X.ECSLib
                 _subpulseStopwatch.Start();
                 DateTime nextInterupt = ProcessNextInterupt(targetDateTime);
                 //do system processors
-              
-                if (_game.Settings.EnableMultiThreading == true) //threaded
+
+                if (_game.Settings.EnableMultiThreading == true)
+                { 
+                    //multi-threaded
                     Parallel.ForEach<StarSystem>(_game.Systems.Values, starSys => starSys.ManagerSubpulses.ProcessSystem(nextInterupt));
-                //The above 'blocks' till all the tasks are done.
-                else //non threaded
+
+                    //The above 'blocks' till all the tasks are done.
+                }
+                else
                 {
+                    // single-threaded
                     foreach (StarSystem starSys in _game.Systems.Values)
                     {
                         starSys.ManagerSubpulses.ProcessSystem(nextInterupt);
                     }
                 }
+
                 LastSubtickTime = _subpulseStopwatch.Elapsed;
                 GameGlobalDateTime = nextInterupt; //set the GlobalDateTime this will invoke the datechange event.
                 _subpulseStopwatch.Reset();
