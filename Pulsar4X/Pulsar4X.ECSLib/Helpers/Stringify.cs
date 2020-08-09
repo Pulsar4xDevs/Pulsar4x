@@ -217,7 +217,22 @@ namespace Pulsar4X.ECSLib
         {
             string stringVolume = "0 m^3";
 
-            if (volume_m > 1.0e9)
+            if (volume_m > 1.0e18)
+            {
+                volume_m = volume_m * 1.0e-18;
+                stringVolume = volume_m.ToString(format) + " Em^3";
+            }
+            else if (volume_m > 1.0e15)
+            {
+                volume_m = volume_m * 1.0e-15;
+                stringVolume = volume_m.ToString(format) + " Pm^3";
+            }
+            else if(volume_m > 1.0e12)
+            {
+                volume_m = volume_m * 1.0e-12;
+                stringVolume = volume_m.ToString(format) + " Tm^3";
+            } 
+            else if (volume_m > 1.0e9)
             {
                 volume_m = volume_m * 1.0e-9;
                 stringVolume = volume_m.ToString(format) + " Gm^3";
@@ -232,8 +247,9 @@ namespace Pulsar4X.ECSLib
                 volume_m = volume_m * 1.0e-3;
                 stringVolume = volume_m.ToString(format) + " Km^3";
             }
-
-            else { stringVolume = volume_m.ToString(format) + " m^3";  }
+            else { 
+                stringVolume = volume_m.ToString(format) + " m^3";  
+            }
 
             return stringVolume;
         }

@@ -36,24 +36,20 @@ namespace Pulsar4X.ECSLib
     
         private void MineResources(Entity colonyEntity)
         {
-            Dictionary<Guid, long> mineRates = colonyEntity.GetDataBlob<MiningDB>().MineingRate;
+            Dictionary<Guid, long> actualMiningRates = MiningHelper.CalculateActualMiningRates(colonyEntity);
             Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().Minerals;
-            
             VolumeStorageDB stockpile = colonyEntity.GetDataBlob<VolumeStorageDB>();
-            float mineBonuses = 1;//colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine);
-            foreach (var kvp in mineRates)
+
+            foreach (var kvp in actualMiningRates)
             {
                 ICargoable mineral = _minerals[kvp.Key];
                 Guid cargoTypeID = mineral.CargoTypeID;
-                double itemMassPerUnit = mineral.MassPerUnit;
 
-                double accessability = planetMinerals[kvp.Key].Accessibility;
-                double actualRate = kvp.Value * mineBonuses * accessability;
-                var unitsMinableThisTick = (long)Math.Min(actualRate, planetMinerals[kvp.Key].Amount);
+                var unitsMinableThisTick = (long)Math.Min(actualMiningRates[kvp.Key], planetMinerals[kvp.Key].Amount);
 
-                if(!stockpile.TypeStores.ContainsKey(mineral.CargoTypeID))
+                if(!stockpile.TypeStores.ContainsKey(cargoTypeID))
                 {
-                    var type = StaticRefLib.StaticData.CargoTypes[mineral.CargoTypeID];
+                    var type = StaticRefLib.StaticData.CargoTypes[cargoTypeID];
                     string erstr = "We didn't mine a potential " + unitsMinableThisTick + " of " + mineral.Name + " because we have no way to store " + type.Name + " cargo.";
                        StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity, erstr);
                        continue; //can't store this mineral
@@ -64,7 +60,7 @@ namespace Pulsar4X.ECSLib
                 if (unitsMinableThisTick > unitsMinedThisTick)
                 {
                     long dif = unitsMinableThisTick - unitsMinedThisTick;
-                    var type = StaticRefLib.StaticData.CargoTypes[mineral.CargoTypeID];
+                    var type = StaticRefLib.StaticData.CargoTypes[cargoTypeID];
                     string erstr = "We didn't mine a potential " + dif + " of " + mineral.Name + " because we don't have enough space to store it.";
                     StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity, erstr);
                 }
@@ -72,7 +68,7 @@ namespace Pulsar4X.ECSLib
                 MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];
                 long newAmount = mineralDeposit.Amount -= unitsMinedThisTick;
 
-                accessability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
+                var accessability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
                 double newAccess = GeneralMath.Clamp(accessability, 0.1, mineralDeposit.Accessibility);
 
                 mineralDeposit.Amount = newAmount;
@@ -86,7 +82,6 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         internal static void CalcMaxRate(Entity colonyEntity)
         {
-
             Dictionary<Guid, long> rates = new Dictionary<Guid, long>();
             var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
 

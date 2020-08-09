@@ -38,7 +38,11 @@ namespace Pulsar4X.SDL2UI
             {
                 headerLine += GetByAlignmentAndMaxLength(headings[i].Key, maxLengthOfDataByColumn[i], headings[i].Value);
             }
-            ImGui.Text(headerLine);
+
+            if (headerLine.Replace(" ", "") != "")
+            {
+                ImGui.Text(headerLine);
+            }
 
             foreach (var row in data)
             {

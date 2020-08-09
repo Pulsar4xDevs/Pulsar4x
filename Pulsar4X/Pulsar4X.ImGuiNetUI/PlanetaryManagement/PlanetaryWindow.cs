@@ -126,34 +126,63 @@ namespace Pulsar4X.SDL2UI
 
         private void RenderGeneralInfo()
         {
+            var headerRow = new List<KeyValuePair<string, TextAlign>>
+            {
+                new KeyValuePair<string, TextAlign>("", TextAlign.Left),
+                new KeyValuePair<string, TextAlign>("", TextAlign.Right)
+            };
+
+            List<string[]> rowData = new List<string[]>();
+
             if (_lookedAtEntity.Entity.HasDataBlob<MassVolumeDB>())
             {
                 var tempMassVolume = _lookedAtEntity.Entity.GetDataBlob<MassVolumeDB>();
-                ImGui.Text("Radius: " + Stringify.Distance(tempMassVolume.RadiusInM));
-                ImGui.Text("Mass: " + tempMassVolume.MassDry.ToString() + " kg");
-                ImGui.Text("Volume: " + tempMassVolume.Volume_m3.ToString() + " m^3");
-                ImGui.Text("Density: " + tempMassVolume.Density_gcm + " kg/m^3");
+                rowData.Add(new string[] { "Radius", Stringify.Distance(tempMassVolume.RadiusInM) });
+                rowData.Add(new string[] { "Mass", tempMassVolume.MassDry.ToString() + " kg" });
+                rowData.Add(new string[] { "Volume", Stringify.Volume(tempMassVolume.Volume_m3) });
+                rowData.Add(new string[] { "Density", tempMassVolume.Density_gcm.ToString("##0.000") + " kg/m^3" });
             }
 
             if (_lookedAtEntity.Entity.HasDataBlob<ColonyInfoDB>())
             {
-                ImGui.Text("---");
+                rowData.Add(new string[] { "-----", "" });
+                rowData.Add(new string[] { "Populations", "" });
                 ColonyInfoDB tempColonyInfo = _lookedAtEntity.Entity.GetDataBlob<ColonyInfoDB>();
-                ImGui.Text("Populations: ");
                 foreach (var popPerSpecies in tempColonyInfo.Population)
                 {
-                    ImGui.Text("  " + Stringify.Quantity(popPerSpecies.Value, "0.0##" ,true) + " of species: ");
-                    ImGui.SameLine();
-                    if (popPerSpecies.Key.HasDataBlob<NameDB>())
-                    {
-                        ImGui.Text(popPerSpecies.Key.GetDataBlob<NameDB>().DefaultName);
-                    }
-                    else
-                    {
-                        ImGui.Text("unknown.");
-                    }
+                    rowData.Add(new string[] {" " + popPerSpecies.Key.GetDefaultName(), Stringify.Quantity(popPerSpecies.Value, "0.0##", true) });
                 }
             }
+
+            if (_lookedAtEntity.Entity.HasDataBlob<AtmosphereDB>())
+            {
+                AtmosphereDB atmosInfo = _lookedAtEntity.Entity.GetDataBlob<AtmosphereDB>();
+                rowData.Add(new string[] { "-----", "" });
+                rowData.Add(new string[] { "Hydroshpere", atmosInfo.Hydrosphere ? "YES" : "NO" });
+                if (atmosInfo.Hydrosphere)
+                {
+                    rowData.Add(new string[] { "  Extent", atmosInfo.HydrosphereExtent.ToString() + " percent" });
+                }
+
+                if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>())
+                {
+                    SystemBodyInfoDB sysBodyInfo = _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>();
+                    rowData.Add(new string[] { "Base Temp", sysBodyInfo.BaseTemperature.ToString("###,##0.00") + "°C" });
+                }
+                rowData.Add(new string[] { "Surface Temp", atmosInfo.SurfaceTemperature.ToString("###,##0.00") + "°C" });
+
+                rowData.Add(new string[] { "-----", "" });
+                rowData.Add(new string[] { "Atmosphere", "" });
+                rowData.Add(new string[] { "Pressure", atmosInfo.Pressure + " atm" });
+
+                rowData.Add(new string[] { "Composition", "" });
+                foreach (var atmosGas in atmosInfo.Composition)
+                {
+                    rowData.Add(new string[] { "  " + atmosGas.Key.Name, Stringify.Quantity(atmosGas.Value, "0.0##") + " atm" });
+                }
+            }
+
+            Helpers.RenderImgUITextTable(headerRow.ToArray(), rowData);
         }
 
         private void RenderInstallations()
@@ -166,36 +195,65 @@ namespace Pulsar4X.SDL2UI
 
         private void RenderMineralDeposits()
         {
-            var headerRow = new KeyValuePair<string, TextAlign>[3];
-            headerRow[0] = new KeyValuePair<string, TextAlign>("Mineral", TextAlign.Left);
-            headerRow[1] = new KeyValuePair<string, TextAlign>("Available", TextAlign.Center);
-            headerRow[2] = new KeyValuePair<string, TextAlign>("Accessibility", TextAlign.Right);
+            var headerRow = new List<KeyValuePair<string, TextAlign>>
+            {
+                new KeyValuePair<string, TextAlign>("Mineral", TextAlign.Left),
+                new KeyValuePair<string, TextAlign>("Available", TextAlign.Center),
+                new KeyValuePair<string, TextAlign>("Accessibility", TextAlign.Right)
+            };
 
             if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>())
             {
+                Dictionary<Guid, long> mineRates = new Dictionary<Guid, long>();
+
                 SystemBodyInfoDB systemBodyInfo = _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>();
+                if (systemBodyInfo.Colonies.Any())
+                {
+                    // if colonies exists then
+                    headerRow.Add(new KeyValuePair<string, TextAlign>("Mining Rate", TextAlign.Right));
+                    foreach (Entity colonyEntity in systemBodyInfo.Colonies)
+                    {
+                        var colonyRates = MiningHelper.CalculateActualMiningRates(colonyEntity);
+                        foreach (var rate in colonyRates)
+                        {
+                            if (!mineRates.ContainsKey(rate.Key))
+                            {
+                                mineRates.Add(rate.Key, 0);
+                            }
+                            mineRates[rate.Key] += rate.Value;
+                        }
+                    }
+                }
+
                 var deposits = systemBodyInfo.Minerals.Where(x => x.Value.Amount > 0);
                 if (deposits.Any())
                 {
                     var maxMineralQuantity = systemBodyInfo.Minerals.Values.Max(x => x.Amount).ToString(_amountFormat).Length;
 
                     List<string[]> rowData = new List<string[]>();
+                    var row = new List<string>();
                     foreach (var key in systemBodyInfo.Minerals.Keys)
                     {
+                        row.Clear();
                         var mineralData = _mineralDefinitions.FirstOrDefault(x => x.ID == key);
                         if (mineralData != null)
                         {
                             var mineralValues = systemBodyInfo.Minerals[key];
-                            var row = new string[3];
-                            row[0] = mineralData.Name;
-                            row[1] = mineralValues.Amount.ToString(_amountFormat);
-                            row[2] = mineralValues.Accessibility.ToString("0.00");
+                            
+                            row.Add(mineralData.Name);
+                            row.Add(mineralValues.Amount.ToString(_amountFormat));
+                            row.Add(mineralValues.Accessibility.ToString("0.00"));
+                            if (mineRates.Any())
+                            {
+                                var rate = Stringify.Quantity(mineRates.ContainsKey(key) ? mineRates[key] : 0) + "/day";
+                                row.Add(rate);
+                            }
 
-                            rowData.Add(row);
+                            rowData.Add(row.ToArray());
                         }
                     }
 
-                    Helpers.RenderImgUITextTable(headerRow, rowData);
+                    Helpers.RenderImgUITextTable(headerRow.ToArray(), rowData);
                 }
             }
         }

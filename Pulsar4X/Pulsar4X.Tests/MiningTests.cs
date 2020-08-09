@@ -117,12 +117,12 @@ namespace Pulsar4X.Tests
             CheckLevels(earthResourcesAfter, "Fissionables", 0.782729, 111457);
             CheckLevels(earthResourcesAfter, "Sorium", 1, 120080);
             CheckLevels(earthResourcesAfter, "Duranium", 1, 59239);
-            CheckLevels(earthResourcesAfter, "Neutronium", 0.628726, 80496);
+            CheckLevels(earthResourcesAfter, "Neutronium", 0.628726, 80495);
             CheckLevels(earthResourcesAfter, "Corbomite", 1, 66847);
-            CheckLevels(earthResourcesAfter, "Tritanium", 0.579378, 53016);
+            CheckLevels(earthResourcesAfter, "Tritanium", 0.579378, 53014);
             CheckLevels(earthResourcesAfter, "Boronide", 1, 111953);
-            CheckLevels(earthResourcesAfter, "Uridium", 0.889412, 100083);
-            CheckLevels(earthResourcesAfter, "Corundium", 0.989507, 50855);
+            CheckLevels(earthResourcesAfter, "Uridium", 0.889412, 100082);
+            CheckLevels(earthResourcesAfter, "Corundium", 0.989507, 50854);
             CheckLevels(earthResourcesAfter, "Mercassium", 1, 130530);
             CheckLevels(earthResourcesAfter, "Vendarite", 1, 56150);
             CheckLevels(earthResourcesAfter, "Gallicite", 1, 102426);
