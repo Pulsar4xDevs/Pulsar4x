@@ -225,7 +225,7 @@ namespace Pulsar4X.SDL2UI
             DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
             if (_orbitDB != null)
             {
-                var headingVector = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(_orbitDB, atDateTime);
+                var headingVector = _orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
                 var heading = Math.Atan2(headingVector.Y, headingVector.X);
                 Heading = (float)heading;
             }
@@ -393,7 +393,7 @@ namespace Pulsar4X.SDL2UI
             DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
             if (_orbitDB != null)
             {
-                var headingVector = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(_orbitDB, atDateTime);
+                var headingVector = _orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
                 var heading = Math.Atan2(headingVector.Y, headingVector.X);
                 Heading = (float)heading;
             }

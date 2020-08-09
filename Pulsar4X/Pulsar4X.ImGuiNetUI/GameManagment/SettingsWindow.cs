@@ -31,7 +31,7 @@ namespace Pulsar4X.SDL2UI
             IsThreaded = _uiState.Game.Settings.EnableMultiThreading;
             EnforceSingleThread = _uiState.Game.Settings.EnforceSingleThread;
             
-            relativeOrbitVelocity = ECSLib.OrbitProcessor.UserelativeVelocity;
+            relativeOrbitVelocity = ECSLib.OrbitProcessor.UseRelativeVelocity;
 
             _orbitalDebugWindow = OrbitalDebugWindow.GetInstance();
 
@@ -121,7 +121,7 @@ namespace Pulsar4X.SDL2UI
 
                         if (ImGui.Checkbox("Translate Uses relative Velocity", ref relativeOrbitVelocity))
                         {
-                            ECSLib.OrbitProcessor.UserelativeVelocity = relativeOrbitVelocity;
+                            ECSLib.OrbitProcessor.UseRelativeVelocity = relativeOrbitVelocity;
                         }
                         if (ImGui.IsItemHovered())
                         { 

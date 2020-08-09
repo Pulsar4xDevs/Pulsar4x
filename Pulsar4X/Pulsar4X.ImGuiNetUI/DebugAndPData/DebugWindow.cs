@@ -378,7 +378,7 @@ namespace Pulsar4X.SDL2UI
                                     SimpleCircle cir; 
                                     if (_drawSOI)
                                     {
-                                        var soiradius = OrbitProcessor.GetSOI_AU(SelectedEntity);
+                                        var soiradius = SelectedEntity.GetSOI_AU();
                                         var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
                                         cir = new SimpleCircle(SelectedEntity.GetDataBlob<PositionDB>(), soiradius, colour);
 
@@ -398,8 +398,8 @@ namespace Pulsar4X.SDL2UI
                                         orbitDB = SelectedEntity.GetDataBlob<OrbitUpdateOftenDB>();
                                     //if (_uiState.CurrentSystemDateTime != lastDate)
                                     //{
-                                    pos = OrbitProcessor.GetAbsolutePosition_AU(orbitDB, _uiState.PrimarySystemDateTime);
-                                        truAnomoly = OrbitProcessor.GetTrueAnomaly(orbitDB, _uiState.PrimarySystemDateTime);
+                                    pos = orbitDB.GetAbsolutePosition_AU(_uiState.PrimarySystemDateTime);
+                                    truAnomoly = orbitDB.GetTrueAnomaly(_uiState.PrimarySystemDateTime);
                                         //lastDate = _uiState.PrimarySystemDateTime;
                                     //}
 
@@ -410,10 +410,10 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("AoP:" + orbitDB.ArgumentOfPeriapsis_Degrees);
                                     ImGui.Text("TrueAnomaly: " + truAnomoly);
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion_DegreesSec + " in Deg/s");
-                                    ImGui.Text("MeanVelocity: " + OrbitMath.MeanOrbitalVelocityInAU(orbitDB) + "Au/s");
-                                    ImGui.Text("MeanVelocity: " + Stringify.Velocity( OrbitMath.MeanOrbitalVelocityInm(orbitDB)));
+                                    ImGui.Text("MeanVelocity: " + orbitDB.MeanOrbitalVelocityInAU() + "Au/s");
+                                    ImGui.Text("MeanVelocity: " + Stringify.Velocity(orbitDB.MeanOrbitalVelocityInm()));
                                     
-                                    ImGui.Text("SOI Radius: " + Stringify.Distance(OrbitProcessor.GetSOI_m(SelectedEntity)));
+                                    ImGui.Text("SOI Radius: " + Stringify.Distance(SelectedEntity.GetSOI_m()));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod.TotalSeconds);
                                     ImGui.Text("SemiMajAxis: " + Stringify.Distance(orbitDB.SemiMajorAxis));
@@ -462,7 +462,7 @@ namespace Pulsar4X.SDL2UI
                                         var pObt = parent.GetDataBlob<OrbitDB>();
                                         var cnmve = SelectedEntity.GetDataBlob<NewtonMoveDB>();
 
-                                        var soiradius = OrbitProcessor.GetSOI_AU(parent);
+                                        var soiradius = parent.GetSOI_AU();
                                         var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
                                         psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
                                         var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;

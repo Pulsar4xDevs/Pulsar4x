@@ -100,7 +100,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             double linierEccentricity = e * a;
-            double soi = OrbitProcessor.GetSOI_AU(_newtonMoveDB.SOIParent);
+            double soi = _newtonMoveDB.SOIParent.GetSOI_AU();
 
             //longditudeOfPeriapsis;
             double _lop = Math.Atan2(eccentVector.Y, eccentVector.X);

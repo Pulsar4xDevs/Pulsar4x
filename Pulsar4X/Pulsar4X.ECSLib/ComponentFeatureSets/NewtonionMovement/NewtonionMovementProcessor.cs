@@ -121,9 +121,7 @@ namespace Pulsar4X.ECSLib
 
                 positionDB.RelativePosition_m += deltaPos;
 
-                double sOIRadius = OrbitProcessor.GetSOI_m(newtonMoveDB.SOIParent);
-
-                
+                double sOIRadius = newtonMoveDB.SOIParent.GetSOI_m();                
                 
                 if (positionDB.RelativePosition_m.Length() >= sOIRadius)
                 {
@@ -134,7 +132,7 @@ namespace Pulsar4X.ECSLib
                     {
                         var orbitDB = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>();
                         newParent = orbitDB.Parent;
-                        var parentVelocity = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbitDB, entity.StarSysDateTime);
+                        var parentVelocity = orbitDB.InstantaneousOrbitalVelocityVector_m(entity.StarSysDateTime);
                         parentrelativeVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
            
                     }
@@ -177,7 +175,7 @@ namespace Pulsar4X.ECSLib
                             entity.RemoveDataBlob<NewtonMoveDB>();
                             entity.SetDataBlob(fastOrbit);
                             positionDB.SetParent(parentEntity);
-                            var newPos = OrbitProcessor.GetPosition_m(fastOrbit, dateTime);
+                            var newPos = fastOrbit.GetPosition_m(dateTime);
                             positionDB.RelativePosition_m = newPos;
                         }
                         else
@@ -186,7 +184,7 @@ namespace Pulsar4X.ECSLib
                             entity.RemoveDataBlob<NewtonMoveDB>();
                             entity.SetDataBlob(newOrbit);
                             positionDB.SetParent(parentEntity);
-                            var newPos = OrbitProcessor.GetPosition_m(newOrbit, dateTime);
+                            var newPos = newOrbit.GetPosition_m(dateTime);
                             positionDB.RelativePosition_m = newPos;
                         }
                             

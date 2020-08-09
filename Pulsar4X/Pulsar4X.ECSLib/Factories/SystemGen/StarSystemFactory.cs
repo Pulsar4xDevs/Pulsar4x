@@ -68,7 +68,7 @@ namespace Pulsar4X.ECSLib
             double mercuryLoP = 77.45645;
             double mercuryMeanLongd = 252.25084;
             OrbitDB mercuryOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.MassDry, mercuryMVDB.MassDry, mercurySemiMajAxis, mercuryEccentricity, mercuryInclination, mercuryLoAN, mercuryLoP, mercuryMeanLongd, GalaxyGen.Settings.J2000);
-            PositionDB mercuryPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(mercuryOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun);
+            PositionDB mercuryPositionDB = new PositionDB(mercuryOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime), sol.Guid, sun);
             //AtmosphereDB mercuryAtmo = new AtmosphereDB();
             SensorProfileDB sensorProfile = new SensorProfileDB();
             mercuryPositionDB.X_AU += x;
@@ -87,7 +87,7 @@ namespace Pulsar4X.ECSLib
             double venusLoP = 131.53298;
             double venusMeanLongd = 181.97973;
             OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.MassDry, venusMVDB.MassDry, venusSemiMajAxis, venusEccentricity, venusInclination, venusLoAN, venusLoP, venusMeanLongd, GalaxyGen.Settings.J2000);
-            PositionDB venusPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(venusOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun);
+            PositionDB venusPositionDB = new PositionDB(venusOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime), sol.Guid, sun);
             sensorProfile = new SensorProfileDB();
             Entity venus = new Entity(sol, new List<BaseDataBlob> { sensorProfile, venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, venus);
@@ -104,7 +104,7 @@ namespace Pulsar4X.ECSLib
             double planetMeanAnomaly = 100.46435;
             OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.MassDry, planetMVDB.MassDry, planetSemiMajorAxisAU, planetEccentricity, planetEclipticInclination, planetLoAN, planetAoP, planetMeanAnomaly, GalaxyGen.Settings.J2000);
             planetBodyDB.Tectonics = TectonicActivity.EarthLike;
-            PositionDB planetPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(planetOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun);
+            PositionDB planetPositionDB = new PositionDB(planetOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime), sol.Guid, sun);
             Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(6), 0.78f);
             atmoGasses.Add(game.StaticData.AtmosphericGases.SelectAt(9), 0.12f);
@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib
             double lunaAoP = 318.0634;
             double lunaMeanAnomaly = 115.3654;
             OrbitDB lunaOrbitDB = OrbitDB.FromAsteroidFormat(planet, planetMVDB.MassDry, lunaMVDB.MassDry, lunaSemiMajAxis, lunaEccentricity, lunaInclination, lunaLoAN, lunaAoP, lunaMeanAnomaly, GalaxyGen.Settings.J2000);
-            PositionDB lunaPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(lunaOrbitDB, StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, planet);
+            PositionDB lunaPositionDB = new PositionDB(lunaOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, planet);
             sensorProfile = new SensorProfileDB();
             Entity luna = new Entity(sol, new List<BaseDataBlob> {sensorProfile, lunaPositionDB, lunaBodyDB, lunaMVDB, lunaNameDB, lunaOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, luna);
@@ -145,7 +145,7 @@ namespace Pulsar4X.ECSLib
             double halleysAoP = 111.33;//°
             double halleysMeanAnomaly = 38.38;//°
             OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(sun, sunMVDB.MassDry, halleysMVDB.MassDry, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
-            PositionDB halleysPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(halleysOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun); // + planetPositionDB.AbsolutePosition_AU, sol.ID);
+            PositionDB halleysPositionDB = new PositionDB(halleysOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime), sol.Guid, sun); // + planetPositionDB.AbsolutePosition_AU, sol.ID);
             sensorProfile = new SensorProfileDB();
             Entity halleysComet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, halleysPositionDB, halleysBodyDB, halleysMVDB, halleysNameDB, halleysOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, halleysComet);
@@ -274,7 +274,7 @@ namespace Pulsar4X.ECSLib
                 PositionDB planetPositionDB = new PositionDB(system.Guid);
                 planetEccentricity = i / 16.0;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.MassDry, planetMVDB.MassDry, planetSemiMajorAxisAU, planetEccentricity, planetEclipticInclination, planetLoAN, planetAoP, planetMeanAnomaly, GalaxyGen.Settings.J2000);
-                planetPositionDB.AbsolutePosition_AU = OrbitProcessor.GetPosition_AU(planetOrbitDB, StaticRefLib.CurrentDateTime);
+                planetPositionDB.AbsolutePosition_AU = planetOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime);
                 Entity planet = new Entity(system, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
@@ -308,7 +308,7 @@ namespace Pulsar4X.ECSLib
                 PositionDB planetPositionDB = new PositionDB(system.Guid);
                 planetAoP = i * 15;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.MassDry, planetMVDB.MassDry, planetSemiMajorAxisAU, planetEccentricity, planetEclipticInclination, planetLoAN, planetAoP, planetMeanAnomaly, GalaxyGen.Settings.J2000);
-                planetPositionDB.AbsolutePosition_AU = OrbitProcessor.GetPosition_AU(planetOrbitDB, StaticRefLib.CurrentDateTime);
+                planetPositionDB.AbsolutePosition_AU = planetOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime);
                 Entity planet = new Entity(system, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);

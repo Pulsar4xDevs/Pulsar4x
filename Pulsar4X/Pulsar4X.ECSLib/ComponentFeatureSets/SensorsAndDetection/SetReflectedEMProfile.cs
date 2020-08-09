@@ -55,7 +55,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (emittingEntity != entity) // don't reflect our own emmision. 
                 {
-                    double distance = PositionDB.GetDistanceBetween_m(position, emittingEntity.GetDataBlob<PositionDB>());
+                    double distance = position.GetDistanceTo_m(emittingEntity.GetDataBlob<PositionDB>());
                     if (distance < 1)
                         distance = 1;
                     

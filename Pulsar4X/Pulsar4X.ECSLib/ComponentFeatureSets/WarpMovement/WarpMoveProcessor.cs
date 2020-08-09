@@ -168,7 +168,7 @@ namespace Pulsar4X.ECSLib
 
             //propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
 
-            double targetSOI = OrbitProcessor.GetSOI_m(moveDB.TargetEntity);
+            double targetSOI = moveDB.TargetEntity.GetSOI_m();
 
             Entity targetEntity;
 

@@ -33,14 +33,14 @@ namespace Pulsar4X.ECSLib
                 var datetime = entity.StarSysDateTime;
                 var orbit = entity.GetDataBlob<OrbitDB>();
 
-                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
+                var vel = orbit.InstantaneousOrbitalVelocityVector_m(datetime);
                 return (pos, vel);
             }
             if (entity.HasDataBlob<OrbitUpdateOftenDB>())
             {
                 var datetime = entity.StarSysDateTime;
                 var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>();
-                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
+                var vel = orbit.InstantaneousOrbitalVelocityVector_m(datetime);
                 return (pos, vel);
             }
 
@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
             {
                 var datetime = entity.StarSysDateTime;
                 var orbit = entity.GetDataBlob<OrbitDB>();
-                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
+                var vel = orbit.InstantaneousOrbitalVelocityVector_m(datetime);
                 if (posdb.Parent != null)
                 {
                     vel += posdb.Parent.GetAbsoluteState().Velocity;
@@ -93,7 +93,7 @@ namespace Pulsar4X.ECSLib
             {
                 var datetime = entity.StarSysDateTime;
                 var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>();
-                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
+                var vel = orbit.InstantaneousOrbitalVelocityVector_m(datetime);
                 if (posdb.Parent != null)
                 {
                     vel += posdb.Parent.GetAbsoluteState().Velocity;
@@ -125,11 +125,11 @@ namespace Pulsar4X.ECSLib
 
             if (entity.HasDataBlob<OrbitDB>())
             {
-                return OrbitProcessor.InstantaneousOrbitalVelocityVector_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
+                return entity.GetDataBlob<OrbitDB>().InstantaneousOrbitalVelocityVector_m(atDateTime);
             }
             if (entity.HasDataBlob<OrbitUpdateOftenDB>())
             {
-                return OrbitProcessor.InstantaneousOrbitalVelocityVector_m(entity.GetDataBlob<OrbitUpdateOftenDB>(), atDateTime);
+                return entity.GetDataBlob<OrbitUpdateOftenDB>().InstantaneousOrbitalVelocityVector_m(atDateTime);
             }
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {
@@ -156,11 +156,11 @@ namespace Pulsar4X.ECSLib
         {
             if (entity.HasDataBlob<OrbitDB>())
             {
-                return OrbitProcessor.AbsoluteOrbitalVector_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
+                return entity.GetDataBlob<OrbitDB>().AbsoluteOrbitalVector_m(atDateTime);
             }
             if (entity.HasDataBlob<OrbitUpdateOftenDB>())
             {
-                return OrbitProcessor.AbsoluteOrbitalVector_m(entity.GetDataBlob<OrbitUpdateOftenDB>(), atDateTime);
+                return entity.GetDataBlob<OrbitUpdateOftenDB>().AbsoluteOrbitalVector_m(atDateTime);
             }
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {
@@ -191,11 +191,11 @@ namespace Pulsar4X.ECSLib
         {
             if (entity.HasDataBlob<OrbitDB>())
             {
-                return OrbitProcessor.GetPosition_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
+                return entity.GetDataBlob<OrbitDB>().GetPosition_m(atDateTime);
             }
             else if (entity.HasDataBlob<OrbitUpdateOftenDB>())
             {
-                return OrbitProcessor.GetPosition_m(entity.GetDataBlob<OrbitUpdateOftenDB>(), atDateTime);
+                return entity.GetDataBlob<OrbitUpdateOftenDB>().GetPosition_m(atDateTime);
             }
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {
@@ -222,11 +222,11 @@ namespace Pulsar4X.ECSLib
         {
             if (entity.HasDataBlob<OrbitDB>())
             {
-                return OrbitProcessor.GetAbsolutePosition_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
+                return entity.GetDataBlob<OrbitDB>().GetAbsolutePosition_m(atDateTime);
             }
             else if (entity.HasDataBlob<OrbitUpdateOftenDB>())
             {
-                return OrbitProcessor.GetAbsolutePosition_m(entity.GetDataBlob<OrbitUpdateOftenDB>(), atDateTime);
+                return entity.GetDataBlob<OrbitUpdateOftenDB>().GetAbsolutePosition_m(atDateTime);
             }
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {
@@ -240,6 +240,43 @@ namespace Pulsar4X.ECSLib
             {
                 throw new Exception("Entity is positionless");
             }
+        }
+
+        public static double GetSOI_m(this Entity entity)
+        {
+            var orbitDB = entity.GetDataBlob<OrbitDB>();
+            if (orbitDB.Parent != null) //if we're not the parent star
+            {
+                var semiMajAxis = orbitDB.SemiMajorAxis;
+
+                var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
+
+                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().MassDry;
+
+                return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
+            }
+            else return double.PositiveInfinity; //if we're the parent star, then soi is infinate.
+        }
+
+        /// <summary>
+        /// Gets the SOI radius of a given body.
+        /// </summary>
+        /// <returns>The SOI radius in AU</returns>
+        /// <param name="entity">Entity which has OrbitDB and MassVolumeDB</param>
+        public static double GetSOI_AU(this Entity entity)
+        {
+            var orbitDB = entity.GetDataBlob<OrbitDB>();
+            if (orbitDB.Parent != null) //if we're not the parent star
+            {
+                var semiMajAxis = orbitDB.SemiMajorAxis_AU;
+
+                var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
+
+                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().MassDry;
+
+                return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
+            }
+            else return double.MaxValue; //if we're the parent star, then soi is infinate. 
         }
     }
 }

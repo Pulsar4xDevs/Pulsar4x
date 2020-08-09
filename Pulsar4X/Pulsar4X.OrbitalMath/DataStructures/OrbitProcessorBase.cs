@@ -17,10 +17,15 @@ namespace Pulsar4X.Orbital
     public class OrbitProcessorBase
     {
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="T:Pulsar4X.Orbital.OrbitProcessor"/> uses relative velocity.
+        /// Gets or sets a value indicating whether this <see cref="T:Pulsar4X.Orbital.OrbitProcessorBase"/> uses relative velocity.
         /// </summary>
         /// <value><c>true</c> if use relative velocity; otherwise, uses absolute <c>false</c>.</value>
         public static bool UseRelativeVelocity { get; set; } = true;
+
+        public static Vector3 GetPosition_m(KeplerElements orbit, DateTime time)
+        {
+            return GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
+        }
 
         #region Orbit Position Calculations
 
