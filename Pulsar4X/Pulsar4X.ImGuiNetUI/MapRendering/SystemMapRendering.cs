@@ -86,35 +86,7 @@ namespace Pulsar4X.SDL2UI
                 _testIcons.TryAdd(Guid.NewGuid(), item);
             }
         }
-
-        internal void SetSystem(FactionVM factionVM)
-        {
-            if (_sysState != null)
-            {
-                _sysState.StarSystem.GetSensorContacts(_faction.Guid).Changes.Unsubscribe(_sensorChanges);
-
-            }
-            if (_state.StarSystemStates.ContainsKey(factionVM.SystemMap.StarSystem.Guid))
-                _sysState = _state.StarSystemStates[factionVM.SystemMap.StarSystem.Guid];
-            else
-            {
-                _sysState = new SystemState(factionVM.SystemMap.StarSystem, factionVM.FactionEntity);
-                _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
-            }
-            var starSys = _sysState.StarSystem;
-            _faction = _state.Faction;
-            _sensorMgr = starSys.GetSensorContacts(_faction.Guid);
-            _sensorChanges = _sensorMgr.Changes.Subscribe();
-
-            _state.SetActiveSystem(starSys.Guid);
-
-            foreach (var entityItem in _sysState.EntityStatesWithPosition.Values.OrderBy(x => x.Position.AbsolutePosition_AU).ToList())
-            {
-                AddIconable(entityItem);
-            }
-
-            _state.LastClickedEntity = _sysState.EntityStatesWithPosition.Values.ElementAt(0);
-        }
+        
 
         internal void SetSystem(StarSystem starSys)
         {

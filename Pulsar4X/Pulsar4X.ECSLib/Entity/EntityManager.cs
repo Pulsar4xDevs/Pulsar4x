@@ -46,6 +46,8 @@ namespace Pulsar4X.ECSLib
         Dictionary<Guid, List<Entity>> EntitesByFaction = new Dictionary<Guid, List<Entity>>();  
         public List<Entity> GetEntitiesByFaction(Guid factionGuid)
         {
+            if (factionGuid == StaticRefLib.Game.GameMasterFaction.Guid)
+                return _entities;
             if (EntitesByFaction.ContainsKey(factionGuid))
                 return EntitesByFaction[factionGuid];
             else

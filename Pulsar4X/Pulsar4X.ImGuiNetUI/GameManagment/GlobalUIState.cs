@@ -39,9 +39,9 @@ namespace Pulsar4X.SDL2UI
             {typeof(OrdersUI), "Orders Window"}
         };
         internal Game Game;
-        internal FactionVM FactionUIState;
+        //internal FactionVM FactionUIState;
         internal bool IsGameLoaded { get { return Game != null; } }
-        internal Entity Faction { get { return FactionUIState.FactionEntity; } }
+        internal Entity Faction { get; set; }
         internal bool ShowMetrixWindow;
         internal bool ShowImgDbg;
         internal bool ShowDemoWindow;
@@ -170,6 +170,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetFaction(Entity factionEntity)
         {
+            Faction = factionEntity;
             FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
             StarSystemStates = new Dictionary<Guid, SystemState>();
             foreach (var guid in factionInfo.KnownSystems)
@@ -202,12 +203,14 @@ namespace Pulsar4X.SDL2UI
         {
             SMenabled = true;
             StarSystemStates = new Dictionary<Guid, SystemState>();
+            var masterFaction = StaticRefLib.Game.GameMasterFaction;
+            SetFaction(masterFaction);
             if(Game != null)
                 foreach (var system in Game.Systems)
                 {
                     StarSystemStates[system.Key] = SystemState.GetMasterState(system.Value);
                 }
-            GalacticMap.SetFaction();
+            
         }
 
         internal void ToggleGameMaster()
