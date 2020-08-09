@@ -90,7 +90,6 @@ namespace Pulsar4X.ECSLib
 
         public static double ColonyPressureCost(this SpeciesDB species, Entity planet)
         {
-            float totalPressure = 0.0f;
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
 
             if (atmosphere == null)
@@ -100,17 +99,13 @@ namespace Pulsar4X.ECSLib
                 return 1.0;
             }
 
-            Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
-
-            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
-            {
-                totalPressure += kvp.Value;
-            }
-
+            var totalPressure = atmosphere.GetAtmosphericPressure();
             if (totalPressure > species.MaximumPressureConstraint)
             {
-                // @todo: varying value, or straight requirement?
-                return 2.0;
+                // AuroraWiki: If the pressure is too high, the colony cost will be equal to the Atmospheric Pressure 
+                //             divided by the species maximum pressure with a minimum of 2.0
+                
+                return Math.Round(Math.Max(totalPressure / species.MaximumPressureConstraint, 2.0), 6);
             }
 
             return 1.0;
@@ -118,6 +113,8 @@ namespace Pulsar4X.ECSLib
 
         public static double ColonyTemperatureCost(this SpeciesDB species, Entity planet)
         {
+            // AuroraWiki : The colony cost for a temperature outside the range is Temperature Difference / Temperature Deviation. 
+            //              So if the deviation was 22 and the temperature was 48 degrees below the minimum, the colony cost would be 48/22 = 2.18
             SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
             double cost;
             double idealTemp = species.BaseTemperature;

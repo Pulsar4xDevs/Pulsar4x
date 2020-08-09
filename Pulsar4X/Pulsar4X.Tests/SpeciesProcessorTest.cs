@@ -389,7 +389,6 @@ namespace Pulsar4X.Tests
             double idealPressure;
             double maxPressure;
             double expected;
-            float totalPressure;
 
             var humans = _humanSpecies.GetDataBlob<SpeciesDB>();
             idealPressure = humans.BasePressure;
@@ -404,21 +403,69 @@ namespace Pulsar4X.Tests
                 
                 // Keep atmosphere breathable
                 atmoGasses.Add(_gasDictionary["N2"], (float)(2.0f * i));
-                totalPressure = 2.0f * i;
                 atmoGasses.Add(_gasDictionary["O2"], 0.1f);
-                totalPressure += 0.1f;
-
-                    
-
                 testAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                 testPlanet = setAtmosphere(testAtmosphereDB);
 
-                if (totalPressure > 4.0)
-                    expected = 2.0;
-                else
+                float pressure = testAtmosphereDB.GetAtmosphericPressure();
+                if (pressure < 4)
+                {
                     expected = 1.0;
-                Assert.AreEqual(expected, humans.ColonyCost(testPlanet));
-
+                    Assert.AreEqual(expected, humans.ColonyCost(testPlanet));
+                }
+                else if (pressure <= 8f)
+                {
+                    expected = 2.0;
+                    Assert.AreEqual(expected, humans.ColonyCost(testPlanet));
+                }
+                else if (pressure <= 10.1f)
+                {
+                    switch (Math.Round(pressure, 6))
+                    {
+                        case 8.099997:
+                            expected = 2.024999;
+                            break;
+                        case 8.299997:
+                            expected = 2.074999;
+                            break;
+                        case 8.499997:
+                            expected = 2.124998;
+                            break;
+                        case 8.699997:
+                            expected = 2.174999;
+                            break;
+                        case 8.899997:
+                            expected = 2.224999;
+                            break;
+                        case 9.099997:
+                            expected = 2.274999;
+                            break;
+                        case 9.299996:
+                            expected = 2.324999;
+                            break;
+                        case 9.499996:
+                            expected = 2.374999;
+                            break;
+                        case 9.699996:
+                            expected = 2.424999;
+                            break;
+                        case 9.899996:
+                            expected = 2.474999;
+                            break;
+                        case 10.099996:
+                            expected = 2.524999;
+                            break;
+                        default:
+                            expected = -1;
+                            break;
+                    }
+                    Assert.AreEqual(expected, humans.ColonyCost(testPlanet), 0.000001);
+                } 
+                else
+                {
+                    // TODO: check specific inputs to outputs
+                    break;
+                }
             }
 
             // Check with pressure from just one gas and multiple gases
