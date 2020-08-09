@@ -95,6 +95,9 @@
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="Data\Pulsar4x\AtmosphericData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Data\Pulsar4x\ComponentDataEnergy.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInPackage>false</IncludeInPackage>
@@ -149,7 +152,7 @@
     <None Update="Data\Pulsar4x\ComponentDataMisc.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Data\Pulsar4x\AtmosphericData.json">
+    <None Update="Data\Pulsar4x\AtmosphericDataAurora.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

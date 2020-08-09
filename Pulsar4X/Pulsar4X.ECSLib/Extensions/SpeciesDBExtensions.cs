@@ -65,6 +65,15 @@ namespace Pulsar4X.ECSLib
 
             foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
             {
+                if (kvp.Key.IsHighlyToxicAtPercentage.HasValue)
+                {
+                    var percentageOfAtmosphere = Math.Round(kvp.Value / totalPressure * 100.0f, 4);
+                    // if current % of atmosphere for this gas is over toxicity threshold
+                    if (percentageOfAtmosphere >= kvp.Key.IsHighlyToxicAtPercentage.Value)
+                    {
+                        cost = Math.Max(cost, 3.0);
+                    }
+                }
                 if (kvp.Key.IsToxicAtPercentage.HasValue)
                 {
                     var percentageOfAtmosphere = Math.Round(kvp.Value / totalPressure * 100.0f, 4);

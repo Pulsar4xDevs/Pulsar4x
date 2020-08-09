@@ -337,6 +337,47 @@ namespace Pulsar4X.Tests
                 }
             }
 
+            //Highly Toxic Gasses at trigger high colony cost when meeting their toxicity threshold. *
+            var gasesThatCanBecomeHighlyToxic = _gasDictionary.Values.Where(x => x.IsHighlyToxicAtPercentage.HasValue).ToList();
+            if (gasesThatCanBecomeHighlyToxic.Any())
+            {
+                var firstBenignGas = _gasDictionary.Values.FirstOrDefault(x => !x.IsToxic && !x.IsHighlyToxic && !x.IsToxicAtPercentage.HasValue);
+                Assert.IsNotNull(firstBenignGas, "No Benign Gases Available To Enable Testing");
+
+                foreach (AtmosphericGasSD gasUnderTest in gasesThatCanBecomeHighlyToxic)
+                {
+                    var toxicityLevel = gasUnderTest.IsHighlyToxicAtPercentage.Value / 100.0f;
+
+                    // Test when gas under test is Exactly on the Toxicity Threshold
+                    expectedCost = 3.0;
+                    atmoGasses.Clear();
+                    atmoGasses.Add(firstBenignGas, 1.0f - toxicityLevel);
+                    atmoGasses.Add(gasUnderTest, toxicityLevel);
+                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
+                    _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
+                    Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
+
+                    // Test when gas under test is Less than on the Toxicity Threshold
+                    expectedCost = 2;
+                    atmoGasses.Clear();
+                    atmoGasses.Add(firstBenignGas, 1.0f - toxicityLevel + 0.01f);
+                    atmoGasses.Add(gasUnderTest, toxicityLevel - 0.01f);
+                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
+                    _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
+                    Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
+
+
+                    // Test when gas under test is Over the Toxicity Threshold
+                    expectedCost = 3.0;
+                    atmoGasses.Clear();
+                    atmoGasses.Add(firstBenignGas, 1.0f - toxicityLevel - 0.01f);
+                    atmoGasses.Add(gasUnderTest, toxicityLevel + 0.01f);
+                    weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
+                    _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
+                    Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
+                }
+            }
+
 
             Assert.AreEqual(1.0, humans.ColonyCost(_earthPlanet));
         }
