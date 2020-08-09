@@ -315,5 +315,13 @@ namespace Pulsar4X.ECSLib
             }
         }
         
+        internal static bool HasSpecificEntity(this VolumeStorageDB storeDB, CargoAbleTypeDB item)
+        {
+            if (storeDB.TypeStores[item.CargoTypeID].Cargoables.ContainsKey(item.ID))
+                return true;
+
+            return false;
+        }
+        
     }
 }
