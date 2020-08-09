@@ -116,7 +116,6 @@ namespace Pulsar4X.Tests
                     EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureDesign);
                 ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
 
-
                 for (j = 0; j < basePop.Length; j++)
                 {
 
@@ -140,7 +139,6 @@ namespace Pulsar4X.Tests
                 }
 
             }
-
 
             // Multiple iteration growth test
             for (i = 0; i < infrastructureAmounts.Length; i++)
@@ -230,13 +228,15 @@ namespace Pulsar4X.Tests
             foreach (KeyValuePair<Entity, long> kvp in lastPop)
             {
                 // count the number of different population groups that need infrastructure support
-                if (SpeciesProcessor.ColonyCost(colonyPlanet, kvp.Key.GetDataBlob<SpeciesDB>()) > 1.0)
+                var species = kvp.Key.GetDataBlob<SpeciesDB>();
+                if (species.ColonyCost(colonyPlanet) > 1.0)
                     needsSupport++;
             }
 
             foreach (KeyValuePair<Entity, long> kvp in lastPop.ToArray())
             {
-                double colonyCost = SpeciesProcessor.ColonyCost(colonyPlanet, kvp.Key.GetDataBlob<SpeciesDB>());
+                var specDb = kvp.Key.GetDataBlob<SpeciesDB>();
+                double colonyCost = specDb.ColonyCost(colonyPlanet);
                 long maxPopulation;
                 long newPop;
 

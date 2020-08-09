@@ -12,6 +12,16 @@ namespace Pulsar4X.ECSLib
             return "Unknown";
         }
 
+        public static void AddComponent(this Entity entity, ComponentInstance component)
+        {
+            EntityManipulation.AddComponentToEntity(entity, component);
+        }
+
+        public static void AddComponent(this Entity entity, ComponentDesign componentDesign, int count = 1)
+        {
+            EntityManipulation.AddComponentToEntity(entity, componentDesign, count);
+        }
+
         public static PositionDB GetSOIParentPositionDB(this Entity entity)
         {
             return (PositionDB)entity.GetDataBlob<PositionDB>().ParentDB;

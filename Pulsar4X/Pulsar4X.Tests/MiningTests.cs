@@ -138,10 +138,10 @@ namespace Pulsar4X.Tests
             ComponentDesigner mineDesigner = new ComponentDesigner(mineSD, faction.GetDataBlob<FactionTechDB>());
             ComponentDesign mineDesign = mineDesigner.CreateDesign(faction);
 
-            EntityManipulation.AddComponentToEntity(colonyEntity, mineDesign, 10);
+            colonyEntity.AddComponent(mineDesign, 10);
 
             ComponentDesign cargoInstallation = DefaultStartFactory.DefaultCargoInstalation(_game, faction);
-            EntityManipulation.AddComponentToEntity(colonyEntity, cargoInstallation, 10);
+            colonyEntity.AddComponent(cargoInstallation, 10);
 
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 

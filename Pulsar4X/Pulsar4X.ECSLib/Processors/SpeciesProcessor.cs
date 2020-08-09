@@ -14,24 +14,10 @@ namespace Pulsar4X.ECSLib
             cost = Math.Max(cost, ColonyGasCost(planet, species));
             cost = Math.Max(cost, ColonyToxicityCost(planet, species));
 
-            if (!ColonyGravityIsHabitible(planet, species))
+            if (!species.CanSurviveGravityOn(planet))
                 return -1.0; // invalid - cannot create colony here
 
             return cost;
-        }
-
-        private static bool ColonyGravityIsHabitible(Entity planet, SpeciesDB species)
-        {
-            SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
-            double planetGravity = sysBody.Gravity;
-            double maxGravity = species.MaximumGravityConstraint;
-            double minGravity = species.MinimumGravityConstraint;
-
-            if (planetGravity < minGravity || planetGravity > maxGravity)
-                return false;
-            return true;
-
- //           throw new NotImplementedException();
         }
 
         /// <summary>

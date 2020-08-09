@@ -182,6 +182,7 @@ namespace Pulsar4X.Tests
             // test a large number of different inputs
             AtmosphereDB weirdAtmosphereDB;
             Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
+            var humans = _humanSpecies.GetDataBlob<SpeciesDB>();
 
             // Test the "low" toxic gases (colony cost 2.0 minimum
             foreach (KeyValuePair<string, AtmosphericGasSD> kvp in lowToxicGases)
@@ -193,7 +194,7 @@ namespace Pulsar4X.Tests
                 weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                 _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
-                Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
             }
 
             // Test the "high" toxic gases (colony cost 3.0 minimum)
@@ -206,7 +207,7 @@ namespace Pulsar4X.Tests
                 weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                 _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
-                Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
             }
 
             // Test the "benign" toxic gases (no affect on colony cost, but no oxygen means 2.0)
@@ -219,7 +220,7 @@ namespace Pulsar4X.Tests
                 weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                 _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
-                Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
             }
 
             // test with atmposheres composed of two toxic gases that have the same colony cost
@@ -239,7 +240,7 @@ namespace Pulsar4X.Tests
                     weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                     _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
-                    Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                    Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
                 }
             }
 
@@ -260,7 +261,7 @@ namespace Pulsar4X.Tests
                     weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                     _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
-                    Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                    Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
                 }
             }
 
@@ -282,7 +283,7 @@ namespace Pulsar4X.Tests
                     weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses); //TODO what's our greenhouse factor an pressure?
                     _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
 
-                    Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                    Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
                 }
             }
 
@@ -310,7 +311,7 @@ namespace Pulsar4X.Tests
                     atmoGasses.Add(gasUnderTest, toxicityLevel);
                     weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
                     _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
-                    Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                    Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
 
                     // Test when gas under test is Less than on the Toxicity Threshold
                     expectedCost = gasUnderTest.ChemicalSymbol.Equals("O2") ? 1 : 2;
@@ -319,7 +320,7 @@ namespace Pulsar4X.Tests
                     atmoGasses.Add(gasUnderTest, toxicityLevel - 0.01f);
                     weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
                     _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
-                    Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                    Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
 
 
                     // Test when gas under test is Over the Toxicity Threshold
@@ -329,12 +330,12 @@ namespace Pulsar4X.Tests
                     atmoGasses.Add(gasUnderTest, toxicityLevel + 0.01f);
                     weirdAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
                     _weirdatmosPlanet = setAtmosphere(weirdAtmosphereDB);
-                    Assert.AreEqual(expectedCost, SpeciesProcessor.ColonyCost(_weirdatmosPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                    Assert.AreEqual(expectedCost, humans.ColonyCost(_weirdatmosPlanet));
                 }
             }
 
 
-            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(1.0, humans.ColonyCost(_earthPlanet));
         }
 
         [Test]
@@ -346,8 +347,9 @@ namespace Pulsar4X.Tests
             double expected;
             float totalPressure;
 
-            idealPressure = _humanSpecies.GetDataBlob<SpeciesDB>().BasePressure;
-            maxPressure = _humanSpecies.GetDataBlob<SpeciesDB>().MaximumPressureConstraint;
+            var humans = _humanSpecies.GetDataBlob<SpeciesDB>();
+            idealPressure = humans.BasePressure;
+            maxPressure = humans.MaximumPressureConstraint;
 
             Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
 
@@ -371,16 +373,14 @@ namespace Pulsar4X.Tests
                     expected = 2.0;
                 else
                     expected = 1.0;
-                Assert.AreEqual(expected, SpeciesProcessor.ColonyCost(testPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                Assert.AreEqual(expected, humans.ColonyCost(testPlanet));
 
             }
 
-
             // Check with pressure from just one gas and multiple gases
 
-
             //throw (new NotImplementedException());
-            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(1.0, humans.ColonyCost(_earthPlanet));
         }
 
         [Test]
@@ -402,8 +402,9 @@ namespace Pulsar4X.Tests
             // Check each species - more can be added above
             foreach (Entity spec in species)
             {
-                idealTemp = spec.GetDataBlob<SpeciesDB>().BaseTemperature;
-                tempRange = spec.GetDataBlob<SpeciesDB>().TemperatureToleranceRange;
+                var specDb = spec.GetDataBlob<SpeciesDB>();
+                idealTemp = specDb.BaseTemperature;
+                tempRange = specDb.TemperatureToleranceRange;
 
                 // Check a wide variety of temperatures
                 for (float temp = -200; temp < 500; temp++)
@@ -411,12 +412,12 @@ namespace Pulsar4X.Tests
                     tempPlanet.GetDataBlob<SystemBodyInfoDB>().BaseTemperature = temp;
                     expected = Math.Abs((idealTemp + 273.15) - (temp + 273.15)) / tempRange;
                     expected = Math.Max(1.0, expected);
-                    Assert.AreEqual(expected, SpeciesProcessor.ColonyCost(tempPlanet, spec.GetDataBlob<SpeciesDB>()));
+                    Assert.AreEqual(expected, specDb.ColonyCost(tempPlanet));
                 }
             }
 
             //throw (new NotImplementedException());
-            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(1.0, _humanSpecies.GetDataBlob<SpeciesDB>().ColonyCost(_earthPlanet));
         }
 
         [Test]
@@ -458,7 +459,7 @@ namespace Pulsar4X.Tests
                     else
                         expected = 2.0;
 
-                    Assert.AreEqual(expected, SpeciesProcessor.ColonyCost(testPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+                    Assert.AreEqual(expected, _humanSpecies.GetDataBlob<SpeciesDB>().ColonyCost(testPlanet));
                 }
             }
 
@@ -471,7 +472,7 @@ namespace Pulsar4X.Tests
             // @todo
             // test for humans on earth
 
-            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _humanSpecies.GetDataBlob<SpeciesDB>() ));
+            Assert.AreEqual(1.0, _humanSpecies.GetDataBlob<SpeciesDB>().ColonyCost(_earthPlanet));
         }
 
         // Sets a planet entity to earth normal

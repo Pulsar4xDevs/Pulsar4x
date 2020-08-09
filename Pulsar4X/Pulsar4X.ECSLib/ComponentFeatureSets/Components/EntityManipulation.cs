@@ -8,11 +8,17 @@ namespace Pulsar4X.ECSLib
 {
     static class EntityManipulation
     {
-
-        
-        internal static void AddComponentToEntity(Entity parentEntity, ComponentInstance componentInstace)
+        internal static void AddComponentToEntity(Entity parentEntity, ComponentInstance componentInstance)
         {
-            AddComponentInstanceToEntity(parentEntity, componentInstace);
+            AddComponentInstanceToEntity(parentEntity, componentInstance);
+            ReCalcProcessor.ReCalcAbilities(parentEntity);
+        }
+
+        internal static void AddComponentToEntity(Entity parentEntity, List<ComponentInstance> instances)
+        {
+            foreach (var instance in instances)
+                AddComponentToEntity(parentEntity, instance);
+
             ReCalcProcessor.ReCalcAbilities(parentEntity);
         }
 
@@ -43,14 +49,6 @@ namespace Pulsar4X.ECSLib
                 }
             }
             else throw new Exception("parentEntiy does not contain a ComponentInstanceDB");
-            
-            ReCalcProcessor.ReCalcAbilities(parentEntity);
-        }
-
-        internal static void AddComponentToEntity(Entity parentEntity, List<ComponentInstance> instances)
-        {
-            foreach (var instance in instances)
-                AddComponentToEntity(parentEntity, instance);
             
             ReCalcProcessor.ReCalcAbilities(parentEntity);
         }

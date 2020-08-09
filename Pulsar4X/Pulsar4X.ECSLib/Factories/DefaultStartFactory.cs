@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
             DefaultMissileSRB(game, factionEntity);
             DefaultMissileSensors(game, factionEntity);
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
-            EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
+            colonyEntity.AddComponent(_sensorInstalation);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
 
@@ -116,11 +116,9 @@ namespace Pulsar4X.ECSLib
             }
 
             Entity colonyEntity2 = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth2);
-            EntityManipulation.AddComponentToEntity(colonyEntity2, _sensorInstalation);
+            colonyEntity2.AddComponent(_sensorInstalation);
             ReCalcProcessor.ReCalcAbilities(colonyEntity2);
 
-
-            
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys2.Guid);
             
             var entitiesWithSensors2 = solSys2.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
@@ -129,9 +127,6 @@ namespace Pulsar4X.ECSLib
                 StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, StaticRefLib.CurrentDateTime);
             }
 
-
-                       
-            
             var JPSurveyPoint1 = solSys.GetAllEntitiesWithDataBlob<JPSurveyableDB>()[0];
             JPSurveyPoint1.GetDataBlob<JPSurveyableDB>().SystemToGuid = solSys2.Guid;
             var JPSurveyPoint2 = solSys2.GetAllEntitiesWithDataBlob<JPSurveyableDB>()[0];
@@ -218,20 +213,20 @@ namespace Pulsar4X.ECSLib
             DefaultMissileTube(game, factionEntity);
             MissileDesign250(game, factionEntity);
             ShipSmallOrdnanceStore(game, factionEntity);
-            EntityManipulation.AddComponentToEntity(colonyEntity, mineDesign);
-            EntityManipulation.AddComponentToEntity(colonyEntity, refinaryDesign);
-            EntityManipulation.AddComponentToEntity(colonyEntity, labEntity);
-            EntityManipulation.AddComponentToEntity(colonyEntity, facEntity);
-           
-            EntityManipulation.AddComponentToEntity(colonyEntity, _fuelTank_1000);
-            
-            EntityManipulation.AddComponentToEntity(colonyEntity, _cargoInstalation);
-            EntityManipulation.AddComponentToEntity(marsColony, _cargoInstalation);
-            
-            EntityManipulation.AddComponentToEntity(colonyEntity, _sensorInstalation);
-            EntityManipulation.AddComponentToEntity(colonyEntity, ShipYard(factionEntity));
-            EntityManipulation.AddComponentToEntity(colonyEntity, _ordnanceStore, 10);
+
+            colonyEntity.AddComponent(mineDesign);
+            colonyEntity.AddComponent(refinaryDesign);
+            colonyEntity.AddComponent(labEntity);
+            colonyEntity.AddComponent(facEntity);           
+            colonyEntity.AddComponent(_fuelTank_1000);            
+            colonyEntity.AddComponent(_cargoInstalation);
+            colonyEntity.AddComponent(_sensorInstalation);
+            colonyEntity.AddComponent(ShipYard(factionEntity));
+            colonyEntity.AddComponent(_ordnanceStore, 10);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
+
+            marsColony.AddComponent(_cargoInstalation);
+            ReCalcProcessor.ReCalcAbilities(marsColony);
 
             var earthCargo = colonyEntity.GetDataBlob<VolumeStorageDB>();
 
@@ -313,10 +308,6 @@ namespace Pulsar4X.ECSLib
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(gunShip1);
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(courier);
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(starship);
-
-            
-            
-            
 
             double test_a = 0.5; //AU
             double test_e = 0;
