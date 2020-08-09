@@ -246,7 +246,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             double mySMA = _currentKE.SemiMajorAxis;
             float smaMin = 1;
-            float smaMax = (float)OrbitProcessor.GetSOI_m(_orderEntity.GetSOIParentEntity());
+            float smaMax = (float)_orderEntity.GetSOIParentEntity().GetSOI_m();
             
             if(ImGui.Combo("Target Object", ref _selectedSibling, _siblingNames, _siblingNames.Length  ))
             {

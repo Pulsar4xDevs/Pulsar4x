@@ -389,7 +389,6 @@ namespace Pulsar4X.SDL2UI
 
             void SetTargetData()
             {
-
                 _targetSensorProfile = _targetEntity.GetDataBlob<SensorProfileDB>();
                 SetReflectedEMProfile.SetEntityProfile(_targetEntity, _uiState.PrimarySystemDateTime);
                 var emitted = _targetSensorProfile.EmittedEMSpectra;
@@ -397,7 +396,7 @@ namespace Pulsar4X.SDL2UI
 
                 var posSelected = _selectedEntity.GetDataBlob<PositionDB>();
 
-                var range = PositionDB.GetDistanceBetween_m(_selectedEntity.GetDataBlob<PositionDB>(), _targetEntity.GetDataBlob<PositionDB>());
+                var range = _selectedEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(_targetEntity.GetDataBlob<PositionDB>());
 
                 _reflectDat = MakeTargetWavDat(reflected, range);
                 _emmittrDat = MakeTargetWavDat(emitted, range);

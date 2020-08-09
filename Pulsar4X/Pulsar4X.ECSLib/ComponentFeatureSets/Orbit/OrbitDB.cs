@@ -201,7 +201,7 @@ namespace Pulsar4X.ECSLib
             var posdb = entity.GetDataBlob<PositionDB>();
             posdb.SetParent(parent);
             var relativePos = posdb.RelativePosition_m;//entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
-            if (relativePos.Length() > OrbitProcessor.GetSOI_m(parent))
+            if (relativePos.Length() > parent.GetSOI_m())
                 throw new Exception("Entity not in target SOI");
 
             //var sgp = UniversalConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
@@ -225,7 +225,7 @@ namespace Pulsar4X.ECSLib
             };
             orbit.CalculateExtendedParameters();
 
-            var pos = OrbitProcessor.GetPosition_m(orbit, atDateTime);
+            var pos = orbit.GetPosition_m(atDateTime);
             var d = (pos - relativePos).Length();
             if (d > 1)
             {
@@ -237,11 +237,11 @@ namespace Pulsar4X.ECSLib
                 StaticRefLib.EventLog.AddEvent(e);
 
                 //other info:
-                var keta = Angle.ToDegrees( ke_m.TrueAnomalyAtEpoch);
-                var obta = Angle.ToDegrees( OrbitProcessor.GetTrueAnomaly(orbit, atDateTime));
+                var keta = Angle.ToDegrees(ke_m.TrueAnomalyAtEpoch);
+                var obta = Angle.ToDegrees(orbit.GetTrueAnomaly(atDateTime));
                 var tadif = Angle.ToDegrees(Angle.DifferenceBetweenRadians(keta, obta));
-                var pos1 = OrbitProcessor.GetPosition_m(orbit, atDateTime);
-                var pos2 = OrbitProcessor.GetPosition_m(orbit, ke_m.TrueAnomalyAtEpoch);
+                var pos1 = orbit.GetPosition_m(atDateTime);
+                var pos2 = orbit.GetPosition_m(ke_m.TrueAnomalyAtEpoch);
                 var d2 = (pos1 - pos2).Length();
             }
             
@@ -264,7 +264,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="Exception"></exception>
         public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp_m, Vector3 position_m, Vector3 velocity_m, DateTime atDateTime)
         {
-            if (position_m.Length() > OrbitProcessor.GetSOI_AU(parent))
+            if (position_m.Length() > parent.GetSOI_AU())
                 throw new Exception("Entity not in target SOI");
             //var sgp  = UniversalConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position_m, velocity_m, atDateTime);
@@ -286,7 +286,7 @@ namespace Pulsar4X.ECSLib
             };
             orbit.CalculateExtendedParameters();
             
-            var pos = OrbitProcessor.GetAbsolutePosition_m(orbit, atDateTime);
+            var pos = orbit.GetAbsolutePosition_m(atDateTime);
             return orbit;
         }
 

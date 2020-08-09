@@ -200,7 +200,7 @@ namespace Pulsar4X.SDL2UI
             _targetRadiusAU = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInAU;
             _targetRadius_m = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().RadiusInM;
 
-            var soiWorldRad_AU = OrbitProcessor.GetSOI_AU(TargetEntity.Entity);
+            var soiWorldRad_AU = TargetEntity.Entity.GetSOI_AU();
             _apMax = soiWorldRad_AU;
 
             float soiViewUnits = _uiState.Camera.ViewDistance(soiWorldRad_AU);
@@ -520,7 +520,7 @@ namespace Pulsar4X.SDL2UI
             //OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate()
 
             
-            if(OrbitProcessor.UserelativeVelocity)
+            if(OrbitProcessor.UseRelativeVelocity)
                 _departureOrbitalVelocity_m = OrderingEntityState.Entity.GetRelativeFutureVelocity(_departureDateTime);
             else
                 _departureOrbitalVelocity_m = OrderingEntityState.Entity.GetAbsoluteFutureVelocity(_departureDateTime);

@@ -28,7 +28,7 @@ namespace Pulsar4X.Tests
             double sgp_m = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
 
             OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp_m, position, velocity, new DateTime());
-            Vector3 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
+            Vector3 resultPos = objOrbit.GetPosition_AU(new DateTime());
         }
 
 
@@ -320,7 +320,7 @@ namespace Pulsar4X.Tests
             
             
             //check EccentricAnomaly:
-            var objE = (OrbitProcessor.GetEccentricAnomaly(objOrbit, objOrbit.MeanAnomalyAtEpoch_Degrees));
+            var objE = (objOrbit.GetEccentricAnomaly(objOrbit.MeanAnomalyAtEpoch_Degrees));
             //var keE =   (OrbitMath.Gete(position, ke.SemiMajorAxis, ke.LinearEccentricity, ke.AoP));
             /*
             if (objE != keE)
@@ -330,7 +330,7 @@ namespace Pulsar4X.Tests
             }
 */
             //check trueAnomaly 
-            var orbTrueAnom = OrbitProcessor.GetTrueAnomaly(objOrbit, new DateTime());
+            var orbTrueAnom = objOrbit.GetTrueAnomaly(new DateTime());
             var orbtaDeg = Angle.ToDegrees(orbTrueAnom);
             var differenceInRadians = orbTrueAnom - ke_m.TrueAnomalyAtEpoch;
             var differenceInDegrees = Angle.ToDegrees(differenceInRadians);
@@ -376,7 +376,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(ke_m.Periapsis, objOrbit.Periapsis, 1.0E-4 );
 
             Vector3 pos_m = position_InMeters;
-            Vector3 result_m = OrbitProcessor.GetPosition_m(objOrbit, new DateTime());
+            Vector3 result_m = objOrbit.GetPosition_m(new DateTime());
 
             double keslr = EllipseMath.SemiLatusRectum(ke_m.SemiMajorAxis, ke_m.Eccentricity);
             double keradius = OrbitMath.RadiusAtAngle(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);
@@ -440,7 +440,7 @@ namespace Pulsar4X.Tests
 
             var intercept_m = OrbitMath.GetInterceptPosition_m(currentPos_m, nonNewtSpeed_m, targetOrbit ,currentDateTime);
 
-            var futurePos1_m =  OrbitProcessor.GetAbsolutePosition_m(targetOrbit, intercept_m.Item2);
+            var futurePos1_m = targetOrbit.GetAbsolutePosition_m(intercept_m.Item2);
 
             var futurePos2_m =  intercept_m.Item1;
 

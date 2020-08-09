@@ -511,7 +511,7 @@ namespace Pulsar4X.SDL2UI
             //but I'm not checking for NewtonMoveDB or OrbitUpdateOftenDB
             if (!_selectedEntityLeft.Entity.HasDataBlob<OrbitDB>()) 
             {
-                dvDif = OrbitMath.MeanOrbitalVelocityInm(_selectedEntityRight.Entity.GetDataBlob<OrbitDB>());
+                dvDif = _selectedEntityRight.Entity.GetDataBlob<OrbitDB>().MeanOrbitalVelocityInm();
             }
             else
             {

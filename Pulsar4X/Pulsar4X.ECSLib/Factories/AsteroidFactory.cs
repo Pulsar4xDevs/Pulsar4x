@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
             planetInfo.SupportsPopulations = false;
             planetInfo.BodyType = BodyType.Asteroid;
 
-            Vector3 targetPos = OrbitProcessor.GetAbsolutePosition_m(target.GetDataBlob<OrbitDB>(), collisionDate);
+            Vector3 targetPos = target.GetDataBlob<OrbitDB>().GetAbsolutePosition_m(collisionDate);
             TimeSpan timeToCollision = collisionDate - StaticRefLib.CurrentDateTime;
 
 
@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
             double sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
             OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
 
-            var currentpos = OrbitProcessor.GetAbsolutePosition_AU(orbit, StaticRefLib.CurrentDateTime);
+            var currentpos = orbit.GetAbsolutePosition_AU(StaticRefLib.CurrentDateTime);
             var posDB = new PositionDB(currentpos.X, currentpos.Y, currentpos.Z, parent.Manager.ManagerGuid, parent);
 
 

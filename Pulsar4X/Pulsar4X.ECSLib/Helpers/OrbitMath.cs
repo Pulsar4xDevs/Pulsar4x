@@ -11,88 +11,6 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class OrbitMath : OrbitalMath
     {
-        #region VelocityAndSpeed;
-
-        /// <summary>
-        /// Calculates distance/s on an orbit by calculating positions now and second in the future. 
-        /// Fairly slow and inefficent. 
-        /// </summary>
-        /// <returns>the distance traveled in a second</returns>
-        /// <param name="orbit">Orbit.</param>
-        /// <param name="atDatetime">At datetime.</param>
-        public static double Hackspeed(OrbitDB orbit, DateTime atDatetime)
-        {
-            var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDatetime);
-            var pos2 = OrbitProcessor.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
-
-            return Distance.DistanceBetween(pos1, pos2);
-        }
-
-        public static double HackVelocityHeading(OrbitDB orbit, DateTime atDatetime)
-        {
-            var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDatetime);
-            var pos2 = OrbitProcessor.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
-
-            Vector3 vector = pos2 - pos1;
-            double heading = Math.Atan2(vector.Y, vector.X);
-            return heading;
-        }
-
-        public static Vector3 HackVelocityVector(OrbitDB orbit, DateTime atDatetime)
-        {
-            var pos1 = OrbitProcessor.GetPosition_AU(orbit, atDatetime);
-            var pos2 = OrbitProcessor.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
-            //double speed = Distance.DistanceBetween(pos1, pos2);
-            return pos2 - pos1;
-        }
-
-        /// <summary>
-        /// This is an aproximation of the mean velocity of an orbit. 
-        /// </summary>
-        /// <returns>The orbital velocity in au.</returns>
-        /// <param name="orbit">Orbit.</param>
-        public static double MeanOrbitalVelocityInAU(OrbitDB orbit)
-        {
-            double a = orbit.SemiMajorAxis_AU;
-            double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
-            double orbitalPerodSeconds = orbit.OrbitalPeriod.TotalSeconds;
-            double peremeter = Math.PI * (3* (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
-            return peremeter  / orbitalPerodSeconds;
-        }
-
-        public static double MeanOrbitalVelocityInm(OrbitDB orbit)
-        {
-            double a = orbit.SemiMajorAxis;
-            double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
-            double orbitalPerodSeconds = orbit.OrbitalPeriod.TotalSeconds;
-            double peremeter = Math.PI * (3* (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
-            return peremeter  / orbitalPerodSeconds;
-        }
-
-        #endregion
-
-        #region Time
-
-        /// <summary>
-        /// Incorrect/Incomplete Unfinished DONOTUSE
-        /// </summary>
-        /// <returns>The to radius from periapsis.</returns>
-        /// <param name="orbit">Orbit.</param>
-        /// <param name="radiusAU">Radius au.</param>
-        public static double TimeToRadiusFromPeriapsis(OrbitDB orbit, double radiusAU)
-        {
-            throw new NotImplementedException();
-            var a = orbit.SemiMajorAxis_AU;
-            var e = orbit.Eccentricity;
-            var p = EllipseMath.SemiLatusRectum(a, e);
-            var angle = AngleAtRadus(radiusAU, p, e);
-            //var meanAnomaly = CurrentMeanAnomaly(orbit.MeanAnomalyAtEpoch, meanMotion, )
-            return TimeFromPeriapsis(a, orbit.GravitationalParameterAU, orbit.MeanAnomalyAtEpoch_Degrees);
-        }
-
-        #endregion
-
-
         /// <summary>
         /// Currently this only calculates the change in velocity from 0 to planet radius +* 0.33333.
         /// TODO: add gravity drag and atmosphere drag, and tech improvements for such.  
@@ -120,8 +38,6 @@ namespace Pulsar4X.ECSLib
             var lowOrbit = prad + alt;
             return lowOrbit;
         }
-
-
 
         struct orbit
         {
@@ -162,7 +78,7 @@ namespace Pulsar4X.ECSLib
 
             for (t=0; t< pl.T; t+=dt)
             {
-                p = OrbitProcessor.GetAbsolutePosition_m(targetOrbit, atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
+                p = targetOrbit.GetAbsolutePosition_m(atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
                 p += offsetPosition;
                 tt = Vector3.Magnitude(p - pos) / speed;  //length(p - pos) / speed;
                 a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
@@ -179,7 +95,7 @@ namespace Pulsar4X.ECSLib
             for (i = 0; i < 10; i++)                               // recursive increase of accuracy
                 for (a1 = -1.0, t = tim - dt, T = tim + dt, dt *= 0.1; t < T; t += dt)
                 {
-                    p = OrbitProcessor.GetAbsolutePosition_m(targetOrbit, atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
+                    p = targetOrbit.GetAbsolutePosition_m(atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
                     p += offsetPosition;    
                     tt = Vector3.Magnitude(p - pos) / speed;  //tt = length(p - pos) / speed;
                     a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
@@ -193,7 +109,7 @@ namespace Pulsar4X.ECSLib
                     }   // remember best option
                 }
             // direction
-            p = OrbitProcessor.GetAbsolutePosition_m(targetOrbit, atDateTime + TimeSpan.FromSeconds(tim));//pl.position(sim_t + tim);
+            p = targetOrbit.GetAbsolutePosition_m(atDateTime + TimeSpan.FromSeconds(tim));//pl.position(sim_t + tim);
             p += offsetPosition;
             //dir = normalize(p - pos);
             return (p, atDateTime + TimeSpan.FromSeconds(tim));

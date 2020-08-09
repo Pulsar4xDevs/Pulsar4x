@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib.Factories.SystemGen
 
             OrbitDB cometOrbitDB = OrbitDB.FromAsteroidFormat(sun, sunMVDB.MassDry, cometMVDB.MassDry, cometSemiMajAxis, cometEccentricity, cometInclination, cometLoAN, cometLoP, cometMeanAnomaly, epoch);
             cometBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, cometOrbitDB);
-            PositionDB cometPositionDB = new PositionDB(OrbitProcessor.GetPosition_AU(cometOrbitDB, StaticRefLib.CurrentDateTime), sol.Guid, sun);
+            PositionDB cometPositionDB = new PositionDB(cometOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime), sol.Guid, sun);
 
             Entity comet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, cometPositionDB, cometBodyDB, cometMVDB, cometNameDB, cometOrbitDB, });
             return comet;
