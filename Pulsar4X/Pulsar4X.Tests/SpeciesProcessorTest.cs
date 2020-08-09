@@ -121,6 +121,9 @@ namespace Pulsar4X.Tests
         [Test]
         public void testColonyGravityIsHabitable()
         {
+            var humans = _humanSpecies.GetDataBlob<SpeciesDB>();
+            var lowGrav = _lowGravSpecies.GetDataBlob<SpeciesDB>();
+            var highGrav = _highGravSpecies.GetDataBlob<SpeciesDB>();
             // @todo: set up two nested loops - one for list of species, one for list of gravities
             // test a large number of different inputs
 
@@ -128,19 +131,19 @@ namespace Pulsar4X.Tests
             _earthPlanet.GetDataBlob<SystemBodyInfoDB>().Gravity = 1.0;
 
             // test for humans on a planet with low gravity
-            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_lowGravPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(-1.0, humans.ColonyCost(_lowGravPlanet));
 
             // test for humans on a planet with high gravity
-            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_highGravPlanet, _humanSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(-1.0, humans.ColonyCost(_highGravPlanet));
 
             // similar tests as above, but for a species with high and low ideal gravity
-            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _lowGravSpecies.GetDataBlob<SpeciesDB>()));
-            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_highGravPlanet, _lowGravSpecies.GetDataBlob<SpeciesDB>()));
-            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_lowGravPlanet, _lowGravSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(-1.0, lowGrav.ColonyCost(_earthPlanet));
+            Assert.AreEqual(-1.0, lowGrav.ColonyCost(_highGravPlanet));
+            Assert.AreEqual(1.0, lowGrav.ColonyCost(_lowGravPlanet));
 
-            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_earthPlanet, _highGravSpecies.GetDataBlob<SpeciesDB>()));
-            Assert.AreEqual(1.0, SpeciesProcessor.ColonyCost(_highGravPlanet, _highGravSpecies.GetDataBlob<SpeciesDB>()));
-            Assert.AreEqual(-1.0, SpeciesProcessor.ColonyCost(_lowGravPlanet, _highGravSpecies.GetDataBlob<SpeciesDB>()));
+            Assert.AreEqual(-1.0, highGrav.ColonyCost(_earthPlanet));
+            Assert.AreEqual(1.0, highGrav.ColonyCost(_highGravPlanet));
+            Assert.AreEqual(-1.0, highGrav.ColonyCost(_lowGravPlanet));
         }
 
         [Test]
