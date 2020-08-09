@@ -7,8 +7,6 @@ namespace Pulsar4X.ECSLib
 {
     public class CargoTransferDB : BaseDataBlob
     {
-
-
         internal Guid TransferJobID { get; } = Guid.NewGuid();
 
         internal Entity CargoFromEntity { get; set; }
@@ -49,4 +47,36 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
     }
+    
+    public class StorageTransferRateAtbDB : IComponentDesignAttribute
+    {
+        /// <summary>
+        /// Gets or sets the transfer rate.
+        /// </summary>
+        /// <value>The transfer rate in Kg/h</value>
+        public int TransferRate_kgh { get; internal set; }
+        /// <summary>
+        /// Gets or sets the transfer range.
+        /// </summary>
+        /// <value>DeltaV in m/s, Low Earth Orbit is about 10000m/s</value>
+        public double TransferRange_ms { get; internal set; }
+
+        public StorageTransferRateAtbDB(int rate_kgh, double rangeDV_ms)
+        {
+            TransferRate_kgh = rate_kgh;
+            TransferRange_ms = rangeDV_ms;
+        }
+
+        public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if (!parentEntity.HasDataBlob<VolumeStorageDB>())
+            {
+                var newdb = new VolumeStorageDB();
+                parentEntity.SetDataBlob(newdb);
+            }
+            StorageSpaceProcessor.RecalcVolumeCapacityAndRates(parentEntity);
+        }
+    }
+
+
 }

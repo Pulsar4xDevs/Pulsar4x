@@ -22,8 +22,7 @@ namespace Pulsar4X.ECSLib
             return false;
             */
         }
-
-
+        
 
         internal static void RecalcVolumeCapacityAndRates(Entity parentEntity)
         {
@@ -93,25 +92,8 @@ namespace Pulsar4X.ECSLib
                 cargoStorageDB.TransferRateInKgHr = (int)(transferRate / i);
                 cargoStorageDB.TransferRangeDv_mps = transferRange / i;
             }
-
         }
-        
-        public static CargoCapacityCheckResult GetAvailableSpace(VolumeStorageDB storeDB, Guid itemGuid, ICargoDefinitionsLibrary library)
-        {
-            var cargoDefinition = library.GetOther(itemGuid);
-            if (cargoDefinition.MassPerUnit == 0)
-                return new CargoCapacityCheckResult(itemGuid, long.MaxValue, long.MaxValue);
-
-            var freeMass = storeDB.TypeStores[cargoDefinition.CargoTypeID].GetFreeMass(cargoDefinition);
-            long count = (long)(freeMass * cargoDefinition.MassPerUnit);
-            return new CargoCapacityCheckResult(
-                itemGuid, 
-                count,
-                (long)freeMass);
-        }
-
     }
-
 }
 
 
