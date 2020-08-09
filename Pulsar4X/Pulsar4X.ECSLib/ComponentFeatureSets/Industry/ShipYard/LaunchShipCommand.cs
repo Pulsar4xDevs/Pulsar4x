@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib.Industry
 
             };
 
-            var parent = Entity.GetSOIParentEntity(orderEntity);
+            var parent = orderEntity.GetSOIParentEntity();
             
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         }

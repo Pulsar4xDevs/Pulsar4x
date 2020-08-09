@@ -166,7 +166,7 @@ namespace Pulsar4X.ECSLib
                     
                     KeplerElements kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, positionDB.RelativePosition_m, newtonMoveDB.CurrentVector_ms, dateTime);
 
-                    var parentEntity = Entity.GetSOIParentEntity(entity, positionDB);
+                    var parentEntity = entity.GetSOIParentEntity(positionDB);
                     
                     if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
                     {

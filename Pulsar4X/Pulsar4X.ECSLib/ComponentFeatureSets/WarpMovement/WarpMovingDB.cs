@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
         {
             ExitPointAbsolute = targetPosition_m;
             
-            var startState = Entity.GetAbsoluteState(thisEntity);
+            var startState = thisEntity.GetAbsoluteState();
             ExitPointAbsolute = targetPosition_m;
             EntryPointAbsolute = startState.pos;
             EntryDateTime = thisEntity.Manager.ManagerSubpulses.StarSysDateTime;
@@ -112,7 +112,7 @@ namespace Pulsar4X.ECSLib
                 thisEntity.StarSysDateTime
             );
             
-            var startState = Entity.GetAbsoluteState(thisEntity);
+            var startState = thisEntity.GetAbsoluteState();
             ExitPointAbsolute = targetIntercept.position + offsetPosition;
             EntryPointAbsolute = startState.pos;
             EntryDateTime = thisEntity.Manager.ManagerSubpulses.StarSysDateTime;

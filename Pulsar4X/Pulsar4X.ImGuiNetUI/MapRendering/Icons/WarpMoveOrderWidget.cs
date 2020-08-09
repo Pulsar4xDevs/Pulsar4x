@@ -50,7 +50,7 @@ namespace Pulsar4X.SDL2UI
             _movingEntityCurrentOrbit = _movingEntity.GetDataBlob<OrbitDB>();
             _transitLeaveDateTime = _currentDateTime;
 
-            _parentPositionDB = Entity.GetSOIParentPositionDB(_movingEntity);
+            _parentPositionDB = _movingEntity.GetSOIParentPositionDB();
             _departIcon = TransitIcon.CreateDepartIcon(_parentPositionDB);
             OnPhysicsUpdate();
         }
@@ -109,8 +109,7 @@ namespace Pulsar4X.SDL2UI
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 
-            _transitLeavePositionrelative_m = Entity.GetRelativeFuturePosition(_movingEntity, _transitLeaveDateTime);
-
+            _transitLeavePositionrelative_m = _movingEntity.GetRelativeFuturePosition(_transitLeaveDateTime);
         }
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)

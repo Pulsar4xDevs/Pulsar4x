@@ -70,10 +70,10 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             _orderEntity = orderEntity.Entity;
             _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
             var myMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
-            var parentMass = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<MassVolumeDB>().MassDry;
+            var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassDry;
             _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
 
-            _siblingEntities = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<PositionDB>().Children.ToArray();
+            _siblingEntities = _orderEntity.GetSOIParentEntity().GetDataBlob<PositionDB>().Children.ToArray();
             List<string> names = new List<string>();
             foreach (var entity in _siblingEntities)
             {
@@ -246,7 +246,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             double mySMA = _currentKE.SemiMajorAxis;
             float smaMin = 1;
-            float smaMax = (float)OrbitProcessor.GetSOI_m( Entity.GetSOIParentEntity(_orderEntity));
+            float smaMax = (float)OrbitProcessor.GetSOI_m(_orderEntity.GetSOIParentEntity());
             
             if(ImGui.Combo("Target Object", ref _selectedSibling, _siblingNames, _siblingNames.Length  ))
             {
@@ -305,7 +305,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             var period = _orderEntity.GetDataBlob<OrbitDB>().OrbitalPeriod.TotalSeconds;
             var orbitDB = _orderEntity.GetDataBlob<OrbitDB>();
-            var parentState = Entity.GetRelativeState(Entity.GetSOIParentEntity(_orderEntity));
+            var parentState = _orderEntity.GetSOIParentEntity().GetRelativeState();
             var parentAngle = Math.Atan2(parentState.pos.Y, parentState.pos.X);
             
             double orbitalPeriod = orbitDB.OrbitalPeriod.TotalSeconds;
@@ -332,9 +332,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             double mySMA = _currentKE.SemiMajorAxis;
             //double escapeSMA = 
             var manuverDateTime = _atDatetime + TimeSpan.FromSeconds(secondsToManuver);
-            var manuverPos = Entity.GetRelativeFuturePosition(_orderEntity, manuverDateTime);
-            var manuverVel = Entity.GetRelativeFutureVelocity(_orderEntity, manuverDateTime);
-            var soi = Entity.GetSOIParentEntity(_orderEntity).GetDataBlob<OrbitDB>().SOI_m;
+            var manuverPos = _orderEntity.GetRelativeFuturePosition(manuverDateTime);
+            var manuverVel = _orderEntity.GetRelativeFutureVelocity(manuverDateTime);
+            var soi = _orderEntity.GetSOIParentEntity().GetDataBlob<OrbitDB>().SOI_m;
             var manuver = InterceptCalcs.Hohmann2(_sgp, manuverPos.Length(), soi)[0];
 
 

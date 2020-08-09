@@ -712,7 +712,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="atDateTime">Datetime of transit start</param>
         public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition_m(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
         {
-            Vector3 moverPos = Entity.GetAbsoluteFuturePosition(mover, atDateTime);
+            Vector3 moverPos = mover.GetAbsoluteFuturePosition(atDateTime);
             double spd_m = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
             return OrbitMath.GetInterceptPosition_m(moverPos, spd_m, targetOrbit, atDateTime, offsetPosition);
         }

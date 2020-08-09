@@ -341,7 +341,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition_m.Length()));
                                 }
 
-                                var relativeState = Entity.GetRelativeState(SelectedEntity);
+                                var relativeState = SelectedEntity.GetRelativeState();
                                 ImGui.Text("relative Velocity: " + relativeState.Velocity);
                                 ImGui.Text("relative Speed: " + Stringify.Velocity(relativeState.Velocity.Length()));
                                 
@@ -432,7 +432,7 @@ namespace Pulsar4X.SDL2UI
                                     
                                     
                                     
-                                    var relativeState = Entity.GetRelativeState(SelectedEntity);
+                                    var relativeState = SelectedEntity.GetRelativeState();
                                     //var globalvec = OrbitMath.OrbitToGlobalVector(relativeState.Velocity, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
                                     var progradeVec = new Vector3(0, 100, 0);
                                     //var thrustvec = OrbitMath.OrbitToGlobalVector(progradeVec, pos, relativeState.Velocity);

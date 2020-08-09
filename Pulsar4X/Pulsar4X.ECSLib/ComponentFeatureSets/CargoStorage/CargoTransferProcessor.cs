@@ -83,8 +83,8 @@ namespace Pulsar4X.ECSLib
             double r1;
             double r2;
             
-            Entity soi1 = Entity.GetSOIParentEntity(entity1);
-            Entity soi2 = Entity.GetSOIParentEntity(entity2);
+            Entity soi1 = entity1.GetSOIParentEntity();
+            Entity soi2 = entity2.GetSOIParentEntity();
             
             
             if(soi1 == soi2)
@@ -93,9 +93,8 @@ namespace Pulsar4X.ECSLib
                 parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
                 sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(0, parentMass);
                 
-                
-                var state1 = Entity.GetRelativeState(entity1);
-                var state2 = Entity.GetRelativeState(entity2);
+                var state1 = entity1.GetRelativeState();
+                var state2 = entity2.GetRelativeState();
                 r1 = state1.pos.Length();
                 r2 = state2.pos.Length();
             }

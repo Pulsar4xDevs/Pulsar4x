@@ -149,7 +149,7 @@ namespace Pulsar4X.SDL2UI
 
             if (OrderingEntityState.Entity.HasDataBlob<OrbitDB>())
             {
-                _massCurrentBody = Entity.GetSOIParentEntity(OrderingEntityState.Entity).GetDataBlob<MassVolumeDB>().MassDry;
+                _massCurrentBody = OrderingEntityState.Entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassDry;
             }
             else
             {
@@ -521,9 +521,9 @@ namespace Pulsar4X.SDL2UI
 
             
             if(OrbitProcessor.UserelativeVelocity)
-                _departureOrbitalVelocity_m = Entity.GetRelativeFutureVelocity(OrderingEntityState.Entity, _departureDateTime);
+                _departureOrbitalVelocity_m = OrderingEntityState.Entity.GetRelativeFutureVelocity(_departureDateTime);
             else
-                _departureOrbitalVelocity_m = Entity.GetAbsoluteFutureVelocity(OrderingEntityState.Entity, _departureDateTime);
+                _departureOrbitalVelocity_m = OrderingEntityState.Entity.GetAbsoluteFutureVelocity(_departureDateTime);
             
             _departureOrbitalSpeed_m = _departureOrbitalVelocity_m.Length();
             _departureAngle = Math.Atan2(_departureOrbitalVelocity_m.Y, _departureOrbitalVelocity_m.X);

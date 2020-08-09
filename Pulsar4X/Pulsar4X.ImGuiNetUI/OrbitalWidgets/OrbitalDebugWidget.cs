@@ -167,7 +167,7 @@ namespace Pulsar4X.SDL2UI
 
         private Entity _entity;
         
-        public OrbitalDebugWidget(EntityState entityState) : base(Entity.GetSOIParentPositionDB(entityState.Entity))
+        public OrbitalDebugWidget(EntityState entityState) : base(entityState.Entity.GetSOIParentPositionDB())
         {
             _entity = entityState.Entity;
 
@@ -193,7 +193,7 @@ namespace Pulsar4X.SDL2UI
             
             //NOTE! _positionDB references the focal point (ie parent's position) *not* the orbiting object position.
             
-            var parentEntity = Entity.GetSOIParentEntity(_entity);
+            var parentEntity = _entity.GetSOIParentEntity();
             _positionDB = parentEntity.GetDataBlob<PositionDB>();
 
             var parentMass = parentEntity.GetDataBlob<MassVolumeDB>().MassDry;

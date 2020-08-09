@@ -43,16 +43,16 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
         
         public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, double beamVelocity, double beamLenInSeconds)
         {
-            var ourState = Entity.GetRelativeState(launchingEntity);
-            var tgtState = Entity.GetRelativeState(targetEntity);
+            var ourState = launchingEntity.GetRelativeState();
+            var tgtState = targetEntity.GetRelativeState();
             
             Vector3 leadToTgt = (tgtState.Velocity - ourState.Velocity);
             Vector3 vectorToTgt = (tgtState.pos = ourState.pos);
             var distanceToTgt = vectorToTgt.Length();
             var timeToTarget = distanceToTgt / beamVelocity;
             var futureDate = launchingEntity.StarSysDateTime + TimeSpan.FromSeconds(timeToTarget);
-            var futurePosition = Entity.GetAbsoluteFuturePosition(targetEntity, futureDate);
-            var ourAbsPos = Entity.GetAbsoluteFuturePosition(launchingEntity, futureDate);
+            var futurePosition = targetEntity.GetAbsoluteFuturePosition(futureDate);
+            var ourAbsPos = launchingEntity.GetAbsoluteFuturePosition(futureDate);
             var normVector = Vector3.Normalise(futurePosition - ourAbsPos);
             var absVector =  normVector * beamVelocity;
             var startPos = (PositionDB)launchingEntity.GetDataBlob<PositionDB>().Clone();
@@ -99,7 +99,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                     timespanToIntercept = TimeSpan.FromSeconds(newttt);
                 }
                 DateTime futureDate = atDateTime + timespanToIntercept;
-                var futurePosition = Entity.GetRelativeFuturePosition(targetEntity, futureDate);
+                var futurePosition = targetEntity.GetRelativeFuturePosition(futureDate);
                     
                 tgtBearing = futurePosition - ourState.pos;
                 distanceToTgt = (tgtBearing).Length();
