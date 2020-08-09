@@ -132,7 +132,7 @@ namespace Pulsar4X.ECSLib
             if (batchJob.InstallOn != null)
             {
                ComponentInstance specificComponent = new ComponentInstance((ComponentDesign)designInfo);
-               if (batchJob.InstallOn == industryEntity || StorageSpaceProcessor.HasEntity(storage, batchJob.InstallOn.GetDataBlob<CargoAbleTypeDB>()))
+               if (batchJob.InstallOn == industryEntity || storage.HasSpecificEntity(batchJob.InstallOn.GetDataBlob<CargoAbleTypeDB>()))
                {
                    EntityManipulation.AddComponentToEntity(batchJob.InstallOn, specificComponent);
                    ReCalcProcessor.ReCalcAbilities(batchJob.InstallOn);

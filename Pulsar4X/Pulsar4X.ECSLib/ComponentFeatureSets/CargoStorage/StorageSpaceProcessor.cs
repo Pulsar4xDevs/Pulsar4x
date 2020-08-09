@@ -12,16 +12,7 @@ namespace Pulsar4X.ECSLib
     public static class StorageSpaceProcessor
     {
 
-        internal static bool HasEntity(VolumeStorageDB storeDB, CargoAbleTypeDB item)
-        {
-            throw new NotImplementedException();
-            /*
-            if(storeDB.TypeStores[item.CargoTypeID].CurrentStore.ContainsKey(item.ID))
-                if (storeDB.TypeStores[item.CargoTypeID].CurrentStore[item.ID].Contains(item.OwningEntity))
-                    return true;
-            return false;
-            */
-        }
+
         
 
         internal static void RecalcVolumeCapacityAndRates(Entity parentEntity)
