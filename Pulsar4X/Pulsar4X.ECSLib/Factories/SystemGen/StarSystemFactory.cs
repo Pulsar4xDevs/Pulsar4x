@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
         {
             StarSystem newSystem = new StarSystem(game, name, seed);
 
-            var rngValue = newSystem.RNG.NextDouble();
+            var rngValue = newSystem.RNGNextDouble();
             int numStars = StaticRefLib.GameSettings.StarChances.Select(rngValue);
             List<Entity> stars = _starFactory.CreateStarsForSystem(newSystem, numStars, StaticRefLib.CurrentDateTime);
 

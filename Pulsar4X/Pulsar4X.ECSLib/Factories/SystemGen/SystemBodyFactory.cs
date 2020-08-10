@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         private int CalcNumBodiesForStar(StarSystem system, MassVolumeDB starMassInfo, StarInfoDB starInfo)
         {
-            var rngVal = system.RNG.NextDouble();
+            var rngVal = system.RNGNextDouble();
             if (rngVal > _galaxyGen.Settings.PlanetGenerationChance)
             {
                 // Star will not have planets.
@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib
             double starSpectralTypeRatio = _galaxyGen.Settings.StarSpectralTypePlanetGenerationRatio[starInfo.SpectralType];
 
             // Random value.
-            double randomMultiplier = system.RNG.NextDouble();
+            double randomMultiplier = system.RNGNextDouble();
 
             double percentOfMax = GeneralMath.Clamp(starMassRatio * starSpectralTypeRatio * randomMultiplier, 0, 1);
 
@@ -117,7 +117,7 @@ namespace Pulsar4X.ECSLib
             while (numberOfBodies > 0)
             {
                 // Select a band to add a body to.
-                var rngVal = system.RNG.NextDouble();
+                var rngVal = system.RNGNextDouble();
                 SystemBand selectedBand = _galaxyGen.Settings.BandBodyWeight.Select(rngVal);
                 // Add a body to that band.
                 switch (selectedBand)
@@ -170,7 +170,7 @@ namespace Pulsar4X.ECSLib
             if (min > _galaxyGen.Settings.MaxNoOfComets)
                 min = _galaxyGen.Settings.MaxNoOfComets;
 
-            int noOfComets = system.RNG.Next(min, _galaxyGen.Settings.MaxNoOfComets + 1);
+            int noOfComets = system.RNGNext(min, _galaxyGen.Settings.MaxNoOfComets + 1);
 
             // now lets create the comets:
             for (int i = 0; i < noOfComets; ++i)
@@ -185,8 +185,8 @@ namespace Pulsar4X.ECSLib
                 cometBodyDB.BodyType = BodyType.Comet;
 
                 MassVolumeDB cometMVDB = MassVolumeDB.NewFromMassAndDensity(
-                    GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[BodyType.Comet], system.RNG.NextDouble()),
-                    GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Comet], system.RNG.NextDouble()));
+                    GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[BodyType.Comet], system.RNGNextDouble()),
+                    GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Comet], system.RNGNextDouble()));
                 newCometProto.SetDataBlob(cometMVDB, EntityManager.GetTypeIndex<MassVolumeDB>());
 
                 GenerateCometOrbit(system, star, newCometProto, currentDateTime);
@@ -212,12 +212,12 @@ namespace Pulsar4X.ECSLib
 
             double min = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Min);
             double max = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Max);
-            double semiMajorAxis = GeneralMath.SelectFromRange(new MinMaxStruct(min, max), system.RNG.NextDouble());
-            double eccentricity = GeneralMath.SelectFromRange(_galaxyGen.Settings.BodyEccentricityByType[BodyType.Comet], system.RNG.NextDouble());
-            double inclination = system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination;
-            double longitudeOfAscendingNode = system.RNG.NextDouble() * 360;
-            double argumentOfPeriapsis = system.RNG.NextDouble() * 360;
-            double meanAnomaly = system.RNG.NextDouble() * 360;
+            double semiMajorAxis = GeneralMath.SelectFromRange(new MinMaxStruct(min, max), system.RNGNextDouble());
+            double eccentricity = GeneralMath.SelectFromRange(_galaxyGen.Settings.BodyEccentricityByType[BodyType.Comet], system.RNGNextDouble());
+            double inclination = system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination;
+            double longitudeOfAscendingNode = system.RNGNextDouble() * 360;
+            double argumentOfPeriapsis = system.RNGNextDouble() * 360;
+            double meanAnomaly = system.RNGNextDouble() * 360;
 
             comet.SetDataBlob(new OrbitDB(star, starMVDB.MassDry, cometMVDB.MassDry, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode,
                                             argumentOfPeriapsis, meanAnomaly, currentDateTime));
@@ -247,7 +247,7 @@ namespace Pulsar4X.ECSLib
                 double massMultiplyer = 1; // Later we do some multiplication.
                 SystemBodyInfoDB newBodyBodyDB = newBody.GetDataBlob<SystemBodyInfoDB>();
 
-                newBodyBodyDB.BodyType = _galaxyGen.Settings.GetBandBodyTypeWeight(systemBand).Select(system.RNG.NextDouble());
+                newBodyBodyDB.BodyType = _galaxyGen.Settings.GetBandBodyTypeWeight(systemBand).Select(system.RNGNextDouble());
                 
 
                 if (newBodyBodyDB.BodyType == BodyType.Asteroid)
@@ -257,7 +257,7 @@ namespace Pulsar4X.ECSLib
                         // Max number of belts reach. Reroll until we've got... not an asteroid belt.
                         while (newBodyBodyDB.BodyType == BodyType.Asteroid)
                         {
-                            newBodyBodyDB.BodyType = _galaxyGen.Settings.GetBandBodyTypeWeight(systemBand).Select(system.RNG.NextDouble());
+                            newBodyBodyDB.BodyType = _galaxyGen.Settings.GetBandBodyTypeWeight(systemBand).Select(system.RNGNextDouble());
                         }
                     }
                     else
@@ -265,7 +265,7 @@ namespace Pulsar4X.ECSLib
                         // We calculate the entire mass of the asteroid belt here.
                         // Note, this "numOfAsteroids" is not the final number. When we 
                         // finalize this asteroid belt, we'll generate asteroids until we run out of mass.
-                        double noOfAsteroids = system.RNG.NextDouble() * _galaxyGen.Settings.MaxNoOfAsteroidsPerBelt;
+                        double noOfAsteroids = system.RNGNextDouble() * _galaxyGen.Settings.MaxNoOfAsteroidsPerBelt;
                         massMultiplyer = noOfAsteroids;
                     }
                 }
@@ -275,14 +275,14 @@ namespace Pulsar4X.ECSLib
                 if (newBodyBodyDB.BodyType == BodyType.Asteroid)
                 {
                     // Mass multiplication here. This allows us to set the mass to the correct value for both asteroid belts and other bodies.
-                    massMultiplyer *= GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.BodyType], system.RNG.NextDouble());  // cache final mass in massMultiplyer.
+                    massMultiplyer *= GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.BodyType], system.RNGNextDouble());  // cache final mass in massMultiplyer.
                     var minMaxDensity = _galaxyGen.Settings.SystemBodyDensityByType[newBodyBodyDB.BodyType];
                     density = (minMaxDensity.Min + minMaxDensity.Max) / 2.0;
                 }
                 else
                 {
-                    massMultiplyer *= GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.BodyType], Math.Pow(system.RNG.NextDouble(), 3)); // cache mass, alos cube random nuber to make smaller bodies more likly.
-                    density = GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[newBodyBodyDB.BodyType], system.RNG.NextDouble());
+                    massMultiplyer *= GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyBodyDB.BodyType], Math.Pow(system.RNGNextDouble(), 3)); // cache mass, alos cube random nuber to make smaller bodies more likly.
+                    density = GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[newBodyBodyDB.BodyType], system.RNGNextDouble());
                 }
                 
                 var mvDB = MassVolumeDB.NewFromMassAndDensity(massMultiplyer, density);
@@ -423,7 +423,7 @@ namespace Pulsar4X.ECSLib
                 return null;
             }
 
-            double sma_m =  GeneralMath.SelectFromRange(minDistance, maxDistance, system.RNG.NextDouble());
+            double sma_m =  GeneralMath.SelectFromRange(minDistance, maxDistance, system.RNGNextDouble());
 
             // Calculate max eccentricity.
             // First calc max eccentricity for the apoapsis.
@@ -451,9 +451,9 @@ namespace Pulsar4X.ECSLib
             }
 
             // Now select a random eccentricity within the limits.
-            double eccentricity = GeneralMath.SelectFromRange(eccentricityMinMax, system.RNG.NextDouble());
+            double eccentricity = GeneralMath.SelectFromRange(eccentricityMinMax, system.RNGNextDouble());
 
-            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, currentDateTime);
+            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination, system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, currentDateTime);
         }
 
         private void FinalizeBodies(StaticDataStore staticData, StarSystem system, Entity body, int bodyCount, DateTime currentDateTime)
@@ -510,7 +510,7 @@ namespace Pulsar4X.ECSLib
             SystemBodyInfoDB parentBodyDB = parent.GetDataBlob<SystemBodyInfoDB>();
 
             // first lets see if this planet gets moons:
-            if (system.RNG.NextDouble() > _galaxyGen.Settings.MoonGenerationChanceByPlanetType[parentBodyDB.BodyType])
+            if (system.RNGNextDouble() > _galaxyGen.Settings.MoonGenerationChanceByPlanetType[parentBodyDB.BodyType])
                 return; // no moons for you :(
 
             // Okay lets work out the number of moons based on:
@@ -519,7 +519,7 @@ namespace Pulsar4X.ECSLib
             // And a random number for randomness.
             MassVolumeDB parentMVDB = parent.GetDataBlob<MassVolumeDB>();
             double massRatioOfParent = parentMVDB.MassDry / _galaxyGen.Settings.SystemBodyMassByType[parentBodyDB.BodyType].Max;
-            double moonGenChance = massRatioOfParent * system.RNG.NextDouble() * _galaxyGen.Settings.MaxNoOfMoonsByPlanetType[parentBodyDB.BodyType];
+            double moonGenChance = massRatioOfParent * system.RNGNextDouble() * _galaxyGen.Settings.MaxNoOfMoonsByPlanetType[parentBodyDB.BodyType];
             moonGenChance = GeneralMath.Clamp(moonGenChance, 1, _galaxyGen.Settings.MaxNoOfMoonsByPlanetType[parentBodyDB.BodyType]);
             int numMoons = (int)Math.Round(moonGenChance);
 
@@ -541,8 +541,8 @@ namespace Pulsar4X.ECSLib
                 }
 
                 MassVolumeDB newMoonMVDB = MassVolumeDB.NewFromMassAndDensity(
-                    GeneralMath.SelectFromRange(moonMassMinMax, system.RNG.NextDouble()),
-                    GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Moon], system.RNG.NextDouble()));
+                    GeneralMath.SelectFromRange(moonMassMinMax, system.RNGNextDouble()),
+                    GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Moon], system.RNGNextDouble()));
                 newMoon.SetDataBlob(newMoonMVDB, EntityManager.GetTypeIndex<MassVolumeDB>());
 
                 moons.Add(newMoon);
@@ -577,7 +577,7 @@ namespace Pulsar4X.ECSLib
                 newBody.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
                 SystemBodyInfoDB newBodyDB = newBody.GetDataBlob<SystemBodyInfoDB>();
 
-                if (system.RNG.NextDouble() > (1.0 / _galaxyGen.Settings.NumberOfAsteroidsPerDwarfPlanet))
+                if (system.RNGNextDouble() > (1.0 / _galaxyGen.Settings.NumberOfAsteroidsPerDwarfPlanet))
                 {
                     newBodyDB.BodyType = BodyType.Asteroid;
                 }
@@ -587,8 +587,8 @@ namespace Pulsar4X.ECSLib
                 }
 
                 MassVolumeDB mvDB = MassVolumeDB.NewFromMassAndDensity(
-                    GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyDB.BodyType], system.RNG.NextDouble()),
-                    GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[newBodyDB.BodyType], system.RNG.NextDouble()));
+                    GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyMassByType[newBodyDB.BodyType], system.RNGNextDouble()),
+                    GeneralMath.SelectFromRange(_galaxyGen.Settings.SystemBodyDensityByType[newBodyDB.BodyType], system.RNGNextDouble()));
                 newBody.SetDataBlob(mvDB, EntityManager.GetTypeIndex<MassVolumeDB>());
 
                 FinalizeAsteroidOrbit(system, newBody, referenceOrbit);
@@ -618,30 +618,30 @@ namespace Pulsar4X.ECSLib
             double deviation = referenceOrbit.SemiMajorAxis_AU * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
             double min = referenceOrbit.SemiMajorAxis_AU - deviation;
             double max = referenceOrbit.SemiMajorAxis_AU + deviation;
-            double semiMajorAxis = GeneralMath.SelectFromRange(min, max, system.RNG.NextDouble());  // don't need to raise to power, reference orbit already did that.
+            double semiMajorAxis = GeneralMath.SelectFromRange(min, max, system.RNGNextDouble());  // don't need to raise to power, reference orbit already did that.
 
             deviation = referenceOrbit.Eccentricity * Math.Pow(_galaxyGen.Settings.MaxAsteroidOrbitDeviation, 2);
             min = referenceOrbit.Eccentricity - deviation;
             max = referenceOrbit.Eccentricity + deviation;
-            double eccentricity = GeneralMath.SelectFromRange(min, max, system.RNG.NextDouble()); // get random eccentricity needs better distribution.
+            double eccentricity = GeneralMath.SelectFromRange(min, max, system.RNGNextDouble()); // get random eccentricity needs better distribution.
 
             deviation = referenceOrbit.Inclination_Degrees * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
             min = referenceOrbit.Inclination_Degrees - deviation;
             max = referenceOrbit.Inclination_Degrees + deviation;
-            double inclination = GeneralMath.SelectFromRange(min, max, system.RNG.NextDouble()); // doesn't do much at the moment but may as well be there. Need better Dist.
+            double inclination = GeneralMath.SelectFromRange(min, max, system.RNGNextDouble()); // doesn't do much at the moment but may as well be there. Need better Dist.
 
             deviation = referenceOrbit.ArgumentOfPeriapsis_Degrees * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
             min = referenceOrbit.ArgumentOfPeriapsis_Degrees - deviation;
             max = referenceOrbit.ArgumentOfPeriapsis_Degrees + deviation;
-            double argumentOfPeriapsis = GeneralMath.SelectFromRange(min, max, system.RNG.NextDouble());
+            double argumentOfPeriapsis = GeneralMath.SelectFromRange(min, max, system.RNGNextDouble());
 
             deviation = referenceOrbit.LongitudeOfAscendingNode_Degrees * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
             min = referenceOrbit.LongitudeOfAscendingNode_Degrees - deviation;
             max = referenceOrbit.LongitudeOfAscendingNode_Degrees + deviation;
-            double longitudeOfAscendingNode = GeneralMath.SelectFromRange(min, max, system.RNG.NextDouble());
+            double longitudeOfAscendingNode = GeneralMath.SelectFromRange(min, max, system.RNGNextDouble());
 
             // Keep the starting point of the orbit completely random.
-            double meanAnomaly = system.RNG.NextDouble() * 360;
+            double meanAnomaly = system.RNGNextDouble() * 360;
 
             // now Create the orbit:
             MassVolumeDB parentMVDB = referenceOrbit.Parent.GetDataBlob<MassVolumeDB>();
@@ -702,11 +702,11 @@ namespace Pulsar4X.ECSLib
             }
 
             // Create some of the basic stats:
-            bodyInfo.AxialTilt = (float)(system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination);
+            bodyInfo.AxialTilt = (float)(system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination);
 
             // generate the planets day length:
             //< @todo Should we do Tidally Locked bodies??? iirc bodies trend toward being tidally locked over time...
-            bodyInfo.LengthOfDay = new TimeSpan((int)Math.Round(GeneralMath.SelectFromRange(0, bodyOrbit.OrbitalPeriod.TotalDays, system.RNG.NextDouble())), system.RNG.Next(0, 24), system.RNG.Next(0, 60), 0);
+            bodyInfo.LengthOfDay = new TimeSpan((int)Math.Round(GeneralMath.SelectFromRange(0, bodyOrbit.OrbitalPeriod.TotalDays, system.RNGNextDouble())), system.RNGNext(0, 24), system.RNGNext(0, 60), 0);
             // just a basic sanity check to make sure we don't end up with a planet rotating once every 3 minutes, It'd pull itself apart!!
             if (bodyInfo.LengthOfDay < TimeSpan.FromHours(_galaxyGen.Settings.MiniumPossibleDayLength))
                 bodyInfo.LengthOfDay += TimeSpan.FromHours(_galaxyGen.Settings.MiniumPossibleDayLength);
@@ -721,7 +721,7 @@ namespace Pulsar4X.ECSLib
                 bodyInfo.Tectonics = TectonicActivity.NA;  // We are not a Terrestrial body, we have no Tectonics!!!
 
             // Generate Magnetic field, must be done before atmosphere:
-            bodyInfo.MagneticField = (float)GeneralMath.SelectFromRange(_galaxyGen.Settings.PlanetMagneticFieldByType[bodyInfo.BodyType], system.RNG.NextDouble());
+            bodyInfo.MagneticField = (float)GeneralMath.SelectFromRange(_galaxyGen.Settings.PlanetMagneticFieldByType[bodyInfo.BodyType], system.RNGNextDouble());
             if (bodyInfo.Tectonics == TectonicActivity.Dead)
                 bodyInfo.MagneticField *= 0.1F; // reduce magnetic field of a dead world.
 
@@ -749,7 +749,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         private TectonicActivity GenerateTectonicActivity(StarSystem system, StarInfoDB starInfo, MassVolumeDB bodyMass)
         {
-            if (system.RNG.NextDouble() > _galaxyGen.Settings.TerrestrialBodyTectonicActivityChance)
+            if (system.RNGNextDouble() > _galaxyGen.Settings.TerrestrialBodyTectonicActivityChance)
             {
                 return TectonicActivity.Dead;
             }
@@ -826,21 +826,21 @@ namespace Pulsar4X.ECSLib
             {
                 return; // no valid atmosphere!
             }
-            else if (system.RNG.NextDouble() > _galaxyGen.Settings.RuinsGenerationChance)
+            else if (system.RNGNextDouble() > _galaxyGen.Settings.RuinsGenerationChance)
             {
                 return; // that's right... lucked out on this one.
             }
 
             // now if we have survived the gauntlet lets gen some Ruins!!
-            ruins.RuinSize = _galaxyGen.Settings.RuinsSizeDistribution.Select(system.RNG.Next(0, 100));
+            ruins.RuinSize = _galaxyGen.Settings.RuinsSizeDistribution.Select(system.RNGNext(0, 100));
 
-            int quality = system.RNG.Next(0, 100);
+            int quality = system.RNGNext(0, 100);
             ruins.RuinQuality = _galaxyGen.Settings.RuinsQualityDistribution.Select(quality);
             if (ruins.RuinSize == RuinsDB.RSize.City && quality >= 95)
                 ruins.RuinQuality = RuinsDB.RQuality.MultipleIntact;  // special case!!
 
             // Ruins count:
-            ruins.RuinCount = (uint)GeneralMath.SelectFromRange(_galaxyGen.Settings.RuinsCountRangeBySize[ruins.RuinSize], system.RNG.NextDouble());
+            ruins.RuinCount = (uint)GeneralMath.SelectFromRange(_galaxyGen.Settings.RuinsCountRangeBySize[ruins.RuinSize], system.RNGNextDouble());
             ruins.RuinCount = (uint)Math.Round(_galaxyGen.Settings.RuinsQualityAdjustment[ruins.RuinQuality] * ruins.RuinCount);
         }
 
@@ -856,7 +856,7 @@ namespace Pulsar4X.ECSLib
 
             // get the mass ratio for this body to planet:
             double massRatio = bodyMass.MassDry / UniversalConstants.Units.EarthMassInKG;
-            double genChance = massRatio * system.RNG.NextDouble();
+            double genChance = massRatio * system.RNGNextDouble();
             double genChanceThreshold = _galaxyGen.Settings.MineralGenerationChanceByBodyType[bodyInfo.BodyType];
 
             // now lets see if this body has minerals
@@ -875,7 +875,7 @@ namespace Pulsar4X.ECSLib
 
                 // get a genChance:
                 double abundance = min.Abundance[bodyInfo.BodyType];
-                genChance = massRatio * system.RNG.NextDouble() * abundance;
+                genChance = massRatio * system.RNGNextDouble() * abundance;
 
                 if (genChance >= genChanceThreshold)
                 {
@@ -905,8 +905,8 @@ namespace Pulsar4X.ECSLib
                 // create a MineralDepositInfo
                 MineralDepositInfo mdi = new MineralDepositInfo
                 {
-                    Accessibility = GeneralMath.Clamp(_galaxyGen.Settings.MinHomeworldMineralAccessibility + system.RNG.NextDouble() * min.Abundance[bodyInfo.BodyType], 0, 1), 
-                    Amount = (long)Math.Round(_galaxyGen.Settings.MinHomeworldMineralAmmount + _galaxyGen.Settings.HomeworldMineralAmmount * system.RNG.NextDouble() * min.Abundance[bodyInfo.BodyType])
+                    Accessibility = GeneralMath.Clamp(_galaxyGen.Settings.MinHomeworldMineralAccessibility + system.RNGNextDouble() * min.Abundance[bodyInfo.BodyType], 0, 1), 
+                    Amount = (long)Math.Round(_galaxyGen.Settings.MinHomeworldMineralAmmount + _galaxyGen.Settings.HomeworldMineralAmmount * system.RNGNextDouble() * min.Abundance[bodyInfo.BodyType])
                 };
                 mdi.HalfOriginalAmount = mdi.Amount / 2;
 
@@ -934,17 +934,17 @@ namespace Pulsar4X.ECSLib
             OrbitDB orbit = body.GetDataBlob<OrbitDB>();
 
             // Set Albeado (all bodies have an albedo):
-            bodyDB.Albedo = (float)GeneralMath.SelectFromRange(_galaxyGen.Settings.PlanetAlbedoByType[bodyDB.BodyType], system.RNG.NextDouble());
+            bodyDB.Albedo = (float)GeneralMath.SelectFromRange(_galaxyGen.Settings.PlanetAlbedoByType[bodyDB.BodyType], system.RNGNextDouble());
 
             // Atmo modifer is used to determine how thick the atmosphere should be, higher = thicker.
             double atmoModifer = _galaxyGen.Settings.AtmosphereGenerationModifier[bodyDB.BodyType] * (mvDB.MassDry / UniversalConstants.Units.EarthMassInKG);
             double atmoGenChance = GeneralMath.Clamp(atmoModifer, 0, 1); // used to detmine if we should haver an atmosphere at all.
 
-            if (atmoGenChance > system.RNG.NextDouble())
+            if (atmoGenChance > system.RNGNextDouble())
             {
                 // we can generate an atmosphere!
                 // first we should decide how thick it should be:
-                double newATM = GenAtmosphereThickness(mvDB.MassDry, bodyDB, orbit, atmoModifer, system.RNG.NextDouble());
+                double newATM = GenAtmosphereThickness(mvDB.MassDry, bodyDB, orbit, atmoModifer, system.RNGNextDouble());
 
                 // set an initial surface temp to the base temp, adjusted for albedo:
                 atmoDB.SurfaceTemperature = atmoDB.SurfaceTemperature = bodyDB.BaseTemperature * (1 - bodyDB.Albedo);
@@ -960,10 +960,10 @@ namespace Pulsar4X.ECSLib
             // Add hydrospher if terra like world that has an atmosphere:
             if ((bodyDB.BodyType == BodyType.Terrestrial || bodyDB.BodyType == BodyType.Terrestrial) && atmoDB.Exists)
             {
-                if (system.RNG.NextDouble() > 0.75)
+                if (system.RNGNextDouble() > 0.75)
                 {
                     atmoDB.Hydrosphere = true;
-                    atmoDB.HydrosphereExtent = (short)(system.RNG.NextDouble() * 100);
+                    atmoDB.HydrosphereExtent = (short)(system.RNGNextDouble() * 100);
                 }
             }
         }
@@ -1054,14 +1054,14 @@ namespace Pulsar4X.ECSLib
                 return; // bail on selecting gases, we don't have enough!!
 
             // get the primary gass:
-            double percentage = 0.6 + 0.3 * system.RNG.NextDouble();
-            var gas = gases.Select(system.RNG.NextDouble());
+            double percentage = 0.6 + 0.3 * system.RNGNextDouble();
+            var gas = gases.Select(system.RNGNextDouble());
             atmoDB.Composition.Add(gas, (float)(percentage * atm));
             gases.Remove(gas);
 
             // get the secondary gas:
             percentage = 0.98 - percentage;
-            gas = gases.Select(system.RNG.NextDouble());
+            gas = gases.Select(system.RNGNextDouble());
             atmoDB.Composition.Add(gas, (float)(percentage * atm));
             gases.Remove(gas);
 
@@ -1076,8 +1076,8 @@ namespace Pulsar4X.ECSLib
             percentage = 0;
             for (int i = 0; i < noOfTraceGases + 1; ++i)
             {
-                percentage = (remainingPercentage - percentage) * system.RNG.NextDouble();  // just use random numbers, it will be close enough.
-                gas = gases.Select(system.RNG.NextDouble()); 
+                percentage = (remainingPercentage - percentage) * system.RNGNextDouble();  // just use random numbers, it will be close enough.
+                gas = gases.Select(system.RNGNextDouble()); 
                 atmoDB.Composition.Add(gas, (float)(percentage * atm));
                 gases.Remove(gas);
             }

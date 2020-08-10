@@ -75,15 +75,15 @@ namespace Pulsar4X.ECSLib
                 SpectralType starType;
                 if (_galaxyGen.Settings.RealStarSystems)
                 {
-                    starType = _galaxyGen.Settings.StarTypeDistributionForRealStars.Select(system.RNG.NextDouble());
+                    starType = _galaxyGen.Settings.StarTypeDistributionForRealStars.Select(system.RNGNextDouble());
                 }
                 else
                 {
-                    starType = _galaxyGen.Settings.StarTypeDistributionForFakeStars.Select(system.RNG.NextDouble());
+                    starType = _galaxyGen.Settings.StarTypeDistributionForFakeStars.Select(system.RNGNextDouble());
                 }
 
                 // We will use the one random number to select from all the spectral type ranges. Should give us saner numbers for stars.
-                double randomSelection = system.RNG.NextDouble();
+                double randomSelection = system.RNGNextDouble();
 
                 // Generate the star's datablobs.
                 MassVolumeDB starMVDB = MassVolumeDB.NewFromMassAndRadius_AU(
@@ -147,10 +147,10 @@ namespace Pulsar4X.ECSLib
 
                 double minDistance = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[previousStarInfo.SpectralType].Max + _galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[currentStarInfo.SpectralType].Max + previousOrbit.SemiMajorAxis_AU;
 
-                double sma = minDistance * Math.Pow(system.RNG.NextDouble(), 3);
-                double eccentricity = Math.Pow(system.RNG.NextDouble() * 0.8, 3);
+                double sma = minDistance * Math.Pow(system.RNGNextDouble(), 3);
+                double eccentricity = Math.Pow(system.RNGNextDouble() * 0.8, 3);
 
-                OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.MassDry, currentStar.GetDataBlob<MassVolumeDB>().MassDry, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, currentDateTime);
+                OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.MassDry, currentStar.GetDataBlob<MassVolumeDB>().MassDry, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNGNextDouble(), system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, currentDateTime);
                 currentStar.SetDataBlob(currentOrbit);
                 currentStar.GetDataBlob<PositionDB>().SetParent(currentOrbit.Parent);
                 previousStar = currentStar;

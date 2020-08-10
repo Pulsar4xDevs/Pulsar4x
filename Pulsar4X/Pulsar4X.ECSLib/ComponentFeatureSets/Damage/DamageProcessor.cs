@@ -54,7 +54,7 @@ namespace Pulsar4X.ECSLib
                 while (damageAmount > 0)
                 {
 
-                    int randValue = mySystem.RNG.Next((int)(damageableEntity.GetDataBlob<MassVolumeDB>().Volume_m3)); //volume in m^3
+                    int randValue = mySystem.RNGNext((int)(damageableEntity.GetDataBlob<MassVolumeDB>().Volume_m3)); //volume in m^3
 
           
                     if (damageAttempt == 20) // need to copy this to fully break out of the loop;
@@ -100,7 +100,7 @@ namespace Pulsar4X.ECSLib
                 int damageAttempt = 0;
                 while (damageAmount > 0)
                 {
-                    int randValue = mySystem.RNG.Next((int)damageableEntity.GetDataBlob<MassVolumeDB>().Volume_km3);
+                    int randValue = mySystem.RNGNext((int)damageableEntity.GetDataBlob<MassVolumeDB>().Volume_km3);
 
                     foreach (KeyValuePair<Entity, double> pair in ColInst.ComponentDictionary)
                     {
