@@ -24,15 +24,23 @@ namespace Pulsar4X.Tests
         public void CreateAndFillStarSystem()
         {
             var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 10 }); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSystem(_game, "Argon Prime", 12345); // Keeping with the X3 theme :P
 
+            // Test Item Counts are as expected
+            Assert.AreEqual(1, system.GetNumberOfStars());
+            //Assert.AreEqual(1, system.GetNumberOfComets());
+            //Assert.AreEqual(5, system.GetNumberOfMoons());
+            //Assert.AreEqual(5, system.GetNumberOfDwarfPlanets());
+            //Assert.AreEqual(2, system.GetNumberOfIceGiants());
+            //Assert.AreEqual(2, system.GetNumberOfGasGiants());
+            //Assert.AreEqual(4, system.GetNumberOfTerrestrialPlanets());
+
             // lets test that the stars generated okay:
             List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>(_smAuthToken);
             Assert.IsNotEmpty(stars);
-            Assert.AreEqual(stars.Count, 1);
 
             StarInfoDB argonPrimeA = stars[0].GetDataBlob<StarInfoDB>();
             Assert.AreEqual(argonPrimeA.Age, 173752610.02727583);
@@ -62,12 +70,32 @@ namespace Pulsar4X.Tests
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSol(_game);
 
+            // Test Item Counts are as expected
+            Assert.AreEqual(1, system.GetNumberOfStars());
+            Assert.AreEqual(1, system.GetNumberOfComets());
+            Assert.AreEqual(5, system.GetNumberOfMoons());
+            Assert.AreEqual(5, system.GetNumberOfDwarfPlanets());
+            Assert.AreEqual(2, system.GetNumberOfIceGiants());
+            Assert.AreEqual(2, system.GetNumberOfGasGiants());
+            Assert.AreEqual(4, system.GetNumberOfTerrestrialPlanets());
+
             // lets test that the stars generated okay:
             List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>(_smAuthToken);
             Assert.IsNotEmpty(stars);
-            Assert.AreEqual(stars.Count, 1);
 
             StarInfoDB sol = stars[0].GetDataBlob<StarInfoDB>();
+            Assert.AreEqual(sol.Age, 4600000000);
+            Assert.AreEqual(sol.Class, "G");
+            Assert.AreEqual(sol.EcoSphereRadius, 1.1635341143662412);
+            Assert.AreEqual(sol.Luminosity, 1);
+            Assert.AreEqual(sol.LuminosityClass, LuminosityClass.V);
+            Assert.AreEqual(sol.MaxHabitableRadius, 1.3736056394868901);
+            Assert.AreEqual(sol.MinHabitableRadius, 0.95346258924559235);
+            Assert.AreEqual(sol.SpectralSubDivision, 0);
+            Assert.AreEqual(sol.SpectralType, SpectralType.G);
+            Assert.AreEqual(sol.Temperature, 5778);
+
+            // now confirm the system bodies all created
 
             List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken);
             Assert.IsNotEmpty(systemBodies);
