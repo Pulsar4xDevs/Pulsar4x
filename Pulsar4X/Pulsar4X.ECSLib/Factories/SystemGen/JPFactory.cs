@@ -23,15 +23,15 @@ namespace Pulsar4X.ECSLib
             
             var jpPositionLimits = new MinMaxStruct(ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[primaryStarInfoDB.SpectralType].Min, ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[primaryStarInfoDB.SpectralType].Max);
 
-            jpPositionDB.X_AU = GeneralMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
-            jpPositionDB.Y_AU = GeneralMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
+            jpPositionDB.X_AU = GeneralMath.SelectFromRange(jpPositionLimits, system.RNGNextDouble());
+            jpPositionDB.Y_AU = GeneralMath.SelectFromRange(jpPositionLimits, system.RNGNextDouble());
 
             // Randomly flip the position sign to allow negative values.
-            if (system.RNG.Next(0, 100) < 50)
+            if (system.RNGNext(0, 100) < 50)
             {
                 jpPositionDB.X_AU = 0 - jpPositionDB.X_AU;
             }
-            if (system.RNG.Next(0, 100) < 50)
+            if (system.RNGNext(0, 100) < 50)
             {
                 jpPositionDB.Y_AU = 0 - jpPositionDB.Y_AU;
             }
@@ -55,8 +55,6 @@ namespace Pulsar4X.ECSLib
             int numJumpPoints = 0;
             int baseJPChance = 90;
 
-            Random RNG = new Random();
-
             double jpChance;
             int random;
             do
@@ -79,7 +77,7 @@ namespace Pulsar4X.ECSLib
                     baseJPChance = 30;
                 }
 
-                random = RNG.Next(0, 100);
+                random = system.RNGNext(0, 100);
             } while (jpChance > random);
 
             return numJumpPoints;
