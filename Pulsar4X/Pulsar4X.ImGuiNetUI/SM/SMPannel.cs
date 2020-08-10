@@ -87,7 +87,8 @@ namespace Pulsar4X.SDL2UI
             //selectedEntityData
             if (_uiState.SMenabled && ImGui.Begin("SM", ref IsActive, _flags))
             {
-
+                if(_currentSystem != _uiState.SelectedSystem)
+                    HardRefresh();
 
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 200);

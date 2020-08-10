@@ -16,6 +16,11 @@ namespace Pulsar4X.ECSLib
 
         public static IOrderHandler OrderHandler { get; private set; }
         
+        public static Entity SpaceMaster
+        {
+            get { return Game.GameMasterFaction; }
+        }
+        
         /// <summary>
         /// this is used to marshal events to the UI thread. 
         /// </summary>
