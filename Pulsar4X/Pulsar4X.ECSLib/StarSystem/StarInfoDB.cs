@@ -98,14 +98,14 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public double MinHabitableRadius_AU => Math.Sqrt(Luminosity / 1.1);
 
-        public double MinHabitableRadius_m => Math.Sqrt(Luminosity / 1.646e+11);
+        public double MinHabitableRadius_m => Distance.AuToMt(MinHabitableRadius_AU);
         /// <summary>
         /// Maximum edge of the Habitable Zone (in AU)
         /// </summary>
         [PublicAPI]
         public double MaxHabitableRadius_AU => Math.Sqrt(Luminosity / 0.53);
 
-        public double MaxHabitableRadius_m => Math.Sqrt(Luminosity / 7.9287e10);
+        public double MaxHabitableRadius_m => Distance.AuToMt(MaxHabitableRadius_AU);
         
         public StarInfoDB() { }
 

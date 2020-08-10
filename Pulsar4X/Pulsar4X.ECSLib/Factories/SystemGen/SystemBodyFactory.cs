@@ -48,7 +48,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         private int CalcNumBodiesForStar(StarSystem system, MassVolumeDB starMassInfo, StarInfoDB starInfo)
         {
-            if (system.RNG.NextDouble() > _galaxyGen.Settings.PlanetGenerationChance)
+            var rngVal = system.RNG.NextDouble();
+            if (rngVal > _galaxyGen.Settings.PlanetGenerationChance)
             {
                 // Star will not have planets.
                 return 0;
@@ -116,7 +117,8 @@ namespace Pulsar4X.ECSLib
             while (numberOfBodies > 0)
             {
                 // Select a band to add a body to.
-                SystemBand selectedBand = _galaxyGen.Settings.BandBodyWeight.Select(system.RNG.NextDouble());
+                var rngVal = system.RNG.NextDouble();
+                SystemBand selectedBand = _galaxyGen.Settings.BandBodyWeight.Select(rngVal);
                 // Add a body to that band.
                 switch (selectedBand)
                 {

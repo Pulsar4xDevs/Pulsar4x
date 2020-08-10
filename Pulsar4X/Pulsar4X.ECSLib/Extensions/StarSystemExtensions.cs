@@ -12,6 +12,11 @@ namespace Pulsar4X.ECSLib
             return system.GetAllEntitiesWithDataBlob<StarInfoDB>().Count();
         }
 
+        public static int GetNumberOfBodies(this StarSystem system)
+        {
+            return system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>().Count();
+        }
+
         public static int GetNumberOfBodiesOfType(this StarSystem system, BodyType type)
         {
             return system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>().Where(x => x.GetDataBlob<SystemBodyInfoDB>().BodyType == type).Count();
