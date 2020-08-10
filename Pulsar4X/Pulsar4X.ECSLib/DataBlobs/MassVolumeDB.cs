@@ -56,8 +56,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public double RadiusInKM
         {
-            get { return RadiusInM * 1000; }
-            internal set { RadiusInM = value * 0.001; }
+            get { return RadiusInM / 1000; }
+            internal set { RadiusInM = value * 1000; }
         }
 
         public double RadiusInM { get; internal set; }
