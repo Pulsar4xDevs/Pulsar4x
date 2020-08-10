@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     [JsonObject(MemberSerialization.OptIn)]
     public class StarSystem : EntityManager, ISerializable
     {
-        private readonly Random RNG { get; private set; }
+        private readonly Random RNG;
 
         [PublicAPI]
         public Guid Guid
