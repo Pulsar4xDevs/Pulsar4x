@@ -198,6 +198,7 @@ namespace Pulsar4X.ECSLib
                 pos.SystemGuid = system.Guid;
                 pos.SetParent(comet.GetDataBlob<OrbitDB>().Parent);
             }
+            
         }
 
         /// <summary>
@@ -548,8 +549,8 @@ namespace Pulsar4X.ECSLib
                 numMoons--;
             }
 
-            double minMoonOrbitDist = parentMVDB.RadiusInAU * _galaxyGen.Settings.MinMoonOrbitMultiplier;
-            double maxMoonDistance = _galaxyGen.Settings.MaxMoonOrbitDistanceByPlanetType[parentBodyDB.BodyType] * massRatioOfParent;
+            double minMoonOrbitDist = parentMVDB.RadiusInM * _galaxyGen.Settings.MinMoonOrbitMultiplier;
+            double maxMoonDistance = Distance.AuToMt(_galaxyGen.Settings.MaxMoonOrbitDistanceByPlanetType[parentBodyDB.BodyType] * massRatioOfParent);
 
             GenerateOrbitsForBodies(system, parent, ref moons, new MinMaxStruct(minMoonOrbitDist, maxMoonDistance), new List<ProtoEntity>(), currentDateTime);
 

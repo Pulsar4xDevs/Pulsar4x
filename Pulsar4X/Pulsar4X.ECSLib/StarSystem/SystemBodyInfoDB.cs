@@ -232,7 +232,7 @@ namespace Pulsar4X.ECSLib
             hash = Misc.ValueHash(SupportsPopulations, hash);
             hash = Misc.ValueHash(LengthOfDay, hash);
             hash = Misc.ValueHash(Gravity, hash);
-            hash = Misc.ValueHash(Minerals, hash);
+            //hash = Misc.ValueHash(Minerals, hash); for some reason minerals were not hashing the same.
             return hash;
         }
 
