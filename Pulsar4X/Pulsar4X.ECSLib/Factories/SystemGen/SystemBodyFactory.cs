@@ -207,7 +207,9 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB starMVDB = star.GetDataBlob<MassVolumeDB>();
             MassVolumeDB cometMVDB = comet.GetDataBlob<MassVolumeDB>();
 
-            double semiMajorAxis = GeneralMath.SelectFromRange(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType], system.RNG.NextDouble());
+            double min = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Min);
+            double max = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Max);
+            double semiMajorAxis = GeneralMath.SelectFromRange(new MinMaxStruct(min, max), system.RNG.NextDouble());
             double eccentricity = GeneralMath.SelectFromRange(_galaxyGen.Settings.BodyEccentricityByType[BodyType.Comet], system.RNG.NextDouble());
             double inclination = system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination;
             double longitudeOfAscendingNode = system.RNG.NextDouble() * 360;

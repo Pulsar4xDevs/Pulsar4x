@@ -86,11 +86,11 @@ namespace Pulsar4X.Tests
             StarInfoDB sol = stars[0].GetDataBlob<StarInfoDB>();
             Assert.AreEqual(sol.Age, 4600000000);
             Assert.AreEqual(sol.Class, "G");
-            Assert.AreEqual(sol.EcoSphereRadius, 1.1635341143662412);
+            Assert.AreEqual(sol.EcoSphereRadius_AU, 1.1635341143662412);
             Assert.AreEqual(sol.Luminosity, 1);
             Assert.AreEqual(sol.LuminosityClass, LuminosityClass.V);
-            Assert.AreEqual(sol.MaxHabitableRadius, 1.3736056394868901);
-            Assert.AreEqual(sol.MinHabitableRadius, 0.95346258924559235);
+            Assert.AreEqual(sol.MaxHabitableRadius_AU, 1.3736056394868901);
+            Assert.AreEqual(sol.MinHabitableRadius_AU, 0.95346258924559235);
             Assert.AreEqual(sol.SpectralSubDivision, 0);
             Assert.AreEqual(sol.SpectralType, SpectralType.G);
             Assert.AreEqual(sol.Temperature, 5778);
