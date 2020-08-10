@@ -128,7 +128,48 @@ namespace Pulsar4X.Tests
             //Assert.AreEqual(147, system.GetNumberOfBodies());
         }
 
+        [Test]
+        [Description("Creates and tests a single star system")]
+        public void CreateAndCheckDeterministic()
+        {
+            var startDate = new DateTime(2050, 1, 1);
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }); // reinit with empty game, so we can do a clean test.
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
+            StarSystemFactory ssf = new StarSystemFactory(_game);
+            var system1 = ssf.CreateSystem(_game, "Argon Prime", 12345); // Keeping with the X3 theme :P
+            var systemtwin = ssf.CreateSystem(_game, "Argon Prime", 12345);
+            var orbitEntites = system1.GetAllEntitiesWithDataBlob<OrbitDB>();
+            var orbitTwins = systemtwin.GetAllEntitiesWithDataBlob<OrbitDB>();
+            
+            Assert.AreEqual(orbitEntites.Count, orbitTwins.Count);
+            for (int i = 0; i < orbitEntites.Count; i++)
+            {
+                var entityPrime = orbitEntites[i];
+                var entityTwin = orbitTwins[i];
+                var db1 = entityPrime.GetDataBlob<OrbitDB>();
+                var db2 = entityTwin.GetDataBlob<OrbitDB>();
+                Assert.AreEqual(db1.GetValueCompareHash(), db2.GetValueCompareHash());
 
+                for (int j = 0; j < entityPrime.DataBlobs.Count; j++)
+                {
+                    var blob1 = entityPrime.DataBlobs[j];
+                    var blob2 = entityTwin.DataBlobs[j];
+                    Assert.IsTrue(blob1.GetType().ToString() == blob2.GetType().ToString());
+                
+                    if (blob1 is IGetValuesHash)
+                    {
+                        IGetValuesHash hashblob1 = (IGetValuesHash)blob1;
+                        IGetValuesHash hashblob2 = (IGetValuesHash)blob2;
+                        var hash1 = hashblob1.GetValueCompareHash();
+                        var hash2 = hashblob2.GetValueCompareHash();
+                        Assert.AreEqual(hash1, hash2, "Hashes for itteration" + j + " type " +blob1.GetType().ToString() + "Don't match");
+                    }
+                }
+                
+            }
+            
+            
+        }
 
         [Test]
         [Description("Creates and tests the Sol star system")]

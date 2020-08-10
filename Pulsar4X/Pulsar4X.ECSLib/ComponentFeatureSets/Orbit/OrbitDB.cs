@@ -596,7 +596,7 @@ namespace Pulsar4X.ECSLib
 
         public int GetValueCompareHash(int hash = 17)
         {
-            hash = Misc.ValueHash(SemiMajorAxis_AU, hash);
+            hash = Misc.ValueHash(SemiMajorAxis, hash);
             hash = Misc.ValueHash(Eccentricity, hash);
 
 

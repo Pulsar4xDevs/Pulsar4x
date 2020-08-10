@@ -236,10 +236,7 @@ namespace Pulsar4X.ECSLib
 
         public int GetValueCompareHash(int hash = 17)
         {
-            hash = Misc.ValueHash(MassDry, hash);
-            hash = Misc.ValueHash(Density_gcm);
-            hash = Misc.ValueHash(RadiusInAU);
-            hash = Misc.ValueHash(Volume_km3);
+            hash = Misc.ValueHash(Density_gcm, hash);
             return hash;
         }
     }

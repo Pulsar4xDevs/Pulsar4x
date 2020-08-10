@@ -248,7 +248,6 @@ namespace Pulsar4X.ECSLib
             hash = Misc.ValueHash(X_AU, hash);
             hash = Misc.ValueHash(Y_AU, hash);
             hash = Misc.ValueHash(Z_AU, hash);
-            hash = Misc.ValueHash(SystemGuid, hash);
             return hash;
         }
     }
