@@ -37,16 +37,16 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(stars);
 
             StarInfoDB argonPrimeA = stars[0].GetDataBlob<StarInfoDB>();
-            Assert.AreEqual(argonPrimeA.Age, 173752610.02727583);
-            Assert.AreEqual(argonPrimeA.Class, "F0-V");
-            Assert.AreEqual(argonPrimeA.EcoSphereRadius_AU, 2.3878481355737571);
-            Assert.AreEqual(argonPrimeA.Luminosity, 4.2116780281066895);
-            Assert.AreEqual(argonPrimeA.LuminosityClass, LuminosityClass.V);
-            Assert.AreEqual(argonPrimeA.MaxHabitableRadius_AU, 2.8189647598333742);
-            Assert.AreEqual(argonPrimeA.MinHabitableRadius_AU, 1.9567315113141397);
-            Assert.AreEqual(argonPrimeA.SpectralSubDivision, 0);
-            Assert.AreEqual(argonPrimeA.SpectralType, SpectralType.F);
-            Assert.AreEqual(argonPrimeA.Temperature, 7162);
+            Assert.AreEqual(173752610.02727583, argonPrimeA.Age);
+            Assert.AreEqual("F0-V", argonPrimeA.Class);
+            Assert.AreEqual(2.3878481355737571, argonPrimeA.EcoSphereRadius_AU);
+            Assert.AreEqual(4.2116780281066895, argonPrimeA.Luminosity);
+            Assert.AreEqual(LuminosityClass.V, argonPrimeA.LuminosityClass);
+            Assert.AreEqual(2.8189647598333742, argonPrimeA.MaxHabitableRadius_AU);
+            Assert.AreEqual(1.9567315113141397, argonPrimeA.MinHabitableRadius_AU);
+            Assert.AreEqual(0, argonPrimeA.SpectralSubDivision);
+            Assert.AreEqual(SpectralType.F, argonPrimeA.SpectralType);
+            Assert.AreEqual(7162, argonPrimeA.Temperature);
 
             MassVolumeDB argonPrimeAMV = stars[0].GetDataBlob<MassVolumeDB>();
             Assert.AreEqual(935668.67593512533, argonPrimeAMV.RadiusInKM);
@@ -55,14 +55,77 @@ namespace Pulsar4X.Tests
             List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken);
             Assert.IsNotEmpty(systemBodies);
 
-            Assert.AreEqual(93, system.GetNumberOfBodies());
             Assert.AreEqual(18, system.GetNumberOfComets());
             Assert.AreEqual(13, system.GetNumberOfMoons());
             Assert.AreEqual(2, system.GetNumberOfDwarfPlanets());
             Assert.AreEqual(1, system.GetNumberOfIceGiants());
             Assert.AreEqual(4, system.GetNumberOfGasGiants());
             Assert.AreEqual(2, system.GetNumberOfTerrestrialPlanets());
+            Assert.AreEqual(93, system.GetNumberOfBodies());
         }
+
+
+        [Test]
+        [Description("Creates and tests another single star system")]
+        public void CreateAndFillStarSystemB()
+        {
+            var startDate = new DateTime(2050, 1, 1);
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }); // reinit with empty game, so we can do a clean test.
+            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
+            StarSystemFactory ssf = new StarSystemFactory(_game);
+            var system = ssf.CreateSystem(_game, "Robin Prime", 22367);
+
+            // Test Item Counts are as expected
+            Assert.AreEqual(2, system.GetNumberOfStars());
+
+            // lets test that the stars generated okay:
+            List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>(_smAuthToken);
+            Assert.IsNotEmpty(stars);
+
+            StarInfoDB robinPrimeA = stars[0].GetDataBlob<StarInfoDB>();
+            Assert.AreEqual(5587857073.9472551, robinPrimeA.Age);
+            Assert.AreEqual("K3-V", robinPrimeA.Class);
+            Assert.AreEqual(0.36210213820970505, robinPrimeA.EcoSphereRadius_AU);
+            Assert.AreEqual(0.096850961446762085, robinPrimeA.Luminosity);
+            Assert.AreEqual(LuminosityClass.V, robinPrimeA.LuminosityClass);
+            Assert.AreEqual(0.42747826039121367, robinPrimeA.MaxHabitableRadius_AU);
+            Assert.AreEqual(0.29672601602819648, robinPrimeA.MinHabitableRadius_AU);
+            Assert.AreEqual(3, robinPrimeA.SpectralSubDivision);
+            Assert.AreEqual(SpectralType.K, robinPrimeA.SpectralType);
+            Assert.AreEqual(3749, robinPrimeA.Temperature);
+
+            MassVolumeDB robinPrimeAMV = stars[0].GetDataBlob<MassVolumeDB>();
+            Assert.AreEqual(493306.41725497658, robinPrimeAMV.RadiusInKM);
+            Assert.AreEqual(251.60390836758395, robinPrimeAMV.SurfaceGravity);
+
+            StarInfoDB robinPrimeB = stars[1].GetDataBlob<StarInfoDB>();
+            Assert.AreEqual(951751181.94079089, robinPrimeB.Age);
+            Assert.AreEqual("G1-V", robinPrimeB.Class);
+            Assert.AreEqual(1.2362061717155353, robinPrimeB.EcoSphereRadius_AU);
+            Assert.AreEqual(1.128817081451416, robinPrimeB.Luminosity);
+            Assert.AreEqual(LuminosityClass.V, robinPrimeB.LuminosityClass);
+            Assert.AreEqual(1.459398352030155, robinPrimeB.MaxHabitableRadius_AU);
+            Assert.AreEqual(1.0130139914009157, robinPrimeB.MinHabitableRadius_AU);
+            Assert.AreEqual(1, robinPrimeB.SpectralSubDivision);
+            Assert.AreEqual(SpectralType.G, robinPrimeB.SpectralType);
+            Assert.AreEqual(5670, robinPrimeB.Temperature);
+
+            MassVolumeDB robinPrimeBMV = stars[1].GetDataBlob<MassVolumeDB>();
+            Assert.AreEqual(746227.35086028383, robinPrimeBMV.RadiusInKM);
+            Assert.AreEqual(224.27634601638144, robinPrimeBMV.SurfaceGravity);
+
+            List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken);
+            Assert.IsNotEmpty(systemBodies);
+
+            //Assert.AreEqual(1, system.GetNumberOfComets());
+            //Assert.AreEqual(13, system.GetNumberOfMoons());
+            //Assert.AreEqual(2, system.GetNumberOfDwarfPlanets());
+            //Assert.AreEqual(1, system.GetNumberOfIceGiants());
+            //Assert.AreEqual(4, system.GetNumberOfGasGiants());
+            //Assert.AreEqual(5, system.GetNumberOfTerrestrialPlanets());
+            //Assert.AreEqual(147, system.GetNumberOfBodies());
+        }
+
 
 
         [Test]
