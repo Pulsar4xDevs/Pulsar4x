@@ -188,7 +188,7 @@ namespace Pulsar4X.ECSLib
         /// Units are AU.
         /// @note These numbers, with the exception of G class stars, are based on habitable zone calculations. They could be tweaked for gameplay.
         /// </summary>
-        public Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType;
+        public Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType_AU;
 
         /// <summary>
         /// Possible ranges for eccentricity by body type.
@@ -774,7 +774,7 @@ namespace Pulsar4X.ECSLib
             };
 
             // note These numbers, with the exception of G class stars, are based on habitable zone calculations. They could be tweaked for gameplay.
-            settings.OrbitalDistanceByStarSpectralType = new Dictionary<SpectralType, MinMaxStruct>()
+            settings.OrbitalDistanceByStarSpectralType_AU = new Dictionary<SpectralType, MinMaxStruct>()
             {
                 {SpectralType.O, new MinMaxStruct
                 {

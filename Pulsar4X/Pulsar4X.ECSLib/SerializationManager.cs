@@ -561,15 +561,15 @@ namespace Pulsar4X.ECSLib
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "AverageEcoSphereRadius", "NS");
-                varNode.InnerText = starIfnoDB.EcoSphereRadius.ToString("N3");
+                varNode.InnerText = starIfnoDB.EcoSphereRadius_AU.ToString("N3");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MinEcoSphereRadius", "NS");
-                varNode.InnerText = starIfnoDB.MinHabitableRadius.ToString("N4");
+                varNode.InnerText = starIfnoDB.MinHabitableRadius_AU.ToString("N4");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MaxEcoSphereRadius", "NS");
-                varNode.InnerText = starIfnoDB.MaxHabitableRadius.ToString("N4");
+                varNode.InnerText = starIfnoDB.MaxHabitableRadius_AU.ToString("N4");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Luminosity", "NS");

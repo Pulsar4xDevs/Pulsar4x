@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
                 // TODO: Introduce a random chance to stablize jumppoints.
             }
             
-            var jpPositionLimits = new MinMaxStruct(ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType].Min, ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType].Max);
+            var jpPositionLimits = new MinMaxStruct(ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[primaryStarInfoDB.SpectralType].Min, ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[primaryStarInfoDB.SpectralType].Max);
 
             jpPositionDB.X_AU = GeneralMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());
             jpPositionDB.Y_AU = GeneralMath.SelectFromRange(jpPositionLimits, system.RNG.NextDouble());

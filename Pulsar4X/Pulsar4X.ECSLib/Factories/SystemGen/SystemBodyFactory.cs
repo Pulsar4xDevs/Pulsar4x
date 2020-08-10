@@ -84,25 +84,28 @@ namespace Pulsar4X.ECSLib
                 return;
 
             // Now calculate the "Bands."
-            MinMaxStruct innerZone;
-            MinMaxStruct habitableZone;
-            MinMaxStruct outerZone;
+            MinMaxStruct innerZone_m;
+            MinMaxStruct habitableZone_m;
+            MinMaxStruct outerZone_m;
+            var zoneMin_m = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Min);
+            var zoneMax_m = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Max );
             bool skipHabitableZone = false;
-            if (starInfo.MinHabitableRadius > _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Max ||
-                starInfo.MaxHabitableRadius < _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Min)
+            if (starInfo.MinHabitableRadius_m > zoneMax_m ||
+                starInfo.MaxHabitableRadius_m < zoneMin_m)
             {
                 // Habitable zone either too close or too far from star.
                 // Only generating inner and outer zones.
                 skipHabitableZone = true;
-                innerZone = new MinMaxStruct(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Min, _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Max * 0.5);
-                habitableZone = new MinMaxStruct(starInfo.MinHabitableRadius, starInfo.MaxHabitableRadius); // Still need this for later.
-                outerZone = new MinMaxStruct(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Max * 0.5, _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Max);
+
+                innerZone_m = new MinMaxStruct(zoneMin_m, zoneMax_m * 0.5);
+                habitableZone_m = new MinMaxStruct(starInfo.MinHabitableRadius_m, starInfo.MaxHabitableRadius_m); // Still need this for later.
+                outerZone_m = new MinMaxStruct(zoneMax_m * 0.5, zoneMax_m);
             }
             else
             {
-                innerZone = new MinMaxStruct(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Min, starInfo.MinHabitableRadius);
-                habitableZone = new MinMaxStruct(starInfo.MinHabitableRadius, starInfo.MaxHabitableRadius);
-                outerZone = new MinMaxStruct(starInfo.MaxHabitableRadius, _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Max);
+                innerZone_m = new MinMaxStruct(zoneMin_m, starInfo.MinHabitableRadius_m);
+                habitableZone_m = new MinMaxStruct(starInfo.MinHabitableRadius_m, starInfo.MaxHabitableRadius_m);
+                outerZone_m = new MinMaxStruct(starInfo.MaxHabitableRadius_m, zoneMax_m);
             }
 
             // Now generate planet numbers.
@@ -137,9 +140,9 @@ namespace Pulsar4X.ECSLib
             // Generate the bodies in each band.
             var systemBodies = new List<ProtoEntity>(numberOfBodies);
 
-            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.HabitableBand, habitableZone, numHabitableZoneBodies, systemBodies, currentDateTime));
-            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.InnerBand, innerZone, numInnerZoneBodies, systemBodies, currentDateTime));
-            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.OuterBand, outerZone, numOuterZoneBodies, systemBodies, currentDateTime));
+            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.HabitableBand, habitableZone_m, numHabitableZoneBodies, systemBodies, currentDateTime));
+            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.InnerBand, innerZone_m, numInnerZoneBodies, systemBodies, currentDateTime));
+            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.OuterBand, outerZone_m, numOuterZoneBodies, systemBodies, currentDateTime));
 
             // Finalize all bodies that were actually added to the star.
             int bodyCount = 1;
@@ -204,7 +207,7 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB starMVDB = star.GetDataBlob<MassVolumeDB>();
             MassVolumeDB cometMVDB = comet.GetDataBlob<MassVolumeDB>();
 
-            double semiMajorAxis = GeneralMath.SelectFromRange(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType], system.RNG.NextDouble());
+            double semiMajorAxis = GeneralMath.SelectFromRange(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType], system.RNG.NextDouble());
             double eccentricity = GeneralMath.SelectFromRange(_galaxyGen.Settings.BodyEccentricityByType[BodyType.Comet], system.RNG.NextDouble());
             double inclination = system.RNG.NextDouble() * _galaxyGen.Settings.MaxBodyInclination;
             double longitudeOfAscendingNode = system.RNG.NextDouble() * 360;
@@ -222,10 +225,10 @@ namespace Pulsar4X.ECSLib
         /// <param name="system">System we're working with.</param>
         /// <param name="star">Star we're generating for.</param>
         /// <param name="systemBand">Enum specifying which band we're working in.</param>
-        /// <param name="bandLimits">MinMax structure representing the distance this band represents.</param>
+        /// <param name="bandLimits_m">MinMax structure representing the distance this band represents. in meters.</param>
         /// <param name="numBodies">Number of bodies to try to generate in this band.</param>
         /// <param name="systemBodies">List of systemBodies already present. Required for Orbit generation.</param>
-        private List<ProtoEntity> GenerateBodiesForBand(StarSystem system, Entity star, SystemBand systemBand, MinMaxStruct bandLimits, int numBodies, List<ProtoEntity> systemBodies, DateTime currentDateTime)
+        private List<ProtoEntity> GenerateBodiesForBand(StarSystem system, Entity star, SystemBand systemBand, MinMaxStruct bandLimits_m, int numBodies, List<ProtoEntity> systemBodies, DateTime currentDateTime)
         {
             List<ProtoEntity> bodies = new List<ProtoEntity>(numBodies);
 
@@ -287,7 +290,7 @@ namespace Pulsar4X.ECSLib
             // Generate the orbits for the bodies.
             // bodies list may be modified.
             // If a body cannot be put into a sane orbit, it is removed.
-            GenerateOrbitsForBodies(system, star, ref bodies, bandLimits, systemBodies, currentDateTime);
+            GenerateOrbitsForBodies(system, star, ref bodies, bandLimits_m, systemBodies, currentDateTime);
 
             return bodies;
         }
@@ -298,9 +301,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="system">System we're working with.</param>
         /// <param name="parent">Parent entity we're working with.</param>
         /// <param name="bodies">List of bodies to place into orbit. May be modified if bodies cannot be placed in a sane orbit.</param>
-        /// <param name="bandLimits">MinMax structure representing the distance limits for the orbit.</param>
+        /// <param name="bandLimits_m">MinMax structure representing the distance limits for the orbit.</param>
         /// <param name="systemBodies">List of bodies already orbiting this parent. We work around these.</param>
-        private void GenerateOrbitsForBodies(StarSystem system, Entity parent, ref List<ProtoEntity> bodies, MinMaxStruct bandLimits, List<ProtoEntity> systemBodies, DateTime currentDateTime)
+        private void GenerateOrbitsForBodies(StarSystem system, Entity parent, ref List<ProtoEntity> bodies, MinMaxStruct bandLimits_m, List<ProtoEntity> systemBodies, DateTime currentDateTime)
         {
             double totalBandMass = 0;
 
@@ -314,11 +317,11 @@ namespace Pulsar4X.ECSLib
             // Prepare the loop variables.
             double remainingBandMass = totalBandMass;
 
-            double minDistance = bandLimits.Min; // The minimum distance we can place a body.
-            double remainingDistance = bandLimits.Max - minDistance; // distance remaining that we can place bodies into.
+            double minDistance_m = bandLimits_m.Min; // The minimum distance we can place a body.
+            double remainingDistance_m = bandLimits_m.Max - minDistance_m; // distance remaining that we can place bodies into.
 
-            double insideApoapsis = double.MinValue; // Apoapsis of the orbit that is inside of the next body.
-            double outsidePeriapsis = double.MaxValue; // Periapsis of the orbit that is outside of the next body.
+            double insideApoapsis_m = double.MinValue; // Apoapsis of the orbit that is inside of the next body.
+            double outsidePeriapsis_m = double.MaxValue; // Periapsis of the orbit that is outside of the next body.
             double insideMass = 0; // Mass of the object that is inside of the next body.
             double outsideMass = 0; // Mass of the object that is outside of the next body.
 
@@ -330,16 +333,16 @@ namespace Pulsar4X.ECSLib
 
                 // Find if the current systemBody is within the bandLimit
                 // and is in a higher orbit than the previous insideOrbit.
-                if (bodyOrbit.Apoapsis_AU <= bandLimits.Min && bodyOrbit.Apoapsis_AU > insideApoapsis)
+                if (bodyOrbit.Apoapsis <= bandLimits_m.Min && bodyOrbit.Apoapsis > insideApoapsis_m)
                 {
-                    insideApoapsis = bodyOrbit.Apoapsis_AU;
+                    insideApoapsis_m = bodyOrbit.Apoapsis;
                     insideMass = bodyMass.MassDry;
                 }
                 // Otherwise, find if the current systemBody is within the bandLimit
                 // and is in a lower orbit than the previous outsideOrbit.
-                else if (bodyOrbit.Periapsis_AU >= bandLimits.Max && bodyOrbit.Periapsis_AU < outsidePeriapsis)
+                else if (bodyOrbit.Periapsis >= bandLimits_m.Max && bodyOrbit.Periapsis < outsidePeriapsis_m)
                 {
-                    outsidePeriapsis = bodyOrbit.Periapsis_AU;
+                    outsidePeriapsis_m = bodyOrbit.Periapsis;
                     outsideMass = bodyMass.MassDry;
                 }
                 // Note, we build our insideOrbit and outsideOrbits, then we try to build orbits between insideOrbit and outsideOrbit.
@@ -356,12 +359,12 @@ namespace Pulsar4X.ECSLib
 
                 // Limit the orbit to the ratio of object mass and remaining distance.
                 double massRatio = currentMVDB.MassDry / remainingBandMass;
-                double maxDistance = remainingDistance * massRatio + minDistance;
+                double maxDistance_m = remainingDistance_m * massRatio + minDistance_m;
                 // We'll either find this orbit, or eject it, so this body is no longer part of remaining mass.
                 remainingBandMass -= currentMVDB.MassDry;
 
                 // Do the heavy math to find the orbit.
-                OrbitDB currentOrbit = FindClearOrbit(system, parent, currentBody, insideApoapsis, outsidePeriapsis, insideMass, outsideMass, minDistance, maxDistance, currentDateTime);
+                OrbitDB currentOrbit = FindClearOrbit(system, parent, currentBody, insideApoapsis_m, outsidePeriapsis_m, insideMass, outsideMass, minDistance_m, maxDistance_m, currentDateTime);
 
                 if (currentOrbit == null)
                 {
@@ -373,7 +376,7 @@ namespace Pulsar4X.ECSLib
                 currentBody.SetDataBlob(currentOrbit);
 
                 insideMass = currentMVDB.MassDry;
-                insideApoapsis = currentOrbit.Apoapsis_AU;
+                insideApoapsis_m = currentOrbit.Apoapsis_AU;
             }
         }
 
@@ -415,7 +418,7 @@ namespace Pulsar4X.ECSLib
                 return null;
             }
 
-            double sma_m = Distance.AuToMt( GeneralMath.SelectFromRange(minDistance, maxDistance, system.RNG.NextDouble()));
+            double sma_m =  GeneralMath.SelectFromRange(minDistance, maxDistance, system.RNG.NextDouble());
 
             // Calculate max eccentricity.
             // First calc max eccentricity for the apoapsis.
@@ -990,13 +993,13 @@ namespace Pulsar4X.ECSLib
                         // if moon get planet orbit, then star
                         var parentOrbitDB = orbit.ParentDB as OrbitDB;
                         starInfo = parentOrbitDB.Parent.GetDataBlob<StarInfoDB>();
-                        ecosphereRatio = (parentOrbitDB.SemiMajorAxis_AU / starInfo.EcoSphereRadius);
+                        ecosphereRatio = (parentOrbitDB.SemiMajorAxis_AU / starInfo.EcoSphereRadius_AU);
                     }
                     else
                     {
                         // if planet get star:
                         starInfo = orbit.Parent.GetDataBlob<StarInfoDB>();
-                        ecosphereRatio = GeneralMath.Clamp(orbit.SemiMajorAxis_AU / starInfo.EcoSphereRadius, 0.1, 2);
+                        ecosphereRatio = GeneralMath.Clamp(orbit.SemiMajorAxis_AU / starInfo.EcoSphereRadius_AU, 0.1, 2);
                     }
 
                     atm = atm * ecosphereRatio;  // if inside eco sphere this will reduce atmo, increase it if outside.

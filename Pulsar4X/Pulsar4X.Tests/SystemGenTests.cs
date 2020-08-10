@@ -37,11 +37,11 @@ namespace Pulsar4X.Tests
             StarInfoDB argonPrimeA = stars[0].GetDataBlob<StarInfoDB>();
             Assert.AreEqual(argonPrimeA.Age, 173752610.02727583);
             Assert.AreEqual(argonPrimeA.Class, "F0-V");
-            Assert.AreEqual(argonPrimeA.EcoSphereRadius, 2.3878481355737571);
+            Assert.AreEqual(argonPrimeA.EcoSphereRadius_AU, 2.3878481355737571);
             Assert.AreEqual(argonPrimeA.Luminosity, 4.2116780281066895);
             Assert.AreEqual(argonPrimeA.LuminosityClass, LuminosityClass.V);
-            Assert.AreEqual(argonPrimeA.MaxHabitableRadius, 2.8189647598333742);
-            Assert.AreEqual(argonPrimeA.MinHabitableRadius, 1.9567315113141397);
+            Assert.AreEqual(argonPrimeA.MaxHabitableRadius_AU, 2.8189647598333742);
+            Assert.AreEqual(argonPrimeA.MinHabitableRadius_AU, 1.9567315113141397);
             Assert.AreEqual(argonPrimeA.SpectralSubDivision, 0);
             Assert.AreEqual(argonPrimeA.SpectralType, SpectralType.F);
             Assert.AreEqual(argonPrimeA.Temperature, 7162);

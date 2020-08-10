@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -88,19 +89,23 @@ namespace Pulsar4X.ECSLib
         /// calculated according to this site: http://www.planetarybiology.com/calculating_habitable_zone.html
         /// </summary>
         [PublicAPI]
-        public double EcoSphereRadius => (MinHabitableRadius + MaxHabitableRadius) / 2;
+        public double EcoSphereRadius_AU => (MinHabitableRadius_AU + MaxHabitableRadius_AU) / 2;
 
+        public double EcoSphereRadius_m => (MinHabitableRadius_m + MaxHabitableRadius_m) / 2;
         /// <summary>
         /// Minimum edge of the Habitable Zone (in AU)
         /// </summary>
         [PublicAPI]
-        public double MinHabitableRadius => Math.Sqrt(Luminosity / 1.1);
+        public double MinHabitableRadius_AU => Math.Sqrt(Luminosity / 1.1);
 
+        public double MinHabitableRadius_m => Math.Sqrt(Luminosity / 1.646e+11);
         /// <summary>
         /// Maximum edge of the Habitable Zone (in AU)
         /// </summary>
         [PublicAPI]
-        public double MaxHabitableRadius => Math.Sqrt(Luminosity / 0.53);
+        public double MaxHabitableRadius_AU => Math.Sqrt(Luminosity / 0.53);
+
+        public double MaxHabitableRadius_m => Math.Sqrt(Luminosity / 7.9287e10);
         
         public StarInfoDB() { }
 
