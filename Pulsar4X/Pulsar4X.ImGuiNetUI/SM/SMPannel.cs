@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
         {
             get
             {
-                if(_selectedEntityIndex >=0)
+                if (_selectedEntityIndex >= 0 && _selectedEntityIndex < _systemEntities.Length)
                     return _systemEntities[_selectedEntityIndex];
                 return null;
             }
@@ -37,6 +37,7 @@ namespace Pulsar4X.SDL2UI
             _uiState.SpaceMasterVM = new SpaceMasterVM();
             HardRefresh();
         }
+
         //TODO auth of some kind. 
         public static SMPannel GetInstance()
         {
@@ -46,8 +47,6 @@ namespace Pulsar4X.SDL2UI
             }
             return (SMPannel)_uiState.LoadedWindows[typeof(SMPannel)];
         }
-
-
 
         void HardRefresh()
         {
