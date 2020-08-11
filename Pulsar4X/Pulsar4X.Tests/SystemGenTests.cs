@@ -52,18 +52,22 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(935668.67593512533, argonPrimeAMV.RadiusInKM);
             Assert.AreEqual(199.94046491477221, argonPrimeAMV.SurfaceGravity);
 
-            List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken);
+            List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
             Assert.IsNotEmpty(systemBodies);
-
+            var numbodies = system.GetNumberOfBodies();
+            Assert.AreEqual(1, system.GetNumberOfStars());
             Assert.AreEqual(2, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
             Assert.AreEqual(2, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
             Assert.AreEqual(1, system.GetNumberOfIceGiants(), "IceGiants");
             Assert.AreEqual(4, system.GetNumberOfGasGiants(), "GasGiants");
             Assert.AreEqual(13, system.GetNumberOfMoons(), "Moons");
-            var hash0 = systemBodies[1].GetValueCompareHash();
-            var hash = systemBodies[21].GetValueCompareHash();
+            Assert.AreEqual(49, system.GetNumberOfAsteroids(), "Asteroids");
+            Assert.AreEqual(0, system.GetNumberOfUnknownObjects(), "unknown");
+            
             Assert.AreEqual(18, system.GetNumberOfComets(), "Comets");
+            
             Assert.AreEqual(93, system.GetNumberOfBodies(), "TotalBodies");
+            Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
         }
 
 
