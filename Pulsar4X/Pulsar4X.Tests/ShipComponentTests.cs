@@ -556,7 +556,7 @@ namespace Pulsar4X.Tests
             generalCargoCapacityAttribute.DescriptionFormula = "";
             generalCargoCapacityAttribute.GuiHint = GuiHint.None;
             generalCargoCapacityAttribute.AttributeType = typeof(VolumeStorageAtb).ToString();
-            generalCargoCapacityAttribute.AttributeFormula = "AtbConstrArgs(Ability(0), GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(1), Ability(2))";
+            generalCargoCapacityAttribute.AttributeFormula = "AtbConstrArgs(GuidString('16b4c4f0-7292-4f4d-8fea-22103c70b288'), Ability(0))";
             component.ComponentAtbSDs.Add(generalCargoCapacityAttribute);
 
             return component;
