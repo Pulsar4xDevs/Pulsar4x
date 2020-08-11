@@ -130,7 +130,7 @@ namespace Pulsar4X.ECSLib
                 return;
             }
             Children.Add(child);
-            Children.Sort((entity1, entity2) => entity1.Guid.CompareTo(entity2.Guid));
+            Children.Sort((entity1, entity2) => entity1.ID.CompareTo(entity2.ID));
         }
 
         private void RemoveChild(Entity child)
