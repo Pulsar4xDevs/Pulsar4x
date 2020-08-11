@@ -1019,7 +1019,8 @@ namespace Pulsar4X.ECSLib
                 {10, BodyType.GasDwarf},
                 {5, BodyType.GasGiant},
                 {0, BodyType.IceGiant},
-                {50, BodyType.Terrestrial},
+                {45, BodyType.Terrestrial},
+                {5, BodyType.DwarfPlanet},
             };
 
             settings.HabitableBandTypeWeights = new WeightedList<BodyType>
@@ -1028,7 +1029,8 @@ namespace Pulsar4X.ECSLib
                 {10, BodyType.GasDwarf},
                 {5, BodyType.GasGiant},
                 {0, BodyType.IceGiant},
-                {60, BodyType.Terrestrial},
+                {55, BodyType.Terrestrial},
+                {5, BodyType.DwarfPlanet},
             };
 
             settings.OuterBandTypeWeights = new WeightedList<BodyType>
@@ -1037,7 +1039,8 @@ namespace Pulsar4X.ECSLib
                 {20, BodyType.GasDwarf},
                 {25, BodyType.GasGiant},
                 {20, BodyType.IceGiant},
-                {10, BodyType.Terrestrial},
+                {7.5, BodyType.Terrestrial},
+                {2.5, BodyType.DwarfPlanet},
             };
 
             #endregion
