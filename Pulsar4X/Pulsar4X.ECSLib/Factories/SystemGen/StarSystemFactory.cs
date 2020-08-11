@@ -36,7 +36,6 @@ namespace Pulsar4X.ECSLib
                 _systemBodyFactory.GenerateSystemBodiesForStar(game.StaticData, newSystem, star, StaticRefLib.CurrentDateTime);
             }
 
-
             // Generate Jump Points
             JPSurveyFactory.GenerateJPSurveyPoints(newSystem);
             JPFactory.GenerateJumpPoints(this, newSystem);

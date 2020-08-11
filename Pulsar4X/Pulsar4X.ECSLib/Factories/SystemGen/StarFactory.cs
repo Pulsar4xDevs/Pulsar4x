@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
@@ -101,27 +102,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // The root star must be the most massive. Find it.
-            Entity rootStar = stars[0];
-
-            double rootStarMass = rootStar.GetDataBlob<MassVolumeDB>().MassDry;
-
-            foreach (Entity currentStar in stars)
-            {
-                double currentStarMass = currentStar.GetDataBlob<MassVolumeDB>().MassDry;
-
-                if (rootStarMass < currentStarMass)
-                {
-                    rootStar = currentStar;
-                    rootStarMass = rootStar.GetDataBlob<MassVolumeDB>().MassDry;
-                }
-            }
-
-            // Swap the root star to index 0.
-            int rootIndex = stars.IndexOf(rootStar);
-            Entity displacedStar = stars[0];
-
-            stars[rootIndex] = displacedStar;
-            stars[0] = rootStar;
+            stars = stars.OrderBy(x => x.GetDataBlob<MassVolumeDB>().MassDry).ToList();
 
             // Generate orbits.
             Entity anchorStar = stars[0];

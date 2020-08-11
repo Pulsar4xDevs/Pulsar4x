@@ -7,6 +7,15 @@ namespace Pulsar4X.ECSLib
 {
     public static class StarSystemExtensions
     {
+        public static List<Entity> GetStarsSortedByDryMass(this StarSystem system)
+        {
+            List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>();
+
+            stars = stars.OrderByDescending(x => x.GetDataBlob<MassVolumeDB>().MassDry).ToList();
+
+            return stars;
+        }
+
         public static int GetNumberOfStars(this StarSystem system)
         {
             return system.GetAllEntitiesWithDataBlob<StarInfoDB>().Count();

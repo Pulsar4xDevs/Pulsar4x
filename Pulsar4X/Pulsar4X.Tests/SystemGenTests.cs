@@ -85,55 +85,59 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(2, system.GetNumberOfStars());
 
             // lets test that the stars generated okay:
-            List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>(_smAuthToken);
+            List<Entity> stars = system.GetStarsSortedByDryMass();
             Assert.IsNotEmpty(stars);
 
             StarInfoDB robinPrimeA = stars[0].GetDataBlob<StarInfoDB>();
-            Assert.AreEqual(5587857073.9472551, robinPrimeA.Age);
-            Assert.AreEqual("K3-V", robinPrimeA.Class);
-            Assert.AreEqual(0.36210213820970505, robinPrimeA.EcoSphereRadius_AU);
-            Assert.AreEqual(0.096850961446762085, robinPrimeA.Luminosity);
+            Assert.AreEqual(951751181.94079089, robinPrimeA.Age);
+            Assert.AreEqual("G1-V", robinPrimeA.Class);
+            Assert.AreEqual(1.2362061717155353, robinPrimeA.EcoSphereRadius_AU);
+            Assert.AreEqual(1.128817081451416, robinPrimeA.Luminosity);
             Assert.AreEqual(LuminosityClass.V, robinPrimeA.LuminosityClass);
-            Assert.AreEqual(0.42747826039121367, robinPrimeA.MaxHabitableRadius_AU);
-            Assert.AreEqual(0.29672601602819648, robinPrimeA.MinHabitableRadius_AU);
-            Assert.AreEqual(3, robinPrimeA.SpectralSubDivision);
-            Assert.AreEqual(SpectralType.K, robinPrimeA.SpectralType);
-            Assert.AreEqual(3749, robinPrimeA.Temperature);
+            Assert.AreEqual(1.459398352030155, robinPrimeA.MaxHabitableRadius_AU);
+            Assert.AreEqual(1.0130139914009157, robinPrimeA.MinHabitableRadius_AU);
+            Assert.AreEqual(1, robinPrimeA.SpectralSubDivision);
+            Assert.AreEqual(SpectralType.G, robinPrimeA.SpectralType);
+            Assert.AreEqual(5670, robinPrimeA.Temperature);
 
             MassVolumeDB robinPrimeAMV = stars[0].GetDataBlob<MassVolumeDB>();
-            Assert.AreEqual(493306.41725497658, robinPrimeAMV.RadiusInKM);
-            Assert.AreEqual(251.60390836758395, robinPrimeAMV.SurfaceGravity);
+            Assert.AreEqual(746227.35086028383, robinPrimeAMV.RadiusInKM);
+            Assert.AreEqual(224.27634601638144, robinPrimeAMV.SurfaceGravity);
+            Assert.AreEqual(1.8712610994637707E30, robinPrimeAMV.MassDry);
 
             StarInfoDB robinPrimeB = stars[1].GetDataBlob<StarInfoDB>();
-            Assert.AreEqual(951751181.94079089, robinPrimeB.Age);
-            Assert.AreEqual("G1-V", robinPrimeB.Class);
-            Assert.AreEqual(1.2362061717155353, robinPrimeB.EcoSphereRadius_AU);
-            Assert.AreEqual(1.128817081451416, robinPrimeB.Luminosity);
+            Assert.AreEqual(5587857073.9472551, robinPrimeB.Age);
+            Assert.AreEqual("K3-V", robinPrimeB.Class);
+            Assert.AreEqual(0.36210213820970505, robinPrimeB.EcoSphereRadius_AU);
+            Assert.AreEqual(0.096850961446762085, robinPrimeB.Luminosity);
             Assert.AreEqual(LuminosityClass.V, robinPrimeB.LuminosityClass);
-            Assert.AreEqual(1.459398352030155, robinPrimeB.MaxHabitableRadius_AU);
-            Assert.AreEqual(1.0130139914009157, robinPrimeB.MinHabitableRadius_AU);
-            Assert.AreEqual(1, robinPrimeB.SpectralSubDivision);
-            Assert.AreEqual(SpectralType.G, robinPrimeB.SpectralType);
-            Assert.AreEqual(5670, robinPrimeB.Temperature);
+            Assert.AreEqual(0.42747826039121367, robinPrimeB.MaxHabitableRadius_AU);
+            Assert.AreEqual(0.29672601602819648, robinPrimeB.MinHabitableRadius_AU);
+            Assert.AreEqual(3, robinPrimeB.SpectralSubDivision);
+            Assert.AreEqual(SpectralType.K, robinPrimeB.SpectralType);
+            Assert.AreEqual(3749, robinPrimeB.Temperature);
 
             MassVolumeDB robinPrimeBMV = stars[1].GetDataBlob<MassVolumeDB>();
-            Assert.AreEqual(746227.35086028383, robinPrimeBMV.RadiusInKM);
-            Assert.AreEqual(224.27634601638144, robinPrimeBMV.SurfaceGravity);
+            Assert.AreEqual(493306.41725497658, robinPrimeBMV.RadiusInKM);
+            Assert.AreEqual(251.60390836758395, robinPrimeBMV.SurfaceGravity);
+            Assert.AreEqual(9.1740162518801132E29, robinPrimeBMV.MassDry);
+
+            Assert.IsTrue(robinPrimeAMV.MassDry > robinPrimeBMV.MassDry, "Star A should be the most massive.");
 
             List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken);
             Assert.IsNotEmpty(systemBodies);
 
-            Assert.AreEqual(5, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
-            Assert.AreEqual(7, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
-            Assert.AreEqual(6, system.GetNumberOfIceGiants(), "IceGiants");
-            Assert.AreEqual(5, system.GetNumberOfGasGiants(), "GasGiants");
-            Assert.AreEqual(43, system.GetNumberOfMoons(), "Moons");
-            Assert.AreEqual(54, system.GetNumberOfAsteroids(), "Asteroids");
+            Assert.AreEqual(2, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
+            Assert.AreEqual(3, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
+            Assert.AreEqual(1, system.GetNumberOfIceGiants(), "IceGiants");
+            Assert.AreEqual(3, system.GetNumberOfGasGiants(), "GasGiants");
+            Assert.AreEqual(8, system.GetNumberOfMoons(), "Moons");
+            Assert.AreEqual(62, system.GetNumberOfAsteroids(), "Asteroids");
             Assert.AreEqual(0, system.GetNumberOfUnknownObjects(), "unknown");
 
-            Assert.AreEqual(39, system.GetNumberOfComets(), "Comets");
+            Assert.AreEqual(15, system.GetNumberOfComets(), "Comets");
 
-            Assert.AreEqual(163, system.GetNumberOfBodies(), "TotalBodies");
+            Assert.AreEqual(96, system.GetNumberOfBodies(), "TotalBodies");
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
         }
 
