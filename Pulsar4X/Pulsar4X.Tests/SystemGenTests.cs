@@ -63,9 +63,9 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(13, system.GetNumberOfMoons(), "Moons");
             Assert.AreEqual(49, system.GetNumberOfAsteroids(), "Asteroids");
             Assert.AreEqual(0, system.GetNumberOfUnknownObjects(), "unknown");
-            
+
             Assert.AreEqual(18, system.GetNumberOfComets(), "Comets");
-            
+
             Assert.AreEqual(93, system.GetNumberOfBodies(), "TotalBodies");
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
         }
@@ -79,7 +79,7 @@ namespace Pulsar4X.Tests
             _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
-            var system = ssf.CreateSystem(_game, "Robin Prime", 22367);
+            var system = ssf.CreateSystem(_game, "Robin Prime", 22367, true);
 
             // Test Item Counts are as expected
             Assert.AreEqual(2, system.GetNumberOfStars());
@@ -139,6 +139,26 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(96, system.GetNumberOfBodies(), "TotalBodies");
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
+
+            // Test initial mineral generation
+            var totalMinerals = system.GetTotalSystemMinerals(_game.StaticData);
+            Assert.AreEqual(27084962760, totalMinerals["Sorium"], "Sorium");
+            Assert.AreEqual(2504615582, totalMinerals["Neutronium"], "Neutronium");
+            Assert.AreEqual(35111974, totalMinerals["Iron"], "Iron");
+            Assert.AreEqual(39722250, totalMinerals["Aluminium"], "Aluminium");
+            Assert.AreEqual(29868472, totalMinerals["Lithium"], "Lithium");
+            Assert.AreEqual(22030529, totalMinerals["Fissionables"], "Fissionables");
+            Assert.AreEqual(1216134, totalMinerals["Duranium"], "Duranium");
+            Assert.AreEqual(49794944, totalMinerals["Corbomite"], "Corbomite");
+            Assert.AreEqual(19768268, totalMinerals["Copper"], "Copper");
+            Assert.AreEqual(29407250, totalMinerals["Titanium"], "Titanium");
+            Assert.AreEqual(39038047, totalMinerals["Tritanium"], "Tritanium");
+            Assert.AreEqual(27187517, totalMinerals["Boronide"], "Boronide");
+            Assert.AreEqual(60503947, totalMinerals["Corundium"], "Corundium");
+            Assert.AreEqual(24266487, totalMinerals["Mercassium"], "Mercassium");
+            Assert.AreEqual(59797777, totalMinerals["Vendarite"], "Vendarite");
+            Assert.AreEqual(24001331, totalMinerals["Gallicite"], "Gallicite");
+            Assert.AreEqual(17760843, totalMinerals["Chromium"], "Chromium");
         }
 
         [Test]
@@ -153,7 +173,7 @@ namespace Pulsar4X.Tests
             var systemtwin = ssf.CreateSystem(_game, "Argon Prime", 12345);
             var orbitEntites = system1.GetAllEntitiesWithDataBlob<OrbitDB>();
             var orbitTwins = systemtwin.GetAllEntitiesWithDataBlob<OrbitDB>();
-            
+
             Assert.AreEqual(orbitEntites.Count, orbitTwins.Count);
             for (int i = 0; i < orbitEntites.Count; i++)
             {
@@ -168,20 +188,18 @@ namespace Pulsar4X.Tests
                     var blob1 = entityPrime.DataBlobs[j];
                     var blob2 = entityTwin.DataBlobs[j];
                     Assert.IsTrue(blob1.GetType().ToString() == blob2.GetType().ToString());
-                
+
                     if (blob1 is IGetValuesHash)
                     {
                         IGetValuesHash hashblob1 = (IGetValuesHash)blob1;
                         IGetValuesHash hashblob2 = (IGetValuesHash)blob2;
                         var hash1 = hashblob1.GetValueCompareHash();
                         var hash2 = hashblob2.GetValueCompareHash();
-                        Assert.AreEqual(hash1, hash2, "Hashes for itteration" + j + " type " +blob1.GetType().ToString() + "Don't match");
+                        Assert.AreEqual(hash1, hash2, "Hashes for itteration" + j + " type " + blob1.GetType().ToString() + "Don't match");
                     }
                 }
-                
+
             }
-            
-            
         }
 
         [Test]
@@ -324,7 +342,7 @@ namespace Pulsar4X.Tests
             string output = $"Total run time: {totalTime.ToString("N4")}s, per system: {(totalTime / numSystems * 1000).ToString("N2")}ms.\ntotal memory used: {(totalMemory / 1024.0).ToString("N2")} MB, per system: {(totalMemory / numSystems).ToString("N2")} KB.\nTotal Entities: {totalEntities}, per system: {totalEntities / (float)numSystems}.\nMemory per entity: {(totalMemory / totalEntities).ToString("N2")}KB";
 
             Console.WriteLine(output);
-            
+
             // print results:
             Assert.Pass(output);
         }
@@ -376,5 +394,5 @@ namespace Pulsar4X.Tests
                 Assert.Pass($"Number of systems with {index} JumpPoints: {d} ({d / (double)numSystems * 100d}% of all systems)");
             }
         }
-}
+    }
 }

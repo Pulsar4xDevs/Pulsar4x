@@ -31,6 +31,11 @@ namespace Pulsar4X.ECSLib
             return system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>().Where(x => x.GetDataBlob<SystemBodyInfoDB>().BodyType == type).Count();
         }
 
+        public static List<Entity> GetEntitiesOfAllBodiesOfType(this StarSystem system, BodyType type)
+        {
+            return system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>().Where(x => x.GetDataBlob<SystemBodyInfoDB>().BodyType == type).ToList();
+        }
+
         public static int GetNumberOfAsteroids(this StarSystem system)
         {
             return system.GetNumberOfBodiesOfType(BodyType.Asteroid);
@@ -74,6 +79,31 @@ namespace Pulsar4X.ECSLib
         public static int GetNumberOfUnknownObjects(this StarSystem system)
         {
             return system.GetNumberOfBodiesOfType(BodyType.Unknown);
+        }
+
+
+        public static Dictionary<string, double> GetTotalSystemMinerals(this StarSystem system, StaticDataStore staticData)
+        {
+            var minerals = new Dictionary<Guid, double>();
+            var bodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>().Select(x => x.GetDataBlob<SystemBodyInfoDB>());
+            foreach (var body in bodies)
+            {
+                foreach (var kvp in body.Minerals)
+                {
+                    if (!minerals.ContainsKey(kvp.Key))
+                    {
+                        minerals.Add(kvp.Key, kvp.Value.Amount * 1.0);
+                    } 
+                    else
+                    {
+                        minerals[kvp.Key] += kvp.Value.Amount * 1.0;
+                    }
+                }
+            }
+
+            var mineralList = staticData.CargoGoods.GetMineralsList();
+            var mineralsByName = minerals.ToDictionary(k => mineralList.First(m => m.ID == k.Key).Name, v => v.Value);
+            return mineralsByName;
         }
 
     }

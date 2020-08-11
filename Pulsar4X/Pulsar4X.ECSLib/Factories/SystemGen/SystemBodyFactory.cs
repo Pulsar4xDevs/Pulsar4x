@@ -883,7 +883,10 @@ namespace Pulsar4X.ECSLib
                     mdi.Amount = (long)Math.Round(_galaxyGen.Settings.MaxMineralAmmountByBodyType[bodyInfo.BodyType] * genChance);
                     mdi.HalfOriginalAmount = mdi.Amount / 2;
 
-                    bodyInfo.Minerals.Add(min.ID, mdi);
+                    if (!bodyInfo.Minerals.ContainsKey(min.ID))
+                    {
+                        bodyInfo.Minerals.Add(min.ID, mdi);
+                    }
                 }
             }
         }

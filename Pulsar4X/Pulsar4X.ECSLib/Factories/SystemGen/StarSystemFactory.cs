@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
@@ -23,7 +24,7 @@ namespace Pulsar4X.ECSLib
             _starFactory = new StarFactory(GalaxyGen);
         }
 
-        public StarSystem CreateSystem(Game game, string name, int seed)
+        public StarSystem CreateSystem(Game game, string name, int seed, bool initialiseAllMinerals = false)
         {
             StarSystem newSystem = new StarSystem(game, name, seed);
 
@@ -43,6 +44,19 @@ namespace Pulsar4X.ECSLib
             //add this system to the GameMaster's Known Systems list.
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(newSystem.Guid);
             OrbitProcessor.UpdateSystemOrbits(newSystem, StaticRefLib.CurrentDateTime); //sets the positions of all the entites.
+
+            // Generate Minerals if requested
+            if (initialiseAllMinerals)
+            {
+                foreach (BodyType bodyType in Enum.GetValues(typeof(BodyType)))
+                {
+                    foreach (Entity entity in newSystem.GetEntitiesOfAllBodiesOfType(bodyType))
+                    {
+                        _systemBodyFactory.MineralGeneration(game.StaticData, newSystem, entity);
+                    }
+                }
+            }
+
             return newSystem;
         }
 
