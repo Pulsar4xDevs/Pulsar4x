@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         [JsonProperty]
         public List<Player> Players = new List<Player>();
-
+        public List<Entity> Factions = new List<Entity>();
         [PublicAPI]
         [JsonProperty]
         public Player SpaceMaster = new Player("Space Master", "");
@@ -118,6 +118,8 @@ namespace Pulsar4X.ECSLib
             SpaceMaster.ChangePassword(new AuthenticationToken(SpaceMaster, ""), newGameSettings.SMPassword);
             GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
 
+            
+            
             if (newGameSettings.CreatePlayerFaction ?? false)
             {
                 

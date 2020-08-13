@@ -90,7 +90,7 @@ namespace Pulsar4X.SDL2UI
             //SystemContacts = system.FactionSensorContacts[faction.ID];
             //_sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
-
+            _faction = StaticRefLib.SpaceMaster;
             foreach (var entityItem in system.GetAllEntitiesWithDataBlob<NameDB>())
             {
 

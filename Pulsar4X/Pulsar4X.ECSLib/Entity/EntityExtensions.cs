@@ -12,6 +12,20 @@ namespace Pulsar4X.ECSLib
             return "Unknown";
         }
 
+        public static string GetOwnersName(this Entity entity)
+        {
+            if (entity.HasDataBlob<NameDB>())
+                return entity.GetDataBlob<NameDB>().OwnersName;
+            return "Unknown";
+        }
+        
+        public static string GetName(this Entity entity, Guid factionID)
+        {
+            if (entity.HasDataBlob<NameDB>())
+                return entity.GetDataBlob<NameDB>().GetName(factionID);
+            return "Unknown";
+        }
+
         public static void AddComponent(this Entity entity, ComponentInstance component)
         {
             EntityManipulation.AddComponentToEntity(entity, component);
