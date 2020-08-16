@@ -25,6 +25,10 @@ namespace Pulsar4X.SDL2UI
         Vector3 _position = new Vector3();
         private Vector3 _graphicPos = new Vector3();
         private EntitySpawnGraphic _icon;
+        
+        private EntityNameSelector _sysBodies;
+        
+        
         private EntitySpawnWindow()
 	    {
 	        _flags = ImGuiWindowFlags.AlwaysAutoResize;
@@ -37,6 +41,9 @@ namespace Pulsar4X.SDL2UI
                 var faction = _factionEntites[i];
                 _factionNames[i] = faction.GetOwnersName();
             }
+
+            var bodies = _uiState.SelectedSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
+            _sysBodies = new EntityNameSelector(bodies.ToArray(), EntityNameSelector.NameType.Owner);
         }
 
         internal static EntitySpawnWindow GetInstance() {
@@ -137,20 +144,25 @@ namespace Pulsar4X.SDL2UI
                 _density = (float)MassVolumeDB.CalculateDensity(_massTon * 1000, volume);
             }
 
-            if (ImGui.DragInt("X", ref _xpos))
+            _sysBodies.Combo("Orbital Parent");
+            if (ImGui.DragInt("X km ralitve", ref _xpos))
             {
-                _graphicPos.X = _xpos;
-                _icon.WorldPosition_m = _graphicPos * 1000;
+                var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
+                var parentPos = _sysBodies.GetSelectedEntity().GetAbsoluteFuturePosition(datetime);
+                _icon.WorldPosition_m = new Vector3( parentPos.X + _xpos * 1000);
             }
 
-            if (ImGui.DragInt("Y", ref _ypos))
+            if (ImGui.DragInt("Y km ralitve", ref _ypos))
             {
-                _graphicPos.Y = _ypos;
-                _icon.WorldPosition_m = _graphicPos * 1000;
+                var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
+                var parentPos = _sysBodies.GetSelectedEntity().GetAbsoluteFuturePosition(datetime);
+                _icon.WorldPosition_m = new Vector3( parentPos.Y + _ypos * 1000);
             }
 
 
-
+            if (ImGui.Button("Create Entity"))
+            {
+            }
         }
 
 
@@ -176,16 +188,19 @@ namespace Pulsar4X.SDL2UI
             
             ImGui.Combo("Select Design", ref _selectedDesignIndex, _shipDesignNames, _shipDesignNames.Length);
 
-            if (ImGui.DragInt("X", ref _xpos))
+            _sysBodies.Combo("Orbital Parent");
+            if (ImGui.DragInt("X km ralitve", ref _xpos))
             {
-                _graphicPos.X = _xpos;
-                _icon.WorldPosition_m = _graphicPos* 1000;
+                var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
+                var parentPos = _sysBodies.GetSelectedEntity().GetAbsoluteFuturePosition(datetime);
+                _icon.WorldPosition_m = new Vector3( parentPos.X + _xpos * 1000);
             }
 
-            if (ImGui.DragInt("Y", ref _ypos))
+            if (ImGui.DragInt("Y km ralitve", ref _ypos))
             {
-                _graphicPos.Y = _ypos;
-                _icon.WorldPosition_m = _graphicPos * 1000;
+                var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
+                var parentPos = _sysBodies.GetSelectedEntity().GetAbsoluteFuturePosition(datetime);
+                _icon.WorldPosition_m = new Vector3( parentPos.Y + _ypos * 1000);
             }
 
             ImGui.Combo("Set Owner Faction", ref _selectedOwnerIndex, _factionNames, _factionNames.Length);
@@ -193,13 +208,17 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.Button("Create Entity"))
             {
                 string shipName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
-                var parent = OrbitProcessor.FindSOIForPosition(_uiState.SelectedSystem, _graphicPos);
+                //var parent = OrbitProcessor.FindSOIForPosition(_uiState.SelectedSystem, _icon.WorldPosition_m);
+                Vector3 ralitivePos = new Vector3(_xpos * 1000, _ypos * 1000, 0);
                 Entity _spawnedship = ShipFactory.CreateShip(
                     _exsistingClasses[_selectedDesignIndex], 
                     _uiState.Faction, 
-                    parent,
+                    ralitivePos,
+                    _sysBodies.GetSelectedEntity(),
                     _uiState.SelectedSystem, 
                     shipName);
+                //hacky force a refresh
+                _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
                 
             }
         }
