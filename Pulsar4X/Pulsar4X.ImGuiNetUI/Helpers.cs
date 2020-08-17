@@ -68,9 +68,9 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        public void Combo(string label)
+        public bool Combo(string label)
         {
-            ImGui.Combo(label, ref _index, _names, _names.Length);
+            return ImGui.Combo(label, ref _index, _names, _names.Length);
         }
 
         public Entity GetSelectedEntity()
