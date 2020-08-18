@@ -82,6 +82,11 @@ namespace Pulsar4X.SDL2UI
         {
             return _names[_index];
         }
+        
+        public bool IsItemSelected
+        {
+            get { return _index > -1; }
+        }
 
     }
 

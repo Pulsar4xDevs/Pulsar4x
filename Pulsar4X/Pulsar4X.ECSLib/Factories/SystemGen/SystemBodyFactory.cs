@@ -88,27 +88,10 @@ namespace Pulsar4X.ECSLib
             MinMaxStruct innerZone_m;
             MinMaxStruct habitableZone_m;
             MinMaxStruct outerZone_m;
-            var zoneMin_m = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Min);
-            var zoneMax_m = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Max );
-            bool skipHabitableZone = false;
-            if (starInfo.MinHabitableRadius_m > zoneMax_m ||
-                starInfo.MaxHabitableRadius_m < zoneMin_m)
-            {
-                // Habitable zone either too close or too far from star.
-                // Only generating inner and outer zones.
-                skipHabitableZone = true;
 
-                innerZone_m = new MinMaxStruct(zoneMin_m, zoneMax_m * 0.5);
-                habitableZone_m = new MinMaxStruct(starInfo.MinHabitableRadius_m, starInfo.MaxHabitableRadius_m); // Still need this for later.
-                outerZone_m = new MinMaxStruct(zoneMax_m * 0.5, zoneMax_m);
-            }
-            else
-            {
-                innerZone_m = new MinMaxStruct(zoneMin_m, starInfo.MinHabitableRadius_m);
-                habitableZone_m = new MinMaxStruct(starInfo.MinHabitableRadius_m, starInfo.MaxHabitableRadius_m);
-                outerZone_m = new MinMaxStruct(starInfo.MaxHabitableRadius_m, zoneMax_m);
-            }
-
+            var zones = HabitibleZones(_galaxyGen.Settings, starInfo);
+            bool skipHabitableZone = !zones.hasHabitible;
+            
             // Now generate planet numbers.
             int numInnerZoneBodies = 0;
             int numHabitableZoneBodies = 0;
@@ -142,9 +125,9 @@ namespace Pulsar4X.ECSLib
             // Generate the bodies in each band.
             var systemBodies = new List<ProtoEntity>(numberOfBodies);
 
-            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.HabitableBand, habitableZone_m, numHabitableZoneBodies, systemBodies, currentDateTime));
-            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.InnerBand, innerZone_m, numInnerZoneBodies, systemBodies, currentDateTime));
-            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.OuterBand, outerZone_m, numOuterZoneBodies, systemBodies, currentDateTime));
+            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.HabitableBand, zones.habitible, numHabitableZoneBodies, systemBodies, currentDateTime));
+            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.InnerBand, zones.inner, numInnerZoneBodies, systemBodies, currentDateTime));
+            systemBodies.AddRange(GenerateBodiesForBand(system, star, SystemBand.OuterBand, zones.outer, numOuterZoneBodies, systemBodies, currentDateTime));
 
             // Finalize all bodies that were actually added to the star.
             int bodyCount = 1;
@@ -157,6 +140,36 @@ namespace Pulsar4X.ECSLib
 
             // Finally, comets!
             GenerateComets(staticData, system, star, currentDateTime);
+        }
+
+        public static (MinMaxStruct inner, MinMaxStruct habitible, MinMaxStruct outer, bool hasHabitible) HabitibleZones(SystemGenSettingsSD settings, StarInfoDB starInfo)
+        {
+            
+            MinMaxStruct innerZone_m;
+            MinMaxStruct habitableZone_m;
+            MinMaxStruct outerZone_m;
+            var zoneMin_m = Distance.AuToMt(settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Min);
+            var zoneMax_m = Distance.AuToMt(settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Max );
+            bool skipHabitableZone = false;
+            if (starInfo.MinHabitableRadius_m > zoneMax_m ||
+                starInfo.MaxHabitableRadius_m < zoneMin_m)
+            {
+                // Habitable zone either too close or too far from star.
+                // Only generating inner and outer zones.
+                skipHabitableZone = true;
+
+                innerZone_m = new MinMaxStruct(zoneMin_m, zoneMax_m * 0.5);
+                habitableZone_m = new MinMaxStruct(starInfo.MinHabitableRadius_m, starInfo.MaxHabitableRadius_m); // Still need this for later.
+                outerZone_m = new MinMaxStruct(zoneMax_m * 0.5, zoneMax_m);
+            }
+            else
+            {
+                innerZone_m = new MinMaxStruct(zoneMin_m, starInfo.MinHabitableRadius_m);
+                habitableZone_m = new MinMaxStruct(starInfo.MinHabitableRadius_m, starInfo.MaxHabitableRadius_m);
+                outerZone_m = new MinMaxStruct(starInfo.MaxHabitableRadius_m, zoneMax_m);
+            }
+
+            return (innerZone_m, habitableZone_m, outerZone_m, !skipHabitableZone);
         }
 
         /// <summary>
@@ -298,6 +311,79 @@ namespace Pulsar4X.ECSLib
             GenerateOrbitsForBodies(system, star, ref bodies, bandLimits_m, systemBodies, currentDateTime);
 
             return bodies;
+        }
+
+        public static Entity GenerateSingleBody(SystemGenSettingsSD settings, StarSystem system, Entity parent, double radius )
+        {
+            var parentstar = parent;
+            var starInfo = parent.GetDataBlob<StarInfoDB>();
+            int heirarchyDepth = 0;
+            double bandRadius = radius;
+            while (starInfo == null)
+            {
+                heirarchyDepth++;
+                parentstar = parent.GetSOIParentEntity();
+                starInfo = parentstar.GetDataBlob<StarInfoDB>();
+                
+            }
+            //if we're orbiting something, then the parents position from the sun is going tobe the average distance from the sun
+            //this kinda breaks in multi star systems...
+            if(heirarchyDepth > 0) 
+                bandRadius = parent.GetAbsoluteFuturePosition(parentstar.StarSysDateTime).Length();
+            
+            var zones = HabitibleZones(settings, starInfo);
+            MinMaxStruct zone;
+            SystemBand band; 
+            if (zones.hasHabitible && bandRadius > zones.habitible.Min && bandRadius < zones.habitible.Max)
+            {
+                zone = zones.habitible;
+                band = SystemBand.HabitableBand;
+            }
+            else if (bandRadius < zones.inner.Max && bandRadius > zones.inner.Min)
+            {
+                zone = zones.inner;
+                band = SystemBand.InnerBand;
+            }
+            else if (bandRadius > zones.outer.Min && bandRadius < zones.outer.Max)
+            {
+                zone = zones.outer;
+                band = SystemBand.OuterBand;
+            }
+            else throw new Exception("bad radius");
+
+            var bodyType = settings.GetBandBodyTypeWeight(band).Select(system.RNGNextDouble());
+            var newBody = CreateBaseBody();
+            SystemBodyInfoDB newBodyBodyDB = newBody.GetDataBlob<SystemBodyInfoDB>();
+            
+
+            // generate Mass volume DB in full here, to avoid problems later:
+            double density;
+            double mass;
+            if (newBodyBodyDB.BodyType == BodyType.Asteroid)
+            {
+                // Mass multiplication here. This allows us to set the mass to the correct value for both asteroid belts and other bodies.
+                mass = GeneralMath.SelectFromRange(settings.SystemBodyMassByType[newBodyBodyDB.BodyType], system.RNGNextDouble());  // cache final mass in massMultiplyer.
+                var minMaxDensity = settings.SystemBodyDensityByType[newBodyBodyDB.BodyType];
+                density = (minMaxDensity.Min + minMaxDensity.Max) / 2.0;
+            }
+            else
+            {
+                mass = GeneralMath.SelectFromRange(settings.SystemBodyMassByType[newBodyBodyDB.BodyType], Math.Pow(system.RNGNextDouble(), 3)); // cache mass, alos cube random nuber to make smaller bodies more likly.
+                density = GeneralMath.SelectFromRange(settings.SystemBodyDensityByType[newBodyBodyDB.BodyType], system.RNGNextDouble());
+            }
+
+            var mvDB = MassVolumeDB.NewFromMassAndDensity(mass, density);
+            newBody.SetDataBlob(mvDB);
+            Entity body = Entity.Create(system, Guid.Empty, newBody);
+            
+            var positionDB = body.GetDataBlob<PositionDB>();
+            positionDB.SystemGuid = system.Guid;
+            positionDB.SetParent(body.GetDataBlob<OrbitDB>().Parent);
+            positionDB.AbsolutePosition_m = body.GetDataBlob<OrbitDB>().GetPosition_m(parent.StarSysDateTime);
+            
+            return body;
+
+
         }
 
         /// <summary>

@@ -42,6 +42,13 @@ namespace Pulsar4X.ECSLib
         }
 
 
+        /// <summary>
+        /// Gets the Sphere of influence parent (the entity this object is orbiting) for a given entity.
+        /// *Does not check if the entity is infact within the sphere of influence, just the current position heirarchy.* 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="positionDB">provide this to save looking it up</param>
+        /// <returns></returns>
         public static Entity GetSOIParentEntity(this Entity entity, PositionDB positionDB = null)
         {
             if (positionDB == null)
@@ -264,6 +271,26 @@ namespace Pulsar4X.ECSLib
             {
                 throw new Exception("Entity is positionless");
             }
+        }
+
+        /// <summary>
+        /// For more efficent, get and store a reference to PositionDB. 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static Vector3 GetAbsolutePosition(this Entity entity)
+        {
+            return entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+        }
+
+        /// <summary>
+        /// For more efficent, get and store a reference to PositionDB.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static Vector3 GetRalitivePosition(this Entity entity)
+        {
+            return entity.GetDataBlob<PositionDB>().RelativePosition_m;
         }
 
         public static double GetSOI_m(this Entity entity)
