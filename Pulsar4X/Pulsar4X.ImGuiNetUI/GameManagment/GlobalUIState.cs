@@ -314,9 +314,7 @@ namespace Pulsar4X.SDL2UI
         {
             
             LastClickedEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
-
-            EntityClickedEvent?.Invoke(LastClickedEntity, button);
-
+            
             if (ActiveWindow != null)
                 ActiveWindow.EntityClicked(StarSystemStates[starSys].EntityStatesWithNames[entityGuid], button);
 
@@ -328,7 +326,8 @@ namespace Pulsar4X.SDL2UI
 
             if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
                 PrimaryEntity = LastClickedEntity;
-
+            
+            EntityClickedEvent?.Invoke(LastClickedEntity, button);
         }
     }
 

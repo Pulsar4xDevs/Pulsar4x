@@ -264,9 +264,10 @@ namespace Pulsar4X.SDL2UI
 
             if(ImGui.Button("Create Entity") && createEnabled)
             {
+                var selectedSystem = _uiState.SelectedSystem;
                 string shipName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
                 //var parent = OrbitProcessor.FindSOIForPosition(_uiState.SelectedSystem, _icon.WorldPosition_m);
-                Vector3 ralitivePos = new Vector3(_xpos * 1000, _ypos * 1000, 0);
+                Vector3 ralitivePos = _icon.WorldPosition_m;
                 Entity _spawnedship = ShipFactory.CreateShip(
                     _exsistingClasses[_selectedDesignIndex], 
                     _factionEntites.GetSelectedEntity(), 
@@ -275,6 +276,7 @@ namespace Pulsar4X.SDL2UI
                     _uiState.SelectedSystem, 
                     shipName);
                 //hacky force a refresh
+                _uiState.StarSystemStates[selectedSystem.Guid] = SystemState.GetMasterState(selectedSystem);
                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
                 
             }
