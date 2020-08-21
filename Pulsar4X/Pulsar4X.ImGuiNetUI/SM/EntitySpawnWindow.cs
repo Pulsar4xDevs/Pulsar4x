@@ -9,7 +9,7 @@ using Pulsar4X.ECSLib.ComponentFeatureSets;
 using Pulsar4X.Orbital;
 using SDL2;
 using Vector3 = Pulsar4X.Orbital.Vector3;
-
+using static Pulsar4X.SDL2UI.ButtonExt;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -127,20 +127,22 @@ namespace Pulsar4X.SDL2UI
         private int _rad = 100;
         private (MinMaxStruct inner, MinMaxStruct habitible, MinMaxStruct outer, bool hasHabitible) _bandinfo;
         SystemGenSettingsSD _sysGensettings =  SystemGenSettingsSD.DefaultSettings;
+        private Entity _parentStar;
+        private StarInfoDB _starInfo;
         void Planet()
         {
             ImGui.InputText("Name", _nameInputBuffer, 16);
             
             if (_sysBodies.Combo("Orbital Parent"))
             {
-                var starInfo = _sysBodies.GetSelectedEntity().GetDataBlob<StarInfoDB>();
-                starInfo = _sysBodies.GetSelectedEntity().GetDataBlob<StarInfoDB>();
-                Entity parentstar;
-                while (starInfo == null)
+                _parentStar = _sysBodies.GetSelectedEntity();
+                _starInfo = _parentStar.GetDataBlob<StarInfoDB>();
+
+                while (_starInfo == null)
                 {
-                    parentstar = _sysBodies.GetSelectedEntity().GetSOIParentEntity();
-                    starInfo = parentstar.GetDataBlob<StarInfoDB>();
-                    _bandinfo = SystemBodyFactory.HabitibleZones(_sysGensettings, starInfo);
+                    _parentStar = _sysBodies.GetSelectedEntity().GetSOIParentEntity();
+                    _starInfo = _parentStar.GetDataBlob<StarInfoDB>();
+                    _bandinfo = SystemBodyFactory.HabitibleZones(_sysGensettings, _starInfo);
                 
                 }
             }
@@ -149,22 +151,60 @@ namespace Pulsar4X.SDL2UI
             var min = Math.Min(_bandinfo.inner.Min, _sysBodies.GetSelectedEntity().GetDataBlob<MassVolumeDB>().RadiusInM);
             if (_sysBodies.GetSelectedEntity().HasDataBlob<StarInfoDB>())
                 min = _bandinfo.inner.Min;
-            if (ImGui.DragInt("Radius from parent", ref _rad, 10, (int)min * 1000, (int)max * 1000))
+
+            bool enabled = false;
+            if (_parentStar != null && _starInfo != null)
+                enabled = true;
+            
+            if (!enabled)
+            {
+                ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
+            }
+            
+            if (ImGui.DragInt("Radius from parent", ref _rad, 100, (int)min * 1000, (int)max * 1000) && enabled)
             {
                 var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
-                var parentPos = _sysBodies.GetSelectedEntity().GetAbsoluteFuturePosition(datetime);
+                var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
                 _icon.WorldPosition_m = new Vector3( parentPos.X + _xpos * 1000, parentPos.Y, _xpos);
+
+                var parent = _sysBodies.GetSelectedEntity();
+                
+                
+                
+                var bandRadius = parent.GetAbsoluteFuturePosition(_parentStar.StarSysDateTime).Length();
+                var zones = SystemBodyFactory.HabitibleZones(_sysGensettings, _starInfo);
+                MinMaxStruct zone;
+                SystemBand band; 
+                if (zones.hasHabitible && bandRadius > zones.habitible.Min && bandRadius < zones.habitible.Max)
+                {
+                    zone = zones.habitible;
+                    band = SystemBand.HabitableBand;
+                }
+                else if (bandRadius < zones.inner.Max && bandRadius > zones.inner.Min)
+                {
+                    zone = zones.inner;
+                    band = SystemBand.InnerBand;
+                }
+                else if (bandRadius > zones.outer.Min && bandRadius < zones.outer.Max)
+                {
+                    zone = zones.outer;
+                    band = SystemBand.OuterBand;
+                }
+                //else throw new Exception("bad radius");
                 
             }
             
 
-            
+            //ImGui.Text("Band: " + );
+
+
+            BodyType btype = BodyType.Unknown;
             if (ImGui.Combo("Body Type", ref _bodyTypeIndex, _bodyTypes, _bodyTypes.Length))
             {
-                var setting = SystemGenSettingsSD.DefaultSettings;
-                BodyType btype = (BodyType)_bodyTypeIndex;
-                _massTon = (float)(0.001 * GeneralMath.SelectFromRange(setting.SystemBodyMassByType[btype], Math.Pow(_rng.NextDouble(), 3))); // cache mass, alos cube random nuber to make smaller bodies more likly.
-                _density = (float) GeneralMath.SelectFromRange(setting.SystemBodyDensityByType[btype], _rng.NextDouble());
+                
+                btype = (BodyType)_bodyTypeIndex;
+                _massTon = (float)(0.001 * GeneralMath.SelectFromRange(_sysGensettings.SystemBodyMassByType[btype], Math.Pow(_rng.NextDouble(), 3))); // cache mass, alos cube random nuber to make smaller bodies more likly.
+                _density = (float) GeneralMath.SelectFromRange(_sysGensettings.SystemBodyDensityByType[btype], _rng.NextDouble());
                 var volume = _massTon * 1000 / _density;
                 _radiusKM = (float)(MassVolumeDB.CalculateRadius_m(_massTon * 1000, _density) * 0.001);
             }
@@ -204,11 +244,13 @@ namespace Pulsar4X.SDL2UI
             
 
 
-            if (ImGui.Button("Create Entity"))
+            if (ButtonED("Create Entity", enabled))
             {
                 
                 var system = _uiState.SelectedSystem;
-                var newBody = SystemBodyFactory.GenerateSingleBody(_sysGensettings, system, _sysBodies.GetSelectedEntity(), _rad);
+                var newBody = SystemBodyFactory.GenerateSingleBody(_sysGensettings, system, _sysBodies.GetSelectedEntity(), btype, _rad);
+                MassVolumeDB massvol = MassVolumeDB.NewFromMassAndDensity(_massTon * 1000, _density);
+                newBody.SetDataBlob(massvol);
             }
         }
 
@@ -257,12 +299,8 @@ namespace Pulsar4X.SDL2UI
                 _sysBodies.IsItemSelected)
                 createEnabled = true;
 
-            if (!createEnabled)
-            {
-                ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
-            }
-
-            if(ImGui.Button("Create Entity") && createEnabled)
+            
+            if(ButtonED("Create Entity", createEnabled))
             {
                 var selectedSystem = _uiState.SelectedSystem;
                 string shipName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
@@ -280,11 +318,6 @@ namespace Pulsar4X.SDL2UI
                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
                 
             }
-
-            if (!createEnabled)
-            {
-                ImGui.PopStyleVar();
-            }
         }
 
         void Colony()
@@ -292,6 +325,28 @@ namespace Pulsar4X.SDL2UI
             
             _sysBodies.Combo("Planet:");
             _factionOwnerEntites.Combo("Owner");
+            bool createEnabled = false;
+            if (_sysBodies.IsItemSelected && _factionOwnerEntites.IsItemSelected)
+                createEnabled = true;
+            
+            if(ButtonED("Create Entity", createEnabled))
+            {
+                var selectedSystem = _uiState.SelectedSystem;
+                string shipName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
+                //var parent = OrbitProcessor.FindSOIForPosition(_uiState.SelectedSystem, _icon.WorldPosition_m);
+                Vector3 ralitivePos = _icon.WorldPosition_m;
+                Entity _spawnedship = ShipFactory.CreateShip(
+                    _exsistingClasses[_selectedDesignIndex], 
+                    _factionEntites.GetSelectedEntity(), 
+                    ralitivePos,
+                    _sysBodies.GetSelectedEntity(),
+                    _uiState.SelectedSystem, 
+                    shipName);
+                //hacky force a refresh
+                _uiState.StarSystemStates[selectedSystem.Guid] = SystemState.GetMasterState(selectedSystem);
+                _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
+                
+            }
         }
 
         public override void OnGameTickChange(DateTime newDate)

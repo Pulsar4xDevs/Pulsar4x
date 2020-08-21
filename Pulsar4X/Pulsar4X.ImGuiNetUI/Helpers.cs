@@ -672,4 +672,25 @@ namespace Pulsar4X.SDL2UI
         }
 
     }
+    
+    public static class ButtonExt
+    {
+        public static bool ButtonED(string label, bool IsEnabled)
+        {
+            
+            if(!IsEnabled)
+                ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
+                
+            bool clicked = ImGui.Button(label);
+            
+            if(!IsEnabled)
+            {
+                ImGui.PopStyleVar();
+                clicked = false; //if we're not enabled, we return false.
+            }
+            return clicked;
+        }
+    }
 }
+
+

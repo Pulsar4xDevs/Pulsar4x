@@ -78,7 +78,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="mass">Mass in Kg.</param>
         /// <param name="radius_au">Radius in AU</param>
         /// <returns></returns>
-        internal static MassVolumeDB NewFromMassAndRadius_AU(double mass, double radius_au)
+        public static MassVolumeDB NewFromMassAndRadius_AU(double mass, double radius_au)
         {
             var mvDB = new MassVolumeDB {MassDry = mass, RadiusInAU = radius_au, Volume_km3 = CalculateVolume_Km3(radius_au)};
             mvDB.Density_gcm = CalculateDensity(mass, mvDB.Volume_m3);
@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
             return mvDB;
         }
         
-        internal static MassVolumeDB NewFromMassAndRadius_m(double mass, double radius_m)
+        public static MassVolumeDB NewFromMassAndRadius_m(double mass, double radius_m)
         {
             var mvDB = new MassVolumeDB {MassDry = mass, RadiusInM = radius_m, Volume_m3 = CalculateVolume_m3(radius_m)};
             mvDB.Density_gcm = CalculateDensity(mass, mvDB.Volume_m3);
@@ -100,7 +100,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="mass">Mass in Kg</param>
         /// <param name="density">Density in Kg/cm^3</param>
         /// <returns></returns>
-        internal static MassVolumeDB NewFromMassAndDensity(double mass, double density)
+        public static MassVolumeDB NewFromMassAndDensity(double mass, double density)
         {
             var mvDB = new MassVolumeDB {MassDry = mass, Density_gcm = density, Volume_km3 = CalculateVolume_Km3_FromMassAndDesity(mass, density), RadiusInAU = CalculateRadius_Au(mass, density)};
 
@@ -113,7 +113,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="mass">Mass in Kg</param>
         /// <param name="volume">Density in m^3</param>
         /// <returns></returns>
-        internal static MassVolumeDB NewFromMassAndVolume(double mass, double volume_m3)
+        public static MassVolumeDB NewFromMassAndVolume(double mass, double volume_m3)
         {
             var density = CalculateDensity(mass, volume_m3);
             var rad = CalculateRadius_m(mass, density);

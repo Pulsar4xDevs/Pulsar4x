@@ -313,7 +313,7 @@ namespace Pulsar4X.ECSLib
             return bodies;
         }
 
-        public static Entity GenerateSingleBody(SystemGenSettingsSD settings, StarSystem system, Entity parent, double radius )
+        public static Entity GenerateSingleBody(SystemGenSettingsSD settings, StarSystem system, Entity parent, BodyType type, double radius )
         {
             var parentstar = parent;
             var starInfo = parent.GetDataBlob<StarInfoDB>();
