@@ -673,7 +673,7 @@ namespace Pulsar4X.SDL2UI
 
     }
     
-    public static class ButtonExt
+    public static class ImguiExt
     {
         public static bool ButtonED(string label, bool IsEnabled)
         {
@@ -689,6 +689,54 @@ namespace Pulsar4X.SDL2UI
                 clicked = false; //if we're not enabled, we return false.
             }
             return clicked;
+        }
+        
+        public static bool SliderAngleED(string label, ref float v_rad, bool IsEnabled)
+        {
+            var rad = v_rad;
+            if(!IsEnabled)
+                ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
+                
+            bool clicked = ImGui.SliderAngle(label, ref v_rad);
+            
+            if(!IsEnabled)
+            {
+                ImGui.PopStyleVar();
+                v_rad = rad;
+                clicked = false; //if we're not enabled, we return false.
+            }
+            return clicked;
+        }
+
+
+
+        public static bool SliderDouble(string label, ref double value, double min, double max)
+        {
+            //double step = attribute.StepValue;
+            //double fstep = step * 10;
+            double val = value;
+            IntPtr valPtr;
+            IntPtr maxPtr;
+            IntPtr minPtr;
+            //IntPtr stepPtr;
+            //IntPtr fstepPtr;
+
+            unsafe
+            {
+                valPtr = new IntPtr(&val);
+                maxPtr = new IntPtr(&max);
+                minPtr = new IntPtr(&min);
+                //stepPtr = new IntPtr(&step);
+                //fstepPtr = new IntPtr(&fstep);
+            }
+
+            bool changed = false;
+            if(ImGui.SliderScalar(label, ImGuiDataType.Double, valPtr, minPtr, maxPtr))
+            {
+                value = val;
+                changed = true;
+            }
+            return changed;
         }
     }
 }

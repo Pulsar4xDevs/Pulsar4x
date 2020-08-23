@@ -343,7 +343,7 @@ namespace Pulsar4X.ECSLib
             {
                 SemiMajorAxis = r,
                 Eccentricity = 0,
-                Inclination_Degrees = i,
+                Inclination = i,
                 LongitudeOfAscendingNode = 0,
                 ArgumentOfPeriapsis = 0,
                 MeanAnomalyAtEpoch = m0,

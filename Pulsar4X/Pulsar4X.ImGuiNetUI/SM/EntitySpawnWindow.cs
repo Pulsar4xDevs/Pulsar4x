@@ -4,12 +4,13 @@ using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Runtime.CompilerServices;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib.ComponentFeatureSets;
 using Pulsar4X.Orbital;
 using SDL2;
 using Vector3 = Pulsar4X.Orbital.Vector3;
-using static Pulsar4X.SDL2UI.ButtonExt;
+using static Pulsar4X.SDL2UI.ImguiExt;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -29,6 +30,10 @@ namespace Pulsar4X.SDL2UI
         private EntityNameSelector _sysBodies;
         private EntityNameSelector _factionEntites;
         private EntityNameSelector _factionOwnerEntites;
+        private KeplerElements _ke;
+        private double _objMass = 1000;
+        private double _parentMass = 1e10;
+        private double _sgp;
         
         private EntitySpawnWindow()
 	    {
@@ -52,6 +57,10 @@ namespace Pulsar4X.SDL2UI
             MinMaxStruct hab = new MinMaxStruct(10000, 100000);
             MinMaxStruct outer = new MinMaxStruct(100000, 10000000);
             _bandinfo = (inner, hab, outer, true);
+            var date = _uiState.SelectedSystem.StarSysDateTime;
+            _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
+            _ke = OrbitalMath.FromPosition(new Vector3(10000, 0, 0), _sgp, date);
+
         }
 
         internal static EntitySpawnWindow GetInstance() {
@@ -128,24 +137,14 @@ namespace Pulsar4X.SDL2UI
         private (MinMaxStruct inner, MinMaxStruct habitible, MinMaxStruct outer, bool hasHabitible) _bandinfo;
         SystemGenSettingsSD _sysGensettings =  SystemGenSettingsSD.DefaultSettings;
         private Entity _parentStar;
+        private Entity _parentObect;
         private StarInfoDB _starInfo;
         void Planet()
         {
-            ImGui.InputText("Name", _nameInputBuffer, 16);
             
-            if (_sysBodies.Combo("Orbital Parent"))
-            {
-                _parentStar = _sysBodies.GetSelectedEntity();
-                _starInfo = _parentStar.GetDataBlob<StarInfoDB>();
+            ImGui.InputText("Name", _nameInputBuffer, 16);
 
-                while (_starInfo == null)
-                {
-                    _parentStar = _sysBodies.GetSelectedEntity().GetSOIParentEntity();
-                    _starInfo = _parentStar.GetDataBlob<StarInfoDB>();
-                    _bandinfo = SystemBodyFactory.HabitibleZones(_sysGensettings, _starInfo);
-                
-                }
-            }
+            SetParent();
 
             var max = Math.Min(_bandinfo.outer.Max, _sysBodies.GetSelectedEntity().GetSOI_m());
             var min = Math.Min(_bandinfo.inner.Min, _sysBodies.GetSelectedEntity().GetDataBlob<MassVolumeDB>().RadiusInM);
@@ -155,11 +154,7 @@ namespace Pulsar4X.SDL2UI
             bool enabled = false;
             if (_parentStar != null && _starInfo != null)
                 enabled = true;
-            
-            if (!enabled)
-            {
-                ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
-            }
+
             
             if (ImGui.DragInt("Radius from parent", ref _rad, 100, (int)min * 1000, (int)max * 1000) && enabled)
             {
@@ -212,6 +207,8 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.DragFloat("Mass in Tons", ref _massTon))
             {
                 _radiusKM = (float)MassVolumeDB.CalculateRadius_m(_massTon, _density);
+                SetMass(_massTon * 1000);
+
             }
             if (ImGui.DragFloat("Density: ", ref _density))
             {
@@ -224,23 +221,8 @@ namespace Pulsar4X.SDL2UI
             }
 
             
-            /*
-            if (ImGui.DragInt("X km ralitve", ref _xpos))
-            {
-                var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
-                var parentPos = _sysBodies.GetSelectedEntity().GetAbsoluteFuturePosition(datetime);
-                _icon.WorldPosition_m = new Vector3( parentPos.X + _xpos * 1000);
-            }
 
-            if (ImGui.DragInt("Y km ralitve", ref _ypos))
-            {
-                var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
-                var parentPos = _sysBodies.GetSelectedEntity().GetAbsoluteFuturePosition(datetime);
-                _icon.WorldPosition_m = new Vector3( parentPos.Y + _ypos * 1000);
-            }
-*/
-
-            
+            OrbitEditWidget.Begin(_ke, OrbitEditWidget.WidgetStyle.Keplerian3d);
             
 
 
@@ -252,6 +234,7 @@ namespace Pulsar4X.SDL2UI
                 MassVolumeDB massvol = MassVolumeDB.NewFromMassAndDensity(_massTon * 1000, _density);
                 newBody.SetDataBlob(massvol);
             }
+            
         }
 
    
@@ -272,7 +255,8 @@ namespace Pulsar4X.SDL2UI
             
             ImGui.Combo("Select Design", ref _selectedDesignIndex, _shipDesignNames, _shipDesignNames.Length);
 
-            _sysBodies.Combo("Orbital Parent");
+            SetParent();
+
             if (ImGui.DragInt("X km ralitve", ref _xpos))
             {
                 var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
@@ -288,6 +272,9 @@ namespace Pulsar4X.SDL2UI
             }
 
             _factionOwnerEntites.Combo("Set Owner Faction");
+            
+            OrbitEditWidget.Begin(_ke, OrbitEditWidget.WidgetStyle.Keplerian2d2);
+            
             ImGui.InputText("Ship Name", _nameInputBuffer, 16);
 
             bool createEnabled = false;
@@ -297,8 +284,12 @@ namespace Pulsar4X.SDL2UI
                 _selectedDesignIndex >= 0 &&
                 _factionEntites.IsItemSelected &&
                 _sysBodies.IsItemSelected)
+            {
                 createEnabled = true;
+            }
 
+            
+            
             
             if(ButtonED("Create Entity", createEnabled))
             {
@@ -347,6 +338,35 @@ namespace Pulsar4X.SDL2UI
                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
                 
             }
+        }
+
+        bool SetParent()
+        {
+            if (_sysBodies.Combo("Orbital Parent"))
+            {
+                _parentObect = _sysBodies.GetSelectedEntity();
+                _parentStar = _parentObect;
+                _parentMass = _parentObect.GetDataBlob<MassVolumeDB>().MassDry;
+                _starInfo = _parentStar.GetDataBlob<StarInfoDB>();
+                
+                while (_starInfo == null)
+                {
+                    _parentStar = _sysBodies.GetSelectedEntity().GetSOIParentEntity();
+                    _starInfo = _parentStar.GetDataBlob<StarInfoDB>();
+                    _bandinfo = SystemBodyFactory.HabitibleZones(_sysGensettings, _starInfo);
+                
+                }
+                _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
+                return true;
+            }
+
+            return false;
+        }
+
+        void SetMass(double massKG)
+        {
+            _objMass = massKG;
+            _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
         }
 
         public override void OnGameTickChange(DateTime newDate)
@@ -415,5 +435,130 @@ namespace Pulsar4X.SDL2UI
         {
             base.Draw(rendererPtr, camera);
         }
+    }
+
+    public static class OrbitEditWidget
+    {
+        public enum WidgetStyle
+        {
+            Newtonion,
+            Keplerian2d1,
+            Keplerian2d2,
+            Keplerian3d
+        }
+
+        public static WidgetStyle Style = WidgetStyle.Keplerian2d2;
+
+        public static bool LockPosition;
+        public static KeplerElements _ke;
+        public static void Begin(KeplerElements keplerElements, WidgetStyle style)
+        {
+            _ke = keplerElements;
+            Style = style;
+            switch (style)
+            {
+                case WidgetStyle.Newtonion:
+                    NewtonionStyle();
+                    break;
+                case WidgetStyle.Keplerian2d1:
+                    KeplerianStyle2d_1();
+                    break;
+                case WidgetStyle.Keplerian2d2:
+                    KeplerianStyle2d_2();
+                    break;
+                case WidgetStyle.Keplerian3d:
+                    KeplerianStyle3d_1();
+                    break;
+
+            }
+        }
+
+        static void NewtonionStyle()
+        {
+        }
+
+        private static float _radius = 0;
+        private static float _eccentricity = 0;
+        private static float _semiMajorAxis = 1000;
+        private static float _lop = 0;
+        private static float _lopAndTrue = 0;
+        private static bool _clockwise;
+        static void KeplerianStyle2d_1()
+        {
+            ImGui.DragFloat("Radius", ref _radius);
+            if (SliderAngleED("ϖ+ν", ref _lopAndTrue, LockPosition))
+            {
+                
+            }
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Londitude of Periapsis + True Anomaly");
+
+            if (SliderDouble("e", ref _ke.Eccentricity, 0, double.MaxValue))
+            {
+                
+                
+                //double trueAnomaly = OrbitalMath.TrueAnomaly(eccentVector, position, velocity);
+                //double eccentricAnomoly = OrbitalMath.GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, _ke.Eccentricity);
+                //var meanAnomaly = OrbitalMath.GetMeanAnomaly(_ke.Eccentricity, eccentricAnomoly);
+            }
+
+
+        }
+
+        static void KeplerianStyle2d_2()
+        {
+            SliderDouble("a", ref _ke.SemiMajorAxis, 0, double.MaxValue);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Semi Major Axis");
+            SliderDouble("e", ref _ke.Eccentricity, 0, double.MaxValue);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("e(ccentricity)");
+
+            ImGui.SliderAngle("ϖ", ref _lop);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Londitude of Periapsis, is Ω + ω (Londitude of Assending Node + Argument of Periapsis)");
+            ImGui.Checkbox("Clockwise Orbit", ref _clockwise);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("i(nclination) is 0 or 180 in a 2d orbit");
+            SliderAngleED("ν", ref _trueAnomaly, LockPosition);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("True Anomaly");
+        }
+
+        private static float _inclination = 0;
+        private static float _loAN = 0;
+        private static float _aoP = 0;
+        private static float _trueAnomaly = 0;
+        static void KeplerianStyle3d_1()
+        {
+            ImGui.DragFloat("a", ref _semiMajorAxis);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Semi Major Axis");
+            
+            SliderDouble("e", ref _ke.Eccentricity, 0, double.MaxValue);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("e(ccentricity)");
+
+            ImGui.SliderAngle("Ω", ref _loAN);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Londitude of AccendingNode");
+            
+            ImGui.SliderAngle("ω", ref _aoP);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Argument of Periapsis)");
+            
+            ImGui.SliderAngle("i", ref _inclination);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("i(nclination)");
+
+            SliderAngleED("ν", ref _trueAnomaly, LockPosition);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("True Anomaly");
+            
+
+
+
+        }
+
     }
 }

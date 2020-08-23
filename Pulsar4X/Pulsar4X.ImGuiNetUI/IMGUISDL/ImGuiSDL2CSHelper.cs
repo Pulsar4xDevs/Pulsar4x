@@ -62,7 +62,7 @@ namespace ImGuiSDL2CS {
                 ImFontConfigPtr config = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
                 ImFontGlyphRangesBuilderPtr builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
                 
-                builder.AddText("ΩωΝνΔδθΘ"); //Omega, Nu, Delta, Theta (UPPER and lower cases)
+                builder.AddText("ΩωΝνΔδθΘϖ"); //Omega, Nu, Delta, Theta (UPPER and lower cases)
                 //builder.AddRanges(fontAtlas.GetGlyphRangesDefault());
                 builder.BuildRanges(out ImVector ranges);
                 
