@@ -441,7 +441,7 @@ namespace Pulsar4X.ECSLib
         }
         private bool _hydrosphere;
 
-        public float HydrosphereExtent
+        public decimal HydrosphereExtent
         {
             get { return _hydrosphereExtent; }
             set
@@ -450,7 +450,7 @@ namespace Pulsar4X.ECSLib
                 OnPropertyChanged();
             }
         }
-        private float _hydrosphereExtent;
+        private decimal _hydrosphereExtent;
 
         #endregion
 

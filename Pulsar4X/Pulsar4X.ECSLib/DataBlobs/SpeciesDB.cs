@@ -8,6 +8,14 @@ namespace Pulsar4X.ECSLib
     public class SpeciesDB : BaseDataBlob
     {
         /// <summary>
+        /// The gas primary this species breathes.
+        /// Defaults to O2
+        /// </summary>
+        [PublicAPI]
+        [JsonProperty]
+        public string BreathableGasSymbol { get; internal set; }
+
+        /// <summary>
         /// The ideal gravity for this species.
         /// </summary>
         [PublicAPI]
@@ -84,25 +92,30 @@ namespace Pulsar4X.ECSLib
 
         public SpeciesDB() { }
 
-        public SpeciesDB(double baseGravity, double minGravity, double maxGravity, double basePressure, double minPressure, double maxPressure, double baseTemp, double minTemp, double maxTemp)
+        public SpeciesDB(double baseGravity, double minGravity, double maxGravity, double basePressure, double minPressure, double maxPressure, double baseTemp, double minTemp, double maxTemp, string breathableGas = "O2")
         {
             BaseGravity = baseGravity;
             MinimumGravityConstraint = minGravity;
             MaximumGravityConstraint = maxGravity;
+
             BasePressure = basePressure;
             MinimumPressureConstraint = minPressure;
             MaximumPressureConstraint = maxPressure;
+
             BaseTemperature = baseTemp;
             MinimumTemperatureConstraint = minTemp;
             MaximumTemperatureConstraint = maxTemp;
 
+            BreathableGasSymbol = breathableGas;
+
+            TemperatureToleranceRange = maxTemp - minTemp;
         }
 
         public override object Clone()
         {
             return new SpeciesDB(BaseGravity, MinimumGravityConstraint, MaximumGravityConstraint,
                 BasePressure, MinimumPressureConstraint, MaximumPressureConstraint,
-                BaseTemperature, MinimumTemperatureConstraint, MaximumTemperatureConstraint);
+                BaseTemperature, MinimumTemperatureConstraint, MaximumTemperatureConstraint, BreathableGasSymbol);
         }
     }
 }

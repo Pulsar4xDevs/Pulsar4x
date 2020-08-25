@@ -1,4 +1,5 @@
 ﻿using Pulsar4X.Orbital;
+using System;
 
 namespace Pulsar4X.ECSLib
 {
@@ -14,7 +15,7 @@ namespace Pulsar4X.ECSLib
 
         public static float ToKelvin(float celsius)
         {
-            return (float)(celsius + UniversalConstants.Units.DegreesCToKelvin);
+            return Convert.ToSingle(celsius + UniversalConstants.Units.DegreesCToKelvin);
         }
 
         public static double ToCelsius(double kelvin)
@@ -24,7 +25,7 @@ namespace Pulsar4X.ECSLib
 
         public static float ToCelsius(float kelvin)
         {
-            return (float)(kelvin + UniversalConstants.Units.KelvinToDegreesC);
+            return Convert.ToSingle(kelvin + UniversalConstants.Units.KelvinToDegreesC);
         }
     }
 }

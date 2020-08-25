@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
         /// The percentage of the bodies sureface covered by water.
         /// </summary>
         [JsonProperty]
-        public short HydrosphereExtent { get; internal set; }
+        public decimal HydrosphereExtent { get; internal set; }
 
         /// <summary>
         /// A measure of the greenhouse factor provided by this Atmosphere.
@@ -96,17 +96,15 @@ namespace Pulsar4X.ECSLib
         /// <param name="hydroExtent">The percentage of the bodies sureface covered by water.</param>
         /// <param name="greenhouseFactor">Greenhouse factor provided by this Atmosphere.</param>
         /// <param name="greenhousePressue"></param>
-        /// <param name="albedo">from 0 to 1.</param>
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
         /// <param name="composition">a Dictionary of gas types as keys and amounts as values</param>
-        internal AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float surfaceTemp, Dictionary<AtmosphericGasSD,float> composition)
+        internal AtmosphereDB(float pressure, bool hydrosphere, decimal hydroExtent, float greenhouseFactor, float greenhousePressue, float surfaceTemp, Dictionary<AtmosphericGasSD,float> composition)
         {
             Pressure = pressure;
             Hydrosphere = hydrosphere;
             HydrosphereExtent = hydroExtent;
             GreenhouseFactor = greenhouseFactor;
             GreenhousePressure = greenhousePressue;
-            //Albedo = albedo;
             SurfaceTemperature = surfaceTemp;
             Composition = composition;
         }

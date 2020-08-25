@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
             {
                 var species = kvp.Key.GetDataBlob<SpeciesDB>();
                 // count the number of different population groups that need infrastructure support
-                if (species.ColonyCost(colony.GetDataBlob<ColonyInfoDB>().PlanetEntity) > 1.0)
+                if (species.ColonyCost(colony.GetDataBlob<ColonyInfoDB>().PlanetEntity) > 0.0)
                     needsSupport++;
             }
 
@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
                 double growthRate;
                 long newPop;
 
-                if (colonyCost > 1.0)
+                if (colonyCost > 0.0)
                 {
                     maxPopulation = (long)((double)(popSupportValue / needsSupport) / colonyCost) ;
                     if (currentPopulation[kvp.Key] > maxPopulation) // People will start dying

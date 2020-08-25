@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace Pulsar4X.ECSLib
@@ -20,28 +22,30 @@ namespace Pulsar4X.ECSLib
 
         public static double ColonyCost(this SpeciesDB species, Entity planet)
         {
-            double cost = 1.0;
-
-            cost = Math.Max(cost, species.ColonyPressureCost(planet));
-            cost = Math.Max(cost, species.ColonyTemperatureCost(planet));
-            cost = Math.Max(cost, species.ColonyGasCost(planet));
-            cost = Math.Max(cost, species.ColonyToxicityCost(planet));
-
             if (!species.CanSurviveGravityOn(planet))
                 return -1.0; // invalid - cannot create colony here
 
-            return cost;
+            List<double> costs = new List<double>
+            {
+                species.ColonyPressureCost(planet),
+                species.ColonyTemperatureCost(planet),
+                species.ColonyGasCost(planet),
+                species.ColonyToxicityCost(planet)
+            };
+
+            return costs.Max();
         }
 
         /// <summary>
-        /// cost should increase with composition. there has to be a more efficent way of doing this too.
+        /// Equvalent to the Dangerous Atmosphere Cost in Aurora 4X C#
+        /// Cost should increase with composition. there has to be a more efficent way of doing this too.
         /// </summary>
         /// <param name="planet"></param>
         /// <param name="species"></param>
         /// <returns></returns>
         public static double ColonyToxicityCost(this SpeciesDB species, Entity planet)
         {
-            double cost = 1.0;
+            double cost = 0.0;
             double totalPressure = 0.0;
             SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
@@ -88,6 +92,12 @@ namespace Pulsar4X.ECSLib
             return cost;
         }
 
+        /// <summary>
+        /// Equivalent to Atmospheric Pressure Cost in Aurora4X C#
+        /// </summary>
+        /// <param name="species"></param>
+        /// <param name="planet"></param>
+        /// <returns></returns>
         public static double ColonyPressureCost(this SpeciesDB species, Entity planet)
         {
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
@@ -96,7 +106,7 @@ namespace Pulsar4X.ECSLib
             {
                 // No atmosphere on the planet, return 1.0?
                 // @todo - some other rule for no atmosphere planets?
-                return 1.0;
+                return 2.0;
             }
 
             var totalPressure = atmosphere.GetAtmosphericPressure();
@@ -108,34 +118,53 @@ namespace Pulsar4X.ECSLib
                 return Math.Round(Math.Max(totalPressure / species.MaximumPressureConstraint, 2.0), 6);
             }
 
-            return 1.0;
+            return 0;
         }
 
+
+        /// <summary>
+        /// Equivalent to Temperature Factor Cost in Aurora4X C#
+        /// </summary>
         public static double ColonyTemperatureCost(this SpeciesDB species, Entity planet)
         {
             // AuroraWiki : The colony cost for a temperature outside the range is Temperature Difference / Temperature Deviation. 
             //              So if the deviation was 22 and the temperature was 48 degrees below the minimum, the colony cost would be 48/22 = 2.18
+            double tempRange = species.MaximumTemperatureConstraint - species.MinimumTemperatureConstraint;
             SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
             double cost;
-            double idealTemp = species.BaseTemperature;
-            double planetTemp = sysBody.BaseTemperature;  // @todo: find correct temperature after terraforming
-            double tempRange = species.TemperatureToleranceRange;
+
+            double planetTemp = sysBody.BaseTemperature;
+            if (planet.HasDataBlob<AtmosphereDB>())
+            {
+                planetTemp = planet.GetDataBlob<AtmosphereDB>().SurfaceTemperature;
+            }
+
+            if (planetTemp <= species.MaximumTemperatureConstraint  && planetTemp >= species.MinimumTemperatureConstraint)
+            {
+                return 0;
+            }
 
             //More Math (the | | signs are for Absolute Value in case you forgot)
             //TempColCost = | Ideal Temp - Current Temp | / TRU (temps in Kelvin)
             // Converting to Kelvin.  It probably doesn't matter, but just in case
-            cost = Math.Abs((idealTemp + 273.15) - (planetTemp + 273.15)) / tempRange;
+            var deviation = tempRange / 2.0;
+            var diff = planetTemp < species.MinimumTemperatureConstraint 
+                        ? Math.Abs(planetTemp - species.MinimumTemperatureConstraint) 
+                        : Math.Abs(planetTemp - species.MaximumTemperatureConstraint);
+
+            cost = diff / deviation;
 
             return cost;
         }
 
-        // Returns cost based on amount of breathable gas in atmosphere
+
+        /// <summary>
+        /// Equivalent to Breathable Atmosphere Cost in Aurora4X C#
+        /// </summary>
         public static double ColonyGasCost(this SpeciesDB species, Entity planet)
         {
-            // @todo: update to check species for its breathable gas
-
-            double cost = 1.0;
-            float O2Pressure = 0.0f;
+            double cost = 0.0;  // if everything is good then this planet doesnt require infrastructure.
+            float speciesBreathablePressure = 0.0f;
             float totalPressure = 0.0f;
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
 
@@ -152,20 +181,20 @@ namespace Pulsar4X.ECSLib
             {
                 string symbol = kvp.Key.ChemicalSymbol;
                 totalPressure += kvp.Value;
-                if (symbol == "O2")
-                    O2Pressure = kvp.Value;
+                if (symbol == species.BreathableGasSymbol)
+                    speciesBreathablePressure = kvp.Value;
             }
 
-            //if (totalPressure >= 4.0f && O2Pressure <= 0.31f)
+            //if (totalPressure >= 4.0f && speciesBreathablePressure <= 0.31f)
             //    cost = cost; // created for the break point
 
             if (totalPressure == 0.0f) // No atmosphere, obviously not breathable
                 return 2.0;
 
-            if (O2Pressure < 0.1f || O2Pressure > 0.3f)  // wrong amount of oxygen
+            if (speciesBreathablePressure < 0.1f || speciesBreathablePressure > 0.3f)  // wrong amount of species Breathable Gas
                 return 2.0;
 
-            if (O2Pressure / totalPressure > 0.3f) // Oxygen cannot be more than 30% of atmosphere to be breathable
+            if (speciesBreathablePressure / totalPressure > 0.3f) // Species Breathable Gas cannot be more than 30% of atmosphere to be breathable
                 return 2.0;
 
             return cost;
