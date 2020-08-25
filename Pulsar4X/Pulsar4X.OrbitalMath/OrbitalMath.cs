@@ -120,6 +120,35 @@ namespace Pulsar4X.Orbital
             return orbit;
         }
 
+        public static KeplerElements FromPositionLope(double sgp, Vector3 ralitivePosition, double lop, double e, DateTime epoch)
+        {
+            var ralpos = ralitivePosition;
+            var r = ralpos.Length();
+            var i = Math.Atan2(ralpos.Z, r);
+            var m0 = Math.Atan2(ralpos.Y, ralpos.X);
+            
+            var orbit = new KeplerElements()
+            {
+                SemiMajorAxis = r,
+                SemiMinorAxis = r,
+                Apoapsis = r,
+                Periapsis = r,
+                LinearEccentricity = 0,
+                Eccentricity = 0,
+                Inclination = i,
+                LoAN = 0,
+                AoP = 0,
+                MeanMotion = Math.Sqrt(sgp / Math.Pow(r, 3)),
+                MeanAnomalyAtEpoch = m0,
+                TrueAnomalyAtEpoch = m0,
+                EccentricAnomaly = m0,
+                OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(r, 3) / sgp),
+                Epoch = epoch,
+            };
+            
+            return orbit;
+        }
+
         #region Vector Calculations
         public static Vector3 CalculateAngularMomentum(Vector3 position, Vector3 velocity)
         {

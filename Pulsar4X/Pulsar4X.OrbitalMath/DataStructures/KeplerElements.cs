@@ -8,6 +8,11 @@ namespace Pulsar4X.Orbital
     public struct KeplerElements
     {
         /// <summary>
+        /// In meters kg^3
+        /// </summary>
+        public double StandardGravParameter;
+        
+        /// <summary>
         /// SemiMajorAxis in Metres
         /// </summary>
         /// <remarks>a</remarks>

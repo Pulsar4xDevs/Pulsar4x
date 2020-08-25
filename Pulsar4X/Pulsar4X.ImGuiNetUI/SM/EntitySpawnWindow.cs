@@ -11,6 +11,7 @@ using Pulsar4X.Orbital;
 using SDL2;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 using static Pulsar4X.SDL2UI.ImguiExt;
+using Vector2 = Pulsar4X.Orbital.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -222,7 +223,7 @@ namespace Pulsar4X.SDL2UI
 
             
 
-            OrbitEditWidget.Begin(_ke, OrbitEditWidget.WidgetStyle.Keplerian3d);
+            OrbitEditWidget.Display(ref _ke, ref _position, OrbitEditWidget.WidgetStyle.Newtonion);
             
 
 
@@ -256,25 +257,17 @@ namespace Pulsar4X.SDL2UI
             ImGui.Combo("Select Design", ref _selectedDesignIndex, _shipDesignNames, _shipDesignNames.Length);
 
             SetParent();
-
-            if (ImGui.DragInt("X km ralitve", ref _xpos))
-            {
-                var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
-                var parentPos = _sysBodies.GetSelectedEntity().GetAbsoluteFuturePosition(datetime);
-                _icon.WorldPosition_m = new Vector3( parentPos.X + _xpos * 1000, parentPos.Y, 0);
-            }
-
-            if (ImGui.DragInt("Y km ralitve", ref _ypos))
-            {
-                var datetime = _sysBodies.GetSelectedEntity().StarSysDateTime;
-                var parentPos = _sysBodies.GetSelectedEntity().GetAbsoluteFuturePosition(datetime);
-                _icon.WorldPosition_m = new Vector3(parentPos.X, parentPos.Y + _ypos * 1000,0);
-            }
+            
 
             _factionOwnerEntites.Combo("Set Owner Faction");
-            
-            OrbitEditWidget.Begin(_ke, OrbitEditWidget.WidgetStyle.Keplerian2d2);
-            
+
+            BorderGroup.Begin("State Vectors");
+            if (OrbitEditWidget.Display(ref _ke, ref _position, OrbitEditWidget.WidgetStyle.Newtonion))
+            {
+                var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
+                _icon.WorldPosition_m = parentPos + _position;
+            }
+            BorderGroup.End();
             ImGui.InputText("Ship Name", _nameInputBuffer, 16);
 
             bool createEnabled = false;
@@ -449,32 +442,70 @@ namespace Pulsar4X.SDL2UI
 
         public static WidgetStyle Style = WidgetStyle.Keplerian2d2;
 
-        public static bool LockPosition;
+        public static bool LockPosition = false;
         public static KeplerElements _ke;
-        public static void Begin(KeplerElements keplerElements, WidgetStyle style)
+        private static Vector2 _vel = new Vector2();
+        private static Vector2 _pos = new Vector2();
+        private static VectorWidget2d.Style posStyle = VectorWidget2d.Style.Cartesian;
+        private static VectorWidget2d.Style velStyle = VectorWidget2d.Style.Polar;
+        
+        public static bool Display(ref KeplerElements keplerElements, ref Vector3 pos, WidgetStyle style)
         {
             _ke = keplerElements;
             Style = style;
+            _pos.X = pos.X;
+            _pos.Y = pos.Y;
+            bool changed = false;
+            if(VectorWidget2d.Display("Position Vector", ref _pos, 0, 299792458))
+            {
+                pos = new Vector3(_pos.X, _pos.Y, 0);
+                _ke = OrbitalMath.KeplerFromPositionAndVelocity(
+                    _ke.StandardGravParameter, 
+                    pos,
+                    new Vector3(_vel.X, _vel.Y, 0), 
+                    _ke.Epoch);
+                changed = true;
+            }
+            
             switch (style)
             {
                 case WidgetStyle.Newtonion:
-                    NewtonionStyle();
+                    if (NewtonionStyle())
+                        changed = true;
                     break;
                 case WidgetStyle.Keplerian2d1:
-                    KeplerianStyle2d_1();
+                    if(KeplerianStyle2d_1())
+                        changed = true;
                     break;
                 case WidgetStyle.Keplerian2d2:
-                    KeplerianStyle2d_2();
+                    if(KeplerianStyle2d_2())
+                        changed = true;
                     break;
                 case WidgetStyle.Keplerian3d:
-                    KeplerianStyle3d_1();
+                    if(KeplerianStyle3d_1())
+                        changed = true;
                     break;
-
+                
             }
+            return changed;
         }
 
-        static void NewtonionStyle()
+
+        
+        static bool NewtonionStyle()
         {
+            
+            if(VectorWidget2d.Display("Velocity Vector", ref _vel, 0, 299792458))
+            {
+                _ke = OrbitalMath.KeplerFromPositionAndVelocity(
+                    _ke.StandardGravParameter, 
+                    new Vector3(_pos.X, _pos.Y, 0), 
+                    new Vector3(_vel.X, _vel.Y, 0), 
+                    _ke.Epoch);
+                return true;
+            }
+
+            return false;
         }
 
         private static float _radius = 0;
@@ -483,12 +514,17 @@ namespace Pulsar4X.SDL2UI
         private static float _lop = 0;
         private static float _lopAndTrue = 0;
         private static bool _clockwise;
-        static void KeplerianStyle2d_1()
+        static bool KeplerianStyle2d_1()
         {
-            ImGui.DragFloat("Radius", ref _radius);
+            bool changed = false;
+            if (ImGui.DragFloat("Radius", ref _radius))
+            {
+                changed = true;
+            }
+
             if (SliderAngleED("ϖ+ν", ref _lopAndTrue, LockPosition))
             {
-                
+                changed = true;
             }
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Londitude of Periapsis + True Anomaly");
@@ -500,62 +536,77 @@ namespace Pulsar4X.SDL2UI
                 //double trueAnomaly = OrbitalMath.TrueAnomaly(eccentVector, position, velocity);
                 //double eccentricAnomoly = OrbitalMath.GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, _ke.Eccentricity);
                 //var meanAnomaly = OrbitalMath.GetMeanAnomaly(_ke.Eccentricity, eccentricAnomoly);
+                changed = true;
             }
 
-
+            return changed;
         }
 
-        static void KeplerianStyle2d_2()
+        static bool KeplerianStyle2d_2()
         {
-            SliderDouble("a", ref _ke.SemiMajorAxis, 0, double.MaxValue);
+            bool changed = false;
+            if(SliderDouble("a", ref _ke.SemiMajorAxis, 0, double.MaxValue))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Semi Major Axis");
-            SliderDouble("e", ref _ke.Eccentricity, 0, double.MaxValue);
+            if(SliderDouble("e", ref _ke.Eccentricity, 0, double.MaxValue))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("e(ccentricity)");
 
-            ImGui.SliderAngle("ϖ", ref _lop);
+            if(ImGui.SliderAngle("ϖ", ref _lop))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Londitude of Periapsis, is Ω + ω (Londitude of Assending Node + Argument of Periapsis)");
-            ImGui.Checkbox("Clockwise Orbit", ref _clockwise);
+            if(ImGui.Checkbox("Clockwise Orbit", ref _clockwise))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("i(nclination) is 0 or 180 in a 2d orbit");
-            SliderAngleED("ν", ref _trueAnomaly, LockPosition);
+            if(SliderAngleED("ν", ref _trueAnomaly, LockPosition))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("True Anomaly");
+            return changed;
         }
 
         private static float _inclination = 0;
         private static float _loAN = 0;
         private static float _aoP = 0;
         private static float _trueAnomaly = 0;
-        static void KeplerianStyle3d_1()
+        static bool KeplerianStyle3d_1()
         {
-            ImGui.DragFloat("a", ref _semiMajorAxis);
+            bool changed = false;
+            if(ImGui.DragFloat("a", ref _semiMajorAxis))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Semi Major Axis");
             
-            SliderDouble("e", ref _ke.Eccentricity, 0, double.MaxValue);
+            if(SliderDouble("e", ref _ke.Eccentricity, 0, double.MaxValue))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("e(ccentricity)");
 
-            ImGui.SliderAngle("Ω", ref _loAN);
+            if(ImGui.SliderAngle("Ω", ref _loAN))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Londitude of AccendingNode");
             
-            ImGui.SliderAngle("ω", ref _aoP);
+            if(ImGui.SliderAngle("ω", ref _aoP))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Argument of Periapsis)");
             
-            ImGui.SliderAngle("i", ref _inclination);
+            if(ImGui.SliderAngle("i", ref _inclination))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("i(nclination)");
 
-            SliderAngleED("ν", ref _trueAnomaly, LockPosition);
+            if(SliderAngleED("ν", ref _trueAnomaly, LockPosition))
+                changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("True Anomaly");
-            
 
+            return changed;
 
 
         }

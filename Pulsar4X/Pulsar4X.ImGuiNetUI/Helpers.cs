@@ -7,6 +7,8 @@ using System.Reflection;
 using ImGuiNET;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
+using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
 
 namespace Pulsar4X.SDL2UI
@@ -735,6 +737,146 @@ namespace Pulsar4X.SDL2UI
             {
                 value = val;
                 changed = true;
+            }
+            return changed;
+        }
+
+
+
+    }
+    
+    public static class VectorWidget2d
+    {
+        public enum Style
+        {
+            Polar,
+            Cartesian
+        }
+
+        private static Style _valueStyle = Style.Cartesian;
+        private static Style _displayStyle = Style.Polar;
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="values">x,y or r,θ</param>
+        /// <param name="minVal"></param>
+        /// <param name="maxVal"></param>
+        /// <param name="valueStyle">if the values are in cartisian or polar coordinates</param>
+        /// <returns></returns>
+        public static bool Display(string label, ref Pulsar4X.Orbital.Vector2 values, int minVal = 0, int maxVal = int.MaxValue, Style valueStyle = Style.Cartesian)
+        {
+            ImGui.PushID(label);
+            //BorderGroup.Begin(label);
+            ImGui.Text(label);
+            _valueStyle = valueStyle;
+            bool changed = false;
+            ImGui.SameLine();
+            if(ImGui.SmallButton("Style"))
+            {
+                var nextStyle = (short)_displayStyle + 1;
+                var max = Enum.GetValues(typeof(Style)).Length;
+                if (nextStyle >= max)
+                    nextStyle = 0;
+                _displayStyle = (Style)nextStyle;
+            }
+                
+            if (_displayStyle == Style.Cartesian)
+            {
+                changed = CartInt(ref values, minVal, maxVal);
+            }
+            else
+            {
+                changed = PolarInt(ref values, maxVal);
+            }
+            //BorderGroup.End();
+            ImGui.PopID();
+            return changed;
+        }
+
+        static bool CartInt(ref Pulsar4X.Orbital.Vector2 values, int minVal, int maxVal)
+        {
+            bool changed = false;
+
+            int x = 0;
+            int y = 0;
+            
+            if (_valueStyle == Style.Cartesian)
+            {
+                x = (int)Math.Round(values.X);
+                y = (int)Math.Round(values.Y);
+            }
+            else
+            {
+                x = (int)Math.Round(values.X * Math.Cos(values.Y));
+                y = (int)Math.Round(values.X * Math.Sin(values.Y));
+            }
+
+
+            if (ImGui.SliderInt("X", ref x, minVal, maxVal))
+                changed = true;
+            if (ImGui.SliderInt("Y", ref y, minVal, maxVal))
+                changed = true;
+                 
+
+            if (changed)
+            {
+                if (_valueStyle == Style.Cartesian)
+                {
+                    values.X = x;
+                    values.Y = y;
+                }
+                else
+                {
+                    values.X = Math.Sqrt((x * x) + (y * y));
+                    values.Y = (float)Math.Atan2(y, x);
+                }
+            }
+            return changed;
+        }
+
+        static bool PolarInt(ref Pulsar4X.Orbital.Vector2 values, int maxVal)
+        {
+            bool changed = false;
+            int r = 0;
+            float theta = 0;
+            if(_valueStyle == Style.Cartesian)
+            {
+                r = (int)Math.Round(values.Length());
+                theta = (float)Math.Atan2(values.Y, values.X);
+                Angle.NormaliseRadians(theta);
+                while (theta < 0)
+                    theta += (float)Math.PI * 2;
+            }
+            else
+            {
+                r =  (int)Math.Round(values.X);
+                theta = (int)Math.Round(values.Y);
+            }
+
+
+            if (ImGui.SliderInt("r", ref r, 0, maxVal))
+                changed = true;
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Radius");
+
+            if (ImGui.SliderAngle("θ", ref theta, 0f, 360f))
+                changed = true;
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Angle");
+            
+            if (changed)
+            {
+                if (_valueStyle == Style.Cartesian)
+                {
+                    values.X = r * Math.Cos(theta);
+                    values.Y = r * Math.Sin(theta);
+                }
+                else
+                {
+                    values.X = r;
+                    values.Y = theta;
+                }
             }
             return changed;
         }
