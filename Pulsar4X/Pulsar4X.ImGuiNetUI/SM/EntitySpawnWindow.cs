@@ -31,6 +31,7 @@ namespace Pulsar4X.SDL2UI
         private EntityNameSelector _sysBodies;
         private EntityNameSelector _factionEntites;
         private EntityNameSelector _factionOwnerEntites;
+        private EntityNameSelector _speciesEntites;
         private KeplerElements _ke;
         private double _objMass = 1000;
         private double _parentMass = 1e10;
@@ -53,6 +54,9 @@ namespace Pulsar4X.SDL2UI
             var stars = _uiState.SelectedSystem.GetAllEntitiesWithDataBlob<StarInfoDB>();
             bodies.AddRange(stars);
             _sysBodies = new EntityNameSelector(bodies.ToArray(), EntityNameSelector.NameType.Owner);
+
+            var species = StaticRefLib.Game.GlobalManager.GetAllEntitiesWithDataBlob<SpeciesDB>().ToArray();
+            _speciesEntites = new EntityNameSelector(species, EntityNameSelector.NameType.Owner);
             
             MinMaxStruct inner = new MinMaxStruct(10, 10000);
             MinMaxStruct hab = new MinMaxStruct(10000, 100000);
@@ -304,13 +308,18 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        private int _popCount = 100000;
         void Colony()
         {
-            
+            bool createEnabled = false;
             _sysBodies.Combo("Planet:");
             _factionOwnerEntites.Combo("Owner");
-            bool createEnabled = false;
-            if (_sysBodies.IsItemSelected && _factionOwnerEntites.IsItemSelected)
+
+            _speciesEntites.Combo("Species");
+
+            ImGui.SliderInt("Population Count", ref _popCount, 0, int.MaxValue);
+            
+            if (_sysBodies.IsItemSelected && _factionOwnerEntites.IsItemSelected && _speciesEntites.IsItemSelected)
                 createEnabled = true;
             
             if(ButtonED("Create Entity", createEnabled))
@@ -319,13 +328,7 @@ namespace Pulsar4X.SDL2UI
                 string shipName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
                 //var parent = OrbitProcessor.FindSOIForPosition(_uiState.SelectedSystem, _icon.WorldPosition_m);
                 Vector3 ralitivePos = _icon.WorldPosition_m;
-                Entity _spawnedship = ShipFactory.CreateShip(
-                    _exsistingClasses[_selectedDesignIndex], 
-                    _factionEntites.GetSelectedEntity(), 
-                    ralitivePos,
-                    _sysBodies.GetSelectedEntity(),
-                    _uiState.SelectedSystem, 
-                    shipName);
+                Entity colonyEnitity = ColonyFactory.CreateColony(_factionOwnerEntites.GetSelectedEntity(), _speciesEntites.GetSelectedEntity(), _sysBodies.GetSelectedEntity(), _popCount);
                 //hacky force a refresh
                 _uiState.StarSystemStates[selectedSystem.Guid] = SystemState.GetMasterState(selectedSystem);
                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
