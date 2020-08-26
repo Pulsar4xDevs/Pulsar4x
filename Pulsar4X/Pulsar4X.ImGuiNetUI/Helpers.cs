@@ -663,7 +663,7 @@ namespace Pulsar4X.SDL2UI
             //ImGui.GetID(Id);
 
             ImGui.Text(StringifyValue(value, displayFormat));
-            if(ImGui.BeginPopupContextItem(Id, ImGuiMouseButton.Right))
+            if(ImGui.BeginPopupContextItem(Id, ImGuiPopupFlags.MouseButtonRight))
             {
                 if(ImGui.SmallButton("Set Display Type"))
                 { }

@@ -228,7 +228,7 @@ namespace Pulsar4X.SDL2UI
             
             
             
-            if (ImGui.BeginPopupContextItem("NameContextMenu"+_entityGuid.ToString()+NameString, ImGuiMouseButton.Right))
+            if (ImGui.BeginPopupContextItem("NameContextMenu"+_entityGuid.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
             {
                 
                 setUpContextMenu(_entityGuid);
@@ -255,7 +255,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     _state.EntityClicked(name.Key, _starSysGuid, MouseButtons.Primary);
                 }
-                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key+name.Value+_entityGuid.ToString()+NameString, ImGuiMouseButton.Right))
+                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key+name.Value+_entityGuid.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
                 {
                     setUpContextMenu(name.Key);
 
