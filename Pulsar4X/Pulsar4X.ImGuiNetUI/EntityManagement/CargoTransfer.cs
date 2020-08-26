@@ -34,9 +34,11 @@ namespace Pulsar4X.SDL2UI
 
         public void Update()
         {
+            if (_volStorageDB == null) //if this colony does not have any storage. 
+                return;
             //we do a deep copy clone so as to avoid a thread collision when we loop through.
             var newDict = new Dictionary<Guid, TypeStore>();
-            
+
             ICollection ic = _volStorageDB.TypeStores;
             lock (ic.SyncRoot)
             {

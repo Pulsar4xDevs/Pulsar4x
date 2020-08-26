@@ -31,6 +31,8 @@ namespace Pulsar4X.ECSLib
             blobs.Add(orderableDB);
             MassVolumeDB mvDB = new MassVolumeDB();
             blobs.Add(mvDB);
+            VolumeStorageDB storageDB = new VolumeStorageDB();
+            blobs.Add(storageDB);
             var pos = new Vector3(planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM, 0, 0);
             PositionDB posDB = new PositionDB(pos, planetEntity);
             blobs.Add(posDB);
