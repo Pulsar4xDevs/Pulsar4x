@@ -294,16 +294,16 @@ namespace Pulsar4X.SDL2UI
                 string shipName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
                 //var parent = OrbitProcessor.FindSOIForPosition(_uiState.SelectedSystem, _icon.WorldPosition_m);
                 Vector3 ralitivePos = _icon.WorldPosition_m;
-                Entity _spawnedship = ShipFactory.CreateShip(
-                    _exsistingClasses[_selectedDesignIndex], 
-                    _factionEntites.GetSelectedEntity(), 
-                    ralitivePos,
+                ShipFactory.CreateShip(
+                    _exsistingClasses[_selectedDesignIndex],
+                    _factionEntites.GetSelectedEntity(),
+                    _ke,
                     _sysBodies.GetSelectedEntity(),
-                    _uiState.SelectedSystem, 
                     shipName);
                 //hacky force a refresh
                 _uiState.StarSystemStates[selectedSystem.Guid] = SystemState.GetMasterState(selectedSystem);
                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
+     
                 
             }
         }
