@@ -79,15 +79,15 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if (_isPaused == true)//When time is paused
             {
-                if (ImGui.ImageButton(_uiState.SDLImageDictionary["PlayImg"], new Vector2(16, 16)))//Provide a button to unpause
+                if (ImGui.ImageButton(_uiState.Img_Play(), new Vector2(16, 16)))//Provide a button to unpause
                     PausePlayPressed();
                 ImGui.SameLine();
-                if (ImGui.ImageButton(_uiState.SDLImageDictionary["OneStepImg"], new Vector2(16, 16)))//Provide a button to increment time
+                if (ImGui.ImageButton(_uiState.Img_OneStep(), new Vector2(16, 16)))//Provide a button to increment time
                     OneStepPressed();
             }
             else//When time is running
             {
-                if (ImGui.ImageButton(_uiState.SDLImageDictionary["PauseImg"], new Vector2(16, 16)))//Provide a button to unpause time
+                if (ImGui.ImageButton(_uiState.Img_Pause(), new Vector2(16, 16)))//Provide a button to unpause time
                     PausePlayPressed();
             }
             

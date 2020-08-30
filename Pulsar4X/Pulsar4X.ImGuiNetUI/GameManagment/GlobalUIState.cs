@@ -107,37 +107,12 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-
             Camera = new Camera(viewport);
 
             MainMenuItems.GetInstance().SetActive();
 
-            string rf = "Resources";
-            LoadImg("Logo", Path.Combine( rf,"PulsarLogo.bmp"));
-            LoadImg("PlayImg", Path.Combine( rf,"Play.bmp"));
-            LoadImg("PauseImg", Path.Combine( rf,"Pause.bmp"));
-            LoadImg("OneStepImg", Path.Combine( rf,"OneStep.bmp"));
-            LoadImg("UpImg", Path.Combine( rf,"UpArrow.bmp"));
-            LoadImg("DnImg", Path.Combine( rf,"DnArrow.bmp"));
-            LoadImg("RepeatImg", Path.Combine( rf,"RepeatIco.bmp"));
-            LoadImg("CancelImg", Path.Combine( rf,"CancelIco.bmp"));
-            LoadImg("DesComp", Path.Combine(rf, "DesignComponentIco.bmp"));
-            LoadImg("DesShip", Path.Combine(rf, "DesignShipIco.bmp"));
-            LoadImg("DesOrd", Path.Combine(rf, "DesignOrdnanceIco.bmp"));
-            LoadImg("GalMap", Path.Combine(rf, "GalaxyMapIco.bmp"));
-            LoadImg("Research", Path.Combine(rf, "ResearchIco.bmp"));
-            LoadImg("Power", Path.Combine(rf, "PowerIco.bmp"));
-            LoadImg("Ruler", Path.Combine(rf, "RulerIco.bmp"));
-            LoadImg("Cargo", Path.Combine(rf, "CargoIco.bmp"));
-            LoadImg("Firecon", Path.Combine(rf, "FireconIco.bmp"));
-            LoadImg("Industry", Path.Combine(rf, "IndustryIco.bmp"));
-            LoadImg("Pin", Path.Combine(rf, "PinIco.bmp"));
-            LoadImg("Rename", Path.Combine(rf, "RenameIco.bmp"));
-            LoadImg("Select", Path.Combine(rf, "SelectIco.bmp"));
-            LoadImg("Tree", Path.Combine(rf, "TreeIco.bmp"));
-
             //DEBUG Code: (can be deleted);
-            DamageTools.LoadFromBitMap(Path.Combine(rf, "ImgTest.bmp"));
+            DamageTools.LoadFromBitMap(Path.Combine("Resources", "ImgTest.bmp"));
             /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
@@ -154,14 +129,6 @@ namespace Pulsar4X.SDL2UI
             foreach(var window in LoadedWindows){
                 window.Value.SetActive(false);
             }
-        }
-
-        internal void LoadImg(string name, string path)
-        {
-            IntPtr sdlSurface = SDL.SDL_LoadBMP(path);
-            IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
-            
-            SDLImageDictionary.Add(name, sdltexture);
         }
 
         internal void SetFaction(Entity factionEntity)

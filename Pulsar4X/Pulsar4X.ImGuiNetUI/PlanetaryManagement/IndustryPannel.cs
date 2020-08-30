@@ -192,7 +192,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         if (batchJob.Auto)
                         {
                             ImGui.SameLine();
-                            ImGui.Image(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16));
+                            ImGui.Image(_state.Img_Repeat(), new Vector2(16, 16));
                         }
 
                         ImGui.NextColumn();
@@ -218,14 +218,14 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             //ImGui.BeginChild("Buttons", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
             ImGui.BeginGroup();
 
-            if (ImGui.ImageButton(_state.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
+            if (ImGui.ImageButton(_state.Img_Up(), new Vector2(16, 8)))
             {
 
                 var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, -1);
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
 
-            if (ImGui.ImageButton(_state.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
+            if (ImGui.ImageButton(_state.Img_Down(), new Vector2(16, 8)))
             {
                 var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, 1);
                 StaticRefLib.OrderHandler.HandleOrder(cmd);
@@ -233,7 +233,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             ImGui.EndGroup();
             ImGui.SameLine();
-            if (ImGui.ImageButton(_state.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
+            if (ImGui.ImageButton(_state.Img_Repeat(), new Vector2(16, 16)))
             {
 
                 var jobcount = _selectedExistingConJob.NumberOrdered;
@@ -244,7 +244,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
 
             ImGui.SameLine();
-            if (ImGui.ImageButton(_state.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
+            if (ImGui.ImageButton(_state.Img_Cancel(), new Vector2(16, 16)))
             {
                 //new ConstructCancelJob(_uiState.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
                 var cmd = IndustryOrder2.CreateCancelJobOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID);
