@@ -95,7 +95,6 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
                 ImGui.End();
             }
-
         }
 
         private void RenderTabOptions()
@@ -134,6 +133,19 @@ namespace Pulsar4X.SDL2UI
 
             List<string[]> rowData = new List<string[]>();
 
+            if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>())
+            {
+                SystemBodyInfoDB sysBodyInfo = _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>();
+                rowData.Add(new string[] { "Body Type", sysBodyInfo.BodyType.ToDescription() });
+            }
+
+            if (_lookedAtEntity.Entity.HasDataBlob<StarInfoDB>())
+            {
+                StarInfoDB starInfo = _lookedAtEntity.Entity.GetDataBlob<StarInfoDB>();
+                rowData.Add(new string[] { "Spectral Type", starInfo.SpectralType.ToDescription() + starInfo.SpectralSubDivision });
+                rowData.Add(new string[] { "Luminosity Type", starInfo.LuminosityClass.ToDescription() });
+            }
+
             if (_lookedAtEntity.Entity.HasDataBlob<MassVolumeDB>())
             {
                 var tempMassVolume = _lookedAtEntity.Entity.GetDataBlob<MassVolumeDB>();
@@ -152,6 +164,13 @@ namespace Pulsar4X.SDL2UI
                 {
                     rowData.Add(new string[] {" " + popPerSpecies.Key.GetDefaultName(), Stringify.Quantity(popPerSpecies.Value, "0.0##", true) });
                 }
+            }
+
+
+            if (_lookedAtEntity.Entity.HasDataBlob<StarInfoDB>())
+            {
+                StarInfoDB starInfo = _lookedAtEntity.Entity.GetDataBlob<StarInfoDB>();
+                rowData.Add(new string[] { "Surface Temp", starInfo.Temperature.ToString("###,##0.00") + "°C" });
             }
 
             if (_lookedAtEntity.Entity.HasDataBlob<AtmosphereDB>())
