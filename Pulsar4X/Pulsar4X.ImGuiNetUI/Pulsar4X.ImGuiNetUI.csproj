@@ -252,6 +252,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="MapRendering\GalaxyMap.cs" />
+    <Compile Remove="PlanetaryManagement\PlanetaryWindow.old.cs" />
     <Compile Remove="Libs\sdl2\**" />
   </ItemGroup>
   <ItemGroup>

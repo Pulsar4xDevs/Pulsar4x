@@ -72,6 +72,7 @@ namespace Pulsar4X.SDL2UI
             }
             else { return false; }
         }
+
         internal static bool CheckIfCanOpenWindow(Type T, EntityState _entityState)
         {
             //Checks if the power gen menu can be opened
@@ -121,6 +122,7 @@ namespace Pulsar4X.SDL2UI
                 return true;
             else {return false;}
         }
+
         // use type PinCameraBlankMenuHelper to pin camara, should use checkIfCanOpenWindow with type before trying to open a given window
         //type parameter is the type of window opened, first parameter indicates wether the window should be opened, second parameter is EntityState for the entity using the window
         //(or window using the entity?) third is the GlobalUIState and fourth indicates wether this function should manage closing preopened pop-ups(mostly utility for EntityContextMenu class[should be set to true when this is used in it])
@@ -138,13 +140,14 @@ namespace Pulsar4X.SDL2UI
                     {
                         ImGui.CloseCurrentPopup();
                     }
-                    
                 }
                 //Menu is goto system menu
                 else if (T == typeof(GotoSystemBlankMenuHelper))
                 {
                     _state.SetActiveSystem(_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>().SystemGuid);
-                }else if(T==typeof(SelectPrimaryBlankMenuHelper)){
+                }
+                else if (T == typeof(SelectPrimaryBlankMenuHelper))
+                {
                     _state.EntitySelectedAsPrimary(_entityState.Entity.Guid, _entityState.StarSysGuid);
                 }
                 //if entity can warp
@@ -153,7 +156,7 @@ namespace Pulsar4X.SDL2UI
                     WarpOrderWindow.GetInstance(_entityState).ToggleActive();
                     _state.ActiveWindow = WarpOrderWindow.GetInstance(_entityState);
                 }
-               //Menu is change orbit menu
+                //Menu is change orbit menu
                 else if (T == typeof(ChangeCurrentOrbitWindow))
                 {
                     ChangeCurrentOrbitWindow.GetInstance(_entityState).ToggleActive();
@@ -172,10 +175,11 @@ namespace Pulsar4X.SDL2UI
                 {
                     RenameWindow.GetInstance(_entityState).ToggleActive();
                     _state.ActiveWindow = RenameWindow.GetInstance(_entityState);
-                    if(managesUIPopUps){
+                    if (managesUIPopUps)
+                    {
                         ImGui.CloseCurrentPopup();
                     }
-                    
+
                 }
                 //Menu is cargo menu
                 else if (T == typeof(CargoTransfer))
@@ -203,22 +207,20 @@ namespace Pulsar4X.SDL2UI
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
-
-                //
-                if (T == typeof(PlanetaryWindow))
+                else if (T == typeof(PlanetaryWindow))
                 {
-                    var instance = PlanetaryWindow.GetInstance(_entityState);
+                    var instance = PlanetaryWindow.GetInstance(_entityState, _state);
                     instance.ToggleActive();
-                    _state.ActiveWindow = instance;
+                }
 
-                    //TODO: implement this(moving a ship entity[_uiState.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
-                    if (T == typeof(JumpThroughJumpPointBlankMenuHelper))
-                    {
+                //TODO: implement this(moving a ship entity[_uiState.PrimaryEntity] from one system to another one and placing it at a given location[_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>(). etc...])
+                if (T == typeof(JumpThroughJumpPointBlankMenuHelper))
+                {
 
-                    }
                 }
             }
         }
+
         public static bool CheckOpenUIWindow(Type T, EntityState _entityState, GlobalUIState _state)
         {
             //If the user has requested a menu be opened and if

@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.SDL2UI
 {
-    class PlanetaryWindow : NonUniquePulsarGuiWindow
+    class UniquePlanetaryWindow : PulsarGuiWindow
     {
         private readonly List<MineralSD> _mineralDefinitions = null;
         private readonly int _maxMineralNameLength = 0;
@@ -27,10 +27,8 @@ namespace Pulsar4X.SDL2UI
 
         private PlanetarySubWindows _selectedSubWindow = PlanetarySubWindows.generalInfo;
 
-        public PlanetaryWindow(EntityState entity, GlobalUIState state)
+        internal UniquePlanetaryWindow(EntityState entity)
         {
-            _state = state;
-            SetName("PlanetaryWindow|" + entity.Entity.Guid.ToString());
             if (_mineralDefinitions == null) {
                 _mineralDefinitions = _uiState.Game.StaticData.CargoGoods.GetMineralsList();
                 _maxMineralNameLength = _mineralDefinitions.Max(x => x.Name.Length);
@@ -46,20 +44,19 @@ namespace Pulsar4X.SDL2UI
             _lookedAtEntity = entity;
         }
 
-        internal static PlanetaryWindow GetInstance(EntityState entity, GlobalUIState state)
+        internal static UniquePlanetaryWindow GetInstance(EntityState entity)
         {
-            string name = "PlanetaryWindow|" + entity.Entity.Guid.ToString(); 
-            PlanetaryWindow thisItem;
-            if (!_uiState.LoadedNonUniqueWindows.ContainsKey(name))
+            UniquePlanetaryWindow thisItem;
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(UniquePlanetaryWindow)))
             {
-                thisItem = new PlanetaryWindow(entity, state);
-                thisItem.StartDisplay();
+                thisItem = new UniquePlanetaryWindow(entity);
             }
             else
             {
-                thisItem = (PlanetaryWindow)_uiState.LoadedNonUniqueWindows[name];
+                thisItem = (UniquePlanetaryWindow)_uiState.LoadedWindows[typeof(UniquePlanetaryWindow)];
                 thisItem.onEntityChange(entity);
             }
+
 
             return thisItem;
         }
