@@ -73,6 +73,12 @@ namespace Pulsar4X.Orbital
         public double MeanMotion;
 
         /// <summary>
+        /// Orbital Period in Seconds
+        /// </summary>
+        /// <remarks>P</remarks>
+        public double OrbitalPeriod;
+        
+        /// <summary>
         /// Mean Anomaly At Epoch
         /// </summary>
         /// <remarks>M0</remarks>
@@ -83,22 +89,29 @@ namespace Pulsar4X.Orbital
         /// </summary>
         /// <remarks>ν or f or  θ</remarks>
         public double TrueAnomalyAtEpoch;
-
-        /// <summary>
-        /// Orbital Period in Seconds
-        /// </summary>
-        /// <remarks>P</remarks>
-        public double OrbitalPeriod;
-
+        
         /// <summary>
         /// Eccentric Anomaly
         /// </summary>
         /// <remarks>E</remarks>
-        public double EccentricAnomaly;
+        public double EccentricAnomalyAtEpoch;
 
         /// <summary>
         /// Epoch
         /// </summary>
         public DateTime Epoch;
+    }
+
+    public struct StateVectors
+    {
+        /// <summary>
+        /// Position ralitive to SOI parent
+        /// </summary>
+        public Vector3 Position;
+
+        /// <summary>
+        /// Velocity Vector
+        /// </summary>
+        public Vector3 Velocity;
     }
 }

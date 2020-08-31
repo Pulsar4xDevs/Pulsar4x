@@ -24,7 +24,6 @@ namespace Pulsar4X.SDL2UI
         private string[] _bodyTypes;
         private int _bodyTypeIndex = 1;
         Random _rng = new Random();
-        Vector3 _position = new Vector3();
         private Vector3 _graphicPos = new Vector3();
         private EntitySpawnGraphic _icon;
         
@@ -33,9 +32,12 @@ namespace Pulsar4X.SDL2UI
         private EntityNameSelector _factionOwnerEntites;
         private EntityNameSelector _speciesEntites;
         private KeplerElements _ke;
+        private StateVectors _sv;
         private double _objMass = 1000;
         private double _parentMass = 1e10;
         private double _sgp;
+        private KeIcon _keIcon;
+        private double parentSOI = 0;
         
         private EntitySpawnWindow()
 	    {
@@ -63,9 +65,12 @@ namespace Pulsar4X.SDL2UI
             MinMaxStruct outer = new MinMaxStruct(100000, 10000000);
             _bandinfo = (inner, hab, outer, true);
             var date = _uiState.SelectedSystem.StarSysDateTime;
+            _parentMass = _sysBodies.GetSelectedEntity().GetDataBlob<MassVolumeDB>().MassDry;
+            parentSOI = _sysBodies.GetSelectedEntity().GetSOI_m();
             _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
             _ke = OrbitalMath.FromPosition(new Vector3(10000, 0, 0), _sgp, date);
-
+            
+             
         }
 
         internal static EntitySpawnWindow GetInstance() {
@@ -167,11 +172,11 @@ namespace Pulsar4X.SDL2UI
                 var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
                 _icon.WorldPosition_m = new Vector3( parentPos.X + _xpos * 1000, parentPos.Y, _xpos);
 
-                var parent = _sysBodies.GetSelectedEntity();
                 
                 
                 
-                var bandRadius = parent.GetAbsoluteFuturePosition(_parentStar.StarSysDateTime).Length();
+                
+                var bandRadius = _parentObect.GetAbsoluteFuturePosition(_parentStar.StarSysDateTime).Length();
                 var zones = SystemBodyFactory.HabitibleZones(_sysGensettings, _starInfo);
                 MinMaxStruct zone;
                 SystemBand band; 
@@ -227,7 +232,7 @@ namespace Pulsar4X.SDL2UI
 
             
 
-            OrbitEditWidget.Display(ref _ke, ref _position, OrbitEditWidget.WidgetStyle.Newtonion);
+            OrbitEditWidget.Display(ref _ke, ref _sv, parentSOI, OrbitEditWidget.WidgetStyle.Newtonion);
             
 
 
@@ -245,6 +250,7 @@ namespace Pulsar4X.SDL2UI
    
         private string[] _shipDesignNames = new string[0];
         private int _selectedDesignIndex = 0;
+
         void Ship()
         {
             if (_factionEntites.Combo("Faction Designs"))
@@ -256,20 +262,50 @@ namespace Pulsar4X.SDL2UI
                 {
                     _shipDesignNames[i] = _exsistingClasses[i].Name;
                 }
-            }
-            
-            ImGui.Combo("Select Design", ref _selectedDesignIndex, _shipDesignNames, _shipDesignNames.Length);
 
-            SetParent();
-            
+                if (_exsistingClasses.Count > 0 && _selectedDesignIndex >= 0)
+                {
+                    _parentMass = _sysBodies.GetSelectedEntity().GetDataBlob<MassVolumeDB>().MassDry;
+                    _objMass = _exsistingClasses[_selectedDesignIndex].MassPerUnit; 
+                    _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
+                    _ke.StandardGravParameter = _sgp;
+                    if(_keIcon != null)
+                        _keIcon.ForceUpdate(_ke, _sv);
+                }
+
+            }
+
+            if (ImGui.Combo("Select Design", ref _selectedDesignIndex, _shipDesignNames, _shipDesignNames.Length))
+            {
+                
+                _parentMass = _sysBodies.GetSelectedEntity().GetDataBlob<MassVolumeDB>().MassDry;
+                _objMass = _exsistingClasses[_selectedDesignIndex].MassPerUnit; 
+                _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
+                _ke.StandardGravParameter = _sgp;
+                if(_keIcon != null)
+                    _keIcon.ForceUpdate(_ke, _sv);
+            }
+
+            if (SetParent())
+            {
+                if (_keIcon != null)
+                {
+                    var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
+                    _keIcon.UpdateParent(parentPos, parentSOI);
+                    _keIcon.ForceUpdate(_ke, _sv);
+                }
+            }
+
 
             _factionOwnerEntites.Combo("Set Owner Faction");
 
             BorderGroup.Begin("State Vectors");
-            if (OrbitEditWidget.Display(ref _ke, ref _position, OrbitEditWidget.WidgetStyle.Newtonion))
+            if (OrbitEditWidget.Display(ref _ke, ref _sv, parentSOI, OrbitEditWidget.WidgetStyle.Newtonion))
             {
                 var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
-                _icon.WorldPosition_m = parentPos + _position;
+                _icon.WorldPosition_m = parentPos + _sv.Position;
+                if(_keIcon != null)
+                    _keIcon.ForceUpdate(_ke, _sv);
             }
             BorderGroup.End();
             ImGui.InputText("Ship Name", _nameInputBuffer, 16);
@@ -283,6 +319,13 @@ namespace Pulsar4X.SDL2UI
                 _sysBodies.IsItemSelected)
             {
                 createEnabled = true;
+                
+                if(_keIcon == null)
+                {
+                    var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
+                    _keIcon = new KeIcon(_ke, _sv, parentPos, parentSOI, _uiState);
+                    _uiState.SelectedSysMapRender.UIWidgets["keIcon"] = _keIcon;
+                }
             }
 
             
@@ -293,7 +336,7 @@ namespace Pulsar4X.SDL2UI
                 var selectedSystem = _uiState.SelectedSystem;
                 string shipName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
                 //var parent = OrbitProcessor.FindSOIForPosition(_uiState.SelectedSystem, _icon.WorldPosition_m);
-                Vector3 ralitivePos = _icon.WorldPosition_m;
+                
                 ShipFactory.CreateShip(
                     _exsistingClasses[_selectedDesignIndex],
                     _factionEntites.GetSelectedEntity(),
@@ -303,8 +346,8 @@ namespace Pulsar4X.SDL2UI
                 //hacky force a refresh
                 _uiState.StarSystemStates[selectedSystem.Guid] = SystemState.GetMasterState(selectedSystem);
                 _uiState.SelectedSysMapRender.OnSelectedSystemChange(_uiState.SelectedSystem);
-     
-                
+
+                _uiState.SelectedSysMapRender.UIWidgets.Remove("keIcon");
             }
         }
 
@@ -353,6 +396,15 @@ namespace Pulsar4X.SDL2UI
                 
                 }
                 _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
+                _ke.StandardGravParameter = _sgp;
+                var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
+                _icon.WorldPosition_m = parentPos + _sv.Position;
+                parentSOI = OrbitalMath.GetSOI(_ke.SemiMajorAxis, _objMass, _parentMass);
+                if (_keIcon != null)
+                {
+                    _keIcon.UpdateParent(parentPos, parentSOI);
+                    _keIcon.ForceUpdate(_ke, _sv);
+                }
                 return true;
             }
 
@@ -446,46 +498,49 @@ namespace Pulsar4X.SDL2UI
         public static WidgetStyle Style = WidgetStyle.Keplerian2d2;
 
         public static bool LockPosition = false;
-        public static KeplerElements _ke;
+        //public static KeplerElements _ke;
         private static Vector2 _vel = new Vector2();
         private static Vector2 _pos = new Vector2();
         private static VectorWidget2d.Style posStyle = VectorWidget2d.Style.Cartesian;
         private static VectorWidget2d.Style velStyle = VectorWidget2d.Style.Polar;
         
-        public static bool Display(ref KeplerElements keplerElements, ref Vector3 pos, WidgetStyle style)
+        public static bool Display(ref KeplerElements ke, ref StateVectors sv, double soi, WidgetStyle style)
         {
-            _ke = keplerElements;
+            //_ke = ke;
             Style = style;
-            _pos.X = pos.X;
-            _pos.Y = pos.Y;
+            _pos.X = sv.Position.X;
+            _pos.Y = sv.Position.Y;
+            _vel.X = sv.Velocity.X;
+            _vel.Y = sv.Velocity.Y;
             bool changed = false;
-            if(VectorWidget2d.Display("Position Vector", ref _pos, 0, 299792458))
+            int maxRadius = (int)Math.Min(int.MaxValue, soi);
+            if(VectorWidget2d.Display("Position Vector", ref _pos, 0, maxRadius))
             {
-                pos = new Vector3(_pos.X, _pos.Y, 0);
-                _ke = OrbitalMath.KeplerFromPositionAndVelocity(
-                    _ke.StandardGravParameter, 
-                    pos,
-                    new Vector3(_vel.X, _vel.Y, 0), 
-                    _ke.Epoch);
+                sv.Position = new Vector3(_pos.X, _pos.Y, 0);
+                ke = OrbitalMath.KeplerFromPositionAndVelocity(
+                    ke.StandardGravParameter, 
+                    sv.Position,
+                    sv.Velocity, 
+                    ke.Epoch);
                 changed = true;
             }
             
             switch (style)
             {
                 case WidgetStyle.Newtonion:
-                    if (NewtonionStyle())
+                    if (NewtonionStyle(ref ke, ref sv))
                         changed = true;
                     break;
                 case WidgetStyle.Keplerian2d1:
-                    if(KeplerianStyle2d_1())
+                    if(KeplerianStyle2d_1(ref ke, ref sv))
                         changed = true;
                     break;
                 case WidgetStyle.Keplerian2d2:
-                    if(KeplerianStyle2d_2())
+                    if(KeplerianStyle2d_2(ref ke, ref sv))
                         changed = true;
                     break;
                 case WidgetStyle.Keplerian3d:
-                    if(KeplerianStyle3d_1())
+                    if(KeplerianStyle3d_1(ref ke, ref sv))
                         changed = true;
                     break;
                 
@@ -495,19 +550,18 @@ namespace Pulsar4X.SDL2UI
 
 
         
-        static bool NewtonionStyle()
+        static bool NewtonionStyle(ref KeplerElements ke, ref StateVectors sv)
         {
-            
             if(VectorWidget2d.Display("Velocity Vector", ref _vel, 0, 299792458))
             {
-                _ke = OrbitalMath.KeplerFromPositionAndVelocity(
-                    _ke.StandardGravParameter, 
-                    new Vector3(_pos.X, _pos.Y, 0), 
-                    new Vector3(_vel.X, _vel.Y, 0), 
-                    _ke.Epoch);
+                sv.Velocity = new Vector3(_vel.X, _vel.Y, 0);
+                ke = OrbitalMath.KeplerFromPositionAndVelocity(
+                    ke.StandardGravParameter, 
+                    sv.Position, 
+                    sv.Velocity, 
+                    ke.Epoch);
                 return true;
             }
-
             return false;
         }
 
@@ -517,7 +571,7 @@ namespace Pulsar4X.SDL2UI
         private static float _lop = 0;
         private static float _lopAndTrue = 0;
         private static bool _clockwise;
-        static bool KeplerianStyle2d_1()
+        static bool KeplerianStyle2d_1(ref KeplerElements ke, ref StateVectors sv)
         {
             bool changed = false;
             if (ImGui.DragFloat("Radius", ref _radius))
@@ -532,7 +586,7 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Londitude of Periapsis + True Anomaly");
 
-            if (SliderDouble("e", ref _ke.Eccentricity, 0, double.MaxValue))
+            if (SliderDouble("e", ref ke.Eccentricity, 0, double.MaxValue))
             {
                 
                 
@@ -545,14 +599,14 @@ namespace Pulsar4X.SDL2UI
             return changed;
         }
 
-        static bool KeplerianStyle2d_2()
+        static bool KeplerianStyle2d_2(ref KeplerElements ke, ref StateVectors sv)
         {
             bool changed = false;
-            if(SliderDouble("a", ref _ke.SemiMajorAxis, 0, double.MaxValue))
+            if(SliderDouble("a", ref ke.SemiMajorAxis, 0, double.MaxValue))
                 changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Semi Major Axis");
-            if(SliderDouble("e", ref _ke.Eccentricity, 0, double.MaxValue))
+            if(SliderDouble("e", ref ke.Eccentricity, 0, double.MaxValue))
                 changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("e(ccentricity)");
@@ -576,7 +630,7 @@ namespace Pulsar4X.SDL2UI
         private static float _loAN = 0;
         private static float _aoP = 0;
         private static float _trueAnomaly = 0;
-        static bool KeplerianStyle3d_1()
+        static bool KeplerianStyle3d_1(ref KeplerElements ke, ref StateVectors sv)
         {
             bool changed = false;
             if(ImGui.DragFloat("a", ref _semiMajorAxis))
@@ -584,7 +638,7 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Semi Major Axis");
             
-            if(SliderDouble("e", ref _ke.Eccentricity, 0, double.MaxValue))
+            if(SliderDouble("e", ref ke.Eccentricity, 0, double.MaxValue))
                 changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("e(ccentricity)");
