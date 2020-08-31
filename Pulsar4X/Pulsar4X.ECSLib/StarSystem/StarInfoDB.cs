@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using Pulsar4X.Orbital;
+using System.ComponentModel;
 
 namespace Pulsar4X.ECSLib
 {
@@ -19,16 +20,35 @@ namespace Pulsar4X.ECSLib
 
     public enum LuminosityClass : byte
     {
-        O,          // Hypergiants
-        Ia,         // Luminous Supergiants
-        Iab,        // Intermediate Supergiants
-        Ib,         // Less Luminous Supergiants
-        II,         // Bright Giants
-        III,        // Giants
-        IV,         // Subgiants
-        V,          // Main-Sequence (like our sun)
-        sd,         // Subdwarfs
-        D,          // White Dwarfs
+        [Description("Hypergiant")]
+        O,
+
+        [Description("Luminous Supergiant")]
+        Ia,
+
+        [Description("Intermediate Supergiant")]
+        Iab,
+
+        [Description("Less Luminous Supergiant")]
+        Ib,
+
+        [Description("Bright Giant")]
+        II,
+
+        [Description("Giant")]
+        III,
+
+        [Description("Subgiant")]
+        IV,
+
+        [Description("Main-Sequence")]
+        V,
+
+        [Description("Sub-Dwarf")]
+        sd,
+
+        [Description("White Dwarf")]
+        D,
     }
 
     public class StarInfoDB : BaseDataBlob, ISensorCloneMethod

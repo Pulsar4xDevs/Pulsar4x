@@ -983,7 +983,7 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.BeginChild("Buttons##bb", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
             ImGui.BeginGroup();
-            //if (ImGui.ImageButton(_uiState.SDLImageDictionary["UpImg"], new Vector2(16, 8)))
+            //if (ImGui.ImageButton(_uiState.UpImg(), new Vector2(16, 8)))
             if (ImGui.Button("^" + "##bb" + _bbSelectedIndex))
             {
                 (string name, int count) item = _listfoo[_bbSelectedIndex];
@@ -991,7 +991,7 @@ namespace Pulsar4X.SDL2UI
                 _listfoo.Insert(_bbSelectedIndex - 1, item);
                 _bbSelectedIndex--;
             }
-            //if (ImGui.ImageButton(_uiState.SDLImageDictionary["DnImg"], new Vector2(16, 8)))
+            //if (ImGui.ImageButton(_uiState.DnImg(), new Vector2(16, 8)))
             if (ImGui.Button("v" + "##bb" + _bbSelectedIndex))
             {
                 (string name, int count) item = _listfoo[_bbSelectedIndex];
@@ -1001,7 +1001,7 @@ namespace Pulsar4X.SDL2UI
             }
             ImGui.EndGroup();
             ImGui.SameLine();
-            //if (ImGui.ImageButton(_uiState.SDLImageDictionary["RepeatImg"], new Vector2(16, 16)))
+            //if (ImGui.ImageButton(_uiState.RepeatImg(), new Vector2(16, 16)))
             if (ImGui.Button("+" + "##bb" + _bbSelectedIndex))
             {
                 //_refineryVM.CurrentJobSelectedItem.ChangeRepeat(!_refineryVM.CurrentJobSelectedItem.Repeat);
@@ -1009,7 +1009,7 @@ namespace Pulsar4X.SDL2UI
             }
         
             ImGui.SameLine();
-            //if (ImGui.ImageButton(_uiState.SDLImageDictionary["CancelImg"], new Vector2(16, 16)))
+            //if (ImGui.ImageButton(_uiState.CancelImg(), new Vector2(16, 16)))
             if (ImGui.Button("-" + "##bb" + _bbSelectedIndex))
             {
                 //_refineryVM.CurrentJobSelectedItem.CancelJob();

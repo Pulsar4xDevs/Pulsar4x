@@ -1,30 +1,65 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Pulsar4X.ECSLib
 {
     public enum BodyType : byte
     {
+        [Description("?")]
         Unknown,
+
+        [Description("Terrestrial")]
         Terrestrial,    // Like Earth/Mars/Venus/etc.
+
+        [Description("Gas Giant")]
         GasGiant,       // Like Jupiter/Saturn
+
+        [Description("Ice Giant")]
         IceGiant,       // Like Uranus/Neptune
+
+        [Description("Dwarf Planet")]
         DwarfPlanet,    // Pluto!
+
+        [Description("Gas Dwarf")]
         GasDwarf,       // What you'd get is Jupiter and Saturn ever had a baby.
-        ///< @todo Add more planet types like Ice Planets (bigger Plutos), carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), Iron SystemBody (http://en.wikipedia.org/wiki/Iron_planet) or Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). (more: http://en.wikipedia.org/wiki/List_of_planet_types).
+
+        /// @TODO: Add more planet types like 
+        ///     Ice Planets (bigger Plutos), 
+        ///     carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), 
+        ///     Iron SystemBody (http://en.wikipedia.org/wiki/Iron_planet) or 
+        ///     Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). 
+        ///     (more: http://en.wikipedia.org/wiki/List_of_planet_types).
+
+        [Description("Moon")]
         Moon,
+
+        [Description("Asteroid")]
         Asteroid,
+
+        [Description("Comet")]
         Comet
     }
 
     public enum TectonicActivity : byte
     {
+        [Description("?")]
         Unknown,
+
+        [Description("Dead")]
         Dead,
+
+        [Description("Minor")]
         Minor,
+
+        [Description("Earth-like")]
         EarthLike,
+
+        [Description("Major")]
         Major,
+
+        [Description("Not-Applicable")]
         NA
     }
 

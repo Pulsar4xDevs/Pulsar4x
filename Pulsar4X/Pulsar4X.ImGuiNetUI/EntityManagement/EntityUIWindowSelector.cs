@@ -67,13 +67,13 @@ namespace Pulsar4X.SDL2UI
 
                     ToolbuttonData btn;
 
-                    void NewButton(Type T,  string PictureString, string TooltipText, List<ToolbuttonData> ButtonList) {
+                    void NewButton(Type T, IntPtr imgPtr, string TooltipText, List<ToolbuttonData> ButtonList) {
                         //Creates a buttton if it is usuable in this situation
                         if (EntityUIWindows.CheckIfCanOpenWindow(T, _entityState))
                         {
                             btn = new ToolbuttonData()
                             {   
-                                Picture = _uiState.SDLImageDictionary[PictureString],
+                                Picture = imgPtr,
                                 TooltipText = TooltipText,
                                 ClickType = T
                                 //Opens up the componet design menu
@@ -81,23 +81,23 @@ namespace Pulsar4X.SDL2UI
                             ButtonList.Add(btn);
                         }
                     }
-                    void NewCondtionalButton(Type T, string PictureString, string TooltipText) {
-                        NewButton(T, PictureString, TooltipText, CondtionalButtons);
+                    void NewCondtionalButton(Type T, IntPtr imgPtr, string TooltipText) {
+                        NewButton(T, imgPtr, TooltipText, CondtionalButtons);
                     }
-                    void NewStandardButton(Type T, string PictureString, string TooltipText) {
-                        NewButton(T, PictureString, TooltipText, StandardButtons);
+                    void NewStandardButton(Type T, IntPtr imgPtr, string TooltipText) {
+                        NewButton(T, imgPtr, TooltipText, StandardButtons);
                     }
 
                     //Populates Buttons
 
-                    NewStandardButton(typeof(SelectPrimaryBlankMenuHelper), "Select", "Selects the entity");
-                    NewStandardButton(typeof(PinCameraBlankMenuHelper), "Pin", "Focuses camera");
-                    NewStandardButton(typeof(RenameWindow), "Rename", "Renames the entity");
+                    NewStandardButton(typeof(SelectPrimaryBlankMenuHelper), _uiState.Img_Select(), "Selects the entity");
+                    NewStandardButton(typeof(PinCameraBlankMenuHelper), _uiState.Img_Pin(), "Focuses camera");
+                    NewStandardButton(typeof(RenameWindow), _uiState.Img_Rename(), "Renames the entity");
 
-                    NewCondtionalButton(typeof(PowerGen), "Power", "Shows power stats");
-                    NewCondtionalButton(typeof(CargoTransfer), "Cargo", "Shows cargo");
-                    NewCondtionalButton(typeof(ColonyPanel), "Industry", "Opens Industry menu");
-                    NewCondtionalButton(typeof(FireControl), "Firecon", "Opens firecontrol menu");
+                    NewCondtionalButton(typeof(PowerGen), _uiState.Img_Power(), "Shows power stats");
+                    NewCondtionalButton(typeof(CargoTransfer), _uiState.Img_Cargo(), "Shows cargo");
+                    NewCondtionalButton(typeof(ColonyPanel), _uiState.Img_Industry(), "Opens Industry menu");
+                    NewCondtionalButton(typeof(FireControl), _uiState.Img_Firecon(), "Opens firecontrol menu");
                    
                     //Displays all buttons in a list
                     void PrintButtonList (ref List<ToolbuttonData> PrintButtons) {
