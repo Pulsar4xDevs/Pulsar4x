@@ -629,6 +629,8 @@ namespace Pulsar4X.SDL2UI
 
         }
     }
+    
+    
 
     public static class DistanceDisplay
     {
@@ -674,7 +676,86 @@ namespace Pulsar4X.SDL2UI
         }
 
     }
-    
+
+ 
+    public static class LargeRangeSliderInt
+    {
+        public delegate int Step (int value);
+
+        public static Step StepMethod = Step1;
+        
+        public static int Step1(int value)
+        {
+            return 1;
+        }
+
+        public static int StepLog2x(int value)
+        {
+            return Convert.ToInt32(Math.Log2(value)) ;
+        }
+        
+
+        public static bool Display(string label, ref int value, int min, int max)
+        {
+
+            ImGui.PushID("largerangeslider");
+            var step = StepMethod(value);
+            bool changed = false;
+
+            if (ImGui.Button("-100k"))
+            {
+                value = Math.Max(min, value - 100000);
+                changed = true;
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("-1k"))
+            {
+                value = Math.Max(min, value - 1000);
+                changed = true;
+            }ImGui.SameLine();
+            if (ImGui.Button("-100"))
+            {
+                value = Math.Max(min, value - 100);
+                changed = true;
+            }ImGui.SameLine();
+            if (ImGui.Button("-1"))
+            {
+                value = Math.Max(min, value - 1);
+                changed = true;
+            }ImGui.SameLine();
+
+            if (ImGui.DragInt(label, ref value, step, min, max))
+            {
+                changed = true;
+            }ImGui.SameLine();
+            
+            if (ImGui.Button("100k"))
+            {
+                value = Math.Min(max, value - 100000);
+                changed = true;
+            }ImGui.SameLine();
+            if (ImGui.Button("1k"))
+            {
+                value = Math.Min(max, value - 1000);
+                changed = true;
+            }ImGui.SameLine();
+            if (ImGui.Button("100"))
+            {
+                value = Math.Min(max, value - 100);
+                changed = true;
+            }ImGui.SameLine();
+            if (ImGui.Button("1"))
+            {
+                value = Math.Min(max, value - 1);
+                changed = true;
+            }
+            ImGui.PopID();
+            
+            return changed;
+
+        }
+    }
+
     public static class ImguiExt
     {
         public static bool ButtonED(string label, bool IsEnabled)
@@ -855,12 +936,19 @@ namespace Pulsar4X.SDL2UI
             }
 
 
-            if (ImGui.SliderInt("r", ref r, 0, maxVal))
+            //if (ImGui.SliderInt("r", ref r, 0, maxVal, r.ToString(), ImGuiSliderFlags.ClampOnInput))
+
+
+            double mdelta = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Length();
+            double step = (Math.Log(maxVal) - Math.Log(1)) / (2000);
+            int speed = Convert.ToInt32(Math.Min(maxVal,Math.Exp(Math.Log(1) + mdelta * step)));
+            
+            if(ImGui.DragInt("r", ref r, speed, 0, maxVal, r.ToString(), ImGuiSliderFlags.ClampOnInput))
                 changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Radius");
 
-            if (ImGui.SliderAngle("θ", ref theta, 0f, 360f))
+            if (ImGui.SliderAngle("θ°", ref theta, 0f, 360f))
                 changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Angle");

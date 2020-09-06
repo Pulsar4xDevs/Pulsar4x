@@ -258,12 +258,12 @@ namespace Pulsar4X.ECSLib
             ShipDesign shipDesign = DefaultShipDesign(game, factionEntity);
             ShipDesign gunShipDesign = GunShipDesign(game, factionEntity);
 
-            Entity gunShip0 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Serial Peacemaker");
-            Entity ship2 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Ensuing Calm");
-            Entity ship3 = ShipFactory.CreateShip(shipDesign, factionEntity, earth, solSys, "Touch-and-Go");
-            Entity gunShip1 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth, solSys, "Prevailing Stillness");
-            Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), factionEntity, earth, solSys, "Planet Express Ship");
-            Entity starship = ShipFactory.CreateShip(SpaceXStarShip(game, factionEntity), factionEntity, earth, solSys, "SN10");
+            Entity gunShip0 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth,  "Serial Peacemaker");
+            Entity ship2 = ShipFactory.CreateShip(shipDesign, factionEntity, earth,  "Ensuing Calm");
+            Entity ship3 = ShipFactory.CreateShip(shipDesign, factionEntity, earth,  "Touch-and-Go");
+            Entity gunShip1 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth,  "Prevailing Stillness");
+            Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), factionEntity, earth,  "Planet Express Ship");
+            Entity starship = ShipFactory.CreateShip(SpaceXStarShip(game, factionEntity), factionEntity, earth,  "SN10");
             var fuel = NameLookup.GetMaterialSD(game, "Sorium Fuel");
             var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
             var methalox = NameLookup.GetMaterialSD(game, "Methalox");

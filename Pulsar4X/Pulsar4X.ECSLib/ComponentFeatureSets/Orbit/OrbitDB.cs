@@ -358,6 +358,43 @@ namespace Pulsar4X.ECSLib
 
             return orbit;
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="objPos">ralitive to parent</param>
+        /// <param name="objMass"></param>
+        /// <param name="atDatetime"></param>
+        /// <returns></returns>
+        public static OrbitDB FromPosition(Entity parent, Vector3 objPos, double objMass, DateTime atDatetime)
+        {
+            
+            var parpos = parent.GetDataBlob<PositionDB>();
+            
+            
+            var r = objPos.Length();
+            var i = Math.Atan2(objPos.Z, r);
+            var m0 = Math.Atan2(objPos.Y, objPos.X);
+            var orbit = new OrbitDB(parent)
+            {
+                SemiMajorAxis = r,
+                Eccentricity = 0,
+                Inclination = i,
+                LongitudeOfAscendingNode = 0,
+                ArgumentOfPeriapsis = 0,
+                MeanAnomalyAtEpoch = m0,
+                Epoch = atDatetime,
+
+                _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
+                _myMass = objMass
+                
+            };
+            orbit.IsStationary = false;
+            orbit.CalculateExtendedParameters();
+
+            return orbit;
+        }
 
         /// <summary>
         /// Returns an orbit representing the defined parameters.

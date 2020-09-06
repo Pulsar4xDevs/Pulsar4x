@@ -74,7 +74,7 @@ namespace Pulsar4X.ECSLib.Industry
             {
                 //_entityCommanding.GetDataBlob<CargoStorageDB>().StoredCargoTypes
                 ShipDesign design = (ShipDesign)_factionEntity.GetDataBlob<FactionInfoDB>().IndustryDesigns[_yardJob.ItemGuid];
-                ShipFactory.CreateShip(design, _factionEntity, targetPosition, orbitalParent, (StarSystem)orbitalParent.Manager);
+                ShipFactory.CreateShip(design, _factionEntity, targetPosition, orbitalParent);
                 _hasLaunched = true;
             }
         }

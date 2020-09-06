@@ -70,6 +70,7 @@ namespace Pulsar4X.Orbital
             double eccentricAnomoly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
             var meanAnomaly = GetMeanAnomaly(eccentricity, eccentricAnomoly);
 
+            ke.StandardGravParameter = standardGravParam;
             ke.SemiMajorAxis = semiMajorAxis;
             ke.SemiMinorAxis = semiMinorAxis;
             ke.Eccentricity = eccentricity;
@@ -112,9 +113,10 @@ namespace Pulsar4X.Orbital
                 MeanMotion = Math.Sqrt(sgp / Math.Pow(r, 3)),
                 MeanAnomalyAtEpoch = m0,
                 TrueAnomalyAtEpoch = m0,
-                EccentricAnomaly = m0,
+                EccentricAnomalyAtEpoch = m0,
                 OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(r, 3) / sgp),
                 Epoch = epoch,
+                StandardGravParameter = sgp,
             };
             
             return orbit;
@@ -141,9 +143,10 @@ namespace Pulsar4X.Orbital
                 MeanMotion = Math.Sqrt(sgp / Math.Pow(r, 3)),
                 MeanAnomalyAtEpoch = m0,
                 TrueAnomalyAtEpoch = m0,
-                EccentricAnomaly = m0,
+                EccentricAnomalyAtEpoch = m0,
                 OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(r, 3) / sgp),
                 Epoch = epoch,
+                StandardGravParameter = sgp,
             };
             
             return orbit;
@@ -565,6 +568,49 @@ namespace Pulsar4X.Orbital
             return v;
         }
 
+
+
+        /// <summary>
+        /// returns state vectors, TODO velocity vector should be 3d.
+        /// As this uses newtonion method to calculate eccentricAnomaly, this is ralitivly expensive. 
+        /// </summary>
+        /// <param name="ke"></param>
+        /// <param name="dateTime"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static (Vector3 position, Vector2 velocity) GetStateVectors(KeplerElements ke, DateTime dateTime)
+        {
+            var secondsFromEpoch = (dateTime - ke.Epoch).TotalSeconds;
+            var sgp = ke.StandardGravParameter;
+            double lofAN = ke.LoAN;
+            double i = ke.Inclination;
+            double e = ke.Eccentricity;
+            double a = ke.SemiMajorAxis;
+            var meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
+            var eccAnom = GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly);
+            var trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
+            double angleToObj = trueAnomaly + ke.AoP;
+
+            double x = Math.Cos(lofAN) * Math.Cos(angleToObj) - Math.Sin(lofAN) * Math.Sin(angleToObj) * Math.Cos(i);
+            double y = Math.Sin(lofAN) * Math.Cos(angleToObj) + Math.Cos(lofAN) * Math.Sin(angleToObj) * Math.Cos(i);
+            double z = Math.Sin(i) * Math.Sin(angleToObj);
+            double radius = a * (1 - e * e) / (1 + e * Math.Cos(trueAnomaly));
+            var position = new Vector3(x, y, z) * radius;
+            
+            (double speed, double headingAngle) = ObjectLocalVelocityPolar(sgp, position, a, e, trueAnomaly, ke.AoP);
+            var v = new Vector2()
+            {
+                X = Math.Cos(headingAngle) * speed,
+                Y = Math.Sin(headingAngle) * speed
+            };
+
+            if (double.IsNaN(v.X) || double.IsNaN(v.Y))
+                throw new Exception("Result is NaN");
+
+            return (position, v);
+
+        }
+
         /// <summary>
         /// This returns the heading mesured from the periapsis (AoP) in radians
         /// Add the LoP to this to get the true heading in a 2d orbit. 
@@ -864,6 +910,31 @@ namespace Pulsar4X.Orbital
             double y = Math.Sin(lofAN) * Math.Cos(angle) + Math.Cos(lofAN) * Math.Sin(angle) * Math.Cos(incl);
             double z = Math.Sin(incl) * Math.Sin(angle);
 
+            return new Vector3(x, y, z) * radius;
+        }
+
+        /// <summary>
+        /// Position using time (ralitivly computationaly expensive)
+        /// </summary>
+        /// <param name="ke"></param>
+        /// <param name="dateTime"></param>
+        /// <returns></returns>
+        public static Vector3 GetRalitivePosition(KeplerElements ke, DateTime dateTime)
+        {
+            var secondsFromEpoch = (dateTime - ke.Epoch).TotalSeconds;
+            double lofAN = ke.LoAN;
+            double i = ke.Inclination;
+            double e = ke.Eccentricity;
+            double a = ke.SemiMajorAxis;
+            var meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
+            var eccAnom = GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly);
+            var trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
+            double angle = trueAnomaly + ke.AoP;
+
+            double x = Math.Cos(lofAN) * Math.Cos(angle) - Math.Sin(lofAN) * Math.Sin(angle) * Math.Cos(i);
+            double y = Math.Sin(lofAN) * Math.Cos(angle) + Math.Cos(lofAN) * Math.Sin(angle) * Math.Cos(i);
+            double z = Math.Sin(i) * Math.Sin(angle);
+            double radius = a * (1 - e * e) / (1 + e * Math.Cos(trueAnomaly));
             return new Vector3(x, y, z) * radius;
         }
 

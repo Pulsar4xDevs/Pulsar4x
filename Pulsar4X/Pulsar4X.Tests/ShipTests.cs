@@ -54,7 +54,7 @@ namespace Pulsar4X.Tests
             _engineComponentDesign = DefaultStartFactory.DefaultWarpDesign(_game, _faction);      
             
             _shipDesign = DefaultStartFactory.DefaultShipDesign(_game, _faction);
-            _ship = ShipFactory.CreateShip(_shipDesign, _faction, _sol, _starSystem, "Testship");
+            _ship = ShipFactory.CreateShip(_shipDesign, _faction, _sol, "Testship");
                         
             ComponentInstancesDB instancesdb = _ship.GetDataBlob<ComponentInstancesDB>();
             instancesdb.TryGetComponentsByAttribute<WarpDriveAtb>(out var instances1);

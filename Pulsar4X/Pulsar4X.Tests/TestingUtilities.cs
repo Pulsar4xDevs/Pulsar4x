@@ -136,7 +136,7 @@ namespace Pulsar4X.Tests
             DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(Game, HumanFaction);
 
             Vector3 position = Earth.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-            DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Earth,  Sol, "Serial Peacemaker");
+            DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Earth,  "Serial Peacemaker");
             Sol.SetDataBlob(DefaultShip.ID, new TransitableDB());
         }
 
