@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -61,6 +62,24 @@ namespace Pulsar4X.ECSLib
         //</summary>
         [JsonProperty]
         public Dictionary<AtmosphericGasSD, float> Composition { get; internal set; }
+
+        //<summary>
+        //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
+        //In Earth Atmospheres (atm).
+        //</summary>
+        [JsonProperty]
+        public Dictionary<AtmosphericGasSD, float> CompositionByPercent { 
+            get
+            {
+                var totalAtm = Composition.Values.Sum();
+                var byPercent = new Dictionary<AtmosphericGasSD, float>();
+                foreach (var kvp in Composition)
+                {
+                    byPercent.Add(kvp.Key, kvp.Value / totalAtm * 100.0f);
+                }
+                return byPercent;
+            }
+        }
 
         /// <summary>
         /// A sting describing the Atmosphere in Percentages, like this:

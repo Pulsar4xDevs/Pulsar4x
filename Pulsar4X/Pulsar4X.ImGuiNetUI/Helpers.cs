@@ -115,7 +115,7 @@ namespace Pulsar4X.SDL2UI
 
             if (headerLine.Replace(" ", "") != "")
             {
-                ImGui.Text(headerLine);
+                ImGui.TextUnformatted(headerLine);
             }
 
             foreach (var row in data)
@@ -125,7 +125,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     rowLine += GetByAlignmentAndMaxLength(row[i], maxLengthOfDataByColumn[i], headings[i].Value);
                 }
-                ImGui.Text(rowLine);
+                ImGui.TextUnformatted(rowLine);
             }
         }
 
