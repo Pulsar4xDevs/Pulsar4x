@@ -144,7 +144,6 @@ namespace Pulsar4X.ECSLib.Factories.SystemGen
             return moon;
         }
 
-
         /// <summary>
         /// Creates Juipiter's 4th moon Callisto
         /// </summary>
@@ -166,6 +165,192 @@ namespace Pulsar4X.ECSLib.Factories.SystemGen
             double moonLoAN = 123;
             double moonAoP = 123;
             double moonMeanAnomaly = 123;
+
+            OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
+            moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+
+            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
+            return moon;
+        }
+
+        /// <summary>
+        /// Creates Juipiter's 5th moon Amalthea
+        /// </summary>
+        /// <remarks>https://en.wikipedia.org/wiki/Amalthea_(moon)</remarks>
+        public static Entity Amalthea(Game game, StarSystem sol, Entity sun, Entity parentPlanet, DateTime epoch, SensorProfileDB sensorProfile)
+        {
+            MassVolumeDB planetMVDB = parentPlanet.GetDataBlob<MassVolumeDB>();
+            OrbitDB planetOrbit = parentPlanet.GetDataBlob<OrbitDB>();
+            PositionDB planetPositionDB = parentPlanet.GetDataBlob<PositionDB>();
+
+            SystemBodyInfoDB moonBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true, Albedo = 0.09f };
+            MassVolumeDB moonMVDB = MassVolumeDB.NewFromMassAndRadius_AU(2.08E18, Distance.KmToAU(83.5));
+            NameDB moonNameDB = new NameDB("Amalthea");
+            double moonSemiMajorAxisAU = Distance.KmToAU(181365.84);
+            double moonEccentricity = 0.00319;
+            double moonEclipticInclination = 0; // 0.374
+
+            // Our orbit code it not advanced enough to deal with LoAN/AoP regression/progression. 
+            double moonLoAN = 123;
+            double moonAoP = 123;
+            double moonMeanAnomaly = 123;
+
+            OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
+            moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+
+            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
+            return moon;
+        }
+
+        /// <summary>
+        /// Creates Juipiter's 6th moon Himalia
+        /// </summary>
+        /// <remarks>https://en.wikipedia.org/wiki/Himalia_(moon)</remarks>
+        public static Entity Himalia(Game game, StarSystem sol, Entity sun, Entity parentPlanet, DateTime epoch, SensorProfileDB sensorProfile)
+        {
+            MassVolumeDB planetMVDB = parentPlanet.GetDataBlob<MassVolumeDB>();
+            OrbitDB planetOrbit = parentPlanet.GetDataBlob<OrbitDB>();
+            PositionDB planetPositionDB = parentPlanet.GetDataBlob<PositionDB>();
+
+            SystemBodyInfoDB moonBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true, Albedo = 0.057f };
+            MassVolumeDB moonMVDB = MassVolumeDB.NewFromMassAndRadius_AU(4.2E18, Distance.KmToAU(85));
+            NameDB moonNameDB = new NameDB("Himalia");
+            double moonSemiMajorAxisAU = Distance.KmToAU(11388690);
+            double moonEccentricity = 0.1537860;
+            double moonEclipticInclination = 0; // 29.90917
+
+            // Our orbit code it not advanced enough to deal with LoAN/AoP regression/progression. 
+            double moonLoAN = 44.99935;
+            double moonAoP = 21.60643;
+            double moonMeanAnomaly = 94.30785;
+
+            OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
+            moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+
+            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
+            return moon;
+        }
+
+        /// <summary>
+        /// Creates Juipiter's 7th moon Elara
+        /// </summary>
+        /// <remarks>https://en.wikipedia.org/wiki/Elara_(moon)</remarks>
+        public static Entity Elara (Game game, StarSystem sol, Entity sun, Entity parentPlanet, DateTime epoch, SensorProfileDB sensorProfile)
+        {
+            MassVolumeDB planetMVDB = parentPlanet.GetDataBlob<MassVolumeDB>();
+            OrbitDB planetOrbit = parentPlanet.GetDataBlob<OrbitDB>();
+            PositionDB planetPositionDB = parentPlanet.GetDataBlob<PositionDB>();
+
+            SystemBodyInfoDB moonBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true, Albedo = 0.046f };
+            MassVolumeDB moonMVDB = MassVolumeDB.NewFromMassAndRadius_AU(8.7E17, Distance.KmToAU(39.95));
+            NameDB moonNameDB = new NameDB("Elara");
+            double moonSemiMajorAxisAU = Distance.KmToAU(11741000);
+            double moonEccentricity = 0.217;
+            double moonEclipticInclination = 0; // 29.90917
+
+            // Our orbit code it not advanced enough to deal with LoAN/AoP regression/progression. 
+            double moonLoAN = 109.4;
+            double moonAoP = 143.6;
+            double moonMeanAnomaly = 333.0;
+
+            OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
+            moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+
+            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
+            return moon;
+        }
+
+        /// <summary>
+        /// Creates Juipiter's 8th moon Pasiphae
+        /// </summary>
+        /// <remarks>https://en.wikipedia.org/wiki/Pasiphae_(moon)</remarks>
+        public static Entity Pasiphae(Game game, StarSystem sol, Entity sun, Entity parentPlanet, DateTime epoch, SensorProfileDB sensorProfile)
+        {
+            MassVolumeDB planetMVDB = parentPlanet.GetDataBlob<MassVolumeDB>();
+            OrbitDB planetOrbit = parentPlanet.GetDataBlob<OrbitDB>();
+            PositionDB planetPositionDB = parentPlanet.GetDataBlob<PositionDB>();
+
+            SystemBodyInfoDB moonBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true, Albedo = 0.044f };
+            MassVolumeDB moonMVDB = MassVolumeDB.NewFromMassAndRadius_AU(3.0E17, Distance.KmToAU(28.9));
+            NameDB moonNameDB = new NameDB("Pasiphae");
+            double moonSemiMajorAxisAU = Distance.KmToAU(23624000);
+            double moonEccentricity = 0.409;
+            double moonEclipticInclination = 0; // 151.4
+
+            // Our orbit code it not advanced enough to deal with LoAN/AoP regression/progression. 
+            double moonLoAN = 123;
+            double moonAoP = 123;
+            double moonMeanAnomaly = 123;
+
+            OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
+            moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+
+            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
+            return moon;
+        }
+
+        /// <summary>
+        /// Creates Juipiter's 9th moon Sinope
+        /// </summary>
+        /// <remarks>https://en.wikipedia.org/wiki/Sinope_(moon)</remarks>
+        public static Entity Sinope(Game game, StarSystem sol, Entity sun, Entity parentPlanet, DateTime epoch, SensorProfileDB sensorProfile)
+        {
+            MassVolumeDB planetMVDB = parentPlanet.GetDataBlob<MassVolumeDB>();
+            OrbitDB planetOrbit = parentPlanet.GetDataBlob<OrbitDB>();
+            PositionDB planetPositionDB = parentPlanet.GetDataBlob<PositionDB>();
+
+            SystemBodyInfoDB moonBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true, Albedo = 0.042f };
+            MassVolumeDB moonMVDB = MassVolumeDB.NewFromMassAndRadius_AU(7.5E16, Distance.KmToAU(17.5));
+            NameDB moonNameDB = new NameDB("Sinope");
+            double moonSemiMajorAxisAU = Distance.KmToAU(23939000);
+            double moonEccentricity = 0.250;
+            double moonEclipticInclination = 0; // 151.4
+
+            // Our orbit code it not advanced enough to deal with LoAN/AoP regression/progression. 
+            double moonLoAN = 123;
+            double moonAoP = 123;
+            double moonMeanAnomaly = 123;
+
+            OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
+            moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+
+            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
+            return moon;
+        }
+
+        /// <summary>
+        /// Creates Juipiter's 10th moon Lysithea
+        /// </summary>
+        /// <remarks>https://en.wikipedia.org/wiki/Lysithea_(moon)</remarks>
+        public static Entity Lysithea(Game game, StarSystem sol, Entity sun, Entity parentPlanet, DateTime epoch, SensorProfileDB sensorProfile)
+        {
+            MassVolumeDB planetMVDB = parentPlanet.GetDataBlob<MassVolumeDB>();
+            OrbitDB planetOrbit = parentPlanet.GetDataBlob<OrbitDB>();
+            PositionDB planetPositionDB = parentPlanet.GetDataBlob<PositionDB>();
+
+            SystemBodyInfoDB moonBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true, Albedo = 0.036f };
+            MassVolumeDB moonMVDB = MassVolumeDB.NewFromMassAndRadius_AU(6.3E16, Distance.KmToAU(21.1));
+            NameDB moonNameDB = new NameDB("Lysithea");
+            double moonSemiMajorAxisAU = Distance.KmToAU(11717000);
+            double moonEccentricity = 0.112;
+            double moonEclipticInclination = 0; // 28.3
+
+            // Our orbit code it not advanced enough to deal with LoAN/AoP regression/progression. 
+            double moonLoAN = 5.5;
+            double moonAoP = 49.5;
+            double moonMeanAnomaly = 329.1;
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
