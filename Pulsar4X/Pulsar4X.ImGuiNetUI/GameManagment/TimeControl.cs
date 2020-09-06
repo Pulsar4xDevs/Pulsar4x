@@ -9,8 +9,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class TimeControl : PulsarGuiWindow
     {
-        
-        ECSLib.MasterTimePulse _timeloop {get { return _uiState.Game.GamePulse; } }
+        ECSLib.MasterTimePulse _timeloop => _uiState.Game.GamePulse;
 
         bool _isPaused = true;
         int _timeSpanValue = 1;
@@ -38,6 +37,7 @@ namespace Pulsar4X.SDL2UI
         {
             IsActive = true;
         }
+
         internal static TimeControl GetInstance()
         {
             if (!_uiState.LoadedWindows.ContainsKey(typeof(TimeControl)))
@@ -49,8 +49,11 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            Vector2 size = new Vector2(200, 100);
-            Vector2 pos = new Vector2(0,0);
+            var iconSize = new Vector2(16, 16);
+            var size = new Vector2(200, 100);
+            var pos = new Vector2(0,0);
+            var col = new Vector4(0, 0, 0, 0);
+
 
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
@@ -58,9 +61,9 @@ namespace Pulsar4X.SDL2UI
             ImGui.Begin("TimeControl", ref IsActive, _flags);
             ImGui.PushItemWidth(100);
 
-            ImGui.PushStyleColor(ImGuiCol.Header, new Vector4(0, 0, 0, 0));
-            ImGui.PushStyleColor(ImGuiCol.HeaderActive, new Vector4(0, 0, 0, 0));
-            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0, 0, 0, 0));
+            ImGui.PushStyleColor(ImGuiCol.Header, col);
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, col);
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, col);
 
             DateTime currenttime = _uiState.SelectedSystemTime;
             if (ImGui.CollapsingHeader("", _xpanderFlags))//Let the user open up the the time frequency menu
@@ -79,15 +82,15 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if (_isPaused == true)//When time is paused
             {
-                if (ImGui.ImageButton(_uiState.Img_Play(), new Vector2(16, 16)))//Provide a button to unpause
+                if (ImGui.ImageButton(_uiState.Img_Play(), iconSize))//Provide a button to unpause
                     PausePlayPressed();
                 ImGui.SameLine();
-                if (ImGui.ImageButton(_uiState.Img_OneStep(), new Vector2(16, 16)))//Provide a button to increment time
+                if (ImGui.ImageButton(_uiState.Img_OneStep(), iconSize))//Provide a button to increment time
                     OneStepPressed();
             }
             else//When time is running
             {
-                if (ImGui.ImageButton(_uiState.Img_Pause(), new Vector2(16, 16)))//Provide a button to unpause time
+                if (ImGui.ImageButton(_uiState.Img_Pause(), iconSize))//Provide a button to unpause time
                     PausePlayPressed();
             }
             
@@ -170,6 +173,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (_timeloop == null)
                 return;
+
             if (_isPaused)
             {
                 _timeloop.StartTime();
@@ -181,10 +185,12 @@ namespace Pulsar4X.SDL2UI
                 _isPaused = true;
             }   
         }
+
         void OneStepPressed()
         {
             if (_timeloop == null)
                 return;
+
             _timeloop.TimeStep();
         }
     }
