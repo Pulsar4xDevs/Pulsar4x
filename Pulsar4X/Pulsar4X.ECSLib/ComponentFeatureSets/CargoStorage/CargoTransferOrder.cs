@@ -6,17 +6,19 @@ namespace Pulsar4X.ECSLib
 {
     public class CargoUnloadToOrder:EntityCommand
     {
-         
-        
         public List<(Guid ID, long amount)> ItemsGuidsToTransfer;
+
         [JsonIgnore]
         public List<(ICargoable item, long amount)> ItemICargoablesToTransfer = new List<(ICargoable item, long amount)>();
+
         public Guid SendCargoToEntityGuid { get; set; }
 
         public override int ActionLanes => 1;
+
         public override bool IsBlocking => true;
         
         public override string Name { get; } = "Cargo Transfer";
+
         public override string Details
         {
             get
@@ -29,12 +31,14 @@ namespace Pulsar4X.ECSLib
         }
 
         Entity _entityCommanding;
+
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
         private CargoTransferDB _cargoTransferDB;
 
         [JsonIgnore]
         Entity factionEntity;
+
         [JsonIgnore]
         Entity sendToEntity;
         
@@ -45,6 +49,7 @@ namespace Pulsar4X.ECSLib
             {
                 itemGuidAmounts.Add((tup.item.ID, tup.amount));
             }
+
             var cmd = new CargoUnloadToOrder()
             {
                 RequestingFactionGuid = faction.Guid,
@@ -54,8 +59,8 @@ namespace Pulsar4X.ECSLib
                 ItemsGuidsToTransfer = itemGuidAmounts,
                 ItemICargoablesToTransfer = itemsToMove
             };
+
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
-            
         }
 
         /// <summary>
@@ -83,8 +88,6 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-
-
         internal override bool IsValidCommand(Game game)
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out factionEntity, out _entityCommanding))
@@ -106,6 +109,7 @@ namespace Pulsar4X.ECSLib
             else
                 return true;
         }
+
         long AmountLeftToXfer()
         {
             long amount = 0;
@@ -120,8 +124,11 @@ namespace Pulsar4X.ECSLib
     public class CargoLoadFromOrder : EntityCommand
     {
         public CargoUnloadToOrder Order;
+
         public override int ActionLanes { get; }
+
         public override bool IsBlocking { get; }
+
         public override string Name { get; } = "Cargo Transfer";
 
         public override string Details
@@ -130,6 +137,7 @@ namespace Pulsar4X.ECSLib
         }
 
         internal override Entity EntityCommanding { get; }
+
         internal override bool IsValidCommand(Game game)
         {
             throw new NotImplementedException();
@@ -142,6 +150,7 @@ namespace Pulsar4X.ECSLib
             {
                 itemGuidAmounts.Add((tup.item.ID, tup.amount));
             }
+
             var unloadcmd = new CargoUnloadToOrder()
             {
                 RequestingFactionGuid = faction.Guid,
@@ -159,9 +168,9 @@ namespace Pulsar4X.ECSLib
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 Order = unloadcmd
             };
+
             StaticRefLib.Game.OrderHandler.HandleOrder(loadCmd);
         }
-        
         
         internal override void ActionCommand(DateTime atDateTime)
         {

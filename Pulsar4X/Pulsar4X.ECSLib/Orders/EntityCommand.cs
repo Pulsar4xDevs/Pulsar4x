@@ -97,10 +97,12 @@ namespace Pulsar4X.ECSLib
             Handler = handler;
             _subPulse = subPulse;
         }
+
         public static CommandReferences CreateForEntity(Game game, Entity entity)
         {
             return new CommandReferences(entity.FactionOwner, entity.Guid, game.OrderHandler, entity.Manager.ManagerSubpulses);
         }
+
         public static CommandReferences CreateForEntity(Game game, Guid entityGuid)
         {
             Entity entity;
@@ -113,18 +115,19 @@ namespace Pulsar4X.ECSLib
 
     public class RenameCommand : EntityCommand
     {
-        
         public override int ActionLanes => 0;
 
         public override bool IsBlocking => false;
+
         public override string Name { get; } = "Rename";
+
         public override string Details { get; } = "Renames This Entity";
+
         Entity _factionEntity;
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
         bool _isFinished = false;
         string NewName;
-
 
         public static void CreateRenameCommand(Game game, Entity faction, Entity orderEntity, string newName)
         {

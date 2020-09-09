@@ -23,8 +23,6 @@ namespace Pulsar4X.SDL2UI
             mineralDeposits
         }
 
-        private EntityState _lookedAtEntity;
-
         private PlanetarySubWindows _selectedSubWindow = PlanetarySubWindows.generalInfo;
 
         public PlanetaryWindow(EntityState entity, GlobalUIState state)
@@ -35,8 +33,6 @@ namespace Pulsar4X.SDL2UI
                 _mineralDefinitions = _uiState.Game.StaticData.CargoGoods.GetMineralsList();
                 _maxMineralNameLength = _mineralDefinitions.Max(x => x.Name.Length);
             }
-            //_flags = ImGuiWindowFlags.NoCollapse;
-
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             onEntityChange(entity);
         }

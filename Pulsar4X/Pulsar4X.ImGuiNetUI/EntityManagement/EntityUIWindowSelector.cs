@@ -13,7 +13,7 @@ namespace Pulsar4X.SDL2UI
     {
         public Vector2 BtnSizes = new Vector2(32, 32);
         private List<ToolbuttonData> StandardButtons = new List<ToolbuttonData>();
-        private List<ToolbuttonData> CondtionalButtons = new List<ToolbuttonData>();
+        private List<ToolbuttonData> ConditionalButtons = new List<ToolbuttonData>();
         //data for a toolbar button, requires an SDL image(for Picture), a PulsarGuiWindow`s SetActive function or equivalent/similar(for OnClick) and
         //the tool tip text to be displayed when the button is hovered(for TooltipText)
         public struct ToolbuttonData
@@ -80,7 +80,7 @@ namespace Pulsar4X.SDL2UI
                         }
                     }
                     void NewCondtionalButton(Type T, IntPtr imgPtr, string TooltipText) {
-                        NewButton(T, imgPtr, TooltipText, CondtionalButtons);
+                        NewButton(T, imgPtr, TooltipText, ConditionalButtons);
                     }
                     void NewStandardButton(Type T, IntPtr imgPtr, string TooltipText) {
                         NewButton(T, imgPtr, TooltipText, StandardButtons);
@@ -142,7 +142,7 @@ namespace Pulsar4X.SDL2UI
                     
                     //Prints both button lists
                     PrintButtonList(ref StandardButtons);
-                    PrintButtonList(ref CondtionalButtons);
+                    PrintButtonList(ref ConditionalButtons);
 
                     void ActionButton(Type T)
                     {

@@ -12,6 +12,8 @@ namespace Pulsar4X.SDL2UI
         internal string UniqueName = "test";
         internal static GlobalUIState _state;
 
+        protected EntityState _lookedAtEntity;
+
         public void SetActive(bool ActiveVal = true)
         {
             IsActive = ActiveVal;
