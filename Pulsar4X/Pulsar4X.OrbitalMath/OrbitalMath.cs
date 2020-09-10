@@ -1102,8 +1102,8 @@ namespace Pulsar4X.Orbital
         /// Gets the sphere of influence radius of a given body
         /// </summary>
         /// <returns>The sphere of influence (SOI) radius in whatever units you feed the semiMajorAxis.</returns>
-        /// <param name="semiMajorAxis">Semi major axis of the smaller body ie the planet around the sun</param>
-        /// <param name="mass">Mass of the smaller body ie the planet</param>
+        /// <param name="semiMajorAxis">Semi major axis of the body we're getting soi for and it's parent</param>
+        /// <param name="mass">Mass of the body we're getting the soi for</param>
         /// <param name="parentMass">Parent mass. ie the sun</param>
         public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
         {

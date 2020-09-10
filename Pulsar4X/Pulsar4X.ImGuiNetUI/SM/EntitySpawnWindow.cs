@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
         private string[] _bodyTypes;
         private int _bodyTypeIndex = 1;
         Random _rng = new Random();
-        private Vector3 _graphicPos = new Vector3();
+        //private Vector3 _graphicPos = new Vector3();
         private EntitySpawnGraphic _icon;
         
         private EntityNameSelector _sysBodies;
@@ -37,7 +37,9 @@ namespace Pulsar4X.SDL2UI
         private double _parentMass = 1e10;
         private double _sgp;
         private KeIcon _keIcon;
-        private double parentSOI = 0;
+        private Icon _soiIcon;
+        private double _parentSOI = 0;
+        private Entity _parentObect;
         
         private EntitySpawnWindow()
 	    {
@@ -56,7 +58,7 @@ namespace Pulsar4X.SDL2UI
             var stars = _uiState.SelectedSystem.GetAllEntitiesWithDataBlob<StarInfoDB>();
             bodies.AddRange(stars);
             _sysBodies = new EntityNameSelector(bodies.ToArray(), EntityNameSelector.NameType.Owner);
-
+            _parentObect = _sysBodies.GetSelectedEntity();
             var species = StaticRefLib.Game.GlobalManager.GetAllEntitiesWithDataBlob<SpeciesDB>().ToArray();
             _speciesEntites = new EntityNameSelector(species, EntityNameSelector.NameType.Owner);
             
@@ -65,11 +67,22 @@ namespace Pulsar4X.SDL2UI
             MinMaxStruct outer = new MinMaxStruct(100000, 10000000);
             _bandinfo = (inner, hab, outer, true);
             var date = _uiState.SelectedSystem.StarSysDateTime;
-            _parentMass = _sysBodies.GetSelectedEntity().GetDataBlob<MassVolumeDB>().MassDry;
-            parentSOI = _sysBodies.GetSelectedEntity().GetSOI_m();
+            _parentMass = _parentObect.GetDataBlob<MassVolumeDB>().MassDry;
+            _parentSOI = _parentObect.GetSOI_m();
             _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
             _ke = OrbitalMath.FromPosition(new Vector3(10000, 0, 0), _sgp, date);
             
+            _soiIcon = new Icon(_parentObect.GetDataBlob<PositionDB>());
+            Shape soishape = new Shape();
+            var soiau = Distance.MToAU(_parentSOI);
+            soishape.Points = CreatePrimitiveShapes.Circle(0, 0, soiau, 64);
+            byte r = 0;
+            byte g = 200;
+            byte b = 100;
+            byte a = 200;
+            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            soishape.Color = colour;
+            _soiIcon.Shapes.Add(soishape);
              
         }
 
@@ -100,8 +113,13 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (!_uiState.SelectedSysMapRender.UIWidgets.ContainsKey(nameof(EntitySpawnGraphic)))
                     {
-                        _icon = new EntitySpawnGraphic(_graphicPos);
+                        var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
+                        _icon = new EntitySpawnGraphic(parentPos + _sv.Position);
                         _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(EntitySpawnGraphic), _icon);
+                    }
+                    if (!_uiState.SelectedSysMapRender.UIWidgets.ContainsKey("soiIcon"))
+                    {
+                        _uiState.SelectedSysMapRender.UIWidgets.Add("soiIcon", _soiIcon);
                     }
                 }
 
@@ -109,12 +127,18 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (_uiState.SelectedSysMapRender.UIWidgets.ContainsKey(nameof(EntitySpawnGraphic)))
                         _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(EntitySpawnGraphic));
+                    
+                    if (_uiState.SelectedSysMapRender.UIWidgets.ContainsKey("soiIcon"))
+                        _uiState.SelectedSysMapRender.UIWidgets.Remove("soiIcon");
                 }
                 
                 if (ImGui.Combo("##entityselector", ref _entityindex, _entitytypes, _entitytypes.Length)) 
                 { 
 
                 }
+
+                if (_soiIcon != null)//hacky way to scale the icon to zoom
+                    _soiIcon.Scale = _uiState.Camera.ZoomLevel;
 
 
                 if (_entitytypes[_entityindex] == "Ship") 
@@ -147,7 +171,7 @@ namespace Pulsar4X.SDL2UI
         private (MinMaxStruct inner, MinMaxStruct habitible, MinMaxStruct outer, bool hasHabitible) _bandinfo;
         SystemGenSettingsSD _sysGensettings =  SystemGenSettingsSD.DefaultSettings;
         private Entity _parentStar;
-        private Entity _parentObect;
+
         private StarInfoDB _starInfo;
         void Planet()
         {
@@ -232,7 +256,7 @@ namespace Pulsar4X.SDL2UI
 
             
 
-            OrbitEditWidget.Display(ref _ke, ref _sv, parentSOI, OrbitEditWidget.WidgetStyle.Newtonion);
+            OrbitEditWidget.Display(ref _ke, ref _sv, _parentSOI, OrbitEditWidget.WidgetStyle.Newtonion);
             
 
 
@@ -288,19 +312,14 @@ namespace Pulsar4X.SDL2UI
 
             if (SetParent())
             {
-                if (_keIcon != null)
-                {
-                    var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
-                    _keIcon.UpdateParent(parentPos, parentSOI);
-                    _keIcon.ForceUpdate(_ke, _sv);
-                }
+
             }
 
 
             _factionOwnerEntites.Combo("Set Owner Faction");
 
             BorderGroup.Begin("State Vectors");
-            if (OrbitEditWidget.Display(ref _ke, ref _sv, parentSOI, OrbitEditWidget.WidgetStyle.Newtonion))
+            if (OrbitEditWidget.Display(ref _ke, ref _sv, _parentSOI, OrbitEditWidget.WidgetStyle.Newtonion))
             {
                 var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
                 _icon.WorldPosition_m = parentPos + _sv.Position;
@@ -323,7 +342,7 @@ namespace Pulsar4X.SDL2UI
                 if(_keIcon == null)
                 {
                     var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
-                    _keIcon = new KeIcon(_ke, _sv, parentPos, parentSOI, _uiState);
+                    _keIcon = new KeIcon(_ke, _sv, parentPos, _parentSOI, _uiState);
                     _uiState.SelectedSysMapRender.UIWidgets["keIcon"] = _keIcon;
                 }
             }
@@ -349,6 +368,8 @@ namespace Pulsar4X.SDL2UI
 
                 _uiState.SelectedSysMapRender.UIWidgets.Remove("keIcon");
             }
+            
+            
         }
 
         private int _popCount = 100000;
@@ -399,12 +420,28 @@ namespace Pulsar4X.SDL2UI
                 _ke.StandardGravParameter = _sgp;
                 var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
                 _icon.WorldPosition_m = parentPos + _sv.Position;
-                parentSOI = OrbitalMath.GetSOI(_ke.SemiMajorAxis, _objMass, _parentMass);
+                _parentSOI = _parentObect.GetSOI_m();
                 if (_keIcon != null)
                 {
-                    _keIcon.UpdateParent(parentPos, parentSOI);
+                    _keIcon.UpdateParent(parentPos, _parentSOI);
                     _keIcon.ForceUpdate(_ke, _sv);
                 }
+
+                if (_soiIcon != null)
+                {
+                    Shape soishape = new Shape();
+                    var soiau = Distance.MToAU(_parentSOI);
+                    soishape.Points = CreatePrimitiveShapes.Circle(0, 0, soiau, 64);
+                    byte r = 0;
+                    byte g = 200;
+                    byte b = 100;
+                    byte a = 200;
+                    SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+                    soishape.Color = colour;
+                    _soiIcon.Shapes.Add(soishape);
+                    _soiIcon.Shapes[0] = soishape;
+                }
+
                 return true;
             }
 
@@ -513,7 +550,7 @@ namespace Pulsar4X.SDL2UI
             _vel.X = sv.Velocity.X;
             _vel.Y = sv.Velocity.Y;
             bool changed = false;
-            int maxRadius = (int)Math.Min(int.MaxValue, soi);
+            double maxRadius = Math.Min(double.MaxValue, soi);
             if(VectorWidget2d.Display("Position Vector", ref _pos, 0, maxRadius))
             {
                 sv.Position = new Vector3(_pos.X, _pos.Y, 0);

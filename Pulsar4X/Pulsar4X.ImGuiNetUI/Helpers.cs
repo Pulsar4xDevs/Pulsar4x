@@ -795,6 +795,11 @@ namespace Pulsar4X.SDL2UI
 
         public static bool SliderDouble(string label, ref double value, double min, double max)
         {
+            return SliderDouble(label, ref value, min, max, null, ImGuiSliderFlags.None);
+        }
+
+        public static bool SliderDouble(string label, ref double value, double min, double max, string format, ImGuiSliderFlags flags)
+        {
             //double step = attribute.StepValue;
             //double fstep = step * 10;
             double val = value;
@@ -814,7 +819,36 @@ namespace Pulsar4X.SDL2UI
             }
 
             bool changed = false;
-            if(ImGui.SliderScalar(label, ImGuiDataType.Double, valPtr, minPtr, maxPtr))
+            if(ImGui.SliderScalar(label, ImGuiDataType.Double, valPtr, minPtr, maxPtr, format, flags))
+            {
+                value = val;
+                changed = true;
+            }
+            return changed;
+        }
+        
+        public static bool DragDouble(string label, ref double value, float v_speed, double min, double max, string format, ImGuiSliderFlags flags)
+        {
+            //double step = attribute.StepValue;
+            //double fstep = step * 10;
+            double val = value;
+            IntPtr valPtr;
+            IntPtr maxPtr;
+            IntPtr minPtr;
+            //IntPtr stepPtr;
+            //IntPtr fstepPtr;
+
+            unsafe
+            {
+                valPtr = new IntPtr(&val);
+                maxPtr = new IntPtr(&max);
+                minPtr = new IntPtr(&min);
+                //stepPtr = new IntPtr(&step);
+                //fstepPtr = new IntPtr(&fstep);
+            }
+
+            bool changed = false;
+            if(ImGui.DragScalar(label, ImGuiDataType.Double, valPtr, v_speed, minPtr, maxPtr, format, flags))
             {
                 value = val;
                 changed = true;
@@ -874,6 +908,44 @@ namespace Pulsar4X.SDL2UI
             ImGui.PopID();
             return changed;
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="values">x,y or r,θ</param>
+        /// <param name="minVal"></param>
+        /// <param name="maxVal"></param>
+        /// <param name="valueStyle">if the values are in cartisian or polar coordinates</param>
+        /// <returns></returns>
+        public static bool Display(string label, ref Pulsar4X.Orbital.Vector2 values, double minVal = 0, double maxVal = double.MaxValue, Style valueStyle = Style.Cartesian)
+        {
+            ImGui.PushID(label);
+            //BorderGroup.Begin(label);
+            ImGui.Text(label);
+            _valueStyle = valueStyle;
+            bool changed = false;
+            ImGui.SameLine();
+            if(ImGui.SmallButton("Style"))
+            {
+                var nextStyle = (short)_displayStyle + 1;
+                var max = Enum.GetValues(typeof(Style)).Length;
+                if (nextStyle >= max)
+                    nextStyle = 0;
+                _displayStyle = (Style)nextStyle;
+            }
+                
+            if (_displayStyle == Style.Cartesian)
+            {
+                changed = CartDouble(ref values, minVal, maxVal);
+            }
+            else
+            {
+                changed = PolarDouble(ref values, maxVal);
+            }
+            //BorderGroup.End();
+            ImGui.PopID();
+            return changed;
+        }
 
         static bool CartInt(ref Pulsar4X.Orbital.Vector2 values, int minVal, int maxVal)
         {
@@ -915,6 +987,110 @@ namespace Pulsar4X.SDL2UI
             }
             return changed;
         }
+        
+        static bool CartDouble(ref Pulsar4X.Orbital.Vector2 values, double minVal, double maxVal)
+        {
+            bool changed = false;
+
+            double x = 0;
+            double y = 0;
+            
+            if (_valueStyle == Style.Cartesian)
+            {
+                x = Math.Round(values.X);
+                y = Math.Round(values.Y);
+            }
+            else
+            {
+                x = Math.Round(values.X * Math.Cos(values.Y));
+                y = Math.Round(values.X * Math.Sin(values.Y));
+            }
+
+
+            if (ImguiExt.SliderDouble("X", ref x, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.ClampOnInput))
+                changed = true;
+            if (ImguiExt.SliderDouble("Y", ref y, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.ClampOnInput))
+                changed = true;
+                 
+
+            if (changed)
+            {
+                if (_valueStyle == Style.Cartesian)
+                {
+                    values.X = x;
+                    values.Y = y;
+                }
+                else
+                {
+                    values.X = Math.Sqrt((x * x) + (y * y));
+                    values.Y = (float)Math.Atan2(y, x);
+                }
+            }
+            return changed;
+        }
+
+        static bool PolarDouble(ref Pulsar4X.Orbital.Vector2 values, double maxVal)
+        {
+            
+            bool changed = false;
+            double r = 0;
+            float theta = 0;
+            if(_valueStyle == Style.Cartesian)
+            {
+                r = (int)Math.Round(values.Length());
+                theta = (float)Math.Atan2(values.Y, values.X);
+                Angle.NormaliseRadians(theta);
+                while (theta < 0)
+                    theta += (float)Math.PI * 2;
+            }
+            else
+            {
+                r =  (int)Math.Round(values.X);
+                theta = (int)Math.Round(values.Y);
+            }
+
+
+            //if (ImGui.SliderInt("r", ref r, 0, maxVal, r.ToString(), ImGuiSliderFlags.ClampOnInput))
+
+            //var step = (Math.Log(maxValue) - Math.Log(minValue))/(steps - 1);
+
+
+            double maxMouseDelta = 1000;
+            double mdelta = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).X;
+            mdelta = Math.Min(mdelta, maxMouseDelta);
+            double step = (Math.Log(maxVal) - Math.Log(1)) / maxMouseDelta;
+            float speed = (float)(Math.Min(maxVal,Math.Exp(Math.Log(1) + mdelta * step)));
+            //ImGui.Text("mdelta:" + mdelta);
+            //ImGui.Text("step:" + step);
+            //ImGui.Text("speed:" + speed);
+            
+            
+            if(ImguiExt.DragDouble("r", ref r, speed, 0, maxVal, Stringify.Distance(r), ImGuiSliderFlags.ClampOnInput))
+                changed = true;
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Radius");
+
+            if (ImGui.SliderAngle("θ°", ref theta, 0f, 360f))
+                changed = true;
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Angle");
+            
+            if (changed)
+            {
+                if (_valueStyle == Style.Cartesian)
+                {
+                    values.X = r * Math.Cos(theta);
+                    values.Y = r * Math.Sin(theta);
+                }
+                else
+                {
+                    values.X = r;
+                    values.Y = theta;
+                }
+            }
+            return changed;
+        }
+        
 
         static bool PolarInt(ref Pulsar4X.Orbital.Vector2 values, int maxVal)
         {
@@ -938,10 +1114,18 @@ namespace Pulsar4X.SDL2UI
 
             //if (ImGui.SliderInt("r", ref r, 0, maxVal, r.ToString(), ImGuiSliderFlags.ClampOnInput))
 
+            //var step = (Math.Log(maxValue) - Math.Log(minValue))/(steps - 1);
 
+
+            double maxMouseDelta = 1000;
             double mdelta = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Length();
-            double step = (Math.Log(maxVal) - Math.Log(1)) / (2000);
+            mdelta = Math.Min(mdelta, maxMouseDelta);
+            double step = (Math.Log(maxVal) - Math.Log(1)) / maxMouseDelta;
             int speed = Convert.ToInt32(Math.Min(maxVal,Math.Exp(Math.Log(1) + mdelta * step)));
+            //ImGui.Text("mdelta:" + mdelta);
+            //ImGui.Text("step:" + step);
+            //ImGui.Text("speed:" + speed);
+            
             
             if(ImGui.DragInt("r", ref r, speed, 0, maxVal, r.ToString(), ImGuiSliderFlags.ClampOnInput))
                 changed = true;

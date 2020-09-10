@@ -111,10 +111,44 @@ namespace Pulsar4X.SDL2UI
 
                 for (int i = 0; i < shape.Points.Length - 1; i++)
                 {
-                    var x1 = Convert.ToInt32(shape.Points[i].X);
-                    var y1 = Convert.ToInt32(shape.Points[i].Y);
-                    var x2 = Convert.ToInt32(shape.Points[i+1].X);
-                    var y2 = Convert.ToInt32(shape.Points[i+1].Y);
+                    //if the point is within int32 range, convert(round) else use max or min. 
+                    int x1; 
+                    
+                    if (shape.Points[i].X > int.MaxValue)
+                        x1 = int.MaxValue;
+                    else if ((shape.Points[i].X < int.MinValue))
+                        x1 = int.MinValue;
+                    else
+                        x1 = Convert.ToInt32(shape.Points[i].X);
+                    
+                    int y1; 
+                    
+                    if (shape.Points[i].Y > int.MaxValue)
+                        y1 = int.MaxValue;
+                    else if ((shape.Points[i].Y < int.MinValue))
+                        y1 = int.MinValue;
+                    else
+                        y1 = Convert.ToInt32(shape.Points[i].Y);
+     
+                    
+                    int x2; 
+                    
+                    if (shape.Points[i+1].X > int.MaxValue)
+                        x2 = int.MaxValue;
+                    else if ((shape.Points[i+1].X < int.MinValue))
+                        x2 = int.MinValue;
+                    else
+                        x2 = Convert.ToInt32(shape.Points[i+1].X);
+                    
+                    int y2; 
+                    
+                    if (shape.Points[i+1].Y > int.MaxValue)
+                        y2 = int.MaxValue;
+                    else if ((shape.Points[i+1].Y < int.MinValue))
+                        y2 = int.MinValue;
+                    else
+                        y2 = Convert.ToInt32(shape.Points[i+1].Y);
+
                     SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
