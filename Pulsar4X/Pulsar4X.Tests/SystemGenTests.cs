@@ -215,7 +215,7 @@ namespace Pulsar4X.Tests
             // Test Item Counts are as expected
             Assert.AreEqual(1, system.GetNumberOfStars());
             Assert.AreEqual(1, system.GetNumberOfComets());
-            Assert.AreEqual(5, system.GetNumberOfMoons());
+            Assert.AreEqual(17, system.GetNumberOfMoons());
             Assert.AreEqual(5, system.GetNumberOfDwarfPlanets());
             Assert.AreEqual(2, system.GetNumberOfIceGiants());
             Assert.AreEqual(2, system.GetNumberOfGasGiants());

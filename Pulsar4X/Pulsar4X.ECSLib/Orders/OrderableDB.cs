@@ -5,10 +5,8 @@ namespace Pulsar4X.ECSLib
 {
     public class OrderableDB : BaseDataBlob
     {
-
         private List<EntityCommand> ActionList = new List<EntityCommand>();
 
-        
         internal void ProcessOrderList(DateTime atDateTime)
         {
             //var atDatetime = OwningEntity.StarSysDateTime;
@@ -19,20 +17,27 @@ namespace Pulsar4X.ECSLib
             {
                 EntityCommand entityCommand = ActionList[i];
 
-
                 if ((mask & entityCommand.ActionLanes) == entityCommand.ActionLanes) //bitwise and
                 {
                     if (entityCommand.IsBlocking)
                     {
                         mask |= entityCommand.ActionLanes; //bitwise or
                     }
-                    if( atDateTime >= entityCommand.ActionOnDate)
+
+                    if (atDateTime >= entityCommand.ActionOnDate)
+                    {
                         entityCommand.ActionCommand(atDateTime);
+                    }
                 }
+
                 if (entityCommand.IsFinished())
+                {
                     ActionList.RemoveAt(i);
+                }
                 else
+                {
                     i++;
+                }
             }
         }
         
@@ -57,6 +62,7 @@ namespace Pulsar4X.ECSLib
             //do I need a lock here?
             return new List<EntityCommand>( ActionList );
         }
+
         public OrderableDB()
         {
         }

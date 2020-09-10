@@ -23,8 +23,6 @@ namespace Pulsar4X.SDL2UI
             mineralDeposits
         }
 
-        private EntityState _lookedAtEntity;
-
         private PlanetarySubWindows _selectedSubWindow = PlanetarySubWindows.generalInfo;
 
         public PlanetaryWindow(EntityState entity, GlobalUIState state)
@@ -35,8 +33,6 @@ namespace Pulsar4X.SDL2UI
                 _mineralDefinitions = _uiState.Game.StaticData.CargoGoods.GetMineralsList();
                 _maxMineralNameLength = _mineralDefinitions.Max(x => x.Name.Length);
             }
-            //_flags = ImGuiWindowFlags.NoCollapse;
-
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             onEntityChange(entity);
         }
@@ -179,7 +175,7 @@ namespace Pulsar4X.SDL2UI
                 rowData.Add(new string[] { "Hydroshpere", atmosInfo.Hydrosphere ? "YES" : "NO" });
                 if (atmosInfo.Hydrosphere)
                 {
-                    rowData.Add(new string[] { "  Extent", atmosInfo.HydrosphereExtent.ToString() + " percent" });
+                    rowData.Add(new string[] { "  Extent", atmosInfo.HydrosphereExtent.ToString() + " %" });
                 }
 
                 if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>())
@@ -194,9 +190,16 @@ namespace Pulsar4X.SDL2UI
                 rowData.Add(new string[] { "Pressure", atmosInfo.Pressure + " atm" });
 
                 rowData.Add(new string[] { "Composition", "" });
-                foreach (var atmosGas in atmosInfo.Composition)
+                foreach (var atmosGas in atmosInfo.CompositionByPercent)
                 {
-                    rowData.Add(new string[] { "  " + atmosGas.Key.Name, Stringify.Quantity(atmosGas.Value, "0.0##") + " atm" });
+                    if (Math.Round(atmosGas.Value, 4) > 0)
+                    {
+                        rowData.Add(new string[] { "  " + atmosGas.Key.Name, Stringify.Quantity(Math.Round(atmosGas.Value, 4), "0.0###") + " %" });
+                    } 
+                    else
+                    {
+                        rowData.Add(new string[] { "  " + atmosGas.Key.Name, "trace amounts" });
+                    }
                 }
             }
 

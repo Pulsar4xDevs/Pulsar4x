@@ -10,32 +10,28 @@ namespace Pulsar4X.SDL2UI
 {
     public class ToolBarUI : PulsarGuiWindow
     {
-        private float _btnSize = 32;//Button size
-        public Vector2 BtnSizes = new Vector2(32, 32);//Button size
-        private List<ToolbuttonData> ToolButtons = new List<ToolbuttonData>();//Stores the data for each button
-        private List<ToolbuttonData> SMToolButtons = new List<ToolbuttonData>();//Stores the data for each button
+        private float _btnSize = 32;                                                //Button size
+        public Vector2 BtnSizes = new Vector2(32, 32);                              //Button size
+        private List<ToolbuttonData> ToolButtons = new List<ToolbuttonData>();      //Stores the data for each button
+        private List<ToolbuttonData> SMToolButtons = new List<ToolbuttonData>();    //Stores the data for each button
 
         public class ToolbuttonData
         //data for a toolbar button, requires an SDL image(for Picture)
         {
-            public IntPtr Picture;//Requires an SDL image(for Picture)
-            public string TooltipText;//Tooltip text for the button
-            public Action OnClick;//A PulsarGuiWindow`s SetActive function to opens window (or similar function)
+            public IntPtr Picture;          //Requires an SDL image(for Picture)
+            public string TooltipText;      //Tooltip text for the button
+            public Action OnClick;          //A PulsarGuiWindow`s SetActive function to opens window (or similar function)
 
             //Checks if window is open
             //Does not need to be intialized
             public Func<bool> GetActive;
             public bool SmButton = false;
-
-
         }
 
         //constructs the toolbar with the given buttons
         private ToolBarUI()
         {
             _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
-
-            
 
             ToolbuttonData btn = new ToolbuttonData()
             {
@@ -56,6 +52,7 @@ namespace Pulsar4X.SDL2UI
                 //Opens up the ship design menu
             };
             ToolButtons.Add(btn);
+
             btn =  new ToolbuttonData()
             {
                 Picture = _uiState.Img_Research(),
@@ -65,6 +62,7 @@ namespace Pulsar4X.SDL2UI
                 //Opens up the research menu
             };
             ToolButtons.Add(btn);
+
             btn = new ToolbuttonData()
             {
                 Picture = _uiState.Img_GalaxyMap(),
@@ -74,6 +72,7 @@ namespace Pulsar4X.SDL2UI
 
             };
             ToolButtons.Add(btn);
+
             btn = new ToolbuttonData()
             {
                 Picture = _uiState.Img_Ruler(),
@@ -83,6 +82,7 @@ namespace Pulsar4X.SDL2UI
                 //Opens the ruler menu
             };
             ToolButtons.Add(btn);
+
             btn = new ToolbuttonData()
             {
                 Picture = _uiState.Img_Tree(),
@@ -92,6 +92,7 @@ namespace Pulsar4X.SDL2UI
                 //Display a tree with all objects in the system
             };
             ToolButtons.Add(btn);
+
             btn = new ToolbuttonData()
             {
                 Picture = _uiState.Img_Tree(),
@@ -101,6 +102,7 @@ namespace Pulsar4X.SDL2UI
                 //Display a tree with all objects in the system
             };
             SMToolButtons.Add(btn);
+
             btn = new ToolbuttonData()
             {
                 Picture = _uiState.Img_Tree(),
@@ -110,10 +112,6 @@ namespace Pulsar4X.SDL2UI
                 //Display a list of bodies with some info about them.
             };
             SMToolButtons.Add(btn);
-
-
-
-
         }
 
         internal static ToolBarUI GetInstance()
@@ -122,6 +120,7 @@ namespace Pulsar4X.SDL2UI
             {
                 return new ToolBarUI();
             }
+
             return (ToolBarUI)PulsarGuiWindow._uiState.LoadedWindows[typeof(ToolBarUI)];
         }
 

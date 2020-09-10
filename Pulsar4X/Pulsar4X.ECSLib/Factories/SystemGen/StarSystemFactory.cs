@@ -217,10 +217,47 @@ namespace Pulsar4X.ECSLib
 
             Entity callisto = Factories.SystemGen.SolEntities.Callisto(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, callisto);
+
+            Entity amalthea = Factories.SystemGen.SolEntities.Amalthea(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, amalthea);
+
+            Entity himalia = Factories.SystemGen.SolEntities.Himalia(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, himalia);
+
+            Entity elara = Factories.SystemGen.SolEntities.Elara(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, elara);
+
+            Entity pasiphae = Factories.SystemGen.SolEntities.Pasiphae(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, pasiphae);
+
+            Entity sinope = Factories.SystemGen.SolEntities.Sinope(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, sinope);
+
+            Entity lysithea = Factories.SystemGen.SolEntities.Lysithea(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, lysithea);
             #endregion
 
             Entity saturn = Factories.SystemGen.SolEntities.Saturn(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, saturn);
+            #region Saturn Moons
+            Entity mimas = Factories.SystemGen.SolEntities.Mimas(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, mimas);
+
+            Entity enceladus = Factories.SystemGen.SolEntities.Enceladus(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, enceladus);
+
+            Entity tethys = Factories.SystemGen.SolEntities.Tethys(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, tethys);
+
+            Entity dione = Factories.SystemGen.SolEntities.Dione(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, dione);
+
+            Entity rhea = Factories.SystemGen.SolEntities.Rhea(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, rhea);
+
+            Entity titan = Factories.SystemGen.SolEntities.Titan(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            _systemBodyFactory.MineralGeneration(game.StaticData, sol, titan);
+            #endregion
 
             Entity uranus = Factories.SystemGen.SolEntities.Uranus(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, uranus);

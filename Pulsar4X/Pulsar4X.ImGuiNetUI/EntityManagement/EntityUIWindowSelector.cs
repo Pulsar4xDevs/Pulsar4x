@@ -11,10 +11,9 @@ namespace Pulsar4X.SDL2UI
     //basically an always open context menu for the currently selected entity.
     public class EntityUIWindowSelector : PulsarGuiWindow
     {
-
         public Vector2 BtnSizes = new Vector2(32, 32);
         private List<ToolbuttonData> StandardButtons = new List<ToolbuttonData>();
-        private List<ToolbuttonData> CondtionalButtons = new List<ToolbuttonData>();
+        private List<ToolbuttonData> ConditionalButtons = new List<ToolbuttonData>();
         //data for a toolbar button, requires an SDL image(for Picture), a PulsarGuiWindow`s SetActive function or equivalent/similar(for OnClick) and
         //the tool tip text to be displayed when the button is hovered(for TooltipText)
         public struct ToolbuttonData
@@ -25,15 +24,14 @@ namespace Pulsar4X.SDL2UI
             public Type ClickType;
             
         }
+
         private EntityUIWindowSelector()
         {
             _flags =  ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize;
-
         }
 
         internal static EntityUIWindowSelector GetInstance()
         {
-
             EntityUIWindowSelector thisItem;
             if (!_uiState.LoadedWindows.ContainsKey(typeof(EntityUIWindowSelector)))
             {
@@ -82,7 +80,7 @@ namespace Pulsar4X.SDL2UI
                         }
                     }
                     void NewCondtionalButton(Type T, IntPtr imgPtr, string TooltipText) {
-                        NewButton(T, imgPtr, TooltipText, CondtionalButtons);
+                        NewButton(T, imgPtr, TooltipText, ConditionalButtons);
                     }
                     void NewStandardButton(Type T, IntPtr imgPtr, string TooltipText) {
                         NewButton(T, imgPtr, TooltipText, StandardButtons);
@@ -116,14 +114,15 @@ namespace Pulsar4X.SDL2UI
                         {
                             ImGui.SameLine();
                             ImGui.PushID(iterations.ToString());
-                            if (EntityUIWindows.CheckOpenUIWindow(button.ClickType, _entityState, _uiState))//If the window is open
+                            if (EntityUIWindows.CheckOpenUIWindow(button.ClickType, _entityState, _uiState))    //If the window is open
                             {
-                                ImGui.PushStyleColor(buttonidx, clickedcolour);//Have the button be "pressed"
+                                ImGui.PushStyleColor(buttonidx, clickedcolour);                                 //Have the button be "pressed"
                             }
                             else//If closed
                             {
-                                ImGui.PushStyleColor(buttonidx, unclickedcolor);//Have the button be colored normally
+                                ImGui.PushStyleColor(buttonidx, unclickedcolor);                                //Have the button be colored normally
                             }
+
                             if (ImGui.ImageButton(button.Picture, BtnSizes))
                             {
                                 EntityUIWindows.OpenUIWindow(button.ClickType, _entityState, _uiState);
@@ -143,7 +142,7 @@ namespace Pulsar4X.SDL2UI
                     
                     //Prints both button lists
                     PrintButtonList(ref StandardButtons);
-                    PrintButtonList(ref CondtionalButtons);
+                    PrintButtonList(ref ConditionalButtons);
 
                     void ActionButton(Type T)
                     {
@@ -162,9 +161,6 @@ namespace Pulsar4X.SDL2UI
                     ActionButton(typeof(GotoSystemBlankMenuHelper));
                     ActionButton(typeof(WarpOrderWindow));
                     ActionButton(typeof(ChangeCurrentOrbitWindow));
-
-
-
                 }
                 ImGui.End();
             }

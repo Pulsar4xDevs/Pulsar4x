@@ -77,50 +77,78 @@ namespace Pulsar4X.SDL2UI
         {
             //Checks if the power gen menu can be opened
             if (_entityState.Entity.HasDataBlob<EnergyGenAbilityDB>() && T == typeof(PowerGen))
-                { return true; }
+            { 
+                return true; 
+            }
             //Check if the pin menu can be opened
             else if (T == typeof(PinCameraBlankMenuHelper))
-                { return true; }
+            { 
+                return true; 
+            }
             //if can be used to go to another system
-            else if (_entityState.Entity.HasDataBlob<JPSurveyableDB>() && T == typeof(GotoSystemBlankMenuHelper) )
+            else if (_entityState.Entity.HasDataBlob<JPSurveyableDB>() && T == typeof(GotoSystemBlankMenuHelper))
             {
                 if (_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo != null)
                 {
                     return true;
                 }
-                else {
+                else
+                {
                     return false;
                 }
             }
             //if can be selected as primary
             else if (T == typeof(SelectPrimaryBlankMenuHelper))
-                { return true; }
-            //if entity can warp
-            else if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && T == typeof(WarpOrderWindow))
-                { return true; }
-            //if entity can move
-            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
-                { return true; }
-            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(NavWindow))
-            { return true; }
-            //if entity can fire?
-            else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && T == typeof(FireControl))
-                { return true; }
-            //if entity can be renamed?
-            else if (T == typeof(RenameWindow))
-                { return true; }
-            //if entity can target
-            else if (_entityState.Entity.HasDataBlob<VolumeStorageDB>() && T == typeof(CargoTransfer))
-                { return true; }
-            //if entity can mine || refine || build
-            else if (_entityState.Entity.HasDataBlob<ColonyInfoDB>() && T == typeof(ColonyPanel))
-            { return true; }
-            else if(_entityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship && T == typeof(PlanetaryWindow)) {
+            {
                 return true;
             }
-            else if (_entityState.Entity.HasDataBlob<OrderableDB>() && T == typeof(OrdersUI))
+            //if entity can warp
+            else if (_entityState.Entity.HasDataBlob<WarpAbilityDB>() && T == typeof(WarpOrderWindow))
+            {
                 return true;
-            else {return false;}
+            }
+            //if entity can move
+            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(ChangeCurrentOrbitWindow))
+            {
+                return true;
+            }
+            else if (_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(NavWindow))
+            {
+                return true;
+            }
+            //if entity can fire?
+            else if (_entityState.Entity.HasDataBlob<FireControlAbilityDB>() && T == typeof(FireControl))
+            {
+                return true;
+            }
+            //if entity can be renamed?
+            else if (T == typeof(RenameWindow))
+            {
+                return true;
+            }
+            //if entity can target
+            else if (_entityState.Entity.HasDataBlob<VolumeStorageDB>() && T == typeof(CargoTransfer))
+            {
+                return true;
+            }
+            //if entity can mine || refine || build
+            else if (_entityState.Entity.HasDataBlob<ColonyInfoDB>() && T == typeof(ColonyPanel))
+            {
+                return true;
+            }
+            else if (_entityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship && T == typeof(PlanetaryWindow))
+            {
+                return true;
+            }
+            // if entity can be given orders
+            else if (_entityState.Entity.HasDataBlob<OrderableDB>() && (T == typeof(OrdersListUI) || T == typeof(OrderCreationUI)))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         // use type PinCameraBlankMenuHelper to pin camara, should use checkIfCanOpenWindow with type before trying to open a given window
@@ -201,15 +229,20 @@ namespace Pulsar4X.SDL2UI
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
-                else if (T == typeof(OrdersUI))
+                else if (T == typeof(OrderCreationUI))
                 {
-                    var instance = OrdersUI.GetInstance(_entityState);
+                    var instance = OrderCreationUI.GetInstance(_entityState);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
                 else if (T == typeof(PlanetaryWindow))
                 {
                     var instance = PlanetaryWindow.GetInstance(_entityState, _state);
+                    instance.ToggleActive();
+                }
+                else if (T == typeof(OrdersListUI))
+                {
+                    var instance = OrdersListUI.GetInstance(_entityState, _state);
                     instance.ToggleActive();
                 }
 
@@ -226,14 +259,17 @@ namespace Pulsar4X.SDL2UI
             //If the user has requested a menu be opened and if
             bool returnval;
 
+            // Global Windows
             if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(ChangeCurrentOrbitWindow)) returnval = ChangeCurrentOrbitWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(FireControl)) returnval = FireControl.GetInstance(_entityState).GetActive();
             else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
+            else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
+            else if (T == typeof(OrderCreationUI)) returnval = OrderCreationUI.GetInstance(_entityState).GetActive();
             else if (T == typeof(CargoTransfer)) returnval = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState).GetActive();
             else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState).GetActive();
-            else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
-            else if (T == typeof(OrdersUI)) returnval = OrdersUI.GetInstance(_entityState).GetActive();
+            // Instance Windows
+            else if (T == typeof(OrdersListUI)) returnval = OrdersListUI.GetInstance(_entityState, _state).GetActive();
             else returnval = false;
             return returnval;
 
