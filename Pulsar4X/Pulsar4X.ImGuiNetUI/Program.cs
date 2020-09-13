@@ -259,6 +259,7 @@ namespace Pulsar4X.SDL2UI
             {
                 item.Display();
             }
+
             foreach (var item in _state.LoadedNonUniqueWindows.Values.ToArray())
             {
                 item.Display();

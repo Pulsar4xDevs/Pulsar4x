@@ -8,7 +8,7 @@ using ImGuiSDL2CS;
 using Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using SDL2;
-
+using System.ComponentModel;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -22,17 +22,26 @@ namespace Pulsar4X.SDL2UI
             Moon,
             Asteroid,
             Comet,
+            Colony,
             Ship,
-            NumberOf
 
+            [Description("Number Of")]
+            NumberOf
         }
+
         internal enum OrbitTrajectoryType
         {
             Unknown,
             Elliptical,
             Hyperbolic,
+
+            [Description("Newtonian Thrust")]
             NewtonionThrust,
+
+            [Description("Non-Newtonian Translation")]
             NonNewtonionTranslation,
+
+            [Description("Number Of")]
             NumberOf         
         }
 

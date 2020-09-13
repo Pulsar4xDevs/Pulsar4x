@@ -36,8 +36,6 @@ namespace Pulsar4X.SDL2UI
             entity.ChangeEvent += On_entityChangeEvent;
 
             SetBodyType();
-
-
         }
 
         public int GetRank()
@@ -63,6 +61,11 @@ namespace Pulsar4X.SDL2UI
             return Entity.GetDataBlob<PositionDB>().Parent;
         }
 
+        public bool IsPlanetOrMoon()
+        {
+            return this.BodyType == UserOrbitSettings.OrbitBodyType.Planet || this.BodyType == UserOrbitSettings.OrbitBodyType.Moon;
+        }
+
         public bool IsSmallBody()
         {
             return this.BodyType == UserOrbitSettings.OrbitBodyType.Asteroid || this.BodyType == UserOrbitSettings.OrbitBodyType.Comet;
@@ -72,9 +75,6 @@ namespace Pulsar4X.SDL2UI
         {
             return this.BodyType == UserOrbitSettings.OrbitBodyType.Star;
         }
-
-
-
 
         public EntityState(SensorContact sensorContact)
         {
@@ -145,6 +145,8 @@ namespace Pulsar4X.SDL2UI
             }
             if (Entity.HasDataBlob<StarInfoDB>())
                 BodyType = UserOrbitSettings.OrbitBodyType.Star;
+            if (Entity.HasDataBlob<ColonyInfoDB>())
+                BodyType = UserOrbitSettings.OrbitBodyType.Colony;
             if (Entity.HasDataBlob<ShipInfoDB>())
                 BodyType = UserOrbitSettings.OrbitBodyType.Ship;
         }

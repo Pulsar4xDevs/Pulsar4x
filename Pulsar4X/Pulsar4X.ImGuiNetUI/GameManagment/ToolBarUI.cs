@@ -96,6 +96,16 @@ namespace Pulsar4X.SDL2UI
             btn = new ToolbuttonData()
             {
                 Picture = _uiState.Img_Tree(),
+                TooltipText = "Design orders and assign to entities",
+                OnClick = new Action(OrderCreationUI.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(OrderCreationUI.GetInstance().GetActive)
+                //Design orders for OrderableDB entities
+            };
+            ToolButtons.Add(btn);
+
+            btn = new ToolbuttonData()
+            {
+                Picture = _uiState.Img_Tree(),
                 TooltipText = "Spawn ships and planets",
                 OnClick = new Action(EntitySpawnWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive),

@@ -1,71 +1,96 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using Pulsar4X.SDL2UI;
+using static Pulsar4X.SDL2UI.UserOrbitSettings;
 
 namespace Pulsar4X.ImGuiNetUI.EntityManagement
 {
     public class OrderCreationUI : PulsarGuiWindow
     {
-        private Entity _orderEntity;
-        private OrderableDB _orderableDB;
+        private Entity _orderEntity = null;
 
+        private OrderableDB _orderableDB = null;
+
+        private Guid _movementTargetGuid = new Guid();
 
         private enum OrderCreationSubWindow
         {
-            movement,
-            transfers,
-            scanning
+            Movement,
+            Transfers,
+            Scanning
         }
 
-        private OrderCreationSubWindow _selectedSubWindow;
+        private enum MovementAction
+        {
+            MoveTo,
+            DockWith,
+            Follow
+        }
 
-        private OrderCreationUI(Entity orderEntity)
+        private OrderCreationSubWindow _selectedSubWindow = OrderCreationSubWindow.Movement;
+        private MovementAction _movementAction = MovementAction.MoveTo;
+
+        private OrderCreationUI()
         {
             _flags = ImGuiWindowFlags.None;
-            _orderEntity = orderEntity;
-            _orderableDB = orderEntity.GetDataBlob<OrderableDB>();
-            _selectedSubWindow = OrderCreationSubWindow.movement;
         }
 
-        public static OrderCreationUI GetInstance(EntityState orderEntity)
+        public static OrderCreationUI GetInstance()
         {
-            OrderCreationUI thisitem;
+            OrderCreationUI thisItem;
             if (!_uiState.LoadedWindows.ContainsKey(typeof(OrderCreationUI)))
             {
-                thisitem = new OrderCreationUI(orderEntity.Entity);
+                thisItem = new OrderCreationUI();
             }
             else
             {
-                thisitem = (OrderCreationUI)_uiState.LoadedWindows[typeof(OrderCreationUI)];
-                if (thisitem._orderEntity != orderEntity.Entity)
-                {
-                    thisitem._orderEntity = orderEntity.Entity;
-                }
+                thisItem = (OrderCreationUI)_uiState.LoadedWindows[typeof(OrderCreationUI)];
             }
 
-            return thisitem;
+            return thisItem;
         }
-        
+
         internal override void Display()
         {
-            var orders = _orderableDB.GetActionList();
+            if (_uiState.LastClickedEntity != null && _uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
+            {
+                EntityState _SelectedEntityState = _uiState.LastClickedEntity;
+                if (_orderEntity == null || _orderEntity != _SelectedEntityState.Entity)
+                {
+                    _orderEntity = _SelectedEntityState.Entity;
+                    _orderableDB = null;
+                    if (_orderEntity != null && _orderEntity.HasDataBlob<OrderableDB>())
+                    {
+                        _orderableDB = _orderEntity.GetDataBlob<OrderableDB>();
+                    }
+                }
+            }
+            else
+            {
+                _orderEntity = null;
+                _orderableDB = null;
+            }
 
             if (IsActive == true && ImGui.Begin("Order Creation", ref IsActive, _flags))
             {
                 RenderTabOptions();
+                if (_orderableDB != null) {
+                    ImGui.TextColored(new System.Numerics.Vector4(0, 123, 0, 255), "Selected Entity: " + _orderEntity.GetName(_uiState.Faction.Guid));
+                }
 
                 ImGui.BeginChild("order_creation_tabs");
                 switch (_selectedSubWindow)
                 {
-                    case OrderCreationSubWindow.movement:
+                    case OrderCreationSubWindow.Movement:
                         RenderMovement();
                         break;
-                    case OrderCreationSubWindow.scanning:
+                    case OrderCreationSubWindow.Scanning:
                         RenderScanning();
                         break;
-                    case OrderCreationSubWindow.transfers:
+                    case OrderCreationSubWindow.Transfers:
                         RenderTransfers();
                         break;
                     default:
@@ -79,11 +104,76 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         private void RenderMovement()
         {
-            ImGui.TextUnformatted("Movement Orders UI to go here:");
+            ImGui.Columns(3);
+            // List of target Entities
+            if (ImGui.TreeNode("Target"))
+            {
+                //var moveCandidates = _uiState.Faction
+                if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
+                {
+                    SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+                    var _NamedEntityStatesByBodyType = _StarSystemState.EntityStatesWithPosition.Values.GroupBy(x => x.BodyType).ToDictionary(k => k.Key, v => v.Select(x => x).ToList());
 
-            ImGui.TextUnformatted("* Move Into Orbit of Body");
-            ImGui.TextUnformatted("* Leave Orbit of Body");
-            ImGui.TextUnformatted("* Dock to Body");
+                    foreach (OrbitBodyType orbitBodyType in _NamedEntityStatesByBodyType.Keys.OrderBy(x => (int)x))
+                    {
+                        if (ImGui.TreeNode(orbitBodyType.ToDescription()))
+                        {
+                            var _NamedEntityStates = _NamedEntityStatesByBodyType[orbitBodyType];
+                            foreach (var body in _NamedEntityStates)
+                            {
+                                if (_orderEntity == null || body.Entity.Guid != _orderEntity.Guid)
+                                {
+                                    if (ImGui.Selectable(_NamedEntityStates.First(x => x == body).Name, _movementTargetGuid == body.Entity.Guid))
+                                    {
+                                        _movementTargetGuid = body.Entity.Guid;
+                                    }
+                                }
+                            }
+                            ImGui.TreePop();
+                        }
+                    }
+                    ImGui.TreePop();
+                }
+            }
+
+            ImGui.NextColumn();
+            if (ImGui.TreeNode("Action"))
+            {
+                if (ImGui.Selectable("Move To Target", _movementAction == MovementAction.MoveTo))
+                {
+                    _movementAction = MovementAction.MoveTo;
+                }
+                if (ImGui.Selectable("Dock With Target", _movementAction == MovementAction.DockWith))
+                {
+                    _movementAction = MovementAction.DockWith;
+                }
+                if (ImGui.Selectable("Follow Target", _movementAction == MovementAction.DockWith))
+                {
+                    _movementAction = MovementAction.Follow;
+                }
+            }
+
+
+            ImGui.NextColumn();
+
+            if (_orderableDB != null)
+            {
+                if (_movementTargetGuid != new Guid())
+                {
+                    ImGui.Button("Add Order to\r\nSelected Entity");
+                }
+                else
+                {
+                    ImGui.TextColored(new System.Numerics.Vector4(123, 0, 0, 255), "Order is\r\nIncomplete");
+                }
+            } 
+            else
+            {
+                ImGui.TextColored(new System.Numerics.Vector4(123, 0, 0, 255), "Selected\r\nEntity\r\nCannot\r\nAccept\r\nOrders");
+            }
+            
+
+            ImGui.Columns(1);
         }
 
         private void RenderScanning()
@@ -110,19 +200,19 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             if (ImGui.SmallButton("Movement"))
             {
-                _selectedSubWindow = OrderCreationSubWindow.movement;
+                _selectedSubWindow = OrderCreationSubWindow.Movement;
             }
 
             ImGui.SameLine();
             if (ImGui.SmallButton("Scanning"))
             {
-                _selectedSubWindow = OrderCreationSubWindow.scanning;
+                _selectedSubWindow = OrderCreationSubWindow.Scanning;
             }
 
             ImGui.SameLine();
             if (ImGui.SmallButton("Transfers"))
             {
-                _selectedSubWindow = OrderCreationSubWindow.transfers;
+                _selectedSubWindow = OrderCreationSubWindow.Transfers;
             }
         }
     }

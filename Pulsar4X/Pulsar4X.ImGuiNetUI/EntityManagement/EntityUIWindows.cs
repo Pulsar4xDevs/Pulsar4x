@@ -141,7 +141,7 @@ namespace Pulsar4X.SDL2UI
                 return true;
             }
             // if entity can be given orders
-            else if (_entityState.Entity.HasDataBlob<OrderableDB>() && (T == typeof(OrdersListUI) || T == typeof(OrderCreationUI)))
+            else if (_entityState.Entity.HasDataBlob<OrderableDB>() && T == typeof(OrdersListUI))
             {
                 return true;
             }
@@ -231,7 +231,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 else if (T == typeof(OrderCreationUI))
                 {
-                    var instance = OrderCreationUI.GetInstance(_entityState);
+                    var instance = OrderCreationUI.GetInstance();
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
@@ -260,12 +260,12 @@ namespace Pulsar4X.SDL2UI
             bool returnval;
 
             // Global Windows
-            if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
+            if (T == typeof(OrderCreationUI)) returnval = OrderCreationUI.GetInstance().GetActive();
+            else if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(ChangeCurrentOrbitWindow)) returnval = ChangeCurrentOrbitWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(FireControl)) returnval = FireControl.GetInstance(_entityState).GetActive();
             else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
-            else if (T == typeof(OrderCreationUI)) returnval = OrderCreationUI.GetInstance(_entityState).GetActive();
             else if (T == typeof(CargoTransfer)) returnval = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState).GetActive();
             else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState).GetActive();
             // Instance Windows
