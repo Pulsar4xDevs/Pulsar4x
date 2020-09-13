@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
 using SDL2;
@@ -24,6 +25,8 @@ namespace Pulsar4X.SDL2UI
     /// </summary>
     public class Icon : IDrawData
     {
+        internal bool DebugShowCenter = false;
+        
         protected ECSLib.IPosition _positionDB;
         protected Orbital.Vector3 _worldPosition_m { get; set; }
         public Orbital.Vector3 WorldPosition_AU
@@ -76,28 +79,31 @@ namespace Pulsar4X.SDL2UI
 
 
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
-
+            
             var mirrorMtx = Matrix.IDMirror(true, false);
             var scaleMtx = Matrix.IDScale(Scale, Scale);
-            Matrix nonZoomMatrix = mirrorMtx * scaleMtx;
-
-            DrawShapes = new Shape[this.Shapes.Count];
-            for (int i = 0; i < Shapes.Count; i++)
+            var posMtx = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
+            Matrix mtx = mirrorMtx * scaleMtx * posMtx;
+            
+            int shapeCount = Shapes.Count;
+            int dsi = 0;
+            DrawShapes = new Shape[shapeCount];
+            
+            if (DebugShowCenter)
+            {
+                DrawShapes = new Shape[shapeCount+1];
+                dsi = 1;
+                var mtxb = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
+                DrawShapes[0] = CreatePrimitiveShapes.CenterWidget(mtxb);
+            }
+            
+            for (int i = 0; i < shapeCount; i++)
             {
                 var shape = Shapes[i];
-                PointD[] drawPoints = new PointD[shape.Points.Length];
-                
-                for (int i2 = 0; i2 < shape.Points.Length; i2++)
-                {
-                    int x;
-                    int y;
-
-                    var tranlsatedPoint = nonZoomMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
-                    x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
-                    y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
-                    drawPoints[i2] = new PointD() { X = x, Y = y };
-                }
-                DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
+                var manipulatedShape = new Shape();
+                manipulatedShape.Points = mtx.Transform(shape.Points);
+                manipulatedShape.Color = shape.Color;
+                DrawShapes[i+dsi] = manipulatedShape;
             }
         }
 

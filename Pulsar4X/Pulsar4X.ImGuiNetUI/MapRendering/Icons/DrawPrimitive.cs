@@ -133,6 +133,34 @@ namespace Pulsar4X.SDL2UI
         public const double ThreeQuarterCircle = HalfCircle + QuarterCircle;
 
 
+        private static Shape _centerWidget;
+        
+        public static Shape CenterWidget(Matrix matrix)
+        {
+            if(_centerWidget.Points == null)
+            {
+                PointD[] drawpoints = new PointD[5];
+                drawpoints[0] = new PointD(0, -16);
+                drawpoints[1] = new PointD(0, 16);
+                drawpoints[2] = new PointD(16, 0);
+                drawpoints[3] = new PointD(-16, 0);
+                drawpoints[4] = new PointD(0, -16);
+                byte r = 150;
+                byte g = 50;
+                byte b = 200;
+                byte a = 255;
+                SDL.SDL_Color colour = new SDL.SDL_Color() {r = r, g = g, b = b, a = a};
+                _centerWidget = new Shape() {Points = drawpoints, Color = colour};
+            }
+            
+            
+            Shape centerWidget = new Shape();
+            centerWidget.Points = matrix.Transform(_centerWidget.Points);
+            centerWidget.Color = _centerWidget.Color;
+            return centerWidget;
+        }
+        
+
         /// <summary>
         /// Creates the arc.
         /// </summary>

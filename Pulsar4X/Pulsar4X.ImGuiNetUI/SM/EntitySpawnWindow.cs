@@ -83,7 +83,8 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
             soishape.Color = colour;
             _soiIcon.Shapes.Add(soishape);
-             
+            _soiIcon.DebugShowCenter = true;
+
         }
 
         internal static EntitySpawnWindow GetInstance() {
@@ -438,7 +439,6 @@ namespace Pulsar4X.SDL2UI
                     byte a = 200;
                     SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
                     soishape.Color = colour;
-                    _soiIcon.Shapes.Add(soishape);
                     _soiIcon.Shapes[0] = soishape;
                 }
 
