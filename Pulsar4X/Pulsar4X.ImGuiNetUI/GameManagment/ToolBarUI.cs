@@ -11,7 +11,7 @@ namespace Pulsar4X.SDL2UI
     public class ToolBarUI : PulsarGuiWindow
     {
         private float _btnSize = 32;                                                //Button size
-        public Vector2 BtnSizes = new Vector2(32, 32);                              //Button size
+        public System.Numerics.Vector2 BtnSizes = new System.Numerics.Vector2(32, 32);                              //Button size
         private List<ToolbuttonData> ToolButtons = new List<ToolbuttonData>();      //Stores the data for each button
         private List<ToolbuttonData> SMToolButtons = new List<ToolbuttonData>();    //Stores the data for each button
 

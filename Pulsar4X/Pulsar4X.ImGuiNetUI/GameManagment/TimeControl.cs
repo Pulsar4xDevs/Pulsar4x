@@ -49,9 +49,9 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            var iconSize = new Vector2(16, 16);
-            var size = new Vector2(200, 100);
-            var pos = new Vector2(0,0);
+            var iconSize = new System.Numerics.Vector2(16, 16);
+            var size = new System.Numerics.Vector2(200, 100);
+            var pos = new System.Numerics.Vector2(0,0);
             var col = new Vector4(0, 0, 0, 0);
 
 

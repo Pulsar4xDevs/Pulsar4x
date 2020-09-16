@@ -78,7 +78,7 @@ namespace Pulsar4X.SDL2UI
                 DBDisplay(_dataBlobs[_selectedDB]);
 
             var p1 = ImGui.GetCursorPos();
-            var size = new Vector2(ImGui.GetContentRegionAvail().X, p1.Y - p0.Y );
+            var size = new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, p1.Y - p0.Y );
             
             BorderListOptions.End(size);
         }
@@ -91,7 +91,7 @@ namespace Pulsar4X.SDL2UI
             
             var _totalHeight = _numLines * _heightMultiplyer;
             _numLines = memberInfos.Length;
-            var size = new Vector2(ImGui.GetContentRegionAvail().X, _totalHeight);
+            var size = new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, _totalHeight);
             
             ImGui.BeginChild("InnerColomns", size);
             
@@ -274,9 +274,9 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(state.Name);
             }
             
-            BorderListOptions.End(new Vector2(200, 200));
+            BorderListOptions.End(new System.Numerics.Vector2(200, 200));
             
-            BorderListOptions.End(new Vector2(250, 500));
+            BorderListOptions.End(new System.Numerics.Vector2(250, 500));
             
             
             

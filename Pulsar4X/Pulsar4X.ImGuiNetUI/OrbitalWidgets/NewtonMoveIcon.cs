@@ -25,9 +25,9 @@ namespace Pulsar4X.SDL2UI
         int _numberOfPoints;
         //internal float a;
         //protected float b;
-        protected PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
+        protected Orbital.Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
-        PointD[] _debugPoints;
+        //PointD[] _debugPoints;
         SDL.SDL_Point[] _debugDrawPoints = new SDL.SDL_Point[0];
 
         //user adjustable variables:
@@ -169,15 +169,15 @@ namespace Pulsar4X.SDL2UI
             double yn = 0;
 
             //first create a list of points for one side of the raw hyperbol
-            var points = new PointD[ctrIndex + 1];
-            points[0] = new PointD() { X = -xn, Y = yn }; //periapsis
+            var points = new Orbital.Vector2[ctrIndex + 1];
+            points[0] = new Orbital.Vector2() { X = -xn, Y = yn }; //periapsis
             for (int i = 1; i < ctrIndex + 1; i++)
             {
                 var lastx = xn;
                 var lasty = yn;
                 xn = fooA * lastx + fooB * lasty;
                 yn = fooC * lastx + fooA * lasty;
-                points[i] = new PointD() { X = -xn, Y = yn };
+                points[i] = new Orbital.Vector2() { X = -xn, Y = yn };
             }
 
 
@@ -188,16 +188,16 @@ namespace Pulsar4X.SDL2UI
             var mtxmr =  Matrix.IDMirror(true, false) * mtx;
             
             
-            _points = new PointD[_numberOfPoints];
-            _points[ctrIndex] = mtx.TransformD(points[0]); //periapsis
+            _points = new Orbital.Vector2[_numberOfPoints];
+            _points[ctrIndex] = mtx.TransformToVector2(points[0]); //periapsis
             
             
             int j = ctrIndex + 1;
             int k = ctrIndex - 1;
             for (int i = 1; i < ctrIndex + 1; i++)
             {
-                _points[j] = mtx.TransformD(points[i]);
-                _points[k] = mtxmr.TransformD(points[i]);
+                _points[j] = mtx.TransformToVector2(points[i]);
+                _points[k] = mtxmr.TransformToVector2(points[i]);
                 j++;
                 k--;
             }
@@ -234,11 +234,11 @@ namespace Pulsar4X.SDL2UI
             double xc = Math.Cos(_lop) * -linierEccentricity;
             double yc = Math.Sin(_lop) * -linierEccentricity;
             
-            _points = new PointD[_numberOfPoints];
+            _points = new Orbital.Vector2[_numberOfPoints];
 
             for (int i = 0; i < _numberOfPoints; i++)
             {
-                _points[i] = new PointD()
+                _points[i] = new Orbital.Vector2()
                 {
                     X = xc + x,
                     Y = yc + y,
@@ -265,7 +265,7 @@ namespace Pulsar4X.SDL2UI
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
-                _drawPoints[i] = mtrx.Transform(_points[i].X, _points[i].Y);
+                _drawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
             }
         }
         
@@ -295,9 +295,9 @@ namespace Pulsar4X.SDL2UI
         int _numberOfPoints;
         //internal float a;
         //protected float b;
-        protected Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
+        protected Orbital.Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
-        PointD[] _debugPoints;
+        Vector2[] _debugPoints;
         SDL.SDL_Point[] _debugDrawPoints = new SDL.SDL_Point[0];
 
         //user adjustable variables:
@@ -315,7 +315,6 @@ namespace Pulsar4X.SDL2UI
         private double _dv = 0;
         private KeplerElements _ke;
         private StateVectors _sv;
-        private Vector3 _parentPos_m;
         private double _parentSOI_m = 0;
         private GlobalUIState _uiState;
         private double _e;
@@ -334,6 +333,7 @@ namespace Pulsar4X.SDL2UI
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             UpdateUserSettings();
             CreatePointArray();
+            DebugShowCenter = true;
 
         }
 
@@ -364,7 +364,6 @@ namespace Pulsar4X.SDL2UI
         /// <param name="parentSoi"></param>
         public void UpdateParent(Vector3 absoluteParenPos, double parentSoi)
         {
-            _parentPos_m = absoluteParenPos;
             _worldPosition_m = absoluteParenPos;
             _parentSOI_m = parentSoi;
         }
@@ -376,7 +375,6 @@ namespace Pulsar4X.SDL2UI
             _ke = ke;
             _sv = sv;
             _e = ke.Eccentricity;
-            _worldPosition_m = _parentPos_m;
             if (_e >= 1)
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             else
@@ -391,7 +389,7 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            Vector2 pos = new Vector2();
+            Orbital.Vector2 pos = new Orbital.Vector2();
             double minDist = (pos - _points[_taIndex]).Length();
 
             for (int i =0; i < _points.Length; i++)
@@ -408,8 +406,9 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            if (_e != _ke.Eccentricity)
+            if (_e != _ke.Eccentricity)//check if the eccentricity has changed.
             {
+                _e = _ke.Eccentricity;
                 if (_e >= 1)
                     TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
                 else
@@ -482,15 +481,15 @@ namespace Pulsar4X.SDL2UI
             double yn = 0;
 
             //first create a list of points for one side of the raw hyperbol
-            var points = new Vector2[ctrIndex + 1];
-            points[0] = new Vector2() { X = -xn, Y = yn }; //periapsis
+            var points = new Orbital.Vector2[ctrIndex + 1];
+            points[0] = new Orbital.Vector2() { X = -xn, Y = yn }; //periapsis
             for (int i = 1; i < ctrIndex + 1; i++)
             {
                 var lastx = xn;
                 var lasty = yn;
                 xn = fooA * lastx + fooB * lasty;
                 yn = fooC * lastx + fooA * lasty;
-                points[i] = new Vector2() { X = -xn, Y = yn };
+                points[i] = new Orbital.Vector2() { X = -xn, Y = yn };
             }
 
 
@@ -501,16 +500,16 @@ namespace Pulsar4X.SDL2UI
             var mtxmr =  Matrix.IDMirror(true, false) * mtx;
             
             
-            _points = new Vector2[_numberOfPoints];
-            _points[ctrIndex] = mtx.TransformVector2(points[0]); //periapsis
+            _points = new Orbital.Vector2[_numberOfPoints];
+            _points[ctrIndex] = mtx.TransformToVector2(points[0]); //periapsis
             
             
             int j = ctrIndex + 1;
             int k = ctrIndex - 1;
             for (int i = 1; i < ctrIndex + 1; i++)
             {
-                _points[j] = mtx.TransformVector2(points[i]);
-                _points[k] = mtxmr.TransformVector2(points[i]);
+                _points[j] = mtx.TransformToVector2(points[i]);
+                _points[k] = mtxmr.TransformToVector2(points[i]);
                 j++;
                 k--;
             }
@@ -547,11 +546,11 @@ namespace Pulsar4X.SDL2UI
             double xc = Math.Cos(_lop) * -linierEccentricity;
             double yc = Math.Sin(_lop) * -linierEccentricity;
             
-            _points = new Vector2[_numberOfPoints];
+            _points = new Orbital.Vector2[_numberOfPoints];
 
             for (int i = 0; i < _numberOfPoints; i++)
             {
-                _points[i] = new Vector2()
+                _points[i] = new Orbital.Vector2()
                 {
                     X = xc + x,
                     Y = yc + y,
@@ -559,8 +558,6 @@ namespace Pulsar4X.SDL2UI
                 x = fooA * x + fooB * y;
                 y = fooC * x + fooD * y;
             }
-            
-
         }
         
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -570,15 +567,31 @@ namespace Pulsar4X.SDL2UI
             //resize from m to au because zoom is au
             //resize for zoom
             //translate to position
-            var foo = camera.ViewCoordinate_m(WorldPosition_m);
-            var trns = Matrix.IDTranslate(foo.x, foo.y);
+            
+            
+            
+
+            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
+            var trns = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
+
             var mtrx = scAU * scZm *  trns;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
 
+            int shapeCount = Shapes.Count;
+            DrawShapes = new Shape[shapeCount];            
+            if (DebugShowCenter)
+            {
+                DrawShapes = new Shape[shapeCount+1];
+                var mtxb = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
+                DrawShapes[0] = CreatePrimitiveShapes.CenterWidget(mtxb);
+            }
+            
             if(TrajectoryType == UserOrbitSettings.OrbitTrajectoryType.Elliptical)
             {
+                //we do this so we can start drawing from the position of the entity,
+                //and fade the line using alpha in the colour (when draw)
                 for (int i = 1; i < _numberOfDrawSegments; i++)
                 {
                     int index = _taIndex;
@@ -588,16 +601,20 @@ namespace Pulsar4X.SDL2UI
                             index++;
                         else
                             index = 0;
-                        _drawPoints[i] = mtrx.Transform(_points[index].X, _points[index].Y);
+                        _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
                     }
                 }
+                
+                //_drawPoints = mtrx.TransformToSDL_Point(_points);
             }
             else
             {
+                /*
                 for (int i = 0; i < _numberOfDrawSegments; i++)
                 {
-                    _drawPoints[i] = mtrx.Transform(_points[i].X, _points[i].Y);
-                }
+                    _drawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
+                }*/
+                _drawPoints = mtrx.TransformToSDL_Point(_points);
             }
             
         }
@@ -614,6 +631,7 @@ namespace Pulsar4X.SDL2UI
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i +1].y);
                 alpha -= _alphaChangeAmount; 
             }
+            base.Draw(rendererPtr, camera);
         }
 
 

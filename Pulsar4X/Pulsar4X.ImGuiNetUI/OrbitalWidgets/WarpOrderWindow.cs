@@ -3,7 +3,7 @@ using ImGuiNET;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
 using Vector3 = Pulsar4X.Orbital.Vector3;
-using Vector2 = System.Numerics.Vector2;
+using Vector2 = Pulsar4X.Orbital.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -212,8 +212,8 @@ namespace Pulsar4X.SDL2UI
             InsertionCalcs();
 
 
-            System.Numerics.Vector2 viewPortSize = _uiState.Camera.ViewPortSize;
-            float windowLen = Math.Min(viewPortSize.X, viewPortSize.Y);
+            Vector2 viewPortSize = _uiState.Camera.ViewPortSize;
+            float windowLen = (float)Math.Min(viewPortSize.X, viewPortSize.Y);
             if (soiViewUnits < windowLen * 0.5)
             {
                 //zoom so soi fills ~3/4 screen.
@@ -269,7 +269,11 @@ namespace Pulsar4X.SDL2UI
         }
         void ActionAddDB()
         {
-            _uiState.SpaceMasterVM.SMSetOrbitToEntity(OrderingEntityState.Entity, TargetEntity.Entity, PointDFunctions.Length(_orbitWidget.Periapsis), _uiState.PrimarySystemDateTime);
+            _uiState.SpaceMasterVM.SMSetOrbitToEntity(
+                OrderingEntityState.Entity, 
+                TargetEntity.Entity, 
+                _orbitWidget.Periapsis.Length(), 
+                _uiState.PrimarySystemDateTime);
             CloseWindow();
         }
 
@@ -326,8 +330,8 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive)
             {
-                var size = new Vector2(200, 100);
-                var pos = new Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
+                var size = new System.Numerics.Vector2(200, 100);
+                var pos = new System.Numerics.Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
 
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.FirstUseEver);

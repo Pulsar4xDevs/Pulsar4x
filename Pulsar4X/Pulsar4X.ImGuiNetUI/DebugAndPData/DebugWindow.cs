@@ -178,7 +178,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("Zoom: " + cam.ZoomLevel);
 
                         ImGui.Text("Raw Cursor Coordinate");
-                        Vector2 mouseCoord = ImGui.GetMousePos();
+                        System.Numerics.Vector2 mouseCoord = ImGui.GetMousePos();
                         ImGui.Text("x: " + mouseCoord.X);
                         ImGui.SameLine();
                         ImGui.Text("y: " + mouseCoord.Y);
@@ -261,7 +261,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.NumberOfEntites);
                     if(ImGui.CollapsingHeader("Log"))
                     {
-                        ImGui.BeginChild("LogChild", new Vector2(800, 300), true);
+                        ImGui.BeginChild("LogChild", new System.Numerics.Vector2(800, 300), true);
                         ImGui.Columns(4, "Events", true);
                         ImGui.Text("DateTime");
                         ImGui.NextColumn();
@@ -491,7 +491,7 @@ namespace Pulsar4X.SDL2UI
 
                                         var x = soiradius * Math.Cos(θ);
                                         var y = soiradius * Math.Sin(θ);
-                                        psoilin = new SimpleLine(parent.GetDataBlob<PositionDB>(), new PointD() { X = x, Y = y }, colour);
+                                        psoilin = new SimpleLine(parent.GetDataBlob<PositionDB>(), new Orbital.Vector2() { X = x, Y = y }, colour);
 
                                         _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoi), psoi);
                                         _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoilin), psoilin);
@@ -666,7 +666,7 @@ namespace Pulsar4X.SDL2UI
                                         float percFull = reloadAmount / reloadMax;
                                         float percToFire = reloadAmount / (minShots * reloadPerShot);
                                         float percPerSec = db.ReloadAmountsPerSec[i] / reloadMax ;
-                                        Vector2 pbsize = new Vector2(200, 5);
+                                        System.Numerics.Vector2 pbsize = new System.Numerics.Vector2(200, 5);
 
                                         float maxShots = reloadMax / reloadPerShot;
                                         ImGui.Text("Max shots per burst: " + maxShots);
@@ -704,7 +704,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 if (ImGui.CollapsingHeader("DamageProfile"))
                                 {
-                                    if (ImGui.ImageButton(_dmgTxtr, new Vector2(64, 64)))
+                                    if (ImGui.ImageButton(_dmgTxtr, new System.Numerics.Vector2(64, 64)))
                                     {
                                         //show a full sized scrollable image. 
                                     }
@@ -777,14 +777,14 @@ namespace Pulsar4X.SDL2UI
 
             for (int i = 0; i < loopto; i++)
             {
-                ImGui.BeginChild("TopItems", new Vector2(400, heightt));
+                ImGui.BeginChild("TopItems", new System.Numerics.Vector2(400, heightt));
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 300);
 
                 ImGui.BeginGroup();
                 var cpos = ImGui.GetCursorPos();
                 ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
-                ImGui.Button("##ht"+i, new Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
+                ImGui.Button("##ht"+i, new System.Numerics.Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
                 ImGui.PopStyleColor();
                 ImGui.SetCursorPos(cpos);
                 ImGui.Text(_listfoo[i].name);
@@ -807,7 +807,7 @@ namespace Pulsar4X.SDL2UI
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 0.5f);
                 ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 2f);
-                ImGui.BeginChild("Buttons", new Vector2(400, hoverHeigt), true);
+                ImGui.BeginChild("Buttons", new System.Numerics.Vector2(400, hoverHeigt), true);
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 300);
 
@@ -855,14 +855,14 @@ namespace Pulsar4X.SDL2UI
 
                 for (int i = _hvSelectedIndex + 1; i < _listfoo.Count; i++)
                 {
-                    ImGui.BeginChild("Bottom", new Vector2(400, heightb));
+                    ImGui.BeginChild("Bottom", new System.Numerics.Vector2(400, heightb));
                     ImGui.Columns(2);
                     ImGui.SetColumnWidth(0, 300);
 
                     ImGui.BeginGroup();
                     var cpos = ImGui.GetCursorPos();
                     ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
-                    ImGui.Button("##hb" + i, new Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
+                    ImGui.Button("##hb" + i, new System.Numerics.Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
                     ImGui.PopStyleColor();
                     ImGui.SetCursorPos(cpos);
                     ImGui.Text(_listfoo[i].name);
@@ -962,7 +962,7 @@ namespace Pulsar4X.SDL2UI
         {
             
             ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
-            ImGui.BeginChild("ButtonBoxList", new Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("ButtonBoxList", new System.Numerics.Vector2(280, 100), true, ImGuiWindowFlags.ChildWindow);
             ImGui.Columns(2);
             for (int i = 0; i < _listfoo.Count; i++)
             {
@@ -981,7 +981,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.EndChild();
             ImGui.SameLine();
 
-            ImGui.BeginChild("Buttons##bb", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
+            ImGui.BeginChild("Buttons##bb", new System.Numerics.Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
             ImGui.BeginGroup();
             //if (ImGui.ImageButton(_uiState.UpImg(), new Vector2(16, 8)))
             if (ImGui.Button("^" + "##bb" + _bbSelectedIndex))

@@ -13,6 +13,12 @@ namespace Pulsar4X.Orbital
             Y = y;
         }
 
+        public Vector2(System.Numerics.Vector2 vector)
+        {
+            X = vector.X;
+            Y = vector.Y;
+        }
+
         public static Vector2 NaN
         {
             get { return new Vector2(double.NaN, double.NaN); }

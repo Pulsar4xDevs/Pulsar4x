@@ -37,7 +37,7 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
            
-            ImGui.SetNextWindowSize(new Vector2(264, 325), ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(264, 325), ImGuiCond.Once);
             if (ImGui.Begin("Currently selected", _flags))
             {
 

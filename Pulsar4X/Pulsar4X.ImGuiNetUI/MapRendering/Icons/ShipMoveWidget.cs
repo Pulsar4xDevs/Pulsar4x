@@ -46,12 +46,12 @@ namespace Pulsar4X.SDL2UI
             _drawPoints = new SDL.SDL_Point[2];
 
 
-            var translated = matrix.Transform(_currentPosition_au.X, _currentPosition_au.Y);
+            var translated = matrix.TransformToSDL_Point(_currentPosition_au.X, _currentPosition_au.Y);
             int x = (int)(ViewScreenPos.x + translated.x);
             int y = (int)(ViewScreenPos.y + translated.y);
             _drawPoints[0] = new SDL.SDL_Point() { x = x, y = y };
 
-            translated = matrix.Transform(_translateEndPoint.X, _translateEndPoint.Y);
+            translated = matrix.TransformToSDL_Point(_translateEndPoint.X, _translateEndPoint.Y);
             x = (int)(ViewScreenPos.x + translated.x );
             y = (int)(ViewScreenPos.y + translated.y );
             _drawPoints[1] = new SDL.SDL_Point() { x = x, y = y };

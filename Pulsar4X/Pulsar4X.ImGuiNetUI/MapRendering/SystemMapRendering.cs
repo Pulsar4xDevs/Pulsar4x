@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
@@ -9,6 +8,7 @@ using Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using SDL2;
 using System.ComponentModel;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -76,7 +76,7 @@ namespace Pulsar4X.SDL2UI
         internal ConcurrentDictionary<Guid, NameIcon> _nameIcons = new ConcurrentDictionary<Guid, NameIcon>();
 
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
-        internal PointD GalacticMapPosition = new PointD();
+        internal Vector2 GalacticMapPosition = new Vector2();
         //internal SystemMap_DrawableVM SysMap;
         Entity _faction;
 
@@ -338,7 +338,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (item.ViewDisplayRect.Intersects(occupiedPosition[j]))
                     {
-                        var newpoint = new Vector2()
+                        var newpoint = new System.Numerics.Vector2()
                         {
                             X = item.ViewOffset.X,
                             Y = item.ViewOffset.Y - occupiedPosition[j].Height

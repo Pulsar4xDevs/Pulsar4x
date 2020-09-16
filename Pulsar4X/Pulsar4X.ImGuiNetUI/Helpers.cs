@@ -166,7 +166,7 @@ namespace Pulsar4X.SDL2UI
     {
         struct BorderListState
         {
-            internal Vector2 _labelSize;
+            internal System.Numerics.Vector2 _labelSize;
             internal  float _xleft;
             internal  float _xcentr;
             internal  float _xright;
@@ -205,7 +205,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushID(id);
             var state = new BorderListState();  
             state._colour = ImGui.GetColorU32(ImGuiCol.Border);
-            state._labelSize = new Vector2( width, ImGui.GetTextLineHeight());
+            state._labelSize = new System.Numerics.Vector2( width, ImGui.GetTextLineHeight());
             ImGui.Columns(2, id, false);
             ImGui.SetColumnWidth(0, width);
             
@@ -259,7 +259,7 @@ namespace Pulsar4X.SDL2UI
             Begin(id, list, ref selected, ImGui.GetColorU32(colorIdx)); 
         }
 */
-        public static void End(Vector2 sizeRight)
+        public static void End(System.Numerics.Vector2 sizeRight)
         {
             ImGui.Unindent(_dentMulitpier * _nestIndex);
             _nestIndex--;
@@ -279,15 +279,15 @@ namespace Pulsar4X.SDL2UI
             ImDrawListPtr wdl = ImGui.GetWindowDrawList();
             
             
-            Vector2[] pts = new Vector2[9];
-            pts[0] = new Vector2(state._xleft, state._yctr1);          //topleft of the selected item
-            pts[1] = new Vector2(state._xleft, state._yctr2);          //botomleft of the selected item
-            pts[2] = new Vector2(state._xcentr, state._yctr2);         //bottom rigth of selected item
-            pts[3] = new Vector2(state._xcentr, boty);           //bottom left of rh colomn
-            pts[4] = new Vector2(state._xright, boty);           //bottom Right
-            pts[5] = new Vector2(state._xright, state._ytop);          //top righht
-            pts[6] = new Vector2(state._xcentr, state._ytop);          //top mid
-            pts[7] = new Vector2(state._xcentr, state._yctr1);         //selected top right
+            System.Numerics.Vector2[] pts = new System.Numerics.Vector2[9];
+            pts[0] = new System.Numerics.Vector2(state._xleft, state._yctr1);          //topleft of the selected item
+            pts[1] = new System.Numerics.Vector2(state._xleft, state._yctr2);          //botomleft of the selected item
+            pts[2] = new System.Numerics.Vector2(state._xcentr, state._yctr2);         //bottom rigth of selected item
+            pts[3] = new System.Numerics.Vector2(state._xcentr, boty);           //bottom left of rh colomn
+            pts[4] = new System.Numerics.Vector2(state._xright, boty);           //bottom Right
+            pts[5] = new System.Numerics.Vector2(state._xright, state._ytop);          //top righht
+            pts[6] = new System.Numerics.Vector2(state._xcentr, state._ytop);          //top mid
+            pts[7] = new System.Numerics.Vector2(state._xcentr, state._yctr1);         //selected top right
             pts[8] = pts[0];                                    //selected top left
 
 
@@ -303,14 +303,14 @@ namespace Pulsar4X.SDL2UI
 
     public static class BorderGroup
     {
-        private static Vector2[] _startPos = new Vector2[8];
-        private static Vector2[] _labelSize = new Vector2[8];
+        private static System.Numerics.Vector2[] _startPos = new System.Numerics.Vector2[8];
+        private static System.Numerics.Vector2[] _labelSize = new System.Numerics.Vector2[8];
         private static uint[] _colour = new uint[8];
         private static byte _nestIndex = 0;
         private static float _dentMulitpier = 3;
-        private static Vector2[] _size = new Vector2[8];
+        private static System.Numerics.Vector2[] _size = new System.Numerics.Vector2[8];
 
-        public static Vector2 GetSize => _size[_nestIndex];
+        public static System.Numerics.Vector2 GetSize => _size[_nestIndex];
 
         public static void Begin(string label, uint colour)
         {
@@ -347,19 +347,19 @@ namespace Pulsar4X.SDL2UI
             _nestIndex--;
             var pos = ImGui.GetCursorScreenPos();
             
-            _size[_nestIndex] = new Vector2(width, pos.Y - _startPos[_nestIndex].Y);
+            _size[_nestIndex] = new System.Numerics.Vector2(width, pos.Y - _startPos[_nestIndex].Y);
             ImDrawListPtr wdl = ImGui.GetWindowDrawList();
 
             float by = _startPos[_nestIndex].Y + _size[_nestIndex].Y + _dentMulitpier -_dentMulitpier * _nestIndex;
             float rx = _startPos[_nestIndex].X + _size[_nestIndex].X - _dentMulitpier * _nestIndex;
             
-            Vector2[] pts = new Vector2[6];
-            pts[0] = new Vector2(_startPos[_nestIndex].X + _dentMulitpier, _startPos[_nestIndex].Y);
+            System.Numerics.Vector2[] pts = new System.Numerics.Vector2[6];
+            pts[0] = new System.Numerics.Vector2(_startPos[_nestIndex].X + _dentMulitpier, _startPos[_nestIndex].Y);
             pts[1] = _startPos[_nestIndex]; //top left
-            pts[2] = new Vector2(_startPos[_nestIndex].X, by); //bottom left
-            pts[3] = new Vector2(rx, by); //bottom right
-            pts[4] = new Vector2(rx, _startPos[_nestIndex].Y); //top right
-            pts[5] = new Vector2(_startPos[_nestIndex].X + _labelSize[_nestIndex].X + _dentMulitpier, _startPos[_nestIndex].Y);
+            pts[2] = new System.Numerics.Vector2(_startPos[_nestIndex].X, by); //bottom left
+            pts[3] = new System.Numerics.Vector2(rx, by); //bottom right
+            pts[4] = new System.Numerics.Vector2(rx, _startPos[_nestIndex].Y); //top right
+            pts[5] = new System.Numerics.Vector2(_startPos[_nestIndex].X + _labelSize[_nestIndex].X + _dentMulitpier, _startPos[_nestIndex].Y);
             wdl.AddPolyline(ref pts[0], pts.Length, _colour[_nestIndex], false, 1.0f);
             
             ImGui.PopID();
@@ -384,10 +384,10 @@ namespace Pulsar4X.SDL2UI
                 state = Convert.ToBoolean(intState);
                 return true;
             }
-            Vector2 recSize = ImGui.GetItemRectSize();
+            System.Numerics.Vector2 recSize = ImGui.GetItemRectSize();
             float x = cpos.X  + 2 + (intState * (txtWid -4) * 2);
             float y = (float)(cpos.Y + recSize.Y * 0.5 - ImGui.GetTextLineHeight() * 0.5);
-            ImGui.SetCursorPos(new Vector2(x, y));
+            ImGui.SetCursorPos(new System.Numerics.Vector2(x, y));
             ImGui.Text(strstate);
             ImGui.PopItemWidth();
             
@@ -407,7 +407,7 @@ namespace Pulsar4X.SDL2UI
             Window,
         }
         static ImDrawListPtr _wdl = ImGui.GetForegroundDrawList();
-        static Vector2 _windowPos = new Vector2();
+        static System.Numerics.Vector2 _windowPos = new System.Numerics.Vector2();
         static UInt32 _lineColour = ImGui.GetColorU32(new Vector4(1, 0, 0, 1));
         static UInt32 _pointColour = ImGui.GetColorU32(new Vector4(1, 1, 0, 1));
         
@@ -447,7 +447,7 @@ namespace Pulsar4X.SDL2UI
 
                 var getColomnOffset = ImGui.GetColumnOffset(1);
                 
-                var itemStartPos = new Vector2();
+                var itemStartPos = new System.Numerics.Vector2();
                 
 
                 var cursorScreenStartPos = _windowPos + getCursorStartPos;
@@ -469,7 +469,7 @@ namespace Pulsar4X.SDL2UI
                 
                 DoRectangle("GetWindowSize", _windowPos, getWindowSize);
 
-                var windowContentRegionStart = new Vector2(cursorScreenStartPos.X, _windowPos.Y);//this seems a bit obtuse
+                var windowContentRegionStart = new System.Numerics.Vector2(cursorScreenStartPos.X, _windowPos.Y);//this seems a bit obtuse
                 DoRectangle("GetWindowContentRegionMax", windowContentRegionStart, getWindowContentRegionMax);
                 DoRectangle("GetWindowContentRegionMin", cursorScreenStartPos, getWindowContentRegionMin);               
                 
@@ -482,7 +482,7 @@ namespace Pulsar4X.SDL2UI
                 DoHLine("GetWindowContentRegionWidth", cursorScreenStartPos, getWindowContentRegionWidth);
                 
                 
-                var colomnWidthstart = new Vector2(_windowPos.X, cursorScreenStartPos.Y);
+                var colomnWidthstart = new System.Numerics.Vector2(_windowPos.X, cursorScreenStartPos.Y);
                 DoHLine("GetColomnWidth", colomnWidthstart, getColomnWidth);
 
                 DoHLine("GetColomnOffset (colomn[1])", colomnWidthstart, getColomnOffset);
@@ -550,7 +550,7 @@ namespace Pulsar4X.SDL2UI
                 
             }
 
-            void DoPoint(string name, Vector2 point, FrameOfReference foR)
+            void DoPoint(string name, System.Numerics.Vector2 point, FrameOfReference foR)
             {
                 ImGui.Text(name);
                 if (ImGui.IsItemHovered())
@@ -570,7 +570,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn();
             }
 
-            void DoRectangle(string name, Vector2 start, Vector2 size)
+            void DoRectangle(string name, System.Numerics.Vector2 start, System.Numerics.Vector2 size)
             {
                 ImGui.Text(name);
                 if (ImGui.IsItemHovered())
@@ -584,7 +584,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn();
             }
 
-            void DoHLine(string name, Vector2 start, float width)
+            void DoHLine(string name, System.Numerics.Vector2 start, float width)
             {
                 ImGui.Text(name);
                 if (ImGui.IsItemHovered())
@@ -600,7 +600,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn();
             }
             
-            void DoVLine(string name, Vector2 start, float height)
+            void DoVLine(string name, System.Numerics.Vector2 start, float height)
             {
                 ImGui.Text(name);
                 if (ImGui.IsItemHovered())
@@ -616,12 +616,12 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn();
             }
 
-            void DrawCrosshair(Vector2 atPos, float radius)
+            void DrawCrosshair(System.Numerics.Vector2 atPos, float radius)
             {
-                var p1 = new Vector2(atPos.X - radius, atPos.Y);
-                var p2 = new Vector2(atPos.X + radius, atPos.Y);
-                var p3 = new Vector2(atPos.X, atPos.Y - radius);
-                var p4 = new Vector2(atPos.X, atPos.Y + radius);
+                var p1 = new System.Numerics.Vector2(atPos.X - radius, atPos.Y);
+                var p2 = new System.Numerics.Vector2(atPos.X + radius, atPos.Y);
+                var p3 = new System.Numerics.Vector2(atPos.X, atPos.Y - radius);
+                var p4 = new System.Numerics.Vector2(atPos.X, atPos.Y + radius);
                 _wdl.AddLine(p1, p2, _pointColour);
                 _wdl.AddLine(p3, p4, _pointColour);
             }

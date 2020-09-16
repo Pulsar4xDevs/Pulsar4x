@@ -138,13 +138,13 @@ namespace Pulsar4X.SDL2UI
 
                 if (compactimage || !displayimage)
                 {
-                    ImGui.BeginChild("ShipDesign", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y));
+                    ImGui.BeginChild("ShipDesign", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y));
                     imageheight = ImGui.GetContentRegionAvail().Y / 2;
                     height = ImGui.GetContentRegionAvail().Y - imageheight;
                 }
                 else
                 {
-                    ImGui.BeginChild("ShipDesign", new Vector2(ImGui.GetContentRegionAvail().X, height));
+                    ImGui.BeginChild("ShipDesign", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, height));
                 }
 
                 //imageheight = imageheight * 0.9f;
@@ -155,7 +155,7 @@ namespace Pulsar4X.SDL2UI
                 //ImGui.SetColumnWidth(3, 278);
                     if (compactimage)
                     {
-                        ImGui.BeginChild("Small Design Windows", new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y- imageheight));
+                        ImGui.BeginChild("Small Design Windows", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y- imageheight));
                     }
                     else
                     {
@@ -601,7 +601,7 @@ namespace Pulsar4X.SDL2UI
 
                 scale = Math.Min(scaleh, scalew);
 
-                ImGui.Image(_shipImgPtr, new Vector2(rawimagewidth * scale, rawimageheight * scale));
+                ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(rawimagewidth * scale, rawimageheight * scale));
             }
         }
     }

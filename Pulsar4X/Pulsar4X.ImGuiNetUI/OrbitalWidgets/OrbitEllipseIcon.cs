@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
 
         protected override void CreatePointArray()
         {
-            _points = new PointD[_numberOfArcSegments + 1];
+            _points = new Vector2[_numberOfArcSegments + 1];
 
             var loAN = -_orbitDB.LongitudeOfAscendingNode;
             var incl = _orbitDB.Inclination;
@@ -74,7 +74,7 @@ namespace Pulsar4X.SDL2UI
                 //Vector3 pnt = new Vector3(x1, y1, 0);
                 //pnt = mtx.Transform(pnt);
                 //Points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
-                _points[i] = new PointD() { X = x2, Y = y2 };
+                _points[i] = new Vector2() { X = x2, Y = y2 };
                 angle += _segmentArcSweepRadians;
             }
 
@@ -86,7 +86,7 @@ namespace Pulsar4X.SDL2UI
                 for (int i = 0; i < _points.Length; i++)
                 {
                     var pnt = mtxr.Transform(new Vector3(_points[i].X, _points[i].Y, 0));
-                        _points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
+                        _points[i] = new Vector2() {X = pnt.X, Y = pnt.Y};
                 }
             }
             //TODO: try a Chaikins curve for this and increase the points depending on zoom and curviture.   
@@ -132,15 +132,14 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-
             Vector3 pos = BodyPositionDB.RelativePosition_AU; 
-            _bodyrelativePos = new PointD() { X = pos.X, Y = pos.Y };
-
-            double minDist = CalcDistance(_bodyrelativePos, _points[_index]);
+            _bodyrelativePos = new Vector2() { X = pos.X, Y = pos.Y };
+            
+            double minDist = (_bodyrelativePos - _points[_index]).Length();
 
             for (int i =0; i < _points.Count(); i++)
             {
-                double dist = CalcDistance(_bodyrelativePos, _points[i]);
+                double dist = (_bodyrelativePos - _points[i]).Length();
                 if (dist < minDist)
                 {
                     minDist = dist;
@@ -148,13 +147,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
         }
-
-        double CalcDistance(PointD p1, PointD p2)
-        {
-            return PointDFunctions.Length(PointDFunctions.Sub(p1, p2));
-        }
-
-
+        
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             //resize for zoom
@@ -165,7 +158,7 @@ namespace Pulsar4X.SDL2UI
             var mtrx = matrix * trns;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             int index = _index;      
-            _drawPoints[0] = mtrx.Transform(_bodyrelativePos.X, _bodyrelativePos.Y);
+            _drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
             for (int i = 1; i < _numberOfDrawSegments; i++)
             {
                 if (index < _numberOfArcSegments - 1)
@@ -173,7 +166,7 @@ namespace Pulsar4X.SDL2UI
                     index++;
                 else
                     index = 0;
-                _drawPoints[i] = mtrx.Transform(_points[index].X, _points[index].Y);
+                _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
             }
         }
 

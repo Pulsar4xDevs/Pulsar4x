@@ -14,7 +14,7 @@ namespace Pulsar4X.SDL2UI
 
         GlobalUIState _state;
         internal Entity ActiveEntity; //interacting with/ordering this entity
-        Vector2 buttonSize = new Vector2(100, 12);
+        System.Numerics.Vector2 buttonSize = new System.Numerics.Vector2(100, 12);
 
         EntityState _entityState;
 

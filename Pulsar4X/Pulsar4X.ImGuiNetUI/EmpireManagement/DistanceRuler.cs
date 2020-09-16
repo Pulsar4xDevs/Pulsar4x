@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         private float _zoomLevelAtFirstClick = 0;
         //~measuring booleans
         private Orbital.Vector3 _firstClick;
-        private Vector2 _firstClickInViewCoord;
+        private System.Numerics.Vector2 _firstClickInViewCoord;
         //~measuring variables
         private void _stopMeasuring()
         {
@@ -116,7 +116,7 @@ namespace Pulsar4X.SDL2UI
                         _stopMeasuring();
                     }else{
                         Orbital.Vector3 lastMousePos = _uiState.Camera.MouseWorldCoordinate_m();
-                        Vector2 lastMousePosInViewCoord = ImGui.GetMousePos();
+                        System.Numerics.Vector2 lastMousePosInViewCoord = ImGui.GetMousePos();
 
                         SDL.SDL_SetRenderDrawColor(_uiState.rendererPtr, 255,255,255,255);
                         SDL.SDL_RenderDrawLine(_uiState.rendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);

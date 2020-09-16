@@ -11,7 +11,7 @@ namespace Pulsar4X.SDL2UI
     //basically an always open context menu for the currently selected entity.
     public class EntityUIWindowSelector : PulsarGuiWindow
     {
-        public Vector2 BtnSizes = new Vector2(32, 32);
+        public System.Numerics.Vector2 BtnSizes = new System.Numerics.Vector2(32, 32);
         private List<ToolbuttonData> StandardButtons = new List<ToolbuttonData>();
         private List<ToolbuttonData> ConditionalButtons = new List<ToolbuttonData>();
         //data for a toolbar button, requires an SDL image(for Picture), a PulsarGuiWindow`s SetActive function or equivalent/similar(for OnClick) and
@@ -53,7 +53,7 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            ImGui.SetNextWindowSize(new Vector2(150, 200), ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(150, 200), ImGuiCond.Once);
             if (ImGui.Begin("Actions", _flags))
             {
                 //check if ANY entity has been clicked

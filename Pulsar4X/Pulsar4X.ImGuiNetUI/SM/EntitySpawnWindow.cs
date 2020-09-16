@@ -83,7 +83,7 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
             soishape.Color = colour;
             _soiIcon.Shapes.Add(soishape);
-            _soiIcon.DebugShowCenter = true;
+            //_soiIcon.DebugShowCenter = true;
 
         }
 
@@ -486,7 +486,7 @@ namespace Pulsar4X.SDL2UI
             byte b = 200;
             byte a = 255;
             
-            PointD[] points = CreatePrimitiveShapes.Circle(0, 0, 3, 12);
+            Orbital.Vector2[] points = CreatePrimitiveShapes.Circle(0, 0, 3, 12);
 
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
             Shapes.Add(new Shape() {Points = points, Color = colour});
@@ -504,12 +504,12 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < Shapes.Count; i++)
             {
                 var shape = Shapes[i];
-                PointD[] drawPoints = new PointD[shape.Points.Length];
+                Orbital.Vector2[] drawPoints = new Orbital.Vector2[shape.Points.Length];
                 for (int j = 0; j < drawPoints.Length; j++)
                 {
                     double x = shape.Points[j].X;
                     double y = shape.Points[j].Y;
-                    drawPoints[j] = trns.TransformD(x, y);
+                    drawPoints[j] = trns.TransformToVector2(x, y);
                 }
                 DrawShapes[i] = new Shape() {Points = drawPoints, Color = shape.Color};
             }
@@ -536,8 +536,8 @@ namespace Pulsar4X.SDL2UI
 
         public static bool LockPosition = false;
         //public static KeplerElements _ke;
-        private static Vector2 _vel = new Vector2();
-        private static Vector2 _pos = new Vector2();
+        private static Orbital.Vector2 _vel = new Orbital.Vector2();
+        private static Orbital.Vector2 _pos = new Orbital.Vector2();
         private static VectorWidget2d.Style posStyle = VectorWidget2d.Style.Cartesian;
         private static VectorWidget2d.Style velStyle = VectorWidget2d.Style.Polar;
         

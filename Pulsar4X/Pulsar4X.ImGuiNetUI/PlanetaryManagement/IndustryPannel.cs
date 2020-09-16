@@ -9,6 +9,7 @@ using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.Industry;
 using Pulsar4X.SDL2UI;
 using SDL2;
+using Vector2 = System.Numerics.Vector2;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 
 

@@ -18,14 +18,14 @@ namespace Pulsar4X.SDL2UI
         protected EntityManager _mgr;
         protected OrbitDB _orbitDB;
         internal IPosition BodyPositionDB;
-        protected PointD _bodyrelativePos;
+        protected Vector2 _bodyrelativePos;
         internal float SemiMaj;
         internal float SemiMinor;
         protected float _loP_Degrees; //longditudeOfPeriapsis (loan + aop) 
         internal float _loP_radians; //longditudeOfPeriapsis (loan + aop) in radians
         internal float _aop;
         internal float _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
-        protected PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
+        protected Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
         protected bool IsRetrogradeOrbit = false;
         #endregion

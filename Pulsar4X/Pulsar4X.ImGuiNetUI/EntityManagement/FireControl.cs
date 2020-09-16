@@ -10,6 +10,7 @@ using Pulsar4X.ECSLib.ComponentFeatureSets.RailGun;
 using Pulsar4X.SDL2UI;
 
 using System.Runtime.InteropServices;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.ImGuiNetUI
 {

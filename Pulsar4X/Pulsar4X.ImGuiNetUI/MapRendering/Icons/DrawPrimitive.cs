@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
+using Pulsar4X.Orbital;
 using ImGuiNET;
 using SDL2;
 using Point = SDL2.SDL.SDL_Point;
@@ -139,12 +139,12 @@ namespace Pulsar4X.SDL2UI
         {
             if(_centerWidget.Points == null)
             {
-                PointD[] drawpoints = new PointD[5];
-                drawpoints[0] = new PointD(0, -16);
-                drawpoints[1] = new PointD(0, 16);
-                drawpoints[2] = new PointD(16, 0);
-                drawpoints[3] = new PointD(-16, 0);
-                drawpoints[4] = new PointD(0, -16);
+                Orbital.Vector2[] drawpoints = new Orbital.Vector2[5];
+                drawpoints[0] = new Orbital.Vector2(0, -16);
+                drawpoints[1] = new Orbital.Vector2(0, 16);
+                drawpoints[2] = new Orbital.Vector2(16, 0);
+                drawpoints[3] = new Orbital.Vector2(-16, 0);
+                drawpoints[4] = new Orbital.Vector2(0, -16);
                 byte r = 150;
                 byte g = 50;
                 byte b = 200;
@@ -155,7 +155,7 @@ namespace Pulsar4X.SDL2UI
             
             
             Shape centerWidget = new Shape();
-            centerWidget.Points = matrix.Transform(_centerWidget.Points);
+            centerWidget.Points = matrix.TransformToVector2(_centerWidget.Points);
             centerWidget.Color = _centerWidget.Color;
             return centerWidget;
         }
@@ -172,9 +172,9 @@ namespace Pulsar4X.SDL2UI
         /// <param name="startAngleRadians">Start angle in radians.</param>
         /// <param name="arcAngleRadians">Arc angle in radians.</param>
         /// <param name="segments">Number of segments this arc will have, resolution. ie a full circle with 6 arcs will draw a hexigon.</param>
-        public static PointD[] CreateArc(int posX, int posY, double xRadius, double yRadius, double startAngleRadians, double arcAngleRadians, int segments)
+        public static Orbital.Vector2[] CreateArc(int posX, int posY, double xRadius, double yRadius, double startAngleRadians, double arcAngleRadians, int segments)
         {
-            PointD[] points = new PointD[segments + 1];
+            Orbital.Vector2[] points = new Orbital.Vector2[segments + 1];
 
             double incrementAngle = arcAngleRadians / segments;
 
@@ -186,21 +186,21 @@ namespace Pulsar4X.SDL2UI
                 double nextAngle = startAngleRadians + incrementAngle * i;
                 drawX = posX + xRadius * Math.Sin(nextAngle);
                 drawY = posY + yRadius * Math.Cos(nextAngle);
-                points[i] = new PointD() { X = drawX, Y = drawY };
+                points[i] = new Orbital.Vector2() { X = drawX, Y = drawY };
             }
 
             return points;
         }
 
-        public static PointD[] AngleArc(PointD ctrPos, double radius, double tipLen, double startAngleRadians, double arcAngleRadians, int segments)
+        public static Orbital.Vector2[] AngleArc(Orbital.Vector2 ctrPos, double radius, double tipLen, double startAngleRadians, double arcAngleRadians, int segments)
         {
 
             double drawX;
             double drawY;
 
-            PointD[] points = new PointD[segments + 3];
+            Orbital.Vector2[] points = new Orbital.Vector2[segments + 3];
 
-            points[0] = new PointD()
+            points[0] = new Orbital.Vector2()
             {
                 Y = ctrPos.Y + (radius + tipLen) * Math.Sin(startAngleRadians),
                 X = ctrPos.X + (radius + tipLen) * Math.Cos(startAngleRadians)
@@ -213,10 +213,10 @@ namespace Pulsar4X.SDL2UI
                 double nextAngle = startAngleRadians + incrementAngle * i;
                 drawY = ctrPos.Y + radius * Math.Sin(nextAngle);
                 drawX = ctrPos.X + radius * Math.Cos(nextAngle);
-                points[i+1] = new PointD() { X = drawX, Y = drawY };
+                points[i+1] = new Orbital.Vector2() { X = drawX, Y = drawY };
             }
 
-            points[points.Length - 1] = new PointD()
+            points[points.Length - 1] = new Orbital.Vector2()
             {
                 Y = ctrPos.Y + (radius + tipLen) * Math.Sin(startAngleRadians + arcAngleRadians),
                 X = ctrPos.X + (radius + tipLen) * Math.Cos(startAngleRadians + arcAngleRadians)
@@ -224,19 +224,19 @@ namespace Pulsar4X.SDL2UI
             return points;
         }
 
-        public static PointD[] RoundedCylinder(int minorRadius, int majorRadius, int offsetX, int offsetY)
+        public static Orbital.Vector2[] RoundedCylinder(int minorRadius, int majorRadius, int offsetX, int offsetY)
         {
-            List<PointD> points = new List<PointD>();
+            List<Orbital.Vector2> points = new List<Orbital.Vector2>();
             double x1 = (minorRadius * 0.5);
             double y1 = (majorRadius * 0.5 - minorRadius * 0.5);
 
             points.AddRange(CreateArc(offsetX, (int)(y1 + offsetY), x1, x1, ThreeQuarterCircle, HalfCircle, 16));
-            points.Add(new PointD() { X = x1 + offsetX, Y = y1 + offsetY });
-            points.Add(new PointD() { X = x1 + offsetX, Y = -y1 + offsetY });
+            points.Add(new Orbital.Vector2() { X = x1 + offsetX, Y = y1 + offsetY });
+            points.Add(new Orbital.Vector2() { X = x1 + offsetX, Y = -y1 + offsetY });
 
             points.AddRange(CreateArc(offsetX, (int)(-y1 + offsetY), x1, x1, QuarterCircle, HalfCircle, 16));
-            points.Add(new PointD() { X = -x1 + offsetX, Y = -y1 + offsetY });
-            points.Add(new PointD() { X = -x1 + offsetX, Y = y1 + offsetY });
+            points.Add(new Orbital.Vector2() { X = -x1 + offsetX, Y = -y1 + offsetY });
+            points.Add(new Orbital.Vector2() { X = -x1 + offsetX, Y = y1 + offsetY });
             return points.ToArray();
         }
 
@@ -248,14 +248,14 @@ namespace Pulsar4X.SDL2UI
             BottomRight,
             Center
         }
-        public static PointD[] Rectangle(int posX, int posY, int width, int height, PosFrom positionFrom = PosFrom.TopLeft)
+        public static Vector2[] Rectangle(int posX, int posY, int width, int height, PosFrom positionFrom = PosFrom.TopLeft)
         {
 
-            var points = new PointD[4] ;
-            PointD tl;
-            PointD tr;
-            PointD br;
-            PointD bl;
+            var points = new Vector2[4] ;
+            Vector2 tl;
+            Vector2 tr;
+            Vector2 br;
+            Vector2 bl;
 
             switch (positionFrom)
             {
@@ -269,7 +269,7 @@ namespace Pulsar4X.SDL2UI
                         br.Y = posY + height;
                         bl.X = posX;
                         bl.Y = posY + height;
-                        points = new PointD[] { tl, tr, br, bl };
+                        points = new Vector2[] { tl, tr, br, bl };
                     }
                     break;
                 case PosFrom.TopRight:
@@ -282,7 +282,7 @@ namespace Pulsar4X.SDL2UI
                         bl.Y = posY + height;
                         tl.X = posX - width;
                         tl.Y = posY;
-                        points = new PointD[] { tr, br, bl, tl };
+                        points = new Vector2[] { tr, br, bl, tl };
                     }
                     break;
                 case PosFrom.BottomRight:
@@ -295,7 +295,7 @@ namespace Pulsar4X.SDL2UI
                         tl.Y = posY - height;
                         tr.X = posX;
                         tr.Y = posY - height;
-                        points = new PointD[] { br, bl, tl, tr };
+                        points = new Vector2[] { br, bl, tl, tr };
                     }
                     break;
                 case PosFrom.BottomLeft:
@@ -309,7 +309,7 @@ namespace Pulsar4X.SDL2UI
                         tr.Y = posY - height;
                         br.X = posX + width;
                         br.Y = posY;
-                        points = new PointD[] { bl, tl, tr, br };
+                        points = new Vector2[] { bl, tl, tr, br };
                     }
                     break;
                 case PosFrom.Center:
@@ -322,7 +322,7 @@ namespace Pulsar4X.SDL2UI
                         br.Y = posY + (int)(height * 0.5);
                         bl.X = posX - (int)(width * 0.5);
                         bl.Y = posY + (int)(height * 0.5);
-                        points = new PointD[] { tl, tr, br, bl, tl };
+                        points = new Vector2[] { tl, tr, br, bl, tl };
                     }
                     break;
             }
@@ -371,9 +371,9 @@ namespace Pulsar4X.SDL2UI
             }
             return ret;
         }
-        public static PointD[] Circle(int posX, int posY, double radius, short segments)
+        public static Orbital.Vector2[] Circle(int posX, int posY, double radius, short segments)
         {
-            PointD[] points = new PointD[segments + 1];
+            Orbital.Vector2[] points = new Orbital.Vector2[segments + 1];
             double incrementAngle = PI2 / segments;
 
             double drawX;
@@ -384,16 +384,16 @@ namespace Pulsar4X.SDL2UI
                 double nextAngle = incrementAngle * i;
                 drawX = posX + radius * Math.Sin(nextAngle);
                 drawY = posY + radius * Math.Cos(nextAngle);
-                points[i] = new PointD() { X = drawX, Y = drawY };
+                points[i] = new Orbital.Vector2() { X = drawX, Y = drawY };
             }
 
             return points;
 
         }
 
-        public static PointD[] Circle(PointD pos, double radius, short segments)
+        public static Vector2[] Circle(Vector2 pos, double radius, short segments)
         {
-            PointD[] points = new PointD[segments + 1];
+            Vector2[] points = new Vector2[segments + 1];
             double incrementAngle = PI2 / segments;
 
             double drawX;
@@ -404,24 +404,24 @@ namespace Pulsar4X.SDL2UI
                 double nextAngle = 0 + incrementAngle * i;
                 drawX = pos.X + radius * Math.Sin(nextAngle);
                 drawY = pos.Y + radius * Math.Cos(nextAngle);
-                points[i] = new PointD() { X = drawX, Y = drawY };
+                points[i] = new Vector2() { X = drawX, Y = drawY };
             }
 
             return points;
 
         }
 
-        public static PointD[] CreateArrow(int len = 32)
+        public static Orbital.Vector2[] CreateArrow(int len = 32)
         {
-            PointD[] arrowPoints = new PointD[7];
+            var arrowPoints = new Orbital.Vector2[7];
 
-            arrowPoints[0] = new PointD() { X =  0, Y = 0 };
-            arrowPoints[1] = new PointD() { X =  0, Y = len -2 };
-            arrowPoints[2] = new PointD() { X =  3, Y = len -3 };
-            arrowPoints[3] = new PointD() { X =  0, Y = len };
-            arrowPoints[4] = new PointD() { X = -3, Y = len -3 };
-            arrowPoints[5] = new PointD() { X =  0, Y = len -2 };
-            arrowPoints[6] = new PointD() { X =  0, Y = 0  };
+            arrowPoints[0] = new Orbital.Vector2() { X =  0, Y = 0 };
+            arrowPoints[1] = new Orbital.Vector2() { X =  0, Y = len -2 };
+            arrowPoints[2] = new Orbital.Vector2() { X =  3, Y = len -3 };
+            arrowPoints[3] = new Orbital.Vector2() { X =  0, Y = len };
+            arrowPoints[4] = new Orbital.Vector2() { X = -3, Y = len -3 };
+            arrowPoints[5] = new Orbital.Vector2() { X =  0, Y = len -2 };
+            arrowPoints[6] = new Orbital.Vector2() { X =  0, Y = 0  };
 
             return arrowPoints;
         }
@@ -463,9 +463,10 @@ namespace Pulsar4X.SDL2UI
         }
     }
 
-    public struct PointD
+    /*
+    public struct Vector2
     {
-        public PointD(double x, double y)
+        public Vector2(double x, double y)
         {
             X = x;
             Y = y;
@@ -476,33 +477,33 @@ namespace Pulsar4X.SDL2UI
     }
     public static class PointDFunctions
     {
-        public static PointD NewFrom(Orbital.Vector3 vector3)
+        public static Vector2 NewFrom(Orbital.Vector3 vector3)
         {
-            return new PointD() { X = vector3.X, Y = vector3.Y };
+            return new Vector2() { X = vector3.X, Y = vector3.Y };
         }
-        public static PointD NewFrom(SDL.SDL_Point sDL_Point)
+        public static Vector2 NewFrom(SDL.SDL_Point sDL_Point)
         {
-            return new PointD() { X = sDL_Point.x, Y = sDL_Point.y };
+            return new Vector2() { X = sDL_Point.x, Y = sDL_Point.y };
         }
-        public static PointD Add(PointD p1, PointD p2)
+        public static Vector2 Add(Vector2 p1, Vector2 p2)
         {
-            return new PointD() { X = p1.X + p2.X, Y = p1.Y + p2.Y };
+            return new Vector2() { X = p1.X + p2.X, Y = p1.Y + p2.Y };
         }
-        public static PointD Sub(PointD p1, PointD p2)
+        public static Vector2 Sub(Vector2 p1, Vector2 p2)
         {
-            return new PointD() { X = p1.X - p2.X, Y = p1.Y - p2.Y };
+            return new Vector2() { X = p1.X - p2.X, Y = p1.Y - p2.Y };
         }
-        public static double Length(PointD point)
+        public static double Length(Vector2 point)
         {
             return Math.Sqrt(LengthSquared(point)); 
         }
-        public static double LengthSquared(PointD point)
+        public static double LengthSquared(Vector2 point)
         {
             return (point.X * point.X) + (point.Y * point.Y);
         }
 
     }
-
+*/
 
 
     public interface IRectangle
@@ -525,12 +526,12 @@ namespace Pulsar4X.SDL2UI
 
         public float Height { get; set; }
 
-        public static Rectangle operator +(Rectangle rectangle, Vector2 point)
+        public static Rectangle operator +(Rectangle rectangle, Orbital.Vector2 point)
         {
             Rectangle newRect = new Rectangle();
 
-            newRect.X = rectangle.X + point.X;
-            newRect.Y = rectangle.Y + point.Y;
+            newRect.X = (float)(rectangle.X + point.X);
+            newRect.Y = (float)(rectangle.Y + point.Y);
             return newRect;
 
         }

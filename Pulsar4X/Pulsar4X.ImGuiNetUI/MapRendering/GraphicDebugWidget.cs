@@ -116,7 +116,7 @@ namespace Pulsar4X.SDL2UI
         internal bool Scales = false;
         internal List<ElementItem> ElementItems = new List<ElementItem>();
         private List<ComplexShape> DrawComplexShapes = new List<ComplexShape>();
-        PointD _ctrPnt { get { return new PointD() { X = XOffset, Y = YOffset }; } }
+        Orbital.Vector2 _ctrPnt { get { return new Orbital.Vector2() { X = XOffset, Y = YOffset }; } }
         ElementItem _anglelineItem;
         ElementItem _testAngleItem;
 
@@ -146,10 +146,10 @@ namespace Pulsar4X.SDL2UI
                 DataString = "This should be from center to + x",
                 Shape = new ComplexShape()
                 {
-                    Points = new PointD[]
+                    Points = new Orbital.Vector2[]
                 {
-                    new PointD(),
-                    new PointD(){X = 256}
+                    new Orbital.Vector2(),
+                    new Orbital.Vector2(){X = 256}
                 },
                     Colors = reflineColour,
                     ColourChanges = new (int pointIndex, int colourIndex)[]
@@ -176,10 +176,10 @@ namespace Pulsar4X.SDL2UI
                 //DataString = "Reference Line. This should be from center to + x",
                 Shape = new ComplexShape()
                 {
-                    Points = new PointD[]
+                    Points = new Orbital.Vector2[]
                 {
-                    new PointD(),
-                    new PointD(){X = 256}
+                    new Orbital.Vector2(),
+                    new Orbital.Vector2(){X = 256}
                 },
                     Colors = reflineColour,
                     ColourChanges = new (int pointIndex, int colourIndex)[]
@@ -206,7 +206,7 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(TestingAngle).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(new PointD(), 128, -16, 0, TestingAngle, 128),
+                    Points = CreatePrimitiveShapes.AngleArc(new Orbital.Vector2(), 128, -16, 0, TestingAngle, 128),
                     Colors = testAngleColour,
                     ColourChanges = new (int pointIndex, int colourIndex)[]
                     {
@@ -243,10 +243,10 @@ namespace Pulsar4X.SDL2UI
             };
 
 
-            var bcp0 = new PointD(0,0);
-            var bcp1 = new PointD(0.5, 0) ;
-            var bcp2 = new PointD(0, 0) ;
-            var bcp3 = new PointD(0, 0.5) ;
+            var bcp0 = new Vector2(0,0);
+            var bcp1 = new Vector2(0.5, 0) ;
+            var bcp2 = new Vector2(0, 0) ;
+            var bcp3 = new Vector2(0, 0.5) ;
              _bc   = new BezierCurve(bcp0, bcp1, bcp2, bcp3);
              _bc.SetLinePoints(0.01f);
             
@@ -261,13 +261,13 @@ namespace Pulsar4X.SDL2UI
                 item.Shape.Scales = Scales;
             }
 
-            _anglelineItem.Shape.Points = new PointD[] 
+            _anglelineItem.Shape.Points = new Orbital.Vector2[] 
             { 
-                new PointD(), 
-                DrawTools.RotatePoint(new PointD() { X = 256 }, TestingAngle) 
+                new Orbital.Vector2(), 
+                DrawTools.RotatePoint(new Orbital.Vector2() { X = 256 }, TestingAngle) 
             };
             _testAngleItem.DataString = Angle.ToDegrees(TestingAngle).ToString() + "°";
-            _testAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(new PointD(), 128, -16, 0, TestingAngle, 128);
+            _testAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(new Orbital.Vector2(), 128, -16, 0, TestingAngle, 128);
 
 
 
@@ -290,7 +290,7 @@ namespace Pulsar4X.SDL2UI
                 var shape = item.Shape;
                 var startPoint = matrix.TransformD(shape.StartPoint.X, shape.StartPoint.Y); //add zoom transformation. 
 
-                PointD[] points = new PointD[shape.Points.Length];
+                Orbital.Vector2[] points = new Orbital.Vector2[shape.Points.Length];
 
                 for (int i = 0; i < shape.Points.Length; i++)
                 {
@@ -298,7 +298,7 @@ namespace Pulsar4X.SDL2UI
 
                     int x;
                     int y;
-                    PointD transformedPoint;
+                    Vector2 transformedPoint;
                     if (shape.Scales)
                         transformedPoint = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation. 
                     else
@@ -306,7 +306,7 @@ namespace Pulsar4X.SDL2UI
 
                     x = (int)(ViewScreenPos.x + transformedPoint.X + startPoint.X);
                     y = (int)(ViewScreenPos.y + transformedPoint.Y + startPoint.Y);
-                    points[i] = new PointD() { X = x, Y = y };
+                    points[i] = new Orbital.Vector2() { X = x, Y = y };
 
                 }
 
@@ -319,7 +319,7 @@ namespace Pulsar4X.SDL2UI
             }
 
 
-            PointD[] mtxArwPts = new PointD[_mtxArwItem.Shape.Points.Length];
+            Orbital.Vector2[] mtxArwPts = new Orbital.Vector2[_mtxArwItem.Shape.Points.Length];
             var mm = Matrix.IDMirror(MtxArwMirrorX, MtxArwMirrorY);
             var mr = Matrix.IDRotate(MtxArwAngle);
             var ms = Matrix.IDScale(MtxArwScaleX, MtxArwScaleY);
@@ -329,7 +329,7 @@ namespace Pulsar4X.SDL2UI
                 var pnt = _mtxArwItem.Shape.Points[i];
                 var transformedPoint = tl.TransformD(pnt.X, pnt.Y);
                 
-                mtxArwPts[i] = new PointD(){
+                mtxArwPts[i] = new Orbital.Vector2(){
                  X = ViewScreenPos.x + transformedPoint.X,
                  Y = ViewScreenPos.y + transformedPoint.Y 
                  };

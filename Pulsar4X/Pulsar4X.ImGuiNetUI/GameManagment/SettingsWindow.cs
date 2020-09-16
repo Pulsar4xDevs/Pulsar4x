@@ -49,8 +49,8 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive)
             {
-                Vector2 size = new Vector2(200, 100);
-                Vector2 pos = new Vector2(0, 0);
+                System.Numerics.Vector2 size = new System.Numerics.Vector2(200, 100);
+                System.Numerics.Vector2 pos = new System.Numerics.Vector2(0, 0);
 
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);

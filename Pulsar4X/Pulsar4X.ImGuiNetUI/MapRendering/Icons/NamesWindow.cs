@@ -9,8 +9,8 @@ namespace Pulsar4X.SDL2UI
         string NameString { get { return EntityState.Name; } }
         List<EntityState> SubEntites;
 
-        public Vector2 WorldPosition;
-        public Vector2 ViewPostion;
+        public System.Numerics.Vector2 WorldPosition;
+        public System.Numerics.Vector2 ViewPostion;
 
         public float X => ViewPostion.X;
         public float Y => ViewPostion.Y;

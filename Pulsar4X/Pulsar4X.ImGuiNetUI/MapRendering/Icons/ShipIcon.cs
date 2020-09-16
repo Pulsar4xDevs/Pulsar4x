@@ -93,12 +93,12 @@ namespace Pulsar4X.SDL2UI
             byte g = 50;
             byte b = 200;
             byte a = 255;
-            PointD[] points = {
-            new PointD { X = 0, Y = 5 },
-            new PointD { X = 5, Y = -5 },
-            new PointD { X = 0, Y = 0 },
-            new PointD { X = -5, Y = -5 },
-            new PointD { X = 0, Y = 5 }
+            Orbital.Vector2[] points = {
+            new Orbital.Vector2() { X = 0, Y = 5 },
+            new Orbital.Vector2() { X = 5, Y = -5 },
+            new Orbital.Vector2() { X = 0, Y = 0 },
+            new Orbital.Vector2() { X = -5, Y = -5 },
+            new Orbital.Vector2() { X = 0, Y = 5 }
             };
 
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
@@ -159,18 +159,18 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
 
 
-            PointD p0 = new PointD() { X = offsetX, Y = (int)(offsetY - height * 0.5) };
-            PointD p1 = new PointD() { X = offsetX + frontWidth, Y = (int)(offsetY - height * 0.5) };
-            PointD p2 = new PointD() { X = (int)(offsetX + width * 0.5), Y = (int)(offsetY - height * 0.3) };
-            PointD p3 = new PointD() { X = (int)(offsetX + width * 0.5), Y = -(int)(offsetY - height * 0.25) };
-            PointD p4 = new PointD() { X = offsetX + backWidth, Y = -(int)(offsetY - height * 0.5) };
-            PointD p5 = new PointD() { X = offsetX, Y = -(int)(offsetY - height * 0.5) };
-            PointD p6 = new PointD() { X = offsetX - backWidth, Y = (int)(offsetY + height * 0.5) };
-            PointD p7 = new PointD() { X = (int)(offsetX + -width * 0.5), Y = (int)(offsetY + height * 0.25) };
-            PointD p8 = new PointD() { X = (int)(offsetX + -width * 0.5), Y = -(int)(offsetY + height * 0.3) };
-            PointD p9 = new PointD() { X = offsetX - frontWidth, Y = -(int)(offsetY + height * 0.5) };
-            PointD p10 = new PointD() { X = offsetX, Y = -(int)(offsetY + height * 0.5) };
-            var shape = new Shape() { Color = colour, Points = new PointD[] { p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 } };
+            Vector2 p0 = new Orbital.Vector2() { X = offsetX, Y = (int)(offsetY - height * 0.5) };
+            Vector2 p1 = new Vector2() { X = offsetX + frontWidth, Y = (int)(offsetY - height * 0.5) };
+            Vector2 p2 = new Vector2() { X = (int)(offsetX + width * 0.5), Y = (int)(offsetY - height * 0.3) };
+            Vector2 p3 = new Vector2() { X = (int)(offsetX + width * 0.5), Y = -(int)(offsetY - height * 0.25) };
+            Vector2 p4 = new Vector2() { X = offsetX + backWidth, Y = -(int)(offsetY - height * 0.5) };
+            Vector2 p5 = new Vector2() { X = offsetX, Y = -(int)(offsetY - height * 0.5) };
+            Vector2 p6 = new Vector2() { X = offsetX - backWidth, Y = (int)(offsetY + height * 0.5) };
+            Vector2 p7 = new Vector2() { X = (int)(offsetX + -width * 0.5), Y = (int)(offsetY + height * 0.25) };
+            Vector2 p8 = new Vector2() { X = (int)(offsetX + -width * 0.5), Y = -(int)(offsetY + height * 0.3) };
+            Vector2 p9 = new Vector2() { X = offsetX - frontWidth, Y = -(int)(offsetY + height * 0.5) };
+            Vector2 p10 = new Vector2() { X = offsetX, Y = -(int)(offsetY + height * 0.5) };
+            var shape = new Shape() { Color = colour, Points = new Orbital.Vector2[] { p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 } };
             Shapes.Add(shape);
                 
 
@@ -255,13 +255,13 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < Shapes.Count; i++)
             {
                 var shape = Shapes[i];
-                PointD[] drawPoints = new PointD[shape.Points.Length];
+                Vector2[] drawPoints = new Vector2[shape.Points.Length];
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
                     var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
                     int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
                     int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
-                    drawPoints[i2] = new PointD() { X = x, Y = y };
+                    drawPoints[i2] = new Vector2() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
             }
@@ -357,12 +357,12 @@ namespace Pulsar4X.SDL2UI
             byte g = 50;
             byte b = 200;
             byte a = 255;
-            PointD[] points = {
-                new PointD { X = 0, Y = 4 },
-                new PointD { X = 2, Y = -4 },
-                new PointD { X = 0, Y = 0 },
-                new PointD { X = -2, Y = -4 },
-                new PointD { X = 0, Y = 4 }
+            Vector2[] points = {
+                new Vector2 { X = 0, Y = 4 },
+                new Vector2 { X = 2, Y = -4 },
+                new Vector2 { X = 0, Y = 0 },
+                new Vector2 { X = -2, Y = -4 },
+                new Vector2 { X = 0, Y = 4 }
             };
 
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
@@ -375,12 +375,12 @@ namespace Pulsar4X.SDL2UI
             byte g = 50;
             byte b = 0;
             byte a = 200;
-            PointD[] points = {
-                new PointD { X = 0, Y = 0 },
-                new PointD { X = -2, Y = -2 },
-                new PointD { X = 0, Y = -5 },
-                new PointD { X = 2, Y = -2 },
-                new PointD { X = 0, Y = 0 }
+            Vector2[] points = {
+                new Vector2 { X = 0, Y = 0 },
+                new Vector2 { X = -2, Y = -2 },
+                new Vector2 { X = 0, Y = -5 },
+                new Vector2 { X = 2, Y = -2 },
+                new Vector2 { X = 0, Y = 0 }
             };
 
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
@@ -424,13 +424,13 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < Shapes.Count; i++)
             {
                 var shape = Shapes[i];
-                PointD[] drawPoints = new PointD[shape.Points.Length];
+                Vector2[] drawPoints = new Vector2[shape.Points.Length];
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
                     var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
                     int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
                     int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
-                    drawPoints[i2] = new PointD() { X = x, Y = y };
+                    drawPoints[i2] = new Vector2() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
             }
@@ -479,9 +479,9 @@ namespace Pulsar4X.SDL2UI
             
             DrawShapes = new Shape[1];
             var s1 = new Shape();
-            s1.Points = new PointD[2];
-            s1.Points[0] = new PointD() {X = p0.x, Y = p0.y};
-            s1.Points[1] = new PointD() {X = p1.x, Y = p1.y};
+            s1.Points = new Vector2[2];
+            s1.Points[0] = new Vector2() {X = p0.x, Y = p0.y};
+            s1.Points[1] = new Vector2() {X = p1.x, Y = p1.y};
             var clr = new SDL.SDL_Color()
             {
                 r = 200,

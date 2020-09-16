@@ -101,7 +101,7 @@ namespace Pulsar4X.SDL2UI
             {
                 var shape = Shapes[i];
                 var manipulatedShape = new Shape();
-                manipulatedShape.Points = mtx.Transform(shape.Points);
+                manipulatedShape.Points = mtx.TransformToVector2(shape.Points);
                 manipulatedShape.Color = shape.Color;
                 DrawShapes[i+dsi] = manipulatedShape;
             }
@@ -210,19 +210,19 @@ namespace Pulsar4X.SDL2UI
 
 
             ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
-            var vsp = new PointD
+            var vsp = new Vector2
             {
                 X = ViewScreenPos.x ,
                 Y = ViewScreenPos.y
             };
-            PointD[] drawPoints = new PointD[_shape.Points.Length];
+            Orbital.Vector2[] drawPoints = new Orbital.Vector2[_shape.Points.Length];
 
             for (int i2 = 0; i2 < _shape.Points.Length; i2++)
             {           
                 var translatedPoint = matrix.TransformD(_shape.Points[i2].X, _shape.Points[i2].Y);
                 int x = (int)(vsp.X + translatedPoint.X);
                 int y = (int)(vsp.Y + translatedPoint.Y);
-                drawPoints[i2] = new PointD() { X = x, Y = y };
+                drawPoints[i2] = new Orbital.Vector2() { X = x, Y = y };
             }
             _drawShape = new Shape() { Points = drawPoints, Color = _shape.Color };
         }
@@ -249,15 +249,15 @@ namespace Pulsar4X.SDL2UI
             set { _worldPosition = value; }
         }
 
-        public SimpleLine(ECSLib.IPosition positionDB, PointD toPoint, SDL.SDL_Color colour)
+        public SimpleLine(ECSLib.IPosition positionDB, Orbital.Vector2 toPoint, SDL.SDL_Color colour)
         {
             _positionDB = positionDB;
             positionByDB = true;
-            PointD p0 = new PointD() { X = 0, Y = 0 };
+            Orbital.Vector2 p0 = new Orbital.Vector2() { X = 0, Y = 0 };
 
             _shape = new Shape()
             {
-                Points = new PointD[] {p0, toPoint },
+                Points = new Orbital.Vector2[] {p0, toPoint },
                 Color = colour,
             };
         }
@@ -279,19 +279,19 @@ namespace Pulsar4X.SDL2UI
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition);
-            var vsp = new PointD
+            var vsp = new Orbital.Vector2()
             {
                 X = ViewScreenPos.x,
                 Y = ViewScreenPos.y
             };
-            PointD[] drawPoints = new PointD[_shape.Points.Length];
+            Orbital.Vector2[] drawPoints = new Orbital.Vector2[_shape.Points.Length];
 
             for (int i2 = 0; i2 < _shape.Points.Length; i2++)
             {
                 var translatedPoint = matrix.TransformD(_shape.Points[i2].X, _shape.Points[i2].Y);
                 int x = (int)(vsp.X + translatedPoint.X);
                 int y = (int)(vsp.Y + translatedPoint.Y);
-                drawPoints[i2] = new PointD() { X = x, Y = y };
+                drawPoints[i2] = new Orbital.Vector2() { X = x, Y = y };
             }
             _drawShape = new Shape() { Points = drawPoints, Color = _shape.Color };
         }

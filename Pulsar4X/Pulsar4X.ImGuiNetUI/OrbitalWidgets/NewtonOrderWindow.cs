@@ -267,7 +267,7 @@ namespace Pulsar4X.SDL2UI
         private void Calcs()
         {
             var rmtx = Matrix.IDRotate(DepartureAngle);
-            PointD dv = rmtx.TransformD(_radialDV, _progradeDV);
+            Vector2 dv = rmtx.TransformD(_radialDV, _progradeDV);
             DeltaV = new Vector3(dv.X, dv.Y, 0);
             _fuelToBurn = OrbitMath.TsiolkovskyFuelUse(_curmass, _exhastVelocity, DeltaV.Length());
         }

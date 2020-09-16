@@ -57,18 +57,18 @@ namespace Pulsar4X.SDL2UI
             float spikeDepth = 50;
             double arc = (2 * Math.PI) / spikes;
             double startAngle = 1.5708 - arc / 2;
-            List<PointD> shapePoints = new List<PointD>();
+            List<Vector2> shapePoints = new List<Vector2>();
             for (int i = 0; i < spikes; i++)
             {
                 var a1 = arc * i;
                 double x1 = (0 * Math.Cos(a1) - spikeheight * Math.Sin(a1));
                 double y1 = (0 * Math.Sin(a1) + spikeheight * Math.Cos(a1));
-                var p1 = new PointD() { X = x1, Y = y1 };
+                var p1 = new Vector2() { X = x1, Y = y1 };
 
                 var a2 = a1 + arc * 0.5;
                 double x2 = (0 * Math.Cos(a2) - spikeDepth * Math.Sin(a2));
                 double y2 = (0 * Math.Sin(a2) + spikeDepth * Math.Cos(a2));
-                var p2 = new PointD() { X = x2, Y = y2 };
+                var p2 = new Vector2() { X = x2, Y = y2 };
 
                 shapePoints.Add(p1);
                 shapePoints.Add(p2);

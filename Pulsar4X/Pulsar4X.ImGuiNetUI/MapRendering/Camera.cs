@@ -6,7 +6,7 @@ using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
 using SDL2;
 using Point = SDL2.SDL.SDL_Point;
-using Vector2 = System.Numerics.Vector2;
+using Vector2 = Pulsar4X.Orbital.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -63,9 +63,12 @@ namespace Pulsar4X.SDL2UI
 
         //public ImVec2 WorldPosition { get { return _cameraWorldPosition; } }
 
-        public Vector2 ViewPortCenter { get { return new Vector2(_viewPort.Size.X * 0.5f, _viewPort.Size.Y * 0.5f); } }
+        public Vector2 ViewPortCenter { get { return new Orbital.Vector2(_viewPort.Size.X * 0.5f, _viewPort.Size.Y * 0.5f); } }
 
-        public Vector2 ViewPortSize { get { return _viewPort.Size; } }
+        public Vector2 ViewPortSize
+        {
+            get { return new Orbital.Vector2(_viewPort.Size); }
+        }
         public float ZoomLevel { get; set; } = 200;
         public double ZoomLevel_m { get; set; } = 1.496e11 / 200;
         public float zoomSpeed { get; set; } = 1.25f;
@@ -133,7 +136,7 @@ namespace Pulsar4X.SDL2UI
         
         public Orbital.Vector3 MouseWorldCoordinate_AU()
         {
-            Vector2 mouseCoord = ImGui.GetMousePos();
+            Orbital.Vector2 mouseCoord = new Orbital.Vector2(ImGui.GetMousePos());
             double x = ((mouseCoord.X - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition_AU.X;
             double y = -(((mouseCoord.Y - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition_AU.Y);
             return new Orbital.Vector3(x, y, 0);
@@ -170,9 +173,9 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="worldSize"></param>
         /// <returns></returns>
-        public Vector2 ViewSize(Vector2 worldSize)
+        public Orbital.Vector2 ViewSize(Orbital.Vector2 worldSize)
         {
-            Vector2 viewSize = new Vector2(worldSize.X * ZoomLevel, worldSize.Y * ZoomLevel);
+            Orbital.Vector2 viewSize = new Orbital.Vector2(worldSize.X * ZoomLevel, worldSize.Y * ZoomLevel);
             return viewSize;
         }
 
@@ -211,9 +214,9 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="viewSize"></param>
         /// <returns></returns>
-        public Vector2 WorldSize(Vector2 viewSize)
+        public Orbital.Vector2 WorldSize(Orbital.Vector2 viewSize)
         {
-            return new Vector2(viewSize.X / ZoomLevel, viewSize.Y / ZoomLevel);
+            return new Orbital.Vector2(viewSize.X / ZoomLevel, viewSize.Y / ZoomLevel);
         }
 
 
@@ -295,13 +298,13 @@ namespace Pulsar4X.SDL2UI
         {
             var colour = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
 
-            PointD point0 = new PointD() { X = -5, Y = 0 };
-            PointD point1 = new PointD() { X = +5, Y = 0 };
-            Shape shape0 = new Shape() { Points = new PointD[2] { point0, point1 }, Color = colour };
+            Orbital.Vector2 point0 = new Orbital.Vector2() { X = -5, Y = 0 };
+            Orbital.Vector2 point1 = new Orbital.Vector2() { X = +5, Y = 0 };
+            Shape shape0 = new Shape() { Points = new Orbital.Vector2[2] { point0, point1 }, Color = colour };
 
-            PointD point2 = new PointD() { X = 0, Y = -5 };
-            PointD point3 = new PointD() { X = 0, Y = +5 };
-            Shape shape1 = new Shape() { Points = new PointD[2] { point2, point3 }, Color = colour };
+            Orbital.Vector2 point2 = new Orbital.Vector2() { X = 0, Y = -5 };
+            Orbital.Vector2 point3 = new Orbital.Vector2() { X = 0, Y = +5 };
+            Shape shape1 = new Shape() { Points = new Orbital.Vector2[2] { point2, point3 }, Color = colour };
 
             this.Shapes = new System.Collections.Generic.List<Shape>() { shape0, shape1 };
         }

@@ -68,7 +68,7 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            ImGui.SetNextWindowSize(new Vector2(400,400),ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(400,400),ImGuiCond.Once);
             if (IsActive == true && ImGui.Begin("Planetary Window: " + _lookedAtEntity.Name, ref IsActive, _flags))
             {
                 RenderTabOptions();

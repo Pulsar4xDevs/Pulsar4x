@@ -10,7 +10,7 @@ namespace Pulsar4X.SDL2UI
     {
 
         bool _saveGame = false;
-        Vector2 buttonSize = new Vector2(184, 24);
+        System.Numerics.Vector2 buttonSize = new System.Numerics.Vector2(184, 24);
         new ImGuiWindowFlags _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoTitleBar;
         private MainMenuItems(){}
         internal static MainMenuItems GetInstance()
@@ -27,11 +27,11 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive)
             {
-                Vector2 size = new Vector2(200, 100);
-                Vector2 pos = new Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
+                System.Numerics.Vector2 size = new System.Numerics.Vector2(200, 100);
+                System.Numerics.Vector2 pos = new System.Numerics.Vector2(_uiState.MainWinSize.X / 2 - size.X / 2, _uiState.MainWinSize.Y / 2 - size.Y / 2);
                 ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 10));
+                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(10, 10));
                 if (ImGui.Begin("Pulsar4X Main Menu", ref IsActive, _flags))
                 {
 

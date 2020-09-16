@@ -41,8 +41,8 @@ namespace Pulsar4X.SDL2UI
         private double highestWave = 0;
         private double lowestMag = 0;
         private double highestMag = 0;
-        private Vector2 _scalingFactor = new Vector2(0.1f, 0.1f);
-        private Vector2 _translation = new Vector2(0,0);
+        private System.Numerics.Vector2 _scalingFactor = new System.Numerics.Vector2(0.1f, 0.1f);
+        private System.Numerics.Vector2 _translation = new System.Numerics.Vector2(0,0);
         private SensorDraw() 
         {
             _draw_list = ImGui.GetWindowDrawList();
@@ -83,7 +83,7 @@ namespace Pulsar4X.SDL2UI
             //
             if(!IsActive || _selectedEntitySate == null)
                 return;
-            ImGui.SetNextWindowSize(new Vector2(1500, 800));
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(1500, 800));
             if (ImGui.Begin("Sensor Display", ref IsActive))
             {
 
@@ -160,10 +160,10 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
 
                     // ImDrawList API uses screen coordinates!
-                    Vector2 canvas_pos = ImGui.GetCursorScreenPos();
-                    Vector2 canvas_size = ImGui.GetContentRegionAvail();
-                    Vector2 canvas_endPos = canvas_pos + canvas_size;
-                    Vector2 waveBounds = new Vector2((float)(highestWave - lowestWave), (float)(highestMag - lowestMag));
+                    System.Numerics.Vector2 canvas_pos = ImGui.GetCursorScreenPos();
+                    System.Numerics.Vector2 canvas_size = ImGui.GetContentRegionAvail();
+                    System.Numerics.Vector2 canvas_endPos = canvas_pos + canvas_size;
+                    System.Numerics.Vector2 waveBounds = new System.Numerics.Vector2((float)(highestWave - lowestWave), (float)(highestMag - lowestMag));
 
                     _scalingFactor.X = 1 / (waveBounds.X / canvas_size.X);
                     _scalingFactor.Y = 1 / (waveBounds.Y / canvas_size.Y);
@@ -176,8 +176,8 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Scale:");
                     ImGui.Text("X: " + _scalingFactor.X + " Y: " + _scalingFactor.Y);
 
-                    Vector2 p0 = _translation + new Vector2((float)lowestWave, (float)lowestMag) * _scalingFactor;
-                    Vector2 p1 = _translation + new Vector2((float)highestWave, (float)highestMag) * _scalingFactor;
+                    System.Numerics.Vector2 p0 = _translation + new System.Numerics.Vector2((float)lowestWave, (float)lowestMag) * _scalingFactor;
+                    System.Numerics.Vector2 p1 = _translation + new System.Numerics.Vector2((float)highestWave, (float)highestMag) * _scalingFactor;
                     ImGui.Text("Box From: " + p0);
                     ImGui.Text("Box To:   " + p1);
 
@@ -199,9 +199,9 @@ namespace Pulsar4X.SDL2UI
                 {
                     for (int i = 0; i < wavesArry.Count; i++)
                     {
-                        Vector2 p0 = _translation + wavesArry.Points[i].p0 * _scalingFactor;
-                        Vector2 p1 = _translation + wavesArry.Points[i].p1 * _scalingFactor;
-                        Vector2 p2 = _translation + wavesArry.Points[i].p2 * _scalingFactor;
+                        System.Numerics.Vector2 p0 = _translation + wavesArry.Points[i].p0 * _scalingFactor;
+                        System.Numerics.Vector2 p1 = _translation + wavesArry.Points[i].p1 * _scalingFactor;
+                        System.Numerics.Vector2 p2 = _translation + wavesArry.Points[i].p2 * _scalingFactor;
                         if (wavesArry.IsWaveDrawn[i].drawSrc)
                         {
 
@@ -212,7 +212,7 @@ namespace Pulsar4X.SDL2UI
 
                         if (wavesArry.HasAtn && wavesArry.IsWaveDrawn[i].drawAtn)
                         {
-                            Vector2 p3 = _translation + wavesArry.Points[i].p3 * _scalingFactor;
+                            System.Numerics.Vector2 p3 = _translation + wavesArry.Points[i].p3 * _scalingFactor;
                             _draw_list.AddTriangleFilled(p0, p3, p2, colour);
                         }
 
@@ -338,7 +338,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     _receverDat = new WaveDrawData();
                     _receverDat.HasAtn = false;
-                    var points = _receverDat.Points = new (Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)[recevers.Count];
+                    var points = _receverDat.Points = new (System.Numerics.Vector2 p0, System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 p3)[recevers.Count];
                     _receverDat.IsWaveDrawn = new (bool drawSrc, bool drawAtn)[recevers.Count];
                     
                     _selectedReceverAtb = new SensorReceverAtbDB[recevers.Count];
@@ -356,9 +356,9 @@ namespace Pulsar4X.SDL2UI
                         float mag1 = (float)_selectedReceverAtb[i].WorstSensitivity_kW;
                         float mag2 = (float)_selectedReceverAtb[i].BestSensitivity_kW;
                         
-                        points[i].p0 = new Vector2(low, mag1);
-                        points[i].p1 = new Vector2(mid, mag2);
-                        points[i].p2 =  new Vector2(high, mag1);
+                        points[i].p0 = new System.Numerics.Vector2(low, mag1);
+                        points[i].p1 = new System.Numerics.Vector2(mid, mag2);
+                        points[i].p2 =  new System.Numerics.Vector2(high, mag1);
                         i++;
                     }
                     
@@ -418,7 +418,7 @@ namespace Pulsar4X.SDL2UI
             {
                 var wavDat = new WaveDrawData();
                 wavDat.HasAtn = true;
-                var datPts = wavDat.Points = new (Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)[wavsDict.Count];
+                var datPts = wavDat.Points = new (System.Numerics.Vector2 p0, System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 p3)[wavsDict.Count];
                 wavDat.IsWaveDrawn = new (bool drawSrc, bool drawAtn)[wavsDict.Count];
 
                 int i = 0;
@@ -432,10 +432,10 @@ namespace Pulsar4X.SDL2UI
                     if (float.IsInfinity(magnatude))
                         magnatude = float.MaxValue;
                     
-                    datPts[i].p0 = new Vector2(low, 0);
-                    datPts[i].p1 = new Vector2(mid, magnatude);
-                    datPts[i].p2 = new Vector2(high, 0);
-                    datPts[i].p3 = new Vector2(mid, atnmag);
+                    datPts[i].p0 = new System.Numerics.Vector2(low, 0);
+                    datPts[i].p1 = new System.Numerics.Vector2(mid, magnatude);
+                    datPts[i].p2 = new System.Numerics.Vector2(high, 0);
+                    datPts[i].p3 = new System.Numerics.Vector2(mid, atnmag);
                     i++;
                 }
 
@@ -464,7 +464,7 @@ namespace Pulsar4X.SDL2UI
     {
         public int Count { get { return Points.Length; } }
         public bool HasAtn = false;
-        public (Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)[] Points = new (Vector2, Vector2, Vector2, Vector2)[0];
+        public (System.Numerics.Vector2 p0, System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 p3)[] Points = new (System.Numerics.Vector2, System.Numerics.Vector2, System.Numerics.Vector2, System.Numerics.Vector2)[0];
         public (bool drawSrc,bool drawAtn)[] IsWaveDrawn = new (bool, bool)[0];
         public uint[] _receverColours;
     }

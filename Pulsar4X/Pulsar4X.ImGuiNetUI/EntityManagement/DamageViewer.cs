@@ -224,7 +224,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             var damageFrag = new DamageFragment()
                             {
                                 Position = _firePos,
-                                Velocity = new Vector2(_fireVel.x, _fireVel.y),
+                                Velocity = new Orbital.Vector2(_fireVel.x, _fireVel.y),
                                 Mass = _projMass,
                                 Density = _projDensity,
                                 Length = _projLen
