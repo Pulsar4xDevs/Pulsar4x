@@ -320,6 +320,10 @@ namespace Pulsar4X.SDL2UI
             _factionOwnerEntites.Combo("Set Owner Faction");
 
             BorderGroup.Begin("State Vectors");
+            ImGui.Text("a: " + _ke.SemiMajorAxis);
+            ImGui.Text("e: " + _ke.Eccentricity);
+            ImGui.Text("Ω: " + _ke.LoAN);
+            ImGui.Text("ω: " + _ke.AoP );
             if (OrbitEditWidget.Display(ref _ke, ref _sv, _parentSOI, OrbitEditWidget.WidgetStyle.Newtonion))
             {
                 var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
@@ -428,19 +432,20 @@ namespace Pulsar4X.SDL2UI
                     _keIcon.ForceUpdate(_ke, _sv);
                 }
 
-                if (_soiIcon != null)
-                {
-                    Shape soishape = new Shape();
-                    var soiau = Distance.MToAU(_parentSOI);
-                    soishape.Points = CreatePrimitiveShapes.Circle(0, 0, soiau, 64);
-                    byte r = 0;
-                    byte g = 200;
-                    byte b = 100;
-                    byte a = 200;
-                    SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
-                    soishape.Color = colour;
-                    _soiIcon.Shapes[0] = soishape;
-                }
+ 
+                _soiIcon.ResetPositionDB(_parentObect.GetDataBlob<PositionDB>());
+                Shape soishape = new Shape();
+                var soiau = Distance.MToAU(_parentSOI);
+                soishape.Points = CreatePrimitiveShapes.Circle(0, 0, soiau, 64);
+                byte r = 0;
+                byte g = 200;
+                byte b = 100;
+                byte a = 200;
+                SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+                soishape.Color = colour;
+                _soiIcon.Shapes[0]=soishape;
+
+                
 
                 return true;
             }

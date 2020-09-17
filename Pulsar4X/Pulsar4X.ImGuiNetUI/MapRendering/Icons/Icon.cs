@@ -69,6 +69,12 @@ namespace Pulsar4X.SDL2UI
             positionByDB = false;
         }
 
+        public void ResetPositionDB(ECSLib.IPosition positionDB)
+        {
+            _positionDB = positionDB;
+            positionByDB = true;
+        }
+
         public virtual void OnPhysicsUpdate()
         {
             

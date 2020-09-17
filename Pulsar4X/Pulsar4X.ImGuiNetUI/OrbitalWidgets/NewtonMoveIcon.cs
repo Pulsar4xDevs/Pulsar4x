@@ -333,7 +333,7 @@ namespace Pulsar4X.SDL2UI
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             UpdateUserSettings();
             CreatePointArray();
-            DebugShowCenter = true;
+            //DebugShowCenter = true;
 
         }
 
@@ -389,7 +389,7 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            Orbital.Vector2 pos = new Orbital.Vector2();
+            Orbital.Vector2 pos = new Vector2(_sv.Position.X, _sv.Position.Y);
             double minDist = (pos - _points[_taIndex]).Length();
 
             for (int i =0; i < _points.Length; i++)
@@ -418,7 +418,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        internal void CreatePointArray()
+        private void CreatePointArray()
         {
             if(_ke.Eccentricity < 1)
             {
@@ -522,9 +522,9 @@ namespace Pulsar4X.SDL2UI
             double a = _ke.SemiMajorAxis;
             double b = _ke.SemiMinorAxis;
             double linierEccentricity = _ke.Eccentricity * a;
-            double _lop = _ke.AoP + _ke.LoAN;            
-            
-            double dTheta = _userSettings.EllipseSweepRadians / (_numberOfPoints - 1);
+            double _lop = _ke.AoP + _ke.LoAN;
+
+            double dTheta = 2 * Math.PI / _numberOfPoints; // _userSettings.EllipseSweepRadians / (_numberOfPoints - 1);
             
             double ct = Math.Cos(_lop);
             double st = Math.Sin(_lop);
@@ -572,12 +572,13 @@ namespace Pulsar4X.SDL2UI
             
 
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
+            var mir = Matrix.IDMirror(true, false);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
             var trns = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
 
-            var mtrx = scAU * scZm *  trns;
-            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
+            var mtrx = mir * scAU * scZm *  trns;
+            _drawPoints = new SDL.SDL_Point[_numberOfPoints + 1];
 
             int shapeCount = Shapes.Count;
             DrawShapes = new Shape[shapeCount];            
@@ -585,35 +586,28 @@ namespace Pulsar4X.SDL2UI
             {
                 DrawShapes = new Shape[shapeCount+1];
                 var mtxb = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
-                DrawShapes[0] = CreatePrimitiveShapes.CenterWidget(mtxb);
+                DrawShapes[0] = CreatePrimitiveShapes.CenterWidget(trns);
             }
-            
+
+            _drawPoints[0] = mtrx.TransformToSDL_Point(_sv.Position.X, _sv.Position.Y);
             if(TrajectoryType == UserOrbitSettings.OrbitTrajectoryType.Elliptical)
             {
                 //we do this so we can start drawing from the position of the entity,
                 //and fade the line using alpha in the colour (when draw)
-                for (int i = 1; i < _numberOfDrawSegments; i++)
+                int index = _taIndex;
+                for (int i = 1; i < _numberOfPoints + 1; i++)
                 {
-                    int index = _taIndex;
-                    {
-                        if (index < _numberOfArcSegments - 1)
+                    if (index < _numberOfPoints - 1)
 
-                            index++;
-                        else
-                            index = 0;
-                        _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
-                    }
-                }
+                        index++;
+                    else
+                        index = 0;
+                   _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
                 
-                //_drawPoints = mtrx.TransformToSDL_Point(_points);
+                }
             }
             else
             {
-                /*
-                for (int i = 0; i < _numberOfDrawSegments; i++)
-                {
-                    _drawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
-                }*/
                 _drawPoints = mtrx.TransformToSDL_Point(_points);
             }
             
