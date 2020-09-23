@@ -11,7 +11,7 @@ A fan-made project to recreate a more user-friendly and better optimized version
 #### Here are some [FAQs](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/FAQ).  
 #### Here are our current [Tasks](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/Issues-&-Projects).  
 #### Our current [Projects](https://github.com/Pulsar4xDevs/Pulsar4x/projects).
-#### Documentation is available on the [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/projects).
+#### Documentation is available on the [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki).
 #### We track bugs in [Issues](https://github.com/Pulsar4xDevs/Pulsar4x/issues).
 
 ### Contributing:  
