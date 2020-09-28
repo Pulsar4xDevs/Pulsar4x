@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
@@ -18,6 +19,7 @@ namespace Pulsar4X.ECSLib
         //and having longditudinal structural parts...
         public RawBmp DamageProfile;
         
+        public List<List<RawBmp>> DamageSlides = new List<List<RawBmp>>();
         
         /// <summary>
         /// this allows us to encode the green value of the ShipDamageProfile to a component instance. 
@@ -28,9 +30,21 @@ namespace Pulsar4X.ECSLib
         private EntityDamageProfileDB()
         {
         }
-    
+
         
+        public EntityDamageProfileDB(ShipDesign entityDesign)
+        {
+            var components = entityDesign.Components;
+            var armor = entityDesign.Armor;
+            Init(components, armor);
+        }
+
         public EntityDamageProfileDB(List<(ComponentDesign component, int count)> components, (ArmorSD armorSD, float thickness) armor)
+        {
+            Init(components, armor);
+        }
+
+        private void Init(List<(ComponentDesign component, int count)> components, (ArmorSD armorSD, float thickness) armor)
         {
             List<(Guid, RawBmp)> typeBitmap = new List<(Guid, RawBmp)>();
             List<(Guid id, int count)> placementOrder = new List<(Guid, int)>();

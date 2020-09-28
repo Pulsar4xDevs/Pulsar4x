@@ -51,7 +51,14 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         {
             MissileProcessor.LaunchMissile(launchingEntity, tgtEntity, LaunchForce, AssignedOrdnance, count);
         }
-        
+
+        public float ToHitChance(Entity launchingEntity, Entity tgtEntity)
+        {
+            //should change this to 1 or 0 depending if the missile is "in range"
+            //ie can actualy reach the target with the given amount of fuel on board. 
+            return 1;
+        }
+
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!componentInstance.HasAblity<WeaponState>())

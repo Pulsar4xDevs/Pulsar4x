@@ -50,6 +50,15 @@ namespace Pulsar4X.ECSLib
             return next;
         }
 
+        public bool RNGNexBool(float chance)
+        {
+            return RNG.NextDouble() < chance;
+        }
+        public bool RNGNexBool(double chance)
+        {
+            return RNG.NextDouble() < chance;
+        }
+
         [JsonConstructor]
         internal StarSystem()
         {

@@ -200,7 +200,7 @@ namespace Pulsar4X.ECSLib
             var position = parentPosition + OrbitProcessor.GetPosition_m(orbit.GetElements(), parent.StarSysDateTime);
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             
-            var shipinfo = new ShipInfoDB();
+            var shipinfo = new ShipInfoDB(shipDesign);
             dataBlobs.Add(shipinfo);
             var mvdb = MassVolumeDB.NewFromMassAndVolume(shipDesign.MassPerUnit, shipDesign.VolumePerUnit);
             dataBlobs.Add(mvdb);

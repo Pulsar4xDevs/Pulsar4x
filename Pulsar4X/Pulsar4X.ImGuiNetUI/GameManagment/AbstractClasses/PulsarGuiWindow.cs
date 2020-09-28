@@ -8,7 +8,7 @@ namespace Pulsar4X.SDL2UI
     {
         protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
         //internal bool IsLoaded;
-        internal bool CanActive = false;
+        internal bool CanActive = true;
         protected bool IsActive = false;
         //internal int StateIndex = -1;
         //protected bool _IsOpen;
@@ -16,12 +16,19 @@ namespace Pulsar4X.SDL2UI
 
         public void SetActive(bool ActiveVal = true)
         {
-            IsActive = ActiveVal;
+            if(CanActive)
+                IsActive = ActiveVal;
+            else
+                IsActive = false;
+            
         }
 
         public void ToggleActive()
         {
-            IsActive = !IsActive;
+            if(CanActive)
+                IsActive = !IsActive;
+            else
+                IsActive = false;
         }
 
         public override bool GetActive()

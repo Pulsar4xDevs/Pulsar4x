@@ -16,7 +16,8 @@ namespace Pulsar4X.SDL2UI.Combat
 {
     public class DamageViewer : PulsarGuiWindow
     {
-        private ComponentDesign _componentDesign;
+        //private ComponentDesign _componentDesign;
+        private Entity _selectedEntity;
 
         int _newmatIDCode;
         int _newmatHitPoints = 10;
@@ -46,6 +47,8 @@ namespace Pulsar4X.SDL2UI.Combat
         private EntityDamageProfileDB _profile;
         private RawBmp _rawShipImage;
         private IntPtr _shipImgPtr;
+
+        private int _selectedDamageEvent = 0;
         
         private DamageViewer()
         {
@@ -55,9 +58,9 @@ namespace Pulsar4X.SDL2UI.Combat
             DamageResist titanium =  new DamageResist(200, 255, 4540f );
             DamageResist steelCarbon =  new DamageResist(230, 255, 7860);
             DamageResist steelStainless =  new DamageResist(255, 255, 7900);
+
             
-            
-            _componentDesign.DamageResistance = aluminium;
+            //_componentDesign.DamageResistance = aluminium;
 
         }
 
@@ -65,9 +68,53 @@ namespace Pulsar4X.SDL2UI.Combat
         {
             if (!_uiState.LoadedWindows.ContainsKey(typeof(DamageViewer)))
             {
-                return new DamageViewer();
+                var dv = new DamageViewer();
+                if(_uiState.PrimaryEntity.Entity != null )
+                {
+                    dv.Init(_uiState.PrimaryEntity.Entity);
+                }
+                return dv;
             }
-            return (DamageViewer)_uiState.LoadedWindows[typeof(DamageViewer)];
+            else
+            {
+                var dv =(DamageViewer)_uiState.LoadedWindows[typeof(DamageViewer)];
+                if(_uiState.PrimaryEntity != null && _uiState.PrimaryEntity.Entity != dv._selectedEntity)
+                    dv.Init(_uiState.PrimaryEntity.Entity);
+                return dv;
+            }
+            
+        }
+
+        private void Init(Entity damageableEntity)
+        {
+            var db = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
+            if(db != null)
+            {
+                _selectedEntity = damageableEntity;
+                _profile = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
+                _rawShipImage = _profile.DamageProfile;
+                _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage);
+
+                if (_profile.DamageSlides.Count > 0)
+                {
+                    _selectedDamageEvent = _profile.DamageSlides.Count - 1;
+
+
+                    var _damageFrames = _profile.DamageSlides[_selectedDamageEvent];
+                    foreach (RawBmp slide in _damageFrames)
+                    {
+                        
+                    }
+                    
+                    
+                }
+                
+                CanActive = true;
+            }
+            else
+            {
+                CanActive = false;
+            }
         }
 
         internal override void Display()
@@ -76,138 +123,20 @@ namespace Pulsar4X.SDL2UI.Combat
             {
                 if (ImGui.Begin("DamageViewer Testing"))
                 {
-                    if (ImGui.CollapsingHeader("Create Ship Profile"))
+
+                    if (_shipImgPtr != IntPtr.Zero)
                     {
-                        if (ImGui.Button("CreateShip"))
-                        {
-                            /*
-
-                            ComponentDesign thruster = new ComponentDesign();
-                            thruster.ID = ID.NewGuid();
-                            thruster.Connections = Connections.Front | Connections.Sides;
-                            thruster.Volume_km3 = 10;
-                            thruster.AspectRatio = 1;
-                            thruster.DamageResistance = DamageTools.DamageResistsLookupTable[200];
-
-
-                            ComponentDesign fuel = new ComponentDesign();
-                            fuel.ID = ID.NewGuid();
-                            fuel.Connections = Connections.Front | Connections.Sides | Connections.Back;
-                            fuel.Volume_km3 = 100;
-                            fuel.AspectRatio = 2f;
-                            fuel.DamageResistance = DamageTools.DamageResistsLookupTable[100];
-
-                            ComponentDesign lifeSuport = new ComponentDesign();
-                            lifeSuport.ID = ID.NewGuid();
-                            lifeSuport.Connections = Connections.Front | Connections.Sides | Connections.Back;
-                            lifeSuport.Volume_km3 = 5;
-                            lifeSuport.AspectRatio = 1;
-                            lifeSuport.DamageResistance = DamageTools.DamageResistsLookupTable[150];
-
-
-                            ComponentDesign cargo = new ComponentDesign();
-                            cargo.ID = ID.NewGuid();
-                            cargo.Connections = Connections.Front | Connections.Sides | Connections.Back;
-                            cargo.Volume_km3 = 100;
-                            cargo.AspectRatio = 0.5f;
-                            cargo.DamageResistance = DamageTools.DamageResistsLookupTable[230];
-
-                            List<(ComponentDesign component, int count)> componentTypes = new List<(ComponentDesign component, int count)>();
-
-                            componentTypes.Add((thruster, 2));
-                            componentTypes.Add((fuel, 1));
-                            componentTypes.Add((lifeSuport, 3));
-                            componentTypes.Add((cargo, 1));
-
-
-
-
-                            _profile = ComponentPlacement.CreateShipMap(componentTypes, DamageTools.DamageResistsLookupTable[255]);
-                            _rawShipImage = _profile.ShipDamageProfile;
-                            _shipImgPtr = CreateSDLTexture(_profile.ShipDamageProfile);
-                            _firePos.x = _rawShipImage.Width / 2;
-                            */
-                        }
-
-                        if (_shipImgPtr != IntPtr.Zero)
-                        {
-                            int w = _rawShipImage.Width; // / 4;
-                            int h = _rawShipImage.Height; // / 4;
-                            ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(w, h));
-
-
-                            ImGui.InputInt("ComponentCluster", ref _selectedComponentIndex);
-                            if (_selectedComponentIndex > 0)
-                            {
-                                if (ImGui.Button("ShiftLeft"))
-                                {
-
-                                    (Guid id, int count) item = _profile.PlacementOrder[_selectedComponentIndex];
-                                    _profile.PlacementOrder.RemoveAt(_selectedComponentIndex);
-                                    _profile.PlacementOrder.Insert(_selectedComponentIndex - 1, item);
-                                    _rawShipImage = ComponentPlacement.CreateShipBmp(_profile);
-                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage);
-                                }
-                            }
-
-                            if (_selectedComponentIndex < _profile.PlacementOrder.Count - 1)
-                            {
-                                if (ImGui.Button("ShiftRight"))
-                                {
-                                    (Guid id, int count) item = _profile.PlacementOrder[_selectedComponentIndex];
-                                    _profile.PlacementOrder.RemoveAt(_selectedComponentIndex);
-                                    _profile.PlacementOrder.Insert(_selectedComponentIndex + 1, item);
-                                    _rawShipImage = ComponentPlacement.CreateShipBmp(_profile);
-                                    _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage);
-                                }
-                            }
-
-                        }
-                    }
-                }
-                    
-                /*
-                if (ImGui.CollapsingHeader("Create Component Profile"))
-                {
-                    if (ImGui.InputFloat("Volume_km3", ref _componentProfile.Volume_km3))
-                    {
-                    }
-
-                    if (ImGui.InputFloat("Aspect Ratio", ref _componentProfile.AspectRatio))
-                    {
-                    }
-
-                    var mat = _componentProfile.Mats;
-                    ImGui.Text("ByteCode: " + mat.IDCode);
-                    ImGui.Text("HitPoints " + mat.HitPoints);
-                    ImGui.Text("Density" + mat.Density);
-                    //ImGui.Text("Heat: " + mat.Heat);
-                    //ImGui.Text("Kinetic: " + mat.Kinetic);
-
+                        int w = _rawShipImage.Width; // / 4;
+                        int h = _rawShipImage.Height; // / 4;
+                        ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(w, h));
                         
-
-                    ImGui.InputInt("ByteCode: ", ref _newmatIDCode);
-                    ImGui.InputInt("HitPoints ", ref _newmatHitPoints);
-                    //ImGui.InputFloat("Heat: ", ref _newmatHeat);
-                    //ImGui.InputFloat("Kinetic: ", ref _newmatKinetic);
-                    ImGui.InputFloat("Density", ref _newmatDensity);
-
-                    if (ImGui.Button("Replace Mat"))
-                    {
-                        _componentProfile.Mats = new DamageResist((byte)_newmatIDCode, _newmatHitPoints, _newmatDensity);
-
-
                     }
+                    
+                }
                 
-                    if (ImGui.Button("Create Bitmap"))
-                    {
-                        _rawComponentImage = DamageTools.CreateComponentByteArray(_componentProfile);
-                        _componentSDLtexture = CreateSDLTexture(_rawComponentImage);
-                    }
-                }*/ 
                 if (_shipImgPtr != IntPtr.Zero)
                 {
-                    if (ImGui.CollapsingHeader("Weapons"))
+                    if (ImGui.CollapsingHeader("Fire a Weapon to check damage result"))
                     {
                         ImGui.InputInt("PositionX", ref _firePos.x);
                         ImGui.InputInt("PositionY", ref _firePos.y);
@@ -229,7 +158,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                 Density = _projDensity,
                                 Length = _projLen
                             };
-                            //_damageFrames = DamageTools.DealDamage(_rawShipImage, damageFrag);
+                            _damageFrames = DamageTools.DealDamage(_profile, damageFrag);
                             _rawShipImage = _damageFrames.Last();
                         }
                     

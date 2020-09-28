@@ -60,6 +60,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
         {
             throw new System.NotImplementedException();
         }
+
+        public float ToHitChance(Entity launchingEntity, Entity tgtEntity)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
 

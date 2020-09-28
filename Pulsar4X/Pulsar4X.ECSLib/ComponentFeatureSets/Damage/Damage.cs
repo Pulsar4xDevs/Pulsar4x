@@ -284,6 +284,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                 Stride = shipDamageProfile.Stride
             };
             finalFrame.SetPixel(savedpxloc.x, savedpxloc.y, savedpx.r, savedpx.g, savedpx.b, savedpx.a);
+            damageProfile.DamageSlides.Add(damageFrames);
+            damageProfile.DamageProfile = finalFrame;
             return damageFrames;
         }
     }

@@ -10,6 +10,7 @@ using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Pulsar4X.Orbital;
+using Pulsar4X.SDL2UI.Combat;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 
@@ -54,7 +55,7 @@ namespace Pulsar4X.SDL2UI
         bool _drawSOI = false;
         bool _drawParentSOI = false;
         //List<ECSLib.Vector4> positions = new List<ECSLib.Vector4>();
-
+        private bool _showDamageWindow = false;
         private IntPtr _dmgTxtr;
         
         List<(string name, Entity entity)> _factionOwnedEntites = new List<(string name, Entity entity)>();
@@ -711,8 +712,21 @@ namespace Pulsar4X.SDL2UI
                                 }
                             }
 
+                            if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
+                            {
+                                var dv = DamageViewer.GetInstance();
+                                if (ImGui.Checkbox("Show Damage", ref _showDamageWindow))
+                                {
+                                    if (dv.CanActive)
+                                        DamageViewer.GetInstance().SetActive(_showDamageWindow);
+                                    else
+                                        _showDamageWindow = false;
+                                }
 
-                            
+                            }
+
+
+
                         }
                     }
                 }
