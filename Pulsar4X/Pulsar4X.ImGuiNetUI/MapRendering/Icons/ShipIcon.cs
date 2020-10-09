@@ -465,7 +465,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
+            //DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
 
  
 

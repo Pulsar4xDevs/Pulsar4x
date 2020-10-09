@@ -193,9 +193,11 @@ namespace Pulsar4X.SDL2UI
 
         void RemoveIconable(Guid entityGuid)
         {
-            _nameIcons.TryRemove(entityGuid, out NameIcon nameIcon);
+            _testIcons.TryRemove(entityGuid, out var testIcon);
             _entityIcons.TryRemove(entityGuid, out IDrawData entityIcon);
             _orbitRings.TryRemove(entityGuid, out IDrawData orbitIcon);
+            _moveIcons.TryRemove(entityGuid, out var moveIcon);
+            _nameIcons.TryRemove(entityGuid, out NameIcon nameIcon);
         }
 
 
@@ -281,6 +283,7 @@ namespace Pulsar4X.SDL2UI
                     //if (changeData.Datablob is NameDB)
                     //TextIconList.Remove(changeData.Entity.ID);
                 }
+                
             }
         }
 

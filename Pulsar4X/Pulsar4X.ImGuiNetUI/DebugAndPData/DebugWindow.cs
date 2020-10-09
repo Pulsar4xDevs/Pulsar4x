@@ -754,6 +754,8 @@ namespace Pulsar4X.SDL2UI
             _allEntites = new List<(string name, Entity entity, string faction)>();
             foreach (var entity in _uiState.SelectedSystem.GetAllEntites())
             {
+                if(entity == null)
+                    continue;
                 string name = entity.Guid.ToString();
                 if(entity.HasDataBlob<NameDB>())
                     name = entity.GetDataBlob<NameDB>().OwnersName;

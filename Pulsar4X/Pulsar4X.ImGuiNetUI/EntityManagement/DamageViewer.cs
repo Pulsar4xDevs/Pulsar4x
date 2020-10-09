@@ -40,6 +40,7 @@ namespace Pulsar4X.SDL2UI.Combat
         private RawBmp _rawComponentImage;
         private IntPtr _componentSDLtexture;
         
+        private int _damageEventIndex = 0;
         private List<RawBmp> _damageFrames;
         private int _showFrameNum = 0;
         private IntPtr _showDmgFrametx;
@@ -48,7 +49,7 @@ namespace Pulsar4X.SDL2UI.Combat
         private RawBmp _rawShipImage;
         private IntPtr _shipImgPtr;
 
-        private int _selectedDamageEvent = 0;
+        
         
         private DamageViewer()
         {
@@ -97,16 +98,8 @@ namespace Pulsar4X.SDL2UI.Combat
 
                 if (_profile.DamageSlides.Count > 0)
                 {
-                    _selectedDamageEvent = _profile.DamageSlides.Count - 1;
-
-
-                    var _damageFrames = _profile.DamageSlides[_selectedDamageEvent];
-                    foreach (RawBmp slide in _damageFrames)
-                    {
-                        
-                    }
-                    
-                    
+                    _damageEventIndex = _profile.DamageSlides.Count - 1;
+                    SetDamageEventFrames();
                 }
                 
                 CanActive = true;
@@ -114,6 +107,15 @@ namespace Pulsar4X.SDL2UI.Combat
             else
             {
                 CanActive = false;
+            }
+        }
+
+        void SetDamageEventFrames()
+        {
+            _damageFrames = _profile.DamageSlides[_damageEventIndex];
+            foreach (RawBmp slide in _damageFrames)
+            {
+                        
             }
         }
 
@@ -165,6 +167,25 @@ namespace Pulsar4X.SDL2UI.Combat
                     }
                 }
 
+                for (int i = 0; i < _profile.DamageSlides.Count; i++)
+                {
+                    
+                }
+                
+                if(_profile.DamageSlides.Count > 1)
+                {
+                    if (ImGui.SliderInt("Damage Events", ref _damageEventIndex, 0, _profile.DamageSlides.Count))
+                    {
+                        SetDamageEventFrames();
+                    }
+                }
+                
+                if(_profile.DamageSlides.Count > 0 && _damageFrames == null)
+                {
+                    _damageEventIndex = 0;
+                    SetDamageEventFrames();
+                }
+                
                 if (_damageFrames != null && _damageFrames.Count > 0)
                 {
                     if (ImGui.Button("NextFrame"))

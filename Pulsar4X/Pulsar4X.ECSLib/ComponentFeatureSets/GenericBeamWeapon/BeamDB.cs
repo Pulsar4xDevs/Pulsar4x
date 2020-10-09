@@ -40,15 +40,26 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                 var futurePosTime = PredictTgtPositionAndTime(state, nowTime, beamInfo.TargetEntity, beamInfo.VelocityVector.Length());
                 var normVector = Vector3.Normalise(futurePosTime.pos - state.AbsolutePosition_m);
                 var absVector =  normVector * beamInfo.VelocityVector.Length();
+                
                 beamInfo.VelocityVector = absVector;
 
-                if (futurePosTime.time <= nowTime)
+                if (futurePosTime.seconds <= seconds)
                 {
-                    var ralitivePos = state.AbsolutePosition_m - futurePosTime.pos;
+                    //var ralitivePos = state.AbsolutePosition_m - futurePosTime.pos;
+                    var posRalitiveToTarget = futurePosTime.pos - state.AbsolutePosition_m;
+                    var beamAngle = Math.Atan2(posRalitiveToTarget.Y, posRalitiveToTarget.X);
+                    var shipFutureVel = beamInfo.TargetEntity.GetAbsoluteFutureVelocity(nowTime + TimeSpan.FromSeconds(futurePosTime.seconds));
+                    var shipHeading = Math.Atan2(shipFutureVel.Y, shipFutureVel.X);
+                    var hitAngle = beamAngle + shipHeading;
+                    var ralitiveVel = shipFutureVel - beamInfo.VelocityVector;
+                    var ralitiveSpeed = ralitiveVel.Length();
+                    
+                    
                     DamageFragment damage = new DamageFragment()
                     {
-                        Velocity = new Vector2( state.VelocityVector.X, state.VelocityVector.Y),
-                        Position = ((int)ralitivePos.X, (int)ralitivePos.Y),
+                        Velocity = new Vector2( ralitiveVel.X, ralitiveVel.Y),
+                        Position = ((int)posRalitiveToTarget.X, (int)posRalitiveToTarget.Y),
+                        Angle = hitAngle,
                         Mass = 0,
                         Density = 0,
                         Length = (float)(beamInfo.Positions[0] - beamInfo.Positions[1]).Length(),
@@ -79,7 +90,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
         public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, bool hitsTarget, double beamVelocity, double beamLenInSeconds)
         {
             var nowTime = launchingEntity.StarSysDateTime;
-            var ourState = launchingEntity.GetRelativeState();
+            var ourState = launchingEntity.GetAbsoluteState();
             var futurePosTime = PredictTgtPositionAndTime(ourState, nowTime, targetEntity, beamVelocity);
             
             var ourAbsPos = launchingEntity.GetAbsoluteFuturePosition(nowTime);
@@ -102,17 +113,17 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             var newbeam = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
         }
 
-        public static (Vector3 pos, DateTime time) PredictTgtPositionAndTime((Vector3 pos, Vector3 Velocity) ourState, DateTime atTime, Entity targetEntity, double beamVelocity)
+        public static (Vector3 pos, double seconds) PredictTgtPositionAndTime((Vector3 pos, Vector3 Velocity) ourState, DateTime atTime, Entity targetEntity, double beamVelocity)
         {
             
-            var tgtState = targetEntity.GetRelativeState();
-            Vector3 leadToTgt = (tgtState.Velocity - ourState.Velocity);
-            Vector3 vectorToTgt = (tgtState.pos = ourState.pos);
+            var tgtState = targetEntity.GetAbsoluteState();
+            Vector3 leadToTgt = (ourState.Velocity - tgtState.Velocity);
+            Vector3 vectorToTgt = (ourState.pos -tgtState.pos);
             var distanceToTgt = vectorToTgt.Length();
             var timeToTarget = distanceToTgt / beamVelocity;
             var futureDate = atTime + TimeSpan.FromSeconds(timeToTarget);
             var futurePosition = targetEntity.GetAbsoluteFuturePosition(futureDate);
-            return (futurePosition, futureDate);
+            return (futurePosition, timeToTarget);
 
         }
         

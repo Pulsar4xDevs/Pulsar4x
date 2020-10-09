@@ -49,6 +49,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
     {
         public Vector2 Velocity;
         public (int x,int y) Position;
+        public double Angle;
         public float Mass;
         public float Density;//kg/m^3
         public float Length;
@@ -203,15 +204,71 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             List<RawBmp> damageFrames = new List<RawBmp>();
 
             var fragmentMass = damage.Mass;
-            var dpos = damage.Position;
+            (int x, int y) dpos = (0,0);
             var dvel = damage.Velocity;
             var dden = damage.Density;
             var dlen = damage.Length;
             var pos = new Vector2(dpos.x, dpos.y);
             var pixelscale = 0.01;
             double startMomentum = dvel.Length() * fragmentMass;
-            double momentum = startMomentum; 
+            double momentum = startMomentum;
             
+                                                                                  
+            
+            //We need to figure out where the incoming damage intersects with the ship's damage profile "image"
+            //this is dpos.
+            var dx = damage.Position.x;
+            var dy = damage.Position.y;
+            var w = shipDamageProfile.Width;
+            var h = shipDamageProfile.Height;                                                                                                                                                                 
+            var hh = h * 0.5;
+            var hw = w * 0.5;
+            //we can add some rand to exactly where it hits here, ie right now with ctrx = hh, we're just going for the soft nugety center
+            var ctrx = hh; 
+            var ctry = hw;
+            
+            var slope = (dy - ctry) / (dx - ctrx);
+            var hsw = slope * hw;
+            var hsh = slope * hh;
+
+            double dpx = 0;
+            double dpy = 0;
+            double m = 0; //multipier, ie the percentage of the whole (dx,dy) triangle once we calculate one side, we can
+            //we can then calculate the percentage of that side of the whole, then calculate the other side by using that percentage
+            
+            if (-hh <= hsw && hsw <= hh) {
+                // line intersects
+                if (w < dx) {
+                    //right edge;
+                    dpx = hw;
+                } else if (w > dx) {
+                    //left edge
+                    dpx = 0;
+                }
+                m = dpx / dx;
+                dpy = m * dy;
+                dpos.y = Convert.ToInt32(dpy + hh);
+                dpos.x = Convert.ToInt32(dpx);
+            }
+            if ( -hw <= hsh && hsh <= hw) {
+                if (h < dy) {
+                    //top edge
+                    dpy = 0;
+
+                } else if (h > dy) {
+                    // bottom edge
+                    dpy = h;
+                }
+                m = dpy / dy;
+                dpx = m * dx;
+                dpos.x = Convert.ToInt32(dpx + hw);
+                dpos.y = Convert.ToInt32(dpy);
+            }
+
+            //we now need to convert from 0,0 being center to 0,0 being top left corner.
+            
+            
+                
             byte[] byteArray = new byte[shipDamageProfile.ByteArray.Length];
             Buffer.BlockCopy(shipDamageProfile.ByteArray, 0, byteArray, 0, shipDamageProfile.ByteArray.Length);
             RawBmp firstFrame = new RawBmp()

@@ -62,7 +62,16 @@ namespace Pulsar4X.SDL2UI
 
             _currentSystem = _uiState.SelectedSystem;
 
-            _systemEntities = _currentSystem.GetAllEntites().ToArray();
+            //_systemEntities = _currentSystem.GetAllEntites().ToArray();
+            List<Entity> allEntites = new List<Entity>();
+            foreach (var entity in _currentSystem.GetAllEntites())
+            {
+                if(entity == null)
+                    continue;
+                allEntites.Add(entity);
+            }
+            _systemEntities = allEntites.ToArray();
+            
             _systemEntityNames = new string[_systemEntities.Length];
             for (int j = 0; j < _systemEntities.Length; j++)
             {

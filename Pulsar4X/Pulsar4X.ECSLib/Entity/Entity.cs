@@ -158,6 +158,7 @@ namespace Pulsar4X.ECSLib
             Manager.RemoveEntity(this);
             Manager = InvalidManager;
             _protectedDataBlobMask_ = EntityManager.BlankDataBlobMask();
+
         }
 
         /// <summary>

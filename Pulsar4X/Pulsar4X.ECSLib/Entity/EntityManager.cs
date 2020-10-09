@@ -215,6 +215,10 @@ namespace Pulsar4X.ECSLib
             {
                 throw new ArgumentException("Provided Entity is not valid in this manager.");
             }
+            
+            Event logevent = new Event(StaticRefLib.CurrentDateTime, "Entity Destroyed");
+            StaticRefLib.EventLog.AddEvent(logevent);          
+            
             int entityID = entity.ID;
             _entities[entityID] = null;
             EntityMasks[entityID] = null;
@@ -232,6 +236,7 @@ namespace Pulsar4X.ECSLib
 
             if (Game != null)
             {
+                UpdateListners(entity, null, EntityChangeType.EntityRemoved);
                 _globalGuidDictionaryLock.EnterWriteLock();
                 try
                 {
@@ -242,7 +247,7 @@ namespace Pulsar4X.ECSLib
                 {
                     _globalGuidDictionaryLock.ExitWriteLock();
                 }
-                UpdateListners(entity, null, EntityChangeType.EntityRemoved);
+                
             }
             else
             {
@@ -372,6 +377,10 @@ namespace Pulsar4X.ECSLib
 
         #region Public API Functions
 
+        /// <summary>
+        /// Don't assume entites are not null
+        /// </summary>
+        /// <returns></returns>
         public List<Entity> GetAllEntites()
         {
             return new List<Entity>(_entities);
