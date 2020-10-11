@@ -18,6 +18,8 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int ReloadRate { get; internal set; }
 
+        [JsonProperty] public int Frequncy { get; internal set; } = 700;
+        
         public double LenPerPulseInSeconds = 1;
         
         public double BeamSpeed { get; internal set; } = 299792458; //299792458 is speed of light.
@@ -71,7 +73,7 @@ namespace Pulsar4X.ECSLib
             //TODO: DELETE! (for testing purposes turning this on so always hitting)
             hitsTarget = true;
             
-            BeamWeapnProcessor.FireBeamWeapon(launchingEntity, tgtEntity, hitsTarget, BeamSpeed, beamLen);
+            BeamWeapnProcessor.FireBeamWeapon(launchingEntity, tgtEntity, hitsTarget, Frequncy,BeamSpeed, beamLen);
         }
 
         public float ToHitChance(Entity launchingEntity, Entity tgtEntity)

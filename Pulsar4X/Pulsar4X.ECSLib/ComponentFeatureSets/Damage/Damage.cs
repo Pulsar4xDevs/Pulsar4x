@@ -51,6 +51,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         public (int x,int y) Position;
         public double Angle;
         public float Mass;
+        public float Momentum;
         public float Density;//kg/m^3
         public float Length;
     }
@@ -204,71 +205,55 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             List<RawBmp> damageFrames = new List<RawBmp>();
 
             var fragmentMass = damage.Mass;
-            (int x, int y) dpos = (0,0);
+            (int x, int y) dpos = (0, 0);
             var dvel = damage.Velocity;
             var dden = damage.Density;
             var dlen = damage.Length;
             var pos = new Vector2(dpos.x, dpos.y);
             var pixelscale = 0.01;
-            double startMomentum = dvel.Length() * fragmentMass;
+            double startMomentum = damage.Momentum;
             double momentum = startMomentum;
-            
-                                                                                  
+
+
             
             //We need to figure out where the incoming damage intersects with the ship's damage profile "image"
-            //this is dpos.
-            var dx = damage.Position.x;
-            var dy = damage.Position.y;
-            var w = shipDamageProfile.Width;
-            var h = shipDamageProfile.Height;                                                                                                                                                                 
-            var hh = h * 0.5;
-            var hw = w * 0.5;
-            //we can add some rand to exactly where it hits here, ie right now with ctrx = hh, we're just going for the soft nugety center
-            var ctrx = hh; 
-            var ctry = hw;
-            
-            var slope = (dy - ctry) / (dx - ctrx);
-            var hsw = slope * hw;
-            var hsh = slope * hh;
+            var pwidth = damageProfile.DamageProfile.Width;
+            var hw = pwidth * 0.5;
+            var phight = damageProfile.DamageProfile.Height;
+            var hh = phight * 0.5;
+            var len = Math.Sqrt((pwidth * pwidth) + (phight * phight));
 
-            double dpx = 0;
-            double dpy = 0;
-            double m = 0; //multipier, ie the percentage of the whole (dx,dy) triangle once we calculate one side, we can
-            //we can then calculate the percentage of that side of the whole, then calculate the other side by using that percentage
+            //damage.Position ralitive to our targets center, but we need to translate for calculating 0,0 at top left
+            Vector2 start = new Vector2(damage.Position.x - hw, damage.Position.y - hh); 
+            var end = new Vector2(pwidth * 0.5, phight * 0.5); //center of our target
+            var tl = new Vector2(0, 0);
+            var tr = new Vector2(pwidth, 0);
+            var bl = new Vector2(0, phight);
+            var br = new Vector2(pwidth, phight);
             
-            if (-hh <= hsw && hsw <= hh) {
-                // line intersects
-                if (w < dx) {
-                    //right edge;
-                    dpx = hw;
-                } else if (w > dx) {
-                    //left edge
-                    dpx = 0;
-                }
-                m = dpx / dx;
-                dpy = m * dy;
-                dpos.y = Convert.ToInt32(dpy + hh);
-                dpos.x = Convert.ToInt32(dpx);
+            //pretty sure these can be else ifs. 
+            Vector2 intersection;
+
+            //left
+            if (LineIntersectsLine(start, end, tl, bl, out intersection))
+            {
             }
-            if ( -hw <= hsh && hsh <= hw) {
-                if (h < dy) {
-                    //top edge
-                    dpy = 0;
-
-                } else if (h > dy) {
-                    // bottom edge
-                    dpy = h;
-                }
-                m = dpy / dy;
-                dpx = m * dx;
-                dpos.x = Convert.ToInt32(dpx + hw);
-                dpos.y = Convert.ToInt32(dpy);
+            //right
+            else if (LineIntersectsLine(start, end, tr, br, out intersection))
+            {
+            }
+            //top
+            else if (LineIntersectsLine(start,end,tl, tr, out intersection))
+            {
+            }
+            //bottom
+            else if (LineIntersectsLine(start,end,bl, br, out intersection))
+            {
             }
 
-            //we now need to convert from 0,0 being center to 0,0 being top left corner.
-            
-            
-                
+            dpos.x = Convert.ToInt32(intersection.X);
+            dpos.y = Convert.ToInt32(intersection.Y);
+
             byte[] byteArray = new byte[shipDamageProfile.ByteArray.Length];
             Buffer.BlockCopy(shipDamageProfile.ByteArray, 0, byteArray, 0, shipDamageProfile.ByteArray.Length);
             RawBmp firstFrame = new RawBmp()
@@ -283,7 +268,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             (byte r, byte g, byte b, byte a) savedpx = shipDamageProfile.GetPixel(dpos.x, dpos.y);
             (int x, int y) savedpxloc = dpos;
             
-            while (momentum > 0 && dpos.x >= 0 && dpos.x <= shipDamageProfile.Width && dpos.y >= 0 && dpos.y <= shipDamageProfile.Height)
+            while (
+                momentum > 0 && 
+                dpos.x >= 0 && 
+                dpos.x <= shipDamageProfile.Width && 
+                dpos.y >= 0 && dpos.y <= shipDamageProfile.Height)
             {
                 byteArray = new byte[shipDamageProfile.ByteArray.Length];
                 RawBmp lastFrame = damageFrames.Last();
@@ -344,6 +333,28 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             damageProfile.DamageSlides.Add(damageFrames);
             damageProfile.DamageProfile = finalFrame;
             return damageFrames;
+        }
+        
+        static bool LineIntersectsLine(Vector2 l1start, Vector2 l1End, Vector2 l2Start, Vector2 l2End, out Vector2 intersectsAt)
+        {
+            // calculate the direction of the lines
+            var uA = 
+                ((l2End.X-l2Start.X)*(l1start.Y-l2Start.Y) - (l2End.Y-l2Start.Y)*(l1start.X-l2Start.X)) / 
+                ((l2End.Y-l2Start.Y)*(l1End.X-l1start.X) - (l2End.X-l2Start.X)*(l1End.Y-l1start.Y));
+            var uB = 
+                ((l1End.X-l1start.X)*(l1start.Y-l2Start.Y) - (l1End.Y-l1start.Y)*(l1start.X-l2Start.X)) / 
+                ((l2End.Y-l2Start.Y)*(l1End.X-l1start.X) - (l2End.X-l2Start.X)*(l1End.Y-l1start.Y));
+
+            // if uA and uB are between 0-1, lines are colliding
+            if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+                double intersectionX = l1start.X + (uA * (l1End.X-l1start.X));
+                double intersectionY = l1start.Y + (uA * (l1End.Y-l1start.Y));
+                intersectsAt = new Vector2(intersectionX, intersectionY);
+                return true;
+            }
+
+            intersectsAt = new Vector2();
+            return false;
         }
     }
 }

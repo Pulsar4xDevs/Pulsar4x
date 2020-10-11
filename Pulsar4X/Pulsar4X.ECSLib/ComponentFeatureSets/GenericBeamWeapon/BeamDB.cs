@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.Orbital;
 
@@ -53,15 +54,16 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                     var hitAngle = beamAngle + shipHeading;
                     var ralitiveVel = shipFutureVel - beamInfo.VelocityVector;
                     var ralitiveSpeed = ralitiveVel.Length();
-                    
+                    var freq = beamInfo.Frequency;
                     
                     DamageFragment damage = new DamageFragment()
                     {
                         Velocity = new Vector2( ralitiveVel.X, ralitiveVel.Y),
                         Position = ((int)posRalitiveToTarget.X, (int)posRalitiveToTarget.Y),
                         Angle = hitAngle,
-                        Mass = 0,
-                        Density = 0,
+                        Mass = 0.000001f,
+                        Density = 1000,
+                        Momentum = (float)(UniversalConstants.Science.PlankConstant * freq),
                         Length = (float)(beamInfo.Positions[0] - beamInfo.Positions[1]).Length(),
                     };
                     var slides = DamageProcessor.OnTakingDamage(beamInfo.TargetEntity, damage);
@@ -87,7 +89,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             }
         }
         
-        public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, bool hitsTarget, double beamVelocity, double beamLenInSeconds)
+        public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, bool hitsTarget,double freqency, double beamVelocity, double beamLenInSeconds)
         {
             var nowTime = launchingEntity.StarSysDateTime;
             var ourState = launchingEntity.GetAbsoluteState();
@@ -103,7 +105,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             beamInfo.Positions[0] = startPos.AbsolutePosition_m ;
             beamInfo.Positions[1] = startPos.AbsolutePosition_m - normVector * beamlenInMeters;
             beamInfo.VelocityVector = absVector;
-            
+            beamInfo.Frequency = freqency;
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             dataBlobs.Add(beamInfo);
             //dataBlobs.Add(new ComponentInstancesDB());
@@ -184,6 +186,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
 
     public class BeamInfoDB : BaseDataBlob
     {
+        public double Frequency;
         public Guid FiredBy;
         public Vector3 VelocityVector;
         public Vector3[] Positions;

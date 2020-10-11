@@ -113,10 +113,8 @@ namespace Pulsar4X.SDL2UI.Combat
         void SetDamageEventFrames()
         {
             _damageFrames = _profile.DamageSlides[_damageEventIndex];
-            foreach (RawBmp slide in _damageFrames)
-            {
-                        
-            }
+            _showFrameNum = 0;
+            _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
         }
 
         internal override void Display()
@@ -184,10 +182,19 @@ namespace Pulsar4X.SDL2UI.Combat
                 {
                     _damageEventIndex = 0;
                     SetDamageEventFrames();
+
                 }
                 
                 if (_damageFrames != null && _damageFrames.Count > 0)
                 {
+                    if (ImGui.Button("PrevFrame"))
+                    {
+                        _showFrameNum--;
+                        if (_showFrameNum < 0)
+                            _showFrameNum = _damageFrames.Count -1;
+                        _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
+                    }
+                    ImGui.SameLine();
                     if (ImGui.Button("NextFrame"))
                     {
                         _showFrameNum++;
@@ -195,6 +202,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             _showFrameNum = 0;
                         _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
                     }
+                    ImGui.Text(_showFrameNum +1  + " of " + _damageFrames.Count);
                     int h = _damageFrames[_showFrameNum].Height;
                     int w = _damageFrames[_showFrameNum].Width;
                     ImGui.Image(_showDmgFrametx, new System.Numerics.Vector2(w, h));

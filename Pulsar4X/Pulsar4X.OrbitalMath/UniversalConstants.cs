@@ -15,6 +15,9 @@ namespace Pulsar4X.Orbital
         {
             // Gravitation Constant
             public const double GravitationalConstant = 6.67408E-11;
+
+            //h in m2 kg/s (or j/s)
+            public const double PlankConstant = 6.62607015E-34;
         }
 
         /// <summary>
