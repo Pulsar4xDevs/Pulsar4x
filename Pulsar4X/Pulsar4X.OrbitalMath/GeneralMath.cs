@@ -151,7 +151,27 @@ namespace Pulsar4X.Orbital
             return speed;
         }
 
+        public static bool LineIntersectsLine(Vector2 l1start, Vector2 l1End, Vector2 l2Start, Vector2 l2End, out Vector2 intersectsAt)
+        {
+            // calculate the direction of the lines
+            var uA = 
+                ((l2End.X-l2Start.X)*(l1start.Y-l2Start.Y) - (l2End.Y-l2Start.Y)*(l1start.X-l2Start.X)) / 
+                ((l2End.Y-l2Start.Y)*(l1End.X-l1start.X) - (l2End.X-l2Start.X)*(l1End.Y-l1start.Y));
+            var uB = 
+                ((l1End.X-l1start.X)*(l1start.Y-l2Start.Y) - (l1End.Y-l1start.Y)*(l1start.X-l2Start.X)) / 
+                ((l2End.Y-l2Start.Y)*(l1End.X-l1start.X) - (l2End.X-l2Start.X)*(l1End.Y-l1start.Y));
 
+            // if uA and uB are between 0-1, lines are colliding
+            if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
+                double intersectionX = l1start.X + (uA * (l1End.X-l1start.X));
+                double intersectionY = l1start.Y + (uA * (l1End.Y-l1start.Y));
+                intersectsAt = new Vector2(intersectionX, intersectionY);
+                return true;
+            }
+
+            intersectsAt = new Vector2();
+            return false;
+        }
 
         /// <summary>
         /// A decimal Sqrt. not as fast as normal Math.Sqrt, but better precision. 

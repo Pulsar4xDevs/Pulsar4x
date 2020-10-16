@@ -235,19 +235,19 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             Vector2 intersection;
 
             //left
-            if (LineIntersectsLine(start, end, tl, bl, out intersection))
+            if (GeneralMath.LineIntersectsLine(start, end, tl, bl, out intersection))
             {
             }
             //right
-            else if (LineIntersectsLine(start, end, tr, br, out intersection))
+            else if (GeneralMath.LineIntersectsLine(start, end, tr, br, out intersection))
             {
             }
             //top
-            else if (LineIntersectsLine(start,end,tl, tr, out intersection))
+            else if (GeneralMath.LineIntersectsLine(start,end,tl, tr, out intersection))
             {
             }
             //bottom
-            else if (LineIntersectsLine(start,end,bl, br, out intersection))
+            else if (GeneralMath.LineIntersectsLine(start,end,bl, br, out intersection))
             {
             }
 
@@ -305,7 +305,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
                 }
 
-                thisFrame.SetPixel(dpos.x, dpos.y, byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)fragmentMass);
+                thisFrame.SetPixel(dpos.x, dpos.y, byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)momentum);
                 thisFrame.SetPixel(savedpxloc.x, savedpxloc.y, savedpx.r, savedpx.g, savedpx.b, savedpx.a);
                 damageFrames.Add(thisFrame);
                 savedpxloc = dpos;
@@ -335,26 +335,6 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             return damageFrames;
         }
         
-        static bool LineIntersectsLine(Vector2 l1start, Vector2 l1End, Vector2 l2Start, Vector2 l2End, out Vector2 intersectsAt)
-        {
-            // calculate the direction of the lines
-            var uA = 
-                ((l2End.X-l2Start.X)*(l1start.Y-l2Start.Y) - (l2End.Y-l2Start.Y)*(l1start.X-l2Start.X)) / 
-                ((l2End.Y-l2Start.Y)*(l1End.X-l1start.X) - (l2End.X-l2Start.X)*(l1End.Y-l1start.Y));
-            var uB = 
-                ((l1End.X-l1start.X)*(l1start.Y-l2Start.Y) - (l1End.Y-l1start.Y)*(l1start.X-l2Start.X)) / 
-                ((l2End.Y-l2Start.Y)*(l1End.X-l1start.X) - (l2End.X-l2Start.X)*(l1End.Y-l1start.Y));
 
-            // if uA and uB are between 0-1, lines are colliding
-            if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
-                double intersectionX = l1start.X + (uA * (l1End.X-l1start.X));
-                double intersectionY = l1start.Y + (uA * (l1End.Y-l1start.Y));
-                intersectsAt = new Vector2(intersectionX, intersectionY);
-                return true;
-            }
-
-            intersectsAt = new Vector2();
-            return false;
-        }
     }
 }
