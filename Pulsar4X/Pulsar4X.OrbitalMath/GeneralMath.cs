@@ -174,6 +174,45 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
+        /// this is incomplete, needs to out two vectors since a rectangle and line will have two points of intercetption
+        /// assuming the start and end are outside the rectangle. 
+        /// </summary>
+        /// <param name="l1start"></param>
+        /// <param name="l1End"></param>
+        /// <param name="topLeft"></param>
+        /// <param name="bottomRight"></param>
+        /// <param name="intersectsAt"></param>
+        /// <returns></returns>
+        public static bool LineIntersectsRectangle(Vector2 l1start, Vector2 l1End, Vector2 topLeft, Vector2 bottomRight, out Vector2 intersectsAt)
+        {
+            var tr = new Vector2(bottomRight.X, topLeft.Y);
+            var bl = new Vector2(topLeft.X, bottomRight.Y);
+            bool intersects = false;
+            //left
+            if (GeneralMath.LineIntersectsLine(l1start, l1End, topLeft, bl, out intersectsAt))
+            {
+                intersects = true;
+            }
+            //right
+            if (GeneralMath.LineIntersectsLine(l1start, l1End, tr, bottomRight, out intersectsAt))
+            {
+                intersects = true;
+            }
+            //top
+            if (GeneralMath.LineIntersectsLine(l1start,l1End,topLeft, tr, out intersectsAt))
+            {
+                intersects = true;
+            }
+            //bottom
+            if (GeneralMath.LineIntersectsLine(l1start,l1End,bl, bottomRight, out intersectsAt))
+            {
+                intersects = true;
+            }
+
+            return intersects;
+        }
+
+        /// <summary>
         /// A decimal Sqrt. not as fast as normal Math.Sqrt, but better precision. 
         /// </summary>
         /// <returns>The sqrt. of x</returns>

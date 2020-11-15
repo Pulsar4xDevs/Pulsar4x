@@ -11,20 +11,29 @@ namespace Pulsar4X.ECSLib
     public class EntityDamageProfileDB : BaseDataBlob
     {
         public (ArmorSD armorType, float thickness) Armor;
+        
+        /// <summary>
+        /// this is the same list as the ship design's List<(ComponentDesign design, int count)> Components
+        /// except we're only storing the guid here. 
+        /// </summary>
         public List<(Guid id, int count)> PlacementOrder;
+        /// <summary>
+        /// this allows us to encode the green value of the ShipDamageProfile to a component instance.
+        /// it's really a single dimentional version of the ship design's List<(ComponentDesign design, int count)> Components
+        /// </summary>
+        public List<ComponentInstance> ComponentLookupTable = new List<ComponentInstance>();
+        
         public List<(Guid, RawBmp)> TypeBitmaps;
         
         //public List<(int index, int size)> Bulkheads; maybe connect armor/skin at these points.
         //if we get around to doing technical stuff like being able to break a ship into two pieces,
         //and having longditudinal structural parts...
-        public RawBmp DamageProfile;
         
+        
+        public RawBmp DamageProfile;
         public List<List<RawBmp>> DamageSlides = new List<List<RawBmp>>();
         
-        /// <summary>
-        /// this allows us to encode the green value of the ShipDamageProfile to a component instance. 
-        /// </summary>
-        public List<ComponentInstance> ComponentLookupTable = new List<ComponentInstance>();
+
 
         [JsonConstructor]
         private EntityDamageProfileDB()

@@ -28,6 +28,13 @@ namespace Pulsar4X.ECSLib
         /// m^3
         /// </summary>
         //public double Volume;
+        
+        /// <summary>
+        /// This lists all the components in order for the design, from front to back, and how many "wide".
+        /// note that component types can be split/arranged ie:
+        /// (bridge,1), (fueltank,2), (cargo,1)(fueltank,1)(engine,3) would have a bridge at teh front,
+        /// then two fueltanks behind, one cargo, another single fueltank, then finaly three engines.
+        /// </summary>
         public List<(ComponentDesign design, int count)> Components;
         public (ArmorSD type, float thickness) Armor;
         public Dictionary<Guid, long> ResourceCosts { get; internal set; } = new Dictionary<Guid, long>();

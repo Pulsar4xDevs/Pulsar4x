@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                     {
                         Velocity = new Vector2( ralitiveVel.X, ralitiveVel.Y),
                         Position = ((int)posRalitiveToTarget.X, (int)posRalitiveToTarget.Y),
-                        Angle = hitAngle,
+                        //Angle = hitAngle,
                         Mass = 0.000001f,
                         Density = 1000,
                         Momentum = (float)(UniversalConstants.Science.PlankConstant * freq),

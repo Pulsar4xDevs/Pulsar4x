@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
     {
         public Vector2 Velocity;
         public (int x,int y) Position;
-        public double Angle;
+        //public double Angle;
         public float Mass;
         public float Momentum;
         public float Density;//kg/m^3
@@ -152,23 +152,30 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         
         public static RawBmp CreateComponentByteArray(ComponentDesign componentDesign, byte typeID)
         {
-            //1 pixel = 1meter resolution
-            var vol = componentDesign.VolumePerUnit * 1000;
-
+            
+            //var vol = componentDesign.VolumePerUnit * 1000;
+            var volm3 = componentDesign.VolumePerUnit;
+            //we convert 3d volume to 2d area at 1px = 1cm resolution
+            var area = Math.Cbrt(volm3) * 2 * 1000;
+            var len = Math.Sqrt(area * componentDesign.AspectRatio);
+            var wid = area / len;
+            
+            
             double floatdepth = Math.Pow(componentDesign.AspectRatio, (float)1 / 3);
             double CSA = componentDesign.VolumePerUnit / floatdepth;
             double floatwidth = Math.Sqrt(CSA) * (double)componentDesign.AspectRatio;
-            int depth = (int)floatdepth;
-            int width = (int)floatwidth;
-            int height = (int)(CSA / width);
-            int v2d = height * width;
-            int volume = (int)vol;
+            //int depth = (int)floatdepth;
+            int width = (int)len;
+            int height = (int)wid;
+            //int v2d = height * width;
+            //int volume = (int)volm3;
 
-            if (componentDesign.AspectRatio > 1)
-            {
-                width = (int)(width / componentDesign.AspectRatio);
-                height = (int)(height / componentDesign.AspectRatio);
-            }
+            //if (componentDesign.AspectRatio > 1)
+            //{
+            //     width = (int)(width / componentDesign.AspectRatio);
+            //    height = (int)(height / componentDesign.AspectRatio);
+            //}
+            
 
             int imagedepth = 4;
             int size = imagedepth * width * height;

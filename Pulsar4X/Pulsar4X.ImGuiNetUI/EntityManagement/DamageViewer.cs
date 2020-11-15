@@ -232,7 +232,9 @@ namespace Pulsar4X.SDL2UI.Combat
                                 Velocity = new Orbital.Vector2(_fireVel.x, _fireVel.y),
                                 Mass = _projMass,
                                 Density = _projDensity,
-                                Length = _projLen
+                                Length = _projLen,
+                                Momentum = (float)_momentum,
+
                             };
                             _damageFrames = DamageTools.DealDamage(_profile, damageFrag);
                             _rawShipImage = _damageFrames.Last();
