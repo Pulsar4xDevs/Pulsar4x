@@ -289,7 +289,7 @@ namespace Pulsar4X.ECSLib.Industry
                 var prodLine = kvp.Value;
                 var industryPointsRemaining = new Dictionary<Guid, int>( prodLine.IndustryTypeRates);
                 List<IndustryJob> Joblist = prodLine.Jobs;
-                float productionPercentage = 1;
+                float productionPercentage = 1; //0 to 1
                 
                 
 

@@ -66,14 +66,38 @@ namespace Pulsar4X.SDL2UI
             if (IsActive)
             {
                 //_flags = ImGuiWindowFlags.AlwaysAutoResize;
-                if (ImGui.Begin("Cargo", ref IsActive, _flags))
+                if (ImGui.Begin("Industry", ref IsActive, _flags))
                 {
-                    _cargoList.Display();
+                    ImGui.BeginTabBar("IndustryTabs");
 
-                    if (_industryPannel != null)// && ImGui.CollapsingHeader("Refinary Points: " + _industryDB.ConstructionPoints))
+                    if (ImGui.BeginTabItem("Overview"))
                     {
-                        _industryPannel.Display();
+                        OverviewPannel.Display(_staticData, _selectedEntity);
+                        ImGui.EndTabItem();
                     }
+
+                    
+                    
+                    
+                    if( ImGui.BeginTabItem("Cargo and Storage"))
+                    {
+                        _cargoList.Display();
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Industry and Construction"))
+                    {
+                        if (_industryPannel != null)// && ImGui.CollapsingHeader("Refinary Points: " + _industryDB.ConstructionPoints))
+                        {
+                            _industryPannel.Display();
+                        }
+                        ImGui.EndTabItem();
+                    }
+
+                    ImGui.EndTabBar();
+                    //_cargoList.Display();
+
+
                 }
                 ImGui.End();
             }
@@ -106,5 +130,17 @@ namespace Pulsar4X.SDL2UI
             if (button == MouseButtons.Primary)
                 _selectedEntity = entity;
         }
+    }
+
+    public class OverviewPannel
+    {
+        public static void Display(StaticDataStore staticData, EntityState selectedEntity)
+        {
+            ComponentInstancesDB intances = selectedEntity.Entity.GetDataBlob<ComponentInstancesDB>();
+            var componentInstances = EntityInfoPanel.ComponentsDisplay.CreateNewInstanceArray(selectedEntity.Entity);
+            EntityInfoPanel.ComponentsDisplay.Display(componentInstances);
+        }
+        
+
     }
 }
