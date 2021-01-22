@@ -291,6 +291,11 @@ namespace Pulsar4X.ECSLib
             _instanceAbilities[typeof(T)] = abilityState;
         }
 
+        public Dictionary<Type, IComponentDesignAttribute> GetAttributes()
+        {
+            return Design.AttributesByType;
+        }
+
         /// <summary>
         /// returns the design name and index of this component ie "Thruster5k# 1"
         /// Avoid doing this each frame, it looks up the name via doing a GetDataBlob and an List.IndexOf()
@@ -319,6 +324,7 @@ namespace Pulsar4X.ECSLib
             HTKMax = design.HTK;
             CargoTypeID = design.CargoTypeID;
             Name = design.Name;
+            
 
         }
 

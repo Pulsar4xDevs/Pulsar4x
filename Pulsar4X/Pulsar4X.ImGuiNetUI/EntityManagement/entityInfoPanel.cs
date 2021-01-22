@@ -152,7 +152,11 @@ namespace Pulsar4X.SDL2UI
         public static class ComponentsDisplay
         {
             
-            
+            /// <summary>
+            /// returns a 2d array[i][j] where i is the component design, and j is the componentInstance 
+            /// </summary>
+            /// <param name="selectedEntity"></param>
+            /// <returns></returns>
             public static ComponentInstance[][] CreateNewInstanceArray(Entity selectedEntity)
             {
                 var instancesDB = selectedEntity.GetDataBlob<ComponentInstancesDB>();
@@ -207,6 +211,45 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Columns(1);
                 BorderGroup.End();
             }
+
+            private static int _selectedIndex = 0;
+            public static void DisplayComplex(ComponentInstance[][] instancesArray)
+            {
+                List<string> names = new List<string>();
+                List<ComponentInstance> flatInstances = new List<ComponentInstance>();
+                int c = 0;
+                for (int i = 0; i < instancesArray.Length; i++)
+                {
+                    for (int j = 0; j < instancesArray[i].Length; j++)
+                    {
+                        var instance = instancesArray[i][j];
+                        string name = instance.Name;
+                        float health = 100 * instance.HealthPercent();
+                        names.Add(name);
+                        flatInstances.Add(instance);
+                        c++;
+                    }
+                }
+                
+                
+                BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 164);
+
+
+                var states = flatInstances[_selectedIndex].GetAllStates();
+                foreach (var state in states)
+                {
+                    ImGui.Text(state.Value.Name);
+                }
+                
+                foreach (var kvpAttribute in flatInstances[_selectedIndex].GetAttributes())
+                {
+                    ImGui.Text(kvpAttribute.Value.AtbName());
+                    ImGui.Text(kvpAttribute.Value.AtbDescription());
+                }
+
+                BorderListOptions.End(new Vector2(84,100));
+            }
+
         }
     }
 }

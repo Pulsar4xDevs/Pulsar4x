@@ -38,5 +38,25 @@ namespace Pulsar4X.ECSLib
                 parentEntity.SetDataBlob(new MiningDB());
             MineResourcesProcessor.CalcMaxRate(parentEntity);
         }
+        
+        public string AtbName()
+        {
+            return "Resource Mining";
+        }
+
+        public string AtbDescription()
+        {
+            
+            string resources = "";
+            foreach (var kvp in ResourcesPerEconTick)
+            {
+                var name =StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key).Name;
+                var amount = kvp.Value;
+
+                resources += name + ", amount. ";
+            }
+            
+            return "Gathers " + resources;
+        }
     }
 }

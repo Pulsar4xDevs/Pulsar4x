@@ -63,6 +63,17 @@ namespace Pulsar4X.ECSLib
             db.DeltaV = OrbitMath.TsiolkovskyRocketEquation(wetmass, dryMass, ExhaustVelocity);
             */
         }
+        
+        public string AtbName()
+        {
+            return "Newton Thrust";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
+        }
     }
 
     public class NewtonThrustAbilityDB : BaseDataBlob

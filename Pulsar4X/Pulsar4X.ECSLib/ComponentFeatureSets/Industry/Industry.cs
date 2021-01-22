@@ -95,7 +95,7 @@ namespace Pulsar4X.ECSLib.Industry
             newline.MaxVolume = MaxProductionVolume;
             newline.IndustryTypeRates = IndustryPoints;
             newline.FacName = componentInstance.Name;
-
+            
             if (db == null)
             {
                 db = new IndustryAbilityDB(componentInstance.ID, newline);
@@ -106,6 +106,25 @@ namespace Pulsar4X.ECSLib.Industry
                 db.ProductionLines.Add(componentInstance.ID, newline);
             }
         }
+        
+        public string AtbName()
+        {
+            return "Industry";
+        }
+
+        public string AtbDescription()
+        {
+            string industryTypesAndPoints = "";
+            foreach (var kvp in IndustryPoints)
+            {
+                var name =StaticRefLib.StaticData.IndustryTypes[kvp.Key].Name;
+                var amount = kvp.Value;
+
+                industryTypesAndPoints += name + ", " + amount + ". ";
+            }
+            return "Adds " + industryTypesAndPoints;
+        }
+        
     }
     public enum ConstructableGuiHints
     {

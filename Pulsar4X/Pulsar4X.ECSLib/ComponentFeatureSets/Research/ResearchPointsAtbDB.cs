@@ -40,5 +40,16 @@ namespace Pulsar4X.ECSLib
             if(!parentEntity.HasDataBlob<TeamsHousedDB>())
                 parentEntity.SetDataBlob(new TeamsHousedDB());
         }
+        
+        public string AtbName()
+        {
+            return "Research Points";
+        }
+
+        public string AtbDescription()
+        {
+
+            return _pointsPerEconTick.ToString();
+        }
     }
 }

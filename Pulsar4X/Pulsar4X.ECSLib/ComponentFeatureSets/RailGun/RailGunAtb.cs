@@ -35,6 +35,17 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
                 componentInstance.SetAbilityState<WeaponState>(wpnState);
             }
         }
+        
+        public string AtbName()
+        {
+            return "Rail Gun";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
+        }
 
         public bool CanLoadOrdnance(OrdnanceDesign ordnanceDesign)
         {

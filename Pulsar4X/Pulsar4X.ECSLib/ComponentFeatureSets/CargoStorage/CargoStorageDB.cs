@@ -102,6 +102,16 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
+        
+        public string AtbName()
+        {
+            return "Cargo Volume";
+        }
+
+        public string AtbDescription()
+        {
+            return "Adds " + MaxVolume + " m^3 Volume to parent cargo storage";
+        }
     }
 
 

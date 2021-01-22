@@ -66,6 +66,17 @@ namespace Pulsar4X.ECSLib
             }
             ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(parentEntity);
         }
+        
+        public string AtbName()
+        {
+            return "Warp Drive";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
+        }
     }
 
 

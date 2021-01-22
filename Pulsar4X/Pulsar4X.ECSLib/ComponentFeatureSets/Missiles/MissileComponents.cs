@@ -49,6 +49,16 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         {
             
         }
+        public string AtbName()
+        {
+            return "Ordnance Payload";
+        }
+
+        public string AtbDescription()
+        {
+
+            return "";
+        }
     }
 
     public class OrdnanceExplosivePayload : OrdnancePayloadAtb
@@ -228,6 +238,17 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             
+        }
+        
+        public string AtbName()
+        {
+            return "EW Suite";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
         }
     }
 

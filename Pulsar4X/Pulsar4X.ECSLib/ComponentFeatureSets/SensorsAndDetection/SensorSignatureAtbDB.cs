@@ -69,5 +69,16 @@ namespace Pulsar4X.ECSLib
 
             parentEntity.SetDataBlob<SensorProfileDB>(_PartSensorProfile);
         }
+        
+        public string AtbName()
+        {
+            return "Sensor Signature";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
+        }
     }
 }

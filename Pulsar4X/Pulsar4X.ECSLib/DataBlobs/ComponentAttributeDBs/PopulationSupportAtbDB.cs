@@ -42,5 +42,16 @@ namespace Pulsar4X.ECSLib
         {
             throw new System.NotImplementedException();
         }
+        
+        public string AtbName()
+        {
+            return "Population Support";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
+        }
     }
 }

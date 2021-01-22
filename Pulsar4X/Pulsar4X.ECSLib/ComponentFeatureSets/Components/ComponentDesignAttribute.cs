@@ -12,6 +12,10 @@ namespace Pulsar4X.ECSLib
         //void OnComponentInstantiation(Entity component);
         void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance);
         //void OnComponentDeInstalation(Entity ship, Entity component);
+
+        string AtbName();
+
+        string AtbDescription();
     }
 
     public class ComponentDesignAttribute

@@ -76,6 +76,16 @@ namespace Pulsar4X.ECSLib
             }
             StorageSpaceProcessor.RecalcVolumeCapacityAndRates(parentEntity);
         }
+        
+        public string AtbName()
+        {
+            return "Cargo Transfer Rate";
+        }
+
+        public string AtbDescription()
+        {
+            return "Adds " + TransferRate_kgh + " kg per hour at " + TransferRange_ms + " m/s Dv";
+        }
     }
 
 

@@ -84,5 +84,16 @@ namespace Pulsar4X.ECSLib
             if (!parentEntity.HasDataBlob<CargoAbleTypeDB>())
                 parentEntity.SetDataBlob(new CargoAbleTypeDB(this)); //basicaly just clone the design to the instance. 
         }
+        
+        public string AtbName()
+        {
+            return "Cargoable";
+        }
+
+        public string AtbDescription()
+        {
+            return "Parent can be stored in " + StaticRefLib.StaticData.CargoTypes[CargoTypeID].Name + " cargo";
+            ;
+        }
     }
 }

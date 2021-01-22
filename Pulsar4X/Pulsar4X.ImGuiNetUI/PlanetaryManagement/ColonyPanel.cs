@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -72,7 +73,7 @@ namespace Pulsar4X.SDL2UI
 
                     if (ImGui.BeginTabItem("Overview"))
                     {
-                        OverviewPannel.Display(_staticData, _selectedEntity);
+                        OverviewPannel.Display(_selectedEntity);
                         ImGui.EndTabItem();
                     }
 
@@ -134,11 +135,24 @@ namespace Pulsar4X.SDL2UI
 
     public class OverviewPannel
     {
-        public static void Display(StaticDataStore staticData, EntityState selectedEntity)
+
+        private static Guid _entityID;
+        private static Dictionary<Guid, IndustryTypeSD> _industryTypes;
+        public static void Setup(EntityState selectedEntity)
+        {
+            _entityID = selectedEntity.Entity.Guid;
+            _industryTypes = Pulsar4X.ECSLib.StaticRefLib.StaticData.IndustryTypes;
+            
+        }
+
+        public static void Display(EntityState selectedEntity)
         {
             ComponentInstancesDB intances = selectedEntity.Entity.GetDataBlob<ComponentInstancesDB>();
             var componentInstances = EntityInfoPanel.ComponentsDisplay.CreateNewInstanceArray(selectedEntity.Entity);
-            EntityInfoPanel.ComponentsDisplay.Display(componentInstances);
+            EntityInfoPanel.ComponentsDisplay.DisplayComplex(componentInstances);
+
+ 
+
         }
         
 

@@ -78,6 +78,17 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 parentEntity.SetDataBlob(mla);
             }*/
         }
+        
+        public string AtbName()
+        {
+            return "Missle Launcher";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
+        }
     }
 
     public class MissileLaunchersAbilityDB : BaseDataBlob

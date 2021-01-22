@@ -106,8 +106,16 @@ namespace Pulsar4X.ECSLib
                 wpnState.WeaponStats[2] = ("Rate Of Fire:", ReloadRate, new ValueTypeStruct(ValueTypeStruct.ValueTypes.Number, ValueTypeStruct.ValueSizes.BaseUnit));
                 componentInstance.SetAbilityState<WeaponState>(wpnState);
             }
-            
+        }
+        
+        public string AtbName()
+        {
+            return "Generic Beam Weapon";
+        }
 
+        public string AtbDescription()
+        {
+            return "";
         }
 
     }
