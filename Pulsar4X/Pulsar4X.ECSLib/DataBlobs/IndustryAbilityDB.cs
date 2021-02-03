@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib
 {
-    public class IndustryAbilityDB : BaseDataBlob
+    public class IndustryAbilityDB : BaseDataBlob, IAbilityDescription
     {
         public class ProductionLine
         {
@@ -55,6 +55,30 @@ namespace Pulsar4X.ECSLib
         public List<IConstrucableDesign> GetJobItems(FactionInfoDB factionInfoDB)
         {
             return factionInfoDB.IndustryDesigns.Values.ToList();
+        }
+
+        public string AbilityName()
+        {
+            return "Production Industry";
+        }
+
+        public string AbilityDescription()
+        {
+            string time = StaticRefLib.Game.Settings.EconomyCycleTime.ToString();
+            string desc = "Refines and Constructs Materials and Items at Rates of: \n";
+            foreach (var kvpLines in ProductionLines)
+            {
+                
+                desc += kvpLines.Value.FacName + "\n";
+                foreach (var kvpRates in kvpLines.Value.IndustryTypeRates)
+                {
+                    string industryName =  "   " + StaticRefLib.StaticData.IndustryTypes[kvpRates.Key].Name;
+                    desc += industryName + " : " + kvpRates.Value + "\n";
+                }
+                 
+            }
+
+            return desc + "per " + time;
         }
     }
 }

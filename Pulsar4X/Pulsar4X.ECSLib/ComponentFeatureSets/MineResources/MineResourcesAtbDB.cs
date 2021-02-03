@@ -46,17 +46,15 @@ namespace Pulsar4X.ECSLib
 
         public string AtbDescription()
         {
-            
-            string resources = "";
+            string time = StaticRefLib.Game.Settings.EconomyCycleTime.ToString();
+            string desc = "Adds to Resource Mining Ability at Rates of: \n";
             foreach (var kvp in ResourcesPerEconTick)
             {
-                var name =StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key).Name;
-                var amount = kvp.Value;
-
-                resources += name + ", amount. ";
+                string resourceName = StaticRefLib.StaticData.CargoGoods.GetMineral(kvp.Key).Name;
+                desc += resourceName + " : " + Stringify.Number(kvp.Value) + "\n";
             }
-            
-            return "Gathers " + resources;
+
+            return desc + "per " + time;
         }
     }
 }

@@ -20,4 +20,11 @@ namespace Pulsar4X.ECSLib
     {
         int GetValueCompareHash(int hash = 17);
     }
+
+    public interface IAbilityDescription
+    {
+        string AbilityName();
+        string AbilityDescription();
+
+    }
 }

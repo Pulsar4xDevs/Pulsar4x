@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 namespace Pulsar4X.ECSLib
 {
     
-    public class VolumeStorageDB : BaseDataBlob
+    public class VolumeStorageDB : BaseDataBlob, IAbilityDescription
     {
         public Dictionary<Guid, TypeStore> TypeStores = new Dictionary<Guid, TypeStore>();
         public double TotalStoredMass { get; internal set; } = 0;
@@ -42,6 +42,23 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new VolumeStorageDB(this);
+        }
+
+        public string AbilityName()
+        {
+            return "Cargo Volume";
+        }
+
+        public string AbilityDescription()
+        {
+            string desc = "Total Volume storage: \n";
+            foreach (var kvp in TypeStores)
+            {
+                string name = StaticRefLib.StaticData.CargoTypes[kvp.Key].Name;
+                desc += name + " : " + kvp.Value.MaxVolume + "\n";
+            }
+            
+            return desc;
         }
     }
 

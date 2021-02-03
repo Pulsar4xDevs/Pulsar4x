@@ -71,9 +71,16 @@ namespace Pulsar4X.SDL2UI
                 {
                     ImGui.BeginTabBar("IndustryTabs");
 
+                    
                     if (ImGui.BeginTabItem("Overview"))
                     {
-                        OverviewPannel.Display(_selectedEntity);
+                        OverViewPannel.Display(_selectedEntity);
+                        ImGui.EndTabItem();
+                    }
+                    
+                    if (ImGui.BeginTabItem("Facilities"))
+                    {
+                        FacilitiesViewPannel.Display(_selectedEntity);
                         ImGui.EndTabItem();
                     }
 
@@ -133,7 +140,25 @@ namespace Pulsar4X.SDL2UI
         }
     }
 
-    public class OverviewPannel
+    public class OverViewPannel
+    {
+        private static Guid _entityID;
+        private static Dictionary<Guid, IndustryTypeSD> _industryTypes;
+        public static void Setup(EntityState selectedEntity)
+        {
+            _entityID = selectedEntity.Entity.Guid;
+            _industryTypes = Pulsar4X.ECSLib.StaticRefLib.StaticData.IndustryTypes;
+            
+        }
+        
+        public static void Display(EntityState selectedEntity)
+        {
+            EntityInfoPanel.AbilitesDisplay.Display(selectedEntity.Entity);
+            
+        }
+    }
+
+    public class FacilitiesViewPannel
     {
 
         private static Guid _entityID;

@@ -3,6 +3,7 @@ using ImGuiNET;
 using Pulsar4X.ECSLib;
 using System.Numerics;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -232,7 +233,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 
                 
-                BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 164);
+                BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 256);
 
 
                 var states = flatInstances[_selectedIndex].GetAllStates();
@@ -247,9 +248,38 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(kvpAttribute.Value.AtbDescription());
                 }
 
-                BorderListOptions.End(new Vector2(84,100));
+                float ycount = flatInstances.Count;
+                float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
+                BorderListOptions.End(new Vector2(184,yhight));
+                
             }
 
+        }
+
+        public static class AbilitesDisplay
+        {
+            private static int _selectedIndex = 0;
+            //private Entity _entity;
+            public static void Display(Entity entity)
+            {
+                List<string> names = new List<string>();
+                List<IAbilityDescription> abilites = new List<IAbilityDescription>();
+                foreach (var db in entity.DataBlobs)
+                {
+                    if (db is IAbilityDescription)
+                    {
+                        IAbilityDescription dbdesc = (IAbilityDescription)db;
+                        names.Add(dbdesc.AbilityName());
+                        abilites.Add(dbdesc);
+                    }
+                }  
+                
+                BorderListOptions.Begin("Abilites", names.ToArray(), ref _selectedIndex, 184 );
+                ImGui.Text(abilites[_selectedIndex].AbilityDescription());
+                float ycount = abilites[_selectedIndex].AbilityDescription().Split("\n").Length -1;
+                float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
+                BorderListOptions.End(new Vector2(256,yhight));
+            }
         }
     }
 }
