@@ -259,11 +259,17 @@ namespace Pulsar4X.SDL2UI
         public static class AbilitesDisplay
         {
             private static int _selectedIndex = 0;
-            //private Entity _entity;
+            private static Entity _entity;
             public static void Display(Entity entity)
             {
                 List<string> names = new List<string>();
                 List<IAbilityDescription> abilites = new List<IAbilityDescription>();
+                if (_entity != entity)
+                {
+                    _selectedIndex = 0;
+                    _entity = entity;
+                }
+
                 foreach (var db in entity.DataBlobs)
                 {
                     if (db is IAbilityDescription)

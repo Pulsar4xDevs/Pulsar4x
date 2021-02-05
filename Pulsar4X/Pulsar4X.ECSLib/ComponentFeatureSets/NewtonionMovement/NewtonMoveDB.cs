@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class NewtonThrustAbilityDB : BaseDataBlob
+    public class NewtonThrustAbilityDB : BaseDataBlob, IAbilityDescription
     {
         
         public double ThrustInNewtons = 0;
@@ -161,6 +161,19 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new NewtonThrustAbilityDB(this);
+        }
+
+        public string AbilityName()
+        {
+            return "Newtonion Thrust";
+        }
+
+        public string AbilityDescription()
+        {
+            string desc = "";
+            desc += "Thrust : " + ThrustInNewtons + " N\n";
+            desc += "Δv : " + DeltaV + " m/s\n";
+            return desc;
         }
     }
 

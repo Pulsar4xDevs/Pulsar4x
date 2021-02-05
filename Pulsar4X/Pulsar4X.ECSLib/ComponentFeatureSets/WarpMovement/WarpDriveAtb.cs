@@ -80,7 +80,7 @@ namespace Pulsar4X.ECSLib
     }
 
 
-    public class WarpAbilityDB : BaseDataBlob
+    public class WarpAbilityDB : BaseDataBlob, IAbilityDescription
     {
         /// <summary>
         /// 
@@ -112,6 +112,21 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new WarpAbilityDB(this);
+        }
+
+        public string AbilityName()
+        {
+            return "Alcubierre Warp Drive";
+        }
+
+        public string AbilityDescription()
+        {
+            string desc = "Power : " + TotalWarpPower + "\n";
+            desc += "Bubble Creation : " + BubbleCreationCost + "\n";
+            desc += "Bubble Sustain : " + BubbleSustainCost + "\n";
+            desc += "Bubble Collapse : " + BubbleCollapseCost + "\n";
+
+            return desc;
         }
     }
 

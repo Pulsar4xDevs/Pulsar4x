@@ -35,7 +35,9 @@ namespace Pulsar4X.ECSLib
         {
             if (!parentEntity.HasDataBlob<EntityResearchDB>())
             {
-                parentEntity.SetDataBlob(new EntityResearchDB());
+                var db = new EntityResearchDB();
+                db.Labs.Add(componentInstance, _pointsPerEconTick);
+                parentEntity.SetDataBlob(db);
             }
             if(!parentEntity.HasDataBlob<TeamsHousedDB>())
                 parentEntity.SetDataBlob(new TeamsHousedDB());
