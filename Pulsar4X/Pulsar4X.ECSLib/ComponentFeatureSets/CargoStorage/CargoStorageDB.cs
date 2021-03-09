@@ -51,11 +51,11 @@ namespace Pulsar4X.ECSLib
 
         public string AbilityDescription()
         {
-            string desc = "Total Volume storage: \n";
+            string desc = "Total Volume storage\n";
             foreach (var kvp in TypeStores)
             {
                 string name = StaticRefLib.StaticData.CargoTypes[kvp.Key].Name;
-                desc += name + " : " + kvp.Value.MaxVolume + "\n";
+                desc += name + "\t" + kvp.Value.MaxVolume + "\n";
             }
             
             return desc;

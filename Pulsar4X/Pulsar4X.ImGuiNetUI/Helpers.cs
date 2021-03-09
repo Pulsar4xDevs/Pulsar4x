@@ -184,6 +184,8 @@ namespace Pulsar4X.SDL2UI
         private static BorderListState[] _states = new BorderListState[8];
         private static float _dentMulitpier = 3;
         private static int _nestIndex = 0;
+
+        private static int colomnCount = 1;
         /*
         private static Vector2 _labelSize = new Vector2();
         private static float _xleft;
@@ -206,6 +208,7 @@ namespace Pulsar4X.SDL2UI
             var state = new BorderListState();  
             state._colour = ImGui.GetColorU32(ImGuiCol.Border);
             state._labelSize = new System.Numerics.Vector2( width, ImGui.GetTextLineHeight());
+            colomnCount = ImGui.GetColumnsCount();
             ImGui.Columns(2, id, false);
             ImGui.SetColumnWidth(0, width);
             
@@ -267,8 +270,9 @@ namespace Pulsar4X.SDL2UI
             var winpos = ImGui.GetCursorPos();
             
             var rgnSize = ImGui.GetContentRegionAvail();
+            
             ImGui.NextColumn();
-            ImGui.Columns(1); 
+            ImGui.Columns(colomnCount); 
             var scpos = ImGui.GetCursorScreenPos();
             ImGui.Unindent(_dentMulitpier);
             

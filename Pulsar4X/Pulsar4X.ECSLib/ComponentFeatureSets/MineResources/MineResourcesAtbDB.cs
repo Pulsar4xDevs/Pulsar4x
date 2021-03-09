@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in ResourcesPerEconTick)
             {
                 string resourceName = StaticRefLib.StaticData.CargoGoods.GetMineral(kvp.Key).Name;
-                desc += resourceName + " : " + Stringify.Number(kvp.Value) + "\n";
+                desc += resourceName + "\t" + Stringify.Number(kvp.Value) + "\n";
             }
 
             return desc + "per " + time;

@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
             {
                 total += line.Value;
                 string labname = line.Key.Name;
-                desc += labname + " : " + line.Value + "\n";
+                desc += labname + "\t" + line.Value + "\n";
             }
 
             desc += labcount.ToString() + " Labs, generating a total of " + total.ToString() + " Research Points";

@@ -260,8 +260,10 @@ namespace Pulsar4X.SDL2UI
         {
             private static int _selectedIndex = 0;
             private static Entity _entity;
+            
             public static void Display(Entity entity)
             {
+                float xwid = 100;
                 List<string> names = new List<string>();
                 List<IAbilityDescription> abilites = new List<IAbilityDescription>();
                 if (_entity != entity)
@@ -280,11 +282,35 @@ namespace Pulsar4X.SDL2UI
                     }
                 }  
                 
+                //left selectable box
                 BorderListOptions.Begin("Abilites", names.ToArray(), ref _selectedIndex, 184 );
-                ImGui.Text(abilites[_selectedIndex].AbilityDescription());
+                
+
+                
+                //right box of sub items
+                string[] abilitiesAry = abilites[_selectedIndex].AbilityDescription().Split("\n");
+                 
+                
+                foreach (var strline in abilitiesAry)
+                {
+                    string[] tabSplit = strline.Split("\t");
+                    for (int i = 0; i < tabSplit.Length; i++)
+                    {
+                        ImGui.Text(tabSplit[i]);
+                        if(i < tabSplit.Length -1)
+                            ImGui.SameLine();
+                    }
+         
+                    if (xwid < ImGui.GetItemRectSize().X)
+                        xwid = ImGui.GetItemRectSize().X;
+                    
+                }
+                
                 float ycount = abilites[_selectedIndex].AbilityDescription().Split("\n").Length -1;
                 float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
-                BorderListOptions.End(new Vector2(256,yhight));
+                
+                ImGui.Columns(2);
+                BorderListOptions.End(new Vector2(xwid,yhight));
             }
         }
     }

@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
                 foreach (var kvpRates in kvpLines.Value.IndustryTypeRates)
                 {
                     string industryName =  "   " + StaticRefLib.StaticData.IndustryTypes[kvpRates.Key].Name;
-                    desc += industryName + " : " + kvpRates.Value + "\n";
+                    desc += industryName + "\t" + kvpRates.Value + "\n";
                 }
                  
             }
