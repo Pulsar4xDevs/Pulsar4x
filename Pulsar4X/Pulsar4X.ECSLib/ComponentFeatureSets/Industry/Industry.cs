@@ -120,9 +120,9 @@ namespace Pulsar4X.ECSLib.Industry
                 var name =StaticRefLib.StaticData.IndustryTypes[kvp.Key].Name;
                 var amount = kvp.Value;
 
-                industryTypesAndPoints += name + ", " + amount + ". ";
+                industryTypesAndPoints += name + "\t" + amount + "\n";
             }
-            return "Adds " + industryTypesAndPoints;
+            return industryTypesAndPoints;
         }
         
     }

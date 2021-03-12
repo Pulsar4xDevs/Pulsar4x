@@ -214,10 +214,13 @@ namespace Pulsar4X.SDL2UI
             }
 
             private static int _selectedIndex = 0;
+            private static float[] _textwidth = new float[2];
             public static void DisplayComplex(ComponentInstance[][] instancesArray)
             {
                 List<string> names = new List<string>();
                 List<ComponentInstance> flatInstances = new List<ComponentInstance>();
+                List<IComponentDesignAttribute> attrubutes = new List<IComponentDesignAttribute>();
+                float xwid = 100;
                 int c = 0;
                 for (int i = 0; i < instancesArray.Length; i++)
                 {
@@ -228,29 +231,88 @@ namespace Pulsar4X.SDL2UI
                         float health = 100 * instance.HealthPercent();
                         names.Add(name);
                         flatInstances.Add(instance);
+                        foreach (var atb in instance.GetAttributes().Values)
+                        {
+                            
+                        }
+
                         c++;
                     }
                 }
                 
                 
-                BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 256);
-
-
-                var states = flatInstances[_selectedIndex].GetAllStates();
-                foreach (var state in states)
+                //BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 256);
+                //left selectable box
+                if (BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 184))
                 {
-                    ImGui.Text(state.Value.Name);
+                    _textwidth = new float[2];
+                    attrubutes = new List<IComponentDesignAttribute>();
+                }
+
+                
+                
+                Dictionary<Type, ComponentAbilityState> states = flatInstances[_selectedIndex].GetAllStates();
+                foreach (var state in states.Values)
+                {
+                    ImGui.Text(state.Name);
                 }
                 
-                foreach (var kvpAttribute in flatInstances[_selectedIndex].GetAttributes())
+                foreach (var atb in flatInstances[_selectedIndex].GetAttributes().Values)
                 {
-                    ImGui.Text(kvpAttribute.Value.AtbName());
-                    ImGui.Text(kvpAttribute.Value.AtbDescription());
+                    attrubutes.Add(atb);
                 }
+                
+                
+
+                for (int atbi = 0; atbi < attrubutes.Count; atbi++)
+                {
+                    var atbName = attrubutes[atbi].AtbName();
+                    ImGui.Text(atbName);
+                    
+                    string[] atbAry = attrubutes[atbi].AtbDescription().Split("\n");
+                    
+                    //we're assuming the first item is a title of sorts
+                    var strline = atbAry[0];
+                    ImGui.Text(strline);
+                    if(xwid < ImGui.GetItemRectSize().X)
+                        xwid = ImGui.GetItemRectSize().X;
+                    
+                    for (int strlinei = 1; strlinei < atbAry.Length; strlinei++)
+                    {
+                        strline = atbAry[strlinei];
+                        
+                        string[] tabSplit = strline.Split("\t"); //split if there are tabs.
+                        var xpos = ImGui.GetCursorPosX();
+                        for (int i = 0; i < tabSplit.Length; i++) 
+                        {
+                            if(i > 0) //after the tab char
+                                ImGui.SetCursorPosX(xpos + _textwidth[i-1] + 12);//allign second row
+                        
+                            ImGui.Text(tabSplit[i]); //display the text
+                            if (_textwidth[i] < ImGui.GetItemRectSize().X) //check the size
+                                _textwidth[i] = ImGui.GetItemRectSize().X; //expand the size for the next frame
+                            if (i < tabSplit.Length - 1) //put the next item on the same line if there is another item in the array
+                                ImGui.SameLine(); //at least this bit shouldnt break if there's more than one tab
+                        }
+                        
+                    }
+                    
+                    
+                    //ImGui.Text(attrubutes[i].AtbDescription());
+                }
+                
 
                 float ycount = flatInstances.Count;
                 float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
-                BorderListOptions.End(new Vector2(184,yhight));
+                
+                //float ycount = abilites[_selectedIndex].AbilityDescription().Split("\n").Length -1;
+                //float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
+                if(xwid < _textwidth[0] + _textwidth[1] + 12)
+                    xwid = _textwidth[0] + _textwidth[1] + 12;
+                ImGui.Columns(2);
+                BorderListOptions.End(new Vector2(xwid,yhight));
+                
+                //BorderListOptions.End(new Vector2(184,yhight));
                 
             }
 
@@ -329,8 +391,8 @@ namespace Pulsar4X.SDL2UI
                 
                 float ycount = abilites[_selectedIndex].AbilityDescription().Split("\n").Length -1;
                 float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
-                if(xwid < _textwidth[0] + _textwidth[1])
-                   xwid = _textwidth[0] + _textwidth[1];
+                if(xwid < _textwidth[0] + _textwidth[1] + 12)
+                   xwid = _textwidth[0] + _textwidth[1] + 12;
                 ImGui.Columns(2);
                 BorderListOptions.End(new Vector2(xwid,yhight));
             }
