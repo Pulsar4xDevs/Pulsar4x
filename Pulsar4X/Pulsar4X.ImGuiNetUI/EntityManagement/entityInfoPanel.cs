@@ -260,6 +260,8 @@ namespace Pulsar4X.SDL2UI
         {
             private static int _selectedIndex = 0;
             private static Entity _entity;
+            private static float[] _textwidth = new float[2];
+            
             
             public static void Display(Entity entity)
             {
@@ -270,6 +272,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     _selectedIndex = 0;
                     _entity = entity;
+                    _textwidth = new float[2];
                 }
 
                 foreach (var db in entity.DataBlobs)
@@ -283,32 +286,51 @@ namespace Pulsar4X.SDL2UI
                 }  
                 
                 //left selectable box
-                BorderListOptions.Begin("Abilites", names.ToArray(), ref _selectedIndex, 184 );
-                
+                if (BorderListOptions.Begin("Abilites", names.ToArray(), ref _selectedIndex, 184))
+                {
+                    _textwidth = new float[2];
+                }
 
-                
+
+
                 //right box of sub items
                 string[] abilitiesAry = abilites[_selectedIndex].AbilityDescription().Split("\n");
-                 
                 
-                foreach (var strline in abilitiesAry)
+                //we're assuming the first item is a title of sorts
+                var strline = abilitiesAry[0];
+                ImGui.Text(strline);
+                if(xwid < ImGui.GetItemRectSize().X)
+                    xwid = ImGui.GetItemRectSize().X;
+                
+                
+                //we're expecting subsequent items to have a(one) tab char, and we want to allign the righthand side
+                //this whole bit of code could break in intersting ways if there's more than one tab char,
+                //however the strings are hardcode, so we'll ignore that problem untill it happens.
+                for (int strlinei = 1; strlinei < abilitiesAry.Length; strlinei++)
                 {
-                    string[] tabSplit = strline.Split("\t");
-                    for (int i = 0; i < tabSplit.Length; i++)
+                    strline = abilitiesAry[strlinei];
+                    if(strlinei > 0)
                     {
-                        ImGui.Text(tabSplit[i]);
-                        if(i < tabSplit.Length -1)
-                            ImGui.SameLine();
+                        string[] tabSplit = strline.Split("\t"); //split if there are tabs.
+                        var xpos = ImGui.GetCursorPosX();
+                        for (int i = 0; i < tabSplit.Length; i++) 
+                        {
+                            if(i > 0) //after the tab char
+                                ImGui.SetCursorPosX(xpos + _textwidth[i-1] + 12);//allign second row
+                            
+                            ImGui.Text(tabSplit[i]); //display the text
+                            if (_textwidth[i] < ImGui.GetItemRectSize().X) //check the size
+                                _textwidth[i] = ImGui.GetItemRectSize().X; //expand the size for the next frame
+                            if (i < tabSplit.Length - 1) //put the next item on the same line if there is another item in the array
+                                ImGui.SameLine(); //at least this bit shouldnt break if there's more than one tab
+                        }
                     }
-         
-                    if (xwid < ImGui.GetItemRectSize().X)
-                        xwid = ImGui.GetItemRectSize().X;
-                    
                 }
                 
                 float ycount = abilites[_selectedIndex].AbilityDescription().Split("\n").Length -1;
                 float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
-                
+                if(xwid < _textwidth[0] + _textwidth[1])
+                   xwid = _textwidth[0] + _textwidth[1];
                 ImGui.Columns(2);
                 BorderListOptions.End(new Vector2(xwid,yhight));
             }

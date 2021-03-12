@@ -202,8 +202,9 @@ namespace Pulsar4X.SDL2UI
         private static float _lhHeight;
         */
         
-        public static void Begin(string id, string[] list, ref int selected, float width)
+        public static bool Begin(string id, string[] list, ref int selected, float width)
         {
+            bool selectedChanged = false;
             ImGui.PushID(id);
             var state = new BorderListState();  
             state._colour = ImGui.GetColorU32(ImGuiCol.Border);
@@ -227,7 +228,10 @@ namespace Pulsar4X.SDL2UI
  
                 ImGui.Text(list[i]);
                 if (ImGui.IsItemClicked())
+                {
                     selected = i;
+                    selectedChanged = true;
+                }
                 
                 if(i == selected)
                 {   
@@ -250,6 +254,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.Indent(_dentMulitpier * _nestIndex);
             _states[_nestIndex] = state;
             _nestIndex++;
+            return selectedChanged;
         }
         /*
         public static void Begin(string id, ref int selected, string[] list)
