@@ -243,7 +243,7 @@ namespace Pulsar4X.SDL2UI
                 
                 //BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 256);
                 //left selectable box
-                if (BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 184))
+                if (BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 188))
                 {
                     _textwidth = new float[2];
                     attrubutes = new List<IComponentDesignAttribute>();
@@ -276,7 +276,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(strline);
                     if(xwid < ImGui.GetItemRectSize().X)
                         xwid = ImGui.GetItemRectSize().X;
-                    
+                    ImGui.Indent(2);
                     for (int strlinei = 1; strlinei < atbAry.Length; strlinei++)
                     {
                         strline = atbAry[strlinei];
@@ -301,7 +301,7 @@ namespace Pulsar4X.SDL2UI
                     //ImGui.Text(attrubutes[i].AtbDescription());
                 }
                 
-
+                ImGui.Unindent(2);
                 float ycount = flatInstances.Count;
                 float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
                 
@@ -364,36 +364,34 @@ namespace Pulsar4X.SDL2UI
                 if(xwid < ImGui.GetItemRectSize().X)
                     xwid = ImGui.GetItemRectSize().X;
                 
-                
+                ImGui.Indent(2);
                 //we're expecting subsequent items to have a(one) tab char, and we want to allign the righthand side
                 //this whole bit of code could break in intersting ways if there's more than one tab char,
                 //however the strings are hardcode, so we'll ignore that problem untill it happens.
                 for (int strlinei = 1; strlinei < abilitiesAry.Length; strlinei++)
                 {
                     strline = abilitiesAry[strlinei];
-                    if(strlinei > 0)
+                    string[] tabSplit = strline.Split("\t"); //split if there are tabs.
+                    var xpos = ImGui.GetCursorPosX();
+                    for (int i = 0; i < tabSplit.Length; i++) 
                     {
-                        string[] tabSplit = strline.Split("\t"); //split if there are tabs.
-                        var xpos = ImGui.GetCursorPosX();
-                        for (int i = 0; i < tabSplit.Length; i++) 
-                        {
-                            if(i > 0) //after the tab char
-                                ImGui.SetCursorPosX(xpos + _textwidth[i-1] + 12);//allign second row
-                            
-                            ImGui.Text(tabSplit[i]); //display the text
-                            if (_textwidth[i] < ImGui.GetItemRectSize().X) //check the size
-                                _textwidth[i] = ImGui.GetItemRectSize().X; //expand the size for the next frame
-                            if (i < tabSplit.Length - 1) //put the next item on the same line if there is another item in the array
-                                ImGui.SameLine(); //at least this bit shouldnt break if there's more than one tab
-                        }
+                        if(i > 0) //after the tab char
+                            ImGui.SetCursorPosX(xpos + _textwidth[i-1] + 12);//allign second row
+                        
+                        ImGui.Text(tabSplit[i]); //display the text
+                        if (_textwidth[i] < ImGui.GetItemRectSize().X) //check the size
+                            _textwidth[i] = ImGui.GetItemRectSize().X; //expand the size for the next frame
+                        if (i < tabSplit.Length - 1) //put the next item on the same line if there is another item in the array
+                            ImGui.SameLine(); //at least this bit shouldnt break if there's more than one tab
                     }
+                    
                 }
-                
+                ImGui.Unindent(2);
                 float ycount = abilites[_selectedIndex].AbilityDescription().Split("\n").Length -1;
                 float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
                 if(xwid < _textwidth[0] + _textwidth[1] + 12)
                    xwid = _textwidth[0] + _textwidth[1] + 12;
-                ImGui.Columns(2);
+                
                 BorderListOptions.End(new Vector2(xwid,yhight));
             }
         }

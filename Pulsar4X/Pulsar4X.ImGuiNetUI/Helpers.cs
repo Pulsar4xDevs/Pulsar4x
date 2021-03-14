@@ -182,7 +182,7 @@ namespace Pulsar4X.SDL2UI
         }
         
         private static BorderListState[] _states = new BorderListState[8];
-        private static float _dentMulitpier = 3;
+        private static float _dentFactor = 4;
         private static int _nestIndex = 0;
 
         private static int colomnCount = 1;
@@ -220,7 +220,7 @@ namespace Pulsar4X.SDL2UI
             var vpad = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
 
             
-            ImGui.Indent(_dentMulitpier);
+            ImGui.Indent(_dentFactor);
             //display the list of items:
             for (int i = 0; i < list.Length; i++)
             {
@@ -250,8 +250,9 @@ namespace Pulsar4X.SDL2UI
                 state._yctr1 = state._ybot;
                 state._yctr2 = state._ybot;
             }
+            
             ImGui.NextColumn(); //set nextColomn so the imgui.items placed after this get put into the righthand side
-            ImGui.Indent(_dentMulitpier * _nestIndex);
+            ImGui.Indent(_dentFactor * (_nestIndex + 1));
             _states[_nestIndex] = state;
             _nestIndex++;
             return selectedChanged;
@@ -269,7 +270,7 @@ namespace Pulsar4X.SDL2UI
 */
         public static void End(System.Numerics.Vector2 sizeRight)
         {
-            ImGui.Unindent(_dentMulitpier * _nestIndex);
+            ImGui.Unindent(_dentFactor * (_nestIndex + 1));
             _nestIndex--;
             var state = _states[_nestIndex];
             var winpos = ImGui.GetCursorPos();
@@ -279,9 +280,9 @@ namespace Pulsar4X.SDL2UI
             ImGui.NextColumn();
             ImGui.Columns(colomnCount); 
             var scpos = ImGui.GetCursorScreenPos();
-            ImGui.Unindent(_dentMulitpier);
+            ImGui.Unindent(_dentFactor);
             
-            state._xright = state._xcentr + sizeRight.X;
+            state._xright = state._xcentr + sizeRight.X + _dentFactor;
 
             float boty = Math.Max(state._ybot, state._ytop + sizeRight.Y); //is the list bigger, or the items drawn after it.
 
