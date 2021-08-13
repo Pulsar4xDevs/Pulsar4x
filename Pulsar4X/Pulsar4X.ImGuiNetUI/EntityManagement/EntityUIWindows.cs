@@ -145,6 +145,17 @@ namespace Pulsar4X.SDL2UI
             {
                 return true;
             }
+            else if (_entityState.Entity.HasDataBlob<VolumeStorageDB>() && T == typeof(TradeBaseWindow))
+            {
+                return true;
+            }
+            else if (
+                _entityState.Entity.HasDataBlob<VolumeStorageDB>() &&
+                _entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() &&
+                T == typeof(TradeShipWindow))
+            {
+                return true;
+            }
             else
             {
                 return false;
@@ -213,6 +224,18 @@ namespace Pulsar4X.SDL2UI
                 else if (T == typeof(CargoTransfer))
                 {
                     var instance = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState);
+                    instance.ToggleActive();
+                    _state.ActiveWindow = instance;
+                }
+                else if (T == typeof(TradeBaseWindow))
+                {
+                    var instance = TradeBaseWindow.GetInstance(_state.Game.StaticData, _entityState);
+                    instance.ToggleActive();
+                    _state.ActiveWindow = instance;
+                }
+                else if (T == typeof(TradeShipWindow))
+                {
+                    var instance = TradeShipWindow.GetInstance(_state.Game.StaticData, _entityState);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }

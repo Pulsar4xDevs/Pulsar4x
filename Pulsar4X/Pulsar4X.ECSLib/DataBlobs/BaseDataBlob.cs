@@ -12,6 +12,13 @@ namespace Pulsar4X.ECSLib
         [NotNull]
         public virtual Entity OwningEntity { get; internal set; } = Entity.InvalidEntity;
 
+        /// <summary>
+        /// while not what we're going for with the whole datablobs being only data, this could help make some things easier. 
+        /// have to be aware that it may require datablobs to be set in a given order if your overide requires a blob that's not yet on the entity
+        /// </summary>
+        internal virtual void OnSetToEntity()
+        {
+        }
         public abstract object Clone();
 
     }

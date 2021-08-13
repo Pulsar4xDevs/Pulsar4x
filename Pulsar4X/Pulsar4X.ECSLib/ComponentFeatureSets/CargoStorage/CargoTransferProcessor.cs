@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-    /// <summary>
+        /// <summary>
         /// Calculates the transfer rate.
         /// </summary>
         /// <returns>The transfer rate.</returns>

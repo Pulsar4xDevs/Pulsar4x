@@ -196,8 +196,8 @@
             },
             {
               "Name": "Refinery Points",
-              "DescriptionFormula": "''",
-              "GuiHint": "None",
+              "DescriptionFormula": "'Refines at a rate of'",
+              "GuiHint": "GuiTextDisplay",
               "AttributeFormula": "Ability('Size') * 0.1"
             },
             {

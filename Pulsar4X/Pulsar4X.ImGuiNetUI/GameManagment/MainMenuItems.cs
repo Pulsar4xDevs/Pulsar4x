@@ -45,7 +45,10 @@ namespace Pulsar4X.SDL2UI
                     if (_uiState.IsGameLoaded)
                     {
                         if (ImGui.Button("Save Current Game", buttonSize))
+                        {
                             _saveGame = !_saveGame;
+                            SerializationManager.Export(_uiState.Game, "SaveGame");
+                        }
                         if (ImGui.Button("Options", buttonSize))
                         {
                             SettingsWindow.GetInstance().ToggleActive();

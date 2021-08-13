@@ -1,0 +1,693 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="$USER_HOME$/.cache/JetBrains/Rider2020.3/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/.cache/JetBrains/Rider2020.3/resharper-host/local/Transient/Rider/v203/SolutionCaches/_Pulsar4X.-1340949018.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/.nuget/packages/microsoft.net.test.sdk/16.7.0-preview-20200519-01/build/netcoreapp2.1" t="Include">
+      <e p="Microsoft.NET.Test.Sdk.Program.cs" t="Include" />
+    </e>
+    <e p="$USER_HOME$/.nuget/packages/nunit3testadapter/3.13.0/build/netcoreapp1.0/NUnit3.TestAdapter.dll" t="Include" />
+    <e p="$USER_HOME$/.nuget/packages/nunit3testadapter/3.13.0/build/netcoreapp1.0/NUnit3.TestAdapter.pdb" t="Include" />
+    <e p="$USER_HOME$/.nuget/packages/nunit3testadapter/3.13.0/build/netcoreapp1.0/nunit.engine.netstandard.dll" t="Include" />
+    <e p="$PROJECT_DIR$" t="IncludeFlat">
+      <e p="Pulsar4X.ECSLib" t="IncludeRecursive">
+        <e p="ChangeLog" t="Include" />
+        <e p="ClassDiagram1.cd" t="Include" />
+        <e p="ComponentFeatureSets" t="Include">
+          <e p="CargoStorage" t="Include">
+            <e p="CargoAbleTypeDB.cs" t="Include" />
+            <e p="CargoCapacityCheckResult.cs" t="Include" />
+            <e p="CargoDefinitionsLibrary.cs" t="Include" />
+            <e p="CargoExtensionMethods.cs" t="Include" />
+            <e p="CargoStorageDB.cs" t="Include" />
+            <e p="CargoTransferDB.cs" t="Include" />
+            <e p="CargoTransferOrder.cs" t="Include" />
+            <e p="CargoTransferProcessor.cs" t="Include" />
+            <e p="StorageSpaceProcessor.cs" t="Include" />
+          </e>
+          <e p="Components" t="Include">
+            <e p="ComponentDesignAttribute.cs" t="Include" />
+            <e p="ComponentDesigner.cs" t="Include" />
+            <e p="ComponentInstance.cs" t="Include" />
+            <e p="ComponentInstancesDB.cs" t="Include" />
+            <e p="EntityManipulation.cs" t="Include" />
+          </e>
+          <e p="Damage" t="Include">
+            <e p="ComponentPlacement.cs" t="Include" />
+            <e p="Damage.cs" t="Include" />
+            <e p="DamageProcessor.cs" t="Include" />
+            <e p="DamageV2.cs" t="Include" />
+            <e p="EntityDamageProfileDB.cs" t="Include" />
+            <e p="RawBmp.cs" t="Include" />
+          </e>
+          <e p="EnergyGeneration" t="Include">
+            <e p="EnergyGeneration.cs" t="Include" />
+          </e>
+          <e p="FireControl" t="Include">
+            <e p="BeamFireControlAtbDB.cs" t="Include" />
+            <e p="FireControlAbilityDB.cs" t="Include" />
+            <e p="FireControlOrders.cs" t="Include" />
+            <e p="GenericWeapnAtb.cs" t="Include" />
+            <e p="WeaponInstanceState.cs" t="Include" />
+            <e p="WeaponProcessor.cs" t="Include" />
+          </e>
+          <e p="GenericBeamWeapon" t="Include">
+            <e p="BeamDB.cs" t="Include" />
+            <e p="GenericBeamWeaponAtbDB.cs" t="Include" />
+          </e>
+          <e p="Industry" t="Include">
+            <e p="Industry.cs" t="Include" />
+            <e p="ShipYard" t="Include">
+              <e p="LaunchShipCommand.cs" t="Include" />
+              <e p="ShipYardAbilityDB.cs" t="Include" />
+            </e>
+          </e>
+          <e p="LeadersAndTeams" t="Include">
+            <e p="TeamsDB.cs" t="Include" />
+          </e>
+          <e p="MineResources" t="Include">
+            <e p="MineProcessor.cs" t="Include" />
+            <e p="MineResourcesAtbDB.cs" t="Include" />
+            <e p="MineingDB.cs" t="Include" />
+            <e p="MiningHelper.cs" t="Include" />
+          </e>
+          <e p="Missiles" t="Include">
+            <e p="MissileComponents.cs" t="Include" />
+            <e p="MissileLauncher.cs" t="Include" />
+            <e p="MissileProcessor.cs" t="Include" />
+          </e>
+          <e p="Navigation" t="Include">
+            <e p="NavMaster.cs" t="Include" />
+          </e>
+          <e p="NewtonionMovement" t="Include">
+            <e p="NewtonMoveDB.cs" t="Include" />
+            <e p="NewtonThrustCommand.cs" t="Include" />
+            <e p="NewtonionMovementProcessor.cs" t="Include" />
+          </e>
+          <e p="Orbit" t="Include">
+            <e p="OrbitDB.cs" t="Include" />
+            <e p="OrbitProcessor.cs" t="Include" />
+          </e>
+          <e p="RailGun" t="Include">
+            <e p="RailGunAtb.cs" t="Include" />
+          </e>
+          <e p="Research" t="Include">
+            <e p="FactionTechDB.cs" t="Include" />
+            <e p="ResearchPointsAtbDB.cs" t="Include" />
+            <e p="ResearchPointsDB.cs" t="Include" />
+            <e p="ResearchProcessor.cs" t="Include" />
+          </e>
+          <e p="SensorsAndDetection" t="Include">
+            <e p="EMWaveForm.cs" t="Include" />
+            <e p="SensorEntityFactory.cs" t="Include" />
+            <e p="SensorInfoDB.cs" t="Include" />
+            <e p="SensorOrbitDB.cs" t="Include" />
+            <e p="SensorPositionDB.cs" t="Include" />
+            <e p="SensorProcessorTools.cs" t="Include" />
+            <e p="SensorProfileDB.cs" t="Include" />
+            <e p="SensorReceverAtbDB.cs" t="Include" />
+            <e p="SensorScan.cs" t="Include" />
+            <e p="SensorSignatureAtbDB.cs" t="Include" />
+            <e p="SetReflectedEMProfile.cs" t="Include" />
+            <e p="SystemSensorContacts.cs" t="Include" />
+          </e>
+          <e p="SimpleBeamWeapon" t="Include" />
+          <e p="WarpMovement" t="Include">
+            <e p="ShipMovementProcessor.cs" t="Include" />
+            <e p="TranslationMoveVM.cs" t="Include" />
+            <e p="WarpDriveAtb.cs" t="Include" />
+            <e p="WarpMoveCommand.cs" t="Include" />
+            <e p="WarpMoveProcessor.cs" t="Include" />
+            <e p="WarpMovingDB.cs" t="Include" />
+          </e>
+        </e>
+        <e p="Data" t="Include">
+          <e p="Pulsar4x" t="Include">
+            <e p="ArmorTypeData.json" t="Include" />
+            <e p="AtmosphericData.json" t="Include" />
+            <e p="AtmosphericDataAurora.json" t="Include" />
+            <e p="CargoTypeData.json" t="Include" />
+            <e p="Commander Name Theme - The Creators.json" t="Include" />
+            <e p="ComponentDataElectronics.json" t="Include" />
+            <e p="ComponentDataEnergy.json" t="Include" />
+            <e p="ComponentDataMisc.json" t="Include" />
+            <e p="ComponentDataOrdnance.json" t="Include" />
+            <e p="ComponentDataPropulsion.json" t="Include" />
+            <e p="ComponentDataWeapons.json" t="Include" />
+            <e p="GameStarts" t="Include">
+              <e p="DefaultStart" t="Include">
+                <e p="Components.json" t="Include" />
+              </e>
+            </e>
+            <e p="IndustryTypeData.json" t="Include" />
+            <e p="InstallationData.json" t="Include" />
+            <e p="Minerals.json" t="Include" />
+            <e p="MineralsAurora.json" t="Include" />
+            <e p="ReinfedMaterialsData.json" t="Include" />
+            <e p="SystemGenSettings.json" t="Include" />
+            <e p="TechnologyData.json" t="Include" />
+            <e p="TechnologyData.json.OLD" t="Include" />
+            <e p="VersionInfo.vinfo" t="Include" />
+          </e>
+        </e>
+        <e p="DataBlobs" t="Include">
+          <e p="AsteroidDamageDB.cs" t="Include" />
+          <e p="AtmosphereDB.cs" t="Include" />
+          <e p="BaseDataBlob.cs" t="Include" />
+          <e p="ColonyBonusesDB.cs" t="Include" />
+          <e p="ColonyInfoDB.cs" t="Include" />
+          <e p="ColonyLifeSupportDB.cs" t="Include" />
+          <e p="CommanderDB.cs" t="Include" />
+          <e p="ComponentAttributeDBs" t="Include">
+            <e p="ActiveSensorAtbDB.cs" t="Include" />
+            <e p="CloakAtbDB.cs" t="Include" />
+            <e p="CommandAtbDB.cs" t="Include" />
+            <e p="ComponentInfoDB.cs" t="Include" />
+            <e p="DamageControlAtbDB.cs" t="Include" />
+            <e p="ElectronicDACAtbDB.cs" t="Include" />
+            <e p="ExplosionChanceAtbDB.cs" t="Include" />
+            <e p="FailureRateMitigationAtbDB.cs" t="Include" />
+            <e p="JumpDriveAtbDB.cs" t="Include" />
+            <e p="JumpPointStabilizationAtbDB.cs" t="Include" />
+            <e p="LifeSupportAtbDB.cs" t="Include" />
+            <e p="MSPCapacityAtbDB.cs" t="Include" />
+            <e p="MissileStorageAtbDB.cs" t="Include" />
+            <e p="PassiveEMSensorAtbDB.cs" t="Include" />
+            <e p="PassiveThermalSensorAtbDB.cs" t="Include" />
+            <e p="PopulationSupportAtbDB.cs" t="Include" />
+            <e p="RefineMatsDB.cs" t="Include" />
+            <e p="ResourcelConsumptionAtbDB.cs" t="Include" />
+            <e p="StandardShieldAtbDB.cs" t="Include" />
+          </e>
+          <e p="ComponentInstanceDBs" t="Include" />
+          <e p="ExampleDB.cs" t="Include" />
+          <e p="FleetDBs" t="Include">
+            <e p="FormationDB.cs" t="Include" />
+          </e>
+          <e p="IndustryAbilityDB.cs" t="Include" />
+          <e p="InstallationsDB.cs" t="Include" />
+          <e p="JPSurveyableDB.cs" t="Include" />
+          <e p="MassVolumeDB.cs" t="Include" />
+          <e p="NameDB.cs" t="Include" />
+          <e p="PositionDB.cs" t="Include" />
+          <e p="RuinsDB.cs" t="Include" />
+          <e p="ScientistDB.cs" t="Include" />
+          <e p="ShipDBs" t="Include">
+            <e p="ArmorDB.cs" t="Include" />
+            <e p="BeamWeaponsDB.cs" t="Include" />
+            <e p="BuildCostDB.cs" t="Include" />
+            <e p="CrewDB.cs" t="Include" />
+            <e p="DamageDB.cs" t="Include" />
+            <e p="DesignInfoDB.cs" t="Include" />
+            <e p="HangerDB.cs" t="Include" />
+            <e p="IndustryDB.cs" t="Include" />
+            <e p="MaintenanceDB.cs" t="Include" />
+            <e p="MissileWeaponsDB.cs" t="Include" />
+            <e p="PowerDB.cs" t="Include" />
+            <e p="ShieldsDB.cs" t="Include" />
+            <e p="ShipInfoDB.cs" t="Include" />
+            <e p="TractorDB.cs" t="Include" />
+            <e p="TroopTransportDB.cs" t="Include" />
+          </e>
+          <e p="SpeciesDB.cs" t="Include" />
+          <e p="TransitableDB.cs" t="Include" />
+          <e p="TreeHierarchyDB.cs" t="Include" />
+        </e>
+        <e p="Entity" t="Include">
+          <e p="Entity.cs" t="Include" />
+          <e p="EntityAccessControl.cs" t="Include" />
+          <e p="EntityChangeListner.cs" t="Include" />
+          <e p="EntityExtensions.cs" t="Include" />
+          <e p="EntityManager.cs" t="Include" />
+          <e p="EntityVM.cs" t="Include" />
+          <e p="GuidNotFoundException.cs" t="Include" />
+          <e p="ProtoEntity.cs" t="Include" />
+        </e>
+        <e p="EventLog" t="Include">
+          <e p="Event.cs" t="Include" />
+          <e p="EventLog.cs" t="Include" />
+          <e p="EventType.cs" t="Include" />
+        </e>
+        <e p="Extensions" t="Include">
+          <e p="AtmosphereDBExtensions.cs" t="Include" />
+          <e p="Common.cs" t="Include" />
+          <e p="ComponentInstancesDBExtensions.cs" t="Include" />
+          <e p="OrbitExtensions.cs" t="Include" />
+          <e p="PositionExtensions.cs" t="Include" />
+          <e p="SpeciesDBExtensions.cs" t="Include" />
+          <e p="StarSystemExtensions.cs" t="Include" />
+        </e>
+        <e p="Faction" t="Include">
+          <e p="FactionAbilitiesDB.cs" t="Include" />
+          <e p="FactionAuthDB.cs" t="Include" />
+          <e p="FactionAuthProcessor.cs" t="Include" />
+          <e p="FactionFactory.cs" t="Include" />
+          <e p="FactionInfoDB.cs" t="Include" />
+          <e p="FactionVM.cs" t="Include" />
+          <e p="OwnedDB.cs" t="Include" />
+          <e p="Player.cs" t="Include" />
+        </e>
+        <e p="Factories" t="Include">
+          <e p="AsteroidFactory.cs" t="Include" />
+          <e p="ColonyFactory.cs" t="Include" />
+          <e p="CommanderFactory.cs" t="Include" />
+          <e p="DefaultStartFactory.cs" t="Include" />
+          <e p="ShipComponents" t="Include" />
+          <e p="ShipFactory.cs" t="Include" />
+          <e p="SpeciesFactory.cs" t="Include" />
+          <e p="SystemGen" t="Include">
+            <e p="GalaxyFactory.cs" t="Include" />
+            <e p="JPFactory.cs" t="Include" />
+            <e p="JPSurveyFactory.cs" t="Include" />
+            <e p="SolEntities" t="Include">
+              <e p="Asteroids" t="Include" />
+              <e p="Ceres.cs" t="Include" />
+              <e p="Comets" t="Include">
+                <e p="HalleysComet.cs" t="Include" />
+              </e>
+              <e p="EarthAndLuna.cs" t="Include" />
+              <e p="Eris.cs" t="Include" />
+              <e p="Haumea.cs" t="Include" />
+              <e p="Jupiter.cs" t="Include" />
+              <e p="Makemake.cs" t="Include" />
+              <e p="Mars.cs" t="Include" />
+              <e p="Mercury.cs" t="Include" />
+              <e p="Neptune.cs" t="Include" />
+              <e p="Pluto.cs" t="Include" />
+              <e p="Saturn.cs" t="Include" />
+              <e p="Uranus.cs" t="Include" />
+              <e p="Venus.cs" t="Include" />
+            </e>
+            <e p="StarFactory.cs" t="Include" />
+            <e p="StarSystemFactory.cs" t="Include" />
+            <e p="SystemBodyFactory.cs" t="Include" />
+          </e>
+          <e p="TechFactory.cs" t="Include" />
+        </e>
+        <e p="Game.cs" t="Include" />
+        <e p="GameLoop" t="Include">
+          <e p="ManagerSubPulse.cs" t="Include" />
+          <e p="MasterTimePulse.cs" t="Include" />
+          <e p="ProcessorManager.cs" t="Include" />
+        </e>
+        <e p="GameSettings.cs" t="Include" />
+        <e p="GameVersionInfo.cs" t="Include" />
+        <e p="Helpers" t="Include">
+          <e p="CargoDictionary.cs" t="Include" />
+          <e p="CollectionChangedHelpers.cs" t="Include" />
+          <e p="ComparableBitArray.cs" t="Include" />
+          <e p="ConcurrentHashSet.cs" t="Include" />
+          <e p="GameMath.cs" t="Include" />
+          <e p="JSONHelper.cs" t="Include" />
+          <e p="MiscHelpers.cs" t="Include" />
+          <e p="NameLookup.cs" t="Include" />
+          <e p="ObserviableConcurrentDictionary.cs" t="Include" />
+          <e p="OrbitMath.cs" t="Include" />
+          <e p="Pathfinding" t="Include">
+            <e p="Graph" t="Include">
+              <e p="EdgeToNeighbor.cs" t="Include" />
+              <e p="Graph.cs" t="Include" />
+              <e p="Node.cs" t="Include" />
+              <e p="NodeList.cs" t="Include" />
+            </e>
+            <e p="PathfindingManager.cs" t="Include" />
+          </e>
+          <e p="Pressure.cs" t="Include" />
+          <e p="Pulse.cs" t="Include" />
+          <e p="Stringify.cs" t="Include" />
+          <e p="Temperature.cs" t="Include" />
+        </e>
+        <e p="Networking" t="Include">
+          <e p="Base.cs" t="Include" />
+          <e p="Client.cs" t="Include" />
+          <e p="ClientConnectionVM.cs" t="Include" />
+          <e p="NetMessageBase.cs" t="Include" />
+          <e p="NetMessagesVM.cs" t="Include" />
+          <e p="Server.cs" t="Include" />
+        </e>
+        <e p="OldViewModels" t="Include">
+          <e p="ColonyScreenVM.cs" t="Include" />
+          <e p="ComponentDesignVM.cs" t="Include" />
+          <e p="ComponentListVM.cs" t="Include" />
+          <e p="ComponentTemplateDesigner" t="Include">
+            <e p="ComponentAbilityTemplateVM.cs" t="Include" />
+            <e p="ComponentTemplateMainPropertiesVM.cs" t="Include" />
+            <e p="ComponentTemplateParentVM.cs" t="Include" />
+            <e p="FormulaEditorVM.cs" t="Include" />
+            <e p="MineralFormulaVM.cs" t="Include" />
+            <e p="TechListVM.cs" t="Include" />
+          </e>
+          <e p="ConstructionAbilityVM.cs" t="Include" />
+          <e p="FactionVMOld.cs" t="Include" />
+          <e p="GameVM.cs" t="Include" />
+          <e p="Helpers" t="Include">
+            <e p="Commands.cs" t="Include" />
+            <e p="DictionaryVM.cs" t="Include" />
+            <e p="ItemPair.cs" t="Include" />
+            <e p="ObservableDictionary.cs" t="Include" />
+            <e p="RangeEnableObservibleCollection.cs" t="Include" />
+            <e p="RelayCommand.cs" t="Include" />
+          </e>
+          <e p="IViewModel.cs" t="Include" />
+          <e p="JobVM.cs" t="Include" />
+          <e p="LogViewerVM.cs" t="Include" />
+          <e p="MinMaxSliderVM.cs" t="Include" />
+          <e p="MissileDesignVM.cs" t="Include" />
+          <e p="NewGameOptionsVM.cs" t="Include" />
+          <e p="NewSpeciesVM.cs" t="Include" />
+          <e p="PlanetVM.cs" t="Include" />
+          <e p="PlayerOptionsVM.cs" t="Include" />
+          <e p="RefineryAbilityVM.cs" t="Include" />
+          <e p="ResearchVM.cs" t="Include" />
+          <e p="ShipDesignVM.cs" t="Include" />
+          <e p="ShipOrderVM.cs" t="Include" />
+          <e p="SpeciesVM.cs" t="Include" />
+          <e p="SystemView" t="Include">
+            <e p="StarSystemSelectionVM.cs" t="Include" />
+            <e p="StarVM.cs" t="Include" />
+            <e p="SystemInfoVM.cs" t="Include" />
+            <e p="SystemMap_DrawableVM.cs" t="Include" />
+            <e p="SystemVM.cs" t="Include" />
+          </e>
+          <e p="TimeControlVM.cs" t="Include" />
+          <e p="ViewModelBase.cs" t="Include" />
+        </e>
+        <e p="Orders" t="Include">
+          <e p="EntityCommand.cs" t="Include" />
+          <e p="IOrderHandler.cs" t="Include" />
+          <e p="OrderableDB.cs" t="Include" />
+          <e p="OrderableProcessor.cs" t="Include" />
+          <e p="ServerOrderHandler.cs" t="Include" />
+        </e>
+        <e p="Processors" t="Include">
+          <e p="ActionDelegateEnum.cs" t="Include" />
+          <e p="AtmosphereProcessor.cs" t="Include" />
+          <e p="Econ Subprocessors" t="Include">
+            <e p="PopulationProcessor.cs" t="Include" />
+          </e>
+          <e p="FactionSystemInfoProcessor.cs" t="Include" />
+          <e p="InterSystemJumpProcessor.cs" t="Include" />
+          <e p="ReCalcProcessor.cs" t="Include" />
+          <e p="ResourceConsumptionProcesor.cs" t="Include" />
+          <e p="RuinsProcessor.cs" t="Include" />
+          <e p="ShipAndColonyInfoProcessor.cs" t="Include" />
+        </e>
+        <e p="Properties" t="Include">
+          <e p="Annotations.cs" t="Include" />
+        </e>
+        <e p="Pulsar4X.ECSLib.csproj" t="IncludeRecursive" />
+        <e p="Pulsar4X.ECSLib.csproj.DotSettings" t="Include" />
+        <e p="Pulsar4X.ECSLib.csproj.old" t="Include" />
+        <e p="Pulsar4X.ECSLib.userprefs" t="Include" />
+        <e p="SerializationManager.cs" t="Include" />
+        <e p="SpaceMasterVM.cs" t="Include" />
+        <e p="StarSystem" t="Include">
+          <e p="StarInfoDB.cs" t="Include" />
+          <e p="StarSystem.cs" t="Include" />
+          <e p="SystemBodyInfoDB.cs" t="Include" />
+        </e>
+        <e p="StaticData" t="Include">
+          <e p="ArmorSD.cs" t="Include" />
+          <e p="AtmosphericGasSD.cs" t="Include" />
+          <e p="CargoTypeSD.cs" t="Include" />
+          <e p="CommanderNameSD.cs" t="Include" />
+          <e p="CommanderNameThemeSD.cs" t="Include" />
+          <e p="ComponentSD.cs" t="Include" />
+          <e p="MineralSD.cs" t="Include" />
+          <e p="PlayerSD.cs" t="Include" />
+          <e p="RefinedMaterialSD.cs" t="Include" />
+          <e p="StaticDataStore.cs" t="Include" />
+          <e p="SystemGenSettingsSD.cs" t="Include" />
+          <e p="TechSD.cs" t="Include" />
+        </e>
+        <e p="StaticDataManager.cs" t="Include" />
+        <e p="StaticRefLib.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="Pulsar4X.ECSLib.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="packages.config" t="Include" />
+      </e>
+      <e p="Pulsar4X.ImGuiNetUI" t="IncludeRecursive">
+        <e p="AssemblyInfo.cs" t="Include" />
+        <e p="DebugAndPData" t="Include">
+          <e p="DebugGUIWindow.cs" t="Include" />
+          <e p="DebugWindow.cs" t="Include" />
+          <e p="EntityInspector.cs" t="Include" />
+          <e p="PerformanceDisplay.cs" t="Include" />
+          <e p="SensorDraw.cs" t="Include" />
+        </e>
+        <e p="Draw.cs" t="Include" />
+        <e p="EmpireManagement" t="Include">
+          <e p="ComponentDesignUI.cs" t="Include" />
+          <e p="DistanceRuler.cs" t="Include" />
+          <e p="OrdnanceDesignUI.cs" t="Include" />
+          <e p="PartDesignUI.cs" t="Include" />
+          <e p="ResearchWindow.cs" t="Include" />
+          <e p="ShipDesign.cs" t="Include" />
+        </e>
+        <e p="EntityManagement" t="Include">
+          <e p="CargoTransfer.cs" t="Include" />
+          <e p="DamageViewer.cs" t="Include" />
+          <e p="EntityContextMenu.cs" t="Include" />
+          <e p="EntityState.cs" t="Include" />
+          <e p="EntityUIWindowSelector.cs" t="Include" />
+          <e p="EntityUIWindows.cs" t="Include" />
+          <e p="FireControl.cs" t="Include" />
+          <e p="NavWindow.cs" t="Include" />
+          <e p="OrderCreationUI.cs" t="Include" />
+          <e p="OrdersListUI.cs" t="Include" />
+          <e p="PowerGen.cs" t="Include" />
+          <e p="RenameWindow.cs" t="Include" />
+          <e p="entityInfoPanel.cs" t="Include" />
+          <e p="smallBodyEntityInfoPanel.cs" t="Include" />
+        </e>
+        <e p="Extensions" t="Include">
+          <e p="ImageLoadingExtensions.cs" t="Include" />
+        </e>
+        <e p="GalaxyManagement" t="Include">
+          <e p="GalaxyWindow.cs" t="Include" />
+          <e p="SystemTreeViewer.cs" t="Include" />
+        </e>
+        <e p="GameManagment" t="Include">
+          <e p="AbstractClasses" t="Include">
+            <e p="NonUniquePulsarGuiWindow.cs" t="Include" />
+            <e p="PulsarGuiWindow.cs" t="Include" />
+            <e p="UpdateWindowState.cs" t="Include" />
+          </e>
+          <e p="GlobalUIState.cs" t="Include" />
+          <e p="MainMenuItems.cs" t="Include" />
+          <e p="NewGameOptions.cs" t="Include" />
+          <e p="SettingsWindow.cs" t="Include" />
+          <e p="TimeControl.cs" t="Include" />
+          <e p="ToolBarUI.cs" t="Include" />
+        </e>
+        <e p="Helpers.cs" t="Include" />
+        <e p="IMGUISDL" t="Include">
+          <e p="ImGuiSDL2CSHelper.cs" t="Include" />
+          <e p="ImGuiSDL2CSWindow.cs" t="Include" />
+          <e p="SDL2.cs" t="Include" />
+          <e p="SDL2CSGL.cs" t="Include" />
+          <e p="SDL2Helper.cs" t="Include" />
+          <e p="SDL2Window.cs" t="Include" />
+        </e>
+        <e p="Libs" t="Include">
+          <e p="cimgui" t="Include">
+            <e p="linux-x64" t="Include">
+              <e p="cimgui.so" t="Include" />
+              <e p="libcimgui.so" t="Include" />
+              <e p="libcimgui.so.old" t="Include" />
+            </e>
+            <e p="osx-x64" t="Include">
+              <e p="cimgui.dylib" t="Include" />
+            </e>
+            <e p="win-x64" t="Include">
+              <e p="cimgui.dll" t="Include" />
+            </e>
+            <e p="win-x86" t="Include">
+              <e p="cimgui.dll" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="MapRendering" t="Include">
+          <e p="Camera.cs" t="Include" />
+          <e p="GalacticMapRender.cs" t="Include" />
+          <e p="GraphicDebugWidget.cs" t="Include" />
+          <e p="Icons" t="Include">
+            <e p="BezierPath.cs" t="Include" />
+            <e p="DrawPrimitive.cs" t="Include" />
+            <e p="Icon.cs" t="Include" />
+            <e p="NameIcon.cs" t="Include" />
+            <e p="NamesWindow.cs" t="Include" />
+            <e p="ShipIcon.cs" t="Include" />
+            <e p="ShipMoveWidget.cs" t="Include" />
+            <e p="StarIcon.cs" t="Include" />
+            <e p="SysBodyIcon.cs" t="Include" />
+            <e p="TestDrawIconData.cs" t="Include" />
+            <e p="WarpMoveOrderWidget.cs" t="Include" />
+          </e>
+          <e p="Matrix.cs" t="Include" />
+          <e p="SystemMapRendering.cs" t="Include" />
+          <e p="SystemState.cs" t="Include" />
+        </e>
+        <e p="OrbitalWidgets" t="Include">
+          <e p="NewtonMoveIcon.cs" t="Include" />
+          <e p="NewtonOrderWindow.cs" t="Include" />
+          <e p="OrbitEllipseBaseClass.cs" t="Include" />
+          <e p="OrbitEllipseIcon.cs" t="Include" />
+          <e p="OrbitHypobolicIcon.cs" t="Include" />
+          <e p="OrbitOrderWiget.cs" t="Include" />
+          <e p="OrbitalDebugWidget.cs" t="Include" />
+          <e p="WarpOrderWindow.cs" t="Include" />
+        </e>
+        <e p="PlanetaryManagement" t="Include">
+          <e p="ColonyPanel.cs" t="Include" />
+          <e p="IndustryPannel.cs" t="Include" />
+          <e p="PlanetaryWindow.cs" t="Include" />
+        </e>
+        <e p="Program.cs" t="Include" />
+        <e p="Pulsar4X.ImGuiNetUI.csproj" t="IncludeRecursive" />
+        <e p="Pulsar4X.ImGuiNetUI.csproj.old" t="Include" />
+        <e p="Resources" t="Include">
+          <e p="ARIALUNI.TTF" t="Include" />
+          <e p="CancelIco.bmp" t="Include" />
+          <e p="CargoIco.bmp" t="Include" />
+          <e p="Cousine-Regular.ttf" t="Include" />
+          <e p="DejaVuMathTeXGyre.ttf" t="Include" />
+          <e p="DejaVuSans.ttf" t="Include" />
+          <e p="DesignComponentIco.bmp" t="Include" />
+          <e p="DesignOrdnanceIco.bmp" t="Include" />
+          <e p="DesignShipIco.bmp" t="Include" />
+          <e p="DnArrow.bmp" t="Include" />
+          <e p="DroidSans.ttf" t="Include" />
+          <e p="FireconIco.bmp" t="Include" />
+          <e p="GalaxyMapIco.bmp" t="Include" />
+          <e p="ImgTest.bmp" t="Include" />
+          <e p="IndustryIco.bmp" t="Include" />
+          <e p="OneStep.bmp" t="Include" />
+          <e p="OneStep.xcf" t="Include" />
+          <e p="Pause.bmp" t="Include" />
+          <e p="PinIco.bmp" t="Include" />
+          <e p="Play.bmp" t="Include" />
+          <e p="PowerIco.bmp" t="Include" />
+          <e p="ProggyClean.ttf" t="Include" />
+          <e p="Pulsar4xSquare.png" t="Include" />
+          <e p="PulsarLogo.bmp" t="Include" />
+          <e p="PulsarLogo.png" t="Include" />
+          <e p="RenameIco.bmp" t="Include" />
+          <e p="RepeatIco.bmp" t="Include" />
+          <e p="ResearchIco.bmp" t="Include" />
+          <e p="Roboto-Medium.ttf" t="Include" />
+          <e p="RulerIco.bmp" t="Include" />
+          <e p="SelectIco.bmp" t="Include" />
+          <e p="TreeIco.bmp" t="Include" />
+          <e p="UpArrow.bmp" t="Include" />
+          <e p="pulsaricon.ico" t="Include" />
+        </e>
+        <e p="SM" t="Include">
+          <e p="EntitySpawnWindow.cs" t="Include" />
+          <e p="SMPannel.cs" t="Include" />
+        </e>
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="imgui.ini" t="Include" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="CustomAssemblyInfo.cs" t="Include" />
+              <e p="Pulsar4X.ImGuiNetUI.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="packages.config" t="Include" />
+      </e>
+      <e p="Pulsar4X.OrbitalMath" t="IncludeRecursive">
+        <e p="DataStructures" t="Include">
+          <e p="EntityBase.cs" t="Include" />
+          <e p="KeplerElements.cs" t="Include" />
+          <e p="Matrix2d.cs" t="Include" />
+          <e p="Matrix3d.cs" t="Include" />
+          <e p="OrbitProcessorBase.cs" t="Include" />
+          <e p="Vector2.cs" t="Include" />
+          <e p="Vector3.cs" t="Include" />
+        </e>
+        <e p="EllipseMath.cs" t="Include" />
+        <e p="Exceptions" t="Include">
+          <e p="OrbitProcessorException.cs" t="Include" />
+        </e>
+        <e p="GeneralMath.cs" t="Include" />
+        <e p="Helpers" t="Include">
+          <e p="Angle.cs" t="Include" />
+          <e p="Distance.cs" t="Include" />
+          <e p="PositionHelper.cs" t="Include" />
+        </e>
+        <e p="OrbitalMath.cs" t="Include" />
+        <e p="Pulsar4X.Orbital.csproj" t="IncludeRecursive" />
+        <e p="UniversalConstants.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="Pulsar4X.Orbital.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="Pulsar4X.Tests" t="IncludeRecursive">
+        <e p="AtmosphereAndSpeciesTests.cs" t="Include" />
+        <e p="CargoSpaceTests.cs" t="Include" />
+        <e p="ChangeLog" t="Include" />
+        <e p="Data" t="Include">
+          <e p="MalformedData" t="Include">
+            <e p="Commander Name Theme - The Creators.json" t="Include" />
+            <e p="Minerals.json" t="Include" />
+            <e p="VersionInfo.vinfo" t="Include" />
+          </e>
+          <e p="Other" t="Include">
+            <e p="Minerals.json" t="Include" />
+            <e p="VersionInfo.vinfo" t="Include" />
+          </e>
+        </e>
+        <e p="DataBlobTests.cs" t="Include" />
+        <e p="EntityManagerTests.cs" t="Include" />
+        <e p="FactoryTests.cs" t="Include" />
+        <e p="MatrixTests.cs" t="Include" />
+        <e p="MiningTests.cs" t="Include" />
+        <e p="NetworkTests.cs" t="Include" />
+        <e p="OrbitFuzzTesting.cs" t="Include" />
+        <e p="OrbitTests.cs" t="Include" />
+        <e p="PathfindingTests.cs" t="Include" />
+        <e p="PopulationProcessorTest.cs" t="Include" />
+        <e p="ProcessorTests.cs" t="Include" />
+        <e p="Pulsar4X.Tests.csproj" t="IncludeRecursive" />
+        <e p="Pulsar4X.Tests.csproj.DotSettings" t="Include" />
+        <e p="Pulsar4X.Tests.csproj.old" t="Include" />
+        <e p="SerializationManagerTests.cs" t="Include" />
+        <e p="ShipComponentTests.cs" t="Include" />
+        <e p="ShipTests.cs" t="Include" />
+        <e p="StaticDataTests.cs" t="Include" />
+        <e p="SystemGenTests.cs" t="Include" />
+        <e p="TestingUtilities.cs" t="Include" />
+        <e p="UnitHelperTests.cs" t="Include" />
+        <e p="Vector3Tests.cs" t="Include" />
+        <e p="ViewModelTests.cs" t="Include" />
+        <e p="WarpMoveTests.cs" t="Include" />
+        <e p="WeightedListsTests.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp3.1" t="Include">
+              <e p="Pulsar4X.Tests.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+        <e p="packages.config" t="Include" />
+      </e>
+      <e p="Pulsar4X.sln" t="IncludeFlat" />
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>
