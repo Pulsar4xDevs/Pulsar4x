@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         Entity sendToEntity;
         
-        public static void CreateCommand(Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
+        public static void CreateCommand(Guid faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
         {
             List<(Guid item, long amount)> itemGuidAmounts = new List<(Guid, long)>();
             foreach (var tup in itemsToMove)
@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
 
             var cmd = new CargoUnloadToOrder()
             {
-                RequestingFactionGuid = faction.Guid,
+                RequestingFactionGuid = faction,
                 EntityCommandingGuid = cargoFromEntity.Guid,
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 SendCargoToEntityGuid = cargoToEntity.Guid,
@@ -136,14 +136,20 @@ namespace Pulsar4X.ECSLib
             get { return Order.Details; }
         }
 
-        internal override Entity EntityCommanding { get; }
+        internal override Entity EntityCommanding { get{return _entityCommanding;} }
+        Entity _entityCommanding;
+        Entity _factionEntity;
 
         internal override bool IsValidCommand(Game game)
         {
-            throw new NotImplementedException();
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+            {
+                return true;
+            }
+            return false;
         }
 
-        public static void CreateCommand(Entity faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
+        public static void CreateCommand(Guid faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
         {
             List<(Guid item, long amount)> itemGuidAmounts = new List<(Guid, long)>();
             foreach (var tup in itemsToMove)
@@ -153,7 +159,7 @@ namespace Pulsar4X.ECSLib
 
             var unloadcmd = new CargoUnloadToOrder()
             {
-                RequestingFactionGuid = faction.Guid,
+                RequestingFactionGuid = faction,
                 EntityCommandingGuid = cargoFromEntity.Guid,
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 SendCargoToEntityGuid = cargoToEntity.Guid,
@@ -163,7 +169,7 @@ namespace Pulsar4X.ECSLib
 
             var loadCmd = new CargoLoadFromOrder()
             {
-                RequestingFactionGuid = faction.Guid,
+                RequestingFactionGuid = faction,
                 EntityCommandingGuid = cargoFromEntity.Guid,
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 Order = unloadcmd
@@ -175,7 +181,8 @@ namespace Pulsar4X.ECSLib
         internal override void ActionCommand(DateTime atDateTime)
         {
             //this needs to happen on a given trigger,ie a finished move command.
-            throw new NotImplementedException();
+
+            Order.ActionCommand(atDateTime);
         }
 
         public override bool IsFinished()

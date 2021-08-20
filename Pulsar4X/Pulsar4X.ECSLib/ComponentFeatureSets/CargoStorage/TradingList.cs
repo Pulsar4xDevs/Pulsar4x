@@ -75,26 +75,76 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+
+
+    public class LogisticsShipProcessor : IHotloopProcessor
+    {
+        public TimeSpan RunFrequency
+        {
+            get { return TimeSpan.FromHours(1); }
+        }
+
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(4);
+
+        public Type GetParameterType => typeof(TradingShipperDB);
+
+        public void Init(Game game)
+        {
+            
+        }
+
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            var tradingBases = manager.GetAllDataBlobsOfType<TradingBaseDB>();
+            var shippingEntities = manager.GetAllEntitiesWithDataBlob<TradingShipperDB>();
+            foreach(Entity shipper in shippingEntities)
+            {
+               TradeCycle.ShipBidding(shipper, tradingBases);
+            }
+        }
+    }
+
+
+    public class LogisticsBaseProcessor : IHotloopProcessor
+    {
+        public TimeSpan RunFrequency
+        {
+            get { return TimeSpan.FromHours(1); }
+        }
+
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(4.25);
+
+        public Type GetParameterType => typeof(TradingBaseDB);
+
+        public void Init(Game game)
+        {
+            
+        }
+
+        public void ProcessEntity(Entity entity, int deltaSeconds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        {
+            var tradingBases = manager.GetAllDataBlobsOfType<TradingBaseDB>();
+            var shippingEntities = manager.GetAllEntitiesWithDataBlob<TradingShipperDB>();
+            foreach(TradingBaseDB tradeBase in tradingBases)
+            {
+                TradeCycle.TradeBaseBidding(tradeBase);
+            }
+        }
+    }
     public static class TradeCycle
     {
         public static List<Entity> ShippingEntites;
-        public static void ProcessTradeCycle(StarSystem system)
-        {
 
-            var tradingBases = system.GetAllDataBlobsOfType<TradingBaseDB>();
-
-            foreach(Entity shipper in ShippingEntites)
-            {
-                ShipBidding(shipper, tradingBases);
-            }
-
-            foreach(TradingBaseDB tradeBase in tradingBases)
-            {
-                TradeBaseBidding(tradeBase);
-            }
-
-
-        }
 
         public class CargoTask
         {
@@ -128,13 +178,17 @@ namespace Pulsar4X.ECSLib
 
             foreach(var tbase in tradingBases)
             {
-
-                if(!tbase.OwningEntity.HasDataBlob<OrbitDB>())
-                    throw new NotImplementedException("Currently we can only predict the movement of stable orbits - target must have an orbitDB");
+                //tbase.OwningEntity.GetAbsoluteFuturePosition
+                OrbitDB odb;// = tbase.OwningEntity.GetDataBlob<OrbitDB>();
+                if(tbase.OwningEntity.HasDataBlob<OrbitDB>())
+                     odb = tbase.OwningEntity.GetDataBlob<OrbitDB>();
+                else
+                    odb = tbase.OwningEntity.GetSOIParentEntity().GetDataBlob<OrbitDB>();
+                    //throw new NotImplementedException("Currently we can only predict the movement of stable orbits - target must have an orbitDB");
                 (Vector3 position, DateTime atDateTime) sourceIntercept = OrbitProcessor.GetInterceptPosition_m
                 (
                     shippingEntity, 
-                    tbase.OwningEntity.GetDataBlob<OrbitDB>(), 
+                    odb, 
                     currentDateTime
                 );
 
@@ -212,12 +266,16 @@ namespace Pulsar4X.ECSLib
                     TimeSpan loadTime = TimeSpan.FromSeconds(3600); //TODO: calculate this properly
                     DateTime DepartSourceTime = arriveSourceTime + loadTime;
 
-                    if(!destinEntity.HasDataBlob<OrbitDB>())
-                        throw new NotImplementedException("Currently we can only predict the movement of stable orbits - target must have an orbitDB");
+                    OrbitDB odb;// = tbase.OwningEntity.GetDataBlob<OrbitDB>();
+                    if(destinEntity.HasDataBlob<OrbitDB>())
+                        odb = destinEntity.GetDataBlob<OrbitDB>();
+                    else
+                        odb = destinEntity.GetSOIParentEntity().GetDataBlob<OrbitDB>();
+                        //throw new NotImplementedException("Currently we can only predict the movement of stable orbits - target must have an orbitDB");
                     (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition_m
                     (
                         shippingEntity, 
-                        destinEntity.GetDataBlob<OrbitDB>(), 
+                        odb, 
                         DepartSourceTime
                     );
 
@@ -292,6 +350,8 @@ namespace Pulsar4X.ECSLib
     
         public static void TradeBaseBidding(TradingBaseDB tradeBase)
         {
+            if (tradeBase.TradeShipBids.Count == 0)
+                return;
             int last = tradeBase.TradeShipBids.Count -1;
             var cargoTask = tradeBase.TradeShipBids[last].cargoTask;
             var ship = tradeBase.TradeShipBids[last].ship;
@@ -315,12 +375,14 @@ namespace Pulsar4X.ECSLib
                         List<(ICargoable, long)> tradeItems = new List<(ICargoable, long)>();
                         tradeItems.Add((cargoTask.item, cargoTask.NumberOfItems));
 
-                        var shipOwner = ship.GetDataBlob<ObjectOwnershipDB>().OwningEntity;
-
+                        var shipOwner = ship.FactionOwner;//.GetDataBlob<ObjectOwnershipDB>().OwningEntity;
+                        //StaticRefLib.
                         //moveto source order.
-                        CargoLoadFromOrder.CreateCommand(shipOwner, tradeBase.OwningEntity, ship, tradeItems);
+                        //CargoLoadFromOrder.CreateCommand(shipOwner, tradeBase.OwningEntity, ship, tradeItems);
+                        CargoUnloadToOrder.CreateCommand(shipOwner, bidTask.cargoTask.Source, ship, tradeItems);
                         //moveto destination order.
-                        CargoUnloadToOrder.CreateCommand(shipOwner, ship, tradeBase.OwningEntity, tradeItems);
+                        CargoUnloadToOrder.CreateCommand(shipOwner, ship, bidTask.cargoTask.Destination, tradeItems);
+                        
                         
                     }
 

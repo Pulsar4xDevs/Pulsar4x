@@ -325,7 +325,9 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(264, 325), ImGuiCond.Once);
-                if (ImGui.Begin("TradeShip", _flags))
+            if(IsActive)
+            {
+                if (ImGui.Begin("TradeShip", ref IsActive, _flags))
                 {
                     if(!_selectedEntity.HasDataBlob<TradingShipperDB>())
                     {
@@ -391,6 +393,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Columns(1);
                     }
                 }
+            }
         }
     }
 

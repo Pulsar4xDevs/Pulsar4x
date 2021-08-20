@@ -573,14 +573,14 @@ namespace Pulsar4X.SDL2UI
 
             //create order for items to go to right
             CargoUnloadToOrder.CreateCommand(
-                _uiState.Faction,
+                _uiState.Faction.Guid,
                 _selectedEntityLeft.Entity,
                 _selectedEntityRight.Entity, 
                 CargoListLeft.GetAllToMoveOut());
 
             //create order for items to go to left
             CargoUnloadToOrder.CreateCommand(
-                _uiState.Faction,
+                _uiState.Faction.Guid,
                 _selectedEntityRight.Entity,
                 _selectedEntityLeft.Entity,
                 CargoListRight.GetAllToMoveOut());
