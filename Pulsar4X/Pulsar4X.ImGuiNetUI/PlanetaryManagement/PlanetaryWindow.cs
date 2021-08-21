@@ -147,7 +147,7 @@ namespace Pulsar4X.SDL2UI
                 rowData.Add(new string[] { "Radius", Stringify.Distance(tempMassVolume.RadiusInM) });
                 rowData.Add(new string[] { "Mass", tempMassVolume.MassDry.ToString() + " kg" });
                 rowData.Add(new string[] { "Volume", Stringify.Volume(tempMassVolume.Volume_m3) });
-                rowData.Add(new string[] { "Density", tempMassVolume.Density_gcm.ToString("##0.000") + " kg/m^3" });
+                rowData.Add(new string[] { "Density", tempMassVolume.DensityDry_gcm.ToString("##0.000") + " kg/m^3" });
             }
 
             if (_lookedAtEntity.Entity.HasDataBlob<ColonyInfoDB>())

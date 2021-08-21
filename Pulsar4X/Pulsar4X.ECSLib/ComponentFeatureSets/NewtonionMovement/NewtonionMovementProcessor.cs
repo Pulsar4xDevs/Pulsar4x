@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
             NewtonMoveDB newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
             NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
             PositionDB positionDB = entity.GetDataBlob<PositionDB>();
-            double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
+            double massTotal_Kg = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
             var manager = entity.Manager;
@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib
             DateTime dateTimeFuture = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
             double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
 
-            double sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(mass_Kg, parentMass_kg);
+            double sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(massTotal_Kg, parentMass_kg);
                 
             
             double secondsToItterate = deltaT;
@@ -76,10 +76,10 @@ namespace Pulsar4X.ECSLib
 
                 distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
 
-                double gravForce = UniversalConstants.Science.GravitationalConstant * (mass_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
+                double gravForce = UniversalConstants.Science.GravitationalConstant * (massTotal_Kg * parentMass_kg / Math.Pow(distanceToParent_m, 2));
                 Vector3 gravForceVector = gravForce * -Vector3.Normalise(positionDB.RelativePosition_m);
 
-                Vector3 totalDVFromGrav = (gravForceVector / mass_Kg) * timeStepInSeconds;
+                Vector3 totalDVFromGrav = (gravForceVector / massTotal_Kg) * timeStepInSeconds;
                 
                 //double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
                 //double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
@@ -92,9 +92,9 @@ namespace Pulsar4X.ECSLib
 
                 if(manuverDV.Length() > 0)
                 {
-                    double dryMass = mass_Kg - newtonThrust.FuelBurnRate * timeStepInSeconds; //how much our ship weighs after a timestep of fuel is used.
+                    double dryMass = massTotal_Kg - newtonThrust.FuelBurnRate * timeStepInSeconds; //how much our ship weighs after a timestep of fuel is used.
                     //how much dv can we get in this timestep.
-                    double deltaVThisStep = OrbitMath.TsiolkovskyRocketEquation(mass_Kg, dryMass, newtonThrust.ExhaustVelocity);
+                    double deltaVThisStep = OrbitMath.TsiolkovskyRocketEquation(massTotal_Kg, dryMass, newtonThrust.ExhaustVelocity);
                     deltaVThisStep = Math.Min(manuverDV.Length(), deltaVThisStep); //don't use more Dv than what is called for.
                     deltaVThisStep = Math.Min(newtonThrust.DeltaV, deltaVThisStep); //check we've got the deltaV to spend.
 
@@ -170,7 +170,7 @@ namespace Pulsar4X.ECSLib
                     {
                         if (entity.HasDataBlob<ProjectileInfoDB>()) //this feels a bit hacky.
                         {
-                            var newOrbit = OrbitDB.FromKeplerElements(parentEntity, mass_Kg, kE, dateTime);
+                            var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
                             var fastOrbit = new OrbitUpdateOftenDB(newOrbit);
                             entity.RemoveDataBlob<NewtonMoveDB>();
                             entity.SetDataBlob(fastOrbit);
@@ -180,7 +180,7 @@ namespace Pulsar4X.ECSLib
                         }
                         else
                         {
-                            var newOrbit = OrbitDB.FromKeplerElements(parentEntity, mass_Kg, kE, dateTime);
+                            var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
                             entity.RemoveDataBlob<NewtonMoveDB>();
                             entity.SetDataBlob(newOrbit);
                             positionDB.SetParent(parentEntity);

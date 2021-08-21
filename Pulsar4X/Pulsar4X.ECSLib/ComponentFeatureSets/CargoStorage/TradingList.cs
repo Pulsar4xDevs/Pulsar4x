@@ -378,10 +378,28 @@ namespace Pulsar4X.ECSLib
                         var shipOwner = ship.FactionOwner;//.GetDataBlob<ObjectOwnershipDB>().OwningEntity;
                         //StaticRefLib.
                         //moveto source order.
+                        var dvdif =  CargoTransferProcessor.CalcDVDifference_m(source, ship);
+                        var cargoDBLeft = source.GetDataBlob<VolumeStorageDB>();
+                        var cargoDBRight = destin.GetDataBlob<VolumeStorageDB>();
+                        var dvMaxRangeDiff_ms = Math.Max(cargoDBLeft.TransferRangeDv_mps, cargoDBRight.TransferRangeDv_mps);
+
+                        var myMass = ship.GetDataBlob<MassVolumeDB>().MassDry;
+                        var parentMass = ship.GetAbsoluteState
+                        var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+                        if(source.HasDataBlob<ColonyInfoDB>())
+                        {}
+                        else //we're moving between two objects who are in orbit, we shoudl be able to match orbit.
+                        {
+                            if(dvdif > dvMaxRangeDiff_ms * 0.01)//if we're less than 10% of perfect
+                            {
+                                var manuvers = InterceptCalcs.Hohmann2(_sgp, mySMA, _targetSMA);
+                                //NewtonThrustCommand.CreateCommand()
+                            }
+                        }
                         //CargoLoadFromOrder.CreateCommand(shipOwner, tradeBase.OwningEntity, ship, tradeItems);
-                        CargoUnloadToOrder.CreateCommand(shipOwner, bidTask.cargoTask.Source, ship, tradeItems);
+                        CargoUnloadToOrder.CreateCommand(shipOwner, source, ship, tradeItems);
                         //moveto destination order.
-                        CargoUnloadToOrder.CreateCommand(shipOwner, ship, bidTask.cargoTask.Destination, tradeItems);
+                        CargoUnloadToOrder.CreateCommand(shipOwner, ship, destin, tradeItems);
                         
                         
                     }

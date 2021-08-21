@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
 
         public double VolumePerUnit => OwningEntity.GetDataBlob<MassVolumeDB>().Volume_m3;
 
-        public double Density => OwningEntity.GetDataBlob<MassVolumeDB>().Density_kgm;
+        public double Density => OwningEntity.GetDataBlob<MassVolumeDB>().DensityDry_kgm;
 
         /// <summary>
         /// This should be set to true if the item has become damaged or in any other way needs to maintain state 

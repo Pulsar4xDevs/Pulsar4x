@@ -366,7 +366,7 @@ namespace Pulsar4X.SDL2UI
                                     MassVolumeDB mvdb = SelectedEntity.GetDataBlob<MassVolumeDB>();
                                     ImGui.Text("Mass " + Stringify.Mass(mvdb.MassDry));
                                     ImGui.Text("Volume " + Stringify.Velocity(mvdb.Volume_m3));
-                                    ImGui.Text("Density " + mvdb.Density_gcm + "g/cm^3");
+                                    ImGui.Text("Density " + mvdb.DensityDry_gcm + "g/cm^3");
                                     ImGui.Text("Radius " + Stringify.Distance(mvdb.RadiusInM));
                                 }
 

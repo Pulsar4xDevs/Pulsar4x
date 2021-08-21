@@ -56,6 +56,11 @@ namespace Pulsar4X.ECSLib
                 long amountFrom = transferDB.CargoFromDB.RemoveCargoByUnit(cargoItem, countToTransferThisTick);
                 long amountTo = transferDB.CargoToDB.AddCargoByUnit(cargoItem, countToTransferThisTick);
                 
+                //update the total masses for these entites
+                transferDB.CargoFromDB.OwningEntity.GetDataBlob<MassVolumeDB>().UpdateMassTotal(transferDB.CargoFromDB);
+                transferDB.CargoToDB.OwningEntity.GetDataBlob<MassVolumeDB>().UpdateMassTotal(transferDB.CargoToDB);
+
+
                 if(amountTo != amountFrom)
                     throw new Exception("something went wrong here");
                 long newAmount = transferDB.ItemsLeftToTransfer[i].amount - amountTo;
@@ -71,8 +76,14 @@ namespace Pulsar4X.ECSLib
             var rate = CalcTransferRate(dv_mps, transferDB.CargoFromDB, transferDB.CargoToDB);
             transferDB.TransferRateInKG = rate;
         }
-        
 
+                
+        /// <summary>
+        /// Calculates the difference in DeltaV between two enties who have the same parent
+        /// </summary>
+        /// <param name="entity1"></param>
+        /// <param name="entity2"></param>
+        /// <returns></returns>
         public static double CalcDVDifference_m(Entity entity1, Entity entity2)
         {
             double dvDif = 0;
@@ -114,7 +125,7 @@ namespace Pulsar4X.ECSLib
         /// Calculates the transfer rate.
         /// </summary>
         /// <returns>The transfer rate.</returns>
-        /// <param name="dvDifference_mps">Dv difference in Km/s</param>
+        /// <param name="dvDifference_mps">Dv difference in m/s</param>
         /// <param name="from">From.</param>
         /// <param name="to">To.</param>
         public static int CalcTransferRate(double dvDifference_mps, VolumeStorageDB from, VolumeStorageDB to)

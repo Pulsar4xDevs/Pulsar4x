@@ -40,7 +40,7 @@ namespace Pulsar4X.ECSLib
             var name = new NameDB("Ellie");
             var AsteroidDmg = new AsteroidDamageDB();
             AsteroidDmg.FractureChance = new PercentValue(0.75f);
-            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.Density_gcm, massVolume.RadiusInM, 50);
+            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50);
             var sensorPfil = new SensorProfileDB();
 
             planetInfo.SupportsPopulations = false;
@@ -97,7 +97,7 @@ namespace Pulsar4X.ECSLib
             var name = new NameDB("Ellie");
             var AsteroidDmg = new AsteroidDamageDB();
             AsteroidDmg.FractureChance = new PercentValue(0.75f);
-            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.Density_gcm, massVolume.RadiusInM, 50);
+            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50);
             var sensorPfil = new SensorProfileDB();
 
             planetInfo.SupportsPopulations = false;

@@ -632,7 +632,7 @@ namespace Pulsar4X.ECSLib
             }
 
             Mass = massVolumeDB.MassDry;
-            Density = massVolumeDB.Density_gcm;
+            Density = massVolumeDB.DensityDry_gcm;
             Radius = massVolumeDB.RadiusInAU;
             Volume = massVolumeDB.Volume_km3;
             SurfaceGravity = massVolumeDB.SurfaceGravity;
