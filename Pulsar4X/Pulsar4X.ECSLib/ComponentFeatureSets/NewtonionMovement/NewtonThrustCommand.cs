@@ -380,7 +380,7 @@ namespace Pulsar4X.ECSLib
                 var dvRemaining = _newtonAbilityDB.DeltaV;
 
 
-                var myMass = _newtonAbilityDB.DryMass_kg + _newtonAbilityDB.TotalFuel_kg;
+                var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
                 var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, _soiParentMass);
             
                 var vectorToTgtFromPrograde = OrbitMath.ParentToProgradeVector(

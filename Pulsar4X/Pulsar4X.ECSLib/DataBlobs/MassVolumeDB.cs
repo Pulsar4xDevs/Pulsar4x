@@ -87,7 +87,7 @@ namespace Pulsar4X.ECSLib
         {
             var mvDB = new MassVolumeDB {MassDry = mass, RadiusInAU = radius_au, Volume_km3 = CalculateVolume_Km3(radius_au)};
             mvDB.DensityDry_gcm = CalculateDensity(mass, mvDB.Volume_m3);
-
+            mvDB.MassTotal = mass;
             return mvDB;
         }
         
@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
         {
             var mvDB = new MassVolumeDB {MassDry = mass, RadiusInM = radius_m, Volume_m3 = CalculateVolume_m3(radius_m)};
             mvDB.DensityDry_gcm = CalculateDensity(mass, mvDB.Volume_m3);
-
+            mvDB.MassTotal = mass;
             return mvDB;
         }
 
@@ -114,7 +114,7 @@ namespace Pulsar4X.ECSLib
         public static MassVolumeDB NewFromMassAndDensity(double mass, double density)
         {
             var mvDB = new MassVolumeDB {MassDry = mass, DensityDry_gcm = density, Volume_km3 = CalculateVolume_Km3_FromMassAndDesity(mass, density), RadiusInAU = CalculateRadius_Au(mass, density)};
-
+            mvDB.MassTotal = mass;
             return mvDB;
         }
 
@@ -129,13 +129,14 @@ namespace Pulsar4X.ECSLib
             var density = CalculateDensity(mass, volume_m3);
             var rad = CalculateRadius_m(mass, density);
             var mvDB = new MassVolumeDB { MassDry = mass, Volume_m3 = volume_m3, DensityDry_gcm = density, RadiusInM = rad };
-
+            mvDB.MassTotal = mass;
             return mvDB;
         }
 
         public MassVolumeDB(MassVolumeDB massVolumeDB)
         {
             MassDry = massVolumeDB.MassDry;
+            MassTotal = massVolumeDB.MassTotal;
             DensityDry_gcm = massVolumeDB.DensityDry_gcm;
             RadiusInAU = massVolumeDB.RadiusInAU;
             Volume_km3 = massVolumeDB.Volume_km3;

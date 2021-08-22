@@ -66,8 +66,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             }
 
             var newtdb = newMissile.GetDataBlob<NewtonThrustAbilityDB>();
-            newtdb.DryMass_kg = missileDesign.MassPerUnit;
-            newtdb.SetFuel(missileDesign.WetMass - missileDesign.MassPerUnit);
+            //newtdb.DryMass_kg = missileDesign.MassPerUnit;
+            newtdb.SetFuel(missileDesign.WetMass - missileDesign.DryMass, missileDesign.WetMass);
             
 
             bool directAttack = false;
@@ -117,8 +117,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
                 //ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate + TimeSpan.FromSeconds(1), targetEntity);
             }
-
-            cargo.RemoveCargoByUnit(missileDesign, 1); //remove missile from parent.
+            CargoTransferProcessor.RemoveCargoItems(launchingEntity, missileDesign, 1);//remove missile from parent.
         }
     }
 

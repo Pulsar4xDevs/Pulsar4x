@@ -3,10 +3,14 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// NOTE!!! none of these update an entites total mass!
+    /// </summary>
     public static class CargoExtensionMethods
     {
         /// <summary>
-        /// Add or remove cargo by volume. ignores transfer rate.
+        /// Add or remove cargo by volume. 
+        /// Ignores transfer rate. Does  not update MassVolumeDB
         /// </summary>
         /// <param name="cargoItem"></param>
         /// <param name="volume">negitive to remove cargo</param>
@@ -45,9 +49,10 @@ namespace Pulsar4X.ECSLib
             
             return volumeStoring;
         }
-        
+
         /// <summary>
-        /// Add or removes cargo from storage, ignores transfer rate.
+        /// Add or removes cargo from storage, 
+        /// Ignores transfer rate. Does  not update MassVolumeDB
         /// </summary>
         /// <param name="cargoItem"></param>
         /// <param name="mass">negitive to remove</param>
@@ -88,10 +93,11 @@ namespace Pulsar4X.ECSLib
             
             return massStoring;
         }
-        
-        
+
+
         /// <summary>
         /// adds cargo by unit count. ie the minimum MassUnit. 
+        /// Ignores transfer rate. Does  not update MassVolumeDB
         /// </summary>
         /// <param name="cargoItem"></param>
         /// <param name="count"></param>
@@ -137,9 +143,10 @@ namespace Pulsar4X.ECSLib
 
             return amountToAdd;
         }
-        
+
         /// <summary>
         /// removes cargo by unit count, ie the minimum MassUnit;
+        /// Ignores transfer rate. Does  not update MassVolumeDB
         /// </summary>
         /// <param name="cargoItem"></param>
         /// <param name="count"></param>
@@ -178,8 +185,8 @@ namespace Pulsar4X.ECSLib
     
             return amountToRemove;
         }
-        
-        
+
+
         /// <summary>
         /// Gives the amount of volume taken up by a given cargoItem
         /// </summary>

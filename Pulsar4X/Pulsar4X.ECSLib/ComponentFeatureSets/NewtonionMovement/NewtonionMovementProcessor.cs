@@ -101,9 +101,15 @@ namespace Pulsar4X.ECSLib
                     totalDVFromThrust = Vector3.Normalise(manuverDV) * deltaVThisStep;
 
                     //remove the deltaV we're expending from the max (TODO: Remove fuel from cargo, change mass of ship)
-                    newtonThrust.BurnDeltaV(deltaVThisStep);
+                    var kgOfFuel = newtonThrust.BurnDeltaV(deltaVThisStep, massTotal_Kg);
+                    var ft = newtonThrust.FuelType;
+                    ProcessedMaterialSD fuel = StaticRefLib.StaticData.CargoGoods.GetMaterials()[ft];
+                    var massRemoved = CargoTransferProcessor.AddRemoveCargoMass(entity, fuel, -kgOfFuel); 
+
+                    
                     //remove the vectorDV from the amount needed to fully complete the manuver. 
                     newtonMoveDB.DeltaVForManuver_FoRO_m -= totalDVFromThrust;
+
                 }
                 
                 //convert prograde to global frame of reference for thrust direction
@@ -317,7 +323,7 @@ namespace Pulsar4X.ECSLib
             var ft = db.FuelType;
             var ev = db.ExhaustVelocity;
             
-            db.DryMass_kg = parentEntity.GetDataBlob<MassVolumeDB>().MassDry; 
+            //db.DryMass_kg = parentEntity.GetDataBlob<MassVolumeDB>().MassDry; 
             ProcessedMaterialSD fuel = StaticRefLib.StaticData.CargoGoods.GetMaterials()[ft];
 
             double fuelMass = 0;
@@ -326,9 +332,7 @@ namespace Pulsar4X.ECSLib
                 var cargo = parentEntity.GetDataBlob<VolumeStorageDB>();
                 fuelMass = cargo.GetMassStored(fuel);
             }
-
-            
-            db.SetFuel(fuelMass);
+            db.SetFuel(fuelMass, fuelMass);
         }
 
 

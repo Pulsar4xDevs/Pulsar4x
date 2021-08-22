@@ -77,6 +77,66 @@ namespace Pulsar4X.ECSLib
             transferDB.TransferRateInKG = rate;
         }
 
+
+        /// <summary>
+        /// Add cargo and updates the entites MassTotal
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="item"></param>
+        /// <param name="amountInMass"></param>
+        internal static double AddCargoItems(Entity entity, ICargoable item, int amount)
+        {
+            VolumeStorageDB cargo = entity.GetDataBlob<VolumeStorageDB>();
+            double amountSuccess = cargo.AddCargoByUnit(item, amount);
+            MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
+            mv.UpdateMassTotal(cargo);
+            return amountSuccess;
+        }
+
+        /// <summary>
+        /// Removes cargo and updates the entites MassTotal
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="item"></param>
+        /// <param name="amountInMass"></param>
+        internal static double RemoveCargoItems(Entity entity, ICargoable item, int amount)
+        {
+            VolumeStorageDB cargo = entity.GetDataBlob<VolumeStorageDB>();
+            double amountSuccess = cargo.RemoveCargoByUnit(item, amount);
+            MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
+            mv.UpdateMassTotal(cargo);
+            return amountSuccess;
+        }
+
+        /// <summary>
+        /// Add or Removes cargo and updates the entites MassTotal
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="item"></param>
+        /// <param name="amountInMass"></param>
+        internal static double AddRemoveCargoMass(Entity entity, ICargoable item, double amountInMass)
+        {
+            VolumeStorageDB cargo = entity.GetDataBlob<VolumeStorageDB>();
+            double amountSuccess = cargo.AddRemoveCargoByMass(item, amountInMass);
+            MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
+            mv.UpdateMassTotal(cargo);
+            return amountSuccess;
+        }
+
+        /// <summary>
+        /// Add or Removes cargo and updates the entites MassTotal
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="item"></param>
+        /// <param name="amountInVolume"></param>
+        internal static double AddRemoveCargoVolume(Entity entity, ICargoable item, double amountInVolume)
+        {
+            VolumeStorageDB cargo = entity.GetDataBlob<VolumeStorageDB>();
+            double amountSuccess = cargo.AddRemoveCargoByVolume(item, amountInVolume);
+            MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
+            mv.UpdateMassTotal(cargo);
+            return amountSuccess;
+        }
                 
         /// <summary>
         /// Calculates the difference in DeltaV between two enties who have the same parent

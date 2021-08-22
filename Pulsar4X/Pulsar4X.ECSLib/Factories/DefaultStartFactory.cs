@@ -234,15 +234,16 @@ namespace Pulsar4X.ECSLib
             var rawSorium = NameLookup.GetMineralSD(game, "Sorium");
             
             var iron = NameLookup.GetMineralSD(game, "Iron");
-            colonyEntity.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(iron, 5000);
+            CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, iron, 5000);
             
             var hydrocarbon = NameLookup.GetMineralSD(game, "Hydrocarbons");
-            colonyEntity.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(hydrocarbon, 5000);
+            CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, hydrocarbon, 5000);
             
             var stainless = NameLookup.GetMaterialSD(game, "Stainless Steel");
-            colonyEntity.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(iron, 1000);
-            colonyEntity.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(_missile, 100);
-            colonyEntity.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(_merlin, 5);
+            CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, stainless, 1000);
+            CargoTransferProcessor.AddCargoItems(colonyEntity, _missile, 100);
+            CargoTransferProcessor.AddCargoItems(colonyEntity, _merlin, 5);
+
             
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
             
@@ -269,19 +270,23 @@ namespace Pulsar4X.ECSLib
             var methalox = NameLookup.GetMaterialSD(game, "Methalox");
             var hydrolox = NameLookup.GetMaterialSD(game, "Hydrolox");
 
-            earthCargo.AddCargoByUnit(rp1, 10000);
-            earthCargo.AddCargoByUnit(methalox, 10000);
-            earthCargo.AddCargoByUnit(hydrolox, 10000);
-   
-            gunShip0.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
-            gunShip1.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
-            ship2.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
-            ship3.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 2000);
-            var count = courier.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(hydrolox, 50000);
-            starship.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByMass(methalox, 1200000);
-            
-            gunShip0.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);
-            gunShip1.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);    
+            CargoTransferProcessor.AddCargoItems(colonyEntity, rp1, 10000);
+            CargoTransferProcessor.AddCargoItems(colonyEntity, methalox, 10000);
+            CargoTransferProcessor.AddCargoItems(colonyEntity, hydrolox, 10000);
+
+
+
+            CargoTransferProcessor.AddRemoveCargoVolume(gunShip0, rp1, 2000);
+            CargoTransferProcessor.AddRemoveCargoVolume(gunShip1, rp1, 2000);
+            CargoTransferProcessor.AddRemoveCargoVolume(ship2, rp1, 2000);
+            CargoTransferProcessor.AddRemoveCargoVolume(ship3, rp1, 2000);
+            CargoTransferProcessor.AddRemoveCargoVolume(courier, hydrolox, 50000);
+            CargoTransferProcessor.AddRemoveCargoVolume(starship, methalox, 1200000);
+
+            CargoTransferProcessor.AddCargoItems(gunShip0, _missile, 20);
+            CargoTransferProcessor.AddCargoItems(gunShip1, _missile, 20);
+            //gunShip0.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);
+            //gunShip1.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);    
             
             var elec = NameLookup.GetMaterialSD(game, "Electrical Energy");
             gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
@@ -298,8 +303,8 @@ namespace Pulsar4X.ECSLib
             targetDrone1.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone1");
             targetDrone2.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone2");
 
-            targetDrone1.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 1000);
-            targetDrone2.GetDataBlob<VolumeStorageDB>().AddRemoveCargoByVolume(rp1, 1000);
+            CargoTransferProcessor.AddRemoveCargoVolume(targetDrone1, rp1, 1000);
+            CargoTransferProcessor.AddRemoveCargoVolume(targetDrone2, rp1, 1000);
 
             
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(gunShip0);
