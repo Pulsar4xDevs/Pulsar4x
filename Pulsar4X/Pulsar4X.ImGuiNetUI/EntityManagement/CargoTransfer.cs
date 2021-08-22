@@ -66,8 +66,11 @@ namespace Pulsar4X.SDL2UI
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
                 
-                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free";
-                ImGui.PushID(_entityState.Entity.Guid.ToString());
+                
+                ImGui.PushID(_entityState.Entity.Guid.ToString());//this helps the ui diferentiate between the left and right side
+                //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
+                //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
+                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.ID;
                 if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
                 {
                     ImGui.Columns(3);
@@ -162,7 +165,6 @@ namespace Pulsar4X.SDL2UI
         {
             //we do a deep copy clone so as to avoid a thread collision when we loop through.
             var newDict = new Dictionary<Guid, TypeStore>();
-            
             ICollection ic = _volStorageDB.TypeStores;
             lock (ic.SyncRoot)
             {
@@ -172,6 +174,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
             _stores = newDict;
+
             
             
             if (_entityState.Entity.HasDataBlob<CargoTransferDB>())
@@ -295,9 +298,10 @@ namespace Pulsar4X.SDL2UI
                 var freeVolume = typeStore.Value.FreeVolume;
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
-                
-                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free";
-                ImGui.PushID(_entityState.Entity.Guid.ToString());
+                ImGui.PushID(_entityState.Entity.Guid.ToString()); //this helps the ui diferentiate between the left and right side
+                //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
+                //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
+                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.ID;
                 if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
                 {
                     ImGui.Columns(3);
