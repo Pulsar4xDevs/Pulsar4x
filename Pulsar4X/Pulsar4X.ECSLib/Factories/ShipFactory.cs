@@ -89,7 +89,7 @@ namespace Pulsar4X.ECSLib
             Name = name;
             Components = components;
             Armor = armor;
-            
+             
             foreach (var component in components)
             {
                 MassPerUnit += component.design.MassPerUnit * component.count;
@@ -106,8 +106,11 @@ namespace Pulsar4X.ECSLib
                 }
 
             }
-            
-            
+            var r = Math.Cbrt(VolumePerUnit * 3 / 4 / Math.PI);
+            var s = 4 * Math.PI * r * r;
+            var v = s * armor.thickness * 0.001; //armor thickness is in mm, volume is in m^3
+            var m = v * armor.armorType.Density;
+            MassPerUnit += (long)Math.Round(m);
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);

@@ -17,7 +17,11 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         private double _sgp;
         private KeplerElements _currentKE;
         private NewtonThrustAbilityDB _newtonThrust;
-
+        private double _totalMass;
+        private double _dryMass;
+        private double _cargoMass;
+        private double _fuelMass;
+        private ICargoable _fuelType; 
         private double _totalDV
         {
             get { return _newtonThrust.DeltaV; }
@@ -25,7 +29,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         
         private double _totalDVUsage = 0;
         
-        
+        private (Vector3 deltaV, double tSec)[] _manuvers;
         
         float _phaseAngleRadians = 0;
         private DateTime _minDateTime;
@@ -69,9 +73,12 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             _orderEntity = orderEntity.Entity;
             _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
-            var myMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal; 
+            _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal; 
+            _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
             var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(_totalMass, parentMass);
+            var fuelTypeID = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            _fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
 
             _siblingEntities = _orderEntity.GetSOIParentEntity().GetDataBlob<PositionDB>().Children.ToArray();
             List<string> names = new List<string>();
@@ -105,6 +112,14 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             
             if (_targetSMA == 0)
                 _targetSMA = (float)_currentKE.SemiMajorAxis;
+
+            _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
+            var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(_totalMass, parentMass);
+            _cargoMass = _orderEntity.GetDataBlob<VolumeStorageDB>().TotalStoredMass;
+            _fuelMass = _orderEntity.GetDataBlob<VolumeStorageDB>().GetUnitsStored(_fuelType);
+
+
         }
 
 
@@ -158,6 +173,11 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 BorderGroup.End();
                 ImGui.NewLine();
                 ImGui.Text("Availible Δv: " + Stringify.Velocity(_totalDV));
+                ImGui.Text("Dry Mass:" + Stringify.Mass(_dryMass, "0.######"));
+                ImGui.Text("Total Mass: " + Stringify.Mass(_totalMass));
+                ImGui.Text("Non Fuel Cargo: " + Stringify.Mass(_cargoMass - _fuelMass));
+                ImGui.Text(_fuelType.Name + " Fuel: " + Stringify.Mass(_fuelMass));
+                ImGui.Text("Total Thrust: " + Stringify.Thrust(_newtonThrust.ThrustInNewtons));
                 switch (_navMode)
                 {                    
                     case NavMode.Thrust:
@@ -215,15 +235,15 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             ImGui.SliderAngle("PhaseAngle", ref _phaseAngleRadians);
       
-            var manuvers = InterceptCalcs.OrbitPhasingManuvers(_currentKE, _sgp, _atDatetime, _phaseAngleRadians);
+            _manuvers = InterceptCalcs.OrbitPhasingManuvers(_currentKE, _sgp, _atDatetime, _phaseAngleRadians);
             
             
             double totalManuverDV = 0;
-            foreach (var manuver in manuvers)
+            foreach (var manuver in _manuvers)
             {
                 ImGui.Text(manuver.deltaV.Length() + "Δv");
                 totalManuverDV += manuver.deltaV.Length();
-                ImGui.Text("Seconds: " + manuver.timeInSeconds);
+                ImGui.Text("Seconds: " + manuver.tSec);
             }
 
             ImGui.Text("Total Δv");
@@ -234,9 +254,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             
             if (ImGui.Button("Make it so"))
             {
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, _atDatetime, manuvers[0].deltaV);
-                DateTime futureDate = _atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, futureDate, manuvers[1].deltaV);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, _atDatetime, _manuvers[0].deltaV);
+                DateTime futureDate = _atDatetime + TimeSpan.FromSeconds(_manuvers[1].tSec);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, futureDate, _manuvers[1].deltaV);
             }
         }
 
@@ -261,15 +281,26 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             //TODO this should be radius from orbiting body not major axies.  
             ImGui.SliderFloat("Target SemiMajorAxis", ref _targetSMA, smaMin, smaMax);
-            var manuvers = InterceptCalcs.Hohmann2(_sgp, mySMA, _targetSMA);
+            _manuvers = InterceptCalcs.Hohmann2(_sgp, mySMA, _targetSMA);
+
+            
+            var burnRate = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
 
             
             
+
             double totalManuverDV = 0;
-            foreach (var manuver in manuvers)
+            foreach (var manuver in _manuvers)
             {
-                ImGui.Text(manuver.deltaV.Length() + "Δv");
-                totalManuverDV += manuver.deltaV.Length();
+                var dv = manuver.deltaV.Length();
+                totalManuverDV += dv;
+                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(_totalMass, exhaustVelocity, dv);
+                double secondsBurn = fuelBurned / burnRate;
+                ImGui.Text(dv + "Δv");
+                ImGui.Text(fuelBurned + " fuel");
+                ImGui.Text(Stringify.Number(secondsBurn, "0.###") + " Second Burn");
+
             }
             
             if(totalManuverDV > _totalDV)
@@ -279,9 +310,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             
             if (ImGui.Button("Make it so"))
             {
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, _atDatetime, manuvers[0].deltaV);
-                DateTime futureDate = _atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, futureDate, manuvers[1].deltaV);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, _atDatetime, _manuvers[0].deltaV);
+                DateTime futureDate = _atDatetime + TimeSpan.FromSeconds(_manuvers[1].tSec);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, futureDate, _manuvers[1].deltaV);
             }
             
         }

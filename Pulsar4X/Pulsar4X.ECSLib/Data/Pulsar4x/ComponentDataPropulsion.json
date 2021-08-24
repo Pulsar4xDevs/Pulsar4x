@@ -124,7 +124,7 @@
               "Units": "kg/s",
               "DescriptionFormula": "'Fuel Consumption per second'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Mass') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
+              "AttributeFormula": "Ability('Mass') * 0.4 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
             },
             {
               "Name": "Thrust",

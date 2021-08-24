@@ -322,7 +322,7 @@ namespace Pulsar4X.ECSLib
             var db = parentEntity.GetDataBlob<NewtonThrustAbilityDB>();
             var ft = db.FuelType;
             var ev = db.ExhaustVelocity;
-            
+            var totalMass = parentEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             //db.DryMass_kg = parentEntity.GetDataBlob<MassVolumeDB>().MassDry; 
             ProcessedMaterialSD fuel = StaticRefLib.StaticData.CargoGoods.GetMaterials()[ft];
 
@@ -332,7 +332,7 @@ namespace Pulsar4X.ECSLib
                 var cargo = parentEntity.GetDataBlob<VolumeStorageDB>();
                 fuelMass = cargo.GetMassStored(fuel);
             }
-            db.SetFuel(fuelMass, fuelMass);
+            db.SetFuel(fuelMass, totalMass);
         }
 
 

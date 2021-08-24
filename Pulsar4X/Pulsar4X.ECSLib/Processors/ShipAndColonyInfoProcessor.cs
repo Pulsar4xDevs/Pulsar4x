@@ -28,6 +28,13 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
+            var armor = shipInfo.Design.Armor;
+            var r = Math.Cbrt(totalVolume * 3 / 4 / Math.PI);
+            var s = 4 * Math.PI * r * r;
+            var v = s * armor.thickness * 0.001; //armor thickness is in mm, volume is in m^3
+            var m = v * armor.type.Density;
+            totalTonnage += (long)Math.Round(m);
+
             shipInfo.InternalHTK = totalHTK;
             MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
             mvDB.MassDry = totalTonnage;

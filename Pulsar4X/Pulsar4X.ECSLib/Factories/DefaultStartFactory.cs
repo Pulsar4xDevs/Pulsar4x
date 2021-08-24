@@ -264,7 +264,7 @@ namespace Pulsar4X.ECSLib
             Entity ship3 = ShipFactory.CreateShip(shipDesign, factionEntity, earth,  "Touch-and-Go");
             Entity gunShip1 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth,  "Prevailing Stillness");
             Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), factionEntity, earth,  "Planet Express Ship");
-            Entity starship = ShipFactory.CreateShip(SpaceXStarShip(game, factionEntity), factionEntity, earth,  "SN10");
+            Entity starship = ShipFactory.CreateShip(SpaceXStarShip(game, factionEntity), factionEntity, earth,  "Starship");
             var fuel = NameLookup.GetMaterialSD(game, "Sorium Fuel");
             var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
             var methalox = NameLookup.GetMaterialSD(game, "Methalox");
@@ -281,7 +281,7 @@ namespace Pulsar4X.ECSLib
             CargoTransferProcessor.AddRemoveCargoVolume(ship2, rp1, 2000);
             CargoTransferProcessor.AddRemoveCargoVolume(ship3, rp1, 2000);
             CargoTransferProcessor.AddRemoveCargoVolume(courier, hydrolox, 50000);
-            CargoTransferProcessor.AddRemoveCargoVolume(starship, methalox, 1200000);
+            CargoTransferProcessor.AddRemoveCargoMass(starship, methalox, 1200000);
 
             CargoTransferProcessor.AddCargoItems(gunShip0, _missile, 20);
             CargoTransferProcessor.AddCargoItems(gunShip1, _missile, 20);
@@ -426,7 +426,7 @@ namespace Pulsar4X.ECSLib
                 
             };
             ArmorSD stainless = game.StaticData.ArmorTypes[new Guid("05dce711-8846-488a-b0f3-57fd7924b268")];
-            _spaceXStarShipDesign = new ShipDesign(factionInfo, "Starship", components2, (stainless, 3));
+            _spaceXStarShipDesign = new ShipDesign(factionInfo, "Starship", components2, (stainless, 12.75f));
             _spaceXStarShipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _spaceXStarShipDesign.Armor);
             return _spaceXStarShipDesign;
         }
@@ -564,6 +564,12 @@ namespace Pulsar4X.ECSLib
             return _f1;
         }
         
+        /*
+            Target Stats:
+            Mass: 1500kg
+            Thrust: 2.3 MN
+            Isp 380s (3.73)
+        */
         public static ComponentDesign RaptorThrusterDesign(Game game, Entity faction)
         {
             if (_raptor != null)
@@ -574,7 +580,7 @@ namespace Pulsar4X.ECSLib
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("B03FE82F-EE70-4A9A-AC61-5A7D44A3364E")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
             engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1500); 
-            engineDesigner.Name = "Raptor";
+            engineDesigner.Name = "Raptor-Vac";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
    
             _raptor = engineDesigner.CreateDesign(faction);
@@ -632,7 +638,7 @@ namespace Pulsar4X.ECSLib
             ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("3528600E-3A1C-488C-BAE6-60251D1156AB")];
             fuelTankDesigner = new ComponentDesigner(tankSD, faction.GetDataBlob<FactionTechDB>());
             fuelTankDesigner.ComponentDesignAttributes["Tank Volume"].SetValueFromInput(1000);
-            fuelTankDesigner.Name = "Tank-2500";
+            fuelTankDesigner.Name = "Tank-1000m^3";
             _fuelTank_1000 = fuelTankDesigner.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_1000.TechID);
             return _fuelTank_1000;
@@ -645,8 +651,8 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner fuelTankDesigner;
             ComponentTemplateSD tankSD = game.StaticData.ComponentTemplates[new Guid("3528600E-3A1C-488C-BAE6-60251D1156AB")];
             fuelTankDesigner = new ComponentDesigner(tankSD, faction.GetDataBlob<FactionTechDB>());
-            fuelTankDesigner.ComponentDesignAttributes["Tank Volume"].SetValueFromInput(2500);
-            fuelTankDesigner.Name = "Tank-1200t";
+            fuelTankDesigner.ComponentDesignAttributes["Tank Volume"].SetValueFromInput(1500);
+            fuelTankDesigner.Name = "Tank-1500m^3";
             _fuelTank_2500 = fuelTankDesigner.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_2500.TechID);
             return _fuelTank_2500;
