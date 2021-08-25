@@ -5,10 +5,22 @@ namespace Pulsar4X.ECSLib
 {
     public abstract class EntityCommand
     {
+        [Flags]
+        public enum ActionLaneTypes
+        {
+            InstantOrder = 0,
+            Movement = 1,
+            InteractWithExternalEntity = 2,
+            InteractWithEntitySameFleet = 4,
+
+            IneteractWithSelf = 8,
+            
+        }
+
         [JsonProperty]
         public Guid CmdID { get; internal set; } = Guid.NewGuid();
         public bool UseActionLanes = true;
-        public abstract int ActionLanes { get;  }
+        public abstract ActionLaneTypes ActionLanes { get;  }
         public abstract bool IsBlocking { get; }
 
         public abstract string Name { get; }
@@ -115,7 +127,7 @@ namespace Pulsar4X.ECSLib
 
     public class RenameCommand : EntityCommand
     {
-        public override int ActionLanes => 0;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking => false;
 

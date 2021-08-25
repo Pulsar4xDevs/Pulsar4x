@@ -381,8 +381,8 @@ namespace Pulsar4X.ECSLib
                         Manuvers(ship, source);
 
 
-                        //CargoLoadFromOrder.CreateCommand(shipOwner, tradeBase.OwningEntity, ship, tradeItems);
-                        CargoUnloadToOrder.CreateCommand(shipOwner, source, ship, tradeItems);//we need to use the above...
+                        CargoLoadFromOrder.CreateCommand(shipOwner, source, ship, tradeItems);
+                        //CargoUnloadToOrder.CreateCommand(shipOwner, source, ship, tradeItems);//we need to use the above...
                         //moveto destination.
                         Manuvers(ship, destin);
                         CargoUnloadToOrder.CreateCommand(shipOwner, ship, destin, tradeItems);
@@ -502,18 +502,16 @@ namespace Pulsar4X.ECSLib
             SetShipTypeAmounts
         }
 
-        public SetLogisticsOrder Order;
+        //public SetLogisticsOrder Order;
         private OrderTypes _type;
-        public override int ActionLanes { get; }
+        public override ActionLaneTypes ActionLanes { get; } = ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking { get; } = false;
 
         public override string Name { get; } = "Set TradeObject";
 
-        public override string Details
-        {
-            get { return Order.Details; }
-        }
+        public override string Details { get; } = "Set Logi"; 
+        
 
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }

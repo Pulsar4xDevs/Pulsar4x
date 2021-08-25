@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
 
         public Guid SendCargoToEntityGuid { get; set; }
 
-        public override int ActionLanes => 1;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement | ActionLaneTypes.InteractWithExternalEntity;
 
         public override bool IsBlocking => true;
         
@@ -125,9 +125,9 @@ namespace Pulsar4X.ECSLib
     {
         public CargoUnloadToOrder Order;
 
-        public override int ActionLanes { get; }
+        public override ActionLaneTypes ActionLanes { get; } = ActionLaneTypes.Movement | ActionLaneTypes.InteractWithExternalEntity;
 
-        public override bool IsBlocking { get; }
+        public override bool IsBlocking { get; } = true;
 
         public override string Name { get; } = "Cargo Transfer";
 

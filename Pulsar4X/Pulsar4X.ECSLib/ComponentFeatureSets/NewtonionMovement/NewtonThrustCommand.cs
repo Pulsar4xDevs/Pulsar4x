@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
 
     public class NewtonThrustCommand : EntityCommand
     {
-        public override int ActionLanes => 1;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
         public override bool IsBlocking => true;
         public override string Name { get; } = "Nav: Thrust";
 
@@ -88,8 +88,8 @@ namespace Pulsar4X.ECSLib
                 return "Attempting intercept on + " + targetName + ", with " + Stringify.Velocity(_newtonAbilityDB.DeltaV) + "Δv remaining.";
             }
         }
-        
-        public override int ActionLanes => 1;
+
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
         public override bool IsBlocking => true;
 
         Entity _factionEntity;
@@ -312,8 +312,8 @@ namespace Pulsar4X.ECSLib
                 return "Attempting intercept on + " + targetName + ", with " + Stringify.Velocity(_newtonAbilityDB.DeltaV) + "Δv remaining.";
             }
         }
-        
-        public override int ActionLanes => 1;
+
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
         public override bool IsBlocking => true;
 
         Entity _factionEntity;

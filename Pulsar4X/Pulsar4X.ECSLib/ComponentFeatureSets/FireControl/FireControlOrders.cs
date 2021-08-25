@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
 {
     public class SetWeaponsFireControlOrder : EntityCommand
     {
-        public override int ActionLanes => 1;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking => false;
         public override string Name { get; } = "Fire Control Set Weapons";
@@ -100,7 +100,7 @@ namespace Pulsar4X.ECSLib
 
     public class SetTargetFireControlOrder : EntityCommand
     {
-        public override int ActionLanes => 1;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking => false;
         
@@ -206,9 +206,9 @@ namespace Pulsar4X.ECSLib
             {
                 return IsFiring.ToString();
             }
-        } 
-        
-        public override int ActionLanes => 1;
+        }
+
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking => false;
 
@@ -300,8 +300,8 @@ namespace Pulsar4X.ECSLib
         
         public override string Name { get; } = "Fire Control Set Ordnance";
         public override string Details { get; } = "";
-        
-        public override int ActionLanes => 1;
+
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking => false;
 

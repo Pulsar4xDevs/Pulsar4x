@@ -5,7 +5,7 @@ namespace Pulsar4X.ECSLib.Industry
 {
     public class LaunchShipCmd : EntityCommand
     {
-        public override int ActionLanes => 1;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
         public override bool IsBlocking => true;
         public override string Name { get; } = "Launch Ship From Storage";
         public override string Details { get; } = "";

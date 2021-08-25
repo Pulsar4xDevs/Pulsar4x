@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
             }
         }
         
-        public override int ActionLanes => 1;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
         public override bool IsBlocking => true;
 
         [JsonProperty]

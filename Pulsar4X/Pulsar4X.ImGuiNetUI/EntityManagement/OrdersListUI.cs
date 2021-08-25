@@ -42,6 +42,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         internal void onEntityChange(EntityState entity)
         {
             _lookedAtEntity = entity;
+
+ 
+
         }
 
         internal override void Display()
@@ -50,10 +53,16 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             if (IsActive == true && ImGui.Begin("Orders: " + _orderEntity.GetOwnersName(), ref IsActive, _flags))
             {
-                ImGui.Columns(2);
+                ImGui.Columns(5);
                 ImGui.Text("Name");
                 ImGui.NextColumn();
                 ImGui.Text("Details");
+                ImGui.NextColumn();
+                ImGui.Text("Mov");
+                ImGui.NextColumn();
+                ImGui.Text("IE");
+                ImGui.NextColumn();
+                ImGui.Text("IS");
                 ImGui.NextColumn();
                 ImGui.Separator();
 
@@ -68,6 +77,30 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         ImGui.NextColumn();
                         ImGui.Text(order.Details);
                         ImGui.NextColumn();
+                        if(order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.Movement))
+                        {
+                            if(order.IsBlocking)
+                                ImGui.TextColored(new System.Numerics.Vector4(1,0,0,0), "--");
+                            else
+                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 0), "|");
+                        }
+                        ImGui.NextColumn();
+                        if (order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.InteractWithExternalEntity))
+                        {
+                            if (order.IsBlocking)
+                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 0), "--");
+                            else
+                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 0), "|");
+                        }
+                        ImGui.NextColumn();
+                        if (order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.IneteractWithSelf))
+                        {
+                            if (order.IsBlocking)
+                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 0), "--");
+                            else
+                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 0), "|");
+                        }
+
                     }
                 }
                 else

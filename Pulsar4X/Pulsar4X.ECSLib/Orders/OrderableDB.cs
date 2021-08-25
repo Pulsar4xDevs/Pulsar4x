@@ -17,13 +17,12 @@ namespace Pulsar4X.ECSLib
             {
                 EntityCommand entityCommand = ActionList[i];
 
-                if ((mask & entityCommand.ActionLanes) == entityCommand.ActionLanes) //bitwise and
+                if ((mask & ((int)entityCommand.ActionLanes)) == ((int)entityCommand.ActionLanes)) //bitwise and
                 {
                     if (entityCommand.IsBlocking)
                     {
-                        mask |= entityCommand.ActionLanes; //bitwise or
+                        mask |= ((int)entityCommand.ActionLanes); //bitwise or =
                     }
-
                     if (atDateTime >= entityCommand.ActionOnDate)
                     {
                         entityCommand.ActionCommand(atDateTime);

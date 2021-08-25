@@ -422,8 +422,8 @@ namespace Pulsar4X.ECSLib.Industry
         
         public short Delta { get; set; }
         
-        public override int ActionLanes => 1; //blocks movement
-        public override bool IsBlocking => true;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf; 
+        public override bool IsBlocking => true; //?why block?
 
 
         private Entity _entityCommanding;
