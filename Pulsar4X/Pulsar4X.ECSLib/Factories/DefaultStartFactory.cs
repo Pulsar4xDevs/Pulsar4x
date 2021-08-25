@@ -412,7 +412,7 @@ namespace Pulsar4X.ECSLib
              * gross mass: 1,320,000 kg
              * propellent mass: 1,200,000 kg max
              * 6.9 Dv
-             * 3,700 isp in vac
+             * 3,700 to 3800 isp in vac
              */
             if (_spaceXStarShipDesign != null)
                 return _spaceXStarShipDesign;

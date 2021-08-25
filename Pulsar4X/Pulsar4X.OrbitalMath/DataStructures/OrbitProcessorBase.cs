@@ -13,6 +13,9 @@ namespace Pulsar4X.Orbital
      /// Eccentric Anomaly is calculated from the Mean Anomaly, and takes the most work. 
      /// True Anomaly, is calculated using the Eccentric Anomaly this is the angle from the parent (or focal point of the ellipse) to the body. 
      /// With the true anomaly, we can then use trig to calculate the position.  
+     /// ***
+     /// Top Thanks to dev 22367rh for seperating all this out into it's own project from the ECSLib project.
+     /// *** 
      /// </summary>
     public class OrbitProcessorBase
     {

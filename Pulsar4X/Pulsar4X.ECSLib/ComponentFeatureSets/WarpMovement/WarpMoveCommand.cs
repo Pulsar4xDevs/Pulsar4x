@@ -50,11 +50,11 @@ namespace Pulsar4X.ECSLib
         /// <param name="targetOffsetPos_m">Target offset position in au.</param>
         /// <param name="transitStartDatetime">Transit start datetime.</param>
         /// <param name="expendDeltaV_AU">Amount of DV to expend to change the orbit in AU/s</param>
-        public static void CreateCommand(Game game, Entity faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_m, DateTime transitStartDatetime, Vector3 expendDeltaV)
+        public static void CreateCommand(Guid faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_m, DateTime transitStartDatetime, Vector3 expendDeltaV)
         {
             var cmd = new WarpMoveCommand()
             {
-                RequestingFactionGuid = faction.Guid,
+                RequestingFactionGuid = faction,
                 EntityCommandingGuid = orderEntity.Guid,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 TargetEntityGuid = targetEntity.Guid,
@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib
                 TransitStartDateTime = transitStartDatetime,
                 ExpendDeltaV = expendDeltaV,
             };
-            game.OrderHandler.HandleOrder(cmd);
+            StaticRefLib.OrderHandler.HandleOrder(cmd);
         }
 
         internal override bool IsValidCommand(Game game)

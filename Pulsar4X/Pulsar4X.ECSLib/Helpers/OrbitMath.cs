@@ -4,7 +4,9 @@ using Pulsar4X.Orbital;
 namespace Pulsar4X.ECSLib
 {
     /// <summary>
-    /// Orbit math.
+    /// This class extends Orbital.OrbitalMath to use Entites and DataBlobs as parameters, and has other useful functions which are more pulsar specific. 
+    /// if you're using raw numbers, use Orbital.OrbitalMath over this one (it'll likely be more efficent due to not having to look up data)
+    /// 
     /// note multiple simular functions for doing the same thing, some of these are untested.
     /// Take care when using unless the function has a decent test in the tests project. 
     /// Some simular functions with simular inputs left in for future performance testing (ie one of the two might be slightly more performant).
@@ -12,7 +14,7 @@ namespace Pulsar4X.ECSLib
     public class OrbitMath : OrbitalMath
     {
         /// <summary>
-        /// Currently this only calculates the change in velocity from 0 to planet radius +* 0.33333.
+        /// Currently this only calculates the change in velocity from 0 to planet radius * 1.1 
         /// TODO: add gravity drag and atmosphere drag, and tech improvements for such.  
         /// </summary>
         /// <param name="planetEntity"></param>
@@ -22,20 +24,28 @@ namespace Pulsar4X.ECSLib
         {
             var lowOrbit = LowOrbitRadius(planetEntity);
             
-            var exaustVelocity = 275;
+            var exaustVelocity = 3000; //this should come from tech. 
             var sgp = OrbitMath.CalculateStandardGravityParameterInKm3S2(payload, planetEntity.GetDataBlob<MassVolumeDB>().MassDry);
             Vector3 pos = new Vector3(lowOrbit, 0, 0);
             
+            //we should add the planet rotational velocity in here too?
             var vel = OrbitMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
             var fuelCost = OrbitMath.TsiolkovskyFuelCost(payload, exaustVelocity, vel.speed);
             return fuelCost;
         }
 
+        /// <summary>
+        /// basicaly the radius of the planet * 1.1 
+        /// in future we may have this dependant on atmosphere (thickness and or gravity?) 
+        /// maybe we should return a lower and an upper bound? ie 1.05 to 1.333 which would allow some flexability with eccentricity,
+        /// and as this is used by ships to get a good logistics transfer orbit, add some flavor with ship skill and risk aversion etc?
+        /// </summary>
+        /// <param name="planetEntity"></param>
+        /// <returns></returns>
         public static double LowOrbitRadius(Entity planetEntity)
         {
-            var prad = planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM;
-            double alt = prad * 0.33333;
-            var lowOrbit = prad + alt;
+            double prad = planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM;
+            var lowOrbit = prad * 1.1;
             return lowOrbit;
         }
 

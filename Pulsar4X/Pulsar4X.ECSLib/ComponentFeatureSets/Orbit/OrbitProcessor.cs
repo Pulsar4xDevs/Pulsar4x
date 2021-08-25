@@ -187,7 +187,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Calculates a cartisian position for an intercept for a ship and an target's orbit. 
+        /// Calculates a cartisian position for an intercept for a ship and an target's orbit using warp. 
         /// </summary>
         /// <returns>The intercept position and DateTime</returns>
         /// <param name="mover">The entity that is trying to intercept a target.</param>

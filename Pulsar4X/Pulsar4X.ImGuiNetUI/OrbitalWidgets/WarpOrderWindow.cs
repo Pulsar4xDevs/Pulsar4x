@@ -168,7 +168,7 @@ namespace Pulsar4X.SDL2UI
             //else if(OrderingEntity.Entity.HasDataBlob<newton>())
             CurrentState = States.NeedsTarget;
             
-            _massOrderingEntity = OrderingEntityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
+            _massOrderingEntity = OrderingEntityState.Entity.GetDataBlob<MassVolumeDB>().MassTotal;
             _stdGravParamCurrentBody = UniversalConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;
             if (_moveWidget == null)
             {
@@ -257,8 +257,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             WarpMoveCommand.CreateCommand(
-                _uiState.Game,
-                _uiState.Faction,
+                _uiState.Faction.Guid,
                 OrderingEntityState.Entity,
                 TargetEntity.Entity,
                 _targetInsertionPoint_m,

@@ -73,13 +73,14 @@ namespace Pulsar4X.SDL2UI
                 string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.ID;
                 if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
                 {
-                    ImGui.Columns(3);
+                    ImGui.Columns(4);
                     ImGui.Text("Item");
                     ImGui.NextColumn();
                     ImGui.Text("Count");
                     ImGui.NextColumn();
-                    ImGui.Text("Total Mass");
+                    ImGui.Text("Mass");
                     ImGui.NextColumn();
+                    ImGui.Text("Volume");
                     ImGui.Separator();
                     foreach (var cargoType in typeStore.Value.CurrentStoreInUnits)
                     {
@@ -97,7 +98,9 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(Stringify.Number(itemsStored));
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Mass(massStored));
-                        ImGui.SetTooltip(Stringify.Volume(volumeStored));
+                        ImGui.NextColumn();
+                        ImGui.Text(Stringify.Volume(volumeStored));
+                        //ImGui.SetTooltip(ctype.ToDescription);
                         ImGui.NextColumn();
                     }
 
@@ -304,14 +307,17 @@ namespace Pulsar4X.SDL2UI
                 string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.ID;
                 if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
                 {
-                    ImGui.Columns(3);
+                    ImGui.Columns(4);
                     ImGui.Text("Item");
                     ImGui.NextColumn();
                     ImGui.Text("Count");
                     ImGui.NextColumn();
-                    ImGui.Text("Total Mass");
+                    ImGui.Text("Mass");
+                    ImGui.NextColumn();
+                    ImGui.Text("Volume");
                     ImGui.NextColumn();
                     ImGui.Separator();
+
 
                     foreach (var cargoItemKvp in typeStore.Value.CurrentStoreInUnits.ToArray())
                     {
@@ -371,6 +377,8 @@ namespace Pulsar4X.SDL2UI
 
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Mass(massStored));
+                        ImGui.NextColumn();
+                        ImGui.Text(Stringify.Volume(volumeStored));
                         ImGui.NextColumn();
                     }
 

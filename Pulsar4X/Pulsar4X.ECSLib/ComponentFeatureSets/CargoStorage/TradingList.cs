@@ -376,82 +376,17 @@ namespace Pulsar4X.ECSLib
                         tradeItems.Add((cargoTask.item, cargoTask.NumberOfItems));
 
                         var shipOwner = ship.FactionOwner;//.GetDataBlob<ObjectOwnershipDB>().OwningEntity;
-                        //StaticRefLib.
-                        //moveto source order.
-                        var dvdif =  CargoTransferProcessor.CalcDVDifference_m(source, ship);
-                        var cargoDBLeft = source.GetDataBlob<VolumeStorageDB>();
-                        var cargoDBRight = destin.GetDataBlob<VolumeStorageDB>();
-                        var dvMaxRangeDiff_ms = Math.Max(cargoDBLeft.TransferRangeDv_mps, cargoDBRight.TransferRangeDv_mps);
-
-                        var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
-                        var parentMass = source.GetDataBlob<MassVolumeDB>().MassTotal;
-                        var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
-
-                        if(source.HasDataBlob<ColonyInfoDB>())
-                        { 
-                            
-                            if (dvdif > dvMaxRangeDiff_ms * 0.01)//fix, whats the best dv dif for a colony on a planet?
-                            {
-                                Entity target = source.GetSOIParentEntity();
-                                double mySMA = 0;
-                                if (ship.HasDataBlob<OrbitDB>())
-                                    mySMA = ship.GetDataBlob<OrbitDB>().SemiMajorAxis;
-                                if (ship.HasDataBlob<OrbitUpdateOftenDB>())
-                                    mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                                if (ship.HasDataBlob<NewtonMoveDB>())
-                                    mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
-
-                                double targetSMA = 0;
-                                if (target.HasDataBlob<OrbitDB>())
-                                    targetSMA = target.GetDataBlob<OrbitDB>().SemiMajorAxis;
-                                if (target.HasDataBlob<OrbitUpdateOftenDB>())
-                                    targetSMA = target.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                                if (target.HasDataBlob<NewtonMoveDB>())
-                                    targetSMA = target.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
-
-                                var manuvers = InterceptCalcs.Hohmann2(sgp, mySMA, targetSMA);
-                                var tnow = ship.Manager.StarSysDateTime;
-                                NewtonThrustCommand.CreateCommand(shipOwner, ship, tnow, manuvers[0].deltaV);
-                                DateTime futureDate = tnow + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-                                NewtonThrustCommand.CreateCommand(shipOwner, ship, futureDate, manuvers[1].deltaV);
-                            }
+                        
+                        //moveto source(if requred)
+                        Manuvers(ship, source);
 
 
-                        }
-                        else //we're moving between two objects who are in orbit, we shoudl be able to match orbit.
-                        {
-                            if(dvdif > dvMaxRangeDiff_ms * 0.01)//if we're less than 10% of perfect
-                            {
-
-                                double mySMA = 0;
-                                if (ship.HasDataBlob<OrbitDB>())
-                                    mySMA = ship.GetDataBlob<OrbitDB>().SemiMajorAxis;
-                                if (ship.HasDataBlob<OrbitUpdateOftenDB>())
-                                    mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                                if (ship.HasDataBlob<NewtonMoveDB>())
-                                    mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
-
-                                double targetSMA = 0;
-                                if (source.HasDataBlob<OrbitDB>())
-                                    targetSMA = source.GetDataBlob<OrbitDB>().SemiMajorAxis;
-                                if (source.HasDataBlob<OrbitUpdateOftenDB>())
-                                    targetSMA = source.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
-                                if (source.HasDataBlob<NewtonMoveDB>())
-                                    targetSMA = source.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
-
-                                var manuvers = InterceptCalcs.Hohmann2(sgp, mySMA, targetSMA);
-                                var tnow = ship.Manager.StarSysDateTime;
-                                NewtonThrustCommand.CreateCommand(shipOwner, ship, tnow, manuvers[0].deltaV);
-                                DateTime futureDate = tnow + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-                                NewtonThrustCommand.CreateCommand(shipOwner, ship, futureDate, manuvers[1].deltaV);
-                            }
-                        }
                         //CargoLoadFromOrder.CreateCommand(shipOwner, tradeBase.OwningEntity, ship, tradeItems);
-                        CargoUnloadToOrder.CreateCommand(shipOwner, source, ship, tradeItems);
-                        //moveto destination order.
+                        CargoUnloadToOrder.CreateCommand(shipOwner, source, ship, tradeItems);//we need to use the above...
+                        //moveto destination.
+                        Manuvers(ship, destin);
                         CargoUnloadToOrder.CreateCommand(shipOwner, ship, destin, tradeItems);
-                        
-                        
+ 
                     }
 
                 }
@@ -460,6 +395,96 @@ namespace Pulsar4X.ECSLib
 
 
 
+        }
+
+
+        private static void Manuvers(Entity ship, Entity target)
+        {
+            var targetBody = target.GetSOIParentEntity();
+
+            var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
+            var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+            var sgpTgtBdy = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, tgtBdyMass);
+
+            if (ship.GetSOIParentEntity() == target.GetSOIParentEntity())
+            {
+                var dvdif = CargoTransferProcessor.CalcDVDifference_m(target, ship);
+                var cargoDBLeft = ship.GetDataBlob<VolumeStorageDB>();
+                var cargoDBRight = target.GetDataBlob<VolumeStorageDB>();
+                var dvMaxRangeDiff_ms = Math.Max(cargoDBLeft.TransferRangeDv_mps, cargoDBRight.TransferRangeDv_mps);
+
+                if (target.HasDataBlob<ColonyInfoDB>())
+                {
+                    if (dvdif > dvMaxRangeDiff_ms * 0.01)//fix, whats the best dv dif for a colony on a planet? can we land? do we want to?
+                    {
+                        
+                        double mySMA = 0;
+                        if (ship.HasDataBlob<OrbitDB>())
+                            mySMA = ship.GetDataBlob<OrbitDB>().SemiMajorAxis;
+                        if (ship.HasDataBlob<OrbitUpdateOftenDB>())
+                            mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
+                        if (ship.HasDataBlob<NewtonMoveDB>())
+                            mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
+
+                        double targetSMA = OrbitMath.LowOrbitRadius(targetBody);
+
+                        var manuvers = InterceptCalcs.Hohmann2(sgpTgtBdy, mySMA, targetSMA);
+                        var tnow = ship.Manager.StarSysDateTime;
+                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, tnow, manuvers[0].deltaV);
+                        DateTime futureDate = tnow + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
+                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, futureDate, manuvers[1].deltaV);
+                    }
+
+
+                }
+                else //we're moving between two objects who are in orbit, we shoudl be able to match orbit.
+                {
+                    if (dvdif > dvMaxRangeDiff_ms * 0.01)//if we're less than 10% of perfect
+                    {
+
+                        double mySMA = 0;
+                        if (ship.HasDataBlob<OrbitDB>())
+                            mySMA = ship.GetDataBlob<OrbitDB>().SemiMajorAxis;
+                        if (ship.HasDataBlob<OrbitUpdateOftenDB>())
+                            mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
+                        if (ship.HasDataBlob<NewtonMoveDB>())
+                            mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
+
+                        double targetSMA = 0;
+                        if (target.HasDataBlob<OrbitDB>())
+                            targetSMA = target.GetDataBlob<OrbitDB>().SemiMajorAxis;
+                        if (target.HasDataBlob<OrbitUpdateOftenDB>())
+                            targetSMA = target.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
+                        if (target.HasDataBlob<NewtonMoveDB>())
+                            targetSMA = target.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
+
+                        var manuvers = InterceptCalcs.Hohmann2(sgpTgtBdy, mySMA, targetSMA);
+                        var tnow = ship.Manager.StarSysDateTime;
+                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, tnow, manuvers[0].deltaV);
+                        DateTime futureDate = tnow + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
+                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, futureDate, manuvers[1].deltaV);
+                    }
+                }
+            }
+            else //if we're not orbiting the same parent as the source, we have to warpmove
+            {
+
+                double targetRad = OrbitMath.LowOrbitRadius(targetBody);
+                var ourState = ship.GetRelativeState();
+
+                var departTime = ship.StarSysDateTime;
+                OrbitDB targetOrbit = targetBody.GetDataBlob<OrbitDB>();
+                (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition_m(ship, targetOrbit, departTime);
+                Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector_m(ourState.Velocity, targetOrbit, targetIntercept.eti);
+                var insertionSpeed = insertionVector.Length();
+                var idealSpeed = Math.Sqrt(targetRad / sgpTgtBdy);//for a circular orbit
+                var deltaV = insertionSpeed - idealSpeed;
+
+                var targetInsertionPosition = Vector3.Normalise(ourState.pos) * targetRad;
+                var thrustVector = Vector3.Normalise(insertionVector) * -deltaV;
+                //should we expend deltaV now or when we get there?
+                WarpMoveCommand.CreateCommand(ship.FactionOwner, ship, targetBody, targetInsertionPosition, targetIntercept.eti, thrustVector);
+            }
         }
     }
 
