@@ -8,7 +8,7 @@ using Pulsar4X.ECSLib;
 namespace Pulsar4X.SDL2UI
 {
     //a do nothing helper class that is plugged into generics for static checks
-    public class TradeBaseWindow : PulsarGuiWindow
+    public class LogiBaseWindow : PulsarGuiWindow
     {
         private Dictionary<ICargoable,(int count, int demandSupplyWeight)> _changes = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
 
@@ -19,13 +19,13 @@ namespace Pulsar4X.SDL2UI
         private Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedResources;
         private EntityState _entityState;
         private Entity _selectedEntity;
-        private TradingBaseDB _tradebaseDB;
+        private LogiBaseDB _tradebaseDB;
 
         private VolumeStorageDB _volStorageDB;
 
         private Dictionary<Guid, TypeStore> _stores;
         private StaticDataStore _staticData;
-        private TradeBaseWindow(EntityState entity)
+        private LogiBaseWindow(EntityState entity)
         {
             SetEntity(entity);
             var allgoods = StaticRefLib.StaticData.CargoGoods.GetAll();
@@ -43,16 +43,16 @@ namespace Pulsar4X.SDL2UI
         }
         string _demandHint = "";
         string _demandBuff = "";
-        internal static TradeBaseWindow GetInstance(StaticDataStore staticData, EntityState state) {
+        internal static LogiBaseWindow GetInstance(StaticDataStore staticData, EntityState state) {
 
-            TradeBaseWindow instance;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(TradeBaseWindow)))
+            LogiBaseWindow instance;
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(LogiBaseWindow)))
             {
-                instance = new TradeBaseWindow(_uiState.LastClickedEntity);
+                instance = new LogiBaseWindow(_uiState.LastClickedEntity);
             }
             else
             {
-                instance = (TradeBaseWindow)_uiState.LoadedWindows[typeof(TradeBaseWindow)];
+                instance = (LogiBaseWindow)_uiState.LoadedWindows[typeof(LogiBaseWindow)];
             }
             if(instance._entityState != _uiState.LastClickedEntity)
                 instance.SetEntity(_uiState.LastClickedEntity);
@@ -66,8 +66,8 @@ namespace Pulsar4X.SDL2UI
             _selectedEntity = _entityState.Entity;
             if (entityState.DataBlobs.ContainsKey(typeof(OrderableDB)))
             {
-                if(_selectedEntity.HasDataBlob<TradingBaseDB>())
-                    _tradebaseDB = _selectedEntity.GetDataBlob<TradingBaseDB>();
+                if(_selectedEntity.HasDataBlob<LogiBaseDB>())
+                    _tradebaseDB = _selectedEntity.GetDataBlob<LogiBaseDB>();
                 else{_tradebaseDB = null;}
                 if(_selectedEntity.HasDataBlob<VolumeStorageDB>())
                     _volStorageDB = _selectedEntity.GetDataBlob<VolumeStorageDB>();
@@ -135,19 +135,19 @@ namespace Pulsar4X.SDL2UI
             if(IsActive)
             if (ImGui.Begin("TradeBase", ref IsActive, _flags))
             {
-                if(!_selectedEntity.HasDataBlob<TradingBaseDB>())
+                if(!_selectedEntity.HasDataBlob<LogiBaseDB>())
                 {
                     if(ImGui.Button("Set this entity as an importer/exporter"))
                     {
-                        SetTradeOrder.CreateCommand(_selectedEntity, SetTradeOrder.OrderTypes.AddTradebaseDB);
-                        _tradebaseDB = _selectedEntity.GetDataBlob<TradingBaseDB>();
+                        SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.AddLogiBaseDB);
+                        _tradebaseDB = _selectedEntity.GetDataBlob<LogiBaseDB>();
                     }
                 }
                 else
                 {
                     if(ImGui.Button("Disable this entity as an inporter/exporter"))
                     {
-                        SetTradeOrder.CreateCommand(_selectedEntity, SetTradeOrder.OrderTypes.RemoveTradebaseDB);
+                        SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.RemoveLogiBaseDB);
                     }
                     ImGui.Columns(4);
                     foreach (var typeStore in _displayedResources)
@@ -243,7 +243,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         if(ImGui.Button("Make it so"))
                         {
-                            SetTradeOrder.CreateCommand_SetBaseItems(_selectedEntity, _changes);
+                            SetLogisticsOrder.CreateCommand_SetBaseItems(_selectedEntity, _changes);
                         }
                     }
                     ImGui.Columns(2);
@@ -264,30 +264,30 @@ namespace Pulsar4X.SDL2UI
     }
     
 
-    public class TradeShipWindow : PulsarGuiWindow
+    public class LogiShipWindow : PulsarGuiWindow
     {
         private System.Guid _factionID;
         private EntityState _entityState;
         private Entity _selectedEntity;
-        private TradingShipperDB _tradeshipDB;
+        private LogiShipperDB _tradeshipDB;
         private VolumeStorageDB _cargoDB;
 
         private Dictionary<Guid, double>  _changes;
 
-        private TradeShipWindow(EntityState entity)
+        private LogiShipWindow(EntityState entity)
         {
             SetEntity(entity);
         }
-        internal static TradeShipWindow GetInstance(StaticDataStore staticData, EntityState state) {
+        internal static LogiShipWindow GetInstance(StaticDataStore staticData, EntityState state) {
 
-            TradeShipWindow instance;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(TradeShipWindow)))
+            LogiShipWindow instance;
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(LogiShipWindow)))
             {
-                instance = new TradeShipWindow(_uiState.LastClickedEntity);
+                instance = new LogiShipWindow(_uiState.LastClickedEntity);
             }
             else
             {
-                instance = (TradeShipWindow)_uiState.LoadedWindows[typeof(TradeShipWindow)];
+                instance = (LogiShipWindow)_uiState.LoadedWindows[typeof(LogiShipWindow)];
             }
             if(instance._entityState != _uiState.LastClickedEntity)
                 instance.SetEntity(_uiState.LastClickedEntity);
@@ -301,8 +301,8 @@ namespace Pulsar4X.SDL2UI
             _changes = new Dictionary<Guid, double>();
             if (_selectedEntity.HasDataBlob<OrderableDB>())
             {
-                if(_selectedEntity.HasDataBlob<TradingShipperDB>())
-                    _tradeshipDB = _selectedEntity.GetDataBlob<TradingShipperDB>();
+                if(_selectedEntity.HasDataBlob<LogiShipperDB>())
+                    _tradeshipDB = _selectedEntity.GetDataBlob<LogiShipperDB>();
                 else{_tradeshipDB = null;}
                 if(_selectedEntity.HasDataBlob<VolumeStorageDB>())
                     _cargoDB = _selectedEntity.GetDataBlob<VolumeStorageDB>();
@@ -329,12 +329,12 @@ namespace Pulsar4X.SDL2UI
             {
                 if (ImGui.Begin("TradeShip", ref IsActive, _flags))
                 {
-                    if(!_selectedEntity.HasDataBlob<TradingShipperDB>())
+                    if(!_selectedEntity.HasDataBlob<LogiShipperDB>())
                     {
                         if(ImGui.Button("Set this entity as an independant Trade Ship"))
                         {
-                            SetTradeOrder.CreateCommand(_selectedEntity, SetTradeOrder.OrderTypes.AddTradeshipDB);
-                            _tradeshipDB = _selectedEntity.GetDataBlob<TradingShipperDB>();
+                            SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.AddLogiShipDB);
+                            _tradeshipDB = _selectedEntity.GetDataBlob<LogiShipperDB>();
                         }
 
                     }
@@ -342,7 +342,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         if(ImGui.Button("Disable this entity as an independant Trade Ship"))
                         {
-                            SetTradeOrder.CreateCommand(_selectedEntity, SetTradeOrder.OrderTypes.RemoveTradeshipDB);
+                            SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.RemoveLogiShipDB);
                         }
 
                         ImGui.Text("Allocate amount of cargo space for trade");
@@ -364,7 +364,7 @@ namespace Pulsar4X.SDL2UI
                         }
                         if(ImGui.Button("Make it so"))
                         {
-                            SetTradeOrder.CreateCommand_SetShipTypeAmounts(_selectedEntity, _changes);
+                            SetLogisticsOrder.CreateCommand_SetShipTypeAmounts(_selectedEntity, _changes);
                         }
                         ImGui.Columns(2);
                         foreach (var item in _tradeshipDB.ActiveCargoTasks)

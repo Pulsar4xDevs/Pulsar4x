@@ -145,14 +145,14 @@ namespace Pulsar4X.SDL2UI
             {
                 return true;
             }
-            else if (_entityState.Entity.HasDataBlob<VolumeStorageDB>() && !_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(TradeBaseWindow))
+            else if (_entityState.Entity.HasDataBlob<VolumeStorageDB>() && !_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(LogiBaseWindow))
             {
                 return true;
             }
             else if (
                 _entityState.Entity.HasDataBlob<VolumeStorageDB>() &&
                 _entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() &&
-                T == typeof(TradeShipWindow))
+                T == typeof(LogiShipWindow))
             {
                 return true;
             }
@@ -227,15 +227,15 @@ namespace Pulsar4X.SDL2UI
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
-                else if (T == typeof(TradeBaseWindow))
+                else if (T == typeof(LogiBaseWindow))
                 {
-                    var instance = TradeBaseWindow.GetInstance(_state.Game.StaticData, _entityState);
+                    var instance = LogiBaseWindow.GetInstance(_state.Game.StaticData, _entityState);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
-                else if (T == typeof(TradeShipWindow))
+                else if (T == typeof(LogiShipWindow))
                 {
-                    var instance = TradeShipWindow.GetInstance(_state.Game.StaticData, _entityState);
+                    var instance = LogiShipWindow.GetInstance(_state.Game.StaticData, _entityState);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }

@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
     /// Contains info on how an entitiy can be stored.
     /// NOTE an entity with this datablob must also have a MassVolumeDB
     /// </summary>
-    public class TradingBaseDB : BaseDataBlob 
+    public class LogiBaseDB : BaseDataBlob 
     {
 
         public Dictionary<ICargoable,(int count, int demandSupplyWeight)> ListedItems = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>(); 
@@ -15,9 +15,9 @@ namespace Pulsar4X.ECSLib
         public Dictionary<ICargoable,(Guid shipingEntity, double amountVolume)> ItemsWaitingPickup = new Dictionary<ICargoable, (Guid shipingEntity, double amountVolume)>();
         public Dictionary<ICargoable,(Guid shipingEntity, double amountVolume)> ItemsInTransit = new Dictionary<ICargoable, (Guid shipingEntity, double amountVolume)>();
 
-        public List<(Entity ship, TradeCycle.CargoTask cargoTask)> TradeShipBids = new List<(Entity ship, TradeCycle.CargoTask cargoTask)>();
+        public List<(Entity ship, LogisticsCycle.CargoTask cargoTask)> TradeShipBids = new List<(Entity ship, LogisticsCycle.CargoTask cargoTask)>();
 
-        public TradingBaseDB()
+        public LogiBaseDB()
         {
 
         }
@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class TradingShipperDB : BaseDataBlob
+    public class LogiShipperDB : BaseDataBlob
     {
         public enum States
         {
@@ -52,9 +52,9 @@ namespace Pulsar4X.ECSLib
 
         public States CurrentState = States.Waiting;
 
-        public List<TradeCycle.CargoTask> ActiveCargoTasks = new List<TradeCycle.CargoTask>();
+        public List<LogisticsCycle.CargoTask> ActiveCargoTasks = new List<LogisticsCycle.CargoTask>();
 
-        public TradingShipperDB()
+        public LogiShipperDB()
         {
 
 
@@ -77,7 +77,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-    public class LogisticsShipProcessor : IHotloopProcessor
+    public class LogiShipProcessor : IHotloopProcessor
     {
         public TimeSpan RunFrequency
         {
@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
 
         public TimeSpan FirstRunOffset => TimeSpan.FromHours(4);
 
-        public Type GetParameterType => typeof(TradingShipperDB);
+        public Type GetParameterType => typeof(LogiShipperDB);
 
         public void Init(Game game)
         {
@@ -100,17 +100,17 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            var tradingBases = manager.GetAllDataBlobsOfType<TradingBaseDB>();
-            var shippingEntities = manager.GetAllEntitiesWithDataBlob<TradingShipperDB>();
+            var tradingBases = manager.GetAllDataBlobsOfType<LogiBaseDB>();
+            var shippingEntities = manager.GetAllEntitiesWithDataBlob<LogiShipperDB>();
             foreach(Entity shipper in shippingEntities)
             {
-               TradeCycle.ShipBidding(shipper, tradingBases);
+               LogisticsCycle.LogiShipBidding(shipper, tradingBases);
             }
         }
     }
 
 
-    public class LogisticsBaseProcessor : IHotloopProcessor
+    public class LogiBaseProcessor : IHotloopProcessor
     {
         public TimeSpan RunFrequency
         {
@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
 
         public TimeSpan FirstRunOffset => TimeSpan.FromHours(4.25);
 
-        public Type GetParameterType => typeof(TradingBaseDB);
+        public Type GetParameterType => typeof(LogiBaseDB);
 
         public void Init(Game game)
         {
@@ -133,15 +133,15 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            var tradingBases = manager.GetAllDataBlobsOfType<TradingBaseDB>();
-            var shippingEntities = manager.GetAllEntitiesWithDataBlob<TradingShipperDB>();
-            foreach(TradingBaseDB tradeBase in tradingBases)
+            var tradingBases = manager.GetAllDataBlobsOfType<LogiBaseDB>();
+            var shippingEntities = manager.GetAllEntitiesWithDataBlob<LogiShipperDB>();
+            foreach(LogiBaseDB tradeBase in tradingBases)
             {
-                TradeCycle.TradeBaseBidding(tradeBase);
+                LogisticsCycle.LogiBaseBidding(tradeBase);
             }
         }
     }
-    public static class TradeCycle
+    public static class LogisticsCycle
     {
         public static List<Entity> ShippingEntites;
 
@@ -160,15 +160,15 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        public static void ShipBidding(Entity shippingEntity, List<TradingBaseDB> tradingBases)
+        public static void LogiShipBidding(Entity shippingEntity, List<LogiBaseDB> tradingBases)
         {
             
             DateTime currentDateTime = shippingEntity.StarSysDateTime;
-            TradingShipperDB shiperdb = shippingEntity.GetDataBlob<TradingShipperDB>();
+            LogiShipperDB shiperdb = shippingEntity.GetDataBlob<LogiShipperDB>();
             List<CargoTask> cargoTasks = new List<CargoTask>();
-            if(shiperdb.CurrentState != TradingShipperDB.States.Waiting)
+            if(shiperdb.CurrentState != LogiShipperDB.States.Waiting)
                 return;
-            shiperdb.CurrentState = TradingShipperDB.States.Bidding;
+            shiperdb.CurrentState = LogiShipperDB.States.Bidding;
 
             double fuelCost = 1; //we need to work out how much fuel costs from the economy at some point. 
             double timeCost = 1; //per second. the ship will need to work this out for itself, should include maintanance, amount of crew etc. 
@@ -325,7 +325,7 @@ namespace Pulsar4X.ECSLib
 
             foreach (var pcombo in possibleCombos)
             {
-                var tbdb = pcombo.Destination.GetDataBlob<TradingBaseDB>(); //we're going to add it to the *DESTINATON* base
+                var tbdb = pcombo.Destination.GetDataBlob<LogiBaseDB>(); //we're going to add it to the *DESTINATON* base
                 
                 if(tbdb.TradeShipBids.Count < 1)
                 {
@@ -348,14 +348,14 @@ namespace Pulsar4X.ECSLib
             
         }
     
-        public static void TradeBaseBidding(TradingBaseDB tradeBase)
+        public static void LogiBaseBidding(LogiBaseDB tradeBase)
         {
             if (tradeBase.TradeShipBids.Count == 0)
                 return;
             int last = tradeBase.TradeShipBids.Count -1;
             var cargoTask = tradeBase.TradeShipBids[last].cargoTask;
             var ship = tradeBase.TradeShipBids[last].ship;
-            var shiptradedb = ship.GetDataBlob<TradingShipperDB>();
+            var shiptradedb = ship.GetDataBlob<LogiShipperDB>();
             Entity source = cargoTask.Source;
             Entity destin = cargoTask.Destination;
 
@@ -490,19 +490,19 @@ namespace Pulsar4X.ECSLib
 
 
 
-    public class SetTradeOrder : EntityCommand
+    public class SetLogisticsOrder : EntityCommand
     {
         public enum OrderTypes
         {
-            AddTradebaseDB,
-            RemoveTradebaseDB,
+            AddLogiBaseDB,
+            RemoveLogiBaseDB,
             SetBaseItems,
-            AddTradeshipDB,
-            RemoveTradeshipDB,
+            AddLogiShipDB,
+            RemoveLogiShipDB,
             SetShipTypeAmounts
         }
 
-        public SetTradeOrder Order;
+        public SetLogisticsOrder Order;
         private OrderTypes _type;
         public override int ActionLanes { get; }
 
@@ -538,7 +538,7 @@ namespace Pulsar4X.ECSLib
         public static void CreateCommand(Entity entity, OrderTypes ordertype )
         {
 
-            SetTradeOrder cmd = new SetTradeOrder();
+            SetLogisticsOrder cmd = new SetLogisticsOrder();
             cmd.EntityCommandingGuid = entity.Guid;
             cmd.RequestingFactionGuid = entity.FactionOwner;
             cmd._type = ordertype;
@@ -550,7 +550,7 @@ namespace Pulsar4X.ECSLib
         public static void CreateCommand_SetBaseItems(Entity entity, Dictionary<ICargoable,(int count, int demandSupplyWeight)> changes )
         {
 
-            SetTradeOrder cmd = new SetTradeOrder();
+            SetLogisticsOrder cmd = new SetLogisticsOrder();
             cmd.EntityCommandingGuid = entity.Guid;
             cmd.RequestingFactionGuid = entity.FactionOwner;
             cmd._type = OrderTypes.SetBaseItems;
@@ -563,7 +563,7 @@ namespace Pulsar4X.ECSLib
         public static void CreateCommand_SetShipTypeAmounts(Entity entity, Dictionary<Guid, double> changes )
         {
 
-            SetTradeOrder cmd = new SetTradeOrder();
+            SetLogisticsOrder cmd = new SetLogisticsOrder();
             cmd.EntityCommandingGuid = entity.Guid;
             cmd.RequestingFactionGuid = entity.FactionOwner;
             cmd._type = OrderTypes.SetShipTypeAmounts;
@@ -577,21 +577,21 @@ namespace Pulsar4X.ECSLib
             
             switch (_type)
             {
-                case OrderTypes.AddTradebaseDB:
+                case OrderTypes.AddLogiBaseDB:
                 {
-                    var db = new TradingBaseDB();
+                    var db = new LogiBaseDB();
                     EntityCommanding.SetDataBlob(db);
                     break;
                 }
-                case OrderTypes.RemoveTradebaseDB:
+                case OrderTypes.RemoveLogiBaseDB:
                 {
-                    EntityCommanding.RemoveDataBlob<TradingBaseDB>();
+                    EntityCommanding.RemoveDataBlob<LogiBaseDB>();
                     break;
                 }
                 case OrderTypes.SetBaseItems:
                 {
 
-                    var db = EntityCommanding.GetDataBlob<TradingBaseDB>();
+                    var db = EntityCommanding.GetDataBlob<LogiBaseDB>();
                     foreach (var item in _baseChanges)
                     {
                         db.ListedItems[item.Key] = item.Value;
@@ -604,20 +604,20 @@ namespace Pulsar4X.ECSLib
                 }
 
 
-                case OrderTypes.AddTradeshipDB:
+                case OrderTypes.AddLogiShipDB:
                 {
-                    var db = new TradingShipperDB();
+                    var db = new LogiShipperDB();
                     EntityCommanding.SetDataBlob(db);
                     break;
                 }
-                case OrderTypes.RemoveTradeshipDB:
+                case OrderTypes.RemoveLogiShipDB:
                 {
-                    EntityCommanding.RemoveDataBlob<TradingShipperDB>();
+                    EntityCommanding.RemoveDataBlob<LogiShipperDB>();
                     break;
                 }
                 case OrderTypes.SetShipTypeAmounts:
                 {
-                    var db = EntityCommanding.GetDataBlob<TradingShipperDB>();
+                    var db = EntityCommanding.GetDataBlob<LogiShipperDB>();
                     foreach (var item in _shipChanges)
                     {
                         db.TradeSpace[item.Key] = item.Value;
