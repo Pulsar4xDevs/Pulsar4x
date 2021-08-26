@@ -234,7 +234,7 @@ namespace Pulsar4X.ECSLib
             var rawSorium = NameLookup.GetMineralSD(game, "Sorium");
             
             var iron = NameLookup.GetMineralSD(game, "Iron");
-            CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, iron, 5000);
+            CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, iron, 500000);
             
             var hydrocarbon = NameLookup.GetMineralSD(game, "Hydrocarbons");
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, hydrocarbon, 5000);
@@ -243,8 +243,14 @@ namespace Pulsar4X.ECSLib
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, stainless, 1000);
             CargoTransferProcessor.AddCargoItems(colonyEntity, _missile, 100);
             CargoTransferProcessor.AddCargoItems(colonyEntity, _merlin, 5);
+            LogiBaseDB earthlogiBase = new LogiBaseDB();
+            earthlogiBase.ListedItems.Add(iron, (100, 1));
+            colonyEntity.SetDataBlob(earthlogiBase);
 
-            
+            LogiBaseDB marslogiBase = new LogiBaseDB();
+            marslogiBase.ListedItems.Add(iron, (-100, 1));
+            marsColony.SetDataBlob(marslogiBase);       
+
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
             
             //test systems

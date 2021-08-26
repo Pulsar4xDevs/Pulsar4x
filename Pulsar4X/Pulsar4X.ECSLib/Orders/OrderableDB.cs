@@ -10,18 +10,18 @@ namespace Pulsar4X.ECSLib
         internal void ProcessOrderList(DateTime atDateTime)
         {
             //var atDatetime = OwningEntity.StarSysDateTime;
-            int mask = 1;
+            int mask = 0;
 
             int i = 0;
             while (i < ActionList.Count)
             {
                 EntityCommand entityCommand = ActionList[i];
 
-                if ((mask & ((int)entityCommand.ActionLanes)) == ((int)entityCommand.ActionLanes)) //bitwise and
+                if ((mask & ((int)entityCommand.ActionLanes)) == 0) //bitwise and
                 {
                     if (entityCommand.IsBlocking)
                     {
-                        mask |= ((int)entityCommand.ActionLanes); //bitwise or =
+                        mask = mask | ((int)entityCommand.ActionLanes); //bitwise or
                     }
                     if (atDateTime >= entityCommand.ActionOnDate)
                     {

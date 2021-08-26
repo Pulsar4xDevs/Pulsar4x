@@ -60,7 +60,7 @@ namespace Pulsar4X.ECSLib
 
         public override bool IsFinished()
         {
-            if (IsRunning && _db.DeltaVForManuver_FoRO_m.Length() <= 0)
+            if (IsRunning && _db.DeltaVForManuver_FoRO_m.Length() == 0)
                 return true;
             else
                 return false;

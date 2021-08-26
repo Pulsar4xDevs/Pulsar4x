@@ -133,8 +133,16 @@ namespace Pulsar4X.ECSLib
 
         public override string Details
         {
-            get { return Order.Details; }
+            get
+            {
+                string fromEntityName = _cargoFrom.GetDataBlob<NameDB>().GetName(_factionEntity);
+                string toEntityName = _entityCommanding.GetDataBlob<NameDB>().GetName(_factionEntity);
+                string detailStr = "From " + fromEntityName + " To " + toEntityName;
+                return detailStr;
+            }
         }
+
+        Entity _cargoFrom;
 
         internal override Entity EntityCommanding { get{return _entityCommanding;} }
         Entity _entityCommanding;
@@ -152,6 +160,7 @@ namespace Pulsar4X.ECSLib
         public static void CreateCommand(Guid faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
         {
             List<(Guid item, long amount)> itemGuidAmounts = new List<(Guid, long)>();
+             
             foreach (var tup in itemsToMove)
             {
                 itemGuidAmounts.Add((tup.item.ID, tup.amount));
@@ -166,15 +175,18 @@ namespace Pulsar4X.ECSLib
                 ItemsGuidsToTransfer = itemGuidAmounts,
                 ItemICargoablesToTransfer = itemsToMove
             };
+            StaticRefLib.Game.OrderHandler.HandleOrder(unloadcmd);
 
             var loadCmd = new CargoLoadFromOrder()
             {
                 RequestingFactionGuid = faction,
-                EntityCommandingGuid = cargoFromEntity.Guid,
+                EntityCommandingGuid = cargoToEntity.Guid,
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                Order = unloadcmd
+                Order = unloadcmd,
+                _cargoFrom = cargoFromEntity
             };
 
+            
             StaticRefLib.Game.OrderHandler.HandleOrder(loadCmd);
         }
         

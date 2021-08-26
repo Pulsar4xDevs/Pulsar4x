@@ -80,26 +80,27 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         if(order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.Movement))
                         {
                             if(order.IsBlocking)
-                                ImGui.TextColored(new System.Numerics.Vector4(1,0,0,0), "--");
+                                ImGui.TextColored(new System.Numerics.Vector4(1,0,0,1), "--");
                             else
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 0), "|");
+                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "|");
                         }
                         ImGui.NextColumn();
                         if (order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.InteractWithExternalEntity))
                         {
                             if (order.IsBlocking)
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 0), "--");
+                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "--");
                             else
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 0), "|");
+                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "|");
                         }
                         ImGui.NextColumn();
                         if (order.ActionLanes.HasFlag(EntityCommand.ActionLaneTypes.IneteractWithSelf))
                         {
                             if (order.IsBlocking)
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 0), "--");
+                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "--");
                             else
-                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 0), "|");
+                                ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "|");
                         }
+                        ImGui.NextColumn();
 
                     }
                 }

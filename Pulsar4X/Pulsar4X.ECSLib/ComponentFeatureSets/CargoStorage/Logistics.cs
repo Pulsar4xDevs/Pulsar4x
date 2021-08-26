@@ -68,6 +68,8 @@ namespace Pulsar4X.ECSLib
             {
                 TradeSpace.Add(kvp.Key, 0);
             }
+            if(!OwningEntity.HasDataBlob<NewtonThrustAbilityDB>())
+                throw new Exception("Non moving entites can't be shippers");
         }
         public override object Clone()
         {
@@ -175,25 +177,109 @@ namespace Pulsar4X.ECSLib
 
             var sourceTradeItems = new List<CargoTask>(); 
             var demandTradeItems = new List<CargoTask>();
-
+            double travelTimeToSource = 0;
             foreach(var tbase in tradingBases)
-            {
-                //tbase.OwningEntity.GetAbsoluteFuturePosition
+            {                
                 OrbitDB odb;// = tbase.OwningEntity.GetDataBlob<OrbitDB>();
                 if(tbase.OwningEntity.HasDataBlob<OrbitDB>())
                      odb = tbase.OwningEntity.GetDataBlob<OrbitDB>();
                 else
                     odb = tbase.OwningEntity.GetSOIParentEntity().GetDataBlob<OrbitDB>();
-                    //throw new NotImplementedException("Currently we can only predict the movement of stable orbits - target must have an orbitDB");
-                (Vector3 position, DateTime atDateTime) sourceIntercept = OrbitProcessor.GetInterceptPosition_m
-                (
-                    shippingEntity, 
-                    odb, 
-                    currentDateTime
-                );
+
+                (Vector3 position, DateTime atDateTime) sourceIntercept;
+                if(shippingEntity.HasDataBlob<WarpAbilityDB>())  
+                {
+                    sourceIntercept = OrbitProcessor.GetInterceptPosition_m
+                    (
+                        shippingEntity, 
+                        odb, 
+                        currentDateTime
+                    );
+                    travelTimeToSource = (shippingEntity.StarSysDateTime - sourceIntercept.atDateTime).TotalSeconds;
+                }
+                else
+                {
+                    List<Entity> shipparents = new List<Entity>();
+                    Entity soiParent = shippingEntity.GetSOIParentEntity();
+                    Entity soiroot = shippingEntity.GetDataBlob<PositionDB>().Root;
+                    shipparents.Add(soiParent);
+                    while (soiParent != soiroot)
+                    {
+                        soiParent = soiParent.GetSOIParentEntity();
+                        shipparents.Add(soiParent);
+                    }
+
+
+                    Entity soiTargetParent = tbase.OwningEntity.GetSOIParentEntity();
+                    Entity soiTargetRoot = tbase.OwningEntity.GetDataBlob<PositionDB>().Root;
+                    if(soiroot != soiTargetRoot)
+                        throw new Exception("Impossibru!");//this should only happen if we're in different systems, need to eventualy handle that. else the tree has gotten fucked up
+                    List<Entity> soiTargetParents = new List<Entity>();
+                    soiTargetParents.Add(soiTargetParent);
+                    while (soiTargetParent != soiroot)
+                    {
+                        soiTargetParent = soiTargetParent.GetSOIParentEntity();
+                        soiTargetParents.Add(soiTargetParent);
+                        
+                    }
+                    
+
+                    //we cycle through both lists from the top till the soi body doesn't match, the last one will be the shared parent.
+                    Entity sharedSOIBody = soiroot;
+                    int i = shipparents.Count -1;
+                    int j = soiTargetParents.Count -1;
+                    while (shipparents[i] == soiTargetParents[j])
+                    {
+                        sharedSOIBody = shipparents[i];
+                        i--;
+                        j--;
+                    }
+                    double shipMass = shippingEntity.GetDataBlob<MassVolumeDB>().MassTotal;
+                    double totalDeltaV = 0;
+                    double TotalSeconds = 0;
+                    var pos = shippingEntity.GetRalitivePosition();
+                    var time = shippingEntity.StarSysDateTime;
+                    List<(double deltav, double secTillNextManuver)> dvandTimes = new List<(double deltav, double secTillNextManuver)>();
+                    double totalTimeInSeconds = 0;
+                    for (int k = 0; k < i; k++)
+                    {
+                        var nextParent = shipparents[k];
+                        var bodyMass = nextParent.GetDataBlob<MassVolumeDB>().MassTotal;
+                        var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(shipMass, bodyMass);
+                        //var ke = OrbitMath.FromPosition(pos, sgp, time);
+                        //var r1 = ke.SemiMajorAxis; //is this right? feel like it's not, but then is current position right
+                        var r1 = pos.Length(); //or is this one right?
+                        var r2 = nextParent.GetSOI_m();
+                        var wca1 = Math.Sqrt(sgp / r1);
+                        var wca2 = Math.Sqrt((2 * r2) / (r1 + r2)) - 1;
+                        var dva = wca1 * wca2;
+                        var timeToPeriaps = Math.PI * Math.Sqrt((Math.Pow(r1 + r2, 3)) / (8 * sgp));
+                        dvandTimes.Add((dva, timeToPeriaps));
+                        totalTimeInSeconds += timeToPeriaps;
+                    }
+                    for (int k = soiTargetParents.Count; k < 0; k--)
+                    {
+                        var nextParent = soiTargetParents[k];
+                        var bodyMass = nextParent.GetDataBlob<MassVolumeDB>().MassTotal;
+                        var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(shipMass, bodyMass);
+                        //var ke = OrbitMath.FromPosition(pos, sgp, time);
+                        //var r1 = ke.SemiMajorAxis; //is this right? feel like it's not, but then is current position right
+                        var r1 = pos.Length(); //or is this one right?
+                        var r2 = nextParent.GetSOI_m();
+                        var wca1 = Math.Sqrt(sgp / r1);
+                        var wca2 = Math.Sqrt((2 * r2) / (r1 + r2)) - 1;
+                        var dva = wca1 * wca2;
+                        var timeToPeriaps = Math.PI * Math.Sqrt((Math.Pow(r1 + r2, 3)) / (8 * sgp));
+                        dvandTimes.Add((dva, timeToPeriaps));
+                        totalTimeInSeconds += timeToPeriaps;
+                    }
+
+                    travelTimeToSource = totalTimeInSeconds; 
+
+                }
 
                 double fuelToSource = 1; //todo calcualte actual amount of fuel to get there. this is going to be orbital manuver fuel since warp just uses power...
-                double travelTimeToSource = (shippingEntity.StarSysDateTime - sourceIntercept.atDateTime).TotalSeconds;
+                
                 
 
                 // var hohmann = InterceptCalcs.Hohmann(sgp, r1, r2); //need to calculate the ideal ranges 
@@ -229,7 +315,7 @@ namespace Pulsar4X.ECSLib
                                 //var loadRate = CargoTransferProcessor.CalcTransferRate(dvDif, tbase.OwningEntity.GetDataBlob<VolumeStorageDB>(), shiperdb.OwningEntity.GetDataBlob<VolumeStorageDB>())
                                 ct.Source = tbase.OwningEntity;
                                 sourceTradeItems.Add(ct);
-                                ct.timeInSeconds = (currentDateTime - sourceIntercept.atDateTime).TotalSeconds;
+                                ct.timeInSeconds =  travelTimeToSource;
                                 ct.fuelUseDV = fuelToSource;
                             }
                             else //it's a demand item. (we ship TO)
