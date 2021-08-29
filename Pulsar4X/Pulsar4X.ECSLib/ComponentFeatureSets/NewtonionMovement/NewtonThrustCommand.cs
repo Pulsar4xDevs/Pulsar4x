@@ -9,15 +9,18 @@ namespace Pulsar4X.ECSLib
     {
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
         public override bool IsBlocking => true;
-        public override string Name { get; } = "Nav: Thrust";
+        public override string Name { get {return _name;}}
+
+        string _name = "Newtonion thrust";
 
         public override string Details
         {
             get
             {
-                return "Expend + " + Stringify.Velocity(_orbitrelativeDeltaV.Length()) + "Δv";
+                return _details;
             }
         }
+        string _details = "";
 
         Entity _factionEntity;
         Entity _entityCommanding;
@@ -26,7 +29,7 @@ namespace Pulsar4X.ECSLib
         private Vector3 _orbitrelativeDeltaV;
         NewtonMoveDB _db;
 
-        public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Vector3 expendDeltaV_m)
+        public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Vector3 expendDeltaV_m, string name="Newtonion thrust")
         {
             var cmd = new NewtonThrustCommand()
             {
@@ -34,10 +37,13 @@ namespace Pulsar4X.ECSLib
                 EntityCommandingGuid = orderEntity.Guid,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 _orbitrelativeDeltaV = expendDeltaV_m,
-                ActionOnDate = actionDateTime
+                ActionOnDate = actionDateTime,
+                _name = name,
 
             };
+            
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+            cmd.UpdateDetailString();
         }
 
         internal override void ActionCommand(DateTime atDateTime)
@@ -54,8 +60,23 @@ namespace Pulsar4X.ECSLib
                 _db.ActionOnDateTime = ActionOnDate;
                 _db.DeltaVForManuver_FoRO_m = _orbitrelativeDeltaV;
                 _entityCommanding.SetDataBlob(_db);
+                UpdateDetailString();
                 IsRunning = true;
             }
+        }
+
+        public override void UpdateDetailString()
+        {
+            
+                
+            if(ActionOnDate > _entityCommanding.StarSysDateTime)
+                _details = "Waiting " + (ActionOnDate - _entityCommanding.StarSysDateTime).ToString("d'd 'h'h 'm'm 's's'") + "\n" 
+                + "   to expend  " + Stringify.Velocity(_orbitrelativeDeltaV.Length()) + " Δv";
+            else if(IsRunning)
+                _details = "Expending " + Stringify.Velocity(_db.DeltaVForManuver_FoRO_m.Length()) + " Δv";
+                
+            
+               
         }
 
         public override bool IsFinished()

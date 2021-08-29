@@ -98,6 +98,11 @@ namespace Pulsar4X.ECSLib
                 Vector3 transformedVector = mtx.Transform(vel);
                 return (pos, transformedVector);
             }
+            if(entity.HasDataBlob<WarpMovingDB>())
+            {
+                var warpdb = entity.GetDataBlob<WarpMovingDB>();
+                return (pos, warpdb.CurrentNonNewtonionVectorMS);
+            }
             else
             {
                 throw new Exception("Entity has no velocity");

@@ -47,21 +47,34 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         }
 
+        public override void OnSystemTickChange(DateTime newDate)
+        {
+            foreach (var item in _orderableDB.GetActionList())
+            {
+                item.UpdateDetailString();
+            }
+        }
+
         internal override void Display()
         {
             var orders = _orderableDB.GetActionList();
-
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(512, 325), ImGuiCond.Once);
             if (IsActive == true && ImGui.Begin("Orders: " + _orderEntity.GetOwnersName(), ref IsActive, _flags))
             {
                 ImGui.Columns(5);
+                ImGui.SetColumnWidth(0, 124);
                 ImGui.Text("Name");
                 ImGui.NextColumn();
+                ImGui.SetColumnWidth(1, 280);
                 ImGui.Text("Details");
                 ImGui.NextColumn();
+                ImGui.SetColumnWidth(2, 32);
                 ImGui.Text("Mov");
                 ImGui.NextColumn();
+                ImGui.SetColumnWidth(3, 32);
                 ImGui.Text("IE");
                 ImGui.NextColumn();
+                ImGui.SetColumnWidth(4, 32);
                 ImGui.Text("IS");
                 ImGui.NextColumn();
                 ImGui.Separator();

@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
             get { return TimeSpan.FromHours(1); }
         }
 
-        public TimeSpan FirstRunOffset => TimeSpan.FromHours(4);
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(0);
 
         public Type GetParameterType => typeof(LogiShipperDB);
 
@@ -97,7 +97,8 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            throw new NotImplementedException();
+            var tradingBases = entity.Manager.GetAllDataBlobsOfType<LogiBaseDB>();
+            LogisticsCycle.LogiShipBidding(entity, tradingBases);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
@@ -119,7 +120,7 @@ namespace Pulsar4X.ECSLib
             get { return TimeSpan.FromHours(1); }
         }
 
-        public TimeSpan FirstRunOffset => TimeSpan.FromHours(4.25);
+        public TimeSpan FirstRunOffset => TimeSpan.FromHours(0.25);
 
         public Type GetParameterType => typeof(LogiBaseDB);
 
@@ -130,7 +131,7 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            throw new NotImplementedException();
+            LogisticsCycle.LogiBaseBidding(entity.GetDataBlob<LogiBaseDB>());
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
@@ -516,9 +517,9 @@ namespace Pulsar4X.ECSLib
 
                         var manuvers = InterceptCalcs.Hohmann2(sgpTgtBdy, mySMA, targetSMA);
                         var tnow = ship.Manager.StarSysDateTime;
-                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, tnow, manuvers[0].deltaV);
+                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, tnow, manuvers[0].deltaV, "Thrust: Homann Manuver");
                         DateTime futureDate = tnow + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, futureDate, manuvers[1].deltaV);
+                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, futureDate, manuvers[1].deltaV, "Thrust: Circularize");
                     }
 
 
@@ -546,9 +547,9 @@ namespace Pulsar4X.ECSLib
 
                         var manuvers = InterceptCalcs.Hohmann2(sgpTgtBdy, mySMA, targetSMA);
                         var tnow = ship.Manager.StarSysDateTime;
-                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, tnow, manuvers[0].deltaV);
+                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, tnow, manuvers[0].deltaV, "Thrust: Homann Manuver");
                         DateTime futureDate = tnow + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, futureDate, manuvers[1].deltaV);
+                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, futureDate, manuvers[1].deltaV, "Thrust: Circularize");
                     }
                 }
             }
@@ -569,7 +570,8 @@ namespace Pulsar4X.ECSLib
                 var targetInsertionPosition = Vector3.Normalise(ourState.pos) * targetRad;
                 var thrustVector = Vector3.Normalise(insertionVector) * -deltaV;
                 //should we expend deltaV now or when we get there?
-                WarpMoveCommand.CreateCommand(ship.FactionOwner, ship, targetBody, targetInsertionPosition, targetIntercept.eti, thrustVector);
+                WarpMoveCommand.CreateCommand(ship.FactionOwner, ship, targetBody, targetInsertionPosition, targetIntercept.eti, new Vector3(0,0,0));
+                NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, targetIntercept.eti, thrustVector, "Thrust: Circularize");
             }
         }
     }
@@ -629,6 +631,7 @@ namespace Pulsar4X.ECSLib
 
 
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+            
         }
 
         public static void CreateCommand_SetBaseItems(Entity entity, Dictionary<ICargoable,(int count, int demandSupplyWeight)> changes )
@@ -654,6 +657,9 @@ namespace Pulsar4X.ECSLib
             cmd._shipChanges = changes;
 
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+            
+            StaticRefLib.ProcessorManager.GetProcessor<LogiShipperDB>().ProcessEntity(entity, 0);
+            StaticRefLib.ProcessorManager.GetProcessor<LogiBaseDB>().ProcessManager(entity.Manager, 0);
         }
 
         internal override void ActionCommand(DateTime atDateTime)

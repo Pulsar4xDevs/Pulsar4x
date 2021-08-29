@@ -25,6 +25,9 @@ namespace Pulsar4X.ECSLib
 
         public abstract string Name { get; }
         public abstract string Details { get; }
+
+        public virtual void UpdateDetailString()
+        {}
         
         [JsonProperty]
         /// <summary>

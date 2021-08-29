@@ -39,6 +39,12 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         string[] _siblingNames = new string[0];
         private int _selectedSibling = -1;
         
+
+        Entity[] _uncleEntites = new Entity[0];
+        string[] _uncleNames = new string[0];
+
+        int _selectedUncle = -1;
+
         private NavWindow(Entity orderEntity)
         {
             _flags = ImGuiWindowFlags.None;
@@ -89,9 +95,18 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 string name = entity.GetDataBlob<NameDB>().GetName(_orderEntity.FactionOwner);
                 names.Add(name);
             }
-
             _siblingNames = names.ToArray();
             
+
+            _uncleEntites = _orderEntity.GetSOIParentEntity().GetSOIParentEntity().GetDataBlob<PositionDB>().Children.ToArray();
+            names = new List<string>();
+            foreach (var entity in _uncleEntites)
+            {
+                string name = entity.GetDataBlob<NameDB>().GetName(_orderEntity.FactionOwner);
+                names.Add(name);
+            }
+            _uncleNames = names.ToArray();
+
             OnSystemTickChange(orderEntity.Entity.StarSysDateTime);
             
         }
@@ -128,6 +143,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             None,
             Thrust,
             HohmannTransfer,
+            InterplanetaryTransfer,
             PhaseChange,
             HighDVIntercept,
             PorkChopPlot,
@@ -151,6 +167,10 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 if (ImGui.Button("Hohmann Transfer"))
                 {
                     _navMode = NavMode.HohmannTransfer;
+                }
+                if (ImGui.Button("Interplanetary Transfer"))
+                {
+                    _navMode = NavMode.InterplanetaryTransfer;
                 }
                 if (ImGui.Button("Phase Change"))
                 {
@@ -190,6 +210,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         break;
                     case NavMode.HohmannTransfer:
                         DisplayHohmannMode();
+                        break;
+                    case NavMode.InterplanetaryTransfer:
+                        DisplayInterPlanetaryHohmannMode();
                         break;
                     case NavMode.EscapeSOI:
                         DisplayEscapeSOI();
@@ -250,7 +273,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.SameLine();
             ImGui.Text("for all manuvers: " + Stringify.Velocity(totalManuverDV));
 
-
+            
             
             if (ImGui.Button("Make it so"))
             {
@@ -310,11 +333,113 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             
             if (ImGui.Button("Make it so"))
             {
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, _atDatetime, _manuvers[0].deltaV);
-                DateTime futureDate = _atDatetime + TimeSpan.FromSeconds(_manuvers[1].tSec);
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, futureDate, _manuvers[1].deltaV);
+                double fuelBurned1 = OrbitMath.TsiolkovskyFuelUse(_totalMass, exhaustVelocity, _manuvers[0].deltaV.Length());
+                double secondsBurn1 = fuelBurned1 / burnRate;
+                var t0 = _atDatetime;
+                var t1 = t0 + TimeSpan.FromSeconds(_manuvers[0].tSec);
+                var t2 = _manuvers[0].tSec + secondsBurn1 * 0.5;
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, t1, _manuvers[0].deltaV);
+
+                double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit); 
+                double fuelBurned2 = OrbitMath.TsiolkovskyFuelUse(mass2, exhaustVelocity, _manuvers[1].deltaV.Length());
+                double secondsBurn2 = fuelBurned2 / burnRate;
+                
+                var t4 = t0 + TimeSpan.FromSeconds(t2) + TimeSpan.FromSeconds(_manuvers[1].tSec- (secondsBurn2 * 0.5));
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, t4, _manuvers[1].deltaV);
+
+                //t0=datenow
+                //...t1=startBurn1
+                //.......t2=midburn1
+                //...............................t4=starburn2
+                //...|..........................| = time given by_manuvers
+                //___|***|***|___________________|**|**|..........burns
+                //____...|..........................| = time given by_manuvers adjusted
             }
             
+        }
+
+        void DisplayInterPlanetaryHohmannMode()
+        {
+            double mySMA = _currentKE.SemiMajorAxis;
+            float smaMin = 1;
+            float smaMax = (float)_orderEntity.GetSOIParentEntity().GetSOI_m();
+
+            if (ImGui.Combo("Target Object", ref _selectedUncle, _uncleNames, _uncleNames.Length))
+            {
+                Entity selectedUnc = _uncleEntites[_selectedUncle];
+                if (selectedUnc.HasDataBlob<OrbitDB>())
+                    _targetSMA = (float)_uncleEntites[_selectedUncle].GetDataBlob<OrbitDB>().SemiMajorAxis;
+                if (selectedUnc.HasDataBlob<OrbitUpdateOftenDB>())
+                    _targetSMA = (float)_uncleEntites[_selectedUncle].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
+                if (selectedUnc.HasDataBlob<NewtonMoveDB>())
+                    _targetSMA = (float)_uncleEntites[_selectedUncle].GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
+            }
+
+            //TODO this should be radius from orbiting body not major axies.  
+            //ImGui.SliderFloat("Target SemiMajorAxis", ref _targetSMA, smaMin, smaMax);
+            if(_selectedUncle > -1)
+            {
+                _manuvers = InterceptCalcs.InterPlanetaryHohmann(_orderEntity.GetSOIParentEntity(), _uncleEntites[_selectedUncle], _orderEntity);
+
+
+                var burnRate = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+                var exhaustVelocity = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+
+
+
+
+                double totalManuverDV = 0;
+                foreach (var manuver in _manuvers)
+                {
+                    var dv = manuver.deltaV.Length();
+                    totalManuverDV += dv;
+                    double fuelBurned = OrbitMath.TsiolkovskyFuelUse(_totalMass, exhaustVelocity, dv);
+                    double secondsBurn = fuelBurned / burnRate;
+                    ImGui.Text(dv + "Δv");
+                    ImGui.Text(fuelBurned + " fuel");
+                    ImGui.Text(Stringify.Number(secondsBurn, "0.###") + " Second Burn");
+
+                }
+
+                if (totalManuverDV > _totalDV)
+                    ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
+                else
+                    ImGui.Text("Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
+
+                if (ImGui.Button("Make it so"))
+                {
+                    var date = _atDatetime;
+                    foreach (var manuver in _manuvers)
+                    {
+                        date += TimeSpan.FromSeconds(manuver.tSec);
+                        NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, date, manuver.deltaV);
+                    }
+
+                    /*
+                    double fuelBurned1 = OrbitMath.TsiolkovskyFuelUse(_totalMass, exhaustVelocity, _manuvers[0].deltaV.Length());
+                    double secondsBurn1 = fuelBurned1 / burnRate;
+                    var t0 = _atDatetime;
+                    var t1 = t0 + TimeSpan.FromSeconds(_manuvers[0].tSec);
+                    var t2 = _manuvers[0].tSec + secondsBurn1 * 0.5;
+                    NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, t1, _manuvers[0].deltaV);
+
+                    double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit);
+                    double fuelBurned2 = OrbitMath.TsiolkovskyFuelUse(mass2, exhaustVelocity, _manuvers[1].deltaV.Length());
+                    double secondsBurn2 = fuelBurned2 / burnRate;
+
+                    var t4 = t0 + TimeSpan.FromSeconds(t2) + TimeSpan.FromSeconds(_manuvers[1].tSec - (secondsBurn2 * 0.5));
+                    NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, t4, _manuvers[1].deltaV);
+                    */
+                    //t0=datenow
+                    //...t1=startBurn1
+                    //.......t2=midburn1
+                    //...............................t4=starburn2
+                    //...|..........................| = time given by_manuvers
+                    //___|***|***|___________________|**|**|..........burns
+                    //____...|..........................| = time given by_manuvers adjusted
+                }
+            }
+
         }
 
         void DisplayHighDVIntercept()

@@ -324,7 +324,7 @@ namespace Pulsar4X.ECSLib
 
 
         /// <summary>
-        /// Hohmann transfer manuver. 
+        /// Hohmann transfer manuver, assumes a cicular orbit. 
         /// </summary>
         /// <param name="sgp"></param>
         /// <param name="r1">radius from parent</param>
@@ -346,6 +346,85 @@ namespace Pulsar4X.ECSLib
             manuvers[0] = (new Vector3(0, dva, 0), 0);
             manuvers[1] = (new Vector3(0, dvb, 0), timeTo2ndBurn);
             return manuvers;
+        }
+
+        /// <summary>
+        /// assumes circular orbit, attempts to calculate transfer window. 
+        /// </summary>
+        /// <param name="deltaV"></param>
+        /// <param name="currentParent"></param>
+        /// <param name="targetParent"></param>
+        /// <param name="manuverEntity"></param>
+        /// <returns>3 manuvers, 0: soi escape, 1:1st hohmman manuver 2: 2nd hohmman manuver</returns>
+        public static (Vector3 deltaV, double timeInSeconds)[] InterPlanetaryHohmann(Entity currentParent, Entity targetParent, Entity manuverEntity)
+        {
+            var meState = manuverEntity.GetRelativeState();
+            var meOdb = manuverEntity.GetDataBlob<OrbitDB>();
+            var meMass = manuverEntity.GetDataBlob<MassVolumeDB>().MassTotal;
+            var meSMA = meOdb.SemiMajorAxis;
+            var meOprd = meOdb.OrbitalPeriod;
+            var meMeanMotion = meOdb.MeanMotion;
+            var meAngle = Math.Atan2(meState.pos.Y, meState.pos.X);
+
+
+            var cpOdb = currentParent.GetDataBlob<OrbitDB>();
+            var cpSOI = currentParent.GetSOI_m() + 100; //might as well go another 100m past soi so less likely problems.
+            var cpmass = currentParent.GetDataBlob<MassVolumeDB>().MassTotal;            
+            var cpsgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(meMass, cpmass);
+            var cpSMA = cpOdb.SemiMajorAxis;
+            var cpOprd = cpOdb.OrbitalPeriod;
+            var cppos = currentParent.GetDataBlob<PositionDB>().RelativePosition_m;
+            var cpAngle = Math.Atan2(cppos.Y, cppos.X);
+
+            var tpOdb = targetParent.GetDataBlob<OrbitDB>();
+            var tpSOI = targetParent.GetSOI_m();
+            var tpMass = targetParent.GetDataBlob<MassVolumeDB>().MassTotal;
+            var tpsgp = OrbitMath.CalculateStandardGravityParameterInM3S2(meMass, tpMass);
+            var tpSMA = tpOdb.SemiMajorAxis;
+            var tpOprd = tpOdb.OrbitalPeriod;
+            var tppos = targetParent.GetDataBlob<PositionDB>().RelativePosition_m;
+            var tpAngle = Math.Atan2(tppos.Y, tppos.X);
+
+            //grandparent (sol in earth to mars)
+            var grandParent = currentParent.GetSOIParentEntity();
+            var gpMass = grandParent.GetDataBlob<MassVolumeDB>().MassTotal;
+            var gpSGP = OrbitMath.CalculateStandardGravityParameterInM3S2(meMass, gpMass);
+            
+            var gpHomman = Hohmann2(gpSGP, cpSMA, tpSMA);
+            var gpHommanAngle = Math.PI*( (1-1/2*Math.Sqrt(2))*Math.Sqrt( Math.Pow((cpSMA / tpSMA +1),3)));
+
+
+            
+            var rads = cpAngle - tpAngle;
+            var closinRads = Math.Max(cpOdb.MeanMotion, tpOdb.MeanMotion) - Math.Min(cpOdb.MeanMotion, tpOdb.MeanMotion);
+            var ttXferWnidow = rads / closinRads;
+
+
+
+            var wca1 = Math.Sqrt(cpsgp / meSMA);
+            var wca2 = Math.Sqrt((2 * cpSOI) / (meSMA + cpSOI)) - 1;
+            var dva = wca1 * wca2;
+            var ttsoi = Math.PI * Math.Sqrt((Math.Pow(meSMA + cpSOI, 3)) / (8 * cpsgp));
+
+            var soiBurnstart = ttXferWnidow - ttsoi;
+            var periods = soiBurnstart / meOprd.TotalSeconds;
+            var meFutureAngle = meAngle * periods;
+            var cpFutureAngle = soiBurnstart / cpOprd.TotalSeconds;
+            var dif = cpFutureAngle - meFutureAngle;
+            soiBurnstart += dif * meMeanMotion;
+            
+            if (cpSMA > tpSMA) //larger orbit to smaller. 
+            {
+                soiBurnstart += meOprd.TotalSeconds * 0.5; //add half an orbit
+            }
+
+            var manuvers = new (Vector3 burn, double time)[3];
+            manuvers[0] = (new Vector3(0,dva, 0), soiBurnstart);
+            manuvers[1] = (gpHomman[0].deltaV, ttsoi);
+            manuvers[2] = (gpHomman[1].deltaV, gpHomman[1].timeInSeconds);
+
+            return manuvers;
+
         }
 
         /// <summary>
