@@ -277,7 +277,7 @@
               "Units": "EP",
               "DescriptionFormula": "'Move Power for ship'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Efficency vs Power') * [Mass] * 500"
+              "AttributeFormula": "Ability('Efficency vs Power') * [Mass] * 1000"
             },
             {
               "Name": "Bubble Creation Energy Cost",

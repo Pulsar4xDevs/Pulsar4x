@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
         public Guid To; 
 
         public States CurrentState = States.Waiting;
-
+        public List<LogisticsCycle.CargoTask> BiddingTasks = new List<LogisticsCycle.CargoTask>();
         public List<LogisticsCycle.CargoTask> ActiveCargoTasks = new List<LogisticsCycle.CargoTask>();
 
         public LogiShipperDB()
@@ -70,6 +70,15 @@ namespace Pulsar4X.ECSLib
             }
             if(!OwningEntity.HasDataBlob<NewtonThrustAbilityDB>())
                 throw new Exception("Non moving entites can't be shippers");
+            if(OwningEntity.HasDataBlob<OrderableDB>())
+            {
+                var order = new BiddingForLogistics()
+                {
+                    EntityCommandingGuid = OwningEntity.Guid,
+                    RequestingFactionGuid = OwningEntity.FactionOwner,
+                };
+                //StaticRefLib.Game.OrderHandler.HandleOrder(order);
+            }
         }
         public override object Clone()
         {
@@ -169,6 +178,7 @@ namespace Pulsar4X.ECSLib
             DateTime currentDateTime = shippingEntity.StarSysDateTime;
             LogiShipperDB shiperdb = shippingEntity.GetDataBlob<LogiShipperDB>();
             List<CargoTask> cargoTasks = new List<CargoTask>();
+            
             if(shiperdb.CurrentState != LogiShipperDB.States.Waiting)
                 return;
             shiperdb.CurrentState = LogiShipperDB.States.Bidding;
@@ -401,6 +411,7 @@ namespace Pulsar4X.ECSLib
                             }
                         }
                     }
+                    
                 }
             }
 
@@ -431,6 +442,7 @@ namespace Pulsar4X.ECSLib
                     }
                 }                
             }
+            shiperdb.BiddingTasks = possibleCombos;
 
             
         }
@@ -576,7 +588,94 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    public class BiddingForLogistics : EntityCommand
+    {
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
 
+        public override bool IsBlocking => false;
+
+        public override string Name {get {return _name;}}
+        string _name = "Logisitics";
+
+        public override string Details {get {return _details;}}
+        string _details = "";
+
+        internal override Entity EntityCommanding { get { return _entityCommanding; } }
+        Entity _entityCommanding;
+        Entity _factionEntity;
+
+        LogiShipperDB _logiShipperDB;
+
+        public override bool IsFinished()
+        {
+            
+            if(_logiShipperDB != null && _entityCommanding.HasDataBlob<LogiShipperDB>())
+                return false;
+            return true;
+        }
+
+        internal override void ActionCommand(DateTime atDateTime)
+        {
+            
+        }
+        public override void UpdateDetailString()
+        {
+            _details = _logiShipperDB.CurrentState.ToString();
+            switch (_logiShipperDB.CurrentState)
+            {
+                case LogiShipperDB.States.Bidding:
+                {
+                    _details = "Bidding on " + _logiShipperDB.BiddingTasks.Count + " consignments";
+                }
+                break;
+                case LogiShipperDB.States.MoveToSupply:
+                    {
+                        _details = "Traveling to Supply to collect goods";
+                    }
+                    break;
+                case LogiShipperDB.States.Loading:
+                    {
+                        _details = "Loading goods ";
+                    }
+                    break;
+                case LogiShipperDB.States.MoveToDestination:
+                    {
+                        _details = "Moving to Destination";
+                    }
+                    break;
+                case LogiShipperDB.States.Unloading:
+                    {
+                        _details = "Unloading goods";
+                    }
+                    break;
+                case LogiShipperDB.States.ResuplySelf:
+                    {
+                        _details = "Refueling";
+                    }
+                    break;
+                case LogiShipperDB.States.Waiting:
+                    {
+                        _details = "Waiting for suply and/or demand";
+                    }
+                    break;
+
+                default:
+                break;
+            }
+            //_logiShipperDB.ActiveCargoTasks[0].
+        }
+
+        internal override bool IsValidCommand(Game game)
+        {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+            {
+                _logiShipperDB = _entityCommanding.GetDataBlob<LogiShipperDB>();
+                return true;
+
+            }
+            return false;
+        }
+    }
 
     public class SetLogisticsOrder : EntityCommand
     {
@@ -601,10 +700,10 @@ namespace Pulsar4X.ECSLib
         public override string Details { get; } = "Set Logi"; 
         
 
-        Entity _entityCommanding;
+        
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
-
-        Entity factionEntity;
+        Entity _entityCommanding;
+        Entity _factionEntity;
 
         private Dictionary<ICargoable,(int count, int demandSupplyWeight)> _baseChanges;
         private Dictionary<Guid, double> _shipChanges;
@@ -612,7 +711,7 @@ namespace Pulsar4X.ECSLib
         internal override bool IsValidCommand(Game game)
         {
             
-            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out factionEntity, out _entityCommanding))
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
                 
                 return true;
@@ -664,59 +763,62 @@ namespace Pulsar4X.ECSLib
 
         internal override void ActionCommand(DateTime atDateTime)
         {
-            
-            switch (_type)
+            if (!IsRunning)
             {
-                case OrderTypes.AddLogiBaseDB:
+                IsRunning = true;
+                switch (_type)
                 {
-                    var db = new LogiBaseDB();
-                    EntityCommanding.SetDataBlob(db);
-                    break;
-                }
-                case OrderTypes.RemoveLogiBaseDB:
-                {
-                    EntityCommanding.RemoveDataBlob<LogiBaseDB>();
-                    break;
-                }
-                case OrderTypes.SetBaseItems:
-                {
-
-                    var db = EntityCommanding.GetDataBlob<LogiBaseDB>();
-                    foreach (var item in _baseChanges)
+                    case OrderTypes.AddLogiBaseDB:
                     {
-                        db.ListedItems[item.Key] = item.Value;
+                        var db = new LogiBaseDB();
+                        EntityCommanding.SetDataBlob(db);
+                        break;
                     }
-                    //NOTE: possibly some conflict here. 
-                    //we might need to consider what to do if a ship is already contracted to grab stuff, 
-                    //and then we change this and remove the items before the ship has collected them.
-                    
-                    break;
-                }
-
-
-                case OrderTypes.AddLogiShipDB:
-                {
-                    var db = new LogiShipperDB();
-                    EntityCommanding.SetDataBlob(db);
-                    break;
-                }
-                case OrderTypes.RemoveLogiShipDB:
-                {
-                    EntityCommanding.RemoveDataBlob<LogiShipperDB>();
-                    break;
-                }
-                case OrderTypes.SetShipTypeAmounts:
-                {
-                    var db = EntityCommanding.GetDataBlob<LogiShipperDB>();
-                    foreach (var item in _shipChanges)
+                    case OrderTypes.RemoveLogiBaseDB:
                     {
-                        db.TradeSpace[item.Key] = item.Value;
+                        EntityCommanding.RemoveDataBlob<LogiBaseDB>();
+                        break;
                     }
-                    //db.TradeSpace = 
+                    case OrderTypes.SetBaseItems:
+                    {
+
+                        var db = EntityCommanding.GetDataBlob<LogiBaseDB>();
+                        foreach (var item in _baseChanges)
+                        {
+                            db.ListedItems[item.Key] = item.Value;
+                        }
+                        //NOTE: possibly some conflict here. 
+                        //we might need to consider what to do if a ship is already contracted to grab stuff, 
+                        //and then we change this and remove the items before the ship has collected them.
+                        
+                        break;
+                    }
+
+
+                    case OrderTypes.AddLogiShipDB:
+                    {
+                        var db = new LogiShipperDB();
+                        EntityCommanding.SetDataBlob(db);
+                        break;
+                    }
+                    case OrderTypes.RemoveLogiShipDB:
+                    {
+                        EntityCommanding.RemoveDataBlob<LogiShipperDB>();
+                        break;
+                    }
+                    case OrderTypes.SetShipTypeAmounts:
+                    {
+                        var db = EntityCommanding.GetDataBlob<LogiShipperDB>();
+                        foreach (var item in _shipChanges)
+                        {
+                            db.TradeSpace[item.Key] = item.Value;
+                        }
+                        //db.TradeSpace = 
+                        
+                        break;
+                    }
                     
-                    break;
                 }
-                
             }
         }
 
