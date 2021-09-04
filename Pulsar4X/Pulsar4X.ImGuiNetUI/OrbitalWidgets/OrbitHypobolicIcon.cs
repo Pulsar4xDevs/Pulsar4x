@@ -84,7 +84,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void CreatePointArray()
         {
-            _dv = _newtonMoveDB.DeltaVForManuver_FoRO_m.Length();
+            _dv = _newtonMoveDB.ManuverDeltaVLen;
             Vector3 vel = Distance.MToAU(_newtonMoveDB.CurrentVector_ms);
             Vector3 pos = myPosDB.RelativePosition_AU;
             Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
@@ -191,7 +191,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            if (_dv != _newtonMoveDB.DeltaVForManuver_FoRO_m.Length())
+            if (_dv != _newtonMoveDB.ManuverDeltaVLen)
                 CreatePointArray();
             
             

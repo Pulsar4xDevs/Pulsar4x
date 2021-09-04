@@ -27,16 +27,31 @@ namespace Pulsar4X.ECSLib
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
         private Vector3 _orbitrelativeDeltaV;
+        private Vector3 _parentRalitiveDeltaV;
         NewtonMoveDB _db;
 
         public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Vector3 expendDeltaV_m, string name="Newtonion thrust")
         {
+
+            var parentMass = orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+            var myMass = orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
+            var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+
+            var futurePosition = orderEntity.GetRelativeFuturePosition(actionDateTime);
+            var futureVector = orderEntity.GetRelativeFutureVelocity(actionDateTime);
+            var pralitiveDV = OrbitalMath.ProgradeToParentVector(sgp, expendDeltaV_m, futurePosition, futureVector);
+
             var cmd = new NewtonThrustCommand()
             {
                 RequestingFactionGuid = faction,
                 EntityCommandingGuid = orderEntity.Guid,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                _orbitrelativeDeltaV = expendDeltaV_m,
+                //_orbitrelativeDeltaV = expendDeltaV_m,
+
+                
+                //var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2()
+
+                _parentRalitiveDeltaV = pralitiveDV,
                 ActionOnDate = actionDateTime,
                 _name = name,
 
@@ -48,7 +63,7 @@ namespace Pulsar4X.ECSLib
 
         internal override void ActionCommand(DateTime atDateTime)
         {
-            if (!IsRunning)
+            if (!IsRunning && atDateTime >= ActionOnDate)
             {
                  var parent = _entityCommanding.GetSOIParentEntity();
                  var currentVel = _entityCommanding.GetRelativeFutureVelocity(ActionOnDate);
@@ -58,7 +73,7 @@ namespace Pulsar4X.ECSLib
                 }
                 _db = new NewtonMoveDB(parent, currentVel);
                 _db.ActionOnDateTime = ActionOnDate;
-                _db.DeltaVForManuver_FoRO_m = _orbitrelativeDeltaV;
+                _db.ManuverDeltaV = _orbitrelativeDeltaV;
                 _entityCommanding.SetDataBlob(_db);
                 UpdateDetailString();
                 IsRunning = true;
@@ -73,7 +88,7 @@ namespace Pulsar4X.ECSLib
                 _details = "Waiting " + (ActionOnDate - _entityCommanding.StarSysDateTime).ToString("d'd 'h'h 'm'm 's's'") + "\n" 
                 + "   to expend  " + Stringify.Velocity(_orbitrelativeDeltaV.Length()) + " Δv";
             else if(IsRunning)
-                _details = "Expending " + Stringify.Velocity(_db.DeltaVForManuver_FoRO_m.Length()) + " Δv";
+                _details = "Expending " + Stringify.Velocity(_db.ManuverDeltaV.Length()) + " Δv";
                 
             
                
@@ -81,7 +96,7 @@ namespace Pulsar4X.ECSLib
 
         public override bool IsFinished()
         {
-            if (IsRunning && _db.DeltaVForManuver_FoRO_m.Length() == 0)
+            if (IsRunning && _db.ManuverDeltaV.Length() == 0)
                 return true;
             else
                 return false;
@@ -204,13 +219,13 @@ namespace Pulsar4X.ECSLib
                 
                 var manuverVector = ManuverVector(dvToUse, burnTime, curOurRalState, curTgtRalState, atDateTime);
 
-                _newtonMovedb.DeltaVForManuver_FoRO_m = manuverVector;
+                _newtonMovedb.ManuverDeltaV = manuverVector; //TODO: this is going to be even more broken now. it used to be using the prograde vector reference and now is using parent/
                 _entityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(atDateTime + TimeSpan.FromSeconds(5), nameof(OrderableProcessor), _entityCommanding);
                 
             }
             else
             {
-                _newtonMovedb.DeltaVForManuver_FoRO_m = new Vector3();
+                _newtonMovedb.ManuverDeltaV = new Vector3();
             }
             
         }
@@ -300,7 +315,7 @@ namespace Pulsar4X.ECSLib
 
         public override bool IsFinished()
         {
-            if (IsRunning && _newtonMovedb.DeltaVForManuver_FoRO_m.Length() <= 0)
+            if (IsRunning && _newtonMovedb.ManuverDeltaV.Length() <= 0)
                 return true;
             else
                 return false;
@@ -417,7 +432,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                _newtonMovedb.DeltaVForManuver_FoRO_m = new Vector3();
+                _newtonMovedb.ManuverDeltaV = new Vector3();
             }
             
         }
@@ -500,7 +515,7 @@ namespace Pulsar4X.ECSLib
 
         public override bool IsFinished()
         {
-            if (IsRunning && _newtonMovedb.DeltaVForManuver_FoRO_m.Length() <= 0)
+            if (IsRunning && _newtonMovedb.ManuverDeltaV.Length() <= 0)
                 return true;
             else
                 return false;

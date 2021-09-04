@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
                 //double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
 
                 
-                Vector3 manuverDV = newtonMoveDB.DeltaVForManuver_FoRO_m; //how much dv needed to complete the manuver.
+                Vector3 manuverDV = newtonMoveDB.ManuverDeltaV; //how much dv needed to complete the manuver.
                 Vector3 totalDVFromThrust = new Vector3(0,0,0);
 
 
@@ -104,22 +104,27 @@ namespace Pulsar4X.ECSLib
                     var kgOfFuel = newtonThrust.BurnDeltaV(deltaVThisStep, massTotal_Kg);
                     var ft = newtonThrust.FuelType;
                     ProcessedMaterialSD fuel = StaticRefLib.StaticData.CargoGoods.GetMaterials()[ft];
-                    var massRemoved = CargoTransferProcessor.AddRemoveCargoMass(entity, fuel, -kgOfFuel); 
+                    var massRemoved = CargoTransferProcessor.AddRemoveCargoMass(entity, fuel, -kgOfFuel);
 
+                    //convert prograde to global frame of reference for thrust direction
+                    //Vector3 globalCoordDVFromThrust = OrbitMath.ProgradeToParentVector(sgp, totalDVFromThrust,
+                    //    positionDB.RelativePosition_m,
+                    //    newtonMoveDB.CurrentVector_ms);
                     
                     //remove the vectorDV from the amount needed to fully complete the manuver. 
-                    newtonMoveDB.DeltaVForManuver_FoRO_m -= totalDVFromThrust;
+                    newtonMoveDB.ManuverDeltaV -= totalDVFromThrust;
+                    //newtonMoveDB.DeltaVForManuver_FoRO_m -= totalDVFromThrust;
+
+
 
                 }
                 
-                //convert prograde to global frame of reference for thrust direction
-                Vector3 globalCoordDVFromThrust = OrbitMath.ProgradeToParentVector(sgp, totalDVFromThrust,  
-                    positionDB.RelativePosition_m, 
-                    newtonMoveDB.CurrentVector_ms);
+                
+
                 
                 
 
-                Vector3 totalDV = totalDVFromGrav + globalCoordDVFromThrust;
+                Vector3 totalDV = totalDVFromGrav + totalDVFromThrust;
                 Vector3 newVelocity = totalDV + newtonMoveDB.CurrentVector_ms;
 
                 newtonMoveDB.CurrentVector_ms = newVelocity;
@@ -163,7 +168,7 @@ namespace Pulsar4X.ECSLib
                     newtonMoveDB.CurrentVector_ms = parentrelativeVector;
                 }
                 
-                if (newtonMoveDB.DeltaVForManuver_FoRO_m.Length() <= 0) //if we've completed the manuver.
+                if (newtonMoveDB.ManuverDeltaV.Length() <= 0) //if we've completed the manuver.
                 {
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
                     //double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
@@ -240,7 +245,9 @@ namespace Pulsar4X.ECSLib
                 
                 double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
                 double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
-                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVForManuver_FoRO_m / maxAccelFromThrust; //per second
+
+                //ohhh was this wrong before? which frame of reference should we be in here? parent ralitive or prograde ralitive?
+                Vector3 accelerationFromThrust = newtonMoveDB.ManuverDeltaV / maxAccelFromThrust; //per second
 
                 Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
                 
@@ -294,7 +301,7 @@ namespace Pulsar4X.ECSLib
                 
                 double maxAccelFromThrust1 = newtonThrust.ExhaustVelocity * Math.Log(mass_Kg / (mass_Kg - newtonThrust.FuelBurnRate));//per second
                 double maxAccelFromThrust = newtonThrust.ThrustInNewtons / mass_Kg; //per second
-                Vector3 accelerationFromThrust = newtonMoveDB.DeltaVForManuver_FoRO_m / maxAccelFromThrust; //per second
+                Vector3 accelerationFromThrust = newtonMoveDB.ManuverDeltaV / maxAccelFromThrust; //per second
 
                 Vector3 accelerationTotal = acceleratonFromGrav + accelerationFromThrust;
                 

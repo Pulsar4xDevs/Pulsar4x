@@ -472,7 +472,7 @@ namespace Pulsar4X.Tests
             Entity parentEntity = TestingUtilities.BasicEarth(mgr);
 
             PositionDB pos1 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
-            var newt1 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ DeltaVForManuver_FoRO_m = new Vector3(0,1,0)};
+            var newt1 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs1 = new BaseDataBlob[4];
             objBlobs1[0] = pos1;
             objBlobs1[1] = new MassVolumeDB() { MassDry = 10000 };
@@ -482,7 +482,7 @@ namespace Pulsar4X.Tests
             
             
             PositionDB pos2 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
-            var newt2 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ DeltaVForManuver_FoRO_m = new Vector3(0,1,0)};
+            var newt2 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs2 = new BaseDataBlob[4];
             objBlobs2[0] = pos2;
             objBlobs2[1] = new MassVolumeDB() { MassDry = 10000 };

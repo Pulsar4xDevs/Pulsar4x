@@ -558,8 +558,8 @@ namespace Pulsar4X.SDL2UI
                                 var ntdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
                                 if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                 {
-                                    ImGui.Text("Manuver Vector: " + nmdb.DeltaVForManuver_FoRO_m);
-                                    ImGui.Text("Total Manuver DV: " + Stringify.Distance(nmdb.DeltaVForManuver_FoRO_m.Length())+"/s");
+                                    ImGui.Text("Manuver Vector: " + nmdb.ManuverDeltaV);
+                                    ImGui.Text("Total Manuver DV: " + Stringify.Distance(nmdb.ManuverDeltaVLen)+"/s");
                                     ImGui.Text("Parent Body: " + nmdb.SOIParent.GetDataBlob<NameDB>().DefaultName);
                                     ImGui.Text("Current Vector:");
                                     ImGui.Text("X:" + Stringify.Velocity(nmdb.CurrentVector_ms.X));

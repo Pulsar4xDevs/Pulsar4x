@@ -184,21 +184,30 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    /// <summary>
+    /// This gets added to an entity when it's doing a newton thrust manuver. 
+    /// </summary>
     public class NewtonMoveDB : BaseDataBlob
     {
         internal DateTime LastProcessDateTime = new DateTime();
         
+
+        /// <summary>
+        /// This is the parent ralitive manuver deltaV (ie within SOI not StarSystem Global)
+        /// </summary>
+        /// <value></value>
+        public Vector3 ManuverDeltaV {get; internal set;}
+
+        /// <summary>
+        /// Just returns the lengths of the manuver deltaV
+        /// </summary>
+        /// <returns></returns>
+        public double ManuverDeltaVLen {get{return ManuverDeltaV.Length();}}
         /// <summary>
         /// Orbital Frame Of Reference: Y is prograde
         /// </summary>
-        public Vector3 DeltaVForManuver_FoRO_m { get; internal set; }
-        /// <summary>
-        /// Orbital Frame Of Reference: Y is prograde
-        /// </summary>
-        public Vector3 DeltaVForManuver_FoRO_AU
-        {
-            get { return Distance.MToAU(DeltaVForManuver_FoRO_m); }
-        }
+        //public Vector3 DeltaVForManuver_FoRO_m { get; private set; }
+
         public DateTime ActionOnDateTime { get; internal set; }
         
         /// <summary>
@@ -217,6 +226,21 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="sphereOfInfluenceParent"></param>
         /// <param name="velocity_ms">Parentrelative Velocity</param>
+        /// <param name="manuverDeltaV">Parentrelative Manuver</param>
+        public NewtonMoveDB(Entity sphereOfInfluenceParent, Vector3 velocity_ms, Vector3 manuverDeltaV)
+        {
+            CurrentVector_ms = velocity_ms;
+            SOIParent = sphereOfInfluenceParent;
+            ManuverDeltaV = manuverDeltaV;
+            ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().MassDry;
+            LastProcessDateTime = sphereOfInfluenceParent.Manager.ManagerSubpulses.StarSysDateTime;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sphereOfInfluenceParent"></param>
+        /// <param name="velocity_ms">Parentrelative Velocity</param>
         public NewtonMoveDB(Entity sphereOfInfluenceParent, Vector3 velocity_ms)
         {
             CurrentVector_ms = velocity_ms;
@@ -224,6 +248,7 @@ namespace Pulsar4X.ECSLib
             ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().MassDry;
             LastProcessDateTime = sphereOfInfluenceParent.Manager.ManagerSubpulses.StarSysDateTime;
         }
+
         public NewtonMoveDB(NewtonMoveDB db)
         {
             LastProcessDateTime = db.LastProcessDateTime;
