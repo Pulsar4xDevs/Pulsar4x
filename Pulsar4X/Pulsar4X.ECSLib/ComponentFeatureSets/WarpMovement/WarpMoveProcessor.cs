@@ -169,7 +169,7 @@ namespace Pulsar4X.ECSLib
             //propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
 
             double targetSOI = moveDB.TargetEntity.GetSOI_m();
-
+            entity.RemoveDataBlob<WarpMovingDB>();
             Entity targetEntity;
 
             if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(positionDB) > targetSOI)
@@ -190,16 +190,23 @@ namespace Pulsar4X.ECSLib
             if (moveDB.ExpendDeltaV.Length() != 0)
             {
                 NewtonThrustCommand.CreateCommand(entity.FactionOwner, entity, entity.StarSysDateTime, moveDB.ExpendDeltaV);
-                entity.RemoveDataBlob<WarpMovingDB>();
+                
                 moveDB.IsAtTarget = true;
             }
             else
             {
                 OrbitDB newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
-                entity.RemoveDataBlob<WarpMovingDB>();
+                
 
 
-                if (newOrbit.Apoapsis < targetSOI) //furtherst point within soi, normal orbit
+
+
+                if(newOrbit.Eccentricity >= 1)
+                {
+                    var newtmove = new NewtonMoveDB(targetEntity, insertionVector_m);
+                    entity.SetDataBlob(newtmove);
+                }
+                else if (newOrbit.Apoapsis < targetSOI) //furtherst point within soi, normal orbit
                 {
                     entity.SetDataBlob(newOrbit);
                 }

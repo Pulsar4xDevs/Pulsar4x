@@ -27,31 +27,25 @@ namespace Pulsar4X.ECSLib
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
         private Vector3 _orbitrelativeDeltaV;
-        private Vector3 _parentRalitiveDeltaV;
+        //private Vector3 _parentRalitiveDeltaV;
         NewtonMoveDB _db;
 
         public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Vector3 expendDeltaV_m, string name="Newtonion thrust")
         {
 
-            var parentMass = orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            var myMass = orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
 
-            var futurePosition = orderEntity.GetRelativeFuturePosition(actionDateTime);
-            var futureVector = orderEntity.GetRelativeFutureVelocity(actionDateTime);
-            var pralitiveDV = OrbitalMath.ProgradeToParentVector(sgp, expendDeltaV_m, futurePosition, futureVector);
 
             var cmd = new NewtonThrustCommand()
             {
                 RequestingFactionGuid = faction,
                 EntityCommandingGuid = orderEntity.Guid,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                //_orbitrelativeDeltaV = expendDeltaV_m,
+                _orbitrelativeDeltaV = expendDeltaV_m,
 
                 
                 //var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2()
 
-                _parentRalitiveDeltaV = pralitiveDV,
+                //_parentRalitiveDeltaV = pralitiveDV,
                 ActionOnDate = actionDateTime,
                 _name = name,
 
@@ -67,13 +61,25 @@ namespace Pulsar4X.ECSLib
             {
                  var parent = _entityCommanding.GetSOIParentEntity();
                  var currentVel = _entityCommanding.GetRelativeFutureVelocity(ActionOnDate);
+
+                var parentMass = _entityCommanding.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+                var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
+                var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+
+                var futurePosition = _entityCommanding.GetRelativeFuturePosition(ActionOnDate);
+                var futureVector = _entityCommanding.GetRelativeFutureVelocity(ActionOnDate);
+                var pralitiveDV = OrbitalMath.ProgradeToParentVector(sgp, _orbitrelativeDeltaV, futurePosition, futureVector);
+                
                 if (_entityCommanding.HasDataBlob<OrbitDB>())
                 {
                     _entityCommanding.RemoveDataBlob<OrbitDB>();
                 }
+
+
+
                 _db = new NewtonMoveDB(parent, currentVel);
                 _db.ActionOnDateTime = ActionOnDate;
-                _db.ManuverDeltaV = _orbitrelativeDeltaV;
+                _db.ManuverDeltaV = pralitiveDV;
                 _entityCommanding.SetDataBlob(_db);
                 UpdateDetailString();
                 IsRunning = true;
@@ -88,7 +94,7 @@ namespace Pulsar4X.ECSLib
                 _details = "Waiting " + (ActionOnDate - _entityCommanding.StarSysDateTime).ToString("d'd 'h'h 'm'm 's's'") + "\n" 
                 + "   to expend  " + Stringify.Velocity(_orbitrelativeDeltaV.Length()) + " Δv";
             else if(IsRunning)
-                _details = "Expending " + Stringify.Velocity(_db.ManuverDeltaV.Length()) + " Δv";
+                _details = "Expending " + Stringify.Velocity(_db.ManuverDeltaVLen) + " Δv";
                 
             
                

@@ -143,6 +143,11 @@ namespace Pulsar4X.ECSLib
                 var vel = move.CurrentVector_ms;
                 return (pos, vel);
             }
+            if(entity.HasDataBlob<WarpMovingDB>())
+            {
+                var vel = entity.GetDataBlob<WarpMovingDB>().CurrentNonNewtonionVectorMS;
+                return(pos,vel);
+            }
             else
             {
                 throw new Exception("Entity has no velocity");

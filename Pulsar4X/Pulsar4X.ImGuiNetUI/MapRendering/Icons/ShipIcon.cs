@@ -222,22 +222,9 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
-            if (_orbitDB != null)
-            {
-                var headingVector = _orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
-                var heading = Math.Atan2(headingVector.Y, headingVector.X);
-                Heading = (float)heading;
-            }
-            else if(_newtonMoveDB != null)
-            {
-                Heading = (float)Math.Atan2(_newtonMoveDB.CurrentVector_ms.Y, _newtonMoveDB.CurrentVector_ms.X); 
-            }
-            else if (_warpMoveDB != null)
-            {
-                Heading = _warpMoveDB.Heading_Radians;
-            }
-
+            var headingVector = _entity.GetRelativeState().Velocity;
+            var heading = Math.Atan2(headingVector.Y, headingVector.X);
+            Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -391,22 +378,9 @@ namespace Pulsar4X.SDL2UI
         {
 
             DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
-            if (_orbitDB != null)
-            {
-                var headingVector = _orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
-                var heading = Math.Atan2(headingVector.Y, headingVector.X);
-                Heading = (float)heading;
-            }
-            else if(_newtonMoveDB != null)
-            {
-                Heading = (float)Math.Atan2(_newtonMoveDB.CurrentVector_ms.Y, _newtonMoveDB.CurrentVector_ms.X);
-                
-            }
-            else if (_warpMoveDB != null)
-            {
-                Heading = _warpMoveDB.Heading_Radians;
-            }
-
+            var headingVector = _entity.GetRelativeState().Velocity;//_orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
+            var heading = Math.Atan2(headingVector.Y, headingVector.X);
+            Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -465,9 +439,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            //DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
 
- 
 
         }
 
