@@ -528,10 +528,11 @@ namespace Pulsar4X.ECSLib
                         double targetSMA = OrbitMath.LowOrbitRadius(targetBody);
 
                         var manuvers = InterceptCalcs.Hohmann2(sgpTgtBdy, mySMA, targetSMA);
-                        var tnow = ship.Manager.StarSysDateTime;
-                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, tnow, manuvers[0].deltaV, "Thrust: Homann Manuver");
-                        DateTime futureDate = tnow + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, futureDate, manuvers[1].deltaV, "Thrust: Circularize");
+
+                        NewtonThrustCommand.CreateCommands(ship, manuvers);
+
+
+
                     }
 
 
@@ -559,9 +560,7 @@ namespace Pulsar4X.ECSLib
 
                         var manuvers = InterceptCalcs.Hohmann2(sgpTgtBdy, mySMA, targetSMA);
                         var tnow = ship.Manager.StarSysDateTime;
-                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, tnow, manuvers[0].deltaV, "Thrust: Homann Manuver");
-                        DateTime futureDate = tnow + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-                        NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, futureDate, manuvers[1].deltaV, "Thrust: Circularize");
+                        NewtonThrustCommand.CreateCommands(ship, manuvers);
                     }
                 }
             }
@@ -583,7 +582,9 @@ namespace Pulsar4X.ECSLib
                 var thrustVector = Vector3.Normalise(insertionVector) * -deltaV;
                 //should we expend deltaV now or when we get there?
                 WarpMoveCommand.CreateCommand(ship.FactionOwner, ship, targetBody, targetInsertionPosition, targetIntercept.eti, new Vector3(0,0,0));
-                NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, targetIntercept.eti, thrustVector, "Thrust: Circularize");
+                //NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, targetIntercept.eti, thrustVector, "Thrust: Circularize");
+                var secFromNow = targetIntercept.eti - ship.StarSysDateTime;
+                NewtonThrustCommand.CreateCommand(ship, (thrustVector, secFromNow.TotalSeconds));
             }
         }
     }

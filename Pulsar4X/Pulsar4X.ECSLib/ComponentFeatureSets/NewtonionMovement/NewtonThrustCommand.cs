@@ -30,7 +30,9 @@ namespace Pulsar4X.ECSLib
         //private Vector3 _parentRalitiveDeltaV;
         NewtonMoveDB _db;
 
-        public static void CreateCommand(Guid faction, Entity orderEntity, DateTime actionDateTime, Vector3 expendDeltaV_m, string name="Newtonion thrust")
+        DateTime _vectorDateTime;
+
+        public static void CreateCommand(Guid faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name="Newtonion thrust")
         {
 
 
@@ -46,7 +48,8 @@ namespace Pulsar4X.ECSLib
                 //var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2()
 
                 //_parentRalitiveDeltaV = pralitiveDV,
-                ActionOnDate = actionDateTime,
+                _vectorDateTime = manuverNodeTime,
+                ActionOnDate = manuverNodeTime - TimeSpan.FromSeconds(burnTime * 0.5),
                 _name = name,
 
             };
@@ -55,19 +58,82 @@ namespace Pulsar4X.ECSLib
             cmd.UpdateDetailString();
         }
 
+        public static void CreateCommands(Entity ship, (Vector3 dv, double t)[] manuvers)
+        {
+            var fuelTypeID = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
+            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
+            var tnow = ship.StarSysDateTime;
+            
+
+            foreach (var manuver in manuvers)
+            {
+                var tmanuver = tnow + TimeSpan.FromSeconds(manuver.t);
+                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, manuver.dv.Length());
+                double tburn = fuelBurned / burnRate;
+                mass -= fuelBurned;
+
+                var cmd = new NewtonThrustCommand()
+                {
+                    RequestingFactionGuid = ship.FactionOwner,
+                    EntityCommandingGuid = ship.Guid,
+                    CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
+                    _orbitrelativeDeltaV = manuver.dv,
+
+                    _vectorDateTime = tmanuver,
+                    ActionOnDate = tmanuver - TimeSpan.FromSeconds(tburn * 0.5),
+                };
+
+                StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+                cmd.UpdateDetailString();
+            }
+        }
+
+        public static void CreateCommand(Entity ship, (Vector3 dv, double t) manuver)
+        {
+            var fuelTypeID = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
+            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
+            var tnow = ship.StarSysDateTime;
+
+                var tmanuver = tnow + TimeSpan.FromSeconds(manuver.t);
+                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, manuver.dv.Length());
+                double tburn = fuelBurned / burnRate;
+                mass -= fuelBurned;
+
+                var cmd = new NewtonThrustCommand()
+                {
+                    RequestingFactionGuid = ship.FactionOwner,
+                    EntityCommandingGuid = ship.Guid,
+                    CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
+                    _orbitrelativeDeltaV = manuver.dv,
+
+                    _vectorDateTime = tmanuver,
+                    ActionOnDate = tmanuver - TimeSpan.FromSeconds(tburn * 0.5),
+                };
+
+                StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+                cmd.UpdateDetailString();
+            
+        }
+
         internal override void ActionCommand(DateTime atDateTime)
         {
             if (!IsRunning && atDateTime >= ActionOnDate)
             {
                  var parent = _entityCommanding.GetSOIParentEntity();
-                 var currentVel = _entityCommanding.GetRelativeFutureVelocity(ActionOnDate);
+                 var currentVel = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
 
                 var parentMass = _entityCommanding.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
                 var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
                 var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
 
-                var futurePosition = _entityCommanding.GetRelativeFuturePosition(ActionOnDate);
-                var futureVector = _entityCommanding.GetRelativeFutureVelocity(ActionOnDate);
+                var futurePosition = _entityCommanding.GetRelativeFuturePosition(_vectorDateTime);
+                var futureVector = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
                 var pralitiveDV = OrbitalMath.ProgradeToParentVector(sgp, _orbitrelativeDeltaV, futurePosition, futureVector);
                 
                 if (_entityCommanding.HasDataBlob<OrbitDB>())

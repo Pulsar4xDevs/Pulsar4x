@@ -163,13 +163,7 @@ namespace Pulsar4X.SDL2UI
 
         void ActionCmd()
         {
-
-            NewtonThrustCommand.CreateCommand(
-                _uiState.Faction.Guid,
-                OrderingEntity.Entity,
-                _actionDateTime,
-                _deltaV_MS);
-
+            NewtonThrustCommand.CreateCommand(OrderingEntity.Entity, (_deltaV_MS, 0));
             CloseWindow();
         }
 

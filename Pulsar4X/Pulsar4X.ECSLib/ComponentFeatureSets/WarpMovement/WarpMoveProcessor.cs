@@ -189,7 +189,17 @@ namespace Pulsar4X.ECSLib
 
             if (moveDB.ExpendDeltaV.Length() != 0)
             {
-                NewtonThrustCommand.CreateCommand(entity.FactionOwner, entity, entity.StarSysDateTime, moveDB.ExpendDeltaV);
+
+                var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+                var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+                var mass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+
+                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, moveDB.ExpendDeltaV.Length());
+                double secondsBurn = fuelBurned / burnRate;
+                var manuverNodeTime = entity.StarSysDateTime + TimeSpan.FromSeconds(secondsBurn * 0.5);
+
+
+                NewtonThrustCommand.CreateCommand(entity.FactionOwner, entity, manuverNodeTime, moveDB.ExpendDeltaV, secondsBurn);
                 
                 moveDB.IsAtTarget = true;
             }

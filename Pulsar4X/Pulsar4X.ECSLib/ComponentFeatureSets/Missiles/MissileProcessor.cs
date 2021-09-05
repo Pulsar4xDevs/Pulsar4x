@@ -110,12 +110,13 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 var manuverDV = manuvers[0].deltaV;
                 //newtmovedb.ActionOnDateTime = atDatetime;
                 //newtmovedb.DeltaVForManuver_FoRO_m = manuverDV;   
-                NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, atDatetime, manuverDV);
-                
-                DateTime futureDate = atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-                Vector3 futureDV = manuvers[1].deltaV;
-                NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
+                //NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, atDatetime, manuverDV);
+                //NewtonThrustCommand.CreateCommand(newMissile, (manuver))
+                //DateTime futureDate = atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
+                //Vector3 futureDV = manuvers[1].deltaV;
+                //NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
                 //ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate + TimeSpan.FromSeconds(1), targetEntity);
+                NewtonThrustCommand.CreateCommands(newMissile, manuvers);
             }
             CargoTransferProcessor.RemoveCargoItems(launchingEntity, missileDesign, 1);//remove missile from parent.
         }
