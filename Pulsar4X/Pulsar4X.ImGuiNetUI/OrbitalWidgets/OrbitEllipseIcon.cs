@@ -156,7 +156,7 @@ namespace Pulsar4X.SDL2UI
             var trns = Matrix.IDTranslate(foo.x, foo.y);
             //var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var mtrx = matrix * trns;
-            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
+            //_drawPoints = new SDL.SDL_Point[_numberOfDrawSegments]; //we don't need to create a whole new array
             int index = _index;      
             _drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
             for (int i = 1; i < _numberOfDrawSegments; i++)

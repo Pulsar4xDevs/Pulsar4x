@@ -114,6 +114,7 @@ namespace Pulsar4X.SDL2UI
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
             _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
             _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
+            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
 
         }
         protected abstract void CreatePointArray();
