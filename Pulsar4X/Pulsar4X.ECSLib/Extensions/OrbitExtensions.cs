@@ -173,16 +173,26 @@ namespace Pulsar4X.ECSLib
             return Math.Atan2(y, x);
             */
         }
-
-
+        
+        /// <summary>
+        /// this allows us to re-use the array, rather than re-creating it each time.
+        /// ThreadStatic ensures that we have a different array for each thread which avoids thread problems.
+        /// however it only initialises once, so we're checking if it's null.
+        /// this whole thing should help unnessisary memory allocation which means less garbage collection. 
+        /// </summary>
+        private const int numIterations = 1000;
+        [ThreadStatic] 
+        private static double[] e = new double[numIterations];
         /// <summary>
         /// Calculates the current Eccentric Anomaly given certain orbital parameters.
         /// </summary>
         public static double GetEccentricAnomaly(this OrbitDB orbit, double currentMeanAnomaly)
         {
+            if (e is null)// threadstatic only inits once so we need to do this... 
+                e = new double[numIterations];
             //Kepler's Equation
-            const int numIterations = 1000;
-            var e = new double[numIterations];
+            //const int numIterations = 1000;
+            //var e = new double[numIterations];
             const double epsilon = 1E-12; // Plenty of accuracy.
             int i = 0;
 
