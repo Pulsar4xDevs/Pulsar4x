@@ -503,7 +503,7 @@ namespace Pulsar4X.ECSLib
                     string pname = systemProcess.GetType().Name;
                     if(!_detailedProcessTimes.ContainsKey(pname))
                         _detailedProcessTimes.Add(pname, new List<double>());
-                    _detailedProcessTimes[pname].Add(_processStopwatch.ElapsedTicks);
+                    _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
                     AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
                 }
 
@@ -522,7 +522,7 @@ namespace Pulsar4X.ECSLib
                     string pname = processor.GetType().Name;
                     if(!_detailedProcessTimes.ContainsKey(pname))
                         _detailedProcessTimes.Add(pname, new List<double>());
-                    _detailedProcessTimes[pname].Add(_processStopwatch.ElapsedTicks);
+                    _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
                 }
 
                 QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 

@@ -430,6 +430,24 @@ namespace Pulsar4X.ECSLib
 
             return GetAllEntitiesWithDataBlobs(dataBlobMask);
         }
+        
+        /// <summary>
+        /// Returns a list of entities that have datablob type T.
+        /// <para></para>
+        /// Returns a blank list if no entities have that datablob.
+        /// <para></para>
+        /// DO NOT ASSUME THE ORDER OF THE RETURNED LIST!
+        /// </summary>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
+        public List<Entity> GetAllEntitiesWithDataBlob<T>(int typeIndex) where T : BaseDataBlob
+        {
+            //int typeIndex = GetTypeIndex<T>();
+
+            ComparableBitArray dataBlobMask = BlankDataBlobMask();
+            dataBlobMask[typeIndex] = true;
+
+            return GetAllEntitiesWithDataBlobs(dataBlobMask);
+        }
 
         /// <summary>
         /// Returns a list of entities that contain all dataBlobs defined by the dataBlobMask.

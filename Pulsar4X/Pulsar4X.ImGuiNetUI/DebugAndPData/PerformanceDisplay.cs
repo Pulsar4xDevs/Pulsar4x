@@ -93,6 +93,18 @@ namespace Pulsar4X.SDL2UI
             if(IsActive && ImGui.Begin("Perf Display"))
             {
                 SetFrameRateArray();
+                ImGui.Text("Global Tick: "); ImGui.SameLine();
+                var t_lpt = _uiState.Game.GamePulse.LastProcessingTime.TotalMilliseconds;
+                var t_tf = _uiState.Game.GamePulse.TickFrequency.TotalMilliseconds;
+                var txt_lpt = t_lpt.ToString();
+                var col = new Vector4(0, 1, 0, 1);
+                if (t_lpt > _uiState.Game.GamePulse.TickFrequency.TotalMilliseconds)
+                    col = new Vector4(1, 0, 0, 1);
+                ImGui.Text(txt_lpt); ImGui.SameLine();
+                var overtime = t_lpt - t_tf;
+                ImGui.TextColored(col, overtime.ToString());
+                
+                
                 //plot vars: (label, values, valueOffset, overlayText, scaleMin, scaleMax, graphSize, Stride)
                 //core game processing rate.
                 //ImGui.PlotHistogram("##GRHistogram", _gameRatesDisplay, 10, _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
@@ -113,11 +125,11 @@ namespace Pulsar4X.SDL2UI
                 {
                     ImGui.Text(item.pname);
                     ImGui.SameLine();
-                    ImGui.Text(item.psum.ToString() + "ms ");
+                    ImGui.Text((item.psum * 1000000).ToString() + "ns ");
                     ImGui.SameLine();
                     ImGui.Text( "ran: " + item.ptimes.Length.ToString() + " times");
                     ImGui.SameLine();
-                    ImGui.Text( "averaging: " + (item.psum / item.ptimes.Length).ToString() + "ms");
+                    ImGui.Text( "averaging: " + (item.psum * 1000000 / item.ptimes.Length).ToString() + "ns");
                 }
                 ImGui.Text("    IsProcecssing: " + _systemState.StarSystem.ManagerSubpulses.IsProcessing);
                 ImGui.Text("    CurrentProcess: " + _systemState.StarSystem.ManagerSubpulses.CurrentProcess);
@@ -156,14 +168,14 @@ namespace Pulsar4X.SDL2UI
                         _sw.Stop();
                         count1 = entites.Count;
                         ticks1 = _sw.ElapsedTicks;
-                        ms1 = _sw.ElapsedMilliseconds;
+                        ms1 = _sw.Elapsed.TotalMilliseconds;
                         
                         _sw.Restart();
                         var datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>();
                         _sw.Stop();
                         count2 = datablobs.Count;
                         ticks2 = _sw.ElapsedTicks;
-                        
+
                         int typeIndex = EntityManager.GetTypeIndex<NewtonMoveDB>();
                         _sw.Restart();
                         datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>(typeIndex);
