@@ -8,6 +8,8 @@ namespace Pulsar4X.ECSLib
 
     public class NewtonionMovementProcessor : IHotloopProcessor
     {
+        private static readonly int _obtDBIdx = EntityManager.GetTypeIndex<OrbitDB>();
+        private static readonly int _nmDBIdx = EntityManager.GetTypeIndex<NewtonMoveDB>();
         public NewtonionMovementProcessor()
         {
         }
@@ -30,7 +32,7 @@ namespace Pulsar4X.ECSLib
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            List<Entity> entites = manager.GetAllEntitiesWithDataBlob<NewtonMoveDB>();
+            List<Entity> entites = manager.GetAllEntitiesWithDataBlob<NewtonMoveDB>(_nmDBIdx);
             foreach (var entity in entites)
             {
                 ProcessEntity(entity, deltaSeconds);

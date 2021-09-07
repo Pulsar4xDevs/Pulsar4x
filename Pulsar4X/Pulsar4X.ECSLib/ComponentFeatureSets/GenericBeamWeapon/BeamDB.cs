@@ -8,6 +8,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
 {
     public class BeamWeapnProcessor : IHotloopProcessor
     {
+        private static readonly int _beamInfoIndex = EntityManager.GetTypeIndex<BeamInfoDB>();
         public void Init(Game game)
         {
             //donothing
@@ -15,12 +16,12 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            BeamMovePhysics(entity.GetDataBlob<BeamInfoDB>(), deltaSeconds);
+            BeamMovePhysics(entity.GetDataBlob<BeamInfoDB>(_beamInfoIndex), deltaSeconds);
         }
 
         public void ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            var dbs = manager.GetAllDataBlobsOfType<BeamInfoDB>();
+            var dbs = manager.GetAllDataBlobsOfType<BeamInfoDB>(_beamInfoIndex);
             foreach (BeamInfoDB db in dbs)
             { 
                 BeamMovePhysics(db, deltaSeconds);
