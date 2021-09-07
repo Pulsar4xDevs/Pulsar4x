@@ -36,6 +36,8 @@ namespace Pulsar4X.SDL2UI
         private TimeControl()
         {
             IsActive = true;
+            ReadTimeSpan();
+            ReadFreqency();
         }
 
         internal static TimeControl GetInstance()
@@ -141,6 +143,33 @@ namespace Pulsar4X.SDL2UI
                     break;
             }
         }
+        void ReadTimeSpan()
+        { 
+            switch (_timeSpanType)
+            {
+                case 0:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalSeconds;
+                    break;
+                case 1:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalMinutes;
+                    break;
+                case 2:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalHours;
+                    break;
+                case 3:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays;
+                    break;
+                case 4:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays / 7;
+                    break;
+                case 5:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays / 30;
+                    break;
+                case 6:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays / 365;
+                    break;
+            }
+        }
         void AdjustFreqency()
         {
             switch (_freqSpanType)
@@ -165,6 +194,33 @@ namespace Pulsar4X.SDL2UI
                     break;
                 case 6:
                     _timeloop.TickFrequency = TimeSpan.FromDays(_freqTimeSpanValue * 365);
+                    break;
+            }
+        }
+        void ReadFreqency()
+        {
+            switch (_freqSpanType)
+            {
+                case 0:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalSeconds;
+                    break;
+                case 1:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalMinutes;
+                    break;
+                case 2:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalHours;
+                    break;
+                case 3:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays;
+                    break;
+                case 4:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays / 7;
+                    break;
+                case 5:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays / 30;
+                    break;
+                case 6:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays / 365;
                     break;
             }
         }
