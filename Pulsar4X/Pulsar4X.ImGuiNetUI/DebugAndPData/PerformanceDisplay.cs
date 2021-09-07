@@ -121,16 +121,36 @@ namespace Pulsar4X.SDL2UI
 
                 var data = _systemState.StarSystem.ManagerSubpulses.GetLastPerfData();
                 ImGui.Text("StarSystemID: " + _systemState.StarSystem.Guid);
+                ImGui.Columns(4);
+                ImGui.SetColumnWidth(0, 160);
+                ImGui.SetColumnWidth(1, 64);
+                ImGui.SetColumnWidth(2, 128);
+                ImGui.SetColumnWidth(3, 128);
+                
+                
+                ImGui.Text("Name"); ImGui.NextColumn();
+                ImGui.Text("Count"); ImGui.NextColumn();
+                ImGui.Text("Run Time"); ImGui.NextColumn();
+                ImGui.Text("Average"); ImGui.NextColumn();
+                string str = "";
                 foreach (var item in data.ProcessTimes)
                 {
+                    
                     ImGui.Text(item.pname);
-                    ImGui.SameLine();
-                    ImGui.Text((item.psum * 1000000).ToString() + "ns ");
-                    ImGui.SameLine();
-                    ImGui.Text( "ran: " + item.ptimes.Length.ToString() + " times");
-                    ImGui.SameLine();
-                    ImGui.Text( "averaging: " + (item.psum * 1000000 / item.ptimes.Length).ToString() + "ns");
+                    ImGui.NextColumn();
+                    ImGui.Text( item.ptimes.Length.ToString());
+                    
+                    ImGui.NextColumn();
+                    str = (item.psum * 1000000).ToString("0.00") + "ns";
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
+                    ImGui.Text(str);
+                    ImGui.NextColumn();
+                    str = (item.psum * 1000000 / item.ptimes.Length).ToString("0.00") + "ns";
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
+                    ImGui.Text( str );
+                    ImGui.NextColumn();
                 }
+                ImGui.Columns(1);
                 ImGui.Text("    IsProcecssing: " + _systemState.StarSystem.ManagerSubpulses.IsProcessing);
                 ImGui.Text("    CurrentProcess: " + _systemState.StarSystem.ManagerSubpulses.CurrentProcess);
                 ImGui.Text("    Last Total ProcessTime: " + data.FullPulseTimeMS);
