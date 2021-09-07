@@ -136,10 +136,6 @@ namespace Pulsar4X.ECSLib
                 var futureVector = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
                 var pralitiveDV = OrbitalMath.ProgradeToParentVector(sgp, _orbitrelativeDeltaV, futurePosition, futureVector);
                 
-                if (_entityCommanding.HasDataBlob<OrbitDB>())
-                {
-                    _entityCommanding.RemoveDataBlob<OrbitDB>();
-                }
 
 
 
@@ -147,6 +143,7 @@ namespace Pulsar4X.ECSLib
                 _db.ActionOnDateTime = ActionOnDate;
                 _db.ManuverDeltaV = pralitiveDV;
                 _entityCommanding.SetDataBlob(_db);
+
                 UpdateDetailString();
                 IsRunning = true;
             }
@@ -243,14 +240,6 @@ namespace Pulsar4X.ECSLib
                 var soiParentEntity = _entityCommanding.GetSOIParentEntity();
                 _soiParentMass = soiParentEntity.GetDataBlob<MassVolumeDB>().MassDry;
                 var currentVel = _entityCommanding.GetRelativeFutureVelocity(atDateTime);
-                if (_entityCommanding.HasDataBlob<OrbitDB>())
-                {
-                    _entityCommanding.RemoveDataBlob<OrbitDB>();
-                }
-                if (_entityCommanding.HasDataBlob<OrbitUpdateOftenDB>())
-                {
-                    _entityCommanding.RemoveDataBlob<OrbitUpdateOftenDB>();
-                }
                 if (_entityCommanding.HasDataBlob<NewtonMoveDB>())
                 {
                     _newtonMovedb = _entityCommanding.GetDataBlob<NewtonMoveDB>();

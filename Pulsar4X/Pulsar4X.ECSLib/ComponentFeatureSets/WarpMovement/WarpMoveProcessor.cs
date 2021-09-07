@@ -169,7 +169,7 @@ namespace Pulsar4X.ECSLib
             //propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
 
             double targetSOI = moveDB.TargetEntity.GetSOI_m();
-            entity.RemoveDataBlob<WarpMovingDB>();
+            
             Entity targetEntity;
 
             if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(positionDB) > targetSOI)
@@ -237,6 +237,7 @@ namespace Pulsar4X.ECSLib
                 positionDB.SetParent(targetEntity);
                 moveDB.IsAtTarget = true;
             }
+            
 
         }
 

@@ -595,6 +595,24 @@ namespace Pulsar4X.ECSLib
             return new OrbitDB(this);
         }
 
+
+        internal override void OnSetToEntity()
+        {
+            if (OwningEntity.HasDataBlob<NewtonMoveDB>())
+            {
+                OwningEntity.RemoveDataBlob<NewtonMoveDB>();
+            }
+            if (OwningEntity.HasDataBlob<OrbitUpdateOftenDB>())
+            {
+                OwningEntity.RemoveDataBlob<OrbitUpdateOftenDB>();
+            }
+            if (OwningEntity.HasDataBlob<WarpMovingDB>())
+            {
+                OwningEntity.RemoveDataBlob<WarpMovingDB>();
+            }
+        }
+        
+
         #region ISensorCloneInterface
 
 
@@ -666,6 +684,22 @@ namespace Pulsar4X.ECSLib
             _myMass = orbit._myMass;
             Epoch = orbit.Epoch;
             CalculateExtendedParameters();
+        }
+        
+        internal override void OnSetToEntity()
+        {
+            if (OwningEntity.HasDataBlob<OrbitDB>())
+            {
+                OwningEntity.RemoveDataBlob<OrbitDB>();
+            }
+            if (OwningEntity.HasDataBlob<NewtonMoveDB>())
+            {
+                OwningEntity.RemoveDataBlob<NewtonMoveDB>();
+            }
+            if (OwningEntity.HasDataBlob<WarpMovingDB>())
+            {
+                OwningEntity.RemoveDataBlob<WarpMovingDB>();
+            }
         }
 
     }

@@ -158,5 +158,22 @@ namespace Pulsar4X.ECSLib
         {
             return new WarpMovingDB(this);
         }
+        
+        internal override void OnSetToEntity()
+        {
+            if (OwningEntity.HasDataBlob<OrbitDB>())
+            {
+                OwningEntity.RemoveDataBlob<OrbitDB>();
+            }
+            if (OwningEntity.HasDataBlob<OrbitUpdateOftenDB>())
+            {
+                OwningEntity.RemoveDataBlob<OrbitUpdateOftenDB>();
+            }
+            if (OwningEntity.HasDataBlob<NewtonMoveDB>())
+            {
+                OwningEntity.RemoveDataBlob<NewtonMoveDB>();
+            }
+        
+        }
     }
 }

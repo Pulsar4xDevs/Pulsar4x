@@ -183,18 +183,16 @@ namespace Pulsar4X.ECSLib
                         {
                             var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
                             var fastOrbit = new OrbitUpdateOftenDB(newOrbit);
-                            entity.RemoveDataBlob<NewtonMoveDB>();
-                            entity.SetDataBlob(fastOrbit);
                             positionDB.SetParent(parentEntity);
+                            entity.SetDataBlob(fastOrbit);
                             var newPos = fastOrbit.GetPosition_m(dateTime);
                             positionDB.RelativePosition_m = newPos;
                         }
                         else
                         {
                             var newOrbit = OrbitDB.FromKeplerElements(parentEntity, massTotal_Kg, kE, dateTime);
-                            entity.RemoveDataBlob<NewtonMoveDB>();
-                            entity.SetDataBlob(newOrbit);
                             positionDB.SetParent(parentEntity);
+                            entity.SetDataBlob(newOrbit);
                             var newPos = newOrbit.GetPosition_m(dateTime);
                             positionDB.RelativePosition_m = newPos;
                         }

@@ -260,7 +260,23 @@ namespace Pulsar4X.ECSLib
         {
             return new NewtonMoveDB(this);
         }
-        
+
+        internal override void OnSetToEntity()
+        {
+            if (OwningEntity.HasDataBlob<OrbitDB>())
+            {
+                OwningEntity.RemoveDataBlob<OrbitDB>();
+            }
+            if (OwningEntity.HasDataBlob<OrbitUpdateOftenDB>())
+            {
+                OwningEntity.RemoveDataBlob<OrbitUpdateOftenDB>();
+            }
+            if (OwningEntity.HasDataBlob<WarpMovingDB>())
+            {
+                OwningEntity.RemoveDataBlob<WarpMovingDB>();
+            }
+        }
+
         public KeplerElements GetElements()
         {
             // if there is not a change in Dv then the kepler elements wont have changed, it might be better to store them?

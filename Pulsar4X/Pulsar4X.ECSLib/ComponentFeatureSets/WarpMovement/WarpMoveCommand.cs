@@ -92,11 +92,6 @@ namespace Pulsar4X.ECSLib
                     _db = new WarpMovingDB(_entityCommanding, _targetEntity, TargetOffsetPosition_m);
                     _db.ExpendDeltaV = ExpendDeltaV;
                     
-
-                    if (EntityCommanding.HasDataBlob<OrbitDB>())
-                        EntityCommanding.RemoveDataBlob<OrbitDB>();
-                    if(EntityCommanding.HasDataBlob<NewtonMoveDB>())
-                        EntityCommanding.RemoveDataBlob<NewtonMoveDB>();
                     EntityCommanding.SetDataBlob(_db);
                     
                     WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
