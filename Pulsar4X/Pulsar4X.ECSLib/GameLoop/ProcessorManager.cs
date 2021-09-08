@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
     internal class ProcessorManager
     {
 
-        internal readonly Dictionary<Type, IHotloopProcessor> _hotloopProcessors = new Dictionary<Type, IHotloopProcessor>();
+        internal readonly Dictionary<Type, IHotloopProcessor> HotloopProcessors = new Dictionary<Type, IHotloopProcessor>();
         private readonly List<IRecalcProcessor> _recalcProcessors = new List<IRecalcProcessor>();
         //private readonly Dictionary<PulseActionEnum, IHotloopProcessor> _hotloopProcessorsByEnum = new Dictionary<PulseActionEnum, IHotloopProcessor>();
         private readonly Dictionary<string, IInstanceProcessor> _instanceProcessors = new Dictionary<string, IInstanceProcessor>();
@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
 
         internal void AddHotloopProcessor<T>(IHotloopProcessor processor) where T : BaseDataBlob
         {
-            _hotloopProcessors.Add(typeof(T), processor);
+            HotloopProcessors.Add(typeof(T), processor);
         }
 
         internal void AddRecalcProcessor(IRecalcProcessor processor)
@@ -37,12 +37,12 @@ namespace Pulsar4X.ECSLib
         {
             var type = typeof(T);
 
-            _hotloopProcessors[type].ProcessManager(manager, deltaSeconds);
+            HotloopProcessors[type].ProcessManager(manager, deltaSeconds);
         }
 
         internal IHotloopProcessor GetProcessor<T>() where T : BaseDataBlob
         {
-            return _hotloopProcessors[typeof(T)];
+            return HotloopProcessors[typeof(T)];
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Pulsar4X.ECSLib
             where T : BaseDataBlob
         {
             var type = typeof(T);
-            _hotloopProcessors[type].ProcessEntity(entity, deltaSeconds);
+            HotloopProcessors[type].ProcessEntity(entity, deltaSeconds);
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Pulsar4X.ECSLib
                 IHotloopProcessor processor = (IHotloopProcessor)Activator.CreateInstance(hotloopType);
                 processor.Init(game);
                 Type type = processor.GetParameterType;
-                _hotloopProcessors.Add(type, processor);
+                HotloopProcessors.Add(type, processor);
             }
 
             var instanceTypes = GetDerivedTypesFor(typeof(IInstanceProcessor));
