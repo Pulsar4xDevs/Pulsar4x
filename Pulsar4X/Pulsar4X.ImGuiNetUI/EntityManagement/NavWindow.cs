@@ -104,8 +104,13 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
             _siblingNames = names.ToArray();
             
-
-            _uncleEntites = _orderEntity.GetSOIParentEntity().GetSOIParentEntity().GetDataBlob<PositionDB>().Children.ToArray();
+            if(_orderEntity.GetSOIParentEntity() == _orderEntity.GetDataBlob<PositionDB>().Root || _orderEntity.GetSOIParentEntity() is null)
+                _uncleEntites = new Entity[0];
+            else
+            {
+                _uncleEntites = _orderEntity.GetSOIParentEntity().GetSOIParentEntity().GetDataBlob<PositionDB>().Children.ToArray();
+                
+            }
             names = new List<string>();
             foreach (var entity in _uncleEntites)
             {

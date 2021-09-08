@@ -133,7 +133,7 @@ namespace Pulsar4X.SDL2UI
         {
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(264, 325), ImGuiCond.Once);
             if(IsActive)
-            if (ImGui.Begin("TradeBase", ref IsActive, _flags))
+            if (ImGui.Begin("Logisitcs Base", ref IsActive, _flags))
             {
                 if(!_selectedEntity.HasDataBlob<LogiBaseDB>())
                 {
@@ -327,7 +327,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(264, 325), ImGuiCond.Once);
             if(IsActive)
             {
-                if (ImGui.Begin("TradeShip", ref IsActive, _flags))
+                if (ImGui.Begin("Logisitcs Ship", ref IsActive, _flags))
                 {
                     if(!_selectedEntity.HasDataBlob<LogiShipperDB>())
                     {
@@ -370,7 +370,9 @@ namespace Pulsar4X.SDL2UI
                         foreach (var item in _tradeshipDB.ActiveCargoTasks)
                         {
                             ImGui.Text("From: " + item.Source.GetName(_factionID));
+                            ImGui.NextColumn();
                             ImGui.Text("To: " + item.Destination.GetName(_factionID));
+                            ImGui.NextColumn();
                             ImGui.Text(item.item.Name);
                             ImGui.NextColumn();
                             ImGui.Text(item.NumberOfItems.ToString());
@@ -381,7 +383,7 @@ namespace Pulsar4X.SDL2UI
 
 
                         ImGui.Text("Current Cargo Manafest");
-                        ImGui.Text("Maybe this should show entire cargo, not just trade cargo, and use colours to diffentiate?");
+                        //ImGui.Text("Maybe this should show entire cargo, not just trade cargo, and use colours to diffentiate?");
                         ImGui.Columns(2);
                         foreach (var item in _tradeshipDB.ItemsToShip)
                         {

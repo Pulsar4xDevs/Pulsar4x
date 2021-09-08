@@ -493,13 +493,13 @@ namespace Pulsar4X.Tests
             var seconds = 100;
             for (int i = 0; i < seconds; i++)
             {
-                NewtonionMovementProcessor.NewtonMove(objEntity1, 1);
+                NewtonionMovementProcessor.NewtonMove(newt1, 1);
                 
                 //this is a hacky way to allow us to increment each second,
                 //since the above method looks at the manager datetime and we're not updating that.
                 newt1.LastProcessDateTime -= TimeSpan.FromSeconds(1);
             }
-            NewtonionMovementProcessor.NewtonMove(objEntity2, seconds);
+            NewtonionMovementProcessor.NewtonMove(newt2, seconds);
             var distance1 = (pos1.RelativePosition_m.Length());
             var distance2 = (pos2.RelativePosition_m.Length());
             
