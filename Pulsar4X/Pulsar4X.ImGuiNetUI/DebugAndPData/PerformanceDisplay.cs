@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Text;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
@@ -120,7 +121,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new System.Numerics.Vector2(248, 60), sizeof(float));
 
                 var data = _systemState.StarSystem.ManagerSubpulses.GetLastPerfData();
-                ImGui.Text("StarSystemID: " + _systemState.StarSystem.Guid);
+                ImGui.Text($"StarSystemID: {_systemState.StarSystem.Guid}");
                 ImGui.Columns(4);
                 ImGui.SetColumnWidth(0, 160);
                 ImGui.SetColumnWidth(1, 64);
@@ -141,26 +142,26 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text( item.ptimes.Length.ToString());
                     
                     ImGui.NextColumn();
-                    str = (item.psum * 1000000).ToString("0.00") + "ns";
+                    str = $"{(item.psum * 1000000):0.00}ns";
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
                     ImGui.Text(str);
                     ImGui.NextColumn();
-                    str = (item.psum * 1000000 / item.ptimes.Length).ToString("0.00") + "ns";
+                    str = $"{(item.psum * 1000000 / item.ptimes.Length):0.00}ns";
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
                     ImGui.Text( str );
                     ImGui.NextColumn();
                 }
                 ImGui.Columns(1);
-                ImGui.Text("    IsProcecssing: " + _systemState.StarSystem.ManagerSubpulses.IsProcessing);
-                ImGui.Text("    CurrentProcess: " + _systemState.StarSystem.ManagerSubpulses.CurrentProcess);
-                ImGui.Text("    Last Total ProcessTime: " + data.FullPulseTimeMS);
+                ImGui.Text($"    IsProcecssing: {_systemState.StarSystem.ManagerSubpulses.IsProcessing}");
+                ImGui.Text($"    CurrentProcess: {_systemState.StarSystem.ManagerSubpulses.CurrentProcess}");
+                ImGui.Text($"    Last Total ProcessTime: {data.FullPulseTimeMS}");
 
                 var numDB = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>().Count;
-                ImGui.Text("ObitDB Count: " + numDB);
+                ImGui.Text($"ObitDB Count: {numDB}");
                 numDB = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>().Count;
-                ImGui.Text("NewtonMoveDB Count: " + numDB);
+                ImGui.Text($"NewtonMoveDB Count: {numDB}");
                 numDB = _systemState.StarSystem.GetAllDataBlobsOfType<SensorAbilityDB>().Count;
-                ImGui.Text("SensorAbilityDB Count: " + numDB);
+                ImGui.Text($"SensorAbilityDB Count: {numDB}");
                 
                 
                 if(ImGui.CollapsingHeader("All Systems"))
@@ -168,9 +169,9 @@ namespace Pulsar4X.SDL2UI
                     foreach (var starsys in StaticRefLib.Game.Systems.Values)
                     {
                         ImGui.Text(starsys.Guid.ToString());
-                        ImGui.Text("    IsProcecssing: " + starsys.ManagerSubpulses.IsProcessing);
-                        ImGui.Text("    CurrentProcess: " + starsys.ManagerSubpulses.CurrentProcess);
-                        ImGui.Text("    Last Total ProcessTime: " + starsys.ManagerSubpulses.GetLastPerfData().FullPulseTimeMS);
+                        ImGui.Text($"    IsProcecssing: {starsys.ManagerSubpulses.IsProcessing}");
+                        ImGui.Text($"    CurrentProcess: {starsys.ManagerSubpulses.CurrentProcess}");
+                        ImGui.Text($"    Last Total ProcessTime: {starsys.ManagerSubpulses.GetLastPerfData().FullPulseTimeMS}");
 
                     }
                 }
@@ -215,18 +216,61 @@ namespace Pulsar4X.SDL2UI
                     
                     
                     ImGui.Text("Using GetEntitysWithDatablob");
-                    ImGui.Text(ticks1 + " ticks to retreave " + count1 + " Entites");
-                    ImGui.Text(ms1 + " in ms");
+                    ImGui.Text($"{ticks1} ticks to retreave {count1} Entites");
+                    ImGui.Text($"{ms1} in ms");
                     ImGui.Text("Using GetAllDataBlobsOfType<T>()");
-                    ImGui.Text(ticks2 + " ticks to retreave " + count2 + " Datablobs by Type");
+                    ImGui.Text($"{ticks2} ticks to retreave {count2} Datablobs by Type");
                     ImGui.Text("Using GetAllDataBlobsOfType<T>(int typeIndex)");
-                    ImGui.Text(ticks3 + " ticks to retreave " + count3 + " Datablobs by typeIndex");
+                    ImGui.Text($"{ticks3} ticks to retreave {count3} Datablobs by typeIndex");
                 
                     
                     
                     
                 }
+
+                if (ImGui.Button("Record To File"))
+                {
+                    RecordToFile();
+                }
             }
+        }
+
+        void RecordToFile()
+        {
+            
+            var t_lpt = _uiState.Game.GamePulse.LastProcessingTime.TotalMilliseconds;
+            var t_tf = _uiState.Game.GamePulse.TickFrequency.TotalMilliseconds;
+            var overtime = t_lpt - t_tf;
+            var starsysdata = _systemState.StarSystem.ManagerSubpulses.GetLastPerfData();
+            var dirst = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var dirinf = new System.IO.DirectoryInfo(dirst);
+            var dir = dirinf.Parent.Parent.Parent.Parent;
+            string machine = Environment.MachineName;
+            string gitver = AssemblyInfo.GetGitHash();
+            string datetime = DateTime.Now.ToString();
+            string threaded = string.Format("{0,-28}{1,24}","Threaded:", StaticRefLib.GameSettings.EnableMultiThreading.ToString());
+            string timespan = string.Format("{0,-28}{1,24}","Time Span:" , _uiState.Game.GamePulse.Ticklength.ToString());
+            string txt_lpt =  string.Format("{0,-28}{1,24}","Full Process Time:", t_lpt.ToString());
+            
+            string sysname = _systemState.StarSystem.NameDB.OwnersName;
+            string sysptime = string.Format("{0,0} {1,-24}:{2,23}",sysname, "Time:", starsysdata.FullPulseTimeMS.ToString());
+            var fpath = System.IO.Path.Combine(dir.FullName, machine);
+
+            //var sb = StringBuilder(gitver);
+            string dataString = gitver + "\n" 
+                                       + datetime + "\n" 
+                                       + threaded + "\n"
+                                       + timespan + "\n"
+                                       + txt_lpt + "\n" 
+                                       + sysptime + "\n";
+            foreach (var data in starsysdata.ProcessTimes)
+            {
+                dataString += string.Format("{0,-28}:{1,24}", data.pname, data.psum + "\n");
+            }
+            
+            //if (!System.IO.File.Exists(fpath))
+                //System.IO.File.Create(fpath);
+            System.IO.File.AppendAllText(fpath, dataString);
         }
 
         public override void OnGameTickChange(DateTime newDate)
