@@ -444,12 +444,12 @@ namespace Pulsar4X.ECSLib
                 //_entityManager.Game.ProcessorManager.Hotloop<PropulsionDB>(_entityManager, (int)deltaActual.TotalSeconds);
                 ProcessToNextInterupt(nextDate);
                 _subPulseStopwatch.Stop();
-                _subpulseTimes.Add(_subPulseStopwatch.ElapsedMilliseconds);
+                _subpulseTimes.Add(_subPulseStopwatch.Elapsed.TotalMilliseconds);
             }
 
             CurrentProcess = "Waiting";
             _masterPulseStopwatch.Stop();
-            _fullPulseTimeMS = _masterPulseStopwatch.ElapsedMilliseconds;
+            _fullPulseTimeMS = _masterPulseStopwatch.Elapsed.TotalMilliseconds;
             AddPerfHistory();
             
             IsProcessing = false;
