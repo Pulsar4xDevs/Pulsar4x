@@ -248,26 +248,27 @@ namespace Pulsar4X.SDL2UI
             string machine = Environment.MachineName;
             string gitver = AssemblyInfo.GetGitHash();
             string datetime = DateTime.Now.ToString();
-            string threaded = string.Format("{0,-28}{1,24}","Threaded:", StaticRefLib.GameSettings.EnableMultiThreading.ToString());
-            string timespan = string.Format("{0,-28}{1,24}","Time Span:" , _uiState.Game.GamePulse.Ticklength.ToString());
-            string txt_lpt =  string.Format("{0,-28}{1,24}","Full Process Time:", t_lpt.ToString());
+            string threaded = string.Format("{0,-28}{1,16}","Threaded:", StaticRefLib.GameSettings.EnableMultiThreading.ToString());
+            string timespan = string.Format("{0,-28}{1,16}","Time Span:" , _uiState.Game.GamePulse.Ticklength.ToString());
+            string txt_lpt =  string.Format("{0,-28}{1,16}","Full Process Time:", t_lpt.ToString());
             
             string sysname = _systemState.StarSystem.NameDB.OwnersName;
-            string sysptime = string.Format("{0,0} {1,-24}:{2,23}",sysname, "Time:", starsysdata.FullPulseTimeMS.ToString());
-            var fpath = System.IO.Path.Combine(dir.FullName, machine);
+            string sysptime = string.Format("{0,0} {1,-24}:{2,15}",sysname, "Time:", starsysdata.FullPulseTimeMS.ToString("0.0000"));
+            var fpath = System.IO.Path.Combine(dir.FullName, "Perflog_" + machine);
 
             //var sb = StringBuilder(gitver);
-            string dataString = gitver + "\n" 
-                                       + datetime + "\n" 
-                                       + threaded + "\n"
-                                       + timespan + "\n"
-                                       + txt_lpt + "\n" 
-                                       + sysptime + "\n";
+            string dataString = "\n" + gitver + "\n" 
+                                         + datetime + "\n" 
+                                         + threaded + "\n"
+                                         + timespan + "\n"
+                                         + txt_lpt + "\n" 
+                                         + sysptime + "\n";
             foreach (var data in starsysdata.ProcessTimes)
             {
-                dataString += string.Format("{0,-28}:{1,24}", data.pname, data.psum + "\n");
+                dataString += string.Format("{0,-28}:{1,16}", data.pname, data.psum.ToString("0.0000") + "\n");
             }
-            
+
+            dataString += "_________________________________________________";
             //if (!System.IO.File.Exists(fpath))
                 //System.IO.File.Create(fpath);
             System.IO.File.AppendAllText(fpath, dataString);
