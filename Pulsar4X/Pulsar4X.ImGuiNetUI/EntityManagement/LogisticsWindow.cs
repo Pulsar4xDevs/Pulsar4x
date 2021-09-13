@@ -354,7 +354,7 @@ namespace Pulsar4X.SDL2UI
                             if(_changes.ContainsKey(type.Key))
                                 currentVal = _changes[type.Key];
                             
-                            if(ImguiExt.SliderDouble(typename, ref currentVal, 0, total))
+                            if(ImGuiExt.SliderDouble(typename, ref currentVal, 0, total))
                             {
                                 if(!_changes.ContainsKey(type.Key))
                                     _changes.Add(type.Key, currentVal);

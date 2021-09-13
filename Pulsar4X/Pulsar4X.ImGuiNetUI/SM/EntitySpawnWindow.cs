@@ -10,7 +10,7 @@ using Pulsar4X.ECSLib.ComponentFeatureSets;
 using Pulsar4X.Orbital;
 using SDL2;
 using Vector3 = Pulsar4X.Orbital.Vector3;
-using static Pulsar4X.SDL2UI.ImguiExt;
+using static Pulsar4X.SDL2UI.ImGuiExt;
 using Vector2 = Pulsar4X.Orbital.Vector2;
 
 namespace Pulsar4X.SDL2UI

@@ -246,7 +246,7 @@ namespace Pulsar4X.SDL2UI.Combat
                             Beam.BeamTypeIndex = _beamTypeIndex;
                         }
 
-                        if (ImguiExt.SliderDouble("Freqency", ref Beam.BeamFreq, Beam.MinFreq, Beam.MaxFreq))
+                        if (ImGuiExt.SliderDouble("Freqency", ref Beam.BeamFreq, Beam.MinFreq, Beam.MaxFreq))
                         {
                             _momentum = (float)(UniversalConstants.Science.PlankConstant * Beam.BeamFreq);
                         }

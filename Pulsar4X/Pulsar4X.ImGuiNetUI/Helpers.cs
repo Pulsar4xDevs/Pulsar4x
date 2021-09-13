@@ -766,7 +766,7 @@ namespace Pulsar4X.SDL2UI
         }
     }
 
-    public static class ImguiExt
+    public static class ImGuiExt
     {
         public static bool ButtonED(string label, bool IsEnabled)
         {
@@ -1017,9 +1017,9 @@ namespace Pulsar4X.SDL2UI
             }
 
 
-            if (ImguiExt.SliderDouble("X", ref x, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.ClampOnInput))
+            if (ImGuiExt.SliderDouble("X", ref x, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.ClampOnInput))
                 changed = true;
-            if (ImguiExt.SliderDouble("Y", ref y, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.ClampOnInput))
+            if (ImGuiExt.SliderDouble("Y", ref y, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.ClampOnInput))
                 changed = true;
                  
 
@@ -1075,7 +1075,7 @@ namespace Pulsar4X.SDL2UI
             //ImGui.Text("speed:" + speed);
             
             
-            if(ImguiExt.DragDouble("r", ref r, speed, 0, maxVal, Stringify.Distance(r), ImGuiSliderFlags.ClampOnInput))
+            if(ImGuiExt.DragDouble("r", ref r, speed, 0, maxVal, Stringify.Distance(r), ImGuiSliderFlags.ClampOnInput))
                 changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Radius");
