@@ -47,12 +47,16 @@ namespace Pulsar4X.ECSLib.Industry
             IndustryTools.ConstructStuff(entity);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            foreach (var entity in manager.GetAllEntitiesWithDataBlob<IndustryAbilityDB>())
+            var entities = manager.GetAllEntitiesWithDataBlob<IndustryAbilityDB>();
+            foreach (var entity in entities)
             {
                 ProcessEntity(entity, deltaSeconds);
             }
+
+            return entities.Count;
+
         }
     }
 

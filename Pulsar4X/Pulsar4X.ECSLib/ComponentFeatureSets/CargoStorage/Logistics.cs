@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
             LogisticsCycle.LogiShipBidding(entity, tradingBases);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             var tradingBases = manager.GetAllDataBlobsOfType<LogiBaseDB>();
             var shippingEntities = manager.GetAllEntitiesWithDataBlob<LogiShipperDB>();
@@ -118,6 +118,8 @@ namespace Pulsar4X.ECSLib
             {
                LogisticsCycle.LogiShipBidding(shipper, tradingBases);
             }
+
+            return shippingEntities.Count;
         }
     }
 
@@ -143,7 +145,7 @@ namespace Pulsar4X.ECSLib
             LogisticsCycle.LogiBaseBidding(entity.GetDataBlob<LogiBaseDB>());
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             var tradingBases = manager.GetAllDataBlobsOfType<LogiBaseDB>();
             var shippingEntities = manager.GetAllEntitiesWithDataBlob<LogiShipperDB>();
@@ -151,6 +153,7 @@ namespace Pulsar4X.ECSLib
             {
                 LogisticsCycle.LogiBaseBidding(tradeBase);
             }
+            return tradingBases.Count;
         }
     }
     public static class LogisticsCycle

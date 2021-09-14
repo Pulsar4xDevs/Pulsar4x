@@ -37,3 +37,36 @@ CargoTransferProcessor      :         0.0531
 LogiShipProcessor           :         0.0439
 SensorScan                  :       150.7980
 ______________________________________
+
+c0d917a4-dirty
+14/09/2021 8:11:37 PM
+Threaded:                              False
+Time Span:                          01:00:00
+Full Process Time:                  264.5644
+Sol Time:                   :       161.8611
+CargoTransferProcessor      :         0.0351
+LogiShipProcessor           :         0.0393
+HotWpnProcessor             :         0.0017
+NewtonionMovementProcessor  :        29.7580
+OrbitProcessor              :         0.3118
+OrbitUpdateOftenProcessor   :         0.0027
+BeamWeapnProcessor          :         0.0026
+EnergyGenProcessor          :         0.6907
+OrderableProcessor          :         1.4114
+WarpMoveProcessor           :         0.0442
+LogiBaseProcessor           :         1.5975
+ResearchProcessor           :         2.3214
+MineResourcesProcessor      :         9.1611
+SensorScan                  :        56.8460
+_________________________________________________
+c0d917a4-dirty
+14/09/2021 8:11:47 PM
+Threaded:                               True
+Time Span:                          01:00:00
+Full Process Time:                  258.9548
+Sol Time:                   :       197.7555
+NewtonionMovementProcessor  :        51.5871
+OrderableProcessor          :         0.2880
+LogiBaseProcessor           :         0.0533
+SensorScan                  :        60.4840
+_________________________________________________

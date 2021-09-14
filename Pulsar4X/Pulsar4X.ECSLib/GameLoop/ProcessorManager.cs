@@ -150,7 +150,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="manager">Manager.</param>
         /// <param name="deltaSeconds">Delta seconds.</param>
-        void ProcessManager(EntityManager manager, int deltaSeconds);
+        int ProcessManager(EntityManager manager, int deltaSeconds);
 
         /// <summary>
         /// How Often this processor should run. 

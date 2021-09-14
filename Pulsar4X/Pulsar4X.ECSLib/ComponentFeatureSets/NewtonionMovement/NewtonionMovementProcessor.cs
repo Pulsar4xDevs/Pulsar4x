@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
             NewtonMove(entity.GetDataBlob<NewtonMoveDB>(), deltaSeconds);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             //List<Entity> entites = manager.GetAllEntitiesWithDataBlob<NewtonMoveDB>(_nmDBIdx);
             var nmdb = manager.GetAllDataBlobsOfType<NewtonMoveDB>(_nmDBIdx);
@@ -41,10 +41,8 @@ namespace Pulsar4X.ECSLib
             {
                 NewtonMove(db, deltaSeconds);
             }
-            //foreach (var entity in entites)
-            //{
-            //    ProcessEntity(entity, deltaSeconds);
-            //}
+
+            return nmdb.Count;
         }
 
         /// <summary>

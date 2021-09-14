@@ -40,13 +40,13 @@ namespace Pulsar4X.ECSLib
             UpdateOrbit(entity, entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>(), toDate);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             DateTime toDate = manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
-            UpdateSystemOrbits(manager, toDate);
+            return UpdateSystemOrbits(manager, toDate);
         }
 
-        internal static void UpdateSystemOrbits(EntityManager manager, DateTime toDate)
+        internal static int UpdateSystemOrbits(EntityManager manager, DateTime toDate)
         {
             //TimeSpan orbitCycle = manager.Game.Settings.OrbitCycleTime;
             //DateTime toDate = manager.ManagerSubpulses.SystemLocalDateTime + orbitCycle;
@@ -58,21 +58,22 @@ namespace Pulsar4X.ECSLib
             if (!firstOrbital.IsValid)
             {
                 // No orbitals in this manager.
-                return;
+                return 0;
             }
 
             Entity root = firstOrbital.GetDataBlob<OrbitDB>(OrbitTypeIndex).Root;
             var rootPositionDB = root.GetDataBlob<PositionDB>(PositionTypeIndex);
 
             // Call recursive function to update every orbit in this system.
-            UpdateOrbit(root, rootPositionDB, toDate);
+            int count = UpdateOrbit(root, rootPositionDB, toDate);
+            return count;
         }
 
-        public static void UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime toDate)
+        public static int UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime toDate)
         {
             var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
             var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
-
+            int counter = 0;
             //if(toDate.Minute > entityOrbitDB.OrbitalPeriod.TotalMinutes)
 
             // Get our Parent-Relative coordinates.
@@ -97,8 +98,11 @@ namespace Pulsar4X.ECSLib
             foreach (Entity child in entityOrbitDB.Children)
             {
                 // RECURSION!
-                UpdateOrbit(child, entityPosition, toDate);
+                
+                counter += UpdateOrbit(child, entityPosition, toDate);
             }
+
+            return counter;
         }
 
 
@@ -241,7 +245,7 @@ namespace Pulsar4X.ECSLib
             UpdateOrbit(orbit, toDate);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             var orbits = manager.GetAllDataBlobsOfType<OrbitUpdateOftenDB>(OrbitTypeIndex);
             DateTime toDate = manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
@@ -249,6 +253,8 @@ namespace Pulsar4X.ECSLib
             {
                 UpdateOrbit(orbit, toDate);
             }
+
+            return orbits.Count;
         }
 
         public static void UpdateOrbit(OrbitUpdateOftenDB entityOrbitDB, DateTime toDate)

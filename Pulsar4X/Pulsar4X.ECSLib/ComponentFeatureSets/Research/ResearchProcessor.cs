@@ -31,13 +31,15 @@ namespace Pulsar4X.ECSLib
             DoResearch(entity);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             List<Entity> entitysWithReserch = manager.GetAllEntitiesWithDataBlob<EntityResearchDB>();
             foreach(var entity in entitysWithReserch)
             {
                 ProcessEntity(entity, deltaSeconds);
             }
+
+            return entitysWithReserch.Count;
         }
 
 

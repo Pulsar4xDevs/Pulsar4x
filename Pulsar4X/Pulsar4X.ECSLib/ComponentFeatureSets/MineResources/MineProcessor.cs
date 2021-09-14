@@ -26,12 +26,14 @@ namespace Pulsar4X.ECSLib
             MineResources(entity);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            foreach(var entity in manager.GetAllEntitiesWithDataBlob<MiningDB>()) 
+            var entities = manager.GetAllEntitiesWithDataBlob<MiningDB>();
+            foreach(var entity in entities) 
             {
                 ProcessEntity(entity, deltaSeconds);
             }
+            return entities.Count;
         }
     
         private void MineResources(Entity colonyEntity)

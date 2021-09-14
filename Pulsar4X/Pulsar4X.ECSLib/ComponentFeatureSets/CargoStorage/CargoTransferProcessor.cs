@@ -228,13 +228,15 @@ namespace Pulsar4X.ECSLib
             return (int)transferRate;
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             List<Entity> entitysWithCargoTransfers = manager.GetAllEntitiesWithDataBlob<CargoTransferDB>();
             foreach(var entity in entitysWithCargoTransfers) 
             {                
                 ProcessEntity(entity, deltaSeconds);
             }
+
+            return entitysWithCargoTransfers.Count;
         }
     }
 

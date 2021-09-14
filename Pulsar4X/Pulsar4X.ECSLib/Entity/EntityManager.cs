@@ -334,6 +334,7 @@ namespace Pulsar4X.ECSLib
             EntityMasks[entityID][typeIndex] = true;
             dataBlob.OwningEntity = _entities[entityID];
             dataBlob.OnSetToEntity();
+            dataBlob.OwningEntity.Manager.ManagerSubpulses.AddSystemInterupt(dataBlob);
             if(updateListners)
                 UpdateListners(_entities[entityID], dataBlob, EntityChangeType.DBAdded);
         }

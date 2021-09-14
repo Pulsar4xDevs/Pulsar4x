@@ -27,18 +27,18 @@ namespace Pulsar4X.ECSLib
             public double[] SubpulseTimes;
             public (string pname, double[] ptimes, double psum)[] ProcessTimes;
         }
-        
+
         Stopwatch _masterPulseStopwatch = new Stopwatch();
         Stopwatch _subPulseStopwatch = new Stopwatch();
         Stopwatch _processStopwatch = new Stopwatch();
-        
+
         private double _fullPulseTimeMS = double.PositiveInfinity;
         private List<double> _subpulseTimes = new List<double>();
         private Dictionary<string, List<double>> _detailedProcessTimes = new Dictionary<string, List<double>>();
-        
+
         public PerformanceData[] PerfHistory = new PerformanceData[1];
         public int PerfHistoryIndex { get; private set; }
-    
+
         /// <summary>
         /// Threadsafe Change the amount of history we store for this Manager.
         /// </summary>
@@ -53,14 +53,13 @@ namespace Pulsar4X.ECSLib
                     var oldHistory = PerfHistory;
                     PerfHistory = new PerformanceData[value];
                     Buffer.BlockCopy(oldHistory, 0, PerfHistory, 0, copyCount);
-                    if (PerfHistoryIndex > value-1)
-                        PerfHistoryIndex = value-1;
+                    if (PerfHistoryIndex > value - 1)
+                        PerfHistoryIndex = value - 1;
                 }
             }
         }
-        
-        [JsonProperty]
-        private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
+
+        [JsonProperty] private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
 
         //public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
         public bool IsProcessing = false;
@@ -71,16 +70,19 @@ namespace Pulsar4X.ECSLib
         private EntityManager _entityManager;
 
         class ProcessSet : ISerializable
-        {   
-            
+        {
+
             [JsonIgnore] //this should get added on initialization. 
             internal List<IHotloopProcessor> SystemProcessors = new List<IHotloopProcessor>();
+
             [JsonProperty] //this needs to get saved. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly). 
-            internal Dictionary<string, List<Entity>> InstanceProcessors = new Dictionary<string, List<Entity>>(); 
+            internal Dictionary<string, List<Entity>> InstanceProcessors = new Dictionary<string, List<Entity>>();
 
             //todo: need to get a list of InstanceProcessors that have entites owned by a specific faction. 
 
-            internal ProcessSet() { }
+            internal ProcessSet()
+            {
+            }
 
             internal ProcessSet(SerializationInfo info, StreamingContext context)
             {
@@ -89,13 +91,13 @@ namespace Pulsar4X.ECSLib
                 ProcessorManager processManager = StaticRefLib.ProcessorManager;
                 foreach (var kvpItem in instanceProcessors)
                 {
-                    
+
                     string typeName = kvpItem.Key;
 
                     //IInstanceProcessor processor = processManager.GetInstanceProcessor(typeName);
                     if (!InstanceProcessors.ContainsKey(typeName))
                         InstanceProcessors.Add(typeName, new List<Entity>());
-                    
+
                     foreach (var entityGuid in kvpItem.Value)
                     {
                         if (game.GlobalManager.FindEntityByGuid(entityGuid, out Entity entity)) //might be a better way to do this, can we get the manager from here and just search localy?
@@ -116,13 +118,14 @@ namespace Pulsar4X.ECSLib
                 Dictionary<string, List<Guid>> instanceProcessors = new Dictionary<string, List<Guid>>();
                 foreach (var kvpitem in InstanceProcessors)
                 {
-                    string typeName = kvpitem.Key;//.TypeName;
+                    string typeName = kvpitem.Key; //.TypeName;
                     instanceProcessors.Add(typeName, new List<Guid>());
                     foreach (var entityItem in kvpitem.Value)
                     {
                         instanceProcessors[typeName].Add(entityItem.Guid);
                     }
                 }
+
                 info.AddValue(nameof(InstanceProcessors), instanceProcessors);
             }
 
@@ -135,7 +138,7 @@ namespace Pulsar4X.ECSLib
                 foreach (var kvp in InstanceProcessors)
                 {
                     if (kvp.Value.Contains(entity))
-                       procList.Add(kvp.Key);
+                        procList.Add(kvp.Key);
                 }
 
                 return procList;
@@ -150,7 +153,7 @@ namespace Pulsar4X.ECSLib
                     if (kvp.Value.Contains(entity))
                         kvp.Value.Remove(entity);
                     procList.Add(kvp.Key);
-                    if(kvp.Value.Count == 0)
+                    if (kvp.Value.Count == 0)
                         removelist.Add(kvp.Key);
                 }
 
@@ -158,6 +161,7 @@ namespace Pulsar4X.ECSLib
                 {
                     InstanceProcessors.Remove(item);
                 }
+
                 return procList;
             }
 
@@ -174,38 +178,34 @@ namespace Pulsar4X.ECSLib
         {
             if (PerfHistoryCount <= 0)
                 return;
-            
-            
+
+
             (string pname, double[] ptimes, double psum)[] pTimes = new (string pname, double[] ptimes, double psum)[_detailedProcessTimes.Count];
 
             int i1 = 0;
             foreach (var kvp in _detailedProcessTimes)
             {
                 var array = kvp.Value.ToArray();
-                
+
                 double sum = 0;
                 for (int i = 0; i < array.Length; i++)
                 {
                     sum += array[i];
                 }
+
                 pTimes[i1] = (kvp.Key, array, sum);
                 i1++;
             }
-            
-            
-            PerformanceData newData = new PerformanceData()
-            {
-                FullPulseTimeMS = _fullPulseTimeMS, 
-                SubpulseTimes = _subpulseTimes.ToArray(),
-                ProcessTimes = pTimes
-            };
-            
+
+
+            PerformanceData newData = new PerformanceData() { FullPulseTimeMS = _fullPulseTimeMS, SubpulseTimes = _subpulseTimes.ToArray(), ProcessTimes = pTimes };
+
             lock (PerfHistory)
             {
                 PerfHistoryIndex++;
                 if (PerfHistoryIndex >= PerfHistoryCount)
                     PerfHistoryIndex = 0;
-                
+
                 PerfHistory[PerfHistoryIndex] = newData;
             }
         }
@@ -217,7 +217,7 @@ namespace Pulsar4X.ECSLib
                 return PerfHistory[PerfHistoryIndex];
             }
         }
-        
+
         internal Dictionary<DateTime, List<String>> GetInstanceProcForEntity(Entity entity)
         {
             var procDict = new Dictionary<DateTime, List<string>>();
@@ -225,8 +225,9 @@ namespace Pulsar4X.ECSLib
             {
                 var procList = kvp.Value.GetInstanceProcForEntity(entity);
                 if (procList.Count > 0)
-                    procDict.Add(kvp.Key, procList);            
+                    procDict.Add(kvp.Key, procList);
             }
+
             return procDict;
         }
 
@@ -253,6 +254,7 @@ namespace Pulsar4X.ECSLib
         /// other systems may not be in sync on this event. 
         /// </summary>
         public event DateChangedEventHandler SystemDateChangedEvent;
+
         /// <summary>
         /// Invoke the SystemDateChangedEvent
         /// </summary>
@@ -267,8 +269,8 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        [JsonProperty]
-        private DateTime _systemLocalDateTime;
+        [JsonProperty] private DateTime _systemLocalDateTime;
+
         public DateTime StarSysDateTime
         {
             get { return _systemLocalDateTime; }
@@ -278,7 +280,7 @@ namespace Pulsar4X.ECSLib
                     throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
                 _systemLocalDateTime = value;
                 if (StaticRefLib.SyncContext != null)
-                    StaticRefLib.SyncContext.Post(InvokeDateChange, value);//marshal to the main (UI) thread, so the event is invoked on that thread.
+                    StaticRefLib.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
                 //NOTE: the above marshaling does not apear to work correctly, it's possible for it to work, the context needs to be in an await state or something. 
                 //do not rely on the above being run on the main thread! (maybe we should remove the marshaling?)
                 else //if context is null, we're probibly running tests or headless.
@@ -293,20 +295,15 @@ namespace Pulsar4X.ECSLib
         private ManagerSubPulse()
         {
             AddPerfHistory();
-        } 
+        }
 
-        internal ManagerSubPulse(EntityManager entityMan, ProcessorManager procMan) 
+        internal ManagerSubPulse(EntityManager entityMan, ProcessorManager procMan)
         {
-            (string pname, double[] ptimes, double psum)[] pTimes = new (string pname, double[] ptimes, double psum)[]{};
-            PerformanceData newData = new PerformanceData()
-            {
-                FullPulseTimeMS = _fullPulseTimeMS, 
-                SubpulseTimes = _subpulseTimes.ToArray(),
-                ProcessTimes = pTimes
-            };
+            (string pname, double[] ptimes, double psum)[] pTimes = new (string pname, double[] ptimes, double psum)[] { };
+            PerformanceData newData = new PerformanceData() { FullPulseTimeMS = _fullPulseTimeMS, SubpulseTimes = _subpulseTimes.ToArray(), ProcessTimes = pTimes };
             PerfHistory[PerfHistoryIndex] = newData;
-            
-            
+
+
             _systemLocalDateTime = StaticRefLib.CurrentDateTime;
             _entityManager = entityMan;
             _processManager = procMan;
@@ -338,12 +335,12 @@ namespace Pulsar4X.ECSLib
         /// <param name="entity"></param>
         internal void AddEntityInterupt(DateTime nextDateTime, string actionProcessor, Entity entity)
         {
-            if(!QueuedProcesses.ContainsKey(nextDateTime))
+            if (!QueuedProcesses.ContainsKey(nextDateTime))
                 QueuedProcesses.Add(nextDateTime, new ProcessSet());
-            if(!QueuedProcesses[nextDateTime].InstanceProcessors.ContainsKey(actionProcessor))
+            if (!QueuedProcesses[nextDateTime].InstanceProcessors.ContainsKey(actionProcessor))
                 QueuedProcesses[nextDateTime].InstanceProcessors.Add(actionProcessor, new List<Entity>());
-            if(!QueuedProcesses[nextDateTime].InstanceProcessors[actionProcessor].Contains(entity))
-                QueuedProcesses[nextDateTime].InstanceProcessors[actionProcessor].Add(entity);                
+            if (!QueuedProcesses[nextDateTime].InstanceProcessors[actionProcessor].Contains(entity))
+                QueuedProcesses[nextDateTime].InstanceProcessors[actionProcessor].Add(entity);
         }
 
 
@@ -354,13 +351,46 @@ namespace Pulsar4X.ECSLib
         /// <param name="action"></param>
         internal void AddSystemInterupt(DateTime nextDateTime, IHotloopProcessor actionProcessor)
         {
-            if(!QueuedProcesses.ContainsKey(nextDateTime))
+            if (!QueuedProcesses.ContainsKey(nextDateTime))
                 QueuedProcesses.Add(nextDateTime, new ProcessSet());
-            if(!QueuedProcesses[nextDateTime].SystemProcessors.Contains(actionProcessor))
-                QueuedProcesses[nextDateTime].SystemProcessors.Add(actionProcessor);               
+            if (!QueuedProcesses[nextDateTime].SystemProcessors.Contains(actionProcessor))
+                QueuedProcesses[nextDateTime].SystemProcessors.Add(actionProcessor);
         }
 
-        /// <summary>
+        internal void AddSystemInterupt<T>() where T:BaseDataBlob
+        {
+            var proc = StaticRefLib.ProcessorManager.GetProcessor<T>();
+            DateTime startDate = new DateTime();
+            var elapsed = _systemLocalDateTime - StaticRefLib.GameSettings.StartDateTime;
+            elapsed -= proc.FirstRunOffset;
+
+            var nextInSec = proc.RunFrequency.TotalSeconds - elapsed.TotalSeconds % proc.RunFrequency.TotalSeconds;
+            var next = TimeSpan.FromSeconds(nextInSec);
+            DateTime nextDT = _systemLocalDateTime + next;
+            if(!QueuedProcesses.ContainsKey(nextDT))
+                QueuedProcesses.Add(nextDT, new ProcessSet());
+            if (!QueuedProcesses[nextDT].SystemProcessors.Contains(proc))
+                QueuedProcesses[nextDT].SystemProcessors.Add(proc);
+        }
+        internal void AddSystemInterupt(BaseDataBlob db)
+        {
+            if (!StaticRefLib.ProcessorManager.HotloopProcessors.ContainsKey(db.GetType()))
+                return;
+            var proc = StaticRefLib.ProcessorManager.HotloopProcessors[db.GetType()];
+            DateTime startDate = new DateTime();
+            var elapsed = _systemLocalDateTime - StaticRefLib.GameSettings.StartDateTime;
+            elapsed -= proc.FirstRunOffset;
+
+            var nextInSec = proc.RunFrequency.TotalSeconds - elapsed.TotalSeconds % proc.RunFrequency.TotalSeconds;
+            var next = TimeSpan.FromSeconds(nextInSec);
+            DateTime nextDT = _systemLocalDateTime + next;
+            if(!QueuedProcesses.ContainsKey(nextDT))
+                QueuedProcesses.Add(nextDT, new ProcessSet());
+            if (!QueuedProcesses[nextDT].SystemProcessors.Contains(proc))
+                QueuedProcesses[nextDT].SystemProcessors.Add(proc);
+        }
+
+    /// <summary>
         /// removes all references of an entity from the dictionary
         /// </summary>
         /// <param name="entity"></param>
@@ -484,14 +514,15 @@ namespace Pulsar4X.ECSLib
                 {
                     _processStopwatch.Restart();
                     CurrentProcess = systemProcess.ToString();
-                    systemProcess.ProcessManager(_entityManager, deltaSeconds);
+                    int count = systemProcess.ProcessManager(_entityManager, deltaSeconds);
                     _processStopwatch.Stop();
                     //ProcessTime[systemProcess.GetType()] = _processStopwatch.Elapsed;
                     string pname = systemProcess.GetType().Name;
                     if(!_detailedProcessTimes.ContainsKey(pname))
                         _detailedProcessTimes.Add(pname, new List<double>());
                     _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
-                    AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
+                    if(count > 0)
+                        AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
                 }
 
                 foreach(var instanceProcessSet in qp.InstanceProcessors)

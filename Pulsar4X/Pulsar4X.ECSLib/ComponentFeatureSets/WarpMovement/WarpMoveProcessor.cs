@@ -241,13 +241,15 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             List<Entity> entitysWithTranslateMove = manager.GetAllEntitiesWithDataBlob<WarpMovingDB>();
             foreach (var entity in entitysWithTranslateMove)
             {
                 ProcessEntity(entity, deltaSeconds);
             }
+
+            return entitysWithTranslateMove.Count;
         }
     }
 

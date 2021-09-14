@@ -109,7 +109,7 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             var blobs = manager.GetAllDataBlobsOfType<GenericFiringWeaponsDB>(_wpnDBIdx);
             
@@ -154,6 +154,8 @@ namespace Pulsar4X.ECSLib
             {
                 UpdateReloadState(blob);
             }
+
+            return blobs.Count;
         }
 
         public static void ProcessReloadWeapon(GenericFiringWeaponsDB reloadingWeapons)

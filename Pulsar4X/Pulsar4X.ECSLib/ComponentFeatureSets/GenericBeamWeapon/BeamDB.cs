@@ -19,13 +19,15 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             BeamMovePhysics(entity.GetDataBlob<BeamInfoDB>(_beamInfoIndex), deltaSeconds);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             var dbs = manager.GetAllDataBlobsOfType<BeamInfoDB>(_beamInfoIndex);
             foreach (BeamInfoDB db in dbs)
             { 
                 BeamMovePhysics(db, deltaSeconds);
             }
+
+            return dbs.Count;
         }
 
         public TimeSpan RunFrequency { get; } = TimeSpan.FromSeconds(1);
