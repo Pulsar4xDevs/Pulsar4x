@@ -48,7 +48,7 @@ namespace Pulsar4X.SDL2UI
         private double count1;
         private double count2;
         private double count3;
-        
+        private List<(string txt, double time, double count)> _callData = new List<(string txt, double time, double count)>();
         
         
         private PerformanceDisplay() 
@@ -184,44 +184,99 @@ namespace Pulsar4X.SDL2UI
                     
                     if (ImGui.Button("Time"))
                     {
+                        _callData = new List<(string txt, double time, double count)>();
                         _sw.Restart();
-                        List<Entity> entites = _systemState.StarSystem.GetAllEntitiesWithDataBlob<NewtonMoveDB>();
+                        List<Entity> entites = _systemState.StarSystem.GetAllEntitiesWithDataBlob<OrbitDB>();
                         _sw.Stop();
-                        count1 = entites.Count;
-                        ticks1 = _sw.ElapsedTicks;
-                        ms1 = _sw.Elapsed.TotalMilliseconds;
-                        
-                        _sw.Restart();
-                        var datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>();
-                        _sw.Stop();
-                        count2 = datablobs.Count;
-                        ticks2 = _sw.ElapsedTicks;
+                        _callData.Add((
+                              "Using GetEntitysWithDatablob\n {0,0} ticks to retreave {1,24} Entites", 
+                              _sw.Elapsed.Ticks, 
+                              entites.Count
+                              ));
 
-                        int typeIndex = EntityManager.GetTypeIndex<NewtonMoveDB>();
+                        
                         _sw.Restart();
-                        datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<NewtonMoveDB>(typeIndex);
+                        var datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>();
                         _sw.Stop();
-                        count3 = datablobs.Count;
-                        ticks3 = _sw.ElapsedTicks;
+                        _callData.Add((
+                                          "Using GetAllDataBlobsOfType<T>()\n {0,0} ticks to retreave {1,24} Entites", 
+                                          _sw.Elapsed.Ticks, 
+                                          datablobs.Count
+                                      ));
+                
+
+                        int typeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+                        _sw.Restart();
+                        datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>(typeIndex);
+                        _sw.Stop();
+                        _callData.Add((
+                                          "Using GetAllDataBlobsOfType<T>(int typeIndex)\n {0,0} ticks to retreave {1,24} Entites", 
+                                          _sw.Elapsed.Ticks, 
+                                          datablobs.Count
+                                      ));
+
                         
+                        var db = datablobs[0];
+                        _sw.Restart();
+                        var ent = db.OwningEntity;
+                        _sw.Stop();
+                        _callData.Add((
+                                          "Using datablob.OwningEntity\n {0,0} ticks to retreave the entity", 
+                                          _sw.Elapsed.Ticks, 
+                                          1
+                                      ));
+
                         
+                        _sw.Restart();
+                        ent.RemoveDataBlob<OrbitDB>();
+                        _sw.Stop();
+                        _callData.Add((
+                                        "Using entity.RemoveDataBlob<T>()\n {0,0} ticks to remove from entity", 
+                                        _sw.Elapsed.Ticks, 
+                                        1
+                                    ));
+                          
+                        _sw.Restart();
+                        ent.SetDataBlob(db);
+                        _sw.Stop();
+                        _callData.Add((
+                                        "Using entity.SetDataBlob(db)\n {0,0} ticks to add to entity", 
+                                            _sw.Elapsed.Ticks, 
+                                            1
+                                        ));
+                          
+                        _sw.Restart();
+                        ent.RemoveDataBlob(typeIndex);
+                        _sw.Stop();
+                        _callData.Add((
+                                            "Using entity.RemoveDataBlob(typeIndex)\n {0,0} ticks to remove from entity", 
+                                            _sw.Elapsed.Ticks, 
+                                            1
+                                        ));
+                          
+                        _sw.Restart();
+                        ent.SetDataBlob(db, typeIndex);
+                        _sw.Stop();
+                        _callData.Add((
+                                            "Using entity.SetDataBlob(db, typeIndex)\n {0,0} ticks to add to entity", 
+                                            _sw.Elapsed.Ticks, 
+                                            1
+                                        ));
 
                         
                     }
+
+
+
+
+
+                    foreach (var dat in _callData)
+                    {
+                        string foo = string.Format(dat.txt, dat.time, dat.count);
+                        ImGui.Text(foo);
+                    }
                     
-                    
-                    
-                    
-                    
-                    
-                    
-                    ImGui.Text("Using GetEntitysWithDatablob");
-                    ImGui.Text($"{ticks1} ticks to retreave {count1} Entites");
-                    ImGui.Text($"{ms1} in ms");
-                    ImGui.Text("Using GetAllDataBlobsOfType<T>()");
-                    ImGui.Text($"{ticks2} ticks to retreave {count2} Datablobs by Type");
-                    ImGui.Text("Using GetAllDataBlobsOfType<T>(int typeIndex)");
-                    ImGui.Text($"{ticks3} ticks to retreave {count3} Datablobs by typeIndex");
+
                 
                     
                     
