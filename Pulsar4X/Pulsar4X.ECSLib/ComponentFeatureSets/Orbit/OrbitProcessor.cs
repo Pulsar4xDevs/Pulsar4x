@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
         {
             var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
             var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
-            int counter = 0;
+            int counter = 1;
             //if(toDate.Minute > entityOrbitDB.OrbitalPeriod.TotalMinutes)
 
             // Get our Parent-Relative coordinates.
