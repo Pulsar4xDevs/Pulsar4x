@@ -142,11 +142,11 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text( item.ptimes.Length.ToString());
                     
                     ImGui.NextColumn();
-                    str = $"{(item.psum * 1000000):0.00}ns";
+                    str = $"{(item.psum):0.00}ms";
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
                     ImGui.Text(str);
                     ImGui.NextColumn();
-                    str = $"{(item.psum * 1000000 / item.ptimes.Length):0.00}ns";
+                    str = $"{(item.psum / item.ptimes.Length):0.00}ms";
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
                     ImGui.Text( str );
                     ImGui.NextColumn();
