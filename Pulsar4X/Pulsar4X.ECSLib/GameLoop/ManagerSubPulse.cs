@@ -270,7 +270,7 @@ namespace Pulsar4X.ECSLib
 
 
         [JsonProperty] private DateTime _systemLocalDateTime;
-
+        private DateTime _processToDateTime;
         public DateTime StarSysDateTime
         {
             get { return _systemLocalDateTime; }
@@ -305,6 +305,7 @@ namespace Pulsar4X.ECSLib
 
 
             _systemLocalDateTime = StaticRefLib.CurrentDateTime;
+            _processToDateTime = _systemLocalDateTime;
             _entityManager = entityMan;
             _processManager = procMan;
             InitHotloopProcessors();
@@ -356,34 +357,26 @@ namespace Pulsar4X.ECSLib
             if (!QueuedProcesses[nextDateTime].SystemProcessors.Contains(actionProcessor))
                 QueuedProcesses[nextDateTime].SystemProcessors.Add(actionProcessor);
         }
-
-        internal void AddSystemInterupt<T>() where T:BaseDataBlob
-        {
-            var proc = StaticRefLib.ProcessorManager.GetProcessor<T>();
-            DateTime startDate = new DateTime();
-            var elapsed = _systemLocalDateTime - StaticRefLib.GameSettings.StartDateTime;
-            elapsed -= proc.FirstRunOffset;
-
-            var nextInSec = proc.RunFrequency.TotalSeconds - elapsed.TotalSeconds % proc.RunFrequency.TotalSeconds;
-            var next = TimeSpan.FromSeconds(nextInSec);
-            DateTime nextDT = _systemLocalDateTime + next;
-            if(!QueuedProcesses.ContainsKey(nextDT))
-                QueuedProcesses.Add(nextDT, new ProcessSet());
-            if (!QueuedProcesses[nextDT].SystemProcessors.Contains(proc))
-                QueuedProcesses[nextDT].SystemProcessors.Add(proc);
-        }
+        
         internal void AddSystemInterupt(BaseDataBlob db)
         {
+            //we need to use _processToDateTime in this function instead of StarSysDateTime (or _systemLocalDateTime)
+            //due to this method being called while/by a child of the "ProcessToNextInterupt()" function is running.
+            //ie if a datablob gets added to the manager, this gets called. a datablob can get added at any time.
+            //we want to add processors to the correct timeslots (processor offset and frequency)
+            //using StarSysDateTime we were adding a processor in a timeslot that would end up after the current datetime,
+            //but before the NextInterupt dateTime, which would cause a Temporal Anomaly Exception. 
+            
             if (!StaticRefLib.ProcessorManager.HotloopProcessors.ContainsKey(db.GetType()))
                 return;
             var proc = StaticRefLib.ProcessorManager.HotloopProcessors[db.GetType()];
-            DateTime startDate = new DateTime();
-            var elapsed = _systemLocalDateTime - StaticRefLib.GameSettings.StartDateTime;
+            DateTime startDate = StaticRefLib.GameSettings.StartDateTime; 
+            var elapsed = _processToDateTime - startDate;  
             elapsed -= proc.FirstRunOffset;
 
             var nextInSec = proc.RunFrequency.TotalSeconds - elapsed.TotalSeconds % proc.RunFrequency.TotalSeconds;
             var next = TimeSpan.FromSeconds(nextInSec);
-            DateTime nextDT = _systemLocalDateTime + next;
+            DateTime nextDT = _processToDateTime + next;
             if(!QueuedProcesses.ContainsKey(nextDT))
                 QueuedProcesses.Add(nextDT, new ProcessSet());
             if (!QueuedProcesses[nextDT].SystemProcessors.Contains(proc))
@@ -466,13 +459,15 @@ namespace Pulsar4X.ECSLib
                 //calculate max time the system can run/time to next interupt
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
                 TimeSpan timeDeltaMax = targetDateTime - StarSysDateTime;
-                DateTime nextDate = GetNextInterupt(timeDeltaMax);
+                
+                //this bit is a bit messy, we're storing this as a class variable
+                //the reason we're storing it, is because one of the functions (AddSystemInterupt)
+                    //is called from elsewhere, possibly during the processing loop.
+                    //we may need to make this more flexable and shorten the processing loop if this happens? 
+                    //that might cause issues elsewhere. 
+                _processToDateTime = GetNextInterupt(timeDeltaMax); 
 
-                TimeSpan deltaActual = nextDate - StarSysDateTime;
-
-                //ShipMovementProcessor.Process(_entityManager, (int)deltaActual.TotalSeconds); //process movement for any entity that can move (not orbit)
-                //_entityManager.Game.ProcessorManager.Hotloop<PropulsionDB>(_entityManager, (int)deltaActual.TotalSeconds);
-                ProcessToNextInterupt(nextDate);
+                ProcessToNextInterupt();
                 _subPulseStopwatch.Stop();
                 _subpulseTimes.Add(_subPulseStopwatch.Elapsed.TotalMilliseconds);
             }
@@ -503,13 +498,13 @@ namespace Pulsar4X.ECSLib
         /// <param name="currentDateTime"></param>
         /// <param name="maxSpan">maximum time delta</param>
         /// <returns>datetime processed to</returns>
-        private void ProcessToNextInterupt(DateTime nextInteruptDateTime)
+        private void ProcessToNextInterupt()
         {
-            TimeSpan span = (nextInteruptDateTime - _systemLocalDateTime);
+            TimeSpan span = (_processToDateTime - _systemLocalDateTime);
             int deltaSeconds = (int)span.TotalSeconds;
-            if (QueuedProcesses.ContainsKey(nextInteruptDateTime))
+            if (QueuedProcesses.ContainsKey(_processToDateTime))
             {
-                var qp = QueuedProcesses[nextInteruptDateTime];
+                var qp = QueuedProcesses[_processToDateTime];
                 foreach (var systemProcess in qp.SystemProcessors)
                 {
                     _processStopwatch.Restart();
@@ -522,7 +517,7 @@ namespace Pulsar4X.ECSLib
                         _detailedProcessTimes.Add(pname, new List<double>());
                     _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
                     if(count > 0)
-                        AddSystemInterupt(nextInteruptDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
+                        AddSystemInterupt(_processToDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
                 }
 
                 foreach(var instanceProcessSet in qp.InstanceProcessors)
@@ -533,7 +528,7 @@ namespace Pulsar4X.ECSLib
                     foreach (var entity in instanceProcessSet.Value)
                     {
 
-                        processor.ProcessEntity(entity, nextInteruptDateTime);
+                        processor.ProcessEntity(entity, _processToDateTime);
                     }
                     _processStopwatch.Stop();
                     //ProcessTime[processor.GetType()] = _processStopwatch.Elapsed;
@@ -543,9 +538,9 @@ namespace Pulsar4X.ECSLib
                     _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
                 }
 
-                QueuedProcesses.Remove(nextInteruptDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 
+                QueuedProcesses.Remove(_processToDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 
             }
-            StarSysDateTime = nextInteruptDateTime; //update the localDateTime and invoke the SystemDateChangedEvent                   
+            StarSysDateTime = _processToDateTime; //update the localDateTime and invoke the SystemDateChangedEvent                   
         }
 
         public int GetTotalNumberOfProceses()
