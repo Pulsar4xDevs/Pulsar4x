@@ -1315,6 +1315,63 @@ namespace Pulsar4X.Orbital
             //dir = normalize(p - pos);
             return (p, atDateTime + TimeSpan.FromSeconds(tim));
         }
+        
+        
+               /// <summary>
+        /// THIS NEEDS TESTING.
+        /// Hohmann the specified GravParamOfParent, semiMajAxisCurrentBody and semiMajAxisOfTarget.
+        /// </summary>
+        /// <returns>two burns with a time in seconds for the second burn</returns>
+        /// <param name="sgp">Grav parameter of parent.</param>
+        /// <param name="semiMajAxisCurrent">semiMajor axis now</param>
+        /// <param name="semiMajAxisOfTarget">target semiMajorAxis</param>
+        public static (Vector3 deltaV, double timeInSeconds)[] Hohmann(double sgp, double semiMajAxisCurrent, double semiMajAxisOfTarget)
+        {
+            double xferOrbitSMA = semiMajAxisCurrent + semiMajAxisOfTarget;
+            double velCurrentBody = Math.Sqrt(sgp / semiMajAxisCurrent);
+            double velTarg = Math.Sqrt(sgp / semiMajAxisOfTarget);
+
+            double xferVelAtPeriapsis = Math.Sqrt(2 * (-sgp / xferOrbitSMA + sgp / semiMajAxisCurrent));
+
+            double xferVelAtApoaxis = Math.Sqrt(2 * (-sgp / xferOrbitSMA + sgp / semiMajAxisOfTarget));
+
+            double deltaVBurn1 = xferVelAtPeriapsis - velCurrentBody;
+            double deltaVBurn2 = xferVelAtApoaxis - velTarg;
+
+            double xferOrbitPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(xferOrbitSMA, 3) / sgp);
+            double timeToSecondBurn = xferOrbitPeriod * 0.5;
+
+            var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
+            manuvers[0] = (new Vector3(0, deltaVBurn1, 0), 0);
+            manuvers[1] = (new Vector3(0, deltaVBurn2, 0), timeToSecondBurn);
+            return manuvers;
+        }
+
+
+        /// <summary>
+        /// Hohmann transfer manuver, assumes a cicular orbit. 
+        /// </summary>
+        /// <param name="sgp"></param>
+        /// <param name="r1">radius from parent</param>
+        /// <param name="r2">radius from parent</param>
+        /// <returns>a tuple containing two manuvers with a time in seconds delay for second manuver</returns>
+        public static (Vector3 deltaV, double timeInSeconds)[] Hohmann2(double sgp, double r1, double r2)
+        {
+            var wca1 = Math.Sqrt(sgp / r1);
+            var wca2 = Math.Sqrt((2 * r2) / (r1 + r2)) - 1;
+            var dva = wca1 * wca2;
+
+            var wcb2 = Math.Sqrt(sgp / r2);
+            var wcb3 = 1 - Math.Sqrt((2 * r1) / (r1 + r2));
+            var dvb = wcb2 * wcb3;
+
+            var timeTo2ndBurn = Math.PI * Math.Sqrt((Math.Pow(r1 + r2, 3)) / (8 * sgp));
+            
+            var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
+            manuvers[0] = (new Vector3(0, dva, 0), 0);
+            manuvers[1] = (new Vector3(0, dvb, 0), timeTo2ndBurn);
+            return manuvers;
+        }
 
 
     }
