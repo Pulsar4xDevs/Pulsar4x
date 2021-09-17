@@ -225,6 +225,24 @@ namespace Pulsar4X.SDL2UI
                                           _sw.Elapsed.Ticks, 
                                           1
                                       ));
+                        
+                        _sw.Restart();
+                        ent.GetDataBlob<OrbitDB>();
+                        _sw.Stop();
+                        _callData.Add((
+                                          "Using entity.GetDataBlob<T>()\n {0,0} ticks to get db", 
+                                          _sw.Elapsed.Ticks, 
+                                          1
+                                          ));
+                        
+                        _sw.Restart();
+                        ent.GetDataBlob<OrbitDB>(typeIndex);
+                        _sw.Stop();
+                        _callData.Add((
+                                          "Using entity.GetDataBlob<T>(typeIndex)\n {0,0} ticks to get db", 
+                                          _sw.Elapsed.Ticks, 
+                                          1
+                                      ));
 
                         
                         _sw.Restart();
