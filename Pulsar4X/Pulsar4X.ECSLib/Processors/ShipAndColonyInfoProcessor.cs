@@ -18,10 +18,9 @@ namespace Pulsar4X.ECSLib
             int totalHTK = componentInstances.GetTotalHTK();
             float totalTonnage = componentInstances.GetTotalTonnage();
             double totalVolume = componentInstances.GetTotalVolume();
-            
-            if (shipInfo.Tonnage != totalTonnage)
+            MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
+            if (mvDB.MassTotal != totalTonnage)
             {
-                shipInfo.Tonnage = totalTonnage;
                 if (shipEntity.HasDataBlob<WarpAbilityDB>())
                 {
                     ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(shipEntity);
@@ -36,7 +35,7 @@ namespace Pulsar4X.ECSLib
             totalTonnage += (long)Math.Round(m);
 
             shipInfo.InternalHTK = totalHTK;
-            MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
+            
             mvDB.MassDry = totalTonnage;
             mvDB.Volume_m3 = totalVolume;
             mvDB.DensityDry_gcm = MassVolumeDB.CalculateDensity(totalTonnage, totalVolume);

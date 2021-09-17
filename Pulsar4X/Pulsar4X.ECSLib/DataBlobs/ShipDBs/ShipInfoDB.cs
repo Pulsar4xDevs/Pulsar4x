@@ -28,9 +28,9 @@ namespace Pulsar4X.ECSLib
 
         public bool IsMilitary { get; set; }
 
-        public float Tonnage { get; set; }
+        //public float Tonnage { get; set; }
 
-        public double TCS { get {return Tonnage * 0.02;} }
+        //public double TCS { get {return Tonnage * 0.02;} }
 
         ///  Ship orders.  
         //public Queue<BaseOrder> Orders;
@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
             Collier = shipInfoDB.Collier;
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
-            Tonnage = shipInfoDB.Tonnage;
+            //Tonnage = shipInfoDB.Tonnage;
             IsMilitary = shipInfoDB.IsMilitary;
             /*
             if (shipInfoDB.Orders == null)

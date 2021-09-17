@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
             warpDB.TotalWarpPower = totalEnginePower;
             //propulsionDB.FuelUsePerKM = totalFuelUsage;
 
-            var mass = ship.GetDataBlob<ShipInfoDB>().Tonnage;
+            var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var maxSpeed = MaxSpeedCalc(totalEnginePower, mass);
             warpDB.MaxSpeed = maxSpeed;
             

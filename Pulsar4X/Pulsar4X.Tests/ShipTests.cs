@@ -61,12 +61,12 @@ namespace Pulsar4X.Tests
             int originalEngineNumber = instances1.Count;
 
             WarpAbilityDB warpAbility = _ship.GetDataBlob<WarpAbilityDB>();
-            ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
-
+            
+            MassVolumeDB mvdb = _ship.GetDataBlob<MassVolumeDB>();
             WarpDriveAtb warpAtb = _engineComponentDesign.GetAttribute<WarpDriveAtb>();
             double warpPower = warpAtb.WarpPower;
             Assert.AreEqual(warpPower * originalEngineNumber , warpAbility.TotalWarpPower, "Incorrect TotalEnginePower");
-            float tonnage1 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
+            double tonnage1 = mvdb.MassTotal;
             int expectedSpeed1 = ShipMovementProcessor.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage1);
             Assert.AreEqual(expectedSpeed1, warpAbility.MaxSpeed, "Incorrect Max Speed");
 
@@ -78,7 +78,7 @@ namespace Pulsar4X.Tests
             
 
             Assert.AreEqual(warpPower * add2engineNumber, warpAbility.TotalWarpPower, "Incorrect TotalEnginePower 2nd engine added");
-            float tonnage2 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
+            double tonnage2 = mvdb.MassTotal;
             int expectedSpeed2 = ShipMovementProcessor.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage2);
             Assert.AreEqual(expectedSpeed2, warpAbility.MaxSpeed, "Incorrect Max Speed 2nd engine");
 
