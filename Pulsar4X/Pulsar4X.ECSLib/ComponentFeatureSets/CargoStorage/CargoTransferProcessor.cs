@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -175,7 +176,7 @@ namespace Pulsar4X.ECSLib
                 return double.PositiveInfinity;
             }
 
-            var hohmann = InterceptCalcs.Hohmann(sgp, r1, r2);
+            var hohmann = OrbitalMath.Hohmann(sgp, r1, r2);
             return dvDif = hohmann[0].deltaV.Length() + hohmann[1].deltaV.Length();
 
 

@@ -101,7 +101,7 @@ namespace Pulsar4X.Tests
                 _sol,
                 targetPos,
                 _ship.StarSysDateTime,
-                new Vector3(0,0,0));
+                new Vector3(0,0,0), tonnage1);
             
             Assert.AreEqual(warpAbility.CurrentVectorMS.Length(), expectedSpeed2, 1.0E-15);
             // _game.GamePulse.Ticklength = TimeSpan.FromSeconds(1);

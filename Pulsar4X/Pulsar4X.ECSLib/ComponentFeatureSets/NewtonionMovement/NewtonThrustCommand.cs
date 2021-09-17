@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Pulsar4X.Orbital;
 
@@ -26,11 +27,13 @@ namespace Pulsar4X.ECSLib
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
-        private Vector3 _orbitrelativeDeltaV;
+        public Vector3 OrbitrelativeDeltaV;
         //private Vector3 _parentRalitiveDeltaV;
         NewtonMoveDB _db;
 
         DateTime _vectorDateTime;
+
+        public List<(string item, double value)> DebugDetails = new List<(string, double)>(); 
 
         public static void CreateCommand(Guid faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name="Newtonion thrust")
         {
@@ -42,7 +45,7 @@ namespace Pulsar4X.ECSLib
                 RequestingFactionGuid = faction,
                 EntityCommandingGuid = orderEntity.Guid,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                _orbitrelativeDeltaV = expendDeltaV_m,
+                OrbitrelativeDeltaV = expendDeltaV_m,
 
                 
                 //var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2()
@@ -80,7 +83,7 @@ namespace Pulsar4X.ECSLib
                     RequestingFactionGuid = ship.FactionOwner,
                     EntityCommandingGuid = ship.Guid,
                     CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
-                    _orbitrelativeDeltaV = manuver.dv,
+                    OrbitrelativeDeltaV = manuver.dv,
 
                     _vectorDateTime = tmanuver,
                     ActionOnDate = tmanuver - TimeSpan.FromSeconds(tburn * 0.5),
@@ -91,7 +94,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public static void CreateCommand(Entity ship, (Vector3 dv, double t) manuver)
+        public static NewtonThrustCommand CreateCommand(Entity ship, (Vector3 dv, double t) manuver)
         {
             var fuelTypeID = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
             var fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
@@ -110,7 +113,7 @@ namespace Pulsar4X.ECSLib
                     RequestingFactionGuid = ship.FactionOwner,
                     EntityCommandingGuid = ship.Guid,
                     CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
-                    _orbitrelativeDeltaV = manuver.dv,
+                    OrbitrelativeDeltaV = manuver.dv,
 
                     _vectorDateTime = tmanuver,
                     ActionOnDate = tmanuver - TimeSpan.FromSeconds(tburn * 0.5),
@@ -118,7 +121,41 @@ namespace Pulsar4X.ECSLib
 
                 StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
                 cmd.UpdateDetailString();
+
+                return cmd;
+
+        }
+        
+        public static NewtonThrustCommand CreateCommand(Entity ship, Vector3 dv, DateTime tmanuver)
+        {
+            var fuelTypeID = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
+            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
+            var tnow = ship.StarSysDateTime;
+
             
+            double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, dv.Length());
+            double tburn = fuelBurned / burnRate;
+            mass -= fuelBurned;
+
+            var cmd = new NewtonThrustCommand()
+            {
+                RequestingFactionGuid = ship.FactionOwner,
+                EntityCommandingGuid = ship.Guid,
+                CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
+                OrbitrelativeDeltaV = dv,
+
+                _vectorDateTime = tmanuver,
+                ActionOnDate = tmanuver - TimeSpan.FromSeconds(tburn * 0.5),
+            };
+
+            StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+            cmd.UpdateDetailString();
+
+            return cmd;
+
         }
 
         internal override void ActionCommand(DateTime atDateTime)
@@ -134,7 +171,7 @@ namespace Pulsar4X.ECSLib
 
                 var futurePosition = _entityCommanding.GetRelativeFuturePosition(_vectorDateTime);
                 var futureVector = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
-                var pralitiveDV = OrbitalMath.ProgradeToParentVector(sgp, _orbitrelativeDeltaV, futurePosition, futureVector);
+                var pralitiveDV = OrbitalMath.ProgradeToParentVector(sgp, OrbitrelativeDeltaV, futurePosition, futureVector);
                 
 
 
@@ -155,7 +192,7 @@ namespace Pulsar4X.ECSLib
                 
             if(ActionOnDate > _entityCommanding.StarSysDateTime)
                 _details = "Waiting " + (ActionOnDate - _entityCommanding.StarSysDateTime).ToString("d'd 'h'h 'm'm 's's'") + "\n" 
-                + "   to expend  " + Stringify.Velocity(_orbitrelativeDeltaV.Length()) + " Δv";
+                + "   to expend  " + Stringify.Velocity(OrbitrelativeDeltaV.Length()) + " Δv";
             else if(IsRunning)
                 _details = "Expending " + Stringify.Velocity(_db.ManuverDeltaVLen) + " Δv";
                 

@@ -262,7 +262,8 @@ namespace Pulsar4X.SDL2UI
                 TargetEntity.Entity,
                 _targetInsertionPoint_m,
                 _departureDateTime,
-                _deltaV_MS);
+                _deltaV_MS,
+                _massOrderingEntity);
             
             CloseWindow();
         }

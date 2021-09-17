@@ -327,7 +327,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             //TODO this should be radius from orbiting body not major axies.  
             ImGui.SliderFloat("Target SemiMajorAxis", ref _targetSMA, smaMin, smaMax);
-            _manuvers = InterceptCalcs.Hohmann2(_sgp, mySMA, _targetSMA);
+            _manuvers = OrbitalMath.Hohmann2(_sgp, mySMA, _targetSMA);
 
             
 
@@ -479,7 +479,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             var manuverPos = _orderEntity.GetRelativeFuturePosition(manuverDateTime);
             var manuverVel = _orderEntity.GetRelativeFutureVelocity(manuverDateTime);
             var soi = _orderEntity.GetSOIParentEntity().GetDataBlob<OrbitDB>().SOI_m;
-            var manuver = InterceptCalcs.Hohmann2(_sgp, manuverPos.Length(), soi)[0];
+            var manuver = OrbitalMath.Hohmann2(_sgp, manuverPos.Length(), soi)[0];
 
 
             manuver.deltaV.Y += 1;

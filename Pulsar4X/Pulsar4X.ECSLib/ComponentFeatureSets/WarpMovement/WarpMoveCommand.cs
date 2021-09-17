@@ -49,8 +49,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="targetEntity">Target entity.</param>
         /// <param name="targetOffsetPos_m">Target offset position in au.</param>
         /// <param name="transitStartDatetime">Transit start datetime.</param>
-        /// <param name="expendDeltaV_AU">Amount of DV to expend to change the orbit in AU/s</param>
-        public static void CreateCommand(Guid faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_m, DateTime transitStartDatetime, Vector3 expendDeltaV)
+        /// <param name="expendDeltaV">Amount of DV to expend to change the orbit in m/s</param>
+        /// /// <param name="mass">mass of ship after warp (needed for DV calc)</param>
+        public static (WarpMoveCommand, NewtonThrustCommand) CreateCommand(Guid faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_m, DateTime transitStartDatetime, Vector3 expendDeltaV, double mass)
         {
             var cmd = new WarpMoveCommand()
             {
@@ -63,6 +64,24 @@ namespace Pulsar4X.ECSLib
                 ExpendDeltaV = expendDeltaV,
             };
             StaticRefLib.OrderHandler.HandleOrder(cmd);
+            if (expendDeltaV.Length() != 0)
+            {
+                
+                (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition_m
+                (
+                    orderEntity, 
+                    targetEntity.GetDataBlob<OrbitDB>(), 
+                    orderEntity.StarSysDateTime,
+                    targetOffsetPos_m
+                );
+                
+                var burntime = TimeSpan.FromSeconds(OrbitMath.BurnTime(orderEntity, expendDeltaV.Length(), mass));
+                var ntcmd = NewtonThrustCommand.CreateCommand(orderEntity, expendDeltaV, targetIntercept.atDateTime + burntime);
+
+                return (cmd, ntcmd);
+            }
+
+            return (cmd, null);
         }
 
         internal override bool IsValidCommand(Game game)

@@ -125,6 +125,39 @@ namespace Pulsar4X.ECSLib
             return (p, atDateTime + TimeSpan.FromSeconds(tim));
         }
 
-        
+        /// <summary>
+        /// Time for a burn manuver in seconds
+        /// </summary>
+        /// <param name="ship"></param>
+        /// <param name="dv"></param>
+        /// <param name="mass"></param>
+        /// <returns>time in seconds</returns>
+        public static double BurnTime(Entity ship, double dv, double mass)
+        {
+            //var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
+            var ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+            double fuelBurned = TsiolkovskyFuelUse(mass, ve, dv);
+            double tburn = fuelBurned / burnRate;
+            return tburn;
+        }
+
+        /// <summary>
+        /// Mass of fuel burned for a given DV change.
+        /// </summary>
+        /// <param name="ship"></param>
+        /// <param name="dv"></param>
+        /// <param name="mass"></param>
+        /// <returns></returns>
+        public static double FuelBurned(Entity ship, double dv, double mass)
+        {
+            var ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            double fuelBurned = TsiolkovskyFuelUse(mass, ve, dv);
+            return fuelBurned;
+        }
+
+
+
+
     }
 }
