@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
             var maxSpeedMS = warpDB.MaxSpeed;
             var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
             EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
-            positionDB.SetParent(null);
+            positionDB.SetParent(positionDB.Root);
             Vector3 targetPosMt = moveDB.ExitPointAbsolute;
             Vector3 currentPositionMt = positionDB.AbsolutePosition_m;
 
