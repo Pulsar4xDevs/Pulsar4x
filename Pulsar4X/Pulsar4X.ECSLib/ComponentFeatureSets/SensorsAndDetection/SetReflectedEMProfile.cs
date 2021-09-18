@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
             sensorSig.LastPositionOfReflectionSet = position.AbsolutePosition_AU;
             sensorSig.LastDatetimeOfReflectionSet = atDate;
 
-            var emmiters = entity.Manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
+            var emmiters = entity.Manager.GetAllDataBlobsOfType<SensorProfileDB>();
             int numberOfEmmitters = emmiters.Count;
             sensorSig.ReflectedEMSpectra.Clear();
 
@@ -51,8 +51,9 @@ namespace Pulsar4X.ECSLib
             
             
             
-            foreach (var emittingEntity in emmiters)
+            foreach (var emmissionDB in emmiters)
             {
+                var emittingEntity = emmissionDB.OwningEntity;
                 if (emittingEntity != entity) // don't reflect our own emmision. 
                 {
                     double distance = position.GetDistanceTo_m(emittingEntity.GetDataBlob<PositionDB>());
@@ -65,7 +66,7 @@ namespace Pulsar4X.ECSLib
                     double reflectionCoefficent = surfaceArea * sensorSig.Reflectivity;
                     
                     
-                    var emmissionDB = emittingEntity.GetDataBlob<SensorProfileDB>();
+                    //var emmissionDB = emittingEntity.GetDataBlob<SensorProfileDB>();
 
                     foreach (var emitedItem in emmissionDB.EmittedEMSpectra)
                     {

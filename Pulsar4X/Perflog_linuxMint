@@ -70,3 +70,27 @@ OrderableProcessor          :         0.2880
 LogiBaseProcessor           :         0.0533
 SensorScan                  :        60.4840
 _________________________________________________
+055db3f3-dirty
+19/09/2021 1:48:33 AM
+Threaded:                              False
+Time Span:                          01:00:00
+Full Process Time:                  101.6382
+Sol Time:                   :        88.1970
+NewtonionMovementProcessor  :        19.1743
+OrderableProcessor          :         0.1703
+OrbitProcessor              :         1.0766
+LogiBaseProcessor           :         0.0274
+SensorScan                  :        39.1807
+_________________________________________________
+055db3f3-dirty
+19/09/2021 1:52:03 AM
+Threaded:                              False
+Time Span:                          01:00:00
+Full Process Time:                  116.2853
+Sol Time:                   :       101.7818
+NewtonionMovementProcessor  :        30.7279
+OrderableProcessor          :         0.3033
+OrbitProcessor              :         1.4223
+LogiBaseProcessor           :         0.0473
+SensorScan                  :        26.9910
+_________________________________________________
