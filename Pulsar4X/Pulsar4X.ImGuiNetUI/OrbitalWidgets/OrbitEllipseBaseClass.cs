@@ -9,10 +9,22 @@ using System.Linq;
 namespace Pulsar4X.SDL2UI
 {
 
+    public interface IKepler
+    {
+        internal IPosition PositionDB { get; }
+        internal IPosition ParentPosDB{ get; }
+        internal double SemiMaj{ get; }
+        internal double SemiMin{ get; }
+        internal double LoP_radians{ get; }
+        internal double Eccentricity{ get; }
+        internal double LinearEccent{ get; }
+        
+    }
+
     /// <summary>
     /// A Collection of Shapes which will make up an icon.
     /// </summary>
-    public abstract class OrbitIconBase : Icon, IUpdateUserSettings
+    public abstract class OrbitIconBase : Icon, IUpdateUserSettings, IKepler
     {
         #region Static properties
         protected EntityManager _mgr;
@@ -24,6 +36,7 @@ namespace Pulsar4X.SDL2UI
         protected float _loP_Degrees; //longditudeOfPeriapsis (loan + aop) 
         internal float _loP_radians; //longditudeOfPeriapsis (loan + aop) in radians
         internal float _aop;
+        internal float _eccentricity;
         internal float _linearEccentricity; //distance from the center of the ellpse to one of the focal points. 
         protected Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
@@ -46,6 +59,8 @@ namespace Pulsar4X.SDL2UI
         protected int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
         protected float _segmentArcSweepRadians; //how large each segment in the drawn portion of the ellipse.  
         protected float _alphaChangeAmount;
+
+
 
 
         #endregion
@@ -74,8 +89,8 @@ namespace Pulsar4X.SDL2UI
             SemiMinor = (float)EllipseMath.SemiMinorAxis(_orbitDB.SemiMajorAxis_AU, _orbitDB.Eccentricity);
 
 
-
-            _linearEccentricity = (float)(_orbitDB.Eccentricity * _orbitDB.SemiMajorAxis_AU); //linear ecentricity
+            _eccentricity = (float)_orbitDB.Eccentricity;
+            _linearEccentricity = (float)(_eccentricity * _orbitDB.SemiMajorAxis_AU); //linear ecentricity
 
             
             if (_orbitDB.Inclination_Degrees > 90 && _orbitDB.Inclination_Degrees < 270) //orbitDB is in degrees.
@@ -118,5 +133,19 @@ namespace Pulsar4X.SDL2UI
 
         }
         protected abstract void CreatePointArray();
+
+        IPosition IKepler.PositionDB => BodyPositionDB;
+
+        IPosition IKepler.ParentPosDB => _positionDB;
+
+        double IKepler.SemiMaj => SemiMaj;
+
+        double IKepler.SemiMin => SemiMinor;
+
+        double IKepler.LoP_radians => _loP_radians;
+
+        double IKepler.Eccentricity => _eccentricity;
+
+        double IKepler.LinearEccent => _linearEccentricity;
     }
 }

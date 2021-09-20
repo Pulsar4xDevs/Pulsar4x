@@ -64,12 +64,19 @@ namespace Pulsar4X.SDL2UI
                         DebugWindow.GetInstance().ToggleActive();
                     }
 
-                    if(_uiState.LastClickedEntity != null && _uiState.LastClickedEntity.Entity.HasDataBlob<OrbitDB>())
+                    if (_uiState.LastClickedEntity != null)
                     {
-                        bool orbitDebugActive = _orbitalDebugWindow.GetActive();
-                        if (ImGui.Checkbox("Show Orbit Debug Lines", ref orbitDebugActive))
+                        var lastClickedEntity = _uiState.LastClickedEntity.Entity;
+
+                         if(lastClickedEntity.HasDataBlob<OrbitDB>() 
+                            || lastClickedEntity.HasDataBlob<OrbitUpdateOftenDB>() 
+                            || lastClickedEntity.HasDataBlob<NewtonMoveDB>())
                         {
-                            OrbitalDebugWindow.GetInstance().ToggleActive();
+                            bool orbitDebugActive = _orbitalDebugWindow.GetActive();
+                            if (ImGui.Checkbox("Show Orbit Debug Lines", ref orbitDebugActive))
+                            {
+                                OrbitalDebugWindow.GetInstance().ToggleActive();
+                            }
                         }
                     }
 

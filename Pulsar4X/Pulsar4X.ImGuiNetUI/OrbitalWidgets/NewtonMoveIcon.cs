@@ -13,12 +13,12 @@ namespace Pulsar4X.SDL2UI
     ///  fixed number of points and maximum inscribed area"
     /// by L.R. Smith
     /// </summary>
-    public class NewtonMoveIcon : Icon, IUpdateUserSettings
+    public class NewtonMoveIcon : Icon, IUpdateUserSettings, IKepler
     {
         //protected EntityManager _mgr;
         NewtonMoveDB _newtonMoveDB;
-        PositionDB parentPosDB;
-        PositionDB myPosDB;
+        PositionDB _parentPosDB;
+        PositionDB _myPosDB;
         double _sgp;
         private double _sgpAU;
         int _index = 0;
@@ -27,6 +27,8 @@ namespace Pulsar4X.SDL2UI
         //protected float b;
         protected Orbital.Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
+        private Orbital.Vector2[] _thrustLinePoints = new Vector2[2];
+        protected SDL.SDL_Point[] _drawThrustLinePoints = new SDL.SDL_Point[2];
         //PointD[] _debugPoints;
         SDL.SDL_Point[] _debugDrawPoints = new SDL.SDL_Point[0];
 
@@ -44,6 +46,11 @@ namespace Pulsar4X.SDL2UI
 
         private double _dv = 0;
         private KeplerElements _ke;
+        private double _semiMaj;
+        private double _semiMin;
+        private double _loPRadians;
+        private double _eccentricity;
+        private double _linearEccent;
 
         public NewtonMoveIcon(KeplerElements ke, Vector3 position) : base(position)
         {
@@ -52,13 +59,14 @@ namespace Pulsar4X.SDL2UI
 
         public NewtonMoveIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonMoveDB>().SOIParent.GetDataBlob<PositionDB>())
         {
+            entityState.OrbitIcon = this;
             BodyType = entityState.BodyType;
             TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             //_mgr = entityState.Entity.Manager;
             _newtonMoveDB = entityState.Entity.GetDataBlob<NewtonMoveDB>();
-            parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
-            _positionDB = parentPosDB;
-            myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
+            _parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
+            _positionDB = _parentPosDB;
+            _myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
             _userOrbitSettingsMtx = settings;
             var parentMass = entityState.Entity.GetDataBlob<NewtonMoveDB>().ParentMass;
             var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
@@ -70,7 +78,6 @@ namespace Pulsar4X.SDL2UI
             
             
             UpdateUserSettings();
-            //CreatePointArray();
             OnPhysicsUpdate();
         }
         public void UpdateUserSettings()
@@ -90,6 +97,7 @@ namespace Pulsar4X.SDL2UI
             _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
             _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
             _numberOfPoints = _numberOfDrawSegments + 1;
+            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
         }
 
 
@@ -102,6 +110,27 @@ namespace Pulsar4X.SDL2UI
             {
                 _ke = ke;
                 CreatePointArray();
+            }
+
+            _eccentricity = ke.Eccentricity;
+            _linearEccent = ke.LinearEccentricity;
+            _semiMaj = ke.SemiMajorAxis;
+            _semiMin = ke.SemiMinorAxis;
+            _loPRadians = OrbitMath.GetLongditudeOfPeriapsis(ke.Inclination, ke.AoP, ke.LoAN);
+
+            if (_newtonMoveDB.ManuverDeltaVLen > 0)
+            {
+                var len = 0.1 * _newtonMoveDB.OwningEntity.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons;
+                var dv = _newtonMoveDB.ManuverDeltaV;
+                var line = Vector3.Normalise(dv) * len ;
+
+
+                _thrustLinePoints[0] = Vector2.Zero;
+                _thrustLinePoints[1] = new Vector2 (line.X, -line.Y);
+            }
+            else
+            {
+                _thrustLinePoints[1] = Vector2.Zero;
             }
         }
 
@@ -122,7 +151,7 @@ namespace Pulsar4X.SDL2UI
         private void CreateHyperbolicPoints()
         {
             Vector3 vel = _newtonMoveDB.CurrentVector_ms;
-            Vector3 pos = myPosDB.RelativePosition_m;
+            Vector3 pos = _myPosDB.RelativePosition_m;
             //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
 
             
@@ -262,10 +291,18 @@ namespace Pulsar4X.SDL2UI
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
             var mtrx = scAU * scZm *  trns;
-            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
+            
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
                 _drawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
+            }
+
+            var foo2 = camera.ViewCoordinate_m(_myPosDB.AbsolutePosition_m);
+            var trns2 = Matrix.IDTranslate(foo2.x, foo2.y);
+            var mtrx2 = scAU * scZm *  trns2;
+            for (int i = 0; i < 2; i++)
+            {
+                _drawThrustLinePoints[i] = mtrx2.TransformToSDL_Point(_thrustLinePoints[i].X, _thrustLinePoints[i].Y);
             }
         }
         
@@ -281,9 +318,30 @@ namespace Pulsar4X.SDL2UI
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i +1].y);
                 alpha -= _alphaChangeAmount; 
             }
+            byte r = 100;
+            byte g = 50;
+            byte b = 200;
+            byte a = 255;
+
+            SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a);
+            SDL.SDL_RenderDrawLine(rendererPtr, _drawThrustLinePoints[0].x, _drawThrustLinePoints[0].y, _drawThrustLinePoints[1].x, _drawThrustLinePoints[1].y);
+            
         }
 
 
+        IPosition IKepler.PositionDB => _myPosDB;
+
+        IPosition IKepler.ParentPosDB => _parentPosDB;
+
+        double IKepler.SemiMaj => _semiMaj;
+
+        double IKepler.SemiMin => _semiMin;
+
+        double IKepler.LoP_radians => _loPRadians;
+
+        double IKepler.Eccentricity => _eccentricity;
+
+        double IKepler.LinearEccent => _linearEccent;
     }
 
     public class KeIcon : Icon, IUpdateUserSettings

@@ -280,7 +280,7 @@ namespace Pulsar4X.ECSLib
         public KeplerElements GetElements()
         {
             // if there is not a change in Dv then the kepler elements wont have changed, it might be better to store them?
-            double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().MassDry;
+            double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, ParentMass);
             var pos = OwningEntity.GetDataBlob<PositionDB>().RelativePosition_m;
             var dateTime = OwningEntity.StarSysDateTime;

@@ -46,10 +46,10 @@ namespace Pulsar4X.SDL2UI
             var entity = entityState.Entity;
             var hasParent = entity.GetSOIParentEntity() != null;
             IsActive = wasActive;
-            if((entity.HasDataBlob<OrbitDB>() || 
-               entity.HasDataBlob<OrbitUpdateOftenDB>()) //|| 
-               //entity.HasDataBlob<NewtonMoveDB>()) 
-               && hasParent)
+            if(hasParent &&
+               (entity.HasDataBlob<OrbitDB>() 
+                || entity.HasDataBlob<OrbitUpdateOftenDB>()) 
+                || entity.HasDataBlob<NewtonMoveDB>())
                 _debugWidget = new OrbitalDebugWidget(entityState);
             else
             {
@@ -102,10 +102,8 @@ namespace Pulsar4X.SDL2UI
     {
         //OrbitIcon orbitIcon;
         KeplerElements _keplerElements;
-        IPosition _bodyPosition
-        {
-            get { return _positionDB; }
-        }
+        private IPosition _bodyPosition;
+
         internal Guid EntityGuid;
 
         Vector2 _f1;
@@ -175,7 +173,7 @@ namespace Pulsar4X.SDL2UI
         public OrbitalDebugWidget(EntityState entityState) : base(entityState.Entity.GetSOIParentPositionDB())
         {
             _entity = entityState.Entity;
-
+            _bodyPosition = _entity.GetDataBlob<PositionDB>();
             var orbitIcon = entityState.OrbitIcon;
             
             
@@ -209,14 +207,14 @@ namespace Pulsar4X.SDL2UI
 
             _loan =  _keplerElements.LoAN;
             _aop = _keplerElements.AoP;
-            _loP = orbitIcon._loP_radians;
+            _loP = orbitIcon.LoP_radians;
 
-            var cP_au = new Vector2() { X = orbitIcon.WorldPosition_AU.X, Y = orbitIcon.WorldPosition_AU.Y };
-            cP_au.X -= orbitIcon._linearEccentricity;
+            var cP_au = new Vector2() { X = orbitIcon.ParentPosDB.AbsolutePosition_AU.X, Y = orbitIcon.ParentPosDB.AbsolutePosition_AU.Y };
+            cP_au.X -= orbitIcon.LinearEccent;
 
-            var f1_au = new Vector2() { X = cP_au.X + orbitIcon._linearEccentricity, Y = cP_au.Y};
-            var f2_au = new Vector2() { X = cP_au.X - orbitIcon._linearEccentricity, Y = cP_au.Y};
-            var coVertex = new Vector2() { X = cP_au.X , Y = cP_au.Y + orbitIcon.SemiMinor };
+            var f1_au = new Vector2() { X = cP_au.X + orbitIcon.LinearEccent, Y = cP_au.Y};
+            var f2_au = new Vector2() { X = cP_au.X - orbitIcon.LinearEccent, Y = cP_au.Y};
+            var coVertex = new Vector2() { X = cP_au.X , Y = cP_au.Y + orbitIcon.SemiMin };
             var periapsisPnt = new Vector2() { X = cP_au.X - orbitIcon.SemiMaj, Y = cP_au.Y  };
             var apoapsisPnt = new Vector2() { X = cP_au.X + orbitIcon.SemiMaj, Y = cP_au.Y  };
 
@@ -229,7 +227,7 @@ namespace Pulsar4X.SDL2UI
 
 
             _semiMajAxis = orbitIcon.SemiMaj;
-            _semiMinAxis = orbitIcon.SemiMinor;
+            _semiMinAxis = orbitIcon.SemiMin;
             
             _ae = _semiMajAxis * _keplerElements.Eccentricity;
             
@@ -245,6 +243,8 @@ namespace Pulsar4X.SDL2UI
                 _keplerElements.Eccentricity, 
                 _trueAnom, 
                 _keplerElements.AoP); //OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(_keplerElements, systemDateTime);
+            
+            
             var ecvec = OrbitMath.EccentricityVector(_sgp, pos_m, (Vector3)vel_m);
             _trueAnom_FromEVec = OrbitMath.TrueAnomaly(ecvec, pos_m, (Vector3)vel_m);
             _trueAnom_FromStateVec = OrbitMath.TrueAnomaly(_sgp, pos_m, (Vector3)vel_m);
@@ -297,7 +297,7 @@ namespace Pulsar4X.SDL2UI
 
                 Shape = new ComplexShape()
                 {
-                    StartPoint = new Vector2() { X = WorldPosition_AU.X, Y = WorldPosition_AU.Y },
+                    StartPoint = _cP,//new Vector2() { X = WorldPosition_AU.X, Y = WorldPosition_AU.Y },
                     Points = new Vector2[]
                     {
                         new Vector2(){ X = - 8, Y =  0 },

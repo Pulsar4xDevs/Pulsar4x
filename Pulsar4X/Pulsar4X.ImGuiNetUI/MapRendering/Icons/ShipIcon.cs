@@ -66,7 +66,12 @@ namespace Pulsar4X.SDL2UI
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
                 else if (db is WarpMovingDB)
-                    _warpMoveDB = (WarpMovingDB)db;                    
+                    _warpMoveDB = (WarpMovingDB)db;
+                else if (db is NewtonMoveDB)
+                {
+                    _newtonMoveDB = (NewtonMoveDB)db;
+                    //NewtonVectors();
+                }
             }
             else if (changeType == EntityChangeData.EntityChangeType.DBRemoved)
             {
@@ -74,6 +79,11 @@ namespace Pulsar4X.SDL2UI
                     _orbitDB = null;
                 else if (db is WarpMovingDB)
                     _warpMoveDB = null;
+                else if (db is NewtonMoveDB)
+                {
+                    _newtonMoveDB = null;
+                    //Shapes.RemoveAt(Shapes.Count-1);
+                }
             }
         }
 
@@ -215,6 +225,24 @@ namespace Pulsar4X.SDL2UI
                 Shapes.Add(new Shape() { Color = colourCone, Points = CreatePrimitiveShapes.CreateArc(toffset, offsetY + boxHeight + coneHeight, (int)(boxWidth * 0.5), coneHeight, CreatePrimitiveShapes.QuarterCircle, CreatePrimitiveShapes.HalfCircle, 8) });
                 toffset += twidth;
             }
+        }
+
+        void NewtonVectors()
+        {
+            byte r = 100;
+            byte g = 50;
+            byte b = 200;
+            byte a = 255;
+            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            var len = 0.00001 * _newtonMoveDB.OwningEntity.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons;
+            var dv = _newtonMoveDB.ManuverDeltaV;
+            var line = Vector3.Normalise(dv) * len ;
+            Vector2[] points = new Vector2[2];
+            points[0]= Vector2.Zero;
+            points[1] = new Vector2(line.X, line.Y);
+            var shape = new Shape() { Color = colour, Points = points };
+            
+            Shapes.Add(shape);
         }
 
 

@@ -534,7 +534,7 @@ namespace Pulsar4X.ECSLib
                             mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
                         if (ship.HasDataBlob<NewtonMoveDB>())
                             mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
-
+                        
                         double targetSMA = OrbitMath.LowOrbitRadius(targetBody);
 
                         var manuvers = OrbitalMath.Hohmann2(sgpTgtBdy, mySMA, targetSMA);
@@ -608,6 +608,8 @@ namespace Pulsar4X.ECSLib
 
                 var targetInsertionPosition = Vector3.Normalise(ourState.pos) * targetRad;
                 var thrustVector = Vector3.Normalise(insertionVector) * -deltaV;
+                var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(shipMass, target.GetDataBlob<MassVolumeDB>().MassTotal);
+                var thrustV2 = OrbitalMath.ProgradeToParentVector(sgp, thrustVector, targetInsertionPosition, insertionVector);
                 //should we expend deltaV now or when we get there?
                 
                 
@@ -618,7 +620,7 @@ namespace Pulsar4X.ECSLib
                     targetBody, 
                     targetInsertionPosition, 
                     at, 
-                    thrustVector,
+                    thrustV2,
                     shipMass);
 
                 var dv = cmd.Item2.OrbitrelativeDeltaV.Length();
