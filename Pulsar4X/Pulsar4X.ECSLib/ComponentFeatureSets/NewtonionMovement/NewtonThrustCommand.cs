@@ -163,7 +163,7 @@ namespace Pulsar4X.ECSLib
             if (!IsRunning && atDateTime >= ActionOnDate)
             {
                  var parent = _entityCommanding.GetSOIParentEntity();
-                 var currentVel = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
+                 var currentVel = _entityCommanding.GetRelativeFutureVelocity(atDateTime);
 
                 var parentMass = _entityCommanding.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
                 var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
