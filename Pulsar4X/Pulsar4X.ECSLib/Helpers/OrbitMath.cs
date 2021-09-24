@@ -157,7 +157,15 @@ namespace Pulsar4X.ECSLib
         }
 
 
-
+        public static KeplerElements KeplerFromOrbitDB(OrbitDB orbitDB)
+        {
+            var entity = orbitDB.OwningEntity;
+            var sgp = orbitDB.GravitationalParameter_m3S2;
+            var state = entity.GetRelativeState();
+            var epoch = entity.StarSysDateTime;
+            return KeplerFromPositionAndVelocity(sgp, state.pos, state.Velocity, epoch);
+            
+        }
 
     }
 }

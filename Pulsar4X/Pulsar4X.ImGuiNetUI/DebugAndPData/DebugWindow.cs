@@ -403,23 +403,79 @@ namespace Pulsar4X.SDL2UI
                                     truAnomoly = orbitDB.GetTrueAnomaly(_uiState.PrimarySystemDateTime);
                                         //lastDate = _uiState.PrimarySystemDateTime;
                                     //}
-
+                                    
+                                    
                                     ImGui.Text("x: " + pos.X);
                                     ImGui.Text("y: " + pos.Y);
                                     ImGui.Text("z: " + pos.Z);
-                                    ImGui.Text("Eccentricity: " + orbitDB.Eccentricity);
-                                    ImGui.Text("AoP:" + orbitDB.ArgumentOfPeriapsis_Degrees);
-                                    ImGui.Text("TrueAnomaly: " + truAnomoly);
+                                    
                                     ImGui.Text("MeanMotion: " + orbitDB.MeanMotion_DegreesSec + " in Deg/s");
-                                    ImGui.Text("MeanVelocity: " + orbitDB.MeanOrbitalVelocityInAU() + "Au/s");
                                     ImGui.Text("MeanVelocity: " + Stringify.Velocity(orbitDB.MeanOrbitalVelocityInm()));
                                     
                                     ImGui.Text("SOI Radius: " + Stringify.Distance(SelectedEntity.GetSOI_m()));
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
                                     ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod.TotalSeconds);
-                                    ImGui.Text("SemiMajAxis: " + Stringify.Distance(orbitDB.SemiMajorAxis));
-                                    ImGui.Text("Periapsis: " + Stringify.Distance(orbitDB.Periapsis));
-                                    ImGui.Text("Appoapsis: " + Stringify.Distance(orbitDB.Apoapsis));
+                                    
+                                    var ke = OrbitMath.KeplerFromOrbitDB(orbitDB);
+                                    ImGui.Columns(3);
+                                    ImGui.SetColumnWidth(0, 128);
+                                    ImGui.SetColumnWidth(1, 128);
+                                    ImGui.SetColumnWidth(2, 128);
+                                    
+                                    ImGui.Text("Eccentricity:");
+                                    ImGui.NextColumn();
+                                    ImGui.Text(orbitDB.Eccentricity.ToString());
+                                    ImGui.NextColumn();
+                                    ImGui.Text(ke.Eccentricity.ToString());
+                                    ImGui.NextColumn();
+                                    
+                                    
+                                    ImGui.Text("AoP:");
+                                    ImGui.NextColumn();
+                                    ImGui.Text(orbitDB.ArgumentOfPeriapsis_Degrees.ToString());
+                                    ImGui.NextColumn();
+                                    ImGui.Text(ke.AoP.ToString());
+                                    ImGui.NextColumn();
+
+                                    
+                                    ImGui.Text("TrueAnomaly:");
+                                    ImGui.NextColumn();
+                                    ImGui.Text(truAnomoly.ToString());
+                                    ImGui.NextColumn();
+                                    ImGui.Text(ke.TrueAnomalyAtEpoch.ToString());
+                                    ImGui.NextColumn();
+
+                                    
+                                    ImGui.Text("SemiMajAxis:");
+                                    ImGui.NextColumn();
+                                    ImGui.Text(Stringify.Distance(orbitDB.SemiMajorAxis));
+                                    ImGui.NextColumn();
+                                    ImGui.Text(Stringify.Distance(ke.SemiMajorAxis));
+                                    ImGui.NextColumn();
+
+                                    
+                                    ImGui.Text("Periapsis: ");
+                                    ImGui.NextColumn();
+                                    ImGui.Text(Stringify.Distance(orbitDB.Periapsis));
+                                    ImGui.NextColumn();
+                                    ImGui.Text(Stringify.Distance(ke.Periapsis));
+                                    ImGui.NextColumn();
+
+                                    
+                                    ImGui.Text("Appoapsis: ");
+                                    ImGui.NextColumn();
+                                    ImGui.Text(Stringify.Distance(orbitDB.Apoapsis));
+                                    ImGui.NextColumn();
+                                    ImGui.Text(Stringify.Distance(ke.Apoapsis));
+                                    ImGui.NextColumn();
+
+                                    
+                                    ImGui.Columns(1);
+                                    
+
+                                    
+                                    
+                                    
                                     if (orbitDB.Parent != null)
                                         ImGui.Text("Parent: " + orbitDB.Parent.GetDataBlob<NameDB>().DefaultName);
                                     if (orbitDB.Children.Count > 0)

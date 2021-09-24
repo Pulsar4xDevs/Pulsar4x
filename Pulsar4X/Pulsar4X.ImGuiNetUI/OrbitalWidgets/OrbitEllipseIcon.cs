@@ -132,7 +132,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            Vector3 pos = BodyPositionDB.RelativePosition_AU; 
+            Vector3 pos = BodyPositionDB.RelativePosition_m; 
             _bodyrelativePos = new Vector2() { X = pos.X, Y = pos.Y };
             
             double minDist = (_bodyrelativePos - _points[_index]).Length();
@@ -154,8 +154,8 @@ namespace Pulsar4X.SDL2UI
             //translate to position
             var foo = camera.ViewCoordinate_m(WorldPosition_m);
             var trns = Matrix.IDTranslate(foo.x, foo.y);
-            //var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
-            var mtrx = matrix * trns;
+            var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
+            var mtrx = scAU * matrix * trns;
             //_drawPoints = new SDL.SDL_Point[_numberOfDrawSegments]; //we don't need to create a whole new array
             int index = _index;      
             _drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
