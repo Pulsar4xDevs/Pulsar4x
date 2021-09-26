@@ -135,7 +135,7 @@ namespace Pulsar4X.SDL2UI
         
         
         double _meanAnom;
-        Vector2 _bodyPosPnt_AU;
+        Vector2 _bodyPosPnt_m;
         Vector2 _bodyEAPnt;
 
         double _sgp;
@@ -209,18 +209,18 @@ namespace Pulsar4X.SDL2UI
             _aop = _keplerElements.AoP;
             _loP = orbitIcon.LoP_radians;
 
-            var cP_au = new Vector2() { X = orbitIcon.ParentPosDB.AbsolutePosition_AU.X, Y = orbitIcon.ParentPosDB.AbsolutePosition_AU.Y };
-            cP_au.X -= orbitIcon.LinearEccent;
+            var cP_m = new Vector2() { X = orbitIcon.ParentPosDB.RelativePosition_m.X, Y = orbitIcon.ParentPosDB.RelativePosition_m.Y };
+            cP_m.X -= orbitIcon.LinearEccent;
 
-            var f1_au = new Vector2() { X = cP_au.X + orbitIcon.LinearEccent, Y = cP_au.Y};
-            var f2_au = new Vector2() { X = cP_au.X - orbitIcon.LinearEccent, Y = cP_au.Y};
-            var coVertex = new Vector2() { X = cP_au.X , Y = cP_au.Y + orbitIcon.SemiMin };
-            var periapsisPnt = new Vector2() { X = cP_au.X - orbitIcon.SemiMaj, Y = cP_au.Y  };
-            var apoapsisPnt = new Vector2() { X = cP_au.X + orbitIcon.SemiMaj, Y = cP_au.Y  };
+            var f1_m = new Vector2() { X = cP_m.X + orbitIcon.LinearEccent, Y = cP_m.Y};
+            var f2_m = new Vector2() { X = cP_m.X - orbitIcon.LinearEccent, Y = cP_m.Y};
+            var coVertex = new Vector2() { X = cP_m.X , Y = cP_m.Y + orbitIcon.SemiMin };
+            var periapsisPnt = new Vector2() { X = cP_m.X - orbitIcon.SemiMaj, Y = cP_m.Y  };
+            var apoapsisPnt = new Vector2() { X = cP_m.X + orbitIcon.SemiMaj, Y = cP_m.Y  };
 
-            _cP = DrawTools.RotatePoint(cP_au, _loP);
-            _f1 = DrawTools.RotatePoint(f1_au, _loP);
-            _f2 = DrawTools.RotatePoint(f2_au, _loP);
+            _cP = DrawTools.RotatePoint(cP_m, _loP);
+            _f1 = DrawTools.RotatePoint(f1_m, _loP);
+            _f2 = DrawTools.RotatePoint(f2_m, _loP);
             _coVertex = DrawTools.RotatePoint(coVertex, _loP);
             _periapsisPnt = DrawTools.RotatePoint(periapsisPnt, _loP);
             _apoapsisPnt = DrawTools.RotatePoint(apoapsisPnt, _loP);
@@ -265,10 +265,10 @@ namespace Pulsar4X.SDL2UI
             //_aopFromCalc3 = OrbitMath.GetArgumentOfPeriapsis3(nodeVector, ecvec, pos, (Vector3)vel, _loan);
             //_aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(_orbitDB.Inclination, ecvec, nodeVector);
             
-            _bodyPosPnt_AU = new Vector2()
+            _bodyPosPnt_m = new Vector2()
             {
-                X = (_bodyPosition.RelativePosition_AU ).X,
-                Y = (_bodyPosition.RelativePosition_AU ).Y
+                X = (_bodyPosition.RelativePosition_m ).X,
+                Y = (_bodyPosition.RelativePosition_m ).Y
             };
             CreateLines();
 
@@ -656,7 +656,7 @@ namespace Pulsar4X.SDL2UI
                 //DataItem = ,
                 Shape = new ComplexShape()
                 {
-                    StartPoint = new Vector2() { X = _bodyPosPnt_AU.X, Y = _bodyPosPnt_AU.Y },
+                    StartPoint = new Vector2() { X = _bodyPosPnt_m.X, Y = _bodyPosPnt_m.Y },
                     Points = new Vector2[]
                     {
                     new Vector2(){ X = - 8, Y =  0 },
@@ -908,7 +908,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     Points = new Vector2[]{
                         _f1,
-                        _bodyPosPnt_AU
+                        _bodyPosPnt_m
                         },
                     Colors = trueAnomColour,
                     ColourChanges = new (int,int)[]
@@ -1147,18 +1147,18 @@ namespace Pulsar4X.SDL2UI
             _trueAnomItem_FromStateVec.DataString = Angle.ToDegrees(_trueAnom_FromStateVec).ToString() + "°";
             
             
-            _bodyPosPnt_AU = new Vector2() 
+            _bodyPosPnt_m = new Vector2() 
             { 
-                X = (_bodyPosition.RelativePosition_AU ).X, 
-                Y = (_bodyPosition.RelativePosition_AU ).Y 
+                X = (_bodyPosition.RelativePosition_m ).X, 
+                Y = (_bodyPosition.RelativePosition_m ).Y 
             };
-            _bodyPosItem.Shape.StartPoint = _bodyPosPnt_AU;
+            _bodyPosItem.Shape.StartPoint = _bodyPosPnt_m;
             
             
             _radiusToBody.Shape.Points = new Vector2[]
             {
                 new Vector2{X = _f1.X, Y = _f1.Y },
-                new Vector2{X = _bodyPosPnt_AU.X, Y = _bodyPosPnt_AU.Y }};
+                new Vector2{X = _bodyPosPnt_m.X, Y = _bodyPosPnt_m.Y }};
             _radiusToBody.DataItem = _bodyPosition.RelativePosition_m.Length();
             _radiusToBody.DataString = Stringify.Distance(_bodyPosition.RelativePosition_m.Length());
             
@@ -1251,6 +1251,17 @@ namespace Pulsar4X.SDL2UI
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
             Matrix nonZoomMatrix = Matrix.IDMirror(true, false);
  
+            
+            var foo = camera.ViewCoordinate_m(WorldPosition_m);
+            var trns = Matrix.IDTranslate(foo.x, foo.y);
+            var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
+            var mtrxZoom = scAU * matrix * trns;
+            
+            var foo2 = camera.ViewCoordinate_m(WorldPosition_m);
+            var trns2 = Matrix.IDTranslate(foo.x, foo.y);
+            //var scAU2 = Matrix.IDScale(6.6859E-12, 6.6859E-12);
+            var mtrxNonZoom = nonZoomMatrix * trns2;
+            
             _drawComplexShapes = new List<ComplexShape>() {};
 
             foreach (var item in ElementItems)
@@ -1268,13 +1279,24 @@ namespace Pulsar4X.SDL2UI
                     int y;
                     Vector2 transformedPoint;
                     if (shape.Scales)
-                        transformedPoint = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation. 
+                        points[i] = mtrxZoom.TransformD(pnt.X, pnt.Y);
+                        //transformedPoint = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation. 
                     else
+                    {
+                        //points[i] = mtrxNonZoom.TransformD(pnt.X, pnt.Y);
                         transformedPoint = nonZoomMatrix.TransformD(pnt.X, pnt.Y);
+                        x = (int)(ViewScreenPos.x + transformedPoint.X + startPoint.X);
+                        y = (int)(ViewScreenPos.y + transformedPoint.Y + startPoint.Y);
+                        points[i] = new Vector2() { X = x, Y = y };
+                    }
+                        
 
+                    /*
                     x = (int)(ViewScreenPos.x + transformedPoint.X + startPoint.X);
                     y = (int)(ViewScreenPos.y + transformedPoint.Y + startPoint.Y);
                     points[i] = new Vector2() { X = x, Y = y };
+                    */
+                    
 
                 }
 
