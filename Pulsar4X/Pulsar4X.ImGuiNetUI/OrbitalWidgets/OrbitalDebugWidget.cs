@@ -690,7 +690,7 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_loan).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 63, -6, 0, _loan, 128),
+                    StartPoint = _cP,
                     Colors = loanColour,
                     ColourChanges = new (int pointIndex, int colourIndex)[]
                     {
@@ -699,6 +699,8 @@ namespace Pulsar4X.SDL2UI
                     Scales = false
                 }
             };
+            //loanAngle.Shape.Points = CreatePrimitiveShapes.AngleArc(_cP, 63, -6, 0, _loan, 128);
+            loanAngle.Shape.Points = CreatePrimitiveShapes.AngleArc(new Vector2(0,0), 63, -6, 0, _loan, 128);
             ElementItems.Add(loanAngle);
 
             //aop angle
@@ -713,7 +715,8 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_aop).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 63, -6, _loan, _aop, 128),
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 63, -6, _loan, _aop, 128),
                     Colors = aopColour,
                     ColourChanges = new (int,int)[]
                     {
@@ -735,7 +738,8 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_aopFromCalc1).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 90, -6, _loan, _aopFromCalc1, 128),
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 90, -6, _loan, _aopFromCalc1, 128),
                     Colors = aopColour,
                     ColourChanges = new (int,int)[]
                     {
@@ -755,7 +759,8 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_aopFromCalc2).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 93, -6, _loan, _aopFromCalc2, 128),
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 93, -6, _loan, _aopFromCalc2, 128),
                     Colors = aopColour,
                     ColourChanges = new (int,int)[]
                     {
@@ -795,7 +800,8 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_aopFromCalc4).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 99, -6, _loan, _aopFromCalc4, 128),
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 99, -6, _loan, _aopFromCalc4, 128),
                     Colors = aopColour,
                     ColourChanges = new (int,int)[]
                     {
@@ -818,7 +824,8 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_loP).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 65, 6, 0, _loP, 128),
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 65, 6, 0, _loP, 128),
                     Colors = lopColour,
                     ColourChanges = new (int pointIndex,int colourIndex)[]{ (0, 0) },
                     Scales = false
@@ -848,8 +855,9 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_trueAnom).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 78, 6, _loP, _trueAnom, 128),
-                Colors = trueAnomColour,
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 78, 6, _loP, _trueAnom, 128),
+                    Colors = trueAnomColour,
                     ColourChanges = new (int,int)[]
                     {
                         (0,0),
@@ -867,7 +875,8 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_trueAnom_FromEVec).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 80, 6, _loP, _trueAnom_FromEVec, 128),
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 80, 6, _loP, _trueAnom_FromEVec, 128),
                     Colors = trueAnomColour,
                     ColourChanges = new (int,int)[]
                     {
@@ -886,7 +895,8 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_trueAnom_FromStateVec).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 84, 6, _loP, _trueAnom_FromStateVec, 128),
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 84, 6, _loP, _trueAnom_FromStateVec, 128),
                     Colors = trueAnomColour,
                     ColourChanges = new (int,int)[]
                     {
@@ -935,7 +945,8 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_meanAnom).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    Points = CreatePrimitiveShapes.AngleArc(_cP, 67, 6, 0, _meanAnom, 128),
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 67, 6, 0, _meanAnom, 128),
                     Colors = meanAnomColour,
                     ColourChanges = new (int,int)[]
                     {
@@ -960,8 +971,8 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_eccentricAnom).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = new Vector2() { X = _cP.X, Y = _cP.Y },
-                    Points = CreatePrimitiveShapes.AngleArc(new Vector2() { X = 0, Y = 0 }, 69, 6, _loP, _eccentricAnom, 128),
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 69, 6, _loP, _eccentricAnom, 128),
                     Colors = eAnomColour,
                     ColourChanges = new (int,int)[]
                     {
@@ -981,8 +992,8 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_eccentricAnom_FromTrueAnom).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = new Vector2() { X = _cP.X, Y = _cP.Y },
-                    Points = CreatePrimitiveShapes.AngleArc(new Vector2() { X = 0, Y = 0 }, 73, 6, _loP, _eccentricAnom_FromTrueAnom, 128),
+                    StartPoint = _cP,
+                    Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 73, 6, _loP, _eccentricAnom_FromTrueAnom, 128),
                     Colors = eAnomColour,
                     ColourChanges = new (int,int)[]
                     {
@@ -1260,14 +1271,14 @@ namespace Pulsar4X.SDL2UI
             var foo2 = camera.ViewCoordinate_m(WorldPosition_m);
             var trns2 = Matrix.IDTranslate(foo.x, foo.y);
             //var scAU2 = Matrix.IDScale(6.6859E-12, 6.6859E-12);
-            var mtrxNonZoom = nonZoomMatrix * trns2;
+            var mtrxNonZoom = trns2;
             
             _drawComplexShapes = new List<ComplexShape>() {};
 
             foreach (var item in ElementItems)
             {
                 var shape = item.Shape;
-                var startPoint = matrix.TransformD(shape.StartPoint.X, shape.StartPoint.Y); //add zoom transformation. 
+                var startPoint = mtrxZoom.TransformD(shape.StartPoint.X, shape.StartPoint.Y); //add zoom transformation. 
 
                 Vector2[] points = new Vector2[shape.Points.Length];
 
@@ -1283,11 +1294,19 @@ namespace Pulsar4X.SDL2UI
                         //transformedPoint = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation. 
                     else
                     {
-                        //points[i] = mtrxNonZoom.TransformD(pnt.X, pnt.Y);
+                        var tp = mtrxNonZoom.TransformD(pnt.X, pnt.Y);
+                        points[i] = new  Vector2(startPoint.X + pnt.X, startPoint.Y + pnt.Y);
+                        if (points[i].X > int.MaxValue || points[i].X < int.MinValue)
+                        {
+                            throw new Exception("");
+                        }
+
+                        /*
                         transformedPoint = nonZoomMatrix.TransformD(pnt.X, pnt.Y);
                         x = (int)(ViewScreenPos.x + transformedPoint.X + startPoint.X);
                         y = (int)(ViewScreenPos.y + transformedPoint.Y + startPoint.Y);
                         points[i] = new Vector2() { X = x, Y = y };
+                        */
                     }
                         
 
@@ -1299,7 +1318,10 @@ namespace Pulsar4X.SDL2UI
                     
 
                 }
-
+                if (points[0].X > int.MaxValue || points[0].X < int.MinValue)
+                {
+                    throw new Exception("");
+                }
                 _drawComplexShapes.Add( new ComplexShape()
                 {
                     Points = points,
@@ -1324,6 +1346,10 @@ namespace Pulsar4X.SDL2UI
                         colour = shape.Colors[shape.ColourChanges[ci].colourIndex];
                         SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
                         ci++;
+                    }
+                    if (shape.Points[0].X > int.MaxValue || shape.Points[0].X < int.MinValue)
+                    {
+                        throw new Exception("");
                     }
                     int x1 = Convert.ToInt32(shape.Points[i].X);
                     int y1 = Convert.ToInt32(shape.Points[i].Y);
@@ -1379,7 +1405,8 @@ namespace Pulsar4X.SDL2UI
                 //DataString = Angle.ToDegrees(heading).ToString() + "°";
                 Shape = new ComplexShape()
                 {
-                    StartPoint = new Vector2(Distance.MToAU( _bodyPosPnt_m.X),Distance.MToAU( _bodyPosPnt_m.Y)),
+                    StartPoint = new Vector2( _bodyPosPnt_m.X, _bodyPosPnt_m.Y),
+                    //StartPoint = new Vector2(Distance.MToAU( _bodyPosPnt_m.X),Distance.MToAU( _bodyPosPnt_m.Y)),
                     //Points = headingPoints.Concat(headingLine).ToArray(), //CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, -heading, 128),
                     Colors = headingColour,
                     ColourChanges = new (int, int)[] {(0, 0),},
@@ -1404,7 +1431,8 @@ namespace Pulsar4X.SDL2UI
                 var vnorm = Vector3.Normalise((Vector3)vel_m) * 64;
                 var headingPoints = CreatePrimitiveShapes.AngleArc(new Vector2() { X = 0, Y = 0 }, 32, 6, 0, heading, 128);
                 Vector2[] headingLine = { new Vector2() { X = 0, Y = 0 }, new Vector2() { X = vnorm.X, Y = vnorm.Y }, };
-                Shape.StartPoint = new Vector2(Distance.MToAU( _bodyPosPnt_m.X),Distance.MToAU( _bodyPosPnt_m.Y));
+                //Shape.StartPoint = new Vector2(Distance.MToAU( _bodyPosPnt_m.X),Distance.MToAU( _bodyPosPnt_m.Y));
+                Shape.StartPoint = new Vector2( _bodyPosPnt_m.X, _bodyPosPnt_m.Y);
                 Shape.Points = headingLine; //headingPoints.Concat(headingLine).ToArray(); 
                 DataString = Angle.ToDegrees(heading).ToString() + "°";
             }
@@ -1462,7 +1490,8 @@ namespace Pulsar4X.SDL2UI
                 //DataString = Angle.ToDegrees(heading).ToString() + "°";
                 Shape = new ComplexShape()
                 {
-                    StartPoint = new Vector2(Distance.MToAU( _bodyPosPnt_m.X),Distance.MToAU( _bodyPosPnt_m.Y)),
+                    StartPoint = new Vector2(_bodyPosPnt_m.X, _bodyPosPnt_m.Y),
+                    //StartPoint = new Vector2(Distance.MToAU( _bodyPosPnt_m.X),Distance.MToAU( _bodyPosPnt_m.Y)),
                     //Points = headingPoints.Concat(headingLine).ToArray(), //CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, -heading, 128),
                     Colors = headingColour,
                     ColourChanges = new (int, int)[] {(0, 0),},
@@ -1494,7 +1523,8 @@ namespace Pulsar4X.SDL2UI
                 //var v3 = OrbitMath.ProgradeToParentVector(_sgp, progradeVector, pos 
                 //var v3norm = Vector3.Normalise(v2) * 64;
                 
-                Shape.StartPoint = new Vector2(Distance.MToAU( _bodyPosPnt_m.X),Distance.MToAU( _bodyPosPnt_m.Y));
+                Shape.StartPoint = new Vector2(_bodyPosPnt_m.X,_bodyPosPnt_m.Y);
+                //Shape.StartPoint = new Vector2(Distance.MToAU( _bodyPosPnt_m.X),Distance.MToAU( _bodyPosPnt_m.Y));
                 
                 //PointD[] velLine = { new PointD() { X = 0, Y = 0 }, new PointD() { X = vnorm.X, Y = vnorm.Y } };
                 Vector2[] vline2 = { new Vector2() { X = 0, Y = 0 }, new Vector2() { X = v2norm.X, Y = v2norm.Y } };
