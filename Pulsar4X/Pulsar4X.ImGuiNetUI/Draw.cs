@@ -26,6 +26,24 @@ namespace Pulsar4X.SDL2UI
             };
             return newPoint;
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="angle">in radians</param>
+        /// <param name="orgin">rotate around this point</param>
+        /// <returns></returns>
+        public static Orbital.Vector2 RotatePointAround(Orbital.Vector2 point, double angle, Orbital.Vector2 orgin)
+        {
+
+            var tmtx = Matrix2d.IDTranslate(-orgin.X, -orgin.Y);
+            var rotmtx = Matrix2d.IDRotate(-angle);
+            var tmtx2 = Matrix2d.IDTranslate(orgin.X, orgin.Y);
+
+            var mtx = tmtx * rotmtx * tmtx2;
+            return mtx.Transform(point);
+        }
     }
 
     /// <summary>
