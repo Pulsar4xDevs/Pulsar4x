@@ -478,19 +478,28 @@ namespace Pulsar4X.ECSLib
                         tradeItems.Add((cargoTask.item, cargoTask.NumberOfItems));
 
                         var shipOwner = ship.FactionOwner;//.GetDataBlob<ObjectOwnershipDB>().OwningEntity;
-                        
+                        Entity currentSOIParent = ship.GetSOIParentEntity();
+                        Entity sourceSOIParent = destin.GetSOIParentEntity(); //might need some checks in here.
                         //moveto source(if requred)
                         var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
                         var at = ship.StarSysDateTime;
-                        var foo = Manuvers(ship, source, at,myMass);
+                        var pos = ship.GetDataBlob<PositionDB>().RelativePosition_m;
+                        var state = ship.GetRelativeState();
+                        var curState = new ManuverState()
+                        {
+                            At = at,
+                            Mass = myMass,
+                            Position = state.pos,
+                            Velocity = state.Velocity
+                        };
+                        var manuverState = Manuvers(ship, currentSOIParent, source, curState);
 
 
                         CargoLoadFromOrder.CreateCommand(shipOwner, source, ship, tradeItems);
                         //CargoUnloadToOrder.CreateCommand(shipOwner, source, ship, tradeItems);//we need to use the above...
                         //moveto destination.
-                        at += TimeSpan.FromSeconds(foo.tsec);
-                        myMass -= foo.fuelBurned;
-                        Manuvers(ship, destin, at, myMass);
+          
+                        Manuvers(ship, sourceSOIParent, destin, manuverState.endState);
                         CargoUnloadToOrder.CreateCommand(shipOwner, ship, destin, tradeItems);
  
                     }
@@ -503,18 +512,38 @@ namespace Pulsar4X.ECSLib
 
         }
 
+        public struct ManuverState
+        {
+            public DateTime At;
+            public double Mass;
+            public Vector3 Position;
+            public Vector3 Velocity;
+        }
 
-        private static (double tsec, double fuelBurned) Manuvers(Entity ship, Entity target, DateTime at, double shipMass)
+
+        private static (ManuverState endState, double fuelBurned) Manuvers(Entity ship, Entity cur, Entity target, ManuverState startState)
         {
 
-            (double t, double f) retval = (0, 0);
+            
+
+            var shipMass = startState.Mass;
+            double tsec = 0;
+            DateTime dateTime = startState.At;
+            double fuelUse = 0;
+            Vector3 pos = startState.Position;
+            Vector3 vel = startState.Velocity;
+            
             
             var targetBody = target.GetSOIParentEntity();
 
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
             var sgpTgtBdy = OrbitMath.CalculateStandardGravityParameterInM3S2(shipMass, tgtBdyMass);
-
+            var curBdyMass = cur.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+            var sgpCurBdy = OrbitalMath.CalculateStandardGravityParameterInM3S2(shipMass, curBdyMass);
+            var ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, startState.Position, startState.Velocity, startState.At);
+            
+            
             if (ship.GetSOIParentEntity() == target.GetSOIParentEntity())
             {
                 var dvdif = CargoTransferProcessor.CalcDVDifference_m(target, ship);
@@ -544,11 +573,24 @@ namespace Pulsar4X.ECSLib
                         foreach (var manvr in manuvers)
                         {
                             
-                            double ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-                            double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(shipMass, ve, manvr.deltaV.Length());
-                            retval.t += manvr.timeInSeconds;
-                            retval.f += fuelBurned;
+                            double vexhaust = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+                            double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(shipMass, vexhaust, manvr.deltaV.Length());
+                            tsec += manvr.timeInSeconds;
+                            dateTime = dateTime + TimeSpan.FromSeconds(tsec);
+                            fuelUse += fuelBurned;
                             shipMass -= fuelBurned;
+
+                            var preManuverState = OrbitMath.GetStateVectors(ke, dateTime);
+                            pos = preManuverState.position;
+                            vel = new Vector3(preManuverState.velocity.X, preManuverState.velocity.Y, 0);
+                            vel += manvr.deltaV;
+                            ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, pos, vel, dateTime);
+                            var postManuverState = OrbitMath.GetStateVectors(ke, dateTime);
+                            pos = postManuverState.position;
+                            vel =  new Vector3(postManuverState.velocity.X, postManuverState.velocity.Y, 0);
+
+
+
                         }
 
 
@@ -584,9 +626,22 @@ namespace Pulsar4X.ECSLib
                             
                             double ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
                             double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(shipMass, ve, manvr.deltaV.Length());
-                            retval.t += manvr.timeInSeconds;
-                            retval.f += fuelBurned;
+                            tsec += manvr.timeInSeconds;
+                            dateTime = dateTime + TimeSpan.FromSeconds(tsec);
+                            fuelUse += fuelBurned;
                             shipMass -= fuelBurned;
+                            
+                            
+                            var preManuverState = OrbitMath.GetStateVectors(ke, dateTime);
+                            pos = preManuverState.position;
+                            vel = new Vector3(preManuverState.velocity.X, preManuverState.velocity.Y, 0);
+                            vel += manvr.deltaV;
+                            
+                            ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, pos, vel, dateTime);
+                            var postManuverState = OrbitMath.GetStateVectors(ke, dateTime);
+                            pos = postManuverState.position;
+                            vel =  new Vector3(postManuverState.velocity.X, postManuverState.velocity.Y, 0);
+                            
                         }
                         NewtonThrustCommand.CreateCommands(ship, manuvers);
                     }
@@ -596,20 +651,30 @@ namespace Pulsar4X.ECSLib
             {
 
                 double targetRad = OrbitMath.LowOrbitRadius(targetBody);
-                var ourState = ship.GetRelativeState();
+                
+                //This is wrong, we need the state for where we WILL BE at this point. 
+                //this is getting our state *now* but we may be doing manuvers before we get to this manuver. 
+                //var ourState = ship.GetRelativeState(); 
+                
 
+                
+                
+                //We should be inserting at a position where our velocity is 90deg from our position to the parent.
+                //this should mean we only require a retrograde thrust to circularise.
+                //we're assuming we have enough thrust(acceleration) to do this manuver in one go. (TODO handle better)
+                
                 //var departTime = ship.StarSysDateTime;
                 OrbitDB targetOrbit = targetBody.GetDataBlob<OrbitDB>();
-                (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition_m(ship, targetOrbit, at);
-                Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector_m(ourState.Velocity, targetOrbit, targetIntercept.eti);
+                (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition_m(ship, targetOrbit, startState.At);
+                Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector_m(startState.Velocity, targetOrbit, targetIntercept.eti);
                 var insertionSpeed = insertionVector.Length();
                 var idealSpeed = Math.Sqrt(targetRad / sgpTgtBdy);//for a circular orbit
                 var deltaV = insertionSpeed - idealSpeed;
 
-                var targetInsertionPosition = Vector3.Normalise(ourState.pos) * targetRad;
+                var targetInsertionPosition = Vector3.Normalise(startState.Velocity) * targetRad;
                 var thrustVector = Vector3.Normalise(insertionVector) * -deltaV;
-                var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(shipMass, target.GetDataBlob<MassVolumeDB>().MassTotal);
-                var thrustV2 = OrbitalMath.ProgradeToParentVector(sgp, thrustVector, targetInsertionPosition, insertionVector);
+                
+                var thrustV2 = OrbitalMath.ProgradeToParentVector(sgpTgtBdy, thrustVector, targetInsertionPosition, insertionVector);
                 //should we expend deltaV now or when we get there?
                 
                 
@@ -619,7 +684,7 @@ namespace Pulsar4X.ECSLib
                     ship, 
                     targetBody, 
                     targetInsertionPosition, 
-                    at, 
+                    startState.At, 
                     thrustV2,
                     shipMass);
 
@@ -627,9 +692,22 @@ namespace Pulsar4X.ECSLib
                 
                 double ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
                 double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(shipMass, ve, dv);
-                retval.t += OrbitMath.BurnTime(ship, dv, shipMass);
-                retval.f += fuelBurned;
+                tsec += OrbitMath.BurnTime(ship, dv, shipMass);
+                dateTime = dateTime + TimeSpan.FromSeconds(tsec);
+                fuelUse += fuelBurned;
                 shipMass -= fuelBurned;
+                
+                
+                
+                var preManuverState = OrbitMath.GetStateVectors(ke, dateTime);
+                pos = preManuverState.position;
+                vel = new Vector3(preManuverState.velocity.X, preManuverState.velocity.Y, 0);
+                vel += thrustV2;
+                            
+                ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, pos, vel, dateTime);
+                var postManuverState = OrbitMath.GetStateVectors(ke, dateTime);
+                pos = postManuverState.position;
+                vel =  new Vector3(postManuverState.velocity.X, postManuverState.velocity.Y, 0);
                 
                 //NewtonThrustCommand.CreateCommand(ship.FactionOwner, ship, targetIntercept.eti, thrustVector, "Thrust: Circularize");
                 //var secFromNow = targetIntercept.eti - ship.StarSysDateTime;
@@ -640,7 +718,16 @@ namespace Pulsar4X.ECSLib
                 //circ.DebugDetails.Add(("ThrustVector y", thrustVector.Y));
             }
 
-            return retval;
+            ManuverState mstate = new ManuverState()
+            {
+                At = startState.At + TimeSpan.FromSeconds(tsec),
+                Mass = shipMass,
+                Position = pos,
+                Velocity = vel
+                
+            };
+            
+            return (mstate, fuelUse);
         }
     }
 
