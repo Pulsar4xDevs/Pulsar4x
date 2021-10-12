@@ -485,21 +485,31 @@ namespace Pulsar4X.ECSLib
                         var at = ship.StarSysDateTime;
                         var pos = ship.GetDataBlob<PositionDB>().RelativePosition_m;
                         var state = ship.GetRelativeState();
-                        var curState = new ManuverState()
+                        var curstate = new ManuverState()
                         {
                             At = at,
                             Mass = myMass,
                             Position = state.pos,
                             Velocity = state.Velocity
                         };
-                        var manuverState = Manuvers(ship, currentSOIParent, source, curState);
-
+                        var manuverState = Manuvers(ship, currentSOIParent, source, curstate);
+                        curstate = manuverState.endState;
 
                         CargoLoadFromOrder.CreateCommand(shipOwner, source, ship, tradeItems);
-                        //CargoUnloadToOrder.CreateCommand(shipOwner, source, ship, tradeItems);//we need to use the above...
+                        
+                        
+                        var smass = sourceSOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
+                        var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(curstate.Mass, smass);
+                        var sstate = currentSOIParent.GetRelativeFutureState(curstate.At);
+                        var dvd = CargoTransferProcessor.CalcDVDifference_m(sgp, (curstate.Position, curstate.Velocity), sstate);
+                        var svs = source.GetDataBlob<VolumeStorageDB>();
+                        var mvs = ship.GetDataBlob<VolumeStorageDB>();
+                        var ctime = CargoTransferProcessor.CalcTransferRate(dvd, svs, mvs);
+                        curstate.At = curstate.At + TimeSpan.FromSeconds(ctime);
+                        
                         //moveto destination.
           
-                        Manuvers(ship, sourceSOIParent, destin, manuverState.endState);
+                        Manuvers(ship, sourceSOIParent, destin, curstate);
                         CargoUnloadToOrder.CreateCommand(shipOwner, ship, destin, tradeItems);
  
                     }
@@ -584,6 +594,7 @@ namespace Pulsar4X.ECSLib
                             pos = preManuverState.position;
                             vel = new Vector3(preManuverState.velocity.X, preManuverState.velocity.Y, 0);
                             vel += manvr.deltaV;
+                            
                             ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, pos, vel, dateTime);
                             var postManuverState = OrbitMath.GetStateVectors(ke, dateTime);
                             pos = postManuverState.position;
