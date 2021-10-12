@@ -140,7 +140,8 @@ namespace Pulsar4X.ECSLib
         }
                 
         /// <summary>
-        /// Calculates the difference in DeltaV between two enties who have the same parent
+        /// Calculates a simplified difference in DeltaV between two enties who have the same parent
+        /// for the purposes of calculating cargo transfer rate
         /// </summary>
         /// <param name="entity1"></param>
         /// <param name="entity2"></param>
@@ -165,8 +166,8 @@ namespace Pulsar4X.ECSLib
                 parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
                 sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(0, parentMass);
                 
-                var state1 = entity1.GetRelativeState();
-                var state2 = entity2.GetRelativeState();
+                (Vector3 pos, Vector3 Velocity) state1 = entity1.GetRelativeState();
+                (Vector3 pos, Vector3 Velocity) state2 = entity2.GetRelativeState();
                 r1 = state1.pos.Length();
                 r2 = state2.pos.Length();
             }
@@ -181,6 +182,25 @@ namespace Pulsar4X.ECSLib
 
 
         }
+
+        
+        
+        /// <summary>
+        /// Calculates a simplified difference in DeltaV between two enties who have the same parent
+        /// for the purposes of calculating cargo transfer rate
+        /// </summary>
+        /// <param name="sgp"></param>
+        /// <param name="state1"></param>
+        /// <param name="state2"></param>
+        /// <returns></returns>
+        public static double CalcDVDifference_m(double sgp, (Vector3 pos, Vector3 Velocity) state1, (Vector3 pos, Vector3 Velocity) state2)
+        {
+            var r1 = state1.pos.Length();
+            var r2 = state2.pos.Length();
+            var hohmann = OrbitalMath.Hohmann(sgp, r1, r2);
+            return hohmann[0].deltaV.Length() + hohmann[1].deltaV.Length();
+        }
+        
 
         /// <summary>
         /// Calculates the transfer rate.
