@@ -154,6 +154,14 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        public static (Vector3 pos, Vector3 Velocity) GetRelativeFutureState(this Entity entity, DateTime atDateTime)
+        {
+            var fvel = GetRelativeFutureVelocity(entity, atDateTime);
+            var fpos = GetRelativeFuturePosition(entity, atDateTime);
+
+            return (fpos, fvel);
+        }
+
         /// <summary>
         /// Gets future velocity for this entity, datablob agnostic.
         /// </summary>
