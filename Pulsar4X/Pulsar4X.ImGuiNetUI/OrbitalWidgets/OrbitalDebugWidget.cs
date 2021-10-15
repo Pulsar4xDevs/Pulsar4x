@@ -71,12 +71,18 @@ namespace Pulsar4X.SDL2UI
 
             if(IsActive && ImGui.Begin("Orbit Lines"))
             {
-                
+                ImGui.Text("Parent: " + _debugWidget.parentname);
+                ImGui.Text("ParentPos: " + _debugWidget.parentPos);
+                ImGui.Text("focal point abs: " + _debugWidget._f1a);
+                ImGui.Text("focal point rel: " + _debugWidget._f1r);
                 foreach (var item in _debugWidget.ElementItems)
                 {
                     ImGui.Text(item.NameString);
                     if (ImGui.IsItemHovered())
+                    {
                         item.SetHighlight(true);
+                        ImGui.Text("StartPoint: " + item.Shape.StartPoint);
+                    }
                     else
                         item.SetHighlight(false);
                     ImGui.SameLine();
@@ -105,9 +111,10 @@ namespace Pulsar4X.SDL2UI
         private IPosition _bodyPosition;
 
         internal Guid EntityGuid;
-
-        Vector2 _f1a;
-        Vector2 _f1r;
+        internal string parentname;
+        internal Vector3 parentPos;
+        internal Vector2 _f1a;
+        internal Vector2 _f1r;
         Vector2 _f2;
         Vector2 _cP;
         Vector2 _coVertex;
@@ -210,10 +217,11 @@ namespace Pulsar4X.SDL2UI
             _aop = _keplerElements.AoP;
             _loP = _orbitIcon.LoP_radians;
 
-            var cP_a = new Vector2() { X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
+            var cP_a = new Vector2() { X = _orbitIcon.ParentPosDB.RelativePosition_m.X, Y = _orbitIcon.ParentPosDB.RelativePosition_m.Y };
             _f1a = new Vector2(){ X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
             _f1r = new Vector2(){ X = _orbitIcon.ParentPosDB.RelativePosition_m.X, Y = _orbitIcon.ParentPosDB.RelativePosition_m.Y };
-            
+            parentname = parentEntity.GetOwnersName();
+            parentPos = parentEntity.GetAbsolutePosition();
             cP_a.X -= _orbitIcon.LinearEccent;
             
 
@@ -1295,18 +1303,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
-            //Matrix nonZoomMatrix = Matrix.IDMirror(true, false);
- 
-            
-            var foo = camera.ViewCoordinate_m(WorldPosition_m);
-            var trns = Matrix.IDTranslate(foo.x, foo.y);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
-            var mtrxZoom = scAU * matrix * trns;
-            
-            //var foo2 = camera.ViewCoordinate_m(WorldPosition_m);
-            //var trns2 = Matrix.IDTranslate(foo.x, foo.y);
-            //var scAU2 = Matrix.IDScale(6.6859E-12, 6.6859E-12);
-            //var mtrxNonZoom = trns2;
             
             _drawComplexShapes = new List<ComplexShape>() {};
 
@@ -1315,8 +1312,9 @@ namespace Pulsar4X.SDL2UI
                 var shape = item.Shape;
                 
                 Vector2[] points = new Vector2[shape.Points.Length];
-
-                var startPoint = mtrxZoom.TransformD(shape.StartPoint.X, shape.StartPoint.Y); //add zoom transformation. 
+                var startPoint = camera.ViewCoordinateV2_m(shape.StartPoint);
+                var mtx = Matrix.IDTranslate(startPoint.X , startPoint.Y );
+                var mtxz = scAU * matrix * mtx;
                 if (shape.Scales)
                 {
                     for (int i = 0; i < shape.Points.Length; i++)
@@ -1326,7 +1324,7 @@ namespace Pulsar4X.SDL2UI
                         int x;
                         int y;
                         Vector2 transformedPoint;
-                        points[i] = mtrxZoom.TransformD(pnt.X, pnt.Y);
+                        points[i] = mtxz.TransformD(pnt.X, pnt.Y);
                     }
                 }
                 else

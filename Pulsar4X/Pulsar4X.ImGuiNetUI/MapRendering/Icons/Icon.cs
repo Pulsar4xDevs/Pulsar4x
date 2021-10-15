@@ -85,10 +85,10 @@ namespace Pulsar4X.SDL2UI
 
 
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
-            
+            var pos = camera.ViewCoordinateV2_m(WorldPosition_m);
             var mirrorMtx = Matrix.IDMirror(true, false);
             var scaleMtx = Matrix.IDScale(Scale, Scale);
-            var posMtx = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
+            var posMtx = Matrix.IDTranslate(pos.X, pos.Y);
             Matrix mtx = mirrorMtx * scaleMtx * posMtx;
             
             int shapeCount = Shapes.Count;

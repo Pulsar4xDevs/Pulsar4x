@@ -152,8 +152,8 @@ namespace Pulsar4X.SDL2UI
         {
             //resize for zoom
             //translate to position
-            var foo = camera.ViewCoordinate_m(WorldPosition_m);
-            var trns = Matrix.IDTranslate(foo.x, foo.y);
+            var foo = camera.ViewCoordinateV2_m(WorldPosition_m);
+            var trns = Matrix.IDTranslate(foo.X, foo.Y);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var mtrx = scAU * matrix * trns;
             //_drawPoints = new SDL.SDL_Point[_numberOfDrawSegments]; //we don't need to create a whole new array
