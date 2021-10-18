@@ -240,6 +240,17 @@ namespace Pulsar4X.SDL2UI
             return points.ToArray();
         }
 
+        public static Orbital.Vector2[] Crosshair()
+        {
+            return new Vector2[]
+            {
+                new Vector2(){ X = - 8, Y =  0 },
+                new Vector2(){ X =  + 8, Y = 0 },
+                new Vector2(){ X = 0 , Y =   - 8 },
+                new Vector2(){ X = 0 , Y =   + 8 }
+            };
+        }
+
         public enum PosFrom
         {
             TopLeft,

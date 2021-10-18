@@ -97,10 +97,33 @@ namespace Pulsar4X.SDL2UI
             
             if (DebugShowCenter)
             {
-                DrawShapes = new Shape[shapeCount+1];
-                dsi = 1;
+                dsi = 3;
+                DrawShapes = new Shape[shapeCount+dsi];
                 var mtxb = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
                 DrawShapes[0] = CreatePrimitiveShapes.CenterWidget(mtxb);
+
+                var abspos = camera.ViewCoordinateV2_m(_positionDB.AbsolutePosition_m);
+                Shape absCtr = new Shape();
+                absCtr.Points = CreatePrimitiveShapes.Crosshair();
+                byte r = 150;
+                byte g = 50;
+                byte b = 200;
+                byte a = 255;
+                SDL.SDL_Color colour = new SDL.SDL_Color() {r = r, g = g, b = b, a = a};
+                absCtr.Color = colour;
+                DrawShapes[1] = absCtr;
+                
+                var ralpos = camera.ViewCoordinateV2_m(_positionDB.RelativePosition_m + _worldPosition_m);
+                Shape ralCtr = new Shape();
+                ralCtr.Points = CreatePrimitiveShapes.Crosshair();
+                 r = 200;
+                 g = 50;
+                 b = 150;
+                 a = 255;
+                colour = new SDL.SDL_Color() {r = r, g = g, b = b, a = a};
+                ralCtr.Color = colour;
+                DrawShapes[1] = ralCtr;
+
             }
             
             for (int i = 0; i < shapeCount; i++)

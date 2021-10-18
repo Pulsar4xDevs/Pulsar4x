@@ -134,7 +134,10 @@ namespace Pulsar4X.SDL2UI
         {
             Vector3 pos = BodyPositionDB.RelativePosition_m; 
             _bodyrelativePos = new Vector2() { X = pos.X, Y = pos.Y };
+            var apos = BodyPositionDB.AbsolutePosition_m;
+            _bodyAbsolutePos = new Vector2(apos.X, apos.Y);
             
+            //we find the point in the ellipse which is closest to the body so we can start drawing from the body.
             double minDist = (_bodyrelativePos - _points[_index]).Length();
 
             for (int i =0; i < _points.Count(); i++)
@@ -152,13 +155,18 @@ namespace Pulsar4X.SDL2UI
         {
             //resize for zoom
             //translate to position
-            var foo = camera.ViewCoordinateV2_m(WorldPosition_m);
+            
+            var foo = camera.ViewCoordinateV2_m(WorldPosition_m); //camera position and zoom
+            
             var trns = Matrix.IDTranslate(foo.X, foo.Y);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
-            var mtrx = scAU * matrix * trns;
-            //_drawPoints = new SDL.SDL_Point[_numberOfDrawSegments]; //we don't need to create a whole new array
-            int index = _index;      
-            _drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
+            var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
+
+            int index = _index;
+            var spos = camera.ViewCoordinateV2_m(_bodyAbsolutePos);
+
+            //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
+            _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
             for (int i = 1; i < _numberOfDrawSegments; i++)
             {
                 if (index < _numberOfArcSegments - 1)
@@ -166,6 +174,7 @@ namespace Pulsar4X.SDL2UI
                     index++;
                 else
                     index = 0;
+                
                 _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
             }
         }

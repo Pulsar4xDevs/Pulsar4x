@@ -173,6 +173,15 @@ namespace Pulsar4X.SDL2UI
             return viewCoord;
         }
         
+        public Orbital.Vector2 ViewCoordinateV2_AU(Orbital.Vector3 worldCoord_AU)
+        {
+            double x = ((worldCoord_AU.X - CameraWorldPosition_AU.X) * ZoomLevel + ViewPortCenter.X);
+            double y = -((worldCoord_AU.Y - CameraWorldPosition_AU.Y) * ZoomLevel - ViewPortCenter.Y);
+            Orbital.Vector2 viewCoord = new Orbital.Vector2( x, y );
+
+            return viewCoord;
+        }
+        
         public Orbital.Vector3 MouseWorldCoordinate_AU()
         {
             Orbital.Vector2 mouseCoord = new Orbital.Vector2(ImGui.GetMousePos());

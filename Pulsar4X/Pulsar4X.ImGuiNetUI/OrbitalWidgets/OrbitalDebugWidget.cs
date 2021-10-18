@@ -217,7 +217,7 @@ namespace Pulsar4X.SDL2UI
             _aop = _keplerElements.AoP;
             _loP = _orbitIcon.LoP_radians;
 
-            var cP_a = new Vector2() { X = _orbitIcon.ParentPosDB.RelativePosition_m.X, Y = _orbitIcon.ParentPosDB.RelativePosition_m.Y };
+            var cP_a = new Vector2() { X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
             _f1a = new Vector2(){ X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
             _f1r = new Vector2(){ X = _orbitIcon.ParentPosDB.RelativePosition_m.X, Y = _orbitIcon.ParentPosDB.RelativePosition_m.Y };
             parentname = parentEntity.GetOwnersName();
@@ -281,8 +281,8 @@ namespace Pulsar4X.SDL2UI
             
             _bodyPosPnt_m = new Vector2()
             {
-                X = (_bodyPosition.RelativePosition_m ).X,
-                Y = (_bodyPosition.RelativePosition_m ).Y
+                X = (_bodyPosition.AbsolutePosition_m ).X,
+                Y = (_bodyPosition.AbsolutePosition_m ).Y
             };
             CreateLines();
 
@@ -1313,18 +1313,15 @@ namespace Pulsar4X.SDL2UI
                 
                 Vector2[] points = new Vector2[shape.Points.Length];
                 var startPoint = camera.ViewCoordinateV2_m(shape.StartPoint);
-                var mtx = Matrix.IDTranslate(startPoint.X , startPoint.Y );
-                var mtxz = scAU * matrix * mtx;
+                //var mtx = Matrix.IDTranslate(startPoint.X , startPoint.Y );
+                //var mtxz = scAU * matrix * mtx;
                 if (shape.Scales)
                 {
                     for (int i = 0; i < shape.Points.Length; i++)
                     {
                         var pnt = shape.Points[i];;
-
-                        int x;
-                        int y;
-                        Vector2 transformedPoint;
-                        points[i] = mtxz.TransformD(pnt.X, pnt.Y);
+                        //Vector2 transformedPoint;
+                        points[i] = camera.ViewCoordinateV2_m(pnt);
                     }
                 }
                 else
@@ -1332,8 +1329,6 @@ namespace Pulsar4X.SDL2UI
                     for (int i = 0; i < shape.Points.Length; i++)
                     {
                         var pnt = shape.Points[i];
-                        int x;
-                        int y;
                         points[i] = new  Vector2(startPoint.X + pnt.X, startPoint.Y + pnt.Y);
                         if (points[i].X > int.MaxValue || points[i].X < int.MinValue)
                         {

@@ -31,6 +31,7 @@ namespace Pulsar4X.SDL2UI
         protected OrbitDB _orbitDB;
         internal IPosition BodyPositionDB;
         protected Vector2 _bodyrelativePos;
+        protected Vector2 _bodyAbsolutePos;
         internal float SemiMaj;
         internal float SemiMinor;
         protected float _loP_Degrees; //longditudeOfPeriapsis (loan + aop) 
