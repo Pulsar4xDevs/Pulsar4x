@@ -235,9 +235,9 @@ namespace Pulsar4X.SDL2UI
             _cP = DrawTools.RotatePointAround(cP_a, _loP, _f1a);
             
             _f2 = DrawTools.RotatePointAround(f2_m, _loP, _f1a);
-            _coVertex = DrawTools.RotatePoint(coVertex, _loP);
-            _periapsisPnt = DrawTools.RotatePoint(periapsisPnt, _loP);
-            _apoapsisPnt = DrawTools.RotatePoint(apoapsisPnt, _loP);
+            _coVertex = DrawTools.RotatePointAround(coVertex, _loP, _f1a);
+            _periapsisPnt = DrawTools.RotatePointAround(periapsisPnt, _loP, _f1a);
+            _apoapsisPnt = DrawTools.RotatePointAround(apoapsisPnt, _loP, _f1a);
 
 
             _semiMajAxis = _orbitIcon.SemiMaj;
