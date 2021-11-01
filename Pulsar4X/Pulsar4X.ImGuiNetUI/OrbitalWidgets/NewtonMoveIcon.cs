@@ -21,13 +21,25 @@ namespace Pulsar4X.SDL2UI
         PositionDB _myPosDB;
         double _sgp;
         private double _sgpAU;
-        int _index = 0;
-        int _numberOfPoints;
+        //_taIndex is the point closest to the orbiting object, it's used to 
+        int _taIndex;
+        //_numberOfEllipsePoints is the total number of points around the ellipse, unadjusted for the percentage of the ellipse actualy drawn.
+        private int _numberOfEllipsePoints;
+        //_numberOfPoints is the number of points drawn in the ellipse. (UserOrbitSettings)
+        int _numberOfDrawnPoints;
         //internal float a;
         //protected float b;
-        protected Orbital.Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
+        //_points is the world coordinate points of an ellipse or hyperbola.
+        //eccentricity, focal offset, and longitude of the periapsis are calculated when populating this array.
+        protected Orbital.Vector2[] _points; 
+        //_drawpoints is the translated resized screen/pixel location of the above ellipse points. 
+        //the above _points are adjusted for camera position and zoom levels when populating this array, as these values can change between frames.
+        //[0] is the position of the orbiting object and subsequent positions trail behind the velocity and drawn with decreasing alpha. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
+        
+        //for drawing the direction of thrust when newton thrusting (world coordinates)
         private Orbital.Vector2[] _thrustLinePoints = new Vector2[2];
+        //above adjusted for camera position and zoom. 
         protected SDL.SDL_Point[] _drawThrustLinePoints = new SDL.SDL_Point[2];
         //PointD[] _debugPoints;
         SDL.SDL_Point[] _debugDrawPoints = new SDL.SDL_Point[0];
@@ -87,20 +99,39 @@ namespace Pulsar4X.SDL2UI
             if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
             {
                 _numberOfArcSegments = _userSettings.NumberOfArcSegments;
+                _numberOfEllipsePoints = _numberOfArcSegments;
                 _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
                 _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
                 _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
-                _numberOfPoints = _numberOfDrawSegments + 1;
+                _numberOfDrawnPoints = _numberOfDrawSegments + 1;//one extra for the object position
                 CreatePointArray();
             }
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
             _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
             _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
-            _numberOfPoints = _numberOfDrawSegments + 1;
-            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
+            _numberOfDrawnPoints = _numberOfDrawSegments + 1; //one extra for the object position
+            _drawPoints = new SDL.SDL_Point[_numberOfDrawnPoints];
         }
 
+        /// <summary>
+        /// This is used to find which point in the _points array is closest to the object
+        /// we then start drawing from that point and change the alpha
+        /// </summary>
+        void SetTrueAnomalyIndex()
+        {
+            Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition_m.X, _myPosDB.RelativePosition_m.Y);
+            double minDist = (pos - _points[_taIndex]).Length();
 
+            for (int i =0; i < _points.Length; i++)
+            {
+                double dist = (pos - _points[i]).Length();
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    _taIndex = i;
+                }
+            }
+        }
         public override void OnPhysicsUpdate()
         {
             if (_newtonMoveDB.OwningEntity == null)
@@ -146,6 +177,9 @@ namespace Pulsar4X.SDL2UI
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
                 CreateHyperbolicPoints();
             }
+            if(_newtonMoveDB.ManuverDeltaV.Length() > 0)
+                TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.NewtonionThrust;
+            SetTrueAnomalyIndex();
         }
 
         private void CreateHyperbolicPoints()
@@ -186,9 +220,9 @@ namespace Pulsar4X.SDL2UI
             double thetaMax = Math.Atan2(y, x2);
             
             //make it an odd number of points
-            if (_numberOfPoints % 2 == 0)
-                _numberOfPoints += 1;
-            int ctrIndex = _numberOfPoints / 2;
+            if (_numberOfDrawnPoints % 2 == 0)
+                _numberOfDrawnPoints += 1;
+            int ctrIndex = _numberOfDrawnPoints / 2;
             
             double dtheta = thetaMax / (ctrIndex - 1);
             double fooA = Math.Cosh(dtheta);
@@ -216,8 +250,11 @@ namespace Pulsar4X.SDL2UI
             var mtx = mtxtr * mtxrt;
             var mtxmr =  Matrix.IDMirror(true, false) * mtx;
             
+            if(_points is null || _points.Length != _numberOfEllipsePoints)
+                _points = new Orbital.Vector2[_numberOfEllipsePoints];
+            if (_drawPoints.Length != _numberOfDrawnPoints)
+                _drawPoints = new SDL.SDL_Point[_numberOfDrawnPoints];
             
-            _points = new Orbital.Vector2[_numberOfPoints];
             _points[ctrIndex] = mtx.TransformToVector2(points[0]); //periapsis
             
             
@@ -233,16 +270,22 @@ namespace Pulsar4X.SDL2UI
 
         }
 
+        /// <summary>
+        /// Create an array of points for a full ellipse with the correct eccentricity, lop, and focal point offset
+        /// ie the focal point should be the "center" or 0,0
+        /// </summary>
         private void CreateEllipsePoints()
         {
-
+            if(_points is null || _points.Length != _numberOfEllipsePoints)
+                _points = new Orbital.Vector2[_numberOfEllipsePoints];
+            if (_drawPoints.Length != _numberOfDrawnPoints)
+                _drawPoints = new SDL.SDL_Point[_numberOfDrawnPoints];
             double a = _ke.SemiMajorAxis;
             double b = _ke.SemiMinorAxis;
             double linierEccentricity = _ke.Eccentricity * a;
-            double _lop = _ke.AoP + _ke.LoAN;            
-            
-            double dTheta = _userSettings.EllipseSweepRadians / (_numberOfPoints - 1);
-            
+            double _lop = _ke.AoP + _ke.LoAN;
+
+            double dTheta = Math.PI * 2 / (_numberOfEllipsePoints - 1);
             double ct = Math.Cos(_lop);
             double st = Math.Sin(_lop);
             double cdp = Math.Cos(dTheta);
@@ -263,9 +306,9 @@ namespace Pulsar4X.SDL2UI
             double xc = Math.Cos(_lop) * -linierEccentricity;
             double yc = Math.Sin(_lop) * -linierEccentricity;
             
-            _points = new Orbital.Vector2[_numberOfPoints];
+            
 
-            for (int i = 0; i < _numberOfPoints; i++)
+            for (int i = 0; i < _numberOfEllipsePoints; i++)
             {
                 _points[i] = new Orbital.Vector2()
                 {
@@ -292,10 +335,30 @@ namespace Pulsar4X.SDL2UI
             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
             var mtrx = scAU * scZm *  trns;
             
+            
+            int index = _taIndex;
+            var spos = camera.ViewCoordinateV2_m(_myPosDB.AbsolutePosition_m);
+
+            //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
+            // [0] is the position of the object. 
+            _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
+            //we should have one less segment than points. 
+            //we should have more _points than _drawPoints. (_points is a full ellipse, we normaly only draw an arc)
+            for (int i = 1; i < _numberOfDrawSegments; i++) 
+            {
+                if (index < _numberOfEllipsePoints - 1)
+
+                    index++;
+                else
+                    index = 0;
+                _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
+            }
+
+            /*
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
                 _drawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
-            }
+            }*/
 
             var foo2 = camera.ViewCoordinate_m(_myPosDB.AbsolutePosition_m);
             var trns2 = Matrix.IDTranslate(foo2.x, foo2.y);
@@ -309,10 +372,11 @@ namespace Pulsar4X.SDL2UI
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
             //now we draw a line between each of the points in the translatedPoints[] array.
+            
             if (_drawPoints.Length < _numberOfDrawSegments - 1)
-                return;
+                return;//why was this? maybe prevent a race condition or something?
             float alpha = _userSettings.MaxAlpha;
-            for (int i = 0; i < _numberOfDrawSegments - 1; i++)
+            for (int i = 0; i < _drawPoints.Length - 1; i++)
             {
                 SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creeping up. 
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i +1].y);
@@ -322,7 +386,8 @@ namespace Pulsar4X.SDL2UI
             byte g = 50;
             byte b = 200;
             byte a = 255;
-
+            
+            //now draw the thrust line. 
             SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a);
             SDL.SDL_RenderDrawLine(rendererPtr, _drawThrustLinePoints[0].x, _drawThrustLinePoints[0].y, _drawThrustLinePoints[1].x, _drawThrustLinePoints[1].y);
             

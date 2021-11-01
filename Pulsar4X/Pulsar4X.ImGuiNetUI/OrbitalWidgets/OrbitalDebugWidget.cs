@@ -1160,6 +1160,14 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
+
+            if (_orbitIcon is NewtonMoveIcon)
+            {
+                List<ElementItem> ElementItems = new List<ElementItem>();
+                CreateLines();
+                
+            }
+
             DateTime systemDateTime = _entity.StarSysDateTime;
             double secondsFromEpoch = (systemDateTime - _keplerElements.Epoch).TotalSeconds;
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_keplerElements, systemDateTime);
@@ -1203,8 +1211,8 @@ namespace Pulsar4X.SDL2UI
             
             _bodyPosPnt_m = new Vector2() 
             { 
-                X = (_bodyPosition.RelativePosition_m ).X, 
-                Y = (_bodyPosition.RelativePosition_m ).Y 
+                X = (_bodyPosition.AbsolutePosition_m ).X, 
+                Y = (_bodyPosition.AbsolutePosition_m ).Y 
             };
             _bodyPosItem.Shape.StartPoint = _bodyPosPnt_m;
             
@@ -1244,13 +1252,20 @@ namespace Pulsar4X.SDL2UI
 
             var evenorm = Vector3.Normalise(ecvec) * 84;
             var evenorm2 = Vector3.Normalise(ecvec2) * 84;
-            
+            /*
             Vector2[] evLine =
             {
                 new Vector2() { X = _f1a.X, Y = _f1a.Y }, 
                 new Vector2(){X= _f1a.X + evenorm.X, Y = _f1a.X+ evenorm.Y},
                 new Vector2() { X = _f1a.X, Y = _f1a.Y },
                 new Vector2(){X= _f1a.X + evenorm2.X, Y = _f1a.X+ evenorm2.Y}
+            };*/
+            Vector2[] evLine =
+            {
+                new Vector2() { X = 0, Y = 0 }, 
+                new Vector2(){X=evenorm.X, Y = evenorm.Y},
+                new Vector2() { X = 0, Y = 0 },
+                new Vector2(){X= evenorm2.X, Y = evenorm2.Y}
             };
             _eccentricityVectorItem.Shape.Points = evLine;
             
