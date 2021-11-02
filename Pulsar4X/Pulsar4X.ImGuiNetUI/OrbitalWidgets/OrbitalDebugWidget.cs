@@ -212,19 +212,26 @@ namespace Pulsar4X.SDL2UI
             _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass); 
 
             EntityGuid = entityState.Entity.Guid;
+            parentname = parentEntity.GetOwnersName();
+            parentPos = parentEntity.GetAbsolutePosition();
+            
+            RefreshEccentricity();
 
+            CreateLines();
+
+        }
+
+        void RefreshEccentricity()
+        {
             _loan =  _keplerElements.LoAN;
             _aop = _keplerElements.AoP;
             _loP = _orbitIcon.LoP_radians;
 
             var cP_a = new Vector2() { X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
             _f1a = new Vector2(){ X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
-            _f1r = new Vector2(){ X = _orbitIcon.ParentPosDB.RelativePosition_m.X, Y = _orbitIcon.ParentPosDB.RelativePosition_m.Y };
-            parentname = parentEntity.GetOwnersName();
-            parentPos = parentEntity.GetAbsolutePosition();
+            //_f1r = new Vector2(){ X = _orbitIcon.ParentPosDB.RelativePosition_m.X, Y = _orbitIcon.ParentPosDB.RelativePosition_m.Y };
             cP_a.X -= _orbitIcon.LinearEccent;
             
-
             //var f1_m = new Vector2() { X = cP_r.X + _orbitIcon.LinearEccent, Y = cP_r.Y};
             var f2_m = new Vector2() { X = cP_a.X - _orbitIcon.LinearEccent, Y = cP_a.Y};
             var coVertex = new Vector2() { X = cP_a.X , Y = cP_a.Y + _orbitIcon.SemiMin };
@@ -245,7 +252,7 @@ namespace Pulsar4X.SDL2UI
             
             _ae = _semiMajAxis * _keplerElements.Eccentricity;
             
-            DateTime systemDateTime = _entity.StarSysDateTime;
+                        DateTime systemDateTime = _entity.StarSysDateTime;
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_keplerElements, systemDateTime);
 
             
@@ -284,11 +291,8 @@ namespace Pulsar4X.SDL2UI
                 X = (_bodyPosition.AbsolutePosition_m ).X,
                 Y = (_bodyPosition.AbsolutePosition_m ).Y
             };
-            CreateLines();
 
         }
-
-
 
         void CreateLines()
         {
@@ -1163,7 +1167,8 @@ namespace Pulsar4X.SDL2UI
 
             if (_orbitIcon is NewtonMoveIcon)
             {
-                List<ElementItem> ElementItems = new List<ElementItem>();
+                ElementItems = new List<ElementItem>();
+                RefreshEccentricity();
                 CreateLines();
                 
             }
