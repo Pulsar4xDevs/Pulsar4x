@@ -19,6 +19,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             onEntityChange(entity);
             _orderEntity = entity.Entity;
             _orderableDB = entity.Entity.GetDataBlob<OrderableDB>();
+            OnSystemTickChange(entity.Entity.StarSysDateTime);
         }
 
         internal static OrdersListUI GetInstance(EntityState entity, GlobalUIState state)
@@ -42,9 +43,6 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         internal void onEntityChange(EntityState entity)
         {
             _lookedAtEntity = entity;
-
- 
-
         }
 
         public override void OnSystemTickChange(DateTime newDate)
