@@ -218,6 +218,22 @@ namespace Pulsar4X.ECSLib
         public Entity SOIParent { get; internal set; }
         public double ParentMass { get; internal set; }
 
+        private KeplerElements _ke;
+
+        internal void UpdateKeplerElements(KeplerElements ke)
+        {
+            _ke = ke;
+        }
+
+        internal void UpdateKeplerElements()
+        {
+            double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
+            var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, ParentMass);
+            var pos = OwningEntity.GetDataBlob<PositionDB>().RelativePosition_m;
+            var dateTime = OwningEntity.StarSysDateTime;
+            _ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, CurrentVector_ms, dateTime);
+        }
+
         [JsonConstructor]
         private NewtonMoveDB() { }
 
@@ -234,6 +250,7 @@ namespace Pulsar4X.ECSLib
             ManuverDeltaV = manuverDeltaV;
             ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().MassDry;
             LastProcessDateTime = sphereOfInfluenceParent.Manager.ManagerSubpulses.StarSysDateTime;
+            
         }
 
         /// <summary>
@@ -247,6 +264,7 @@ namespace Pulsar4X.ECSLib
             SOIParent = sphereOfInfluenceParent;
             ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().MassDry;
             LastProcessDateTime = sphereOfInfluenceParent.Manager.ManagerSubpulses.StarSysDateTime;
+            
         }
 
         public NewtonMoveDB(NewtonMoveDB db)
@@ -254,7 +272,8 @@ namespace Pulsar4X.ECSLib
             LastProcessDateTime = db.LastProcessDateTime;
             CurrentVector_ms = db.CurrentVector_ms;
             SOIParent = db.SOIParent;
-            ParentMass = db.ParentMass; 
+            ParentMass = db.ParentMass;
+            
         }
         public override object Clone()
         {
@@ -275,17 +294,13 @@ namespace Pulsar4X.ECSLib
             {
                 OwningEntity.RemoveDataBlob<WarpMovingDB>();
             }
+            
+            UpdateKeplerElements();
         }
 
         public KeplerElements GetElements()
         {
-            // if there is not a change in Dv then the kepler elements wont have changed, it might be better to store them?
-            double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, ParentMass);
-            var pos = OwningEntity.GetDataBlob<PositionDB>().RelativePosition_m;
-            var dateTime = OwningEntity.StarSysDateTime;
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, CurrentVector_ms, dateTime);
-            return ke;
+            return _ke;
         }
     }
 }

@@ -121,6 +121,7 @@ namespace Pulsar4X.ECSLib
                     
                     //remove the vectorDV from the amount needed to fully complete the manuver. 
                     newtonMoveDB.ManuverDeltaV -= totalDVFromThrust;
+                    newtonMoveDB.UpdateKeplerElements();
                     //newtonMoveDB.DeltaVForManuver_FoRO_m -= totalDVFromThrust;
 
 
@@ -141,6 +142,7 @@ namespace Pulsar4X.ECSLib
                 positionDB.RelativePosition_m += deltaPos;
 
                 double sOIRadius = newtonMoveDB.SOIParent.GetSOI_m();                
+                var kE = newtonMoveDB.GetElements();
                 
                 if (positionDB.RelativePosition_m.Length() >= sOIRadius)
                 {
@@ -168,12 +170,15 @@ namespace Pulsar4X.ECSLib
 
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
                     //double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
-                    var kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posrelativeToNewParent, parentrelativeVector, dateTime);
+                    
 
+                    kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, posrelativeToNewParent, parentrelativeVector, dateTime);
                     positionDB.SetParent(newParent);
                     newtonMoveDB.ParentMass = parentMass_kg;
                     newtonMoveDB.SOIParent = newParent;
                     newtonMoveDB.CurrentVector_ms = parentrelativeVector;
+                    newtonMoveDB.UpdateKeplerElements(kE);
+                    
                 }
                 
                 if (newtonMoveDB.ManuverDeltaV.Length() <= 0) //if we've completed the manuver.
@@ -181,8 +186,14 @@ namespace Pulsar4X.ECSLib
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
                     //double sgp = GMath.StandardGravitationalParameter(parentMass_kg + mass_Kg);
                     
-                    KeplerElements kE = OrbitMath.KeplerFromPositionAndVelocity(sgp, positionDB.RelativePosition_m, newtonMoveDB.CurrentVector_ms, dateTime);
-
+                    //something funky with the below. though it may be just float differences, not sure. 
+                    /*
+#if DEBUG
+                    var kE2 = OrbitMath.KeplerFromPositionAndVelocity(sgp, positionDB.RelativePosition_m, newtonMoveDB.CurrentVector_ms, dateTime);
+                    if (kE.Eccentricity != kE2.Eccentricity)
+                        throw new Exception("Old Elements Exception - eccentricity has changed and newtonMoveDB.UpdateKeplerElements() has not been called");
+#endif
+                    */
                     var parentEntity = entity.GetSOIParentEntity(positionDB);
                     
                     if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent

@@ -255,7 +255,7 @@ namespace Pulsar4X.SDL2UI
                         DateTime systemDateTime = _entity.StarSysDateTime;
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_keplerElements, systemDateTime);
 
-            
+            /*
             var pos_m = _bodyPosition.RelativePosition_m;
             var vel_m = OrbitMath.ObjectLocalVelocityVector(
                 _sgp, 
@@ -264,7 +264,10 @@ namespace Pulsar4X.SDL2UI
                 _keplerElements.Eccentricity, 
                 _trueAnom, 
                 _keplerElements.AoP); //OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(_keplerElements, systemDateTime);
-            
+            */
+            var state = _entity.GetRelativeState();
+            var pos_m = state.pos;
+            var vel_m = state.Velocity;
             
             var ecvec = OrbitMath.EccentricityVector(_sgp, pos_m, (Vector3)vel_m);
             _trueAnom_FromEVec = OrbitMath.TrueAnomaly(ecvec, pos_m, (Vector3)vel_m);
@@ -1094,6 +1097,8 @@ namespace Pulsar4X.SDL2UI
             ElementItems.Add(_eccentricAnomItem_FromStateVec2);
 
             */
+            
+            /*
             var pos = _bodyPosition.RelativePosition_m;
             //var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_AU(_keplerElements, _keplerElements.Parent.Manager.ManagerSubpulses.StarSysDateTime);
             
@@ -1104,6 +1109,11 @@ namespace Pulsar4X.SDL2UI
                 _keplerElements.Eccentricity, 
                 _trueAnom, 
                 _aop);
+            */
+
+            var state = _entity.GetRelativeState();
+            var pos = state.pos;
+            var vel = state.Velocity;
             
             var ecvec = OrbitMath.EccentricityVector(_sgp, pos, (Vector3)vel);
             var ecvec2 = OrbitMath.EccentricityVector2(_sgp, pos, (Vector3)vel);
@@ -1190,6 +1200,7 @@ namespace Pulsar4X.SDL2UI
             
             
             _trueAnom = OrbitProcessor.GetTrueAnomaly(_keplerElements, systemDateTime);
+            /*
             var pos_m = _bodyPosition.RelativePosition_m;
             var vel_m = OrbitMath.ObjectLocalVelocityVector(
                 _sgp, 
@@ -1198,7 +1209,10 @@ namespace Pulsar4X.SDL2UI
                 _keplerElements.Eccentricity, 
                 _trueAnom, 
                 _keplerElements.AoP);
-            
+            */
+            var state = _entity.GetRelativeState();
+            var pos_m = state.pos;
+            var vel_m = state.Velocity;
             
             var ecvec = OrbitMath.EccentricityVector(_sgp, pos_m, (Vector3)vel_m);
             var ecvec2 = OrbitMath.EccentricityVector2(_sgp, pos_m, (Vector3)vel_m);
@@ -1350,9 +1364,10 @@ namespace Pulsar4X.SDL2UI
                     {
                         var pnt = shape.Points[i];
                         points[i] = new  Vector2(startPoint.X + pnt.X, startPoint.Y + pnt.Y);
-                        if (points[i].X > int.MaxValue || points[i].X < int.MinValue)
+                        if (points[i].X > int.MaxValue || points[i].X < int.MinValue || points[i].X is Double.NaN)
                         {
-                            throw new Exception("point outside bounds, probilby a scale issue");
+                            //throw new Exception("point outside bounds, probilby a scale issue");
+                            points[i] = new  Vector2(startPoint.X, startPoint.Y);
                         }
                     }
                 }

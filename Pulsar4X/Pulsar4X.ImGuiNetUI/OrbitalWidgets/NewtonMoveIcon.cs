@@ -58,11 +58,7 @@ namespace Pulsar4X.SDL2UI
 
         private double _dv = 0;
         private KeplerElements _ke;
-        private double _semiMaj;
-        private double _semiMin;
-        private double _loPRadians;
-        private double _eccentricity;
-        private double _linearEccent;
+
 
         public NewtonMoveIcon(KeplerElements ke, Vector3 position) : base(position)
         {
@@ -106,10 +102,14 @@ namespace Pulsar4X.SDL2UI
                 _numberOfDrawnPoints = _numberOfDrawSegments + 1;//one extra for the object position
                 CreatePointArray();
             }
-            _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
-            _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
-            _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
-            _numberOfDrawnPoints = _numberOfDrawSegments + 1; //one extra for the object position
+            else
+            {
+                _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
+                _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
+                _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
+                _numberOfDrawnPoints = _numberOfDrawSegments + 1; //one extra for the object position
+            }
+
             _drawPoints = new SDL.SDL_Point[_numberOfDrawnPoints];
         }
 
@@ -134,20 +134,15 @@ namespace Pulsar4X.SDL2UI
         }
         public override void OnPhysicsUpdate()
         {
-            if (_newtonMoveDB.OwningEntity == null)
+            if (_newtonMoveDB.OwningEntity == null) //There's a threaded race condition here which will cause a null...
                 return;
-            var ke = _newtonMoveDB.GetElements();
+            var ke = _newtonMoveDB.GetElements(); //...cause a null ref exception inside this call. 
             if (ke.Eccentricity != _ke.Eccentricity)
             {
                 _ke = ke;
                 CreatePointArray();
             }
-
-            _eccentricity = ke.Eccentricity;
-            _linearEccent = ke.LinearEccentricity;
-            _semiMaj = ke.SemiMajorAxis;
-            _semiMin = ke.SemiMinorAxis;
-            _loPRadians = OrbitMath.GetLongditudeOfPeriapsis(ke.Inclination, ke.AoP, ke.LoAN);
+            
 
             if (_newtonMoveDB.ManuverDeltaVLen > 0)
             {
@@ -398,17 +393,20 @@ namespace Pulsar4X.SDL2UI
 
         IPosition IKepler.ParentPosDB => _parentPosDB;
 
-        double IKepler.SemiMaj => _semiMaj;
+        double IKepler.SemiMaj => _ke.SemiMajorAxis;
 
-        double IKepler.SemiMin => _semiMin;
+        double IKepler.SemiMin => _ke.SemiMinorAxis;
 
-        double IKepler.LoP_radians => _loPRadians;
+        double IKepler.LoP_radians => OrbitMath.GetLongditudeOfPeriapsis(_ke.Inclination, _ke.AoP, _ke.LoAN);
 
-        double IKepler.Eccentricity => _eccentricity;
+        double IKepler.Eccentricity => _ke.Eccentricity;
 
-        double IKepler.LinearEccent => _linearEccent;
+        double IKepler.LinearEccent => _ke.LinearEccentricity;
     }
 
+    /// <summary>
+    /// I think this version was just an attempt to re-write another verson that would be more versitile needing less versions to draw the orbit lines?
+    /// </summary>
     public class KeIcon : Icon, IUpdateUserSettings
     {
 
