@@ -101,10 +101,10 @@ namespace Pulsar4X.Orbital
         {
             return new Matrix3d()
             {
-                X = new double[4] { 1, 0, 0, 0 },
-                Y = new double[4] { 0, 1, 0, 0 },
-                Z = new double[4] { 0, 0, 1, 0 },
-                W = new double[4] { x, y, z, 1 }
+                X = new double[4] { 1, 0, 0, x },
+                Y = new double[4] { 0, 1, 0, y },
+                Z = new double[4] { 0, 0, 1, z },
+                W = new double[4] { 0, 0, 0, 1 }
             };
         }
 
@@ -160,10 +160,18 @@ namespace Pulsar4X.Orbital
 
         static double MultiplyRowbyColomn(Matrix3d l, Vector3 r, int lRow)
         {
-            double[] rarray = new[] { r.X, r.Y, r.Z, 0 };
+            double[] rarray = new[] { r.X, r.Y, r.Z, 1 };
             double value = 0;
             for (int i = 0; i < 4; i++)
             {
+                /*
+                int ix = lRow;
+                int iy = i;
+                var rw = l.Row(ix);
+                var colomnVal = rw[iy];
+                //var colomnVal = l.Row(ix)[iy];
+                value += colomnVal * rarray[i];
+                */
                 value += l.Row(lRow)[i] * rarray[i];
             }
             return value;
