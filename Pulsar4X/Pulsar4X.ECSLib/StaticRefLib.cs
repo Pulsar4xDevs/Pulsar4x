@@ -36,6 +36,7 @@ namespace Pulsar4X.ECSLib
         public static void Setup(Game game)
         {
             Game = game;
+            GameSettings = new GameSettings();
             StaticData = game.StaticData;
             ProcessorManager = new ProcessorManager(game);
             GamePulse = new MasterTimePulse(game);
