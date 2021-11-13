@@ -42,11 +42,39 @@ namespace Pulsar4X.Tests
                  0.96714,     //halleysEccentricity
                  0, 
                  0, //halleysLoAN
-                 111.33, //halleysAoP
+                 0, //halleysAoP
                  38.38,     //halleysMeanAnomaly at Epoch
                  new System.DateTime(1994, 2, 17)),
-             "Elliptical Orbit"
+             "Elliptical 2d 0 lop 0 aop Orbit"
              ),
+            (
+                OrbitDB.FromAsteroidFormat( //elliptical orbit
+                    parentBody, 
+                    parentMassDB.MassDry, 
+                    2.2e14,          //halleysBodyMass
+                    17.834,     //halleysSemiMajAxis 
+                    0.96714,     //halleysEccentricity
+                    0, 
+                    0, //halleysLoAN
+                    111.33, //halleysAoP
+                    38.38,     //halleysMeanAnomaly at Epoch
+                    new System.DateTime(1994, 2, 17)),
+                "Elliptical 2d 0 lop, 111.33 aop Orbit"
+            ),
+            (
+                OrbitDB.FromAsteroidFormat( //elliptical orbit
+                    parentBody, 
+                    parentMassDB.MassDry, 
+                    2.2e14,          //halleysBodyMass
+                    17.834,     //halleysSemiMajAxis 
+                    0.96714,     //halleysEccentricity
+                    0, 
+                    58.42, //halleysLoAN
+                    111.33, //halleysAoP
+                    38.38,     //halleysMeanAnomaly at Epoch
+                    new System.DateTime(1994, 2, 17)),
+                "Elliptical 2d 58.42 aop and 111.33 lop Orbit"
+            ),
             (
              OrbitDB.FromAsteroidFormat( //elliptical 2d retrograde orbit. 
                  parentBody, 
