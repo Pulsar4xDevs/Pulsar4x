@@ -687,16 +687,16 @@ namespace Pulsar4X.Orbital
         /// <param name="atDatetime">At datetime.</param>
         public static double Hackspeed(KeplerElements orbit, DateTime atDatetime)
         {
-            var pos1 = OrbitProcessorBase.GetPosition_AU(orbit, atDatetime);
-            var pos2 = OrbitProcessorBase.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
+            var pos1 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
+            var pos2 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
 
             return Distance.DistanceBetween(pos1, pos2);
         }
 
         public static double HackVelocityHeading(KeplerElements orbit, DateTime atDatetime)
         {
-            var pos1 = OrbitProcessorBase.GetPosition_AU(orbit, atDatetime);
-            var pos2 = OrbitProcessorBase.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
+            var pos1 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
+            var pos2 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
 
             Vector3 vector = pos2 - pos1;
             double heading = Math.Atan2(vector.Y, vector.X);
@@ -705,8 +705,8 @@ namespace Pulsar4X.Orbital
 
         public static Vector3 HackVelocityVector(KeplerElements orbit, DateTime atDatetime)
         {
-            var pos1 = OrbitProcessorBase.GetPosition_AU(orbit, atDatetime);
-            var pos2 = OrbitProcessorBase.GetPosition_AU(orbit, atDatetime + TimeSpan.FromSeconds(1));
+            var pos1 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
+            var pos2 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
             //double speed = Distance.DistanceBetween(pos1, pos2);
             return pos2 - pos1;
         }

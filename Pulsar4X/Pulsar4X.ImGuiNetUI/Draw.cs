@@ -81,6 +81,8 @@ namespace Pulsar4X.SDL2UI
         internal ComplexShape Shape;
         internal SDL.SDL_Color[] Colour;
         internal SDL.SDL_Color[] HighlightColour;
+        internal bool IsEnabled = false;
+        internal bool ShowLines = false;
 
         internal void SetHighlight(bool isHighlighted)
         {

@@ -77,14 +77,26 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("focal point rel: " + _debugWidget._f1r);
                 foreach (var item in _debugWidget.ElementItems)
                 {
-                    ImGui.Text(item.NameString);
+                    bool showlines = item.IsEnabled;
+                    //ImGui.Text(item.NameString);
+                    if (ImGui.Checkbox(item.NameString, ref showlines))
+                    {
+                        item.ShowLines = showlines;
+                        item.IsEnabled = showlines;
+                    }
+
                     if (ImGui.IsItemHovered())
                     {
                         item.SetHighlight(true);
-                        ImGui.Text("StartPoint: " + item.Shape.StartPoint);
+                        item.ShowLines = true;
+                        //ImGui.Text("StartPoint: " + item.Shape.StartPoint);
                     }
                     else
+                    {
                         item.SetHighlight(false);
+                        item.ShowLines = showlines;
+                    }
+
                     ImGui.SameLine();
                     ImGui.Text(item.DataString);
                 }
@@ -172,6 +184,7 @@ namespace Pulsar4X.SDL2UI
         ElementItem _eccentricityVectorItem;
         ElementItem _bodyPosItem;
         HeadingElement _headingItemRel;
+        HeadingElement _headingItemRel2;
         HeadingElement _headingItemAbs;
         //private VelVecElement _velvecItem;
 
@@ -1163,6 +1176,18 @@ namespace Pulsar4X.SDL2UI
             _headingItemRel.NameString = "Heading (rel)";
             ElementItems.Add(_headingItemRel);
             
+            
+            var vel2 = OrbitalMath.HackVelocityVector(_keplerElements, _entity.StarSysDateTime);
+            _headingItemRel2 = new HeadingElement(
+                _keplerElements, 
+                _sgp, 
+                _worldPosition_m, 
+                _bodyPosition, 
+                _trueAnom, 
+                (Vector3)vel_m);
+            _headingItemRel2.NameString = "Heading (rel2)";
+            ElementItems.Add(_headingItemRel2);
+            
             var absVel = _entity.GetAbsoluteState().Velocity;
             _headingItemAbs = new HeadingElement(
                 _keplerElements, 
@@ -1334,6 +1359,9 @@ namespace Pulsar4X.SDL2UI
 
             
             _headingItemRel.Update(_trueAnom, (Vector3)vel_m);
+
+            var vel2 = OrbitalMath.HackVelocityVector(_keplerElements, systemDateTime);
+            _headingItemRel2.Update(_trueAnom, (Vector3)vel2);
             
             var absVel = _entity.GetAbsoluteState().Velocity;
             _headingItemAbs.Update(_trueAnom, (Vector3)absVel);
@@ -1352,6 +1380,9 @@ namespace Pulsar4X.SDL2UI
 
             foreach (var item in ElementItems)
             {
+                if(!item.ShowLines)//don't draw the lines if we're not suposed to. 
+                    continue;
+                
                 var shape = item.Shape;
                 
                 Vector2[] points = new Vector2[shape.Points.Length];
@@ -1463,7 +1494,7 @@ namespace Pulsar4X.SDL2UI
                     StartPoint = new Vector2( _bodyPosPnt_m.X, _bodyPosPnt_m.Y),
                     Colors = headingColour,
                     ColourChanges = new (int, int)[] {(0, 0),},
-                    Scales = true
+                    Scales = false
                 };
                 
                 Update(trueAnomaly, vel_m);
@@ -1487,7 +1518,7 @@ namespace Pulsar4X.SDL2UI
                 { 
                     
                     new Vector2() { X = 0, Y = 0 }, 
-                    new Vector2() { X = vnorm.X, Y = vnorm.Y }, 
+                    new Vector2() { X = vnorm.X, Y = vnorm.Y * -1}, 
                 };
                 Shape.StartPoint = new Vector2( _bodyPosPnt_m.X, _bodyPosPnt_m.Y);
                 Shape.Points = headingLine; //headingPoints.Concat(headingLine).ToArray(); 
