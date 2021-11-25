@@ -89,7 +89,7 @@ namespace Pulsar4X.SDL2UI
                     //Populates Buttons
 
                     NewStandardButton(typeof(SelectPrimaryBlankMenuHelper), _uiState.Img_Select(), "Selects the entity");
-                    NewStandardButton(typeof(PinCameraBlankMenuHelper), _uiState.Img_Pin(), "Focuses camera");
+                    NewStandardButton(typeof(PinCameraBlankMenuHelper), _uiState.Img_Pin(), "Focuses  and Pins camera to this entity");
                     NewStandardButton(typeof(RenameWindow), _uiState.Img_Rename(), "Renames the entity");
 
                     NewCondtionalButton(typeof(PowerGen), _uiState.Img_Power(), "Shows power stats");
