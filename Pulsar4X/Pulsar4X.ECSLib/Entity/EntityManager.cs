@@ -216,7 +216,16 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentException("Provided Entity is not valid in this manager.");
             }
             
-            Event logevent = new Event(StaticRefLib.CurrentDateTime, "Entity Destroyed");
+            Event logevent = new Event(StaticRefLib.CurrentDateTime, "Entity Removed From Manager");
+            logevent.Entity = entity;
+            if(entity.FactionOwner != Guid.Empty)
+                logevent.Faction = GetGlobalEntityByGuid(entity.FactionOwner);
+            logevent.SystemGuid = ManagerGuid;
+            logevent.EventType = EventType.EntityDestroyed;
+            if (entity.IsValid && entity.HasDataBlob<NameDB>())
+                logevent.EntityName = entity.GetDataBlob<NameDB>().OwnersName;
+            
+            
             StaticRefLib.EventLog.AddEvent(logevent);          
             
             int entityID = entity.ID;

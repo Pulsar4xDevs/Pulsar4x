@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public NameDB() { }
+        public NameDB() { _names.Add(Guid.Empty, "Un-Named");}
 
         public NameDB(string defaultName)
         {

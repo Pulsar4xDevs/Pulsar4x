@@ -58,6 +58,7 @@ namespace Pulsar4X.ECSLib
             game.SpaceMaster.SetAccess(factionEntity, AccessRole.SM);
             name.SetName(factionEntity.Guid, factionName);
             game.Factions.Add(factionEntity);
+            StaticRefLib.EventLog.AddPlayer(factionEntity);
             return factionEntity;
         }
 

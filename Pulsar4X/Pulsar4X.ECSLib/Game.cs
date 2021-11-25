@@ -81,10 +81,12 @@ namespace Pulsar4X.ECSLib
 
             OrderHandler = new StandAloneOrderHandler(this);
             
+            
             StaticRefLib.Setup(this);
 
             GlobalManager = new EntityManager(this, true);
-            
+            StaticRefLib.SetEventlog(new EventLog(this));
+            GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
 
         }
 
@@ -99,7 +101,7 @@ namespace Pulsar4X.ECSLib
 
             StaticRefLib.GameSettings = newGameSettings;
             GamePulse.GameGlobalDateTime = newGameSettings.StartDateTime;
-
+            
             // Load Static Data
             if (newGameSettings.DataSets != null)
             {
@@ -188,14 +190,6 @@ namespace Pulsar4X.ECSLib
 
         #region Public API
 
-        [PublicAPI]
-        public Player AddPlayer(string playerName, string playerPassword = "")
-        {
-            var player = new Player(playerName, playerPassword);
-            Players.Add(player);
-            StaticRefLib.EventLog.AddPlayer(player);
-            return player;
-        }
 
         [PublicAPI]
         public List<StarSystem> GetSystems(AuthenticationToken authToken)
@@ -266,6 +260,8 @@ namespace Pulsar4X.ECSLib
             Player foundPlayer = Players.Find(player => player.ID == authToken?.PlayerID);
             return foundPlayer?.IsTokenValid(authToken) != null ? foundPlayer : null;
         }
+
+
 
         [PublicAPI]
         public void GenerateSystems(AuthenticationToken authToken, int numSystems)

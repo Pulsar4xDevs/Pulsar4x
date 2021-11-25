@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.Serialization;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Pulsar4X.ECSLib.Industry;
@@ -52,6 +53,13 @@ namespace Pulsar4X.ECSLib
         /// stores sensor contacts for the entire faction, when a contact is created it gets added here. 
         /// </summary>
         internal Dictionary<Guid, SensorContact> SensorContacts = new Dictionary<Guid, SensorContact>();
+        
+        public Dictionary<EventType, bool> HaltsOnEvent { get; } = new Dictionary<EventType, bool>();
+        
+        [JsonProperty]
+        private Dictionary<Entity, uint> FactionAccessRoles { get; set; } = new Dictionary<Entity, uint>();
+        internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
+
 
 
         public FactionInfoDB()

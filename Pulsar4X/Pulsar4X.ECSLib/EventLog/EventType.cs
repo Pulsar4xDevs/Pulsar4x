@@ -5,8 +5,10 @@ namespace Pulsar4X.ECSLib
     {
         NoEventType,
 
+        //gameEvents
         SystemDateChange,
         GlobalDateChange,
+        EntityDestroyed,
 
         #region GameErrors
 

@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         bool relativeOrbitVelocity;
 
         private OrbitalDebugWindow _orbitalDebugWindow;
-        
+        private GameLogWindow _logWindow;
         private SettingsWindow()
         {
             _userOrbitSettingsMtx = _uiState.UserOrbitSettingsMtx;
@@ -34,6 +34,7 @@ namespace Pulsar4X.SDL2UI
             relativeOrbitVelocity = ECSLib.OrbitProcessor.UseRelativeVelocity;
 
             _orbitalDebugWindow = OrbitalDebugWindow.GetInstance();
+            _logWindow = GameLogWindow.GetInstance();
 
         }
         internal static SettingsWindow GetInstance()
@@ -88,6 +89,12 @@ namespace Pulsar4X.SDL2UI
                     if (ImGui.Checkbox("Show Pulsar GUI Debug Window", ref debugActive))
                     {
                         DebugGUIWindow.GetInstance().ToggleActive();
+                    }
+                    
+                    bool logActive = _logWindow.GetActive();
+                    if (ImGui.Checkbox("Show Log", ref logActive))
+                    {
+                        _logWindow.ToggleActive();
                     }
 
                     bool perfActive = PerformanceDisplay.GetInstance().GetActive();

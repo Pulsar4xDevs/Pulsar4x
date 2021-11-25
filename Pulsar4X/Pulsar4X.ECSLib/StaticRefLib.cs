@@ -40,7 +40,6 @@ namespace Pulsar4X.ECSLib
             StaticData = game.StaticData;
             ProcessorManager = new ProcessorManager(game);
             GamePulse = new MasterTimePulse(game);
-            EventLog = new EventLog(game);
             SyncContext = SynchronizationContext.Current;
             OrderHandler = game.OrderHandler;
         }

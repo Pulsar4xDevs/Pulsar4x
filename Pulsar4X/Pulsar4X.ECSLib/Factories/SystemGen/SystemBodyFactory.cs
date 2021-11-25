@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
             var position = new PositionDB(0, 0, 0, Guid.Empty);
             var massVolume = new MassVolumeDB();
             var planetInfo = new SystemBodyInfoDB();
-            var name = new NameDB();
+            var name = new NameDB("ProtoBody");
             var orbit = new OrbitDB();
             var atmo = new AtmosphereDB();
             var ruins = new RuinsDB();
