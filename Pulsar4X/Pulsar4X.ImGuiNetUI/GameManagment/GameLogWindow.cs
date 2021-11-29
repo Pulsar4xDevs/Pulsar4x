@@ -29,11 +29,21 @@ public class GameLogWindow : PulsarGuiWindow
     {
         if (IsActive)
         {
+            System.Numerics.Vector2 size = new System.Numerics.Vector2(800, 600);
+            System.Numerics.Vector2 pos = new System.Numerics.Vector2(0, 0);
+            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
             if (ImGui.Begin("GameLog", ref IsActive))
             {
 
                 //ImGui.BeginChild("LogChild", new System.Numerics.Vector2(800, 300), true);
                 ImGui.Columns(5, "Events", true);
+                ImGui.SetColumnWidth(0, 164);
+                ImGui.SetColumnWidth(1, 128);
+                ImGui.SetColumnWidth(2, 128);
+                ImGui.SetColumnWidth(3, 128);
+                ImGui.SetColumnWidth(4, 240);
+                
                 ImGui.Text("DateTime");
                 ImGui.NextColumn();
                 if(ImGui.SmallButton("Type")) //ImGui.Text("Type");
@@ -112,27 +122,19 @@ public class GameLogSettingsWindow : PulsarGuiWindow
     {
         if (IsActive)
         {
+            System.Numerics.Vector2 size = new System.Numerics.Vector2(224, 600);
+            System.Numerics.Vector2 pos = new System.Numerics.Vector2(0, 0);
+            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
             if (ImGui.Begin("Event Settings", ref IsActive))
             {
-
-                //ImGui.BeginChild("LogChild", new System.Numerics.Vector2(800, 300), true);
-                ImGui.Columns(2, "Events", true);
-                ImGui.Text("Type");
-                ImGui.NextColumn();
-                ImGui.Text("Halts");
-                ImGui.NextColumn();
-
-                foreach (var item in _facInfo.HaltsOnEvent)
+                foreach (EventType etype in EventType.GetValues(typeof(EventType)))
                 {
-                    var etype = item.Key;
-                    var halts = item.Value;
-                    
-                    ImGui.Separator();
-                    ImGui.Text(etype.ToString());
-                    ImGui.NextColumn();
-                    ImGui.Text(halts.ToString());
-                    ImGui.NextColumn();
+                    bool halts = false;
+                    if (_facInfo.HaltsOnEvent.ContainsKey(etype))
+                        halts = _facInfo.HaltsOnEvent[etype];
 
+                    ImGui.Checkbox(etype.ToString(), ref halts);
                 }
                 ImGui.Separator();
                 
