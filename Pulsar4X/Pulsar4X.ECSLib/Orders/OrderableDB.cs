@@ -29,6 +29,16 @@ namespace Pulsar4X.ECSLib
                         }
                         if (atDateTime >= entityCommand.ActionOnDate)
                         {
+                            if(entityCommand.PauseOnAction &! entityCommand.IsRunning)
+                            {
+                                Event newEvent = new Event(atDateTime, "Command Halt");
+                                newEvent.EventType = EventType.OrdersHalt;
+                                newEvent.Entity = OwningEntity;
+                                newEvent.Faction = OwningEntity.GetFactionOwner;
+                                StaticRefLib.EventLog.AddEvent(newEvent);
+                                
+
+                            }
                             entityCommand.ActionCommand(atDateTime);
                         }
                     }

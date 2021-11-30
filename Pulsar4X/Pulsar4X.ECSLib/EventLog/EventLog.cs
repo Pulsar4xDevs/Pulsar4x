@@ -108,20 +108,25 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal void AddPlayerEntityErrorEvent(Entity entity, string message)
+        internal void AddPlayerEntityErrorEvent(Entity entity, EventType type, string message)
         {
             Event newEvent = new Event(message);
-            newEvent.ConcernedFaction.Add(entity.FactionOwner);
+            newEvent.ConcernedFaction.Add(entity.FactionOwnerID);
             newEvent.Time = entity.StarSysDateTime;
+            newEvent.Entity = entity;
+            newEvent.EntityName = entity.GetDataBlob<NameDB>().OwnersName;
+            newEvent.Faction = entity.GetFactionOwner;
             _events.Add(newEvent);
             //_newEvents[entity.FactionOwner]
         }
         internal void AddGameEntityErrorEvent(Entity entity, string message)
         {
             Event newEvent = new Event(message);
-            newEvent.ConcernedFaction.Add(entity.FactionOwner);
+            newEvent.ConcernedFaction.Add(entity.FactionOwnerID);
             newEvent.Time = entity.StarSysDateTime;
             newEvent.EventType = EventType.Opps;
+            newEvent.Entity = entity;
+            newEvent.Faction = entity.GetFactionOwner;
             _events.Add(newEvent);
             //_newEvents[entity.FactionOwner]
         }
@@ -154,13 +159,13 @@ namespace Pulsar4X.ECSLib
             //var ownedDB = @event.Entity?.GetDataBlob<OwnedDB>();
             if (@event.Entity != null)
             {
-                if (@event.Entity.FactionOwner != Guid.Empty)
+                if (@event.Entity.FactionOwnerID != Guid.Empty)
                 {
                     foreach (KeyValuePair<Entity, AccessRole> keyValuePair in factionInfo.AccessRoles)
                     {
                         Entity arFaction = keyValuePair.Key;
                         AccessRole arRole = keyValuePair.Value;
-                        if (@event.Entity.FactionOwner == arFaction.Guid)
+                        if (@event.Entity.FactionOwnerID == arFaction.Guid)
                         {
                             if (@event.Entity.HasDataBlob<ShipInfoDB>() && (arRole & AccessRole.UnitVision) == AccessRole.UnitVision)
                             {
@@ -252,13 +257,13 @@ namespace Pulsar4X.ECSLib
             //var ownedDB = @event.Entity?.GetDataBlob<OwnedDB>();
             if (@event.Entity != null)
             {
-                if (@event.Entity.FactionOwner != Guid.Empty)
+                if (@event.Entity.FactionOwnerID != Guid.Empty)
                 {
                     foreach (KeyValuePair<Entity, AccessRole> keyValuePair in player.AccessRoles)
                     {
                         Entity arFaction = keyValuePair.Key;
                         AccessRole arRole = keyValuePair.Value;
-                        if (@event.Entity.FactionOwner == arFaction.Guid)
+                        if (@event.Entity.FactionOwnerID == arFaction.Guid)
                         {
                             if (@event.Entity.HasDataBlob<ShipInfoDB>() && (arRole & AccessRole.UnitVision) == AccessRole.UnitVision)
                             {

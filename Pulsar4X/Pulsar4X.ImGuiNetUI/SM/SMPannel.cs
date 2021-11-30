@@ -109,7 +109,7 @@ namespace Pulsar4X.SDL2UI
                     }
                     
                     ImGui.NextColumn();
-                    var ownerFactionID = _systemEntities[i].FactionOwner;
+                    var ownerFactionID = _systemEntities[i].FactionOwnerID;
                     if(ownerFactionID != Guid.Empty)
                     {
                         var ownerFaction = game.GlobalManager.GetGlobalEntityByGuid(ownerFactionID);

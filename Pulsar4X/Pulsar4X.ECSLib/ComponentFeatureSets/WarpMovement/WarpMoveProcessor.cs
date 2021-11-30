@@ -199,7 +199,7 @@ namespace Pulsar4X.ECSLib
                 var manuverNodeTime = entity.StarSysDateTime + TimeSpan.FromSeconds(secondsBurn * 0.5);
 
 
-                NewtonThrustCommand.CreateCommand(entity.FactionOwner, entity, manuverNodeTime, moveDB.ExpendDeltaV, secondsBurn);
+                NewtonThrustCommand.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, moveDB.ExpendDeltaV, secondsBurn);
                 
                 moveDB.IsAtTarget = true;
             }

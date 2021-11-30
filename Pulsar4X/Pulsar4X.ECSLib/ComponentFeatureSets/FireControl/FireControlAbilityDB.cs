@@ -99,7 +99,7 @@ namespace Pulsar4X.ECSLib
 
         public FireControlAbilityState(ComponentInstance componentInstance) : base(componentInstance)
         {
-            _factionOwner = componentInstance.ParentInstances.OwningEntity.FactionOwner;
+            _factionOwner = componentInstance.ParentInstances.OwningEntity.FactionOwnerID;
         }
 
         public FireControlAbilityState(FireControlAbilityState db) : base(db.ComponentInstance)

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -6,7 +7,7 @@ namespace Pulsar4X.SDL2UI;
 public class GameLogWindow : PulsarGuiWindow
 {
     private EventLog _eventLog;
-    
+    public HashSet<EventType> HidenEvents = new HashSet<EventType>();
     private GameLogWindow()
     {
         _eventLog = StaticRefLib.EventLog;
@@ -60,6 +61,8 @@ public class GameLogWindow : PulsarGuiWindow
                 
                 foreach (var gameEvent in _eventLog.GetAllEvents())
                 {
+                    if(HidenEvents.Contains(gameEvent.EventType))
+                        continue;//skip this event if it's hidden.
 
                     var entity = gameEvent.Entity;
                     string entityStr = "N/A";
@@ -80,7 +83,7 @@ public class GameLogWindow : PulsarGuiWindow
                     ImGui.Text(factionStr);
                     ImGui.NextColumn();
                     ImGui.Text(entityStr);
-                    if(ImGui.IsItemHovered())
+                    if(ImGui.IsItemHovered() && entity != null)
                         ImGui.SetTooltip(entity.Guid.ToString());
                     ImGui.NextColumn();
                     ImGui.TextWrapped(gameEvent.Message);
@@ -100,9 +103,11 @@ public class GameLogWindow : PulsarGuiWindow
 public class GameLogSettingsWindow : PulsarGuiWindow
 {
     private FactionInfoDB _facInfo;
+    private HashSet<EventType> _hidenEvents;
     private GameLogSettingsWindow()
     {
         _facInfo = _uiState.Faction.GetDataBlob<FactionInfoDB>();
+        _hidenEvents = GameLogWindow.GetInstance().HidenEvents;
     }
     internal static GameLogSettingsWindow GetInstance()
     {
@@ -122,19 +127,54 @@ public class GameLogSettingsWindow : PulsarGuiWindow
     {
         if (IsActive)
         {
-            System.Numerics.Vector2 size = new System.Numerics.Vector2(224, 600);
+            System.Numerics.Vector2 size = new System.Numerics.Vector2(264, 600);
             System.Numerics.Vector2 pos = new System.Numerics.Vector2(0, 0);
-            ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
+            ImGui.SetNextWindowSize(size, ImGuiCond.Always);
             ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
+
+            
             if (ImGui.Begin("Event Settings", ref IsActive))
             {
+                ImGui.Columns(3);
+                ImGui.SetColumnWidth(0, 164);
+                ImGui.Text("Type");
+                ImGui.NextColumn();
+                ImGui.SetColumnWidth(1, 38);
+                ImGui.Text("Halts");
+                ImGui.NextColumn();
+                ImGui.SetColumnWidth(2, 38);
+                ImGui.Text("Hide");
+                ImGui.Separator();
+                ImGui.NextColumn();
+                
                 foreach (EventType etype in EventType.GetValues(typeof(EventType)))
                 {
+                    string typestr = etype.ToString();
+                    
                     bool halts = false;
                     if (_facInfo.HaltsOnEvent.ContainsKey(etype))
                         halts = _facInfo.HaltsOnEvent[etype];
+                    bool isHidden = _hidenEvents.Contains(etype);
+                    
+                    ImGui.Text(typestr);
+                    ImGui.NextColumn();
+                    
+                    if (ImGui.Checkbox("##halt" + typestr, ref halts))
+                    {
+                        _facInfo.HaltsOnEvent[etype] = halts;
+                    }
+                    ImGui.NextColumn();
+                    //ImGui.SameLine();
+                    if (ImGui.Checkbox("##hidden" + typestr, ref isHidden))
+                    {
+                        if (isHidden)
+                            _hidenEvents.Add(etype);
+                        else
+                            _hidenEvents.Remove(etype);
 
-                    ImGui.Checkbox(etype.ToString(), ref halts);
+
+                    }
+                    ImGui.NextColumn();
                 }
                 ImGui.Separator();
                 

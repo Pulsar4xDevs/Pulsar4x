@@ -55,10 +55,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             dataBlobs.Add(new ComponentInstancesDB());
             dataBlobs.Add(misslPositionDB);
             dataBlobs.Add(MassVolumeDB.NewFromMassAndVolume(missileDesign.WetMass, missileDesign.WetMass));
-            dataBlobs.Add(new NameDB(defaultName, launchingEntity.FactionOwner,  factionsName));
+            dataBlobs.Add(new NameDB(defaultName, launchingEntity.FactionOwnerID,  factionsName));
             dataBlobs.Add(newtmovedb);
             dataBlobs.Add(orderabledb);
-            var newMissile = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
+            var newMissile = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwnerID, dataBlobs);
             
             foreach (var tuple in missileDesign.Components)
             {
@@ -92,7 +92,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                  
                 launchVelocity = parentVelocity + launcherVector;
                 */
-                ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, launchingEntity.StarSysDateTime, targetEntity);
+                ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwnerID, newMissile, launchingEntity.StarSysDateTime, targetEntity);
                 
             }
             else

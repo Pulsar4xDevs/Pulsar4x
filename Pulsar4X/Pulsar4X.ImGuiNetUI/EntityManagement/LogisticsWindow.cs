@@ -308,7 +308,7 @@ namespace Pulsar4X.SDL2UI
                     _cargoDB = _selectedEntity.GetDataBlob<VolumeStorageDB>();
                 else{_cargoDB = null;}
                 CanActive = true;//And note if that it can be displayed
-                _factionID = _selectedEntity.FactionOwner;
+                _factionID = _selectedEntity.FactionOwnerID;
             }
             else
             {

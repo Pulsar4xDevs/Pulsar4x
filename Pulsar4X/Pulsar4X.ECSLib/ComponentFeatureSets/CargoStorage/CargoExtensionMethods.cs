@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
             {
                 var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
                 string errString = "Can't add or remove " + cargoItem.Name + " because this entity cannot even store " + type.Name + " types of cargo";
-                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity, errString);
+                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity, EventType.Storage, errString);
                 return 0;
             }
             TypeStore store = db.TypeStores[cargoItem.CargoTypeID];
@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib
             {
                 var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
                 string errString = "Can't add or remove " + cargoItem.Name + " because this entity cannot even store " + type.Name + " types of cargo";
-                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity, errString);
+                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity,EventType.Storage, errString);
                 return 0;
             }
             TypeStore store = db.TypeStores[cargoItem.CargoTypeID];
@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
             {
                 var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
                 string errString = "Can't add or remove " + cargoItem.Name + " because this entity cannot even store " + type.Name + " types of cargo";
-                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity, errString);
+                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity,EventType.Storage, errString);
                 return 0;
             }
             
@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
             {
                 var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
                 string errString = "Can't add or remove " + cargoItem.Name + " because it does not have a volumetric value.";
-                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity, errString);
+                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity, EventType.Storage, errString);
                 return 0;
             }
 
@@ -158,7 +158,7 @@ namespace Pulsar4X.ECSLib
             {
                 var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
                 string errString = "Can't add or remove " + cargoItem.Name + " because this entity cannot even store " + type.Name + " types of cargo";
-                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity, errString);
+                StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity, EventType.Storage, errString);
                 return 0;
             }
     

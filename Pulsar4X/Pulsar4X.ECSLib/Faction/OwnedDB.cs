@@ -192,13 +192,13 @@ namespace Pulsar4X.ECSLib
         internal void SetOwned(Entity entity)
         {
             OwnedEntities[entity.Guid] = entity;
-            entity.FactionOwner = this.OwningEntity.Guid;
+            entity.FactionOwnerID = this.OwningEntity.Guid;
         }
 
         internal void AddEntity(Entity entity)
         {
             OwnedEntities[entity.Guid] = entity;
-            entity.FactionOwner = this.OwningEntity.FactionOwner;
+            entity.FactionOwnerID = this.OwningEntity.FactionOwnerID;
         }
 
         internal void RemoveEntity(Entity entity)
@@ -206,7 +206,7 @@ namespace Pulsar4X.ECSLib
             if (OwnedEntities.ContainsKey(entity.Guid))
             {
                 OwnedEntities.Remove(entity.Guid);
-                entity.FactionOwner = Guid.Empty;
+                entity.FactionOwnerID = Guid.Empty;
             }
         }
 

@@ -25,7 +25,11 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public EntityManager Manager { get; private set; }
         [JsonProperty]
-        public Guid FactionOwner { get; internal set; }
+        public Guid FactionOwnerID { get; internal set; }
+        public Entity GetFactionOwner
+        {
+            get { return Manager.GetGlobalEntityByGuid(FactionOwnerID); }
+        }
 
         public DateTime StarSysDateTime => Manager.StarSysDateTime;
 
@@ -59,11 +63,11 @@ namespace Pulsar4X.ECSLib
         internal Entity([NotNull] EntityManager manager, Guid factionOwner, IEnumerable<BaseDataBlob> dataBlobs = null) : this(Guid.NewGuid(), manager,  factionOwner, dataBlobs) { }
 
 
-        internal Entity(Guid id, [NotNull] EntityManager manager, Guid factionOwner,  IEnumerable<BaseDataBlob> dataBlobs = null)
+        internal Entity(Guid id, [NotNull] EntityManager manager, Guid factionOwnerID,  IEnumerable<BaseDataBlob> dataBlobs = null)
         {
             Manager = manager;
             Guid = id;
-            FactionOwner = factionOwner;
+            FactionOwnerID = factionOwnerID;
             //This is problematic, currently, if a datablob references it's own entity (ie namedb in faction entity) the entity will get a new guid. 
             //and (presumably) the db will point to an empty entity. 
             //TODO: should we throw an exception instead of just replacing the guid with a new one? I'm leaning towards yes. 

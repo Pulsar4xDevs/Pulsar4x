@@ -44,7 +44,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (this.OwningEntity.GetDataBlob<NameDB>() != null)
                 {
-                    return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.FactionOwner);
+                    return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.FactionOwnerID);
                 }
                 else return "Unknown Object"; 
             }

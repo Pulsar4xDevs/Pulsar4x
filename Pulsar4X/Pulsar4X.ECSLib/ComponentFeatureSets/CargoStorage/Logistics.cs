@@ -75,7 +75,7 @@ namespace Pulsar4X.ECSLib
                 var order = new BiddingForLogistics()
                 {
                     EntityCommandingGuid = OwningEntity.Guid,
-                    RequestingFactionGuid = OwningEntity.FactionOwner,
+                    RequestingFactionGuid = OwningEntity.FactionOwnerID,
                 };
                 //StaticRefLib.Game.OrderHandler.HandleOrder(order);
             }
@@ -477,7 +477,7 @@ namespace Pulsar4X.ECSLib
                         List<(ICargoable, long)> tradeItems = new List<(ICargoable, long)>();
                         tradeItems.Add((cargoTask.item, cargoTask.NumberOfItems));
 
-                        var shipOwner = ship.FactionOwner;//.GetDataBlob<ObjectOwnershipDB>().OwningEntity;
+                        var shipOwner = ship.FactionOwnerID;//.GetDataBlob<ObjectOwnershipDB>().OwningEntity;
                         Entity currentSOIParent = ship.GetSOIParentEntity();
                         Entity sourceSOIParent = destin.GetSOIParentEntity(); //might need some checks in here.
                         //moveto source(if requred)
@@ -691,7 +691,7 @@ namespace Pulsar4X.ECSLib
                 
                 
                 var cmd = WarpMoveCommand.CreateCommand(
-                    ship.FactionOwner, 
+                    ship.FactionOwnerID, 
                     ship, 
                     targetBody, 
                     targetInsertionPosition, 
@@ -879,7 +879,7 @@ namespace Pulsar4X.ECSLib
 
             SetLogisticsOrder cmd = new SetLogisticsOrder();
             cmd.EntityCommandingGuid = entity.Guid;
-            cmd.RequestingFactionGuid = entity.FactionOwner;
+            cmd.RequestingFactionGuid = entity.FactionOwnerID;
             cmd._type = ordertype;
 
 
@@ -892,7 +892,7 @@ namespace Pulsar4X.ECSLib
 
             SetLogisticsOrder cmd = new SetLogisticsOrder();
             cmd.EntityCommandingGuid = entity.Guid;
-            cmd.RequestingFactionGuid = entity.FactionOwner;
+            cmd.RequestingFactionGuid = entity.FactionOwnerID;
             cmd._type = OrderTypes.SetBaseItems;
             cmd._baseChanges = changes;
 
@@ -905,7 +905,7 @@ namespace Pulsar4X.ECSLib
 
             SetLogisticsOrder cmd = new SetLogisticsOrder();
             cmd.EntityCommandingGuid = entity.Guid;
-            cmd.RequestingFactionGuid = entity.FactionOwner;
+            cmd.RequestingFactionGuid = entity.FactionOwnerID;
             cmd._type = OrderTypes.SetShipTypeAmounts;
             cmd._shipChanges = changes;
 

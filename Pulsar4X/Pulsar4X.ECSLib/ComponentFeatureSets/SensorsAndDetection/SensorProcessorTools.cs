@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
             for (int i = 0; i < detectableEntities.Count; i++)
             {
                 var detectableEntity = detectableEntities[i];
-                if (filterSameFaction && detectableEntity.FactionOwner == factionOwner)
+                if (filterSameFaction && detectableEntity.FactionOwnerID == factionOwner)
                     continue;
                 else 
                 {

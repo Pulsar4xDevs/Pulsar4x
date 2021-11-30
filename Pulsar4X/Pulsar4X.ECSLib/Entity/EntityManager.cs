@@ -181,11 +181,11 @@ namespace Pulsar4X.ECSLib
 
             UpdateListners(_entities[entityID], null, EntityChangeType.EntityAdded);
 
-            if (entity.FactionOwner != null)
+            if (entity.FactionOwnerID != null)
             {
-                if (!EntitesByFaction.ContainsKey(entity.FactionOwner))
-                    EntitesByFaction.Add(entity.FactionOwner, new List<Entity>());
-                EntitesByFaction[entity.FactionOwner].Add(entity);
+                if (!EntitesByFaction.ContainsKey(entity.FactionOwnerID))
+                    EntitesByFaction.Add(entity.FactionOwnerID, new List<Entity>());
+                EntitesByFaction[entity.FactionOwnerID].Add(entity);
             }
                 //return entityID; //commented this out since we're now setting the entity.ID in here instead of returning the ID to be set by the entity. this was due to UpdateListners needing a valid entity. 
         }
@@ -218,8 +218,8 @@ namespace Pulsar4X.ECSLib
             
             Event logevent = new Event(StaticRefLib.CurrentDateTime, "Entity Removed From Manager");
             logevent.Entity = entity;
-            if(entity.FactionOwner != Guid.Empty)
-                logevent.Faction = GetGlobalEntityByGuid(entity.FactionOwner);
+            if(entity.FactionOwnerID != Guid.Empty)
+                logevent.Faction = GetGlobalEntityByGuid(entity.FactionOwnerID);
             logevent.SystemGuid = ManagerGuid;
             logevent.EventType = EventType.EntityDestroyed;
             if (entity.IsValid && entity.HasDataBlob<NameDB>())
@@ -264,7 +264,7 @@ namespace Pulsar4X.ECSLib
                 _localEntityDictionary.Remove(entity.Guid);
             }
 
-            EntitesByFaction[entity.FactionOwner].Remove(entity);
+            EntitesByFaction[entity.FactionOwnerID].Remove(entity);
             foreach (var factionContacts in FactionSensorContacts.Values)
             {
                 factionContacts.RemoveContact(entity.Guid);

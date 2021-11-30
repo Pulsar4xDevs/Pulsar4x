@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
                 {
                     var type = StaticRefLib.StaticData.CargoTypes[cargoTypeID];
                     string erstr = "We didn't mine a potential " + unitsMinableThisTick + " of " + mineral.Name + " because we have no way to store " + type.Name + " cargo.";
-                       StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity, erstr);
+                    StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity, EventType.Storage, erstr);
                        continue; //can't store this mineral
                 }
                 
@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
                     long dif = unitsMinableThisTick - unitsMinedThisTick;
                     var type = StaticRefLib.StaticData.CargoTypes[cargoTypeID];
                     string erstr = "We didn't mine a potential " + dif + " of " + mineral.Name + " because we don't have enough space to store it.";
-                    StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity, erstr);
+                    StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity,EventType.Storage, erstr);
                 }
 
                 MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];

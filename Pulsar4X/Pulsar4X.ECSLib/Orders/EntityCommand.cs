@@ -78,6 +78,8 @@ namespace Pulsar4X.ECSLib
         /// <param name="game">Game.</param>
         internal abstract void ActionCommand(DateTime atDateTime);
 
+        public bool PauseOnAction = false;
+        
         public bool IsRunning { get; protected set; } = false;
         public abstract bool IsFinished(); 
     }
@@ -88,7 +90,7 @@ namespace Pulsar4X.ECSLib
         {
             if(globalManager.FindEntityByGuid(targetEntityGuid, out targetEntity)) {
                 if(globalManager.FindEntityByGuid(factionGuid, out factionEntity)) {
-                    if(targetEntity.FactionOwner == factionEntity.Guid) 
+                    if(targetEntity.FactionOwnerID == factionEntity.Guid) 
                         return true;
                 }
             }
@@ -115,14 +117,14 @@ namespace Pulsar4X.ECSLib
 
         public static CommandReferences CreateForEntity(Game game, Entity entity)
         {
-            return new CommandReferences(entity.FactionOwner, entity.Guid, game.OrderHandler, entity.Manager.ManagerSubpulses);
+            return new CommandReferences(entity.FactionOwnerID, entity.Guid, game.OrderHandler, entity.Manager.ManagerSubpulses);
         }
 
         public static CommandReferences CreateForEntity(Game game, Guid entityGuid)
         {
             Entity entity;
             if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
-                return new CommandReferences(entity.FactionOwner, entityGuid, game.OrderHandler, entity.Manager.ManagerSubpulses);
+                return new CommandReferences(entity.FactionOwnerID, entityGuid, game.OrderHandler, entity.Manager.ManagerSubpulses);
             else
                 throw new Exception("Entity Not Found");
         }

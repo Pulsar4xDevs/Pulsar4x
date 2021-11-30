@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             dataBlobs.Add(startPos);
             //dataBlobs.Add(new NameDB("Beam", launchingEntity.FactionOwner, "Beam" ));
 
-            var newbeam = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
+            var newbeam = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwnerID, dataBlobs);
         }
 
         public static (Vector3 pos, double seconds) PredictTgtPositionAndTime((Vector3 pos, Vector3 Velocity) ourState, DateTime atTime, Entity targetEntity, double beamVelocity)

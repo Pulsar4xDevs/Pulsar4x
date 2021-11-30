@@ -80,7 +80,7 @@ namespace Pulsar4X.ECSLib
 
                 var cmd = new NewtonThrustCommand()
                 {
-                    RequestingFactionGuid = ship.FactionOwner,
+                    RequestingFactionGuid = ship.FactionOwnerID,
                     EntityCommandingGuid = ship.Guid,
                     CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
                     OrbitrelativeDeltaV = manuver.dv,
@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
 
                 var cmd = new NewtonThrustCommand()
                 {
-                    RequestingFactionGuid = ship.FactionOwner,
+                    RequestingFactionGuid = ship.FactionOwnerID,
                     EntityCommandingGuid = ship.Guid,
                     CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
                     OrbitrelativeDeltaV = manuver.dv,
@@ -142,7 +142,7 @@ namespace Pulsar4X.ECSLib
 
             var cmd = new NewtonThrustCommand()
             {
-                RequestingFactionGuid = ship.FactionOwner,
+                RequestingFactionGuid = ship.FactionOwnerID,
                 EntityCommandingGuid = ship.Guid,
                 CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
                 OrbitrelativeDeltaV = dv,

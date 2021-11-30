@@ -67,6 +67,7 @@ namespace Pulsar4X.ECSLib
             Dictionary<Guid, ComponentDesign> componentDesigns = new Dictionary<Guid, ComponentDesign>();
             Dictionary<Guid, ShipDesign> shipClasses = new Dictionary<Guid, ShipDesign>();
             SetIndustryDesigns(componentDesigns, shipClasses);
+            HaltsOnEvent.Add(EventType.OrdersHalt, true);
         }
 
         public FactionInfoDB(
@@ -83,6 +84,7 @@ namespace Pulsar4X.ECSLib
             ShipDesigns = shipClasses;
             KnownFactions = new List<Entity>();
             SetIndustryDesigns(componentDesigns, shipClasses);
+            HaltsOnEvent.Add(EventType.OrdersHalt, true);
         }
         
 
@@ -97,6 +99,7 @@ namespace Pulsar4X.ECSLib
             ShipDesigns = new Dictionary<Guid, ShipDesign>(factionDB.ShipDesigns);
             InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>(factionDB.ComponentDesigns);
             IndustryDesigns = new Dictionary<Guid, IConstrucableDesign>(factionDB.IndustryDesigns);
+            HaltsOnEvent.Add(EventType.OrdersHalt, true);
             
         }
 

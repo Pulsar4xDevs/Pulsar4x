@@ -22,8 +22,8 @@ namespace Pulsar4X.ECSLib
         {
             get
             {
-                if (_names.ContainsKey(OwningEntity.FactionOwner))
-                    return _names[OwningEntity.FactionOwner];
+                if (_names.ContainsKey(OwningEntity.FactionOwnerID))
+                    return _names[OwningEntity.FactionOwnerID];
                 else return DefaultName;
             }
         }
@@ -89,7 +89,7 @@ namespace Pulsar4X.ECSLib
         public void SetName(Guid requestingFaction, string specifiedName)
         {
             _names[requestingFaction] = specifiedName;
-            if (requestingFaction == OwningEntity.FactionOwner)
+            if (requestingFaction == OwningEntity.FactionOwnerID)
             {
                 _names[StaticRefLib.SpaceMaster.Guid] = specifiedName;
             }

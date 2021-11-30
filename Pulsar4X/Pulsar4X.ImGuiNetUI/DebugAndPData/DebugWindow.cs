@@ -816,9 +816,9 @@ namespace Pulsar4X.SDL2UI
                 if(entity.HasDataBlob<NameDB>())
                     name = entity.GetDataBlob<NameDB>().OwnersName;
                 string factionOwner = Guid.Empty.ToString();
-                if(entity.FactionOwner != Guid.Empty)
+                if(entity.FactionOwnerID != Guid.Empty)
                 {
-                    Entity factionEntity = StaticRefLib.Game.GlobalManager.GetGlobalEntityByGuid(entity.FactionOwner);
+                    Entity factionEntity = StaticRefLib.Game.GlobalManager.GetGlobalEntityByGuid(entity.FactionOwnerID);
                     factionOwner = factionEntity.GetDataBlob<NameDB>().OwnersName;
                 }
                 _allEntites.Add((name, entity, factionOwner));

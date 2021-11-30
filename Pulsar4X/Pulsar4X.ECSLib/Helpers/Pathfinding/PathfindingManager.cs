@@ -124,10 +124,10 @@ namespace Pulsar4X.ECSLib
         public Stack<Node> GetPath(Entity source, Entity destination, out double totalCost)
         {
             Graph graph;
-            if (source.FactionOwner != Guid.Empty)
+            if (source.FactionOwnerID != Guid.Empty)
             {
                 Entity faction;
-                source.Manager.FindEntityByGuid(source.FactionOwner, out faction);
+                source.Manager.FindEntityByGuid(source.FactionOwnerID, out faction);
                 graph = GetPathfindingGraph(faction);
             }
             else

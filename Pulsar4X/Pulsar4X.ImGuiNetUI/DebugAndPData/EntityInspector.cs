@@ -223,7 +223,7 @@ namespace Pulsar4X.SDL2UI
             var componentsByDesign = instancesDB.ComponentsByDesign;
             
 
-            StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(instancesDB.OwningEntity.FactionOwner, out var faction);
+            StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(instancesDB.OwningEntity.FactionOwnerID, out var faction);
             FactionInfoDB factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
             
             string[] designNames = new string[componentsByDesign.Count];

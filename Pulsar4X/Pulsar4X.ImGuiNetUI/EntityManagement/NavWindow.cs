@@ -99,7 +99,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             {
                 //TODO: this is going to show *all* entities, not just the ones this faction can see.
                 //going to need to come up with a way to get this data. (filtering for this should be done in the engine not ui)
-                string name = entity.GetDataBlob<NameDB>().GetName(_orderEntity.FactionOwner);
+                string name = entity.GetDataBlob<NameDB>().GetName(_orderEntity.FactionOwnerID);
                 names.Add(name);
             }
             _siblingNames = names.ToArray();
@@ -114,7 +114,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             names = new List<string>();
             foreach (var entity in _uncleEntites)
             {
-                string name = entity.GetDataBlob<NameDB>().GetName(_orderEntity.FactionOwner);
+                string name = entity.GetDataBlob<NameDB>().GetName(_orderEntity.FactionOwnerID);
                 names.Add(name);
             }
             _uncleNames = names.ToArray();
@@ -294,7 +294,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn1 = fuelBurned1 / _burnRate;
                 var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
 
 
                 double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit);
@@ -302,7 +302,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn2 = fuelBurned2 / _burnRate;
                 var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
             }
         }
 
@@ -355,14 +355,14 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn1 = fuelBurned1 / _burnRate;
                 var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, _manuvers[0].deltaV, secondsBurn1);
 
                 double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit); 
                 double fuelBurned2 = OrbitMath.TsiolkovskyFuelUse(mass2, _exhaustVelocity, _manuvers[1].deltaV.Length());
                 double secondsBurn2 = fuelBurned2 / _burnRate;
                 var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
 
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, _manuvers[1].deltaV, secondsBurn2);
             }
             
         }
@@ -421,7 +421,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         var manuverNodeTime = date + TimeSpan.FromSeconds(secondsBurn * 0.5);
                         mass -= fuelBurned;
 
-                        NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, manuverNodeTime, manuver.deltaV, secondsBurn);
+                        NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime, manuver.deltaV, secondsBurn);
                     }
 
 
@@ -496,7 +496,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 double secondsBurn = fuelBurned / _burnRate;
                 //var manuverNodeTime = _atDatetime + TimeSpan.FromSeconds(secondsBurn * 0.5);
             
-                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwner, _orderEntity, manuverDateTime, manuver.deltaV, secondsBurn);
+                NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverDateTime, manuver.deltaV, secondsBurn);
             }
 
         }

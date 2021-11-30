@@ -56,10 +56,10 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         internal override void Display()
         {
             var orders = _orderableDB.GetActionList();
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(512, 325), ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(550, 325), ImGuiCond.Once);
             if (IsActive == true && ImGui.Begin("Orders: " + _orderEntity.GetOwnersName(), ref IsActive, _flags))
             {
-                ImGui.Columns(5);
+                ImGui.Columns(6);
                 ImGui.SetColumnWidth(0, 124);
                 ImGui.Text("Name");
                 ImGui.NextColumn();
@@ -74,6 +74,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 ImGui.NextColumn();
                 ImGui.SetColumnWidth(4, 32);
                 ImGui.Text("IS");
+                ImGui.NextColumn();
+                ImGui.SetColumnWidth(5, 44);
+                ImGui.Text("Pause");
                 ImGui.NextColumn();
                 ImGui.Separator();
 
@@ -111,6 +114,11 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                             else
                                 ImGui.TextColored(new System.Numerics.Vector4(1, 0, 0, 1), "|");
                         }
+                        ImGui.NextColumn();
+                        if (ImGui.Checkbox("##"+order.CmdID, ref order.PauseOnAction))
+                        {
+                        }
+
                         ImGui.NextColumn();
 
                     }

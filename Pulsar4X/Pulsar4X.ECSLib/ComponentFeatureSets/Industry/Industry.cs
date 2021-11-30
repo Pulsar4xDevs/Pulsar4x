@@ -297,7 +297,7 @@ namespace Pulsar4X.ECSLib.Industry
         {
             VolumeStorageDB stockpile = industryEntity.GetDataBlob<VolumeStorageDB>();
             Entity faction;
-            industryEntity.Manager.FindEntityByGuid(industryEntity.FactionOwner, out faction);
+            industryEntity.Manager.FindEntityByGuid(industryEntity.FactionOwnerID, out faction);
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
 
