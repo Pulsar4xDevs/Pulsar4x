@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
@@ -45,8 +46,22 @@ namespace Pulsar4X.Tests
                  0, //halleysAoP
                  38.38,     //halleysMeanAnomaly at Epoch
                  new System.DateTime(1994, 2, 17)),
-             "Elliptical 2d 0 lop 0 aop Orbit"
+             "Elliptical 2d 0 LoAN 0 aop Orbit"
              ),
+            (
+                OrbitDB.FromAsteroidFormat( //elliptical orbit
+                    parentBody, 
+                    parentMassDB.MassDry, 
+                    2.2e14,          //halleysBodyMass
+                    17.834,     //halleysSemiMajAxis 
+                    0.96714,     //halleysEccentricity
+                    0, 
+                    0, //halleysLoAN
+                    45.0, //halleysAoP
+                    38.38,     //halleysMeanAnomaly at Epoch
+                    new System.DateTime(1994, 2, 17)),
+                "Elliptical 2d 0 LoAN, 45.0 aop Orbit"
+            ),
             (
                 OrbitDB.FromAsteroidFormat( //elliptical orbit
                     parentBody, 
@@ -59,7 +74,7 @@ namespace Pulsar4X.Tests
                     111.33, //halleysAoP
                     38.38,     //halleysMeanAnomaly at Epoch
                     new System.DateTime(1994, 2, 17)),
-                "Elliptical 2d 0 lop, 111.33 aop Orbit"
+                "Elliptical 2d 0 LoAN, 111.33 aop Orbit"
             ),
             (
                 OrbitDB.FromAsteroidFormat( //elliptical orbit
@@ -73,7 +88,7 @@ namespace Pulsar4X.Tests
                     111.33, //halleysAoP
                     38.38,     //halleysMeanAnomaly at Epoch
                     new System.DateTime(1994, 2, 17)),
-                "Elliptical 2d 58.42 aop and 111.33 lop Orbit"
+                "Elliptical 2d 58.42 LoAN and 111.33 aop Orbit"
             ),
             (
              OrbitDB.FromAsteroidFormat( //elliptical 2d retrograde orbit. 
@@ -212,8 +227,8 @@ namespace Pulsar4X.Tests
 
                 var nodeVector = OrbitMath.CalculateNode(OrbitMath.CalculateAngularMomentum(pos, (Vector3)vel));
                 double loAN = OrbitMath.CalculateLongitudeOfAscendingNode(nodeVector);
-                
-                Assert.AreEqual(o_Ω, loAN, 1.0e-10);
+                string message = Angle.ToDegrees(o_Ω).ToString() + " " + Angle.ToDegrees(loAN).ToString();
+                AssertExtensions.AreAngleEqual(o_Ω, loAN, 1.0e-10, message);
 
             }
         }
@@ -472,9 +487,9 @@ namespace Pulsar4X.Tests
                     //these should not change (other than floating point errors) between each itteration
                     Assert.AreEqual(o_a, ke_a, 0.001, "SemiMajorAxis a"); //should be more accurate than this, though if testing from a given set of ke to state, and back, the calculated could be more acurate...
                     Assert.AreEqual(o_e, ke_e, 0.00001, "Eccentricity e");
-                    Assert.AreEqual(o_i, ke_i, 1.0E-7, "Inclination i expected: " + Angle.ToDegrees(o_i) + " was: " + Angle.ToDegrees(ke_i));
-                    Assert.AreEqual(o_Ω, ke_Ω, 1.0E-7, "LoAN Ω expected: " + Angle.ToDegrees(o_Ω) + " was: " + Angle.ToDegrees(ke_Ω));
-                    Assert.AreEqual(o_ω, ke_ω, 1.0E-7, "AoP ω expected: " + Angle.ToDegrees(o_ω) + " was: " + Angle.ToDegrees(ke_ω));
+                    AssertExtensions.AreAngleEqual(o_i, ke_i, 1.0E-7, "Inclination i expected: " + Angle.ToDegrees(o_i) + " was: " + Angle.ToDegrees(ke_i));
+                    AssertExtensions.AreAngleEqual(o_Ω, ke_Ω, 1.0E-7, "LoAN Ω expected: " + Angle.ToDegrees(o_Ω) + " was: " + Angle.ToDegrees(ke_Ω));
+                    AssertExtensions.AreAngleEqual(o_ω, ke_ω, 1.0E-0, "AoP ω expected: " + Angle.ToDegrees(o_ω) + " was: " + Angle.ToDegrees(ke_ω));
                     Assert.AreEqual(o_n, ke_n, 1.0E-7, "MeanMotion n expected: " + Angle.ToDegrees(o_n) + " was: " + Angle.ToDegrees(ke_n));
                 });
             }
@@ -612,5 +627,8 @@ namespace Pulsar4X.Tests
                 });
             }
         }
+
+
+
     }
 }

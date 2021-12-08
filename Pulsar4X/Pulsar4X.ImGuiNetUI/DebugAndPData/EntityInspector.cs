@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Reflection;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -166,6 +167,41 @@ namespace Pulsar4X.SDL2UI
                                     RecursiveReflection(item);
                                 }
                             }
+
+                            ImGui.TreePop();
+                        }
+                        else
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                        }
+                    }
+                    else if (typeof(KeplerElements).IsAssignableFrom(value.GetType()))
+                    {
+                        //var items = (KeplerElements)GetValue(memberInfo, obj);
+                        MemberInfo[] memberInfoske =  typeof(KeplerElements).GetMembers(flags);
+                        int itemsCount = memberInfoske.Length;
+                        
+                        if (ImGui.TreeNode(memberInfo.Name))
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                            _numLines += itemsCount;
+    
+                                foreach (var memberInfoke in memberInfoske)
+                                {
+                                    object valueke = GetValue(memberInfoke, value);
+                                    ImGui.Text(memberInfoke.Name);
+                                    ImGui.NextColumn();
+                                    //object value = memberInfo.GetValue(obj);
+                                    if (valueke != null)
+                                        ImGui.Text(valueke.ToString());
+                                    else ImGui.Text("null");
+                                    ImGui.NextColumn();
+                                }
+                            
 
                             ImGui.TreePop();
                         }

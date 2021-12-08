@@ -57,6 +57,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        private Dictionary<string, bool> lineEnabledPersistance = new Dictionary<string, bool>();
 
         internal override void Display()
         {
@@ -77,12 +78,24 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("focal point rel: " + _debugWidget._f1r);
                 foreach (var item in _debugWidget.ElementItems)
                 {
-                    bool showlines = item.IsEnabled;
+                    bool showlines = item.IsEnabled; //this feels like a cludgy bit of code...
+                    if (lineEnabledPersistance.ContainsKey(item.NameString))
+                    {
+                        showlines = lineEnabledPersistance[item.NameString];
+                        item.IsEnabled = showlines;
+                    }
+                    else
+                    {
+                        lineEnabledPersistance[item.NameString] = showlines;
+                    }
+
+                    
                     //ImGui.Text(item.NameString);
                     if (ImGui.Checkbox(item.NameString, ref showlines))
                     {
                         item.ShowLines = showlines;
                         item.IsEnabled = showlines;
+                        lineEnabledPersistance[item.NameString] = showlines;
                     }
 
                     if (ImGui.IsItemHovered())
@@ -881,7 +894,7 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_Color[] lopHColour = { new SDL.SDL_Color() { r = 100, g = 100, b = 60, a = 255 } };
             ElementItem lopAngle = new ElementItem()
             {
-                NameString = "Longditude Of Periapsis",
+                NameString = "Longditude Of Periapsis (ϖ = Ω + ω)",
                 Colour = lopColour,
                 HighlightColour = lopHColour,
                 DataItem = Angle.ToDegrees(_loP),
@@ -1375,7 +1388,7 @@ namespace Pulsar4X.SDL2UI
 
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
-            
+            var mirMtx = Matrix.IDMirror(false, true);
             _drawComplexShapes = new List<ComplexShape>() {};
 
             foreach (var item in ElementItems)
@@ -1403,7 +1416,7 @@ namespace Pulsar4X.SDL2UI
                     for (int i = 0; i < shape.Points.Length; i++)
                     {
                         var pnt = shape.Points[i];
-                        points[i] = new  Vector2(startPoint.X + pnt.X, startPoint.Y + pnt.Y);
+                        points[i] = new  Vector2(startPoint.X + pnt.X, startPoint.Y + pnt.Y * -1);
                         if (points[i].X > int.MaxValue || points[i].X < int.MinValue || points[i].X is Double.NaN)
                         {
                             //throw new Exception("point outside bounds, probilby a scale issue");
@@ -1518,7 +1531,7 @@ namespace Pulsar4X.SDL2UI
                 { 
                     
                     new Vector2() { X = 0, Y = 0 }, 
-                    new Vector2() { X = vnorm.X, Y = vnorm.Y * -1}, 
+                    new Vector2() { X = vnorm.X, Y = vnorm.Y}, 
                 };
                 Shape.StartPoint = new Vector2( _bodyPosPnt_m.X, _bodyPosPnt_m.Y);
                 Shape.Points = headingLine; //headingPoints.Concat(headingLine).ToArray(); 
