@@ -2,36 +2,42 @@ using System;
 
 namespace NUnit.Framework;
 
-public static class AssertExtensions
+public class AssertExtensions
 {
-    const double pi2 = Math.PI * 2;
     public static void AreAngleEqual(double expected, double actual, double delta)
     {
-        double mod_e = (expected % pi2 + pi2 ) % pi2;
-        double mod_a = (actual % pi2 + pi2 ) % pi2;
-        Assert.AreEqual(mod_e, mod_a, delta);
+        double value = Math.PI - Math.Abs(Math.Abs(expected - actual) % Math.Tau - Math.PI);
+        Assert.IsTrue(value <= delta);
     }
-    public static void AreAngleNotEqual(double expected, double actual)
+    public static void AreAngleNotEqual(double expected, double actual, double delta)
     {
-        double mod_e = (expected % pi2 + pi2 ) % pi2;
-        double mod_a = (actual % pi2 + pi2 ) % pi2;
-        Assert.AreNotEqual(mod_e, mod_a);
+        double value = Math.PI - Math.Abs(Math.Abs(expected - actual) % Math.Tau - Math.PI);
+        Assert.IsFalse(value <= delta);
 
     }
     
     public static void AreAngleEqual(double expected, double actual, double delta, string message)
     {
-        double mod_e = (expected % pi2 + pi2 ) % pi2;
-        double mod_a = (actual % pi2 + pi2 ) % pi2;
-        Assert.AreEqual(mod_e, mod_a, delta, message );
+        double value = Math.PI - Math.Abs(Math.Abs(expected - actual) % Math.Tau - Math.PI);
+        Assert.IsTrue(value <= delta, message);
     }
-    public static void AreAngleNotEqual(double expected, double actual, string message)
+    public static void AreAngleNotEqual(double expected, double actual, double delta, string message)
     {
-        double mod_e = (expected % pi2 + pi2 ) % pi2;
-        double mod_a = (actual % pi2 + pi2 ) % pi2;
-        Assert.AreNotEqual(mod_e, mod_a, message);
+        double value = Math.PI - Math.Abs(Math.Abs(expected - actual) % Math.Tau - Math.PI);
+        Assert.IsFalse(value <= delta, message);
 
     }
-    
+
+
+    [Test]
+    public void TestAreAnglesEqual()
+    {
+        AreAngleEqual(0, Math.Tau,0);
+        AreAngleEqual(Math.Tau, 0,0);
+        AreAngleEqual(0, -Math.Tau,0);
+        AreAngleEqual(-Math.Tau, 0,0);
+        AreAngleEqual(0, 6.2831853071795845,1.0E-10);
+        AreAngleEqual(6.2831853071795845, 0,1.0E-10);
+    }
 
 }

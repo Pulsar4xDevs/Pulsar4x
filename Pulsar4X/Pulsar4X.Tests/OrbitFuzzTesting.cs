@@ -76,6 +76,7 @@ namespace Pulsar4X.Tests
                     new System.DateTime(1994, 2, 17)),
                 "Elliptical 2d 0 LoAN, 111.33 aop Orbit"
             ),
+            /* THIS IS an INVALID test, for 2d orbits, LoAN should be 0!
             (
                 OrbitDB.FromAsteroidFormat( //elliptical orbit
                     parentBody, 
@@ -89,7 +90,7 @@ namespace Pulsar4X.Tests
                     38.38,     //halleysMeanAnomaly at Epoch
                     new System.DateTime(1994, 2, 17)),
                 "Elliptical 2d 58.42 LoAN and 111.33 aop Orbit"
-            ),
+            ),*/
             (
              OrbitDB.FromAsteroidFormat( //elliptical 2d retrograde orbit. 
                  parentBody, 
@@ -227,7 +228,7 @@ namespace Pulsar4X.Tests
 
                 var nodeVector = OrbitMath.CalculateNode(OrbitMath.CalculateAngularMomentum(pos, (Vector3)vel));
                 double loAN = OrbitMath.CalculateLongitudeOfAscendingNode(nodeVector);
-                string message = Angle.ToDegrees(o_Ω).ToString() + " " + Angle.ToDegrees(loAN).ToString();
+                string message = "Expected: " + Angle.ToDegrees(o_Ω).ToString() + "°\nBut was: " + Angle.ToDegrees(loAN).ToString()+ "° ";
                 AssertExtensions.AreAngleEqual(o_Ω, loAN, 1.0e-10, message);
 
             }
@@ -444,6 +445,7 @@ namespace Pulsar4X.Tests
             double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
             double o_n = orbitDB.MeanMotion; 
             double o_ω = orbitDB.ArgumentOfPeriapsis;
+            double o_lop = o_Ω + o_ω;
         
             DateTime o_epoch = orbitDB.Epoch; 
 
@@ -474,6 +476,7 @@ namespace Pulsar4X.Tests
                 double ke_M0 = ke.MeanAnomalyAtEpoch;
                 double ke_n = ke.MeanMotion;
                 double ke_ω = ke.AoP;
+                double ke_lop = ke.LoAN + ke.AoP;
                 
                 Vector3 eccentricityVector = OrbitMath.EccentricityVector(sgp, pos, vel);
                 double ke_ν = OrbitMath.TrueAnomaly(eccentricityVector, pos, vel);
@@ -487,10 +490,11 @@ namespace Pulsar4X.Tests
                     //these should not change (other than floating point errors) between each itteration
                     Assert.AreEqual(o_a, ke_a, 0.001, "SemiMajorAxis a"); //should be more accurate than this, though if testing from a given set of ke to state, and back, the calculated could be more acurate...
                     Assert.AreEqual(o_e, ke_e, 0.00001, "Eccentricity e");
-                    AssertExtensions.AreAngleEqual(o_i, ke_i, 1.0E-7, "Inclination i expected: " + Angle.ToDegrees(o_i) + " was: " + Angle.ToDegrees(ke_i));
-                    AssertExtensions.AreAngleEqual(o_Ω, ke_Ω, 1.0E-7, "LoAN Ω expected: " + Angle.ToDegrees(o_Ω) + " was: " + Angle.ToDegrees(ke_Ω));
-                    AssertExtensions.AreAngleEqual(o_ω, ke_ω, 1.0E-0, "AoP ω expected: " + Angle.ToDegrees(o_ω) + " was: " + Angle.ToDegrees(ke_ω));
-                    Assert.AreEqual(o_n, ke_n, 1.0E-7, "MeanMotion n expected: " + Angle.ToDegrees(o_n) + " was: " + Angle.ToDegrees(ke_n));
+                    AssertExtensions.AreAngleEqual(o_i, ke_i, 1.0E-7, "Inclination i expected: " + Angle.ToDegrees(o_i) + "° was: " + Angle.ToDegrees(ke_i)+"°");
+                    AssertExtensions.AreAngleEqual(o_Ω, ke_Ω, 1.0E-7, "LoAN Ω expected: " + Angle.ToDegrees(o_Ω) + "° was: " + Angle.ToDegrees(ke_Ω)+"°");
+                    AssertExtensions.AreAngleEqual(o_ω, ke_ω, 1.0E-7, "AoP ω expected: " + Angle.ToDegrees(o_ω) + "° was: " + Angle.ToDegrees(ke_ω)+"°");
+                    AssertExtensions.AreAngleEqual(o_lop, ke_lop, 1.0E-7, "LoP expected: " + Angle.ToDegrees(o_lop) + "° was: " + Angle.ToDegrees(ke_lop)+"°");
+                    Assert.AreEqual(o_n, ke_n, 1.0E-7, "MeanMotion n expected: " + Angle.ToDegrees(o_n) + "° was: " + Angle.ToDegrees(ke_n)+"°");
                 });
             }
         }
