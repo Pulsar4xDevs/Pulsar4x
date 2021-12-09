@@ -215,7 +215,7 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static double GetArgumentOfPeriapsis1(Vector3 nodeVector, Vector3 eccentricityVector, Vector3 pos, Vector3 vel)
         {
-            throw new Exception("Broken Math Function, This function should not be used.");
+            //throw new Exception("Broken Math Function, This function should not be used.");
             double aop;
             if (nodeVector.Length() == 0)
             {
@@ -269,7 +269,7 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static double GetArgumentOfPeriapsis3(double inclination, Vector3 eccentricityVector, Vector3 nodeVector)
         {
-            throw new Exception("Broken Math Function, This function shoudl not be used.");
+            //throw new Exception("Broken Math Function, This function shoudl not be used.");
             double aoP = 0;
             double e = eccentricityVector.Length();
             if (Math.Abs(inclination) < Epsilon)

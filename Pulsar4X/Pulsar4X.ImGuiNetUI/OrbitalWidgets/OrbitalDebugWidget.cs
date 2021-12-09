@@ -72,10 +72,10 @@ namespace Pulsar4X.SDL2UI
 
             if(IsActive && ImGui.Begin("Orbit Lines"))
             {
-                ImGui.Text("Parent: " + _debugWidget.parentname);
-                ImGui.Text("ParentPos: " + _debugWidget.parentPos);
-                ImGui.Text("focal point abs: " + _debugWidget._f1a);
-                ImGui.Text("focal point rel: " + _debugWidget._f1r);
+                ImGui.Text($"Parent: {_debugWidget.parentname}");
+                ImGui.Text($"ParentPos: {_debugWidget.parentPos}");
+                ImGui.Text($"focal point abs: { _debugWidget._f1a}");
+                ImGui.Text($"focal point rel: { _debugWidget._f1r}");
                 foreach (var item in _debugWidget.ElementItems)
                 {
                     bool showlines = item.IsEnabled; //this feels like a cludgy bit of code...
@@ -212,22 +212,7 @@ namespace Pulsar4X.SDL2UI
             _orbitIcon = entityState.OrbitIcon;
             
             
-            if (_entity.HasDataBlob<OrbitDB>() || _entity.HasDataBlob<OrbitUpdateOftenDB>())
-            {
-                var orbitDB = _entity.GetDataBlob<OrbitDB>();
-                if (orbitDB == null)
-                    orbitDB = _entity.GetDataBlob<OrbitUpdateOftenDB>();
-                _keplerElements = orbitDB.GetElements();
-                
-                
-            }
-            else
-            {
-                if (_entity.HasDataBlob<NewtonMoveDB>())
-                {
-                    _keplerElements = _entity.GetDataBlob<NewtonMoveDB>().GetElements();
-                }
-            }
+
             
             //NOTE! _positionDB references the focal point (ie parent's position) *not* the orbiting object position.
             
@@ -250,9 +235,28 @@ namespace Pulsar4X.SDL2UI
 
         void RefreshEccentricity()
         {
+            
+            if (_entity.HasDataBlob<OrbitDB>() || _entity.HasDataBlob<OrbitUpdateOftenDB>())
+            {
+                var orbitDB = _entity.GetDataBlob<OrbitDB>();
+                if (orbitDB == null)
+                    orbitDB = _entity.GetDataBlob<OrbitUpdateOftenDB>();
+                _keplerElements = orbitDB.GetElements();
+                
+                
+            }
+            else
+            {
+                if (_entity.HasDataBlob<NewtonMoveDB>())
+                {
+                    _keplerElements = _entity.GetDataBlob<NewtonMoveDB>().GetElements();
+                }
+            }
+            
             _loan =  _keplerElements.LoAN;
             _aop = _keplerElements.AoP;
             _loP = _orbitIcon.LoP_radians;
+            
 
             var cP_a = new Vector2() { X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
             _f1a = new Vector2(){ X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
@@ -262,8 +266,8 @@ namespace Pulsar4X.SDL2UI
             //var f1_m = new Vector2() { X = cP_r.X + _orbitIcon.LinearEccent, Y = cP_r.Y};
             var f2_m = new Vector2() { X = cP_a.X - _orbitIcon.LinearEccent, Y = cP_a.Y};
             var coVertex = new Vector2() { X = cP_a.X , Y = cP_a.Y + _orbitIcon.SemiMin };
-            var periapsisPnt = new Vector2() { X = cP_a.X - _orbitIcon.SemiMaj, Y = cP_a.Y  };
-            var apoapsisPnt = new Vector2() { X = cP_a.X + _orbitIcon.SemiMaj, Y = cP_a.Y  };
+            var periapsisPnt = new Vector2() { X = cP_a.X + _orbitIcon.SemiMaj, Y = cP_a.Y  };
+            var apoapsisPnt = new Vector2() { X = cP_a.X - _orbitIcon.SemiMaj, Y = cP_a.Y  };
 
             
             _cP = DrawTools.RotatePointAround(cP_a, _loP, _f1a);
@@ -311,9 +315,9 @@ namespace Pulsar4X.SDL2UI
             Vector3 angularVelocity = Vector3.Cross(pos_m, (Vector3)vel_m);
             Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
             
-            //_aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, (Vector3)vel, pos);
+            _aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, pos_m, vel_m);
             _aopFromCalc2 = OrbitMath.GetArgumentOfPeriapsis(pos_m, _keplerElements.Inclination, _loan, _trueAnom);
-            //_aopFromCalc3 = OrbitMath.GetArgumentOfPeriapsis3(nodeVector, ecvec, pos, (Vector3)vel, _loan);
+            _aopFromCalc3 = OrbitMath.GetArgumentOfPeriapsis3(_keplerElements.Inclination, ecvec, nodeVector);
             //_aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(_orbitDB.Inclination, ecvec, nodeVector);
             
             _bodyPosPnt_m = new Vector2()
@@ -766,7 +770,7 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_loan).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = _cP,
+                    StartPoint = _f1a,
                     Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 63, -6, 0, _loan, 128),
                     Colors = loanColour,
                     ColourChanges = new (int pointIndex, int colourIndex)[]
@@ -785,14 +789,14 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_Color[] aopHColour = { new SDL.SDL_Color() { r = 100, g = 0, b = 100, a = 255 } };
             ElementItem aopAngle = new ElementItem()
             {
-                NameString = "Argument Of Periapsis (ω)",
+                NameString = "Argument Of Periapsis (ω) - from elements",
                 Colour = aopColour,
                 HighlightColour = aopHColour,
                 DataItem = Angle.ToDegrees(_aop),
                 DataString = Angle.ToDegrees(_aop).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = _cP,
+                    StartPoint = _f1a,
                     Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 63, -6, _loan, _aop, 128),
                     Colors = aopColour,
                     ColourChanges = new (int,int)[]
@@ -815,7 +819,7 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_aopFromCalc1).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = _cP,
+                    StartPoint = _f1a,
                     Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 90, -6, _loan, _aopFromCalc1, 128),
                     Colors = aopColour,
                     ColourChanges = new (int,int)[]
@@ -836,7 +840,7 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_aopFromCalc2).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = _cP,
+                    StartPoint = _f1a,
                     Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 93, -6, _loan, _aopFromCalc2, 128),
                     Colors = aopColour,
                     ColourChanges = new (int,int)[]
@@ -877,7 +881,7 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_aopFromCalc4).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = _cP,
+                    StartPoint = _f1a,
                     Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 99, -6, _loan, _aopFromCalc4, 128),
                     Colors = aopColour,
                     ColourChanges = new (int,int)[]
@@ -901,7 +905,7 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_loP).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = _cP,
+                    StartPoint = _f1a,
                     Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 65, 6, 0, _loP, 128),
                     Colors = lopColour,
                     ColourChanges = new (int pointIndex,int colourIndex)[]{ (0, 0) },
@@ -910,6 +914,55 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(lopAngle);
 
+            ElementItem periapsLine = new ElementItem()
+            {
+                NameString = "Periapsis Line",
+                Colour = aopColour,
+                HighlightColour = aopHColour,
+                //DataItem = _semiMinAxis,
+                DataString = Stringify.Distance(_apoapsisPnt.Length()), 
+                Shape = new ComplexShape()
+                {
+                    Points = new Vector2[]
+                    {
+                        _f1a,
+                        _periapsisPnt
+                    },
+                    Colors = aopColour,
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0, 0)
+                    },
+                    Scales = true
+                }
+            };
+            ElementItems.Add(periapsLine);
+            
+            ElementItem periapsPnt = new ElementItem()
+            {
+                NameString = "Periapsis Point",
+                Colour = aopColour,
+                HighlightColour = aopHColour,
+                Shape = new ComplexShape()
+                {
+                    StartPoint = _periapsisPnt,
+                    Points = new Vector2[]
+                    {
+                        new Vector2(){ X = - 8, Y =  0 },
+                        new Vector2(){ X =  + 8, Y = 0 },
+                        new Vector2(){ X = 0 , Y =   - 8 },
+                        new Vector2(){ X = 0 , Y =   + 8 }
+                    },
+                    Colors = aopColour,
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0, 0)
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(periapsPnt);
+            
             #region TrueAnomaly
             
             //trueAnom angle index 3
@@ -932,7 +985,7 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_trueAnom).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = _cP,
+                    StartPoint = _f1a,
                     Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 78, 6, _loP, _trueAnom, 128),
                     Colors = trueAnomColour,
                     ColourChanges = new (int,int)[]
@@ -952,7 +1005,7 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_trueAnom_FromEVec).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = _cP,
+                    StartPoint = new Vector2() { X = _f1a.X, Y = _f1a.Y },
                     Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 80, 6, _loP, _trueAnom_FromEVec, 128),
                     Colors = trueAnomColour,
                     ColourChanges = new (int,int)[]
@@ -972,7 +1025,7 @@ namespace Pulsar4X.SDL2UI
                 DataString = Angle.ToDegrees(_trueAnom_FromStateVec).ToString() + "°",
                 Shape = new ComplexShape()
                 {
-                    StartPoint = _cP,
+                    StartPoint = new Vector2() { X = _f1a.X, Y = _f1a.Y },
                     Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 84, 6, _loP, _trueAnom_FromStateVec, 128),
                     Colors = trueAnomColour,
                     ColourChanges = new (int,int)[]
@@ -1348,7 +1401,7 @@ namespace Pulsar4X.SDL2UI
 
 
 
-            //_aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, (Vector3)vel, pos);
+            _aopFromCalc1 = OrbitMath.GetArgumentOfPeriapsis1(nodeVector, ecvec, pos_m, vel_m);
             _aopItem_FromCalc1.Shape.Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 90, -6, _loan, _aopFromCalc1, 128);
             _aopItem_FromCalc1.DataItem = Angle.ToDegrees(_aopFromCalc1);
             _aopItem_FromCalc1.DataString = Angle.ToDegrees(_aopFromCalc1).ToString() + "°";
@@ -1364,8 +1417,8 @@ namespace Pulsar4X.SDL2UI
             _aopItem_FromCalc3.DataItem = Angle.ToDegrees(_aopFromCalc3);
             _aopItem_FromCalc3.DataString = Angle.ToDegrees(_aopFromCalc3).ToString() + "°";
             */
-            //_aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(_orbitDB.Inclination, ecvec, nodeVector);
             
+            _aopFromCalc4 = OrbitMath.GetArgumentOfPeriapsis3(_keplerElements.Inclination, ecvec, nodeVector);
             _aopItem_FromCalc4.Shape.Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 99, -6, _loan, _aopFromCalc4, 128);
             _aopItem_FromCalc4.DataItem = Angle.ToDegrees(_aopFromCalc4);
             _aopItem_FromCalc4.DataString = Angle.ToDegrees(_aopFromCalc4).ToString() + "°";
