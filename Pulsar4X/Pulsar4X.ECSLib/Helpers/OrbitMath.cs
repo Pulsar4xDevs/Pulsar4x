@@ -167,5 +167,98 @@ namespace Pulsar4X.ECSLib
             
         }
 
+        /// <summary>
+        /// the maximum deltaV availible (emtpy of cargo full of fuel).
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static double GetEmptyWetDV(Entity entity)
+        {
+            var fuelTypeID = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
+            //var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
+            //var totalMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+            var parentMass = entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+            
+            //var cargoMass = entity.GetDataBlob<VolumeStorageDB>().TotalStoredMass;
+            //var fuelMass = entity.GetDataBlob<VolumeStorageDB>().GetMassStored(fuelType);
+            var fuelMassMax = entity.GetDataBlob<VolumeStorageDB>().GetMassMax(fuelType);
+            var massTotal = massDry + fuelMassMax;
+            //var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(massTotal, parentMass);
+            
+            return TsiolkovskyRocketEquation(massTotal, massDry, exhaustVelocity);
+
+        }
+        
+        /// <summary>
+        /// Max deltaV given a specific amount of (non fuel) cargoMass
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="cargoMass">non volitile cargo</param>
+        /// <returns></returns>
+        public static double GetWetDV(Entity entity, double cargoMass)
+        {
+            var fuelTypeID = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
+            //var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
+            //var totalMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+            var parentMass = entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+
+            var fuelMassMax = entity.GetDataBlob<VolumeStorageDB>().GetMassMax(fuelType);
+            var massCargoDry = massDry + cargoMass;
+            var massTotal = massCargoDry + fuelMassMax;
+            
+            //var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(massTotal, parentMass);
+            
+            return TsiolkovskyRocketEquation(massTotal, massCargoDry, exhaustVelocity);
+
+        }
+        
+        /// <summary>
+        /// Max deltaV given a specific amount of (non fuel) cargoMass, and an ammount of fuel
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="cargoMass">non volitile cargo</param>
+        /// <returns></returns>
+        public static double GetWetDV(Entity entity, double cargoMass, double fuelMass)
+        {
+            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
+            var parentMass = entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+
+            var massCargoDry = massDry + cargoMass;
+            var massTotal = massCargoDry + fuelMass;
+            
+            return TsiolkovskyRocketEquation(massTotal, massCargoDry, exhaustVelocity);
+
+        }
+        
+        /// <summary>
+        /// deltaV given a specific amount of (non fuel) cargoMass,and the current amount of carried fuel
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="cargoMass">non volitile cargo</param>
+        /// <returns></returns>
+        public static double GetDV(Entity entity, double cargoMass)
+        {
+            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
+            var parentMass = entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+            var fuelTypeID = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
+            var fuelMass = entity.GetDataBlob<VolumeStorageDB>().GetMassStored(fuelType);
+            
+            var massCargoDry = massDry + cargoMass;
+            var massTotal = massCargoDry + fuelMass;
+            
+            return TsiolkovskyRocketEquation(massTotal, massCargoDry, exhaustVelocity);
+
+        }
+
+
     }
 }

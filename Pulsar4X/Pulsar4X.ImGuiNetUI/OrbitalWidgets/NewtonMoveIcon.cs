@@ -172,6 +172,7 @@ namespace Pulsar4X.SDL2UI
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
                 CreateHyperbolicPoints();
             }
+            
             if(_newtonMoveDB.ManuverDeltaV.Length() > 0)
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.NewtonionThrust;
             SetTrueAnomalyIndex();

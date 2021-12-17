@@ -219,6 +219,22 @@ namespace Pulsar4X.ECSLib
 
             return units * cargoItem.MassPerUnit;
         }
+        
+        /// <summary>
+        /// Gives the max amount of mass storeable for a given item
+        /// </summary>
+        /// <param name="cargoItem"></param>
+        /// <returns></returns>
+        public static double GetMassMax(this VolumeStorageDB db,ICargoable cargoItem)
+        {
+            if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
+                return 0.0;
+            if (!db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
+                return 0.0;
+            var volume = Math.Max(0, db.TypeStores[cargoItem.CargoTypeID].MaxVolume);
+
+            return volume / cargoItem.VolumePerUnit;
+        }
 
         /// <summary>
         /// Gives the amount of units that are stored of a given item

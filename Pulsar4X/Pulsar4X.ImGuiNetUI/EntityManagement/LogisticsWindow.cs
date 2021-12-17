@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -272,7 +273,8 @@ namespace Pulsar4X.SDL2UI
         private LogiShipperDB _tradeshipDB;
         private VolumeStorageDB _cargoDB;
 
-        private Dictionary<Guid, double>  _changes;
+        private SetLogisticsOrder.Changes _changes;
+        private double _changeMass = 1;
 
         private LogiShipWindow(EntityState entity)
         {
@@ -298,7 +300,7 @@ namespace Pulsar4X.SDL2UI
         {
             _entityState = entityState;
             _selectedEntity = _entityState.Entity;
-            _changes = new Dictionary<Guid, double>();
+            _changes = new SetLogisticsOrder.Changes();
             if (_selectedEntity.HasDataBlob<OrderableDB>())
             {
                 if(_selectedEntity.HasDataBlob<LogiShipperDB>())
@@ -346,22 +348,41 @@ namespace Pulsar4X.SDL2UI
                         }
 
                         ImGui.Text("Allocate amount of cargo space for trade");
+                        double totalVol = 0;
                         foreach (var type in _cargoDB.TypeStores)
                         {
                             var typename = StaticRefLib.StaticData.CargoTypes[type.Key].Name;
-                            var total = type.Value.MaxVolume;
+                            var typeVol = type.Value.MaxVolume;
+                            totalVol += typeVol;
                             var currentVal = _tradeshipDB.TradeSpace[type.Key];
-                            if(_changes.ContainsKey(type.Key))
-                                currentVal = _changes[type.Key];
+                            var volAmounts = _changes.VolumeAmounts;
+                            if(volAmounts.ContainsKey(type.Key))
+                                currentVal = volAmounts[type.Key];
                             
-                            if(ImGuiExt.SliderDouble(typename, ref currentVal, 0, total))
+                            if(ImGuiExt.SliderDouble(typename, ref currentVal, 0, typeVol))
                             {
-                                if(!_changes.ContainsKey(type.Key))
-                                    _changes.Add(type.Key, currentVal);
+                                if(!volAmounts.ContainsKey(type.Key))
+                                    volAmounts.Add(type.Key, currentVal);
                                 else
-                                    _changes[type.Key] = currentVal;
+                                    volAmounts[type.Key] = currentVal;
+                                if (_changes.MaxMass == 0)
+                                    _changes.MaxMass = (int)totalVol;
                             }
                         }
+
+                        int maxMassVal = _changes.MaxMass;
+                        if(ImGui.SliderInt("MassConstraint", ref maxMassVal, 0, (int)totalVol))
+                        {
+                            _changes.MaxMass = maxMassVal;
+                        }
+
+
+                        var maxdv = OrbitMath.GetWetDV(_selectedEntity, maxMassVal);
+                        var dv = OrbitMath.GetDV(_selectedEntity, maxMassVal);
+                        ImGui.Text($"Max Dv:  {Stringify.Velocity(maxdv)}");
+                        ImGui.Text($"Max Dv with current fuel: {Stringify.Velocity(dv)}");
+                        
+                        
                         if(ImGui.Button("Make it so"))
                         {
                             SetLogisticsOrder.CreateCommand_SetShipTypeAmounts(_selectedEntity, _changes);

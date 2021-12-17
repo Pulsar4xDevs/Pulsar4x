@@ -244,11 +244,11 @@ namespace Pulsar4X.ECSLib
             CargoTransferProcessor.AddCargoItems(colonyEntity, _missile, 100);
             CargoTransferProcessor.AddCargoItems(colonyEntity, _merlin, 5);
             LogiBaseDB earthlogiBase = new LogiBaseDB();
-            earthlogiBase.ListedItems.Add(iron, (100, 1));
+            earthlogiBase.ListedItems.Add(iron, (1000, 1));
             colonyEntity.SetDataBlob(earthlogiBase);
 
             LogiBaseDB marslogiBase = new LogiBaseDB();
-            marslogiBase.ListedItems.Add(iron, (-100, 1));
+            marslogiBase.ListedItems.Add(iron, (-1000, 1));
             marsColony.SetDataBlob(marslogiBase);       
 
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
@@ -264,12 +264,14 @@ namespace Pulsar4X.ECSLib
             // Todo: handle this in CreateShip
             ShipDesign shipDesign = DefaultShipDesign(game, factionEntity);
             ShipDesign gunShipDesign = GunShipDesign(game, factionEntity);
+            ShipDesign courierDesign = CargoShipDesign(game, factionEntity);
 
             Entity gunShip0 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth,  "Serial Peacemaker");
             Entity ship2 = ShipFactory.CreateShip(shipDesign, factionEntity, earth,  "Ensuing Calm");
             Entity ship3 = ShipFactory.CreateShip(shipDesign, factionEntity, earth,  "Touch-and-Go");
             Entity gunShip1 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth,  "Prevailing Stillness");
-            Entity courier = ShipFactory.CreateShip(CargoShipDesign(game, factionEntity), factionEntity, earth,  "Planet Express Ship");
+            Entity courier = ShipFactory.CreateShip(courierDesign, factionEntity, earth, Math.PI, "Planet Express Ship");
+            Entity courier2 = ShipFactory.CreateShip(courierDesign, factionEntity, earth, 0, "PE2");
             Entity starship = ShipFactory.CreateShip(SpaceXStarShip(game, factionEntity), factionEntity, earth,  "Starship");
             var fuel = NameLookup.GetMaterialSD(game, "Sorium Fuel");
             var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
@@ -287,6 +289,7 @@ namespace Pulsar4X.ECSLib
             CargoTransferProcessor.AddRemoveCargoVolume(ship2, rp1, 2000);
             CargoTransferProcessor.AddRemoveCargoVolume(ship3, rp1, 2000);
             CargoTransferProcessor.AddRemoveCargoVolume(courier, hydrolox, 50000);
+            CargoTransferProcessor.AddRemoveCargoVolume(courier2, hydrolox, 50000);
             CargoTransferProcessor.AddRemoveCargoMass(starship, methalox, 1200000);
 
             CargoTransferProcessor.AddCargoItems(gunShip0, _missile, 20);
@@ -300,6 +303,7 @@ namespace Pulsar4X.ECSLib
             ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
+            courier2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.ID] = 2750;
             
             
             Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (10 * Math.PI / 180), "Target Drone0");
@@ -318,6 +322,7 @@ namespace Pulsar4X.ECSLib
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship3);
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(gunShip1);
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(courier);
+            NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(courier2);
             NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(starship);
 
             double test_a = 0.5; //AU
@@ -356,6 +361,7 @@ namespace Pulsar4X.ECSLib
             solSys.SetDataBlob(ship2.ID, new TransitableDB());
             solSys.SetDataBlob(gunShip1.ID, new TransitableDB());
             solSys.SetDataBlob(courier.ID, new TransitableDB());
+            solSys.SetDataBlob(courier2.ID, new TransitableDB());
 
             //Entity ship = ShipFactory.CreateShip(shipDesign, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB

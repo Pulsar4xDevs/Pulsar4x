@@ -196,6 +196,7 @@ namespace Pulsar4X.SDL2UI
         //ElementItem _eccentricAnomItem_FromStateVec2;
         ElementItem _eccentricityVectorItem;
         ElementItem _bodyPosItem;
+        private ElementItem _bodyPosFromState;
         HeadingElement _headingItemRel;
         HeadingElement _headingItemRel2;
         HeadingElement _headingItemAbs;
@@ -730,7 +731,7 @@ namespace Pulsar4X.SDL2UI
                     new SDL.SDL_Color(){a = 0} };
             _bodyPosItem = new ElementItem()
             {
-                NameString = "Object Position (P)",
+                NameString = "Object Position (P) - from PosDB",
                 Colour = objPntColour,
                 HighlightColour = objPntHColour,
                 //DataItem = ,
@@ -755,6 +756,39 @@ namespace Pulsar4X.SDL2UI
                 }
             };
             ElementItems.Add(_bodyPosItem);
+            
+            var state = _entity.GetRelativeState();
+            var pos_m = state.pos;
+            var vel_m = state.Velocity;
+
+            var posA_m = _entity.GetAbsolutePosition();
+            _bodyPosFromState = new ElementItem()
+            {
+                NameString = "Object Position (P) - from State",
+                Colour = objPntColour,
+                HighlightColour = objPntHColour,
+                //DataItem = ,
+                Shape = new ComplexShape()
+                {
+                    StartPoint = new Vector2() { X = posA_m.X, Y = posA_m.Y },
+                    Points = new Vector2[]
+                    {
+                        new Vector2(){ X = - 8, Y =  0 },
+                        new Vector2(){ X =  + 8, Y = 0 },
+                        new Vector2(){ X = 0 , Y =   - 8 },
+                        new Vector2(){ X = 0 , Y =   + 8 }
+                    }, 
+                    Colors = objPntColour,
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0, 0),
+                        (1,1),
+                        (2,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_bodyPosFromState);
 
             //loan angle
             SDL.SDL_Color[] loanColour =
@@ -1191,9 +1225,9 @@ namespace Pulsar4X.SDL2UI
                 _aop);
             */
 
-            var state = _entity.GetRelativeState();
-            var pos_m = state.pos;
-            var vel_m = state.Velocity;
+            //var state = _entity.GetRelativeState();
+            //var pos_m = state.pos;
+            //var vel_m = state.Velocity;
             
             var ecvec = OrbitMath.EccentricityVector(_sgp, pos_m, (Vector3)vel_m);
             var ecvec2 = OrbitMath.EccentricityVector2(_sgp, pos_m, (Vector3)vel_m);
@@ -1340,7 +1374,9 @@ namespace Pulsar4X.SDL2UI
                 Y = (_bodyPosition.AbsolutePosition_m ).Y 
             };
             _bodyPosItem.Shape.StartPoint = _bodyPosPnt_m;
-            
+
+            var posA_m = _entity.GetAbsolutePosition();
+            _bodyPosFromState.Shape.StartPoint = new Vector2(posA_m.X, posA_m.Y);
             
             _radiusToBody.Shape.Points = new Vector2[]
             {
