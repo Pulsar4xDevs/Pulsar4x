@@ -418,6 +418,7 @@ namespace Pulsar4X.SDL2UI
         CargoListPannelComplex SelectedCargoPannel;
         CargoListPannelComplex UnselectedCargoPannel;
         bool _hasCargoAbilityLeft;
+        bool _isSelectingRight = false;
         bool _hasCargoAbilityRight;
         Dictionary<Guid, bool> headersOpenDict = new Dictionary<Guid, bool>();
         
@@ -428,7 +429,7 @@ namespace Pulsar4X.SDL2UI
         private CargoTransfer()
         {
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
-            ClickedEntityIsPrimary = false;            
+            //ClickedEntityIsPrimary = false;            
         }
         
         public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
@@ -470,6 +471,11 @@ namespace Pulsar4X.SDL2UI
         void HardRefresh()
         {
             _selectedEntityLeft = _uiState.PrimaryEntity;
+            _selectedEntityRight = null;
+            CargoListRight = null;
+            _hasCargoAbilityRight = false;
+            _transferRate = 0;
+            _isSelectingRight = false;
             if(_selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
             {
                 CargoListLeft = new CargoListPannelComplex(_staticData, _selectedEntityLeft, headersOpenDict);
@@ -481,7 +487,11 @@ namespace Pulsar4X.SDL2UI
             
             if (_uiState.PrimaryEntity != _uiState.LastClickedEntity)
             {
-                _selectedEntityRight = _uiState.LastClickedEntity;
+                if(_isSelectingRight)
+                {
+                    _selectedEntityRight = _uiState.LastClickedEntity;
+                    _isSelectingRight = false;
+                }
                 if (_selectedEntityRight != null && _selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
                 {
                     if (!_hasCargoAbilityRight)
@@ -569,7 +579,14 @@ namespace Pulsar4X.SDL2UI
         {
             if(button == MouseButtons.Primary)
             {
-                Set2ndCargo(entity); 
+                if(_selectedEntityLeft.Entity.Guid != entity.Entity.Guid && _isSelectingRight)
+                    Set2ndCargo(entity);
+                else
+                {
+                    HardRefresh();
+                }
+
+                
             }
         }
 
@@ -645,8 +662,21 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("Transfer Rate Kg/h: " + _transferRate);
                             
                         }
-                        else
-                            ImGui.Text("Select Entity For Transfer");
+
+                        string label = "Click to Select Entity For Transfer";
+                        if (_isSelectingRight)
+                            label = "Select Entity For Transfer";
+                        else if (ImGui.SmallButton(label))
+                        {
+                            _isSelectingRight = !_isSelectingRight;
+                            if (_isSelectingRight)
+                                ClickedEntityIsPrimary = false;
+                            else
+                                ClickedEntityIsPrimary = true;
+                            
+                        }
+                        if(!_isSelectingRight)
+                            ClickedEntityIsPrimary = true;
                     }
 
                 }
