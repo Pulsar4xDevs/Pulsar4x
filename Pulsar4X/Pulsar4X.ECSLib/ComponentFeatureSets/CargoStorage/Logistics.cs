@@ -316,9 +316,13 @@ namespace Pulsar4X.ECSLib
                         if(tradingItems.Key.CargoTypeID == cargoSpace.Key)
                         {
                             //we abs this since if it's demand, it'll be negative. we want to find how much to carry.
+                            var vpu = tradingItems.Key.VolumePerUnit;
+                            var mpu = tradingItems.Key.MassPerUnit;
+                            var tradeCount = tradingItems.Value.count;
+                            var shipCount = Math.Min(mpu * shiperdb.MaxTradeMass, Math.Pow(possibleTradeVolume,3) / vpu);
+                            long numCanCarry = (long)Math.Min(Math.Abs(tradeCount), shipCount);
                             
-                            var volCanCarry = Math.Min(possibleTradeVolume, Math.Abs(tradingItems.Value.count * tradingItems.Key.VolumePerUnit));
-                            long numCanCarry =  (long)(volCanCarry / tradingItems.Key.VolumePerUnit);
+                            
                             var ct = new CargoTask();
                             
                             ct.item = tradingItems.Key;
