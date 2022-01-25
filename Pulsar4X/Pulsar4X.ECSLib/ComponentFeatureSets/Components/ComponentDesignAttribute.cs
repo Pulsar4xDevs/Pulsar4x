@@ -519,21 +519,13 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// sets the function and parameter stuff.
+        /// https://github.com/ncalc/ncalc/wiki/Parameters
         /// </summary>
         private void SetupExpression()
         {
             _expression.EvaluateFunction += NCalcPulsarFunctions;
             _expression.EvaluateParameter += NCalcPulsarParameters;
-
-            _expression.Parameters["xMassx"] = new Expression("Mass"); //unknown string will force it to look in the NCalcPulsarParameters or something
-            //see http://ncalc.codeplex.com/wikipage?title=parameters&referringTitle=Home (Dynamic Parameters)
-            _expression.Parameters["xVolumex"] = new Expression("Volume_km3");
-            _expression.Parameters["xCrewx"] = new Expression("Crew");
-            _expression.Parameters["xHTKx"] = new Expression("HTK");
-            _expression.Parameters["xResearchCostx"] = new Expression("ResearchCost");
-            _expression.Parameters["xMineralCosts"] = new Expression("MineralCosts");
-            _expression.Parameters["xCreditCosts"] = new Expression("CreditCosts");
-            _expression.Parameters["xGuidDictx"] = new Expression("GuidDict");
+            
             //put extra parameters that don't require extra processing here.ie:
             //_expression.Parameters["X"] = 5;
         }
