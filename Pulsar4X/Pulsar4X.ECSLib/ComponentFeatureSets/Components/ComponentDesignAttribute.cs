@@ -546,14 +546,14 @@ namespace Pulsar4X.ECSLib
                     break;
                 
                 case "Mass":
-                    MakeThisDependant(_designer.MassFormula);
-                    args.Result = _designer.MassValue;
+                    MakeThisDependant(_designer.MassFormula); //we do this so that when the mass value changes, whatever formula is referencing mass gets updated also. 
+                    args.Result = (double)_designer.MassValue; //this is the resulting value from the mass value. 
                     break;
                 
                 case "Volume_km3":
                 
                     MakeThisDependant(_designer.VolumeFormula);
-                    args.Result = _designer.VolumeFormula;
+                    args.Result = _designer.VolumeM3Value;
                     break;
                 case "Crew":
                     MakeThisDependant(_designer.CrewFormula);

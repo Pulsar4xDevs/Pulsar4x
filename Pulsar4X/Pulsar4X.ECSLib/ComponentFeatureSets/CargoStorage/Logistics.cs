@@ -45,6 +45,8 @@ namespace Pulsar4X.ECSLib
             Waiting
         }
 
+        public string StateString = "";
+
         public Guid From; 
         public List<(ICargoable item, int count)>  ItemsToShip =  new List<(ICargoable item, int count)>();
         public Dictionary<Guid, double>  TradeSpace =  new Dictionary<Guid, double>();
@@ -822,6 +824,7 @@ namespace Pulsar4X.ECSLib
                 break;
             }
             //_logiShipperDB.ActiveCargoTasks[0].
+            _logiShipperDB.StateString = _details;
         }
 
         internal override bool IsValidCommand(Game game)
@@ -909,6 +912,11 @@ namespace Pulsar4X.ECSLib
         {
             public Dictionary<Guid, double> VolumeAmounts = new Dictionary<Guid, double>();
             public int MaxMass = 0;
+
+            public Changes()
+            {
+                
+            }
         }
         
         public static void CreateCommand_SetShipTypeAmounts(Entity entity, Changes changes )
@@ -924,6 +932,7 @@ namespace Pulsar4X.ECSLib
             
             StaticRefLib.ProcessorManager.GetProcessor<LogiShipperDB>().ProcessEntity(entity, 0);
             StaticRefLib.ProcessorManager.GetProcessor<LogiBaseDB>().ProcessManager(entity.Manager, 0);
+            cmd.UpdateDetailString();
         }
 
         internal override void ActionCommand(DateTime atDateTime)

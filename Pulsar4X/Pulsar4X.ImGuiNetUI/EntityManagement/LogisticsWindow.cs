@@ -387,6 +387,8 @@ namespace Pulsar4X.SDL2UI
                         {
                             SetLogisticsOrder.CreateCommand_SetShipTypeAmounts(_selectedEntity, _changes);
                         }
+
+                        ImGui.Text(_tradeshipDB.StateString);
                         ImGui.Columns(2);
                         foreach (var item in _tradeshipDB.ActiveCargoTasks)
                         {

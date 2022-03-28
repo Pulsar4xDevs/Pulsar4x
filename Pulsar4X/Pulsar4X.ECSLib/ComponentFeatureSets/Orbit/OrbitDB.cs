@@ -360,7 +360,7 @@ namespace Pulsar4X.ECSLib
         }
         
         /// <summary>
-        /// 
+        /// Circular orbit from position. 
         /// </summary>
         /// <param name="parent"></param>
         /// <param name="objPos">ralitive to parent</param>

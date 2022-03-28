@@ -42,6 +42,7 @@ namespace Pulsar4X.ECSLib
         public bool EnableMultiThreading { get; set; } = false;
         public bool EnforceSingleThread { get; set; } = false; //if above is false and this is true, everything will be done on the main thread, and the UI will wait for processes to finish before updating.
         
+        public bool StrictNetonion { get; set; } = false;
 
 
         #endregion
@@ -68,6 +69,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public bool? AllJumpPointsStabilized { get; set; } = false;
 
+        
+        
         #region Not Implemented in ECSLib
 
         /// <summary>

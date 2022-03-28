@@ -14,25 +14,27 @@ namespace Pulsar4X.SDL2UI
         ImGuiTreeNodeFlags _xpanderFlags = ImGuiTreeNodeFlags.CollapsingHeader;
         List<List<UserOrbitSettings>> _userOrbitSettingsMtx;
         //UserOrbitSettings _userOrbitSettings;
-
-        bool IsThreaded;
-        private bool EnforceSingleThread;
-        bool relativeOrbitVelocity;
+        private GameSettings _gameSettings;
+        private bool _isThreaded;
+        private bool _enforceSingleThread;
+        private bool _relativeOrbitVelocity;
+        private bool _strictNewtonion;
 
         private OrbitalDebugWindow _orbitalDebugWindow;
         private GameLogWindow _logWindow;
         private SettingsWindow()
         {
             _userOrbitSettingsMtx = _uiState.UserOrbitSettingsMtx;
-
+            _gameSettings = _uiState.Game.Settings;
 
 
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
-            IsThreaded = _uiState.Game.Settings.EnableMultiThreading;
-            EnforceSingleThread = _uiState.Game.Settings.EnforceSingleThread;
+            _isThreaded = _gameSettings.EnableMultiThreading;
+            _enforceSingleThread = _gameSettings.EnforceSingleThread;
             
-            relativeOrbitVelocity = ECSLib.OrbitProcessor.UseRelativeVelocity;
-
+            _relativeOrbitVelocity = ECSLib.OrbitProcessor.UseRelativeVelocity; //TODO: feel like this should be in game settings
+            _strictNewtonion = _gameSettings.StrictNetonion;
+            
             _orbitalDebugWindow = OrbitalDebugWindow.GetInstance();
             _logWindow = GameLogWindow.GetInstance();
 
@@ -118,31 +120,43 @@ namespace Pulsar4X.SDL2UI
 
                     if (ImGui.CollapsingHeader("Process settings", _xpanderFlags))
                     {
-                        if (ImGui.Checkbox("MultiThreaded", ref IsThreaded))
+                        if (ImGui.Checkbox("MultiThreaded", ref _isThreaded))
                         {
-                            _uiState.Game.Settings.EnableMultiThreading = IsThreaded;
+                            _uiState.Game.Settings.EnableMultiThreading = _isThreaded;
                         }
 
-                        if (ImGui.Checkbox("EnforceSingleThread", ref EnforceSingleThread))
+                        if (ImGui.Checkbox("EnforceSingleThread", ref _enforceSingleThread))
                         {
-                            _uiState.Game.Settings.EnforceSingleThread = EnforceSingleThread;
-                            if (EnforceSingleThread)
+                            _uiState.Game.Settings.EnforceSingleThread = _enforceSingleThread;
+                            if (_enforceSingleThread)
                             {
-                                IsThreaded = false;
+                                _isThreaded = false;
                                 _uiState.Game.Settings.EnableMultiThreading = false;
                             }
                         }
 
-                        if (ImGui.Checkbox("Translate Uses relative Velocity", ref relativeOrbitVelocity))
+                        if (ImGui.Checkbox("Translate Uses relative Velocity", ref _relativeOrbitVelocity))
                         {
-                            ECSLib.OrbitProcessor.UseRelativeVelocity = relativeOrbitVelocity;
+                            ECSLib.OrbitProcessor.UseRelativeVelocity = _relativeOrbitVelocity;
                         }
                         if (ImGui.IsItemHovered())
                         { 
-                            if (relativeOrbitVelocity)
+                            if (_relativeOrbitVelocity)
                                 ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using a vector relative to it's origin parent");
                             else
                                 ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using the absolute Vector (ie raltive to the root'sun'");
+                        }
+                        
+                        if (ImGui.Checkbox("Translate Uses Strict Newtonion", ref _strictNewtonion))
+                        {
+                            _gameSettings.StrictNetonion = _strictNewtonion;
+                        }
+                        if (ImGui.IsItemHovered())
+                        { 
+                            if (_strictNewtonion)
+                                ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter: \n An orbit using a vector relative to it's origin vector");
+                            else
+                                ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter: \n a Simple circular orbit ignoring its origin newton vector");
                         }
                         
                     }

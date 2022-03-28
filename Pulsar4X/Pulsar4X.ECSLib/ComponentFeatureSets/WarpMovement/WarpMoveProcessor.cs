@@ -51,8 +51,9 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class WarpMoveProcessor : IHotloopProcessor
     {
-        static StaticDataStore staticData;//maybe shouldnt do this, however I can't currently see a reason we'd ever want to run with two different static data sets.
-
+        //maybe shouldnt do this, however I can't currently see a reason we'd ever want to run with two different static data sets.
+        private static StaticDataStore _staticData;
+        private static GameSettings _gameSettings; 
 
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
 
@@ -62,7 +63,8 @@ namespace Pulsar4X.ECSLib
 
         public void Init(Game game)
         {
-            staticData = game.StaticData; 
+            _staticData = game.StaticData;
+            _gameSettings = game.Settings;
         }
 
         public static void StartNonNewtTranslation(Entity entity)
@@ -146,7 +148,11 @@ namespace Pulsar4X.ECSLib
                 //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
                 positionDB.RelativePosition_m = moveDB.ExitPointrelative;
                 
-                SetOrbitHere(entity, positionDB, moveDB, dateTimeFuture);
+                if(_gameSettings.StrictNetonion)
+                    SetOrbitHere(entity, positionDB, moveDB, dateTimeFuture);
+                else
+                    SetOrbitHereSimple(entity, positionDB, moveDB, dateTimeFuture);
+                
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
                 powerDB.AddDemand( - warpDB.BubbleSustainCost, entity.StarSysDateTime);
                 powerDB.AddDemand(-warpDB.BubbleCollapseCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
@@ -161,6 +167,30 @@ namespace Pulsar4X.ECSLib
 
             moveDB.LastProcessDateTime = dateTimeFuture;
 
+        }
+
+        void SetOrbitHereSimple(Entity entity, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
+        {
+            double targetSOI = moveDB.TargetEntity.GetSOI_m();
+            
+            Entity targetEntity;
+
+            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(positionDB) > targetSOI)
+            {
+                targetEntity = moveDB.TargetEntity.GetDataBlob<OrbitDB>().Parent; //TODO: it's concevable we could be in another SOI not the parent (ie we could be in a target's moon's SOI)
+            }
+            else
+            {
+                targetEntity = moveDB.TargetEntity;
+            }
+            OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
+
+            //just chuck it in a circular orbit. 
+            OrbitDB newOrbit = OrbitDB.FromPosition(targetEntity, entity, atDateTime); 
+            entity.SetDataBlob(newOrbit);
+            positionDB.SetParent(targetEntity);
+            moveDB.IsAtTarget = true;
+            
         }
 
         void SetOrbitHere(Entity entity, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
@@ -207,10 +237,6 @@ namespace Pulsar4X.ECSLib
             {
                 OrbitDB newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
                 
-
-
-
-
                 if(newOrbit.Eccentricity >= 1)
                 {
                     var newtmove = new NewtonMoveDB(targetEntity, insertionVector_m);
