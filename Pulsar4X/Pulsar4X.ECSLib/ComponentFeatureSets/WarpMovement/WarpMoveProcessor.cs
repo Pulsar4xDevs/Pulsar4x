@@ -148,7 +148,7 @@ namespace Pulsar4X.ECSLib
                 //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
                 positionDB.RelativePosition_m = moveDB.ExitPointrelative;
                 
-                if(_gameSettings.StrictNetonion)
+                if(_gameSettings.StrictNewtonion)
                     SetOrbitHere(entity, positionDB, moveDB, dateTimeFuture);
                 else
                     SetOrbitHereSimple(entity, positionDB, moveDB, dateTimeFuture);

@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         float _maxDV;
         float _progradeDV;
         float _radialDV;
-
+        private bool _strictNewtonMode = true;
         Orbital.Vector3 _deltaV_MS; 
 
         KeplerElements _ke_m;
@@ -93,7 +93,7 @@ namespace Pulsar4X.SDL2UI
 
             OrderingEntityState = entityState;
             _smMode = smMode;
-
+            _strictNewtonMode = StaticRefLib.Game.Settings.StrictNewtonion;
             _displayText = "Warp Order: " + OrderingEntityState.Name;
             _tooltipText = "Select target to orbit";
             CurrentState = States.NeedsTarget;
@@ -355,45 +355,78 @@ namespace Pulsar4X.SDL2UI
                                 break;
                             case States.NeedsInsertionPoint:
                                 {
-                                    if (_newtonUI != null)
+
+                                    if (_strictNewtonMode)
                                     {
-                                        if(_newtonUI.Display())
-                                            InsertionCalcs();
+                                        if (_newtonUI != null)
+                                        {
+                                            if (_newtonUI.Display())
+                                                InsertionCalcs();
+                                        }
+
+                                        var mousePos = ImGui.GetMousePos();
+
+                                        var mouseWorldPos = _uiState.Camera.MouseWorldCoordinate_m();
+                                        _targetInsertionPoint_m = (mouseWorldPos - GetTargetPosition()); //relative to the target body
+
+                                        _moveWidget.SetArrivalPosition(_targetInsertionPoint_m);
+
+                                        //var velAU = OrbitProcessor.PreciseOrbitalVector(sgpCBAU, ralPosCBAU, smaCurrOrbtAU);
+
+
+                                        _ke_m = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _targetInsertionPoint_m, _insertionOrbitalVelocity_m, _departureDateTime);
+
+
+                                        _orbitWidget.SetParametersFromKeplerElements(_ke_m, _targetInsertionPoint_m);
+                                        _apoapsis_m = _ke_m.Apoapsis;
+                                        _periapsis_m = _ke_m.Periapsis;
+                                        Eccentricity = _ke_m.Eccentricity;
+                                    }
+                                    else
+                                    {
+                                        var mousePos = ImGui.GetMousePos();
+
+                                        var mouseWorldPos = _uiState.Camera.MouseWorldCoordinate_m();
+                                        _targetInsertionPoint_m = (mouseWorldPos - GetTargetPosition()); //relative to the target body
+
+                                        _moveWidget.SetArrivalPosition(_targetInsertionPoint_m);
+                                        _ke_m = OrbitMath.FromPosition(_targetInsertionPoint_m, _stdGravParamCurrentBody, _departureDateTime);
+                                        _orbitWidget.SetParametersFromKeplerElements(_ke_m, _targetInsertionPoint_m);
+                                        _apoapsis_m = _ke_m.Apoapsis;
+                                        _periapsis_m = _ke_m.Periapsis;
+                                        Eccentricity = _ke_m.Eccentricity;
+
                                     }
 
-                                    var mousePos = ImGui.GetMousePos();
-
-                                    var mouseWorldPos = _uiState.Camera.MouseWorldCoordinate_m();
-                                    _targetInsertionPoint_m = (mouseWorldPos - GetTargetPosition()); //relative to the target body
-
-                                    _moveWidget.SetArrivalPosition(_targetInsertionPoint_m);
-
-                                    //var velAU = OrbitProcessor.PreciseOrbitalVector(sgpCBAU, ralPosCBAU, smaCurrOrbtAU);
-
-
-                                    _ke_m = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _targetInsertionPoint_m, _insertionOrbitalVelocity_m, _departureDateTime);
-                                    
-
-                                    _orbitWidget.SetParametersFromKeplerElements(_ke_m, _targetInsertionPoint_m);
-                                    _apoapsis_m = _ke_m.Apoapsis;
-                                    _periapsis_m = _ke_m.Periapsis;
-                                    Eccentricity = _ke_m.Eccentricity;
                                     break;
                                 }
 
                             case States.NeedsActioning:
                                 {
-                                    if (_newtonUI != null)
+                                    if (_strictNewtonMode)
                                     {
-                                        if(_newtonUI.Display())
-                                            InsertionCalcs();
+                                        if (_newtonUI != null)
+                                        {
+                                            if (_newtonUI.Display())
+                                                InsertionCalcs();
+                                        }
+
+                                        _ke_m = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _targetInsertionPoint_m, _insertionOrbitalVelocity_m, _departureDateTime);
+
+                                        _orbitWidget.SetParametersFromKeplerElements(_ke_m, _targetInsertionPoint_m);
+                                        _apoapsis_m = _ke_m.Apoapsis;
+                                        _periapsis_m = _ke_m.Periapsis;
+                                        Eccentricity = _ke_m.Eccentricity;
                                     }
-                                    _ke_m = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParamTargetBody_m, _targetInsertionPoint_m, _insertionOrbitalVelocity_m, _departureDateTime);
-                                     
-                                    _orbitWidget.SetParametersFromKeplerElements(_ke_m, _targetInsertionPoint_m);
-                                    _apoapsis_m = _ke_m.Apoapsis;
-                                    _periapsis_m = _ke_m.Periapsis;
-                                    Eccentricity = _ke_m.Eccentricity;
+                                    else
+                                    {
+                                        _ke_m = OrbitMath.FromPosition(_targetInsertionPoint_m, _stdGravParamCurrentBody, _departureDateTime);
+                                        _orbitWidget.SetParametersFromKeplerElements(_ke_m, _targetInsertionPoint_m);
+                                        _apoapsis_m = _ke_m.Apoapsis;
+                                        _periapsis_m = _ke_m.Periapsis;
+                                        Eccentricity = _ke_m.Eccentricity;
+                                    }
+
                                     break;
                                 }
                             default:

@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
             _enforceSingleThread = _gameSettings.EnforceSingleThread;
             
             _relativeOrbitVelocity = ECSLib.OrbitProcessor.UseRelativeVelocity; //TODO: feel like this should be in game settings
-            _strictNewtonion = _gameSettings.StrictNetonion;
+            _strictNewtonion = _gameSettings.StrictNewtonion;
             
             _orbitalDebugWindow = OrbitalDebugWindow.GetInstance();
             _logWindow = GameLogWindow.GetInstance();
@@ -149,7 +149,7 @@ namespace Pulsar4X.SDL2UI
                         
                         if (ImGui.Checkbox("Translate Uses Strict Newtonion", ref _strictNewtonion))
                         {
-                            _gameSettings.StrictNetonion = _strictNewtonion;
+                            _gameSettings.StrictNewtonion = _strictNewtonion;
                         }
                         if (ImGui.IsItemHovered())
                         { 
