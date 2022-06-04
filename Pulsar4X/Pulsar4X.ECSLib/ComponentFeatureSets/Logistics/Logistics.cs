@@ -683,14 +683,15 @@ namespace Pulsar4X.ECSLib
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         }
         
-        public struct Changes
+        public class Changes//maybe should be a struct, but would need to not use a dictionary and need to check mutability. 
         {
-            public Dictionary<Guid, double> VolumeAmounts = new Dictionary<Guid, double>();
-            public int MaxMass = 0;
+            public Dictionary<Guid, double> VolumeAmounts;
+            public int MaxMass;
 
             public Changes()
             {
-                
+                VolumeAmounts = new Dictionary<Guid, double>();
+                MaxMass = 0;
             }
         }
         
