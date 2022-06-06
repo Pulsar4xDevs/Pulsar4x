@@ -126,14 +126,29 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Remove="Libs\SDL2-CS.dll" />
-    <None Remove="Libs\sdl2\**" />
     <None Remove="Libs\SDL2-CS.dll.config" />
     <None Remove="Libs\SDL2-CS.pdb" />
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
     <None Include="Libs\cimgui\linux-x64\cimgui.so">
       <Link>libcimgui.so</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Libs\sdl2\linux-x64\libSDL2.so">
+      <Link>libSDL2.so</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Libs\sdl2\linux-x64\libSDL2_image.so">
+      <Link>libSDL2_image.so</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Libs\sdl2\linux-x64\libSDL2_mixer.so">
+      <Link>libSDL2_mixer.so</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Libs\sdl2\linux-x64\libSDL2_ttf.so">
+      <Link>libSDL2_ttf.so</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup Condition=" '$(OS)' == 'Windows_NT' ">
@@ -253,15 +268,11 @@
   <ItemGroup>
     <Compile Remove="MapRendering\GalaxyMap.cs" />
     <Compile Remove="PlanetaryManagement\PlanetaryWindow.old.cs" />
-    <Compile Remove="Libs\sdl2\**" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\PowerIco.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Remove="Libs\sdl2\**" />
   </ItemGroup>
 
   <Target Name="GetGitHash" BeforeTargets="WriteGitHash" Condition="'$(BuildHash)' == ''">
