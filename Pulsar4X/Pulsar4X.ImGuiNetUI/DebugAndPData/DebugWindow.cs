@@ -37,7 +37,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         _selectedEntityState = null;
                     }
-                    _uiState.LastClickedEntity = _selectedEntityState;
+                    _uiState.EntityClicked(_selectedEntityState, MouseButtons.Primary);
                     OnSelectedEntityChanged();
                 }
             }

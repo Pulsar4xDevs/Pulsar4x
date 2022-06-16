@@ -275,11 +275,30 @@ namespace Pulsar4X.SDL2UI
 
         internal void EntityClicked(Guid entityGuid, Guid starSys, MouseButtons button)
         {
-            
-            LastClickedEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
+            var entityState = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
+            LastClickedEntity = entityState;
             
             if (ActiveWindow != null)
-                ActiveWindow.EntityClicked(StarSystemStates[starSys].EntityStatesWithNames[entityGuid], button);
+                ActiveWindow.EntityClicked(entityState, button);
+
+            SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
+            if(LastClickedEntity.DebugOrbitOrder != null)
+            {
+                SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
+            }
+
+            if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
+                PrimaryEntity = LastClickedEntity;
+            
+            EntityClickedEvent?.Invoke(LastClickedEntity, button);
+        }
+        
+        internal void EntityClicked(EntityState entityState, MouseButtons button)
+        {
+            LastClickedEntity = entityState;
+            
+            if (ActiveWindow != null)
+                ActiveWindow.EntityClicked(entityState, button);
 
             SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
             if(LastClickedEntity.DebugOrbitOrder != null)
