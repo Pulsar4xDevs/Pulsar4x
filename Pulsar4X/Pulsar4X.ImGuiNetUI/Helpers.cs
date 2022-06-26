@@ -300,8 +300,8 @@ namespace Pulsar4X.SDL2UI
             pts[7] = new System.Numerics.Vector2(state._xcentr, state._yctr1);         //selected top right
             pts[8] = pts[0];                                    //selected top left
 
-
-            wdl.AddPolyline(ref pts[0], pts.Length, state._colour, false, 1.0f);
+            var plflag = ImGuiNET.ImDrawFlags.None;
+            wdl.AddPolyline(ref pts[0], pts.Length, state._colour, plflag, 1.0f);
             
             ImGui.PopID();
             
@@ -370,7 +370,8 @@ namespace Pulsar4X.SDL2UI
             pts[3] = new System.Numerics.Vector2(rx, by); //bottom right
             pts[4] = new System.Numerics.Vector2(rx, _startPos[_nestIndex].Y); //top right
             pts[5] = new System.Numerics.Vector2(_startPos[_nestIndex].X + _labelSize[_nestIndex].X + _dentMulitpier, _startPos[_nestIndex].Y);
-            wdl.AddPolyline(ref pts[0], pts.Length, _colour[_nestIndex], false, 1.0f);
+            var plflag = ImGuiNET.ImDrawFlags.None;
+            wdl.AddPolyline(ref pts[0], pts.Length, _colour[_nestIndex], plflag, 1.0f);
             
             ImGui.PopID();
             
@@ -443,7 +444,7 @@ namespace Pulsar4X.SDL2UI
                 var getWindowSize = ImGui.GetWindowSize();
                 var getWindowContentRegionMax = ImGui.GetWindowContentRegionMax();
                 var getWindowContentRegionMin = ImGui.GetWindowContentRegionMin();
-                var getWindowContentRegionWidth = ImGui.GetWindowContentRegionWidth();
+                var getWindowContentRegionWidth = ImGui.GetWindowContentRegionMax().X - getWindowContentRegionMin.X;
                 
                 var getFontSize = ImGui.GetFontSize();
 
@@ -1017,9 +1018,9 @@ namespace Pulsar4X.SDL2UI
             }
 
 
-            if (ImGuiExt.SliderDouble("X", ref x, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.ClampOnInput))
+            if (ImGuiExt.SliderDouble("X", ref x, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.AlwaysClamp))
                 changed = true;
-            if (ImGuiExt.SliderDouble("Y", ref y, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.ClampOnInput))
+            if (ImGuiExt.SliderDouble("Y", ref y, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.AlwaysClamp))
                 changed = true;
                  
 
@@ -1075,7 +1076,7 @@ namespace Pulsar4X.SDL2UI
             //ImGui.Text("speed:" + speed);
             
             
-            if(ImGuiExt.DragDouble("r", ref r, speed, 0, maxVal, Stringify.Distance(r), ImGuiSliderFlags.ClampOnInput))
+            if(ImGuiExt.DragDouble("r", ref r, speed, 0, maxVal, Stringify.Distance(r), ImGuiSliderFlags.AlwaysClamp))
                 changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Radius");
@@ -1137,7 +1138,7 @@ namespace Pulsar4X.SDL2UI
             //ImGui.Text("speed:" + speed);
             
             
-            if(ImGui.DragInt("r", ref r, speed, 0, maxVal, r.ToString(), ImGuiSliderFlags.ClampOnInput))
+            if(ImGui.DragInt("r", ref r, speed, 0, maxVal, r.ToString(), ImGuiSliderFlags.AlwaysClamp))
                 changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Radius");
