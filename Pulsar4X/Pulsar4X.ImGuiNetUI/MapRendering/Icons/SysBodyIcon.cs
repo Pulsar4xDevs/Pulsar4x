@@ -1,5 +1,6 @@
 ﻿using System;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -83,7 +84,7 @@ namespace Pulsar4X.SDL2UI
                 //this is not right, need to pull the points in towards the center, not just pull them left. 
                 double x = points[i].X - _rng.Next(jagMin, jagMax);
                 double y = points[i].Y - _rng.Next(jagMin, jagMax);
-                points[i] = new PointD() { X = x, Y = y };
+                points[i] = new Vector2() { X = x, Y = y };
             }
             //colors picked out of my ass for a brown look. 
             //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff. 

@@ -19,8 +19,8 @@ namespace Pulsar4X.SDL2UI
         private bool _firstClickDone = false;
         private float _zoomLevelAtFirstClick = 0;
         //~measuring booleans
-        private ECSLib.Vector3 _firstClick;
-        private Vector2 _firstClickInViewCoord;
+        private Orbital.Vector3 _firstClick;
+        private System.Numerics.Vector2 _firstClickInViewCoord;
         //~measuring variables
         private void _stopMeasuring()
         {
@@ -54,7 +54,7 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        internal override void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button)
+        internal override void MapClicked(Orbital.Vector3 worldPos_m, MouseButtons button)
         {
             base.MapClicked(worldPos_m, button);
             if (true)//button == MouseButtons::Primary)
@@ -115,8 +115,8 @@ namespace Pulsar4X.SDL2UI
                     if(_zoomLevelAtFirstClick != _uiState.Camera.ZoomLevel){
                         _stopMeasuring();
                     }else{
-                        ECSLib.Vector3 lastMousePos = _uiState.Camera.MouseWorldCoordinate_m();
-                        Vector2 lastMousePosInViewCoord = ImGui.GetMousePos();
+                        Orbital.Vector3 lastMousePos = _uiState.Camera.MouseWorldCoordinate_m();
+                        System.Numerics.Vector2 lastMousePosInViewCoord = ImGui.GetMousePos();
 
                         SDL.SDL_SetRenderDrawColor(_uiState.rendererPtr, 255,255,255,255);
                         SDL.SDL_RenderDrawLine(_uiState.rendererPtr, (int)_firstClickInViewCoord.X, (int)_firstClickInViewCoord.Y, (int)lastMousePosInViewCoord.X, (int)lastMousePosInViewCoord.Y);

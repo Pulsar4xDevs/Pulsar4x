@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -22,7 +23,7 @@ namespace Pulsar4X.ECSLib
         /// The percentage of the bodies sureface covered by water.
         /// </summary>
         [JsonProperty]
-        public short HydrosphereExtent { get; internal set; }
+        public decimal HydrosphereExtent { get; internal set; }
 
         /// <summary>
         /// A measure of the greenhouse factor provided by this Atmosphere.
@@ -62,6 +63,24 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Dictionary<AtmosphericGasSD, float> Composition { get; internal set; }
 
+        //<summary>
+        //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
+        //In Earth Atmospheres (atm).
+        //</summary>
+        [JsonProperty]
+        public Dictionary<AtmosphericGasSD, float> CompositionByPercent { 
+            get
+            {
+                var totalAtm = Composition.Values.Sum();
+                var byPercent = new Dictionary<AtmosphericGasSD, float>();
+                foreach (var kvp in Composition)
+                {
+                    byPercent.Add(kvp.Key, kvp.Value / totalAtm * 100.0f);
+                }
+                return byPercent;
+            }
+        }
+
         /// <summary>
         /// A sting describing the Atmosphere in Percentages, like this:
         /// "75% Nitrogen (N), 21% Oxygen (O), 3% Carbon dioxide (CO2), 1% Argon (Ar)"
@@ -96,17 +115,15 @@ namespace Pulsar4X.ECSLib
         /// <param name="hydroExtent">The percentage of the bodies sureface covered by water.</param>
         /// <param name="greenhouseFactor">Greenhouse factor provided by this Atmosphere.</param>
         /// <param name="greenhousePressue"></param>
-        /// <param name="albedo">from 0 to 1.</param>
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
         /// <param name="composition">a Dictionary of gas types as keys and amounts as values</param>
-        internal AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float surfaceTemp, Dictionary<AtmosphericGasSD,float> composition)
+        internal AtmosphereDB(float pressure, bool hydrosphere, decimal hydroExtent, float greenhouseFactor, float greenhousePressue, float surfaceTemp, Dictionary<AtmosphericGasSD,float> composition)
         {
             Pressure = pressure;
             Hydrosphere = hydrosphere;
             HydrosphereExtent = hydroExtent;
             GreenhouseFactor = greenhouseFactor;
             GreenhousePressure = greenhousePressue;
-            //Albedo = albedo;
             SurfaceTemperature = surfaceTemp;
             Composition = composition;
         }

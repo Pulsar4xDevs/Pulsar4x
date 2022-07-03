@@ -38,17 +38,27 @@ namespace Pulsar4X.SDL2UI
             _faction = faction;
             foreach (Entity entityItem in StarSystem.GetEntitiesByFaction(faction.Guid))
             {
-                var entityState = new EntityState(entityItem);// { Name = "Unknown" };
+                var entityState = new EntityState(entityItem);
+                // Add Data to State if Available
                 if (entityItem.HasDataBlob<NameDB>())
                 {
                     entityState.Name = entityItem.GetDataBlob<NameDB>().GetName(faction);
-                    EntityStatesWithNames.Add(entityItem.Guid, entityState);
-                }                    
+                }
                 if (entityItem.HasDataBlob<PositionDB>())
                 {
-                 EntityStatesWithPosition.Add(entityItem.Guid, entityState);
+                    entityState.Position = entityItem.GetDataBlob<PositionDB>();
                 }
-                if( entityItem.HasDataBlob<ColonyInfoDB>())
+
+                // Add To Lists
+                if (entityItem.HasDataBlob<NameDB>())
+                {
+                    EntityStatesWithNames.Add(entityItem.Guid, entityState);
+                }
+                if (entityItem.HasDataBlob<PositionDB>())
+                {
+                    EntityStatesWithPosition.Add(entityItem.Guid, entityState);
+                }
+                if (entityItem.HasDataBlob<ColonyInfoDB>())
                 {
                     EntityStatesColonies.Add(entityItem.Guid, entityState);
                 }
@@ -80,7 +90,7 @@ namespace Pulsar4X.SDL2UI
             //SystemContacts = system.FactionSensorContacts[faction.ID];
             //_sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
-
+            _faction = StaticRefLib.SpaceMaster;
             foreach (var entityItem in system.GetAllEntitiesWithDataBlob<NameDB>())
             {
 

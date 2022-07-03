@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 {
@@ -13,14 +14,14 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             var parentPositionDB = launchingEntity.GetDataBlob<PositionDB>();
             Vector3 parentPosition = parentPositionDB.AbsolutePosition_m;
             var parentPosRal = parentPositionDB.RelativePosition_m;
-            var tgtEntityOrbit = targetEntity.GetDataBlob<OrbitDB>();
+            var targetEntityOrbit = targetEntity.GetDataBlob<OrbitDB>();
             if (targetEntity.HasDataBlob<OrbitUpdateOftenDB>())
-                tgtEntityOrbit = targetEntity.GetDataBlob<OrbitUpdateOftenDB>();
+                targetEntityOrbit = targetEntity.GetDataBlob<OrbitUpdateOftenDB>();
             
             //MissileLauncherAtb launcherAtb;
             VolumeStorageDB cargo = launchingEntity.GetDataBlob<VolumeStorageDB>();
             
-            int numMis = cargo.TypeStores[missileDesign.CargoTypeID].CurrentStoreInUnits[missileDesign.ID];
+            long numMis = cargo.TypeStores[missileDesign.CargoTypeID].CurrentStoreInUnits[missileDesign.ID];
             if (numMis < 1)
                 return;
             
@@ -34,7 +35,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             double totalDV = OrbitMath.TsiolkovskyRocketEquation(missileDesign.WetMass, missileDesign.DryMass, missileDesign.ExaustVelocity);
             double speed = launchSpeed + launchManuverDv;
             var misslPositionDB = (PositionDB)parentPositionDB.Clone();
-            Vector3 parentVelocity = Entity.GetRalitiveFutureVelocity(launchingEntity, launchingEntity.StarSysDateTime);
+            Vector3 parentVelocity = launchingEntity.GetRelativeFutureVelocity(launchingEntity.StarSysDateTime);
             
 
             
@@ -54,10 +55,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             dataBlobs.Add(new ComponentInstancesDB());
             dataBlobs.Add(misslPositionDB);
             dataBlobs.Add(MassVolumeDB.NewFromMassAndVolume(missileDesign.WetMass, missileDesign.WetMass));
-            dataBlobs.Add(new NameDB(defaultName, launchingEntity.FactionOwner,  factionsName));
+            dataBlobs.Add(new NameDB(defaultName, launchingEntity.FactionOwnerID,  factionsName));
             dataBlobs.Add(newtmovedb);
             dataBlobs.Add(orderabledb);
-            var newMissile = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
+            var newMissile = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwnerID, dataBlobs);
             
             foreach (var tuple in missileDesign.Components)
             {
@@ -65,8 +66,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             }
 
             var newtdb = newMissile.GetDataBlob<NewtonThrustAbilityDB>();
-            newtdb.DryMass_kg = missileDesign.MassPerUnit;
-            newtdb.SetFuel(missileDesign.WetMass - missileDesign.MassPerUnit);
+            //newtdb.DryMass_kg = missileDesign.MassPerUnit;
+            newtdb.SetFuel(missileDesign.WetMass - missileDesign.DryMass, missileDesign.WetMass);
             
 
             bool directAttack = false;
@@ -91,7 +92,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                  
                 launchVelocity = parentVelocity + launcherVector;
                 */
-                ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, launchingEntity.StarSysDateTime, targetEntity);
+                ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwnerID, newMissile, launchingEntity.StarSysDateTime, targetEntity);
                 
             }
             else
@@ -100,8 +101,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 if (launchingEntity.HasDataBlob<OrbitUpdateOftenDB>())
                     launchOrbit = launchingEntity.GetDataBlob<OrbitUpdateOftenDB>();
                 
-                var launchTrueAnomaly = OrbitProcessor.GetTrueAnomaly(launchOrbit, atDatetime);
-                var targetTrueAnomaly = OrbitProcessor.GetTrueAnomaly(tgtEntityOrbit, atDatetime);
+                var launchTrueAnomaly = launchOrbit.GetTrueAnomaly(atDatetime);
+                var targetTrueAnomaly = targetEntityOrbit.GetTrueAnomaly(atDatetime);
                 var phaseAngle = targetTrueAnomaly - launchTrueAnomaly;
                 var manuvers = InterceptCalcs.OrbitPhasingManuvers(launchOrbit, atDatetime, phaseAngle);
                 
@@ -109,15 +110,15 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
                 var manuverDV = manuvers[0].deltaV;
                 //newtmovedb.ActionOnDateTime = atDatetime;
                 //newtmovedb.DeltaVForManuver_FoRO_m = manuverDV;   
-                NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, atDatetime, manuverDV);
-                
-                DateTime futureDate = atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
-                Vector3 futureDV = manuvers[1].deltaV;
-                NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
+                //NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, atDatetime, manuverDV);
+                //NewtonThrustCommand.CreateCommand(newMissile, (manuver))
+                //DateTime futureDate = atDatetime + TimeSpan.FromSeconds(manuvers[1].timeInSeconds);
+                //Vector3 futureDV = manuvers[1].deltaV;
+                //NewtonThrustCommand.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate, futureDV);
                 //ThrustToTargetCmd.CreateCommand(launchingEntity.FactionOwner, newMissile, futureDate + TimeSpan.FromSeconds(1), targetEntity);
+                NewtonThrustCommand.CreateCommands(newMissile, manuvers);
             }
-
-            cargo.RemoveCargoByUnit(missileDesign, 1); //remove missile from parent.
+            CargoTransferProcessor.RemoveCargoItems(launchingEntity, missileDesign, 1);//remove missile from parent.
         }
     }
 

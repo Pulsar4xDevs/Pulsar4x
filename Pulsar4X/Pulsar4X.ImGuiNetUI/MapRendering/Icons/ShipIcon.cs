@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
+using Pulsar4X.Orbital;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -65,7 +66,12 @@ namespace Pulsar4X.SDL2UI
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
                 else if (db is WarpMovingDB)
-                    _warpMoveDB = (WarpMovingDB)db;                    
+                    _warpMoveDB = (WarpMovingDB)db;
+                else if (db is NewtonMoveDB)
+                {
+                    _newtonMoveDB = (NewtonMoveDB)db;
+                    //NewtonVectors();
+                }
             }
             else if (changeType == EntityChangeData.EntityChangeType.DBRemoved)
             {
@@ -73,6 +79,11 @@ namespace Pulsar4X.SDL2UI
                     _orbitDB = null;
                 else if (db is WarpMovingDB)
                     _warpMoveDB = null;
+                else if (db is NewtonMoveDB)
+                {
+                    _newtonMoveDB = null;
+                    //Shapes.RemoveAt(Shapes.Count-1);
+                }
             }
         }
 
@@ -92,12 +103,12 @@ namespace Pulsar4X.SDL2UI
             byte g = 50;
             byte b = 200;
             byte a = 255;
-            PointD[] points = {
-            new PointD { X = 0, Y = 5 },
-            new PointD { X = 5, Y = -5 },
-            new PointD { X = 0, Y = 0 },
-            new PointD { X = -5, Y = -5 },
-            new PointD { X = 0, Y = 5 }
+            Orbital.Vector2[] points = {
+            new Orbital.Vector2() { X = 0, Y = 5 },
+            new Orbital.Vector2() { X = 5, Y = -5 },
+            new Orbital.Vector2() { X = 0, Y = 0 },
+            new Orbital.Vector2() { X = -5, Y = -5 },
+            new Orbital.Vector2() { X = 0, Y = 5 }
             };
 
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
@@ -158,18 +169,18 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
 
 
-            PointD p0 = new PointD() { X = offsetX, Y = (int)(offsetY - height * 0.5) };
-            PointD p1 = new PointD() { X = offsetX + frontWidth, Y = (int)(offsetY - height * 0.5) };
-            PointD p2 = new PointD() { X = (int)(offsetX + width * 0.5), Y = (int)(offsetY - height * 0.3) };
-            PointD p3 = new PointD() { X = (int)(offsetX + width * 0.5), Y = -(int)(offsetY - height * 0.25) };
-            PointD p4 = new PointD() { X = offsetX + backWidth, Y = -(int)(offsetY - height * 0.5) };
-            PointD p5 = new PointD() { X = offsetX, Y = -(int)(offsetY - height * 0.5) };
-            PointD p6 = new PointD() { X = offsetX - backWidth, Y = (int)(offsetY + height * 0.5) };
-            PointD p7 = new PointD() { X = (int)(offsetX + -width * 0.5), Y = (int)(offsetY + height * 0.25) };
-            PointD p8 = new PointD() { X = (int)(offsetX + -width * 0.5), Y = -(int)(offsetY + height * 0.3) };
-            PointD p9 = new PointD() { X = offsetX - frontWidth, Y = -(int)(offsetY + height * 0.5) };
-            PointD p10 = new PointD() { X = offsetX, Y = -(int)(offsetY + height * 0.5) };
-            var shape = new Shape() { Color = colour, Points = new PointD[] { p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 } };
+            Vector2 p0 = new Orbital.Vector2() { X = offsetX, Y = (int)(offsetY - height * 0.5) };
+            Vector2 p1 = new Vector2() { X = offsetX + frontWidth, Y = (int)(offsetY - height * 0.5) };
+            Vector2 p2 = new Vector2() { X = (int)(offsetX + width * 0.5), Y = (int)(offsetY - height * 0.3) };
+            Vector2 p3 = new Vector2() { X = (int)(offsetX + width * 0.5), Y = -(int)(offsetY - height * 0.25) };
+            Vector2 p4 = new Vector2() { X = offsetX + backWidth, Y = -(int)(offsetY - height * 0.5) };
+            Vector2 p5 = new Vector2() { X = offsetX, Y = -(int)(offsetY - height * 0.5) };
+            Vector2 p6 = new Vector2() { X = offsetX - backWidth, Y = (int)(offsetY + height * 0.5) };
+            Vector2 p7 = new Vector2() { X = (int)(offsetX + -width * 0.5), Y = (int)(offsetY + height * 0.25) };
+            Vector2 p8 = new Vector2() { X = (int)(offsetX + -width * 0.5), Y = -(int)(offsetY + height * 0.3) };
+            Vector2 p9 = new Vector2() { X = offsetX - frontWidth, Y = -(int)(offsetY + height * 0.5) };
+            Vector2 p10 = new Vector2() { X = offsetX, Y = -(int)(offsetY + height * 0.5) };
+            var shape = new Shape() { Color = colour, Points = new Orbital.Vector2[] { p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 } };
             Shapes.Add(shape);
                 
 
@@ -216,35 +227,40 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        void NewtonVectors()
+        {
+            byte r = 100;
+            byte g = 50;
+            byte b = 200;
+            byte a = 255;
+            SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
+            var len = 0.00001 * _newtonMoveDB.OwningEntity.GetDataBlob<NewtonThrustAbilityDB>().ThrustInNewtons;
+            var dv = _newtonMoveDB.ManuverDeltaV;
+            var line = Vector3.Normalise(dv) * len ;
+            Vector2[] points = new Vector2[2];
+            points[0]= Vector2.Zero;
+            points[1] = new Vector2(line.X, line.Y);
+            var shape = new Shape() { Color = colour, Points = points };
+            
+            Shapes.Add(shape);
+        }
+
 
 
         public override void OnPhysicsUpdate()
         {
 
-            DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
-            if (_orbitDB != null)
-            {
-                var headingVector = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(_orbitDB, atDateTime);
-                var heading = Math.Atan2(headingVector.Y, headingVector.X);
-                Heading = (float)heading;
-            }
-            else if(_newtonMoveDB != null)
-            {
-                Heading = (float)Math.Atan2(_newtonMoveDB.CurrentVector_ms.Y, _newtonMoveDB.CurrentVector_ms.X); 
-            }
-            else if (_warpMoveDB != null)
-            {
-                Heading = _warpMoveDB.Heading_Radians;
-            }
-
+            var headingVector = _entity.GetRelativeState().Velocity;
+            var heading = Math.Atan2(headingVector.Y, headingVector.X);
+            Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
-            var scaleMatrix = Matrix.NewScaleMatrix(Scale, Scale);
-            var rotateMatrix = Matrix.NewRotateMatrix(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
+            var mirrorMatrix = Matrix.IDMirror(true, false);
+            var scaleMatrix = Matrix.IDScale(Scale, Scale);
+            var rotateMatrix = Matrix.IDRotate(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
 
             var shipMatrix = mirrorMatrix * scaleMatrix * rotateMatrix;
 
@@ -254,13 +270,13 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < Shapes.Count; i++)
             {
                 var shape = Shapes[i];
-                PointD[] drawPoints = new PointD[shape.Points.Length];
+                Vector2[] drawPoints = new Vector2[shape.Points.Length];
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
                     var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
                     int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
                     int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
-                    drawPoints[i2] = new PointD() { X = x, Y = y };
+                    drawPoints[i2] = new Vector2() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
             }
@@ -356,12 +372,12 @@ namespace Pulsar4X.SDL2UI
             byte g = 50;
             byte b = 200;
             byte a = 255;
-            PointD[] points = {
-                new PointD { X = 0, Y = 4 },
-                new PointD { X = 2, Y = -4 },
-                new PointD { X = 0, Y = 0 },
-                new PointD { X = -2, Y = -4 },
-                new PointD { X = 0, Y = 4 }
+            Vector2[] points = {
+                new Vector2 { X = 0, Y = 4 },
+                new Vector2 { X = 2, Y = -4 },
+                new Vector2 { X = 0, Y = 0 },
+                new Vector2 { X = -2, Y = -4 },
+                new Vector2 { X = 0, Y = 4 }
             };
 
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
@@ -374,12 +390,12 @@ namespace Pulsar4X.SDL2UI
             byte g = 50;
             byte b = 0;
             byte a = 200;
-            PointD[] points = {
-                new PointD { X = 0, Y = 0 },
-                new PointD { X = -2, Y = -2 },
-                new PointD { X = 0, Y = -5 },
-                new PointD { X = 2, Y = -2 },
-                new PointD { X = 0, Y = 0 }
+            Vector2[] points = {
+                new Vector2 { X = 0, Y = 0 },
+                new Vector2 { X = -2, Y = -2 },
+                new Vector2 { X = 0, Y = -5 },
+                new Vector2 { X = 2, Y = -2 },
+                new Vector2 { X = 0, Y = 0 }
             };
 
             SDL.SDL_Color colour = new SDL.SDL_Color() { r = r, g = g, b = b, a = a };
@@ -390,30 +406,17 @@ namespace Pulsar4X.SDL2UI
         {
 
             DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
-            if (_orbitDB != null)
-            {
-                var headingVector = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(_orbitDB, atDateTime);
-                var heading = Math.Atan2(headingVector.Y, headingVector.X);
-                Heading = (float)heading;
-            }
-            else if(_newtonMoveDB != null)
-            {
-                Heading = (float)Math.Atan2(_newtonMoveDB.CurrentVector_ms.Y, _newtonMoveDB.CurrentVector_ms.X);
-                
-            }
-            else if (_warpMoveDB != null)
-            {
-                Heading = _warpMoveDB.Heading_Radians;
-            }
-
+            var headingVector = _entity.GetRelativeState().Velocity;//_orbitDB.InstantaneousOrbitalVelocityVector_m(atDateTime);
+            var heading = Math.Atan2(headingVector.Y, headingVector.X);
+            Heading = (float)heading;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
 
-            var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
-            var scaleMatrix = Matrix.NewScaleMatrix(Scale, Scale);
-            var rotateMatrix = Matrix.NewRotateMatrix(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
+            var mirrorMatrix = Matrix.IDMirror(true, false);
+            var scaleMatrix = Matrix.IDScale(Scale, Scale);
+            var rotateMatrix = Matrix.IDRotate(Heading - Math.PI * 0.5);//because the icons were done facing up, but angles are referenced from the right
 
             var shipMatrix = mirrorMatrix * scaleMatrix * rotateMatrix;
 
@@ -423,13 +426,13 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < Shapes.Count; i++)
             {
                 var shape = Shapes[i];
-                PointD[] drawPoints = new PointD[shape.Points.Length];
+                Vector2[] drawPoints = new Vector2[shape.Points.Length];
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
                     var tranlsatedPoint = shipMatrix.TransformD(shape.Points[i2].X, shape.Points[i2].Y);
                     int x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
                     int y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
-                    drawPoints[i2] = new PointD() { X = x, Y = y };
+                    drawPoints[i2] = new Vector2() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
             }
@@ -464,9 +467,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            DateTime atDateTime = _entity.Manager.ManagerSubpulses.StarSysDateTime;
 
- 
 
         }
 
@@ -478,9 +479,9 @@ namespace Pulsar4X.SDL2UI
             
             DrawShapes = new Shape[1];
             var s1 = new Shape();
-            s1.Points = new PointD[2];
-            s1.Points[0] = new PointD() {X = p0.x, Y = p0.y};
-            s1.Points[1] = new PointD() {X = p1.x, Y = p1.y};
+            s1.Points = new Vector2[2];
+            s1.Points[0] = new Vector2() {X = p0.x, Y = p0.y};
+            s1.Points[1] = new Vector2() {X = p1.x, Y = p1.y};
             var clr = new SDL.SDL_Color()
             {
                 r = 200,

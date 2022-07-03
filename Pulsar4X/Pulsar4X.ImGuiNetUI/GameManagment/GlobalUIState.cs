@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,7 @@ using Pulsar4X.ImGuiNetUI.EntityManagement;
 using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
-
-    
 {
-    
-
     public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
     public class GlobalUIState
     {
@@ -30,16 +27,20 @@ namespace Pulsar4X.SDL2UI
             {typeof(FireControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
+            {typeof(LogiBaseWindow), "TradeBase"},
+            {typeof(LogiShipWindow), "TradeShip"},
             {typeof(ColonyPanel), "Economy"},
             {typeof(GotoSystemBlankMenuHelper), "Go to system"},
             {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
             {typeof(PlanetaryWindow), "Planetary window"},
-            {typeof(NavWindow), "Nav Window"}
+            {typeof(NavWindow), "Nav Window"},
+            {typeof(OrdersListUI), "Orders Window"},
+            {typeof(OrderCreationUI), "Order Creation"}
         };
         internal Game Game;
-        internal FactionVM FactionUIState;
+        //internal FactionVM FactionUIState;
         internal bool IsGameLoaded { get { return Game != null; } }
-        internal Entity Faction { get { return FactionUIState.FactionEntity; } }
+        internal Entity Faction { get; set; }
         internal bool ShowMetrixWindow;
         internal bool ShowImgDbg;
         internal bool ShowDemoWindow;
@@ -81,7 +82,7 @@ namespace Pulsar4X.SDL2UI
         internal EntityState LastClickedEntity = null;
         
         internal EntityState PrimaryEntity { get; private set; }
-        internal ECSLib.Vector3 LastWorldPointClicked_m { get; set; }
+        internal Orbital.Vector3 LastWorldPointClicked_m { get; set; }
 
 
 
@@ -109,37 +110,12 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-
             Camera = new Camera(viewport);
 
             MainMenuItems.GetInstance().SetActive();
 
-            string rf = "Resources";
-            LoadImg("Logo", Path.Combine( rf,"PulsarLogo.bmp"));
-            LoadImg("PlayImg", Path.Combine( rf,"Play.bmp"));
-            LoadImg("PauseImg", Path.Combine( rf,"Pause.bmp"));
-            LoadImg("OneStepImg", Path.Combine( rf,"OneStep.bmp"));
-            LoadImg("UpImg", Path.Combine( rf,"UpArrow.bmp"));
-            LoadImg("DnImg", Path.Combine( rf,"DnArrow.bmp"));
-            LoadImg("RepeatImg", Path.Combine( rf,"RepeatIco.bmp"));
-            LoadImg("CancelImg", Path.Combine( rf,"CancelIco.bmp"));
-            LoadImg("DesComp", Path.Combine(rf, "DesignComponentIco.bmp"));
-            LoadImg("DesShip", Path.Combine(rf, "DesignShipIco.bmp"));
-            LoadImg("DesOrd", Path.Combine(rf, "DesignOrdnanceIco.bmp"));
-            LoadImg("GalMap", Path.Combine(rf, "GalaxyMapIco.bmp"));
-            LoadImg("Research", Path.Combine(rf, "ResearchIco.bmp"));
-            LoadImg("Power", Path.Combine(rf, "PowerIco.bmp"));
-            LoadImg("Ruler", Path.Combine(rf, "RulerIco.bmp"));
-            LoadImg("Cargo", Path.Combine(rf, "CargoIco.bmp"));
-            LoadImg("Firecon", Path.Combine(rf, "FireconIco.bmp"));
-            LoadImg("Industry", Path.Combine(rf, "IndustryIco.bmp"));
-            LoadImg("Pin", Path.Combine(rf, "PinIco.bmp"));
-            LoadImg("Rename", Path.Combine(rf, "RenameIco.bmp"));
-            LoadImg("Select", Path.Combine(rf, "SelectIco.bmp"));
-            LoadImg("Tree", Path.Combine(rf, "TreeIco.bmp"));
-
             //DEBUG Code: (can be deleted);
-            DamageTools.LoadFromBitMap(Path.Combine(rf, "ImgTest.bmp"));
+            DamageTools.LoadFromBitMap(Path.Combine("Resources", "ImgTest.bmp"));
             /*
             int gltxtrID;
             GL.GenTextures(1, out gltxtrID);
@@ -158,16 +134,9 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        internal void LoadImg(string name, string path)
-        {
-            IntPtr sdlSurface = SDL.SDL_LoadBMP(path);
-            IntPtr sdltexture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
-            
-            SDLImageDictionary.Add(name, sdltexture);
-        }
-
         internal void SetFaction(Entity factionEntity)
         {
+            Faction = factionEntity;
             FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
             StarSystemStates = new Dictionary<Guid, SystemState>();
             foreach (var guid in factionInfo.KnownSystems)
@@ -200,12 +169,14 @@ namespace Pulsar4X.SDL2UI
         {
             SMenabled = true;
             StarSystemStates = new Dictionary<Guid, SystemState>();
+            var masterFaction = StaticRefLib.Game.GameMasterFaction;
+            SetFaction(masterFaction);
             if(Game != null)
                 foreach (var system in Game.Systems)
                 {
                     StarSystemStates[system.Key] = SystemState.GetMasterState(system.Value);
                 }
-            GalacticMap.SetFaction();
+            
         }
 
         internal void ToggleGameMaster()
@@ -227,11 +198,8 @@ namespace Pulsar4X.SDL2UI
         }
 
         //checks wether the planet icon is clicked
-        internal void MapClicked(ECSLib.Vector3 worldCoord, MouseButtons button)
+        internal void MapClicked(Orbital.Vector3 worldCoord, MouseButtons button)
         {
-
-            
-
             if (button == MouseButtons.Primary)
                 LastWorldPointClicked_m = worldCoord;
 
@@ -307,13 +275,11 @@ namespace Pulsar4X.SDL2UI
 
         internal void EntityClicked(Guid entityGuid, Guid starSys, MouseButtons button)
         {
+            var entityState = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
+            LastClickedEntity = entityState;
             
-            LastClickedEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
-
-            EntityClickedEvent?.Invoke(LastClickedEntity, button);
-
             if (ActiveWindow != null)
-                ActiveWindow.EntityClicked(StarSystemStates[starSys].EntityStatesWithNames[entityGuid], button);
+                ActiveWindow.EntityClicked(entityState, button);
 
             SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
             if(LastClickedEntity.DebugOrbitOrder != null)
@@ -323,151 +289,28 @@ namespace Pulsar4X.SDL2UI
 
             if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
                 PrimaryEntity = LastClickedEntity;
-
+            
+            EntityClickedEvent?.Invoke(LastClickedEntity, button);
         }
-    }
-
-    public abstract class UpdateWindowState
-    {
-        internal static GlobalUIState _uiState;
-        public abstract bool GetActive();
         
-        public abstract void OnGameTickChange(DateTime newDate);
-        public abstract void OnSystemTickChange(DateTime newDate);
-
-        public abstract void OnSelectedSystemChange(StarSystem newStarSys);
-
-        protected UpdateWindowState()
+        internal void EntityClicked(EntityState entityState, MouseButtons button)
         {
-            _uiState.UpdateableWindows.Add(this);
-        }
+            LastClickedEntity = entityState;
+            
+            if (ActiveWindow != null)
+                ActiveWindow.EntityClicked(entityState, button);
 
-        public void Deconstructor()
-        {
-            _uiState.UpdateableWindows.Remove(this);
-        }
-
-    }
-
-    public abstract class PulsarGuiWindow : UpdateWindowState
-    {
-        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
-        //internal bool IsLoaded;
-        internal bool CanActive = false;
-        protected bool IsActive = false;
-        //internal int StateIndex = -1;
-        //protected bool _IsOpen;
-        public bool ClickedEntityIsPrimary = true;
-        
-        public void SetActive(bool ActiveVal = true)
-        {
-            IsActive = ActiveVal;
-        }
-        public void ToggleActive()
-        {
-            IsActive = !IsActive;
-        }
-        public override bool GetActive()
-        {
-            return IsActive;
-        }
-
-
-        protected PulsarGuiWindow()
-        {
-            _uiState.LoadedWindows[this.GetType()] = this;
-        }
-
-
-        
-
-        /*An example of how the constructor should be for a derived class. 
-         * 
-        private  DerivedClass (GlobalUIState state):base(state)
-        {
-            any other DerivedClass specific constrctor stuff here.
-        }
-        internal static DerivedClass GetInstance(GlobalUIState state)
-        {
-            if (!state.LoadedWindows.ContainsKey(typeof(DerivedClass)))
+            SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
+            if(LastClickedEntity.DebugOrbitOrder != null)
             {
-                return new DerivedClass(state);
+                SelectedSysMapRender.SelectedEntityExtras.Add(LastClickedEntity.DebugOrbitOrder);
             }
-            return (DerivedClass)state.LoadedWindows[typeof(DerivedClass)];
+
+            if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
+                PrimaryEntity = LastClickedEntity;
+            
+            EntityClickedEvent?.Invoke(LastClickedEntity, button);
         }
-        */
-
-        internal abstract void Display();
-
-        internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
-
-        internal virtual void EntitySelectedAsPrimary(EntityState entity){ }
-
-        internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
-
-        public override void OnGameTickChange(DateTime newDate)
-        {
-        }
-        
-        public override void OnSystemTickChange(DateTime newDate)
-        {
-        }
-        
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
-        {
-        }
-    }
-
-    public abstract class NonUniquePulsarGuiWindow
-    {
-        protected ImGuiWindowFlags _flags = ImGuiWindowFlags.None;
-        internal bool CanActive = false;
-        internal bool IsActive = false;
-        internal string UniqueName = "test";
-        internal static GlobalUIState _state;
-
-        public void SetActive(bool ActiveVal = true)
-        {
-            IsActive = ActiveVal;
-        }
-        public void ToggleActive()
-        {
-            IsActive = !IsActive;
-        }
-        public bool GetActive()
-        {
-            return IsActive;
-        }
-
-        public void SetName(string Newname)
-        {
-            UniqueName = Newname;
-        }
-
-        public void StartDisplay()
-        {
-            _state.LoadedNonUniqueWindows[this.UniqueName] = this;
-        }
-
-
-        protected NonUniquePulsarGuiWindow()
-        {
-                
-        }
-
-
-        internal abstract void Display();
-
-        internal virtual void EntityClicked(EntityState entity, MouseButtons button) { }
-
-        internal virtual void EntitySelectedAsPrimary(EntityState entity) { }
-
-        internal virtual void MapClicked(ECSLib.Vector3 worldPos_m, MouseButtons button) { }
-
-        internal void Destroy()
-        {
-        }
-
     }
 
 }

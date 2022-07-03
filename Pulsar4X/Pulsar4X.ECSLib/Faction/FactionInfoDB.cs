@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.Serialization;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Pulsar4X.ECSLib.Industry;
@@ -52,6 +53,13 @@ namespace Pulsar4X.ECSLib
         /// stores sensor contacts for the entire faction, when a contact is created it gets added here. 
         /// </summary>
         internal Dictionary<Guid, SensorContact> SensorContacts = new Dictionary<Guid, SensorContact>();
+        
+        public Dictionary<EventType, bool> HaltsOnEvent { get; } = new Dictionary<EventType, bool>();
+        
+        [JsonProperty]
+        private Dictionary<Entity, uint> FactionAccessRoles { get; set; } = new Dictionary<Entity, uint>();
+        internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
+
 
 
         public FactionInfoDB()
@@ -59,6 +67,7 @@ namespace Pulsar4X.ECSLib
             Dictionary<Guid, ComponentDesign> componentDesigns = new Dictionary<Guid, ComponentDesign>();
             Dictionary<Guid, ShipDesign> shipClasses = new Dictionary<Guid, ShipDesign>();
             SetIndustryDesigns(componentDesigns, shipClasses);
+            HaltsOnEvent.Add(EventType.OrdersHalt, true);
         }
 
         public FactionInfoDB(
@@ -75,6 +84,7 @@ namespace Pulsar4X.ECSLib
             ShipDesigns = shipClasses;
             KnownFactions = new List<Entity>();
             SetIndustryDesigns(componentDesigns, shipClasses);
+            HaltsOnEvent.Add(EventType.OrdersHalt, true);
         }
         
 
@@ -89,6 +99,7 @@ namespace Pulsar4X.ECSLib
             ShipDesigns = new Dictionary<Guid, ShipDesign>(factionDB.ShipDesigns);
             InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>(factionDB.ComponentDesigns);
             IndustryDesigns = new Dictionary<Guid, IConstrucableDesign>(factionDB.IndustryDesigns);
+            HaltsOnEvent.Add(EventType.OrdersHalt, true);
             
         }
 

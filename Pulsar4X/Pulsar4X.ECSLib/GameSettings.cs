@@ -4,69 +4,11 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public static class GameConstants
-    {
-        public const int MinimumTimestep = 5;
-
-        /// <summary>
-        /// Scientific Constants
-        /// </summary>
-        public static class Science
-        {
-            // Gravitation Constant
-            public const double GravitationalConstant = 6.67408E-11;
-        }
-
-        /// <summary>
-        /// Constants dealing with units and measurements
-        /// </summary>
-        public static class Units
-        {
-            public const double SolarMassInKG = 1.98855E30;
-
-            public const double EarthMassInKG = 5.97219E24;
-
-            public const double SolMassInEarthMasses = 332946;
-
-            public const double KmPerLightYear = 9460730472580.8;
-
-            public const double AuPerLightYear = KmPerLightYear / KmPerAu;
-
-            public const double KmPerAu = MetersPerAu / 1000;
-
-            public const double MetersPerAu = 149597870700;  // this is exact, see: http://en.wikipedia.org/wiki/Astronomical_unit
-
-            /// <summary>
-            /// Plus or Minus 65Km
-            /// </summary>
-            public const double SolarRadiusInKm = 696342.0;
-
-            public const double SolarRadiusInAu = SolarRadiusInKm / KmPerAu;
-
-            /// <summary>
-            /// Earth's gravity in m/s^2. Aka 1g.
-            /// </summary>
-            public const double EarthGravity = 9.81;
-
-            /// <summary>
-            /// Note that this is = to 1 ATM.
-            /// </summary>
-            public const double EarthAtmosphereInKpa = 101.325;
-
-            /// <summary>
-            /// Add to Kelvin to get degrees c.
-            /// </summary>
-            public const double DegreesCToKelvin = 273.15;
-
-            /// <summary>
-            /// Add to degrees c to get kelvin.
-            /// </summary>
-            public const double KelvinToDegreesC = -273.15;
-        }
-    }
     [Serializable]
     public class GameSettings
     {
+        public const int MinimumTimestep = 5;
+
         #region General Game Settings
 
         public string GameName { get; set; } = "New Game";
@@ -100,6 +42,7 @@ namespace Pulsar4X.ECSLib
         public bool EnableMultiThreading { get; set; } = false;
         public bool EnforceSingleThread { get; set; } = false; //if above is false and this is true, everything will be done on the main thread, and the UI will wait for processes to finish before updating.
         
+        public bool StrictNewtonion { get; set; } = false;
 
 
         #endregion
@@ -126,6 +69,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public bool? AllJumpPointsStabilized { get; set; } = false;
 
+        
+        
         #region Not Implemented in ECSLib
 
         /// <summary>

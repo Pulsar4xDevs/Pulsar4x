@@ -22,13 +22,13 @@ namespace Pulsar4X.ECSLib
         {
             get
             {
-                if (_names.ContainsKey(OwningEntity.FactionOwner))
-                    return _names[OwningEntity.FactionOwner];
+                if (_names.ContainsKey(OwningEntity.FactionOwnerID))
+                    return _names[OwningEntity.FactionOwnerID];
                 else return DefaultName;
             }
         }
 
-        public NameDB() { }
+        public NameDB() { _names.Add(Guid.Empty, "Un-Named");}
 
         public NameDB(string defaultName)
         {
@@ -63,8 +63,16 @@ namespace Pulsar4X.ECSLib
             {
                 // Entry not found for the specific entity.
                 // Return guid instead. TODO: call an automatic naming function
-                name = OwningEntity.Guid.ToString();
-                SetName(requestingFaction, name);
+                if (StaticRefLib.Game.GameMasterFaction.Guid == requestingFaction)
+                {
+                    name = OwnersName;
+                    SetName(requestingFaction, OwnersName);
+                }
+                else
+                {
+                    name = OwningEntity.Guid.ToString();
+                    SetName(requestingFaction, name);
+                }
 
             }
             return name;
@@ -73,44 +81,17 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public string GetName(Entity requestingFaction)
         {
-            string name;
-            if (!_names.TryGetValue(requestingFaction.Guid, out name))
-            {
-                // Entry not found for the specific entity.
-                // Return guid instead. TODO: call an automatic naming function
-                name = OwningEntity.Guid.ToString();
-                SetName(requestingFaction.Guid, name);
-
-            }
-            return name;
+            return GetName(requestingFaction.Guid);
         }
-
-        /// <summary>
-        /// returns the name but no longer checks the auth. needs rewriting or getting rid of. 
-        /// </summary>
-        /// <returns>The name.</returns>
-        /// <param name="requestingFaction">Requesting faction.</param>
-        /// <param name="game">Game.</param>
-        /// <param name="auth">Auth.</param>
-        [Obsolete]
-        public string GetName(Guid requestingFaction, Game game, AuthenticationToken auth)
-        {
-            /*
-            if (game.GetPlayerForToken(auth).AccessRoles[requestingFaction] < AccessRole.Intelligence)
-                requestingFaction = Entity.InvalidEntity;*/
-            return GetName(requestingFaction);
-        }
+        
 
         [PublicAPI]
         public void SetName(Guid requestingFaction, string specifiedName)
         {
-            if (_names.ContainsKey(requestingFaction))
+            _names[requestingFaction] = specifiedName;
+            if (requestingFaction == OwningEntity.FactionOwnerID)
             {
-                _names[requestingFaction] = specifiedName;
-            }
-            else
-            {
-                _names.Add(requestingFaction, specifiedName);
+                _names[StaticRefLib.SpaceMaster.Guid] = specifiedName;
             }
         }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -24,7 +25,11 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public EntityManager Manager { get; private set; }
         [JsonProperty]
-        public Guid FactionOwner { get; internal set; }
+        public Guid FactionOwnerID { get; internal set; }
+        public Entity GetFactionOwner
+        {
+            get { return Manager.GetGlobalEntityByGuid(FactionOwnerID); }
+        }
 
         public DateTime StarSysDateTime => Manager.StarSysDateTime;
 
@@ -58,11 +63,11 @@ namespace Pulsar4X.ECSLib
         internal Entity([NotNull] EntityManager manager, Guid factionOwner, IEnumerable<BaseDataBlob> dataBlobs = null) : this(Guid.NewGuid(), manager,  factionOwner, dataBlobs) { }
 
 
-        internal Entity(Guid id, [NotNull] EntityManager manager, Guid factionOwner,  IEnumerable<BaseDataBlob> dataBlobs = null)
+        internal Entity(Guid id, [NotNull] EntityManager manager, Guid factionOwnerID,  IEnumerable<BaseDataBlob> dataBlobs = null)
         {
             Manager = manager;
             Guid = id;
-            FactionOwner = factionOwner;
+            FactionOwnerID = factionOwnerID;
             //This is problematic, currently, if a datablob references it's own entity (ie namedb in faction entity) the entity will get a new guid. 
             //and (presumably) the db will point to an empty entity. 
             //TODO: should we throw an exception instead of just replacing the guid with a new one? I'm leaning towards yes. 
@@ -157,6 +162,7 @@ namespace Pulsar4X.ECSLib
             Manager.RemoveEntity(this);
             Manager = InvalidManager;
             _protectedDataBlobMask_ = EntityManager.BlankDataBlobMask();
+
         }
 
         /// <summary>
@@ -347,236 +353,6 @@ namespace Pulsar4X.ECSLib
                     hash = Misc.ValueHash(item, hash);
             }
             return hash;
-        }
-
-        public static PositionDB GetSOIParentPositionDB(Entity entity)
-        {
-            return (PositionDB)entity.GetDataBlob<PositionDB>().ParentDB;
-        }
-
-        public static Entity GetSOIParentEntity(Entity entity, PositionDB positionDB = null)
-        {
-            if (positionDB == null)
-                positionDB = entity.GetDataBlob<PositionDB>();
-            return positionDB.Parent;
-        }
-
-        public static (Vector3 pos, Vector3 Velocity) GetRalitiveState(Entity entity)
-        {
-            var pos = entity.GetDataBlob<PositionDB>().RelativePosition_m;
-            if (entity.HasDataBlob<OrbitDB>())
-            {
-                var datetime = entity.StarSysDateTime;
-                var orbit = entity.GetDataBlob<OrbitDB>();
-                
-                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
-                return (pos, vel);
-            }
-            if (entity.HasDataBlob<OrbitUpdateOftenDB>())
-            {
-                var datetime = entity.StarSysDateTime;
-                var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>();
-                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
-                return (pos, vel);
-            }
-
-            if (entity.HasDataBlob<NewtonMoveDB>())
-            {
-                var move = entity.GetDataBlob<NewtonMoveDB>();
-                
-                var vel = move.CurrentVector_ms;
-                return (pos, vel);
-            }
-
-            if (entity.HasDataBlob<ColonyInfoDB>())
-            {
-                var daylen = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().LengthOfDay.TotalSeconds;
-                var radius = pos.Length();
-                var d = 2 * Math.PI * radius;
-                var speed = d / daylen;
-                
-                Vector3 vel = new Vector3(0, speed, 0);
-                
-                var posAngle = Math.Atan2(pos.Y, pos.X);
-                var mtx = Matrix3d.IDRotateZ(posAngle + (Math.PI * 0.5));
-
-                
-            
-                Vector3 transformedVector = mtx.Transform(vel);
-                return (pos, transformedVector);
-
-            }
-            else
-            {
-                throw new Exception("Entity has no velocity");
-            }
-        }
-        
-        public static (Vector3 pos, Vector3 Velocity) GetAbsoluteState(Entity entity)
-        {
-            var posdb = entity.GetDataBlob<PositionDB>();
-            var pos = posdb.AbsolutePosition_m;
-            if (entity.HasDataBlob<OrbitDB>())
-            {
-                var datetime = entity.StarSysDateTime;
-                var orbit = entity.GetDataBlob<OrbitDB>();
-                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
-                if (posdb.Parent != null)
-                {
-                    vel += GetAbsoluteState(posdb.Parent).Velocity;
-                }
-
-                return (pos, vel);
-            }
-            if (entity.HasDataBlob<OrbitUpdateOftenDB>())
-            {
-                var datetime = entity.StarSysDateTime;
-                var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>();
-                var vel = OrbitProcessor.InstantaneousOrbitalVelocityVector_m(orbit, datetime);
-                if (posdb.Parent != null)
-                {
-                    vel += GetAbsoluteState(posdb.Parent).Velocity;
-                }
-                return (pos, vel);
-            }
-
-            if (entity.HasDataBlob<NewtonMoveDB>())
-            {
-                var move = entity.GetDataBlob<NewtonMoveDB>();
-                var vel = move.CurrentVector_ms;
-                return (pos, vel);
-            }
-            else
-            {
-                throw new Exception("Entity has no velocity");
-            }
-        }
-
-        /// <summary>
-        /// Gets future velocity for this entity, datablob agnostic.
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="atDateTime"></param>
-        /// <returns>Velocity in m/s ralitive to SOI parent</returns>
-        /// <exception cref="Exception"></exception>
-        public static Vector3 GetRalitiveFutureVelocity(Entity entity, DateTime atDateTime)
-        {
-            
-            if (entity.HasDataBlob<OrbitDB>())
-            {
-                return OrbitProcessor.InstantaneousOrbitalVelocityVector_m(entity.GetDataBlob<OrbitDB>(), atDateTime); 
-            }
-            if (entity.HasDataBlob<OrbitUpdateOftenDB>())
-            {
-                return OrbitProcessor.InstantaneousOrbitalVelocityVector_m(entity.GetDataBlob<OrbitUpdateOftenDB>(), atDateTime);
-            }
-            else if (entity.HasDataBlob<NewtonMoveDB>())
-            {
-                return NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
-            }
-            else if (entity.HasDataBlob<WarpMovingDB>())
-            {
-                return entity.GetDataBlob<WarpMovingDB>().SavedNewtonionVector;
-            }
-            else
-            {
-                throw new Exception("Entity has no velocity");
-            }
-        }
-
-        /// <summary>
-        /// Gets future velocity for this entity, datablob agnostic.
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="atDateTime"></param>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        public static Vector3 GetAbsoluteFutureVelocity(Entity entity, DateTime atDateTime)
-        {
-            if (entity.HasDataBlob<OrbitDB>())
-            {
-                return OrbitProcessor.AbsoluteOrbitalVector_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
-            }            
-            if (entity.HasDataBlob<OrbitUpdateOftenDB>())
-            {
-                return OrbitProcessor.AbsoluteOrbitalVector_m(entity.GetDataBlob<OrbitUpdateOftenDB>(), atDateTime);
-            }
-            else if (entity.HasDataBlob<NewtonMoveDB>())
-            {
-                var vel = NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
-                //recurse
-                return GetAbsoluteFutureVelocity(GetSOIParentEntity(entity), atDateTime) + vel;
-            }
-            else if (entity.HasDataBlob<WarpMovingDB>())
-            {
-                return entity.GetDataBlob<WarpMovingDB>().SavedNewtonionVector;
-            }
-            else
-            {
-                throw new Exception("Entity has no velocity");
-            }
-        }
-        
-        /// <summary>
-        /// Gets a future position for this entity, regarless of wheter it's orbit or newtonion trajectory
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="atDateTime"></param>
-        /// <returns>In Meters</returns>
-        /// <exception cref="Exception"> if entity doesn't have one of the correct datablobs</exception>
-        public static Vector3 GetRalitiveFuturePosition(Entity entity, DateTime atDateTime)
-        {
-            if (entity.HasDataBlob<OrbitDB>())
-            {
-                return OrbitProcessor.GetPosition_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
-            }
-            else if(entity.HasDataBlob<OrbitUpdateOftenDB>())
-            {
-                return OrbitProcessor.GetPosition_m(entity.GetDataBlob<OrbitUpdateOftenDB>(), atDateTime);
-            }
-            else if (entity.HasDataBlob<NewtonMoveDB>())
-            {
-                return  NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
-            }
-            else if (entity.HasDataBlob<PositionDB>())
-            {
-                return entity.GetDataBlob<PositionDB>().RelativePosition_m;
-            }
-            else
-            {
-                throw new Exception("Entity is positionless");
-            }
-        }
-
-        /// <summary>
-        /// Gets a future position for this entity, regarless of wheter it's orbit or newtonion trajectory
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <param name="atDateTime"></param>
-        /// <returns>In Meters</returns>
-        /// <exception cref="Exception"> if entity doesn't have one of the correct datablobs</exception>
-        public static Vector3 GetAbsoluteFuturePosition(Entity entity, DateTime atDateTime)
-        {
-            if (entity.HasDataBlob<OrbitDB>())
-            {
-                return OrbitProcessor.GetAbsolutePosition_m(entity.GetDataBlob<OrbitDB>(), atDateTime);
-            }
-            else if (entity.HasDataBlob<OrbitUpdateOftenDB>())
-            {
-                return OrbitProcessor.GetAbsolutePosition_m(entity.GetDataBlob<OrbitUpdateOftenDB>(), atDateTime);
-            }
-            else if (entity.HasDataBlob<NewtonMoveDB>())
-            {
-                return NewtonionMovementProcessor.GetAbsoluteState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).pos;
-            }
-            else if (entity.HasDataBlob<PositionDB>())
-            {
-                return entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
-            }
-            else
-            {
-                throw new Exception("Entity is positionless");
-            }
         }
         
         /// <summary>

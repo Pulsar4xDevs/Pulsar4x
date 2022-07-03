@@ -35,6 +35,17 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
                 componentInstance.SetAbilityState<WeaponState>(wpnState);
             }
         }
+        
+        public string AtbName()
+        {
+            return "Rail Gun";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
+        }
 
         public bool CanLoadOrdnance(OrdnanceDesign ordnanceDesign)
         {
@@ -57,6 +68,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.RailGun
         }
 
         public void FireWeapon(Entity launchingEntity, Entity tgtEntity, int count)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public float ToHitChance(Entity launchingEntity, Entity tgtEntity)
         {
             throw new System.NotImplementedException();
         }

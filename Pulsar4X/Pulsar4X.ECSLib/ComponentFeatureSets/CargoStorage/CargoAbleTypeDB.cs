@@ -27,11 +27,11 @@ namespace Pulsar4X.ECSLib
         }
 
         [JsonIgnore]
-        public int MassPerUnit => (int)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().MassDry); //TODO: could a storable item ever be too large for an int? this assumes that won't happen.
+        public long MassPerUnit => (long)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().MassDry); 
 
         public double VolumePerUnit => OwningEntity.GetDataBlob<MassVolumeDB>().Volume_m3;
 
-        public double Density => OwningEntity.GetDataBlob<MassVolumeDB>().Density_kgm;
+        public double Density => OwningEntity.GetDataBlob<MassVolumeDB>().DensityDry_kgm;
 
         /// <summary>
         /// This should be set to true if the item has become damaged or in any other way needs to maintain state 
@@ -44,7 +44,7 @@ namespace Pulsar4X.ECSLib
             {
                 if (this.OwningEntity.GetDataBlob<NameDB>() != null)
                 {
-                    return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.FactionOwner);
+                    return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.FactionOwnerID);
                 }
                 else return "Unknown Object"; 
             }
@@ -83,6 +83,17 @@ namespace Pulsar4X.ECSLib
         {
             if (!parentEntity.HasDataBlob<CargoAbleTypeDB>())
                 parentEntity.SetDataBlob(new CargoAbleTypeDB(this)); //basicaly just clone the design to the instance. 
+        }
+        
+        public string AtbName()
+        {
+            return "Cargoable";
+        }
+
+        public string AtbDescription()
+        {
+            return "Parent can be stored in " + StaticRefLib.StaticData.CargoTypes[CargoTypeID].Name + " cargo";
+            ;
         }
     }
 }

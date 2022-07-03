@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -187,7 +188,7 @@ namespace Pulsar4X.ECSLib
         /// Units are AU.
         /// @note These numbers, with the exception of G class stars, are based on habitable zone calculations. They could be tweaked for gameplay.
         /// </summary>
-        public Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType;
+        public Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType_AU;
 
         /// <summary>
         /// Possible ranges for eccentricity by body type.
@@ -254,7 +255,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// These are the maximum thresholds fore each type of tectonic activity a planet can have.
-        /// Tectonic activity is calculated by Mass (in earth masses) / Star Age. 
+        /// Tectonic activity is calculated by Mass (in planet masses) / Star Age. 
         /// Earth has a tectonic activity of 0.217 by this calculation.
         /// So if the tectonic activing number is less than the threshold of Earth like but greater than Minor then it will be Earth like.
         /// </summary>
@@ -438,38 +439,38 @@ namespace Pulsar4X.ECSLib
             {
                 {SpectralType.O, new MinMaxStruct
                 {
-                    Min = 6.6 * GameConstants.Units.SolarRadiusInAu,
-                    Max = 250 * GameConstants.Units.SolarRadiusInAu
+                    Min = 6.6 * UniversalConstants.Units.SolarRadiusInAu,
+                    Max = 250 * UniversalConstants.Units.SolarRadiusInAu
                 }},
                 {SpectralType.B, new MinMaxStruct
                 {
-                    Min = 1.8 * GameConstants.Units.SolarRadiusInAu,
-                    Max = 6.6 * GameConstants.Units.SolarRadiusInAu
+                    Min = 1.8 * UniversalConstants.Units.SolarRadiusInAu,
+                    Max = 6.6 * UniversalConstants.Units.SolarRadiusInAu
                 }},
                 {SpectralType.A, new MinMaxStruct
                 {
-                    Min = 1.4 * GameConstants.Units.SolarRadiusInAu,
-                    Max = 1.8 * GameConstants.Units.SolarRadiusInAu
+                    Min = 1.4 * UniversalConstants.Units.SolarRadiusInAu,
+                    Max = 1.8 * UniversalConstants.Units.SolarRadiusInAu
                 }},
                 {SpectralType.F, new MinMaxStruct
                 {
-                    Min = 1.15 * GameConstants.Units.SolarRadiusInAu,
-                    Max = 1.4 * GameConstants.Units.SolarRadiusInAu
+                    Min = 1.15 * UniversalConstants.Units.SolarRadiusInAu,
+                    Max = 1.4 * UniversalConstants.Units.SolarRadiusInAu
                 }},
                 {SpectralType.G, new MinMaxStruct
                 {
-                    Min = 0.96 * GameConstants.Units.SolarRadiusInAu,
-                    Max = 1.15 * GameConstants.Units.SolarRadiusInAu
+                    Min = 0.96 * UniversalConstants.Units.SolarRadiusInAu,
+                    Max = 1.15 * UniversalConstants.Units.SolarRadiusInAu
                 }},
                 {SpectralType.K, new MinMaxStruct
                 {
-                    Min = 0.7 * GameConstants.Units.SolarRadiusInAu,
-                    Max = 0.96 * GameConstants.Units.SolarRadiusInAu
+                    Min = 0.7 * UniversalConstants.Units.SolarRadiusInAu,
+                    Max = 0.96 * UniversalConstants.Units.SolarRadiusInAu
                 }},
                 {SpectralType.M, new MinMaxStruct
                 {
-                    Min = 0.12 * GameConstants.Units.SolarRadiusInAu,
-                    Max = 0.7 * GameConstants.Units.SolarRadiusInAu
+                    Min = 0.12 * UniversalConstants.Units.SolarRadiusInAu,
+                    Max = 0.7 * UniversalConstants.Units.SolarRadiusInAu
                 }},
             };
 
@@ -558,38 +559,38 @@ namespace Pulsar4X.ECSLib
             {
                 {SpectralType.O, new MinMaxStruct
                 {
-                    Min = 16 * GameConstants.Units.SolarMassInKG,
-                    Max = 265 * GameConstants.Units.SolarMassInKG
+                    Min = 16 * UniversalConstants.Units.SolarMassInKG,
+                    Max = 265 * UniversalConstants.Units.SolarMassInKG
                 }},
                 {SpectralType.B, new MinMaxStruct
                 {
-                    Min = 2.1 * GameConstants.Units.SolarMassInKG,
-                    Max = 16 * GameConstants.Units.SolarMassInKG
+                    Min = 2.1 * UniversalConstants.Units.SolarMassInKG,
+                    Max = 16 * UniversalConstants.Units.SolarMassInKG
                 }},
                 {SpectralType.A, new MinMaxStruct
                 {
-                    Min = 1.4 * GameConstants.Units.SolarMassInKG,
-                    Max = 2.1 * GameConstants.Units.SolarMassInKG
+                    Min = 1.4 * UniversalConstants.Units.SolarMassInKG,
+                    Max = 2.1 * UniversalConstants.Units.SolarMassInKG
                 }},
                 {SpectralType.F, new MinMaxStruct
                 {
-                    Min = 1.04 * GameConstants.Units.SolarMassInKG,
-                    Max = 1.4 * GameConstants.Units.SolarMassInKG
+                    Min = 1.04 * UniversalConstants.Units.SolarMassInKG,
+                    Max = 1.4 * UniversalConstants.Units.SolarMassInKG
                 }},
                 {SpectralType.G, new MinMaxStruct
                 {
-                    Min = 0.8 * GameConstants.Units.SolarMassInKG,
-                    Max = 1.04 * GameConstants.Units.SolarMassInKG
+                    Min = 0.8 * UniversalConstants.Units.SolarMassInKG,
+                    Max = 1.04 * UniversalConstants.Units.SolarMassInKG
                 }},
                 {SpectralType.K, new MinMaxStruct
                 {
-                    Min = 0.45 * GameConstants.Units.SolarMassInKG,
-                    Max = 0.8 * GameConstants.Units.SolarMassInKG
+                    Min = 0.45 * UniversalConstants.Units.SolarMassInKG,
+                    Max = 0.8 * UniversalConstants.Units.SolarMassInKG
                 }},
                 {SpectralType.M, new MinMaxStruct
                 {
-                    Min = 0.08 * GameConstants.Units.SolarMassInKG,
-                    Max = 0.45 * GameConstants.Units.SolarMassInKG
+                    Min = 0.08 * UniversalConstants.Units.SolarMassInKG,
+                    Max = 0.45 * UniversalConstants.Units.SolarMassInKG
                 }},
             };
 
@@ -687,29 +688,29 @@ namespace Pulsar4X.ECSLib
             {
                 {BodyType.GasGiant, new MinMaxStruct
                 {
-                    Min = 15 * GameConstants.Units.EarthMassInKG,
-                    Max = 500 * GameConstants.Units.EarthMassInKG
+                    Min = 15 * UniversalConstants.Units.EarthMassInKG,
+                    Max = 500 * UniversalConstants.Units.EarthMassInKG
                 }},
                 {BodyType.IceGiant, new MinMaxStruct
                 {
-                    Min = 5 * GameConstants.Units.EarthMassInKG,
-                    Max = 30 * GameConstants.Units.EarthMassInKG
+                    Min = 5 * UniversalConstants.Units.EarthMassInKG,
+                    Max = 30 * UniversalConstants.Units.EarthMassInKG
                 }},
                 {BodyType.GasDwarf, new MinMaxStruct
                 {
-                    Min = 1 * GameConstants.Units.EarthMassInKG,
-                    Max = 15 * GameConstants.Units.EarthMassInKG
+                    Min = 1 * UniversalConstants.Units.EarthMassInKG,
+                    Max = 15 * UniversalConstants.Units.EarthMassInKG
                 }},
                 {BodyType.Terrestrial, new MinMaxStruct
                 {
-                    Min = 0.05 * GameConstants.Units.EarthMassInKG,
-                    Max = 5 * GameConstants.Units.EarthMassInKG
+                    Min = 0.05 * UniversalConstants.Units.EarthMassInKG,
+                    Max = 5 * UniversalConstants.Units.EarthMassInKG
                 }},
                 {BodyType.Moon, new MinMaxStruct
                 {
                     Min = 1E16,
-                    Max = 1 * GameConstants.Units.EarthMassInKG
-                }}, // note 1E16 is 1 nano earth mass.
+                    Max = 1 * UniversalConstants.Units.EarthMassInKG
+                }}, // note 1E16 is 1 nano planet mass.
                 {BodyType.DwarfPlanet, new MinMaxStruct
                 {
                     Min = 2E20,
@@ -773,7 +774,7 @@ namespace Pulsar4X.ECSLib
             };
 
             // note These numbers, with the exception of G class stars, are based on habitable zone calculations. They could be tweaked for gameplay.
-            settings.OrbitalDistanceByStarSpectralType = new Dictionary<SpectralType, MinMaxStruct>()
+            settings.OrbitalDistanceByStarSpectralType_AU = new Dictionary<SpectralType, MinMaxStruct>()
             {
                 {SpectralType.O, new MinMaxStruct
                 {
@@ -980,11 +981,11 @@ namespace Pulsar4X.ECSLib
 
             settings.MaxMoonOrbitDistanceByPlanetType = new Dictionary<BodyType, double>
             {
-                {BodyType.GasGiant, 60581692 / GameConstants.Units.KmPerAu}, // twice highest jupiter moon orbit
-                {BodyType.IceGiant, 49285000 / GameConstants.Units.KmPerAu}, // twice Neptune's highest moon orbit
-                {BodyType.GasDwarf, 6058169 / GameConstants.Units.KmPerAu}, // WAG
-                {BodyType.Terrestrial, 1923740 / GameConstants.Units.KmPerAu}, // 5 * luna orbit.
-                {BodyType.DwarfPlanet, 25000 / GameConstants.Units.KmPerAu}, // WAG
+                {BodyType.GasGiant, 60581692 / UniversalConstants.Units.KmPerAu}, // twice highest jupiter moon orbit
+                {BodyType.IceGiant, 49285000 / UniversalConstants.Units.KmPerAu}, // twice Neptune's highest moon orbit
+                {BodyType.GasDwarf, 6058169 / UniversalConstants.Units.KmPerAu}, // WAG
+                {BodyType.Terrestrial, 1923740 / UniversalConstants.Units.KmPerAu}, // 5 * luna orbit.
+                {BodyType.DwarfPlanet, 25000 / UniversalConstants.Units.KmPerAu}, // WAG
             };
 
             // note Given the way the calculation for max moons is done it is unlikely that any planet will ever have the maximum number of moon, so pad as desired.
@@ -1018,7 +1019,8 @@ namespace Pulsar4X.ECSLib
                 {10, BodyType.GasDwarf},
                 {5, BodyType.GasGiant},
                 {0, BodyType.IceGiant},
-                {50, BodyType.Terrestrial},
+                {45, BodyType.Terrestrial},
+                {5, BodyType.DwarfPlanet},
             };
 
             settings.HabitableBandTypeWeights = new WeightedList<BodyType>
@@ -1027,7 +1029,8 @@ namespace Pulsar4X.ECSLib
                 {10, BodyType.GasDwarf},
                 {5, BodyType.GasGiant},
                 {0, BodyType.IceGiant},
-                {60, BodyType.Terrestrial},
+                {55, BodyType.Terrestrial},
+                {5, BodyType.DwarfPlanet},
             };
 
             settings.OuterBandTypeWeights = new WeightedList<BodyType>
@@ -1036,7 +1039,8 @@ namespace Pulsar4X.ECSLib
                 {20, BodyType.GasDwarf},
                 {25, BodyType.GasGiant},
                 {20, BodyType.IceGiant},
-                {10, BodyType.Terrestrial},
+                {7.5, BodyType.Terrestrial},
+                {2.5, BodyType.DwarfPlanet},
             };
 
             #endregion

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SqlClient;
 using Newtonsoft.Json;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -65,10 +66,21 @@ namespace Pulsar4X.ECSLib
             }
             ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(parentEntity);
         }
+        
+        public string AtbName()
+        {
+            return "Warp Drive";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
+        }
     }
 
 
-    public class WarpAbilityDB : BaseDataBlob
+    public class WarpAbilityDB : BaseDataBlob, IAbilityDescription
     {
         /// <summary>
         /// 
@@ -100,6 +112,21 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new WarpAbilityDB(this);
+        }
+
+        public string AbilityName()
+        {
+            return "Alcubierre Warp Drive";
+        }
+
+        public string AbilityDescription()
+        {
+            string desc = "Power : " + TotalWarpPower + "\n";
+            desc += "Bubble Creation : " + BubbleCreationCost + "\n";
+            desc += "Bubble Sustain : " + BubbleSustainCost + "\n";
+            desc += "Bubble Collapse : " + BubbleCollapseCost + "\n";
+
+            return desc;
         }
     }
 

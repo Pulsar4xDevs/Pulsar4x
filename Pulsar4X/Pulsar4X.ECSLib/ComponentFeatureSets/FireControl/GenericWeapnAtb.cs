@@ -44,5 +44,16 @@ namespace Pulsar4X.ECSLib
         {
             
         }
+        
+        public string AtbName()
+        {
+            return "Generic Weapon";
+        }
+
+        public string AtbDescription()
+        {
+            return "";
+        }
+        
     }
 }

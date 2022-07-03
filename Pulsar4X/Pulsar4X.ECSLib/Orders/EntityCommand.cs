@@ -5,12 +5,30 @@ namespace Pulsar4X.ECSLib
 {
     public abstract class EntityCommand
     {
+        [Flags]
+        public enum ActionLaneTypes
+        {
+            InstantOrder = 0,
+            Movement = 1,
+            InteractWithExternalEntity = 2,
+            InteractWithEntitySameFleet = 4,
+
+            IneteractWithSelf = 8,
+            
+        }
+
         [JsonProperty]
         public Guid CmdID { get; internal set; } = Guid.NewGuid();
         public bool UseActionLanes = true;
-        public abstract int ActionLanes { get;  }
+        public abstract ActionLaneTypes ActionLanes { get;  }
         public abstract bool IsBlocking { get; }
 
+        public abstract string Name { get; }
+        public abstract string Details { get; }
+
+        public virtual void UpdateDetailString()
+        {}
+        
         [JsonProperty]
         /// <summary>
         /// This is the faction that has requested the command. 
@@ -60,6 +78,8 @@ namespace Pulsar4X.ECSLib
         /// <param name="game">Game.</param>
         internal abstract void ActionCommand(DateTime atDateTime);
 
+        public bool PauseOnAction = false;
+        
         public bool IsRunning { get; protected set; } = false;
         public abstract bool IsFinished(); 
     }
@@ -70,7 +90,7 @@ namespace Pulsar4X.ECSLib
         {
             if(globalManager.FindEntityByGuid(targetEntityGuid, out targetEntity)) {
                 if(globalManager.FindEntityByGuid(factionGuid, out factionEntity)) {
-                    if(targetEntity.FactionOwner == factionEntity.Guid) 
+                    if(targetEntity.FactionOwnerID == factionEntity.Guid) 
                         return true;
                 }
             }
@@ -94,15 +114,17 @@ namespace Pulsar4X.ECSLib
             Handler = handler;
             _subPulse = subPulse;
         }
+
         public static CommandReferences CreateForEntity(Game game, Entity entity)
         {
-            return new CommandReferences(entity.FactionOwner, entity.Guid, game.OrderHandler, entity.Manager.ManagerSubpulses);
+            return new CommandReferences(entity.FactionOwnerID, entity.Guid, game.OrderHandler, entity.Manager.ManagerSubpulses);
         }
+
         public static CommandReferences CreateForEntity(Game game, Guid entityGuid)
         {
             Entity entity;
             if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
-                return new CommandReferences(entity.FactionOwner, entityGuid, game.OrderHandler, entity.Manager.ManagerSubpulses);
+                return new CommandReferences(entity.FactionOwnerID, entityGuid, game.OrderHandler, entity.Manager.ManagerSubpulses);
             else
                 throw new Exception("Entity Not Found");
         }
@@ -110,16 +132,19 @@ namespace Pulsar4X.ECSLib
 
     public class RenameCommand : EntityCommand
     {
-        
-        public override int ActionLanes => 0;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking => false;
+
+        public override string Name { get; } = "Rename";
+
+        public override string Details { get; } = "Renames This Entity";
+
         Entity _factionEntity;
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
         bool _isFinished = false;
         string NewName;
-
 
         public static void CreateRenameCommand(Game game, Entity faction, Entity orderEntity, string newName)
         {

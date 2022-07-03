@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using System;
 using System.Collections.Generic;
 
@@ -44,36 +45,28 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestShipCreation()
         {
-
-            ComponentDesigner engineDesigner;// = DefaultStartFactory.DefaultEngineDesign(_game, _faction);
-      
             //_engineSD = NameLookup.GetTemplateSD(_game, "Alcubierre Warp Drive");
+            //ComponentDesigner engineDesigner = DefaultStartFactory.DefaultEngineDesign(_game, _faction);
             //engineDesigner = new ComponentDesigner(_engineSD, _faction.GetDataBlob<FactionTechDB>());
             //engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(5); //size = 25 power.
-            
-            
-            
             //_engineComponentDesign = engineDesigner.CreateDesign(_faction);
-            _engineComponentDesign = DefaultStartFactory.DefaultWarpDesign(_game, _faction);
-            
+
+            _engineComponentDesign = DefaultStartFactory.DefaultWarpDesign(_game, _faction);      
             
             _shipDesign = DefaultStartFactory.DefaultShipDesign(_game, _faction);
-            _ship = ShipFactory.CreateShip(_shipDesign, _faction, _sol, _starSystem, "Testship");
-
-            
+            _ship = ShipFactory.CreateShip(_shipDesign, _faction, _sol, "Testship");
+                        
             ComponentInstancesDB instancesdb = _ship.GetDataBlob<ComponentInstancesDB>();
             instancesdb.TryGetComponentsByAttribute<WarpDriveAtb>(out var instances1);
-            int origionalEngineNumber = instances1.Count;
-            
-
+            int originalEngineNumber = instances1.Count;
 
             WarpAbilityDB warpAbility = _ship.GetDataBlob<WarpAbilityDB>();
-            ShipInfoDB shipInfo = _ship.GetDataBlob<ShipInfoDB>();
-
+            
+            MassVolumeDB mvdb = _ship.GetDataBlob<MassVolumeDB>();
             WarpDriveAtb warpAtb = _engineComponentDesign.GetAttribute<WarpDriveAtb>();
             double warpPower = warpAtb.WarpPower;
-            Assert.AreEqual(warpPower * origionalEngineNumber , warpAbility.TotalWarpPower, "Incorrect TotalEnginePower");
-            float tonnage1 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
+            Assert.AreEqual(warpPower * originalEngineNumber , warpAbility.TotalWarpPower, "Incorrect TotalEnginePower");
+            double tonnage1 = mvdb.MassTotal;
             int expectedSpeed1 = ShipMovementProcessor.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage1);
             Assert.AreEqual(expectedSpeed1, warpAbility.MaxSpeed, "Incorrect Max Speed");
 
@@ -81,11 +74,11 @@ namespace Pulsar4X.Tests
             EntityManipulation.AddComponentToEntity(_ship, _engineComponentDesign);
             instancesdb.TryGetComponentsByAttribute<WarpDriveAtb>(out var instances2);
             int add2engineNumber = instances2.Count;
-            Assert.AreEqual(origionalEngineNumber + 1, add2engineNumber);            
+            Assert.AreEqual(originalEngineNumber + 1, add2engineNumber);            
             
 
             Assert.AreEqual(warpPower * add2engineNumber, warpAbility.TotalWarpPower, "Incorrect TotalEnginePower 2nd engine added");
-            float tonnage2 = _ship.GetDataBlob<ShipInfoDB>().Tonnage;
+            double tonnage2 = mvdb.MassTotal;
             int expectedSpeed2 = ShipMovementProcessor.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage2);
             Assert.AreEqual(expectedSpeed2, warpAbility.MaxSpeed, "Incorrect Max Speed 2nd engine");
 
@@ -103,13 +96,12 @@ namespace Pulsar4X.Tests
             var targetPos = new Vector3(ralpos.X , ralpos.Y, ralpos.Z);
             targetPos.X += expectedSpeed2 * 60 * 60; //distance for an hours travel. 
             WarpMoveCommand.CreateCommand(
-                _game,
-                _faction,
+                _faction.Guid,
                 _ship,
                 _sol,
                 targetPos,
                 _ship.StarSysDateTime,
-                new Vector3(0,0,0));
+                new Vector3(0,0,0), tonnage1);
             
             Assert.AreEqual(warpAbility.CurrentVectorMS.Length(), expectedSpeed2, 1.0E-15);
             // _game.GamePulse.Ticklength = TimeSpan.FromSeconds(1);

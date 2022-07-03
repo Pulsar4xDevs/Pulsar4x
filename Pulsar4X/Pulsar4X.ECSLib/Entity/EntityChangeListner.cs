@@ -182,7 +182,7 @@ namespace Pulsar4X.ECSLib
                     break;
                 }
             }
-            if (include && ListenForFaction.Guid == changeData.Entity.FactionOwner) //note: this will miss a lot of new entittes, since this code gets called before ownership is set on a new entity. it will get caught when a datablob is set though. 
+            if (include && ListenForFaction.Guid == changeData.Entity.FactionOwnerID) //note: this will miss a lot of new entittes, since this code gets called before ownership is set on a new entity. it will get caught when a datablob is set though. 
             {
                 ListningToEntites.Add(changeData.Entity); 
                 EntityChanges.Enqueue(changeData);

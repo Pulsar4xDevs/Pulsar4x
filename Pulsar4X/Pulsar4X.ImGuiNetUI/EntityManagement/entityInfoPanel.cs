@@ -3,6 +3,7 @@ using ImGuiNET;
 using Pulsar4X.ECSLib;
 using System.Numerics;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -37,7 +38,7 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
            
-            ImGui.SetNextWindowSize(new Vector2(264, 325), ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(264, 325), ImGuiCond.Once);
             if (ImGui.Begin("Currently selected", _flags))
             {
 
@@ -152,7 +153,11 @@ namespace Pulsar4X.SDL2UI
         public static class ComponentsDisplay
         {
             
-            
+            /// <summary>
+            /// returns a 2d array[i][j] where i is the component design, and j is the componentInstance 
+            /// </summary>
+            /// <param name="selectedEntity"></param>
+            /// <returns></returns>
             public static ComponentInstance[][] CreateNewInstanceArray(Entity selectedEntity)
             {
                 var instancesDB = selectedEntity.GetDataBlob<ComponentInstancesDB>();
@@ -206,6 +211,188 @@ namespace Pulsar4X.SDL2UI
                 }
                 ImGui.Columns(1);
                 BorderGroup.End();
+            }
+
+            private static int _selectedIndex = 0;
+            private static float[] _textwidth = new float[2];
+            public static void DisplayComplex(ComponentInstance[][] instancesArray)
+            {
+                List<string> names = new List<string>();
+                List<ComponentInstance> flatInstances = new List<ComponentInstance>();
+                List<IComponentDesignAttribute> attrubutes = new List<IComponentDesignAttribute>();
+                float xwid = 100;
+                int c = 0;
+                for (int i = 0; i < instancesArray.Length; i++)
+                {
+                    for (int j = 0; j < instancesArray[i].Length; j++)
+                    {
+                        var instance = instancesArray[i][j];
+                        string name = instance.Name;
+                        float health = 100 * instance.HealthPercent();
+                        names.Add(name);
+                        flatInstances.Add(instance);
+                        foreach (var atb in instance.GetAttributes().Values)
+                        {
+                            
+                        }
+
+                        c++;
+                    }
+                }
+                
+                
+                //BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 256);
+                //left selectable box
+                if (BorderListOptions.Begin("Components", names.ToArray(), ref _selectedIndex, 188))
+                {
+                    _textwidth = new float[2];
+                    attrubutes = new List<IComponentDesignAttribute>();
+                }
+
+                
+                
+                Dictionary<Type, ComponentAbilityState> states = flatInstances[_selectedIndex].GetAllStates();
+                foreach (var state in states.Values)
+                {
+                    ImGui.Text(state.Name);
+                }
+                
+                foreach (var atb in flatInstances[_selectedIndex].GetAttributes().Values)
+                {
+                    attrubutes.Add(atb);
+                }
+                
+                
+
+                for (int atbi = 0; atbi < attrubutes.Count; atbi++)
+                {
+                    var atbName = attrubutes[atbi].AtbName();
+                    ImGui.Text(atbName);
+                    
+                    string[] atbAry = attrubutes[atbi].AtbDescription().Split("\n");
+                    
+                    //we're assuming the first item is a title of sorts
+                    var strline = atbAry[0];
+                    ImGui.Text(strline);
+                    if(xwid < ImGui.GetItemRectSize().X)
+                        xwid = ImGui.GetItemRectSize().X;
+                    ImGui.Indent(2);
+                    for (int strlinei = 1; strlinei < atbAry.Length; strlinei++)
+                    {
+                        strline = atbAry[strlinei];
+                        
+                        string[] tabSplit = strline.Split("\t"); //split if there are tabs.
+                        var xpos = ImGui.GetCursorPosX();
+                        for (int i = 0; i < tabSplit.Length; i++) 
+                        {
+                            if(i > 0) //after the tab char
+                                ImGui.SetCursorPosX(xpos + _textwidth[i-1] + 12);//allign second row
+                        
+                            ImGui.Text(tabSplit[i]); //display the text
+                            if (_textwidth[i] < ImGui.GetItemRectSize().X) //check the size
+                                _textwidth[i] = ImGui.GetItemRectSize().X; //expand the size for the next frame
+                            if (i < tabSplit.Length - 1) //put the next item on the same line if there is another item in the array
+                                ImGui.SameLine(); //at least this bit shouldnt break if there's more than one tab
+                        }
+                        
+                    }
+                    
+                    
+                    //ImGui.Text(attrubutes[i].AtbDescription());
+                }
+                
+                ImGui.Unindent(2);
+                float ycount = flatInstances.Count;
+                float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
+                
+                //float ycount = abilites[_selectedIndex].AbilityDescription().Split("\n").Length -1;
+                //float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
+                if(xwid < _textwidth[0] + _textwidth[1] + 12)
+                    xwid = _textwidth[0] + _textwidth[1] + 12;
+                ImGui.Columns(2);
+                BorderListOptions.End(new Vector2(xwid,yhight));
+                
+                //BorderListOptions.End(new Vector2(184,yhight));
+                
+            }
+
+        }
+
+        public static class AbilitesDisplay
+        {
+            private static int _selectedIndex = 0;
+            private static Entity _entity;
+            private static float[] _textwidth = new float[2];
+            
+            
+            public static void Display(Entity entity)
+            {
+                float xwid = 100;
+                List<string> names = new List<string>();
+                List<IAbilityDescription> abilites = new List<IAbilityDescription>();
+                if (_entity != entity)
+                {
+                    _selectedIndex = 0;
+                    _entity = entity;
+                    _textwidth = new float[2];
+                }
+
+                foreach (var db in entity.DataBlobs)
+                {
+                    if (db is IAbilityDescription)
+                    {
+                        IAbilityDescription dbdesc = (IAbilityDescription)db;
+                        names.Add(dbdesc.AbilityName());
+                        abilites.Add(dbdesc);
+                    }
+                }  
+                
+                //left selectable box
+                if (BorderListOptions.Begin("Abilites", names.ToArray(), ref _selectedIndex, 184))
+                {
+                    _textwidth = new float[2];
+                }
+
+
+
+                //right box of sub items
+                string[] abilitiesAry = abilites[_selectedIndex].AbilityDescription().Split("\n");
+                
+                //we're assuming the first item is a title of sorts
+                var strline = abilitiesAry[0];
+                ImGui.Text(strline);
+                if(xwid < ImGui.GetItemRectSize().X)
+                    xwid = ImGui.GetItemRectSize().X;
+                
+                ImGui.Indent(2);
+                //we're expecting subsequent items to have a(one) tab char, and we want to allign the righthand side
+                //this whole bit of code could break in intersting ways if there's more than one tab char,
+                //however the strings are hardcode, so we'll ignore that problem untill it happens.
+                for (int strlinei = 1; strlinei < abilitiesAry.Length; strlinei++)
+                {
+                    strline = abilitiesAry[strlinei];
+                    string[] tabSplit = strline.Split("\t"); //split if there are tabs.
+                    var xpos = ImGui.GetCursorPosX();
+                    for (int i = 0; i < tabSplit.Length; i++) 
+                    {
+                        if(i > 0) //after the tab char
+                            ImGui.SetCursorPosX(xpos + _textwidth[i-1] + 12);//allign second row
+                        
+                        ImGui.Text(tabSplit[i]); //display the text
+                        if (_textwidth[i] < ImGui.GetItemRectSize().X) //check the size
+                            _textwidth[i] = ImGui.GetItemRectSize().X; //expand the size for the next frame
+                        if (i < tabSplit.Length - 1) //put the next item on the same line if there is another item in the array
+                            ImGui.SameLine(); //at least this bit shouldnt break if there's more than one tab
+                    }
+                    
+                }
+                ImGui.Unindent(2);
+                float ycount = abilites[_selectedIndex].AbilityDescription().Split("\n").Length -1;
+                float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
+                if(xwid < _textwidth[0] + _textwidth[1] + 12)
+                   xwid = _textwidth[0] + _textwidth[1] + 12;
+                
+                BorderListOptions.End(new Vector2(xwid,yhight));
             }
         }
     }

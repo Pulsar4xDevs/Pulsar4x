@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         {
             Entity entity = game.GlobalManager.GetGlobalEntityByGuid(EntityGuid);
             Entity faction = game.GlobalManager.GetLocalEntityByGuid(FactionGuid);
-            if (entity.FactionOwner == faction.Guid)
+            if (entity.FactionOwnerID == faction.Guid)
             {
                 //serialise entity and send it
                 throw new NotImplementedException();

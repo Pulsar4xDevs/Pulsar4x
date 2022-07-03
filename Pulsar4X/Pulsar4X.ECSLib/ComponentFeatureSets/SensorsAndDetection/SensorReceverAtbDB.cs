@@ -131,5 +131,17 @@ namespace Pulsar4X.ECSLib
             //SensorProcessorTools.(componentInstance);
 
         }
+        
+        public string AtbName()
+        {
+            return "Sensor Recever";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
+        }
+        
     }
 }

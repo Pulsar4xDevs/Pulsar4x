@@ -54,5 +54,16 @@ namespace Pulsar4X.ECSLib
         {
             
         }
+        
+        public string AtbName()
+        {
+            return "Resource Consumption";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
+        }
     }
 }

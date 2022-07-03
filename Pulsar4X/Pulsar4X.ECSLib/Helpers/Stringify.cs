@@ -81,9 +81,8 @@ namespace Pulsar4X.ECSLib
 
             return str;
         }
-        public static string Number(double number,  string format = "0.###")
+        public static string Number(double number,  string format = "0.0##")
         {
-
             string stringCount = "0";
             double absCnt = Math.Abs(number);
             double cnt;
@@ -122,7 +121,44 @@ namespace Pulsar4X.ECSLib
 
             return stringCount;
         }
-        
+
+        public static string Quantity(double number, string format = "0.###", bool fullSuffix = false)
+        {
+            string stringCount = "0";
+            double absCnt = Math.Abs(number);
+            double cnt;
+            if (absCnt > 1.0e15)
+            {
+                cnt = number * 1.0e-15;
+                stringCount = cnt.ToString(format) + (fullSuffix ? " quadrillion" : "q");
+            }
+            else if (absCnt > 1.0e12)
+            {
+                cnt = number * 1.0e-12;
+                stringCount = cnt.ToString(format) + (fullSuffix ? " trillion" : "t");  // Trillion
+            }
+            else if (absCnt > 1.0e9)
+            {
+                cnt = number * 1.0e-9;
+                stringCount = cnt.ToString(format) + (fullSuffix ? " billion" : "b");  // Billion
+            }
+            else if (absCnt > 1.0e6)
+            {
+                cnt = number * 1.0e-6;
+                stringCount = cnt.ToString(format) + (fullSuffix ? " million" : "m");  // Million
+            }
+            else if (absCnt > 1.0e3)
+            {
+                cnt = number * 1.0e-3;
+                stringCount = cnt.ToString(format) + (fullSuffix ? " thousand" : "k");  // Thousand
+            }
+            else { 
+                stringCount = number.ToString(format);
+            }
+
+            return stringCount;
+        }
+
 
         public static string Power(double amountInKw, string format = "0.###")
         {
@@ -181,7 +217,22 @@ namespace Pulsar4X.ECSLib
         {
             string stringVolume = "0 m^3";
 
-            if (volume_m > 1.0e9)
+            if (volume_m > 1.0e18)
+            {
+                volume_m = volume_m * 1.0e-18;
+                stringVolume = volume_m.ToString(format) + " Em^3";
+            }
+            else if (volume_m > 1.0e15)
+            {
+                volume_m = volume_m * 1.0e-15;
+                stringVolume = volume_m.ToString(format) + " Pm^3";
+            }
+            else if(volume_m > 1.0e12)
+            {
+                volume_m = volume_m * 1.0e-12;
+                stringVolume = volume_m.ToString(format) + " Tm^3";
+            } 
+            else if (volume_m > 1.0e9)
             {
                 volume_m = volume_m * 1.0e-9;
                 stringVolume = volume_m.ToString(format) + " Gm^3";
@@ -196,8 +247,9 @@ namespace Pulsar4X.ECSLib
                 volume_m = volume_m * 1.0e-3;
                 stringVolume = volume_m.ToString(format) + " Km^3";
             }
-
-            else { stringVolume = volume_m.ToString(format) + " m^3";  }
+            else { 
+                stringVolume = volume_m.ToString(format) + " m^3";  
+            }
 
             return stringVolume;
         }

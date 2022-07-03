@@ -133,13 +133,21 @@ namespace Pulsar4X.ECSLib
                     var typestring = "Pulsar4X.ECSLib." + (string)reader.Value;
                     Type dataBlobType = Type.GetType(typestring);
                     reader.Read(); // StartObject (dataBlob)
-                    //bool exists3 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
-                    BaseDataBlob dataBlob = (BaseDataBlob)serializer.Deserialize(reader, dataBlobType); // EndObject (dataBlob)
-                    //bool exists4 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
-                    protoEntity.SetDataBlob(dataBlob);
+                    if (reader.TokenType == JsonToken.EndObject)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        //bool exists3 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
+                        BaseDataBlob dataBlob = (BaseDataBlob)serializer.Deserialize(reader, dataBlobType); // EndObject (dataBlob)
+                                                                                                            //bool exists4 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
+                        protoEntity.SetDataBlob(dataBlob);
+                    }
                     reader.Read(); // PropertyName DATABLOB OR EndObject (Entity)
                     //bool exists5 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                 }
+
                 //bool exists6 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                 return protoEntity;
             }

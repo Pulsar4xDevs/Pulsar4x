@@ -962,7 +962,7 @@
       <FileName>Game.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Pulsar4X.ECSLib.GameConstants" Collapsed="true">
+  <Class Name="Pulsar4X.ECSLib.UniversalConstants" Collapsed="true">
     <Position X="62.5" Y="6.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>

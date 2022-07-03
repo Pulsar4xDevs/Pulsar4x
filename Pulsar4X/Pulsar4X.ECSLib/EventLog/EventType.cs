@@ -5,8 +5,10 @@ namespace Pulsar4X.ECSLib
     {
         NoEventType,
 
+        //gameEvents
         SystemDateChange,
         GlobalDateChange,
+        EntityDestroyed,
 
         #region GameErrors
 
@@ -203,6 +205,9 @@ namespace Pulsar4X.ECSLib
 
         #endregion
 
+        //IndustryEvents
+        Storage,
+
         // Diplomatic Events
         TreatyAgreed,
         TechExchange,
@@ -236,6 +241,7 @@ namespace Pulsar4X.ECSLib
         OrdersAssigned,
         OrdersNotPossible,
         OrdersCompleted,
+        OrdersHalt,
 
         // Life Pod Events
         LifePodExpired,

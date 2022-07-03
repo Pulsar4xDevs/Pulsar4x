@@ -2,9 +2,11 @@
 
 namespace Pulsar4X.ECSLib
 {
-    //
-    //@summary Provides the ability to support a number of colonists in a population.  Dependent on the colony cost.
-    //
+    /// <summary>
+    /// Provides the ability to support a number of colonists in a population.  
+    /// Dependent on the colony cost. 
+    /// Colony cost is infrastructure cost to house 10,000 population
+    /// </summary>
     public class PopulationSupportAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         [JsonProperty]
@@ -39,6 +41,17 @@ namespace Pulsar4X.ECSLib
         public void OnComponentDeInstalation(Entity ship, Entity component)
         {
             throw new System.NotImplementedException();
+        }
+        
+        public string AtbName()
+        {
+            return "Population Support";
+        }
+
+        public string AtbDescription()
+        {
+
+            return " ";
         }
     }
 }

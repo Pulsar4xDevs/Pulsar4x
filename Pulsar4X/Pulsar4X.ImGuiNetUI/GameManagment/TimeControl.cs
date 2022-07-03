@@ -9,8 +9,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class TimeControl : PulsarGuiWindow
     {
-        
-        ECSLib.MasterTimePulse _timeloop {get { return _uiState.Game.GamePulse; } }
+        ECSLib.MasterTimePulse _timeloop => _uiState.Game.GamePulse;
 
         bool _isPaused = true;
         int _timeSpanValue = 1;
@@ -37,7 +36,10 @@ namespace Pulsar4X.SDL2UI
         private TimeControl()
         {
             IsActive = true;
+            ReadTimeSpan();
+            ReadFreqency();
         }
+
         internal static TimeControl GetInstance()
         {
             if (!_uiState.LoadedWindows.ContainsKey(typeof(TimeControl)))
@@ -49,8 +51,11 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            Vector2 size = new Vector2(200, 100);
-            Vector2 pos = new Vector2(0,0);
+            var iconSize = new System.Numerics.Vector2(16, 16);
+            var size = new System.Numerics.Vector2(200, 100);
+            var pos = new System.Numerics.Vector2(0,0);
+            var col = new Vector4(0, 0, 0, 0);
+
 
             ImGui.SetNextWindowSize(size, ImGuiCond.FirstUseEver);
             ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
@@ -58,9 +63,9 @@ namespace Pulsar4X.SDL2UI
             ImGui.Begin("TimeControl", ref IsActive, _flags);
             ImGui.PushItemWidth(100);
 
-            ImGui.PushStyleColor(ImGuiCol.Header, new Vector4(0, 0, 0, 0));
-            ImGui.PushStyleColor(ImGuiCol.HeaderActive, new Vector4(0, 0, 0, 0));
-            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0, 0, 0, 0));
+            ImGui.PushStyleColor(ImGuiCol.Header, col);
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, col);
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, col);
 
             DateTime currenttime = _uiState.SelectedSystemTime;
             if (ImGui.CollapsingHeader("", _xpanderFlags))//Let the user open up the the time frequency menu
@@ -79,15 +84,15 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if (_isPaused == true)//When time is paused
             {
-                if (ImGui.ImageButton(_uiState.SDLImageDictionary["PlayImg"], new Vector2(16, 16)))//Provide a button to unpause
+                if (ImGui.ImageButton(_uiState.Img_Play(), iconSize))//Provide a button to unpause
                     PausePlayPressed();
                 ImGui.SameLine();
-                if (ImGui.ImageButton(_uiState.SDLImageDictionary["OneStepImg"], new Vector2(16, 16)))//Provide a button to increment time
+                if (ImGui.ImageButton(_uiState.Img_OneStep(), iconSize))//Provide a button to increment time
                     OneStepPressed();
             }
             else//When time is running
             {
-                if (ImGui.ImageButton(_uiState.SDLImageDictionary["PauseImg"], new Vector2(16, 16)))//Provide a button to unpause time
+                if (ImGui.ImageButton(_uiState.Img_Pause(), iconSize))//Provide a button to unpause time
                     PausePlayPressed();
             }
             
@@ -98,7 +103,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushItemWidth(100);
                 ImGui.Text("   " + currenttime.ToShortTimeString());
                 ImGui.SameLine();
-                if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), 1))
+                if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), ImGuiSliderFlags.None))
                     AdjustFreqency();
                 ImGui.SameLine();
                 if (ImGui.Combo("##freqCmbo", ref _freqSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
@@ -138,6 +143,33 @@ namespace Pulsar4X.SDL2UI
                     break;
             }
         }
+        void ReadTimeSpan()
+        { 
+            switch (_timeSpanType)
+            {
+                case 0:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalSeconds;
+                    break;
+                case 1:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalMinutes;
+                    break;
+                case 2:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalHours;
+                    break;
+                case 3:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays;
+                    break;
+                case 4:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays / 7;
+                    break;
+                case 5:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays / 30;
+                    break;
+                case 6:
+                    _timeSpanValue = (int)_timeloop.Ticklength.TotalDays / 365;
+                    break;
+            }
+        }
         void AdjustFreqency()
         {
             switch (_freqSpanType)
@@ -165,11 +197,39 @@ namespace Pulsar4X.SDL2UI
                     break;
             }
         }
+        void ReadFreqency()
+        {
+            switch (_freqSpanType)
+            {
+                case 0:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalSeconds;
+                    break;
+                case 1:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalMinutes;
+                    break;
+                case 2:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalHours;
+                    break;
+                case 3:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays;
+                    break;
+                case 4:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays / 7;
+                    break;
+                case 5:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays / 30;
+                    break;
+                case 6:
+                    _freqTimeSpanValue = (float)_timeloop.TickFrequency.TotalDays / 365;
+                    break;
+            }
+        }
 
         void PausePlayPressed()
         {
             if (_timeloop == null)
                 return;
+
             if (_isPaused)
             {
                 _timeloop.StartTime();
@@ -181,10 +241,12 @@ namespace Pulsar4X.SDL2UI
                 _isPaused = true;
             }   
         }
+
         void OneStepPressed()
         {
             if (_timeloop == null)
                 return;
+
             _timeloop.TimeStep();
         }
     }

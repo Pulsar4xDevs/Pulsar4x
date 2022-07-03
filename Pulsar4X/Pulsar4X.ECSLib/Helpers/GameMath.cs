@@ -1,169 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.Serialization;
-using Pulsar4X.Vectors;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
-{
-    /// <summary>
-    /// Small Helper Class for Angle unit Conversions
-    /// </summary>
-    public static class Angle
-    {
-        public static double ToRadians(double degrees)
-        {
-            return degrees * Math.PI / 180;
-        }
-
-        public static double ToDegrees(double radians)
-        {
-            return radians * 180 / Math.PI;
-        }
-
-        /// <summary>
-        /// returns a number between -2 * pi and 2 * pi
-        /// </summary>
-        /// <returns>The radians.</returns>
-        /// <param name="radians">Radians.</param>
-        public static double NormaliseRadians(double radians)
-        {
-            radians = radians % (2 * Math.PI);
-            return radians;
-        }
-
-        /// <summary>
-        /// returns a number between 0 and 2 * pi
-        /// </summary>
-        /// <param name="radians"></param>
-        /// <returns></returns>
-        public static double NormaliseRadiansPositive(double radians)
-        {
-            radians = NormaliseRadians(radians);
-            if (radians < 0)
-                radians += (2 *Math.PI);
-            return radians;
-        }
-
-        /// <summary>
-        /// returns a number between -360 and 360
-        /// </summary>
-        /// <returns>The degrees.</returns>
-        /// <param name="degrees">Degrees.</param>
-        public static double NormaliseDegrees(double degrees)
-        {
-            degrees = degrees % 360;
-            return degrees;
-        }
-
-        public static double DifferenceBetweenRadians(double a1, double a2)
-        {
-            return Math.PI - Math.Abs(Math.Abs(a1 - a2) - Math.PI);
-        }
-
-        public static double DifferenceBetweenDegrees(double a1, double a2)
-        {
-            return 180 - Math.Abs(Math.Abs(a1 - a2) - 180);
-        }
-
-    }
-
-    /// <summary>
-    /// Small helper class for Temperature unit conversions
-    /// </summary>
-    public static class Temperature
-    {
-        public static double ToKelvin(double celsius)
-        {
-            return celsius + GameConstants.Units.DegreesCToKelvin;
-        }
-
-        public static float ToKelvin(float celsius)
-        {
-            return (float)(celsius + GameConstants.Units.DegreesCToKelvin);
-        }
-
-        public static double ToCelsius(double kelvin)
-        {
-            return kelvin + GameConstants.Units.KelvinToDegreesC;
-        }
-
-        public static float ToCelsius(float kelvin)
-        {
-            return (float)(kelvin + GameConstants.Units.KelvinToDegreesC);
-        }
-    }
-
-    /// <summary>
-    /// Small helper class for Distance unit conversions
-    /// </summary>
-    public static class Distance
-    {
-        public static Vector3 MToAU(Vector3 meters)
-        {
-            return meters / GameConstants.Units.MetersPerAu;
-        }
-        public static double MToAU(double meters)
-        {
-            return meters / GameConstants.Units.MetersPerAu;
-        }
-        
-        public static double MToKm(double meters)
-        {
-            return meters / 1000.0;
-        }
-        public static double KmToM(double kilometers)
-        {
-            return kilometers * 1000.0;
-        }
-        
-        public static double KmToAU(double km)
-        {
-            return km / GameConstants.Units.KmPerAu;
-        }
-        public static Vector3 KmToAU(Vector3 km)
-        {
-            return km / GameConstants.Units.KmPerAu;
-        }
-        public static Vector2 KmToAU(Vector2 km)
-        {
-            return km / GameConstants.Units.KmPerAu;
-        }
-        public static double AuToKm(double au)
-        {
-            return au * GameConstants.Units.KmPerAu;
-        }
-        public static Vector3 AuToKm(Vector3 Au)
-        {
-            return new Vector3(AuToKm(Au.X), AuToKm(Au.Y), AuToKm(Au.Z));
-        }
-        public static Vector2 AuToKm(Vector2 Au)
-        {
-            return new Vector2(AuToKm(Au.X), AuToKm(Au.Y));
-        }
-
-        public static Vector3 AuToMt(Vector3 au)
-        {
-            Vector3 meters = au * GameConstants.Units.MetersPerAu;
-            return meters;
-        }
-        public static Vector2 AuToMt(Vector2 au)
-        {
-            Vector2 meters = au * GameConstants.Units.MetersPerAu;
-            return meters;
-        }
-        public static double AuToMt(double au)
-        {
-            return au * GameConstants.Units.MetersPerAu; 
-        }
-
-        public static double DistanceBetween(Vector3 p1, Vector3 p2)
-        {
-            return (p1 - p2).Length();
-        }
-
-    }
-
+{   
     /// <summary>
     /// Used for holding a percentage stores as a byte so 255 bits precision.
     /// Takes and Returns 0.0 to 1.0 for easy multiplcation math.
@@ -219,8 +60,6 @@ namespace Pulsar4X.ECSLib
             return new PercentValue(percentValue);
         }
     }
-
-
 
     public class WeightedValue<T>
     {
@@ -449,245 +288,89 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    /// <summary>
-    /// Just a container for some general math functions.
-    /// </summary>
-    public class GMath
-    {
-        /// <summary>
-        /// Clamps a value between the provided man and max.
-        /// </summary>
-        public static double Clamp(double value, double min, double max)
-        {
-            if (value > max)
-                return max;
-            if (value < min)
-                return min;
-
-            return value;
-        }
-
-        public static double Clamp(double value, MinMaxStruct minMax)
-        {
-            return Clamp(value, minMax.Min, minMax.Max);
-        }
-
-        /// <summary>
-        /// Selects a number from a range based on the selection percentage provided.
-        /// </summary>
-        public static double SelectFromRange(MinMaxStruct minMax, double selection)
-        {
-            return minMax.Min + selection * (minMax.Max - minMax.Min);
-        }
-
-        /// <summary>
-        /// Selects a number from a range based on the selection percentage provided.
-        /// </summary>
-        public static double SelectFromRange(double min, double max, double selection)
-        {
-            return min + selection * (max - min);
-        }
-
-        /// <summary>
-        /// Calculates where the value falls inside the MinMaxStruct.
-        /// </summary>
-        /// <returns>Value's percent in the MinMaxStruct (Ranged from 0.0 to 1.0)</returns>
-        public static double GetPercentage(double value, MinMaxStruct minMax)
-        {
-            return GetPercentage(value, minMax.Min, minMax.Max);
-        }
-
-        /// <summary>
-        /// Calculates where the value falls between the min and max.
-        /// </summary>
-        /// <returns>Value's percent in the MinMaxStruct (Ranged from 0.0 to 1.0)</returns>
-        public static double GetPercentage(double value, double min, double max)
-        {
-            if (min >= max)
-            {
-                throw new ArgumentOutOfRangeException("min", "Min value must be less than Max value.");
-            }
-            double adjustedMax = max - min;
-            double adjustedValue = value - min;
-            return adjustedValue / adjustedMax;
-        }
-
-        /// <summary>
-        /// Returns the gravitational attraction between two masses.
-        /// </summary>
-        /// <param name="mass1">Mass of first body. (KG)</param>
-        /// <param name="mass2">Mass of second body. (KG)</param>
-        /// <param name="distance">Distance between bodies. (M)</param>
-        /// <returns>Force (Newtons)</returns>
-        public static double GetGravitationalAttraction(double mass1, double mass2, double distance)
-        {
-            // http://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation
-            return GameConstants.Science.GravitationalConstant * mass1 * mass2 / (distance * distance);
-        }
-
-        /// <summary>
-        /// Returns the gravitational attraction of a body at a specified distance.
-        /// </summary>
-        /// <param name="mass">Mass of the body. (KG)</param>
-        /// <param name="distance">Distance to the body. (M)</param>
-        /// <returns>Force (Newtons)</returns>
-        public static double GetStandardGravitationAttraction(double mass, double distance)
-        {
-            return GetGravitationalAttraction(mass, 1, distance);
-        }
-
-        /// <summary>
-        /// Standard Gravitational parameter. in m^3 s^-2
-        /// </summary>
-        /// <returns>The gravitational parameter.</returns>
-        /// <param name="mass">Mass.</param>
-        public static double StandardGravitationalParameter(double mass)
-        {
-            return mass * GameConstants.Science.GravitationalConstant;
-        }
-
-        public static double GravitationalParameter_Km3s2(double mass)
-        {
-            return GameConstants.Science.GravitationalConstant * mass / 1000000000; // (1000^3)
-        }
-
-        public static double GrabitiationalParameter_Au3s2(double mass)
-        {
-            return GameConstants.Science.GravitationalConstant * mass / 3.347928976e33; // (149597870700^3)
-        }
-
-        /// <summary>
-        /// calculates a vector from two positions and a magnatude
-        /// </summary>
-        /// <returns>The vector.</returns>
-        /// <param name="currentPosition">Current position.</param>
-        /// <param name="targetPosition">Target position.</param>
-        /// <param name="speedMagnitude_AU">Speed magnitude.</param>
-        public static Vector3 GetVector(Vector3 currentPosition, Vector3 targetPosition, double speedMagnitude_AU)
-        {
-            Vector3 speed = new Vector3(0, 0, 0);
-            double length;
-
-
-            Vector3 speedMagInAU = new Vector3(0, 0, 0);
-
-            Vector3 direction = new Vector3(0, 0, 0);
-            direction.X = targetPosition.X - currentPosition.X;
-            direction.Y = targetPosition.Y - currentPosition.Y;
-            direction.Z = targetPosition.Z - currentPosition.Z;
-
-            length = direction.Length(); // Distance between targets in AU
-            if (length != 0)
-            {
-                direction.X = (direction.X / length);
-                direction.Y = (direction.Y / length);
-                direction.Z = (direction.Z / length);
-
-                speedMagInAU.X = direction.X * speedMagnitude_AU;
-                speedMagInAU.Y = direction.Y * speedMagnitude_AU;
-                speedMagInAU.Z = direction.Z * speedMagnitude_AU;
-            }
-
-
-            speed.X = (speedMagInAU.X);
-            speed.Y = (speedMagInAU.Y);
-            speed.Z = (speedMagInAU.Z);
-
-            return speed;
-        }
-
-
-
-        /// <summary>
-        /// A decimal Sqrt. not as fast as normal Math.Sqrt, but better precision. 
-        /// </summary>
-        /// <returns>The sqrt. of x</returns>
-        /// <param name="x">x</param>
-        /// <param name="guess">normaly ignored, this is for the recursion</param>
-        public static decimal Sqrt(decimal x, decimal? guess = null)
-        {
-            var ourGuess = guess.GetValueOrDefault(x / 2m);
-            var result = x / ourGuess;
-            var average = (ourGuess + result) / 2m;
-
-            if (average == ourGuess) // This checks for the maximum precision possible with a decimal.
-                return average;
-            else
-                return Sqrt(x, average);
-        }
-
-    }
-
-    /// <summary>
-    /// Small helper struct to make all these min/max dicts. nicer.
-    /// </summary>
-    public struct MinMaxStruct
-    {
-        public double Min, Max;
-
-        public MinMaxStruct(double min, double max)
-        {
-            Min = min;
-            Max = max;
-        }
-    }
+    
 
     public static class InterceptCalcs
     {
-        /// <summary>
-        /// THIS NEEDS TESTING.
-        /// Hohmann the specified GravParamOfParent, semiMajAxisCurrentBody and semiMajAxisOfTarget.
-        /// </summary>
-        /// <returns>two burns with a time in seconds for the second burn</returns>
-        /// <param name="sgp">Grav parameter of parent.</param>
-        /// <param name="semiMajAxisCurrent">semiMajor axis now</param>
-        /// <param name="semiMajAxisOfTarget">target semiMajorAxis</param>
-        public static (Vector3 deltaV, double timeInSeconds)[] Hohmann(double sgp, double semiMajAxisCurrent, double semiMajAxisOfTarget)
-        {
-            double xferOrbitSMA = semiMajAxisCurrent + semiMajAxisOfTarget;
-            double velCurrentBody = Math.Sqrt(sgp / semiMajAxisCurrent);
-            double velTarg = Math.Sqrt(sgp / semiMajAxisOfTarget);
-
-            double xferVelAtPeriapsis = Math.Sqrt(2 * (-sgp / xferOrbitSMA + sgp / semiMajAxisCurrent));
-
-            double xferVelAtApoaxis = Math.Sqrt(2 * (-sgp / xferOrbitSMA + sgp / semiMajAxisOfTarget));
-
-            double deltaVBurn1 = xferVelAtPeriapsis - velCurrentBody;
-            double deltaVBurn2 = xferVelAtApoaxis - velTarg;
-
-            double xferOrbitPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(xferOrbitSMA, 3) / sgp);
-            double timeToSecondBurn = xferOrbitPeriod * 0.5;
-
-            var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
-            manuvers[0] = (new Vector3(0, deltaVBurn1, 0), 0);
-            manuvers[1] = (new Vector3(0, deltaVBurn2, 0), timeToSecondBurn);
-            return manuvers;
-        }
-
+ 
 
         /// <summary>
-        /// Hohmann transfer manuver. 
+        /// assumes circular orbit, attempts to calculate transfer window. 
         /// </summary>
-        /// <param name="sgp"></param>
-        /// <param name="r1">radius from parent</param>
-        /// <param name="r2">radius from parent</param>
-        /// <returns>a tuple containing two manuvers with a time in seconds delay for second manuver</returns>
-        public static (Vector3 deltaV, double timeInSeconds)[] Hohmann2(double sgp, double r1, double r2)
+        /// <param name="deltaV"></param>
+        /// <param name="currentParent"></param>
+        /// <param name="targetParent"></param>
+        /// <param name="manuverEntity"></param>
+        /// <returns>3 manuvers, 0: soi escape, 1:1st hohmman manuver 2: 2nd hohmman manuver</returns>
+        public static (Vector3 deltaV, double timeInSeconds)[] InterPlanetaryHohmann(Entity currentParent, Entity targetParent, Entity manuverEntity)
         {
-            var wca1 = Math.Sqrt(sgp / r1);
-            var wca2 = Math.Sqrt((2 * r2) / (r1 + r2)) - 1;
-            var dva = wca1 * wca2;
+            var meState = manuverEntity.GetRelativeState();
+            var meOdb = manuverEntity.GetDataBlob<OrbitDB>();
+            var meMass = manuverEntity.GetDataBlob<MassVolumeDB>().MassTotal;
+            var meSMA = meOdb.SemiMajorAxis;
+            var meOprd = meOdb.OrbitalPeriod;
+            var meMeanMotion = meOdb.MeanMotion;
+            var meAngle = Math.Atan2(meState.pos.Y, meState.pos.X);
 
-            var wcb2 = Math.Sqrt(sgp / r2);
-            var wcb3 = 1 - Math.Sqrt((2 * r1) / (r1 + r2));
-            var dvb = wcb2 * wcb3;
 
-            var timeTo2ndBurn = Math.PI * Math.Sqrt((Math.Pow(r1 + r2, 3)) / (8 * sgp));
+            var cpOdb = currentParent.GetDataBlob<OrbitDB>();
+            var cpSOI = currentParent.GetSOI_m() + 100; //might as well go another 100m past soi so less likely problems.
+            var cpmass = currentParent.GetDataBlob<MassVolumeDB>().MassTotal;            
+            var cpsgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(meMass, cpmass);
+            var cpSMA = cpOdb.SemiMajorAxis;
+            var cpOprd = cpOdb.OrbitalPeriod;
+            var cppos = currentParent.GetDataBlob<PositionDB>().RelativePosition_m;
+            var cpAngle = Math.Atan2(cppos.Y, cppos.X);
+
+            var tpOdb = targetParent.GetDataBlob<OrbitDB>();
+            var tpSOI = targetParent.GetSOI_m();
+            var tpMass = targetParent.GetDataBlob<MassVolumeDB>().MassTotal;
+            var tpsgp = OrbitMath.CalculateStandardGravityParameterInM3S2(meMass, tpMass);
+            var tpSMA = tpOdb.SemiMajorAxis;
+            var tpOprd = tpOdb.OrbitalPeriod;
+            var tppos = targetParent.GetDataBlob<PositionDB>().RelativePosition_m;
+            var tpAngle = Math.Atan2(tppos.Y, tppos.X);
+
+            //grandparent (sol in earth to mars)
+            var grandParent = currentParent.GetSOIParentEntity();
+            var gpMass = grandParent.GetDataBlob<MassVolumeDB>().MassTotal;
+            var gpSGP = OrbitMath.CalculateStandardGravityParameterInM3S2(meMass, gpMass);
             
-            var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
-            manuvers[0] = (new Vector3(0, dva, 0), 0);
-            manuvers[1] = (new Vector3(0, dvb, 0), timeTo2ndBurn);
+            var gpHomman = OrbitalMath.Hohmann2(gpSGP, cpSMA, tpSMA);
+            var gpHommanAngle = Math.PI*( (1-1/2*Math.Sqrt(2))*Math.Sqrt( Math.Pow((cpSMA / tpSMA +1),3)));
+
+
+            
+            var rads = cpAngle - tpAngle;
+            var closinRads = Math.Max(cpOdb.MeanMotion, tpOdb.MeanMotion) - Math.Min(cpOdb.MeanMotion, tpOdb.MeanMotion);
+            var ttXferWnidow = rads / closinRads;
+
+
+
+            var wca1 = Math.Sqrt(cpsgp / meSMA);
+            var wca2 = Math.Sqrt((2 * cpSOI) / (meSMA + cpSOI)) - 1;
+            var dva = wca1 * wca2;
+            var ttsoi = Math.PI * Math.Sqrt((Math.Pow(meSMA + cpSOI, 3)) / (8 * cpsgp));
+
+            var soiBurnstart = ttXferWnidow - ttsoi;
+            var periods = soiBurnstart / meOprd.TotalSeconds;
+            var meFutureAngle = meAngle * periods;
+            var cpFutureAngle = soiBurnstart / cpOprd.TotalSeconds;
+            var dif = cpFutureAngle - meFutureAngle;
+            soiBurnstart += dif * meMeanMotion;
+            
+            if (cpSMA > tpSMA) //larger orbit to smaller. 
+            {
+                soiBurnstart += meOprd.TotalSeconds * 0.5; //add half an orbit
+            }
+
+            var manuvers = new (Vector3 burn, double time)[3];
+            manuvers[0] = (new Vector3(0,dva, 0), soiBurnstart);
+            manuvers[1] = (gpHomman[0].deltaV, ttsoi);
+            manuvers[2] = (gpHomman[1].deltaV, gpHomman[1].timeInSeconds);
+
             return manuvers;
+
         }
 
         /// <summary>
@@ -705,11 +388,11 @@ namespace Pulsar4X.ECSLib
             //PositionDB moverPosition = mover.GetDataBlob<PositionDB>();
 
             OrbitDB moverOrbit = mover.GetDataBlob<OrbitDB>();
-            Vector3 moverPosInKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(moverOrbit, atDateTime));
+            Vector3 moverPosInKM = Distance.AuToKm(moverOrbit.GetAbsolutePosition_AU(atDateTime));
 
             //PropulsionAbilityDB moverPropulsion = mover.GetDataBlob<PropulsionAbilityDB>();
 
-            Vector3 targetPosInKM = Distance.AuToKm((OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, atDateTime)));
+            Vector3 targetPosInKM = Distance.AuToKm((targetOrbit.GetAbsolutePosition_AU(atDateTime)));
 
             int speed = 25000;//moverPropulsion.MaximumSpeed * 100; //299792458;
 
@@ -722,7 +405,7 @@ namespace Pulsar4X.ECSLib
             DateTime edi = atDateTime;
             DateTime edi_prev = atDateTime;
 
-            Vector3 predictedPosKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, edi_prev));
+            Vector3 predictedPosKM = Distance.AuToKm(targetOrbit.GetAbsolutePosition_AU(edi_prev));
             double distance = (predictedPosKM - moverPosInKM).Length();
             eti = TimeSpan.FromSeconds((distance * 1000) / speed);
 
@@ -738,7 +421,7 @@ namespace Pulsar4X.ECSLib
                     eti_prev = eti;
                     edi_prev = edi;
 
-                    predictedPosKM = Distance.AuToKm(OrbitProcessor.GetAbsolutePosition_AU(targetOrbit, edi_prev));
+                    predictedPosKM = Distance.AuToKm(targetOrbit.GetAbsolutePosition_AU(edi_prev));
 
                     distance = (predictedPosKM - moverPosInKM).Length();
                     eti = TimeSpan.FromSeconds((distance * 1000) / speed);
@@ -838,7 +521,7 @@ namespace Pulsar4X.ECSLib
             
             
             //one of these will be the periapsis, the other the appoapsis, depending on whether we're behind or ahead of the target.
-            double phaseOrbitApsis1 = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();// 
+            double phaseOrbitApsis1 = orbit.GetPosition_m(manuverTime).Length();// 
             double phaseOrbitApsis2 = phaseOrbitMA - phaseOrbitApsis1;
 
 
@@ -851,7 +534,7 @@ namespace Pulsar4X.ECSLib
             double wc10 = Math.Sqrt(2 * sgp);
             double orbitAngularMomentum = wc9 * wc10;
 
-            double r = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();
+            double r = orbit.GetPosition_m(manuverTime).Length();
 
             double dv = phaseOrbitAngularMomentum / r - orbitAngularMomentum / r;
 

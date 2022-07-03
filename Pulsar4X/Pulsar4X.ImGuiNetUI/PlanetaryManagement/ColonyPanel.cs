@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -66,14 +67,45 @@ namespace Pulsar4X.SDL2UI
             if (IsActive)
             {
                 //_flags = ImGuiWindowFlags.AlwaysAutoResize;
-                if (ImGui.Begin("Cargo", ref IsActive, _flags))
+                if (ImGui.Begin("Industry", ref IsActive, _flags))
                 {
-                    _cargoList.Display();
+                    ImGui.BeginTabBar("IndustryTabs");
 
-                    if (_industryPannel != null)// && ImGui.CollapsingHeader("Refinary Points: " + _industryDB.ConstructionPoints))
+                    
+                    if (ImGui.BeginTabItem("Overview"))
                     {
-                        _industryPannel.Display();
+                        OverViewPannel.Display(_selectedEntity);
+                        ImGui.EndTabItem();
                     }
+                    
+                    if (ImGui.BeginTabItem("Facilities"))
+                    {
+                        FacilitiesViewPannel.Display(_selectedEntity);
+                        ImGui.EndTabItem();
+                    }
+
+                    
+                    
+                    
+                    if( ImGui.BeginTabItem("Cargo and Storage"))
+                    {
+                        _cargoList.Display();
+                        ImGui.EndTabItem();
+                    }
+
+                    if (ImGui.BeginTabItem("Industry and Construction"))
+                    {
+                        if (_industryPannel != null)// && ImGui.CollapsingHeader("Refinary Points: " + _industryDB.ConstructionPoints))
+                        {
+                            _industryPannel.Display();
+                        }
+                        ImGui.EndTabItem();
+                    }
+
+                    ImGui.EndTabBar();
+                    //_cargoList.Display();
+
+
                 }
                 ImGui.End();
             }
@@ -106,5 +138,48 @@ namespace Pulsar4X.SDL2UI
             if (button == MouseButtons.Primary)
                 _selectedEntity = entity;
         }
+    }
+
+    public class OverViewPannel
+    {
+        private static Guid _entityID;
+        private static Dictionary<Guid, IndustryTypeSD> _industryTypes;
+        public static void Setup(EntityState selectedEntity)
+        {
+            _entityID = selectedEntity.Entity.Guid;
+            _industryTypes = Pulsar4X.ECSLib.StaticRefLib.StaticData.IndustryTypes;
+            
+        }
+        
+        public static void Display(EntityState selectedEntity)
+        {
+            EntityInfoPanel.AbilitesDisplay.Display(selectedEntity.Entity);
+            
+        }
+    }
+
+    public class FacilitiesViewPannel
+    {
+
+        private static Guid _entityID;
+        private static Dictionary<Guid, IndustryTypeSD> _industryTypes;
+        public static void Setup(EntityState selectedEntity)
+        {
+            _entityID = selectedEntity.Entity.Guid;
+            _industryTypes = Pulsar4X.ECSLib.StaticRefLib.StaticData.IndustryTypes;
+            
+        }
+
+        public static void Display(EntityState selectedEntity)
+        {
+            ComponentInstancesDB intances = selectedEntity.Entity.GetDataBlob<ComponentInstancesDB>();
+            var componentInstances = EntityInfoPanel.ComponentsDisplay.CreateNewInstanceArray(selectedEntity.Entity);
+            EntityInfoPanel.ComponentsDisplay.DisplayComplex(componentInstances);
+
+ 
+
+        }
+        
+
     }
 }

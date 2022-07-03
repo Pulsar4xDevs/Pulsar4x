@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -13,25 +14,25 @@ namespace Pulsar4X.SDL2UI
 
     public class BezierCurve: IDrawData
     {
-        PointD[] _controlPoints;
-        List<PointD> _linePoints;
-        PointD[] _drawPoints;
+        Vector2[] _controlPoints;
+        List<Vector2> _linePoints;
+        Vector2[] _drawPoints;
         public bool Scales = true;
 
-        public BezierCurve(PointD p0, PointD p1, PointD p2, PointD p3)
+        public BezierCurve(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)
         {
-            _controlPoints = new PointD[4] {p0, p1, p2, p3};
+            _controlPoints = new Vector2[4] {p0, p1, p2, p3};
         }
 
         public void SetLinePoints(float dt)
         {
-            _linePoints = new List<PointD>();
+            _linePoints = new List<Vector2>();
             for (float t = 0.0f; t < 1.0; t += dt)
             {
                 var x = BezCalc(t, _controlPoints[0].X, _controlPoints[1].X, _controlPoints[2].X, _controlPoints[3].X);
                 var y = BezCalc(t, _controlPoints[0].Y, _controlPoints[1].Y, _controlPoints[2].Y, _controlPoints[3].Y);
                 
-                _linePoints.Add(new PointD() {X = x, Y = y});
+                _linePoints.Add(new Vector2() {X = x, Y = y});
             }
         }
 
@@ -51,12 +52,12 @@ namespace Pulsar4X.SDL2UI
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             var zm =camera.GetZoomMatrix();
-            var tm = camera.GetPanMatrix();
+            //var tm = camera.GetPanMatrix();
             
-            Matrix nonZoomMatrix = Matrix.NewMirrorMatrix(true, false);
+            Matrix nonZoomMatrix = Matrix.IDMirror(true, false);
             var vsp = camera.ViewCoordinate_m(new Vector3(0,0,0));
 
-            _drawPoints = new PointD[_linePoints.Count];
+            _drawPoints = new Vector2[_linePoints.Count];
 
             for (int i = 0; i < _linePoints.Count; i++)
             {
@@ -64,7 +65,7 @@ namespace Pulsar4X.SDL2UI
 
                 int x;
                 int y;
-                PointD transformedPoint;
+                Vector2 transformedPoint;
                 if (Scales)
                     transformedPoint = matrix.TransformD(pnt.X, pnt.Y); //add zoom transformation. 
                 else
@@ -72,7 +73,7 @@ namespace Pulsar4X.SDL2UI
 
                 x = (int)(vsp.x + transformedPoint.X);// + startPoint.X);
                 y = (int)(vsp.y + transformedPoint.Y);// + startPoint.Y);
-                _drawPoints[i] = new PointD() { X = x, Y = y };
+                _drawPoints[i] = new Vector2() { X = x, Y = y };
 
             }
             

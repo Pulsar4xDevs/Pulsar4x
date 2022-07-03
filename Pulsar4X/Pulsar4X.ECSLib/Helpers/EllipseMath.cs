@@ -27,7 +27,10 @@ namespace Pulsar4X.ECSLib
         }
         public static double SemiMinorAxis(double semiMajorAxis, double eccentricity)
         {
-            return semiMajorAxis * Math.Sqrt(1 - eccentricity * eccentricity);
+            if (eccentricity < 1)
+                return semiMajorAxis * Math.Sqrt(1 - eccentricity * eccentricity);
+            else
+                return semiMajorAxis * Math.Sqrt(eccentricity * eccentricity - 1);
         }
 
         public static double SemiMinorAxisFromApsis(double apoapsis, double periapsis)

@@ -14,7 +14,7 @@ namespace Pulsar4X.SDL2UI
 
         GlobalUIState _state;
         internal Entity ActiveEntity; //interacting with/ordering this entity
-        Vector2 buttonSize = new Vector2(100, 12);
+        System.Numerics.Vector2 buttonSize = new System.Numerics.Vector2(100, 12);
 
         EntityState _entityState;
 
@@ -40,11 +40,8 @@ namespace Pulsar4X.SDL2UI
                 if(EntityUIWindows.CheckIfCanOpenWindow(T, _entityState)){
                 bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[T]);
                     {
-
                         EntityUIWindows.OpenUIWindow(T, _entityState, _state, buttonresult ,true);
-
-                    }
-                
+                    }                
                 }
             }
             
@@ -60,6 +57,7 @@ namespace Pulsar4X.SDL2UI
             ContextButton(typeof(WarpOrderWindow));
             ContextButton(typeof(ChangeCurrentOrbitWindow));
             ContextButton(typeof(NavWindow));
+            ContextButton(typeof(OrdersListUI));
             ImGui.EndGroup();
 
         }

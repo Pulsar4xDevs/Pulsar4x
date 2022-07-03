@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
+using Pulsar4X.Orbital;
+using System.ComponentModel;
 
 namespace Pulsar4X.ECSLib
 {
@@ -18,16 +20,35 @@ namespace Pulsar4X.ECSLib
 
     public enum LuminosityClass : byte
     {
-        O,          // Hypergiants
-        Ia,         // Luminous Supergiants
-        Iab,        // Intermediate Supergiants
-        Ib,         // Less Luminous Supergiants
-        II,         // Bright Giants
-        III,        // Giants
-        IV,         // Subgiants
-        V,          // Main-Sequence (like our sun)
-        sd,         // Subdwarfs
-        D,          // White Dwarfs
+        [Description("Hypergiant")]
+        O,
+
+        [Description("Luminous Supergiant")]
+        Ia,
+
+        [Description("Intermediate Supergiant")]
+        Iab,
+
+        [Description("Less Luminous Supergiant")]
+        Ib,
+
+        [Description("Bright Giant")]
+        II,
+
+        [Description("Giant")]
+        III,
+
+        [Description("Subgiant")]
+        IV,
+
+        [Description("Main-Sequence")]
+        V,
+
+        [Description("Sub-Dwarf")]
+        sd,
+
+        [Description("White Dwarf")]
+        D,
     }
 
     public class StarInfoDB : BaseDataBlob, ISensorCloneMethod
@@ -88,19 +109,23 @@ namespace Pulsar4X.ECSLib
         /// calculated according to this site: http://www.planetarybiology.com/calculating_habitable_zone.html
         /// </summary>
         [PublicAPI]
-        public double EcoSphereRadius => (MinHabitableRadius + MaxHabitableRadius) / 2;
+        public double EcoSphereRadius_AU => (MinHabitableRadius_AU + MaxHabitableRadius_AU) / 2;
 
+        public double EcoSphereRadius_m => (MinHabitableRadius_m + MaxHabitableRadius_m) / 2;
         /// <summary>
         /// Minimum edge of the Habitable Zone (in AU)
         /// </summary>
         [PublicAPI]
-        public double MinHabitableRadius => Math.Sqrt(Luminosity / 1.1);
+        public double MinHabitableRadius_AU => Math.Sqrt(Luminosity / 1.1);
 
+        public double MinHabitableRadius_m => Distance.AuToMt(MinHabitableRadius_AU);
         /// <summary>
         /// Maximum edge of the Habitable Zone (in AU)
         /// </summary>
         [PublicAPI]
-        public double MaxHabitableRadius => Math.Sqrt(Luminosity / 0.53);
+        public double MaxHabitableRadius_AU => Math.Sqrt(Luminosity / 0.53);
+
+        public double MaxHabitableRadius_m => Distance.AuToMt(MaxHabitableRadius_AU);
         
         public StarInfoDB() { }
 

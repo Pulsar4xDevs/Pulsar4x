@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         [JsonProperty]
         public List<Player> Players = new List<Player>();
-
+        public List<Entity> Factions = new List<Entity>();
         [PublicAPI]
         [JsonProperty]
         public Player SpaceMaster = new Player("Space Master", "");
@@ -81,10 +81,12 @@ namespace Pulsar4X.ECSLib
 
             OrderHandler = new StandAloneOrderHandler(this);
             
+            
             StaticRefLib.Setup(this);
 
             GlobalManager = new EntityManager(this, true);
-            
+            StaticRefLib.SetEventlog(new EventLog(this));
+            GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
 
         }
 
@@ -99,7 +101,7 @@ namespace Pulsar4X.ECSLib
 
             StaticRefLib.GameSettings = newGameSettings;
             GamePulse.GameGlobalDateTime = newGameSettings.StartDateTime;
-
+            
             // Load Static Data
             if (newGameSettings.DataSets != null)
             {
@@ -118,6 +120,8 @@ namespace Pulsar4X.ECSLib
             SpaceMaster.ChangePassword(new AuthenticationToken(SpaceMaster, ""), newGameSettings.SMPassword);
             GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
 
+            
+            
             if (newGameSettings.CreatePlayerFaction ?? false)
             {
                 
@@ -186,14 +190,6 @@ namespace Pulsar4X.ECSLib
 
         #region Public API
 
-        [PublicAPI]
-        public Player AddPlayer(string playerName, string playerPassword = "")
-        {
-            var player = new Player(playerName, playerPassword);
-            Players.Add(player);
-            StaticRefLib.EventLog.AddPlayer(player);
-            return player;
-        }
 
         [PublicAPI]
         public List<StarSystem> GetSystems(AuthenticationToken authToken)
@@ -264,6 +260,8 @@ namespace Pulsar4X.ECSLib
             Player foundPlayer = Players.Find(player => player.ID == authToken?.PlayerID);
             return foundPlayer?.IsTokenValid(authToken) != null ? foundPlayer : null;
         }
+
+
 
         [PublicAPI]
         public void GenerateSystems(AuthenticationToken authToken, int numSystems)

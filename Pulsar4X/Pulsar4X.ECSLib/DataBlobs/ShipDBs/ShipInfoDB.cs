@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -10,13 +11,9 @@ namespace Pulsar4X.ECSLib
     {
 
         #region Properties
-        /// <summary>
-        /// The guid of the ship class, if this is a ship class then the ID will be empty. 
-        /// use IsClassDefinition() to determin if this is a ship class definmition
-        /// </summary>
-        public Guid ShipClassDefinition { get; set; }
 
-        public bool Obsolete { get; set; }
+        public ShipDesign Design { get; private set; }
+        
         public bool Conscript { get; set; }
 
         // Should we have these: ??
@@ -31,9 +28,9 @@ namespace Pulsar4X.ECSLib
 
         public bool IsMilitary { get; set; }
 
-        public float Tonnage { get; set; }
+        //public float Tonnage { get; set; }
 
-        public double TCS { get {return Tonnage * 0.02;} }
+        //public double TCS { get {return Tonnage * 0.02;} }
 
         ///  Ship orders.  
         //public Queue<BaseOrder> Orders;
@@ -42,24 +39,25 @@ namespace Pulsar4X.ECSLib
 
         #region Constructors
 
-        public ShipInfoDB()
+        [JsonConstructor]
+        private ShipInfoDB()
         {
-            //Orders = new Queue<BaseOrder>();
+        }
+
+        public ShipInfoDB(ShipDesign design)
+        {
+            Design = design;
+            //design.ID
         }
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)
         {
-            if (shipInfoDB.ShipClassDefinition == Guid.Empty) //Class
-                ShipClassDefinition = shipInfoDB.OwningEntity.Guid;
-            else //Ship
-                ShipClassDefinition = shipInfoDB.ShipClassDefinition;
-            Obsolete = shipInfoDB.Obsolete;
             Conscript = shipInfoDB.Conscript;
             Tanker = shipInfoDB.Tanker;
             Collier = shipInfoDB.Collier;
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
-            Tonnage = shipInfoDB.Tonnage;
+            //Tonnage = shipInfoDB.Tonnage;
             IsMilitary = shipInfoDB.IsMilitary;
             /*
             if (shipInfoDB.Orders == null)
@@ -70,18 +68,7 @@ namespace Pulsar4X.ECSLib
         }
 
         #endregion
-
-        /// <summary>
-        /// Returns true if this is a definition of a class.
-        /// </summary>
-        public bool IsClassDefinition()
-        {
-            if (ShipClassDefinition != Guid.Empty)
-                return false;
-
-            return true;
-        }
-
+        
         public override object Clone()
         {
             return new ShipInfoDB(this);

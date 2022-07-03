@@ -1,0 +1,96 @@
+2012a5da-dirty
+14/09/2021 10:57:13 AM
+Threaded:                              False
+Time Span:                          01:00:00
+Full Process Time:                  614.2879
+Sol Time:                   :       162.2056
+CargoTransferProcessor      :         0.0444
+LogiShipProcessor           :         0.0389
+HotWpnProcessor             :         4.5458
+NewtonionMovementProcessor  :        32.9694
+OrbitProcessor              :         1.3030
+OrbitUpdateOftenProcessor   :         5.6605
+BeamWeapnProcessor          :         4.3584
+EnergyGenProcessor          :         0.9805
+OrderableProcessor          :         1.0818
+WarpMoveProcessor           :         0.1911
+LogiBaseProcessor           :         1.0897
+ResearchProcessor           :         1.7315
+MineResourcesProcessor      :         6.7710
+SensorScan                  :        41.3608
+______________________________________
+2012a5da-dirty
+14/09/2021 10:57:36 AM
+Threaded:                               True
+Time Span:                          01:00:00
+Full Process Time:                  401.2149
+Sol Time:                   :       331.7703
+HotWpnProcessor             :         6.1438
+NewtonionMovementProcessor  :        41.4077
+OrbitUpdateOftenProcessor   :        28.8652
+BeamWeapnProcessor          :         4.9175
+OrderableProcessor          :         0.3632
+OrbitProcessor              :         2.1455
+WarpMoveProcessor           :         0.2809
+LogiBaseProcessor           :         0.0400
+CargoTransferProcessor      :         0.0531
+LogiShipProcessor           :         0.0439
+SensorScan                  :       150.7980
+______________________________________
+
+c0d917a4-dirty
+14/09/2021 8:11:37 PM
+Threaded:                              False
+Time Span:                          01:00:00
+Full Process Time:                  264.5644
+Sol Time:                   :       161.8611
+CargoTransferProcessor      :         0.0351
+LogiShipProcessor           :         0.0393
+HotWpnProcessor             :         0.0017
+NewtonionMovementProcessor  :        29.7580
+OrbitProcessor              :         0.3118
+OrbitUpdateOftenProcessor   :         0.0027
+BeamWeapnProcessor          :         0.0026
+EnergyGenProcessor          :         0.6907
+OrderableProcessor          :         1.4114
+WarpMoveProcessor           :         0.0442
+LogiBaseProcessor           :         1.5975
+ResearchProcessor           :         2.3214
+MineResourcesProcessor      :         9.1611
+SensorScan                  :        56.8460
+_________________________________________________
+c0d917a4-dirty
+14/09/2021 8:11:47 PM
+Threaded:                               True
+Time Span:                          01:00:00
+Full Process Time:                  258.9548
+Sol Time:                   :       197.7555
+NewtonionMovementProcessor  :        51.5871
+OrderableProcessor          :         0.2880
+LogiBaseProcessor           :         0.0533
+SensorScan                  :        60.4840
+_________________________________________________
+055db3f3-dirty
+19/09/2021 1:48:33 AM
+Threaded:                              False
+Time Span:                          01:00:00
+Full Process Time:                  101.6382
+Sol Time:                   :        88.1970
+NewtonionMovementProcessor  :        19.1743
+OrderableProcessor          :         0.1703
+OrbitProcessor              :         1.0766
+LogiBaseProcessor           :         0.0274
+SensorScan                  :        39.1807
+_________________________________________________
+055db3f3-dirty
+19/09/2021 1:52:03 AM
+Threaded:                              False
+Time Span:                          01:00:00
+Full Process Time:                  116.2853
+Sol Time:                   :       101.7818
+NewtonionMovementProcessor  :        30.7279
+OrderableProcessor          :         0.3033
+OrbitProcessor              :         1.4223
+LogiBaseProcessor           :         0.0473
+SensorScan                  :        26.9910
+_________________________________________________

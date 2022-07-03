@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -51,14 +52,19 @@ namespace Pulsar4X.ECSLib
 
                 //TODO: this wont handle objects that have a larger unit mass than the availible transferRate,
                 //but maybe that makes for a game mechanic
-                int countToTransferThisTick = (int)(massToTransferThisTick / itemMassPerUnit);
+                long countToTransferThisTick = (long)(massToTransferThisTick / itemMassPerUnit);
                 
-                var amountFrom = transferDB.CargoFromDB.RemoveCargoByUnit(cargoItem, countToTransferThisTick);
-                var amountTo = transferDB.CargoToDB.AddCargoByUnit(cargoItem, countToTransferThisTick);
+                long amountFrom = transferDB.CargoFromDB.RemoveCargoByUnit(cargoItem, countToTransferThisTick);
+                long amountTo = transferDB.CargoToDB.AddCargoByUnit(cargoItem, countToTransferThisTick);
                 
+                //update the total masses for these entites
+                transferDB.CargoFromDB.OwningEntity.GetDataBlob<MassVolumeDB>().UpdateMassTotal(transferDB.CargoFromDB);
+                transferDB.CargoToDB.OwningEntity.GetDataBlob<MassVolumeDB>().UpdateMassTotal(transferDB.CargoToDB);
+
+
                 if(amountTo != amountFrom)
                     throw new Exception("something went wrong here");
-                var newAmount = transferDB.ItemsLeftToTransfer[i].amount - amountTo;
+                long newAmount = transferDB.ItemsLeftToTransfer[i].amount - amountTo;
                 transferDB.ItemsLeftToTransfer[i] = (cargoItem, newAmount);
             }
             
@@ -71,8 +77,75 @@ namespace Pulsar4X.ECSLib
             var rate = CalcTransferRate(dv_mps, transferDB.CargoFromDB, transferDB.CargoToDB);
             transferDB.TransferRateInKG = rate;
         }
-        
 
+
+        /// <summary>
+        /// Add cargo and updates the entites MassTotal
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="item"></param>
+        /// <param name="amountInMass"></param>
+        internal static double AddCargoItems(Entity entity, ICargoable item, int amount)
+        {
+            VolumeStorageDB cargo = entity.GetDataBlob<VolumeStorageDB>();
+            double amountSuccess = cargo.AddCargoByUnit(item, amount);
+            MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
+            mv.UpdateMassTotal(cargo);
+            return amountSuccess;
+        }
+
+        /// <summary>
+        /// Removes cargo and updates the entites MassTotal
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="item"></param>
+        /// <param name="amountInMass"></param>
+        internal static double RemoveCargoItems(Entity entity, ICargoable item, int amount)
+        {
+            VolumeStorageDB cargo = entity.GetDataBlob<VolumeStorageDB>();
+            double amountSuccess = cargo.RemoveCargoByUnit(item, amount);
+            MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
+            mv.UpdateMassTotal(cargo);
+            return amountSuccess;
+        }
+
+        /// <summary>
+        /// Add or Removes cargo and updates the entites MassTotal
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="item"></param>
+        /// <param name="amountInMass"></param>
+        internal static double AddRemoveCargoMass(Entity entity, ICargoable item, double amountInMass)
+        {
+            VolumeStorageDB cargo = entity.GetDataBlob<VolumeStorageDB>();
+            double amountSuccess = cargo.AddRemoveCargoByMass(item, amountInMass);
+            MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
+            mv.UpdateMassTotal(cargo);
+            return amountSuccess;
+        }
+
+        /// <summary>
+        /// Add or Removes cargo and updates the entites MassTotal
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="item"></param>
+        /// <param name="amountInVolume"></param>
+        internal static double AddRemoveCargoVolume(Entity entity, ICargoable item, double amountInVolume)
+        {
+            VolumeStorageDB cargo = entity.GetDataBlob<VolumeStorageDB>();
+            double amountSuccess = cargo.AddRemoveCargoByVolume(item, amountInVolume);
+            MassVolumeDB mv = entity.GetDataBlob<MassVolumeDB>();
+            mv.UpdateMassTotal(cargo);
+            return amountSuccess;
+        }
+                
+        /// <summary>
+        /// Calculates a simplified difference in DeltaV between two enties who have the same parent
+        /// for the purposes of calculating cargo transfer rate
+        /// </summary>
+        /// <param name="entity1"></param>
+        /// <param name="entity2"></param>
+        /// <returns></returns>
         public static double CalcDVDifference_m(Entity entity1, Entity entity2)
         {
             double dvDif = 0;
@@ -83,8 +156,8 @@ namespace Pulsar4X.ECSLib
             double r1;
             double r2;
             
-            Entity soi1 = Entity.GetSOIParentEntity(entity1);
-            Entity soi2 = Entity.GetSOIParentEntity(entity2);
+            Entity soi1 = entity1.GetSOIParentEntity();
+            Entity soi2 = entity2.GetSOIParentEntity();
             
             
             if(soi1 == soi2)
@@ -93,9 +166,8 @@ namespace Pulsar4X.ECSLib
                 parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
                 sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(0, parentMass);
                 
-                
-                var state1 = Entity.GetRalitiveState(entity1);
-                var state2 = Entity.GetRalitiveState(entity2);
+                (Vector3 pos, Vector3 Velocity) state1 = entity1.GetRelativeState();
+                (Vector3 pos, Vector3 Velocity) state2 = entity2.GetRelativeState();
                 r1 = state1.pos.Length();
                 r2 = state2.pos.Length();
             }
@@ -105,17 +177,36 @@ namespace Pulsar4X.ECSLib
                 return double.PositiveInfinity;
             }
 
-            var hohmann = InterceptCalcs.Hohmann(sgp, r1, r2);
+            var hohmann = OrbitalMath.Hohmann(sgp, r1, r2);
             return dvDif = hohmann[0].deltaV.Length() + hohmann[1].deltaV.Length();
 
 
         }
 
-    /// <summary>
+        
+        
+        /// <summary>
+        /// Calculates a simplified difference in DeltaV between two enties who have the same parent
+        /// for the purposes of calculating cargo transfer rate
+        /// </summary>
+        /// <param name="sgp"></param>
+        /// <param name="state1"></param>
+        /// <param name="state2"></param>
+        /// <returns></returns>
+        public static double CalcDVDifference_m(double sgp, (Vector3 pos, Vector3 Velocity) state1, (Vector3 pos, Vector3 Velocity) state2)
+        {
+            var r1 = state1.pos.Length();
+            var r2 = state2.pos.Length();
+            var hohmann = OrbitalMath.Hohmann(sgp, r1, r2);
+            return hohmann[0].deltaV.Length() + hohmann[1].deltaV.Length();
+        }
+        
+
+        /// <summary>
         /// Calculates the transfer rate.
         /// </summary>
         /// <returns>The transfer rate.</returns>
-        /// <param name="dvDifference_mps">Dv difference in Km/s</param>
+        /// <param name="dvDifference_mps">Dv difference in m/s</param>
         /// <param name="from">From.</param>
         /// <param name="to">To.</param>
         public static int CalcTransferRate(double dvDifference_mps, VolumeStorageDB from, VolumeStorageDB to)
@@ -158,13 +249,15 @@ namespace Pulsar4X.ECSLib
             return (int)transferRate;
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             List<Entity> entitysWithCargoTransfers = manager.GetAllEntitiesWithDataBlob<CargoTransferDB>();
             foreach(var entity in entitysWithCargoTransfers) 
             {                
                 ProcessEntity(entity, deltaSeconds);
             }
+
+            return entitysWithCargoTransfers.Count;
         }
     }
 

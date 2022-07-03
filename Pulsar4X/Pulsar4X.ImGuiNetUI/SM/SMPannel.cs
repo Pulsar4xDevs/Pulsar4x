@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
         {
             get
             {
-                if(_selectedEntityIndex >=0)
+                if (_selectedEntityIndex >= 0 && _selectedEntityIndex < _systemEntities.Length)
                     return _systemEntities[_selectedEntityIndex];
                 return null;
             }
@@ -37,6 +37,7 @@ namespace Pulsar4X.SDL2UI
             _uiState.SpaceMasterVM = new SpaceMasterVM();
             HardRefresh();
         }
+
         //TODO auth of some kind. 
         public static SMPannel GetInstance()
         {
@@ -46,8 +47,6 @@ namespace Pulsar4X.SDL2UI
             }
             return (SMPannel)_uiState.LoadedWindows[typeof(SMPannel)];
         }
-
-
 
         void HardRefresh()
         {
@@ -63,7 +62,16 @@ namespace Pulsar4X.SDL2UI
 
             _currentSystem = _uiState.SelectedSystem;
 
-            _systemEntities = _currentSystem.GetAllEntites().ToArray();
+            //_systemEntities = _currentSystem.GetAllEntites().ToArray();
+            List<Entity> allEntites = new List<Entity>();
+            foreach (var entity in _currentSystem.GetAllEntites())
+            {
+                if(entity == null)
+                    continue;
+                allEntites.Add(entity);
+            }
+            _systemEntities = allEntites.ToArray();
+            
             _systemEntityNames = new string[_systemEntities.Length];
             for (int j = 0; j < _systemEntities.Length; j++)
             {
@@ -87,7 +95,8 @@ namespace Pulsar4X.SDL2UI
             //selectedEntityData
             if (_uiState.SMenabled && ImGui.Begin("SM", ref IsActive, _flags))
             {
-
+                if(_currentSystem != _uiState.SelectedSystem)
+                    HardRefresh();
 
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 200);
@@ -100,7 +109,7 @@ namespace Pulsar4X.SDL2UI
                     }
                     
                     ImGui.NextColumn();
-                    var ownerFactionID = _systemEntities[i].FactionOwner;
+                    var ownerFactionID = _systemEntities[i].FactionOwnerID;
                     if(ownerFactionID != Guid.Empty)
                     {
                         var ownerFaction = game.GlobalManager.GetGlobalEntityByGuid(ownerFactionID);

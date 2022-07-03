@@ -19,9 +19,11 @@ namespace Pulsar4X.ECSLib
         [CanBeNull]
         public Entity Entity { get; internal set; }
 
+        public string EntityName { get; internal set; } = "";
+
         public EventType EventType { get; internal set; }
 
-        internal List<Guid> ConcernedPlayers { get; set; } = new List<Guid>();
+        internal List<Guid> ConcernedFaction { get; set; } = new List<Guid>();
 
 
         public Event(string message)
@@ -34,16 +36,16 @@ namespace Pulsar4X.ECSLib
         public Event(DateTime time, string message, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null) : this(time, message, Guid.Empty, faction, entity, concernedPlayers)
         { }
 
-        public Event(DateTime time, string message, Guid systemGuid, Entity faction= null, Entity entity = null, List<Guid> concernedPlayers = null)
+        public Event(DateTime time, string message, Guid systemGuid, Entity faction= null, Entity entity = null, List<Guid> concernedFaction = null)
         {
             Time = time;
             Message = message;
             Faction = faction;
             SystemGuid = systemGuid;
             Entity = entity;
-            if (concernedPlayers != null)
+            if (concernedFaction != null)
             {
-                ConcernedPlayers = concernedPlayers;
+                ConcernedFaction = concernedFaction;
             }
 
         }
@@ -68,7 +70,7 @@ namespace Pulsar4X.ECSLib
 
             if ((context.State & StreamingContextStates.Persistence) != 0)
             {
-                ConcernedPlayers = (List<Guid>)info.GetValue(nameof(ConcernedPlayers), typeof(List<Guid>));
+                ConcernedFaction = (List<Guid>)info.GetValue(nameof(ConcernedFaction), typeof(List<Guid>));
             }
         }
 
@@ -82,7 +84,7 @@ namespace Pulsar4X.ECSLib
 
             if ((context.State & StreamingContextStates.Persistence) != 0)
             {
-                info.AddValue(nameof(ConcernedPlayers), ConcernedPlayers);
+                info.AddValue(nameof(ConcernedFaction), ConcernedFaction);
             }
         }
     }

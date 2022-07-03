@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -39,13 +40,13 @@ namespace Pulsar4X.ECSLib
             var name = new NameDB("Ellie");
             var AsteroidDmg = new AsteroidDamageDB();
             AsteroidDmg.FractureChance = new PercentValue(0.75f);
-            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.Density_gcm, massVolume.RadiusInM, 50);
+            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50);
             var sensorPfil = new SensorProfileDB();
 
             planetInfo.SupportsPopulations = false;
             planetInfo.BodyType = BodyType.Asteroid;
 
-            Vector3 targetPos = OrbitProcessor.GetAbsolutePosition_m(target.GetDataBlob<OrbitDB>(), collisionDate);
+            Vector3 targetPos = target.GetDataBlob<OrbitDB>().GetAbsolutePosition_m(collisionDate);
             TimeSpan timeToCollision = collisionDate - StaticRefLib.CurrentDateTime;
 
 
@@ -56,7 +57,7 @@ namespace Pulsar4X.ECSLib
             double sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
             OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
 
-            var currentpos = OrbitProcessor.GetAbsolutePosition_AU(orbit, StaticRefLib.CurrentDateTime);
+            var currentpos = orbit.GetAbsolutePosition_AU(StaticRefLib.CurrentDateTime);
             var posDB = new PositionDB(currentpos.X, currentpos.Y, currentpos.Z, parent.Manager.ManagerGuid, parent);
 
 
@@ -96,7 +97,7 @@ namespace Pulsar4X.ECSLib
             var name = new NameDB("Ellie");
             var AsteroidDmg = new AsteroidDamageDB();
             AsteroidDmg.FractureChance = new PercentValue(0.75f);
-            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.Density_gcm, massVolume.RadiusInM, 50);
+            var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50);
             var sensorPfil = new SensorProfileDB();
 
             planetInfo.SupportsPopulations = false;
@@ -107,7 +108,7 @@ namespace Pulsar4X.ECSLib
             var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             var myMass = massVolume.MassDry;
 
-            double sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
+            double sgp = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
             //OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, position, velocity, atDateTime);
             //OrbitDB orbit = (OrbitDB)origOrbit.Clone();
             OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, origOrbit.SemiMajorAxis_AU, 

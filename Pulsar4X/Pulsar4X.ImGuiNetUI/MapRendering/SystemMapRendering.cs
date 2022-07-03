@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
@@ -8,7 +7,8 @@ using ImGuiSDL2CS;
 using Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using SDL2;
-
+using System.ComponentModel;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -22,23 +22,39 @@ namespace Pulsar4X.SDL2UI
             Moon,
             Asteroid,
             Comet,
+            Colony,
             Ship,
-            NumberOf
 
+            [Description("Number Of")]
+            NumberOf
         }
+
         internal enum OrbitTrajectoryType
         {
             Unknown,
+            [Description("An Elliptical Orbit")]
             Elliptical,
             Hyperbolic,
+
+            [Description("Newtonian Thrust")]
             NewtonionThrust,
+
+            [Description("Non-Newtonian Translation")]
             NonNewtonionTranslation,
+
+            [Description("Number Of")]
             NumberOf         
         }
-
+        //the arc thats actualy drawn, ie we don't normaly draw a full 360 degree (6.28rad) orbit, but only 
+        //a section of it ie 3/4 of the orbit (4.71rad) and this is player adjustable. 
         public float EllipseSweepRadians = 4.71239f;
+        //we stop showing names when zoomed out further than this number
         public float ShowNameAtZoom = 100;
-        //32 is a good low number, slightly ugly.  180 is a little overkill till you get really big orbits. 
+        
+        /// <summary>
+        /// Number of segments in a full ellipse. this is basicaly the resolution of the orbits.
+        /// 32 is a good low number, slightly ugly. 180 is a little overkill till you get really big orbits. 
+        /// </summary>
         public byte NumberOfArcSegments = 180; 
 
         public byte Red = 0;
@@ -67,7 +83,7 @@ namespace Pulsar4X.SDL2UI
         internal ConcurrentDictionary<Guid, NameIcon> _nameIcons = new ConcurrentDictionary<Guid, NameIcon>();
 
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
-        internal PointD GalacticMapPosition = new PointD();
+        internal Vector2 GalacticMapPosition = new Vector2();
         //internal SystemMap_DrawableVM SysMap;
         Entity _faction;
 
@@ -86,39 +102,7 @@ namespace Pulsar4X.SDL2UI
                 _testIcons.TryAdd(Guid.NewGuid(), item);
             }
         }
-
-        internal void SetSystem(FactionVM factionVM)
-        {
-            if (_sysState != null)
-            {
-                _sysState.StarSystem.GetSensorContacts(_faction.Guid).Changes.Unsubscribe(_sensorChanges);
-
-            }
-            if (_state.StarSystemStates.ContainsKey(factionVM.SystemMap.StarSystem.Guid))
-                _sysState = _state.StarSystemStates[factionVM.SystemMap.StarSystem.Guid];
-            else
-            {
-                _sysState = new SystemState(factionVM.SystemMap.StarSystem, factionVM.FactionEntity);
-                _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
-            }
-            var starSys = _sysState.StarSystem;
-            _faction = _state.Faction;
-            _sensorMgr = starSys.GetSensorContacts(_faction.Guid);
-            _sensorChanges = _sensorMgr.Changes.Subscribe();
-
-
-
-            _state.SetActiveSystem(starSys.Guid);
-
-
-            foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
-            {
-                AddIconable(entityItem);
-            }
-
-            _state.LastClickedEntity = _sysState.EntityStatesWithPosition.Values.ElementAt(0);
-
-        }
+        
 
         internal void SetSystem(StarSystem starSys)
         {
@@ -162,7 +146,6 @@ namespace Pulsar4X.SDL2UI
                 _nameIcons.TryAdd(entityItem.Guid, new NameIcon(entityState, _state));
             }
 
-
             if (entityItem.HasDataBlob<OrbitDB>())
             {
                 var orbitDB = entityItem.GetDataBlob<OrbitDB>();
@@ -181,8 +164,10 @@ namespace Pulsar4X.SDL2UI
             if (entityItem.HasDataBlob<NewtonMoveDB>())
             {
                 var hyp = entityItem.GetDataBlob<NewtonMoveDB>();
-                OrbitHypobolicIcon orb;
-                orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                Icon orb;
+                //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                //NewtonMoveIcon 
+                orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
                 _orbitRings.TryAdd(entityItem.Guid, orb);
             }
 
@@ -190,25 +175,12 @@ namespace Pulsar4X.SDL2UI
             {
                 _entityIcons.TryAdd(entityItem.Guid, new StarIcon(entityItem));
             }
+
             if (entityItem.HasDataBlob<SystemBodyInfoDB>())
             {
                 _entityIcons.TryAdd(entityItem.Guid, new SysBodyIcon(entityItem));
-                if (entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies.Count > 0)
-                {
-                    foreach (var colony in entityItem.GetDataBlob<SystemBodyInfoDB>().Colonies)
-                    {
-                        _nameIcons[entityItem.Guid].AddSubName(colony);
-                        _sysState.EntityStatesWithPosition[entityItem.Guid].NameIcon = _nameIcons[entityItem.Guid];
-                        /*
-                        IconEntityStates.Add(colony.ID, new EntityState(colony)
-                        {
-
-                            Name = _nameIcons[entityItem.ID].SubNames[colony.ID],
-                            NameIcon = _nameIcons[entityItem.ID]
-                        });*/
-                    }
-                }
             }
+
             if (entityItem.HasDataBlob<ShipInfoDB>())
             {
                 _entityIcons.TryAdd(entityItem.Guid, new ShipIcon(entityItem));
@@ -228,17 +200,22 @@ namespace Pulsar4X.SDL2UI
 
         void RemoveIconable(Guid entityGuid)
         {
-            _nameIcons.TryRemove(entityGuid, out NameIcon nameIcon);
+            _testIcons.TryRemove(entityGuid, out var testIcon);
             _entityIcons.TryRemove(entityGuid, out IDrawData entityIcon);
             _orbitRings.TryRemove(entityGuid, out IDrawData orbitIcon);
+            _moveIcons.TryRemove(entityGuid, out var moveIcon);
+            _nameIcons.TryRemove(entityGuid, out NameIcon nameIcon);
         }
 
 
         public void UpdateUserOrbitSettings()
         {
-            foreach (OrbitEllipseIcon item in _orbitRings.Values)
+            foreach (var item in _orbitRings.Values)
             {
-                item.UpdateUserSettings();
+                if(item is IUpdateUserSettings foo)
+                {
+                    foo.UpdateUserSettings();
+                }
             }
         }
 
@@ -282,8 +259,9 @@ namespace Pulsar4X.SDL2UI
                     {
                         if(entityState.Entity.HasDataBlob<NewtonMoveDB>()) //because sometimes it can be added and removed in a single tick. 
                         {
-                            OrbitHypobolicIcon orb;
-                            orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                            Icon orb;
+                            //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
+                            orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
                             _orbitRings.AddOrUpdate(changeData.Entity.Guid, orb, ((guid, data) => data = orb));
                         }
                     }
@@ -312,6 +290,7 @@ namespace Pulsar4X.SDL2UI
                     //if (changeData.Datablob is NameDB)
                     //TextIconList.Remove(changeData.Entity.ID);
                 }
+                
             }
         }
 
@@ -369,7 +348,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (item.ViewDisplayRect.Intersects(occupiedPosition[j]))
                     {
-                        var newpoint = new Vector2()
+                        var newpoint = new System.Numerics.Vector2()
                         {
                             X = item.ViewOffset.X,
                             Y = item.ViewOffset.Y - occupiedPosition[j].Height

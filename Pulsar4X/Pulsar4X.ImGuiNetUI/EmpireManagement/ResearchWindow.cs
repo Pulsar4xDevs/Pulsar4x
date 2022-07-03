@@ -88,7 +88,7 @@ namespace Pulsar4X.SDL2UI
 
                 DisplayTeams(width, height);
 
-                ImGui.BeginChild("Separator", new Vector2(width, ImGui.GetTextLineHeightWithSpacing() + 1));
+                ImGui.BeginChild("Separator", new System.Numerics.Vector2(width, ImGui.GetTextLineHeightWithSpacing() + 1));
                 ImGui.Columns(1);
                 ImGui.Text("Tech Que");
                 ImGui.Separator();
@@ -121,7 +121,7 @@ namespace Pulsar4X.SDL2UI
 
         private void DisplayTeams(float width, float height)
         {
-            ImGui.BeginChild("Teams", new Vector2(width, height));
+            ImGui.BeginChild("Teams", new System.Numerics.Vector2(width, height));
 
             ImGui.Columns(4);
             //ImGui.SetColumnWidth(0, 150);
@@ -177,7 +177,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 else// Otherwise create an invisible button for spacing
                 {
-                    Vector2 buttonsize = new Vector2(15, 0);
+                    System.Numerics.Vector2 buttonsize = new System.Numerics.Vector2(15, 0);
                     ImGui.InvisibleButton(" ", buttonsize);
                 }
 
@@ -200,7 +200,7 @@ namespace Pulsar4X.SDL2UI
                     float frac = (float)proj.amountDone / proj.amountMax;
                     var size = ImGui.GetTextLineHeight();
                     var pos = ImGui.GetCursorPos();
-                    ImGui.ProgressBar(frac, new Vector2(245, size), "");
+                    ImGui.ProgressBar(frac, new System.Numerics.Vector2(245, size), "");
                     ImGui.SetCursorPos(pos);
                     ImGui.Text(proj.tech.Name);
                     if (ImGui.IsItemHovered())
@@ -225,7 +225,7 @@ namespace Pulsar4X.SDL2UI
         }
         private void DisplayTechs()
         {
-            ImGui.BeginChild("ResearchablesHeader", new Vector2(300, ImGui.GetTextLineHeightWithSpacing() + 2));
+            ImGui.BeginChild("ResearchablesHeader", new System.Numerics.Vector2(300, ImGui.GetTextLineHeightWithSpacing() + 2));
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 250);
             ImGui.Text("Tech");
@@ -235,7 +235,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.Separator();
             ImGui.EndChild();
 
-            ImGui.BeginChild("techlist", new Vector2(300, 250));
+            ImGui.BeginChild("techlist", new System.Numerics.Vector2(300, 250));
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 250);
 
@@ -246,7 +246,7 @@ namespace Pulsar4X.SDL2UI
                     float frac = (float)_researchableTechs[i].amountDone / _researchableTechs[i].amountMax;
                     var size = ImGui.GetTextLineHeight();
                     var pos = ImGui.GetCursorPos();
-                    ImGui.ProgressBar(frac, new Vector2(245, size), "");
+                    ImGui.ProgressBar(frac, new System.Numerics.Vector2(245, size), "");
                     ImGui.SetCursorPos(pos);
                     ImGui.Text(_researchableTechs[i].tech.Name);
 
@@ -296,7 +296,7 @@ namespace Pulsar4X.SDL2UI
             
             for (int i = 0; i < loopto; i++)
             {
-                ImGui.BeginChild("Top", new Vector2(400, heightt));
+                ImGui.BeginChild("Top", new System.Numerics.Vector2(400, heightt));
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 300);
                 (Guid techID, bool cycle) queueItem = _scienceTeams[selected].scientist.ProjectQueue[i];
@@ -305,7 +305,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.BeginGroup();
                 var cpos = ImGui.GetCursorPos();
                 ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
-                ImGui.Button("##projItem.tech.Name", new Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
+                ImGui.Button("##projItem.tech.Name", new System.Numerics.Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
                 ImGui.PopStyleColor();
                 ImGui.SetCursorPos(cpos);
                 ImGui.Text(projItem.tech.Name);
@@ -327,7 +327,7 @@ namespace Pulsar4X.SDL2UI
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.ChildBorderSize, 0.5f);
                 ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 2f);
-                ImGui.BeginChild("Buttons", new Vector2(400, hoverHeigt), true);
+                ImGui.BeginChild("Buttons", new System.Numerics.Vector2(400, hoverHeigt), true);
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 300);
 
@@ -360,7 +360,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.BeginGroup();
                     var cpos = ImGui.GetCursorPos();
                     ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
-                    ImGui.Button("##projItem1.tech.Name", new Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
+                    ImGui.Button("##projItem1.tech.Name", new System.Numerics.Vector2(colomnWidth0 - spacingH, ImGui.GetTextLineHeightWithSpacing()));
                     ImGui.PopStyleColor();
                     ImGui.SetCursorPos(cpos);
                     ImGui.Text(projItem1.tech.Name);

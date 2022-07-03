@@ -61,11 +61,11 @@
         "Key": "55FA0D2E-0BC7-44F5-A292-B593F2248C3B",
         "Value": {
           "Name": "Methalox",
-          "Description": "Highly refined Methane and Oxygen rocket fuel at a mix of 0.7:1 by volume",
+          "Description": "Highly refined Methane and Oxygen rocket fuel at a mix of 1:3.333 by mass",
           "ID": "55FA0D2E-0BC7-44F5-A292-B593F2248C3B",
           "CargoTypeID": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
           "MassPerUnit": 1,
-          "VolumePerUnit": 0.001193504,
+          "VolumePerUnit": 0.000835561,
           "MineralsRequired": {
             "List": [
               {

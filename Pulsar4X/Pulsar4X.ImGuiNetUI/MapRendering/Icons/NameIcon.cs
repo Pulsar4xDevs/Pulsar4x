@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
         Guid _entityGuid;
         Guid _starSysGuid;
         public Dictionary<Guid, string> SubNames = new Dictionary<Guid, string>();
-        public Vector2 ViewOffset { get; set; } = new Vector2();
+        public System.Numerics.Vector2 ViewOffset { get; set; } = new System.Numerics.Vector2();
         public Rectangle ViewDisplayRect = new Rectangle();
         UserOrbitSettings.OrbitBodyType _bodyType = UserOrbitSettings.OrbitBodyType.Unknown;
         internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[(int)_bodyType]; } }
@@ -68,7 +68,7 @@ namespace Pulsar4X.SDL2UI
 
         public static NameIcon operator +(NameIcon nameIcon, SDL.SDL_Point point)
         {
-            Vector2 newpoint = new Vector2()
+            System.Numerics.Vector2 newpoint = new System.Numerics.Vector2()
             {
                 X = nameIcon.ViewOffset.X + point.x,
                 Y = nameIcon.ViewOffset.Y + point.y
@@ -95,7 +95,7 @@ namespace Pulsar4X.SDL2UI
             //DefaultViewOffset = new SDL.SDL_Point() { x = Width, y = -Height };
             if (camera.ZoomLevel < DrawAtZoom)
                 return;
-            Vector2 defualtOffset = new Vector2(4,-(Height / 2));
+            System.Numerics.Vector2 defualtOffset = new System.Numerics.Vector2(4,-(Height / 2));
             ViewOffset = defualtOffset;
             base.OnFrameUpdate(matrix, camera);
 
@@ -228,7 +228,7 @@ namespace Pulsar4X.SDL2UI
             
             
             
-            if (ImGui.BeginPopupContextItem("NameContextMenu"+_entityGuid.ToString()+NameString, 1))
+            if (ImGui.BeginPopupContextItem("NameContextMenu"+_entityGuid.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
             {
                 
                 setUpContextMenu(_entityGuid);
@@ -255,7 +255,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     _state.EntityClicked(name.Key, _starSysGuid, MouseButtons.Primary);
                 }
-                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key+name.Value+_entityGuid.ToString()+NameString, 1))
+                if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key+name.Value+_entityGuid.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
                 {
                     setUpContextMenu(name.Key);
 

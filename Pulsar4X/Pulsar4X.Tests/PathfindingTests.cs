@@ -114,7 +114,7 @@ namespace Pulsar4X.Tests
             _game = new Game(new NewGameSettings { GameName = "Pathfinding Test Game", StartDateTime = DateTime.Now, MaxSystems = 10 });
             _pathfindingManager = new PathfindingManager(_game);
 
-            _testPlayer = _game.AddPlayer("TestPlayer");
+            //_testPlayer = _game.AddPlayer("TestPlayer");
             _authToken = new AuthenticationToken(_testPlayer.ID);
 
             _humanFaction = DefaultStartFactory.DefaultHumans(_game, "TestHumanFaction");

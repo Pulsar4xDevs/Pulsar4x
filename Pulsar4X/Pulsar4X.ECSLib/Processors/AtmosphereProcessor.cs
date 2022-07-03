@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -51,7 +52,7 @@ namespace Pulsar4X.ECSLib
                 {
                     // From Aurora: Greenhouse Factor = 1 + (Atmospheric Pressure /10) + Greenhouse Pressure   (Maximum = 3.0)
                     atmoDB.GreenhouseFactor = (atmoDB.Pressure * 0.035F) + atmoDB.GreenhousePressure;  // note that we do without the extra +1 as it seems to give us better temps.
-                    atmoDB.GreenhouseFactor = (float)GMath.Clamp(atmoDB.GreenhouseFactor, -3.0, 3.0);
+                    atmoDB.GreenhouseFactor = (float)GeneralMath.Clamp(atmoDB.GreenhouseFactor, -3.0, 3.0);
 
                     // From Aurora: Surface Temperature in Kelvin = Base Temperature in Kelvin x Greenhouse Factor x Albedo
                     atmoDB.SurfaceTemperature = Temperature.ToKelvin(bodyDB.BaseTemperature);

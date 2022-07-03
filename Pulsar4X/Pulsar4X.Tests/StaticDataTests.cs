@@ -197,7 +197,7 @@ namespace Pulsar4X.Tests
             soriumFuel.Name = "Sorium Fuel";
             soriumFuel.Description = "Fuel for SpaceShips";
             soriumFuel.ID = new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A");
-            soriumFuel.MineralsRequired = new Dictionary<Guid, int>();
+            soriumFuel.MineralsRequired = new Dictionary<Guid, long>();
             soriumFuel.MineralsRequired.Add(new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"), 1);
             soriumFuel.MassPerUnit = 1;
             //soriumFuel.CargoType = CargoType.Fuel;
@@ -209,9 +209,9 @@ namespace Pulsar4X.Tests
             DepleatedDuranuim.Name = "Depleated Duranuim";
             DepleatedDuranuim.Description = "A mix of Duranium and refined fuel to teset refinarys";
             DepleatedDuranuim.ID = new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB");
-            DepleatedDuranuim.MineralsRequired = new Dictionary<Guid, int>();
+            DepleatedDuranuim.MineralsRequired = new Dictionary<Guid, long>();
             DepleatedDuranuim.MineralsRequired.Add(new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), 5);
-            DepleatedDuranuim.MaterialsRequired = new Dictionary<Guid, int>();
+            DepleatedDuranuim.MaterialsRequired = new Dictionary<Guid, long>();
             DepleatedDuranuim.MaterialsRequired.Add(new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"), 1);
             DepleatedDuranuim.MassPerUnit = 1;
             //DepleatedDuranuim.CargoType = CargoType.General;
@@ -345,7 +345,6 @@ namespace Pulsar4X.Tests
             StaticDataLoadException ex = Assert.Throws<StaticDataLoadException>(
             delegate { StaticDataManager.LoadData("MalformedData", game); });
             Assert.That(ex.Message, Is.EqualTo("Error while loading static data: Bad Json provided in directory: MalformedData"));
-
 
             // now ,lets try for a directory that does not exist.
             Assert.Throws<DirectoryNotFoundException>(

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -184,10 +185,10 @@ namespace Pulsar4X.ECSLib
             this.SystemGuid = positionDB.SystemGuid;
         }
 
-        public PositionDB(Vector3 ralitivePos_m, Entity SOIParent) : base(SOIParent)
+        public PositionDB(Vector3 relativePos_m, Entity SOIParent) : base(SOIParent)
         {
             SystemGuid = SOIParent.Manager.ManagerGuid;
-            RelativePosition_m = ralitivePos_m;
+            RelativePosition_m = relativePos_m;
         }
 
         
@@ -215,58 +216,6 @@ namespace Pulsar4X.ECSLib
             }
             base.SetParent(newParent);
             _positionInMeters = newRelative;
-        }
-
-        /// <summary>
-        /// Static function to find the distance in AU between two positions.
-        /// </summary>
-        /// <returns>Distance between posA and posB.</returns>
-        public static double GetDistanceBetween_AU(IPosition posA, IPosition posB)
-        {
-            return (posA.AbsolutePosition_AU - posB.AbsolutePosition_AU).Length();
-        }
-        public static double GetDistanceBetween_m(IPosition posA, IPosition posB)
-        {
-            return (posA.AbsolutePosition_m - posB.AbsolutePosition_m).Length();
-        }
-        public static double GetDistanceBetween_m(Vector3 posA, PositionDB posB)
-        {
-            return (posA - posB.AbsolutePosition_m).Length();
-        }
-
-        /// <summary>
-        /// 
-        /// Instance function for those who don't like static functions. In AU
-        /// </summary>
-        public double GetDistanceTo_m(IPosition otherPos)
-        {
-            return GetDistanceBetween_m(this, otherPos);
-        }
-
-        public double GetDistanceTo_m(Vector3 otherPos)
-        {
-            return(AbsolutePosition_m - otherPos).Length();
-        }
-
-        public double GetDistanceTo_AU(IPosition otherPos)
-        {
-            return GetDistanceBetween_AU(this, otherPos);
-        }
-        
-        /// <summary>
-        /// Static Function to find the Distance Squared betweeen two positions.
-        /// </summary>
-        public static double GetDistanceBetweenSqrd(PositionDB posA, PositionDB posB)
-        {
-            return (posA.AbsolutePosition_AU - posB.AbsolutePosition_AU).LengthSquared();
-        }
-
-        /// <summary>
-        /// Instance function for those who don't like static functions.
-        /// </summary>
-        public double GetDistanceToSqrd(PositionDB otherPos)
-        {
-            return GetDistanceBetweenSqrd(this, otherPos);
         }
 
         public static PositionDB operator +(PositionDB posA, PositionDB posB)
@@ -299,7 +248,6 @@ namespace Pulsar4X.ECSLib
             hash = Misc.ValueHash(X_AU, hash);
             hash = Misc.ValueHash(Y_AU, hash);
             hash = Misc.ValueHash(Z_AU, hash);
-            hash = Misc.ValueHash(SystemGuid, hash);
             return hash;
         }
     }

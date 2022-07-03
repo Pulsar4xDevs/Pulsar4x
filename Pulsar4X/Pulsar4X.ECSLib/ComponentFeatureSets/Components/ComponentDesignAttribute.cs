@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using NCalc;
 using NCalc.Domain;
 
@@ -11,10 +12,16 @@ namespace Pulsar4X.ECSLib
         //void OnComponentInstantiation(Entity component);
         void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance);
         //void OnComponentDeInstalation(Entity ship, Entity component);
+
+        string AtbName();
+
+        string AtbDescription();
     }
 
     public class ComponentDesignAttribute
     {
+        private readonly CultureInfo _toStringCulture = new CultureInfo("en-GB");
+
         private ComponentTemplateAttributeSD _templateSD;
         public string Name { get { return _templateSD.Name; } }
 
@@ -162,7 +169,6 @@ namespace Pulsar4X.ECSLib
 
         public void SetValueFromInput(double input)
         {
-
             Debug.Assert(GuiHint != GuiHint.GuiTextDisplay || GuiHint != GuiHint.None, Name + " is not an editable value");
             SetMin();
             SetMax();
@@ -170,10 +176,9 @@ namespace Pulsar4X.ECSLib
                 input = MinValue;
             else if (input > MaxValue)
                 input = MaxValue;
-            Formula.ReplaceExpression(input.ToString()); //prevents it being reset to the default value on Evaluate;
-            Formula.Evaluate();//force dependants to recalc.
+            Formula.ReplaceExpression(input.ToString(_toStringCulture));    //prevents it being reset to the default value on Evaluate;
+            Formula.Evaluate();                                             //force dependants to recalc.
             ParentComponent.SetAttributes();
-            
         }
 
         public double Value { get { return Formula.DResult; } }
@@ -251,6 +256,8 @@ namespace Pulsar4X.ECSLib
                         return (int)val; 
                     case float val:
                         return (int)val;
+                    case long val:
+                        return Convert.ToInt32(val);
                     case int val:
                         return val;
                     default:
@@ -259,6 +266,38 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
+
+        /// <summary>
+        /// Returns Result as a Long. note that if the result was a double you will loose the fraction (ie 1.8 will be 1)
+        /// Getting this will fire the Evaluate if Result is null (but won't know if it's old)
+        /// </summary>
+        internal long LongResult
+        {
+            get
+            {
+                switch (Result)
+                {
+                    case null:
+                        Evaluate();
+                        if (Result is null)
+                            throw new Exception("Result type is unexpectedly null");
+                        else
+                            return LongResult;
+                    case double val:
+                        return (long)val;
+                    case float val:
+                        return (long)val;
+                    case int val:
+                        return Convert.ToInt64(val);
+                    case long val:
+                        return val;
+                    default:
+                        throw new Exception("Unexpected Result data Type " + Result.GetType() + " is not double or long");
+
+                }
+            }
+        }
+
         /// <summary>
         /// Returns Result as a double
         /// Getting this will fire the Evaluate if Result is null (but won't know if its old)
@@ -446,7 +485,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// it's better to use the string version of this, as that will store the origional string.
+        /// it's better to use the string version of this, as that will store the original string.
         /// </summary>
         /// <param name="expression"></param>
         internal void ReplaceExpression(Expression expression)
@@ -480,21 +519,13 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// sets the function and parameter stuff.
+        /// https://github.com/ncalc/ncalc/wiki/Parameters
         /// </summary>
         private void SetupExpression()
         {
             _expression.EvaluateFunction += NCalcPulsarFunctions;
             _expression.EvaluateParameter += NCalcPulsarParameters;
-
-            _expression.Parameters["xMassx"] = new Expression("Mass"); //unknown string will force it to look in the NCalcPulsarParameters or something
-            //see http://ncalc.codeplex.com/wikipage?title=parameters&referringTitle=Home (Dynamic Parameters)
-            _expression.Parameters["xVolumex"] = new Expression("Volume_km3");
-            _expression.Parameters["xCrewx"] = new Expression("Crew");
-            _expression.Parameters["xHTKx"] = new Expression("HTK");
-            _expression.Parameters["xResearchCostx"] = new Expression("ResearchCost");
-            _expression.Parameters["xMineralCosts"] = new Expression("MineralCosts");
-            _expression.Parameters["xCreditCosts"] = new Expression("CreditCosts");
-            _expression.Parameters["xGuidDictx"] = new Expression("GuidDict");
+            
             //put extra parameters that don't require extra processing here.ie:
             //_expression.Parameters["X"] = 5;
         }
@@ -515,14 +546,14 @@ namespace Pulsar4X.ECSLib
                     break;
                 
                 case "Mass":
-                    MakeThisDependant(_designer.MassFormula);
-                    args.Result = _designer.MassValue;
+                    MakeThisDependant(_designer.MassFormula); //we do this so that when the mass value changes, whatever formula is referencing mass gets updated also. 
+                    args.Result = (double)_designer.MassValue; //this is the resulting value from the mass value. 
                     break;
                 
                 case "Volume_km3":
                 
                     MakeThisDependant(_designer.VolumeFormula);
-                    args.Result = _designer.VolumeFormula;
+                    args.Result = _designer.VolumeM3Value;
                     break;
                 case "Crew":
                     MakeThisDependant(_designer.CrewFormula);

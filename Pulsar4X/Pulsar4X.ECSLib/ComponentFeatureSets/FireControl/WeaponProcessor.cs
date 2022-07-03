@@ -97,6 +97,8 @@ namespace Pulsar4X.ECSLib
 /// </summary>
     public class HotWpnProcessor : IHotloopProcessor
     {
+        private static readonly int _wpnDBIdx = EntityManager.GetTypeIndex<GenericFiringWeaponsDB>();
+        private static readonly int _obtDBIdx = EntityManager.GetTypeIndex<OrbitDB>();
         public void Init(Game game)
         {
             
@@ -107,9 +109,9 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            var blobs = manager.GetAllDataBlobsOfType<GenericFiringWeaponsDB>();
+            var blobs = manager.GetAllDataBlobsOfType<GenericFiringWeaponsDB>(_wpnDBIdx);
             
             //when firing weapons we need to have the parent in the right place.
             //orbits don't update every subtick, so we update just this entity for this tick, if it's an orbiting entity.
@@ -118,8 +120,7 @@ namespace Pulsar4X.ECSLib
                 var entity = blob.OwningEntity; //
                 if (entity.HasDataBlob<OrbitDB>())
                 {
-                    var fastBlob = new OrbitUpdateOftenDB(entity.GetDataBlob<OrbitDB>());
-                    entity.RemoveDataBlob<OrbitDB>();
+                    var fastBlob = new OrbitUpdateOftenDB(entity.GetDataBlob<OrbitDB>(_obtDBIdx));
                     entity.SetDataBlob(fastBlob);
                 }
                 List<Entity> targets = new List<Entity>();
@@ -133,9 +134,9 @@ namespace Pulsar4X.ECSLib
                 {
                     if (tgt.HasDataBlob<OrbitDB>())
                     {
-                        var fastBlob = new OrbitUpdateOftenDB(tgt.GetDataBlob<OrbitDB>());
-                        tgt.RemoveDataBlob<OrbitDB>();
+                        var fastBlob = new OrbitUpdateOftenDB(tgt.GetDataBlob<OrbitDB>(_obtDBIdx));
                         tgt.SetDataBlob(fastBlob);
+
                     }
                 }
             }
@@ -153,6 +154,8 @@ namespace Pulsar4X.ECSLib
             {
                 UpdateReloadState(blob);
             }
+
+            return blobs.Count;
         }
 
         public static void ProcessReloadWeapon(GenericFiringWeaponsDB reloadingWeapons)

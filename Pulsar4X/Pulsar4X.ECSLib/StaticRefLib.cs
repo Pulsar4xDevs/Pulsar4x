@@ -16,6 +16,11 @@ namespace Pulsar4X.ECSLib
 
         public static IOrderHandler OrderHandler { get; private set; }
         
+        public static Entity SpaceMaster
+        {
+            get { return Game.GameMasterFaction; }
+        }
+        
         /// <summary>
         /// this is used to marshal events to the UI thread. 
         /// </summary>
@@ -31,10 +36,10 @@ namespace Pulsar4X.ECSLib
         public static void Setup(Game game)
         {
             Game = game;
+            GameSettings = new GameSettings();
             StaticData = game.StaticData;
             ProcessorManager = new ProcessorManager(game);
             GamePulse = new MasterTimePulse(game);
-            EventLog = new EventLog(game);
             SyncContext = SynchronizationContext.Current;
             OrderHandler = game.OrderHandler;
         }

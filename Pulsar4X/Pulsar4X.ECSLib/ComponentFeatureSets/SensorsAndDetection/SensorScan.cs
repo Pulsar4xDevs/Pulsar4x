@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
         {
             EntityManager manager = entity.Manager;
             Entity faction;// = entity.GetDataBlob<OwnedDB>().OwnedByFaction;
-            entity.Manager.FindEntityByGuid(entity.FactionOwner, out faction);
+            entity.Manager.FindEntityByGuid(entity.FactionOwnerID, out faction);
 
             
             var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
@@ -32,10 +32,10 @@ namespace Pulsar4X.ECSLib
 
 
                     SystemSensorContacts sensorMgr;
-                    if (!manager.FactionSensorContacts.ContainsKey(entity.FactionOwner))
+                    if (!manager.FactionSensorContacts.ContainsKey(entity.FactionOwnerID))
                         sensorMgr = new SystemSensorContacts(manager, faction);
                     else 
-                        sensorMgr = manager.FactionSensorContacts[entity.FactionOwner];
+                        sensorMgr = manager.FactionSensorContacts[entity.FactionOwnerID];
                     
 
                     var detections = SensorProcessorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition_m, detectableEntitys, atDateTime, faction.Guid, true);

@@ -275,7 +275,7 @@ namespace Pulsar4X.Tests
 
         public Guid CargoTypeID { get; set; }
 
-        public int MassPerUnit { get; set; }
+        public long MassPerUnit { get; set; }
         public double VolumePerUnit { get; }
         public double Density { get; set; }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -14,7 +15,7 @@ namespace Pulsar4X.ECSLib
             for (int i = 0; i < detectableEntities.Count; i++)
             {
                 var detectableEntity = detectableEntities[i];
-                if (filterSameFaction && detectableEntity.FactionOwner == factionOwner)
+                if (filterSameFaction && detectableEntity.FactionOwnerID == factionOwner)
                     continue;
                 else 
                 {
@@ -56,7 +57,7 @@ namespace Pulsar4X.ECSLib
 
             TimeSpan timeSinceLastCalc = atDate - sensorProfile.LastDatetimeOfReflectionSet;
             PositionDB positionOfSensorProfile = detectableEntity.GetDataBlob<PositionDB>();//sensorProfile.OwningEntity.GetDataBlob<ComponentInstanceInfoDB>().ParentEntity.GetDataBlob<PositionDB>();
-            double distanceSinceLastCalc = PositionDB.GetDistanceBetween_m(sensorProfile.LastPositionOfReflectionSet, positionOfSensorProfile);
+            double distanceSinceLastCalc = sensorProfile.LastPositionOfReflectionSet.GetDistanceTo_m(positionOfSensorProfile);
 
             //Only set the reflectedEMProfile of the target if it's not been done recently:
             //TODO: is this still neccicary now that I've found and fixed the loop? (refelctions were getting bounced around)
@@ -70,7 +71,7 @@ namespace Pulsar4X.ECSLib
                 targetPosition = detectableEntity.GetDataBlob<PositionDB>();
             else throw new Exception("This Object does not have a position.");
  
-            var distance = PositionDB.GetDistanceBetween_m(receverPos, targetPosition);
+            var distance = receverPos.GetDistanceTo_m(targetPosition);
             SensorReturnValues detectionValues = DetectonQuality(receverDB, AttenuatedForDistance(sensorProfile, distance));
             SensorInfoDB sensorInfo;
             if (detectionValues.SignalStrength_kW > 0.0)

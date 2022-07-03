@@ -5,7 +5,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
-using Pulsar4X.Vectors;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 {
@@ -49,7 +49,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
     {
         public Vector2 Velocity;
         public (int x,int y) Position;
+        //public double Angle;
         public float Mass;
+        public float Momentum;
         public float Density;//kg/m^3
         public float Length;
     }
@@ -150,23 +152,30 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         
         public static RawBmp CreateComponentByteArray(ComponentDesign componentDesign, byte typeID)
         {
-            //1 pixel = 1meter resolution
-            var vol = componentDesign.VolumePerUnit * 1000;
-
+            
+            //var vol = componentDesign.VolumePerUnit * 1000;
+            var volm3 = componentDesign.VolumePerUnit;
+            //we convert 3d volume to 2d area at 1px = 1cm resolution
+            var area = Math.Cbrt(volm3) * 2 * 1000;
+            var len = Math.Sqrt(area * componentDesign.AspectRatio);
+            var wid = area / len;
+            
+            
             double floatdepth = Math.Pow(componentDesign.AspectRatio, (float)1 / 3);
             double CSA = componentDesign.VolumePerUnit / floatdepth;
             double floatwidth = Math.Sqrt(CSA) * (double)componentDesign.AspectRatio;
-            int depth = (int)floatdepth;
-            int width = (int)floatwidth;
-            int height = (int)(CSA / width);
-            int v2d = height * width;
-            int volume = (int)vol;
+            //int depth = (int)floatdepth;
+            int width = (int)len;
+            int height = (int)wid;
+            //int v2d = height * width;
+            //int volume = (int)volm3;
 
-            if (componentDesign.AspectRatio > 1)
-            {
-                width = (int)(width / componentDesign.AspectRatio);
-                height = (int)(height / componentDesign.AspectRatio);
-            }
+            //if (componentDesign.AspectRatio > 1)
+            //{
+            //     width = (int)(width / componentDesign.AspectRatio);
+            //    height = (int)(height / componentDesign.AspectRatio);
+            //}
+            
 
             int imagedepth = 4;
             int size = imagedepth * width * height;
@@ -203,15 +212,55 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             List<RawBmp> damageFrames = new List<RawBmp>();
 
             var fragmentMass = damage.Mass;
-            var dpos = damage.Position;
+            (int x, int y) dpos = (0, 0);
             var dvel = damage.Velocity;
             var dden = damage.Density;
             var dlen = damage.Length;
             var pos = new Vector2(dpos.x, dpos.y);
             var pixelscale = 0.01;
-            double startMomentum = dvel.Length() * fragmentMass;
-            double momentum = startMomentum; 
+            double startMomentum = damage.Momentum;
+            double momentum = startMomentum;
+
+
             
+            //We need to figure out where the incoming damage intersects with the ship's damage profile "image"
+            var pwidth = damageProfile.DamageProfile.Width;
+            var hw = pwidth * 0.5;
+            var phight = damageProfile.DamageProfile.Height;
+            var hh = phight * 0.5;
+            var len = Math.Sqrt((pwidth * pwidth) + (phight * phight));
+
+            //damage.Position ralitive to our targets center, but we need to translate for calculating 0,0 at top left
+            Vector2 start = new Vector2(damage.Position.x - hw, damage.Position.y - hh); 
+            var end = new Vector2(pwidth * 0.5, phight * 0.5); //center of our target
+            var tl = new Vector2(0, 0);
+            var tr = new Vector2(pwidth, 0);
+            var bl = new Vector2(0, phight);
+            var br = new Vector2(pwidth, phight);
+            
+            //pretty sure these can be else ifs. 
+            Vector2 intersection;
+
+            //left
+            if (GeneralMath.LineIntersectsLine(start, end, tl, bl, out intersection))
+            {
+            }
+            //right
+            else if (GeneralMath.LineIntersectsLine(start, end, tr, br, out intersection))
+            {
+            }
+            //top
+            else if (GeneralMath.LineIntersectsLine(start,end,tl, tr, out intersection))
+            {
+            }
+            //bottom
+            else if (GeneralMath.LineIntersectsLine(start,end,bl, br, out intersection))
+            {
+            }
+
+            dpos.x = Convert.ToInt32(intersection.X);
+            dpos.y = Convert.ToInt32(intersection.Y);
+
             byte[] byteArray = new byte[shipDamageProfile.ByteArray.Length];
             Buffer.BlockCopy(shipDamageProfile.ByteArray, 0, byteArray, 0, shipDamageProfile.ByteArray.Length);
             RawBmp firstFrame = new RawBmp()
@@ -226,7 +275,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             (byte r, byte g, byte b, byte a) savedpx = shipDamageProfile.GetPixel(dpos.x, dpos.y);
             (int x, int y) savedpxloc = dpos;
             
-            while (momentum > 0 && dpos.x >= 0 && dpos.x <= shipDamageProfile.Width && dpos.y >= 0 && dpos.y <= shipDamageProfile.Height)
+            while (
+                momentum > 0 && 
+                dpos.x >= 0 && 
+                dpos.x <= shipDamageProfile.Width && 
+                dpos.y >= 0 && dpos.y <= shipDamageProfile.Height)
             {
                 byteArray = new byte[shipDamageProfile.ByteArray.Length];
                 RawBmp lastFrame = damageFrames.Last();
@@ -259,7 +312,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
                 }
 
-                thisFrame.SetPixel(dpos.x, dpos.y, byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)fragmentMass);
+                thisFrame.SetPixel(dpos.x, dpos.y, byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)momentum);
                 thisFrame.SetPixel(savedpxloc.x, savedpxloc.y, savedpx.r, savedpx.g, savedpx.b, savedpx.a);
                 damageFrames.Add(thisFrame);
                 savedpxloc = dpos;
@@ -284,7 +337,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
                 Stride = shipDamageProfile.Stride
             };
             finalFrame.SetPixel(savedpxloc.x, savedpxloc.y, savedpx.r, savedpx.g, savedpx.b, savedpx.a);
+            damageProfile.DamageSlides.Add(damageFrames);
+            damageProfile.DamageProfile = finalFrame;
             return damageFrames;
         }
+        
+
     }
 }

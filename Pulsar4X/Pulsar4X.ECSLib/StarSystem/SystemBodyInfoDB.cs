@@ -1,30 +1,65 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Pulsar4X.ECSLib
 {
     public enum BodyType : byte
     {
+        [Description("?")]
         Unknown,
+
+        [Description("Terrestrial")]
         Terrestrial,    // Like Earth/Mars/Venus/etc.
+
+        [Description("Gas Giant")]
         GasGiant,       // Like Jupiter/Saturn
+
+        [Description("Ice Giant")]
         IceGiant,       // Like Uranus/Neptune
+
+        [Description("Dwarf Planet")]
         DwarfPlanet,    // Pluto!
+
+        [Description("Gas Dwarf")]
         GasDwarf,       // What you'd get is Jupiter and Saturn ever had a baby.
-        ///< @todo Add more planet types like Ice Planets (bigger Plutos), carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), Iron SystemBody (http://en.wikipedia.org/wiki/Iron_planet) or Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). (more: http://en.wikipedia.org/wiki/List_of_planet_types).
+
+        /// @TODO: Add more planet types like 
+        ///     Ice Planets (bigger Plutos), 
+        ///     carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), 
+        ///     Iron SystemBody (http://en.wikipedia.org/wiki/Iron_planet) or 
+        ///     Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). 
+        ///     (more: http://en.wikipedia.org/wiki/List_of_planet_types).
+
+        [Description("Moon")]
         Moon,
+
+        [Description("Asteroid")]
         Asteroid,
+
+        [Description("Comet")]
         Comet
     }
 
     public enum TectonicActivity : byte
     {
+        [Description("?")]
         Unknown,
+
+        [Description("Dead")]
         Dead,
+
+        [Description("Minor")]
         Minor,
+
+        [Description("Earth-like")]
         EarthLike,
+
+        [Description("Major")]
         Major,
+
+        [Description("Not-Applicable")]
         NA
     }
 
@@ -34,9 +69,9 @@ namespace Pulsar4X.ECSLib
     public class MineralDepositInfo
     {
         [JsonProperty]
-        public int Amount { get; internal set; }
+        public long Amount { get; internal set; }
         [JsonProperty]
-        public int HalfOriginalAmount { get; internal set; }
+        public long HalfOriginalAmount { get; internal set; }
         [JsonProperty]
         public double Accessibility { get; internal set; }
     }
@@ -151,7 +186,7 @@ namespace Pulsar4X.ECSLib
 
 
         /// <summary>
-        /// Stores the amount of the variopus minerials. the guid can be used to lookup the
+        /// Stores the amount of the various minerials. the guid can be used to lookup the
         /// minerial definition (MineralSD) from the StaticDataStore.
         /// </summary>
         [PublicAPI]
@@ -193,31 +228,31 @@ namespace Pulsar4X.ECSLib
             UpdateDatablob(sensorInfo.DetectedEntity.GetDataBlob<SystemBodyInfoDB>(), sensorInfo);
         }
 
-        void UpdateDatablob(SystemBodyInfoDB origionalDB, SensorInfoDB sensorInfo)
+        void UpdateDatablob(SystemBodyInfoDB originalDB, SensorInfoDB sensorInfo)
         {
             Random rng = new Random(); //TODO: rand should be deterministic. 
             float accuracy = sensorInfo.HighestDetectionQuality.SignalQuality;
 
             if (sensorInfo.HighestDetectionQuality.SignalQuality > 0.20)
-                BodyType = origionalDB.BodyType;
+                BodyType = originalDB.BodyType;
             else
                 BodyType = BodyType.Unknown;
             if (sensorInfo.HighestDetectionQuality.SignalQuality > 0.80)
-                Tectonics = origionalDB.Tectonics;
+                Tectonics = originalDB.Tectonics;
             else
                 Tectonics = TectonicActivity.Unknown;
             //TODO: #SensorClone, #TMI more random to the rest of it.
-            var tilt = SensorProcessorTools.RndSigmoid(origionalDB.AxialTilt, accuracy, rng);
+            var tilt = SensorProcessorTools.RndSigmoid(originalDB.AxialTilt, accuracy, rng);
             AxialTilt = (float)tilt;
-            MagneticField = origionalDB.MagneticField;
-            BaseTemperature = origionalDB.BaseTemperature;
-            RadiationLevel = origionalDB.RadiationLevel;
-            AtmosphericDust = origionalDB.AtmosphericDust;
-            SupportsPopulations = origionalDB.SupportsPopulations;
-            LengthOfDay = origionalDB.LengthOfDay;
-            Gravity = origionalDB.Gravity;
-            Minerals = new Dictionary<Guid, MineralDepositInfo>(origionalDB.Minerals); //This really needs to be handled properly
-            Colonies = new List<Entity>(origionalDB.Colonies); //this needs to only have owned colonies and sensor entites of unowned colonies.
+            MagneticField = originalDB.MagneticField;
+            BaseTemperature = originalDB.BaseTemperature;
+            RadiationLevel = originalDB.RadiationLevel;
+            AtmosphericDust = originalDB.AtmosphericDust;
+            SupportsPopulations = originalDB.SupportsPopulations;
+            LengthOfDay = originalDB.LengthOfDay;
+            Gravity = originalDB.Gravity;
+            Minerals = new Dictionary<Guid, MineralDepositInfo>(originalDB.Minerals); //This really needs to be handled properly
+            Colonies = new List<Entity>(originalDB.Colonies); //this needs to only have owned colonies and sensor entites of unowned colonies.
         }
 
         public int GetValueCompareHash(int hash = 17)
@@ -232,13 +267,13 @@ namespace Pulsar4X.ECSLib
             hash = Misc.ValueHash(SupportsPopulations, hash);
             hash = Misc.ValueHash(LengthOfDay, hash);
             hash = Misc.ValueHash(Gravity, hash);
-            hash = Misc.ValueHash(Minerals, hash);
+            //hash = Misc.ValueHash(Minerals, hash); for some reason minerals were not hashing the same.
             return hash;
         }
 
-        SystemBodyInfoDB(SystemBodyInfoDB origionalDB, SensorInfoDB sensorInfo)
+        SystemBodyInfoDB(SystemBodyInfoDB originalDB, SensorInfoDB sensorInfo)
         {
-            UpdateDatablob(origionalDB, sensorInfo);
+            UpdateDatablob(originalDB, sensorInfo);
         }
     }
 }

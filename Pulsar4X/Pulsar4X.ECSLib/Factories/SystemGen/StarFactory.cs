@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -74,20 +76,20 @@ namespace Pulsar4X.ECSLib
                 SpectralType starType;
                 if (_galaxyGen.Settings.RealStarSystems)
                 {
-                    starType = _galaxyGen.Settings.StarTypeDistributionForRealStars.Select(system.RNG.NextDouble());
+                    starType = _galaxyGen.Settings.StarTypeDistributionForRealStars.Select(system.RNGNextDouble());
                 }
                 else
                 {
-                    starType = _galaxyGen.Settings.StarTypeDistributionForFakeStars.Select(system.RNG.NextDouble());
+                    starType = _galaxyGen.Settings.StarTypeDistributionForFakeStars.Select(system.RNGNextDouble());
                 }
 
                 // We will use the one random number to select from all the spectral type ranges. Should give us saner numbers for stars.
-                double randomSelection = system.RNG.NextDouble();
+                double randomSelection = system.RNGNextDouble();
 
                 // Generate the star's datablobs.
                 MassVolumeDB starMVDB = MassVolumeDB.NewFromMassAndRadius_AU(
-                    GMath.SelectFromRange(_galaxyGen.Settings.StarMassBySpectralType[starType], randomSelection),
-                    GMath.SelectFromRange(_galaxyGen.Settings.StarRadiusBySpectralType[starType], randomSelection));
+                    GeneralMath.SelectFromRange(_galaxyGen.Settings.StarMassBySpectralType[starType], randomSelection),
+                    GeneralMath.SelectFromRange(_galaxyGen.Settings.StarRadiusBySpectralType[starType], randomSelection));
                 
                 StarInfoDB starData = GenerateStarInfo(starMVDB, starType, randomSelection);
 
@@ -100,27 +102,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // The root star must be the most massive. Find it.
-            Entity rootStar = stars[0];
-
-            double rootStarMass = rootStar.GetDataBlob<MassVolumeDB>().MassDry;
-
-            foreach (Entity currentStar in stars)
-            {
-                double currentStarMass = currentStar.GetDataBlob<MassVolumeDB>().MassDry;
-
-                if (rootStarMass < currentStarMass)
-                {
-                    rootStar = currentStar;
-                    rootStarMass = rootStar.GetDataBlob<MassVolumeDB>().MassDry;
-                }
-            }
-
-            // Swap the root star to index 0.
-            int rootIndex = stars.IndexOf(rootStar);
-            Entity displacedStar = stars[0];
-
-            stars[rootIndex] = displacedStar;
-            stars[0] = rootStar;
+            stars = stars.OrderBy(x => x.GetDataBlob<MassVolumeDB>().MassDry).ToList();
 
             // Generate orbits.
             Entity anchorStar = stars[0];
@@ -144,12 +126,12 @@ namespace Pulsar4X.ECSLib
                 OrbitDB previousOrbit = previousStar.GetDataBlob<OrbitDB>();
                 StarInfoDB previousStarInfo = previousStar.GetDataBlob<StarInfoDB>();
 
-                double minDistance = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[previousStarInfo.SpectralType].Max + _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[currentStarInfo.SpectralType].Max + previousOrbit.SemiMajorAxis_AU;
+                double minDistance = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[previousStarInfo.SpectralType].Max + _galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[currentStarInfo.SpectralType].Max + previousOrbit.SemiMajorAxis_AU;
 
-                double sma = minDistance * Math.Pow(system.RNG.NextDouble(), 3);
-                double eccentricity = Math.Pow(system.RNG.NextDouble() * 0.8, 3);
+                double sma = minDistance * Math.Pow(system.RNGNextDouble(), 3);
+                double eccentricity = Math.Pow(system.RNGNextDouble() * 0.8, 3);
 
-                OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.MassDry, currentStar.GetDataBlob<MassVolumeDB>().MassDry, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, currentDateTime);
+                OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.MassDry, currentStar.GetDataBlob<MassVolumeDB>().MassDry, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNGNextDouble(), system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, currentDateTime);
                 currentStar.SetDataBlob(currentOrbit);
                 currentStar.GetDataBlob<PositionDB>().SetParent(currentOrbit.Parent);
                 previousStar = currentStar;
@@ -197,8 +179,8 @@ namespace Pulsar4X.ECSLib
                 // mass/type are tiny. Tho there will still be the obvious inverse relationship here.
                 Age = (1 - starMVDB.MassDry / _galaxyGen.Settings.StarMassBySpectralType[spectralType].Max) * maxStarAge,
                 SpectralType = spectralType,
-                Temperature = (uint)Math.Round(GMath.SelectFromRange(_galaxyGen.Settings.StarTemperatureBySpectralType[spectralType], randomSelection)),
-                Luminosity = (float)GMath.SelectFromRange(_galaxyGen.Settings.StarLuminosityBySpectralType[spectralType], randomSelection)
+                Temperature = (uint)Math.Round(GeneralMath.SelectFromRange(_galaxyGen.Settings.StarTemperatureBySpectralType[spectralType], randomSelection)),
+                Luminosity = (float)GeneralMath.SelectFromRange(_galaxyGen.Settings.StarLuminosityBySpectralType[spectralType], randomSelection)
             };
 
             // Generate a string specifying the full spectral class form a star.

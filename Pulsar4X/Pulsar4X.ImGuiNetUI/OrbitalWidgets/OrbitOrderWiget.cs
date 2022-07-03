@@ -1,5 +1,6 @@
 ﻿using System;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using ImGuiNET;
 using System.Collections.Generic;
@@ -37,8 +38,8 @@ namespace Pulsar4X.SDL2UI
 
         PositionDB _bodyPositionDB;
 
-        internal PointD Apoapsis;
-        internal PointD Periapsis;
+        internal Vector2 Apoapsis;
+        internal Vector2 Periapsis;
         internal double OrbitEllipseSemiMaj_m;
         internal double OrbitEllipseSemiMinor_m;
 
@@ -46,7 +47,7 @@ namespace Pulsar4X.SDL2UI
 
         double _linearEccentricity_m; //distance from the center of the ellpse to one of the focal points. 
 
-        PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
+        Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         SDL.SDL_Point[] _drawPoints;
         //sphere of influance radius, if the entity is outside this, then this is affected by the parent (or other) gravitational body
         double _soiWorldRadius_AU; 
@@ -102,7 +103,7 @@ namespace Pulsar4X.SDL2UI
 
             _linearEccentricity_m = 0;
 
-            _soiWorldRadius_AU = OrbitProcessor.GetSOI_AU(targetEntity);
+            _soiWorldRadius_AU = targetEntity.GetSOI_AU();
             _targetWorldRadius_AU = targetEntity.GetDataBlob<MassVolumeDB>().RadiusInAU;
             Setup();
 
@@ -118,7 +119,7 @@ namespace Pulsar4X.SDL2UI
             EllipseMath.SemiMinorAxis(OrbitEllipseSemiMaj_m, _eccentricity);
             _linearEccentricity_m = (float)(orbitDB.Eccentricity * OrbitEllipseSemiMaj_m);
 
-            _soiWorldRadius_AU = OrbitProcessor.GetSOI_AU(targetEntity);
+            _soiWorldRadius_AU = targetEntity.GetSOI_AU();
             _targetWorldRadius_AU = targetEntity.GetDataBlob<MassVolumeDB>().RadiusInAU;
             Setup();
         }
@@ -191,7 +192,7 @@ namespace Pulsar4X.SDL2UI
             var coslop = 1 * Math.Cos(LonditudeOfPeriapsis);
             var sinlop = 1 * Math.Sin(LonditudeOfPeriapsis);
             
-            _points = new PointD[_numberOfArcSegments + 1];
+            _points = new Vector2[_numberOfArcSegments + 1];
             double angle = 0;
             for (int i = 0; i < _numberOfArcSegments + 1; i++)
             {
@@ -201,7 +202,7 @@ namespace Pulsar4X.SDL2UI
                 //rotates the points to allow for the LongditudeOfPeriapsis. 
                 double x2 = (x1 * coslop) - (y1 * sinlop);
                 double y2 = (x1 * sinlop) + (y1 * coslop);
-                _points[i] = new PointD() { X = x2, Y = y2 };
+                _points[i] = new Vector2() { X = x2, Y = y2 };
                 angle += _segmentArcSweepRadians;
             }
             
@@ -216,7 +217,7 @@ namespace Pulsar4X.SDL2UI
                 for (int i = 0; i < _points.Length; i++)
                 {
                     var pnt = mtxr.Transform(new Vector3(_points[i].X, _points[i].Y, 0));
-                    _points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
+                    _points[i] = new Vector2() {X = pnt.X, Y = pnt.Y};
                 }
             }
         }
@@ -227,13 +228,13 @@ namespace Pulsar4X.SDL2UI
 
 
             CreatePointArray();
-            PointD pointD = new PointD() { X = _position_m.X, Y = _position_m.Y };
-
-            double minDist = CalcDistance(pointD, _points[_index]);
+            Vector2 vector2 = new Vector2() { X = _position_m.X, Y = _position_m.Y };
+ 
+            double minDist = (vector2 - _points[_index]).Length();
 
             for (int i = 0; i < _points.Count(); i++)
             {
-                double dist = CalcDistance(pointD, _points[i]);
+                double dist = (vector2 - _points[i]).Length();
                 if (dist < minDist)
                 {
                     minDist = dist;
@@ -241,11 +242,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
         }
-
-        double CalcDistance(PointD p1, PointD p2)
-        {
-            return PointDFunctions.Length(PointDFunctions.Sub(p1, p2));
-        }
+        
 
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -259,7 +256,7 @@ namespace Pulsar4X.SDL2UI
             int index = _index;
 
 
-            PointD translated;
+            Vector2 translated;
             _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
@@ -292,7 +289,7 @@ namespace Pulsar4X.SDL2UI
             float alpha = MaxAlpha;
             for (int i = 0; i < _numberOfDrawSegments - 1; i++)
             {
-                var au = 1;//GameConstants.Units.MetersPerAu;
+                var au = 1;//UniversalConstants.Units.MetersPerAu;
                 int x1 = (int)(_drawPoints[i].x * au);
                 int y1 = (int)(_drawPoints[i].y * au);
                 int x2 = (int)(_drawPoints[i + 1].x * au);

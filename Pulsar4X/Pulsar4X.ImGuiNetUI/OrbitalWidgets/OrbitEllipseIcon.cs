@@ -1,5 +1,6 @@
 ﻿using System;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using ImGuiNET;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace Pulsar4X.SDL2UI
 
         protected override void CreatePointArray()
         {
-            _points = new PointD[_numberOfArcSegments + 1];
+            _points = new Vector2[_numberOfArcSegments + 1];
 
             var loAN = -_orbitDB.LongitudeOfAscendingNode;
             var incl = _orbitDB.Inclination;
@@ -73,7 +74,7 @@ namespace Pulsar4X.SDL2UI
                 //Vector3 pnt = new Vector3(x1, y1, 0);
                 //pnt = mtx.Transform(pnt);
                 //Points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
-                _points[i] = new PointD() { X = x2, Y = y2 };
+                _points[i] = new Vector2() { X = x2, Y = y2 };
                 angle += _segmentArcSweepRadians;
             }
 
@@ -85,7 +86,7 @@ namespace Pulsar4X.SDL2UI
                 for (int i = 0; i < _points.Length; i++)
                 {
                     var pnt = mtxr.Transform(new Vector3(_points[i].X, _points[i].Y, 0));
-                        _points[i] = new PointD() {X = pnt.X, Y = pnt.Y};
+                        _points[i] = new Vector2() {X = pnt.X, Y = pnt.Y};
                 }
             }
             //TODO: try a Chaikins curve for this and increase the points depending on zoom and curviture.   
@@ -131,15 +132,17 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-
-            Vector3 pos = BodyPositionDB.RelativePosition_AU; 
-            _bodyRalitivePos = new PointD() { X = pos.X, Y = pos.Y };
-
-            double minDist = CalcDistance(_bodyRalitivePos, _points[_index]);
+            Vector3 pos = BodyPositionDB.RelativePosition_m; 
+            _bodyrelativePos = new Vector2() { X = pos.X, Y = pos.Y };
+            var apos = BodyPositionDB.AbsolutePosition_m;
+            _bodyAbsolutePos = new Vector2(apos.X, apos.Y);
+            
+            //we find the point in the ellipse which is closest to the body so we can start drawing from the body.
+            double minDist = (_bodyrelativePos - _points[_index]).Length();
 
             for (int i =0; i < _points.Count(); i++)
             {
-                double dist = CalcDistance(_bodyRalitivePos, _points[i]);
+                double dist = (_bodyrelativePos - _points[i]).Length();
                 if (dist < minDist)
                 {
                     minDist = dist;
@@ -147,31 +150,23 @@ namespace Pulsar4X.SDL2UI
                 }
             }
         }
-
-        double CalcDistance(PointD p1, PointD p2)
-        {
-            return PointDFunctions.Length(PointDFunctions.Sub(p1, p2));
-        }
-
-
+        
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-
-            var foo = camera.ViewCoordinate_m(WorldPosition_m);
-            var vsp = new PointD
-            {
-                X = foo.x,
-                Y = foo.y
-            };
-
+            //resize for zoom
+            //translate to position
+            
+            var foo = camera.ViewCoordinateV2_m(WorldPosition_m); //camera position and zoom
+            
+            var trns = Matrix.IDTranslate(foo.X, foo.Y);
+            var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
+            var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
 
             int index = _index;
-            _drawPoints = new SDL.SDL_Point[_numberOfDrawSegments];
+            var spos = camera.ViewCoordinateV2_m(_bodyAbsolutePos);
 
-            //first index in the drawPoints is the position of the body
-            var translated = matrix.TransformD(_bodyRalitivePos.X, _bodyRalitivePos.Y);
-            _drawPoints[0] = new SDL.SDL_Point() { x = (int)(vsp.X + translated.X), y = (int)(vsp.Y + translated.Y) };
-            
+            //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
+            _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
             for (int i = 1; i < _numberOfDrawSegments; i++)
             {
                 if (index < _numberOfArcSegments - 1)
@@ -179,13 +174,8 @@ namespace Pulsar4X.SDL2UI
                     index++;
                 else
                     index = 0;
-
-                translated = matrix.TransformD(_points[index].X, _points[index].Y); //add zoom transformation. 
-
-                int x = (int)(vsp.X + translated.X);
-                int y = (int)(vsp.Y + translated.Y);
-
-                _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
+                
+                _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
             }
         }
 

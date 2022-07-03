@@ -47,64 +47,16 @@ namespace Pulsar4X.ECSLib.Industry
             IndustryTools.ConstructStuff(entity);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            foreach (var entity in manager.GetAllEntitiesWithDataBlob<IndustryAbilityDB>())
+            var entities = manager.GetAllEntitiesWithDataBlob<IndustryAbilityDB>();
+            foreach (var entity in entities)
             {
                 ProcessEntity(entity, deltaSeconds);
             }
-        }
-    }
 
-    public class IndustryAbilityDB : BaseDataBlob
-    {
+            return entities.Count;
 
-        public class ProductionLine
-        {
-            public string FacName;
-            public double MaxVolume;
-            public Dictionary<Guid, int> IndustryTypeRates = new Dictionary<Guid, int>();
-            public List<IndustryJob> Jobs = new List<IndustryJob>();
-        }
-        
-        //public int ConstructionPoints { get; } = 0;
-        //public List<JobBase> JobBatchList { get; } = new List<JobBase>();
-        
-        //public Dictionary<Guid, int> IndustryTypeRates { get; } = new Dictionary<Guid, int>();
-        //public Dictionary<Guid, List<JobBase>> JobsBytype = new Dictionary<Guid, List<JobBase>>();
-
-
-        public Dictionary<Guid, ProductionLine> ProductionLines { get; } = new Dictionary<Guid, ProductionLine>();
-
-        [JsonConstructor]
-        private IndustryAbilityDB()
-        {
-        }
-
-        public IndustryAbilityDB(Dictionary<Guid, ProductionLine> productionLines)
-        {
-            ProductionLines = productionLines;
-        }
-        public IndustryAbilityDB(Guid componentID, ProductionLine productionLine)
-        {
-            ProductionLines.Add(componentID, productionLine);
-        }
-
-        public IndustryAbilityDB(IndustryAbilityDB db)
-        {
-            //IndustryTypeRates = new Dictionary<Guid, int>(db.IndustryTypeRates);
-            ProductionLines = new Dictionary<Guid, ProductionLine>(db.ProductionLines);
-        }
-
-        public override object Clone()
-        {
-            return new IndustryAbilityDB(this);
-        }
-
-
-        public List<IConstrucableDesign> GetJobItems(FactionInfoDB factionInfoDB)
-        {
-            return factionInfoDB.IndustryDesigns.Values.ToList();
         }
     }
 
@@ -147,7 +99,7 @@ namespace Pulsar4X.ECSLib.Industry
             newline.MaxVolume = MaxProductionVolume;
             newline.IndustryTypeRates = IndustryPoints;
             newline.FacName = componentInstance.Name;
-
+            
             if (db == null)
             {
                 db = new IndustryAbilityDB(componentInstance.ID, newline);
@@ -158,6 +110,25 @@ namespace Pulsar4X.ECSLib.Industry
                 db.ProductionLines.Add(componentInstance.ID, newline);
             }
         }
+        
+        public string AtbName()
+        {
+            return "Industry";
+        }
+
+        public string AtbDescription()
+        {
+            string industryTypesAndPoints = "";
+            foreach (var kvp in IndustryPoints)
+            {
+                var name =StaticRefLib.StaticData.IndustryTypes[kvp.Key].Name;
+                var amount = kvp.Value;
+
+                industryTypesAndPoints += name + "\t" + amount + "\n";
+            }
+            return industryTypesAndPoints;
+        }
+        
     }
     public enum ConstructableGuiHints
     {
@@ -173,9 +144,9 @@ namespace Pulsar4X.ECSLib.Industry
         Guid ID { get;  }
         string Name { get;  } //player defined name. ie "5t 2kn Thruster".
 
-        Dictionary<Guid, int> ResourceCosts { get; }
+        Dictionary<Guid, long> ResourceCosts { get; }
 
-        int IndustryPointCosts { get; }
+        long IndustryPointCosts { get; }
         Guid IndustryTypeID { get; }
         
         void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo);
@@ -189,11 +160,11 @@ namespace Pulsar4X.ECSLib.Industry
         public Guid ItemGuid { get; protected set; }
         public ushort NumberOrdered { get; internal set; }
         public ushort NumberCompleted { get; internal set; }
-        public int ProductionPointsLeft { get; internal set; }
-        public int ProductionPointsCost { get; protected set; }
+        public long ProductionPointsLeft { get; internal set; }
+        public long ProductionPointsCost { get; protected set; }
         public bool Auto { get; internal set; }
 
-        public Dictionary<Guid, int> ResourcesRequired { get; internal set; } = new Dictionary<Guid, int>();
+        public Dictionary<Guid, long> ResourcesRequired { get; internal set; } = new Dictionary<Guid, long>();
         
         
         public JobBase()
@@ -326,7 +297,7 @@ namespace Pulsar4X.ECSLib.Industry
         {
             VolumeStorageDB stockpile = industryEntity.GetDataBlob<VolumeStorageDB>();
             Entity faction;
-            industryEntity.Manager.FindEntityByGuid(industryEntity.FactionOwner, out faction);
+            industryEntity.Manager.FindEntityByGuid(industryEntity.FactionOwnerID, out faction);
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
 
@@ -341,7 +312,7 @@ namespace Pulsar4X.ECSLib.Industry
                 var prodLine = kvp.Value;
                 var industryPointsRemaining = new Dictionary<Guid, int>( prodLine.IndustryTypeRates);
                 List<IndustryJob> Joblist = prodLine.Jobs;
-                float productionPercentage = 1;
+                float productionPercentage = 1; //0 to 1
                 
                 
 
@@ -363,16 +334,16 @@ namespace Pulsar4X.ECSLib.Industry
                         //gather availible resorces for this job.
                         //right now we take all the resources we can, for an individual item in the batch. 
                         //even if we're taking more than we can use in this turn, we're using/storing it. 
-                        IDictionary<Guid, int> resourceCosts = batchJob.ResourcesRequired;
+                        IDictionary<Guid, long> resourceCosts = batchJob.ResourcesRequired;
                         //Note: this is editing batchjob.ResourcesRequired variable. 
                         ConsumeResources(stockpile, ref resourceCosts);
                         //we calculate the difference between the design resources and the amount of resources we've squirreled away. 
                     
                         
                         // this is the total of the resources that we don't have access to for this item. 
-                        int unusableResourceSum = resourceCosts.Sum(item => item.Value);
+                        var unusableResourceSum = resourceCosts.Sum(item => item.Value);
                         // this is the total resources that can be used on this item. 
-                        int useableResourcePoints = resourceSum - unusableResourceSum;
+                        var useableResourcePoints = resourceSum - unusableResourceSum;
                         
                         pointsToUse = Math.Min(industryPointsRemaining[designInfo.IndustryTypeID], batchJob.ProductionPointsLeft);
                         pointsToUse = Math.Min(pointsToUse, useableResourcePoints * pointPerResource);
@@ -397,25 +368,25 @@ namespace Pulsar4X.ECSLib.Industry
             }
         }
         
-        internal static void ConsumeResources(VolumeStorageDB fromCargo, ref IDictionary<Guid, int> toUse)
+        internal static void ConsumeResources(VolumeStorageDB fromCargo, ref IDictionary<Guid, long> toUse)
         {   
-            foreach (KeyValuePair<Guid, int> kvp in toUse.ToArray())
+            foreach (KeyValuePair<Guid, long> kvp in toUse.ToArray())
             {             
                 ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);//fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(kvp.Key);
                 
                 Guid cargoTypeID = cargoItem.CargoTypeID;
-                int amountUsedThisTick = 0;
+                long amountUsedThisTick = 0;
                 if (fromCargo.TypeStores.ContainsKey(cargoTypeID))
                 {
                     if (fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
                     {
-                        amountUsedThisTick = Math.Min((int)fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits[cargoItem.ID], kvp.Value);
+                        amountUsedThisTick = Math.Min(fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits[cargoItem.ID], kvp.Value);
                     }
                 }
 
                 if (amountUsedThisTick > 0)
                 {
-                    int used = fromCargo.RemoveCargoByUnit(cargoItem, amountUsedThisTick);
+                    long used = fromCargo.RemoveCargoByUnit(cargoItem, amountUsedThisTick);
                     toUse[kvp.Key] -= used;
                 }
             }         
@@ -427,6 +398,17 @@ namespace Pulsar4X.ECSLib.Industry
     
     public class IndustryOrder2:EntityCommand 
     {
+
+        public override string Name
+        {
+            get
+            {
+                return "Industry: " + OrderType.ToString();
+            }
+        }
+
+
+        public override string Details { get; } = "Instant";
 
         public enum OrderTypeEnum
         {
@@ -444,8 +426,8 @@ namespace Pulsar4X.ECSLib.Industry
         
         public short Delta { get; set; }
         
-        public override int ActionLanes => 1; //blocks movement
-        public override bool IsBlocking => true;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf; 
+        public override bool IsBlocking => true; //?why block?
 
 
         private Entity _entityCommanding;

@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
             orderableDB.ProcessOrderList(atDateTime);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             List<Entity> entitysWithCargoTransfers = manager.GetAllEntitiesWithDataBlob<OrderableDB>();
             
@@ -38,6 +38,8 @@ namespace Pulsar4X.ECSLib
             {
                 ProcessEntity(entity, deltaSeconds);
             }
+
+            return entitysWithCargoTransfers.Count;
         }
 
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)

@@ -15,36 +15,31 @@ namespace Pulsar4X.ECSLib
         {
             ShipInfoDB shipInfo = shipEntity.GetDataBlob<ShipInfoDB>();
             ComponentInstancesDB componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>();
-            float totalTonnage = 0;
-            int totalHTK = 0;
-            double totalVolume = 0;
-            
-            foreach (KeyValuePair<Guid, List<ComponentInstance>> instance in componentInstances.GetComponentsByDesigns())
-            {                
-                var componentVolume = componentInstances.AllDesigns[instance.Key].VolumePerUnit;
-                var componentTonnage = componentInstances.AllDesigns[instance.Key].MassPerUnit;
-                
-                foreach (var componentInstance in instance.Value)
+            int totalHTK = componentInstances.GetTotalHTK();
+            float totalTonnage = componentInstances.GetTotalTonnage();
+            double totalVolume = componentInstances.GetTotalVolume();
+            MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
+            if (mvDB.MassTotal != totalTonnage)
+            {
+                if (shipEntity.HasDataBlob<WarpAbilityDB>())
                 {
-                    
-                    totalHTK += componentInstance.HTKRemaining; 
-                    totalVolume += componentVolume;
-                    totalTonnage += componentTonnage;
+                    ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(shipEntity);
                 }
             }
-            if (shipInfo.Tonnage != totalTonnage)
-            {
-                shipInfo.Tonnage = totalTonnage;
-                if(shipEntity.HasDataBlob<WarpAbilityDB>())
-                    ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(shipEntity);
-            }
+
+            var armor = shipInfo.Design.Armor;
+            var r = Math.Cbrt(totalVolume * 3 / 4 / Math.PI);
+            var s = 4 * Math.PI * r * r;
+            var v = s * armor.thickness * 0.001; //armor thickness is in mm, volume is in m^3
+            var m = v * armor.type.Density;
+            totalTonnage += (long)Math.Round(m);
+
             shipInfo.InternalHTK = totalHTK;
-            MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
+            
             mvDB.MassDry = totalTonnage;
             mvDB.Volume_m3 = totalVolume;
-            mvDB.Density_gcm = MassVolumeDB.CalculateDensity(totalTonnage, totalVolume);
-            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius_Au(totalTonnage, mvDB.Density_gcm);
-            
+            mvDB.DensityDry_gcm = MassVolumeDB.CalculateDensity(totalTonnage, totalVolume);
+            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius_Au(totalTonnage, mvDB.DensityDry_gcm);
         }
     }
 

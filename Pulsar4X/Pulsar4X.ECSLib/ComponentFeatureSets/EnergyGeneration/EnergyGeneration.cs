@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -71,6 +72,17 @@ namespace Pulsar4X.ECSLib
             }
 
         }
+        
+        public string AtbName()
+        {
+            return "Energy Generation";
+        }
+
+        public string AtbDescription()
+        {
+            string fuelName = StaticRefLib.StaticData.CargoGoods.GetAny(FuelType).Name;
+            return "Generates " + PowerOutputMax + " Mw, using: " + FuelUsedAtMax + "kg/s of " + fuelName;
+        }
     }
 
     public class EnergyStoreAtb : IComponentDesignAttribute
@@ -107,6 +119,16 @@ namespace Pulsar4X.ECSLib
                 genDB.EnergyStored[EnergyTypeID] = 0;
                 genDB.EnergyStoreMax[EnergyTypeID] = MaxStore;
             }
+        }
+        
+        public string AtbName()
+        {
+            return "Energy Storage";
+        }
+
+        public string AtbDescription()
+        {
+            return "Adds " + MaxStore + " Energy Storage to parent";
         }
     }
 
@@ -225,7 +247,7 @@ namespace Pulsar4X.ECSLib
             
             var output = _energyGenDB.TotalOutputMax - _energyGenDB.Demand;
             
-            output = GMath.Clamp(output, -stored, freestore);
+            output = GeneralMath.Clamp(output, -stored, freestore);
             _energyGenDB.EnergyStored[energyType] += output;
 
             if (output > 0)

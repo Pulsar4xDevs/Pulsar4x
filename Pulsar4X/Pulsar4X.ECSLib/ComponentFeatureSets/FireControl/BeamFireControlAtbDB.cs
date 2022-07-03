@@ -47,5 +47,15 @@ namespace Pulsar4X.ECSLib
                 componentInstance.SetAbilityState<FireControlAbilityState>(new FireControlAbilityState(componentInstance));
             ability.FireControlInstances.Add(componentInstance);
         }
+
+        public string AtbName()
+        {
+            return "Beam Fire Control";
+        }
+
+        public string AtbDescription()
+        {
+            return "Adds fire control to parent, per Item";
+        }
     }
 }

@@ -1,27 +1,33 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
 {
     public class BeamWeapnProcessor : IHotloopProcessor
     {
+        private static readonly int _beamInfoIndex = EntityManager.GetTypeIndex<BeamInfoDB>();
         public void Init(Game game)
         {
-            //dotnothing
+            //donothing
         }
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            BeamMovePhysics(entity.GetDataBlob<BeamInfoDB>(), deltaSeconds);
+            BeamMovePhysics(entity.GetDataBlob<BeamInfoDB>(_beamInfoIndex), deltaSeconds);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            var dbs = manager.GetAllDataBlobsOfType<BeamInfoDB>();
+            var dbs = manager.GetAllDataBlobsOfType<BeamInfoDB>(_beamInfoIndex);
             foreach (BeamInfoDB db in dbs)
             { 
                 BeamMovePhysics(db, deltaSeconds);
             }
+
+            return dbs.Count;
         }
 
         public TimeSpan RunFrequency { get; } = TimeSpan.FromSeconds(1);
@@ -30,45 +36,100 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
 
         public static void BeamMovePhysics(BeamInfoDB beamInfo, int seconds)
         {
-            for (int i = 0; i < seconds; i++)
+            if (beamInfo.HitsTarget)
             {
-                beamInfo.PosDB.AbsolutePosition_m += beamInfo.VelocityVector;
+                //adjust the vector to ensure the visuals line up with the target
+                var state = (beamInfo.PosDB.AbsolutePosition_m, beamInfo.VelocityVector);
+                var nowTime = beamInfo.OwningEntity.StarSysDateTime;
+                var futurePosTime = PredictTgtPositionAndTime(state, nowTime, beamInfo.TargetEntity, beamInfo.VelocityVector.Length());
+                var normVector = Vector3.Normalise(futurePosTime.pos - state.AbsolutePosition_m);
+                var absVector =  normVector * beamInfo.VelocityVector.Length();
+                
+                beamInfo.VelocityVector = absVector;
+
+                if (futurePosTime.seconds <= seconds)
+                {
+                    //var ralitivePos = state.AbsolutePosition_m - futurePosTime.pos;
+                    var posRalitiveToTarget = futurePosTime.pos - state.AbsolutePosition_m;
+                    var beamAngle = Math.Atan2(posRalitiveToTarget.Y, posRalitiveToTarget.X);
+                    var shipFutureVel = beamInfo.TargetEntity.GetAbsoluteFutureVelocity(nowTime + TimeSpan.FromSeconds(futurePosTime.seconds));
+                    var shipHeading = Math.Atan2(shipFutureVel.Y, shipFutureVel.X);
+                    var hitAngle = beamAngle + shipHeading;
+                    var ralitiveVel = shipFutureVel - beamInfo.VelocityVector;
+                    var ralitiveSpeed = ralitiveVel.Length();
+                    var freq = beamInfo.Frequency;
+                    
+                    DamageFragment damage = new DamageFragment()
+                    {
+                        Velocity = new Vector2( ralitiveVel.X, ralitiveVel.Y),
+                        Position = ((int)posRalitiveToTarget.X, (int)posRalitiveToTarget.Y),
+                        //Angle = hitAngle,
+                        Mass = 0.000001f,
+                        Density = 1000,
+                        Momentum = (float)(UniversalConstants.Science.PlankConstant * freq),
+                        Length = (float)(beamInfo.Positions[0] - beamInfo.Positions[1]).Length(),
+                    };
+                    var slides = DamageProcessor.OnTakingDamage(beamInfo.TargetEntity, damage);
+                    beamInfo.OwningEntity.Destroy();
+                }
+                else
+                {
+                    beamInfo.PosDB.AbsolutePosition_m += beamInfo.VelocityVector * seconds;
+                    for (int j = 0; j < beamInfo.Positions.Length; j++)
+                    {
+                        beamInfo.Positions[j] += beamInfo.VelocityVector * seconds;
+                    }
+                }
+            }
+            
+            else
+            {
+                beamInfo.PosDB.AbsolutePosition_m += beamInfo.VelocityVector * seconds;
                 for (int j = 0; j < beamInfo.Positions.Length; j++)
                 {
-                    beamInfo.Positions[j] += beamInfo.VelocityVector;
+                    beamInfo.Positions[j] += beamInfo.VelocityVector * seconds;
                 }
             }
         }
         
-        public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, double beamVelocity, double beamLenInSeconds)
+        public static void FireBeamWeapon(Entity launchingEntity, Entity targetEntity, bool hitsTarget,double freqency, double beamVelocity, double beamLenInSeconds)
         {
-            var ourState = Entity.GetRalitiveState(launchingEntity);
-            var tgtState = Entity.GetRalitiveState(targetEntity);
+            var nowTime = launchingEntity.StarSysDateTime;
+            var ourState = launchingEntity.GetAbsoluteState();
+            var futurePosTime = PredictTgtPositionAndTime(ourState, nowTime, targetEntity, beamVelocity);
             
-            Vector3 leadToTgt = (tgtState.Velocity - ourState.Velocity);
-            Vector3 vectorToTgt = (tgtState.pos = ourState.pos);
-            var distanceToTgt = vectorToTgt.Length();
-            var timeToTarget = distanceToTgt / beamVelocity;
-            var futureDate = launchingEntity.StarSysDateTime + TimeSpan.FromSeconds(timeToTarget);
-            var futurePosition = Entity.GetAbsoluteFuturePosition(targetEntity, futureDate);
-            var ourAbsPos = Entity.GetAbsoluteFuturePosition(launchingEntity, futureDate);
-            var normVector = Vector3.Normalise(futurePosition - ourAbsPos);
+            var ourAbsPos = launchingEntity.GetAbsoluteFuturePosition(nowTime);
+            var normVector = Vector3.Normalise(futurePosTime.pos - ourAbsPos);
             var absVector =  normVector * beamVelocity;
             var startPos = (PositionDB)launchingEntity.GetDataBlob<PositionDB>().Clone();
-            var beamInfo = new BeamInfoDB(launchingEntity.Guid);
+            var beamInfo = new BeamInfoDB(launchingEntity.Guid, targetEntity, hitsTarget);
             var beamlenInMeters = beamLenInSeconds * 299792458;
             beamInfo.Positions = new Vector3[2];
             beamInfo.Positions[0] = startPos.AbsolutePosition_m ;
             beamInfo.Positions[1] = startPos.AbsolutePosition_m - normVector * beamlenInMeters;
             beamInfo.VelocityVector = absVector;
-            
+            beamInfo.Frequency = freqency;
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             dataBlobs.Add(beamInfo);
             //dataBlobs.Add(new ComponentInstancesDB());
             dataBlobs.Add(startPos);
             //dataBlobs.Add(new NameDB("Beam", launchingEntity.FactionOwner, "Beam" ));
 
-            var newbeam = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwner, dataBlobs);
+            var newbeam = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwnerID, dataBlobs);
+        }
+
+        public static (Vector3 pos, double seconds) PredictTgtPositionAndTime((Vector3 pos, Vector3 Velocity) ourState, DateTime atTime, Entity targetEntity, double beamVelocity)
+        {
+            
+            var tgtState = targetEntity.GetAbsoluteState();
+            Vector3 leadToTgt = (ourState.Velocity - tgtState.Velocity);
+            Vector3 vectorToTgt = (ourState.pos -tgtState.pos);
+            var distanceToTgt = vectorToTgt.Length();
+            var timeToTarget = distanceToTgt / beamVelocity;
+            var futureDate = atTime + TimeSpan.FromSeconds(timeToTarget);
+            var futurePosition = targetEntity.GetAbsoluteFuturePosition(futureDate);
+            return (futurePosition, timeToTarget);
+
         }
         
         Vector3 LeadVector(
@@ -98,7 +159,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                     timespanToIntercept = TimeSpan.FromSeconds(newttt);
                 }
                 DateTime futureDate = atDateTime + timespanToIntercept;
-                var futurePosition = Entity.GetRalitiveFuturePosition(targetEntity, futureDate);
+                var futurePosition = targetEntity.GetRelativeFuturePosition(futureDate);
                     
                 tgtBearing = futurePosition - ourState.pos;
                 distanceToTgt = (tgtBearing).Length();
@@ -117,7 +178,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             return vectorToTgt * dvToUse;
         }
         
-        double TimeToTarget(double distanceToTgt, Vector3 ourVelocity, Vector3 targetVelocity)
+        public static double TimeToTarget(double distanceToTgt, Vector3 ourVelocity, Vector3 targetVelocity)
         {
             Vector3 leadToTgt = targetVelocity - ourVelocity;
             var closingSpeed = leadToTgt.Length() ;
@@ -128,9 +189,12 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
 
     public class BeamInfoDB : BaseDataBlob
     {
+        public double Frequency;
         public Guid FiredBy;
         public Vector3 VelocityVector;
         public Vector3[] Positions;
+        public bool HitsTarget;
+        public Entity TargetEntity;
         private PositionDB _posDB;
         public PositionDB PosDB {
             get
@@ -140,9 +204,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                 return _posDB;
             }}
 
-        public BeamInfoDB(Guid launchedBy)
+        public BeamInfoDB(Guid launchedBy, Entity targetEntity, bool hitsTarget)
         {
             FiredBy = launchedBy;
+            TargetEntity = targetEntity;
+            HitsTarget = hitsTarget;
         }
 
         public override object Clone()

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 
 namespace Pulsar4X.ECSLib
 {
@@ -24,9 +25,25 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="damageableEntity"></param>
         /// <param name="damageAmount"></param>
-        public static void OnTakingDamage(Entity damageableEntity, int damageAmount, DateTime atDateTime)
+        public static List<RawBmp> OnTakingDamage(Entity damageableEntity, DamageFragment damage)
         {
-        
+
+            var db = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
+            if (!damageableEntity.HasDataBlob<EntityDamageProfileDB>())
+            {
+                //I think currently most damageable entites should already have this, 
+                //need to consider whether an undamaged entity needs this or if we should create it if and when it gets damaged.
+                
+                if(damageableEntity.HasDataBlob<ShipInfoDB>())
+                {
+                    db = new EntityDamageProfileDB(damageableEntity.GetDataBlob<ShipInfoDB>().Design);
+                    damageableEntity.SetDataBlob(db);
+                }
+                //return;
+            }
+            
+             return DamageTools.DealDamage(db, damage);
+
             /*
             if (damageableEntity.HasDataBlob<AsteroidDamageDB>())
             {
@@ -54,7 +71,7 @@ namespace Pulsar4X.ECSLib
                 while (damageAmount > 0)
                 {
 
-                    int randValue = mySystem.RNG.Next((int)(damageableEntity.GetDataBlob<MassVolumeDB>().Volume_m3)); //volume in m^3
+                    int randValue = mySystem.RNGNext((int)(damageableEntity.GetDataBlob<MassVolumeDB>().Volume_m3)); //volume in m^3
 
           
                     if (damageAttempt == 20) // need to copy this to fully break out of the loop;
@@ -100,7 +117,7 @@ namespace Pulsar4X.ECSLib
                 int damageAttempt = 0;
                 while (damageAmount > 0)
                 {
-                    int randValue = mySystem.RNG.Next((int)damageableEntity.GetDataBlob<MassVolumeDB>().Volume_km3);
+                    int randValue = mySystem.RNGNext((int)damageableEntity.GetDataBlob<MassVolumeDB>().Volume_km3);
 
                     foreach (KeyValuePair<Entity, double> pair in ColInst.ComponentDictionary)
                     {
@@ -200,7 +217,7 @@ namespace Pulsar4X.ECSLib
                 EntityManager mySystem = Asteroid.Manager;
                 
 
-                var origVel = OrbitProcessor.AbsoluteOrbitalVector_AU(origOrbit, atDateTime);
+                var origVel = origOrbit.AbsoluteOrbitalVector_AU(atDateTime);
 
                 //public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
                 //I need the target entity, the collisionDate, and the starSystem. I may have starsystem from guid.

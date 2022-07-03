@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Reflection;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -78,7 +79,7 @@ namespace Pulsar4X.SDL2UI
                 DBDisplay(_dataBlobs[_selectedDB]);
 
             var p1 = ImGui.GetCursorPos();
-            var size = new Vector2(ImGui.GetContentRegionAvail().X, p1.Y - p0.Y );
+            var size = new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, p1.Y - p0.Y );
             
             BorderListOptions.End(size);
         }
@@ -91,7 +92,7 @@ namespace Pulsar4X.SDL2UI
             
             var _totalHeight = _numLines * _heightMultiplyer;
             _numLines = memberInfos.Length;
-            var size = new Vector2(ImGui.GetContentRegionAvail().X, _totalHeight);
+            var size = new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, _totalHeight);
             
             ImGui.BeginChild("InnerColomns", size);
             
@@ -176,6 +177,41 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                         }
                     }
+                    else if (typeof(KeplerElements).IsAssignableFrom(value.GetType()))
+                    {
+                        //var items = (KeplerElements)GetValue(memberInfo, obj);
+                        MemberInfo[] memberInfoske =  typeof(KeplerElements).GetMembers(flags);
+                        int itemsCount = memberInfoske.Length;
+                        
+                        if (ImGui.TreeNode(memberInfo.Name))
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                            _numLines += itemsCount;
+    
+                                foreach (var memberInfoke in memberInfoske)
+                                {
+                                    object valueke = GetValue(memberInfoke, value);
+                                    ImGui.Text(memberInfoke.Name);
+                                    ImGui.NextColumn();
+                                    //object value = memberInfo.GetValue(obj);
+                                    if (valueke != null)
+                                        ImGui.Text(valueke.ToString());
+                                    else ImGui.Text("null");
+                                    ImGui.NextColumn();
+                                }
+                            
+
+                            ImGui.TreePop();
+                        }
+                        else
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                        }
+                    }
                     else
                     {
                         ImGui.Text(memberInfo.Name);
@@ -223,7 +259,7 @@ namespace Pulsar4X.SDL2UI
             var componentsByDesign = instancesDB.ComponentsByDesign;
             
 
-            StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(instancesDB.OwningEntity.FactionOwner, out var faction);
+            StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(instancesDB.OwningEntity.FactionOwnerID, out var faction);
             FactionInfoDB factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
             
             string[] designNames = new string[componentsByDesign.Count];
@@ -274,9 +310,9 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(state.Name);
             }
             
-            BorderListOptions.End(new Vector2(200, 200));
+            BorderListOptions.End(new System.Numerics.Vector2(200, 200));
             
-            BorderListOptions.End(new Vector2(250, 500));
+            BorderListOptions.End(new System.Numerics.Vector2(250, 500));
             
             
             

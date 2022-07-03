@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using static SDL2.SDL;
 
@@ -28,8 +29,8 @@ namespace Pulsar4X.SDL2UI
 
         PositionDB _targetPositionDB;
 
-        Vector3 _transitLeavePositionRalitive_m; //ralitive to the parentBody
-        private Vector3 _transitArriveRalitivePos_m { get; set; }
+        Vector3 _transitLeavePositionrelative_m; //relative to the parentBody
+        private Vector3 _transitArriverelativePos_m { get; set; }
         private Vector3 _transitArriveAbsolutePos_m { get; set; }
 
         SDL_Point[] _linePoints;
@@ -49,7 +50,7 @@ namespace Pulsar4X.SDL2UI
             _movingEntityCurrentOrbit = _movingEntity.GetDataBlob<OrbitDB>();
             _transitLeaveDateTime = _currentDateTime;
 
-            _parentPositionDB = Entity.GetSOIParentPositionDB(_movingEntity);
+            _parentPositionDB = _movingEntity.GetSOIParentPositionDB();
             _departIcon = TransitIcon.CreateDepartIcon(_parentPositionDB);
             OnPhysicsUpdate();
         }
@@ -71,18 +72,18 @@ namespace Pulsar4X.SDL2UI
             _targetPositionDB = _targetEntity.GetDataBlob<PositionDB>();
 
             _arriveIcon = TransitIcon.CreateArriveIcon(_targetPositionDB);
-            //these are ralitive to thier respective bodies, for the initial default, copying the position shoul be fine.
+            //these are relative to thier respective bodies, for the initial default, copying the position shoul be fine.
             //however a better default would djust the distance from the target to get a circular orbit and
             //check if it's above minimum and that the resulting orbit is within soi 
             _arriveIcon.ProgradeAngle = _departIcon.ProgradeAngle; 
             OnPhysicsUpdate();
         }
 
-        public void SetArrivalPosition(Vector3 ralitiveWorldPosition_m)
+        public void SetArrivalPosition(Vector3 relativeWorldPosition_m)
         {
-            _transitArriveRalitivePos_m = ralitiveWorldPosition_m;
-            _transitArriveAbsolutePos_m = _targetPositionDB.AbsolutePosition_m + _transitArriveRalitivePos_m;
-            _arriveIcon.SetTransitPositon(_transitArriveRalitivePos_m);
+            _transitArriverelativePos_m = relativeWorldPosition_m;
+            _transitArriveAbsolutePos_m = _targetPositionDB.AbsolutePosition_m + _transitArriverelativePos_m;
+            _arriveIcon.SetTransitPositon(_transitArriverelativePos_m);
         }
 
 
@@ -90,7 +91,7 @@ namespace Pulsar4X.SDL2UI
         public void SetDepartureProgradeAngle(double angle)
         {
             _departIcon.ProgradeAngle = angle;
-            _departIcon.SetTransitPositon(_transitLeavePositionRalitive_m);
+            _departIcon.SetTransitPositon(_transitLeavePositionrelative_m);
 
         }
         public void SetArivalProgradeAngle(double angle)
@@ -98,7 +99,7 @@ namespace Pulsar4X.SDL2UI
             if (_arriveIcon != null)
             {
                 _arriveIcon.ProgradeAngle = angle;
-                _arriveIcon.SetTransitPositon(_transitArriveRalitivePos_m);
+                _arriveIcon.SetTransitPositon(_transitArriverelativePos_m);
             }
         }
 
@@ -108,8 +109,7 @@ namespace Pulsar4X.SDL2UI
             if (_transitLeaveDateTime < _currentDateTime)
                 _transitLeaveDateTime = _currentDateTime;
 
-            _transitLeavePositionRalitive_m = Entity.GetRalitiveFuturePosition(_movingEntity, _transitLeaveDateTime);
-
+            _transitLeavePositionrelative_m = _movingEntity.GetRelativeFuturePosition(_transitLeaveDateTime);
         }
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -165,7 +165,7 @@ namespace Pulsar4X.SDL2UI
         //DateTime TransitDateTime;
         //Vector4 _transitPosition;
         Shape _progradeArrow;
-        PointD[] _arrow;
+        Orbital.Vector2[] _arrow;
 
         private TransitIcon(PositionDB parentPos) : base(parentPos)
         {
@@ -218,19 +218,19 @@ namespace Pulsar4X.SDL2UI
 
         void CreateCheverons(int x, int y)
         {
-            PointD[] chevronPoints1 = new PointD[3];
-            chevronPoints1[0] = new PointD() { X = x - 4, Y = y + 3 };
-            chevronPoints1[1] = new PointD() { X = x + 0, Y = y - 3 };
-            chevronPoints1[2] = new PointD() { X = x + 4, Y = y + 3 };
+            Orbital.Vector2[] chevronPoints1 = new Orbital.Vector2[3];
+            chevronPoints1[0] = new Orbital.Vector2() { X = x - 4, Y = y + 3 };
+            chevronPoints1[1] = new Orbital.Vector2() { X = x + 0, Y = y - 3 };
+            chevronPoints1[2] = new Orbital.Vector2() { X = x + 4, Y = y + 3 };
             Shape chevron = new Shape()
             {
                 Points = chevronPoints1,
                 Color = PrimaryColour
             };
-            PointD[] chevronPoints2 = new PointD[3];
-            chevronPoints2[0] = new PointD() { X = x - 4, Y = y + 7 };
-            chevronPoints2[1] = new PointD() { X = x + 0, Y = y + 1 };
-            chevronPoints2[2] = new PointD() { X = x + 4, Y = y + 7 };
+            Orbital.Vector2[] chevronPoints2 = new Orbital.Vector2[3];
+            chevronPoints2[0] = new Orbital.Vector2() { X = x - 4, Y = y + 7 };
+            chevronPoints2[1] = new Orbital.Vector2() { X = x + 0, Y = y + 1 };
+            chevronPoints2[2] = new Orbital.Vector2() { X = x + 4, Y = y + 7 };
             Shape chevron2 = new Shape()
             {
                 Points = chevronPoints2,
@@ -243,7 +243,7 @@ namespace Pulsar4X.SDL2UI
 
         void CreateProgradeArrow()
         {
-            PointD[] arrowPoints = CreatePrimitiveShapes.CreateArrow(24);
+            Orbital.Vector2[] arrowPoints = CreatePrimitiveShapes.CreateArrow(24);
             /*
             List<PointD> arrowPoints = new List<PointD>(pnts.Length);
             foreach (var point in pnts)
@@ -253,11 +253,11 @@ namespace Pulsar4X.SDL2UI
                 arrowPoints.Add(new PointD() { X = x, Y = y });
             }
             */
-            var rotate270 = Matrix.New270DegreeMatrix();
-            _arrow = new PointD[arrowPoints.Length];
+            var rotate270 = Matrix.IDRotate270Deg();
+            _arrow = new Orbital.Vector2[arrowPoints.Length];
             for (int i = 0; i < _arrow.Length; i++)
             {
-                _arrow[i] = rotate270.TransformD(arrowPoints[i]);
+                _arrow[i] = rotate270.TransformToVector2(arrowPoints[i]);
             }
 
             _progradeArrow = new Shape()
@@ -278,10 +278,10 @@ namespace Pulsar4X.SDL2UI
         /// <summary>
         /// Sets the transit postion.
         /// </summary>
-        /// <param name="transitPositionRalitive_m">Transit position offset, this is the world position ralitive to the parent body</param>
-        public void SetTransitPositon(Vector3 transitPositionRalitive_m)
+        /// <param name="transitPositionrelative_m">Transit position offset, this is the world position relative to the parent body</param>
+        public void SetTransitPositon(Vector3 transitPositionrelative_m)
         {
-            _worldPosition_m = transitPositionRalitive_m;
+            _worldPosition_m = transitPositionrelative_m;
             
             OnPhysicsUpdate();
         }
@@ -305,35 +305,35 @@ namespace Pulsar4X.SDL2UI
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
             //rotate the progradeArrow.
-            Matrix rotate = Matrix.NewRotateMatrix(ProgradeAngle);
-            _progradeArrow.Points = new PointD[_arrow.Length];
+            Matrix rotate = Matrix.IDRotate(ProgradeAngle);
+            _progradeArrow.Points = new Orbital.Vector2[_arrow.Length];
             for (int i = 0; i < _arrow.Length; i++)
             {
-                _progradeArrow.Points[i] = rotate.TransformD(_arrow[i]);
+                _progradeArrow.Points[i] = rotate.TransformToVector2(_arrow[i]);
             }
             Shapes[0] = _progradeArrow;
             
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
             
-            var mirrorMtx = Matrix.NewMirrorMatrix(true, false);
-            var scaleMtx = Matrix.NewScaleMatrix(Scale, Scale);
+            var mirrorMtx = Matrix.IDMirror(true, false);
+            var scaleMtx = Matrix.IDScale(Scale, Scale);
             Matrix nonZoomMatrix = mirrorMtx * scaleMtx;
 
             DrawShapes = new Shape[this.Shapes.Count];
             for (int i = 0; i < Shapes.Count; i++)
             {
                 var shape = Shapes[i];
-                PointD[] drawPoints = new PointD[shape.Points.Length];
+                Orbital.Vector2[] drawPoints = new Orbital.Vector2[shape.Points.Length];
                 
                 for (int i2 = 0; i2 < shape.Points.Length; i2++)
                 {
                     int x;
                     int y;
 
-                    var tranlsatedPoint = nonZoomMatrix.TransformD( shape.Points[i2].X,  shape.Points[i2].Y);
+                    var tranlsatedPoint = nonZoomMatrix.TransformToVector2( shape.Points[i2].X,  shape.Points[i2].Y);
                     x = (int)(ViewScreenPos.x + tranlsatedPoint.X );
                     y = (int)(ViewScreenPos.y + tranlsatedPoint.Y );
-                    drawPoints[i2] = new PointD() { X = x, Y = y };
+                    drawPoints[i2] = new Orbital.Vector2() { X = x, Y = y };
                 }
                 DrawShapes[i] = new Shape() { Points = drawPoints, Color = shape.Color };
             }

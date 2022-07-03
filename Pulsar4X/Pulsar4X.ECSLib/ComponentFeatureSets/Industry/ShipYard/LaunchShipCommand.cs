@@ -1,11 +1,14 @@
 using System;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib.Industry
 {
     public class LaunchShipCmd : EntityCommand
     {
-        public override int ActionLanes => 1;
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
         public override bool IsBlocking => true;
+        public override string Name { get; } = "Launch Ship From Storage";
+        public override string Details { get; } = "";
 
         Entity _factionEntity;
         Entity _entityCommanding;
@@ -31,7 +34,7 @@ namespace Pulsar4X.ECSLib.Industry
 
             };
 
-            var parent = Entity.GetSOIParentEntity(orderEntity);
+            var parent = orderEntity.GetSOIParentEntity();
             
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         }
@@ -71,7 +74,7 @@ namespace Pulsar4X.ECSLib.Industry
             {
                 //_entityCommanding.GetDataBlob<CargoStorageDB>().StoredCargoTypes
                 ShipDesign design = (ShipDesign)_factionEntity.GetDataBlob<FactionInfoDB>().IndustryDesigns[_yardJob.ItemGuid];
-                ShipFactory.CreateShip(design, _factionEntity, targetPosition, orbitalParent, (StarSystem)orbitalParent.Manager);
+                ShipFactory.CreateShip(design, _factionEntity, targetPosition, orbitalParent);
                 _hasLaunched = true;
             }
         }

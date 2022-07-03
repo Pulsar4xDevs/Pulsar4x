@@ -21,6 +21,7 @@ namespace Pulsar4X.ECSLib
         private readonly Dictionary<Guid, EntityManager> _globalEntityDictionary;
         private readonly ReaderWriterLockSlim _globalGuidDictionaryLock;
         public int NumberOfEntites { get { return _entities.Count; } }
+        public int NumberOfGlobalEntites { get { return _globalEntityDictionary.Count; } }
         private int _nextID;
 
         internal readonly List<ComparableBitArray> EntityMasks = new List<ComparableBitArray>();
@@ -45,6 +46,8 @@ namespace Pulsar4X.ECSLib
         Dictionary<Guid, List<Entity>> EntitesByFaction = new Dictionary<Guid, List<Entity>>();  
         public List<Entity> GetEntitiesByFaction(Guid factionGuid)
         {
+            if (factionGuid == StaticRefLib.Game.GameMasterFaction.Guid)
+                return _entities;
             if (EntitesByFaction.ContainsKey(factionGuid))
                 return EntitesByFaction[factionGuid];
             else
@@ -178,11 +181,11 @@ namespace Pulsar4X.ECSLib
 
             UpdateListners(_entities[entityID], null, EntityChangeType.EntityAdded);
 
-            if (entity.FactionOwner != null)
+            if (entity.FactionOwnerID != null)
             {
-                if (!EntitesByFaction.ContainsKey(entity.FactionOwner))
-                    EntitesByFaction.Add(entity.FactionOwner, new List<Entity>());
-                EntitesByFaction[entity.FactionOwner].Add(entity);
+                if (!EntitesByFaction.ContainsKey(entity.FactionOwnerID))
+                    EntitesByFaction.Add(entity.FactionOwnerID, new List<Entity>());
+                EntitesByFaction[entity.FactionOwnerID].Add(entity);
             }
                 //return entityID; //commented this out since we're now setting the entity.ID in here instead of returning the ID to be set by the entity. this was due to UpdateListners needing a valid entity. 
         }
@@ -212,6 +215,19 @@ namespace Pulsar4X.ECSLib
             {
                 throw new ArgumentException("Provided Entity is not valid in this manager.");
             }
+            
+            Event logevent = new Event(StaticRefLib.CurrentDateTime, "Entity Removed From Manager");
+            logevent.Entity = entity;
+            if(entity.FactionOwnerID != Guid.Empty)
+                logevent.Faction = GetGlobalEntityByGuid(entity.FactionOwnerID);
+            logevent.SystemGuid = ManagerGuid;
+            logevent.EventType = EventType.EntityDestroyed;
+            if (entity.IsValid && entity.HasDataBlob<NameDB>())
+                logevent.EntityName = entity.GetDataBlob<NameDB>().OwnersName;
+            
+            
+            StaticRefLib.EventLog.AddEvent(logevent);          
+            
             int entityID = entity.ID;
             _entities[entityID] = null;
             EntityMasks[entityID] = null;
@@ -229,6 +245,7 @@ namespace Pulsar4X.ECSLib
 
             if (Game != null)
             {
+                UpdateListners(entity, null, EntityChangeType.EntityRemoved);
                 _globalGuidDictionaryLock.EnterWriteLock();
                 try
                 {
@@ -239,7 +256,7 @@ namespace Pulsar4X.ECSLib
                 {
                     _globalGuidDictionaryLock.ExitWriteLock();
                 }
-                UpdateListners(entity, null, EntityChangeType.EntityRemoved);
+                
             }
             else
             {
@@ -247,7 +264,7 @@ namespace Pulsar4X.ECSLib
                 _localEntityDictionary.Remove(entity.Guid);
             }
 
-            EntitesByFaction[entity.FactionOwner].Remove(entity);
+            EntitesByFaction[entity.FactionOwnerID].Remove(entity);
             foreach (var factionContacts in FactionSensorContacts.Values)
             {
                 factionContacts.RemoveContact(entity.Guid);
@@ -325,6 +342,8 @@ namespace Pulsar4X.ECSLib
             _dataBlobMap[typeIndex][entityID] = dataBlob;
             EntityMasks[entityID][typeIndex] = true;
             dataBlob.OwningEntity = _entities[entityID];
+            dataBlob.OnSetToEntity();
+            dataBlob.OwningEntity.Manager.ManagerSubpulses.AddSystemInterupt(dataBlob);
             if(updateListners)
                 UpdateListners(_entities[entityID], dataBlob, EntityChangeType.DBAdded);
         }
@@ -369,6 +388,10 @@ namespace Pulsar4X.ECSLib
 
         #region Public API Functions
 
+        /// <summary>
+        /// Don't assume entites are not null
+        /// </summary>
+        /// <returns></returns>
         public List<Entity> GetAllEntites()
         {
             return new List<Entity>(_entities);
@@ -411,6 +434,24 @@ namespace Pulsar4X.ECSLib
         public List<Entity> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
         {
             int typeIndex = GetTypeIndex<T>();
+
+            ComparableBitArray dataBlobMask = BlankDataBlobMask();
+            dataBlobMask[typeIndex] = true;
+
+            return GetAllEntitiesWithDataBlobs(dataBlobMask);
+        }
+        
+        /// <summary>
+        /// Returns a list of entities that have datablob type T.
+        /// <para></para>
+        /// Returns a blank list if no entities have that datablob.
+        /// <para></para>
+        /// DO NOT ASSUME THE ORDER OF THE RETURNED LIST!
+        /// </summary>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
+        public List<Entity> GetAllEntitiesWithDataBlob<T>(int typeIndex) where T : BaseDataBlob
+        {
+            //int typeIndex = GetTypeIndex<T>();
 
             ComparableBitArray dataBlobMask = BlankDataBlobMask();
             dataBlobMask[typeIndex] = true;

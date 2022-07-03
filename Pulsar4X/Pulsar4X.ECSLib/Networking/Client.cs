@@ -335,7 +335,7 @@ namespace Pulsar4X.Networking
             else
             {
                 Messages.Add("Warning! Unmatched Faction Hash");
-                Messages.Add("OrigionalfactionHash: " + hash.ToString());
+                Messages.Add("OriginalfactionHash: " + hash.ToString());
                 printEntityHashInfo(factionEntity);
             }
 
@@ -396,11 +396,11 @@ namespace Pulsar4X.Networking
             //this ensures that the ownership is properly set. I've tried a couple of other ways of doing this, but so far this seems to work the best.
             //doing it in the datablob post deserialization caused it to attempt to set the ownership before the entity was valid, and added an entity with an empty guid to the owned data. 
 
-            var owned = entity.FactionOwner;
+            var owned = entity.FactionOwnerID;
             if (owned != Guid.Empty)
             {
                 Entity faction;
-                entity.Manager.FindEntityByGuid(entity.FactionOwner, out faction);
+                entity.Manager.FindEntityByGuid(entity.FactionOwnerID, out faction);
                 var owner = faction.GetDataBlob<FactionOwnerDB>();
                 if (!owner.OwnedEntities.ContainsKey(entity.Guid))
                 {
@@ -435,7 +435,7 @@ namespace Pulsar4X.Networking
                     name = entity.Guid.ToString();
                 Messages.Add("Warning! Unmatched Entity Hash for: " + name);
                 Messages.Add("This is likely due to an incorrect IValueCompare implemenation on a datablob");
-                Messages.Add("Origional Entity Hash: " + hash.ToString());
+                Messages.Add("Original Entity Hash: " + hash.ToString());
                 printEntityHashInfo(entity);
             }
 

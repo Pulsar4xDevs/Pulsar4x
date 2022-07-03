@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     [JsonObject(MemberSerialization.OptIn)]
     public class StarSystem : EntityManager, ISerializable
     {
-
+        private readonly Random RNG;
 
         [PublicAPI]
         public Guid Guid
@@ -36,11 +36,42 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int Seed { get;  set; }
 
-        internal Random RNG { get; private set; }
+        [PublicAPI]
+        public int RNGNext(int min, int max)
+        {
+            var next = RNG.Next(min, max);
+            return next;
+        }
+
+        [PublicAPI]
+        public double RNGNextDouble()
+        {
+            var next = RNG.NextDouble();
+            return next;
+        }
+
+        public bool RNGNexBool(float chance)
+        {
+            return RNG.NextDouble() < chance;
+        }
+        public bool RNGNexBool(double chance)
+        {
+            return RNG.NextDouble() < chance;
+        }
 
         [JsonConstructor]
         internal StarSystem()
         {
+        }
+
+        public StarSystem(Game game, string name) : base(game, false)
+        {
+            NameDB = new NameDB(name);
+
+            var R = new Random();
+            Seed = R.Next(int.MaxValue - 1);        // Find a random integer for the seed so can recreate if needed
+            RNG = new Random(Seed);
+            game.Systems.Add(Guid, this);
         }
 
         public StarSystem(Game game, string name, int seed) : base(game, false)
@@ -51,6 +82,7 @@ namespace Pulsar4X.ECSLib
             RNG = new Random(seed);
             game.Systems.Add(Guid, this);
         }
+
         internal StarSystem(Game game, string name, int seed, Guid systemID): base(game, false)
         {
             NameDB = new NameDB(name);

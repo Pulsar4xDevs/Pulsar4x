@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.Orbital;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
+
+    
     public class Matrix
     {
         double[] X = new double[3] { 1, 0, 0 };
         double[] Y = new double[3] { 0, 1, 0};
         double[] Z = new double[3] {0, 0, 1};
 
-        public static Matrix NewScaleMatrix(double scaleX, double scaleY)
+        public static Matrix IDScale(double scaleX, double scaleY)
         {
             Matrix matrix = new Matrix()
             {
@@ -21,7 +24,7 @@ namespace Pulsar4X.SDL2UI
             return matrix;
         }
 
-        public static Matrix NewTranslateMatrix(double translateX, double tranlsateY)
+        public static Matrix IDTranslate(double translateX, double tranlsateY)
         {
             Matrix matrix = new Matrix()
             {
@@ -33,7 +36,7 @@ namespace Pulsar4X.SDL2UI
             
         }
 
-        public static Matrix NewMirrorMatrix(bool x, bool y)
+        public static Matrix IDMirror(bool x, bool y)
         {
             Matrix matrix = new Matrix();
             if (y)
@@ -45,7 +48,7 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        public static Matrix NewRotateMatrix(double radians)
+        public static Matrix IDRotate(double radians)
         {
             Matrix matrix = new Matrix()
             {
@@ -56,7 +59,7 @@ namespace Pulsar4X.SDL2UI
             return matrix;
         }
 
-        public static Matrix New90DegreeMatrix()
+        public static Matrix IDRotate90Deg()
         {
             Matrix matrix = new Matrix()
             {
@@ -67,7 +70,7 @@ namespace Pulsar4X.SDL2UI
             return matrix;
         }
 
-        public static Matrix New180DegreeMatrix()
+        public static Matrix IDRotate180Deg()
         {
             Matrix matrix = new Matrix()
             {
@@ -78,7 +81,7 @@ namespace Pulsar4X.SDL2UI
             return matrix;
         }
 
-        public static Matrix New270DegreeMatrix()
+        public static Matrix IDRotate270Deg()
         {
             Matrix matrix = new Matrix()
             {
@@ -106,56 +109,100 @@ namespace Pulsar4X.SDL2UI
             return newMatrix;
         }
 
-        public SDL.SDL_Point Transform(double itemx, double itemy)
+
+
+        public Orbital.Vector2 TransformToVector2(double itemx, double itemy)
         {
+            Orbital.Vector2 newpoint2 = new Orbital.Vector2();
+            newpoint2.X = X[0] * itemx + Y[0] * itemy + Z[0] * 1;
+            newpoint2.Y = X[1] * itemx + Y[1] * itemy + Z[1] * 1;
+            return newpoint2;
+        }
+        public Orbital.Vector2 TransformToVector2(Orbital.Vector2 vector)
+        {
+            Orbital.Vector2 newpoint2 = new Orbital.Vector2();
+            newpoint2.X = X[0] * vector.X + Y[0] * vector.Y + Z[0] * 1;
+            newpoint2.Y = X[1] * vector.X + Y[1] * vector.Y + Z[1] * 1;
+            return newpoint2;
+        }
+        public Orbital.Vector2[] TransformToVector2(ICollection<Orbital.Vector2> vectors)
+        {
+            Orbital.Vector2[] newpoints = new Orbital.Vector2[vectors.Count];
+            int i = 0;
+            foreach (var point in vectors)
+            {
+                newpoints[i] = new Orbital.Vector2()
+                {
+                    X = X[0] * point.X + Y[0] * point.Y + Z[0] * 1,
+                    Y = X[1] * point.X + Y[1] * point.Y + Z[1] * 1,
+                };
+                i++;
+            }
+            return newpoints;
+        }
+
+        public SDL.SDL_Point TransformToSDL_Point(double itemx, double itemy)
+        {
+            /*
             SDL.SDL_Point newPoint = new SDL.SDL_Point();
             var newPointd = TransformD(itemx, itemy);
             newPoint.x = (int)newPointd.X;
             newPoint.y = (int)newPointd.Y;
             return newPoint;
-        }
-
-        public PointD TransformD(PointD point)
-        {
-            return TransformD(point.X, point.Y); 
-        }
-
-        public PointD TransformD(double itemx, double itemy)
-        {
-
-            PointD newPoint = new PointD();
-            //multiply a 2x2 matrix by a 2x1 matrix
-            double x;
-            x = X[0] * itemx;
-            x += X[1] * itemy;
-            x += X[2] * 1;
-            newPoint.X = x;
-            double y;
-            y = Y[0] * itemx;
-            y += Y[1] * itemy;
-            y += Y[2] * 1;
-            newPoint.Y = y; 
-
-
+            */
+            SDL.SDL_Point newPoint = new SDL.SDL_Point();
+            newPoint.x = (int)(X[0] * itemx + Y[0] * itemy + Z[0] * 1);
+            newPoint.y = (int)(X[1] * itemx + Y[1] * itemy + Z[1] * 1);
             return newPoint;
+            
+            
         }
-
-        public SDL.SDL_Point[] Transform(ICollection<SDL.SDL_Point> points)
+        
+        public SDL.SDL_Point[] TransformToSDL_Point(ICollection<SDL.SDL_Point> points)
         {
             SDL.SDL_Point[] newPoints = new SDL.SDL_Point[points.Count];
             int i = 0;
             foreach (var item in points)
             {
-                newPoints[i] = Transform(item.x, item.y);
+                newPoints[i] = TransformToSDL_Point(item.x, item.y);
+                i++;
+            }
+            return newPoints;
+        }
+        
+        public SDL.SDL_Point[] TransformToSDL_Point(ICollection<Orbital.Vector2> points)
+        {
+            SDL.SDL_Point[] newPoints = new SDL.SDL_Point[points.Count];
+            int i = 0;
+            foreach (var item in points)
+            {
+                newPoints[i] = TransformToSDL_Point(item.X, item.Y);
                 i++;
             }
             return newPoints;
         }
 
-
-        public PointD[] Transform(ICollection<PointD> points)
+        
+        
+        
+        
+        
+        public Vector2 TransformD(Vector2 point)
         {
-            PointD[] newPoints = new PointD[points.Count];
+            return TransformD(point.X, point.Y); 
+        }
+
+        public Vector2 TransformD(double itemx, double itemy)
+        {
+            Vector2 newpoint2 = new Vector2();
+            newpoint2.X = X[0] * itemx + Y[0] * itemy + Z[0] * 1;
+            newpoint2.Y = X[1] * itemx + Y[1] * itemy + Z[1] * 1;
+            return newpoint2;
+        }
+
+        public Vector2[] Transform(ICollection<Vector2> points)
+        {
+            Vector2[] newPoints = new Vector2[points.Count];
             int i = 0;
             foreach (var item in points)
             {

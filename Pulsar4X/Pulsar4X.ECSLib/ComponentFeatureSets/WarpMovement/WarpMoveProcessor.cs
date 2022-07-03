@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -15,7 +16,7 @@ namespace Pulsar4X.ECSLib
     /// Ship enters a non newtonion translation state
     /// in this state, the ship is unaffected by it's previous newtonion vector & gravity
     /// Acceleration is instant.
-    /// Speed is shown ralitive to the parent star.  
+    /// Speed is shown relative to the parent star.  
     /// Cannot change its direction or speed untill exit.  
     /// An exit should be able to be forced prematurly, but this should come at a cost.
     /// An exit should be able to be forced by outside (enemy) forces. *
@@ -39,7 +40,7 @@ namespace Pulsar4X.ECSLib
     /// 
     /// I considered tying the non-newtonion speed vector to actual still space,
     /// but finding how fast the sun is actualy moving proved difficult, 
-    /// many websites just added speeds of galaxy + solarsystem together and ignored the ralitive vectors. 
+    /// many websites just added speeds of galaxy + solarsystem together and ignored the relative vectors. 
     /// one site I found sugested 368 ± 2 km/s 
     /// this might not be terrible, however if we gave max speeds of that number, 
     /// we'd be able to travel 368 km/s in one direction, and none in the oposite direction.
@@ -50,8 +51,9 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class WarpMoveProcessor : IHotloopProcessor
     {
-        static StaticDataStore staticData;//maybe shouldnt do this, however I can't currently see a reason we'd ever want to run with two different static data sets.
-
+        //maybe shouldnt do this, however I can't currently see a reason we'd ever want to run with two different static data sets.
+        private static StaticDataStore _staticData;
+        private static GameSettings _gameSettings; 
 
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
 
@@ -61,7 +63,8 @@ namespace Pulsar4X.ECSLib
 
         public void Init(Game game)
         {
-            staticData = game.StaticData; 
+            _staticData = game.StaticData;
+            _gameSettings = game.Settings;
         }
 
         public static void StartNonNewtTranslation(Entity entity)
@@ -72,7 +75,7 @@ namespace Pulsar4X.ECSLib
             var maxSpeedMS = warpDB.MaxSpeed;
             var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
             EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
-            positionDB.SetParent(null);
+            positionDB.SetParent(positionDB.Root);
             Vector3 targetPosMt = moveDB.ExitPointAbsolute;
             Vector3 currentPositionMt = positionDB.AbsolutePosition_m;
 
@@ -143,9 +146,13 @@ namespace Pulsar4X.ECSLib
                 var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
                 positionDB.SetParent(moveDB.TargetEntity);
                 //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
-                positionDB.RelativePosition_m = moveDB.ExitPointRalitive;
+                positionDB.RelativePosition_m = moveDB.ExitPointrelative;
                 
-                SetOrbitHere(entity, positionDB, moveDB, dateTimeFuture);
+                if(_gameSettings.StrictNewtonion)
+                    SetOrbitHere(entity, positionDB, moveDB, dateTimeFuture);
+                else
+                    SetOrbitHereSimple(entity, positionDB, moveDB, dateTimeFuture);
+                
                 powerDB.AddDemand(warpDB.BubbleCollapseCost, entity.StarSysDateTime);
                 powerDB.AddDemand( - warpDB.BubbleSustainCost, entity.StarSysDateTime);
                 powerDB.AddDemand(-warpDB.BubbleCollapseCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
@@ -162,13 +169,37 @@ namespace Pulsar4X.ECSLib
 
         }
 
+        void SetOrbitHereSimple(Entity entity, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
+        {
+            double targetSOI = moveDB.TargetEntity.GetSOI_m();
+            
+            Entity targetEntity;
+
+            if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(positionDB) > targetSOI)
+            {
+                targetEntity = moveDB.TargetEntity.GetDataBlob<OrbitDB>().Parent; //TODO: it's concevable we could be in another SOI not the parent (ie we could be in a target's moon's SOI)
+            }
+            else
+            {
+                targetEntity = moveDB.TargetEntity;
+            }
+            OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
+
+            //just chuck it in a circular orbit. 
+            OrbitDB newOrbit = OrbitDB.FromPosition(targetEntity, entity, atDateTime); 
+            entity.SetDataBlob(newOrbit);
+            positionDB.SetParent(targetEntity);
+            moveDB.IsAtTarget = true;
+            
+        }
+
         void SetOrbitHere(Entity entity, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
         {
 
             //propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
 
-            double targetSOI = OrbitProcessor.GetSOI_m(moveDB.TargetEntity);
-
+            double targetSOI = moveDB.TargetEntity.GetSOI_m();
+            
             Entity targetEntity;
 
             if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(positionDB) > targetSOI)
@@ -188,17 +219,30 @@ namespace Pulsar4X.ECSLib
 
             if (moveDB.ExpendDeltaV.Length() != 0)
             {
-                NewtonThrustCommand.CreateCommand(entity.FactionOwner, entity, entity.StarSysDateTime, moveDB.ExpendDeltaV);
-                entity.RemoveDataBlob<WarpMovingDB>();
+
+                var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+                var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+                var mass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+
+                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, moveDB.ExpendDeltaV.Length());
+                double secondsBurn = fuelBurned / burnRate;
+                var manuverNodeTime = entity.StarSysDateTime + TimeSpan.FromSeconds(secondsBurn * 0.5);
+
+
+                NewtonThrustCommand.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, moveDB.ExpendDeltaV, secondsBurn);
+                
                 moveDB.IsAtTarget = true;
             }
             else
             {
                 OrbitDB newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
-                entity.RemoveDataBlob<WarpMovingDB>();
-
-
-                if (newOrbit.Apoapsis < targetSOI) //furtherst point within soi, normal orbit
+                
+                if(newOrbit.Eccentricity >= 1)
+                {
+                    var newtmove = new NewtonMoveDB(targetEntity, insertionVector_m);
+                    entity.SetDataBlob(newtmove);
+                }
+                else if (newOrbit.Apoapsis < targetSOI) //furtherst point within soi, normal orbit
                 {
                     entity.SetDataBlob(newOrbit);
                 }
@@ -219,16 +263,19 @@ namespace Pulsar4X.ECSLib
                 positionDB.SetParent(targetEntity);
                 moveDB.IsAtTarget = true;
             }
+            
 
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             List<Entity> entitysWithTranslateMove = manager.GetAllEntitiesWithDataBlob<WarpMovingDB>();
             foreach (var entity in entitysWithTranslateMove)
             {
                 ProcessEntity(entity, deltaSeconds);
             }
+
+            return entitysWithTranslateMove.Count;
         }
     }
 

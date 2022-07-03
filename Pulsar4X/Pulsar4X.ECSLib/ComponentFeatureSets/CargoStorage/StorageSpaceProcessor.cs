@@ -12,18 +12,8 @@ namespace Pulsar4X.ECSLib
     public static class StorageSpaceProcessor
     {
 
-        internal static bool HasEntity(VolumeStorageDB storeDB, CargoAbleTypeDB item)
-        {
-            throw new NotImplementedException();
-            /*
-            if(storeDB.TypeStores[item.CargoTypeID].CurrentStore.ContainsKey(item.ID))
-                if (storeDB.TypeStores[item.CargoTypeID].CurrentStore[item.ID].Contains(item.OwningEntity))
-                    return true;
-            return false;
-            */
-        }
 
-
+        
 
         internal static void RecalcVolumeCapacityAndRates(Entity parentEntity)
         {
@@ -93,25 +83,8 @@ namespace Pulsar4X.ECSLib
                 cargoStorageDB.TransferRateInKgHr = (int)(transferRate / i);
                 cargoStorageDB.TransferRangeDv_mps = transferRange / i;
             }
-
         }
-        
-        public static CargoCapacityCheckResult GetAvailableSpace(VolumeStorageDB storeDB, Guid itemGuid, ICargoDefinitionsLibrary library)
-        {
-            var cargoDefinition = library.GetOther(itemGuid);
-            if (cargoDefinition.MassPerUnit == 0)
-                return new CargoCapacityCheckResult(itemGuid, long.MaxValue, long.MaxValue);
-
-            var freeMass = storeDB.TypeStores[cargoDefinition.CargoTypeID].GetFreeMass(cargoDefinition);
-            long count = (long)(freeMass * cargoDefinition.MassPerUnit);
-            return new CargoCapacityCheckResult(
-                itemGuid, 
-                count,
-                (long)freeMass);
-        }
-
     }
-
 }
 
 

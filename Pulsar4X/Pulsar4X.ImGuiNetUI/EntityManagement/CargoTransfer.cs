@@ -34,9 +34,11 @@ namespace Pulsar4X.SDL2UI
 
         public void Update()
         {
+            if (_volStorageDB == null) //if this colony does not have any storage. 
+                return;
             //we do a deep copy clone so as to avoid a thread collision when we loop through.
             var newDict = new Dictionary<Guid, TypeStore>();
-            
+
             ICollection ic = _volStorageDB.TypeStores;
             lock (ic.SyncRoot)
             {
@@ -64,17 +66,21 @@ namespace Pulsar4X.SDL2UI
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
                 
-                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free";
-                ImGui.PushID(_entityState.Entity.Guid.ToString());
+                
+                ImGui.PushID(_entityState.Entity.Guid.ToString());//this helps the ui diferentiate between the left and right side
+                //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
+                //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
+                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.ID;
                 if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
                 {
-                    ImGui.Columns(3);
+                    ImGui.Columns(4);
                     ImGui.Text("Item");
                     ImGui.NextColumn();
                     ImGui.Text("Count");
                     ImGui.NextColumn();
-                    ImGui.Text("Total Mass");
+                    ImGui.Text("Mass");
                     ImGui.NextColumn();
+                    ImGui.Text("Volume");
                     ImGui.Separator();
                     foreach (var cargoType in typeStore.Value.CurrentStoreInUnits)
                     {
@@ -92,7 +98,9 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(Stringify.Number(itemsStored));
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Mass(massStored));
-                        ImGui.SetTooltip(Stringify.Volume(volumeStored));
+                        ImGui.NextColumn();
+                        ImGui.Text(Stringify.Volume(volumeStored));
+                        //ImGui.SetTooltip(ctype.ToDescription);
                         ImGui.NextColumn();
                     }
 
@@ -133,10 +141,10 @@ namespace Pulsar4X.SDL2UI
         EntityState _entityState;
         VolumeStorageDB _volStorageDB;
         Dictionary<Guid, TypeStore> _stores = new Dictionary<Guid, TypeStore>();
-        Dictionary<ICargoable, int> _cargoToMove = new Dictionary<ICargoable, int>();
-        Dictionary<ICargoable, int> _cargoToMoveUI = new Dictionary<ICargoable, int>();
-        Dictionary<ICargoable, int> _cargoToMoveOrders = new Dictionary<ICargoable, int>();
-        Dictionary<ICargoable, int> _cargoToMoveDatablob = new Dictionary<ICargoable, int>();
+        Dictionary<ICargoable, long> _cargoToMove = new Dictionary<ICargoable, long>();
+        Dictionary<ICargoable, long> _cargoToMoveUI = new Dictionary<ICargoable, long>();
+        Dictionary<ICargoable, long> _cargoToMoveOrders = new Dictionary<ICargoable, long>();
+        Dictionary<ICargoable, long> _cargoToMoveDatablob = new Dictionary<ICargoable, long>();
         
         //Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
         //public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
@@ -160,7 +168,6 @@ namespace Pulsar4X.SDL2UI
         {
             //we do a deep copy clone so as to avoid a thread collision when we loop through.
             var newDict = new Dictionary<Guid, TypeStore>();
-            
             ICollection ic = _volStorageDB.TypeStores;
             lock (ic.SyncRoot)
             {
@@ -170,12 +177,13 @@ namespace Pulsar4X.SDL2UI
                 }
             }
             _stores = newDict;
+
             
             
             if (_entityState.Entity.HasDataBlob<CargoTransferDB>())
             {
                 var itemsToXfer = _entityState.Entity.GetDataBlob<CargoTransferDB>().GetItemsToTransfer();
-                var newxferDict = new Dictionary<ICargoable, int>();
+                var newxferDict = new Dictionary<ICargoable, long>();
                 foreach (var tuple in itemsToXfer)
                 {
                     newxferDict.Add(tuple.item, tuple.unitCount);
@@ -186,12 +194,12 @@ namespace Pulsar4X.SDL2UI
             if (_entityState.Entity.HasDataBlob<OrderableDB>())
             {
                 var orders = _entityState.Entity.GetDataBlob<OrderableDB>().GetActionList();
-                var newxferDict = new Dictionary<ICargoable, int>(); 
+                var newxferDict = new Dictionary<ICargoable, long>(); 
                 foreach (var order in orders)
                 {
-                    if (order is CargoXferOrder)
+                    if (order is CargoUnloadToOrder)
                     {
-                        var xferOrder = (CargoXferOrder)order;
+                        var xferOrder = (CargoUnloadToOrder)order;
                         foreach (var tuple in xferOrder.ItemICargoablesToTransfer)
                         {
                             if (!newxferDict.ContainsKey(tuple.item))
@@ -208,9 +216,9 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        internal List<(ICargoable,int)> GetAllToMoveOut()
+        internal List<(ICargoable, long)> GetAllToMoveOut()
         {
-            List<(ICargoable,int)> listToMove = new List<(ICargoable,int)>();
+            var listToMove = new List<(ICargoable, long)>();
 
             foreach (var item in _cargoToMoveUI)
             {
@@ -222,7 +230,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void ClearUINumbers()
         {
-            _cargoToMoveUI = new Dictionary<ICargoable, int>();
+            _cargoToMoveUI = new Dictionary<ICargoable, long>();
             Update();
         }
 
@@ -232,7 +240,7 @@ namespace Pulsar4X.SDL2UI
             
         }
 
-        internal void AddUICargoIn(ICargoable cargoItem, int itemCount)
+        internal void AddUICargoIn(ICargoable cargoItem, long itemCount)
         {
             if(!_cargoToMoveUI.ContainsKey(cargoItem))
                 _cargoToMoveUI.Add(cargoItem, itemCount);
@@ -244,7 +252,7 @@ namespace Pulsar4X.SDL2UI
 
         public void UpdateTotalMoving()
         {
-            var newDict = new Dictionary<ICargoable, int>();
+            var newDict = new Dictionary<ICargoable, long>();
             foreach (var kvp in _cargoToMoveDatablob)
             {
                 if(!newDict.ContainsKey(kvp.Key))
@@ -293,19 +301,23 @@ namespace Pulsar4X.SDL2UI
                 var freeVolume = typeStore.Value.FreeVolume;
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
-                
-                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free";
-                ImGui.PushID(_entityState.Entity.Guid.ToString());
+                ImGui.PushID(_entityState.Entity.Guid.ToString()); //this helps the ui diferentiate between the left and right side
+                //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
+                //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
+                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.ID;
                 if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
                 {
-                    ImGui.Columns(3);
+                    ImGui.Columns(4);
                     ImGui.Text("Item");
                     ImGui.NextColumn();
                     ImGui.Text("Count");
                     ImGui.NextColumn();
-                    ImGui.Text("Total Mass");
+                    ImGui.Text("Mass");
+                    ImGui.NextColumn();
+                    ImGui.Text("Volume");
                     ImGui.NextColumn();
                     ImGui.Separator();
+
 
                     foreach (var cargoItemKvp in typeStore.Value.CurrentStoreInUnits.ToArray())
                     {
@@ -317,11 +329,12 @@ namespace Pulsar4X.SDL2UI
                         }
 
                         var cname = cargoItem.Name;
-                        var unitsStored = cargoItemKvp.Value;
+                        var unitsStored = Math.Max(0, cargoItemKvp.Value);
+
                         var volumePerItem = cargoItem.VolumePerUnit;
                         var volumeStored = _volStorageDB.GetVolumeStored(cargoItem);
                         var massStored = _volStorageDB.GetMassStored(cargoItem);
-                        
+
                         bool isSelected = selectedCargo == cargoItem;
                         if (ImGui.Selectable(cname, isSelected))
                         {
@@ -330,9 +343,9 @@ namespace Pulsar4X.SDL2UI
                         }
 
                         ImGui.NextColumn();
-                        ImGui.Text(Stringify.Number(unitsStored));
-                        
-                        
+                        ImGui.Text(Stringify.Number(unitsStored * 1.0));
+
+
                         if (_cargoToMove.ContainsKey(cargoItem))
                         {
                             var unitsMoving = _cargoToMove[cargoItem];
@@ -356,14 +369,16 @@ namespace Pulsar4X.SDL2UI
                                     blue = 0.75f;
                             }
 
-                            if(unitsMoving > 0)
+                            if (unitsMoving > 0)
                                 ImGui.TextColored(new Vector4(0.5f, 1, blue, 1), text);
                             else
                                 ImGui.TextColored(new Vector4(1f, 0.5f, blue, 1), text);
                         }
-                        
+
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Mass(massStored));
+                        ImGui.NextColumn();
+                        ImGui.Text(Stringify.Volume(volumeStored));
                         ImGui.NextColumn();
                     }
 
@@ -403,6 +418,7 @@ namespace Pulsar4X.SDL2UI
         CargoListPannelComplex SelectedCargoPannel;
         CargoListPannelComplex UnselectedCargoPannel;
         bool _hasCargoAbilityLeft;
+        bool _isSelectingRight = false;
         bool _hasCargoAbilityRight;
         Dictionary<Guid, bool> headersOpenDict = new Dictionary<Guid, bool>();
         
@@ -413,8 +429,7 @@ namespace Pulsar4X.SDL2UI
         private CargoTransfer()
         {
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
-            ClickedEntityIsPrimary = false;
-            
+            //ClickedEntityIsPrimary = false;            
         }
         
         public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
@@ -456,6 +471,11 @@ namespace Pulsar4X.SDL2UI
         void HardRefresh()
         {
             _selectedEntityLeft = _uiState.PrimaryEntity;
+            _selectedEntityRight = null;
+            CargoListRight = null;
+            _hasCargoAbilityRight = false;
+            _transferRate = 0;
+            _isSelectingRight = false;
             if(_selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
             {
                 CargoListLeft = new CargoListPannelComplex(_staticData, _selectedEntityLeft, headersOpenDict);
@@ -467,7 +487,11 @@ namespace Pulsar4X.SDL2UI
             
             if (_uiState.PrimaryEntity != _uiState.LastClickedEntity)
             {
-                _selectedEntityRight = _uiState.LastClickedEntity;
+                if(_isSelectingRight)
+                {
+                    _selectedEntityRight = _uiState.LastClickedEntity;
+                    _isSelectingRight = false;
+                }
                 if (_selectedEntityRight != null && _selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
                 {
                     if (!_hasCargoAbilityRight)
@@ -511,7 +535,7 @@ namespace Pulsar4X.SDL2UI
             //but I'm not checking for NewtonMoveDB or OrbitUpdateOftenDB
             if (!_selectedEntityLeft.Entity.HasDataBlob<OrbitDB>()) 
             {
-                dvDif = OrbitMath.MeanOrbitalVelocityInm(_selectedEntityRight.Entity.GetDataBlob<OrbitDB>());
+                dvDif = _selectedEntityRight.Entity.GetDataBlob<OrbitDB>().MeanOrbitalVelocityInm();
             }
             else
             {
@@ -555,7 +579,14 @@ namespace Pulsar4X.SDL2UI
         {
             if(button == MouseButtons.Primary)
             {
-                Set2ndCargo(entity); 
+                if(_selectedEntityLeft.Entity.Guid != entity.Entity.Guid && _isSelectingRight)
+                    Set2ndCargo(entity);
+                else
+                {
+                    HardRefresh();
+                }
+
+                
             }
         }
 
@@ -570,17 +601,15 @@ namespace Pulsar4X.SDL2UI
         {
 
             //create order for items to go to right
-            CargoXferOrder.CreateCommand(
-                _uiState.Game,
-                _uiState.Faction,
+            CargoUnloadToOrder.CreateCommand(
+                _uiState.Faction.Guid,
                 _selectedEntityLeft.Entity,
                 _selectedEntityRight.Entity, 
                 CargoListLeft.GetAllToMoveOut());
 
             //create order for items to go to left
-            CargoXferOrder.CreateCommand(
-                _uiState.Game,
-                _uiState.Faction,
+            CargoUnloadToOrder.CreateCommand(
+                _uiState.Faction.Guid,
                 _selectedEntityRight.Entity,
                 _selectedEntityLeft.Entity,
                 CargoListRight.GetAllToMoveOut());
@@ -633,8 +662,21 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("Transfer Rate Kg/h: " + _transferRate);
                             
                         }
-                        else
-                            ImGui.Text("Select Entity For Transfer");
+
+                        string label = "Click to Select Entity For Transfer";
+                        if (_isSelectingRight)
+                            label = "Select Entity For Transfer";
+                        else if (ImGui.SmallButton(label))
+                        {
+                            _isSelectingRight = !_isSelectingRight;
+                            if (_isSelectingRight)
+                                ClickedEntityIsPrimary = false;
+                            else
+                                ClickedEntityIsPrimary = true;
+                            
+                        }
+                        if(!_isSelectingRight)
+                            ClickedEntityIsPrimary = true;
                     }
 
                 }

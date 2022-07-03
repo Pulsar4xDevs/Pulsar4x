@@ -4,6 +4,7 @@ using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using Pulsar4X.SDL2UI;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.ImGuiNetUI.EntityManagement
 {

@@ -2,6 +2,7 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
@@ -440,7 +441,7 @@ namespace Pulsar4X.ECSLib
         }
         private bool _hydrosphere;
 
-        public float HydrosphereExtent
+        public decimal HydrosphereExtent
         {
             get { return _hydrosphereExtent; }
             set
@@ -449,7 +450,7 @@ namespace Pulsar4X.ECSLib
                 OnPropertyChanged();
             }
         }
-        private float _hydrosphereExtent;
+        private decimal _hydrosphereExtent;
 
         #endregion
 
@@ -631,7 +632,7 @@ namespace Pulsar4X.ECSLib
             }
 
             Mass = massVolumeDB.MassDry;
-            Density = massVolumeDB.Density_gcm;
+            Density = massVolumeDB.DensityDry_gcm;
             Radius = massVolumeDB.RadiusInAU;
             Volume = massVolumeDB.Volume_km3;
             SurfaceGravity = massVolumeDB.SurfaceGravity;

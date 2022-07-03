@@ -1,13 +1,25 @@
 ﻿using System;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
 {
     public class WarpMoveCommand : EntityCommand
     {
 
-        public override int ActionLanes => 1;
+        public override string Name { get; } = "Nav: Warp Move";
+
+        public override string Details
+        {
+            get
+            {
+                string targetName = _targetEntity.GetDataBlob<NameDB>().GetName(_factionEntity);
+                return "Warp to + " + Stringify.Distance(TargetOffsetPosition_m.Length()) + " from " + targetName;
+            }
+        }
+        
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
         public override bool IsBlocking => true;
 
         [JsonProperty]
@@ -37,12 +49,13 @@ namespace Pulsar4X.ECSLib
         /// <param name="targetEntity">Target entity.</param>
         /// <param name="targetOffsetPos_m">Target offset position in au.</param>
         /// <param name="transitStartDatetime">Transit start datetime.</param>
-        /// <param name="expendDeltaV_AU">Amount of DV to expend to change the orbit in AU/s</param>
-        public static void CreateCommand(Game game, Entity faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_m, DateTime transitStartDatetime, Vector3 expendDeltaV)
+        /// <param name="expendDeltaV">Amount of DV to expend to change the orbit in m/s</param>
+        /// /// <param name="mass">mass of ship after warp (needed for DV calc)</param>
+        public static (WarpMoveCommand, NewtonThrustCommand) CreateCommand(Guid faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_m, DateTime transitStartDatetime, Vector3 expendDeltaV, double mass)
         {
             var cmd = new WarpMoveCommand()
             {
-                RequestingFactionGuid = faction.Guid,
+                RequestingFactionGuid = faction,
                 EntityCommandingGuid = orderEntity.Guid,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 TargetEntityGuid = targetEntity.Guid,
@@ -50,7 +63,25 @@ namespace Pulsar4X.ECSLib
                 TransitStartDateTime = transitStartDatetime,
                 ExpendDeltaV = expendDeltaV,
             };
-            game.OrderHandler.HandleOrder(cmd);
+            StaticRefLib.OrderHandler.HandleOrder(cmd);
+            if (expendDeltaV.Length() != 0)
+            {
+                
+                (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition_m
+                (
+                    orderEntity, 
+                    targetEntity.GetDataBlob<OrbitDB>(), 
+                    orderEntity.StarSysDateTime,
+                    targetOffsetPos_m
+                );
+                
+                var burntime = TimeSpan.FromSeconds(OrbitMath.BurnTime(orderEntity, expendDeltaV.Length(), mass));
+                var ntcmd = NewtonThrustCommand.CreateCommand(orderEntity, expendDeltaV, targetIntercept.atDateTime + burntime);
+
+                return (cmd, ntcmd);
+            }
+
+            return (cmd, null);
         }
 
         internal override bool IsValidCommand(Game game)
@@ -80,11 +111,6 @@ namespace Pulsar4X.ECSLib
                     _db = new WarpMovingDB(_entityCommanding, _targetEntity, TargetOffsetPosition_m);
                     _db.ExpendDeltaV = ExpendDeltaV;
                     
-
-                    if (EntityCommanding.HasDataBlob<OrbitDB>())
-                        EntityCommanding.RemoveDataBlob<OrbitDB>();
-                    if(EntityCommanding.HasDataBlob<NewtonMoveDB>())
-                        EntityCommanding.RemoveDataBlob<NewtonMoveDB>();
                     EntityCommanding.SetDataBlob(_db);
                     
                     WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);

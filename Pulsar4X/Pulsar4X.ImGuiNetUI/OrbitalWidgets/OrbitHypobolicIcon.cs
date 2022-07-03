@@ -1,5 +1,6 @@
 ﻿using System;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using System.Linq;
 using System.Collections.Generic;
@@ -17,9 +18,9 @@ namespace Pulsar4X.SDL2UI
         int _numberOfPoints;
         //internal float a;
         //protected float b;
-        protected PointD[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
+        protected Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
-        PointD[] _debugPoints;
+        Vector2[] _debugPoints;
         SDL.SDL_Point[] _debugDrawPoints = new SDL.SDL_Point[0];
 
         //user adjustable variables:
@@ -38,6 +39,8 @@ namespace Pulsar4X.SDL2UI
 
         public OrbitHypobolicIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonMoveDB>().SOIParent.GetDataBlob<PositionDB>())
         {
+            BodyType = entityState.BodyType;
+            TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             _mgr = entityState.Entity.Manager;
             _newtonMoveDB = entityState.Entity.GetDataBlob<NewtonMoveDB>();
             parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
@@ -46,7 +49,7 @@ namespace Pulsar4X.SDL2UI
             _userOrbitSettingsMtx = settings;
             var parentMass = entityState.Entity.GetDataBlob<NewtonMoveDB>().ParentMass;
             var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
-            _sgp = GameConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
+            _sgp = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
 
             UpdateUserSettings();
@@ -58,22 +61,30 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void UpdateUserSettings()
         {
-            //if this happens, we need to rebuild the whole set of points. 
+            
+            
+         
+            //if this is the case, we need to rebuild the whole set of points. 
             if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
             {
                 _numberOfArcSegments = _userSettings.NumberOfArcSegments;
+                _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
+                _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
+                _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
+                _numberOfPoints = _numberOfDrawSegments + 1;
                 CreatePointArray();
             }
-
             _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
             _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
             _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
-            _numberOfPoints = _numberOfDrawSegments + 1;
+            _numberOfPoints = _numberOfDrawSegments + 1;   
+            
+
         }
 
         internal void CreatePointArray()
         {
-            _dv = _newtonMoveDB.DeltaVForManuver_FoRO_m.Length();
+            _dv = _newtonMoveDB.ManuverDeltaVLen;
             Vector3 vel = Distance.MToAU(_newtonMoveDB.CurrentVector_ms);
             Vector3 pos = myPosDB.RelativePosition_AU;
             Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
@@ -82,8 +93,14 @@ namespace Pulsar4X.SDL2UI
             double v = vel.Length();
             double a = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
             double b = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
+            if (double.IsNaN(b)) //eccentricity is close enough to 0 to cause e * e -1 to = -1 (and sqrt(-1) then = i)
+            {
+                b = a;
+                e = 0;
+            }
+
             double linierEccentricity = e * a;
-            double soi = OrbitProcessor.GetSOI_AU(_newtonMoveDB.SOIParent);
+            double soi = _newtonMoveDB.SOIParent.GetSOI_AU();
 
             //longditudeOfPeriapsis;
             double _lop = Math.Atan2(eccentVector.Y, eccentVector.X);
@@ -110,20 +127,20 @@ namespace Pulsar4X.SDL2UI
             double xn = a;
             double yn = 0;
 
-            var points = new PointD[ctrIndex + 1];
-            points[0] = new PointD() { X = xn, Y = yn };
+            var points = new Vector2[ctrIndex + 1];
+            points[0] = new Vector2() { X = xn, Y = yn };
             for (int i = 1; i < ctrIndex + 1; i++)
             {
                 var lastx = xn;
                 var lasty = yn;
                 xn = fooA * lastx + fooB * lasty;
                 yn = fooC * lastx + fooA * lasty;
-                points[i] = new PointD() { X = xn, Y = yn };
+                points[i] = new Vector2() { X = xn, Y = yn };
             }
 
 
-            _points = new PointD[_numberOfPoints];
-            _points[ctrIndex] = new PointD()
+            _points = new Vector2[_numberOfPoints];
+            _points[ctrIndex] = new Vector2()
             {
                 X = ((points[0].X - linierEccentricity )* Math.Cos(_lop)) - (points[0].Y * Math.Sin(_lop)),
                 Y = ((points[0].X - linierEccentricity) * Math.Sin(_lop)) + (points[0].Y * Math.Cos(_lop))
@@ -137,13 +154,13 @@ namespace Pulsar4X.SDL2UI
                 double y2a = (x * Math.Sin(_lop)) + (ya * Math.Cos(_lop));
                 double x2b = (x * Math.Cos(_lop)) - (yb * Math.Sin(_lop));
                 double y2b = (x * Math.Sin(_lop)) + (yb * Math.Cos(_lop));
-                _points[ctrIndex + i] = new PointD()
+                _points[ctrIndex + i] = new Vector2()
                 {
                     X = x2a,
                     Y = y2a 
                 };
 
-                _points[ctrIndex - i] = new PointD()
+                _points[ctrIndex - i] = new Vector2()
                 {
                     X = x2b,
                     Y = y2b
@@ -161,7 +178,7 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < _numberOfPoints; i++)
             {
 
-                PointD translated = matrix.TransformD(_points[i].X, _points[i].Y); //add zoom transformation. 
+                Vector2 translated = matrix.TransformD(_points[i].X, _points[i].Y); //add zoom transformation. 
 
                 int x = (int)(ViewScreenPos.x + translated.X);
                 int y = (int)(ViewScreenPos.y + translated.Y);
@@ -174,18 +191,19 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
 
-            if (_dv != _newtonMoveDB.DeltaVForManuver_FoRO_m.Length())
+            if (_dv != _newtonMoveDB.ManuverDeltaVLen)
                 CreatePointArray();
             
             
             Vector3 pos = myPosDB.RelativePosition_AU;
-            var ralitivePos = new PointD() { X = pos.X, Y = pos.Y };
-
-            double minDist = PointDFunctions.Length(PointDFunctions.Sub(ralitivePos, _points[_index]));
+            var relativePos = new Vector2() { X = pos.X, Y = pos.Y };
+ 
+            
+            double minDist = (relativePos - _points[_index]).Length();
 
             for (int i = 0; i < _points.Count(); i++)
             {
-                double dist = PointDFunctions.Length(PointDFunctions.Sub(ralitivePos, _points[i]));
+                double dist = (relativePos - _points[i]).Length();
                 if (dist < minDist)
                 {
                     minDist = dist;

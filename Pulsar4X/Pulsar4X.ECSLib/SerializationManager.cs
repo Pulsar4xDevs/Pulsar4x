@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using Pulsar4X.Orbital;
 using Formatting = Newtonsoft.Json.Formatting;
 
 namespace Pulsar4X.ECSLib
@@ -560,15 +561,15 @@ namespace Pulsar4X.ECSLib
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "AverageEcoSphereRadius", "NS");
-                varNode.InnerText = starIfnoDB.EcoSphereRadius.ToString("N3");
+                varNode.InnerText = starIfnoDB.EcoSphereRadius_AU.ToString("N3");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MinEcoSphereRadius", "NS");
-                varNode.InnerText = starIfnoDB.MinHabitableRadius.ToString("N4");
+                varNode.InnerText = starIfnoDB.MinHabitableRadius_AU.ToString("N4");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MaxEcoSphereRadius", "NS");
-                varNode.InnerText = starIfnoDB.MaxHabitableRadius.ToString("N4");
+                varNode.InnerText = starIfnoDB.MaxHabitableRadius_AU.ToString("N4");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Luminosity", "NS");
@@ -587,11 +588,11 @@ namespace Pulsar4X.ECSLib
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "MassInEarthMasses", "NS");
-                varNode.InnerText = (massVolumeDB.MassDry / GameConstants.Units.EarthMassInKG).ToString("N2");
+                varNode.InnerText = (massVolumeDB.MassDry / UniversalConstants.Units.EarthMassInKG).ToString("N2");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Density", "NS");
-                varNode.InnerText = massVolumeDB.Density_gcm.ToString("N4");
+                varNode.InnerText = massVolumeDB.DensityDry_gcm.ToString("N4");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Radius", "NS");

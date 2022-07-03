@@ -10,6 +10,7 @@ using Pulsar4X.ECSLib.ComponentFeatureSets.RailGun;
 using Pulsar4X.SDL2UI;
 
 using System.Runtime.InteropServices;
+using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.ImGuiNetUI
 {
@@ -40,7 +41,7 @@ namespace Pulsar4X.ImGuiNetUI
         private Dictionary<Guid, (float reload, float min, float max)> _reloadState = new Dictionary<Guid, (float reload, float min, float max)>();
         //private WeaponState[] _unAssignedWeapons = new WeaponState[0];
         private OrdnanceDesign[] _allOrdnanceDesigns = new OrdnanceDesign[0];
-        Dictionary<Guid, int> _storedOrdnance = new Dictionary<Guid, int>();
+        Dictionary<Guid, long> _storedOrdnance = new Dictionary<Guid, long>();
         private bool _showOnlyCargoOrdnance = true;
 
 
@@ -383,11 +384,14 @@ namespace Pulsar4X.ImGuiNetUI
             
             var sysstate = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             var contacts = sysstate.SystemContacts;
-            _allSensorContacts = contacts.GetAllContacts().ToArray();
+            _allSensorContacts = new SensorContact[0];
+            if (contacts != null)
+            {
+                _allSensorContacts = contacts.GetAllContacts().ToArray();
+            }
             _ownEntites = sysstate.EntityStatesWithPosition.Values.ToArray();
             RefreshWpnNamesCashe();
-            RefreshReloadStateCashe();
-            
+            RefreshReloadStateCashe();           
         }
 
         public override void OnSystemTickChange(DateTime newdate)
@@ -410,7 +414,7 @@ namespace Pulsar4X.ImGuiNetUI
 
                     lock (shipOrdnances.SyncRoot)
                     {
-                        foreach (KeyValuePair<Guid, int> ordType in shipOrdnances)
+                        foreach (KeyValuePair<Guid, long> ordType in shipOrdnances)
                             _storedOrdnance[ordType.Key] = ordType.Value;
                     }
                 }

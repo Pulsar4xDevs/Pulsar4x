@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.Tests
 {
@@ -27,7 +28,7 @@ namespace Pulsar4X.Tests
             double sgp_m = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
 
             OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp_m, position, velocity, new DateTime());
-            Vector3 resultPos = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
+            Vector3 resultPos = objOrbit.GetPosition_AU(new DateTime());
         }
 
 
@@ -114,7 +115,7 @@ namespace Pulsar4X.Tests
             if (sma < (double)decimal.MaxValue)
             {
                 decimal smad = (decimal)sma;
-                E = GMath.Sqrt(1 - (decimal)p / smad);
+                E = GeneralMath.Sqrt(1 - (decimal)p / smad);
 
                 decimal PlusMinus = smad * E;
                 Periapsis = (double)(smad - PlusMinus);
@@ -319,7 +320,7 @@ namespace Pulsar4X.Tests
             
             
             //check EccentricAnomaly:
-            var objE = (OrbitProcessor.GetEccentricAnomaly(objOrbit, objOrbit.MeanAnomalyAtEpoch_Degrees));
+            var objE = (objOrbit.GetEccentricAnomaly(objOrbit.MeanAnomalyAtEpoch_Degrees));
             //var keE =   (OrbitMath.Gete(position, ke.SemiMajorAxis, ke.LinearEccentricity, ke.AoP));
             /*
             if (objE != keE)
@@ -329,7 +330,7 @@ namespace Pulsar4X.Tests
             }
 */
             //check trueAnomaly 
-            var orbTrueAnom = OrbitProcessor.GetTrueAnomaly(objOrbit, new DateTime());
+            var orbTrueAnom = objOrbit.GetTrueAnomaly(new DateTime());
             var orbtaDeg = Angle.ToDegrees(orbTrueAnom);
             var differenceInRadians = orbTrueAnom - ke_m.TrueAnomalyAtEpoch;
             var differenceInDegrees = Angle.ToDegrees(differenceInRadians);
@@ -375,11 +376,11 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(ke_m.Periapsis, objOrbit.Periapsis, 1.0E-4 );
 
             Vector3 pos_m = position_InMeters;
-            Vector3 result_m = OrbitProcessor.GetPosition_m(objOrbit, new DateTime());
+            Vector3 result_m = objOrbit.GetPosition_m(new DateTime());
 
             double keslr = EllipseMath.SemiLatusRectum(ke_m.SemiMajorAxis, ke_m.Eccentricity);
             double keradius = OrbitMath.RadiusAtAngle(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);
-            Vector3 kemathPos = OrbitMath.GetRalitivePosition(ke_m.LoAN, ke_m.AoP, ke_m.Inclination, ke_m.TrueAnomalyAtEpoch, keradius);
+            Vector3 kemathPos = OrbitMath.GetRelativePosition(ke_m.LoAN, ke_m.AoP, ke_m.Inclination, ke_m.TrueAnomalyAtEpoch, keradius);
             
             Assert.AreEqual(kemathPos.Length(), pos_m.Length(), 0.02);
 
@@ -439,7 +440,7 @@ namespace Pulsar4X.Tests
 
             var intercept_m = OrbitMath.GetInterceptPosition_m(currentPos_m, nonNewtSpeed_m, targetOrbit ,currentDateTime);
 
-            var futurePos1_m =  OrbitProcessor.GetAbsolutePosition_m(targetOrbit, intercept_m.Item2);
+            var futurePos1_m = targetOrbit.GetAbsolutePosition_m(intercept_m.Item2);
 
             var futurePos2_m =  intercept_m.Item1;
 
@@ -471,7 +472,7 @@ namespace Pulsar4X.Tests
             Entity parentEntity = TestingUtilities.BasicEarth(mgr);
 
             PositionDB pos1 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
-            var newt1 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ DeltaVForManuver_FoRO_m = new Vector3(0,1,0)};
+            var newt1 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs1 = new BaseDataBlob[4];
             objBlobs1[0] = pos1;
             objBlobs1[1] = new MassVolumeDB() { MassDry = 10000 };
@@ -481,7 +482,7 @@ namespace Pulsar4X.Tests
             
             
             PositionDB pos2 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
-            var newt2 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ DeltaVForManuver_FoRO_m = new Vector3(0,1,0)};
+            var newt2 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs2 = new BaseDataBlob[4];
             objBlobs2[0] = pos2;
             objBlobs2[1] = new MassVolumeDB() { MassDry = 10000 };
@@ -492,13 +493,13 @@ namespace Pulsar4X.Tests
             var seconds = 100;
             for (int i = 0; i < seconds; i++)
             {
-                NewtonionMovementProcessor.NewtonMove(objEntity1, 1);
+                NewtonionMovementProcessor.NewtonMove(newt1, 1);
                 
                 //this is a hacky way to allow us to increment each second,
                 //since the above method looks at the manager datetime and we're not updating that.
                 newt1.LastProcessDateTime -= TimeSpan.FromSeconds(1);
             }
-            NewtonionMovementProcessor.NewtonMove(objEntity2, seconds);
+            NewtonionMovementProcessor.NewtonMove(newt2, seconds);
             var distance1 = (pos1.RelativePosition_m.Length());
             var distance2 = (pos2.RelativePosition_m.Length());
             

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.Tests
 {
@@ -17,7 +18,7 @@ namespace Pulsar4X.Tests
             double parentMass = 1.989e30;
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
             parentblobs[0] = new PositionDB(mgr.ManagerGuid) { X_AU = 0, Y_AU = 0, Z_AU = 0 };
-            parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
+            parentblobs[1] = MassVolumeDB.NewFromMassAndRadius_m(parentMass, 696342000.0 );
             parentblobs[2] = new OrbitDB();
             return new Entity(mgr, parentblobs);
         }
@@ -135,7 +136,7 @@ namespace Pulsar4X.Tests
             DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(Game, HumanFaction);
 
             Vector3 position = Earth.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-            DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Earth,  Sol, "Serial Peacemaker");
+            DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Earth,  "Serial Peacemaker");
             Sol.SetDataBlob(DefaultShip.ID, new TransitableDB());
         }
 

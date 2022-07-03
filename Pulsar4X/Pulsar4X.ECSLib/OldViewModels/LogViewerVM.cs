@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
         {
             _gameVM = gameVM;
             if (Game != null && Auth != null)
-                foreach (var item in StaticRefLib.EventLog.GetAllEvents(Auth))
+                foreach (var item in StaticRefLib.EventLog.GetAllEvents())
                 {
                     EventsDict.Add(new EventVM(item, _gameVM.CurrentFaction, _gameVM));
                 }
@@ -44,10 +44,11 @@ namespace Pulsar4X.ECSLib
 
         public void Refresh()
         {
-            foreach (var item in StaticRefLib.EventLog.GetNewEvents(Auth))
+            /*
+            foreach (var item in StaticRefLib.EventLog.GetNewEvents())
             {
                 EventsDict.Add(new EventVM(item, _gameVM.CurrentFaction, _gameVM));
-            }
+            }*/
         }
 
         public class EventTypeBoolPair : ViewModelBase

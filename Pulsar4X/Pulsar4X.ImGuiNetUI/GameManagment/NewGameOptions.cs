@@ -2,6 +2,7 @@
 using Pulsar4X;
 using ImGuiNET;
 using ImGuiSDL2CS;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -87,7 +88,7 @@ namespace Pulsar4X.SDL2UI
 
         void CreateNewGame()
         {
-
+ 
             gameSettings = new ECSLib.NewGameSettings
             {
                 GameName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer),
@@ -100,19 +101,17 @@ namespace Pulsar4X.SDL2UI
                 DefaultSolStart = true,
                 MasterSeed = _masterSeed
             };
-
+            //TODO: Tidyup: new Game(gameSettings) doesn't currently create a default faction as per the settings.
+            //this should probilby be fixed, either we create it there or we... dont.
             _uiState.Game = new ECSLib.Game(gameSettings);
-            //_uiState.LoadedWindows.Add(new TimeControl(_uiState));
-            //_uiState.LoadedWindows.Remove(this);
-            ECSLib.FactionVM factionVM = new ECSLib.FactionVM(_uiState.Game);
-            _uiState.FactionUIState = factionVM;
-
-            factionVM.CreateDefaultFaction(ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer), ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer));
-
-            _uiState.SetFaction(factionVM.FactionEntity);
-            //_uiState.MapRendering.SetSystem(factionVM.KnownSystems[0]);
-            //_uiState.MapRendering.SetSystem(factionVM);
-            _uiState.SetActiveSystem(factionVM.KnownSystems[0].Guid);
+            
+            var factionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer);
+            var factionPasswd = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer);
+            var factionEntity = DefaultStartFactory.DefaultHumans(StaticRefLib.Game, factionName);
+            AuthProcessor.StorePasswordAsHash(StaticRefLib.Game, factionEntity, factionPasswd);
+            _uiState.SetFaction(factionEntity);
+            _uiState.SetActiveSystem(factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
+            
             DebugWindow.GetInstance().SetGameEvents();
             IsActive = false;
             //we initialize window instances so that they get always displayed and automatically open after new game is created.

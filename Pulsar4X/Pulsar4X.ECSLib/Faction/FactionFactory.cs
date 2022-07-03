@@ -57,6 +57,8 @@ namespace Pulsar4X.ECSLib
             // Add this faction to the SM's access list.
             game.SpaceMaster.SetAccess(factionEntity, AccessRole.SM);
             name.SetName(factionEntity.Guid, factionName);
+            game.Factions.Add(factionEntity);
+            StaticRefLib.EventLog.AddPlayer(factionEntity);
             return factionEntity;
         }
 

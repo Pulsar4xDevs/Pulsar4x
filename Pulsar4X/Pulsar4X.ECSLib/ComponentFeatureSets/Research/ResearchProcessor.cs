@@ -31,13 +31,15 @@ namespace Pulsar4X.ECSLib
             DoResearch(entity);
         }
 
-        public void ProcessManager(EntityManager manager, int deltaSeconds)
+        public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             List<Entity> entitysWithReserch = manager.GetAllEntitiesWithDataBlob<EntityResearchDB>();
             foreach(var entity in entitysWithReserch)
             {
                 ProcessEntity(entity, deltaSeconds);
             }
+
+            return entitysWithReserch.Count;
         }
 
 
@@ -53,7 +55,7 @@ namespace Pulsar4X.ECSLib
         {
             
             Entity faction;
-            entity.Manager.FindEntityByGuid(entity.FactionOwner, out faction);
+            entity.Manager.FindEntityByGuid(entity.FactionOwnerID, out faction);
             FactionAbilitiesDB factionAbilities = faction.GetDataBlob<FactionAbilitiesDB>();
             FactionTechDB factionTechs = faction.GetDataBlob<FactionTechDB>();
             EntityResearchDB entityResearch = entity.GetDataBlob<EntityResearchDB>();

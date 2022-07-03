@@ -1,11 +1,7 @@
 ﻿using System;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
-using Pulsar4X.Vectors;
-using Vector2 = Pulsar4X.Vectors.Vector2;
-
-//using System.Numerics;
-
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -23,12 +19,12 @@ namespace Pulsar4X.SDL2UI
 
         DateTime _actionDateTime;
 
-        //double _origionalOrbitalSpeed = double.NaN;
-        Vector3 _orbitalVelocityAtChange_m = ECSLib.Vector3.NaN;
-        double _origionalAngle = double.NaN;
+        //double _originalOrbitalSpeed = double.NaN;
+        Vector3 _orbitalVelocityAtChange_m = Orbital.Vector3.NaN;
+        double _originalAngle = double.NaN;
 
         double _newOrbitalSpeed_m = double.NaN;
-        Vector3 _newOrbitalVelocity_m = ECSLib.Vector3.NaN;
+        Vector3 _newOrbitalVelocity_m = Orbital.Vector3.NaN;
         double _newAngle = double.NaN;
 
         double _massOrderingEntity = double.NaN;
@@ -109,10 +105,10 @@ namespace Pulsar4X.SDL2UI
             _massOrderingEntity = OrderingEntity.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             _stdGravParam_m = OrbitMath.CalculateStandardGravityParameterInM3S2(_massOrderingEntity, _massParentBody);
 
-            _positonAtChange_m = OrbitProcessor.GetPosition_m(_orderEntityOrbit, _actionDateTime);
+            _positonAtChange_m = _orderEntityOrbit.GetPosition_m(_actionDateTime);
             var velAtChange2d = OrbitProcessor.GetOrbitalVector_m(_orderEntityOrbit, _actionDateTime);
             _orbitalVelocityAtChange_m = new Vector3(velAtChange2d.X, velAtChange2d.Y, 0);
-            _origionalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
+            _originalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
 
             
             var newtondb = entity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
@@ -158,31 +154,25 @@ namespace Pulsar4X.SDL2UI
             if (_actionDateTime < newDate)
             { 
                 _actionDateTime = newDate;
-                _positonAtChange_m = OrbitProcessor.GetPosition_m(_orderEntityOrbit, _actionDateTime);
+                _positonAtChange_m = _orderEntityOrbit.GetPosition_m( _actionDateTime);
                 var vector2 = OrbitProcessor.GetOrbitalVector_m(_orderEntityOrbit, _actionDateTime);
                 _orbitalVelocityAtChange_m = new Vector3(vector2.X, vector2.Y,0);
-                _origionalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
+                _originalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
             }
         }
 
         void ActionCmd()
         {
-
-            NewtonThrustCommand.CreateCommand(
-                _uiState.Faction.Guid,
-                OrderingEntity.Entity,
-                _actionDateTime,
-                _deltaV_MS);
-
+            NewtonThrustCommand.CreateCommand(OrderingEntity.Entity, (_deltaV_MS, 0));
             CloseWindow();
         }
 
         void Calcs()
         {
        
-            //double x = (_radialDV * Math.Cos(_origionalAngle)) - (_progradeDV * Math.Sin(_origionalAngle));
-            //double y = (_radialDV * Math.Sin(_origionalAngle)) + (_progradeDV * Math.Cos(_origionalAngle));
-            _deltaV_MS = _newtonUI.DeltaV; //new ECSLib.Vector3(x, y, 0);
+            //double x = (_radialDV * Math.Cos(_originalAngle)) - (_progradeDV * Math.Sin(_originalAngle));
+            //double y = (_radialDV * Math.Sin(_originalAngle)) + (_progradeDV * Math.Cos(_originalAngle));
+            _deltaV_MS = _newtonUI.DeltaV; //new Orbital.Vector3(x, y, 0);
 
 
             _newOrbitalVelocity_m = _orbitalVelocityAtChange_m + _deltaV_MS;
@@ -197,7 +187,7 @@ namespace Pulsar4X.SDL2UI
             _orbitWidget.SetParametersFromKeplerElements(_ke_m, _positonAtChange_m);
 
             /*
-            var sgpCBAU = GameConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);
+            var sgpCBAU = UniversalConstants.Science.GravitationalConstant * (_massCurrentBody + _massOrderingEntity) / 3.347928976e33;// (149597870700 * 149597870700 * 149597870700);
             var ralPosCBAU = OrderingEntity.Entity.GetDataBlob<PositionDB>().RelativePosition_AU;
             var smaCurrOrbtAU = OrderingEntity.Entity.GetDataBlob<OrbitDB>().SemiMajorAxis;
             var velAU = OrbitProcessor.PreciseOrbitalVector(sgpCBAU, ralPosCBAU, smaCurrOrbtAU);
@@ -270,8 +260,8 @@ namespace Pulsar4X.SDL2UI
 
         private void Calcs()
         {
-            var rmtx = Matrix.NewRotateMatrix(DepartureAngle);
-            PointD dv = rmtx.TransformD(_radialDV, _progradeDV);
+            var rmtx = Matrix.IDRotate(DepartureAngle);
+            Vector2 dv = rmtx.TransformD(_radialDV, _progradeDV);
             DeltaV = new Vector3(dv.X, dv.Y, 0);
             _fuelToBurn = OrbitMath.TsiolkovskyFuelUse(_curmass, _exhastVelocity, DeltaV.Length());
         }

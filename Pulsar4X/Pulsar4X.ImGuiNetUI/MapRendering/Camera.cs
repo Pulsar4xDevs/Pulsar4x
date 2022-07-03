@@ -3,9 +3,10 @@ using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using SDL2;
 using Point = SDL2.SDL.SDL_Point;
-//using Vector2 = ImGuiNET.Vector2;
+using Vector2 = Pulsar4X.Orbital.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -20,13 +21,13 @@ namespace Pulsar4X.SDL2UI
         internal bool IsPinnedToEntity { get; private set; }
         internal Guid PinnedEntityGuid;
         PositionDB _entityPosDB;
-        internal ECSLib.Vector3 _camWorldPos_m = new ECSLib.Vector3();
-        public ECSLib.Vector3 CameraWorldPosition_AU
+        internal Orbital.Vector3 _camWorldPos_m = new Orbital.Vector3();
+        public Orbital.Vector3 CameraWorldPosition_AU
         {
             get
             {
                 if (IsPinnedToEntity && _entityPosDB != null)
-                    return new ECSLib.Vector3
+                    return new Orbital.Vector3
                     {
                         X = Distance.MToAU(_camWorldPos_m.X) + _entityPosDB.AbsolutePosition_AU.X,
                         Y = Distance.MToAU(_camWorldPos_m.Y) + _entityPosDB.AbsolutePosition_AU.Y
@@ -37,12 +38,12 @@ namespace Pulsar4X.SDL2UI
 
         }
        
-        public ECSLib.Vector3 CameraWorldPosition_m
+        public Orbital.Vector3 CameraWorldPosition_m
         {
             get
             {
                 if (IsPinnedToEntity && _entityPosDB != null)
-                    return new ECSLib.Vector3
+                    return new Orbital.Vector3
                     {
                         X = _camWorldPos_m.X + _entityPosDB.AbsolutePosition_m.X,
                         Y = _camWorldPos_m.Y + _entityPosDB.AbsolutePosition_m.Y
@@ -62,9 +63,12 @@ namespace Pulsar4X.SDL2UI
 
         //public ImVec2 WorldPosition { get { return _cameraWorldPosition; } }
 
-        public Vector2 ViewPortCenter { get { return new Vector2(_viewPort.Size.X * 0.5f, _viewPort.Size.Y * 0.5f); } }
+        public Vector2 ViewPortCenter { get { return new Orbital.Vector2(_viewPort.Size.X * 0.5f, _viewPort.Size.Y * 0.5f); } }
 
-        public Vector2 ViewPortSize { get { return _viewPort.Size; } }
+        public Vector2 ViewPortSize
+        {
+            get { return new Orbital.Vector2(_viewPort.Size); }
+        }
         public float ZoomLevel { get; set; } = 200;
         public double ZoomLevel_m { get; set; } = 1.496e11 / 200;
         public float zoomSpeed { get; set; } = 1.25f;
@@ -83,7 +87,7 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        public bool IsInViewm(ECSLib.Vector3 worldPos)
+        public bool IsInViewm(Orbital.Vector3 worldPos)
         {
             if (worldPos.X > 0 && worldPos.X < this.ViewPortSize.X && worldPos.Y > 0 && worldPos.Y < this.ViewPortSize.Y)
                 return true;
@@ -96,7 +100,7 @@ namespace Pulsar4X.SDL2UI
             if (entity.HasDataBlob<PositionDB>())
             {
                 _entityPosDB = entity.GetDataBlob<PositionDB>();
-                _camWorldPos_m = new ECSLib.Vector3(); //zero on it. 
+                _camWorldPos_m = new Orbital.Vector3(); //zero on it. 
                 IsPinnedToEntity = true;
                 PinnedEntityGuid = entity.Guid;
             }
@@ -110,7 +114,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        public Point ViewCoordinate_m(ECSLib.Vector3 worldCoord_m)
+        public Point ViewCoordinate_m(Orbital.Vector3 worldCoord_m)
         {
             //we're converting to AU here because zoom works best at AU...
             int x = (int)(Distance.MToAU( worldCoord_m.X - CameraWorldPosition_m.X) * ZoomLevel + ViewPortCenter.X);
@@ -120,7 +124,37 @@ namespace Pulsar4X.SDL2UI
             return viewCoord;
         }
         
-        public Point ViewCoordinate_AU(ECSLib.Vector3 worldCoord_AU)
+        public Point ViewCoordinate_m(Orbital.Vector2 worldCoord_m)
+        {
+            //we're converting to AU here because zoom works best at AU...
+            int x = (int)(Distance.MToAU( worldCoord_m.X - CameraWorldPosition_m.X) * ZoomLevel + ViewPortCenter.X);
+            int y = -(int)(Distance.MToAU(worldCoord_m.Y - CameraWorldPosition_m.Y) * ZoomLevel - ViewPortCenter.Y);
+            Point viewCoord = new Point() { x = x, y = y };
+
+            return viewCoord;
+        }
+        
+        public Orbital.Vector2 ViewCoordinateV2_m(Orbital.Vector2 worldCoord_m)
+        {
+            //we're converting to AU here because zoom works best at AU...
+            double x = (Distance.MToAU( worldCoord_m.X - CameraWorldPosition_m.X) * ZoomLevel + ViewPortCenter.X);
+            double y = -(Distance.MToAU(worldCoord_m.Y - CameraWorldPosition_m.Y) * ZoomLevel - ViewPortCenter.Y);
+            Orbital.Vector2 viewCoord = new Orbital.Vector2( x, y );
+
+            return viewCoord;
+        }
+        
+        public Orbital.Vector2 ViewCoordinateV2_m(Orbital.Vector3 worldCoord_m)
+        {
+            //we're converting to AU here because zoom works best at AU...
+            double x = (Distance.MToAU( worldCoord_m.X - CameraWorldPosition_m.X) * ZoomLevel + ViewPortCenter.X);
+            double y = -(Distance.MToAU(worldCoord_m.Y - CameraWorldPosition_m.Y) * ZoomLevel - ViewPortCenter.Y);
+            Orbital.Vector2 viewCoord = new Orbital.Vector2( x, y );
+
+            return viewCoord;
+        }
+        
+        public Point ViewCoordinate_AU(Orbital.Vector3 worldCoord_AU)
         {
             int x = (int)((worldCoord_AU.X - CameraWorldPosition_AU.X) * ZoomLevel + ViewPortCenter.X);
             int y = -(int)((worldCoord_AU.Y - CameraWorldPosition_AU.Y) * ZoomLevel - ViewPortCenter.Y);
@@ -130,25 +164,43 @@ namespace Pulsar4X.SDL2UI
         }
         
         
-        public ECSLib.Vector3 MouseWorldCoordinate_AU()
+        public Orbital.Vector2 ViewCoordinateV2_AU(Orbital.Vector2 worldCoord_AU)
         {
-            Vector2 mouseCoord = ImGui.GetMousePos();
+            double x = ((worldCoord_AU.X - CameraWorldPosition_AU.X) * ZoomLevel + ViewPortCenter.X);
+            double y = -((worldCoord_AU.Y - CameraWorldPosition_AU.Y) * ZoomLevel - ViewPortCenter.Y);
+            Orbital.Vector2 viewCoord = new Orbital.Vector2( x, y );
+
+            return viewCoord;
+        }
+        
+        public Orbital.Vector2 ViewCoordinateV2_AU(Orbital.Vector3 worldCoord_AU)
+        {
+            double x = ((worldCoord_AU.X - CameraWorldPosition_AU.X) * ZoomLevel + ViewPortCenter.X);
+            double y = -((worldCoord_AU.Y - CameraWorldPosition_AU.Y) * ZoomLevel - ViewPortCenter.Y);
+            Orbital.Vector2 viewCoord = new Orbital.Vector2( x, y );
+
+            return viewCoord;
+        }
+        
+        public Orbital.Vector3 MouseWorldCoordinate_AU()
+        {
+            Orbital.Vector2 mouseCoord = new Orbital.Vector2(ImGui.GetMousePos());
             double x = ((mouseCoord.X - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition_AU.X;
             double y = -(((mouseCoord.Y - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition_AU.Y);
-            return new ECSLib.Vector3(x, y, 0);
+            return new Orbital.Vector3(x, y, 0);
 
         }
-        public ECSLib.Vector3 MouseWorldCoordinate_m()
+        public Orbital.Vector3 MouseWorldCoordinate_m()
         {
             //Vector2 mouseCoord = ImGui.GetMousePos();
-            //double x = ((mouseCoord.X - ViewPortCenter.X) / (ZoomLevel / GameConstants.Units.MetersPerAu) + CameraWorldPosition_m.X);
-            //double y = -(((mouseCoord.Y - ViewPortCenter.Y) / (ZoomLevel/ GameConstants.Units.MetersPerAu) - CameraWorldPosition_m.Y));
+            //double x = ((mouseCoord.X - ViewPortCenter.X) / (ZoomLevel / UniversalConstants.Units.MetersPerAu) + CameraWorldPosition_m.X);
+            //double y = -(((mouseCoord.Y - ViewPortCenter.Y) / (ZoomLevel/ UniversalConstants.Units.MetersPerAu) - CameraWorldPosition_m.Y));
 
             var mwcau = MouseWorldCoordinate_AU();
             double x = Distance.AuToMt(mwcau.X);
             double y = Distance.AuToMt(mwcau.Y);
             
-            return new ECSLib.Vector3(x, y, 0);
+            return new Orbital.Vector3(x, y, 0);
 
         }
         
@@ -157,11 +209,11 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="viewCoordinate"></param>
         /// <returns></returns>
-        public ECSLib.Vector3 WorldCoordinate_m(int viewCoordinateX, int viewCoordinateY)
+        public Orbital.Vector3 WorldCoordinate_m(int viewCoordinateX, int viewCoordinateY)
         {
-            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel * GameConstants.Units.MetersPerAu) + CameraWorldPosition_m.X;
-            double y = -(((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel * GameConstants.Units.MetersPerAu) - CameraWorldPosition_m.Y);
-            return new ECSLib.Vector3(x, y, 0);
+            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel * UniversalConstants.Units.MetersPerAu) + CameraWorldPosition_m.X;
+            double y = -(((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel * UniversalConstants.Units.MetersPerAu) - CameraWorldPosition_m.Y);
+            return new Orbital.Vector3(x, y, 0);
         }
 
         /// <summary>
@@ -169,9 +221,9 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="worldSize"></param>
         /// <returns></returns>
-        public Vector2 ViewSize(Vector2 worldSize)
+        public Orbital.Vector2 ViewSize(Orbital.Vector2 worldSize)
         {
-            Vector2 viewSize = new Vector2(worldSize.X * ZoomLevel, worldSize.Y * ZoomLevel);
+            Orbital.Vector2 viewSize = new Orbital.Vector2(worldSize.X * ZoomLevel, worldSize.Y * ZoomLevel);
             return viewSize;
         }
 
@@ -210,9 +262,9 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="viewSize"></param>
         /// <returns></returns>
-        public Vector2 WorldSize(Vector2 viewSize)
+        public Orbital.Vector2 WorldSize(Orbital.Vector2 viewSize)
         {
-            return new Vector2(viewSize.X / ZoomLevel, viewSize.Y / ZoomLevel);
+            return new Orbital.Vector2(viewSize.X / ZoomLevel, viewSize.Y / ZoomLevel);
         }
 
 
@@ -224,8 +276,8 @@ namespace Pulsar4X.SDL2UI
         public void WorldOffset_m(double xOffset, double yOffset)
         {
             
-            _camWorldPos_m.X += (float)(xOffset * GameConstants.Units.MetersPerAu / ZoomLevel);
-            _camWorldPos_m.Y += (float)(-yOffset * GameConstants.Units.MetersPerAu / ZoomLevel);
+            _camWorldPos_m.X += (float)(xOffset * UniversalConstants.Units.MetersPerAu / ZoomLevel);
+            _camWorldPos_m.Y += (float)(-yOffset * UniversalConstants.Units.MetersPerAu / ZoomLevel);
         }
 
 
@@ -269,8 +321,8 @@ namespace Pulsar4X.SDL2UI
         /// <returns>The zoom matrix.</returns>
         public Matrix GetZoomMatrix()
         {
-            var mirrorMatrix = Matrix.NewMirrorMatrix(true, false);
-            var scaleMtx = Matrix.NewScaleMatrix(ZoomLevel, ZoomLevel);
+            var mirrorMatrix = Matrix.IDMirror(true, false);
+            var scaleMtx = Matrix.IDScale(ZoomLevel, ZoomLevel);
             return mirrorMatrix * scaleMtx;
         }
 
@@ -278,7 +330,7 @@ namespace Pulsar4X.SDL2UI
         {
             int x = (int)((0 - CameraWorldPosition_AU.X) * ZoomLevel + ViewPortCenter.X);
             int y = -(int)((0 - CameraWorldPosition_AU.Y) * ZoomLevel - ViewPortCenter.Y);
-            return Matrix.NewTranslateMatrix(x, y);
+            return Matrix.IDTranslate(x, y);
         }
 
 
@@ -290,17 +342,17 @@ namespace Pulsar4X.SDL2UI
     /// </summary>
     class CursorCrosshair : Icon
     {
-        public CursorCrosshair(ECSLib.Vector3 positionM) : base(positionM)
+        public CursorCrosshair(Orbital.Vector3 positionM) : base(positionM)
         {
             var colour = new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 255 };
 
-            PointD point0 = new PointD() { X = -5, Y = 0 };
-            PointD point1 = new PointD() { X = +5, Y = 0 };
-            Shape shape0 = new Shape() { Points = new PointD[2] { point0, point1 }, Color = colour };
+            Orbital.Vector2 point0 = new Orbital.Vector2() { X = -5, Y = 0 };
+            Orbital.Vector2 point1 = new Orbital.Vector2() { X = +5, Y = 0 };
+            Shape shape0 = new Shape() { Points = new Orbital.Vector2[2] { point0, point1 }, Color = colour };
 
-            PointD point2 = new PointD() { X = 0, Y = -5 };
-            PointD point3 = new PointD() { X = 0, Y = +5 };
-            Shape shape1 = new Shape() { Points = new PointD[2] { point2, point3 }, Color = colour };
+            Orbital.Vector2 point2 = new Orbital.Vector2() { X = 0, Y = -5 };
+            Orbital.Vector2 point3 = new Orbital.Vector2() { X = 0, Y = +5 };
+            Shape shape1 = new Shape() { Points = new Orbital.Vector2[2] { point2, point3 }, Color = colour };
 
             this.Shapes = new System.Collections.Generic.List<Shape>() { shape0, shape1 };
         }

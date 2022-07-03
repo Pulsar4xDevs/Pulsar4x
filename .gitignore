@@ -46,3 +46,5 @@ _ReSharper.AuroraExtract
 *.usertasks
 Pulsar4X/TestResults/Pulsar4X.TE.Tests.mdf
 Pulsar4X/TestResults/Pulsar4X.TE.Tests_log.ldf
+#Jetbrains Rider files 
+.idea/
