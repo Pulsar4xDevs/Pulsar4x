@@ -278,10 +278,21 @@ namespace Pulsar4X.SDL2UI
 
                             string entityStr = "";
                             if (gameEvent.Entity != null)
-                                if (gameEvent.Entity.HasDataBlob<NameDB>())
-                                    entityStr = gameEvent.Entity.GetDataBlob<NameDB>().DefaultName;
+                            {
+                                if (gameEvent.EntityName.IsNullOrWhitespace() && gameEvent.Entity.IsValid)
+                                {
+                                    if (gameEvent.Entity.HasDataBlob<NameDB>())
+                                        entityStr = gameEvent.Entity.GetDataBlob<NameDB>().DefaultName;
+                                    else
+                                        entityStr = gameEvent.Entity.Guid.ToString();
+                                }
                                 else
-                                    entityStr = gameEvent.Entity.Guid.ToString();
+                                {
+                                    entityStr = gameEvent.EntityName;
+                                }
+                            }
+                        
+
                             string factionStr = "";
                             if (gameEvent.Faction != null)
                                 if (gameEvent.Faction.HasDataBlob<NameDB>())
