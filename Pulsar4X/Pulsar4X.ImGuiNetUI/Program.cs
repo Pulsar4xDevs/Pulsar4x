@@ -117,7 +117,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            if (_state.Camera.IsGrabbingMap)
+            if (_state.Camera.IsGrabbingMap && e.type == SDL.SDL_EventType.SDL_MOUSEMOTION)
             {
                 int deltaX = _state.Camera.MouseFrameIncrementX - e.motion.x;
                 int deltaY = _state.Camera.MouseFrameIncrementY - e.motion.y;
