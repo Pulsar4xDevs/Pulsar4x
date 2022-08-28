@@ -52,7 +52,7 @@ namespace ImGuiSDL2CS {
             ImGuiSDL2CSHelper.Init();
             OnEvent = ImGuiOnEvent;
             OnLoop = ImGuiOnLoop;
-
+            SDL.SDL_SetHint("SDL_RENDER_LINE_METHOD", "2"); //https://github.com/libsdl-org/SDL/blob/1fc7f681187f80ccd6b9625214b47db665cd9aaf/include/SDL_hints.h#L1304-L1315
         }
 
         public override void Run() {
