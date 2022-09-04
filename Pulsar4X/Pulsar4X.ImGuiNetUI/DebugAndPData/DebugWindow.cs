@@ -505,8 +505,8 @@ namespace Pulsar4X.SDL2UI
                                     var progradeVec = new Vector3(0, 100, 0);
                                     //var thrustvec = OrbitMath.OrbitToGlobalVector(progradeVec, pos, relativeState.Velocity);
                                     //var thrustvec2 = OrbitMath.OrbitToGlobalVector(progradeVec, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
-                                    var thrustvec3 = OrbitMath.ProgradeToParentVector(progradeVec, truAnomoly, orbitDB.ArgumentOfPeriapsis, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
-                                    var thrustvec4 = OrbitMath.ProgradeToParentVector(orbitDB.GravitationalParameter_m3S2, progradeVec, pos, relativeState.Velocity);
+                                    var thrustvec3 = OrbitMath.ProgradeToStateVector(progradeVec, truAnomoly, orbitDB.ArgumentOfPeriapsis, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                    var thrustvec4 = OrbitMath.ProgradeToStateVector(orbitDB.GravitationalParameter_m3S2, progradeVec, pos, relativeState.Velocity);
                                     ImGui.Text("stateVec: " + relativeState.Velocity);
                                     //ImGui.Text("globalVec: " + globalvec);
                                     //ImGui.Text("thrustvec: " + thrustvec);

@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
                     var massRemoved = CargoTransferProcessor.AddRemoveCargoMass(entity, fuel, -kgOfFuel);
 
                     //convert prograde to global frame of reference for thrust direction
-                    //Vector3 globalCoordDVFromThrust = OrbitMath.ProgradeToParentVector(sgp, totalDVFromThrust,
+                    //Vector3 globalCoordDVFromThrust = OrbitMath.ProgradeToStateVector(sgp, totalDVFromThrust,
                     //    positionDB.RelativePosition_m,
                     //    newtonMoveDB.CurrentVector_ms);
                     

@@ -64,5 +64,20 @@ namespace Pulsar4X.Orbital
             return 180 - Math.Abs(Math.Abs(a1 - a2) - 180);
         }
 
+        public static double RadiansFromVector2(Vector2 vector)
+        {
+            return Math.Atan2(vector.Y, vector.X);
+        }
+        
+        /// <summary>
+        /// currently ignores Z
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <returns></returns>
+        public static double RadiansFromVector3(Vector3 vector)
+        {
+            return Math.Atan2(vector.Y, vector.X);
+        }
+
     }
 }

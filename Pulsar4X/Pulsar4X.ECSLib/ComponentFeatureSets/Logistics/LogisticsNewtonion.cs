@@ -298,7 +298,7 @@ namespace Pulsar4X.ECSLib
             var targetInsertionPosition = Vector3.Normalise(startState.Velocity) * targetRad;
             var thrustVector = Vector3.Normalise(insertionVector) * -deltaV;
 
-            var thrustV2 = OrbitalMath.ProgradeToParentVector(sgpTgtBdy, thrustVector, targetInsertionPosition, insertionVector);
+            var thrustV2 = OrbitalMath.ProgradeToStateVector(sgpTgtBdy, thrustVector, targetInsertionPosition, insertionVector);
             //should we expend deltaV now or when we get there?
 
 

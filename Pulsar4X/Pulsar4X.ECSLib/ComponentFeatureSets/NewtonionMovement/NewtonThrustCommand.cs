@@ -171,7 +171,7 @@ namespace Pulsar4X.ECSLib
 
                 var futurePosition = _entityCommanding.GetRelativeFuturePosition(_vectorDateTime);
                 var futureVector = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
-                var pralitiveDV = OrbitalMath.ProgradeToParentVector(sgp, OrbitrelativeDeltaV, futurePosition, futureVector);
+                var pralitiveDV = OrbitalMath.ProgradeToStateVector(sgp, OrbitrelativeDeltaV, futurePosition, futureVector);
                 
 
 
@@ -375,7 +375,7 @@ namespace Pulsar4X.ECSLib
             var myMass = _newtonAbilityDB.DryMass_kg + _newtonAbilityDB.TotalFuel_kg;
             var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, _soiParentMass);
             
-            var manuverVector = OrbitMath.ParentToProgradeVector(
+            var manuverVector = OrbitMath.StateToProgradeVector(
                 sgp, 
                 deltaVVector, 
                 ourState.Position, 
@@ -517,7 +517,7 @@ namespace Pulsar4X.ECSLib
                 var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
                 var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, _soiParentMass);
             
-                var vectorToTgtFromPrograde = OrbitMath.ParentToProgradeVector(
+                var vectorToTgtFromPrograde = OrbitMath.StateToProgradeVector(
                     sgp, 
                     curTgtRalState.pos, 
                     curOurRalState.pos, 
@@ -576,7 +576,7 @@ namespace Pulsar4X.ECSLib
             var myMass = _newtonAbilityDB.DryMass_kg + _newtonAbilityDB.TotalFuel_kg;
             var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, _soiParentMass);
             
-            var manuverVector = OrbitMath.ParentToProgradeVector(
+            var manuverVector = OrbitMath.StateToProgradeVector(
                 sgp, 
                 deltaVVector, 
                 ourState.Position, 

@@ -86,11 +86,11 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
             var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
             _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(_totalMass, parentMass);
-            var fuelTypeID = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
+            var fuelTypeID = _newtonThrust.FuelType;
             _fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
 
-            _burnRate = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            _exhaustVelocity = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            _burnRate = _newtonThrust.FuelBurnRate;
+            _exhaustVelocity = _newtonThrust.ExhaustVelocity;
 
 
             _siblingEntities = _orderEntity.GetSOIParentEntity().GetDataBlob<PositionDB>().Children.ToArray();
