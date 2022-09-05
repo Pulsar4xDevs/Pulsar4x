@@ -5,6 +5,7 @@ using ImGuiNET;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
 using Pulsar4X.SDL2UI;
+using Pulsar4X.SDL2UI.ManuverNodes;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 
@@ -241,11 +242,13 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         
         private float _radialDV;
         private float _progradeDV;
+        private ManuverNode _node;
         void DisplayThrustMode()
         {
             bool changes = false;
             float maxprogradeDV = (float)(_totalDV - Math.Abs(_radialDV));
             float maxradialDV = (float)(_totalDV - Math.Abs(_progradeDV));
+            double tseconds = 0;
                         
             if (ImGui.SliderFloat("Prograde Δv", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
             {
@@ -257,12 +260,37 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 //Calcs();
                 changes = true;
             }
+
+            ImGui.Text("Time: " + _atDatetime); ImGui.SameLine();
             
+            if (ImGui.Button("-1"))
+            {
+                _atDatetime -= TimeSpan.FromSeconds(1);
+                tseconds -= 1;
+                changes = true;
+            } ImGui.SameLine();            
+            if (ImGui.Button("+1"))
+            {
+                _atDatetime += TimeSpan.FromSeconds(1);
+                tseconds += 1;
+                changes = true;
+            } ImGui.SameLine();
+
             //ImGui.Text("Fuel to burn:" + Stringify.Mass(_fuelToBurn));
             //ImGui.Text("Burn time: " + (int)(_fuelToBurn / _fuelRate) +" s");
             //ImGui.Text("DeltaV: " + Stringify.Distance(DeltaV.Length())+ "/s of " + Stringify.Distance(_maxDV) + "/s");
             //ImGui.Text("Eccentricity: " + Eccentricity.ToString("g3"));
             //return changes;
+
+            if (changes)
+            {
+                if (_node is null)
+                    _node = new ManuverNode(_orderEntity, _atDatetime);
+                
+                _node.ManipulateNode(_progradeDV, _radialDV, 0, tseconds);
+            }
+
+
         }
 
 
