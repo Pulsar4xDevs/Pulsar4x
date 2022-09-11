@@ -7,7 +7,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class ShipMoveWidget : Icon
     {
-        //PositionDB _positionDB;
+        //PositionDB ParentPositionDB;
         Vector3 _translateStartPoint = new Vector3();
         Vector3 _translateEndPoint = new Vector3();
         Vector3 _currentPosition_au = new Vector3();

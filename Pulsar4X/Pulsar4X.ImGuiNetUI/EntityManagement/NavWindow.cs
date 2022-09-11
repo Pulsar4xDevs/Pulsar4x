@@ -243,6 +243,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         private float _radialDV;
         private float _progradeDV;
         private ManuverNode _node;
+        private RouteTrajectory _routeTrajectory;
         void DisplayThrustMode()
         {
             bool changes = false;
@@ -282,15 +283,28 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             //ImGui.Text("Eccentricity: " + Eccentricity.ToString("g3"));
             //return changes;
 
+
+            if (_node is null)
+                _node = new ManuverNode(_orderEntity, _atDatetime);
+            if (_routeTrajectory is null)
+            {
+                _routeTrajectory = new RouteTrajectory(_orderEntity, _node);
+                _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_routeTrajectory);
+            }
             if (changes)
             {
-                if (_node is null)
-                    _node = new ManuverNode(_orderEntity, _atDatetime);
-                
                 _node.ManipulateNode(_progradeDV, _radialDV, 0, tseconds);
+                _routeTrajectory.UpdateNode(0);
             }
-
-
+            
+            if (!_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_routeTrajectory))
+                _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_routeTrajectory);
+            var deltat = _node.NodeTime - _orderEntity.Manager.StarSysDateTime;
+            ImGui.Text("node in: " + deltat);
+            var span = _routeTrajectory.GetSegment(0).SegmentTimeSpan;
+            ImGui.Text("Span: " + span);
+            
+            
         }
 
 

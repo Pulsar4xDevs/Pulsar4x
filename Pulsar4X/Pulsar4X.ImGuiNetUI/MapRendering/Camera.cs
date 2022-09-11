@@ -333,7 +333,22 @@ namespace Pulsar4X.SDL2UI
             return Matrix.IDTranslate(x, y);
         }
 
-
+        /// <summary>
+        /// Thhis is used to see if the camera position or zoom has changed, is there a faster way to do it? probibly.
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + _camWorldPos_m.X.GetHashCode();
+                hash = hash * 23 + _camWorldPos_m.Y.GetHashCode();
+                //hash = hash * 23 + _camWorldPos_m.Z.GetHashCode();
+                hash = hash * 23 + ZoomLevel.GetHashCode();
+                return hash;
+            }
+        }
     }
 
     /// <summary>

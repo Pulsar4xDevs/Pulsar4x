@@ -217,7 +217,7 @@ namespace Pulsar4X.SDL2UI
             
 
             
-            //NOTE! _positionDB references the focal point (ie parent's position) *not* the orbiting object position.
+            //NOTE! ParentPositionDB references the focal point (ie parent's position) *not* the orbiting object position.
             
             var parentEntity = _entity.GetSOIParentEntity();
             _positionDB = parentEntity.GetDataBlob<PositionDB>();

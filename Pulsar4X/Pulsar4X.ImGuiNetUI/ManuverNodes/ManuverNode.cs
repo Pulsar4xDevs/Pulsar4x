@@ -54,7 +54,7 @@ public class ManuverNode
     private double _burnRate;
     private double _exhaustVelocity;
 
-    private KeplerElements TargetOrbit;
+    public KeplerElements TargetOrbit;
 
     public ManuverNode(Entity orderEntity, DateTime nodeTime)
     {

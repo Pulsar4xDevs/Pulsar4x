@@ -104,7 +104,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             //adjust so moons get the right positions  
-            Vector4 pos = _bodyPositionDB.AbsolutePosition;// - _positionDB.AbsolutePosition;   
+            Vector4 pos = _bodyPositionDB.AbsolutePosition;// - ParentPositionDB.AbsolutePosition;   
             PointD pointD = new PointD() { x = pos.X, y = pos.Y };
 
              
