@@ -27,6 +27,7 @@ namespace Pulsar4X.Orbital
         public static double NormaliseRadians(double radians)
         {
             radians = radians % (2 * Math.PI);
+
             return radians;
         }
 
