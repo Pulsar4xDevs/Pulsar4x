@@ -20,6 +20,59 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void ConstructorsCorrectlySetCoordinates()
+        {
+            Vector3 vector = new Vector3(2d); // Should all be equal to 2d
+            Assert.AreEqual(2d, vector.X);
+            Assert.AreEqual(2d, vector.Y);
+            Assert.AreEqual(2d, vector.Z);
+
+            vector = new Vector3(1d, 3d, -4d); // Should be equal as shown
+			Assert.AreEqual(1d, vector.X);
+			Assert.AreEqual(3d, vector.Y);
+			Assert.AreEqual(-4d, vector.Z);
+
+            vector = new Vector3(vector); // Should be the same as previous case
+			Assert.AreEqual(1d, vector.X);
+			Assert.AreEqual(3d, vector.Y);
+			Assert.AreEqual(-4d, vector.Z);
+		}
+
+        [Test]
+        public void StaticConstructorsReturnCorrectValues()
+        {
+            Vector3 vector = Vector3.NaN;
+            Assert.AreEqual(double.NaN, vector.X);
+            Assert.AreEqual(double.NaN, vector.Y);
+            Assert.AreEqual(double.NaN, vector.Z);
+
+			vector = Vector3.One;
+			Assert.AreEqual(1d, vector.X);
+			Assert.AreEqual(1d, vector.Y);
+			Assert.AreEqual(1d, vector.Z);
+
+			vector = Vector3.Zero;
+			Assert.AreEqual(0d, vector.X);
+			Assert.AreEqual(0d, vector.Y);
+			Assert.AreEqual(0d, vector.Z);
+
+			vector = Vector3.UnitX;
+			Assert.AreEqual(1d, vector.X);
+			Assert.AreEqual(0d, vector.Y);
+			Assert.AreEqual(0d, vector.Z);
+
+			vector = Vector3.UnitY;
+			Assert.AreEqual(0d, vector.X);
+			Assert.AreEqual(1d, vector.Y);
+			Assert.AreEqual(0d, vector.Z);
+
+			vector = Vector3.UnitZ;
+			Assert.AreEqual(0d, vector.X);
+			Assert.AreEqual(0d, vector.Y);
+			Assert.AreEqual(1d, vector.Z);
+		}
+
+        [Test]
         public void EqualCorrectlyReturnsTrue() 
         {
             Assert.True(vec1 == new Vector3(vec1));
@@ -101,21 +154,29 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void Length()
+        public void LengthSquaredReturnsCorrectValue()
         {
-            vec1 = new Vector3(1);
 
-            Assert.That(vec1.Length(), Is.EqualTo(Math.Sqrt(3.0)).Within(1).Ulps);
-            Assert.That(vec1.LengthSquared(), Is.EqualTo(3.0).Within(1).Ulps);
+            Vector3 vector = new Vector3(2d, 3d, 4d); // Value should be 4 + 9 + 16 = 29
+            Assert.AreEqual(29d, vector.LengthSquared());
 
-            Assert.That(Vector3.UnitX.Length(), Is.EqualTo(Math.Sqrt(1)).Within(1).Ulps);
-            Assert.That(Vector3.UnitY.Length(), Is.EqualTo(Math.Sqrt(1)).Within(1).Ulps);
-            Assert.That(Vector3.UnitZ.LengthSquared(), Is.EqualTo(1.0).Within(1).Ulps);
+            vector = new Vector3(2d, -3d, 4d); // Same value, despite the negative coordinate
+			Assert.AreEqual(29d, vector.LengthSquared());
+		}
 
-            Assert.That(vec2.LengthSquared(), Is.EqualTo(5.0).Within(1).Ulps);
-            Assert.That(vec2.Length(), Is.EqualTo(Math.Sqrt(5)).Within(1).Ulps);
+        [Test]
+        public void LengthReturnsCorrectValue()
+        {
 
-            vec1 = new Vector3(1);
+            Vector3 vector = new Vector3(3d, 0d, 0d); // Value should be the same as the non-zero coordinate
+            Assert.AreEqual(3d, vector.Length());
+
+            vector = new Vector3(2d, 3d, 4d); // Value should be sqrt(4 + 9 + 16)
+            Assert.AreEqual(Math.Sqrt(29d), vector.Length());
+
+            vector = new Vector3(2d, -3d, 4d); // Same value, despite the negative coordinate
+            Assert.AreEqual(Math.Sqrt(29d), vector.Length());
+
         }
     }
 }
