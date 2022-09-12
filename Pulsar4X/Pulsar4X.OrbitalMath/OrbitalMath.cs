@@ -52,7 +52,7 @@ namespace Pulsar4X.Orbital
 
 
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
-            double linierEccentricity = eccentricity * semiMajorAxis;
+            double linearEccentricity = eccentricity * semiMajorAxis;
 
             double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
 
@@ -91,10 +91,10 @@ namespace Pulsar4X.Orbital
             return ke;
         }
 
-        public static KeplerElements FromPosition(Vector3 ralitivePosition, double sgp, DateTime epoch)
+        public static KeplerElements FromPosition(Vector3 relativePosition, double sgp, DateTime epoch)
         {
 
-            var ralpos = ralitivePosition;
+            var ralpos = relativePosition;
             var r = ralpos.Length();
             var i = Math.Atan2(ralpos.Z, r);
             var m0 = Math.Atan2(ralpos.Y, ralpos.X);
@@ -122,9 +122,9 @@ namespace Pulsar4X.Orbital
             return orbit;
         }
 
-        public static KeplerElements FromPositionLope(double sgp, Vector3 ralitivePosition, double lop, double e, DateTime epoch)
+        public static KeplerElements FromPositionLope(double sgp, Vector3 relativePosition, double lop, double e, DateTime epoch)
         {
-            var ralpos = ralitivePosition;
+            var ralpos = relativePosition;
             var r = ralpos.Length();
             var i = Math.Atan2(ralpos.Z, r);
             var m0 = Math.Atan2(ralpos.Y, ralpos.X);
@@ -617,7 +617,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// returns state vectors, TODO velocity vector should be 3d. TODO Use Orbit.StateVectors
-        /// As this uses newtonion method to calculate eccentricAnomaly, this is ralitivly expensive. 
+        /// As this uses newtonion method to calculate eccentricAnomaly, this is relatively expensive. 
         /// </summary>
         /// <param name="ke"></param>
         /// <param name="dateTime"></param>
@@ -657,7 +657,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// This returns the heading mesured from the periapsis (AoP) in radians
+        /// This returns the heading measured from the periapsis (AoP) in radians
         /// Add the LoP to this to get the true heading in a 2d orbit. 
         /// </summary>
         /// <returns>The orbital velocity polar coordinate.</returns>
@@ -959,12 +959,12 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Position using time (ralitivly computationaly expensive)
+        /// Position using time (relatively computationaly expensive)
         /// </summary>
         /// <param name="ke"></param>
         /// <param name="dateTime"></param>
         /// <returns></returns>
-        public static Vector3 GetRalitivePosition(KeplerElements ke, DateTime dateTime)
+        public static Vector3 GetRelativePosition(KeplerElements ke, DateTime dateTime)
         {
             var secondsFromEpoch = (dateTime - ke.Epoch).TotalSeconds;
             double lofAN = ke.LoAN;
