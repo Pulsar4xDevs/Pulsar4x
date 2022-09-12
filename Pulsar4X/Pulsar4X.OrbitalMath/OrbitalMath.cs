@@ -14,7 +14,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// Kepler elements from velocity and position.
-        /// Note, to get correct results ensure all Sgp, position, and velocity values are all in the same type (ie meters, km, or AU)
+        /// Note, to get correct results ensure all Sgp, position, and velocity values are all in the same unit (ie meters, km, or AU)
         /// </summary>
         /// <returns>a struct of Kepler elements.</returns>
         /// <param name="standardGravParam">Standard grav parameter.</param>
@@ -24,13 +24,15 @@ namespace Pulsar4X.Orbital
         {
             KeplerElements ke = new KeplerElements();
             Vector3 angularVelocity = Vector3.Cross(position, velocity);
-            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+            Vector3 nodeVector = Vector3.Cross(Vector3.UnitZ, angularVelocity);
 
             Vector3 eccentVector = EccentricityVector(standardGravParam, position, velocity);
 
             double eccentricity = eccentVector.Length();
+            double speed = velocity.Length();
+            double angularSpeed = angularVelocity.Length();
 
-            double specificOrbitalEnergy = Math.Pow(velocity.Length(), 2) * 0.5 - standardGravParam / position.Length();
+            double specificOrbitalEnergy = Math.Pow(speed * speed, 2) * 0.5 - standardGravParam / position.Length();
 
             double semiMajorAxis;
             double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
@@ -46,7 +48,7 @@ namespace Pulsar4X.Orbital
             }
             else //parabola
             {
-                p = angularVelocity.Length() * angularVelocity.Length() / standardGravParam;
+                p = angularSpeed * angularSpeed / standardGravParam;
                 semiMajorAxis = double.MaxValue;
             }
 
@@ -54,7 +56,7 @@ namespace Pulsar4X.Orbital
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
             double linearEccentricity = eccentricity * semiMajorAxis;
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
+            double inclination = Math.Acos(angularVelocity.Z / angularSpeed); //should be 0 in 2d. or pi if counter clockwise orbit. 
 
             if (double.IsNaN(inclination))
                 inclination = 0;
@@ -84,7 +86,7 @@ namespace Pulsar4X.Orbital
             ke.MeanMotion = meanMotion;
             ke.MeanAnomalyAtEpoch = meanAnomaly;
             ke.TrueAnomalyAtEpoch = trueAnomaly;
-            ke.OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajorAxis, 3) / standardGravParam);
+            ke.OrbitalPeriod = 2 * Math.PI / meanMotion;
             ke.Epoch = epoch; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
             //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
 
