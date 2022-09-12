@@ -75,31 +75,31 @@ namespace Pulsar4X.Tests
         [Test]
         public void EqualCorrectlyReturnsTrue() 
         {
-            Assert.True(vec1 == new Vector3(vec1));
-            Assert.True(vec2 == new Vector3(vec2.X, vec2.Y, vec2.Z));
+            Assert.That(vec1 == new Vector3(vec1), Is.True);
+            Assert.That(vec2 == new Vector3(vec2.X, vec2.Y, vec2.Z), Is.True);
         }
 
         [Test]
         public void EqualCorrectlyReturnsFalse() 
         {
-            Assert.False(vec1 == new Vector3(vec1.X, vec1.Y, vec1.Z + 1));
-            Assert.False(vec1 == new Vector3(vec1.X, vec1.Y + 1, vec1.Z));
-            Assert.False(vec1 == new Vector3(vec1.X + 1, vec1.Y, vec1.Z));
+            Assert.That(vec1 == new Vector3(vec1.X, vec1.Y, vec1.Z + 1), Is.False);
+            Assert.That(vec1 == new Vector3(vec1.X, vec1.Y + 1, vec1.Z), Is.False);
+            Assert.That(vec1 == new Vector3(vec1.X + 1, vec1.Y, vec1.Z), Is.False);
         }
 
         [Test]
         public void NotEqualCorrectlyReturnsTrue() 
         {
-			Assert.True(vec1 != new Vector3(vec1.X, vec1.Y, vec1.Z + 1));
-			Assert.True(vec1 != new Vector3(vec1.X, vec1.Y + 1, vec1.Z));
-			Assert.True(vec1 != new Vector3(vec1.X + 1, vec1.Y, vec1.Z));
+			Assert.That(vec1 != new Vector3(vec1.X, vec1.Y, vec1.Z + 1), Is.True);
+			Assert.That(vec1 != new Vector3(vec1.X, vec1.Y + 1, vec1.Z), Is.True);
+			Assert.That(vec1 != new Vector3(vec1.X + 1, vec1.Y, vec1.Z), Is.True);
 		}
 
         [Test]
         public void NotEqualCorrectlyReturnsFalse() 
         {
-			Assert.False(vec1 != new Vector3(vec1));
-			Assert.False(vec2 != new Vector3(vec2.X, vec2.Y, vec2.Z));
+			Assert.That(vec1 != new Vector3(vec1), Is.False);
+			Assert.That(vec2 != new Vector3(vec2.X, vec2.Y, vec2.Z), Is.False);
 		}
 
         [Test]
