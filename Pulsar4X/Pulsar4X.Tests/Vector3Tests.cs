@@ -103,7 +103,7 @@ namespace Pulsar4X.Tests
 		}
 
         [Test]
-        public void Addition()
+        public void AdditionReturnsCorrectValue()
         {
             Assert.That(vec1 + vec2, Is.EqualTo(new Vector3(2, 2, 2)).Within(1).Ulps);
 
@@ -113,7 +113,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void Subtraction()
+        public void SubtractionReturnsCorrectValue()
         {
             Assert.That(vec1 - vec2, Is.EqualTo(new Vector3(-2, 0, 2)).Within(1).Ulps);
 
@@ -123,7 +123,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void Multiplication()
+        public void MultiplicationReturnsCorrectValue()
         {
             Assert.That(vec1 * vec2, Is.EqualTo(new Vector3(0.0, 1.0, 0.0)).Within(1).Ulps);
 
@@ -139,7 +139,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void Division()
+        public void DivisionReturnsCorrectValue()
         {
             vec1.X = 1;
             vec2.Z = 1;
