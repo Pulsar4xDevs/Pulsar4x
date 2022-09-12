@@ -103,22 +103,26 @@ namespace Pulsar4X.Orbital
 
         public static double GravitationalParameter_Km3s2(double mass)
         {
-            return UniversalConstants.Science.GravitationalConstant * mass / 1000000000; // (1000^3)
+            double factor = UniversalConstants.Units.MetersPerKm;
+            return StandardGravitationalParameter(mass) / 
+                (factor*factor*factor); // = (1000^3) = 1000000000
         }
 
         public static double GravitiationalParameter_Au3s2(double mass)
         {
-            return UniversalConstants.Science.GravitationalConstant * mass / 3.347928976e33; // (149597870700^3)
-        }
+            double factor = UniversalConstants.Units.MetersPerAu;
+            return StandardGravitationalParameter(mass) /
+                (factor * factor * factor); // = (149597870700^3) = 3.347928976e33
+		}
 
-        /// <summary>
-        /// calculates a vector from two positions and a magnatude
-        /// </summary>
-        /// <returns>The vector.</returns>
-        /// <param name="currentPosition">Current position.</param>
-        /// <param name="targetPosition">Target position.</param>
-        /// <param name="speedMagnitude_AU">Speed magnitude.</param>
-        public static Vector3 GetVector(Vector3 currentPosition, Vector3 targetPosition, double speedMagnitude_AU)
+		/// <summary>
+		/// calculates a vector from two positions and a magnatude
+		/// </summary>
+		/// <returns>The vector.</returns>
+		/// <param name="currentPosition">Current position.</param>
+		/// <param name="targetPosition">Target position.</param>
+		/// <param name="speedMagnitude_AU">Speed magnitude.</param>
+		public static Vector3 GetVector(Vector3 currentPosition, Vector3 targetPosition, double speedMagnitude_AU)
         {
             Vector3 speed = new Vector3(0, 0, 0);
             double length;
