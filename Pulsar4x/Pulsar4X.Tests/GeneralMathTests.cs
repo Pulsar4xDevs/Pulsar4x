@@ -40,5 +40,32 @@ namespace Pulsar4X.Tests
 			CheckClamp(test, min, max, min);
 		}
 		#endregion
+		#region GetVector
+
+		[TestCase(1, 3, 5, 1, 0, 0, 4)]
+		[TestCase(1, 3, 5, 1, 0, 0, 1)]
+		[TestCase(1, 3, 5, 1, 0, 0, -1)]
+		[TestCase(-4, 13, 24, 1, 1, 0, 4)]
+		[TestCase(-4, 13, 24, -8, 5, -5, -12)]
+		[TestCase(2, -1, 5, 5, 1, 4, 0)]
+		public void GetVectorCorrectlyCalculatesVelocityVector(
+			double p1, double p2, double p3,
+			double d1, double d2, double d3,
+			double magnitude
+		)
+		{
+			Vector3 position = new Vector3(p1, p2, p3);
+			Vector3 direction = new Vector3(d1, d2, d3);
+			Vector3 target = position + direction;
+
+			Assert.That
+			(
+				GeneralMath.GetVector(position, target, magnitude), 
+				Is.EqualTo(Vector3.Normalise(direction)*magnitude)
+			);
+
+		}
+
+		#endregion
 	}
 }
