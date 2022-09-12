@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 
 namespace Pulsar4X.Orbital
 {
@@ -10,6 +11,7 @@ namespace Pulsar4X.Orbital
     /// <typeparam name="T">An int, float, </typeparam>
     public struct Vector3 : IEquatable<Vector3>, IFormattable, IComparable<Vector3>
     {
+
         public double X;
         public double Y;
         public double Z;
@@ -90,11 +92,6 @@ namespace Pulsar4X.Orbital
         public static Vector3 UnitZ
         {
             get { return new Vector3(0, 0, 1); }
-        }
-
-        public static Vector3 Vector3FromDecimals(decimal X, decimal Y, decimal Z)
-        {
-            return new Vector3((double)X, (double)Y, (double)Z);
         }
 
         #endregion

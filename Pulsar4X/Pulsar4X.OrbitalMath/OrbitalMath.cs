@@ -161,13 +161,13 @@ namespace Pulsar4X.Orbital
             * velocity              m/sec
             */
             var (X, Y, Z) = Vector3.CrossPrecise(position, velocity);
-            return Vector3.Vector3FromDecimals(X, Y, Z);
+            return new Vector3((double)X, (double)Y, (double)Z);
         }
 
         public static Vector3 CalculateNode(Vector3 angularVelocity)
         {
             var (X, Y, Z) = Vector3.CrossPrecise(new Vector3(0, 0, 1), angularVelocity);
-            return Vector3.Vector3FromDecimals(X, Y, Z);
+            return new Vector3((double)X, (double)Y, (double)Z);
         }
 
         public static double CalculateStandardGravityParameterInKm3S2(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
