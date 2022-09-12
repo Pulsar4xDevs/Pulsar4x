@@ -144,12 +144,21 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Returns the magnitude of the vector.
+        /// Returns the square of the length of the vector, for use when 
+        /// magnitudes are being compared
+        /// </summary>
+        public static double SqrMagnitude(Vector3 vector)
+        {
+            return (vector.X*vector.X) + (vector.Y*vector.Y) + (vector.Z*vector.Z);
+        }
+
+        /// <summary>
+        /// Returns the length of the vector.
         /// </summary>
         /// 
         public static double Magnitude(Vector3 vector)
         {
-            return Math.Sqrt((vector.X * vector.X) + (vector.Y * vector.Y) + (vector.Z * vector.Z));
+            return Math.Sqrt(SqrMagnitude(vector));
         }
 
 
