@@ -166,7 +166,7 @@ namespace Pulsar4X.Orbital
 
         public static Vector3 CalculateNode(Vector3 angularVelocity)
         {
-            var (X, Y, Z) = Vector3.CrossPrecise(new Vector3(0, 0, 1), angularVelocity);
+            var (X, Y, Z) = Vector3.CrossPrecise(Vector3.UnitZ, angularVelocity);
             return new Vector3((double)X, (double)Y, (double)Z);
         }
 
