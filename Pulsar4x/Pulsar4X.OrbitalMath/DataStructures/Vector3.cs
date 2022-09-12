@@ -107,7 +107,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Divides the first vector by the second. 
+        /// Divides the first vector element-wise by the second. 
         /// </summary>
         public static Vector3 Divide(Vector3 left, Vector3 right)
         {
@@ -167,7 +167,6 @@ namespace Pulsar4X.Orbital
         /// <summary>
         /// Returns the dot product of two vectors
         /// </summary>
-
         public static double Dot(Vector3 left, Vector3 right)
         {
             return left.X * right.X + left.Y * right.Y + left.Z * right.Z;
@@ -191,7 +190,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Cross product of left and right. Note: this ignores the fourth (W) property and treats them as 3d vectors.
+        /// Cross product of left and right.
         /// </summary>
         public static Vector3 Cross(Vector3 left, Vector3 right)
         {
@@ -227,7 +226,6 @@ namespace Pulsar4X.Orbital
         /// <summary>
         /// Returns the angle between two vectors
         /// </summary>
-
         public static double AngleBetween(Vector3 left, Vector3 right)
         {
             return Math.Acos(Dot(left, right) / (left.Length() * right.Length()));
