@@ -67,5 +67,102 @@ namespace Pulsar4X.Tests
 		}
 
 		#endregion
+		#region LineIntersectsLine
+
+		[Test]
+		public void LineIntersectsLineReturnsTrueIfSegmentsIntersetWithinTheirLengths()
+		{
+			Vector2 start1 = new Vector2(-1, 0);
+			Vector2 end1 = new Vector2(1, 0);
+
+			Vector2 start2 = new Vector2(0, -1);
+			Vector2 end2 = new Vector2(0, 1);
+
+			Vector2 output;
+
+			bool result = GeneralMath.LineIntersectsLine(start1, end1, start2, end2, out output);
+
+			Assert.That(result, Is.True);
+
+			start1 = new Vector2(1, 0);
+			end1 = new Vector2(-1, 0);
+
+			start2 = new Vector2(0, -1);
+			end2 = new Vector2(0, 1);
+
+			result = GeneralMath.LineIntersectsLine(start1, end1, start2, end2, out output);
+
+			Assert.That(result, Is.True);
+		}
+
+		[Test]
+		public void LineIntersectsLineReturnsFalseIfSegmentsParallel()
+		{
+			Vector2 start1 = new Vector2(-1, 0);
+			Vector2 end1 = new Vector2(1, 0);
+
+			Vector2 start2 = new Vector2(-1, 1);
+			Vector2 end2 = new Vector2(1, 1);
+
+			Vector2 output;
+
+			bool result = GeneralMath.LineIntersectsLine(start1, end1, start2, end2, out output);
+
+			Assert.That(result, Is.False);
+		}
+
+		[Test]
+		public void LineIntersectsLineReturnsFalseIfSegmentsIntersectOutsideTheirLength()
+		{
+			Vector2 start1 = new Vector2(-1, 0);
+			Vector2 end1 = new Vector2(1, 0);
+
+			Vector2 start2 = new Vector2(0, 1);
+			Vector2 end2 = new Vector2(0, 2);
+
+			Vector2 output;
+
+			bool result = GeneralMath.LineIntersectsLine(start1, end1, start2, end2, out output);
+
+			Assert.That(result, Is.False);
+		}
+
+		[Test]
+		public void LineIntersectsLineReturnsCorrectIntersectionPoint()
+		{
+			Vector2 start1 = new Vector2(-1, 0);
+			Vector2 end1 = new Vector2(1, 0);
+
+			Vector2 start2 = new Vector2(0, -1);
+			Vector2 end2 = new Vector2(0, 1);
+
+			Vector2 output;
+
+			GeneralMath.LineIntersectsLine(start1, end1, start2, end2, out output);
+
+			Assert.That(output, Is.EqualTo(Vector2.Zero));
+
+			start1 = new Vector2(0, 0);
+			end1 = new Vector2(2, 0);
+
+			start2 = new Vector2(1, -1);
+			end2 = new Vector2(1, 1);
+
+			GeneralMath.LineIntersectsLine(start1, end1, start2, end2, out output);
+
+			Assert.That(output, Is.EqualTo(new Vector2(1, 0)));
+
+			start1 = new Vector2(-1, 0);
+			end1 = new Vector2(1, 0);
+
+			start2 = new Vector2(0, 1);
+			end2 = new Vector2(0, 2);
+
+			GeneralMath.LineIntersectsLine(start1, end1, start2, end2, out output);
+
+			Assert.That(output, Is.EqualTo(Vector2.Zero));
+		}
+
+		#endregion
 	}
 }
