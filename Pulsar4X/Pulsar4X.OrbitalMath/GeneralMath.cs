@@ -28,17 +28,17 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Selects a number from a range based on the selection percentage provided.
+        /// Linearly interpolates between two values.
         /// </summary>
-        public static double SelectFromRange(MinMaxStruct minMax, double selection)
+        public static double Lerp(MinMaxStruct minMax, double selection)
         {
             return minMax.Min + selection * (minMax.Max - minMax.Min);
         }
 
         /// <summary>
-        /// Selects a number from a range based on the selection percentage provided.
+        /// Linearly interpolates between two values.
         /// </summary>
-        public static double SelectFromRange(double min, double max, double selection)
+        public static double Lerp(double min, double max, double selection)
         {
             return min + selection * (max - min);
         }

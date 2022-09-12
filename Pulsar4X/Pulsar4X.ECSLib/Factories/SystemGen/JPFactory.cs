@@ -23,8 +23,8 @@ namespace Pulsar4X.ECSLib
             
             var jpPositionLimits = new MinMaxStruct(ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[primaryStarInfoDB.SpectralType].Min, ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[primaryStarInfoDB.SpectralType].Max);
 
-            jpPositionDB.X_AU = GeneralMath.SelectFromRange(jpPositionLimits, system.RNGNextDouble());
-            jpPositionDB.Y_AU = GeneralMath.SelectFromRange(jpPositionLimits, system.RNGNextDouble());
+            jpPositionDB.X_AU = GeneralMath.Lerp(jpPositionLimits, system.RNGNextDouble());
+            jpPositionDB.Y_AU = GeneralMath.Lerp(jpPositionLimits, system.RNGNextDouble());
 
             // Randomly flip the position sign to allow negative values.
             if (system.RNGNext(0, 100) < 50)
