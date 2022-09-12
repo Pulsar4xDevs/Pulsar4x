@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
             {
                 p = targetOrbit.GetAbsolutePosition_m(atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
                 p += offsetPosition;
-                tt = Vector3.Magnitude(p - pos) / speed;  //length(p - pos) / speed;
+                tt = (p - pos).Length() / speed;  //length(p - pos) / speed;
                 a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
                 a0 /= pl.T;                                   // remove full periods from the difference
                 a0 -= Math.Floor(a0);
@@ -107,7 +107,7 @@ namespace Pulsar4X.ECSLib
                 {
                     p = targetOrbit.GetAbsolutePosition_m(atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
                     p += offsetPosition;    
-                    tt = Vector3.Magnitude(p - pos) / speed;  //tt = length(p - pos) / speed;
+                    tt = (p - pos).Length() / speed;  //tt = length(p - pos) / speed;
                     a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
                     a0 /= pl.T;                                   // remove full periods from the difference
                     a0 -= Math.Floor(a0);

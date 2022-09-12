@@ -144,25 +144,6 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Returns the square of the length of the vector, for use when 
-        /// magnitudes are being compared
-        /// </summary>
-        public static double SqrMagnitude(Vector3 vector)
-        {
-            return (vector.X*vector.X) + (vector.Y*vector.Y) + (vector.Z*vector.Z);
-        }
-
-        /// <summary>
-        /// Returns the length of the vector.
-        /// </summary>
-        /// 
-        public static double Magnitude(Vector3 vector)
-        {
-            return Math.Sqrt(SqrMagnitude(vector));
-        }
-
-
-        /// <summary>
         /// attempts to get a more mathmaticaly precise result by casting to a decimal and back again.
         /// due to not having a built in Sqrt function for decimal, we cast back before that is done.
         /// </summary>
@@ -179,7 +160,7 @@ namespace Pulsar4X.Orbital
 
         public static Vector3 Normalise(Vector3 vector)
         {
-            double magnitude = Magnitude(vector);
+            double magnitude = vector.Length();
             if (magnitude != 0)
                 return vector / magnitude;
             else
@@ -252,7 +233,7 @@ namespace Pulsar4X.Orbital
 
         public static double AngleBetween(Vector3 left, Vector3 right)
         {
-            return Math.Acos(Dot(left, right) / (Magnitude(left) * Magnitude(right)));
+            return Math.Acos(Dot(left, right) / (left.Length() * right.Length()));
         }
 
         /// <summary>
