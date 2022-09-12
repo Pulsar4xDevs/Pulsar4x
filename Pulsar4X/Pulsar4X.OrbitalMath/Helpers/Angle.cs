@@ -20,13 +20,17 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// returns a number between -2 * pi and 2 * pi
+        /// returns a number between -pi and pi
         /// </summary>
         /// <returns>The radians.</returns>
         /// <param name="radians">Radians.</param>
         public static double NormaliseRadians(double radians)
         {
-            radians = radians % (2 * Math.PI);
+            radians = NormaliseRadiansPositive(radians);
+            if (radians > Math.PI)
+            {
+                radians -= 2 * Math.PI;
+            }
 
             return radians;
         }
@@ -38,10 +42,9 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static double NormaliseRadiansPositive(double radians)
         {
-            radians = NormaliseRadians(radians);
-            if (radians < 0)
-                radians += (2 * Math.PI);
-            return radians;
+			radians %= 2 * Math.PI;
+			radians = (radians + 2 * Math.PI) % (2 * Math.PI);
+			return radians;
         }
 
         /// <summary>

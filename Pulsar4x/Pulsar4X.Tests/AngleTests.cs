@@ -49,23 +49,33 @@ namespace Pulsar4X.Tests
 		}
 
 		[TestCase(0, 0)]
-		[TestCase(1/6*Math.PI, 1/6*Math.PI)]
-		[TestCase(-1/6*Math.PI, -1/6*Math.PI)]
-		[TestCase(11/12*Math.PI, 11/12*Math.PI)]
-		[TestCase(-11/12*Math.PI, -11/12*Math.PI)]
+		[TestCase(1d/6d*Math.PI, 1d/6d*Math.PI)]
+		[TestCase(-1d/6d*Math.PI, -1d/6d*Math.PI)]
+		[TestCase(11d/12d*Math.PI, 11d/12d*Math.PI)]
+		[TestCase(-11d/12d*Math.PI, -11d/12d*Math.PI)]
 		[TestCase(Math.PI, Math.PI)]
-		[TestCase(-Math.PI, -Math.PI)]
-		[TestCase(13/12*Math.PI, 1/12*Math.PI)]
-		[TestCase(-13/12*Math.PI, -1/12*Math.PI)]
-		[TestCase(23/12*Math.PI, 11/12*Math.PI)]
-		[TestCase(-23/12*Math.PI, -11/12*Math.PI)]
-		[TestCase(2*Math.PI, 0)]
-		[TestCase(-2*Math.PI, 0)]
-		[TestCase(25/12*Math.PI, 1/12*Math.PI)]
-		[TestCase(-25/12*Math.PI, -1/12*Math.PI)]
-		public void RadiansCorrectlyNormalized(double input, double output)
+		[TestCase(-Math.PI, Math.PI)]
+		[TestCase(13d/12d*Math.PI, -11d/12d*Math.PI)]
+		[TestCase(-13d/12d*Math.PI, 11d/12d*Math.PI)]
+		[TestCase(23d/12d*Math.PI, -1d/12d*Math.PI)]
+		[TestCase(-23d/12d*Math.PI, 1d/12d*Math.PI)]
+		[TestCase(2d*Math.PI, 0)]
+		[TestCase(-2d*Math.PI, 0)]
+		[TestCase(25d/12d*Math.PI, 1d/12d*Math.PI)]
+		[TestCase(-25d/12d*Math.PI, -1d/12d*Math.PI)]
+		public void RadiansCorrectlyNormalized(double radians, double normalized)
 		{
-			Assert.That(Angle.NormaliseRadians(input), Is.EqualTo(output));
+			Console.WriteLine(radians.ToString() + ", " + normalized.ToString());
+			radians %= 2 * Math.PI;
+			Console.WriteLine(radians);
+			radians = (radians + 2 * Math.PI) % (2 * Math.PI);
+			Console.WriteLine(radians);
+			if (radians > Math.PI)
+			{
+				radians -= 2 * Math.PI;
+			}
+			Console.WriteLine(radians);
+			Assert.That(Angle.NormaliseRadians(radians), Is.EqualTo(normalized).Within(epsilon));
 		}
 
 		[Test]
