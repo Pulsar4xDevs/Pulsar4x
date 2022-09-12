@@ -32,11 +32,11 @@ namespace Pulsar4X.Tests
 		[TestCase(179, 179)]
 		[TestCase(-179, -179)]
 		[TestCase(180, 180)]
-		[TestCase(-180, -180)]
-		[TestCase(181, 181)]
-		[TestCase(-181, -181)]
-		[TestCase(359, 359)]
-		[TestCase(-359, -359)]
+		[TestCase(-180, 180)]
+		[TestCase(181, -179)]
+		[TestCase(-181, 179)]
+		[TestCase(359, -1)]
+		[TestCase(-359, 1)]
 		[TestCase(360, 0)]
 		[TestCase(-360, 0)]
 		[TestCase(361, 1)]
@@ -45,7 +45,7 @@ namespace Pulsar4X.Tests
 		[TestCase(-721, -1)]
 		public void DegreesCorrectlyNormalized(double input, double output)
 		{
-			Assert.That(Angle.NormaliseDegrees(input), Is.EqualTo(output));
+			Assert.That(Angle.NormaliseDegrees(input), Is.EqualTo(output).Within(epsilon));
 		}
 
 		[TestCase(0, 0)]
@@ -79,46 +79,39 @@ namespace Pulsar4X.Tests
 		}
 
 		[Test]
-		public void CorrectlyNormalisesAngles(
+		public void NormalizedAnglesInCorrectRange(
 			[Random(-1080d, 1080d, 10)] double degrees
 		)
 		{
 			double normalized = Angle.NormaliseDegrees(degrees);
 
-			Assert.That(normalized, Is.InRange(-360, 360), 
+			Assert.That(normalized, Is.InRange(-180, 180), 
 				"Degrees out of range");
-			Assert.That(normalized, Is.EqualTo(degrees % 360),
-				"Degrees incorrect value");
 
 			double radians = Angle.ToRadians(degrees);
 			normalized = Angle.NormaliseRadians(radians);
 
-			Assert.That(normalized, Is.InRange(-2*Math.PI, 2*Math.PI), 
+			Assert.That(normalized, Is.InRange(-Math.PI, Math.PI), 
 				"Radians out of range");
-			Assert.That(normalized, Is.EqualTo(radians % (2*Math.PI)),
-				"Radians incorrect value");
 
 			normalized = Angle.NormaliseRadiansPositive(radians);
-			double check = radians % (2*Math.PI);
-			check += (check < 0) ? 2*Math.PI : 0;
 
 			Assert.That(normalized, Is.InRange(0, 2*Math.PI),
 				"PositiveRadians out of range");
-			Assert.That(normalized, Is.EqualTo(check),
-				"PositiveRadians incorrect value");
 
 		}
 
 		[TestCase(10, 5, 5)]
-		[TestCase(-10, 5, 15)]
-		[TestCase(5, 10, 5)]
+		[TestCase(5, 5, 0)]
+		[TestCase(-10, 5, -15)]
+		[TestCase(5, 10, -5)]
 		[TestCase(720, 240, 120)]
 		[TestCase(720, -360, 0)]
 		[TestCase(361, 1, 0)]
 		public void DegreeSubtractionReturnCorrectValue(double a1, double a2, double diff)
 		{
 
-			Assert.That(Angle.DifferenceBetweenDegrees(a1, a2), Is.EqualTo(diff));
+			Assert.That(Angle.DifferenceBetweenDegrees(a1, a2), Is.EqualTo(diff).Within(epsilon));
 
 		}
 

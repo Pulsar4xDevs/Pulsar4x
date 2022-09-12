@@ -31,7 +31,6 @@ namespace Pulsar4X.Orbital
             {
                 radians -= 2 * Math.PI;
             }
-
             return radians;
         }
 
@@ -54,18 +53,17 @@ namespace Pulsar4X.Orbital
         /// <param name="degrees">Degrees.</param>
         public static double NormaliseDegrees(double degrees)
         {
-            degrees = degrees % 360;
-            return degrees;
+            return ToDegrees(NormaliseRadians(ToRadians(degrees)));
         }
 
         public static double DifferenceBetweenRadians(double a1, double a2)
         {
-            return Math.PI - Math.Abs(Math.Abs(a1 - a2) - Math.PI);
+            return NormaliseRadians(a1 - a2);
         }
 
         public static double DifferenceBetweenDegrees(double a1, double a2)
         {
-            return 180 - Math.Abs(Math.Abs(a1 - a2) - 180);
+            return NormaliseDegrees(a1 - a2);
         }
 
         public static double RadiansFromVector2(Vector2 vector)
