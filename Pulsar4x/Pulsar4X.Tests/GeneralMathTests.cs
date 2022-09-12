@@ -1,4 +1,6 @@
-﻿using Pulsar4X.Orbital;
+﻿using System;
+using System.Diagnostics;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.Tests
 {
@@ -161,6 +163,31 @@ namespace Pulsar4X.Tests
 			GeneralMath.LineIntersectsLine(start1, end1, start2, end2, out output);
 
 			Assert.That(output, Is.EqualTo(Vector2.Zero));
+		}
+
+		[Test]
+		public void LineIntersectsLineRunningTimeStudy()
+		{
+			Stopwatch sw = new Stopwatch();
+			Random random = new Random();
+
+			for (int i = 1; i < 1000000; i++)
+			{
+
+				Vector2 start1 = Vector2.Random;
+				Vector2 end1 = Vector2.Random;
+
+				Vector2 start2 = Vector2.Random;
+				Vector2 end2 = Vector2.Random;
+
+				Vector2 output;
+
+				sw.Start();
+				GeneralMath.LineIntersectsLine(start1, end1, start2, end2, out output);
+				sw.Stop();
+
+			}
+			Console.WriteLine("Elapsed Seconds: " + sw.Elapsed);
 		}
 
 		#endregion
