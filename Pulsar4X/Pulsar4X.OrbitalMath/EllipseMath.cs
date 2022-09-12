@@ -22,10 +22,12 @@ namespace Pulsar4X.Orbital
         {
             return (apoapsis + periapsis) / 2;
         }
+
         public static double SemiMajorAxisFromLinearEccentricity(double linearEccentricity, double eccentricity)
         {
             return linearEccentricity * eccentricity;
         }
+
         public static double SemiMinorAxis(double semiMajorAxis, double eccentricity)
         {
             if (eccentricity < 1)
@@ -36,17 +38,19 @@ namespace Pulsar4X.Orbital
 
         public static double SemiMinorAxisFromApsis(double apoapsis, double periapsis)
         {
-            return Math.Sqrt(Math.Abs(apoapsis) * Math.Abs(periapsis));
+            return Math.Sqrt(Math.Abs(apoapsis * periapsis));
         }
 
-        public static double LinearEccentricity(double appoapsis, double semiMajorAxis)
+        public static double LinearEccentricity(double apoapsis, double semiMajorAxis)
         {
-            return appoapsis - semiMajorAxis;
+            return apoapsis - semiMajorAxis;
         }
+
         public static double LinearEccentricityFromEccentricity(double semiMajorAxis, double eccentricity)
         {
             return semiMajorAxis * eccentricity;
         }
+
         public static double Eccentricity(double linearEccentricity, double semiMajorAxis)
         {
             return linearEccentricity / semiMajorAxis;
@@ -56,6 +60,7 @@ namespace Pulsar4X.Orbital
         {
             return (1 + eccentricity) * semiMajorAxis;
         }
+
         public static double Periapsis(double eccentricity, double semiMajorAxis)
         {
             return (1 - eccentricity) * semiMajorAxis;
