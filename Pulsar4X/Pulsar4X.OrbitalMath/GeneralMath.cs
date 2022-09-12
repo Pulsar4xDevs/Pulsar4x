@@ -124,35 +124,10 @@ namespace Pulsar4X.Orbital
 		/// <param name="speedMagnitude_AU">Speed magnitude.</param>
 		public static Vector3 GetVector(Vector3 currentPosition, Vector3 targetPosition, double speedMagnitude_AU)
         {
-            Vector3 speed = new Vector3(0, 0, 0);
-            double length;
+            Vector3 direction = targetPosition - currentPosition;
 
-
-            Vector3 speedMagInAU = new Vector3(0, 0, 0);
-
-            Vector3 direction = new Vector3(0, 0, 0);
-            direction.X = targetPosition.X - currentPosition.X;
-            direction.Y = targetPosition.Y - currentPosition.Y;
-            direction.Z = targetPosition.Z - currentPosition.Z;
-
-            length = direction.Length(); // Distance between targets in AU
-            if (length != 0)
-            {
-                direction.X = (direction.X / length);
-                direction.Y = (direction.Y / length);
-                direction.Z = (direction.Z / length);
-
-                speedMagInAU.X = direction.X * speedMagnitude_AU;
-                speedMagInAU.Y = direction.Y * speedMagnitude_AU;
-                speedMagInAU.Z = direction.Z * speedMagnitude_AU;
-            }
-
-
-            speed.X = (speedMagInAU.X);
-            speed.Y = (speedMagInAU.Y);
-            speed.Z = (speedMagInAU.Z);
-
-            return speed;
+            double length = direction.Length(); // Distance between targets in AU
+            return (length != 0) ? direction *speedMagnitude_AU / length : Vector3.Zero;
         }
 
         public static bool LineIntersectsLine(Vector2 l1start, Vector2 l1End, Vector2 l2Start, Vector2 l2End, out Vector2 intersectsAt)
