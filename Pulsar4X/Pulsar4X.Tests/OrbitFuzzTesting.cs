@@ -566,7 +566,7 @@ namespace Pulsar4X.Tests
             }
         }
         
-                [Test, TestCaseSource(nameof(_allTestOrbitData))]
+        [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TestingPosition((OrbitDB orbitDB, string TestName) testData)
         {
             var orbitDB = testData.orbitDB;
@@ -632,6 +632,83 @@ namespace Pulsar4X.Tests
             }
         }
 
+        [Test, TestCaseSource(nameof(_allTestOrbitData))]
+        public void TestinProgradeToStateConversion((OrbitDB orbitDB, string TestName) testData)
+        {
+            var orbitDB = testData.orbitDB;
+            
+            double sgp = orbitDB.GravitationalParameterAU; 
+            double o_a = orbitDB.SemiMajorAxis_AU; 
+            double o_e = orbitDB.Eccentricity; 
+            double o_i = orbitDB.Inclination; 
+            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
+            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
+            double o_n = orbitDB.MeanMotion; 
+            double o_ω = orbitDB.ArgumentOfPeriapsis;
+        
+            DateTime o_epoch = orbitDB.Epoch; 
+
+            double periodInSeconds = OrbitMath.GetOrbitalPeriodInSeconds(sgp, o_a);
+            Assert.AreEqual(periodInSeconds, orbitDB.OrbitalPeriod.TotalSeconds, 0.1);
+
+            //lets break the orbit up and check the rest of the paremeters at different points of the orbit:
+            double segmentTime = periodInSeconds / 16;
+
+            for (int i = 0; i < 16; i++)
+            {
+                TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
+                DateTime segmentDatetime = o_epoch + timeSinceEpoch;
+
+                double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
+                double o_E = orbitDB.GetEccentricAnomaly(o_M);
+                double o_ν = orbitDB.GetTrueAnomaly(segmentDatetime);
+
+                var pos = orbitDB.GetPosition_AU(segmentDatetime);
+                var vel = orbitDB.AbsoluteOrbitalVector_AU(segmentDatetime);
+                var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, vel, segmentDatetime);
+
+                var ke_epoch = ke.Epoch;
+                double ke_a = ke.SemiMajorAxis;
+                double ke_e = ke.Eccentricity;
+                double ke_i = ke.Inclination;
+                double ke_Ω = ke.LoAN;
+                double ke_M0 = ke.MeanAnomalyAtEpoch;
+                double ke_n = ke.MeanMotion;
+                double ke_ω = ke.AoP;
+                
+                Vector3 eccentricityVector = OrbitMath.EccentricityVector(sgp, pos, vel);
+                double ke_ν = OrbitMath.TrueAnomaly(eccentricityVector, pos, vel);
+                
+                double ke_E = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(ke_ν, ke_e);
+                double ke_E2 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(o_ν, o_e);
+                
+                
+                
+                var state = OrbitMath.GetStateVectors(ke, segmentDatetime);
+                var progradeVector = new Vector3(0, state.velocity.Length(), 0);
+                var progradeFromCalc = OrbitMath.ProgradeVector(ke, segmentDatetime);
+
+                var stateFromPrograde1 = OrbitMath.ProgradeToStateVector(progradeVector, ke);
+
+                var stateFromPrograde2 = OrbitMath.ProgradeToStateVector(progradeVector, ke_ν, ke_ω, ke_Ω, ke_i);
+                
+                Assert.Multiple(() =>
+                {
+                    Assert.AreEqual(progradeVector.X, progradeFromCalc.X, 1.0E-16);
+                    Assert.AreEqual(progradeVector.Y, progradeFromCalc.Y, 1.0E-16);
+                    Assert.AreEqual(progradeVector.Z, progradeFromCalc.Z, 1.0E-16);
+                    
+                    
+                    Assert.AreEqual(state.velocity.X, stateFromPrograde1.X, 1.0E-6);
+                    Assert.AreEqual(state.velocity.Y, stateFromPrograde1.Y, 1.0E-6);
+                    Assert.AreEqual(0, stateFromPrograde1.Z, 1.0E-6);
+                    
+                    Assert.AreEqual(state.velocity.X, stateFromPrograde2.X, 1.0E-6);
+                    Assert.AreEqual(state.velocity.Y, stateFromPrograde2.Y, 1.0E-6);
+                    Assert.AreEqual(0, stateFromPrograde2.Z, 1.0E-6);
+                });
+            }
+        }
 
 
     }

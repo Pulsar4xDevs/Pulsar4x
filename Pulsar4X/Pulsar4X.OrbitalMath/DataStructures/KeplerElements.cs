@@ -102,6 +102,9 @@ namespace Pulsar4X.Orbital
         public DateTime Epoch;
     }
 
+    /// <summary>
+    /// State Vectors are orbital parent ralitive.
+    /// </summary>
     public struct StateVectors
     {
         /// <summary>
@@ -110,8 +113,16 @@ namespace Pulsar4X.Orbital
         public Vector3 Position;
 
         /// <summary>
-        /// Velocity Vector
+        /// Velocity Vector Ralitive to SOI parent, but X is global East, Y global North Z global up. 
         /// </summary>
         public Vector3 Velocity;
+        
+        /// <summary>
+        /// Velocity as a prograde ie (0, velocity.length, 0) vector
+        /// </summary>
+        public Vector3 ProgradeVector
+        {
+            get { return new Vector3(0, Velocity.Y, 0); }
+        }
     }
 }

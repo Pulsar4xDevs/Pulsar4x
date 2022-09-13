@@ -251,26 +251,51 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             float maxradialDV = (float)(_totalDV - Math.Abs(_progradeDV));
             double tseconds = 0;
                         
+            
+            
+            if (ImGui.Button("-1##pg"))
+            {
+                _progradeDV -= 1;
+                changes = true;
+            } ImGui.SameLine();            
+            if (ImGui.Button("+1##pg"))
+            {
+                _progradeDV += 1;
+                changes = true;
+            }ImGui.SameLine();
             if (ImGui.SliderFloat("Prograde Δv", ref _progradeDV, -maxprogradeDV, maxprogradeDV))
             {
                 //Calcs();
                 changes = true;
-            }
+            } 
+            
+            
+            if (ImGui.Button("-1##rd"))
+            {
+                _radialDV -= 1;
+                changes = true;
+            } ImGui.SameLine();            
+            if (ImGui.Button("+1##rd"))
+            {
+                _radialDV += 1;
+                changes = true;
+            } ImGui.SameLine();
             if (ImGui.SliderFloat("Radial Δv", ref _radialDV, -maxradialDV, maxradialDV))
             {
                 //Calcs();
                 changes = true;
             }
+            
 
             ImGui.Text("Time: " + _atDatetime); ImGui.SameLine();
             
-            if (ImGui.Button("-1"))
+            if (ImGui.Button("-1##t"))
             {
                 _atDatetime -= TimeSpan.FromSeconds(1);
                 tseconds -= 1;
                 changes = true;
             } ImGui.SameLine();            
-            if (ImGui.Button("+1"))
+            if (ImGui.Button("+1##t"))
             {
                 _atDatetime += TimeSpan.FromSeconds(1);
                 tseconds += 1;
