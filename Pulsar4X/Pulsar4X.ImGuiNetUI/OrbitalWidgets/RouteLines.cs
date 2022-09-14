@@ -177,8 +177,8 @@ public class KeplerSegment : ITrajectorySegment
     {
         _endTime = endTime;
         //we find the point in the ellipse which is closesed to startTime  and end time:
-        var startPos = (Vector2)OrbitMath.GetRalitivePosition(_keplerOrbit, _startTime);
-        var endPos = (Vector2)OrbitMath.GetRalitivePosition(_keplerOrbit, _endTime);
+        var startPos = (Vector2)OrbitMath.GetRelativePosition(_keplerOrbit, _startTime);
+        var endPos = (Vector2)OrbitMath.GetRelativePosition(_keplerOrbit, _endTime);
         
         double minDistStart = (startPos - Points[0]).Length();
         double minDistEnd = minDistStart;
