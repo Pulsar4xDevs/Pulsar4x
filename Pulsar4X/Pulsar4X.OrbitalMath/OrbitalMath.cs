@@ -120,32 +120,7 @@ namespace Pulsar4X.Orbital
 
         public static KeplerElements FromPositionLope(double sgp, Vector3 relativePosition, double lop, double e, DateTime epoch)
         {
-            var ralpos = relativePosition;
-            var r = ralpos.Length();
-            var i = Math.Atan2(ralpos.Z, r);
-            var m0 = Math.Atan2(ralpos.Y, ralpos.X);
-
-            var orbit = new KeplerElements()
-            {
-                SemiMajorAxis = r,
-                SemiMinorAxis = r,
-                Apoapsis = r,
-                Periapsis = r,
-                LinearEccentricity = 0,
-                Eccentricity = 0,
-                Inclination = i,
-                LoAN = 0,
-                AoP = 0,
-                MeanMotion = Math.Sqrt(sgp / Math.Pow(r, 3)),
-                MeanAnomalyAtEpoch = m0,
-                TrueAnomalyAtEpoch = m0,
-                EccentricAnomalyAtEpoch = m0,
-                OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(r, 3) / sgp),
-                Epoch = epoch,
-                StandardGravParameter = sgp,
-            };
-
-            return orbit;
+            return FromPosition(relativePosition, sgp, epoch);
         }
 
         #region Vector Calculations
@@ -315,18 +290,15 @@ namespace Pulsar4X.Orbital
         {
             Vector3 angularMomentum = Vector3.Cross(position, velocity);
             Vector3 foo1 = Vector3.Cross(velocity, angularMomentum) / sgp;
-            var foo2 = position / position.Length();
-            var E = foo1 - foo2;
+            Vector3 foo2 = Vector3.Normalise(position);
+            Vector3 E = foo1 - foo2;
             if (E.Length() < Epsilon)
             {
-                return new Vector3(0, 0, 0);
+                return Vector3.Zero;
             }
             else
                 return E;
         }
-
-
-
 
         /// <summary>
         /// Slighty different way of calculating eccentrictyVector.
@@ -338,14 +310,14 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static Vector3 EccentricityVector2(double sgp, Vector3 position, Vector3 velocity)
         {
-            var speed = velocity.Length();
+            //var speed = velocity.Length();
             var radius = position.Length();
-            var foo1 = (speed * speed - sgp / radius) * position;
+            var foo1 = (velocity.LengthSquared() - sgp / radius) * position;
             var foo2 = Vector3.Dot(position, velocity) * velocity;
             var E = (foo1 - foo2) / sgp;
             if (E.Length() < Epsilon)
             {
-                return new Vector3(0, 0, 0);
+                return Vector3.Zero;
             }
             else
                 return E;
