@@ -505,5 +505,12 @@ namespace Pulsar4X.Tests
             
             Assert.AreEqual(distance1, distance2); //if we put the variable timstep which is related to the speed of the object in we'll have to give this a delta
         }
+
+        [Test]
+        public void CalculateExtendedParametersGetsNonNaNOrbitalPeriod()
+        {
+
+        }
+
     }
 }

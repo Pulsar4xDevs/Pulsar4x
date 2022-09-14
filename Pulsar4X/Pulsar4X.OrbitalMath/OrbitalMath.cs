@@ -32,7 +32,7 @@ namespace Pulsar4X.Orbital
             double speed = velocity.Length();
             double angularSpeed = angularVelocity.Length();
 
-            double specificOrbitalEnergy = Math.Pow(speed * speed, 2) * 0.5 - standardGravParam / position.Length();
+            double specificOrbitalEnergy = speed * speed * 0.5 - standardGravParam / position.Length();
 
             double semiMajorAxis;
             double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
