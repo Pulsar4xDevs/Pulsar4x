@@ -341,18 +341,18 @@ namespace Pulsar4X.Orbital
             double e = eccentVector.Length(); //eccentricity
             double r = position.Length();
 
-            if (e > Epsilon) //if eccentricity is bigger than a tiny amount, it's a circular orbit.
+            if (e > Epsilon) //if eccentricity is bigger than a tiny amount, it's an elliptical orbit.
             {
                 double dotEccPos = Vector3.Dot(eccentVector, position);
                 double talen = e * r;
                 talen = dotEccPos / talen;
                 talen = GeneralMath.Clamp(talen, -1, 1);
-                var trueAnomoly = Math.Acos(talen);
+                var trueAnomaly = Math.Acos(talen);
 
                 if (Vector3.Dot(position, velocity) < 0)
-                    trueAnomoly = Math.PI * 2 - trueAnomoly;
+                    trueAnomaly = Math.PI * 2 - trueAnomaly;
 
-                return Angle.NormaliseRadiansPositive(trueAnomoly);
+                return Angle.NormaliseRadiansPositive(trueAnomaly);
             }
             else
             {

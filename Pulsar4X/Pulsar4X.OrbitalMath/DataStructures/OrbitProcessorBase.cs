@@ -1,7 +1,5 @@
 ﻿using Pulsar4X.Orbital.Helpers;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Pulsar4X.Orbital
 {
@@ -39,11 +37,7 @@ namespace Pulsar4X.Orbital
         /// <param name="time">Time position desired from.</param>
         public static Vector3 GetPosition_AU(KeplerElements orbit, DateTime time, bool isStationary = false)
         {
-            if (isStationary)
-            {
-                return Vector3.Zero;
-            }
-            return GetPosition_AU(orbit, GetTrueAnomaly(orbit, time));
+            return Distance.MToAU(GetPosition_m(orbit, time, isStationary));
         }
 
         public static Vector3 GetPosition_m(KeplerElements orbit, DateTime time, bool isStationary = false)
@@ -52,7 +46,6 @@ namespace Pulsar4X.Orbital
             {
                 return Vector3.Zero;
             }
-
             return GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
         }
 
@@ -63,25 +56,7 @@ namespace Pulsar4X.Orbital
         /// <param name="time">Time position desired from.</param>
         public static Vector3 GetAbsolutePosition_AU(EntityBase entity, DateTime time)
         {
-            if (entity.Parent == null)//if we're the parent sun
-                return GetPosition_AU(entity.Orbit, GetTrueAnomaly(entity.Orbit, time), entity.IsStationary);
-
-            //else if we're a child
-            Vector3 rootPos = PositionHelper.GetAbsolutePositionInAU(entity.Parent);
-            if (entity.IsStationary)
-            {
-                return rootPos;
-            }
-
-            if (entity.Orbit.Eccentricity < 1)
-                return rootPos + GetPosition_AU(entity.Orbit, GetTrueAnomaly(entity.Orbit, time));
-            else
-                return rootPos + GetPosition_AU(entity.Orbit, GetTrueAnomaly(entity.Orbit, time));
-            //if (orbit.Eccentricity == 1)
-            //    return GetAbsolutePositionForParabolicOrbit_AU();
-            //else
-            //    return GetAbsolutePositionForHyperbolicOrbit_AU(orbit, time);
-
+            return Distance.MToAU(GetAbsolutePosition_m(entity, time));
         }
 
         public static Vector3 GetAbsolutePosition_m(EntityBase entity, DateTime time, bool isStationary = false)
@@ -147,50 +122,12 @@ namespace Pulsar4X.Orbital
         /// <param name="trueAnomaly">Angle in Radians.</param>
         public static Vector3 GetPosition_AU(KeplerElements orbit, double trueAnomaly, bool isStationary = false)
         {
-            if (isStationary)
-            {
-                return Vector3.Zero;
-            }
-
-            // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
-            double radius = Distance.MToAU(orbit.SemiMajorAxis) * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
-
-            double incl = orbit.Inclination;
-
-            //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
-            double lofAN = orbit.LoAN;
-            //double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
-            double angleFromLoAN = trueAnomaly + orbit.AoP;
-
-            double x = Math.Cos(lofAN) * Math.Cos(angleFromLoAN) - Math.Sin(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
-            double y = Math.Sin(lofAN) * Math.Cos(angleFromLoAN) + Math.Cos(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
-            double z = Math.Sin(incl) * Math.Sin(angleFromLoAN);
-
-            return new Vector3(x, y, z) * radius;
+            return Distance.MToAU(GetPosition_m(orbit, trueAnomaly, isStationary));
         }
 
-        public static Vector3 GetPosition_m(KeplerElements orbit, double trueAnomaly, bool isStationary = false)
+        public static Vector3 GetPosition_m(KeplerElements orbit, double trueAnomaly, bool isStationary)
         {
-            if (isStationary)
-            {
-                return Vector3.Zero;
-            }
-
-            // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
-            double radius = orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
-
-            double incl = orbit.Inclination;
-
-            //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
-            double lofAN = orbit.LoAN;
-            //double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
-            double angleFromLoAN = trueAnomaly + orbit.AoP;
-
-            double x = Math.Cos(lofAN) * Math.Cos(angleFromLoAN) - Math.Sin(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
-            double y = Math.Sin(lofAN) * Math.Cos(angleFromLoAN) + Math.Cos(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
-            double z = Math.Sin(incl) * Math.Sin(angleFromLoAN);
-
-            return new Vector3(x, y, z) * radius;
+            return (isStationary) ? Vector3.Zero : GetPosition_m(orbit, trueAnomaly);
         }
 
         public static Vector3 GetPosition_m(KeplerElements orbit, double trueAnomaly)
@@ -313,14 +250,7 @@ namespace Pulsar4X.Orbital
         /// <param name="atDateTime">At date time.</param>
         public static Vector3 GetOrbitalVector_AU(EntityBase entity, DateTime atDateTime)
         {
-            if (UseRelativeVelocity)
-            {
-                return InstantaneousOrbitalVelocityVector_AU(entity, atDateTime);
-            }
-            else
-            {
-                return AbsoluteOrbitalVector_AU(entity, atDateTime);
-            }
+            return Distance.MToAU(GetOrbitalVector_m(entity, atDateTime));
         }
 
         /// <summary>
@@ -360,10 +290,7 @@ namespace Pulsar4X.Orbital
         /// <param name="atDateTime">At date time.</param>
         public static Vector3 AbsoluteOrbitalVector_AU(EntityBase entity, DateTime atDateTime)
         {
-            Vector3 vector = InstantaneousOrbitalVelocityVector_AU(entity, atDateTime);
-            if (entity.Parent != null)
-                vector += AbsoluteOrbitalVector_AU(entity.Parent, atDateTime);
-            return vector;
+            return Distance.MToAU(AbsoluteOrbitalVector_m(entity, atDateTime));
         }
 
         /// <summary>
@@ -417,22 +344,7 @@ namespace Pulsar4X.Orbital
         /// <param name="atDateTime">At date time.</param>
         public static Vector3 InstantaneousOrbitalVelocityVector_AU(EntityBase entity, DateTime atDateTime)
         {
-            var parentEntityDryMassInKG = entity.Parent != null ? entity.Parent.DryMassInKG : 0;
-            var position = GetPosition_AU(entity.Orbit, atDateTime);
-            var sma = Distance.MToAU(entity.Orbit.SemiMajorAxis);
-            var gravitationalParameter_Km3S2 = GeneralMath.GravitationalParameter_Km3s2(parentEntityDryMassInKG + entity.DryMassInKG);   // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
-            if (gravitationalParameter_Km3S2 == 0 || sma == 0)
-                return new Vector3(); //so we're not returning NaN;
-
-            var gravitationalParameterAU = GeneralMath.GravitiationalParameter_Au3s2(parentEntityDryMassInKG + entity.DryMassInKG);// (149597870700 * 149597870700 * 149597870700);
-            var sgp = gravitationalParameterAU;
-
-            double e = entity.Orbit.Eccentricity;
-            double trueAnomaly = GetTrueAnomaly(entity.Orbit, atDateTime);
-            double aoP = entity.Orbit.AoP;
-            double i = entity.Orbit.Inclination;
-            double loAN = entity.Orbit.LoAN;
-            return OrbitalMath.ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
+            return Distance.MToAU(InstantaneousOrbitalVelocityVector_m(entity, atDateTime));
         }
 
         /// <summary>
@@ -449,7 +361,7 @@ namespace Pulsar4X.Orbital
             var sma = entity.Orbit.SemiMajorAxis; 
             var gravitationalParameter_Km3S2 = GeneralMath.GravitationalParameter_Km3s2(parentEntityDryMassInKG + entity.DryMassInKG);   // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
             if (gravitationalParameter_Km3S2 == 0 || sma == 0)
-                return new Vector3(); //so we're not returning NaN;
+                return Vector3.Zero; //so we're not returning NaN;
 
             var gravitationalParameter_m3S2 = GeneralMath.StandardGravitationalParameter(parentEntityDryMassInKG + entity.DryMassInKG);
             var sgp = gravitationalParameter_m3S2;
@@ -462,7 +374,6 @@ namespace Pulsar4X.Orbital
             return OrbitalMath.ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
         }
 
-
         /// <summary>
         /// Gets the Shpere of Influence radius of a given body.
         /// </summary>
@@ -472,12 +383,7 @@ namespace Pulsar4X.Orbital
         /// <returns>The Shpere of Influence radius in AU</returns>
         public static double GetSOI_AU(KeplerElements orbit, double entityDryMassInKG, double? parentEntityDryMassInKG)
         {
-            if (parentEntityDryMassInKG.HasValue) //if we're not the parent star
-            {
-                return OrbitalMath.GetSOI(Distance.MToAU(orbit.SemiMajorAxis), entityDryMassInKG, parentEntityDryMassInKG.Value);
-            }
-            
-            return double.MaxValue; //if we're the parent star, then soi is infinate. 
+            return Distance.MToAU(GetSOI_m(orbit, entityDryMassInKG, parentEntityDryMassInKG));
         }
 
         /// <summary>
