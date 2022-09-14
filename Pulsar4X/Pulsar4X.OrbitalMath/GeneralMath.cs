@@ -28,17 +28,17 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Selects a number from a range based on the selection percentage provided.
+        /// Linearly interpolates between two values.
         /// </summary>
-        public static double SelectFromRange(MinMaxStruct minMax, double selection)
+        public static double Lerp(MinMaxStruct minMax, double selection)
         {
             return minMax.Min + selection * (minMax.Max - minMax.Min);
         }
 
         /// <summary>
-        /// Selects a number from a range based on the selection percentage provided.
+        /// Linearly interpolates between two values.
         /// </summary>
-        public static double SelectFromRange(double min, double max, double selection)
+        public static double Lerp(double min, double max, double selection)
         {
             return min + selection * (max - min);
         }
@@ -103,52 +103,31 @@ namespace Pulsar4X.Orbital
 
         public static double GravitationalParameter_Km3s2(double mass)
         {
-            return UniversalConstants.Science.GravitationalConstant * mass / 1000000000; // (1000^3)
+            double factor = UniversalConstants.Units.MetersPerKm;
+            return StandardGravitationalParameter(mass) / 
+                (factor*factor*factor); // = (1000^3) = 1000000000
         }
 
         public static double GravitiationalParameter_Au3s2(double mass)
         {
-            return UniversalConstants.Science.GravitationalConstant * mass / 3.347928976e33; // (149597870700^3)
-        }
+            double factor = UniversalConstants.Units.MetersPerAu;
+            return StandardGravitationalParameter(mass) /
+                (factor * factor * factor); // = (149597870700^3) = 3.347928976e33
+		}
 
-        /// <summary>
-        /// calculates a vector from two positions and a magnatude
-        /// </summary>
-        /// <returns>The vector.</returns>
-        /// <param name="currentPosition">Current position.</param>
-        /// <param name="targetPosition">Target position.</param>
-        /// <param name="speedMagnitude_AU">Speed magnitude.</param>
-        public static Vector3 GetVector(Vector3 currentPosition, Vector3 targetPosition, double speedMagnitude_AU)
+		/// <summary>
+		/// calculates a vector from two positions and a magnatude
+		/// </summary>
+		/// <returns>The vector.</returns>
+		/// <param name="currentPosition">Current position.</param>
+		/// <param name="targetPosition">Target position.</param>
+		/// <param name="speedMagnitude_AU">Speed magnitude.</param>
+		public static Vector3 GetVector(Vector3 currentPosition, Vector3 targetPosition, double speedMagnitude_AU)
         {
-            Vector3 speed = new Vector3(0, 0, 0);
-            double length;
+            Vector3 direction = targetPosition - currentPosition;
 
-
-            Vector3 speedMagInAU = new Vector3(0, 0, 0);
-
-            Vector3 direction = new Vector3(0, 0, 0);
-            direction.X = targetPosition.X - currentPosition.X;
-            direction.Y = targetPosition.Y - currentPosition.Y;
-            direction.Z = targetPosition.Z - currentPosition.Z;
-
-            length = direction.Length(); // Distance between targets in AU
-            if (length != 0)
-            {
-                direction.X = (direction.X / length);
-                direction.Y = (direction.Y / length);
-                direction.Z = (direction.Z / length);
-
-                speedMagInAU.X = direction.X * speedMagnitude_AU;
-                speedMagInAU.Y = direction.Y * speedMagnitude_AU;
-                speedMagInAU.Z = direction.Z * speedMagnitude_AU;
-            }
-
-
-            speed.X = (speedMagInAU.X);
-            speed.Y = (speedMagInAU.Y);
-            speed.Z = (speedMagInAU.Z);
-
-            return speed;
+            double length = direction.Length(); // Distance between targets in AU
+            return (length != 0) ? direction *speedMagnitude_AU / length : Vector3.Zero;
         }
 
         public static bool LineIntersectsLine(Vector2 l1start, Vector2 l1End, Vector2 l2Start, Vector2 l2End, out Vector2 intersectsAt)

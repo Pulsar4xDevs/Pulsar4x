@@ -88,8 +88,8 @@ namespace Pulsar4X.ECSLib
 
                 // Generate the star's datablobs.
                 MassVolumeDB starMVDB = MassVolumeDB.NewFromMassAndRadius_AU(
-                    GeneralMath.SelectFromRange(_galaxyGen.Settings.StarMassBySpectralType[starType], randomSelection),
-                    GeneralMath.SelectFromRange(_galaxyGen.Settings.StarRadiusBySpectralType[starType], randomSelection));
+                    GeneralMath.Lerp(_galaxyGen.Settings.StarMassBySpectralType[starType], randomSelection),
+                    GeneralMath.Lerp(_galaxyGen.Settings.StarRadiusBySpectralType[starType], randomSelection));
                 
                 StarInfoDB starData = GenerateStarInfo(starMVDB, starType, randomSelection);
 
@@ -179,8 +179,8 @@ namespace Pulsar4X.ECSLib
                 // mass/type are tiny. Tho there will still be the obvious inverse relationship here.
                 Age = (1 - starMVDB.MassDry / _galaxyGen.Settings.StarMassBySpectralType[spectralType].Max) * maxStarAge,
                 SpectralType = spectralType,
-                Temperature = (uint)Math.Round(GeneralMath.SelectFromRange(_galaxyGen.Settings.StarTemperatureBySpectralType[spectralType], randomSelection)),
-                Luminosity = (float)GeneralMath.SelectFromRange(_galaxyGen.Settings.StarLuminosityBySpectralType[spectralType], randomSelection)
+                Temperature = (uint)Math.Round(GeneralMath.Lerp(_galaxyGen.Settings.StarTemperatureBySpectralType[spectralType], randomSelection)),
+                Luminosity = (float)GeneralMath.Lerp(_galaxyGen.Settings.StarLuminosityBySpectralType[spectralType], randomSelection)
             };
 
             // Generate a string specifying the full spectral class form a star.

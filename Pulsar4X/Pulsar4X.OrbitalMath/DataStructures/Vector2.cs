@@ -39,6 +39,16 @@ namespace Pulsar4X.Orbital
         {
             get { return new Vector2(0, 0); }
         }
+
+        public static Vector2 Random
+        {
+            get 
+            { 
+                Random r = new Random();
+                return new Vector2(r.NextDouble(), r.NextDouble()); 
+            }
+        }
+
         /// <summary>
         /// Adds two vectors together. 
         /// </summary>

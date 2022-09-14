@@ -605,7 +605,7 @@ namespace Pulsar4X.SDL2UI
   
                                     ImGui.Text("Max Speed: " + warpDB.MaxSpeed);
                                     ImGui.Text("CurrentVector: " + warpDB.CurrentVectorMS);
-                                    ImGui.Text("Current Speed: " + Orbital.Vector3.Magnitude( warpDB.CurrentVectorMS));
+                                    ImGui.Text("Current Speed: " + warpDB.CurrentVectorMS.Length());
                                     
                                     
                                     //ImGui.Text("Energy type: " + warpDB.EnergyType);

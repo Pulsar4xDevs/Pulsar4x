@@ -41,7 +41,7 @@ namespace Pulsar4X.Orbital
         {
             if (isStationary)
             {
-                return new Vector3(0, 0, 0);
+                return Vector3.Zero;
             }
             return GetPosition_AU(orbit, GetTrueAnomaly(orbit, time));
         }
@@ -50,7 +50,7 @@ namespace Pulsar4X.Orbital
         {
             if (isStationary)
             {
-                return new Vector3(0, 0, 0);
+                return Vector3.Zero;
             }
 
             return GetPosition_m(orbit, GetTrueAnomaly(orbit, time));
@@ -149,7 +149,7 @@ namespace Pulsar4X.Orbital
         {
             if (isStationary)
             {
-                return new Vector3(0, 0, 0);
+                return Vector3.Zero;
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
@@ -173,7 +173,7 @@ namespace Pulsar4X.Orbital
         {
             if (isStationary)
             {
-                return new Vector3(0, 0, 0);
+                return Vector3.Zero;
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly

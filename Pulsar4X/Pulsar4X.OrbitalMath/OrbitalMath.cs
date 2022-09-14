@@ -14,7 +14,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// Kepler elements from velocity and position.
-        /// Note, to get correct results ensure all Sgp, position, and velocity values are all in the same type (ie meters, km, or AU)
+        /// Note, to get correct results ensure all Sgp, position, and velocity values are all in the same unit (ie meters, km, or AU)
         /// </summary>
         /// <returns>a struct of Kepler elements.</returns>
         /// <param name="standardGravParam">Standard grav parameter.</param>
@@ -24,13 +24,15 @@ namespace Pulsar4X.Orbital
         {
             KeplerElements ke = new KeplerElements();
             Vector3 angularVelocity = Vector3.Cross(position, velocity);
-            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+            Vector3 nodeVector = Vector3.Cross(Vector3.UnitZ, angularVelocity);
 
             Vector3 eccentVector = EccentricityVector(standardGravParam, position, velocity);
 
             double eccentricity = eccentVector.Length();
+            double speed = velocity.Length();
+            double angularSpeed = angularVelocity.Length();
 
-            double specificOrbitalEnergy = Math.Pow(velocity.Length(), 2) * 0.5 - standardGravParam / position.Length();
+            double specificOrbitalEnergy = speed * speed * 0.5 - standardGravParam / position.Length();
 
             double semiMajorAxis;
             double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
@@ -46,15 +48,15 @@ namespace Pulsar4X.Orbital
             }
             else //parabola
             {
-                p = angularVelocity.Length() * angularVelocity.Length() / standardGravParam;
+                p = angularSpeed * angularSpeed / standardGravParam;
                 semiMajorAxis = double.MaxValue;
             }
 
 
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
-            double linierEccentricity = eccentricity * semiMajorAxis;
+            double linearEccentricity = eccentricity * semiMajorAxis;
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
+            double inclination = Math.Acos(angularVelocity.Z / angularSpeed); //should be 0 in 2d. or pi if counter clockwise orbit. 
 
             if (double.IsNaN(inclination))
                 inclination = 0;
@@ -84,17 +86,17 @@ namespace Pulsar4X.Orbital
             ke.MeanMotion = meanMotion;
             ke.MeanAnomalyAtEpoch = meanAnomaly;
             ke.TrueAnomalyAtEpoch = trueAnomaly;
-            ke.OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajorAxis, 3) / standardGravParam);
+            ke.OrbitalPeriod = 2 * Math.PI / meanMotion;
             ke.Epoch = epoch; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
             //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
 
             return ke;
         }
 
-        public static KeplerElements FromPosition(Vector3 ralitivePosition, double sgp, DateTime epoch)
+        public static KeplerElements FromPosition(Vector3 relativePosition, double sgp, DateTime epoch)
         {
 
-            var ralpos = ralitivePosition;
+            var ralpos = relativePosition;
             var r = ralpos.Length();
             var i = Math.Atan2(ralpos.Z, r);
             var m0 = Math.Atan2(ralpos.Y, ralpos.X);
@@ -122,9 +124,9 @@ namespace Pulsar4X.Orbital
             return orbit;
         }
 
-        public static KeplerElements FromPositionLope(double sgp, Vector3 ralitivePosition, double lop, double e, DateTime epoch)
+        public static KeplerElements FromPositionLope(double sgp, Vector3 relativePosition, double lop, double e, DateTime epoch)
         {
-            var ralpos = ralitivePosition;
+            var ralpos = relativePosition;
             var r = ralpos.Length();
             var i = Math.Atan2(ralpos.Z, r);
             var m0 = Math.Atan2(ralpos.Y, ralpos.X);
@@ -161,13 +163,13 @@ namespace Pulsar4X.Orbital
             * velocity              m/sec
             */
             var (X, Y, Z) = Vector3.CrossPrecise(position, velocity);
-            return Vector3.Vector3FromDecimals(X, Y, Z);
+            return new Vector3((double)X, (double)Y, (double)Z);
         }
 
         public static Vector3 CalculateNode(Vector3 angularVelocity)
         {
-            var (X, Y, Z) = Vector3.CrossPrecise(new Vector3(0, 0, 1), angularVelocity);
-            return Vector3.Vector3FromDecimals(X, Y, Z);
+            var (X, Y, Z) = Vector3.CrossPrecise(Vector3.UnitZ, angularVelocity);
+            return new Vector3((double)X, (double)Y, (double)Z);
         }
 
         public static double CalculateStandardGravityParameterInKm3S2(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
@@ -617,7 +619,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// returns state vectors, TODO velocity vector should be 3d. TODO Use Orbit.StateVectors
-        /// As this uses newtonion method to calculate eccentricAnomaly, this is ralitivly expensive. 
+        /// As this uses newtonion method to calculate eccentricAnomaly, this is relatively expensive. 
         /// </summary>
         /// <param name="ke"></param>
         /// <param name="dateTime"></param>
@@ -657,7 +659,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// This returns the heading mesured from the periapsis (AoP) in radians
+        /// This returns the heading measured from the periapsis (AoP) in radians
         /// Add the LoP to this to get the true heading in a 2d orbit. 
         /// </summary>
         /// <returns>The orbital velocity polar coordinate.</returns>
@@ -959,12 +961,12 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Position using time (ralitivly computationaly expensive)
+        /// Position using time (relatively computationaly expensive)
         /// </summary>
         /// <param name="ke"></param>
         /// <param name="dateTime"></param>
         /// <returns></returns>
-        public static Vector3 GetRalitivePosition(KeplerElements ke, DateTime dateTime)
+        public static Vector3 GetRelativePosition(KeplerElements ke, DateTime dateTime)
         {
             var secondsFromEpoch = (dateTime - ke.Epoch).TotalSeconds;
             double lofAN = ke.LoAN;
@@ -1326,7 +1328,7 @@ namespace Pulsar4X.Orbital
             {
                 p = OrbitProcessorBase.GetAbsolutePosition_m(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
                 p += offsetPosition;
-                tt = Vector3.Magnitude(p - pos) / speed;  //length(p - pos) / speed;
+                tt = (p - pos).Length() / speed;  //length(p - pos) / speed;
                 a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
                 a0 /= pl.T;                                   // remove full periods from the difference
                 a0 -= Math.Floor(a0);
@@ -1343,7 +1345,7 @@ namespace Pulsar4X.Orbital
                 {
                     p = OrbitProcessorBase.GetAbsolutePosition_m(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
                     p += offsetPosition;
-                    tt = Vector3.Magnitude(p - pos) / speed;  //tt = length(p - pos) / speed;
+                    tt = (p - pos).Length() / speed;  //tt = length(p - pos) / speed;
                     a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
                     a0 /= pl.T;                                   // remove full periods from the difference
                     a0 -= Math.Floor(a0);

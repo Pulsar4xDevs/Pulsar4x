@@ -233,8 +233,8 @@ namespace Pulsar4X.SDL2UI
             {
                 
                 btype = (BodyType)_bodyTypeIndex;
-                _massTon = (float)(0.001 * GeneralMath.SelectFromRange(_sysGensettings.SystemBodyMassByType[btype], Math.Pow(_rng.NextDouble(), 3))); // cache mass, alos cube random nuber to make smaller bodies more likly.
-                _density = (float) GeneralMath.SelectFromRange(_sysGensettings.SystemBodyDensityByType[btype], _rng.NextDouble());
+                _massTon = (float)(0.001 * GeneralMath.Lerp(_sysGensettings.SystemBodyMassByType[btype], Math.Pow(_rng.NextDouble(), 3))); // cache mass, alos cube random nuber to make smaller bodies more likly.
+                _density = (float) GeneralMath.Lerp(_sysGensettings.SystemBodyDensityByType[btype], _rng.NextDouble());
                 var volume = _massTon * 1000 / _density;
                 _radiusKM = (float)(MassVolumeDB.CalculateRadius_m(_massTon * 1000, _density) * 0.001);
             }

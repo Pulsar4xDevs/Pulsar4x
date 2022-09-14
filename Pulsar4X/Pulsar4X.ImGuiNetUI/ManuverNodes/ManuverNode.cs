@@ -71,7 +71,7 @@ public class ManuverNode
         _exhaustVelocity = _newtonThrust.ExhaustVelocity;
         
         TargetOrbit = orderEntity.GetDataBlob<OrbitDB>().GetElements();
-        _nodePosition = OrbitalMath.GetRalitivePosition(TargetOrbit, NodeTime);
+        _nodePosition = OrbitalMath.GetRelativePosition(TargetOrbit, NodeTime);
 
     }
 
