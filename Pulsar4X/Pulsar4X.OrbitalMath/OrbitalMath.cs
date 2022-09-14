@@ -55,25 +55,16 @@ namespace Pulsar4X.Orbital
                 semiMajorAxis = double.MaxValue;
             }
 
-
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
-            double linearEccentricity = eccentricity * semiMajorAxis;
 
             double inclination = Math.Acos(angularVelocity.Z / angularSpeed); //should be 0 in 2d. or pi if counter clockwise orbit. 
 
             if (double.IsNaN(inclination))
                 inclination = 0;
 
-            double longdOfAN = CalculateLongitudeOfAscendingNode(nodeVector);
-
-
             double trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
-            double argOfPeriaps = GetArgumentOfPeriapsis(position, inclination, longdOfAN, trueAnomaly);
-            var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
-
 
             double eccentricAnomaly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
-            var meanAnomaly = GetMeanAnomaly(eccentricity, eccentricAnomaly);
 
             ke.StandardGravParameter = standardGravParam;
             ke.SemiMajorAxis = semiMajorAxis;
@@ -83,13 +74,13 @@ namespace Pulsar4X.Orbital
             ke.Apoapsis = EllipseMath.Apoapsis(eccentricity, semiMajorAxis);
             ke.Periapsis = EllipseMath.Periapsis(eccentricity, semiMajorAxis);
             ke.LinearEccentricity = EllipseMath.LinearEccentricity(ke.Apoapsis, semiMajorAxis);
-            ke.LoAN = longdOfAN;
-            ke.AoP = argOfPeriaps;
+            ke.LoAN = CalculateLongitudeOfAscendingNode(nodeVector); ;
+            ke.AoP = GetArgumentOfPeriapsis(position, inclination, ke.LoAN, trueAnomaly); ;
             ke.Inclination = inclination;
-            ke.MeanMotion = meanMotion;
-            ke.MeanAnomalyAtEpoch = meanAnomaly;
+            ke.MeanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3)); ;
+            ke.MeanAnomalyAtEpoch = GetMeanAnomaly(eccentricity, eccentricAnomaly);
             ke.TrueAnomalyAtEpoch = trueAnomaly;
-            ke.OrbitalPeriod = 2 * Math.PI / meanMotion;
+            ke.OrbitalPeriod = 2 * Math.PI / ke.MeanMotion;
             ke.Epoch = epoch; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
             //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
 
