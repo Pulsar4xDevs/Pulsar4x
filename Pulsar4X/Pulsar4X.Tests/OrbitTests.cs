@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
@@ -507,9 +508,30 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void CalculateExtendedParametersGetsNonNaNOrbitalPeriod()
+        public void EccentricityVectorTimeStudy()
         {
+            Stopwatch sw1 = new Stopwatch();
+            Stopwatch sw2 = new Stopwatch();
 
+            for (int i = 0; i < 1e6; i++)
+            {
+                Random r = new Random();
+
+                double sgp = r.NextDouble();
+                Vector3 position = Vector3.Random(r);
+                Vector3 velocity = Vector3.Random(r);
+
+                sw1.Start();
+                OrbitalMath.EccentricityVector(sgp, position, velocity);
+                sw1.Stop();
+
+				sw2.Start();
+				OrbitalMath.EccentricityVector2(sgp, position, velocity);
+				sw2.Stop();
+			}
+
+            Console.WriteLine("EccentricityVector:\t\t" + sw1.Elapsed.ToString());
+            Console.WriteLine("EccentricityVector2:\t" + sw2.Elapsed.ToString());
         }
 
     }

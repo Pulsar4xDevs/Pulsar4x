@@ -94,6 +94,11 @@ namespace Pulsar4X.Orbital
             get { return new Vector3(0, 0, 1); }
         }
 
+        public static Vector3 Random(Random r)
+        {
+            return new Vector3(r.NextDouble(), r.NextDouble(), r.NextDouble());
+        }
+
         #endregion
 
         #region Methods
