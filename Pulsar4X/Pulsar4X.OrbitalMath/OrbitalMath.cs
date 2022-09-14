@@ -731,11 +731,7 @@ namespace Pulsar4X.Orbital
         /// <param name="orbit">Orbit.</param>
         public static double MeanOrbitalVelocityInAU(KeplerElements orbit)
         {
-            double a = Distance.MToAU(orbit.SemiMajorAxis);
-            double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
-            double orbitalPerodSeconds = orbit.OrbitalPeriod;
-            double peremeter = Math.PI * (3 * (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
-            return peremeter / orbitalPerodSeconds;
+            return Distance.MToAU(MeanOrbitalVelocityInm(orbit));
         }
 
         public static double MeanOrbitalVelocityInm(KeplerElements orbit)
@@ -1026,7 +1022,7 @@ namespace Pulsar4X.Orbital
         {
             // http://en.wikipedia.org/wiki/Orbital_period#Two_bodies_orbiting_each_other
             TimeSpan period;
-            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis, 3) / sgp);
+            double orbitalPeriod = GetOrbitalPeriodInSeconds(sgp, SemiMajorAxis);
             if (orbitalPeriod * 10000000 > long.MaxValue)
             {
                 period = TimeSpan.MaxValue;
