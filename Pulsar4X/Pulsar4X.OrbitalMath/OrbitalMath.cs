@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Pulsar4X.Orbital
 {
@@ -29,19 +30,21 @@ namespace Pulsar4X.Orbital
             Vector3 eccentVector = EccentricityVector(standardGravParam, position, velocity);
 
             double eccentricity = eccentVector.Length();
-            double speed = velocity.Length();
             double angularSpeed = angularVelocity.Length();
 
-            double specificOrbitalEnergy = speed * speed * 0.5 - standardGravParam / position.Length();
+            double specificOrbitalEnergy = velocity.LengthSquared() * 0.5 - standardGravParam / position.Length();
 
             double semiMajorAxis;
             double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
-            if (Math.Abs(eccentricity) > 1) //hypobola
+
+			// If we run into negative eccentricity we have big problems
+			Debug.Assert(eccentricity >= 0, "Negative eccentricity, this is physically impossible");
+            if (eccentricity > 1) //hypobola
             {
                 semiMajorAxis = -(-standardGravParam / (2 * specificOrbitalEnergy)); //in this case the sma is negitive
                 p = semiMajorAxis * (1 - eccentricity * eccentricity);
             }
-            else if (Math.Abs(eccentricity) < 1) //ellipse
+            else if (eccentricity < 1) //ellipse
             {
                 semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
                 p = semiMajorAxis * (1 - eccentricity * eccentricity);
@@ -69,8 +72,8 @@ namespace Pulsar4X.Orbital
             var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
 
 
-            double eccentricAnomoly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
-            var meanAnomaly = GetMeanAnomaly(eccentricity, eccentricAnomoly);
+            double eccentricAnomaly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
+            var meanAnomaly = GetMeanAnomaly(eccentricity, eccentricAnomaly);
 
             ke.StandardGravParameter = standardGravParam;
             ke.SemiMajorAxis = semiMajorAxis;
