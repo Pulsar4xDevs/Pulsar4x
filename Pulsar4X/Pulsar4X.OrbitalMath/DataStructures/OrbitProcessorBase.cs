@@ -98,30 +98,16 @@ namespace Pulsar4X.Orbital
 
         public static double GetTrueAnomaly(KeplerElements orbit, DateTime time)
         {
-            TimeSpan timeSinceEpoch = time - orbit.Epoch;
+            // Get seconds since last time we passed the epoch point in the orbit
+            double timeSinceEpoch = (time - orbit.Epoch).TotalSeconds % orbit.OrbitalPeriod;
 
-            // Don't attempt to calculate large timeframes.
-            while (timeSinceEpoch.TotalSeconds > orbit.OrbitalPeriod && orbit.OrbitalPeriod != 0)
-            {
-                double years = timeSinceEpoch.TotalSeconds / orbit.OrbitalPeriod;
-                timeSinceEpoch -= TimeSpan.FromSeconds(years * orbit.OrbitalPeriod);
-                orbit.Epoch += TimeSpan.FromSeconds(years * orbit.OrbitalPeriod);
-            }
-
-            double m0 = orbit.MeanAnomalyAtEpoch;
-            double n = orbit.MeanMotion;
-            double currentMeanAnomaly = OrbitalMath.GetMeanAnomalyFromTime(m0, n, timeSinceEpoch.TotalSeconds);
+            double currentMeanAnomaly = OrbitalMath.GetMeanAnomalyFromTime(
+				orbit.MeanAnomalyAtEpoch, orbit.MeanMotion, timeSinceEpoch
+            );
 
             double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
             return OrbitalMath.TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
-            /*
-            var x = Math.Cos(eccentricAnomaly) - orbit.Eccentricity;
-            var y = Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity) * Math.Sin(eccentricAnomaly);
-            return Math.Atan2(y, x);
-            */
         }
-
-        
 
         /// <summary>
         /// Calculates the current Eccentric Anomaly given certain orbital parameters.
