@@ -80,7 +80,7 @@ namespace Pulsar4X.Orbital
             ke.MeanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3)); ;
             ke.MeanAnomalyAtEpoch = GetMeanAnomaly(eccentricity, eccentricAnomaly);
             ke.TrueAnomalyAtEpoch = trueAnomaly;
-            ke.OrbitalPeriod = 2 * Math.PI / ke.MeanMotion;
+            ke.Period = 2 * Math.PI / ke.MeanMotion;
             ke.Epoch = epoch; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
             //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
 
@@ -110,7 +110,7 @@ namespace Pulsar4X.Orbital
                 MeanAnomalyAtEpoch = m0,
                 TrueAnomalyAtEpoch = m0,
                 EccentricAnomalyAtEpoch = m0,
-                OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(r, 3) / sgp),
+                Period = 2 * Math.PI * Math.Sqrt(Math.Pow(r, 3) / sgp),
                 Epoch = epoch,
                 StandardGravParameter = sgp,
             };
@@ -738,7 +738,7 @@ namespace Pulsar4X.Orbital
         {
             double a = orbit.SemiMajorAxis;
             double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
-            double orbitalPerodSeconds = orbit.OrbitalPeriod;
+            double orbitalPerodSeconds = orbit.Period;
             double peremeter = Math.PI * (3 * (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
             return peremeter / orbitalPerodSeconds;
         }
@@ -1273,7 +1273,7 @@ namespace Pulsar4X.Orbital
             var pl = new Orbit()
             {
                 position = moverAbsolutePos,
-                T = targetEntity.Orbit.OrbitalPeriod,
+                T = targetEntity.Orbit.Period,
             };
 
             double a = targetEntity.Orbit.SemiMajorAxis * 2;

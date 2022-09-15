@@ -446,7 +446,7 @@ namespace Pulsar4X.ECSLib
         public static (Vector3 deltaV, double timeInSeconds)[] OrbitPhasingManuvers(KeplerElements orbit, double sgp, DateTime manuverTime, double phaseAngle)
         {
             //https://en.wikipedia.org/wiki/Orbit_phasing
-            double orbitalPeriod = orbit.OrbitalPeriod;
+            double orbitalPeriod = orbit.Period;
             double e = orbit.Eccentricity;
 
             var wc1 = Math.Sqrt((1 - e) / (1 + e));

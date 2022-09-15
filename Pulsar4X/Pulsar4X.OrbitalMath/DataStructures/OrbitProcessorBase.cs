@@ -99,7 +99,7 @@ namespace Pulsar4X.Orbital
         public static double GetTrueAnomaly(KeplerElements orbit, DateTime time)
         {
             // Get seconds since last time we passed the epoch point in the orbit
-            double timeSinceEpoch = (time - orbit.Epoch).TotalSeconds % orbit.OrbitalPeriod;
+            double timeSinceEpoch = (time - orbit.Epoch).TotalSeconds % orbit.Period;
 
             double currentMeanAnomaly = OrbitalMath.GetMeanAnomalyFromTime(
 				orbit.MeanAnomalyAtEpoch, orbit.MeanMotion, timeSinceEpoch

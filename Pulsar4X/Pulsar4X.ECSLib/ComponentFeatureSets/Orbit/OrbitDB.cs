@@ -584,7 +584,7 @@ namespace Pulsar4X.ECSLib
             ke.MeanAnomalyAtEpoch = MeanAnomalyAtEpoch;                                  //M0
             ke.Epoch = Epoch;
             ke.LinearEccentricity = Eccentricity * SemiMajorAxis;                        //ae
-            ke.OrbitalPeriod = OrbitalPeriod.TotalSeconds;
+            ke.Period = OrbitalPeriod.TotalSeconds;
             
             //ke.TrueAnomalyAtEpoch  ;   //ν or f or  θ
             return ke;
