@@ -30,26 +30,42 @@ namespace Pulsar4X.Orbital
         /// </summary>
         /// <param name="orbit">KeplerElements to calculate position from.</param>
         /// <param name="time">Time position desired from.</param>
-        public static Vector3 GetPosition(KeplerElements orbit, DateTime time)
-        {
-            return GetPosition(orbit, GetTrueAnomaly(orbit, time));
-        }
-
         public static Vector3 GetPosition(KeplerElements orbit, DateTime time, bool isStationary = false)
         {
-            if (isStationary)
-            {
-                return Vector3.Zero;
-            }
-            return GetPosition(orbit, GetTrueAnomaly(orbit, time));
+            return (isStationary) ? Vector3.Zero : GetPosition(orbit, GetTrueAnomaly(orbit, time));
         }
 
-        /// <summary>
-        /// Calculates the root relative cartesian coordinate of an orbit for a given time.
-        /// </summary>
-        /// <param name="entity">Base Entity to calculate position from.</param>
-        /// <param name="time">Time position desired from.</param>
-        public static Vector3 GetAbsolutePosition(EntityBase entity, DateTime time, bool isStationary = false)
+		/// <summary>
+		/// Calculates the cartesian coordinates (relative to it's parent) of an orbit for a given angle.
+		/// </summary>
+		/// <param name="orbit">KeplerElements to calculate position from.</param>
+		/// <param name="trueAnomaly">Angle in Radians.</param>
+		public static Vector3 GetPosition(KeplerElements orbit, double trueAnomaly, bool isStationary = false)
+		{
+            if (isStationary) return Vector3.Zero;
+			// http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
+			double radius = orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
+
+			double incl = orbit.Inclination;
+
+			//https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
+			double lofAN = orbit.LoAN;
+			//double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
+			double angleFromLoAN = trueAnomaly + orbit.AoP;
+
+			double x = Math.Cos(lofAN) * Math.Cos(angleFromLoAN) - Math.Sin(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
+			double y = Math.Sin(lofAN) * Math.Cos(angleFromLoAN) + Math.Cos(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
+			double z = Math.Sin(incl) * Math.Sin(angleFromLoAN);
+
+			return new Vector3(x, y, z) * radius;
+		}
+
+		/// <summary>
+		/// Calculates the root relative cartesian coordinate of an orbit for a given time.
+		/// </summary>
+		/// <param name="entity">Base Entity to calculate position from.</param>
+		/// <param name="time">Time position desired from.</param>
+		public static Vector3 GetAbsolutePosition(EntityBase entity, DateTime time, bool isStationary = false)
         {
             if (entity.Parent == null)//if we're the parent sun
                 return GetPosition(entity.Orbit, GetTrueAnomaly(entity.Orbit, time));
@@ -105,34 +121,7 @@ namespace Pulsar4X.Orbital
             */
         }
 
-        /// <summary>
-        /// Calculates the cartesian coordinates (relative to it's parent) of an orbit for a given angle.
-        /// </summary>
-        /// <param name="orbit">KeplerElements to calculate position from.</param>
-        /// <param name="trueAnomaly">Angle in Radians.</param>
-        public static Vector3 GetPosition(KeplerElements orbit, double trueAnomaly, bool isStationary)
-        {
-            return (isStationary) ? Vector3.Zero : GetPosition(orbit, trueAnomaly);
-        }
-
-        public static Vector3 GetPosition(KeplerElements orbit, double trueAnomaly)
-        {
-            // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
-            double radius = orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
-
-            double incl = orbit.Inclination;
-
-            //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
-            double lofAN = orbit.LoAN;
-            //double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
-            double angleFromLoAN = trueAnomaly + orbit.AoP;
-
-            double x = Math.Cos(lofAN) * Math.Cos(angleFromLoAN) - Math.Sin(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
-            double y = Math.Sin(lofAN) * Math.Cos(angleFromLoAN) + Math.Cos(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
-            double z = Math.Sin(incl) * Math.Sin(angleFromLoAN);
-
-            return new Vector3(x, y, z) * radius;
-        }
+        
 
         /// <summary>
         /// Calculates the current Eccentric Anomaly given certain orbital parameters.
