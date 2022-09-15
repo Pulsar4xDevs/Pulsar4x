@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 
 namespace Pulsar4X.Orbital
 {
@@ -102,87 +101,6 @@ namespace Pulsar4X.Orbital
         /// </summary>
         public DateTime Epoch;
 
-        public KeplerElements(double sgp, Vector3 position, Vector3 velocity, DateTime epoch)
-        {
-			StandardGravParameter = sgp;
-			Vector3 eccentVector = OrbitalMath.EccentricityVector(StandardGravParameter, position, velocity);
-			Eccentricity = eccentVector.Length();
-
-			double specificOrbitalEnergy = velocity.LengthSquared() * 0.5 - StandardGravParameter / position.Length();
-			Vector3 angularVelocity = Vector3.Cross(position, velocity);
-			double angularSpeed = angularVelocity.Length();
-			Inclination = Math.Acos(angularVelocity.Z / angularSpeed); //should be 0 in 2d. or pi if counter clockwise orbit. 
-			if (double.IsNaN(Inclination))
-				Inclination = 0;
-
-			double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
-
-			// If we run into negative eccentricity we have big problems
-			Debug.Assert(Eccentricity >= 0, "Negative eccentricity, this is physically impossible");
-			if (Eccentricity > 1) //hypobola
-			{
-				SemiMajorAxis = -(-StandardGravParameter / (2 * specificOrbitalEnergy)); //in this case the sma is negitive
-				p = SemiMajorAxis * (1 - Eccentricity * Eccentricity);
-			} else if (Eccentricity < 1) //ellipse
-			{
-				SemiMajorAxis = -StandardGravParameter / (2 * specificOrbitalEnergy);
-				p = SemiMajorAxis * (1 - Eccentricity * Eccentricity);
-			} else //parabola
-			{
-				p = angularSpeed * angularSpeed / StandardGravParameter;
-				SemiMajorAxis = double.MaxValue;
-			}
-
-			Apoapsis = EllipseMath.Apoapsis(Eccentricity, SemiMajorAxis);
-			Periapsis = EllipseMath.Periapsis(Eccentricity, SemiMajorAxis);
-			LinearEccentricity = EllipseMath.LinearEccentricity(Apoapsis, SemiMajorAxis);
-			SemiMinorAxis = EllipseMath.SemiMinorAxis(SemiMajorAxis, Eccentricity);
-
-
-			TrueAnomalyAtEpoch = OrbitalMath.TrueAnomaly(eccentVector, position, velocity);
-			
-            Vector3 nodeVector = Vector3.Cross(Vector3.UnitZ, angularVelocity);
-			LoAN = OrbitalMath.CalculateLongitudeOfAscendingNode(nodeVector); ;
-			
-            AoP = OrbitalMath.GetArgumentOfPeriapsis(position, Inclination, LoAN, TrueAnomalyAtEpoch); ;
-			MeanMotion = Math.Sqrt(StandardGravParameter / Math.Pow(SemiMajorAxis, 3)); ;
-			
-            double eccentricAnomaly = OrbitalMath.GetEccentricAnomalyFromTrueAnomaly(TrueAnomalyAtEpoch, Eccentricity);
-			MeanAnomalyAtEpoch = OrbitalMath.GetMeanAnomaly(Eccentricity, eccentricAnomaly);
-			
-            OrbitalPeriod = 2 * Math.PI / MeanMotion;
-			Epoch = epoch; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
-                           //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
-            
-            // This was not set in this method in OrbitalMath where I got this method
-            EccentricAnomalyAtEpoch = default;
-		}
-
-		public KeplerElements(Vector3 relativePosition, double sgp, DateTime epoch)
-		{
-
-			var ralpos = relativePosition;
-			var r = ralpos.Length();
-			var i = Math.Atan2(ralpos.Z, r);
-			var m0 = Math.Atan2(ralpos.Y, ralpos.X);
-
-			SemiMajorAxis = r;
-			SemiMinorAxis = r;
-			Apoapsis = r;
-			Periapsis = r;
-			LinearEccentricity = 0;
-			Eccentricity = 0;
-			Inclination = i;
-			LoAN = 0;
-			AoP = 0;
-			MeanMotion = Math.Sqrt(sgp / Math.Pow(r, 3));
-			MeanAnomalyAtEpoch = m0;
-			TrueAnomalyAtEpoch = m0;
-			EccentricAnomalyAtEpoch = m0;
-            OrbitalPeriod = 2 * Math.PI /MeanMotion;
-			Epoch = epoch;
-			StandardGravParameter = sgp;
-		}
 	}
 
     public struct StateVectors
