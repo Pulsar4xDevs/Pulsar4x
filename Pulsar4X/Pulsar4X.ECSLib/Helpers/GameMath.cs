@@ -470,7 +470,7 @@ namespace Pulsar4X.ECSLib
             
             
             //one of these will be the periapsis, the other the appoapsis, depending on whether we're behind or ahead of the target.
-            double phaseOrbitApsis1 = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();// 
+            double phaseOrbitApsis1 = OrbitProcessor.GetPosition(orbit, manuverTime).Length();// 
             double phaseOrbitApsis2 = phaseOrbitMA - phaseOrbitApsis1;
 
 
@@ -483,7 +483,7 @@ namespace Pulsar4X.ECSLib
             double wc10 = Math.Sqrt(2 * sgp);
             double orbitAngularMomentum = wc9 * wc10;
 
-            double r = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();
+            double r = OrbitProcessor.GetPosition(orbit, manuverTime).Length();
 
             double dv = phaseOrbitAngularMomentum / r - orbitAngularMomentum / r;
 

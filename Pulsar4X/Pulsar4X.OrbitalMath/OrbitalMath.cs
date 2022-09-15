@@ -700,16 +700,16 @@ namespace Pulsar4X.Orbital
         /// <param name="atDatetime">At datetime.</param>
         public static double Hackspeed(KeplerElements orbit, DateTime atDatetime)
         {
-            var pos1 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
-            var pos2 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
+            var pos1 = OrbitProcessorBase.GetPosition(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
+            var pos2 = OrbitProcessorBase.GetPosition(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
 
             return Distance.DistanceBetween(pos1, pos2);
         }
 
         public static double HackVelocityHeading(KeplerElements orbit, DateTime atDatetime)
         {
-            var pos1 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
-            var pos2 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
+            var pos1 = OrbitProcessorBase.GetPosition(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
+            var pos2 = OrbitProcessorBase.GetPosition(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
 
             Vector3 vector = pos2 - pos1;
             double heading = Math.Atan2(vector.Y, vector.X);
@@ -718,8 +718,8 @@ namespace Pulsar4X.Orbital
 
         public static Vector3 HackVelocityVector(KeplerElements orbit, DateTime atDatetime)
         {
-            var pos1 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
-            var pos2 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
+            var pos1 = OrbitProcessorBase.GetPosition(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
+            var pos2 = OrbitProcessorBase.GetPosition(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
             //double speed = Distance.DistanceBetween(pos1, pos2);
             return pos2 - pos1;
         }
@@ -1288,7 +1288,7 @@ namespace Pulsar4X.Orbital
 
             for (t = 0; t < pl.T; t += dt)
             {
-                p = OrbitProcessorBase.GetAbsolutePosition_m(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
+                p = OrbitProcessorBase.GetAbsolutePosition(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
                 p += offsetPosition;
                 tt = (p - pos).Length() / speed;  //length(p - pos) / speed;
                 a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
@@ -1305,7 +1305,7 @@ namespace Pulsar4X.Orbital
             for (i = 0; i < 10; i++)                               // recursive increase of accuracy
                 for (a1 = -1.0, t = tim - dt, T = tim + dt, dt *= 0.1; t < T; t += dt)
                 {
-                    p = OrbitProcessorBase.GetAbsolutePosition_m(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
+                    p = OrbitProcessorBase.GetAbsolutePosition(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
                     p += offsetPosition;
                     tt = (p - pos).Length() / speed;  //tt = length(p - pos) / speed;
                     a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
@@ -1319,7 +1319,7 @@ namespace Pulsar4X.Orbital
                     }   // remember best option
                 }
             // direction
-            p = OrbitProcessorBase.GetAbsolutePosition_m(targetEntity, atDateTime + TimeSpan.FromSeconds(tim));//pl.position(sim_t + tim);
+            p = OrbitProcessorBase.GetAbsolutePosition(targetEntity, atDateTime + TimeSpan.FromSeconds(tim));//pl.position(sim_t + tim);
             p += offsetPosition;
             //dir = normalize(p - pos);
             return (p, atDateTime + TimeSpan.FromSeconds(tim));
