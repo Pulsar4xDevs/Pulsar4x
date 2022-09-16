@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
                 OrbitDB previousOrbit = previousStar.GetDataBlob<OrbitDB>();
                 StarInfoDB previousStarInfo = previousStar.GetDataBlob<StarInfoDB>();
 
-                double minDistance = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[previousStarInfo.SpectralType].Max + _galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[currentStarInfo.SpectralType].Max + previousOrbit.SemiMajorAxis_AU;
+                double minDistance = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[previousStarInfo.SpectralType].Max + _galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[currentStarInfo.SpectralType].Max + Distance.MToAU(previousOrbit.SemiMajorAxis);
 
                 double sma = minDistance * Math.Pow(system.RNGNextDouble(), 3);
                 double eccentricity = Math.Pow(system.RNGNextDouble() * 0.8, 3);

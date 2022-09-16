@@ -334,18 +334,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="entity">Entity which has OrbitDB and MassVolumeDB</param>
         public static double GetSOI_AU(this Entity entity)
         {
-            var orbitDB = entity.GetDataBlob<OrbitDB>();
-            if (orbitDB.Parent != null) //if we're not the parent star
-            {
-                var semiMajAxis = orbitDB.SemiMajorAxis_AU;
-
-                var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
-
-                var parentMass = orbitDB.Parent.GetDataBlob<MassVolumeDB>().MassDry;
-
-                return OrbitMath.GetSOI(semiMajAxis, myMass, parentMass);
-            }
-            else return double.MaxValue; //if we're the parent star, then soi is infinate. 
+            return Distance.MToAU(entity.GetSOI_m());
         }
     }
 }
