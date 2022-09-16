@@ -107,32 +107,6 @@ namespace Pulsar4X.ECSLib
 
 
         #region Orbit Position Calculations
-
-        //public static Vector4 GetAbsolutePositionForParabolicOrbit_AU()
-        //{ }
-
-        //public static Vector4 GetAbsolutePositionForHyperbolicOrbit_AU(OrbitDB orbitDB, DateTime time)
-        //{
-            
-        //}
-
-        /// <summary>
-        /// Gets the orbital vector, will be either Absolute or relative depending on static bool UserelativeVelocity
-        /// </summary>
-        /// <returns>The orbital vector.</returns>
-        /// <param name="orbit">Orbit.</param>
-        /// <param name="atDateTime">At date time.</param>
-        public static Vector3 GetOrbitalVector_AU(OrbitDB orbit, DateTime atDateTime)
-        {
-            if (UseRelativeVelocity)
-            {
-                return orbit.InstantaneousOrbitalVelocityVector_AU(atDateTime);
-            }
-            else
-            {
-                return orbit.AbsoluteOrbitalVector_AU(atDateTime);
-            }
-        }
         
         /// <summary>
         /// Gets the orbital vector, will be either Absolute or relative depending on static bool UserelativeVelocity
