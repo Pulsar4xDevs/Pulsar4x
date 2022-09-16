@@ -699,34 +699,22 @@ namespace Pulsar4X.ECSLib
                 throw new InvalidOperationException("Invalid Reference Orbit.");
             }
             // we will use the reference orbit + MaxAsteroidOrbitDeviation to constrain the orbit values:
+            double deviation = _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
 
-            // Create semiMajorAxis:
-            double sma = Distance.MToAU(referenceOrbit.SemiMajorAxis);
-			double deviation = sma * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
-            double min = sma - deviation;
-            double max = sma + deviation;
-            double semiMajorAxis = GeneralMath.Lerp(min, max, system.RNGNextDouble());  // don't need to raise to power, reference orbit already did that.
-
-            deviation = referenceOrbit.Eccentricity * Math.Pow(_galaxyGen.Settings.MaxAsteroidOrbitDeviation, 2);
-            min = referenceOrbit.Eccentricity - deviation;
-            max = referenceOrbit.Eccentricity + deviation;
-            double eccentricity = GeneralMath.Lerp(min, max, system.RNGNextDouble()); // get random eccentricity needs better distribution.
-
-            deviation = referenceOrbit.Inclination_Degrees * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
-            min = referenceOrbit.Inclination_Degrees - deviation;
-            max = referenceOrbit.Inclination_Degrees + deviation;
-            double inclination = GeneralMath.Lerp(min, max, system.RNGNextDouble()); // doesn't do much at the moment but may as well be there. Need better Dist.
-
-            deviation = referenceOrbit.ArgumentOfPeriapsis_Degrees * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
-            min = referenceOrbit.ArgumentOfPeriapsis_Degrees - deviation;
-            max = referenceOrbit.ArgumentOfPeriapsis_Degrees + deviation;
-            double argumentOfPeriapsis = GeneralMath.Lerp(min, max, system.RNGNextDouble());
-
-            deviation = referenceOrbit.LongitudeOfAscendingNode_Degrees * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
-            min = referenceOrbit.LongitudeOfAscendingNode_Degrees - deviation;
-            max = referenceOrbit.LongitudeOfAscendingNode_Degrees + deviation;
-            double longitudeOfAscendingNode = GeneralMath.Lerp(min, max, system.RNGNextDouble());
-
+			// Creates orbital parameters by multiplying referenceOrbit
+            // parameters by a value between +/- MaxAsteroidOrbitDeviation
+            // of the reference parameter
+            double semiMajorAxis = Distance.MToAU(referenceOrbit.SemiMajorAxis) * 
+                (1 + GeneralMath.Lerp(-deviation, deviation, system.RNGNextDouble()));  // don't need to raise to power, reference orbit already did that.
+            double eccentricity = referenceOrbit.Eccentricity *
+                (1 + GeneralMath.Lerp(-deviation, deviation, system.RNGNextDouble())); // get random eccentricity needs better distribution.
+            double inclination = referenceOrbit.Inclination *
+                (1 + GeneralMath.Lerp(-deviation, deviation, system.RNGNextDouble())); // doesn't do much at the moment but may as well be there. Need better Dist.
+            double argumentOfPeriapsis = referenceOrbit.ArgumentOfPeriapsis *
+                (1 + GeneralMath.Lerp(-deviation, deviation, system.RNGNextDouble()));
+            double longitudeOfAscendingNode = referenceOrbit.LongitudeOfAscendingNode *
+				(1 + GeneralMath.Lerp(-deviation, deviation, system.RNGNextDouble()));
+			
             // Keep the starting point of the orbit completely random.
             double meanAnomaly = system.RNGNextDouble() * 360;
 
