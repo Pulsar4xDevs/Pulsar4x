@@ -240,11 +240,11 @@ namespace Pulsar4X.ECSLib
         {
             if (entity.HasDataBlob<OrbitDB>())
             {
-                return entity.GetDataBlob<OrbitDB>().GetPosition_m(atDateTime);
+                return entity.GetDataBlob<OrbitDB>().GetPosition(atDateTime);
             }
             else if (entity.HasDataBlob<OrbitUpdateOftenDB>())
             {
-                return entity.GetDataBlob<OrbitUpdateOftenDB>().GetPosition_m(atDateTime);
+                return entity.GetDataBlob<OrbitUpdateOftenDB>().GetPosition(atDateTime);
             }
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {

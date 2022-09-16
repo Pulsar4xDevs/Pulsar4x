@@ -377,7 +377,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(ke_m.Periapsis, objOrbit.Periapsis, 1.0E-4 );
 
             Vector3 pos_m = position_InMeters;
-            Vector3 result_m = objOrbit.GetPosition_m(new DateTime());
+            Vector3 result_m = objOrbit.GetPosition(new DateTime());
 
             double keslr = EllipseMath.SemiLatusRectum(ke_m.SemiMajorAxis, ke_m.Eccentricity);
             double keradius = OrbitMath.RadiusAtAngle(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);

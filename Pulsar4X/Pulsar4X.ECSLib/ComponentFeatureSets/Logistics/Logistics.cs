@@ -307,7 +307,7 @@ namespace Pulsar4X.ECSLib
                     else
                         odb = destinEntity.GetSOIParentEntity().GetDataBlob<OrbitDB>();
                         //throw new NotImplementedException("Currently we can only predict the movement of stable orbits - target must have an orbitDB");
-                    (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition_m
+                    (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition
                     (
                         shippingEntity, 
                         odb, 

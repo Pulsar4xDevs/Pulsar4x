@@ -573,11 +573,11 @@ namespace Pulsar4X.SDL2UI
         {
             _deltaV_MS = _newtonUI.DeltaV;
             OrbitDB targetOrbit = TargetEntity.Entity.GetDataBlob<OrbitDB>();
-            (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition_m(OrderingEntityState.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
+            (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition(OrderingEntityState.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
 
             DateTime estArivalDateTime = targetIntercept.eti; //rough calc. 
             
-            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector_m(_departureOrbitalVelocity_m, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
+            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity_m, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
             _insertionOrbitalVelocity_m = insertionVector;
 
             _insertionOrbitalVelocity_m +=  _deltaV_MS;

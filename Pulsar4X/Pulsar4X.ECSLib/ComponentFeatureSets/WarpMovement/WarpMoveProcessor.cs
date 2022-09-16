@@ -213,7 +213,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
 
             
-            Vector3 insertionVector_m = OrbitProcessor.GetOrbitalInsertionVector_m(moveDB.SavedNewtonionVector, targetOrbit, atDateTime);
+            Vector3 insertionVector_m = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector, targetOrbit, atDateTime);
             
             positionDB.SetParent(targetEntity);
 
@@ -235,7 +235,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                OrbitDB newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
+                OrbitDB newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);
                 
                 if(newOrbit.Eccentricity >= 1)
                 {
@@ -250,7 +250,7 @@ namespace Pulsar4X.ECSLib
                 {
                     //find who's SOI we are in, and create an orbit around that.
                     targetEntity = OrbitProcessor.FindSOIForPosition((StarSystem)entity.Manager, positionDB.AbsolutePosition_m);
-                    newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
+                    newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);
                     entity.SetDataBlob(newOrbit);
 
                 }

@@ -115,7 +115,7 @@ namespace Pulsar4X.ECSLib
             return new Vector3(x, y, z) * radius;
         }
 
-        public static Vector3 GetPosition_m(this OrbitDB orbit, DateTime time)
+        public static Vector3 GetPosition(this OrbitDB orbit, DateTime time)
         {
             if (orbit.IsStationary)
             {
@@ -319,7 +319,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="atDateTime">At date time.</param>
         public static Vector3 InstantaneousOrbitalVelocityVector_m(this OrbitDB orbit, DateTime atDateTime)
         {
-            var position = orbit.GetPosition_m(atDateTime);
+            var position = orbit.GetPosition(atDateTime);
             var sma = orbit.SemiMajorAxis;
             if (orbit.GravitationalParameter_Km3S2 == 0 || sma == 0)
                 return new Vector3(); //so we're not returning NaN;

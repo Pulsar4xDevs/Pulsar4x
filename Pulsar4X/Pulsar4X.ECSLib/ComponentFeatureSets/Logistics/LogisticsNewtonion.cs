@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
             (Vector3 position, DateTime atDateTime) sourceIntercept;
             if (shippingEntity.HasDataBlob<WarpAbilityDB>())
             {
-                sourceIntercept = OrbitProcessor.GetInterceptPosition_m
+                sourceIntercept = OrbitProcessor.GetInterceptPosition
                 (
                     shippingEntity,
                     odb,
@@ -289,8 +289,8 @@ namespace Pulsar4X.ECSLib
 
             //var departTime = ship.StarSysDateTime;
             OrbitDB targetOrbit = targetBody.GetDataBlob<OrbitDB>();
-            (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition_m(ship, targetOrbit, startState.At);
-            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector_m(startState.Velocity, targetOrbit, targetIntercept.eti);
+            (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition(ship, targetOrbit, startState.At);
+            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(startState.Velocity, targetOrbit, targetIntercept.eti);
             var insertionSpeed = insertionVector.Length();
             var idealSpeed = Math.Sqrt(targetRad / sgpTgtBdy);//for a circular orbit
             var deltaV = insertionSpeed - idealSpeed;

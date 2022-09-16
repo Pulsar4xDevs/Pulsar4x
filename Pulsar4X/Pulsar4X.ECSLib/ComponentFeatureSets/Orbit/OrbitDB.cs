@@ -190,7 +190,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="parent">Parent. must have massdb</param>
         /// <param name="entity">Entity. must have massdb</param>
         /// <param name="velocity_m">Velocity in meters.</param>
-        public static OrbitDB FromVelocity_m(Entity parent, Entity entity, Vector3 velocity_m, DateTime atDateTime)
+        public static OrbitDB FromVelocity(Entity parent, Entity entity, Vector3 velocity_m, DateTime atDateTime)
         {
             var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
@@ -225,7 +225,7 @@ namespace Pulsar4X.ECSLib
             };
             orbit.CalculateExtendedParameters();
 
-            var pos = orbit.GetPosition_m(atDateTime);
+            var pos = orbit.GetPosition(atDateTime);
             var d = (pos - relativePos).Length();
             if (d > 1)
             {
@@ -240,7 +240,7 @@ namespace Pulsar4X.ECSLib
                 var keta = Angle.ToDegrees(ke_m.TrueAnomalyAtEpoch);
                 var obta = Angle.ToDegrees(orbit.GetTrueAnomaly(atDateTime));
                 var tadif = Angle.ToDegrees(Angle.DifferenceBetweenRadians(keta, obta));
-                var pos1 = orbit.GetPosition_m(atDateTime);
+                var pos1 = orbit.GetPosition(atDateTime);
                 var pos2 = orbit.GetPosition_m(ke_m.TrueAnomalyAtEpoch);
                 var d2 = (pos1 - pos2).Length();
             }
