@@ -585,7 +585,7 @@ namespace Pulsar4X.ECSLib
             ke.Epoch = Epoch;
             ke.LinearEccentricity = Eccentricity * SemiMajorAxis;                        //ae
             ke.OrbitalPeriod = OrbitalPeriod.TotalSeconds;
-            
+            ke.StandardGravParameter = OrbitalMath.CalculateStandardGravityParameterInM3S2(_myMass, _parentMass);
             //ke.TrueAnomalyAtEpoch  ;   //ν or f or  θ
             return ke;
         }
