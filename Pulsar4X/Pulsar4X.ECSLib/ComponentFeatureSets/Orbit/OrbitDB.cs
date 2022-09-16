@@ -192,7 +192,6 @@ namespace Pulsar4X.ECSLib
         /// <param name="velocity_m">Velocity in meters.</param>
         public static OrbitDB FromVelocity(Entity parent, Entity entity, Vector3 velocity_m, DateTime atDateTime)
         {
-            var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             var myMass = entity.GetDataBlob<MassVolumeDB>().MassDry;
 
             //var epoch1 = parent.Manager.ManagerSubpulses.StarSysDateTime; //getting epoch from here is incorrect as the local datetime doesn't change till after the subpulse.
@@ -205,25 +204,11 @@ namespace Pulsar4X.ECSLib
                 throw new Exception("Entity not in target SOI");
 
             //var sgp = UniversalConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
-            var sgp_m = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
+            var sgp_m = GeneralMath.StandardGravitationalParameter(myMass + parent.GetDataBlob<MassVolumeDB>().MassDry);
             var ke_m = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, relativePos, velocity_m, atDateTime);
 
-            
-            OrbitDB orbit = new OrbitDB(parent)
-            {
-                SemiMajorAxis = ke_m.SemiMajorAxis,
-                Eccentricity = ke_m.Eccentricity,
-                Inclination = ke_m.Inclination,
-                LongitudeOfAscendingNode = ke_m.LoAN,
-                ArgumentOfPeriapsis = ke_m.AoP,
-                MeanAnomalyAtEpoch = ke_m.MeanAnomalyAtEpoch,
-                Epoch = atDateTime,
 
-                _parentMass = parentMass,
-                _myMass = myMass
-
-            };
-            orbit.CalculateExtendedParameters();
+            OrbitDB orbit = FromKeplerElements(parent, myMass, ke_m, atDateTime);
 
             var pos = orbit.GetPosition(atDateTime);
             var d = (pos - relativePos).Length();
@@ -268,29 +253,9 @@ namespace Pulsar4X.ECSLib
                 throw new Exception("Entity not in target SOI");
             //var sgp  = UniversalConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position_m, velocity_m, atDateTime);
-            
-            
-            OrbitDB orbit = new OrbitDB(parent)
-            {
-                SemiMajorAxis = ke.SemiMajorAxis,
-                Eccentricity = ke.Eccentricity,
-                Inclination = ke.Inclination,
-                LongitudeOfAscendingNode = ke.LoAN,
-                ArgumentOfPeriapsis = ke.AoP,
-                MeanAnomalyAtEpoch = ke.MeanAnomalyAtEpoch,
-                Epoch = atDateTime,
 
-                _parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry,
-                _myMass = myMass
-
-            };
-            orbit.CalculateExtendedParameters();
-            
-            var pos = orbit.GetAbsolutePosition_m(atDateTime);
-            return orbit;
+            return FromKeplerElements(parent, myMass, ke, atDateTime);
         }
-
-
 
         /// <summary>
         /// In Meters
