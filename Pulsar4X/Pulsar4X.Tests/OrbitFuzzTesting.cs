@@ -140,7 +140,7 @@ namespace Pulsar4X.Tests
             var orbitDB = testData.orbitDB;
             
             double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis_AU; 
+            double o_a = Distance.MToAU(orbitDB.SemiMajorAxis); 
             double o_e = orbitDB.Eccentricity; 
             double o_i = orbitDB.Inclination; 
             double o_Ω = orbitDB.LongitudeOfAscendingNode; 
@@ -200,9 +200,9 @@ namespace Pulsar4X.Tests
         {
             var orbitDB = testData.orbitDB;
             
-            double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis_AU; 
-            double o_e = orbitDB.Eccentricity; 
+            double sgp = orbitDB.GravitationalParameterAU;
+			double o_a = Distance.MToAU(orbitDB.SemiMajorAxis);
+			double o_e = orbitDB.Eccentricity; 
             double o_i = orbitDB.Inclination; 
             double o_Ω = orbitDB.LongitudeOfAscendingNode; 
             double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
@@ -240,9 +240,9 @@ namespace Pulsar4X.Tests
         {
             var orbitDB = testData.orbitDB;
             
-            double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis_AU; 
-            double o_e = orbitDB.Eccentricity; 
+            double sgp = orbitDB.GravitationalParameterAU;
+			double o_a = Distance.MToAU(orbitDB.SemiMajorAxis);
+			double o_e = orbitDB.Eccentricity; 
             double o_i = orbitDB.Inclination; 
             double o_Ω = orbitDB.LongitudeOfAscendingNode; 
             double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
@@ -293,9 +293,9 @@ namespace Pulsar4X.Tests
         {
             var orbitDB = testData.orbitDB;
             
-            double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis_AU; 
-            double o_e = orbitDB.Eccentricity; 
+            double sgp = orbitDB.GravitationalParameterAU;
+			double o_a = Distance.MToAU(orbitDB.SemiMajorAxis);
+			double o_e = orbitDB.Eccentricity; 
             double o_i = orbitDB.Inclination; 
             double o_Ω = orbitDB.LongitudeOfAscendingNode; 
             double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
@@ -344,9 +344,9 @@ namespace Pulsar4X.Tests
         {
             var orbitDB = testData.orbitDB;
             
-            double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis_AU; 
-            double o_e = orbitDB.Eccentricity; 
+            double sgp = orbitDB.GravitationalParameterAU;
+			double o_a = Distance.MToAU(orbitDB.SemiMajorAxis);
+			double o_e = orbitDB.Eccentricity; 
             double o_i = orbitDB.Inclination; 
             double o_Ω = orbitDB.LongitudeOfAscendingNode; 
             double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
@@ -383,9 +383,9 @@ namespace Pulsar4X.Tests
         {
             var orbitDB = testData.orbitDB;
             
-            double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis_AU; 
-            double o_e = orbitDB.Eccentricity; 
+            double sgp = orbitDB.GravitationalParameterAU;
+			double o_a = Distance.MToAU(orbitDB.SemiMajorAxis);
+			double o_e = orbitDB.Eccentricity; 
             double o_i = orbitDB.Inclination; 
             double o_Ω = orbitDB.LongitudeOfAscendingNode; 
             double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
@@ -437,9 +437,9 @@ namespace Pulsar4X.Tests
         {
             var orbitDB = testData.orbitDB;
             
-            double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis_AU; 
-            double o_e = orbitDB.Eccentricity; 
+            double sgp = orbitDB.GravitationalParameterAU;
+			double o_a = Distance.MToAU(orbitDB.SemiMajorAxis);
+			double o_e = orbitDB.Eccentricity; 
             double o_i = orbitDB.Inclination; 
             double o_Ω = orbitDB.LongitudeOfAscendingNode; 
             double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
@@ -504,9 +504,9 @@ namespace Pulsar4X.Tests
         {
             var orbitDB = testData.orbitDB;
             
-            double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis_AU; 
-            double o_e = orbitDB.Eccentricity; 
+            double sgp = orbitDB.GravitationalParameterAU;
+			double o_a = Distance.MToAU(orbitDB.SemiMajorAxis);
+			double o_e = orbitDB.Eccentricity; 
             double o_i = orbitDB.Inclination; 
             double o_Ω = orbitDB.LongitudeOfAscendingNode; 
             double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
@@ -571,9 +571,9 @@ namespace Pulsar4X.Tests
         {
             var orbitDB = testData.orbitDB;
             
-            double sgp = orbitDB.GravitationalParameterAU; 
-            double o_a = orbitDB.SemiMajorAxis_AU; 
-            double o_e = orbitDB.Eccentricity; 
+            double sgp = orbitDB.GravitationalParameterAU;
+			double o_a = Distance.MToAU(orbitDB.SemiMajorAxis);
+			double o_e = orbitDB.Eccentricity; 
             double o_i = orbitDB.Inclination; 
             double o_Ω = orbitDB.LongitudeOfAscendingNode; 
             double o_M0 = orbitDB.MeanAnomalyAtEpoch; 

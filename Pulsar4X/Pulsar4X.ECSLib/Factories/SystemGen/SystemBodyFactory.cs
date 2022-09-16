@@ -752,7 +752,7 @@ namespace Pulsar4X.ECSLib
             else
             {
                 OrbitDB parentOrbit = parent.GetDataBlob<OrbitDB>();
-                parentSMA += parentOrbit.SemiMajorAxis_AU;
+                parentSMA += parentOrbit.SemiMajorAxis;
                 if (parentOrbit.Parent == null)
                 {
                     throw new InvalidOperationException("Body cannot be finalized without a root star.");
@@ -787,7 +787,7 @@ namespace Pulsar4X.ECSLib
                 bodyInfo.LengthOfDay += TimeSpan.FromHours(_galaxyGen.Settings.MiniumPossibleDayLength);
 
             // Note that base temp does not take into account albedo or atmosphere.
-            bodyInfo.BaseTemperature = (float)CalculateBaseTemperatureOfBody(star, starInfo, bodyOrbit.SemiMajorAxis_AU + parentSMA);
+            bodyInfo.BaseTemperature = (float)CalculateBaseTemperatureOfBody(star, starInfo, bodyOrbit.SemiMajorAxis + parentSMA);
 
             // generate Plate tectonics
             if (bodyInfo.BodyType == BodyType.Terrestrial)
@@ -854,13 +854,13 @@ namespace Pulsar4X.ECSLib
         /// Calculates the temperature of a body given its parent star and its distance from that star.
         /// @note For info on how the Temp. is calculated see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
         /// </summary>
-        /// <param name="distanceFromStar"> in AU! TODO: ChangeTo meters</param>
+        /// <param name="distanceFromStar"> in meters</param>
         /// <returns>Temperature in Degrees C</returns>
         public static double CalculateBaseTemperatureOfBody(Entity star, StarInfoDB starInfo, double distanceFromStar)
         {
             MassVolumeDB starMVDB = star.GetDataBlob<MassVolumeDB>();
             double temp = Temperature.ToKelvin(starInfo.Temperature);
-            temp = temp * Math.Sqrt(starMVDB.RadiusInAU / (2 * distanceFromStar));
+            temp = temp * Math.Sqrt(starMVDB.RadiusInM / (2 * distanceFromStar));
             return Temperature.ToCelsius(temp);
         }
 
@@ -876,7 +876,7 @@ namespace Pulsar4X.ECSLib
             //https://cosmicreflections.skythisweek.info/2017/11/15/average-orbital-distance/
             //time averaged distance = r = a(1+ e^2/2)
             double averageDistanceFromStar = orbit.SemiMajorAxis * (1 + Math.Pow(orbit.Eccentricity, 2) / 2); 
-            return CalculateBaseTemperatureOfBody(star, starInfoDB, Distance.MToAU(averageDistanceFromStar));
+            return CalculateBaseTemperatureOfBody(star, starInfoDB, averageDistanceFromStar);
 
         }
 
@@ -1076,13 +1076,13 @@ namespace Pulsar4X.ECSLib
                         // if moon get planet orbit, then star
                         var parentOrbitDB = orbit.ParentDB as OrbitDB;
                         starInfo = parentOrbitDB.Parent.GetDataBlob<StarInfoDB>();
-                        ecosphereRatio = (parentOrbitDB.SemiMajorAxis_AU / starInfo.EcoSphereRadius_AU);
+                        ecosphereRatio = (parentOrbitDB.SemiMajorAxis / starInfo.EcoSphereRadius_m);
                     }
                     else
                     {
                         // if planet get star:
                         starInfo = orbit.Parent.GetDataBlob<StarInfoDB>();
-                        ecosphereRatio = GeneralMath.Clamp(orbit.SemiMajorAxis_AU / starInfo.EcoSphereRadius_AU, 0.1, 2);
+                        ecosphereRatio = GeneralMath.Clamp(orbit.SemiMajorAxis / starInfo.EcoSphereRadius_m, 0.1, 2);
                     }
 
                     atm = atm * ecosphereRatio;  // if inside eco sphere this will reduce atmo, increase it if outside.
