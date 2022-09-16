@@ -111,7 +111,7 @@ namespace Pulsar4X.ECSLib
             double sgp = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
             //OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, position, velocity, atDateTime);
             //OrbitDB orbit = (OrbitDB)origOrbit.Clone();
-            OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, origOrbit.SemiMajorAxis_AU, 
+            OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, Distance.MToAU(origOrbit.SemiMajorAxis), 
                 origOrbit.Eccentricity, origOrbit.Inclination_Degrees, origOrbit.LongitudeOfAscendingNode_Degrees, 
                 origOrbit.ArgumentOfPeriapsis_Degrees, origOrbit.MeanMotion_DegreesSec, origOrbit.Epoch);
 

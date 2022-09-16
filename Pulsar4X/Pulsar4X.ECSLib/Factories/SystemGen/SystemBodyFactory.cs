@@ -701,9 +701,10 @@ namespace Pulsar4X.ECSLib
             // we will use the reference orbit + MaxAsteroidOrbitDeviation to constrain the orbit values:
 
             // Create semiMajorAxis:
-            double deviation = referenceOrbit.SemiMajorAxis_AU * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
-            double min = referenceOrbit.SemiMajorAxis_AU - deviation;
-            double max = referenceOrbit.SemiMajorAxis_AU + deviation;
+            double sma = Distance.MToAU(referenceOrbit.SemiMajorAxis);
+			double deviation = sma * _galaxyGen.Settings.MaxAsteroidOrbitDeviation;
+            double min = sma - deviation;
+            double max = sma + deviation;
             double semiMajorAxis = GeneralMath.Lerp(min, max, system.RNGNextDouble());  // don't need to raise to power, reference orbit already did that.
 
             deviation = referenceOrbit.Eccentricity * Math.Pow(_galaxyGen.Settings.MaxAsteroidOrbitDeviation, 2);

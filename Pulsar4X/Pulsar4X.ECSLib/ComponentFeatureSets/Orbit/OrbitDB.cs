@@ -507,7 +507,7 @@ namespace Pulsar4X.ECSLib
             GravitationalParameterAU = GeneralMath.GravitiationalParameter_Au3s2(_parentMass + _myMass);// (149597870700 * 149597870700 * 149597870700);
             GravitationalParameter_m3S2 = GeneralMath.StandardGravitationalParameter(_parentMass + _myMass);
 
-            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(Distance.AuToKm(SemiMajorAxis_AU), 3) / (GravitationalParameter_Km3S2));
+            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis, 3) / (GravitationalParameter_m3S2));
             if (orbitalPeriod * 10000000 > long.MaxValue)
             {
                 OrbitalPeriod = TimeSpan.MaxValue;
@@ -518,11 +518,11 @@ namespace Pulsar4X.ECSLib
             }
 
             // http://en.wikipedia.org/wiki/Mean_motion
-            MeanMotion_DegreesSec = Math.Sqrt(GravitationalParameter_Km3S2 / Math.Pow(Distance.AuToKm(SemiMajorAxis_AU), 3)); // Calculated in radians.
+            MeanMotion_DegreesSec = Math.Sqrt(GravitationalParameter_m3S2 / Math.Pow(SemiMajorAxis, 3)); // Calculated in radians.
             MeanMotion_DegreesSec = Angle.ToDegrees(MeanMotion_DegreesSec); // Stored in degrees.
 
-            Apoapsis_AU = (1 + Eccentricity) * SemiMajorAxis_AU;
-            Periapsis_AU = (1 - Eccentricity) * SemiMajorAxis_AU;
+            Apoapsis_AU = Distance.MToAU((1 + Eccentricity) * SemiMajorAxis);
+            Periapsis_AU = Distance.MToAU((1 - Eccentricity) * SemiMajorAxis);
 
             SOI_m = OrbitMath.GetSOI(SemiMajorAxis, _myMass, _parentMass);
 
@@ -603,7 +603,7 @@ namespace Pulsar4X.ECSLib
             double signalNowMagnatude = sensorInfo.LatestDetectionQuality.SignalStrength_kW;
 
 
-            SemiMajorAxis_AU = actualDB.SemiMajorAxis_AU;
+            SemiMajorAxis = actualDB.SemiMajorAxis;
             Eccentricity = actualDB.Eccentricity;
             Inclination_Degrees = actualDB.Inclination_Degrees;
             LongitudeOfAscendingNode_Degrees = actualDB.LongitudeOfAscendingNode_Degrees;
