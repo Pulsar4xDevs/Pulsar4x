@@ -114,7 +114,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>The orbital vector.</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static Vector3 GetOrbitalVector_m(OrbitDB orbit, DateTime atDateTime)
+        public static Vector3 GetOrbitalVector(OrbitDB orbit, DateTime atDateTime)
         {
             if (UseRelativeVelocity)
             {
@@ -126,7 +126,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public static Vector3 GetOrbitalInsertionVector_m(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
+        public static Vector3 GetOrbitalInsertionVector(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
         {
             if (UseRelativeVelocity)
                 return departureVelocity;
@@ -171,7 +171,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="mover">The entity that is trying to intercept a target.</param>
         /// <param name="targetOrbit">Target orbit.</param>
         /// <param name="atDateTime">Datetime of transit start</param>
-        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition_m(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
+        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
         {
             Vector3 moverPos = mover.GetAbsoluteFuturePosition(atDateTime);
             double spd_m = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
@@ -237,7 +237,7 @@ namespace Pulsar4X.ECSLib
             PositionDB entityPosition = entityOrbitDB.OwningEntity.GetDataBlob<PositionDB>(PositionTypeIndex);
             try
             {
-                Vector3 newPosition = entityOrbitDB.GetPosition_m(toDate);
+                Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
                 entityPosition.RelativePosition_m = newPosition;
             }
             catch (OrbitProcessor.OrbitProcessorException e)

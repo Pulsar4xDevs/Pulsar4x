@@ -379,7 +379,7 @@ namespace Pulsar4X.ECSLib
             var positionDB = body.GetDataBlob<PositionDB>();
             positionDB.SystemGuid = system.Guid;
             positionDB.SetParent(body.GetDataBlob<OrbitDB>().Parent);
-            positionDB.AbsolutePosition_m = body.GetDataBlob<OrbitDB>().GetPosition_m(parent.StarSysDateTime);
+            positionDB.AbsolutePosition_m = body.GetDataBlob<OrbitDB>().GetPosition(parent.StarSysDateTime);
             
             return body;
 

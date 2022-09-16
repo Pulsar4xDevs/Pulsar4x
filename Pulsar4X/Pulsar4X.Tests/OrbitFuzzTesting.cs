@@ -405,7 +405,7 @@ namespace Pulsar4X.Tests
                 double o_E = orbitDB.GetEccentricAnomaly(o_M);
                 double o_ν = orbitDB.GetTrueAnomaly(segmentDatetime);
 
-                var pos = orbitDB.GetPosition_m(segmentDatetime);
+                var pos = orbitDB.GetPosition(segmentDatetime);
                 var vel = orbitDB.InstantaneousOrbitalVelocityVector_m(segmentDatetime);
 
                 Vector3 angularVelocity = Vector3.Cross(pos, (Vector3)vel);
@@ -617,7 +617,7 @@ namespace Pulsar4X.Tests
                 double ke_E2 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(o_ν, o_e);
 
 
-                var pm = orbitDB.GetPosition_m(segmentDatetime);
+                var pm = orbitDB.GetPosition(segmentDatetime);
                 var pau = orbitDB.GetPosition_AU(segmentDatetime);
                 
                 Assert.Multiple(() =>

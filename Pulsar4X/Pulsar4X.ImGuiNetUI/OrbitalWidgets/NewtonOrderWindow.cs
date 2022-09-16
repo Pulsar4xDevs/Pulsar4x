@@ -105,8 +105,8 @@ namespace Pulsar4X.SDL2UI
             _massOrderingEntity = OrderingEntity.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             _stdGravParam_m = OrbitMath.CalculateStandardGravityParameterInM3S2(_massOrderingEntity, _massParentBody);
 
-            _positonAtChange_m = _orderEntityOrbit.GetPosition_m(_actionDateTime);
-            var velAtChange2d = OrbitProcessor.GetOrbitalVector_m(_orderEntityOrbit, _actionDateTime);
+            _positonAtChange_m = _orderEntityOrbit.GetPosition(_actionDateTime);
+            var velAtChange2d = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _actionDateTime);
             _orbitalVelocityAtChange_m = new Vector3(velAtChange2d.X, velAtChange2d.Y, 0);
             _originalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
 
@@ -154,8 +154,8 @@ namespace Pulsar4X.SDL2UI
             if (_actionDateTime < newDate)
             { 
                 _actionDateTime = newDate;
-                _positonAtChange_m = _orderEntityOrbit.GetPosition_m( _actionDateTime);
-                var vector2 = OrbitProcessor.GetOrbitalVector_m(_orderEntityOrbit, _actionDateTime);
+                _positonAtChange_m = _orderEntityOrbit.GetPosition( _actionDateTime);
+                var vector2 = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _actionDateTime);
                 _orbitalVelocityAtChange_m = new Vector3(vector2.X, vector2.Y,0);
                 _originalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
             }
