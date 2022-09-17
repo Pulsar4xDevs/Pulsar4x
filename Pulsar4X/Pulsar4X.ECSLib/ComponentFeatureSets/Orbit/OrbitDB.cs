@@ -7,16 +7,6 @@ namespace Pulsar4X.ECSLib
 {
     public class OrbitDB : TreeHierarchyDB, IGetValuesHash
     {
-        /// <summary>
-        /// Semimajor Axis of orbit in AU.
-        /// Radius of an orbit at the orbit's two most distant points.
-        /// </summary>
-        [PublicAPI]
-        public double SemiMajorAxis_AU
-        {
-            get { return Distance.MToAU(SemiMajorAxis);}
-            protected set { SemiMajorAxis = Distance.AuToMt(value); }
-        }
         
         /// <summary>
         /// Stored in Meters

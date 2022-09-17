@@ -294,6 +294,9 @@ namespace Pulsar4X.ECSLib
             return OrbitMath.ParentLocalVeclocityVector(sgp, position, sma, e, trueAnomaly, aoP, i, loAN);
         }
 
+
+        // Messed something up in this method...
+
         /// <summary>
         /// PreciseOrbital Velocy in polar coordinates
         /// </summary>
@@ -302,17 +305,19 @@ namespace Pulsar4X.ECSLib
         /// <param name="atDateTime">At date time.</param>
         public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(this OrbitDB orbit, DateTime atDateTime)
         {
-            var position = orbit.GetPosition_AU(atDateTime);
-            var sma = Distance.MToAU(orbit.SemiMajorAxis);
-            if (orbit.GravitationalParameter_Km3S2 == 0 || sma == 0)
+            var position = orbit.GetPosition(atDateTime);
+            var sma = orbit.SemiMajorAxis;
+            if (orbit.GravitationalParameter_m3S2 == 0 || sma == 0)
                 return (0, 0); //so we're not returning NaN;
-            var sgp = orbit.GravitationalParameterAU;
+            var sgp = orbit.GravitationalParameter_m3S2;
 
             double e = orbit.Eccentricity;
             double trueAnomaly = orbit.GetTrueAnomaly(atDateTime);
             double aoP = orbit.ArgumentOfPeriapsis;
 
             (double speed, double heading) polar = OrbitMath.ObjectLocalVelocityPolar(sgp, position, sma, e, trueAnomaly, aoP);
+
+            polar = (polar.speed, polar.heading);
 
             return polar;
         }
@@ -384,16 +389,16 @@ namespace Pulsar4X.ECSLib
         /// <param name="atDatetime">At datetime.</param>
         public static double Hackspeed(this OrbitDB orbit, DateTime atDatetime)
         {
-            var pos1 = orbit.GetPosition_AU(atDatetime);
-            var pos2 = orbit.GetPosition_AU(atDatetime + TimeSpan.FromSeconds(1));
+            var pos1 = orbit.GetPosition(atDatetime);
+            var pos2 = orbit.GetPosition(atDatetime + TimeSpan.FromSeconds(1));
 
             return Distance.DistanceBetween(pos1, pos2);
         }
 
         public static double HackVelocityHeading(this OrbitDB orbit, DateTime atDatetime)
         {
-            var pos1 = orbit.GetPosition_AU(atDatetime);
-            var pos2 = orbit.GetPosition_AU(atDatetime + TimeSpan.FromSeconds(1));
+            var pos1 = orbit.GetPosition(atDatetime);
+            var pos2 = orbit.GetPosition(atDatetime + TimeSpan.FromSeconds(1));
 
             Vector3 vector = pos2 - pos1;
             double heading = Math.Atan2(vector.Y, vector.X);
@@ -402,8 +407,8 @@ namespace Pulsar4X.ECSLib
 
         public static Vector3 HackVelocityVector(this OrbitDB orbit, DateTime atDatetime)
         {
-            var pos1 = orbit.GetPosition_AU(atDatetime);
-            var pos2 = orbit.GetPosition_AU(atDatetime + TimeSpan.FromSeconds(1));
+            var pos1 = orbit.GetPosition(atDatetime);
+            var pos2 = orbit.GetPosition(atDatetime + TimeSpan.FromSeconds(1));
             //double speed = Distance.DistanceBetween(pos1, pos2);
             return pos2 - pos1;
         }
