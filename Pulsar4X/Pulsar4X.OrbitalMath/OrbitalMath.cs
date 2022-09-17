@@ -143,15 +143,7 @@ namespace Pulsar4X.Orbital
 
         public static double CalculateStandardGravityParameterInKm3S2(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
         {
-            double sgpInKm3S2 = CalculateStandardGravityParameterInM3S2(bodyBeingOrbitedMassInKg, orbiterMassInKg) / Math.Pow(UniversalConstants.Units.KmPerAu, 3);
-            return sgpInKm3S2;
-        }
-
-        public static double CalculateStandardGravityParameterInM3S2(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
-        {
-            // https://en.wikipedia.org/wiki/Standard_gravitational_parameter
-            double sgpInM3S2 = UniversalConstants.Science.GravitationalConstant * (bodyBeingOrbitedMassInKg + orbiterMassInKg);
-            return sgpInM3S2;
+            return GeneralMath.StandardGravitationalParameter(bodyBeingOrbitedMassInKg + orbiterMassInKg) / Math.Pow(UniversalConstants.Units.KmPerAu, 3);
         }
 
         /// <summary>

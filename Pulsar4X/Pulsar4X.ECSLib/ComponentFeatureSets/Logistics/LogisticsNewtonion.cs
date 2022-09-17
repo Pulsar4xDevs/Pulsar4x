@@ -69,7 +69,7 @@ namespace Pulsar4X.ECSLib
                 {
                     var nextParent = shipparents[k];
                     var bodyMass = nextParent.GetDataBlob<MassVolumeDB>().MassTotal;
-                    var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(shipMass, bodyMass);
+                    var sgp = GeneralMath.StandardGravitationalParameter(shipMass + bodyMass);
                     //var ke = OrbitMath.FromPosition(pos, sgp, time);
                     //var r1 = ke.SemiMajorAxis; //is this right? feel like it's not, but then is current position right
                     var r1 = pos.Length(); //or is this one right?
@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
                 {
                     var nextParent = soiTargetParents[k];
                     var bodyMass = nextParent.GetDataBlob<MassVolumeDB>().MassTotal;
-                    var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(shipMass, bodyMass);
+                    var sgp = GeneralMath.StandardGravitationalParameter(shipMass + bodyMass);
                     //var ke = OrbitMath.FromPosition(pos, sgp, time);
                     //var r1 = ke.SemiMajorAxis; //is this right? feel like it's not, but then is current position right
                     var r1 = pos.Length(); //or is this one right?
@@ -120,9 +120,9 @@ namespace Pulsar4X.ECSLib
 
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgpTgtBdy = OrbitMath.CalculateStandardGravityParameterInM3S2(shipMass, tgtBdyMass);
+            var sgpTgtBdy = GeneralMath.StandardGravitationalParameter(shipMass + tgtBdyMass);
             var curBdyMass = cur.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgpCurBdy = OrbitalMath.CalculateStandardGravityParameterInM3S2(shipMass, curBdyMass);
+            var sgpCurBdy = GeneralMath.StandardGravitationalParameter(shipMass + curBdyMass);
             var ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, startState.Position, startState.Velocity, startState.At);
 
             double mySMA = 0;
@@ -188,9 +188,9 @@ namespace Pulsar4X.ECSLib
 
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgpTgtBdy = OrbitMath.CalculateStandardGravityParameterInM3S2(shipMass, tgtBdyMass);
+            var sgpTgtBdy = GeneralMath.StandardGravitationalParameter(shipMass + tgtBdyMass);
             var curBdyMass = cur.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgpCurBdy = OrbitalMath.CalculateStandardGravityParameterInM3S2(shipMass, curBdyMass);
+            var sgpCurBdy = GeneralMath.StandardGravitationalParameter(shipMass + curBdyMass);
             var ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, startState.Position, startState.Velocity, startState.At);
 
             double mySMA = 0;
@@ -262,9 +262,9 @@ namespace Pulsar4X.ECSLib
 
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgpTgtBdy = OrbitMath.CalculateStandardGravityParameterInM3S2(shipMass, tgtBdyMass);
+            var sgpTgtBdy = GeneralMath.StandardGravitationalParameter(shipMass + tgtBdyMass);
             var curBdyMass = cur.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgpCurBdy = OrbitalMath.CalculateStandardGravityParameterInM3S2(shipMass, curBdyMass);
+            var sgpCurBdy = GeneralMath.StandardGravitationalParameter(shipMass + curBdyMass);
             var ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, startState.Position, startState.Velocity, startState.At);
 
             double mySMA = 0;

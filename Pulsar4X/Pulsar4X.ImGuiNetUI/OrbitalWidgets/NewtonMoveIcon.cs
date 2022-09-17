@@ -79,7 +79,7 @@ namespace Pulsar4X.SDL2UI
             var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             var _sgp1 = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
-            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+            _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
             _ke = _newtonMoveDB.GetElements();
             
             

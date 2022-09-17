@@ -228,7 +228,7 @@ namespace Pulsar4X.ECSLib
         internal void UpdateKeplerElements()
         {
             double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, ParentMass);
+            var sgp = GeneralMath.StandardGravitationalParameter(myMass + ParentMass);
             var pos = OwningEntity.GetDataBlob<PositionDB>().RelativePosition_m;
             var dateTime = OwningEntity.StarSysDateTime;
             _ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, CurrentVector_ms, dateTime);

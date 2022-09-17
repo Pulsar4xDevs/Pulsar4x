@@ -26,7 +26,7 @@ namespace Pulsar4X.Tests
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
-            double sgp_m = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
+            double sgp_m = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
 
             OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp_m, position, velocity, new DateTime());
             Vector3 resultPos = objOrbit.GetPosition_AU(new DateTime());
@@ -39,7 +39,7 @@ namespace Pulsar4X.Tests
             
             var parentMass = 5.97237e24;
             var objMass = 7.342e22;
-            var sgpm = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
+            var sgpm = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
             var speedm = OrbitMath.InstantaneousOrbitalSpeed(sgpm, 405400000, 384399000);
             Assert.AreEqual(970, speedm, 0.025);
         }
@@ -74,7 +74,7 @@ namespace Pulsar4X.Tests
 
             Vector3 postionKm = new Vector3() { X = 405400 };
             Vector3 velocityKm = new Vector3() { Y = 0.97 };
-            double sgpKm = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
+            double sgpKm = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
 
             KeplerElements elementsKm = OrbitMath.KeplerFromPositionAndVelocity(sgpKm, postionKm, velocityKm, new DateTime());
 
@@ -278,7 +278,7 @@ namespace Pulsar4X.Tests
         public void TestOrbitDBFromVectors(double parentMass, double objMass, Vector3 position_InMeters, Vector3 velocity_InMetersSec)
         {
             double angleΔ = 0.0000000001;
-            double sgp_m = OrbitMath.CalculateStandardGravityParameterInM3S2(objMass, parentMass);
+            double sgp_m = GeneralMath.StandardGravitationalParameter(objMass + parentMass);
             KeplerElements ke_m = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position_InMeters, velocity_InMetersSec, new DateTime());
 
             Game game = new Game();
@@ -430,7 +430,7 @@ namespace Pulsar4X.Tests
             Vector3 targetObjVelocity = new Vector3 { Y = Distance.KmToM(35) };
 
 
-            double sgp_m = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+            double sgp_m = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
             //KeplerElements ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, targetObjPosition, targetObjVelocity);
 
             var currentDateTime = new DateTime(2000, 1, 1);

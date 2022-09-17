@@ -316,7 +316,7 @@ namespace Pulsar4X.ECSLib
             var cpOdb = currentParent.GetDataBlob<OrbitDB>();
             var cpSOI = currentParent.GetSOI_m() + 100; //might as well go another 100m past soi so less likely problems.
             var cpmass = currentParent.GetDataBlob<MassVolumeDB>().MassTotal;            
-            var cpsgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(meMass, cpmass);
+            var cpsgp = GeneralMath.StandardGravitationalParameter(meMass + cpmass);
             var cpSMA = cpOdb.SemiMajorAxis;
             var cpOprd = cpOdb.OrbitalPeriod;
             var cppos = currentParent.GetDataBlob<PositionDB>().RelativePosition_m;
@@ -325,7 +325,7 @@ namespace Pulsar4X.ECSLib
             var tpOdb = targetParent.GetDataBlob<OrbitDB>();
             var tpSOI = targetParent.GetSOI_m();
             var tpMass = targetParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            var tpsgp = OrbitMath.CalculateStandardGravityParameterInM3S2(meMass, tpMass);
+            var tpsgp = GeneralMath.StandardGravitationalParameter(meMass + tpMass);
             var tpSMA = tpOdb.SemiMajorAxis;
             var tpOprd = tpOdb.OrbitalPeriod;
             var tppos = targetParent.GetDataBlob<PositionDB>().RelativePosition_m;
@@ -334,7 +334,7 @@ namespace Pulsar4X.ECSLib
             //grandparent (sol in earth to mars)
             var grandParent = currentParent.GetSOIParentEntity();
             var gpMass = grandParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            var gpSGP = OrbitMath.CalculateStandardGravityParameterInM3S2(meMass, gpMass);
+            var gpSGP = GeneralMath.StandardGravitationalParameter(meMass + gpMass);
             
             var gpHomman = OrbitalMath.Hohmann2(gpSGP, cpSMA, tpSMA);
             var gpHommanAngle = Math.PI*( (1-1/2*Math.Sqrt(2))*Math.Sqrt( Math.Pow((cpSMA / tpSMA +1),3)));

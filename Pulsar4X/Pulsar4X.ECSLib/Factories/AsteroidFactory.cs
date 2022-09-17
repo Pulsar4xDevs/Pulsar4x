@@ -54,7 +54,7 @@ namespace Pulsar4X.ECSLib
             var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             var myMass = massVolume.MassDry;
 
-            double sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+            double sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
             OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
 
             var currentpos = orbit.GetAbsolutePosition_AU(StaticRefLib.CurrentDateTime);
