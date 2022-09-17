@@ -207,7 +207,7 @@ namespace Pulsar4X.SDL2UI
 
 
             _massTargetBody = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().MassDry;
-            _stdGravParamTargetBody_m = OrbitMath.CalculateStandardGravityParameterInM3S2(_massOrderingEntity, _massTargetBody);
+            _stdGravParamTargetBody_m = GeneralMath.StandardGravitationalParameter(_massOrderingEntity + _massTargetBody);
             
             InsertionCalcs();
 

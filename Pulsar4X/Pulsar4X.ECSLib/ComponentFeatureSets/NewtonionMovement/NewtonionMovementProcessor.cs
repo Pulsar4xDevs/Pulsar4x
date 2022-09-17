@@ -69,7 +69,7 @@ namespace Pulsar4X.ECSLib
             DateTime dateTimeFuture = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds);
             double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
 
-            double sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(massTotal_Kg, parentMass_kg);
+            double sgp = GeneralMath.StandardGravitationalParameter(massTotal_Kg + parentMass_kg);
                 
             
             double secondsToItterate = deltaT;

@@ -224,7 +224,7 @@ namespace Pulsar4X.SDL2UI
 
             var parentMass = parentEntity.GetDataBlob<MassVolumeDB>().MassDry;
             var myMass = _entity.GetDataBlob<MassVolumeDB>().MassDry;
-            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass); 
+            _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass); 
 
             EntityGuid = entityState.Entity.Guid;
             parentname = parentEntity.GetOwnersName();

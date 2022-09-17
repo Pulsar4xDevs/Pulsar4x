@@ -103,7 +103,7 @@ namespace Pulsar4X.SDL2UI
 
             _massParentBody = _orderEntityOrbit.Parent.GetDataBlob<MassVolumeDB>().MassDry;
             _massOrderingEntity = OrderingEntity.Entity.GetDataBlob<MassVolumeDB>().MassDry;
-            _stdGravParam_m = OrbitMath.CalculateStandardGravityParameterInM3S2(_massOrderingEntity, _massParentBody);
+            _stdGravParam_m = GeneralMath.StandardGravitationalParameter(_massOrderingEntity + _massParentBody);
 
             _positonAtChange_m = _orderEntityOrbit.GetPosition(_actionDateTime);
             var velAtChange2d = OrbitProcessor.GetOrbitalVector(_orderEntityOrbit, _actionDateTime);
