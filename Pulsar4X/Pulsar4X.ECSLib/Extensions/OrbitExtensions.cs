@@ -282,7 +282,7 @@ namespace Pulsar4X.ECSLib
         {
             var position = orbit.GetPosition(atDateTime);
             var sma = orbit.SemiMajorAxis;
-            if (orbit.GravitationalParameter_Km3S2 == 0 || sma == 0)
+            if (orbit.GravitationalParameter_m3S2 == 0 || sma == 0)
                 return new Vector3(); //so we're not returning NaN;
             var sgp = orbit.GravitationalParameter_m3S2;
 
