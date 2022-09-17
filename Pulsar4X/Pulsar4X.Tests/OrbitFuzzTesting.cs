@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using NUnit.Framework;
+using NUnit.Framework.Interfaces;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
 
@@ -14,10 +15,8 @@ namespace Pulsar4X.Tests
         static Entity parentBody = TestingUtilities.BasicSol(starSys);
         static MassVolumeDB parentMassDB = parentBody.GetDataBlob<MassVolumeDB>();
         
-    
         static List<(OrbitDB orbitDB, string TestName)> _allTestOrbitData = new List<(OrbitDB, string)>()
         {
-            
             (
              OrbitDB.FromAsteroidFormat //circular orbit.
                  (
@@ -133,31 +132,40 @@ namespace Pulsar4X.Tests
                  new System.DateTime(1994, 2, 17)),
              "Elliptical Retrograde 3d Orbit")
         };
-        
+
+        double epsilon, sgp, o_a, o_e, o_i, o_Ω, o_M0, o_n, o_ω, o_lop;
+        double periodInSeconds, segmentTime;
+        DateTime o_epoch;
+
+		private void SetupElements(OrbitDB orbit)
+        {
+			// One effect of switching from AU to m is
+			// an increase of the absolute magnitude of errors
+			// due to the increased value of the lengths
+			epsilon = 1e-1;
+
+			sgp = orbit.GravitationalParameter_m3S2;
+			o_a = orbit.SemiMajorAxis;
+			o_e = orbit.Eccentricity;
+			o_i = orbit.Inclination;
+			o_Ω = orbit.LongitudeOfAscendingNode;
+			o_M0 = orbit.MeanAnomalyAtEpoch;
+			o_n = orbit.MeanMotion;
+			o_ω = orbit.ArgumentOfPeriapsis;
+			o_lop = o_Ω + o_ω;
+
+			o_epoch = orbit.Epoch;
+
+			periodInSeconds = orbit.OrbitalPeriod.TotalSeconds;
+			segmentTime = periodInSeconds / 16;
+		}
+
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TestOrbitalVelocityCalcs((OrbitDB orbitDB, string TestName) testData)
         {
-            double epsilon = 1e-1; // One effect of switching from AU to m is
-                                   // an increase of the absolute magnitude of errors
-                                   // due to the increased value of the lengths
 
             var orbitDB = testData.orbitDB;
-            
-            double sgp = orbitDB.GravitationalParameter_m3S2; 
-            double o_a = orbitDB.SemiMajorAxis; 
-            double o_e = orbitDB.Eccentricity; 
-            double o_i = orbitDB.Inclination; 
-            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
-            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
-            double o_n = orbitDB.MeanMotion; 
-            double o_ω = orbitDB.ArgumentOfPeriapsis;
-
-            DateTime o_epoch = orbitDB.Epoch; 
-            
-            double periodInSeconds = orbitDB.OrbitalPeriod.TotalSeconds;
-            double segmentTime = periodInSeconds / 16;
-
-
+            SetupElements(orbitDB);
             
             //lets break the orbit up and check the paremeters at different points of the orbit:
             for (int i = 0; i < 16; i++)
@@ -202,24 +210,11 @@ namespace Pulsar4X.Tests
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TestLoANCalc((OrbitDB orbitDB, string TestName) testData)
         {
-            var orbitDB = testData.orbitDB;
-            
-            double sgp = orbitDB.GravitationalParameter_m3S2;
-			double o_a = orbitDB.SemiMajorAxis;
-			double o_e = orbitDB.Eccentricity; 
-            double o_i = orbitDB.Inclination; 
-            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
-            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
-            double o_n = orbitDB.MeanMotion; 
-            double o_ω = orbitDB.ArgumentOfPeriapsis;
-        
-            DateTime o_epoch = orbitDB.Epoch; 
+			var orbitDB = testData.orbitDB;
+			SetupElements(orbitDB);
 
- 
-            double periodInSeconds = orbitDB.OrbitalPeriod.TotalSeconds;
-            double segmentTime = periodInSeconds / 16;
-            //lets break the orbit up and check the paremeters at different points of the orbit:
-            for (int i = 0; i < 16; i++)
+			//lets break the orbit up and check the paremeters at different points of the orbit:
+			for (int i = 0; i < 16; i++)
             {
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
@@ -237,27 +232,13 @@ namespace Pulsar4X.Tests
 
             }
         }
-        
-        
+
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TrueAnomalyCalcs((OrbitDB orbitDB, string TestName) testData)
         {
             var orbitDB = testData.orbitDB;
-            
-            double sgp = orbitDB.GravitationalParameter_m3S2;
-			double o_a = orbitDB.SemiMajorAxis;
-			double o_e = orbitDB.Eccentricity; 
-            double o_i = orbitDB.Inclination; 
-            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
-            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
-            double o_n = orbitDB.MeanMotion; 
-            double o_ω = orbitDB.ArgumentOfPeriapsis;
-        
-            DateTime o_epoch = orbitDB.Epoch; 
+            SetupElements(orbitDB);
 
- 
-            double periodInSeconds = orbitDB.OrbitalPeriod.TotalSeconds;
-            double segmentTime = periodInSeconds / 16;
             //lets break the orbit up and check the paremeters at different points of the orbit:
             for (int i = 0; i < 16; i++)
             {
@@ -269,7 +250,7 @@ namespace Pulsar4X.Tests
 
                 var pos = orbitDB.GetPosition(segmentDatetime);
                 var vel = orbitDB.InstantaneousOrbitalVelocityVector_m(segmentDatetime);
-                
+
                 Vector3 ev = OrbitMath.EccentricityVector(sgp, pos, (Vector3)vel);
                 double ν1 = OrbitMath.TrueAnomaly(sgp, pos, (Vector3)vel);
                 double ν2 = OrbitMath.TrueAnomaly(ev, pos, (Vector3)vel);
@@ -282,36 +263,22 @@ namespace Pulsar4X.Tests
                 double d3 = Angle.ToDegrees(ν3);
 
 
-                if(o_e > 1.0e-7) // because this test will fail if we have a circular orbit. 
+                if (o_e > 1.0e-7) // because this test will fail if we have a circular orbit. 
                     Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν1), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d1);
-                
+
                 Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν2), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d2);
                 Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν3), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d3);
-                
             }
         }
-
         
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TestEccentricAnomalyCalcs((OrbitDB orbitDB, string TestName) testData)
         {
-            var orbitDB = testData.orbitDB;
-            
-            double sgp = orbitDB.GravitationalParameter_m3S2;
-			double o_a = orbitDB.SemiMajorAxis;
-			double o_e = orbitDB.Eccentricity; 
-            double o_i = orbitDB.Inclination; 
-            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
-            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
-            double o_n = orbitDB.MeanMotion; 
-            double o_ω = orbitDB.ArgumentOfPeriapsis;
-        
-            DateTime o_epoch = orbitDB.Epoch; 
-            
-            double periodInSeconds = orbitDB.OrbitalPeriod.TotalSeconds;
-            double segmentTime = periodInSeconds / 16;
-            //lets break the orbit up and check the paremeters at different points of the orbit:
-            for (int i = 0; i < 16; i++)
+			var orbitDB = testData.orbitDB;
+			SetupElements(orbitDB);
+
+			//lets break the orbit up and check the paremeters at different points of the orbit:
+			for (int i = 0; i < 16; i++)
             {
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
@@ -346,26 +313,11 @@ namespace Pulsar4X.Tests
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TestMeanAnomalyCalcs((OrbitDB orbitDB, string TestName) testData)
         {
-            var orbitDB = testData.orbitDB;
-            
-            double sgp = orbitDB.GravitationalParameter_m3S2;
-			double o_a = orbitDB.SemiMajorAxis;
-			double o_e = orbitDB.Eccentricity; 
-            double o_i = orbitDB.Inclination; 
-            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
-            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
-            double o_n = orbitDB.MeanMotion; 
-            double o_ω = orbitDB.ArgumentOfPeriapsis;
-        
-            DateTime o_epoch = orbitDB.Epoch; 
+			var orbitDB = testData.orbitDB;
+			SetupElements(orbitDB);
 
-
-            
-            double periodInSeconds = orbitDB.OrbitalPeriod.TotalSeconds;
-            double segmentTime = periodInSeconds / 16;
-
-            //lets break the orbit up and check the paremeters at different points of the orbit:
-            for (int i = 0; i < 16; i++)
+			//lets break the orbit up and check the paremeters at different points of the orbit:
+			for (int i = 0; i < 16; i++)
             {
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
@@ -385,23 +337,11 @@ namespace Pulsar4X.Tests
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TestAngleOfPeriapsCalcs((OrbitDB orbitDB, string TestName) testData)
         {
-            var orbitDB = testData.orbitDB;
-            
-            double sgp = orbitDB.GravitationalParameter_m3S2;
-			double o_a = orbitDB.SemiMajorAxis;
-			double o_e = orbitDB.Eccentricity; 
-            double o_i = orbitDB.Inclination; 
-            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
-            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
-            double o_n = orbitDB.MeanMotion; 
-            double o_ω = orbitDB.ArgumentOfPeriapsis;
-        
-            DateTime o_epoch = orbitDB.Epoch; 
+			var orbitDB = testData.orbitDB;
+			SetupElements(orbitDB);
 
-            double periodInSeconds = orbitDB.OrbitalPeriod.TotalSeconds;
-            double segmentTime = periodInSeconds / 16;
-            //lets break the orbit up and check the paremeters at different points of the orbit:
-            for (int i = 0; i < 16; i++)
+			//lets break the orbit up and check the paremeters at different points of the orbit:
+			for (int i = 0; i < 16; i++)
             {
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
@@ -416,8 +356,6 @@ namespace Pulsar4X.Tests
                 Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
                 Vector3 eccentVector = OrbitMath.EccentricityVector(sgp, pos, vel);
 
-                
-                
                 var ω2 = OrbitMath.GetArgumentOfPeriapsis(pos, o_i, o_Ω, o_ν);
                 
                 //These two functions below need fixing, they don't give the correct values in testing.
@@ -439,27 +377,11 @@ namespace Pulsar4X.Tests
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TestingStaticKeplerConversions((OrbitDB orbitDB, string TestName) testData)
         {
-            double epsilon = 1e-1;
+			var orbitDB = testData.orbitDB;
+			SetupElements(orbitDB);
 
-            var orbitDB = testData.orbitDB;
-            
-            double sgp = orbitDB.GravitationalParameter_m3S2;
-			double o_a = orbitDB.SemiMajorAxis;
-			double o_e = orbitDB.Eccentricity; 
-            double o_i = orbitDB.Inclination; 
-            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
-            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
-            double o_n = orbitDB.MeanMotion; 
-            double o_ω = orbitDB.ArgumentOfPeriapsis;
-            double o_lop = o_Ω + o_ω;
-        
-            DateTime o_epoch = orbitDB.Epoch; 
-
-            double periodInSeconds = OrbitMath.GetOrbitalPeriodInSeconds(sgp, o_a);
-            Assert.AreEqual(periodInSeconds, orbitDB.OrbitalPeriod.TotalSeconds, 0.1);
-
-            //lets break the orbit up and check the rest of the paremeters at different points of the orbit:
-            double segmentTime = periodInSeconds / 16;
+			//lets break the orbit up and check the rest of the paremeters at different points of the orbit:
+			Assert.AreEqual(periodInSeconds, orbitDB.OrbitalPeriod.TotalSeconds, 0.1);
 
             for (int i = 0; i < 16; i++)
             {
@@ -508,26 +430,10 @@ namespace Pulsar4X.Tests
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TestingVariableKeplerConversions((OrbitDB orbitDB, string TestName) testData)
         {
-            double epsilon = 1e-1;
+			var orbitDB = testData.orbitDB;
+			SetupElements(orbitDB);
 
-            var orbitDB = testData.orbitDB;
-            
-            double sgp = orbitDB.GravitationalParameter_m3S2;
-			double o_a = orbitDB.SemiMajorAxis;
-			double o_e = orbitDB.Eccentricity; 
-            double o_i = orbitDB.Inclination; 
-            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
-            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
-            double o_n = orbitDB.MeanMotion; 
-            double o_ω = orbitDB.ArgumentOfPeriapsis;
-        
-            DateTime o_epoch = orbitDB.Epoch; 
-
-            double periodInSeconds = OrbitMath.GetOrbitalPeriodInSeconds(sgp, o_a);
-            Assert.AreEqual(periodInSeconds, orbitDB.OrbitalPeriod.TotalSeconds, 0.1);
-
-            //lets break the orbit up and check the rest of the paremeters at different points of the orbit:
-            double segmentTime = periodInSeconds / 16;
+			Assert.AreEqual(periodInSeconds, orbitDB.OrbitalPeriod.TotalSeconds, 0.1);
 
             for (int i = 0; i < 16; i++)
             {
@@ -556,10 +462,7 @@ namespace Pulsar4X.Tests
                 
                 double ke_E = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(ke_ν, ke_e);
                 double ke_E2 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(o_ν, o_e);
-         
-                
-                
-                
+
                 Assert.Multiple(() =>
                 {
                     Assert.AreEqual(o_ν, ke_ν, 1.0E-10);
@@ -573,29 +476,14 @@ namespace Pulsar4X.Tests
                 });
             }
         }
-        
+
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TestingPosition((OrbitDB orbitDB, string TestName) testData)
         {
             var orbitDB = testData.orbitDB;
-            
-            double sgp = orbitDB.GravitationalParameter_m3S2;
-			double o_a = orbitDB.SemiMajorAxis;
-			double o_e = orbitDB.Eccentricity; 
-            double o_i = orbitDB.Inclination; 
-            double o_Ω = orbitDB.LongitudeOfAscendingNode; 
-            double o_M0 = orbitDB.MeanAnomalyAtEpoch; 
-            double o_n = orbitDB.MeanMotion; 
-            double o_ω = orbitDB.ArgumentOfPeriapsis;
-        
-            DateTime o_epoch = orbitDB.Epoch; 
+            SetupElements(orbitDB);
 
-            double periodInSeconds = OrbitMath.GetOrbitalPeriodInSeconds(sgp, o_a);
             Assert.AreEqual(periodInSeconds, orbitDB.OrbitalPeriod.TotalSeconds, 0.1);
-
-            //lets break the orbit up and check the rest of the paremeters at different points of the orbit:
-            double segmentTime = periodInSeconds / 16;
-
             for (int i = 0; i < 16; i++)
             {
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
@@ -617,30 +505,24 @@ namespace Pulsar4X.Tests
                 double ke_M0 = ke.MeanAnomalyAtEpoch;
                 double ke_n = ke.MeanMotion;
                 double ke_ω = ke.AoP;
-                
+
                 Vector3 eccentricityVector = OrbitMath.EccentricityVector(sgp, pos, vel);
                 double ke_ν = OrbitMath.TrueAnomaly(eccentricityVector, pos, vel);
-                
+
                 double ke_E = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(ke_ν, ke_e);
                 double ke_E2 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(o_ν, o_e);
 
-
                 var pm = orbitDB.GetPosition(segmentDatetime);
                 var pau = orbitDB.GetPosition_AU(segmentDatetime);
-                
+
                 Assert.Multiple(() =>
                 {
                     Assert.AreEqual(pm.Length(), Distance.AuToMt(pau.Length()), 1.0E-2);
                     Assert.AreEqual(pm.X, Distance.AuToMt(pau.X), 1.0E-2);
                     Assert.AreEqual(pm.Y, Distance.AuToMt(pau.Y), 1.0E-2);
                     Assert.AreEqual(pm.Z, Distance.AuToMt(pau.Z), 1.0E-2);
-                    
-
                 });
             }
         }
-
-
-
     }
 }
