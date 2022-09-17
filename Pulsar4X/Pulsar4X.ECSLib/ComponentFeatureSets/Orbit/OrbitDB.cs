@@ -89,23 +89,12 @@ namespace Pulsar4X.ECSLib
         /// Point in orbit furthest from the ParentBody. Measured in AU.
         /// </summary>
         [PublicAPI]
-        public double Apoapsis_AU
-        {
-            get { return Distance.MToAU(Apoapsis);}
-            private set { Apoapsis = Distance.AuToMt(value); }
-        }
         public double Apoapsis { get; private set; }
         
         /// <summary>
         /// Point in orbit closest to the ParentBody. Measured in AU.
         /// </summary>
         [PublicAPI]
-        public double Periapsis_AU
-        {
-            get { return Distance.MToAU(Periapsis);}
-            private set { Periapsis = Distance.AuToMt(value); }
-        }
-        
         public double Periapsis { get; private set; }
 
         /// <summary>
@@ -443,8 +432,8 @@ namespace Pulsar4X.ECSLib
             // http://en.wikipedia.org/wiki/Mean_motion
             MeanMotion = Math.Sqrt(GravitationalParameter_m3S2 / Math.Pow(SemiMajorAxis, 3)); // Calculated in radians.
 
-            Apoapsis_AU = Distance.MToAU((1 + Eccentricity) * SemiMajorAxis);
-            Periapsis_AU = Distance.MToAU((1 - Eccentricity) * SemiMajorAxis);
+            Apoapsis = (1 + Eccentricity) * SemiMajorAxis;
+            Periapsis = (1 - Eccentricity) * SemiMajorAxis;
 
             SOI_m = OrbitMath.GetSOI(SemiMajorAxis, _myMass, _parentMass);
 

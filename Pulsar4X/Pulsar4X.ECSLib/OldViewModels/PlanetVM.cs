@@ -605,8 +605,8 @@ namespace Pulsar4X.ECSLib
             }
 
             SemiMajorAxis = Distance.MToAU(orbitDB.SemiMajorAxis);
-            Apoapsis = orbitDB.Apoapsis_AU;
-            Periapsis = orbitDB.Periapsis_AU;
+            Apoapsis = orbitDB.Apoapsis;
+            Periapsis = orbitDB.Periapsis;
             ArgumentOfPeriapsis = orbitDB.ArgumentOfPeriapsis;
             LongitudeOfAscendingNode = orbitDB.LongitudeOfAscendingNode;
             Eccentricity = orbitDB.Eccentricity;
