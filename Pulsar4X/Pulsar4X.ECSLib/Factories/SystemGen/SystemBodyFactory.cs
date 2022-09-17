@@ -467,7 +467,7 @@ namespace Pulsar4X.ECSLib
                 currentBody.SetDataBlob(currentOrbit);
 
                 insideMass = currentMVDB.MassDry;
-                insideApoapsis_m = currentOrbit.Apoapsis_AU;
+                insideApoapsis_m = Distance.MToAU(currentOrbit.Apoapsis);
             }
         }
 
