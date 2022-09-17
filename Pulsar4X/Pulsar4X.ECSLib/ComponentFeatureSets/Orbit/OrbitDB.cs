@@ -98,15 +98,11 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public DateTime Epoch { get; internal set; }
 
-        
-        
-        public double GravitationalParameter_m3S2 { get; protected set; }
-        
-        /// <summary>
-        /// 2-Body gravitational parameter of system in km^3/s^2
-        /// </summary>
-        [PublicAPI]
-        public double GravitationalParameter_Km3S2 { get; protected set; }
+		/// <summary>
+		/// 2-Body gravitational parameter of system in m^3/s^2
+		/// </summary>
+		[PublicAPI]
+		public double GravitationalParameter_m3S2 { get; protected set; }
 
         public double SOI_m { get; protected set; } = double.MaxValue;
         
@@ -491,7 +487,6 @@ namespace Pulsar4X.ECSLib
             }
             // Calculate extended parameters.
             // http://en.wikipedia.org/wiki/Standard_gravitational_parameter#Two_bodies_orbiting_each_other
-            GravitationalParameter_Km3S2 = GeneralMath.GravitationalParameter_Km3s2(_parentMass + _myMass); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
             GravitationalParameter_m3S2 = GeneralMath.StandardGravitationalParameter(_parentMass + _myMass);
 
             double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis, 3) / (GravitationalParameter_m3S2));
