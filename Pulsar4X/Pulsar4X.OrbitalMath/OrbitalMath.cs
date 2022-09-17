@@ -1224,9 +1224,9 @@ namespace Pulsar4X.Orbital
         {
             var lowOrbit = LowOrbitRadius(planetRadiusInM);
 
-            var exaustVelocity = 275;
-            var sgp = OrbitalMath.CalculateStandardGravityParameterInKm3S2(payload, planetMassDryInKG);
-            Vector3 pos = new Vector3(lowOrbit, 0, 0);
+            var exaustVelocity = 3000;
+            var sgp = GeneralMath.StandardGravitationalParameter(payload + planetMassDryInKG);
+            Vector3 pos = lowOrbit * Vector3.UnitX;
 
             var vel = OrbitalMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
             var fuelCost = OrbitalMath.TsiolkovskyFuelCost(payload, exaustVelocity, vel.speed);
@@ -1235,10 +1235,7 @@ namespace Pulsar4X.Orbital
 
         public static double LowOrbitRadius(double planetRadiusInM)
         {
-            var prad = planetRadiusInM;
-            double alt = prad * 0.33333;
-            var lowOrbit = prad + alt;
-            return lowOrbit;
+            return planetRadiusInM * 1.1;
         }
 
         struct Orbit

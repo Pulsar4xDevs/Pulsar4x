@@ -22,16 +22,10 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public static double FuelCostToLowOrbit(Entity planetEntity, double payload)
         {
-            var lowOrbit = LowOrbitRadius(planetEntity);
-            
-            var exaustVelocity = 3000; //this should come from tech. 
-            var sgp = OrbitMath.CalculateStandardGravityParameterInKm3S2(payload, planetEntity.GetDataBlob<MassVolumeDB>().MassDry);
-            Vector3 pos = new Vector3(lowOrbit, 0, 0);
-            
-            //we should add the planet rotational velocity in here too?
-            var vel = OrbitMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
-            var fuelCost = OrbitMath.TsiolkovskyFuelCost(payload, exaustVelocity, vel.speed);
-            return fuelCost;
+            return FuelCostToLowOrbit(
+                planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM,
+                planetEntity.GetDataBlob<MassVolumeDB>().MassDry, payload
+            );
         }
 
         /// <summary>
@@ -44,9 +38,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public static double LowOrbitRadius(Entity planetEntity)
         {
-            double prad = planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM;
-            var lowOrbit = prad * 1.1;
-            return lowOrbit;
+            return LowOrbitRadius(planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM);
         }
 
         struct orbit
