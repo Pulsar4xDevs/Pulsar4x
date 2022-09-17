@@ -112,8 +112,8 @@ namespace Pulsar4X.ECSLib
             //OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, position, velocity, atDateTime);
             //OrbitDB orbit = (OrbitDB)origOrbit.Clone();
             OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, Distance.MToAU(origOrbit.SemiMajorAxis), 
-                origOrbit.Eccentricity, origOrbit.Inclination_Degrees, origOrbit.LongitudeOfAscendingNode_Degrees, 
-                origOrbit.ArgumentOfPeriapsis_Degrees, origOrbit.MeanMotion_DegreesSec, origOrbit.Epoch);
+                origOrbit.Eccentricity, origOrbit.Inclination, origOrbit.LongitudeOfAscendingNode, 
+                origOrbit.ArgumentOfPeriapsis, origOrbit.MeanAnomalyAtEpoch, origOrbit.Epoch);
 
             var posDB = new PositionDB(position.X, position.Y, position.Z, parent.Manager.ManagerGuid, parent);
 

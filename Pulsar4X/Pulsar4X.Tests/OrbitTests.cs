@@ -312,7 +312,7 @@ namespace Pulsar4X.Tests
             var objM0 = objOrbit.MeanAnomalyAtEpoch;
             var keM0 = ke_m.MeanAnomalyAtEpoch;
             Assert.AreEqual(keM0, objM0, angleΔ);
-            Assert.AreEqual(objM0, OrbitMath.GetMeanAnomalyFromTime(objM0, objOrbit.MeanMotion_DegreesSec, 0), "meanAnomalyError");
+            Assert.AreEqual(objM0, OrbitMath.GetMeanAnomalyFromTime(objM0, Angle.ToDegrees(objOrbit.MeanMotion), 0), "meanAnomalyError");
 
             //checkEpoch
             var objEpoch = objOrbit.Epoch;
@@ -322,7 +322,8 @@ namespace Pulsar4X.Tests
             
             
             //check EccentricAnomaly:
-            var objE = (objOrbit.GetEccentricAnomaly(objOrbit.MeanAnomalyAtEpoch_Degrees));
+            // I feel like this should be in radians
+            var objE = (objOrbit.GetEccentricAnomaly(Angle.ToDegrees(objOrbit.MeanAnomalyAtEpoch)));
             //var keE =   (OrbitMath.Gete(position, ke.SemiMajorAxis, ke.LinearEccentricity, ke.AoP));
             /*
             if (objE != keE)
@@ -399,7 +400,7 @@ namespace Pulsar4X.Tests
             if (velocity_InMetersSec.Z == 0)
             {
                 Assert.IsTrue(ke_m.Inclination == 0);
-                Assert.IsTrue(objOrbit.Inclination_Degrees == 0);
+                Assert.IsTrue(objOrbit.Inclination == 0);
             }
 
             //var speedVectorAU = OrbitProcessor.PreciseOrbitalVector(sgp, position, ke.SemiMajorAxis);
