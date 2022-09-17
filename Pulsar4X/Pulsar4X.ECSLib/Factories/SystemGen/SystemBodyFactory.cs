@@ -228,9 +228,9 @@ namespace Pulsar4X.ECSLib
             double semiMajorAxis = GeneralMath.Lerp(new MinMaxStruct(min, max), system.RNGNextDouble());
             double eccentricity = GeneralMath.Lerp(_galaxyGen.Settings.BodyEccentricityByType[BodyType.Comet], system.RNGNextDouble());
             double inclination = system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination;
-            double longitudeOfAscendingNode = system.RNGNextDouble() * 360;
-            double argumentOfPeriapsis = system.RNGNextDouble() * 360;
-            double meanAnomaly = system.RNGNextDouble() * 360;
+            double longitudeOfAscendingNode = system.RNGNextDouble() * 2 * Math.PI;
+            double argumentOfPeriapsis = system.RNGNextDouble() * 2 * Math.PI;
+            double meanAnomaly = system.RNGNextDouble() * 2 * Math.PI;
 
             comet.SetDataBlob(new OrbitDB(star, starMVDB.MassDry, cometMVDB.MassDry, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode,
                                             argumentOfPeriapsis, meanAnomaly, currentDateTime));
@@ -539,7 +539,7 @@ namespace Pulsar4X.ECSLib
             // Now select a random eccentricity within the limits.
             double eccentricity = GeneralMath.Lerp(eccentricityMinMax, system.RNGNextDouble());
 
-            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination, system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, currentDateTime);
+            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination, system.RNGNextDouble() * 2 * Math.PI, system.RNGNextDouble() * 2 * Math.PI, system.RNGNextDouble() * 2 * Math.PI, currentDateTime);
         }
 
         private void FinalizeBodies(StaticDataStore staticData, StarSystem system, Entity body, int bodyCount, DateTime currentDateTime)

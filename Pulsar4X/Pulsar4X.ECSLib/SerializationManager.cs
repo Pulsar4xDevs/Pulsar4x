@@ -630,7 +630,7 @@ namespace Pulsar4X.ECSLib
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Inclination", "NS");
-            varNode.InnerText = orbit.Inclination_Degrees.ToString("N2");
+            varNode.InnerText = Angle.ToDegrees(orbit.Inclination).ToString("N2");
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Children", "NS");

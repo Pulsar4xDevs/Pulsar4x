@@ -420,7 +420,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("y: " + pos.Y);
                                     ImGui.Text("z: " + pos.Z);
                                     
-                                    ImGui.Text("MeanMotion: " + orbitDB.MeanMotion_DegreesSec + " in Deg/s");
+                                    ImGui.Text("MeanMotion: " + Angle.ToDegrees(orbitDB.MeanMotion) + " in Deg/s");
                                     ImGui.Text("MeanVelocity: " + Stringify.Velocity(orbitDB.MeanOrbitalVelocityInm()));
                                     
                                     ImGui.Text("SOI Radius: " + Stringify.Distance(SelectedEntity.GetSOI_m()));
@@ -443,7 +443,7 @@ namespace Pulsar4X.SDL2UI
                                     
                                     ImGui.Text("AoP:");
                                     ImGui.NextColumn();
-                                    ImGui.Text(orbitDB.ArgumentOfPeriapsis_Degrees.ToString());
+                                    ImGui.Text(Angle.ToDegrees(orbitDB.ArgumentOfPeriapsis).ToString());
                                     ImGui.NextColumn();
                                     ImGui.Text(ke.AoP.ToString());
                                     ImGui.NextColumn();
