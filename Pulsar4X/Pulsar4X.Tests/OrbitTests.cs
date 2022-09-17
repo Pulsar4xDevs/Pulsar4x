@@ -69,7 +69,8 @@ namespace Pulsar4X.Tests
             Vector3 velocity = new Vector3() { Y = Distance.KmToAU(0.97) }; //approx velocity of moon at apoapsis
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
-            double sgp = OrbitMath.CalculateStandardGravityParameterInKm3S2(parentMass, objMass);
+            // There's definitely a unit mistake below...
+            double sgp = GeneralMath.StandardGravitationalParameter(parentMass + objMass) / Math.Pow(UniversalConstants.Units.KmPerAu, 3);
             KeplerElements elements = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity, new DateTime());
 
             Vector3 postionKm = new Vector3() { X = 405400 };

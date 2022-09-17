@@ -141,11 +141,6 @@ namespace Pulsar4X.Orbital
             return new Vector3((double)X, (double)Y, (double)Z);
         }
 
-        public static double CalculateStandardGravityParameterInKm3S2(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
-        {
-            return GeneralMath.StandardGravitationalParameter(bodyBeingOrbitedMassInKg + orbiterMassInKg) / Math.Pow(UniversalConstants.Units.KmPerAu, 3);
-        }
-
         /// <summary>
         /// In calculation this is referred to as RAAN or LoAN or Ω
         /// </summary>
