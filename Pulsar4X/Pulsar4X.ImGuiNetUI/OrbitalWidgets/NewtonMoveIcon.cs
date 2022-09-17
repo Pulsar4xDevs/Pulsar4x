@@ -20,7 +20,6 @@ namespace Pulsar4X.SDL2UI
         PositionDB _parentPosDB;
         PositionDB _myPosDB;
         double _sgp;
-        private double _sgpAU;
         //_taIndex is the point closest to the orbiting object, it's used to 
         int _taIndex;
         //_numberOfEllipsePoints is the total number of points around the ellipse, unadjusted for the percentage of the ellipse actualy drawn.
@@ -81,7 +80,6 @@ namespace Pulsar4X.SDL2UI
             var _sgp1 = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
             _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
-            _sgpAU = GeneralMath.GravitiationalParameter_Au3s2(parentMass + myMass);
             _ke = _newtonMoveDB.GetElements();
             
             

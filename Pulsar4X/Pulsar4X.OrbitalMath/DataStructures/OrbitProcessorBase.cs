@@ -256,14 +256,11 @@ namespace Pulsar4X.Orbital
         /// <param name="atDateTime">At date time.</param>
         public static (double speed, double heading) InstantaneousOrbitalVelocityPolarCoordinate(KeplerElements orbit, DateTime atDateTime, double entityDryMassInKG, double parentEntityDryMassInKG)
         {
-            var position = Distance.MToAU(GetPosition(orbit, atDateTime));
-            var sma = Distance.MToAU(orbit.SemiMajorAxis);
-            var gravitationalParameter_Km3S2 = GeneralMath.GravitationalParameter_Km3s2(parentEntityDryMassInKG + entityDryMassInKG);   // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
-            if (gravitationalParameter_Km3S2 == 0 || sma == 0)
+            var position = GetPosition(orbit, atDateTime);
+            var sma = orbit.SemiMajorAxis;
+            var sgp = GeneralMath.StandardGravitationalParameter(parentEntityDryMassInKG + entityDryMassInKG);   // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
+            if (sgp== 0 || sma == 0)
                 return (0, 0); //so we're not returning NaN;
-
-            var gravitationalParameterAU = GeneralMath.GravitiationalParameter_Au3s2(parentEntityDryMassInKG + entityDryMassInKG);// (149597870700 * 149597870700 * 149597870700);
-            var sgp = gravitationalParameterAU;
 
             double e = orbit.Eccentricity;
             double trueAnomaly = GetTrueAnomaly(orbit, atDateTime);
@@ -286,12 +283,9 @@ namespace Pulsar4X.Orbital
             var parentEntityDryMassInKG = entity.Parent != null ? entity.Parent.DryMassInKG : 0;
             var position = GetPosition(entity.Orbit, atDateTime);
             var sma = entity.Orbit.SemiMajorAxis; 
-            var gravitationalParameter_Km3S2 = GeneralMath.GravitationalParameter_Km3s2(parentEntityDryMassInKG + entity.DryMassInKG);   // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
-            if (gravitationalParameter_Km3S2 == 0 || sma == 0)
+            var sgp = GeneralMath.StandardGravitationalParameter(parentEntityDryMassInKG + entity.DryMassInKG);   // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
+            if (sgp == 0 || sma == 0)
                 return Vector3.Zero; //so we're not returning NaN;
-
-            var gravitationalParameter_m3S2 = GeneralMath.StandardGravitationalParameter(parentEntityDryMassInKG + entity.DryMassInKG);
-            var sgp = gravitationalParameter_m3S2;
 
             double e = entity.Orbit.Eccentricity;
             double trueAnomaly = GetTrueAnomaly(entity.Orbit, atDateTime);
