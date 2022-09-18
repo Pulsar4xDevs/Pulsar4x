@@ -388,26 +388,26 @@ namespace Pulsar4X.ECSLib
             //PositionDB moverPosition = mover.GetDataBlob<PositionDB>();
 
             OrbitDB moverOrbit = mover.GetDataBlob<OrbitDB>();
-            Vector3 moverPosInKM = Distance.AuToKm(moverOrbit.GetAbsolutePosition_AU(atDateTime));
+            Vector3 moverPos = Distance.MToKm(moverOrbit.GetAbsolutePosition_m(atDateTime));
 
             //PropulsionAbilityDB moverPropulsion = mover.GetDataBlob<PropulsionAbilityDB>();
 
-            Vector3 targetPosInKM = Distance.AuToKm((targetOrbit.GetAbsolutePosition_AU(atDateTime)));
+            Vector3 targetPos = Distance.MToKm((targetOrbit.GetAbsolutePosition_m(atDateTime)));
 
             int speed = 25000;//moverPropulsion.MaximumSpeed * 100; //299792458;
 
             (Vector3, TimeSpan) intercept = (new Vector3(), TimeSpan.Zero);
 
-
+            // Get rid of km references
 
             TimeSpan eti = new TimeSpan();
             TimeSpan eti_prev = new TimeSpan();
             DateTime edi = atDateTime;
             DateTime edi_prev = atDateTime;
 
-            Vector3 predictedPosKM = Distance.AuToKm(targetOrbit.GetAbsolutePosition_AU(edi_prev));
-            double distance = (predictedPosKM - moverPosInKM).Length();
-            eti = TimeSpan.FromSeconds((distance * 1000) / speed);
+            Vector3 predictedPos = targetOrbit.GetAbsolutePosition_m(edi_prev);
+            double distance = (predictedPos - moverPos).Length();
+            eti = TimeSpan.FromSeconds(distance / speed);
 
             int steps = 0;
             if (eti < targetOrbit.OrbitalPeriod)
@@ -421,9 +421,9 @@ namespace Pulsar4X.ECSLib
                     eti_prev = eti;
                     edi_prev = edi;
 
-                    predictedPosKM = Distance.AuToKm(targetOrbit.GetAbsolutePosition_AU(edi_prev));
+                    predictedPos = Distance.MToKm(targetOrbit.GetAbsolutePosition_m(edi_prev));
 
-                    distance = (predictedPosKM - moverPosInKM).Length();
+                    distance = (predictedPos - moverPos).Length();
                     eti = TimeSpan.FromSeconds((distance * 1000) / speed);
                     edi = atDateTime + eti;
 
