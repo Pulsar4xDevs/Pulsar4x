@@ -989,11 +989,11 @@ namespace Pulsar4X.ECSLib
 
             settings.MaxMoonOrbitDistanceByPlanetType = new Dictionary<BodyType, double>
             {
-                {BodyType.GasGiant, 60581692 / UniversalConstants.Units.KmPerAu}, // twice highest jupiter moon orbit
-                {BodyType.IceGiant, 49285000 / UniversalConstants.Units.KmPerAu}, // twice Neptune's highest moon orbit
-                {BodyType.GasDwarf, 6058169 / UniversalConstants.Units.KmPerAu}, // WAG
-                {BodyType.Terrestrial, 1923740 / UniversalConstants.Units.KmPerAu}, // 5 * luna orbit.
-                {BodyType.DwarfPlanet, 25000 / UniversalConstants.Units.KmPerAu}, // WAG
+                {BodyType.GasGiant, Distance.KmToM(60581692)}, // twice highest jupiter moon orbit
+                {BodyType.IceGiant, Distance.KmToM(49285000)}, // twice Neptune's highest moon orbit
+                {BodyType.GasDwarf, Distance.KmToM(6058169)}, // WAG
+                {BodyType.Terrestrial, Distance.KmToM(1923740)}, // 5 * luna orbit.
+                {BodyType.DwarfPlanet, Distance.KmToM(25000)}, // WAG
             };
 
             // note Given the way the calculation for max moons is done it is unlikely that any planet will ever have the maximum number of moon, so pad as desired.
