@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
 
             MassVolumeDB starMassVolumeDB = MassVolumeDB.NewFromMassAndRadius_AU(mass, radius);
             StarInfoDB starInfoDB = new StarInfoDB {Age = age, Class = starClass, Luminosity = luminosity, SpectralType = spectralType, Temperature = temperature, LuminosityClass = luminosityClass, SpectralSubDivision = subDivision};
-            PositionDB starPositionDB = new PositionDB(new Vector3(0,0,0), system.Guid);
+            PositionDB starPositionDB = new PositionDB(Vector3.Zero, system.Guid);
             NameDB starNameDB = new NameDB(starName);
             OrbitDB starOrbitDB = new OrbitDB();
 
