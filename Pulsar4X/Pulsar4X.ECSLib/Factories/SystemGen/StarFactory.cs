@@ -87,7 +87,7 @@ namespace Pulsar4X.ECSLib
                 double randomSelection = system.RNGNextDouble();
 
                 // Generate the star's datablobs.
-                MassVolumeDB starMVDB = MassVolumeDB.NewFromMassAndRadius_AU(
+                MassVolumeDB starMVDB = MassVolumeDB.NewFromMassAndRadius_m(
                     GeneralMath.Lerp(_galaxyGen.Settings.StarMassBySpectralType[starType], randomSelection),
                     GeneralMath.Lerp(_galaxyGen.Settings.StarRadiusBySpectralType[starType], randomSelection));
                 
