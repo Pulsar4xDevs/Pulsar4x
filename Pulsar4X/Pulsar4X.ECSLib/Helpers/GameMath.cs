@@ -8,6 +8,8 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Used for holding a percentage stores as a byte so 255 bits precision.
     /// Takes and Returns 0.0 to 1.0 for easy multiplcation math.
+    /// 
+    /// This would be better as a double
     /// </summary>
     public struct PercentValue
     {
@@ -388,17 +390,15 @@ namespace Pulsar4X.ECSLib
             //PositionDB moverPosition = mover.GetDataBlob<PositionDB>();
 
             OrbitDB moverOrbit = mover.GetDataBlob<OrbitDB>();
-            Vector3 moverPos = Distance.MToKm(moverOrbit.GetAbsolutePosition_m(atDateTime));
+            Vector3 moverPos = moverOrbit.GetAbsolutePosition_m(atDateTime);
 
             //PropulsionAbilityDB moverPropulsion = mover.GetDataBlob<PropulsionAbilityDB>();
 
-            Vector3 targetPos = Distance.MToKm((targetOrbit.GetAbsolutePosition_m(atDateTime)));
+            Vector3 targetPos = targetOrbit.GetAbsolutePosition_m(atDateTime);
 
             int speed = 25000;//moverPropulsion.MaximumSpeed * 100; //299792458;
 
             (Vector3, TimeSpan) intercept = (new Vector3(), TimeSpan.Zero);
-
-            // Get rid of km references
 
             TimeSpan eti = new TimeSpan();
             TimeSpan eti_prev = new TimeSpan();
@@ -415,16 +415,16 @@ namespace Pulsar4X.ECSLib
 
                 double timeDifference = double.MaxValue;
                 double distanceDifference = timeDifference * speed;
-                while (distanceDifference >= 1000)
+                while (distanceDifference >= 1)
                 {
 
                     eti_prev = eti;
                     edi_prev = edi;
 
-                    predictedPos = Distance.MToKm(targetOrbit.GetAbsolutePosition_m(edi_prev));
+                    predictedPos = targetOrbit.GetAbsolutePosition_m(edi_prev);
 
                     distance = (predictedPos - moverPos).Length();
-                    eti = TimeSpan.FromSeconds((distance * 1000) / speed);
+                    eti = TimeSpan.FromSeconds(distance / speed);
                     edi = atDateTime + eti;
 
                     timeDifference = Math.Abs(eti.TotalSeconds - eti_prev.TotalSeconds);
@@ -460,8 +460,6 @@ namespace Pulsar4X.ECSLib
             double phaseTime = wc3 * wc4;
 
             double phaseOrbitPeriod = orbitalPeriod - phaseTime;
-
-            
 
             //double phaseOrbitSMA0 = Math.Pow(Math.Sqrt(sgp) * phaseOrbitPeriod / (Math.PI * 2), (2.0 / 3.0)); //I think this one will be slightly slower
             
