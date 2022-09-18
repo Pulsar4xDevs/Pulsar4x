@@ -22,7 +22,7 @@ namespace Pulsar4X.Tests
             Vector3 velocity = new Vector3() { Y = 54000 };
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(man.ManagerGuid) { X_AU = 0, Y_AU = 0, Z_AU = 0 };
+            parentblobs[0] = new PositionDB(man.ManagerGuid) { AbsolutePosition_m = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
@@ -286,7 +286,7 @@ namespace Pulsar4X.Tests
             EntityManager man = new EntityManager(game, false);
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(man.ManagerGuid) { X_AU = 0, Y_AU = 0, Z_AU = 0 };
+            parentblobs[0] = new PositionDB(man.ManagerGuid) { AbsolutePosition_m = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
@@ -419,7 +419,7 @@ namespace Pulsar4X.Tests
             EntityManager mgr = new EntityManager(game, false);
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { X_AU = 0, Y_AU = 0, Z_AU = 0 };
+            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition_m = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(mgr, parentblobs);
@@ -474,7 +474,9 @@ namespace Pulsar4X.Tests
             EntityManager mgr = new EntityManager(game, false);
             Entity parentEntity = TestingUtilities.BasicEarth(mgr);
 
-            PositionDB pos1 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
+            Vector3 absolutePosition = new Vector3(0, Distance.AuToMt(8.52699302490434E-05), 0);
+
+			PositionDB pos1 = new PositionDB(mgr.ManagerGuid, parentEntity) { AbsolutePosition_m = absolutePosition };
             var newt1 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs1 = new BaseDataBlob[4];
             objBlobs1[0] = pos1;
@@ -484,7 +486,7 @@ namespace Pulsar4X.Tests
             Entity objEntity1 = new Entity(mgr, objBlobs1);
             
             
-            PositionDB pos2 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
+            PositionDB pos2 = new PositionDB(mgr.ManagerGuid, parentEntity) { AbsolutePosition_m = absolutePosition };
             var newt2 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs2 = new BaseDataBlob[4];
             objBlobs2[0] = pos2;
