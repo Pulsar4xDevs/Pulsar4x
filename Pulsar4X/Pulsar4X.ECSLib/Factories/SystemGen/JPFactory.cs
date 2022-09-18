@@ -20,8 +20,8 @@ namespace Pulsar4X.ECSLib
             {
                 // TODO: Introduce a random chance to stablize jumppoints.
             }
-            
-            var jpPositionLimits = new MinMaxStruct(ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[primaryStarInfoDB.SpectralType].Min, ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[primaryStarInfoDB.SpectralType].Max);
+
+            var jpPositionLimits = ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[primaryStarInfoDB.SpectralType];
 
             jpPositionDB.X_AU = GeneralMath.Lerp(jpPositionLimits, system.RNGNextDouble());
             jpPositionDB.Y_AU = GeneralMath.Lerp(jpPositionLimits, system.RNGNextDouble());
@@ -29,11 +29,11 @@ namespace Pulsar4X.ECSLib
             // Randomly flip the position sign to allow negative values.
             if (system.RNGNext(0, 100) < 50)
             {
-                jpPositionDB.X_AU = 0 - jpPositionDB.X_AU;
+                jpPositionDB.X_AU = -jpPositionDB.X_AU;
             }
             if (system.RNGNext(0, 100) < 50)
             {
-                jpPositionDB.Y_AU = 0 - jpPositionDB.Y_AU;
+                jpPositionDB.Y_AU = -jpPositionDB.Y_AU;
             }
 
             var dataBlobs = new List<BaseDataBlob> { jpNameDB, jpTransitableDB, jpPositionDB};

@@ -72,7 +72,6 @@ namespace Pulsar4X.ECSLib
             internal set { _positionInMeters = value; }
         }
 
-
         /// <summary>
         /// System X coordinate in AU
         /// </summary>
@@ -172,8 +171,8 @@ namespace Pulsar4X.ECSLib
 
         public PositionDB(Guid systemGuid, Entity parent = null) : base(parent)
         {
-            Vector3? parentPos = (ParentDB as PositionDB)?.AbsolutePosition_AU;
-            AbsolutePosition_AU = parentPos ?? Vector3.Zero;
+            Vector3? parentPos = (ParentDB as PositionDB)?.AbsolutePosition_m;
+            AbsolutePosition_m = parentPos ?? Vector3.Zero;
             SystemGuid = systemGuid;
         }
 
@@ -245,9 +244,7 @@ namespace Pulsar4X.ECSLib
 
         public int GetValueCompareHash(int hash = 17)
         {
-            hash = Misc.ValueHash(X_AU, hash);
-            hash = Misc.ValueHash(Y_AU, hash);
-            hash = Misc.ValueHash(Z_AU, hash);
+            hash = Misc.ValueHash(AbsolutePosition_m, hash);
             return hash;
         }
     }
