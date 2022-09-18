@@ -640,11 +640,11 @@ namespace Pulsar4X.ECSLib
             if (positionDB != null)
             {
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "PositionInAU", "NS");
-                varNode.InnerText = "(" + positionDB.X_AU.ToString("N3") + ", " + positionDB.Y_AU.ToString("N3") + ", " + positionDB.Z_AU.ToString("N3") + ")";
+                varNode.InnerText = Distance.MToAU(positionDB.AbsolutePosition_m).ToString("N3");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "PositionInKm", "NS");
-                varNode.InnerText = "(" + positionDB.XInKm.ToString("N3") + ", " + positionDB.YInKm.ToString("N3") + ", " + positionDB.ZInKm.ToString("N3") + ")";
+                varNode.InnerText = Distance.MToKm(positionDB.AbsolutePosition_m).ToString("N3");
                 bodyNode.AppendChild(varNode);
             }
 
