@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
 
             var currentpos = orbit.GetAbsolutePosition_m(StaticRefLib.CurrentDateTime);
-            var posDB = new PositionDB(Distance.MToAU(currentpos), parent.Manager.ManagerGuid, parent);
+            var posDB = new PositionDB(currentpos, parent.Manager.ManagerGuid, parent);
 
 
             var planetDBs = new List<BaseDataBlob>
@@ -94,8 +94,7 @@ namespace Pulsar4X.ECSLib
             var massVolume = MassVolumeDB.NewFromMassAndRadius_m(mass, radius);
             var planetInfo = new SystemBodyInfoDB();
             var name = new NameDB("Ellie");
-            var AsteroidDmg = new AsteroidDamageDB();
-            AsteroidDmg.FractureChance = new PercentValue(0.75f);
+            var AsteroidDmg = new AsteroidDamageDB{ FractureChance = new PercentValue(0.75f) };
             var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50);
             var sensorPfil = new SensorProfileDB();
 
@@ -114,7 +113,6 @@ namespace Pulsar4X.ECSLib
                 origOrbit.ArgumentOfPeriapsis, origOrbit.MeanAnomalyAtEpoch, origOrbit.Epoch);
 
             var posDB = new PositionDB(position, parent.Manager.ManagerGuid, parent);
-
 
             var planetDBs = new List<BaseDataBlob>
             {

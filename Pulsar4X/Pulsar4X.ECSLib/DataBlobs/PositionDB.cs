@@ -136,9 +136,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="absolutePos_AU"></param>
         /// <param name="systemGuid"></param>
         /// <param name="parent"></param>
-        public PositionDB(Vector3 absolutePos_AU, Guid systemGuid, Entity parent = null) : base(parent)
+        public PositionDB(Vector3 relativePos, Guid systemGuid, Entity parent = null) : base(parent)
         {
-            AbsolutePosition_AU = absolutePos_AU;
+            RelativePosition_m = relativePos;
             SystemGuid = systemGuid;
         }
 
