@@ -439,38 +439,38 @@ namespace Pulsar4X.ECSLib
             {
                 {SpectralType.O, new MinMaxStruct
                 {
-                    Min = 6.6 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 250 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 6.6 * UniversalConstants.Units.SolarRadius,
+                    Max = 250 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.B, new MinMaxStruct
                 {
-                    Min = 1.8 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 6.6 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 1.8 * UniversalConstants.Units.SolarRadius,
+                    Max = 6.6 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.A, new MinMaxStruct
                 {
-                    Min = 1.4 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 1.8 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 1.4 * UniversalConstants.Units.SolarRadius,
+                    Max = 1.8 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.F, new MinMaxStruct
                 {
-                    Min = 1.15 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 1.4 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 1.15 * UniversalConstants.Units.SolarRadius,
+                    Max = 1.4 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.G, new MinMaxStruct
                 {
-                    Min = 0.96 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 1.15 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 0.96 * UniversalConstants.Units.SolarRadius,
+                    Max = 1.15 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.K, new MinMaxStruct
                 {
-                    Min = 0.7 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 0.96 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 0.7 * UniversalConstants.Units.SolarRadius,
+                    Max = 0.96 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.M, new MinMaxStruct
                 {
-                    Min = 0.12 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 0.7 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 0.12 * UniversalConstants.Units.SolarRadius,
+                    Max = 0.7 * UniversalConstants.Units.SolarRadius
                 }},
             };
 

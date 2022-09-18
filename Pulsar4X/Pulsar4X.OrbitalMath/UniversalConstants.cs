@@ -72,6 +72,8 @@ namespace Pulsar4X.Orbital
 
             public const double SolarRadiusInAu = SolarRadiusInKm / KmPerAu;
 
+            public const double SolarRadius = SolarRadiusInKm * MetersPerKm;
+
             /// <summary>
             /// Earth's gravity in m/s^2. Aka 1g.
             /// </summary>
