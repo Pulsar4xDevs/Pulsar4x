@@ -58,7 +58,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
 
             var currentpos = orbit.GetAbsolutePosition_AU(StaticRefLib.CurrentDateTime);
-            var posDB = new PositionDB(currentpos.X, currentpos.Y, currentpos.Z, parent.Manager.ManagerGuid, parent);
+            var posDB = new PositionDB(currentpos, parent.Manager.ManagerGuid, parent);
 
 
             var planetDBs = new List<BaseDataBlob>

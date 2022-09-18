@@ -31,23 +31,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="time">Time position desired from.</param>
         public static Vector3 GetAbsolutePosition_AU(this OrbitDB orbit, DateTime time)
         {
-            if (orbit.Parent == null)//if we're the parent sun
-                return orbit.GetPosition_AU(orbit.GetTrueAnomaly(time));
-            //else if we're a child
-            Vector3 rootPos = orbit.Parent.GetDataBlob<PositionDB>().AbsolutePosition_AU;
-            if (orbit.IsStationary)
-            {
-                return rootPos;
-            }
-
-            if (orbit.Eccentricity < 1)
-                return rootPos + orbit.GetPosition_AU(orbit.GetTrueAnomaly(time));
-            else
-                return rootPos + orbit.GetPosition_AU(orbit.GetTrueAnomaly(time));
-            //if (orbit.Eccentricity == 1)
-            //    return GetAbsolutePositionForParabolicOrbit_AU();
-            //else
-            //    return GetAbsolutePositionForHyperbolicOrbit_AU(orbit, time);
+            return Distance.MToAU(GetAbsolutePosition_m(orbit, time));
         }
 
         public static Vector3 GetAbsolutePosition_m(this OrbitDB orbit, DateTime time)
