@@ -546,7 +546,9 @@ namespace Pulsar4X.ECSLib
 
     /// <summary>
     /// An experimental distance value struct. 
-    /// idea here was to simply define what a distance value was and handle very small or very large numbers equaly well.   
+    /// idea here was to simply define what a distance value was and handle very small or very large numbers equaly well. 
+    /// 
+    /// This functionality is synonymous with double
     /// </summary>
     public struct DistanceValue
     {
