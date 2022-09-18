@@ -95,7 +95,7 @@ public class RouteTrajectory : IDrawData
             var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
 
             int index = seg.IndexStart;
-            var spos = camera.ViewCoordinateV2_m(seg.ParentPositionDB.AbsolutePosition_m);
+            var spos = camera.ViewCoordinateV2_m(seg.StartPositionDB.AbsolutePosition_m);
 
             //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
             DrawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
@@ -146,6 +146,7 @@ public class KeplerSegment : ITrajectorySegment
     float _segmentArcSweepRadians;
     private bool IsRetrogradeOrbit;
     public IPosition ParentPositionDB;
+    public IPosition StartPositionDB;
     public int IndexStart = 0;
     public int IndexEnd = 0;
     public int IndexCount = 0;
@@ -197,12 +198,11 @@ public class KeplerSegment : ITrajectorySegment
                 IndexEnd = i;
             }
         }
-
+        
         if (IndexStart < IndexEnd)
             IndexCount = IndexEnd - IndexStart;
         else
             IndexCount = Points.Length - (IndexStart - IndexEnd);
-
     }
 
     public void CreatePointArray()
@@ -234,7 +234,7 @@ public class KeplerSegment : ITrajectorySegment
             double x2 = (x1 * coslop) - (y1 * sinlop);
             double y2 = (x1 * sinlop) + (y1 * coslop);
             Points[i] = new Vector2() { X = x2, Y = y2 };
-            angle += _segmentArcSweepRadians;
+            angle -= _segmentArcSweepRadians;
         }
 
         if (IsRetrogradeOrbit)

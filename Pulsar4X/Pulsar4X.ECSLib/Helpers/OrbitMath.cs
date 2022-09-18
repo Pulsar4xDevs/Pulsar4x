@@ -11,6 +11,30 @@ namespace Pulsar4X.ECSLib
     /// Take care when using unless the function has a decent test in the tests project. 
     /// Some simular functions with simular inputs left in for future performance testing (ie one of the two might be slightly more performant).
     /// </summary>
+    ///
+    
+    
+    public static class OrbitalMathExtensions
+    {
+        /// <summary>
+        /// Time for a burn manuver in seconds
+        /// </summary>
+        /// <param name="ship"></param>
+        /// <param name="dv"></param>
+        /// <param name="mass"></param>
+        /// <returns>time in seconds</returns>
+        public static double BurnTime(this OrbitalMath math, Entity ship, double dv, double mass)
+        {
+            //var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
+            var ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+            double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(mass, ve, dv);
+            double tburn = fuelBurned / burnRate;
+            return tburn;
+        }
+    }
+
+
     public class OrbitMath : OrbitalMath
     {
         /// <summary>

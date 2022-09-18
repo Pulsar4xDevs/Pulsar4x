@@ -172,6 +172,11 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.SetNextWindowSize(new Vector2(600f, 400f), ImGuiCond.FirstUseEver);
             if (ImGui.Begin("Nav Control", ref IsActive, _flags))
             {
+                ImGui.Columns(2);
+                BorderGroup.Begin("Nodes");
+                
+                BorderGroup.End(); //ImGui.SameLine();
+                ImGui.NextColumn();
                 BorderGroup.Begin("Mode");
                 if (ImGui.Button("Manual Thrust"))
                 {
@@ -204,6 +209,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 }
 
                 BorderGroup.End();
+                ImGui.Columns(1);
                 ImGui.NewLine();
                 ImGui.Text("Availible Δv: " + Stringify.Velocity(_totalDV));
                 ImGui.Text("Dry Mass:" + Stringify.Mass(_dryMass, "0.######"));
@@ -314,6 +320,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             if (_routeTrajectory is null)
             {
                 _routeTrajectory = new RouteTrajectory(_orderEntity, _node);
+                _routeTrajectory.GetSegment(0).StartPositionDB = _orderEntity.GetDataBlob<PositionDB>();
                 _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_routeTrajectory);
             }
             if (changes)
@@ -329,7 +336,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             var span = _routeTrajectory.GetSegment(0).SegmentTimeSpan;
             ImGui.Text("Span: " + span);
             
-            
+
         }
 
 
