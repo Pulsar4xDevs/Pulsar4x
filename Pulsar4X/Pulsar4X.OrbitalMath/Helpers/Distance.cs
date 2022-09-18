@@ -58,6 +58,10 @@
             Vector2 meters = au * UniversalConstants.Units.MetersPerAu;
             return meters;
         }
+        public static MinMaxStruct AuToMt(MinMaxStruct au)
+        {
+            return new MinMaxStruct(AuToMt(au.Min), AuToMt(au.Max));
+        }
         public static double AuToMt(double au)
         {
             return au * UniversalConstants.Units.MetersPerAu;

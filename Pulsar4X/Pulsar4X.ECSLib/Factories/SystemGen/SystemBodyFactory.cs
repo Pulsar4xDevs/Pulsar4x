@@ -148,8 +148,8 @@ namespace Pulsar4X.ECSLib
             MinMaxStruct innerZone_m;
             MinMaxStruct habitableZone_m;
             MinMaxStruct outerZone_m;
-            var zoneMin_m = Distance.AuToMt(settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Min);
-            var zoneMax_m = Distance.AuToMt(settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Max );
+            var zoneMin_m = settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Min;
+            var zoneMax_m = settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Max;
             bool skipHabitableZone = false;
             if (starInfo.MinHabitableRadius_m > zoneMax_m ||
                 starInfo.MaxHabitableRadius_m < zoneMin_m)
@@ -223,9 +223,7 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB starMVDB = star.GetDataBlob<MassVolumeDB>();
             MassVolumeDB cometMVDB = comet.GetDataBlob<MassVolumeDB>();
 
-            double min = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Min);
-            double max = Distance.AuToMt(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[starInfo.SpectralType].Max);
-            double semiMajorAxis = GeneralMath.Lerp(new MinMaxStruct(min, max), system.RNGNextDouble());
+            double semiMajorAxis = GeneralMath.Lerp(_galaxyGen.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType], system.RNGNextDouble());
             double eccentricity = GeneralMath.Lerp(_galaxyGen.Settings.BodyEccentricityByType[BodyType.Comet], system.RNGNextDouble());
             double inclination = system.RNGNextDouble() * _galaxyGen.Settings.MaxBodyInclination;
             double longitudeOfAscendingNode = system.RNGNextDouble() * 2 * Math.PI;

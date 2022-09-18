@@ -10,30 +10,34 @@ namespace Pulsar4X.ECSLib
         {
             var primaryStarInfoDB = system.GetFirstEntityWithDataBlob<StarInfoDB>().GetDataBlob<OrbitDB>().Root.GetDataBlob<StarInfoDB>();
 
-            NameDB jpNameDB = new NameDB("Jump Point");
-            PositionDB jpPositionDB = new PositionDB(0,0,0, system.Guid);
-            TransitableDB jpTransitableDB = new TransitableDB();
+            var jpPositionLimits = ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType[primaryStarInfoDB.SpectralType];
 
-            jpTransitableDB.IsStabilized = system.Game.Settings.AllJumpPointsStabilized ?? false;
-
-            if (!jpTransitableDB.IsStabilized)
-            {
-                // TODO: Introduce a random chance to stablize jumppoints.
-            }
-
-            var jpPositionLimits = ssf.GalaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[primaryStarInfoDB.SpectralType];
-
-            jpPositionDB.X_AU = GeneralMath.Lerp(jpPositionLimits, system.RNGNextDouble());
-            jpPositionDB.Y_AU = GeneralMath.Lerp(jpPositionLimits, system.RNGNextDouble());
+            double X = GeneralMath.Lerp(jpPositionLimits, system.RNGNextDouble());
+            double Y = GeneralMath.Lerp(jpPositionLimits, system.RNGNextDouble());
 
             // Randomly flip the position sign to allow negative values.
             if (system.RNGNext(0, 100) < 50)
             {
-                jpPositionDB.X_AU = -jpPositionDB.X_AU;
+                X = -X;
             }
             if (system.RNGNext(0, 100) < 50)
             {
-                jpPositionDB.Y_AU = -jpPositionDB.Y_AU;
+                Y = -Y;
+            }
+
+            double X_AU = Distance.MToAU(X);
+            double Y_AU = Distance.MToAU(Y);
+
+            NameDB jpNameDB = new NameDB("Jump Point");
+            PositionDB jpPositionDB = new PositionDB(X_AU,Y_AU,0, system.Guid);
+            TransitableDB jpTransitableDB = new TransitableDB
+            {
+                IsStabilized = system.Game.Settings.AllJumpPointsStabilized ?? false
+            };
+
+            if (!jpTransitableDB.IsStabilized)
+            {
+                // TODO: Introduce a random chance to stablize jumppoints.
             }
 
             var dataBlobs = new List<BaseDataBlob> { jpNameDB, jpTransitableDB, jpPositionDB};

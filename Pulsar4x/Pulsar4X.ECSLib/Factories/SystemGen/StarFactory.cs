@@ -126,12 +126,12 @@ namespace Pulsar4X.ECSLib
                 OrbitDB previousOrbit = previousStar.GetDataBlob<OrbitDB>();
                 StarInfoDB previousStarInfo = previousStar.GetDataBlob<StarInfoDB>();
 
-                double minDistance = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[previousStarInfo.SpectralType].Max + _galaxyGen.Settings.OrbitalDistanceByStarSpectralType_AU[currentStarInfo.SpectralType].Max + Distance.MToAU(previousOrbit.SemiMajorAxis);
+                double minDistance = _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[previousStarInfo.SpectralType].Max + _galaxyGen.Settings.OrbitalDistanceByStarSpectralType[currentStarInfo.SpectralType].Max + previousOrbit.SemiMajorAxis;
 
                 double sma = minDistance * Math.Pow(system.RNGNextDouble(), 3);
                 double eccentricity = Math.Pow(system.RNGNextDouble() * 0.8, 3);
 
-                OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.MassDry, currentStar.GetDataBlob<MassVolumeDB>().MassDry, sma, eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNGNextDouble(), system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, currentDateTime);
+                OrbitDB currentOrbit = OrbitDB.FromAsteroidFormat(anchorStar, anchorMVDB.MassDry, currentStar.GetDataBlob<MassVolumeDB>().MassDry, Distance.MToAU(sma), eccentricity, _galaxyGen.Settings.MaxBodyInclination * system.RNGNextDouble(), system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, system.RNGNextDouble() * 360, currentDateTime);
                 currentStar.SetDataBlob(currentOrbit);
                 currentStar.GetDataBlob<PositionDB>().SetParent(currentOrbit.Parent);
                 previousStar = currentStar;
