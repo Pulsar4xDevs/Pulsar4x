@@ -67,8 +67,7 @@ namespace Pulsar4X.ECSLib
             StarSystem sol = new StarSystem(game, "something", -1);
 
             Entity sun = _starFactory.CreateStar(sol, UniversalConstants.Units.SolarMassInKG, UniversalConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "something");
-            sun.GetDataBlob<PositionDB>().X_AU += x;
-            sun.GetDataBlob<PositionDB>().Y_AU += x;
+            sun.GetDataBlob<PositionDB>().AbsolutePosition_m += new Vector3(x, y, 0);
             
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
@@ -85,8 +84,7 @@ namespace Pulsar4X.ECSLib
             PositionDB mercuryPositionDB = new PositionDB(mercuryOrbitDB.GetPosition_AU(StaticRefLib.CurrentDateTime), sol.Guid, sun);
             //AtmosphereDB mercuryAtmo = new AtmosphereDB();
             SensorProfileDB sensorProfile = new SensorProfileDB();
-            mercuryPositionDB.X_AU += x;
-            mercuryPositionDB.Y_AU += x;
+            mercuryPositionDB.AbsolutePosition_m += new Vector3(x, y, 0);
             Entity mercury = new Entity(sol, new List<BaseDataBlob>{sensorProfile, mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
             _systemBodyFactory.MineralGeneration(game.StaticData, sol, mercury);
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, mercuryBodyDB, mercuryMVDB);

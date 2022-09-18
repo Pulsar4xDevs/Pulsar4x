@@ -72,33 +72,6 @@ namespace Pulsar4X.ECSLib
             internal set { _positionInMeters = value; }
         }
 
-        /// <summary>
-        /// System X coordinate in AU
-        /// </summary>
-        public double X_AU
-        {
-            get { return AbsolutePosition_AU.X; }
-            internal set {  _positionInMeters.X = Distance.AuToMt(value); }
-        }
-
-        /// <summary>
-        /// System Y coordinate in AU
-        /// </summary>
-        public double Y_AU
-        {
-            get { return AbsolutePosition_AU.Y; }
-            internal set { _positionInMeters.Y = Distance.AuToMt(value); }
-        }
-
-        /// <summary>
-        /// System Z coordinate in AU
-        /// </summary>
-        public double Z_AU
-        {
-            get { return AbsolutePosition_AU.Z; }
-            internal set { _positionInMeters.Z = Distance.AuToMt(value); }
-        }
-
         #region Unit Conversion Properties
 
         /// <summary>
