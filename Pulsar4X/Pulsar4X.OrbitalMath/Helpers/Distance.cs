@@ -18,7 +18,15 @@
         {
             return meters / 1000.0;
         }
-        public static double KmToM(double kilometers)
+		public static Vector2 MToKm(Vector2 meters)
+		{
+			return meters / 1000.0;
+		}
+		public static Vector3 MToKm(Vector3 meters)
+		{
+			return meters / 1000.0;
+		}
+		public static double KmToM(double kilometers)
         {
             return kilometers * 1000.0;
         }
