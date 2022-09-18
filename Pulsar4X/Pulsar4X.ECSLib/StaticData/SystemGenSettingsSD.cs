@@ -190,10 +190,18 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType_AU;
 
-        /// <summary>
-        /// Possible ranges for eccentricity by body type.
-        /// </summary>
-        public Dictionary<BodyType, MinMaxStruct> BodyEccentricityByType;
+
+		/// <summary>
+		/// Orbital distance restrictions (i.e. SemiMajorAxis restrictions) for a planet based upon the type of star it is orbiting.
+		/// Units are AU.
+		/// @note These numbers, with the exception of G class stars, are based on habitable zone calculations. They could be tweaked for gameplay.
+		/// </summary>
+		public Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType;
+
+		/// <summary>
+		/// Possible ranges for eccentricity by body type.
+		/// </summary>
+		public Dictionary<BodyType, MinMaxStruct> BodyEccentricityByType;
 
         /// <summary>
         /// The possible ranges for albedo for various planet types.
@@ -773,47 +781,47 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            // note These numbers, with the exception of G class stars, are based on habitable zone calculations. They could be tweaked for gameplay.
-            settings.OrbitalDistanceByStarSpectralType_AU = new Dictionary<SpectralType, MinMaxStruct>()
-            {
-                {SpectralType.O, new MinMaxStruct
-                {
-                    Min = 1,
-                    Max = 200
-                }},
-                {SpectralType.B, new MinMaxStruct
-                {
-                    Min = 0.5,
-                    Max = 100
-                }},
-                {SpectralType.A, new MinMaxStruct
-                {
-                    Min = 0.3,
-                    Max = 90
-                }},
-                {SpectralType.F, new MinMaxStruct
-                {
-                    Min = 0.2,
-                    Max = 60
-                }},
-                {SpectralType.G, new MinMaxStruct
-                {
-                    Min = 0.1,
-                    Max = 40
-                }},
-                {SpectralType.K, new MinMaxStruct
-                {
-                    Min = 0.01,
-                    Max = 18
-                }},
-                {SpectralType.M, new MinMaxStruct
-                {
-                    Min = 0.005,
-                    Max = 9
-                }},
-            };
+			// note These numbers, with the exception of G class stars, are based on habitable zone calculations. They could be tweaked for gameplay.
+			settings.OrbitalDistanceByStarSpectralType = new Dictionary<SpectralType, MinMaxStruct>()
+			{
+				{SpectralType.O, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 1,
+					Max = 200
+				})},
+				{SpectralType.B, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.5,
+					Max = 100
+				})},
+				{SpectralType.A, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.3,
+					Max = 90
+				})},
+				{SpectralType.F, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.2,
+					Max = 60
+				})},
+				{SpectralType.G, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.1,
+					Max = 40
+				})},
+				{SpectralType.K, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.01,
+					Max = 18
+				})},
+				{SpectralType.M, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.005,
+					Max = 9
+				})},
+			};
 
-            settings.BodyEccentricityByType = new Dictionary<BodyType, MinMaxStruct>
+			settings.BodyEccentricityByType = new Dictionary<BodyType, MinMaxStruct>
             {
                 {BodyType.Asteroid, new MinMaxStruct
                 {
