@@ -203,9 +203,9 @@ namespace Pulsar4X.SDL2UI
 
         bool positionByDB;
 
-        public Vector3 WorldPosition_AU
+        public Vector3 WorldPosition
         {
-            get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
+            get { if (positionByDB) return _positionDB.AbsolutePosition_m + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
         }
 
@@ -238,7 +238,7 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition);
             var vsp = new Vector2
             {
                 X = ViewScreenPos.x ,
@@ -274,7 +274,7 @@ namespace Pulsar4X.SDL2UI
 
         public Orbital.Vector3 WorldPosition
         {
-            get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
+            get { if (positionByDB) return _positionDB.AbsolutePosition_m + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
         }
 
@@ -307,7 +307,7 @@ namespace Pulsar4X.SDL2UI
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition);
+            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition);
             var vsp = new Orbital.Vector2()
             {
                 X = ViewScreenPos.x,
