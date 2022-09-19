@@ -94,7 +94,7 @@ namespace Pulsar4X.ECSLib
                 StarInfoDB starData = GenerateStarInfo(starMVDB, starType, randomSelection);
 
                 // Initialize Position as 0,0,0. It will be updated when the star's orbit is calculated.
-                PositionDB positionData = new PositionDB(0, 0, 0, system.Guid);
+                PositionDB positionData = new PositionDB(Vector3.Zero, system.Guid);
 
                 var baseDataBlobs = new List<BaseDataBlob> {starMVDB, starData, positionData};
 
