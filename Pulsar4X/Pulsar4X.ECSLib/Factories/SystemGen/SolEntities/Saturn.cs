@@ -70,7 +70,7 @@ namespace Pulsar4X.ECSLib.Factories.SystemGen
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_m, sol.Guid, parentPlanet);
 
             Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib.Factories.SystemGen
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_m, sol.Guid, parentPlanet);
 
             Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
@@ -132,7 +132,7 @@ namespace Pulsar4X.ECSLib.Factories.SystemGen
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_m, sol.Guid, parentPlanet);
 
             Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
@@ -163,7 +163,7 @@ namespace Pulsar4X.ECSLib.Factories.SystemGen
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_m, sol.Guid, parentPlanet);
 
             Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
@@ -194,7 +194,7 @@ namespace Pulsar4X.ECSLib.Factories.SystemGen
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_m, sol.Guid, parentPlanet);
 
             Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
             SensorProcessorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
@@ -225,7 +225,7 @@ namespace Pulsar4X.ECSLib.Factories.SystemGen
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_AU, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(StaticRefLib.CurrentDateTime) + planetPositionDB.AbsolutePosition_m, sol.Guid, parentPlanet);
 
             var pressureAtm = Pressure.KPaToAtm(146.7f);
             Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>

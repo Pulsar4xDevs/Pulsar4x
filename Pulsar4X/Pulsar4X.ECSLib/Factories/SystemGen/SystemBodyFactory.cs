@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public static ProtoEntity CreateBaseBody()
         {
-            var position = new PositionDB(0, 0, 0, Guid.Empty);
+            var position = new PositionDB(Vector3.Zero, Guid.Empty);
             var massVolume = new MassVolumeDB();
             var planetInfo = new SystemBodyInfoDB();
             var name = new NameDB("ProtoBody");
@@ -558,7 +558,7 @@ namespace Pulsar4X.ECSLib
             var positionDB = body.GetDataBlob<PositionDB>();
             positionDB.SystemGuid = system.Guid;
             positionDB.SetParent(body.GetDataBlob<OrbitDB>().Parent);
-            positionDB.AbsolutePosition_AU = body.GetDataBlob<OrbitDB>().GetPosition_AU(currentDateTime);
+            positionDB.AbsolutePosition_m = body.GetDataBlob<OrbitDB>().GetPosition(currentDateTime);
 
             GenerateMoons(system, body, currentDateTime);
 
