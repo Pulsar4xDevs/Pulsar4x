@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
             // TODO: Make these settings load from GalaxyGen settings.
             var ringSettings = new Dictionary<double, int>
             {
-                { 2, 6 }
+                { Distance.AuToMt(2), 6 }
             };
 
             var surveyPoints = new List<ProtoEntity>();
@@ -32,13 +32,13 @@ namespace Pulsar4X.ECSLib
 
         public static List<ProtoEntity> GenerateSurveyRing(double distance, int numToGenerate, int startingNumber = 0)
         {
-            double degreeOffsetPerPoint = 360d / numToGenerate;
+            double degreeOffsetPerPoint = 2*Math.PI / numToGenerate;
 
             var surveyRingList = new List<ProtoEntity>(numToGenerate);
 
             for (int i = startingNumber; i < numToGenerate + startingNumber; i++)
             {
-                double thisPointDegreeOffset = Angle.ToRadians(i * degreeOffsetPerPoint);
+                double thisPointDegreeOffset = i * degreeOffsetPerPoint;
 
                 double y = distance * Math.Cos(thisPointDegreeOffset);
                 double x = distance * Math.Sin(thisPointDegreeOffset);

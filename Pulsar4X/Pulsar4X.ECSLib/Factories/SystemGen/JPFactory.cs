@@ -25,11 +25,8 @@ namespace Pulsar4X.ECSLib
                 Y = -Y;
             }
 
-            double X_AU = Distance.MToAU(X);
-            double Y_AU = Distance.MToAU(Y);
-
             NameDB jpNameDB = new NameDB("Jump Point");
-            PositionDB jpPositionDB = new PositionDB(X_AU,Y_AU,0, system.Guid);
+            PositionDB jpPositionDB = new PositionDB(X, Y, 0, system.Guid);
             TransitableDB jpTransitableDB = new TransitableDB
             {
                 IsStabilized = system.Game.Settings.AllJumpPointsStabilized ?? false

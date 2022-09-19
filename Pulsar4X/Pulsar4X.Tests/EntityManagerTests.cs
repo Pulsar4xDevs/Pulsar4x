@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Orbital;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -100,7 +101,7 @@ namespace Pulsar4X.Tests
             Entity testEntity = Entity.Create(_game.GlobalManager, Guid.Empty);
             testEntity.SetDataBlob(new OrbitDB());
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.InvalidEntity));
-            testEntity.SetDataBlob(new PositionDB(0, 0, 0, Guid.Empty), EntityManager.GetTypeIndex<PositionDB>());
+            testEntity.SetDataBlob(new PositionDB(Vector3.Zero, Guid.Empty), EntityManager.GetTypeIndex<PositionDB>());
 
             // test bad input:
             Assert.Catch(typeof(ArgumentNullException), () =>
@@ -400,7 +401,7 @@ namespace Pulsar4X.Tests
             Entity testEntity = Entity.Create(_game.GlobalManager, Guid.Empty);
             testEntity.SetDataBlob(new OrbitDB());
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.InvalidEntity));
-            testEntity.SetDataBlob(new PositionDB(0, 0, 0, Guid.Empty), EntityManager.GetTypeIndex<PositionDB>());
+            testEntity.SetDataBlob(new PositionDB(Vector3.Zero, Guid.Empty), EntityManager.GetTypeIndex<PositionDB>());
 
             Assert.True(testEntity.HasDataBlob<OrbitDB>(), "This entity should have an OrbitDB");
             Assert.False(testEntity.HasDataBlob<VolumeStorageDB>(), "This entity should NOT have a VolumeStorageDB");

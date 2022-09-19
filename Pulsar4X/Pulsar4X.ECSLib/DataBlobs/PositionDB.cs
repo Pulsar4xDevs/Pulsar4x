@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="z">Z value.</param>
         public PositionDB(double x, double y, double z, Guid systemGuid, Entity parent = null) : base(parent)
         {
-            AbsolutePosition_AU = new Vector3(x, y, z);
+            AbsolutePosition_m = new Vector3(x, y, z);
             SystemGuid = systemGuid;
         }
 
