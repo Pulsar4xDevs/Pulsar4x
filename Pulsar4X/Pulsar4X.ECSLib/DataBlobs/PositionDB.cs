@@ -72,51 +72,6 @@ namespace Pulsar4X.ECSLib
             internal set { _positionInMeters = value; }
         }
 
-        #region Unit Conversion Properties
-
-        /// <summary>
-        /// Position as a vec4. This is a utility property that converts Position to Km on get and to AU on set.
-        /// </summary>
-        public Vector3 PositionInKm
-        {
-            get { return new Vector3(Distance.AuToKm(AbsolutePosition_AU.X), Distance.AuToKm(AbsolutePosition_AU.Y), Distance.AuToKm(AbsolutePosition_AU.Z)); }
-            set { AbsolutePosition_AU = new Vector3(Distance.KmToAU(value.X), Distance.KmToAU(value.Y), Distance.KmToAU(value.Z)); }
-        }
-
-        /// <summary>
-        /// System X coordinante. This is a utility property that converts the X Coord. to Km on get and to AU on set.
-        /// </summary>
-        public double XInKm
-        {
-            get { return Distance.AuToKm(AbsolutePosition_AU.X); }
-            set { _positionInMeters.X = Distance.KmToAU(value); }
-        }
-
-        /// <summary>
-        /// System Y coordinante. This is a utility property that converts the Y Coord. to Km on get and to AU on set.
-        /// </summary>
-        public double YInKm
-        {
-            get { return Distance.AuToKm(AbsolutePosition_AU.Y); }
-            set { _positionInMeters.Y = Distance.KmToAU(value); }
-        }
-
-        /// <summary>
-        /// System Z coordinate. This is a utility property that converts the Z Coord. to Km on get and to AU on set.
-        /// </summary>
-        public double ZInKm
-        {
-            get { return Distance.AuToKm(AbsolutePosition_AU.Z); }
-            set { _positionInMeters.Z = Distance.KmToAU(value); }
-        }
-
-        public void AddMeters(Vector3 addVector)
-        {
-            _positionInMeters += Distance.MToAU(addVector);
-        }
-
-        #endregion
-
         /// <summary>
         /// Initialized 
         /// .

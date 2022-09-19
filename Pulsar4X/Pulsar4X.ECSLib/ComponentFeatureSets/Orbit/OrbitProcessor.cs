@@ -79,10 +79,10 @@ namespace Pulsar4X.ECSLib
             // Get our Parent-Relative coordinates.
             try
             {
-                Vector3 newPosition = entityOrbitDB.GetPosition_AU(toDate);
+                Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
 
                 // Get our Absolute coordinates.
-                entityPosition.AbsolutePosition_AU = parentPositionDB.AbsolutePosition_AU + newPosition;
+                entityPosition.AbsolutePosition_m = parentPositionDB.AbsolutePosition_m + newPosition;
 
             }
             catch (OrbitProcessorException e)
