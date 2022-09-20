@@ -11,11 +11,6 @@ namespace Pulsar4X.ECSLib
         public Vector3 MemoryrelativePosition_m;
         internal Vector3 AcuracyOffset = new Vector3();
 
-        public Vector3 AbsolutePosition_AU
-        {
-            get { return Distance.MToAU(AbsolutePosition_m); }
-        }
-
         public Vector3 AbsolutePosition_m 
         {             
             get

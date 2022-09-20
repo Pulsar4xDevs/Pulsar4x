@@ -6,7 +6,6 @@ namespace Pulsar4X.ECSLib
 {
     public interface IPosition
     {
-        Vector3 AbsolutePosition_AU { get; }
         Vector3 AbsolutePosition_m { get; }
         Vector3 RelativePosition_AU { get; }
         Vector3 RelativePosition_m { get; }
@@ -19,14 +18,8 @@ namespace Pulsar4X.ECSLib
         public Guid SystemGuid;
 
         /// <summary>
-        /// The Position as a Vec3, in AU.
+        /// The Position as a Vec3, in m.
         /// </summary>
-        public Vector3 AbsolutePosition_AU
-        {
-            get { return Distance.MToAU(AbsolutePosition_m); }
-            internal set { AbsolutePosition_m = Distance.AuToMt(value); }
-        }
-
         public Vector3 AbsolutePosition_m 
         {             
             get
@@ -88,7 +81,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="absolutePos_AU"></param>
+        /// <param name="relativePos_m"></param>
         /// <param name="systemGuid"></param>
         /// <param name="parent"></param>
         public PositionDB(Vector3 relativePos, Guid systemGuid, Entity parent = null) : base(parent)
