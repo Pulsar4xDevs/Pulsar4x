@@ -83,7 +83,7 @@ namespace Pulsar4X.SDL2UI
 
                     if (_Opened)
                     {
-                        _ChildList = _ChildList.OrderBy(x => x.GetDataBlob<PositionDB>().AbsolutePosition_AU).ToList();
+                        _ChildList = _ChildList.OrderBy(x => x.GetDataBlob<PositionDB>().AbsolutePosition_m).ToList();
                         foreach (Entity _ChildBody in _ChildList)
                         {
                             TreeGen(_ChildBody, _SelectedBody);

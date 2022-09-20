@@ -26,28 +26,17 @@ namespace Pulsar4X.SDL2UI
         {
             get
             {
-                if (IsPinnedToEntity && _entityPosDB != null)
-                    return new Orbital.Vector3
-                    {
-                        X = Distance.MToAU(_camWorldPos_m.X) + _entityPosDB.AbsolutePosition_AU.X,
-                        Y = Distance.MToAU(_camWorldPos_m.Y) + _entityPosDB.AbsolutePosition_AU.Y
-                    };
-                else
-                    return Distance.MToAU(_camWorldPos_m);
+                return Distance.MToAU(CameraWorldPosition);
             }
 
         }
        
-        public Orbital.Vector3 CameraWorldPosition_m
+        public Orbital.Vector3 CameraWorldPosition
         {
             get
             {
                 if (IsPinnedToEntity && _entityPosDB != null)
-                    return new Orbital.Vector3
-                    {
-                        X = _camWorldPos_m.X + _entityPosDB.AbsolutePosition_m.X,
-                        Y = _camWorldPos_m.Y + _entityPosDB.AbsolutePosition_m.Y
-                    };
+                    return _camWorldPos_m + _entityPosDB.AbsolutePosition_m;
                 else
                     return _camWorldPos_m;
             }
@@ -113,32 +102,12 @@ namespace Pulsar4X.SDL2UI
                 _camWorldPos_m = entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
             }
         }
-
-        public Point ViewCoordinate_m(Orbital.Vector3 worldCoord_m)
-        {
-            //we're converting to AU here because zoom works best at AU...
-            int x = (int)(Distance.MToAU( worldCoord_m.X - CameraWorldPosition_m.X) * ZoomLevel + ViewPortCenter.X);
-            int y = -(int)(Distance.MToAU(worldCoord_m.Y - CameraWorldPosition_m.Y) * ZoomLevel - ViewPortCenter.Y);
-            Point viewCoord = new Point() { x = x, y = y };
-
-            return viewCoord;
-        }
-        
-        public Point ViewCoordinate_m(Orbital.Vector2 worldCoord_m)
-        {
-            //we're converting to AU here because zoom works best at AU...
-            int x = (int)(Distance.MToAU( worldCoord_m.X - CameraWorldPosition_m.X) * ZoomLevel + ViewPortCenter.X);
-            int y = -(int)(Distance.MToAU(worldCoord_m.Y - CameraWorldPosition_m.Y) * ZoomLevel - ViewPortCenter.Y);
-            Point viewCoord = new Point() { x = x, y = y };
-
-            return viewCoord;
-        }
         
         public Orbital.Vector2 ViewCoordinateV2_m(Orbital.Vector2 worldCoord_m)
         {
             //we're converting to AU here because zoom works best at AU...
-            double x = (Distance.MToAU( worldCoord_m.X - CameraWorldPosition_m.X) * ZoomLevel + ViewPortCenter.X);
-            double y = -(Distance.MToAU(worldCoord_m.Y - CameraWorldPosition_m.Y) * ZoomLevel - ViewPortCenter.Y);
+            double x = (Distance.MToAU( worldCoord_m.X - CameraWorldPosition.X) * ZoomLevel + ViewPortCenter.X);
+            double y = -(Distance.MToAU(worldCoord_m.Y - CameraWorldPosition.Y) * ZoomLevel - ViewPortCenter.Y);
             Orbital.Vector2 viewCoord = new Orbital.Vector2( x, y );
 
             return viewCoord;
@@ -146,41 +115,38 @@ namespace Pulsar4X.SDL2UI
         
         public Orbital.Vector2 ViewCoordinateV2_m(Orbital.Vector3 worldCoord_m)
         {
-            //we're converting to AU here because zoom works best at AU...
-            double x = (Distance.MToAU( worldCoord_m.X - CameraWorldPosition_m.X) * ZoomLevel + ViewPortCenter.X);
-            double y = -(Distance.MToAU(worldCoord_m.Y - CameraWorldPosition_m.Y) * ZoomLevel - ViewPortCenter.Y);
-            Orbital.Vector2 viewCoord = new Orbital.Vector2( x, y );
+            return ViewCoordinateV2_m((Vector2)worldCoord_m);
+        }
+        
+        public Point ViewCoordinate_m(Orbital.Vector2 worldCoord_m)
+        {
+            Orbital.Vector2 coordinate = ViewCoordinateV2_m(worldCoord_m);
+            return new Point { x = (int)coordinate.X, y = (int)coordinate.Y };
+        }
 
-            return viewCoord;
+        public Point ViewCoordinate_m(Orbital.Vector3 worldCoord_m)
+        {
+            return ViewCoordinate_m((Vector2)worldCoord_m);
         }
         
         public Point ViewCoordinate_AU(Orbital.Vector3 worldCoord_AU)
         {
-            int x = (int)((worldCoord_AU.X - CameraWorldPosition_AU.X) * ZoomLevel + ViewPortCenter.X);
-            int y = -(int)((worldCoord_AU.Y - CameraWorldPosition_AU.Y) * ZoomLevel - ViewPortCenter.Y);
-            Point viewCoord = new Point() { x = x, y = y };
-
-            return viewCoord;
+            // Since this method uses AU anyway, might as well return it
+            return ViewCoordinate_m(Distance.AuToMt(worldCoord_AU));
         }
         
         
         public Orbital.Vector2 ViewCoordinateV2_AU(Orbital.Vector2 worldCoord_AU)
         {
-            double x = ((worldCoord_AU.X - CameraWorldPosition_AU.X) * ZoomLevel + ViewPortCenter.X);
-            double y = -((worldCoord_AU.Y - CameraWorldPosition_AU.Y) * ZoomLevel - ViewPortCenter.Y);
-            Orbital.Vector2 viewCoord = new Orbital.Vector2( x, y );
-
-            return viewCoord;
+            // Since this method uses AU anyway, might as well return it
+            return ViewCoordinateV2_m(Distance.AuToMt(worldCoord_AU));
         }
         
         public Orbital.Vector2 ViewCoordinateV2_AU(Orbital.Vector3 worldCoord_AU)
         {
-            double x = ((worldCoord_AU.X - CameraWorldPosition_AU.X) * ZoomLevel + ViewPortCenter.X);
-            double y = -((worldCoord_AU.Y - CameraWorldPosition_AU.Y) * ZoomLevel - ViewPortCenter.Y);
-            Orbital.Vector2 viewCoord = new Orbital.Vector2( x, y );
-
-            return viewCoord;
-        }
+            // Since this method  uses AU anyway, might as well return it
+			return ViewCoordinateV2_m(Distance.AuToMt(worldCoord_AU));
+		}
         
         public Orbital.Vector3 MouseWorldCoordinate_AU()
         {
@@ -211,8 +177,8 @@ namespace Pulsar4X.SDL2UI
         /// <returns></returns>
         public Orbital.Vector3 WorldCoordinate_m(int viewCoordinateX, int viewCoordinateY)
         {
-            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel * UniversalConstants.Units.MetersPerAu) + CameraWorldPosition_m.X;
-            double y = -(((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel * UniversalConstants.Units.MetersPerAu) - CameraWorldPosition_m.Y);
+            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel * UniversalConstants.Units.MetersPerAu) + CameraWorldPosition.X;
+            double y = -(((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel * UniversalConstants.Units.MetersPerAu) - CameraWorldPosition.Y);
             return new Orbital.Vector3(x, y, 0);
         }
 
