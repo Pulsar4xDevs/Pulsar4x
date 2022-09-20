@@ -86,8 +86,8 @@ namespace Pulsar4X.SDL2UI
                 //displays the size in meters of the current screen area account for zoom and window dimensions
                 var windowCornerInWorldCoordinate = _uiState.Camera.WorldCoordinate_m((int)_uiState.MainWinSize.X, (int)_uiState.MainWinSize.Y);
                 ImGui.Text("Current screen is:");
-                ImGui.Text(ECSLib.Stringify.Distance(((windowCornerInWorldCoordinate.X - _uiState.Camera.CameraWorldPosition_m.X)*2))+" wide.");
-                ImGui.Text(ECSLib.Stringify.Distance((-(windowCornerInWorldCoordinate.Y - _uiState.Camera.CameraWorldPosition_m.Y)*2))+" tall.");
+                ImGui.Text(ECSLib.Stringify.Distance(((windowCornerInWorldCoordinate.X - _uiState.Camera.CameraWorldPosition.X)*2))+" wide.");
+                ImGui.Text(ECSLib.Stringify.Distance((-(windowCornerInWorldCoordinate.Y - _uiState.Camera.CameraWorldPosition.Y)*2))+" tall.");
                 //ImGui.Text((_uiState.Camera.WorldCoordinate_m((int)_uiState.Camera.ViewPortSize.X, (int)_uiState.Camera.ViewPortSize.Y).X - _uiState.Camera.CameraWorldPosition_m.X).ToString());
                 var mpp = _uiState.Camera.WorldDistance_m(1);
                 /* I can't math. why can't I math?
