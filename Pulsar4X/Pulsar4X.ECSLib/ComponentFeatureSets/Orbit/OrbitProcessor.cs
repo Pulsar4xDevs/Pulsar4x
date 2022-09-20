@@ -82,7 +82,7 @@ namespace Pulsar4X.ECSLib
                 Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
 
                 // Get our Absolute coordinates.
-                entityPosition.AbsolutePosition_m = parentPositionDB.AbsolutePosition_m + newPosition;
+                entityPosition.AbsolutePosition = parentPositionDB.AbsolutePosition + newPosition;
 
             }
             catch (OrbitProcessorException e)
@@ -152,7 +152,7 @@ namespace Pulsar4X.ECSLib
             Entity closestEntity = orbits[0].Root;
             foreach (var entity in withinSOIOf)
             {
-                var pos = entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+                var pos = entity.GetDataBlob<PositionDB>().AbsolutePosition;
                 var distance = (AbsolutePosition - pos).Length();
                 if (distance < closestDist)
                 {

@@ -206,7 +206,7 @@ namespace Pulsar4X.ECSLib
         {
 
             var starsys = parent.Manager;
-            var parentPosition = parent.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            var parentPosition = parent.GetDataBlob<PositionDB>().AbsolutePosition;
             var position = parentPosition + OrbitProcessor.GetPosition(orbit.GetElements(), parent.StarSysDateTime);
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             

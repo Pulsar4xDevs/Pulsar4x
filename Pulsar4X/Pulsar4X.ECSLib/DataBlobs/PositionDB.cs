@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
 {
     public interface IPosition
     {
-        Vector3 AbsolutePosition_m { get; }
+        Vector3 AbsolutePosition { get; }
         Vector3 RelativePosition_AU { get; }
         Vector3 RelativePosition_m { get; }
     }
@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The Position as a Vec3, in m.
         /// </summary>
-        public Vector3 AbsolutePosition_m 
+        public Vector3 AbsolutePosition 
         {             
             get
             {
@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
                     PositionDB parentpos = (PositionDB)ParentDB;
                     if(parentpos == this)
                         throw new Exception("Infinite loop triggered");
-                    return parentpos.AbsolutePosition_m + _positionInMeters;
+                    return parentpos.AbsolutePosition + _positionInMeters;
                 }
             }
             internal set
@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
                 else
                 {
                     PositionDB parentpos = (PositionDB)ParentDB;
-                    _positionInMeters = value - parentpos.AbsolutePosition_m;
+                    _positionInMeters = value - parentpos.AbsolutePosition;
                 }
             } }
 
@@ -74,7 +74,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="z">Z value.</param>
         public PositionDB(double x, double y, double z, Guid systemGuid, Entity parent = null) : base(parent)
         {
-            AbsolutePosition_m = new Vector3(x, y, z);
+            AbsolutePosition = new Vector3(x, y, z);
             SystemGuid = systemGuid;
         }
 
@@ -92,8 +92,8 @@ namespace Pulsar4X.ECSLib
 
         public PositionDB(Guid systemGuid, Entity parent = null) : base(parent)
         {
-            Vector3? parentPos = (ParentDB as PositionDB)?.AbsolutePosition_m;
-            AbsolutePosition_m = parentPos ?? Vector3.Zero;
+            Vector3? parentPos = (ParentDB as PositionDB)?.AbsolutePosition;
+            AbsolutePosition = parentPos ?? Vector3.Zero;
             SystemGuid = systemGuid;
         }
 
@@ -124,7 +124,7 @@ namespace Pulsar4X.ECSLib
         {
             if (newParent != null && !newParent.HasDataBlob<PositionDB>())
                 throw new Exception("newParent must have a PositionDB");
-            Vector3 currentAbsolute = this.AbsolutePosition_m;
+            Vector3 currentAbsolute = this.AbsolutePosition;
             Vector3 newRelative;
             if (newParent == null)
             {
@@ -132,7 +132,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition_m;
+                newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
             }
             base.SetParent(newParent);
             _positionInMeters = newRelative;
@@ -165,7 +165,7 @@ namespace Pulsar4X.ECSLib
 
         public int GetValueCompareHash(int hash = 17)
         {
-            hash = Misc.ValueHash(AbsolutePosition_m, hash);
+            hash = Misc.ValueHash(AbsolutePosition, hash);
             return hash;
         }
     }

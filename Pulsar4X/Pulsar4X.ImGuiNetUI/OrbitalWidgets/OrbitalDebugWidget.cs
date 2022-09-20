@@ -261,8 +261,8 @@ namespace Pulsar4X.SDL2UI
             _loP = _orbitIcon.LoP_radians;
             
 
-            var cP_a = new Vector2() { X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
-            _f1a = new Vector2(){ X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
+            var cP_a = new Vector2() { X = _orbitIcon.ParentPosDB.AbsolutePosition.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition.Y };
+            _f1a = new Vector2(){ X = _orbitIcon.ParentPosDB.AbsolutePosition.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition.Y };
             //_f1r = new Vector2(){ X = _orbitIcon.ParentPosDB.RelativePosition_m.X, Y = _orbitIcon.ParentPosDB.RelativePosition_m.Y };
             cP_a.X -= _orbitIcon.LinearEccent;
             
@@ -325,8 +325,8 @@ namespace Pulsar4X.SDL2UI
             
             _bodyPosPnt_m = new Vector2()
             {
-                X = (_bodyPosition.AbsolutePosition_m ).X,
-                Y = (_bodyPosition.AbsolutePosition_m ).Y
+                X = (_bodyPosition.AbsolutePosition ).X,
+                Y = (_bodyPosition.AbsolutePosition ).Y
             };
 
         }
@@ -1372,8 +1372,8 @@ namespace Pulsar4X.SDL2UI
             
             _bodyPosPnt_m = new Vector2() 
             { 
-                X = (_bodyPosition.AbsolutePosition_m ).X, 
-                Y = (_bodyPosition.AbsolutePosition_m ).Y 
+                X = (_bodyPosition.AbsolutePosition ).X, 
+                Y = (_bodyPosition.AbsolutePosition ).Y 
             };
             _bodyPosItem.Shape.StartPoint = _bodyPosPnt_m;
 
@@ -1567,8 +1567,8 @@ namespace Pulsar4X.SDL2UI
                 _bodyPosition = bodyPos;
                 _bodyPosPnt_m = new Vector2()
                 {
-                    X = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).X,
-                    Y = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).Y
+                    X = (_bodyPosition.AbsolutePosition + _worldPosition_m).X,
+                    Y = (_bodyPosition.AbsolutePosition + _worldPosition_m).Y
                 };
                 double lop = _ke.LoAN + _ke.AoP;
                 
@@ -1608,8 +1608,8 @@ namespace Pulsar4X.SDL2UI
             {
                 _bodyPosPnt_m = new Vector2()
                 {
-                    X = (_bodyPosition.AbsolutePosition_m ).X,
-                    Y = (_bodyPosition.AbsolutePosition_m ).Y
+                    X = (_bodyPosition.AbsolutePosition ).X,
+                    Y = (_bodyPosition.AbsolutePosition ).Y
                 };
 
                 var vnorm = Vector3.Normalise(vel_m) * 60;
@@ -1649,8 +1649,8 @@ namespace Pulsar4X.SDL2UI
                 _bodyPosition = bodyPos;
                 _bodyPosPnt_m = new Vector2()
                 {
-                    X = (_bodyPosition.AbsolutePosition_m ).X,
-                    Y = (_bodyPosition.AbsolutePosition_m ).Y
+                    X = (_bodyPosition.AbsolutePosition ).X,
+                    Y = (_bodyPosition.AbsolutePosition ).Y
                 };
                 double lop = _ke.LoAN + _ke.AoP;
                 
@@ -1689,8 +1689,8 @@ namespace Pulsar4X.SDL2UI
             {
                 _bodyPosPnt_m = new Vector2()
                 {
-                    X = (_bodyPosition.AbsolutePosition_m).X,
-                    Y = (_bodyPosition.AbsolutePosition_m).Y
+                    X = (_bodyPosition.AbsolutePosition).X,
+                    Y = (_bodyPosition.AbsolutePosition).Y
                 };
 
 

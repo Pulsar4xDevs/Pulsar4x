@@ -36,7 +36,7 @@ namespace Pulsar4X.SDL2UI
             get
             {
                 if (IsPinnedToEntity && _entityPosDB != null)
-                    return _camWorldPos_m + _entityPosDB.AbsolutePosition_m;
+                    return _camWorldPos_m + _entityPosDB.AbsolutePosition;
                 else
                     return _camWorldPos_m;
             }
@@ -99,7 +99,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (entity.HasDataBlob<PositionDB>())
             {
-                _camWorldPos_m = entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+                _camWorldPos_m = entity.GetDataBlob<PositionDB>().AbsolutePosition;
             }
         }
         

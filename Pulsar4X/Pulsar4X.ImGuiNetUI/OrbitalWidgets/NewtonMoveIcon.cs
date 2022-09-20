@@ -331,7 +331,7 @@ namespace Pulsar4X.SDL2UI
             
             
             int index = _taIndex;
-            var spos = camera.ViewCoordinateV2_m(_myPosDB.AbsolutePosition_m);
+            var spos = camera.ViewCoordinateV2_m(_myPosDB.AbsolutePosition);
 
             //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
             // [0] is the position of the object. 
@@ -354,7 +354,7 @@ namespace Pulsar4X.SDL2UI
                 _drawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
             }*/
 
-            var foo2 = camera.ViewCoordinate_m(_myPosDB.AbsolutePosition_m);
+            var foo2 = camera.ViewCoordinate_m(_myPosDB.AbsolutePosition);
             var trns2 = Matrix.IDTranslate(foo2.x, foo2.y);
             var mtrx2 = scAU * scZm *  trns2;
             for (int i = 0; i < 2; i++)

@@ -165,7 +165,7 @@ namespace Pulsar4X.ECSLib
                     }
                     parentMass_kg = newParent.GetDataBlob<MassVolumeDB>().MassDry;
                     
-                    Vector3 posrelativeToNewParent = positionDB.AbsolutePosition_m - newParent.GetDataBlob<PositionDB>(_posDBIdx).AbsolutePosition_m;
+                    Vector3 posrelativeToNewParent = positionDB.AbsolutePosition - newParent.GetDataBlob<PositionDB>(_posDBIdx).AbsolutePosition;
 
 
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);
@@ -298,7 +298,7 @@ namespace Pulsar4X.ECSLib
             double mass_Kg = entity.GetDataBlob<MassVolumeDB>().MassDry;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
-            Vector3 newAbsolute = positionDB.AbsolutePosition_m;
+            Vector3 newAbsolute = positionDB.AbsolutePosition;
             Vector3 velocity = newtonMoveDB.CurrentVector_ms;
             
             double secondsToItterate = timeDelta.TotalSeconds;

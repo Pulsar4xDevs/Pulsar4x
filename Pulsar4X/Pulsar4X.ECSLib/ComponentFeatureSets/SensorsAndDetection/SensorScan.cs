@@ -38,7 +38,7 @@ namespace Pulsar4X.ECSLib
                         sensorMgr = manager.FactionSensorContacts[entity.FactionOwnerID];
                     
 
-                    var detections = SensorProcessorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition_m, detectableEntitys, atDateTime, faction.Guid, true);
+                    var detections = SensorProcessorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition, detectableEntitys, atDateTime, faction.Guid, true);
                     SensorInfoDB sensorInfo;
                     for (int i = 0; i < detections.Length; i++)
                     {

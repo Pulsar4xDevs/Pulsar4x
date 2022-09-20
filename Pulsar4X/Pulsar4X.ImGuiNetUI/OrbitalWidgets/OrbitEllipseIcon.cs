@@ -134,7 +134,7 @@ namespace Pulsar4X.SDL2UI
         {
             Vector3 pos = BodyPositionDB.RelativePosition_m; 
             _bodyrelativePos = new Vector2() { X = pos.X, Y = pos.Y };
-            var apos = BodyPositionDB.AbsolutePosition_m;
+            var apos = BodyPositionDB.AbsolutePosition;
             _bodyAbsolutePos = new Vector2(apos.X, apos.Y);
             
             //we find the point in the ellipse which is closest to the body so we can start drawing from the body.
