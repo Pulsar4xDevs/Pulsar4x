@@ -146,7 +146,7 @@ namespace Pulsar4X.ECSLib
                 var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
                 positionDB.SetParent(moveDB.TargetEntity);
                 //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
-                positionDB.RelativePosition_m = moveDB.ExitPointrelative;
+                positionDB.RelativePosition = moveDB.ExitPointrelative;
                 
                 if(_gameSettings.StrictNewtonion)
                     SetOrbitHere(entity, positionDB, moveDB, dateTimeFuture);

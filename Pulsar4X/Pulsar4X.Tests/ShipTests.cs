@@ -92,7 +92,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(warpAbility.CurrentVectorMS.Length(), 0);
 
             var posDB = _ship.GetDataBlob<PositionDB>();
-            var ralpos = posDB.RelativePosition_m;
+            var ralpos = posDB.RelativePosition;
             var targetPos = new Vector3(ralpos.X , ralpos.Y, ralpos.Z);
             targetPos.X += expectedSpeed2 * 60 * 60; //distance for an hours travel. 
             WarpMoveCommand.CreateCommand(
@@ -107,7 +107,7 @@ namespace Pulsar4X.Tests
             // _game.GamePulse.Ticklength = TimeSpan.FromSeconds(1);
             //_game.GamePulse.TimeStep();
             StaticRefLib.ProcessorManager.GetProcessor<WarpMovingDB>().ProcessEntity(_ship, 1);
-            var ralposNow = posDB.RelativePosition_m;
+            var ralposNow = posDB.RelativePosition;
             var distance = Math.Abs((ralpos - ralposNow).Length());
             
             Assert.AreEqual(distance, expectedSpeed2, 1.0E-15);

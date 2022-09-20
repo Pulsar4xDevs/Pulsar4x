@@ -350,7 +350,7 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     ImGui.Text("Parent: " + positiondb.Parent.GetDataBlob<NameDB>().DefaultName);
 
-                                    ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition_m.Length()));
+                                    ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition.Length()));
                                 }
 
                                 var relativeState = SelectedEntity.GetRelativeState();
@@ -538,7 +538,7 @@ namespace Pulsar4X.SDL2UI
 
                                         var sgp = GeneralMath.StandardGravitationalParameter(pmass + mymass);
                                         var vel = Distance.KmToM(cnmve.CurrentVector_ms);
-                                        var cpos = myPos.RelativePosition_m;
+                                        var cpos = myPos.RelativePosition;
                                         var eccentVector = OrbitMath.EccentricityVector(sgp, cpos, vel);
                                         double ce = eccentVector.Length();
                                         var r = cpos.Length();

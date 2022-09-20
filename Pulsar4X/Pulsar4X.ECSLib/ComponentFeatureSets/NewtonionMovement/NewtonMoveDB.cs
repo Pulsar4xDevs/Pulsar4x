@@ -229,7 +229,7 @@ namespace Pulsar4X.ECSLib
         {
             double myMass = OwningEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             var sgp = GeneralMath.StandardGravitationalParameter(myMass + ParentMass);
-            var pos = OwningEntity.GetDataBlob<PositionDB>().RelativePosition_m;
+            var pos = OwningEntity.GetDataBlob<PositionDB>().RelativePosition;
             var dateTime = OwningEntity.StarSysDateTime;
             _ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, pos, CurrentVector_ms, dateTime);
         }

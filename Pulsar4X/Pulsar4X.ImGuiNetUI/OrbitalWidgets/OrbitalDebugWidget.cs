@@ -1078,8 +1078,8 @@ namespace Pulsar4X.SDL2UI
                 NameString = "Radius (r)",
                 Colour = trueAnomColour,
                 HighlightColour = trueAnomHColour,
-                DataItem = _bodyPosition.RelativePosition_m.Length(),
-                DataString = Stringify.Distance(_bodyPosition.RelativePosition_m.Length())  ,
+                DataItem = _bodyPosition.RelativePosition.Length(),
+                DataString = Stringify.Distance(_bodyPosition.RelativePosition.Length())  ,
                 Shape = new ComplexShape()
                 {
                     Points = new Vector2[]{
@@ -1384,8 +1384,8 @@ namespace Pulsar4X.SDL2UI
             {
                 new Vector2{X = _f1a.X, Y = _f1a.Y },
                 new Vector2{X = _bodyPosPnt_m.X, Y = _bodyPosPnt_m.Y }};
-            _radiusToBody.DataItem = _bodyPosition.RelativePosition_m.Length();
-            _radiusToBody.DataString = Stringify.Distance(_bodyPosition.RelativePosition_m.Length());
+            _radiusToBody.DataItem = _bodyPosition.RelativePosition.Length();
+            _radiusToBody.DataString = Stringify.Distance(_bodyPosition.RelativePosition.Length());
             
             _meanAnomalyItem.Shape.Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 67, 6, 0, _meanAnom, 128);
             _meanAnomalyItem.DataItem = Angle.ToDegrees(_meanAnom);
@@ -1574,7 +1574,7 @@ namespace Pulsar4X.SDL2UI
                 
                 
                 
-                double speed = OrbitalMath.InstantaneousOrbitalSpeed(_sgp, _bodyPosition.RelativePosition_m.Length(), _ke.SemiMajorAxis);
+                double speed = OrbitalMath.InstantaneousOrbitalSpeed(_sgp, _bodyPosition.RelativePosition.Length(), _ke.SemiMajorAxis);
             
 
                 SDL.SDL_Color[] headingColour = 

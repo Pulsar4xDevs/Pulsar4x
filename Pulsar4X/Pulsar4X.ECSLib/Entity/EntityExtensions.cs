@@ -58,7 +58,7 @@ namespace Pulsar4X.ECSLib
 
         public static (Vector3 pos, Vector3 Velocity) GetRelativeState(this Entity entity)
         {
-            var pos = entity.GetDataBlob<PositionDB>().RelativePosition_m;
+            var pos = entity.GetDataBlob<PositionDB>().RelativePosition;
             if (entity.HasDataBlob<OrbitDB>())
             {
                 var datetime = entity.StarSysDateTime;
@@ -252,7 +252,7 @@ namespace Pulsar4X.ECSLib
             }
             else if (entity.HasDataBlob<PositionDB>())
             {
-                return entity.GetDataBlob<PositionDB>().RelativePosition_m;
+                return entity.GetDataBlob<PositionDB>().RelativePosition;
             }
             else
             {
@@ -308,7 +308,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public static Vector3 GetRalitivePosition(this Entity entity)
         {
-            return entity.GetDataBlob<PositionDB>().RelativePosition_m;
+            return entity.GetDataBlob<PositionDB>().RelativePosition;
         }
 
         public static double GetSOI_m(this Entity entity)

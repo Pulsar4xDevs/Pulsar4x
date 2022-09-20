@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib
             //var parentPos = OrbitProcessor.GetAbsolutePosition_AU(parent.GetDataBlob<OrbitDB>(), atDateTime); //need to use the parent position at the epoch
             var posdb = entity.GetDataBlob<PositionDB>();
             posdb.SetParent(parent);
-            var relativePos = posdb.RelativePosition_m;//entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
+            var relativePos = posdb.RelativePosition;//entity.GetDataBlob<PositionDB>().AbsolutePosition_AU - parentPos;
             if (relativePos.Length() > parent.GetSOI_m())
                 throw new Exception("Entity not in target SOI");
 

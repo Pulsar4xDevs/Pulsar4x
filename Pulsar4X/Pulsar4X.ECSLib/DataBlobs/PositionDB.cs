@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
     public interface IPosition
     {
         Vector3 AbsolutePosition { get; }
-        Vector3 RelativePosition_m { get; }
+        Vector3 RelativePosition { get; }
     }
     //TODO: get rid of AU, why are we using AU.
     public class PositionDB : TreeHierarchyDB, IGetValuesHash, IPosition
@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Get or Set the position relative to the parent Entity's abolutePositon
         /// </summary>
-        public Vector3 RelativePosition_m         
+        public Vector3 RelativePosition         
         {
             get { return _positionInMeters; }
             internal set { _positionInMeters = value; }
@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="parent"></param>
         public PositionDB(Vector3 relativePos, Guid systemGuid, Entity parent = null) : base(parent)
         {
-            RelativePosition_m = relativePos;
+            RelativePosition = relativePos;
             SystemGuid = systemGuid;
         }
 
@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
         public PositionDB(Vector3 relativePos_m, Entity SOIParent) : base(SOIParent)
         {
             SystemGuid = SOIParent.Manager.ManagerGuid;
-            RelativePosition_m = relativePos_m;
+            RelativePosition = relativePos_m;
         }
 
         

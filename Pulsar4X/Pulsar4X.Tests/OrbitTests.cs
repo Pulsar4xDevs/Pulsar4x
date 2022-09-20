@@ -505,8 +505,8 @@ namespace Pulsar4X.Tests
                 newt1.LastProcessDateTime -= TimeSpan.FromSeconds(1);
             }
             NewtonionMovementProcessor.NewtonMove(newt2, seconds);
-            var distance1 = (pos1.RelativePosition_m.Length());
-            var distance2 = (pos2.RelativePosition_m.Length());
+            var distance1 = (pos1.RelativePosition.Length());
+            var distance2 = (pos2.RelativePosition.Length());
             
             Assert.AreEqual(distance1, distance2); //if we put the variable timstep which is related to the speed of the object in we'll have to give this a delta
         }

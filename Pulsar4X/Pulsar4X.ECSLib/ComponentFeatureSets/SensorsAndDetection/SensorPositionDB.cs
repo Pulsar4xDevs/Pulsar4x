@@ -26,17 +26,17 @@ namespace Pulsar4X.ECSLib
 
         public Vector3 RelativePosition_AU
         {
-            get { return Distance.MToAU(RelativePosition_m); }
+            get { return Distance.MToAU(RelativePosition); }
         }
 
-        public Vector3 RelativePosition_m
+        public Vector3 RelativePosition
         {
             get
             {
                 if (GetDataFrom == DataFrom.Parent)
-                    return ActualEntityPositionDB.RelativePosition_m;
+                    return ActualEntityPositionDB.RelativePosition;
                 if (GetDataFrom == DataFrom.Sensors)
-                    return ActualEntityPositionDB.RelativePosition_m + AcuracyOffset;
+                    return ActualEntityPositionDB.RelativePosition + AcuracyOffset;
                 else
                     return MemoryrelativePosition_m;
             }
