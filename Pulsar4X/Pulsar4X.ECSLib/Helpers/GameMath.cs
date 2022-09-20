@@ -321,7 +321,7 @@ namespace Pulsar4X.ECSLib
             var cpsgp = GeneralMath.StandardGravitationalParameter(meMass + cpmass);
             var cpSMA = cpOdb.SemiMajorAxis;
             var cpOprd = cpOdb.OrbitalPeriod;
-            var cppos = currentParent.GetDataBlob<PositionDB>().RelativePosition_m;
+            var cppos = currentParent.GetDataBlob<PositionDB>().RelativePosition;
             var cpAngle = Math.Atan2(cppos.Y, cppos.X);
 
             var tpOdb = targetParent.GetDataBlob<OrbitDB>();
@@ -330,7 +330,7 @@ namespace Pulsar4X.ECSLib
             var tpsgp = GeneralMath.StandardGravitationalParameter(meMass + tpMass);
             var tpSMA = tpOdb.SemiMajorAxis;
             var tpOprd = tpOdb.OrbitalPeriod;
-            var tppos = targetParent.GetDataBlob<PositionDB>().RelativePosition_m;
+            var tppos = targetParent.GetDataBlob<PositionDB>().RelativePosition;
             var tpAngle = Math.Atan2(tppos.Y, tppos.X);
 
             //grandparent (sol in earth to mars)

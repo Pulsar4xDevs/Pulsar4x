@@ -418,7 +418,7 @@ namespace Pulsar4X.ECSLib
                         //moveto source(if requred)
                         var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
                         var at = ship.StarSysDateTime;
-                        var pos = ship.GetDataBlob<PositionDB>().RelativePosition_m;
+                        var pos = ship.GetDataBlob<PositionDB>().RelativePosition;
                         var state = ship.GetRelativeState();
                         var curstate = new ManuverState()
                         {

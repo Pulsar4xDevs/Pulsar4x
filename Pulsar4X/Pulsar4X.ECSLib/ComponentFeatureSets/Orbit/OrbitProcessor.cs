@@ -238,7 +238,7 @@ namespace Pulsar4X.ECSLib
             try
             {
                 Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
-                entityPosition.RelativePosition_m = newPosition;
+                entityPosition.RelativePosition = newPosition;
             }
             catch (OrbitProcessor.OrbitProcessorException e)
             {

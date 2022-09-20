@@ -117,7 +117,7 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         void SetTrueAnomalyIndex()
         {
-            Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition_m.X, _myPosDB.RelativePosition_m.Y);
+            Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition.X, _myPosDB.RelativePosition.Y);
             double minDist = (pos - _points[_taIndex]).Length();
 
             for (int i =0; i < _points.Length; i++)
@@ -179,7 +179,7 @@ namespace Pulsar4X.SDL2UI
         private void CreateHyperbolicPoints()
         {
             Vector3 vel = _newtonMoveDB.CurrentVector_ms;
-            Vector3 pos = _myPosDB.RelativePosition_m;
+            Vector3 pos = _myPosDB.RelativePosition;
             //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
 
             

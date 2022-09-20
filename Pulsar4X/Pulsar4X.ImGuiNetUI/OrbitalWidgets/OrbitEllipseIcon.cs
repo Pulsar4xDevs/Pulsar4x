@@ -132,7 +132,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            Vector3 pos = BodyPositionDB.RelativePosition_m; 
+            Vector3 pos = BodyPositionDB.RelativePosition; 
             _bodyrelativePos = new Vector2() { X = pos.X, Y = pos.Y };
             var apos = BodyPositionDB.AbsolutePosition;
             _bodyAbsolutePos = new Vector2(apos.X, apos.Y);

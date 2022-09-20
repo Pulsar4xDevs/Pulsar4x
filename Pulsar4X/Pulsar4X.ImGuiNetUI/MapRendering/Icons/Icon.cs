@@ -113,7 +113,7 @@ namespace Pulsar4X.SDL2UI
                 absCtr.Color = colour;
                 DrawShapes[1] = absCtr;
                 
-                var ralpos = camera.ViewCoordinateV2_m(_positionDB.RelativePosition_m + _worldPosition_m);
+                var ralpos = camera.ViewCoordinateV2_m(_positionDB.RelativePosition + _worldPosition_m);
                 Shape ralCtr = new Shape();
                 ralCtr.Points = CreatePrimitiveShapes.Crosshair();
                  r = 200;
