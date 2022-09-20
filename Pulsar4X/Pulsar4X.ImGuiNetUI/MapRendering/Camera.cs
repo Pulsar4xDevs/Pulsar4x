@@ -148,26 +148,17 @@ namespace Pulsar4X.SDL2UI
 			return ViewCoordinateV2_m(Distance.AuToMt(worldCoord_AU));
 		}
         
-        public Orbital.Vector3 MouseWorldCoordinate_AU()
-        {
-            Orbital.Vector2 mouseCoord = new Orbital.Vector2(ImGui.GetMousePos());
-            double x = ((mouseCoord.X - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition_AU.X;
-            double y = -(((mouseCoord.Y - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition_AU.Y);
-            return new Orbital.Vector3(x, y, 0);
-
-        }
         public Orbital.Vector3 MouseWorldCoordinate_m()
         {
-            //Vector2 mouseCoord = ImGui.GetMousePos();
-            //double x = ((mouseCoord.X - ViewPortCenter.X) / (ZoomLevel / UniversalConstants.Units.MetersPerAu) + CameraWorldPosition_m.X);
-            //double y = -(((mouseCoord.Y - ViewPortCenter.Y) / (ZoomLevel/ UniversalConstants.Units.MetersPerAu) - CameraWorldPosition_m.Y));
-
-            var mwcau = MouseWorldCoordinate_AU();
-            double x = Distance.AuToMt(mwcau.X);
-            double y = Distance.AuToMt(mwcau.Y);
-            
-            return new Orbital.Vector3(x, y, 0);
-
+			Orbital.Vector2 mouseCoord = new Orbital.Vector2(ImGui.GetMousePos());
+            return WorldCoordinate_m(mouseCoord.X, mouseCoord.Y);
+			//double x = (Distance.AuToMt(mouseCoord.X - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition.X;
+			//double y = -((Distance.AuToMt(mouseCoord.Y - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y);
+			//return new Orbital.Vector3(x, y, 0);
+        }
+        public Orbital.Vector3 MouseWorldCoordinate_AU()
+        {
+            return Distance.MToAU(MouseWorldCoordinate_m());
         }
         
         /// <summary>
@@ -175,10 +166,10 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="viewCoordinate"></param>
         /// <returns></returns>
-        public Orbital.Vector3 WorldCoordinate_m(int viewCoordinateX, int viewCoordinateY)
+        public Orbital.Vector3 WorldCoordinate_m(double viewCoordinateX, double viewCoordinateY)
         {
-            double x = ((viewCoordinateX - ViewPortCenter.X) / ZoomLevel * UniversalConstants.Units.MetersPerAu) + CameraWorldPosition.X;
-            double y = -(((viewCoordinateY - ViewPortCenter.Y) / ZoomLevel * UniversalConstants.Units.MetersPerAu) - CameraWorldPosition.Y);
+            double x = (Distance.AuToMt(viewCoordinateX - ViewPortCenter.X) / ZoomLevel) + CameraWorldPosition.X;
+            double y = -((Distance.AuToMt(viewCoordinateY - ViewPortCenter.Y) / ZoomLevel) - CameraWorldPosition.Y);
             return new Orbital.Vector3(x, y, 0);
         }
 

@@ -9,7 +9,10 @@
         {
             return meters / UniversalConstants.Units.MetersPerAu;
         }
-        public static double MToAU(double meters)
+		public static Vector2 MToAU(Vector2 meters) {
+			return meters / UniversalConstants.Units.MetersPerAu;
+		}
+		public static double MToAU(double meters)
         {
             return meters / UniversalConstants.Units.MetersPerAu;
         }
