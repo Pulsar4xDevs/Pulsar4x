@@ -7,7 +7,6 @@ namespace Pulsar4X.ECSLib
     public interface IPosition
     {
         Vector3 AbsolutePosition { get; }
-        Vector3 RelativePosition_AU { get; }
         Vector3 RelativePosition_m { get; }
     }
     //TODO: get rid of AU, why are we using AU.
@@ -53,12 +52,6 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Get or Set the position relative to the parent Entity's abolutePositon
         /// </summary>
-        public Vector3 RelativePosition_AU
-        {
-            get { return Distance.MToAU(_positionInMeters); }
-            internal set { _positionInMeters = Distance.AuToMt(value); }
-        }
-
         public Vector3 RelativePosition_m         
         {
             get { return _positionInMeters; }
