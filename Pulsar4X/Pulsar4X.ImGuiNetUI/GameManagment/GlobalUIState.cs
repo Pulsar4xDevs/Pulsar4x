@@ -222,7 +222,7 @@ namespace Pulsar4X.SDL2UI
                 foreach(var oneEntityState in allEntities){
                     var oneEntity = oneEntityState.Value.Entity;
                     if(oneEntity.HasDataBlob<PositionDB>()){
-                        var thisDistanceInM = Math.Sqrt(Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition_m.X-worldCoord.X, 2) + Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition_m.Y -worldCoord.Y,2));
+                        var thisDistanceInM = Math.Sqrt(Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition.X-worldCoord.X, 2) + Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition.Y -worldCoord.Y,2));
                         if(thisDistanceInM <= closestEntityDistInM){
                             
                             closestEntityDistInM = thisDistanceInM;

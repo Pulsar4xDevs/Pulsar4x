@@ -229,7 +229,7 @@ namespace Pulsar4X.ECSLib
             
             var parpos = parent.GetDataBlob<PositionDB>();
             var objPos = obj.GetDataBlob<PositionDB>();
-            var ralpos = objPos.AbsolutePosition_m - parpos.AbsolutePosition_m;
+            var ralpos = objPos.AbsolutePosition - parpos.AbsolutePosition;
             var r = ralpos.Length();
             var i = Math.Atan2(ralpos.Z, r);
             var m0 = Math.Atan2(ralpos.Y, ralpos.X);

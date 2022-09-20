@@ -563,7 +563,7 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException("positionDB");
             }
 
-            Position = positionDB.AbsolutePosition_m;
+            Position = positionDB.AbsolutePosition;
             if (Name == "Earth")
             {
             }

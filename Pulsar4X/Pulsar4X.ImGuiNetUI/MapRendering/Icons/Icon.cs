@@ -38,7 +38,7 @@ namespace Pulsar4X.SDL2UI
             get 
             { 
                 if (positionByDB) 
-                    return _positionDB.AbsolutePosition_m + _worldPosition_m; 
+                    return _positionDB.AbsolutePosition + _worldPosition_m; 
                 else 
                     return _worldPosition_m; 
             }
@@ -102,7 +102,7 @@ namespace Pulsar4X.SDL2UI
                 var mtxb = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
                 DrawShapes[0] = CreatePrimitiveShapes.CenterWidget(mtxb);
 
-                var abspos = camera.ViewCoordinateV2_m(_positionDB.AbsolutePosition_m);
+                var abspos = camera.ViewCoordinateV2_m(_positionDB.AbsolutePosition);
                 Shape absCtr = new Shape();
                 absCtr.Points = CreatePrimitiveShapes.Crosshair();
                 byte r = 150;
@@ -205,7 +205,7 @@ namespace Pulsar4X.SDL2UI
 
         public Vector3 WorldPosition
         {
-            get { if (positionByDB) return _positionDB.AbsolutePosition_m + _worldPosition; else return _worldPosition; }
+            get { if (positionByDB) return _positionDB.AbsolutePosition + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
         }
 
@@ -274,7 +274,7 @@ namespace Pulsar4X.SDL2UI
 
         public Orbital.Vector3 WorldPosition
         {
-            get { if (positionByDB) return _positionDB.AbsolutePosition_m + _worldPosition; else return _worldPosition; }
+            get { if (positionByDB) return _positionDB.AbsolutePosition + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
         }
 

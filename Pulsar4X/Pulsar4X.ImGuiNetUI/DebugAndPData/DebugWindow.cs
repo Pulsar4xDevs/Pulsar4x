@@ -342,7 +342,7 @@ namespace Pulsar4X.SDL2UI
                             if (SelectedEntity.HasDataBlob<PositionDB>())
                             {
                                 var positiondb = SelectedEntity.GetDataBlob<PositionDB>();
-                                var posAbs = positiondb.AbsolutePosition_m;
+                                var posAbs = positiondb.AbsolutePosition;
                                 ImGui.Text("x: " + Stringify.Distance(posAbs.X));
                                 ImGui.Text("y: " + Stringify.Distance(posAbs.Y));
                                 ImGui.Text("z: " + Stringify.Distance(posAbs.Z));

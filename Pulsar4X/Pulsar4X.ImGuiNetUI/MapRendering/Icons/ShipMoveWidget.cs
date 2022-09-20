@@ -36,7 +36,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            _currentPosition = _positionDB.AbsolutePosition_m; 
+            _currentPosition = _positionDB.AbsolutePosition; 
 
         }
 

@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
             var atDatetime = launchingEntity.Manager.StarSysDateTime;
             var parentPositionDB = launchingEntity.GetDataBlob<PositionDB>();
-            Vector3 parentPosition = parentPositionDB.AbsolutePosition_m;
+            Vector3 parentPosition = parentPositionDB.AbsolutePosition;
             var parentPosRal = parentPositionDB.RelativePosition_m;
             var targetEntityOrbit = targetEntity.GetDataBlob<OrbitDB>();
             if (targetEntity.HasDataBlob<OrbitUpdateOftenDB>())

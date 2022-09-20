@@ -112,7 +112,7 @@ namespace Pulsar4X.ECSLib
         public static (Vector3 pos, Vector3 Velocity) GetAbsoluteState(this Entity entity)
         {
             var posdb = entity.GetDataBlob<PositionDB>();
-            var pos = posdb.AbsolutePosition_m;
+            var pos = posdb.AbsolutePosition;
             if (entity.HasDataBlob<OrbitDB>())
             {
                 var datetime = entity.StarSysDateTime;
@@ -283,7 +283,7 @@ namespace Pulsar4X.ECSLib
             }
             else if (entity.HasDataBlob<PositionDB>())
             {
-                return entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+                return entity.GetDataBlob<PositionDB>().AbsolutePosition;
             }
             else
             {
@@ -298,7 +298,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public static Vector3 GetAbsolutePosition(this Entity entity)
         {
-            return entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            return entity.GetDataBlob<PositionDB>().AbsolutePosition;
         }
 
         /// <summary>

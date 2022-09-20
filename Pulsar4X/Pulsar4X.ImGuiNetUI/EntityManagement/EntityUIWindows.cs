@@ -60,7 +60,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     if(_state.PrimaryEntity != null)
                     {
-                        if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (Orbital.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition_m, _entityState.Position.AbsolutePosition_m) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m))
+                        if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (Orbital.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition, _entityState.Position.AbsolutePosition) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m))
                         {
                             return true;
                         }

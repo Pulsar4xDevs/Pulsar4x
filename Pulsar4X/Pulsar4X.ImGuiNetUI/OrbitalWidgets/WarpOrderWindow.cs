@@ -544,11 +544,11 @@ namespace Pulsar4X.SDL2UI
 
         Orbital.Vector3 GetTargetPosition()
         {
-            return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition;
         }
         Orbital.Vector3 GetMyPosition()
         {
-            return OrderingEntityState.Entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            return OrderingEntityState.Entity.GetDataBlob<PositionDB>().AbsolutePosition;
         }
 
         void DepartureCalcs()

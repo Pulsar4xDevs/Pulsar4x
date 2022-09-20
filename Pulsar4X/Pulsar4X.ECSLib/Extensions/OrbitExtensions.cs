@@ -39,7 +39,7 @@ namespace Pulsar4X.ECSLib
             if (orbit.Parent == null)//if we're the parent sun
                 return orbit.GetPosition_m(orbit.GetTrueAnomaly(time));
             //else if we're a child
-            Vector3 rootPos = orbit.Parent.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            Vector3 rootPos = orbit.Parent.GetDataBlob<PositionDB>().AbsolutePosition;
             if (orbit.IsStationary)
             {
                 return rootPos;

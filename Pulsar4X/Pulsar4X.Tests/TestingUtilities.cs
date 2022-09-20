@@ -17,7 +17,7 @@ namespace Pulsar4X.Tests
         {
             double parentMass = 1.989e30;
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition_m = Vector3.Zero };
+            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = MassVolumeDB.NewFromMassAndRadius_m(parentMass, 696342000.0 );
             parentblobs[2] = new OrbitDB();
             return new Entity(mgr, parentblobs);
@@ -27,7 +27,7 @@ namespace Pulsar4X.Tests
         {
             double parentMass = 5.97237e24;
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition_m = Vector3.Zero };
+            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             return new Entity(mgr, parentblobs);
@@ -135,7 +135,7 @@ namespace Pulsar4X.Tests
             DefaultWeaponDesign = DefaultStartFactory.DefaultSimpleLaser(Game, HumanFaction);
             DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(Game, HumanFaction);
 
-            Vector3 position = Earth.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            Vector3 position = Earth.GetDataBlob<PositionDB>().AbsolutePosition;
             DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Earth,  "Serial Peacemaker");
             Sol.SetDataBlob(DefaultShip.ID, new TransitableDB());
         }
