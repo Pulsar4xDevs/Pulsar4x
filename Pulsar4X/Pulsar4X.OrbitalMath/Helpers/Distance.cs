@@ -33,8 +33,12 @@
         {
             return kilometers * 1000.0;
         }
+		public static Vector3 KmToM(Vector3 kilometers) 
+        {
+			return kilometers * 1000.0;
+		}
 
-        public static double KmToAU(double km)
+		public static double KmToAU(double km)
         {
             return km / UniversalConstants.Units.KmPerAu;
         }

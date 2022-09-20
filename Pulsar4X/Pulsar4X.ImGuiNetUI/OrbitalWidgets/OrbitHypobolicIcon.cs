@@ -86,7 +86,7 @@ namespace Pulsar4X.SDL2UI
         {
             _dv = _newtonMoveDB.ManuverDeltaVLen;
             Vector3 vel = Distance.MToAU(_newtonMoveDB.CurrentVector_ms);
-            Vector3 pos = myPosDB.RelativePosition_AU;
+            Vector3 pos = Distance.MToAU(myPosDB.RelativePosition_m);
             Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
             double e = eccentVector.Length();
             double r = pos.Length();
@@ -195,7 +195,7 @@ namespace Pulsar4X.SDL2UI
                 CreatePointArray();
             
             
-            Vector3 pos = myPosDB.RelativePosition_AU;
+            Vector3 pos = Distance.MToAU(myPosDB.RelativePosition_m);
             var relativePos = new Vector2() { X = pos.X, Y = pos.Y };
  
             
