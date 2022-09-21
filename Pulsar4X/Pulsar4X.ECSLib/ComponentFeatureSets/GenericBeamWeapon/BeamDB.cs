@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                 var state = (beamInfo.PosDB.AbsolutePosition, beamInfo.VelocityVector);
                 var nowTime = beamInfo.OwningEntity.StarSysDateTime;
                 var futurePosTime = PredictTgtPositionAndTime(state, nowTime, beamInfo.TargetEntity, beamInfo.VelocityVector.Length());
-                var normVector = Vector3.Normalise(futurePosTime.pos - state.AbsolutePosition_m);
+                var normVector = Vector3.Normalise(futurePosTime.pos - state.AbsolutePosition);
                 var absVector =  normVector * beamInfo.VelocityVector.Length();
                 
                 beamInfo.VelocityVector = absVector;
@@ -50,7 +50,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                 if (futurePosTime.seconds <= seconds)
                 {
                     //var ralitivePos = state.AbsolutePosition_m - futurePosTime.pos;
-                    var posRalitiveToTarget = futurePosTime.pos - state.AbsolutePosition_m;
+                    var posRalitiveToTarget = futurePosTime.pos - state.AbsolutePosition;
                     var beamAngle = Math.Atan2(posRalitiveToTarget.Y, posRalitiveToTarget.X);
                     var shipFutureVel = beamInfo.TargetEntity.GetAbsoluteFutureVelocity(nowTime + TimeSpan.FromSeconds(futurePosTime.seconds));
                     var shipHeading = Math.Atan2(shipFutureVel.Y, shipFutureVel.X);
