@@ -50,6 +50,11 @@ public class RouteTrajectory : IDrawData
         _nodes.Add(node);
     }
 
+    public int Count
+    {
+        get { return _nodes.Count; }
+    }
+
     public void UpdateNode(int index)
     {
         _segments[index].FullUpdate();

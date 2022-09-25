@@ -164,7 +164,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         }
 
         private NavMode _navMode = NavMode.None;
-
+        private string[] nodenames = new string[0];
+        private int selectedNode = 0;
         internal override void Display()
         {
             if (!IsActive)
@@ -172,9 +173,73 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.SetNextWindowSize(new Vector2(600f, 400f), ImGuiCond.FirstUseEver);
             if (ImGui.Begin("Nav Control", ref IsActive, _flags))
             {
+
+                int nodecount = 1;
+                if (_routeTrajectory != null && _routeTrajectory.Count > 1)
+                {
+                    nodecount = _routeTrajectory.Count;
+                }
+
+                if (nodenames.Length != nodecount)
+                {
+                    nodenames = new string[nodecount];
+                    for (int i = 0; i == nodecount; i++)
+                    {
+                        nodenames[i] = "Node " + i;
+                    }
+
+                    nodenames[nodecount - 1] = "New Node";
+                }
+
+                if (BorderListOptions.Begin("nodes", nodenames, ref selectedNode, 180))
+                {
+                }
+
+                    if (ImGui.Button("Manual Thrust"))
+                    {
+                        _navMode = NavMode.Thrust;
+                    }
+                    if (ImGui.Button("Hohmann Transfer"))
+                    {
+                        _navMode = NavMode.HohmannTransfer;
+                    }
+                    if (ImGui.Button("Interplanetary Transfer"))
+                    {
+                        _navMode = NavMode.InterplanetaryTransfer;
+                    }
+                    if (ImGui.Button("Phase Change"))
+                    {
+                        _navMode = NavMode.PhaseChange;
+                    }
+                    if (ImGui.Button("High Δv Intercept"))
+                    {
+                        _navMode = NavMode.HighDVIntercept;
+                    }
+                    if (ImGui.Button("Porkchop Plot"))
+                    {
+                        _navMode = NavMode.PorkChopPlot;
+                    }
+
+                    if (ImGui.Button("Escape SOI"))
+                    {
+                        _navMode = NavMode.EscapeSOI;
+                    }
+                    
+                BorderListOptions.End(new(200, 200));    
+                
+                
+/*
                 ImGui.Columns(2);
                 BorderGroup.Begin("Nodes");
-                
+
+
+                if (ImGui.Button("New At Periapsis"))
+                {
+                } ImGui.SameLine();
+                if (ImGui.Button("New At Apoapsis"))
+                {
+                }
+
                 BorderGroup.End(); //ImGui.SameLine();
                 ImGui.NextColumn();
                 BorderGroup.Begin("Mode");
@@ -210,6 +275,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 BorderGroup.End();
                 ImGui.Columns(1);
+                */
                 ImGui.NewLine();
                 ImGui.Text("Availible Δv: " + Stringify.Velocity(_totalDV));
                 ImGui.Text("Dry Mass:" + Stringify.Mass(_dryMass, "0.######"));
