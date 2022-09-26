@@ -313,7 +313,7 @@ namespace Pulsar4X.ECSLib
             // http://en.wikipedia.org/wiki/Mean_longitude
             double meanAnomaly = meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis);
             double sma_m = Distance.AuToMt(semiMajorAxis_AU);
-            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, Angle.ToRadians(inclination), Angle.ToRadians(longitudeOfAscendingNode), Angle.ToRadians(argumentOfPeriapsis), meanAnomaly, epoch);
+            return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, Angle.ToRadians(inclination), Angle.ToRadians(longitudeOfAscendingNode), Angle.ToRadians(argumentOfPeriapsis), Angle.ToRadians(meanAnomaly), epoch);
         }
 
         /// <summary>
