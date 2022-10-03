@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
         {
             //todo rand these a bit.
-            double radius = Distance.KmToAU(0.5);
+            double radius = 500;
 
             double mass;
             if (asteroidMass < 0)
@@ -32,14 +32,13 @@ namespace Pulsar4X.ECSLib
                 mass = asteroidMass;
 
             var speed = 40000;
-            Vector3 velocity = new Vector3(speed, 0, 0);
+            Vector3 velocity = Vector3.UnitX*speed;
 
 
-            var massVolume = MassVolumeDB.NewFromMassAndRadius_AU(mass, radius);
+            var massVolume = MassVolumeDB.NewFromMassAndRadius_m(mass, radius);
             var planetInfo = new SystemBodyInfoDB();
             var name = new NameDB("Ellie");
-            var AsteroidDmg = new AsteroidDamageDB();
-            AsteroidDmg.FractureChance = new PercentValue(0.75f);
+            var AsteroidDmg = new AsteroidDamageDB{ FractureChance = new PercentValue(0.75f) };
             var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50);
             var sensorPfil = new SensorProfileDB();
 
@@ -54,11 +53,11 @@ namespace Pulsar4X.ECSLib
             var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             var myMass = massVolume.MassDry;
 
-            double sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+            double sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
             OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
 
-            var currentpos = orbit.GetAbsolutePosition_AU(StaticRefLib.CurrentDateTime);
-            var posDB = new PositionDB(currentpos.X, currentpos.Y, currentpos.Z, parent.Manager.ManagerGuid, parent);
+            var currentpos = orbit.GetAbsolutePosition_m(StaticRefLib.CurrentDateTime);
+            var posDB = new PositionDB(currentpos, parent.Manager.ManagerGuid, parent);
 
 
             var planetDBs = new List<BaseDataBlob>
@@ -80,7 +79,7 @@ namespace Pulsar4X.ECSLib
         public static Entity CreateAsteroid4(Vector3 position, OrbitDB origOrbit, DateTime atDateTime, double asteroidMass = -1.0)
         {
             //todo rand these a bit.
-            double radius = Distance.KmToAU(0.5);
+            double radius = 500;
 
             double mass;
             if (asteroidMass == -1.0)
@@ -88,15 +87,14 @@ namespace Pulsar4X.ECSLib
             else
                 mass = asteroidMass;
 
-            var speed = Distance.KmToAU(40);
-            Vector3 velocity = new Vector3(speed, 0, 0);
+            var speed = 40000;
+            Vector3 velocity = Vector3.UnitX*speed;
 
 
-            var massVolume = MassVolumeDB.NewFromMassAndRadius_AU(mass, radius);
+            var massVolume = MassVolumeDB.NewFromMassAndRadius_m(mass, radius);
             var planetInfo = new SystemBodyInfoDB();
             var name = new NameDB("Ellie");
-            var AsteroidDmg = new AsteroidDamageDB();
-            AsteroidDmg.FractureChance = new PercentValue(0.75f);
+            var AsteroidDmg = new AsteroidDamageDB{ FractureChance = new PercentValue(0.75f) };
             var dmgPfl = EntityDamageProfileDB.AsteroidDamageProfile(massVolume.Volume_km3, massVolume.DensityDry_gcm, massVolume.RadiusInM, 50);
             var sensorPfil = new SensorProfileDB();
 
@@ -108,15 +106,13 @@ namespace Pulsar4X.ECSLib
             var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             var myMass = massVolume.MassDry;
 
-            double sgp = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
             //OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, position, velocity, atDateTime);
             //OrbitDB orbit = (OrbitDB)origOrbit.Clone();
-            OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, origOrbit.SemiMajorAxis_AU, 
-                origOrbit.Eccentricity, origOrbit.Inclination_Degrees, origOrbit.LongitudeOfAscendingNode_Degrees, 
-                origOrbit.ArgumentOfPeriapsis_Degrees, origOrbit.MeanMotion_DegreesSec, origOrbit.Epoch);
+            OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, Distance.MToAU(origOrbit.SemiMajorAxis), 
+                origOrbit.Eccentricity, origOrbit.Inclination, origOrbit.LongitudeOfAscendingNode, 
+                origOrbit.ArgumentOfPeriapsis, origOrbit.MeanAnomalyAtEpoch, origOrbit.Epoch);
 
-            var posDB = new PositionDB(position.X, position.Y, position.Z, parent.Manager.ManagerGuid, parent);
-
+            var posDB = new PositionDB(position, parent.Manager.ManagerGuid, parent);
 
             var planetDBs = new List<BaseDataBlob>
             {

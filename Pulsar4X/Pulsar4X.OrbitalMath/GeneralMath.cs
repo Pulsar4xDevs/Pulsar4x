@@ -101,20 +101,6 @@ namespace Pulsar4X.Orbital
             return mass * UniversalConstants.Science.GravitationalConstant;
         }
 
-        public static double GravitationalParameter_Km3s2(double mass)
-        {
-            double factor = UniversalConstants.Units.MetersPerKm;
-            return StandardGravitationalParameter(mass) / 
-                (factor*factor*factor); // = (1000^3) = 1000000000
-        }
-
-        public static double GravitiationalParameter_Au3s2(double mass)
-        {
-            double factor = UniversalConstants.Units.MetersPerAu;
-            return StandardGravitationalParameter(mass) /
-                (factor * factor * factor); // = (149597870700^3) = 3.347928976e33
-		}
-
 		/// <summary>
 		/// calculates a vector from two positions and a magnatude
 		/// </summary>

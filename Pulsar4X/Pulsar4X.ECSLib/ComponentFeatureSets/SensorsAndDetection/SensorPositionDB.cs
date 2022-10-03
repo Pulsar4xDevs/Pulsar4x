@@ -11,37 +11,32 @@ namespace Pulsar4X.ECSLib
         public Vector3 MemoryrelativePosition_m;
         internal Vector3 AcuracyOffset = new Vector3();
 
-        public Vector3 AbsolutePosition_AU
-        {
-            get { return Distance.MToAU(AbsolutePosition_m); }
-        }
-
-        public Vector3 AbsolutePosition_m 
+        public Vector3 AbsolutePosition 
         {             
             get
             {
                 if (GetDataFrom == DataFrom.Parent)
-                    return ActualEntityPositionDB.AbsolutePosition_m;
+                    return ActualEntityPositionDB.AbsolutePosition;
                 if (GetDataFrom == DataFrom.Sensors)
-                    return ActualEntityPositionDB.AbsolutePosition_m + AcuracyOffset;
+                    return ActualEntityPositionDB.AbsolutePosition + AcuracyOffset;
                 else
-                    return ParentPositionDB.AbsolutePosition_m + MemoryrelativePosition_m; 
+                    return ParentPositionDB.AbsolutePosition + MemoryrelativePosition_m; 
             } 
         }
 
         public Vector3 RelativePosition_AU
         {
-            get { return Distance.MToAU(RelativePosition_m); }
+            get { return Distance.MToAU(RelativePosition); }
         }
 
-        public Vector3 RelativePosition_m
+        public Vector3 RelativePosition
         {
             get
             {
                 if (GetDataFrom == DataFrom.Parent)
-                    return ActualEntityPositionDB.RelativePosition_m;
+                    return ActualEntityPositionDB.RelativePosition;
                 if (GetDataFrom == DataFrom.Sensors)
-                    return ActualEntityPositionDB.RelativePosition_m + AcuracyOffset;
+                    return ActualEntityPositionDB.RelativePosition + AcuracyOffset;
                 else
                     return MemoryrelativePosition_m;
             }

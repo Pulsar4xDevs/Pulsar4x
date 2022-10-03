@@ -76,7 +76,7 @@ namespace Pulsar4X.Orbital
         /// Orbital Period in Seconds
         /// </summary>
         /// <remarks>P</remarks>
-        public double OrbitalPeriod;
+        public double Period;
         
         /// <summary>
         /// Mean Anomaly At Epoch
@@ -100,7 +100,8 @@ namespace Pulsar4X.Orbital
         /// Epoch
         /// </summary>
         public DateTime Epoch;
-    }
+
+	}
 
     /// <summary>
     /// State Vectors are orbital parent ralitive.

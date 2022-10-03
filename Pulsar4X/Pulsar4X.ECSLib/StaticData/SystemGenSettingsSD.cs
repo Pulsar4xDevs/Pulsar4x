@@ -190,10 +190,18 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType_AU;
 
-        /// <summary>
-        /// Possible ranges for eccentricity by body type.
-        /// </summary>
-        public Dictionary<BodyType, MinMaxStruct> BodyEccentricityByType;
+
+		/// <summary>
+		/// Orbital distance restrictions (i.e. SemiMajorAxis restrictions) for a planet based upon the type of star it is orbiting.
+		/// Units are AU.
+		/// @note These numbers, with the exception of G class stars, are based on habitable zone calculations. They could be tweaked for gameplay.
+		/// </summary>
+		public Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType;
+
+		/// <summary>
+		/// Possible ranges for eccentricity by body type.
+		/// </summary>
+		public Dictionary<BodyType, MinMaxStruct> BodyEccentricityByType;
 
         /// <summary>
         /// The possible ranges for albedo for various planet types.
@@ -439,38 +447,38 @@ namespace Pulsar4X.ECSLib
             {
                 {SpectralType.O, new MinMaxStruct
                 {
-                    Min = 6.6 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 250 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 6.6 * UniversalConstants.Units.SolarRadius,
+                    Max = 250 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.B, new MinMaxStruct
                 {
-                    Min = 1.8 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 6.6 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 1.8 * UniversalConstants.Units.SolarRadius,
+                    Max = 6.6 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.A, new MinMaxStruct
                 {
-                    Min = 1.4 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 1.8 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 1.4 * UniversalConstants.Units.SolarRadius,
+                    Max = 1.8 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.F, new MinMaxStruct
                 {
-                    Min = 1.15 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 1.4 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 1.15 * UniversalConstants.Units.SolarRadius,
+                    Max = 1.4 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.G, new MinMaxStruct
                 {
-                    Min = 0.96 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 1.15 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 0.96 * UniversalConstants.Units.SolarRadius,
+                    Max = 1.15 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.K, new MinMaxStruct
                 {
-                    Min = 0.7 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 0.96 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 0.7 * UniversalConstants.Units.SolarRadius,
+                    Max = 0.96 * UniversalConstants.Units.SolarRadius
                 }},
                 {SpectralType.M, new MinMaxStruct
                 {
-                    Min = 0.12 * UniversalConstants.Units.SolarRadiusInAu,
-                    Max = 0.7 * UniversalConstants.Units.SolarRadiusInAu
+                    Min = 0.12 * UniversalConstants.Units.SolarRadius,
+                    Max = 0.7 * UniversalConstants.Units.SolarRadius
                 }},
             };
 
@@ -773,47 +781,47 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            // note These numbers, with the exception of G class stars, are based on habitable zone calculations. They could be tweaked for gameplay.
-            settings.OrbitalDistanceByStarSpectralType_AU = new Dictionary<SpectralType, MinMaxStruct>()
-            {
-                {SpectralType.O, new MinMaxStruct
-                {
-                    Min = 1,
-                    Max = 200
-                }},
-                {SpectralType.B, new MinMaxStruct
-                {
-                    Min = 0.5,
-                    Max = 100
-                }},
-                {SpectralType.A, new MinMaxStruct
-                {
-                    Min = 0.3,
-                    Max = 90
-                }},
-                {SpectralType.F, new MinMaxStruct
-                {
-                    Min = 0.2,
-                    Max = 60
-                }},
-                {SpectralType.G, new MinMaxStruct
-                {
-                    Min = 0.1,
-                    Max = 40
-                }},
-                {SpectralType.K, new MinMaxStruct
-                {
-                    Min = 0.01,
-                    Max = 18
-                }},
-                {SpectralType.M, new MinMaxStruct
-                {
-                    Min = 0.005,
-                    Max = 9
-                }},
-            };
+			// note These numbers, with the exception of G class stars, are based on habitable zone calculations. They could be tweaked for gameplay.
+			settings.OrbitalDistanceByStarSpectralType = new Dictionary<SpectralType, MinMaxStruct>()
+			{
+				{SpectralType.O, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 1,
+					Max = 200
+				})},
+				{SpectralType.B, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.5,
+					Max = 100
+				})},
+				{SpectralType.A, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.3,
+					Max = 90
+				})},
+				{SpectralType.F, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.2,
+					Max = 60
+				})},
+				{SpectralType.G, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.1,
+					Max = 40
+				})},
+				{SpectralType.K, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.01,
+					Max = 18
+				})},
+				{SpectralType.M, Distance.AuToMt(new MinMaxStruct
+				{
+					Min = 0.005,
+					Max = 9
+				})},
+			};
 
-            settings.BodyEccentricityByType = new Dictionary<BodyType, MinMaxStruct>
+			settings.BodyEccentricityByType = new Dictionary<BodyType, MinMaxStruct>
             {
                 {BodyType.Asteroid, new MinMaxStruct
                 {
@@ -981,11 +989,11 @@ namespace Pulsar4X.ECSLib
 
             settings.MaxMoonOrbitDistanceByPlanetType = new Dictionary<BodyType, double>
             {
-                {BodyType.GasGiant, 60581692 / UniversalConstants.Units.KmPerAu}, // twice highest jupiter moon orbit
-                {BodyType.IceGiant, 49285000 / UniversalConstants.Units.KmPerAu}, // twice Neptune's highest moon orbit
-                {BodyType.GasDwarf, 6058169 / UniversalConstants.Units.KmPerAu}, // WAG
-                {BodyType.Terrestrial, 1923740 / UniversalConstants.Units.KmPerAu}, // 5 * luna orbit.
-                {BodyType.DwarfPlanet, 25000 / UniversalConstants.Units.KmPerAu}, // WAG
+                {BodyType.GasGiant, Distance.KmToM(60581692)}, // twice highest jupiter moon orbit
+                {BodyType.IceGiant, Distance.KmToM(49285000)}, // twice Neptune's highest moon orbit
+                {BodyType.GasDwarf, Distance.KmToM(6058169)}, // WAG
+                {BodyType.Terrestrial, Distance.KmToM(1923740)}, // 5 * luna orbit.
+                {BodyType.DwarfPlanet, Distance.KmToM(25000)}, // WAG
             };
 
             // note Given the way the calculation for max moons is done it is unlikely that any planet will ever have the maximum number of moon, so pad as desired.

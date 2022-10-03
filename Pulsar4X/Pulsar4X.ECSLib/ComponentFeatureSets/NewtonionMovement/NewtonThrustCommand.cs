@@ -167,7 +167,7 @@ namespace Pulsar4X.ECSLib
 
                 var parentMass = _entityCommanding.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
                 var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
-                var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+                var sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
 
                 var futurePosition = _entityCommanding.GetRelativeFuturePosition(_vectorDateTime);
                 var futureVector = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
@@ -515,7 +515,7 @@ namespace Pulsar4X.ECSLib
 
 
                 var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
-                var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, _soiParentMass);
+                var sgp = GeneralMath.StandardGravitationalParameter(myMass + _soiParentMass);
             
                 var vectorToTgtFromPrograde = OrbitMath.StateToProgradeVector(
                     sgp, 

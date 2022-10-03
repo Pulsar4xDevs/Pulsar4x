@@ -8,6 +8,8 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// Used for holding a percentage stores as a byte so 255 bits precision.
     /// Takes and Returns 0.0 to 1.0 for easy multiplcation math.
+    /// 
+    /// This would be better as a double
     /// </summary>
     public struct PercentValue
     {
@@ -316,25 +318,25 @@ namespace Pulsar4X.ECSLib
             var cpOdb = currentParent.GetDataBlob<OrbitDB>();
             var cpSOI = currentParent.GetSOI_m() + 100; //might as well go another 100m past soi so less likely problems.
             var cpmass = currentParent.GetDataBlob<MassVolumeDB>().MassTotal;            
-            var cpsgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(meMass, cpmass);
+            var cpsgp = GeneralMath.StandardGravitationalParameter(meMass + cpmass);
             var cpSMA = cpOdb.SemiMajorAxis;
             var cpOprd = cpOdb.OrbitalPeriod;
-            var cppos = currentParent.GetDataBlob<PositionDB>().RelativePosition_m;
+            var cppos = currentParent.GetDataBlob<PositionDB>().RelativePosition;
             var cpAngle = Math.Atan2(cppos.Y, cppos.X);
 
             var tpOdb = targetParent.GetDataBlob<OrbitDB>();
             var tpSOI = targetParent.GetSOI_m();
             var tpMass = targetParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            var tpsgp = OrbitMath.CalculateStandardGravityParameterInM3S2(meMass, tpMass);
+            var tpsgp = GeneralMath.StandardGravitationalParameter(meMass + tpMass);
             var tpSMA = tpOdb.SemiMajorAxis;
             var tpOprd = tpOdb.OrbitalPeriod;
-            var tppos = targetParent.GetDataBlob<PositionDB>().RelativePosition_m;
+            var tppos = targetParent.GetDataBlob<PositionDB>().RelativePosition;
             var tpAngle = Math.Atan2(tppos.Y, tppos.X);
 
             //grandparent (sol in earth to mars)
             var grandParent = currentParent.GetSOIParentEntity();
             var gpMass = grandParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            var gpSGP = OrbitMath.CalculateStandardGravityParameterInM3S2(meMass, gpMass);
+            var gpSGP = GeneralMath.StandardGravitationalParameter(meMass + gpMass);
             
             var gpHomman = OrbitalMath.Hohmann2(gpSGP, cpSMA, tpSMA);
             var gpHommanAngle = Math.PI*( (1-1/2*Math.Sqrt(2))*Math.Sqrt( Math.Pow((cpSMA / tpSMA +1),3)));
@@ -388,26 +390,24 @@ namespace Pulsar4X.ECSLib
             //PositionDB moverPosition = mover.GetDataBlob<PositionDB>();
 
             OrbitDB moverOrbit = mover.GetDataBlob<OrbitDB>();
-            Vector3 moverPosInKM = Distance.AuToKm(moverOrbit.GetAbsolutePosition_AU(atDateTime));
+            Vector3 moverPos = moverOrbit.GetAbsolutePosition_m(atDateTime);
 
             //PropulsionAbilityDB moverPropulsion = mover.GetDataBlob<PropulsionAbilityDB>();
 
-            Vector3 targetPosInKM = Distance.AuToKm((targetOrbit.GetAbsolutePosition_AU(atDateTime)));
+            Vector3 targetPos = targetOrbit.GetAbsolutePosition_m(atDateTime);
 
             int speed = 25000;//moverPropulsion.MaximumSpeed * 100; //299792458;
 
             (Vector3, TimeSpan) intercept = (new Vector3(), TimeSpan.Zero);
-
-
 
             TimeSpan eti = new TimeSpan();
             TimeSpan eti_prev = new TimeSpan();
             DateTime edi = atDateTime;
             DateTime edi_prev = atDateTime;
 
-            Vector3 predictedPosKM = Distance.AuToKm(targetOrbit.GetAbsolutePosition_AU(edi_prev));
-            double distance = (predictedPosKM - moverPosInKM).Length();
-            eti = TimeSpan.FromSeconds((distance * 1000) / speed);
+            Vector3 predictedPos = targetOrbit.GetAbsolutePosition_m(edi_prev);
+            double distance = (predictedPos - moverPos).Length();
+            eti = TimeSpan.FromSeconds(distance / speed);
 
             int steps = 0;
             if (eti < targetOrbit.OrbitalPeriod)
@@ -415,16 +415,16 @@ namespace Pulsar4X.ECSLib
 
                 double timeDifference = double.MaxValue;
                 double distanceDifference = timeDifference * speed;
-                while (distanceDifference >= 1000)
+                while (distanceDifference >= 1)
                 {
 
                     eti_prev = eti;
                     edi_prev = edi;
 
-                    predictedPosKM = Distance.AuToKm(targetOrbit.GetAbsolutePosition_AU(edi_prev));
+                    predictedPos = targetOrbit.GetAbsolutePosition_m(edi_prev);
 
-                    distance = (predictedPosKM - moverPosInKM).Length();
-                    eti = TimeSpan.FromSeconds((distance * 1000) / speed);
+                    distance = (predictedPos - moverPos).Length();
+                    eti = TimeSpan.FromSeconds(distance / speed);
                     edi = atDateTime + eti;
 
                     timeDifference = Math.Abs(eti.TotalSeconds - eti_prev.TotalSeconds);
@@ -446,7 +446,7 @@ namespace Pulsar4X.ECSLib
         public static (Vector3 deltaV, double timeInSeconds)[] OrbitPhasingManuvers(KeplerElements orbit, double sgp, DateTime manuverTime, double phaseAngle)
         {
             //https://en.wikipedia.org/wiki/Orbit_phasing
-            double orbitalPeriod = orbit.OrbitalPeriod;
+            double orbitalPeriod = orbit.Period;
             double e = orbit.Eccentricity;
 
             var wc1 = Math.Sqrt((1 - e) / (1 + e));
@@ -461,8 +461,6 @@ namespace Pulsar4X.ECSLib
 
             double phaseOrbitPeriod = orbitalPeriod - phaseTime;
 
-            
-
             //double phaseOrbitSMA0 = Math.Pow(Math.Sqrt(sgp) * phaseOrbitPeriod / (Math.PI * 2), (2.0 / 3.0)); //I think this one will be slightly slower
             
             //using the full Major axis here rather than semiMaj.
@@ -470,7 +468,7 @@ namespace Pulsar4X.ECSLib
             
             
             //one of these will be the periapsis, the other the appoapsis, depending on whether we're behind or ahead of the target.
-            double phaseOrbitApsis1 = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();// 
+            double phaseOrbitApsis1 = OrbitProcessor.GetPosition(orbit, manuverTime).Length();// 
             double phaseOrbitApsis2 = phaseOrbitMA - phaseOrbitApsis1;
 
 
@@ -483,7 +481,7 @@ namespace Pulsar4X.ECSLib
             double wc10 = Math.Sqrt(2 * sgp);
             double orbitAngularMomentum = wc9 * wc10;
 
-            double r = OrbitProcessor.GetPosition_m(orbit, manuverTime).Length();
+            double r = OrbitProcessor.GetPosition(orbit, manuverTime).Length();
 
             double dv = phaseOrbitAngularMomentum / r - orbitAngularMomentum / r;
 
@@ -521,7 +519,7 @@ namespace Pulsar4X.ECSLib
             
             
             //one of these will be the periapsis, the other the appoapsis, depending on whether we're behind or ahead of the target.
-            double phaseOrbitApsis1 = orbit.GetPosition_m(manuverTime).Length();// 
+            double phaseOrbitApsis1 = orbit.GetPosition(manuverTime).Length();// 
             double phaseOrbitApsis2 = phaseOrbitMA - phaseOrbitApsis1;
 
 
@@ -534,7 +532,7 @@ namespace Pulsar4X.ECSLib
             double wc10 = Math.Sqrt(2 * sgp);
             double orbitAngularMomentum = wc9 * wc10;
 
-            double r = orbit.GetPosition_m(manuverTime).Length();
+            double r = orbit.GetPosition(manuverTime).Length();
 
             double dv = phaseOrbitAngularMomentum / r - orbitAngularMomentum / r;
 
@@ -548,7 +546,9 @@ namespace Pulsar4X.ECSLib
 
     /// <summary>
     /// An experimental distance value struct. 
-    /// idea here was to simply define what a distance value was and handle very small or very large numbers equaly well.   
+    /// idea here was to simply define what a distance value was and handle very small or very large numbers equaly well. 
+    /// 
+    /// This functionality is synonymous with double
     /// </summary>
     public struct DistanceValue
     {

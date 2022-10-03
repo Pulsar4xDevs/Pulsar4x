@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
             var position = entity.GetDataBlob<PositionDB>();
             var sensorSig = entity.GetDataBlob<SensorProfileDB>();
 
-            sensorSig.LastPositionOfReflectionSet = position.AbsolutePosition_AU;
+            sensorSig.LastPositionOfReflectionSet = position.AbsolutePosition;
             sensorSig.LastDatetimeOfReflectionSet = atDate;
 
             var emmiters = entity.Manager.GetAllDataBlobsOfType<SensorProfileDB>();

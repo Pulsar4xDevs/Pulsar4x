@@ -82,7 +82,7 @@ namespace Pulsar4X.SDL2UI
         public void SetArrivalPosition(Vector3 relativeWorldPosition_m)
         {
             _transitArriverelativePos_m = relativeWorldPosition_m;
-            _transitArriveAbsolutePos_m = _targetPositionDB.AbsolutePosition_m + _transitArriverelativePos_m;
+            _transitArriveAbsolutePos_m = _targetPositionDB.AbsolutePosition + _transitArriverelativePos_m;
             _arriveIcon.SetTransitPositon(_transitArriverelativePos_m);
         }
 

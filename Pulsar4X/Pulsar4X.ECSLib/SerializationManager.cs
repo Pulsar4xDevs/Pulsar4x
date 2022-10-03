@@ -610,15 +610,15 @@ namespace Pulsar4X.ECSLib
 
             // add orbit details:
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "SemiMajorAxis", "NS");
-            varNode.InnerText = orbit.SemiMajorAxis_AU.ToString("N3");
+            varNode.InnerText = Distance.MToAU(orbit.SemiMajorAxis).ToString("N3");
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Apoapsis", "NS");
-            varNode.InnerText = orbit.Apoapsis_AU.ToString("N3");
+            varNode.InnerText = Distance.MToAU(orbit.Apoapsis).ToString("N3");
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Periapsis", "NS");
-            varNode.InnerText = orbit.Periapsis_AU.ToString("N3");
+            varNode.InnerText = Distance.MToAU(orbit.Periapsis).ToString("N3");
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Year", "NS");
@@ -630,7 +630,7 @@ namespace Pulsar4X.ECSLib
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Inclination", "NS");
-            varNode.InnerText = orbit.Inclination_Degrees.ToString("N2");
+            varNode.InnerText = Angle.ToDegrees(orbit.Inclination).ToString("N2");
             bodyNode.AppendChild(varNode);
 
             varNode = xmlDoc.CreateNode(XmlNodeType.Element, "Children", "NS");
@@ -640,11 +640,11 @@ namespace Pulsar4X.ECSLib
             if (positionDB != null)
             {
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "PositionInAU", "NS");
-                varNode.InnerText = "(" + positionDB.X_AU.ToString("N3") + ", " + positionDB.Y_AU.ToString("N3") + ", " + positionDB.Z_AU.ToString("N3") + ")";
+                varNode.InnerText = Distance.MToAU(positionDB.AbsolutePosition).ToString("N3");
                 bodyNode.AppendChild(varNode);
 
                 varNode = xmlDoc.CreateNode(XmlNodeType.Element, "PositionInKm", "NS");
-                varNode.InnerText = "(" + positionDB.XInKm.ToString("N3") + ", " + positionDB.YInKm.ToString("N3") + ", " + positionDB.ZInKm.ToString("N3") + ")";
+                varNode.InnerText = Distance.MToKm(positionDB.AbsolutePosition).ToString("N3");
                 bodyNode.AppendChild(varNode);
             }
 

@@ -86,7 +86,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal; 
             _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
             var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(_totalMass, parentMass);
+            _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + parentMass);
             var fuelTypeID = _newtonThrust.FuelType;
             _fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
 
@@ -143,7 +143,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(_totalMass, parentMass);
+            _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + parentMass);
             _cargoMass = _orderEntity.GetDataBlob<VolumeStorageDB>().TotalStoredMass;
             _fuelMass = _orderEntity.GetDataBlob<VolumeStorageDB>().GetUnitsStored(_fuelType);
 

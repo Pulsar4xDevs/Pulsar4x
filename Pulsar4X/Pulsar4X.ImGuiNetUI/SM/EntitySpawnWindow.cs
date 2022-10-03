@@ -69,7 +69,7 @@ namespace Pulsar4X.SDL2UI
             var date = _uiState.SelectedSystem.StarSysDateTime;
             _parentMass = _parentObect.GetDataBlob<MassVolumeDB>().MassDry;
             _parentSOI = _parentObect.GetSOI_m();
-            _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
+            _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
             _ke = OrbitalMath.FromPosition(new Vector3(10000, 0, 0), _sgp, date);
             
             _soiIcon = new Icon(_parentObect.GetDataBlob<PositionDB>());
@@ -292,7 +292,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     _parentMass = _sysBodies.GetSelectedEntity().GetDataBlob<MassVolumeDB>().MassDry;
                     _objMass = _exsistingClasses[_selectedDesignIndex].MassPerUnit; 
-                    _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
+                    _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
                     _ke.StandardGravParameter = _sgp;
                     if(_keIcon != null)
                         _keIcon.ForceUpdate(_ke, _sv);
@@ -305,7 +305,7 @@ namespace Pulsar4X.SDL2UI
                 
                 _parentMass = _sysBodies.GetSelectedEntity().GetDataBlob<MassVolumeDB>().MassDry;
                 _objMass = _exsistingClasses[_selectedDesignIndex].MassPerUnit; 
-                _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
+                _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
                 _ke.StandardGravParameter = _sgp;
                 if(_keIcon != null)
                     _keIcon.ForceUpdate(_ke, _sv);
@@ -421,7 +421,7 @@ namespace Pulsar4X.SDL2UI
                     _bandinfo = SystemBodyFactory.HabitibleZones(_sysGensettings, _starInfo);
                 
                 }
-                _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
+                _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
                 _ke.StandardGravParameter = _sgp;
                 var parentPos = _sysBodies.GetSelectedEntity().GetAbsolutePosition();
                 _icon.WorldPosition_m = parentPos + _sv.Position;
@@ -456,7 +456,7 @@ namespace Pulsar4X.SDL2UI
         void SetMass(double massKG)
         {
             _objMass = massKG;
-            _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_objMass, _parentMass);
+            _sgp = GeneralMath.StandardGravitationalParameter(_objMass + _parentMass);
         }
 
         public override void OnGameTickChange(DateTime newDate)

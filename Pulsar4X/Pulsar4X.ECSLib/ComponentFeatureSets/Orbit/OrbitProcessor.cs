@@ -79,10 +79,10 @@ namespace Pulsar4X.ECSLib
             // Get our Parent-Relative coordinates.
             try
             {
-                Vector3 newPosition = entityOrbitDB.GetPosition_AU(toDate);
+                Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
 
                 // Get our Absolute coordinates.
-                entityPosition.AbsolutePosition_AU = parentPositionDB.AbsolutePosition_AU + newPosition;
+                entityPosition.AbsolutePosition = parentPositionDB.AbsolutePosition + newPosition;
 
             }
             catch (OrbitProcessorException e)
@@ -107,32 +107,6 @@ namespace Pulsar4X.ECSLib
 
 
         #region Orbit Position Calculations
-
-        //public static Vector4 GetAbsolutePositionForParabolicOrbit_AU()
-        //{ }
-
-        //public static Vector4 GetAbsolutePositionForHyperbolicOrbit_AU(OrbitDB orbitDB, DateTime time)
-        //{
-            
-        //}
-
-        /// <summary>
-        /// Gets the orbital vector, will be either Absolute or relative depending on static bool UserelativeVelocity
-        /// </summary>
-        /// <returns>The orbital vector.</returns>
-        /// <param name="orbit">Orbit.</param>
-        /// <param name="atDateTime">At date time.</param>
-        public static Vector3 GetOrbitalVector_AU(OrbitDB orbit, DateTime atDateTime)
-        {
-            if (UseRelativeVelocity)
-            {
-                return orbit.InstantaneousOrbitalVelocityVector_AU(atDateTime);
-            }
-            else
-            {
-                return orbit.AbsoluteOrbitalVector_AU(atDateTime);
-            }
-        }
         
         /// <summary>
         /// Gets the orbital vector, will be either Absolute or relative depending on static bool UserelativeVelocity
@@ -140,7 +114,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>The orbital vector.</returns>
         /// <param name="orbit">Orbit.</param>
         /// <param name="atDateTime">At date time.</param>
-        public static Vector3 GetOrbitalVector_m(OrbitDB orbit, DateTime atDateTime)
+        public static Vector3 GetOrbitalVector(OrbitDB orbit, DateTime atDateTime)
         {
             if (UseRelativeVelocity)
             {
@@ -152,7 +126,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public static Vector3 GetOrbitalInsertionVector_m(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
+        public static Vector3 GetOrbitalInsertionVector(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
         {
             if (UseRelativeVelocity)
                 return departureVelocity;
@@ -178,7 +152,7 @@ namespace Pulsar4X.ECSLib
             Entity closestEntity = orbits[0].Root;
             foreach (var entity in withinSOIOf)
             {
-                var pos = entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+                var pos = entity.GetDataBlob<PositionDB>().AbsolutePosition;
                 var distance = (AbsolutePosition - pos).Length();
                 if (distance < closestDist)
                 {
@@ -197,7 +171,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="mover">The entity that is trying to intercept a target.</param>
         /// <param name="targetOrbit">Target orbit.</param>
         /// <param name="atDateTime">Datetime of transit start</param>
-        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition_m(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
+        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
         {
             Vector3 moverPos = mover.GetAbsoluteFuturePosition(atDateTime);
             double spd_m = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
@@ -263,8 +237,8 @@ namespace Pulsar4X.ECSLib
             PositionDB entityPosition = entityOrbitDB.OwningEntity.GetDataBlob<PositionDB>(PositionTypeIndex);
             try
             {
-                Vector3 newPosition = entityOrbitDB.GetPosition_m(toDate);
-                entityPosition.RelativePosition_m = newPosition;
+                Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
+                entityPosition.RelativePosition = newPosition;
             }
             catch (OrbitProcessor.OrbitProcessorException e)
             {

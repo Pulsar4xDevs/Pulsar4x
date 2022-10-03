@@ -20,7 +20,6 @@ namespace Pulsar4X.SDL2UI
         PositionDB _parentPosDB;
         PositionDB _myPosDB;
         double _sgp;
-        private double _sgpAU;
         //_taIndex is the point closest to the orbiting object, it's used to 
         int _taIndex;
         //_numberOfEllipsePoints is the total number of points around the ellipse, unadjusted for the percentage of the ellipse actualy drawn.
@@ -80,8 +79,7 @@ namespace Pulsar4X.SDL2UI
             var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             var _sgp1 = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
-            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
-            _sgpAU = GeneralMath.GravitiationalParameter_Au3s2(parentMass + myMass);
+            _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
             _ke = _newtonMoveDB.GetElements();
             
             
@@ -119,7 +117,7 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         void SetTrueAnomalyIndex()
         {
-            Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition_m.X, _myPosDB.RelativePosition_m.Y);
+            Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition.X, _myPosDB.RelativePosition.Y);
             double minDist = (pos - _points[_taIndex]).Length();
 
             for (int i =0; i < _points.Length; i++)
@@ -181,7 +179,7 @@ namespace Pulsar4X.SDL2UI
         private void CreateHyperbolicPoints()
         {
             Vector3 vel = _newtonMoveDB.CurrentVector_ms;
-            Vector3 pos = _myPosDB.RelativePosition_m;
+            Vector3 pos = _myPosDB.RelativePosition;
             //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
 
             
@@ -333,7 +331,7 @@ namespace Pulsar4X.SDL2UI
             
             
             int index = _taIndex;
-            var spos = camera.ViewCoordinateV2_m(_myPosDB.AbsolutePosition_m);
+            var spos = camera.ViewCoordinateV2_m(_myPosDB.AbsolutePosition);
 
             //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
             // [0] is the position of the object. 
@@ -356,7 +354,7 @@ namespace Pulsar4X.SDL2UI
                 _drawPoints[i] = mtrx.TransformToSDL_Point(Points[i].X, Points[i].Y);
             }*/
 
-            var foo2 = camera.ViewCoordinate_m(_myPosDB.AbsolutePosition_m);
+            var foo2 = camera.ViewCoordinate_m(_myPosDB.AbsolutePosition);
             var trns2 = Matrix.IDTranslate(foo2.x, foo2.y);
             var mtrx2 = scAU * scZm *  trns2;
             for (int i = 0; i < 2; i++)

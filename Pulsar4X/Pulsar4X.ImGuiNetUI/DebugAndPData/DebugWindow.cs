@@ -189,29 +189,29 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("x" + Stringify.Distance(mouseWorldCoord.X));
                         ImGui.SameLine();
                         ImGui.Text("y" + Stringify.Distance(mouseWorldCoord.Y));
-                        var mouseWorldCoord_AU = cam.MouseWorldCoordinate_AU();
+                        var mouseWorldCoord_AU = Distance.MToAU(cam.MouseWorldCoordinate_AU());
                         ImGui.Text("x" + mouseWorldCoord_AU.X + " AU");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseWorldCoord_AU.Y + " AU");
 
                         ImGui.Text("Cursor View Coordinate:");
                         ImGui.Text("(WorldCoord - CameraWorldPos) * zoomLevel + viewportCenter");
-                        ImGui.Text("(" + mouseWorldCoord.X + "-" + cam.CameraWorldPosition_m.X + ") *" + cam.ZoomLevel + "+" + cam.ViewPortCenter.X);
+                        ImGui.Text("(" + mouseWorldCoord.X + "-" + cam.CameraWorldPosition.X + ") *" + cam.ZoomLevel + "+" + cam.ViewPortCenter.X);
                         var mouseViewCoord = cam.ViewCoordinate_m(mouseWorldCoord);
                         ImGui.Text("x" + mouseViewCoord.x + " p");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseViewCoord.y + " p");
-                        var mouseviewCoord_AU = cam.ViewCoordinate_AU(mouseWorldCoord_AU);
+                        var mouseviewCoord_AU = cam.ViewCoordinate_AU(mouseWorldCoord);
                         ImGui.Text("x" + mouseviewCoord_AU.x + " p");
                         ImGui.SameLine();
                         ImGui.Text("y" + mouseviewCoord_AU.y + " p");
                     
                         ImGui.Text("Camrera WorldPosition");
-                        var camWorldCoord_m = cam.CameraWorldPosition_m;
+                        var camWorldCoord_m = cam.CameraWorldPosition;
                         ImGui.Text("x" + camWorldCoord_m.X + " m");
                         ImGui.SameLine();
                         ImGui.Text("y" + camWorldCoord_m.Y + " m");
-                        var camWorldCoord_AU = cam.CameraWorldPosition_AU;
+                        var camWorldCoord_AU = Distance.MToAU(cam.CameraWorldPosition);
                         ImGui.Text("x" + camWorldCoord_AU.X + " AU");
                         ImGui.SameLine();
                         ImGui.Text("y" + camWorldCoord_AU.Y + " AU");
@@ -342,7 +342,7 @@ namespace Pulsar4X.SDL2UI
                             if (SelectedEntity.HasDataBlob<PositionDB>())
                             {
                                 var positiondb = SelectedEntity.GetDataBlob<PositionDB>();
-                                var posAbs = positiondb.AbsolutePosition_m;
+                                var posAbs = positiondb.AbsolutePosition;
                                 ImGui.Text("x: " + Stringify.Distance(posAbs.X));
                                 ImGui.Text("y: " + Stringify.Distance(posAbs.Y));
                                 ImGui.Text("z: " + Stringify.Distance(posAbs.Z));
@@ -350,7 +350,7 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     ImGui.Text("Parent: " + positiondb.Parent.GetDataBlob<NameDB>().DefaultName);
 
-                                    ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition_m.Length()));
+                                    ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition.Length()));
                                 }
 
                                 var relativeState = SelectedEntity.GetRelativeState();
@@ -420,7 +420,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.Text("y: " + pos.Y);
                                     ImGui.Text("z: " + pos.Z);
                                     
-                                    ImGui.Text("MeanMotion: " + orbitDB.MeanMotion_DegreesSec + " in Deg/s");
+                                    ImGui.Text("MeanMotion: " + Angle.ToDegrees(orbitDB.MeanMotion) + " in Deg/s");
                                     ImGui.Text("MeanVelocity: " + Stringify.Velocity(orbitDB.MeanOrbitalVelocityInm()));
                                     
                                     ImGui.Text("SOI Radius: " + Stringify.Distance(SelectedEntity.GetSOI_m()));
@@ -443,7 +443,7 @@ namespace Pulsar4X.SDL2UI
                                     
                                     ImGui.Text("AoP:");
                                     ImGui.NextColumn();
-                                    ImGui.Text(orbitDB.ArgumentOfPeriapsis_Degrees.ToString());
+                                    ImGui.Text(Angle.ToDegrees(orbitDB.ArgumentOfPeriapsis).ToString());
                                     ImGui.NextColumn();
                                     ImGui.Text(ke.AoP.ToString());
                                     ImGui.NextColumn();
@@ -536,9 +536,9 @@ namespace Pulsar4X.SDL2UI
                                         var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;
                                         var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().MassDry;
 
-                                        var sgp = UniversalConstants.Science.GravitationalConstant * (pmass + mymass) / 3.347928976e33;
-                                        var vel = Distance.KmToAU(cnmve.CurrentVector_ms);
-                                        var cpos = myPos.RelativePosition_AU;
+                                        var sgp = GeneralMath.StandardGravitationalParameter(pmass + mymass);
+                                        var vel = Distance.KmToM(cnmve.CurrentVector_ms);
+                                        var cpos = myPos.RelativePosition;
                                         var eccentVector = OrbitMath.EccentricityVector(sgp, cpos, vel);
                                         double ce = eccentVector.Length();
                                         var r = cpos.Length();

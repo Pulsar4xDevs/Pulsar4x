@@ -563,7 +563,7 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException("positionDB");
             }
 
-            Position = positionDB.AbsolutePosition_AU;
+            Position = positionDB.AbsolutePosition;
             if (Name == "Earth")
             {
             }
@@ -604,13 +604,13 @@ namespace Pulsar4X.ECSLib
                 _parentStarGuid = orbitDB.Parent.GetDataBlob<OrbitDB>().Parent.Guid;
             }
 
-            SemiMajorAxis = orbitDB.SemiMajorAxis_AU;
-            Apoapsis = orbitDB.Apoapsis_AU;
-            Periapsis = orbitDB.Periapsis_AU;
-            ArgumentOfPeriapsis = orbitDB.ArgumentOfPeriapsis_Degrees;
-            LongitudeOfAscendingNode = orbitDB.LongitudeOfAscendingNode_Degrees;
+            SemiMajorAxis = Distance.MToAU(orbitDB.SemiMajorAxis);
+            Apoapsis = orbitDB.Apoapsis;
+            Periapsis = orbitDB.Periapsis;
+            ArgumentOfPeriapsis = orbitDB.ArgumentOfPeriapsis;
+            LongitudeOfAscendingNode = orbitDB.LongitudeOfAscendingNode;
             Eccentricity = orbitDB.Eccentricity;
-            Inclination = orbitDB.Inclination_Degrees;
+            Inclination = orbitDB.Inclination;
             OrbitalPeriod = orbitDB.OrbitalPeriod;
         }
 
