@@ -42,9 +42,9 @@ public class ManuverNode
     public DateTime NodeTime;
     public DateTime TimeAtStartBurn;
 
-    private Orbital.Vector3 _nodePosition;
+    internal Orbital.Vector3 _nodePosition;
 
-    private Entity _orderEntity;
+    internal Entity _orderEntity;
     private NewtonThrustAbilityDB _newtonThrust;
     private double _totalMass;
     private double _dryMass;
