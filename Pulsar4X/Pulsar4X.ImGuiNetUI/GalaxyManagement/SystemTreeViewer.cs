@@ -36,7 +36,7 @@ namespace Pulsar4X.SDL2UI
                 if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
                 {
                     SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
-                    List<EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithPosition.Values.OrderBy(x => x.Position.AbsolutePosition_AU).ToList();
+                    List<EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithPosition.Values.OrderBy(x => x.Position.AbsolutePosition).ToList();
                     List<EntityState> _Stars = new List<EntityState>();
 
                     foreach (EntityState Body in _NamedEntityStates)
@@ -83,7 +83,7 @@ namespace Pulsar4X.SDL2UI
 
                     if (_Opened)
                     {
-                        _ChildList = _ChildList.OrderBy(x => x.GetDataBlob<PositionDB>().AbsolutePosition_AU).ToList();
+                        _ChildList = _ChildList.OrderBy(x => x.GetDataBlob<PositionDB>().AbsolutePosition).ToList();
                         foreach (Entity _ChildBody in _ChildList)
                         {
                             TreeGen(_ChildBody, _SelectedBody);

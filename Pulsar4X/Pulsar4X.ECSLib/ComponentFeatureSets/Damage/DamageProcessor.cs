@@ -217,14 +217,14 @@ namespace Pulsar4X.ECSLib
                 EntityManager mySystem = Asteroid.Manager;
                 
 
-                var origVel = origOrbit.AbsoluteOrbitalVector_AU(atDateTime);
+                var origVel = origOrbit.AbsoluteOrbitalVector_m(atDateTime);
 
                 //public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
                 //I need the target entity, the collisionDate, and the starSystem. I may have starsystem from guid.
                 //Ok so this should create the asteroid without having to add the new asteroids to a list. as that is done in the factory.
-                Entity newAsteroid1 = AsteroidFactory.CreateAsteroid4(pDB.AbsolutePosition_AU, origOrbit, atDateTime, newMass); 
+                Entity newAsteroid1 = AsteroidFactory.CreateAsteroid4(pDB.AbsolutePosition, origOrbit, atDateTime, newMass); 
                 //var newOrbit = OrbitDB.FromVector(origOrbit.Parent, )
-                Entity newAsteroid2 = AsteroidFactory.CreateAsteroid4(pDB.AbsolutePosition_AU, origOrbit, atDateTime, newMass);
+                Entity newAsteroid2 = AsteroidFactory.CreateAsteroid4(pDB.AbsolutePosition, origOrbit, atDateTime, newMass);
 
                 mySystem.RemoveEntity(Asteroid);
 

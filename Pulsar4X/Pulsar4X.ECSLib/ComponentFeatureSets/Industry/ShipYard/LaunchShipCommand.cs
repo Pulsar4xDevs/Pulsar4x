@@ -63,7 +63,7 @@ namespace Pulsar4X.ECSLib.Industry
                         {
                             FuelCost = OrbitMath.TsiolkovskyFuelCost(design.MassPerUnit, 275, 1);
                             //targetOrbit = (OrbitDB)_entityCommanding.GetDataBlob<OrbitDB>().Clone();
-                            targetPosition = _entityCommanding.GetDataBlob<PositionDB>().RelativePosition_m;
+                            targetPosition = _entityCommanding.GetDataBlob<PositionDB>().RelativePosition;
                             IsRunning = true;
                         }
                         

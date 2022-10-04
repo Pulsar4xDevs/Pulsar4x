@@ -17,24 +17,13 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public DateTime LastProcessDateTime = new DateTime();
 
-        public Vector3 SavedNewtonionVector { get; internal set; }
         [JsonProperty]
-        public Vector3 SavedNewtonionVector_AU
-        {
-            get => Distance.MToAU(SavedNewtonionVector);
-            internal set => SavedNewtonionVector = Distance.AuToMt(value);
-        }
+        public Vector3 SavedNewtonionVector { get; internal set; }
 
         [JsonProperty]
         public Vector3 EntryPointAbsolute { get; internal set; }
-        public Vector3 TranslateEntryAbsolutePoint_AU
-        {
-            get => Distance.MToAU(EntryPointAbsolute);
-            internal set => EntryPointAbsolute = Distance.AuToMt(value);
-        }
         [JsonProperty]
         public Vector3 ExitPointAbsolute { get; internal set; }
-        public Vector3 TranslateExitPoint_AU => Distance.MToAU(ExitPointAbsolute);
 
         [JsonProperty]
         public Vector3 ExitPointrelative { get; internal set; }
@@ -54,10 +43,6 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [JsonProperty]
         internal Vector3 ExpendDeltaV { get; set; }
-        internal Vector3 ExpendDeltaV_AU {
-            get => Distance.MToAU(ExpendDeltaV);
-            set => ExpendDeltaV = Distance.AuToMt(value);
-        }
 
         [JsonProperty]
         internal bool IsAtTarget { get; set; }
@@ -105,7 +90,7 @@ namespace Pulsar4X.ECSLib
         {
             if(!targetEntity.HasDataBlob<OrbitDB>())
                 throw new NotImplementedException("Currently we can only predict the movement of stable orbits - target must have an orbitDB");
-            (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition_m
+            (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition
             (
                 thisEntity, 
                 targetEntity.GetDataBlob<OrbitDB>(), 

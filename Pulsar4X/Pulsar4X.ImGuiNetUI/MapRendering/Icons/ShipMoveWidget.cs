@@ -10,7 +10,7 @@ namespace Pulsar4X.SDL2UI
         //PositionDB ParentPositionDB;
         Vector3 _translateStartPoint = new Vector3();
         Vector3 _translateEndPoint = new Vector3();
-        Vector3 _currentPosition_au = new Vector3();
+        Vector3 _currentPosition = new Vector3();
         public byte Red = 255;
         public byte Grn = 255;
         public byte Blu = 0;
@@ -21,8 +21,8 @@ namespace Pulsar4X.SDL2UI
             if (entity.HasDataBlob<WarpMovingDB>())
             {
                 var db = entity.GetDataBlob<WarpMovingDB>();
-                _translateStartPoint = db.TranslateEntryAbsolutePoint_AU;
-                _translateEndPoint = db.TranslateExitPoint_AU;
+                _translateStartPoint = db.EntryPointAbsolute;
+                _translateEndPoint = db.ExitPointAbsolute;
             }
             if (entity.HasDataBlob<OrderableDB>())
             {
@@ -36,7 +36,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            _currentPosition_au = _positionDB.AbsolutePosition_AU; 
+            _currentPosition = _positionDB.AbsolutePosition; 
 
         }
 
@@ -46,7 +46,7 @@ namespace Pulsar4X.SDL2UI
             _drawPoints = new SDL.SDL_Point[2];
 
 
-            var translated = matrix.TransformToSDL_Point(_currentPosition_au.X, _currentPosition_au.Y);
+            var translated = matrix.TransformToSDL_Point(_currentPosition.X, _currentPosition.Y);
             int x = (int)(ViewScreenPos.x + translated.x);
             int y = (int)(ViewScreenPos.y + translated.y);
             _drawPoints[0] = new SDL.SDL_Point() { x = x, y = y };

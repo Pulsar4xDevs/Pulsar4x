@@ -64,7 +64,7 @@ public class ManuverNode
         _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal;
         _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;
         var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-        _sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2(_totalMass, parentMass);
+        _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + parentMass);
         var fuelTypeID = _newtonThrust.FuelType;
         _fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
         _burnRate = _newtonThrust.FuelBurnRate;

@@ -6,10 +6,8 @@ namespace Pulsar4X.ECSLib
 {
     public interface IPosition
     {
-        Vector3 AbsolutePosition_AU { get; }
-        Vector3 AbsolutePosition_m { get; }
-        Vector3 RelativePosition_AU { get; }
-        Vector3 RelativePosition_m { get; }
+        Vector3 AbsolutePosition { get; }
+        Vector3 RelativePosition { get; }
     }
     //TODO: get rid of AU, why are we using AU.
     public class PositionDB : TreeHierarchyDB, IGetValuesHash, IPosition
@@ -19,15 +17,9 @@ namespace Pulsar4X.ECSLib
         public Guid SystemGuid;
 
         /// <summary>
-        /// The Position as a Vec3, in AU.
+        /// The Position as a Vec3, in m.
         /// </summary>
-        public Vector3 AbsolutePosition_AU
-        {
-            get { return Distance.MToAU(AbsolutePosition_m); }
-            internal set { AbsolutePosition_m = Distance.AuToMt(value); }
-        }
-
-        public Vector3 AbsolutePosition_m 
+        public Vector3 AbsolutePosition 
         {             
             get
             {
@@ -40,7 +32,7 @@ namespace Pulsar4X.ECSLib
                     PositionDB parentpos = (PositionDB)ParentDB;
                     if(parentpos == this)
                         throw new Exception("Infinite loop triggered");
-                    return parentpos.AbsolutePosition_m + _positionInMeters;
+                    return parentpos.AbsolutePosition + _positionInMeters;
                 }
             }
             internal set
@@ -50,7 +42,7 @@ namespace Pulsar4X.ECSLib
                 else
                 {
                     PositionDB parentpos = (PositionDB)ParentDB;
-                    _positionInMeters = value - parentpos.AbsolutePosition_m;
+                    _positionInMeters = value - parentpos.AbsolutePosition;
                 }
             } }
 
@@ -60,90 +52,11 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Get or Set the position relative to the parent Entity's abolutePositon
         /// </summary>
-        public Vector3 RelativePosition_AU
-        {
-            get { return Distance.MToAU(_positionInMeters); }
-            internal set { _positionInMeters = Distance.AuToMt(value); }
-        }
-
-        public Vector3 RelativePosition_m         
+        public Vector3 RelativePosition         
         {
             get { return _positionInMeters; }
             internal set { _positionInMeters = value; }
         }
-
-
-        /// <summary>
-        /// System X coordinate in AU
-        /// </summary>
-        public double X_AU
-        {
-            get { return AbsolutePosition_AU.X; }
-            internal set {  _positionInMeters.X = Distance.AuToMt(value); }
-        }
-
-        /// <summary>
-        /// System Y coordinate in AU
-        /// </summary>
-        public double Y_AU
-        {
-            get { return AbsolutePosition_AU.Y; }
-            internal set { _positionInMeters.Y = Distance.AuToMt(value); }
-        }
-
-        /// <summary>
-        /// System Z coordinate in AU
-        /// </summary>
-        public double Z_AU
-        {
-            get { return AbsolutePosition_AU.Z; }
-            internal set { _positionInMeters.Z = Distance.AuToMt(value); }
-        }
-
-        #region Unit Conversion Properties
-
-        /// <summary>
-        /// Position as a vec4. This is a utility property that converts Position to Km on get and to AU on set.
-        /// </summary>
-        public Vector3 PositionInKm
-        {
-            get { return new Vector3(Distance.AuToKm(AbsolutePosition_AU.X), Distance.AuToKm(AbsolutePosition_AU.Y), Distance.AuToKm(AbsolutePosition_AU.Z)); }
-            set { AbsolutePosition_AU = new Vector3(Distance.KmToAU(value.X), Distance.KmToAU(value.Y), Distance.KmToAU(value.Z)); }
-        }
-
-        /// <summary>
-        /// System X coordinante. This is a utility property that converts the X Coord. to Km on get and to AU on set.
-        /// </summary>
-        public double XInKm
-        {
-            get { return Distance.AuToKm(AbsolutePosition_AU.X); }
-            set { _positionInMeters.X = Distance.KmToAU(value); }
-        }
-
-        /// <summary>
-        /// System Y coordinante. This is a utility property that converts the Y Coord. to Km on get and to AU on set.
-        /// </summary>
-        public double YInKm
-        {
-            get { return Distance.AuToKm(AbsolutePosition_AU.Y); }
-            set { _positionInMeters.Y = Distance.KmToAU(value); }
-        }
-
-        /// <summary>
-        /// System Z coordinate. This is a utility property that converts the Z Coord. to Km on get and to AU on set.
-        /// </summary>
-        public double ZInKm
-        {
-            get { return Distance.AuToKm(AbsolutePosition_AU.Z); }
-            set { _positionInMeters.Z = Distance.KmToAU(value); }
-        }
-
-        public void AddMeters(Vector3 addVector)
-        {
-            _positionInMeters += Distance.MToAU(addVector);
-        }
-
-        #endregion
 
         /// <summary>
         /// Initialized 
@@ -154,26 +67,26 @@ namespace Pulsar4X.ECSLib
         /// <param name="z">Z value.</param>
         public PositionDB(double x, double y, double z, Guid systemGuid, Entity parent = null) : base(parent)
         {
-            AbsolutePosition_AU = new Vector3(x, y, z);
+            AbsolutePosition = new Vector3(x, y, z);
             SystemGuid = systemGuid;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="absolutePos_AU"></param>
+        /// <param name="relativePos_m"></param>
         /// <param name="systemGuid"></param>
         /// <param name="parent"></param>
-        public PositionDB(Vector3 absolutePos_AU, Guid systemGuid, Entity parent = null) : base(parent)
+        public PositionDB(Vector3 relativePos, Guid systemGuid, Entity parent = null) : base(parent)
         {
-            AbsolutePosition_AU = absolutePos_AU;
+            RelativePosition = relativePos;
             SystemGuid = systemGuid;
         }
 
         public PositionDB(Guid systemGuid, Entity parent = null) : base(parent)
         {
-            Vector3? parentPos = (ParentDB as PositionDB)?.AbsolutePosition_AU;
-            AbsolutePosition_AU = parentPos ?? Vector3.Zero;
+            Vector3? parentPos = (ParentDB as PositionDB)?.AbsolutePosition;
+            AbsolutePosition = parentPos ?? Vector3.Zero;
             SystemGuid = systemGuid;
         }
 
@@ -188,7 +101,7 @@ namespace Pulsar4X.ECSLib
         public PositionDB(Vector3 relativePos_m, Entity SOIParent) : base(SOIParent)
         {
             SystemGuid = SOIParent.Manager.ManagerGuid;
-            RelativePosition_m = relativePos_m;
+            RelativePosition = relativePos_m;
         }
 
         
@@ -204,7 +117,7 @@ namespace Pulsar4X.ECSLib
         {
             if (newParent != null && !newParent.HasDataBlob<PositionDB>())
                 throw new Exception("newParent must have a PositionDB");
-            Vector3 currentAbsolute = this.AbsolutePosition_m;
+            Vector3 currentAbsolute = this.AbsolutePosition;
             Vector3 newRelative;
             if (newParent == null)
             {
@@ -212,7 +125,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition_m;
+                newRelative = currentAbsolute - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
             }
             base.SetParent(newParent);
             _positionInMeters = newRelative;
@@ -245,9 +158,7 @@ namespace Pulsar4X.ECSLib
 
         public int GetValueCompareHash(int hash = 17)
         {
-            hash = Misc.ValueHash(X_AU, hash);
-            hash = Misc.ValueHash(Y_AU, hash);
-            hash = Misc.ValueHash(Z_AU, hash);
+            hash = Misc.ValueHash(AbsolutePosition, hash);
             return hash;
         }
     }

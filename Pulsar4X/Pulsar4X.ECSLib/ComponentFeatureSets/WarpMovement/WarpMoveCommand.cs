@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
             if (expendDeltaV.Length() != 0)
             {
                 
-                (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition_m
+                (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition
                 (
                     orderEntity, 
                     targetEntity.GetDataBlob<OrbitDB>(), 

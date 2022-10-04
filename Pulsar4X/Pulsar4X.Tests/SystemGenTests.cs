@@ -49,8 +49,8 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(7162, argonPrimeA.Temperature);
 
             MassVolumeDB argonPrimeAMV = stars[0].GetDataBlob<MassVolumeDB>();
-            Assert.AreEqual(935668.67593512533, argonPrimeAMV.RadiusInKM);
-            Assert.AreEqual(199.94046491477221, argonPrimeAMV.SurfaceGravity);
+            Assert.AreEqual(935668.67593512533, argonPrimeAMV.RadiusInKM, 1e-9);
+            Assert.AreEqual(199.94046491477221, argonPrimeAMV.SurfaceGravity, 1e-9);
 
             List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
             Assert.IsNotEmpty(systemBodies);
@@ -101,8 +101,8 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(5670, robinPrimeA.Temperature);
 
             MassVolumeDB robinPrimeAMV = stars[0].GetDataBlob<MassVolumeDB>();
-            Assert.AreEqual(746227.35086028383, robinPrimeAMV.RadiusInKM);
-            Assert.AreEqual(224.27634601638144, robinPrimeAMV.SurfaceGravity);
+            Assert.AreEqual(746227.35086028383, robinPrimeAMV.RadiusInKM, 1e-9);
+            Assert.AreEqual(224.27634601638144, robinPrimeAMV.SurfaceGravity, 1e-9);
             Assert.AreEqual(1.8712610994637707E30, robinPrimeAMV.MassDry);
 
             StarInfoDB robinPrimeB = stars[1].GetDataBlob<StarInfoDB>();
@@ -118,8 +118,8 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(3749, robinPrimeB.Temperature);
 
             MassVolumeDB robinPrimeBMV = stars[1].GetDataBlob<MassVolumeDB>();
-            Assert.AreEqual(493306.41725497658, robinPrimeBMV.RadiusInKM);
-            Assert.AreEqual(251.60390836758395, robinPrimeBMV.SurfaceGravity);
+            Assert.AreEqual(493306.41725497658, robinPrimeBMV.RadiusInKM, 1e-9);
+            Assert.AreEqual(251.60390836758395, robinPrimeBMV.SurfaceGravity, 1e-9);
             Assert.AreEqual(9.1740162518801132E29, robinPrimeBMV.MassDry);
 
             Assert.IsTrue(robinPrimeAMV.MassDry > robinPrimeBMV.MassDry, "Star A should be the most massive.");

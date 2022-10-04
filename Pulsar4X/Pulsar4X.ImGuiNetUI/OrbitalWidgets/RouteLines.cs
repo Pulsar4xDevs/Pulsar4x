@@ -21,7 +21,7 @@ public class RouteTrajectory : IDrawData
     {
         get 
         {
-            return _positionDB.AbsolutePosition_m + _worldPosition_m;
+            return _positionDB.AbsolutePosition + _worldPosition_m;
         }
         set 
         { 
@@ -32,17 +32,6 @@ public class RouteTrajectory : IDrawData
     public KeplerSegment GetSegment(int index)
     {
         return (KeplerSegment)_segments[index];
-    }
-    
-    public RouteTrajectory(Entity entity)
-    {
-        var positionDB = entity.GetDataBlob<PositionDB>();
-       // var parentPosDB = entity.GetSOIParentPositionDB();
-        //ManuverNode node = new ManuverNode(entity, entity.StarSysDateTime);
-        //AddNode(node, parentPosDB);
-        
-        _positionDB = positionDB;
-
     }
 
     public RouteTrajectory(Entity entity, ManuverNode node)
@@ -55,15 +44,10 @@ public class RouteTrajectory : IDrawData
 
     }
 
-    public void AddNode(ManuverNode node, IPosition parentPositionDB)
+    public void AddNode(ManuverNode node, IPosition positionDB)
     {
-        _segments.Add(new KeplerSegment(node, parentPositionDB));
+        _segments.Add(new KeplerSegment(node, positionDB));
         _nodes.Add(node);
-    }
-
-    public int Count
-    {
-        get { return _nodes.Count; }
     }
 
     public void UpdateNode(int index)
@@ -104,14 +88,14 @@ public class RouteTrajectory : IDrawData
             //resize for zoom
             //translate to position
             
-            var foo = camera.ViewCoordinateV2_m(seg.ParentPositionDB.AbsolutePosition_m); //camera position and zoom
+            var foo = camera.ViewCoordinateV2_m(seg.ParentPositionDB.AbsolutePosition); //camera position and zoom
             
             var trns = Matrix.IDTranslate(foo.X, foo.Y);
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
 
             int index = seg.IndexStart;
-            var spos = camera.ViewCoordinateV2_m(seg.ParentPositionDB.AbsolutePosition_m + seg._node._nodePosition);
+            var spos = camera.ViewCoordinateV2_m(seg.StartPositionDB.AbsolutePosition);
 
             //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
             DrawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
@@ -153,7 +137,7 @@ interface ITrajectorySegment
 
 public class KeplerSegment : ITrajectorySegment
 {
-    internal ManuverNode _node;
+    private ManuverNode _node;
     private KeplerElements _keplerOrbit;
     private DateTime _startTime;
     private DateTime _endTime;
@@ -162,8 +146,7 @@ public class KeplerSegment : ITrajectorySegment
     float _segmentArcSweepRadians;
     private bool IsRetrogradeOrbit;
     public IPosition ParentPositionDB;
-    //public IPosition StartPositionDB;
-    //public OrbitMath StartPosition
+    public IPosition StartPositionDB;
     public int IndexStart = 0;
     public int IndexEnd = 0;
     public int IndexCount = 0;
@@ -179,9 +162,8 @@ public class KeplerSegment : ITrajectorySegment
         this.ParentPositionDB = ParentPositionDB;
         _keplerOrbit = node.TargetOrbit;
         _startTime = node.NodeTime;
-        //StartPositionDB = node.
         CreatePointArray();
-        SetEndTime(_startTime + TimeSpan.FromSeconds(_keplerOrbit.OrbitalPeriod));
+        SetEndTime(_startTime + TimeSpan.FromSeconds(_keplerOrbit.Period));
         
     }
 
