@@ -228,7 +228,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     {
                         _editingNodes = new ManuverNode[2];
                         _editingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-                        var halfOrbit = _editingNodes[0].TargetOrbit.OrbitalPeriod * 0.5;
+                        var halfOrbit = _editingNodes[0].TargetOrbit.Period * 0.5;
                         _editingNodes[1] = new ManuverNode(_orderEntity, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
                         
                         _routeTrajectory.AddNode(_editingNodes[0], _orderEntity.GetSOIParentPositionDB());
@@ -245,7 +245,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     {
                         _editingNodes = new ManuverNode[1];
                         _editingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-                        var halfOrbit = _editingNodes[0].TargetOrbit.OrbitalPeriod * 0.5;
+                        var halfOrbit = _editingNodes[0].TargetOrbit.Period * 0.5;
                         _editingNodes[1] = new ManuverNode(_orderEntity, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
                         _navMode = NavMode.PhaseChange;
                     }
