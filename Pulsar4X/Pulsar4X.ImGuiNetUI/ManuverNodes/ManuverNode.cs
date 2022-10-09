@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
 using Vector3 = System.Numerics.Vector3;
@@ -7,6 +9,16 @@ namespace Pulsar4X.SDL2UI.ManuverNodes;
 
 public class ManuverNode
 {
+    public string NodeName = "";
+    /// <summary>
+    /// This descibes the center of the burn in DeltaV 
+    /// </summary>
+    public DateTime NodeTime;
+    /// <summary>
+    /// This is the time we should start the burn
+    /// </summary>
+    public DateTime TimeAtStartBurn; 
+    
     /// <summary>
     /// Raises and lowers altitude of orbit 
     /// Positive Prograde,
@@ -39,8 +51,7 @@ public class ManuverNode
     public double BurnTimeTotal;
     public double BurnTimeRemaining;
 
-    public DateTime NodeTime;
-    public DateTime TimeAtStartBurn;
+
 
     internal Orbital.Vector3 _nodePosition;
 
@@ -53,7 +64,7 @@ public class ManuverNode
 
     private double _burnRate;
     private double _exhaustVelocity;
-
+    public KeplerElements PriorOrbit;
     public KeplerElements TargetOrbit;
 
     public ManuverNode(Entity orderEntity, DateTime nodeTime)
@@ -70,18 +81,26 @@ public class ManuverNode
         _burnRate = _newtonThrust.FuelBurnRate;
         _exhaustVelocity = _newtonThrust.ExhaustVelocity;
         
-        TargetOrbit = orderEntity.GetDataBlob<OrbitDB>().GetElements();
-        _nodePosition = OrbitalMath.GetRelativePosition(TargetOrbit, NodeTime);
+        PriorOrbit = orderEntity.GetDataBlob<OrbitDB>().GetElements();
+        TargetOrbit = PriorOrbit;
+        _nodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime);
 
     }
 
+    /// <summary>
+    /// Adds parameters to exsisting node
+    /// </summary>
+    /// <param name="prograde"></param>
+    /// <param name="radial"></param>
+    /// <param name="normal"></param>
+    /// <param name="time"></param>
     public void ManipulateNode(double prograde, double radial, double normal,  double time = 0)
     {
         Prograde += prograde;
         Radial += radial;
         Normal += normal;
         NodeTime += TimeSpan.FromSeconds(time);
-        
+        _nodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime); //set the position for new time on current orbit
         double dv = Math.Sqrt((normal * normal) + (prograde * prograde) + (radial * radial));
         DeltaVCost += dv;
 
@@ -94,16 +113,16 @@ public class ManuverNode
         var firsthalfDvFuel = OrbitalMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv * 0.5);
         var firsthalfBurnTime = firsthalfDvFuel / _burnRate;
         TimeAtStartBurn = NodeTime - TimeSpan.FromSeconds(firsthalfBurnTime);
-        (Orbital.Vector3 position, Vector2 velocity) stateVectors = OrbitalMath.GetStateVectors(TargetOrbit, NodeTime);
+        (Orbital.Vector3 position, Vector2 velocity) stateVectors = OrbitalMath.GetStateVectors(PriorOrbit, NodeTime);
         
         Orbital.Vector3 velocity = new Orbital.Vector3(stateVectors.velocity.X, stateVectors.velocity.Y, 0);
-        velocity += OrbitalMath.ProgradeToStateVector(new(radial, prograde, normal), TargetOrbit);
+        velocity += OrbitalMath.ProgradeToStateVector(new(radial, prograde, normal), PriorOrbit);
         
         TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, _nodePosition, velocity, NodeTime);
     }
 
     /// <summary>
-    /// Manipulate node with vector3
+    /// Adds parameters to exsisting node
     /// </summary>
     /// <param name="burn">
     /// x: Radial
@@ -117,7 +136,7 @@ public class ManuverNode
     }
 
     /// <summary>
-    /// Manipulate node with vector3
+    /// Adds parameters to exsisting node
     /// </summary>
     /// <param name="burn">
     /// x: Radial
@@ -131,7 +150,7 @@ public class ManuverNode
     }
 
     /// <summary>
-    /// Manipulate node with vector2
+    /// Adds parameters to exsisting node
     /// </summary>
     /// <param name="burn">
     /// x: Radial
@@ -144,7 +163,7 @@ public class ManuverNode
     }
     
     /// <summary>
-    /// Manipulate node with vector2
+    /// Adds parameters to exsisting node
     /// </summary>
     /// <param name="burn">
     /// x: Radial
@@ -156,4 +175,58 @@ public class ManuverNode
         ManipulateNode(burn.Y, burn.X, 0, time);
     }
 
+    /// <summary>
+    /// Sets the node with given parameters (replaces exsisting parameters)
+    /// </summary>
+    /// <param name="prograde"></param>
+    /// <param name="radial"></param>
+    /// <param name="normal"></param>
+    /// <param name="time"></param>
+    public void SetNode(double prograde, double radial, double normal,  DateTime time)
+    {
+        Prograde = prograde;
+        Radial = radial;
+        Normal = normal;
+        NodeTime = time;
+        _nodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime); //set the position for new time on current orbit
+        double dv = Math.Sqrt((normal * normal) + (prograde * prograde) + (radial * radial));
+        DeltaVCost = dv;
+
+        FuelCostTotal = OrbitalMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, DeltaVCost);
+        FuelCostRemaining = FuelCostTotal;
+
+        BurnTimeTotal = FuelCostTotal / _burnRate;
+        BurnTimeRemaining = BurnTimeTotal;
+
+        var firsthalfDvFuel = OrbitalMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv * 0.5);
+        var firsthalfBurnTime = firsthalfDvFuel / _burnRate;
+        TimeAtStartBurn = NodeTime - TimeSpan.FromSeconds(firsthalfBurnTime);
+        (Orbital.Vector3 position, Vector2 velocity) stateVectors = OrbitalMath.GetStateVectors(PriorOrbit, NodeTime);
+        
+        Orbital.Vector3 velocity = new Orbital.Vector3(stateVectors.velocity.X, stateVectors.velocity.Y, 0);
+        velocity += OrbitalMath.ProgradeToStateVector(new(radial, prograde, normal), PriorOrbit);
+        
+        TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, _nodePosition, velocity, NodeTime);
+        if (TargetOrbit.MeanAnomalyAtEpoch is double.NaN)
+            throw new Exception("wtf exception");
+
+    }
+    
+    public void SetNode(Orbital.Vector3 burn, DateTime time)
+    {
+        SetNode(burn.Y, burn.X, burn.Z, time);
+    }
+    
+}
+
+public class ManuverSequence
+{
+    public String SequenceName = "";
+    public bool IsOpen = false;
+    public ManuverSequence ParentSequence;
+
+    public List<ManuverNode> ManuverNodes = new List<ManuverNode>();
+    public List<ManuverSequence> ManuverSequences = new List<ManuverSequence>();
+    
+    
 }
