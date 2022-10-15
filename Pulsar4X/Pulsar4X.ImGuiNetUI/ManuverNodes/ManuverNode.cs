@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using ImGuiNET;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
 using Vector3 = System.Numerics.Vector3;
@@ -220,7 +221,7 @@ public class ManuverNode
         TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, NodePosition, velocity, NodeTime);
         if (TargetOrbit.MeanAnomalyAtEpoch is double.NaN)
             throw new Exception("wtf exception");
-
+        
     }
     
     public void SetNode(Orbital.Vector3 burn, DateTime time)

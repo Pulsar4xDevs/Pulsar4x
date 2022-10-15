@@ -584,13 +584,21 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 _atDatetime += TimeSpan.FromSeconds(1);
                 tseconds += 1;
                 changes = true;
-            } ImGui.SameLine();
+            } //ImGui.SameLine();
             
             if (changes)
             {
-                _manuverLines.EditingNodes[0].ManipulateNode(_progradeDV, _radialDV, 0, tseconds);
+                //_manuverLines.EditingNodes[0].ManipulateNode(_progradeDV, _radialDV, 0, tseconds);
+                DateTime t1 = _orderEntity.StarSysDateTime + TimeSpan.FromSeconds(tseconds);
+                _manuverLines.EditingNodes[0].SetNode(_progradeDV, _radialDV, 0, t1);
 
             }
+            ImGui.Text(_progradeDV.ToString());
+            ImGui.Text(_radialDV.ToString());
+            ImGui.Text(_manuverLines.EditingNodes[0].TargetOrbit.Eccentricity.ToString());
+            ImGui.Text(_manuverLines.EditingNodes[0].TargetOrbit.SemiMajorAxis.ToString());
+            ImGui.Text(_manuverLines.EditingNodes[0].TargetOrbit.SemiMinorAxis.ToString());
+            
             
             if (!_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_manuverLines))
                 _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_manuverLines);

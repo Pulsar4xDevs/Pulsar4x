@@ -176,14 +176,14 @@ namespace Pulsar4X.SDL2UI
         /// <returns></returns>
         public static Vector2[] ElipsePoints(double xc, double yc, double loP, double a, double b, int n)
         {
-            double dphi = 2 * Math.PI / n - 1;
+            double dphi = 2 * Math.PI / (n - 1);
             double cosTheta = Math.Cos(loP);
             double sinTheta = Math.Sin(loP);
             double cosdphi = Math.Cos(dphi);
             double sindphi = Math.Sin(dphi);
             double alpha = cosdphi + sindphi * sinTheta * cosTheta * (a / b - b / a);
-            double bravo = - sindphi * ((b * sinTheta) * (b * sinTheta) + (a * cosTheta) * (a * cosTheta) / (a * b));
-            double chrly = sindphi * ((b * cosTheta) * (b * cosTheta) + (a * cosTheta) * (a * cosTheta) / (a * b));
+            double bravo = - sindphi * ((b * sinTheta) * (b * sinTheta) + (a * cosTheta) * (a * cosTheta)) / (a * b);
+            double chrly = sindphi * ((b * cosTheta) * (b * cosTheta) + (a * sinTheta) * (a * sinTheta)) / (a * b);
             double delta = cosdphi + sindphi * sinTheta * cosTheta * (b / a - a / b);
             delta = delta - (chrly * bravo) / alpha;
             chrly = chrly / alpha;
