@@ -51,10 +51,21 @@ public class ManuverNode
     public double BurnTimeTotal;
     public double BurnTimeRemaining;
 
+    public Vector2 TargetVelocity;
 
+    /// <summary>
+    /// Ralitive to parent
+    /// </summary>
+    internal Orbital.Vector3 NodePosition;
 
-    internal Orbital.Vector3 _nodePosition;
-
+    /// <summary>
+    /// Angle of position
+    /// </summary>
+    public double GetNodeAnomaly
+    {
+        get { return Angle.RadiansFromVector3(NodePosition); }
+    }
+    
     internal Entity _orderEntity;
     private NewtonThrustAbilityDB _newtonThrust;
     private double _totalMass;
@@ -83,8 +94,8 @@ public class ManuverNode
         
         PriorOrbit = orderEntity.GetDataBlob<OrbitDB>().GetElements();
         TargetOrbit = PriorOrbit;
-        _nodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime);
-
+        NodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime);
+        TargetVelocity = OrbitalMath.GetStateVectors(TargetOrbit, nodeTime).velocity;
     }
 
     /// <summary>
@@ -100,7 +111,7 @@ public class ManuverNode
         Radial += radial;
         Normal += normal;
         NodeTime += TimeSpan.FromSeconds(time);
-        _nodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime); //set the position for new time on current orbit
+        NodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime); //set the position for new time on current orbit
         double dv = Math.Sqrt((normal * normal) + (prograde * prograde) + (radial * radial));
         DeltaVCost += dv;
 
@@ -117,8 +128,8 @@ public class ManuverNode
         
         Orbital.Vector3 velocity = new Orbital.Vector3(stateVectors.velocity.X, stateVectors.velocity.Y, 0);
         velocity += OrbitalMath.ProgradeToStateVector(new(radial, prograde, normal), PriorOrbit);
-        
-        TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, _nodePosition, velocity, NodeTime);
+        TargetVelocity = new Vector2(velocity.X, velocity.Y);
+        TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, NodePosition, velocity, NodeTime);
     }
 
     /// <summary>
@@ -188,7 +199,7 @@ public class ManuverNode
         Radial = radial;
         Normal = normal;
         NodeTime = time;
-        _nodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime); //set the position for new time on current orbit
+        NodePosition = OrbitalMath.GetRelativePosition(PriorOrbit, NodeTime); //set the position for new time on current orbit
         double dv = Math.Sqrt((normal * normal) + (prograde * prograde) + (radial * radial));
         DeltaVCost = dv;
 
@@ -206,7 +217,7 @@ public class ManuverNode
         Orbital.Vector3 velocity = new Orbital.Vector3(stateVectors.velocity.X, stateVectors.velocity.Y, 0);
         velocity += OrbitalMath.ProgradeToStateVector(new(radial, prograde, normal), PriorOrbit);
         
-        TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, _nodePosition, velocity, NodeTime);
+        TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, NodePosition, velocity, NodeTime);
         if (TargetOrbit.MeanAnomalyAtEpoch is double.NaN)
             throw new Exception("wtf exception");
 
@@ -222,10 +233,22 @@ public class ManuverNode
 public class ManuverSequence
 {
     public String SequenceName = "";
-    public bool IsOpen = false;
-    public ManuverSequence ParentSequence;
+    //public bool IsOpen = false;
+    //public ManuverSequence ParentSequence;
+
+    /// <summary>
+    /// the focal point of orbits in this sequence. 
+    /// </summary>
+    public ECSLib.IPosition ParentPosition = new zeroPosition();
+
+    class zeroPosition : IPosition
+    {
+        public Orbital.Vector3 AbsolutePosition { get {return Orbital.Vector3.Zero;} }
+        public Orbital.Vector3 RelativePosition { get {return Orbital.Vector3.Zero;} }
+    }
 
     public List<ManuverNode> ManuverNodes = new List<ManuverNode>();
+    public List<(double startAngle, double endAngle)> OrbitArcs = new List<(double startAngle, double endAngle)>();
     public List<ManuverSequence> ManuverSequences = new List<ManuverSequence>();
     
     
