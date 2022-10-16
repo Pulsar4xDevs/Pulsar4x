@@ -286,141 +286,6 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     }
                 }
 
-
-                /*
-                                int nodecount = 0;
-                                if (_routeTrajectory != null && _routeTrajectory.Count > 0)
-                                {
-                                    nodecount = _routeTrajectory.Count;
-                                }
-                
-                                if (nodenames.Length <= nodecount)
-                                {
-                                    nodenames = new string[nodecount + 1];
-                                    for (int i = 0; i != nodecount; i++)
-                                    {
-                                        nodenames[i] = "Node " + i;
-                                    }
-                
-                                    nodenames[nodecount] = "New Node";
-                                }
-                
-                                if (BorderListOptions.Begin("nodes", nodenames, ref _selectedNode, 180))
-                                {
-                                }
-                
-                                if (_selectedNode != nodecount)
-                                {
-                                    ImGui.Text("Editing " + nodenames[_selectedNode]);
-                                    _navMode = NavMode.Edit;
-                                }
-                                else
-                                {
-                                    _navMode = NavMode.None;
-                                    if (ImGui.Button("Manual Thrust"))
-                                    {
-                                        _editingNodes = new ManuverNode[1];
-                                        _editingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-                                        _routeTrajectory.AddNode(_editingNodes[0], _orderEntity.GetSOIParentPositionDB());
-                                        _navMode = NavMode.Thrust;
-                                    }
-                                    
-                                    if (ImGui.Button("Hohmann Transfer"))
-                                    {
-                                        _editingNodes = new ManuverNode[2];
-                                        _editingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-                                        var halfOrbit = _editingNodes[0].TargetOrbit.Period * 0.5;
-                                        _editingNodes[1] = new ManuverNode(_orderEntity, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
-                                        
-                                        _routeTrajectory.AddNode(_editingNodes[0], _orderEntity.GetSOIParentPositionDB());
-                                        _routeTrajectory.AddNode(_editingNodes[1], _orderEntity.GetSOIParentPositionDB());
-                                        _navMode = NavMode.HohmannTransfer;
-                                    }
-                
-                                    if (ImGui.Button("Interplanetary Transfer"))
-                                    {
-                                        _navMode = NavMode.InterplanetaryTransfer;
-                                    }
-                
-                                    if (ImGui.Button("Phase Change"))
-                                    {
-                                        _editingNodes = new ManuverNode[1];
-                                        _editingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-                                        var halfOrbit = _editingNodes[0].TargetOrbit.Period * 0.5;
-                                        _editingNodes[1] = new ManuverNode(_orderEntity, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
-                                        _navMode = NavMode.PhaseChange;
-                                    }
-                
-                                    if (ImGui.Button("High Δv Intercept"))
-                                    {
-                                        _navMode = NavMode.HighDVIntercept;
-                                    }
-                
-                                    if (ImGui.Button("Porkchop Plot"))
-                                    {
-                                        _navMode = NavMode.PorkChopPlot;
-                                    }
-                
-                                    if (ImGui.Button("Escape SOI"))
-                                    {
-                                        _editingNodes = new ManuverNode[1];
-                                        _editingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-                                        _navMode = NavMode.EscapeSOI;
-                                    }
-                                }
-                
-                                BorderListOptions.End(new(200, 200));    
-                                */
-                
-/*
-                ImGui.Columns(2);
-                BorderGroup.Begin("Nodes");
-
-
-                if (ImGui.Button("New At Periapsis"))
-                {
-                } ImGui.SameLine();
-                if (ImGui.Button("New At Apoapsis"))
-                {
-                }
-
-                BorderGroup.End(); //ImGui.SameLine();
-                ImGui.NextColumn();
-                BorderGroup.Begin("Mode");
-                if (ImGui.Button("Manual Thrust"))
-                {
-                    _navMode = NavMode.Thrust;
-                }
-                if (ImGui.Button("Hohmann Transfer"))
-                {
-                    _navMode = NavMode.HohmannTransfer;
-                }
-                if (ImGui.Button("Interplanetary Transfer"))
-                {
-                    _navMode = NavMode.InterplanetaryTransfer;
-                }
-                if (ImGui.Button("Phase Change"))
-                {
-                    _navMode = NavMode.PhaseChange;
-                }
-                if (ImGui.Button("High Δv Intercept"))
-                {
-                    _navMode = NavMode.HighDVIntercept;
-                }
-                if (ImGui.Button("Porkchop Plot"))
-                {
-                    _navMode = NavMode.PorkChopPlot;
-                }
-
-                if (ImGui.Button("Escape SOI"))
-                {
-                    _navMode = NavMode.EscapeSOI;
-                }
-
-                BorderGroup.End();
-                
-                */
-
                 switch (_navMode)
                 {                    
                     case NavMode.Edit:
@@ -598,7 +463,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.Text(_manuverLines.EditingNodes[0].TargetOrbit.Eccentricity.ToString());
             ImGui.Text(_manuverLines.EditingNodes[0].TargetOrbit.SemiMajorAxis.ToString());
             ImGui.Text(_manuverLines.EditingNodes[0].TargetOrbit.SemiMinorAxis.ToString());
-            
+            ImGui.Text(_manuverLines.EditingNodes[0].TargetOrbit.LoAN.ToString());
+            ImGui.Text(_manuverLines.EditingNodes[0].TargetOrbit.AoP.ToString());
             
             if (!_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_manuverLines))
                 _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_manuverLines);

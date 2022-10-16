@@ -128,7 +128,7 @@ public class ManuverNode
         (Orbital.Vector3 position, Vector2 velocity) stateVectors = OrbitalMath.GetStateVectors(PriorOrbit, NodeTime);
         
         Orbital.Vector3 velocity = new Orbital.Vector3(stateVectors.velocity.X, stateVectors.velocity.Y, 0);
-        velocity += OrbitalMath.ProgradeToStateVector(new(radial, prograde, normal), PriorOrbit);
+        velocity += OrbitalMath.ProgradeToStateVector(new(prograde, radial, normal), PriorOrbit);
         TargetVelocity = new Vector2(velocity.X, velocity.Y);
         TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, NodePosition, velocity, NodeTime);
     }
@@ -214,11 +214,21 @@ public class ManuverNode
         var firsthalfBurnTime = firsthalfDvFuel / _burnRate;
         TimeAtStartBurn = NodeTime - TimeSpan.FromSeconds(firsthalfBurnTime);
         (Orbital.Vector3 position, Vector2 velocity) stateVectors = OrbitalMath.GetStateVectors(PriorOrbit, NodeTime);
+        Console.Out.WriteLine(stateVectors.velocity);
+        var velocityOrig = new Orbital.Vector3(stateVectors.velocity.X, stateVectors.velocity.Y, 0);
+        Console.Out.WriteLine(Stringify.Velocity(velocityOrig.X) + ", " + Stringify.Velocity(velocityOrig.Y));
         
-        Orbital.Vector3 velocity = new Orbital.Vector3(stateVectors.velocity.X, stateVectors.velocity.Y, 0);
-        velocity += OrbitalMath.ProgradeToStateVector(new(radial, prograde, normal), PriorOrbit);
+        var velocityPgde = new Orbital.Vector3(prograde, radial, normal);
+        Console.Out.WriteLine(Stringify.Velocity(velocityPgde.X) + ", " + Stringify.Velocity(velocityPgde.Y));
+
+        var velocitystate = OrbitMath.ProgradeToStateVector(velocityPgde, PriorOrbit);
+        Console.Out.WriteLine(Stringify.Velocity(velocitystate.X) + ", " + Stringify.Velocity(velocitystate.Y));
         
-        TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, NodePosition, velocity, NodeTime);
+        var velocitynew = velocityOrig + velocitystate;
+        Console.Out.WriteLine(Stringify.Velocity(velocitynew.X) + ", " + Stringify.Velocity(velocitynew.Y));
+        
+        TargetOrbit =  OrbitalMath.KeplerFromPositionAndVelocity(_sgp, NodePosition, velocitynew, NodeTime);
+        
         if (TargetOrbit.MeanAnomalyAtEpoch is double.NaN)
             throw new Exception("wtf exception");
         
