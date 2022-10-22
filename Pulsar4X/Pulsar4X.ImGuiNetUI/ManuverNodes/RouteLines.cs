@@ -53,8 +53,8 @@ public class ManuverLinesComplete : IDrawData
         if (DrawPoints.Length != points.Length)
             DrawPoints = new SDL.SDL_Point[points.Length];
 
+        
         var foo = camera.ViewCoordinateV2_m(RootSequence.ParentPosition.AbsolutePosition); //camera position and zoom
-            
         var trns = Matrix.IDTranslate(foo.X, foo.Y);
         var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
         var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
@@ -102,21 +102,37 @@ public static class RenderManuverLines
     {
         int res = 128;
         var data = GetData(manuverSequence);
-        Vector2[] pointArray = new Vector2[data.Count * res];
+        
 
-
-        foreach (var item in data)
+        List<Vector2[]> arraylist = new List<Vector2[]>();
+        var pointCount = 0;
+        for (int index = 0; index < data.Count; index++)
         {
-            double xc = - item.ke.LinearEccentricity;
-            double yc = 0;
+            (KeplerElements ke, double startAngle) item = data[index];
+            double le = item.ke.LinearEccentricity;
+
             double lop = item.ke.LoAN + item.ke.AoP;
             double a = item.ke.SemiMajorAxis;
             double b = item.ke.SemiMinorAxis;
-
-            Array.Copy(CreatePrimitiveShapes.ElipsePoints(xc, yc, lop, a, b, res), pointArray, res);
-
+            double startAngle = item.startAngle;
+            double endAngle = Math.PI * 2;
+            if (index < data.Count - 1)
+                endAngle = data[index + 1].startAngle;
+            
+            var kp = CreatePrimitiveShapes.KeplerPoints(le, lop, a, b, res, item.startAngle, endAngle);
+            arraylist.Add(kp);
+            pointCount += kp.Length;
         }
 
+        Vector2[] pointArray = new Vector2[pointCount];
+        int paIndex = 0;
+        for (int i = 0; i < arraylist.Count; i++)
+        {
+            var source = arraylist[i];
+            Array.Copy(source, 0, pointArray, paIndex, source.Length );
+            paIndex += source.Length;
+        }
+        
         return pointArray;
     }
     
