@@ -125,8 +125,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             _uncleNames = names.ToArray();
 
             OnSystemTickChange(orderEntity.Entity.StarSysDateTime);
-            
-            //_routeTrajectory = new RouteTrajectory(_orderEntity);
+
             _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_manuverLines);
             _manuverLines.RootSequence.ParentPosition = _orderEntity.GetSOIParentPositionDB();
 
@@ -155,8 +154,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + parentMass);
             _cargoMass = _orderEntity.GetDataBlob<VolumeStorageDB>().TotalStoredMass;
             _fuelMass = _orderEntity.GetDataBlob<VolumeStorageDB>().GetUnitsStored(_fuelType);
-
-
+            
         }
 
 
@@ -177,12 +175,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         private string[] nodenames = new string[0];
         private int _selectedNode = 0;
         
-        
         private float _radialDV;
         private float _progradeDV;
-        //private ManuverNode[] _editingNodes;
-        //private RouteTrajectory _routeTrajectory;
-        //private ManuverSequence _manuverRoot;
         
         private int _indentAmount = 4;
         private int _indentDepth = 0;
@@ -319,9 +313,6 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 ImGui.Text(_fuelType.Name + " Fuel: " + Stringify.Mass(_fuelMass));
                 ImGui.Text("Total Thrust: " + Stringify.Thrust(_newtonThrust.ThrustInNewtons));
                 
-                
-                
-                
             }
         }
         
@@ -390,8 +381,6 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 tseconds += halfPeriod;
                 changes = true;
             } ImGui.SameLine();
-            
-            
 
             if (changes)
             {
@@ -402,8 +391,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_manuverLines);
             var deltat = _manuverLines.EditingNodes[0].NodeTime - _orderEntity.Manager.StarSysDateTime;
             ImGui.Text("node in: " + deltat);
-            //var span = _routeTrajectory.GetSegment(_selectedNode).SegmentTimeSpan;
-            //ImGui.Text("Span: " + span);
+ 
             
             //if (ImGui.Button("Make it so")) { }
         }
@@ -495,8 +483,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 _uiState.SelectedSysMapRender.SelectedEntityExtras.Add(_manuverLines);
             var deltat = _manuverLines.EditingNodes[0].NodeTime - _orderEntity.Manager.StarSysDateTime;
             ImGui.Text("node in: " + deltat);
-            //var span = _routeTrajectory.GetSegment(_selectedNode).SegmentTimeSpan;
-            //ImGui.Text("Span: " + span);
+
             
             if (ImGui.Button("Make it so"))
             {
@@ -680,11 +667,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                         NewtonThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime, manuver.deltaV, secondsBurn);
                     }
-
-
                 }
             }
-
         }
 
         void DisplayHighDVIntercept()

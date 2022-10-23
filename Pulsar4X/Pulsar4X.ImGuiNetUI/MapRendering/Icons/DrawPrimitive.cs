@@ -159,8 +159,8 @@ namespace Pulsar4X.SDL2UI
             centerWidget.Color = _centerWidget.Color;
             return centerWidget;
         }
-        
-                /// <summary>
+
+        /// <summary>
         /// Parametric ellipse taken from:
         /// "Drawing ellipses, hyperbolas or parabolas with a fixed number of points and maximum inscribed area"
         /// by L. B. Smith
@@ -168,15 +168,18 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         /// <param name="xc">x center of ellipse (not focal)</param>
         /// <param name="yc">x center of ellipse (not focal)</param>
+        /// <param name="linerEccentricity"></param>
         /// <param name="loP">londitude of periapsis</param>
         /// <param name="a">semi major axis</param>
         /// <param name="b">semi minor axis</param>
         /// <param name="n">number of required points for a full elipse</param>
+        /// <param name="arcStart"></param>
+        /// <param name="arcEnd"></param>
         /// <returns></returns>
         public static Vector2[] KeplerPoints(double linerEccentricity, double loP, double a, double b, int n, double arcStart, double arcEnd)
         {
             double dphi = 2 * Math.PI / (n - 1);
-            double arcSize = arcEnd = arcStart;
+            double arcSize = Angle.DifferenceBetweenRadians(arcStart, arcEnd);
             if (arcSize < 1 || arcSize > 2 * Math.PI)
                 arcSize = 2 * Math.PI;
             int nPoints = (int)(arcSize / dphi) + 1;
@@ -186,8 +189,8 @@ namespace Pulsar4X.SDL2UI
             double sindphi = Math.Sin(dphi);
             double cosStrt = Math.Cos(arcStart + loP);
             double sinStrt = Math.Sin(arcStart + loP);
-            double cosEnd = Math.Cos(arcEnd);
-            double sinEnd = Math.Sin(arcEnd);
+            double cosEnd = Math.Cos(arcEnd + loP);
+            double sinEnd = Math.Sin(arcEnd + loP);
             
             
             double cosLoP = Math.Cos(loP);

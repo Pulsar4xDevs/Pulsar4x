@@ -12,12 +12,8 @@ public class ManuverLinesComplete : IDrawData
 {
     public ManuverSequence SelectedSequence;
     public ManuverSequence RootSequence = new ManuverSequence();
-    //public KeplerElements[] OrbitSegments = new KeplerElements[0];
-    //public double[] OrbitSegmentsSeconds = new double[0];
-    //public int[] OrbitSegmentEndIndex = new int[0];
-
     public ManuverNode[] EditingNodes = new ManuverNode[0];
-    ///public int EditingOrbitIndex = 0;
+
     public int EditingNodesCount
     {
         get { return EditingNodes.Length; }
@@ -137,7 +133,7 @@ public class ManuverLinesComplete : IDrawData
 
     private Vector2[] points = new Vector2[0];
     private SDL.SDL_Point[] DrawPoints = new SDL.SDL_Point[0];
-    private Vector2[] pointsEditing = new Vector2[0];
+    
     private SDL.SDL_Point[] DrawPointsEditing = new SDL.SDL_Point[0];
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
@@ -216,11 +212,11 @@ public static class RenderManuverLines
             double a = item.ke.SemiMajorAxis;
             double b = item.ke.SemiMinorAxis;
             double startAngle = item.startAngle;
-            double endAngle = Math.PI * 2;
+            double endAngle = startAngle + Math.PI * 2;
             if (index < data.Count - 1)
-                endAngle = data[index + 1].startAngle;
+                endAngle = data[index + 1].startAngle; 
             
-            var kp = CreatePrimitiveShapes.KeplerPoints(le, lop, a, b, res, item.startAngle, endAngle);
+            var kp = CreatePrimitiveShapes.KeplerPoints(le, lop, a, b, res, startAngle, endAngle);
             arraylist.Add(kp);
             pointCount += kp.Length;
         }
@@ -264,7 +260,7 @@ public static class RenderManuverLines
             if (index < data.Count - 1)
                 endAngle = data[index + 1].startAngle;
             
-            var kp = CreatePrimitiveShapes.KeplerPoints(le, lop, a, b, res, item.startAngle, endAngle);
+            var kp = CreatePrimitiveShapes.KeplerPoints(le, lop, a, b, res, startAngle, endAngle);
             arraylist.Add(kp);
             pointCount += kp.Length;
         }
