@@ -212,51 +212,13 @@ namespace Pulsar4X.SDL2UI
                 x = alpha * x + bravo * y;
                 y = chrly * x + delta * y;
             }
-            points[nPoints - 1] = new Vector2(a * cosEnd, a * sinEnd);
+
+            x = a * cosEnd;
+            y = a * sinEnd;
+            points[nPoints - 1] = new Vector2(xc + x, yc + y);
             return points;
         }
-        
-                /// <summary>
-        /// Parametric ellipse taken from:
-        /// "Drawing ellipses, hyperbolas or parabolas with a fixed number of points and maximum inscribed area"
-        /// by L. B. Smith
-        /// published in The Computer journal jan 1971 https://academic.oup.com/comjnl/article/14/1/81/356378
-        /// </summary>
-        /// <param name="xc">x center of ellipse (not focal)</param>
-        /// <param name="yc">x center of ellipse (not focal)</param>
-        /// <param name="loP">londitude of periapsis</param>
-        /// <param name="a">semi major axis</param>
-        /// <param name="b">semi minor axis</param>
-        /// <param name="n">number of required points</param>
-        /// <returns></returns>
-        public static Vector2[] KeplerPointsx(double linerEccentricity, double loP, double a, double b, int n, double arcStart, double arcSize)
-        {
-            double dphi = 2 * Math.PI / (n - 1);
-            double cosdphi = Math.Cos(dphi);
-            double sindphi = Math.Sin(dphi);
-
-            double cosLoP = Math.Cos(loP);
-            double sinLoP = Math.Sin(loP);
-            
-            
-            double bravo = - sindphi * ( a * a ) / (a * b);
-
-            double delta = cosdphi - (sindphi * bravo) / dphi;
-            double chrly = sindphi / dphi;
-            double x = a * cosLoP;
-            double y = a * sinLoP;
-            Vector2[] points = new Vector2[n];
-            for (int i = 0; i < n; i++)
-            {
-                double xn = 0 + x;
-                double yn = 0 + y;
-                points[i] = new Vector2(xn, yn);
-                x = dphi * x + bravo * y;
-                y = chrly * x + delta * y;
-            }
-
-            return points;
-        }
+                
         /// <summary>
         /// Parametric ellipse taken from:
         /// "Drawing ellipses, hyperbolas or parabolas with a fixed number of points and maximum inscribed area"

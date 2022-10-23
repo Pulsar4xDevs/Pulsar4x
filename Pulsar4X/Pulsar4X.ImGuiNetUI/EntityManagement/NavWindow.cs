@@ -206,8 +206,12 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 if (ImGui.Selectable(mnode.NodeName))
                 {
                     _navMode = NavMode.Edit;
+                    _manuverLines.EditingNodes = new ManuverNode[1];
+                    _manuverLines.EditingNodes[0] = mnode;
                     _progradeDV = (float)mnode.Prograde;
                     _radialDV = (float)mnode.Radial;
+                    _atDatetime = mnode.NodeTime;
+
 
                 }
             }
@@ -234,12 +238,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 {
                     if (ImGui.Button("Manual Thrust"))
                     {
-                        //_editingNodes = new ManuverNode[1];
-                        //_editingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-                        //_routeTrajectory.AddNode(_editingNodes[0], _orderEntity.GetSOIParentPositionDB());
-                        _manuverLines.EditingNodes = new ManuverNode[1];
-                        _manuverLines.EditingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
-
+                        _manuverLines.AddNewEditNode(_orderEntity, _atDatetime);
                         _navMode = NavMode.Thrust;
                     }
                     
@@ -364,7 +363,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 changes = true;
             }
             
-            ImGui.Text("Time: " + _atDatetime); ImGui.SameLine();
+            ImGui.Text("Time: " + _atDatetime); //ImGui.SameLine();
             
             if (ImGui.Button("-1##t"))
             {
@@ -378,12 +377,25 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 tseconds += 1;
                 changes = true;
             } ImGui.SameLine();
+            var halfPeriod = _manuverLines.EditingNodes[0].PriorOrbit.Period * .5;
+            if (ImGui.Button("-Apsis##t"))
+            {
+                _atDatetime -= TimeSpan.FromSeconds(halfPeriod);
+                tseconds -= halfPeriod;
+                changes = true;
+            } ImGui.SameLine();            
+            if (ImGui.Button("+Apsis##t"))
+            {
+                _atDatetime -= TimeSpan.FromSeconds(halfPeriod);
+                tseconds += halfPeriod;
+                changes = true;
+            } ImGui.SameLine();
             
             
 
             if (changes)
             {
-                _manuverLines.EditingNodes[0].ManipulateNode(_progradeDV, _radialDV, 0, tseconds);
+                _manuverLines.ManipulateNode(0, _progradeDV, _radialDV, tseconds);
             }
             
             if (!_uiState.SelectedSysMapRender.SelectedEntityExtras.Contains(_manuverLines))
@@ -436,7 +448,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
             
 
-            ImGui.Text("Time: " + _atDatetime); ImGui.SameLine();
+            ImGui.Text("Time: " + _atDatetime); //ImGui.SameLine();
             
             if (ImGui.Button("-1##t"))
             {
@@ -449,13 +461,26 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 _atDatetime += TimeSpan.FromSeconds(1);
                 tseconds += 1;
                 changes = true;
+            }             
+            ImGui.SameLine();
+            var halfPeriod = _manuverLines.EditingNodes[0].PriorOrbit.Period * .5;
+            if (ImGui.Button("-Apsis##t"))
+            {
+                _atDatetime -= TimeSpan.FromSeconds(halfPeriod);
+                tseconds -= halfPeriod;
+                changes = true;
+            } ImGui.SameLine();            
+            if (ImGui.Button("+Apsis##t"))
+            {
+                _atDatetime -= TimeSpan.FromSeconds(halfPeriod);
+                tseconds += halfPeriod;
+                changes = true;
             } //ImGui.SameLine();
             
             if (changes)
             {
-                //_manuverLines.EditingNodes[0].ManipulateNode(_progradeDV, _radialDV, 0, tseconds);
-                DateTime t1 = _orderEntity.StarSysDateTime + TimeSpan.FromSeconds(tseconds);
-                _manuverLines.EditingNodes[0].SetNode(_progradeDV, _radialDV, 0, t1);
+                _manuverLines.ManipulateNode(0, _progradeDV, _radialDV, tseconds);
+                tseconds = 0;
 
             }
             ImGui.Text(_progradeDV.ToString());
@@ -475,11 +500,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             
             if (ImGui.Button("Make it so"))
             {
-                var newseq = new ManuverSequence();
-                newseq.SequenceName = "Thrust Manuver";
                 _manuverLines.EditingNodes[0].NodeName = "Thrust";
-                newseq.ManuverNodes.Add(_manuverLines.EditingNodes[0]);
-                _manuverLines.SelectedSequence.ManuverSequences.Add(newseq);
+                _manuverLines.AddSequence("Thrust Manuver");
+                _navMode = NavMode.None;
             }
         }
 

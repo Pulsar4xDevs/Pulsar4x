@@ -12,12 +12,12 @@ public class ManuverLinesComplete : IDrawData
 {
     public ManuverSequence SelectedSequence;
     public ManuverSequence RootSequence = new ManuverSequence();
-    public KeplerElements[] OrbitSegments = new KeplerElements[0];
-    public double[] OrbitSegmentsSeconds = new double[0];
-    public int[] OrbitSegmentEndIndex = new int[0];
+    //public KeplerElements[] OrbitSegments = new KeplerElements[0];
+    //public double[] OrbitSegmentsSeconds = new double[0];
+    //public int[] OrbitSegmentEndIndex = new int[0];
 
     public ManuverNode[] EditingNodes = new ManuverNode[0];
-    public int EditingOrbitIndex = 0;
+    ///public int EditingOrbitIndex = 0;
     public int EditingNodesCount
     {
         get { return EditingNodes.Length; }
@@ -44,9 +44,101 @@ public class ManuverLinesComplete : IDrawData
         a = 255
     };
 
+    public void AddNewNode(Entity orderEntity, DateTime nodeTime)
+    {
+        ManuverNode newNode = new ManuverNode(orderEntity, nodeTime);
+        AddNewNode(newNode);
+    }
+
+    public void AddNewNode(ManuverNode node)
+    {
+        DateTime nodeTime = node.NodeTime;
+        var val = RenderManuverLines.FindNodeTime(RootSequence, nodeTime);
+
+
+        if (val[0].nodeIndex != -1) //if has priorNode
+        {
+            node.PriorOrbit = val[0].seq.ManuverNodes[val[0].nodeIndex].TargetOrbit;
+        }
+
+        if (val[1].nodeIndex != -1) //if has next node
+        {
+            val[1].seq.ManuverNodes[val[1].nodeIndex].PriorOrbit = node.TargetOrbit;
+            SelectedSequence.ManuverNodes.Insert(0,node);
+        }
+        else
+        {
+            SelectedSequence.ManuverNodes.Add(node); 
+        }
+    }
+
+    public void AddNewEditNode(Entity orderEntity, DateTime nodeTime)
+    {
+        ManuverNode newNode = new ManuverNode(orderEntity, nodeTime);
+        var val = RenderManuverLines.FindNodeTime(RootSequence, nodeTime);
+        
+        if (val[0].nodeIndex != -1) //if has priorNode
+        {
+            newNode.PriorOrbit = val[0].seq.ManuverNodes[val[0].nodeIndex].TargetOrbit;
+        }
+
+        if (val[1].nodeIndex != -1) //if has next node
+        {
+            val[1].seq.ManuverNodes[val[1].nodeIndex].PriorOrbit = newNode.TargetOrbit;
+        }
+
+        EditingNodes = new ManuverNode[1];
+        EditingNodes[0] = newNode;
+    }
+
+    public void AddExsistingEditingNodes()
+    {
+        foreach (var node in EditingNodes)
+        {
+            AddNewNode(node);
+        }
+
+        EditingNodes = new ManuverNode[0];
+    }
+
+    public void AddSequence(string name)
+    {
+        var newseq = new ManuverSequence();
+        newseq.SequenceName = "Thrust Manuver";
+        SelectedSequence.ManuverSequences.Add(newseq);
+        SelectedSequence = newseq;
+        AddExsistingEditingNodes();
+        
+    }
+
+    public void ManipulateNode(int nodeIndex, double _progradeDV, double _radialDV, double tseconds)
+    {
+        var nodeToEdit = EditingNodes[nodeIndex];
+        nodeToEdit.ManipulateNode(_progradeDV, _radialDV, 0, tseconds);
+        if (tseconds != 0)
+        {
+            var nodeTime = nodeToEdit.NodeTime;
+            var val = RenderManuverLines.FindNodeTime(RootSequence, nodeTime);
+        
+            if (val[0].nodeIndex != -1) //if has priorNode
+            {
+                nodeToEdit.PriorOrbit = val[0].seq.ManuverNodes[val[0].nodeIndex].TargetOrbit;
+            }
+
+            if (val[1].nodeIndex != -1) //if has next node
+            {
+                val[1].seq.ManuverNodes[val[1].nodeIndex].PriorOrbit = nodeToEdit.TargetOrbit;
+            }
+        }
+            
+        
+    }
+
 
     private Vector2[] points = new Vector2[0];
     private SDL.SDL_Point[] DrawPoints = new SDL.SDL_Point[0];
+    private Vector2[] pointsEditing = new Vector2[0];
+    private SDL.SDL_Point[] DrawPointsEditing = new SDL.SDL_Point[0];
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
         points = RenderManuverLines.CreatePointArray(RootSequence);
@@ -63,7 +155,14 @@ public class ManuverLinesComplete : IDrawData
         {
             DrawPoints[i] = mtrx.TransformToSDL_Point(points[i].X, points[i].Y);
         }
-        
+
+        points = RenderManuverLines.CreatePointArray(EditingNodes);
+        if(DrawPointsEditing.Length != points.Length)
+            DrawPointsEditing = new SDL.SDL_Point[points.Length];
+        for (int i = 0; i < points.Length; i++)
+        {
+            DrawPointsEditing[i] = mtrx.TransformToSDL_Point(points[i].X, points[i].Y);
+        }
     }
 
     public void OnPhysicsUpdate()
@@ -74,8 +173,10 @@ public class ManuverLinesComplete : IDrawData
     public void Draw(IntPtr rendererPtr, Camera camera)
     {
         SDL.SDL_SetRenderDrawColor(rendererPtr, obtClr.r, obtClr.g, obtClr.b, obtClr.a);
-
         SDL.SDL_RenderDrawLines(rendererPtr, DrawPoints, DrawPoints.Length);
+        
+        SDL.SDL_SetRenderDrawColor(rendererPtr, editClr.r, editClr.g, editClr.b, editClr.a);
+        SDL.SDL_RenderDrawLines(rendererPtr, DrawPointsEditing, DrawPointsEditing.Length);
     }
 }
 
@@ -136,5 +237,85 @@ public static class RenderManuverLines
         return pointArray;
     }
     
+    
+    public static Vector2[] CreatePointArray(ManuverNode[] manuverNodes)
+    {
+        int res = 128;
+        List<(KeplerElements ke, double startAngle)> data = new List<(KeplerElements ke, double startAngle)>();
+        foreach (var node in manuverNodes)
+        {
+            var tgtOrbit = node.TargetOrbit;
+            data.Add((tgtOrbit, node.GetNodeAnomaly));
+        }
+        
 
+        List<Vector2[]> arraylist = new List<Vector2[]>();
+        var pointCount = 0;
+        for (int index = 0; index < data.Count; index++)
+        {
+            (KeplerElements ke, double startAngle) item = data[index];
+            double le = item.ke.LinearEccentricity;
+
+            double lop = item.ke.LoAN + item.ke.AoP;
+            double a = item.ke.SemiMajorAxis;
+            double b = item.ke.SemiMinorAxis;
+            double startAngle = item.startAngle;
+            double endAngle = Math.PI * 2;
+            if (index < data.Count - 1)
+                endAngle = data[index + 1].startAngle;
+            
+            var kp = CreatePrimitiveShapes.KeplerPoints(le, lop, a, b, res, item.startAngle, endAngle);
+            arraylist.Add(kp);
+            pointCount += kp.Length;
+        }
+
+        Vector2[] pointArray = new Vector2[pointCount];
+        int paIndex = 0;
+        for (int i = 0; i < arraylist.Count; i++)
+        {
+            var source = arraylist[i];
+            Array.Copy(source, 0, pointArray, paIndex, source.Length );
+            paIndex += source.Length;
+        }
+        
+        return pointArray;
+    }
+
+    public static (ManuverSequence seq, int nodeIndex)[] FindNodeTime(ManuverSequence manuverSequence, DateTime nodeTime)
+    {
+
+        (ManuverSequence seq, int priorNodeIndex)[] returnValue = new (ManuverSequence seq, int priorNodeIndex)[2];
+        returnValue[0] =  (manuverSequence, -1);
+        returnValue[1] = (manuverSequence, -1);
+        
+        if(manuverSequence.ManuverNodes.Count > 0)
+        {
+            for (int i = 0; i < manuverSequence.ManuverNodes.Count; i++)
+            {
+                ManuverNode node = manuverSequence.ManuverNodes[i];
+                if (nodeTime >= node.NodeTime)
+                {
+                    returnValue[0] = (manuverSequence, i);
+                    if (manuverSequence.ManuverNodes.Count > i + 1)
+                        returnValue[1] = (manuverSequence, i + 1);
+                    return returnValue;
+                }
+            }
+        }
+
+        if (manuverSequence.ManuverSequences.Count > 0)
+        {
+            foreach (ManuverSequence seq in manuverSequence.ManuverSequences)
+            {
+                var val = FindNodeTime(seq, nodeTime);
+                if (val[0].nodeIndex > -1)
+                    returnValue = val;
+                if (val[1].nodeIndex > -1)
+                    return returnValue;
+            }
+        }
+
+        return returnValue;
+
+    }
 }
