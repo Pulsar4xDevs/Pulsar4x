@@ -163,7 +163,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
     <None Include="Libs\cimgui\osx-x64\cimgui.dylib">
-      <Link>cimgui.dylib</Link>
+      <Link>libcimgui</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Libs\sdl2\win-x86\SDL2.dll">
