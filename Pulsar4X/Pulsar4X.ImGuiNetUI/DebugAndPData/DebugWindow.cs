@@ -221,9 +221,9 @@ namespace Pulsar4X.SDL2UI
 
                     
                     
-                    ImGui.Text("Special Chars");
-                    ImGui.Text("Proggy clean is crisp but these chars are blury, Ω, ω, ν, Δ, θ");
-                    ImGui.Text("this text is fine, Ω, ω, ν but this text is blury");
+                    ImGui.Text("Suported Special Chars");
+                    ImGui.Text("Ω, ω, ν, Δ, θ");
+                    
 
 
                     if (ImGui.CollapsingHeader("GraphicTests", ImGuiTreeNodeFlags.CollapsingHeader))

@@ -68,7 +68,14 @@ namespace Pulsar4X.Orbital
         {
             return Math.Atan2(vector.Y, vector.X);
         }
-        
+
+        public static Vector2 PositionFromAngle(double radians, double distance = 1)
+        {
+            double x = distance * Math.Cos(radians);
+            double y = distance * Math.Sin(radians);
+            return new Vector2(x, y);
+        }
+
         /// <summary>
         /// currently ignores Z
         /// </summary>

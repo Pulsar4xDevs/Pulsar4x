@@ -173,18 +173,20 @@ public class ManuverLinesComplete : IDrawData
         
         SDL.SDL_SetRenderDrawColor(rendererPtr, editClr.r, editClr.g, editClr.b, editClr.a);
         SDL.SDL_RenderDrawLines(rendererPtr, DrawPointsEditing, DrawPointsEditing.Length);
+        if(DrawPoints.Length > 1)
+            SDL.SDL_RenderDrawLine(rendererPtr, DrawPoints[0].x, DrawPoints[0].y, DrawPoints[1].x, DrawPoints[1].y);
     }
 }
 
 public static class RenderManuverLines
 {
-    public static List<(KeplerElements ke, double startAngle)> GetData(ManuverSequence manuverSequence)
+    public static List<(KeplerElements ke, Vector2 startPos)> GetData(ManuverSequence manuverSequence)
     {
-        List<(KeplerElements ke, double startAngle)> list = new List<(KeplerElements ke, double startAngle)>();
+        List<(KeplerElements ke, Vector2 startAngle)> list = new List<(KeplerElements ke, Vector2 startAngle)>();
         foreach (var node in manuverSequence.ManuverNodes)
         {
             var tgtOrbit = node.TargetOrbit;
-            list.Add((tgtOrbit, node.GetNodeAnomaly));
+            list.Add((tgtOrbit, (Vector2)node.NodePosition));
         }
 
         foreach (var manSeq in manuverSequence.ManuverSequences)
@@ -205,18 +207,18 @@ public static class RenderManuverLines
         var pointCount = 0;
         for (int index = 0; index < data.Count; index++)
         {
-            (KeplerElements ke, double startAngle) item = data[index];
+            (KeplerElements ke, Vector2 startPos) item = data[index];
             double le = item.ke.LinearEccentricity;
 
             double lop = item.ke.LoAN + item.ke.AoP;
             double a = item.ke.SemiMajorAxis;
             double b = item.ke.SemiMinorAxis;
-            double startAngle = item.startAngle;
-            double endAngle = startAngle + Math.PI * 2;
+            Vector2 startPos = item.startPos;
+            Vector2 endPos = startPos;
             if (index < data.Count - 1)
-                endAngle = data[index + 1].startAngle; 
+                endPos = data[index + 1].startPos; 
             
-            var kp = CreatePrimitiveShapes.KeplerPoints(le, lop, a, b, res, startAngle, endAngle);
+            var kp = CreatePrimitiveShapes.KeplerPoints(lop, a, b, res, startPos, endPos);
             arraylist.Add(kp);
             pointCount += kp.Length;
         }
@@ -237,11 +239,11 @@ public static class RenderManuverLines
     public static Vector2[] CreatePointArray(ManuverNode[] manuverNodes)
     {
         int res = 128;
-        List<(KeplerElements ke, double startAngle)> data = new List<(KeplerElements ke, double startAngle)>();
+        List<(KeplerElements ke, Vector2 startPos)> data = new List<(KeplerElements ke, Vector2 startPos)>();
         foreach (var node in manuverNodes)
         {
             var tgtOrbit = node.TargetOrbit;
-            data.Add((tgtOrbit, node.GetNodeAnomaly));
+            data.Add((tgtOrbit, (Vector2)node.NodePosition));
         }
         
 
@@ -249,18 +251,18 @@ public static class RenderManuverLines
         var pointCount = 0;
         for (int index = 0; index < data.Count; index++)
         {
-            (KeplerElements ke, double startAngle) item = data[index];
+            (KeplerElements ke, Vector2 startPos) item = data[index];
             double le = item.ke.LinearEccentricity;
 
             double lop = item.ke.LoAN + item.ke.AoP;
             double a = item.ke.SemiMajorAxis;
             double b = item.ke.SemiMinorAxis;
-            double startAngle = item.startAngle;
-            double endAngle = Math.PI * 2;
+            Vector2 startPos = item.startPos;
+            Vector2 endPos = startPos;
             if (index < data.Count - 1)
-                endAngle = data[index + 1].startAngle;
+                endPos = data[index + 1].startPos; 
             
-            var kp = CreatePrimitiveShapes.KeplerPoints(le, lop, a, b, res, startAngle, endAngle);
+            var kp = CreatePrimitiveShapes.KeplerPoints(lop, a, b, res, startPos, endPos);
             arraylist.Add(kp);
             pointCount += kp.Length;
         }

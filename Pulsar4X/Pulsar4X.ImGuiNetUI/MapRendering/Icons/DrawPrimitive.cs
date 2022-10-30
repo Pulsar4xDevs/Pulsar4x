@@ -160,6 +160,79 @@ namespace Pulsar4X.SDL2UI
             return centerWidget;
         }
 
+                /// <summary>
+        /// Parametric ellipse taken from:
+        /// "Drawing ellipses, hyperbolas or parabolas with a fixed number of points and maximum inscribed area"
+        /// by L. B. Smith
+        /// published in The Computer journal jan 1971 https://academic.oup.com/comjnl/article/14/1/81/356378
+        /// </summary>
+        /// <param name="loP">londitude of periapsis</param>
+        /// <param name="a">semi major axis</param>
+        /// <param name="b">semi minor axis</param>
+        /// <param name="n">number of required points for a full elipse</param>
+        /// <param name="arcStart"></param>
+        /// <param name="arcEnd"></param>
+        /// <returns></returns>
+        public static Vector2[] KeplerPoints(double loP, double a, double b, int n, double arcStart, double arcEnd)
+        {
+
+            double linerEccentricity =  EllipseMath.LinearEccentricityFromAxies(a, b);
+            
+            double dphi = 2 * Math.PI / (n - 1);
+
+            
+            double cosTheta = Math.Cos(loP);
+            double sinTheta = Math.Sin(loP);
+            double cosdphi = Math.Cos(dphi);
+            double sindphi = Math.Sin(dphi);
+            double cosLoP = Math.Cos(loP);
+            double sinLoP = Math.Sin(loP);
+            
+            //double xs = startPos.X - linerEccentricity * cosLoP;
+            //double ys = startPos.Y - linerEccentricity * sinLoP;
+            //double xe = endPos.X - linerEccentricity * cosLoP;
+            //double ye = endPos.Y - linerEccentricity * sinLoP;          
+            //double arcStart = Math.Atan2(ys, xs);
+            //double arcEnd = Math.Atan2(ye, xe);
+            
+            double cosStrt = Math.Cos(arcStart);
+            double sinStrt = Math.Sin(arcStart);
+            double cosEnd = Math.Cos(arcEnd);
+            double sinEnd = Math.Sin(arcEnd);
+            
+            double arcSize = Angle.DifferenceBetweenRadians(arcStart, arcEnd);
+            if (arcSize < 1 || arcSize > 2 * Math.PI)
+                arcSize = 2 * Math.PI;
+            int nPoints = (int)(arcSize / dphi) + 1;
+
+            double xc = -linerEccentricity * cosLoP;
+            double yc = -linerEccentricity * sinLoP;
+
+            double alpha = cosdphi + sindphi * sinTheta * cosTheta * (a / b - b / a);
+            double bravo = - sindphi * ((b * sinTheta) * (b * sinTheta) + (a * cosTheta) * (a * cosTheta)) / (a * b);
+            double chrly = sindphi * ((b * cosTheta) * (b * cosTheta) + (a * sinTheta) * (a * sinTheta)) / (a * b);
+            double delta = cosdphi + sindphi * sinTheta * cosTheta * (b / a - a / b);
+            delta = delta - (chrly * bravo) / alpha;
+            chrly = chrly / alpha;
+            double x = a * cosStrt;
+            double y = a * sinStrt;
+            Vector2[] points = new Vector2[nPoints];
+            for (int i = 0; i < nPoints -1; i++)
+            {
+                double xn = xc + x;
+                double yn = yc + y;
+                points[i] = new Vector2(xn, yn);
+                x = alpha * x + bravo * y;
+                y = chrly * x + delta * y;
+            }
+
+            x = a * cosEnd;
+            y = a * sinEnd;
+            points[nPoints - 1] = new Vector2(xc + x, yc + y);
+            return points;
+        }
+            
+        
         /// <summary>
         /// Parametric ellipse taken from:
         /// "Drawing ellipses, hyperbolas or parabolas with a fixed number of points and maximum inscribed area"
@@ -176,28 +249,39 @@ namespace Pulsar4X.SDL2UI
         /// <param name="arcStart"></param>
         /// <param name="arcEnd"></param>
         /// <returns></returns>
-        public static Vector2[] KeplerPoints(double linerEccentricity, double loP, double a, double b, int n, double arcStart, double arcEnd)
+        public static Vector2[] KeplerPoints(double loP, double a, double b, int n, Vector2 startPos, Vector2 endPos)
         {
+            double linerEccentricity =  EllipseMath.LinearEccentricityFromAxies(a, b);
             double dphi = 2 * Math.PI / (n - 1);
-            double arcSize = Angle.DifferenceBetweenRadians(arcStart, arcEnd);
-            if (arcSize < 1 || arcSize > 2 * Math.PI)
-                arcSize = 2 * Math.PI;
-            int nPoints = (int)(arcSize / dphi) + 1;
+
+            
             double cosTheta = Math.Cos(loP);
             double sinTheta = Math.Sin(loP);
             double cosdphi = Math.Cos(dphi);
             double sindphi = Math.Sin(dphi);
-            double cosStrt = Math.Cos(arcStart + loP);
-            double sinStrt = Math.Sin(arcStart + loP);
-            double cosEnd = Math.Cos(arcEnd + loP);
-            double sinEnd = Math.Sin(arcEnd + loP);
-            
-            
             double cosLoP = Math.Cos(loP);
             double sinLoP = Math.Sin(loP);
+            
+            double xs = startPos.X - linerEccentricity * cosLoP;
+            double ys = startPos.Y - linerEccentricity * sinLoP;
+            double xe = endPos.X - linerEccentricity * cosLoP;
+            double ye = endPos.Y - linerEccentricity * sinLoP;          
+            double arcStart = Math.Atan2(ys, xs);
+            double arcEnd = Math.Atan2(ye, xe);
+            
+            double cosStrt = Math.Cos(arcStart);
+            double sinStrt = Math.Sin(arcStart);
+            double cosEnd = Math.Cos(arcEnd);
+            double sinEnd = Math.Sin(arcEnd);
+            
+            double arcSize = Angle.DifferenceBetweenRadians(arcStart, arcEnd);
+            if (arcSize < 1 || arcSize > 2 * Math.PI)
+                arcSize = 2 * Math.PI;
+            int nPoints = (int)(arcSize / dphi) + 1;
+
             double xc = -linerEccentricity * cosLoP;
             double yc = -linerEccentricity * sinLoP;
-            
+
             double alpha = cosdphi + sindphi * sinTheta * cosTheta * (a / b - b / a);
             double bravo = - sindphi * ((b * sinTheta) * (b * sinTheta) + (a * cosTheta) * (a * cosTheta)) / (a * b);
             double chrly = sindphi * ((b * cosTheta) * (b * cosTheta) + (a * sinTheta) * (a * sinTheta)) / (a * b);

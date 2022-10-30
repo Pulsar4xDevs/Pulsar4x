@@ -51,9 +51,20 @@ namespace Pulsar4X.Orbital
             return semiMajorAxis * eccentricity;
         }
 
+        public static double LinearEccentricityFromAxies(double a, double b)
+        {
+            return Math.Sqrt(a * a - b * b);
+            
+        }
+        
         public static double Eccentricity(double linearEccentricity, double semiMajorAxis)
         {
             return linearEccentricity / semiMajorAxis;
+        }
+
+        public static double EccentricityFromAxies(double a, double b)
+        {
+            return Math.Sqrt(1 - (b * b) / (a * a));
         }
 
         public static double Apoapsis(double eccentricity, double semiMajorAxis)
