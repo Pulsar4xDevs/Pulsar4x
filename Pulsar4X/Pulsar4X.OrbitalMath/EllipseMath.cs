@@ -108,5 +108,33 @@ namespace Pulsar4X.Orbital
             return area;
         }
 
+        /// <summary>
+        /// https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_center
+        /// </summary>
+        /// <param name="b">semi minor</param>
+        /// <param name="e">eccentricity</param>
+        /// <param name="theta">angle</param>
+        /// <returns></returns>
+        public static double RadiusFromCenter(double b, double e, double theta)
+        {
+            return b / Math.Sqrt(1 - (e * Math.Cos(theta)) * (e * Math.Cos(theta)));
+        }
+
+        /// <summary>
+        /// https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_focus
+        /// </summary>
+        /// <param name="a">semi major</param>
+        /// <param name="e">eccentricy</param>
+        /// <param name="phi">angle from focal 1 to focal 2 (or center)</param>
+        /// <param name="theta">angle</param>
+        /// <returns></returns>
+        public static double RadiusFromFocal(double a, double e, double phi, double theta)
+        {
+            double dividend = a * (1 - e * e);
+            double divisor = 1 - e * Math.Cos(theta - phi);
+            double quotent = dividend / divisor;
+            return quotent;
+        }
+
     }
 }

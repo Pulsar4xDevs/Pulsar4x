@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Pulsar4X.Orbital;
 using ImGuiNET;
+using Pulsar4X.ECSLib;
 using SDL2;
 using Point = SDL2.SDL.SDL_Point;
 
@@ -239,15 +240,12 @@ namespace Pulsar4X.SDL2UI
         /// by L. B. Smith
         /// published in The Computer journal jan 1971 https://academic.oup.com/comjnl/article/14/1/81/356378
         /// </summary>
-        /// <param name="xc">x center of ellipse (not focal)</param>
-        /// <param name="yc">x center of ellipse (not focal)</param>
-        /// <param name="linerEccentricity"></param>
         /// <param name="loP">londitude of periapsis</param>
         /// <param name="a">semi major axis</param>
         /// <param name="b">semi minor axis</param>
         /// <param name="n">number of required points for a full elipse</param>
-        /// <param name="arcStart"></param>
-        /// <param name="arcEnd"></param>
+        /// <param name="startPos"></param>
+        /// <param name="endPos"></param>
         /// <returns></returns>
         public static Vector2[] KeplerPoints(double loP, double a, double b, int n, Vector2 startPos, Vector2 endPos)
         {
@@ -255,13 +253,12 @@ namespace Pulsar4X.SDL2UI
             double dphi = 2 * Math.PI / (n - 1);
 
             
-            double cosTheta = Math.Cos(loP);
-            double sinTheta = Math.Sin(loP);
-            double cosdphi = Math.Cos(dphi);
-            double sindphi = Math.Sin(dphi);
             double cosLoP = Math.Cos(loP);
             double sinLoP = Math.Sin(loP);
+            double cosdphi = Math.Cos(dphi);
+            double sindphi = Math.Sin(dphi);
             
+            //normalise the start & end points to the center ellipes instead of the focal point 
             double xs = startPos.X - linerEccentricity * cosLoP;
             double ys = startPos.Y - linerEccentricity * sinLoP;
             double xe = endPos.X - linerEccentricity * cosLoP;
@@ -269,29 +266,38 @@ namespace Pulsar4X.SDL2UI
             double arcStart = Math.Atan2(ys, xs);
             double arcEnd = Math.Atan2(ye, xe);
             
+            
+            Console.Clear();
+            Console.WriteLine("ArcStart: " + arcStart + " rad or " + Angle.ToDegrees(arcStart) + " Deg");
+            Console.WriteLine("ArcEnd: " + arcEnd + " rad or " + Angle.ToDegrees(arcEnd) + " Deg");
             double cosStrt = Math.Cos(arcStart);
             double sinStrt = Math.Sin(arcStart);
             double cosEnd = Math.Cos(arcEnd);
             double sinEnd = Math.Sin(arcEnd);
             
-            double arcSize = Angle.DifferenceBetweenRadians(arcStart, arcEnd);
-            if (arcSize < 1 || arcSize > 2 * Math.PI)
+            double arcSize = Math.Abs(Angle.DifferenceBetweenRadians(arcEnd, arcStart));
+            Console.WriteLine("Arc Size: " + Angle.ToDegrees(arcSize));
+            if (arcSize == 0 || arcSize > 2 * Math.PI)
                 arcSize = 2 * Math.PI;
             int nPoints = (int)(arcSize / dphi) + 1;
-
+    
+            Console.WriteLine("arc size " + Angle.ToDegrees(arcSize));
+            Console.WriteLine("arc Points " + nPoints);
+            
             double xc = -linerEccentricity * cosLoP;
             double yc = -linerEccentricity * sinLoP;
 
-            double alpha = cosdphi + sindphi * sinTheta * cosTheta * (a / b - b / a);
-            double bravo = - sindphi * ((b * sinTheta) * (b * sinTheta) + (a * cosTheta) * (a * cosTheta)) / (a * b);
-            double chrly = sindphi * ((b * cosTheta) * (b * cosTheta) + (a * sinTheta) * (a * sinTheta)) / (a * b);
-            double delta = cosdphi + sindphi * sinTheta * cosTheta * (b / a - a / b);
+            double alpha = cosdphi + sindphi * sinLoP * cosLoP * (a / b - b / a);
+            double bravo = - sindphi * ((b * sinLoP) * (b * sinLoP) + (a * cosLoP) * (a * cosLoP)) / (a * b);
+            double chrly = sindphi * ((b * cosLoP) * (b * cosLoP) + (a * sinLoP) * (a * sinLoP)) / (a * b);
+            double delta = cosdphi + sindphi * sinLoP * cosLoP * (b / a - a / b);
             delta = delta - (chrly * bravo) / alpha;
             chrly = chrly / alpha;
-            double x = a * cosStrt;
-            double y = a * sinStrt;
+            double x = a * cosLoP ;
+            double y = a * sinLoP ;
             Vector2[] points = new Vector2[nPoints];
-            for (int i = 0; i < nPoints -1; i++)
+            points[0] = startPos;
+            for (int i = 1; i < nPoints -1; i++)
             {
                 double xn = xc + x;
                 double yn = yc + y;
@@ -299,10 +305,8 @@ namespace Pulsar4X.SDL2UI
                 x = alpha * x + bravo * y;
                 y = chrly * x + delta * y;
             }
-
-            x = a * cosEnd;
-            y = a * sinEnd;
-            points[nPoints - 1] = new Vector2(xc + x, yc + y);
+            
+            points[nPoints - 1] = endPos;
             return points;
         }
                 

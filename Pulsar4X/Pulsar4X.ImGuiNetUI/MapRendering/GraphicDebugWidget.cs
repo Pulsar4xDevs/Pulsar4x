@@ -138,9 +138,18 @@ namespace Pulsar4X.SDL2UI
 
             if (ImGui.CollapsingHeader("EllipseArc"))
             {
-                ImGui.SliderFloat("a", ref _ellipseA, 25, 200);
-                ImGui.SliderFloat("b", ref _ellipseB, 25, 200);
-                ImGui.SliderFloat("Eccentricity", ref _ellipseEccentricity, 0, 25f);
+                if (ImGui.SliderFloat("a", ref _ellipseA, _ellipseB, 200))
+                {
+                    _ellipseEccentricity = (float)EllipseMath.EccentricityFromAxies(_ellipseA, _ellipseB);
+                }
+                if(ImGui.SliderFloat("b", ref _ellipseB, 25, _ellipseA))
+                {
+                    _ellipseEccentricity = (float)EllipseMath.EccentricityFromAxies(_ellipseA, _ellipseB);
+                }
+                if(ImGui.SliderFloat("Eccentricity", ref _ellipseEccentricity, 0, 1f))
+                {
+                    _ellipseB = (float)(_ellipseA * Math.Sqrt(1 - _ellipseEccentricity * _ellipseEccentricity));
+                }
                 ImGui.SliderAngle("Angle", ref _ellipseLoP);
                 ImGui.SliderAngle("Angle Start", ref _ellipseArcStart);
                 ImGui.SliderAngle("Angle End", ref _ellipseArcEnd);
@@ -149,8 +158,12 @@ namespace Pulsar4X.SDL2UI
                 var points = CreatePrimitiveShapes.KeplerPoints(_ellipseLoP, _ellipseA, _ellipseB, _ellipseRes, _ellipseArcStart, _ellipseArcEnd);
                 _debugWidget.SetKeplerEllipsePoints = points;
 
-                Vector2 startPos = Angle.PositionFromAngle(_ellipseArcStart);
-                Vector2 endPos = Angle.PositionFromAngle(_ellipseArcEnd);
+                double phi = Angle.NormaliseRadians(_ellipseLoP + Math.PI);
+                double startR = EllipseMath.RadiusFromFocal(_ellipseA, _ellipseEccentricity, phi, _ellipseArcStart);
+                double endR = EllipseMath.RadiusFromFocal(_ellipseA, _ellipseEccentricity, phi, _ellipseArcEnd);
+                Vector2 startPos = Angle.PositionFromAngle(_ellipseArcStart, startR);
+                Vector2 endPos = Angle.PositionFromAngle(_ellipseArcEnd, endR);
+                
                 
                 
                 var points2 = CreatePrimitiveShapes.KeplerPoints(_ellipseLoP, _ellipseA, _ellipseB, _ellipseRes, startPos, endPos);
@@ -217,7 +230,7 @@ namespace Pulsar4X.SDL2UI
         {
             set
             {
-                _keplerEllipseItem.IsEnabled = value;
+                //_keplerEllipseItem.IsEnabled = value;
                 _keplerEllipseItem2.IsEnabled = value; 
             }
         }

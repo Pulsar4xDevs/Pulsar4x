@@ -56,7 +56,7 @@ namespace Pulsar4X.Orbital
 
         public static double DifferenceBetweenRadians(double a1, double a2)
         {
-            return NormaliseRadians(a1 - a2);
+            return NormaliseRadiansPositive(a1 - a2);
         }
 
         public static double DifferenceBetweenDegrees(double a1, double a2)
