@@ -293,8 +293,8 @@ namespace Pulsar4X.SDL2UI
             double delta = cosdphi + sindphi * sinLoP * cosLoP * (b / a - a / b);
             delta = delta - (chrly * bravo) / alpha;
             chrly = chrly / alpha;
-            double x = a * cosLoP ;
-            double y = a * sinLoP ;
+            double x = startPos.X - xc ;
+            double y = startPos.Y - yc ;
             Vector2[] points = new Vector2[nPoints];
             points[0] = startPos;
             for (int i = 1; i < nPoints -1; i++)
