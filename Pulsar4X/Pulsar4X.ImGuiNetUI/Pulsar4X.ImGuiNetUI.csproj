@@ -163,7 +163,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">
     <None Include="Libs\cimgui\osx-x64\cimgui.dylib">
-      <Link>cimgui.dylib</Link>
+      <Link>libcimgui</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Libs\sdl2\win-x86\SDL2.dll">
@@ -274,26 +274,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
-  <Target Name="GetGitHash" BeforeTargets="WriteGitHash" Condition="'$(BuildHash)' == ''">
-    <PropertyGroup>
-      <!-- temp file for the git version (lives in "obj" folder)-->
-      <VerFile>$(IntermediateOutputPath)gitver</VerFile>
-    </PropertyGroup>
-
-    <!-- write the hash to the temp file.-->
-    <Exec Command="git describe --long --always --dirty &gt; $(VerFile)" />
-
-    <!-- read the version into the GitVersion itemGroup-->
-    <ReadLinesFromFile File="$(VerFile)">
-      <Output TaskParameter="Lines" ItemName="GitVersion" />
-    </ReadLinesFromFile>
-    <!-- Set the BuildHash property to contain the GitVersion, if it wasn't already set.-->
-    <PropertyGroup>
-      <BuildHash>@(GitVersion)</BuildHash>
-    </PropertyGroup>
-  </Target>
-
+  
   <Target Name="WriteGitHash" BeforeTargets="CoreCompile">
     <!-- names the obj/.../CustomAssemblyInfo.cs file -->
     <PropertyGroup>

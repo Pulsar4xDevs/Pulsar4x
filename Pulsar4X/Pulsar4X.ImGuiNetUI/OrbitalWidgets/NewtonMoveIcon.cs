@@ -20,7 +20,6 @@ namespace Pulsar4X.SDL2UI
         PositionDB _parentPosDB;
         PositionDB _myPosDB;
         double _sgp;
-        private double _sgpAU;
         //_taIndex is the point closest to the orbiting object, it's used to 
         int _taIndex;
         //_numberOfEllipsePoints is the total number of points around the ellipse, unadjusted for the percentage of the ellipse actualy drawn.
@@ -29,11 +28,11 @@ namespace Pulsar4X.SDL2UI
         int _numberOfDrawnPoints;
         //internal float a;
         //protected float b;
-        //_points is the world coordinate points of an ellipse or hyperbola.
+        //Points is the world coordinate points of an ellipse or hyperbola.
         //eccentricity, focal offset, and longitude of the periapsis are calculated when populating this array.
         protected Orbital.Vector2[] _points; 
         //_drawpoints is the translated resized screen/pixel location of the above ellipse points. 
-        //the above _points are adjusted for camera position and zoom levels when populating this array, as these values can change between frames.
+        //the above Points are adjusted for camera position and zoom levels when populating this array, as these values can change between frames.
         //[0] is the position of the orbiting object and subsequent positions trail behind the velocity and drawn with decreasing alpha. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
         
@@ -80,8 +79,7 @@ namespace Pulsar4X.SDL2UI
             var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             var _sgp1 = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
-            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
-            _sgpAU = GeneralMath.GravitiationalParameter_Au3s2(parentMass + myMass);
+            _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
             _ke = _newtonMoveDB.GetElements();
             
             
@@ -114,12 +112,12 @@ namespace Pulsar4X.SDL2UI
         }
 
         /// <summary>
-        /// This is used to find which point in the _points array is closest to the object
+        /// This is used to find which point in the Points array is closest to the object
         /// we then start drawing from that point and change the alpha
         /// </summary>
         void SetTrueAnomalyIndex()
         {
-            Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition_m.X, _myPosDB.RelativePosition_m.Y);
+            Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition.X, _myPosDB.RelativePosition.Y);
             double minDist = (pos - _points[_taIndex]).Length();
 
             for (int i =0; i < _points.Length; i++)
@@ -181,7 +179,7 @@ namespace Pulsar4X.SDL2UI
         private void CreateHyperbolicPoints()
         {
             Vector3 vel = _newtonMoveDB.CurrentVector_ms;
-            Vector3 pos = _myPosDB.RelativePosition_m;
+            Vector3 pos = _myPosDB.RelativePosition;
             //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
 
             
@@ -333,13 +331,13 @@ namespace Pulsar4X.SDL2UI
             
             
             int index = _taIndex;
-            var spos = camera.ViewCoordinateV2_m(_myPosDB.AbsolutePosition_m);
+            var spos = camera.ViewCoordinateV2_m(_myPosDB.AbsolutePosition);
 
             //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
             // [0] is the position of the object. 
             _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
             //we should have one less segment than points. 
-            //we should have more _points than _drawPoints. (_points is a full ellipse, we normaly only draw an arc)
+            //we should have more Points than _drawPoints. (Points is a full ellipse, we normaly only draw an arc)
             for (int i = 1; i < _numberOfDrawSegments; i++) 
             {
                 if (index < _numberOfEllipsePoints - 1)
@@ -353,10 +351,10 @@ namespace Pulsar4X.SDL2UI
             /*
             for (int i = 0; i < _numberOfDrawSegments; i++)
             {
-                _drawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
+                _drawPoints[i] = mtrx.TransformToSDL_Point(Points[i].X, Points[i].Y);
             }*/
 
-            var foo2 = camera.ViewCoordinate_m(_myPosDB.AbsolutePosition_m);
+            var foo2 = camera.ViewCoordinate_m(_myPosDB.AbsolutePosition);
             var trns2 = Matrix.IDTranslate(foo2.x, foo2.y);
             var mtrx2 = scAU * scZm *  trns2;
             for (int i = 0; i < 2; i++)

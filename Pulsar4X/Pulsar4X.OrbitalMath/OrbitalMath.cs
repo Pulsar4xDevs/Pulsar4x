@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Pulsar4X.Orbital
 {
@@ -14,7 +15,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// Kepler elements from velocity and position.
-        /// Note, to get correct results ensure all Sgp, position, and velocity values are all in the same type (ie meters, km, or AU)
+        /// Note, to get correct results ensure all Sgp, position, and velocity values are all in the same unit (ie meters, km, or AU)
         /// </summary>
         /// <returns>a struct of Kepler elements.</returns>
         /// <param name="standardGravParam">Standard grav parameter.</param>
@@ -24,51 +25,46 @@ namespace Pulsar4X.Orbital
         {
             KeplerElements ke = new KeplerElements();
             Vector3 angularVelocity = Vector3.Cross(position, velocity);
-            Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
+            Vector3 nodeVector = Vector3.Cross(Vector3.UnitZ, angularVelocity);
 
             Vector3 eccentVector = EccentricityVector(standardGravParam, position, velocity);
 
             double eccentricity = eccentVector.Length();
+            double angularSpeed = angularVelocity.Length();
 
-            double specificOrbitalEnergy = Math.Pow(velocity.Length(), 2) * 0.5 - standardGravParam / position.Length();
+            double specificOrbitalEnergy = velocity.LengthSquared() * 0.5 - standardGravParam / position.Length();
 
             double semiMajorAxis;
             double p; //p is where the ellipse or hypobola crosses a line from the focal point 90 degrees from the sma
-            if (Math.Abs(eccentricity) > 1) //hypobola
+
+			// If we run into negative eccentricity we have big problems
+			Debug.Assert(eccentricity >= 0, "Negative eccentricity, this is physically impossible");
+            if (eccentricity > 1) //hypobola
             {
                 semiMajorAxis = -(-standardGravParam / (2 * specificOrbitalEnergy)); //in this case the sma is negitive
                 p = semiMajorAxis * (1 - eccentricity * eccentricity);
             }
-            else if (Math.Abs(eccentricity) < 1) //ellipse
+            else if (eccentricity < 1) //ellipse
             {
                 semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
                 p = semiMajorAxis * (1 - eccentricity * eccentricity);
             }
             else //parabola
             {
-                p = angularVelocity.Length() * angularVelocity.Length() / standardGravParam;
+                p = angularSpeed * angularSpeed / standardGravParam;
                 semiMajorAxis = double.MaxValue;
             }
 
-
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
-            double linierEccentricity = eccentricity * semiMajorAxis;
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
+            double inclination = Math.Acos(angularVelocity.Z / angularSpeed); //should be 0 in 2d. or pi if counter clockwise orbit. 
 
             if (double.IsNaN(inclination))
                 inclination = 0;
 
-            double longdOfAN = CalculateLongitudeOfAscendingNode(nodeVector);
-
-
             double trueAnomaly = TrueAnomaly(eccentVector, position, velocity);
-            double argOfPeriaps = GetArgumentOfPeriapsis(position, inclination, longdOfAN, trueAnomaly);
-            var meanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3));
 
-
-            double eccentricAnomoly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
-            var meanAnomaly = GetMeanAnomaly(eccentricity, eccentricAnomoly);
+            double eccentricAnomaly = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, eccentricity);
 
             ke.StandardGravParameter = standardGravParam;
             ke.SemiMajorAxis = semiMajorAxis;
@@ -78,27 +74,27 @@ namespace Pulsar4X.Orbital
             ke.Apoapsis = EllipseMath.Apoapsis(eccentricity, semiMajorAxis);
             ke.Periapsis = EllipseMath.Periapsis(eccentricity, semiMajorAxis);
             ke.LinearEccentricity = EllipseMath.LinearEccentricity(ke.Apoapsis, semiMajorAxis);
-            ke.LoAN = longdOfAN;
-            ke.AoP = argOfPeriaps;
+            ke.LoAN = CalculateLongitudeOfAscendingNode(nodeVector); ;
+            ke.AoP = GetArgumentOfPeriapsis(position, inclination, ke.LoAN, trueAnomaly); ;
             ke.Inclination = inclination;
-            ke.MeanMotion = meanMotion;
-            ke.MeanAnomalyAtEpoch = meanAnomaly;
+            ke.MeanMotion = Math.Sqrt(standardGravParam / Math.Pow(semiMajorAxis, 3)); ;
+            ke.MeanAnomalyAtEpoch = GetMeanAnomaly(eccentricity, eccentricAnomaly);
             ke.TrueAnomalyAtEpoch = trueAnomaly;
-            ke.OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(semiMajorAxis, 3) / standardGravParam);
+            ke.Period = 2 * Math.PI / ke.MeanMotion;
             ke.Epoch = epoch; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
-                              //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
+            //Epoch(semiMajorAxis, semiMinorAxis, eccentricAnomoly, OrbitalPeriod(standardGravParam, semiMajorAxis));
 
             return ke;
         }
 
-        public static KeplerElements FromPosition(Vector3 ralitivePosition, double sgp, DateTime epoch)
+        public static KeplerElements FromPosition(Vector3 relativePosition, double sgp, DateTime epoch)
         {
 
-            var ralpos = ralitivePosition;
+            var ralpos = relativePosition;
             var r = ralpos.Length();
             var i = Math.Atan2(ralpos.Z, r);
             var m0 = Math.Atan2(ralpos.Y, ralpos.X);
-            
+
             var orbit = new KeplerElements()
             {
                 SemiMajorAxis = r,
@@ -114,45 +110,21 @@ namespace Pulsar4X.Orbital
                 MeanAnomalyAtEpoch = m0,
                 TrueAnomalyAtEpoch = m0,
                 EccentricAnomalyAtEpoch = m0,
-                OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(r, 3) / sgp),
+                Period = 2 * Math.PI * Math.Sqrt(Math.Pow(r, 3) / sgp),
                 Epoch = epoch,
                 StandardGravParameter = sgp,
             };
-            
+
             return orbit;
         }
 
-        public static KeplerElements FromPositionLope(double sgp, Vector3 ralitivePosition, double lop, double e, DateTime epoch)
+        public static KeplerElements FromPositionLope(double sgp, Vector3 relativePosition, double lop, double e, DateTime epoch)
         {
-            var ralpos = ralitivePosition;
-            var r = ralpos.Length();
-            var i = Math.Atan2(ralpos.Z, r);
-            var m0 = Math.Atan2(ralpos.Y, ralpos.X);
-            
-            var orbit = new KeplerElements()
-            {
-                SemiMajorAxis = r,
-                SemiMinorAxis = r,
-                Apoapsis = r,
-                Periapsis = r,
-                LinearEccentricity = 0,
-                Eccentricity = 0,
-                Inclination = i,
-                LoAN = 0,
-                AoP = 0,
-                MeanMotion = Math.Sqrt(sgp / Math.Pow(r, 3)),
-                MeanAnomalyAtEpoch = m0,
-                TrueAnomalyAtEpoch = m0,
-                EccentricAnomalyAtEpoch = m0,
-                OrbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(r, 3) / sgp),
-                Epoch = epoch,
-                StandardGravParameter = sgp,
-            };
-            
-            return orbit;
+            return FromPosition(relativePosition, sgp, epoch);
         }
 
         #region Vector Calculations
+
         public static Vector3 CalculateAngularMomentum(Vector3 position, Vector3 velocity)
         {
             /*
@@ -160,26 +132,13 @@ namespace Pulsar4X.Orbital
             * velocity              m/sec
             */
             var (X, Y, Z) = Vector3.CrossPrecise(position, velocity);
-            return Vector3.Vector3FromDecimals(X, Y, Z);
+            return new Vector3((double)X, (double)Y, (double)Z);
         }
 
         public static Vector3 CalculateNode(Vector3 angularVelocity)
         {
-            var (X, Y, Z) = Vector3.CrossPrecise(new Vector3(0, 0, 1), angularVelocity);
-            return Vector3.Vector3FromDecimals(X, Y, Z);
-        }
-
-        public static double CalculateStandardGravityParameterInKm3S2(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
-        {
-            double sgpInKm3S2 = CalculateStandardGravityParameterInM3S2(bodyBeingOrbitedMassInKg, orbiterMassInKg) / Math.Pow(UniversalConstants.Units.KmPerAu, 3);
-            return sgpInKm3S2;
-        }
-
-        public static double CalculateStandardGravityParameterInM3S2(double orbiterMassInKg, double bodyBeingOrbitedMassInKg)
-        {
-            // https://en.wikipedia.org/wiki/Standard_gravitational_parameter
-            double sgpInM3S2 = UniversalConstants.Science.GravitationalConstant * (bodyBeingOrbitedMassInKg + orbiterMassInKg);
-            return sgpInM3S2;
+            var (X, Y, Z) = Vector3.CrossPrecise(Vector3.UnitZ, angularVelocity);
+            return new Vector3((double)X, (double)Y, (double)Z);
         }
 
         /// <summary>
@@ -201,6 +160,7 @@ namespace Pulsar4X.Orbital
 
             return longitudeOfAscendingNode;
         }
+
         #endregion
 
         #region ArgumentOfPeriapsis
@@ -252,10 +212,15 @@ namespace Pulsar4X.Orbital
                 Sw = (Ry * Math.Cos(loAN) - Rx * Math.Sin(loAN)) / R;
             }
             else
-            { Sw = Rz / (R * Math.Sin(incl)); }
+            {
+                Sw = Rz / (R * Math.Sin(incl));
+            }
 
             var W = Math.Atan2(Sw, Cw) - TA;
-            if (W < 0) { W = 2 * Math.PI + W; }
+            if (W < 0)
+            {
+                W = 2 * Math.PI + W;
+            }
 
             return W;
         }
@@ -312,18 +277,15 @@ namespace Pulsar4X.Orbital
         {
             Vector3 angularMomentum = Vector3.Cross(position, velocity);
             Vector3 foo1 = Vector3.Cross(velocity, angularMomentum) / sgp;
-            var foo2 = position / position.Length();
-            var E = foo1 - foo2;
+            Vector3 foo2 = Vector3.Normalise(position);
+            Vector3 E = foo1 - foo2;
             if (E.Length() < Epsilon)
             {
-                return new Vector3(0, 0, 0);
+                return Vector3.Zero;
             }
             else
                 return E;
         }
-
-
-
 
         /// <summary>
         /// Slighty different way of calculating eccentrictyVector.
@@ -335,14 +297,14 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static Vector3 EccentricityVector2(double sgp, Vector3 position, Vector3 velocity)
         {
-            var speed = velocity.Length();
+            //var speed = velocity.Length();
             var radius = position.Length();
-            var foo1 = (speed * speed - sgp / radius) * position;
+            var foo1 = (velocity.LengthSquared() - sgp / radius) * position;
             var foo2 = Vector3.Dot(position, velocity) * velocity;
             var E = (foo1 - foo2) / sgp;
             if (E.Length() < Epsilon)
             {
-                return new Vector3(0, 0, 0);
+                return Vector3.Zero;
             }
             else
                 return E;
@@ -366,18 +328,18 @@ namespace Pulsar4X.Orbital
             double e = eccentVector.Length(); //eccentricity
             double r = position.Length();
 
-            if (e > Epsilon) //if eccentricity is bigger than a tiny amount, it's a circular orbit.
+            if (e > Epsilon) //if eccentricity is bigger than a tiny amount, it's an elliptical orbit.
             {
                 double dotEccPos = Vector3.Dot(eccentVector, position);
                 double talen = e * r;
                 talen = dotEccPos / talen;
                 talen = GeneralMath.Clamp(talen, -1, 1);
-                var trueAnomoly = Math.Acos(talen);
+                var trueAnomaly = Math.Acos(talen);
 
                 if (Vector3.Dot(position, velocity) < 0)
-                    trueAnomoly = Math.PI * 2 - trueAnomoly;
+                    trueAnomaly = Math.PI * 2 - trueAnomaly;
 
-                return Angle.NormaliseRadiansPositive(trueAnomoly);
+                return Angle.NormaliseRadiansPositive(trueAnomaly);
             }
             else
             {
@@ -396,9 +358,9 @@ namespace Pulsar4X.Orbital
         /// <param name="velocity">Velocity.</param>
         public static double TrueAnomaly(double sgp, Vector3 position, Vector3 velocity)
         {
-            var H = Vector3.Cross(position, velocity).Length();    //angular momentum?
-            var r = position.Length();                                      //radius
-            var q = Vector3.Dot(position, velocity);               //dot product of r*v
+            var H = Vector3.Cross(position, velocity).Length(); //angular momentum?
+            var r = position.Length(); //radius
+            var q = Vector3.Dot(position, velocity); //dot product of r*v
             var TAx = H * H / (r * sgp) - 1;
             var TAy = H * q / (r * sgp);
             var TA = Math.Atan2(TAy, TAx);
@@ -461,12 +423,25 @@ namespace Pulsar4X.Orbital
         /// <param name="loAN"></param>
         /// <param name="inclination"></param>
         /// <returns></returns>
-        public static Vector3 ProgradeToParentVector(Vector3 progradeVector, double trueAnomaly, double aop, double loAN, double inclination)
+        public static Vector3 ProgradeToStateVector(Vector3 progradeVector, double trueAnomaly, double aop, double loAN, double inclination)
         {
             var mtxTruA = Matrix3d.IDRotateZ(-trueAnomaly);
             var mtxaop = Matrix3d.IDRotateZ(-aop);
             var mtxLoAN = Matrix3d.IDRotateZ(-loAN);
             var mtxincl = Matrix3d.IDRotateX(inclination);
+
+            var mtx = mtxLoAN * mtxincl * mtxTruA * mtxaop;
+
+            var transformedVector = mtx.Transform(progradeVector);
+            return transformedVector;
+        }
+
+        public static Vector3 ProgradeToStateVector(Vector3 progradeVector, KeplerElements ke)
+        {
+            var mtxTruA = Matrix3d.IDRotateZ(-ke.TrueAnomalyAtEpoch);
+            var mtxaop = Matrix3d.IDRotateZ(-ke.Apoapsis);
+            var mtxLoAN = Matrix3d.IDRotateZ(-ke.LoAN);
+            var mtxincl = Matrix3d.IDRotateX(ke.Inclination);
 
             var mtx = mtxLoAN * mtxincl * mtxTruA * mtxaop;
 
@@ -483,7 +458,7 @@ namespace Pulsar4X.Orbital
         /// <param name="position"></param>
         /// <param name="currentVelocityVector"></param>
         /// <returns></returns>
-        public static Vector3 ProgradeToParentVector(double sgp, Vector3 progradeVector, Vector3 position, Vector3 currentVelocityVector)
+        public static Vector3 ProgradeToStateVector(double sgp, Vector3 progradeVector, Vector3 position, Vector3 currentVelocityVector)
         {
             Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
             Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
@@ -495,7 +470,7 @@ namespace Pulsar4X.Orbital
                 inclination = 0;
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
 
-            return ProgradeToParentVector(progradeVector, trueAnomaly, aop, loAN, inclination);
+            return ProgradeToStateVector(progradeVector, trueAnomaly, aop, loAN, inclination);
         }
 
 
@@ -508,7 +483,7 @@ namespace Pulsar4X.Orbital
         /// <param name="loAN"></param>
         /// <param name="inclination"></param>
         /// <returns></returns>
-        public static Vector3 ParentToProgradeVector(Vector3 vector, double trueAnomaly, double aop, double loAN, double inclination)
+        public static Vector3 StateToProgradeVector(Vector3 vector, double trueAnomaly, double aop, double loAN, double inclination)
         {
             var mtxTruA = Matrix3d.IDRotateZ(trueAnomaly);
             var mtxaop = Matrix3d.IDRotateZ(aop);
@@ -521,6 +496,31 @@ namespace Pulsar4X.Orbital
             return transformedVector;
         }
 
+        public static Vector3 ProgradeVector(KeplerElements ke, DateTime dateTime )
+        {
+            var secondsFromEpoch = (dateTime - ke.Epoch).TotalSeconds;
+            var sgp = ke.StandardGravParameter;
+            double lofAN = ke.LoAN;
+            double i = ke.Inclination;
+            double e = ke.Eccentricity;
+            double a = ke.SemiMajorAxis;
+            var meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
+            var eccAnom = GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly);
+            var trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
+            double angleToObj = trueAnomaly + ke.AoP;
+
+            double x = Math.Cos(lofAN) * Math.Cos(angleToObj) - Math.Sin(lofAN) * Math.Sin(angleToObj) * Math.Cos(i);
+            double y = Math.Sin(lofAN) * Math.Cos(angleToObj) + Math.Cos(lofAN) * Math.Sin(angleToObj) * Math.Cos(i);
+            double z = Math.Sin(i) * Math.Sin(angleToObj);
+            double radius = a * (1 - e * e) / (1 + e * Math.Cos(trueAnomaly));
+            var position = new Vector3(x, y, z) * radius;
+
+            var spd = InstantaneousOrbitalSpeed(sgp, radius, ke.SemiMajorAxis);
+
+            return new Vector3(0, spd, 0);
+
+        }
+
         /// <summary>
         /// Converts parent to prograde vector
         /// </summary>
@@ -529,7 +529,7 @@ namespace Pulsar4X.Orbital
         /// <param name="position"></param>
         /// <param name="currentVelocityVector"></param>
         /// <returns></returns>
-        public static Vector3 ParentToProgradeVector(double sgp, Vector3 orbitLocalVec, Vector3 position, Vector3 currentVelocityVector)
+        public static Vector3 StateToProgradeVector(double sgp, Vector3 orbitLocalVec, Vector3 position, Vector3 currentVelocityVector)
         {
             Vector3 angularVelocity = Vector3.Cross(position, currentVelocityVector);
             Vector3 nodeVector = Vector3.Cross(new Vector3(0, 0, 1), angularVelocity);
@@ -541,7 +541,7 @@ namespace Pulsar4X.Orbital
                 inclination = 0;
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
 
-            return ParentToProgradeVector(orbitLocalVec, trueAnomaly, aop, loAN, inclination);
+            return StateToProgradeVector(orbitLocalVec, trueAnomaly, aop, loAN, inclination);
         }
 
 
@@ -571,8 +571,8 @@ namespace Pulsar4X.Orbital
 
 
         /// <summary>
-        /// returns state vectors, TODO velocity vector should be 3d.
-        /// As this uses newtonion method to calculate eccentricAnomaly, this is ralitivly expensive. 
+        /// returns state vectors, TODO velocity vector should be 3d. TODO Use Orbit.StateVectors
+        /// As this uses newtonion method to calculate eccentricAnomaly, this is relatively expensive. 
         /// </summary>
         /// <param name="ke"></param>
         /// <param name="dateTime"></param>
@@ -612,7 +612,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// This returns the heading mesured from the periapsis (AoP) in radians
+        /// This returns the heading measured from the periapsis (AoP) in radians
         /// Add the LoP to this to get the true heading in a 2d orbit. 
         /// </summary>
         /// <returns>The orbital velocity polar coordinate.</returns>
@@ -687,16 +687,16 @@ namespace Pulsar4X.Orbital
         /// <param name="atDatetime">At datetime.</param>
         public static double Hackspeed(KeplerElements orbit, DateTime atDatetime)
         {
-            var pos1 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
-            var pos2 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
+            var pos1 = OrbitProcessorBase.GetPosition(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
+            var pos2 = OrbitProcessorBase.GetPosition(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
 
             return Distance.DistanceBetween(pos1, pos2);
         }
 
         public static double HackVelocityHeading(KeplerElements orbit, DateTime atDatetime)
         {
-            var pos1 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
-            var pos2 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
+            var pos1 = OrbitProcessorBase.GetPosition(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
+            var pos2 = OrbitProcessorBase.GetPosition(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
 
             Vector3 vector = pos2 - pos1;
             double heading = Math.Atan2(vector.Y, vector.X);
@@ -705,8 +705,8 @@ namespace Pulsar4X.Orbital
 
         public static Vector3 HackVelocityVector(KeplerElements orbit, DateTime atDatetime)
         {
-            var pos1 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
-            var pos2 = OrbitProcessorBase.GetPosition_m(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
+            var pos1 = OrbitProcessorBase.GetPosition(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
+            var pos2 = OrbitProcessorBase.GetPosition(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
             //double speed = Distance.DistanceBetween(pos1, pos2);
             return pos2 - pos1;
         }
@@ -718,18 +718,14 @@ namespace Pulsar4X.Orbital
         /// <param name="orbit">Orbit.</param>
         public static double MeanOrbitalVelocityInAU(KeplerElements orbit)
         {
-            double a = Distance.MToAU(orbit.SemiMajorAxis);
-            double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
-            double orbitalPerodSeconds = orbit.OrbitalPeriod;
-            double peremeter = Math.PI * (3 * (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
-            return peremeter / orbitalPerodSeconds;
+            return Distance.MToAU(MeanOrbitalVelocityInm(orbit));
         }
 
         public static double MeanOrbitalVelocityInm(KeplerElements orbit)
         {
             double a = orbit.SemiMajorAxis;
             double b = EllipseMath.SemiMinorAxis(a, orbit.Eccentricity);
-            double orbitalPerodSeconds = orbit.OrbitalPeriod;
+            double orbitalPerodSeconds = orbit.Period;
             double peremeter = Math.PI * (3 * (a + b) - Math.Sqrt((3 * a + b) * (a + 3 * b)));
             return peremeter / orbitalPerodSeconds;
         }
@@ -914,12 +910,12 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Position using time (ralitivly computationaly expensive)
+        /// Position using time (relatively computationaly expensive)
         /// </summary>
         /// <param name="ke"></param>
         /// <param name="dateTime"></param>
         /// <returns></returns>
-        public static Vector3 GetRalitivePosition(KeplerElements ke, DateTime dateTime)
+        public static Vector3 GetRelativePosition(KeplerElements ke, DateTime dateTime)
         {
             var secondsFromEpoch = (dateTime - ke.Epoch).TotalSeconds;
             double lofAN = ke.LoAN;
@@ -1013,7 +1009,7 @@ namespace Pulsar4X.Orbital
         {
             // http://en.wikipedia.org/wiki/Orbital_period#Two_bodies_orbiting_each_other
             TimeSpan period;
-            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis, 3) / sgp);
+            double orbitalPeriod = GetOrbitalPeriodInSeconds(sgp, SemiMajorAxis);
             if (orbitalPeriod * 10000000 > long.MaxValue)
             {
                 period = TimeSpan.MaxValue;
@@ -1188,7 +1184,7 @@ namespace Pulsar4X.Orbital
         /// Tsiolkovsky's rocket equation.
         /// Use this to calculate the amount of fuel you will use when you know how much fuel you have availible.
         /// </summary>
-        /// <param name="wetMass">fuel Availible</param>
+        /// <param name="wetMass">Total mass of ship and fuel</param>
         /// <param name="ve">ExhaustVelocity, not isp</param>
         /// <param name="deltaV">DeltaV to use</param>
         /// <returns>Fuel to burn</returns>
@@ -1223,9 +1219,9 @@ namespace Pulsar4X.Orbital
         {
             var lowOrbit = LowOrbitRadius(planetRadiusInM);
 
-            var exaustVelocity = 275;
-            var sgp = OrbitalMath.CalculateStandardGravityParameterInKm3S2(payload, planetMassDryInKG);
-            Vector3 pos = new Vector3(lowOrbit, 0, 0);
+            var exaustVelocity = 3000;
+            var sgp = GeneralMath.StandardGravitationalParameter(payload + planetMassDryInKG);
+            Vector3 pos = lowOrbit * Vector3.UnitX;
 
             var vel = OrbitalMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
             var fuelCost = OrbitalMath.TsiolkovskyFuelCost(payload, exaustVelocity, vel.speed);
@@ -1234,10 +1230,7 @@ namespace Pulsar4X.Orbital
 
         public static double LowOrbitRadius(double planetRadiusInM)
         {
-            var prad = planetRadiusInM;
-            double alt = prad * 0.33333;
-            var lowOrbit = prad + alt;
-            return lowOrbit;
+            return planetRadiusInM * 1.1;
         }
 
         struct Orbit
@@ -1264,7 +1257,7 @@ namespace Pulsar4X.Orbital
             var pl = new Orbit()
             {
                 position = moverAbsolutePos,
-                T = targetEntity.Orbit.OrbitalPeriod,
+                T = targetEntity.Orbit.Period,
             };
 
             double a = targetEntity.Orbit.SemiMajorAxis * 2;
@@ -1279,9 +1272,9 @@ namespace Pulsar4X.Orbital
 
             for (t = 0; t < pl.T; t += dt)
             {
-                p = OrbitProcessorBase.GetAbsolutePosition_m(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
+                p = OrbitProcessorBase.GetAbsolutePosition(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
                 p += offsetPosition;
-                tt = Vector3.Magnitude(p - pos) / speed;  //length(p - pos) / speed;
+                tt = (p - pos).Length() / speed;  //length(p - pos) / speed;
                 a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
                 a0 /= pl.T;                                   // remove full periods from the difference
                 a0 -= Math.Floor(a0);
@@ -1296,9 +1289,9 @@ namespace Pulsar4X.Orbital
             for (i = 0; i < 10; i++)                               // recursive increase of accuracy
                 for (a1 = -1.0, t = tim - dt, T = tim + dt, dt *= 0.1; t < T; t += dt)
                 {
-                    p = OrbitProcessorBase.GetAbsolutePosition_m(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
+                    p = OrbitProcessorBase.GetAbsolutePosition(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
                     p += offsetPosition;
-                    tt = Vector3.Magnitude(p - pos) / speed;  //tt = length(p - pos) / speed;
+                    tt = (p - pos).Length() / speed;  //tt = length(p - pos) / speed;
                     a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
                     a0 /= pl.T;                                   // remove full periods from the difference
                     a0 -= Math.Floor(a0);
@@ -1310,7 +1303,7 @@ namespace Pulsar4X.Orbital
                     }   // remember best option
                 }
             // direction
-            p = OrbitProcessorBase.GetAbsolutePosition_m(targetEntity, atDateTime + TimeSpan.FromSeconds(tim));//pl.position(sim_t + tim);
+            p = OrbitProcessorBase.GetAbsolutePosition(targetEntity, atDateTime + TimeSpan.FromSeconds(tim));//pl.position(sim_t + tim);
             p += offsetPosition;
             //dir = normalize(p - pos);
             return (p, atDateTime + TimeSpan.FromSeconds(tim));

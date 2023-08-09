@@ -9,7 +9,10 @@
         {
             return meters / UniversalConstants.Units.MetersPerAu;
         }
-        public static double MToAU(double meters)
+		public static Vector2 MToAU(Vector2 meters) {
+			return meters / UniversalConstants.Units.MetersPerAu;
+		}
+		public static double MToAU(double meters)
         {
             return meters / UniversalConstants.Units.MetersPerAu;
         }
@@ -18,12 +21,24 @@
         {
             return meters / 1000.0;
         }
-        public static double KmToM(double kilometers)
+		public static Vector2 MToKm(Vector2 meters)
+		{
+			return meters / 1000.0;
+		}
+		public static Vector3 MToKm(Vector3 meters)
+		{
+			return meters / 1000.0;
+		}
+		public static double KmToM(double kilometers)
         {
             return kilometers * 1000.0;
         }
+		public static Vector3 KmToM(Vector3 kilometers) 
+        {
+			return kilometers * 1000.0;
+		}
 
-        public static double KmToAU(double km)
+		public static double KmToAU(double km)
         {
             return km / UniversalConstants.Units.KmPerAu;
         }
@@ -57,6 +72,10 @@
         {
             Vector2 meters = au * UniversalConstants.Units.MetersPerAu;
             return meters;
+        }
+        public static MinMaxStruct AuToMt(MinMaxStruct au)
+        {
+            return new MinMaxStruct(AuToMt(au.Min), AuToMt(au.Max));
         }
         public static double AuToMt(double au)
         {

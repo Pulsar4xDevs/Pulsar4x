@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
@@ -21,11 +22,11 @@ namespace Pulsar4X.Tests
             Vector3 velocity = new Vector3() { Y = 54000 };
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(man.ManagerGuid) { X_AU = 0, Y_AU = 0, Z_AU = 0 };
+            parentblobs[0] = new PositionDB(man.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
-            double sgp_m = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
+            double sgp_m = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
 
             OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp_m, position, velocity, new DateTime());
             Vector3 resultPos = objOrbit.GetPosition_AU(new DateTime());
@@ -38,7 +39,7 @@ namespace Pulsar4X.Tests
             
             var parentMass = 5.97237e24;
             var objMass = 7.342e22;
-            var sgpm = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
+            var sgpm = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
             var speedm = OrbitMath.InstantaneousOrbitalSpeed(sgpm, 405400000, 384399000);
             Assert.AreEqual(970, speedm, 0.025);
         }
@@ -68,12 +69,13 @@ namespace Pulsar4X.Tests
             Vector3 velocity = new Vector3() { Y = Distance.KmToAU(0.97) }; //approx velocity of moon at apoapsis
             double parentMass = 5.97237e24;
             double objMass = 7.342e22;
-            double sgp = OrbitMath.CalculateStandardGravityParameterInKm3S2(parentMass, objMass);
+            // There's definitely a unit mistake below...
+            double sgp = GeneralMath.StandardGravitationalParameter(parentMass + objMass) / Math.Pow(UniversalConstants.Units.KmPerAu, 3);
             KeplerElements elements = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, velocity, new DateTime());
 
             Vector3 postionKm = new Vector3() { X = 405400 };
             Vector3 velocityKm = new Vector3() { Y = 0.97 };
-            double sgpKm = OrbitMath.CalculateStandardGravityParameterInM3S2(parentMass, objMass);
+            double sgpKm = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
 
             KeplerElements elementsKm = OrbitMath.KeplerFromPositionAndVelocity(sgpKm, postionKm, velocityKm, new DateTime());
 
@@ -277,14 +279,14 @@ namespace Pulsar4X.Tests
         public void TestOrbitDBFromVectors(double parentMass, double objMass, Vector3 position_InMeters, Vector3 velocity_InMetersSec)
         {
             double angleΔ = 0.0000000001;
-            double sgp_m = OrbitMath.CalculateStandardGravityParameterInM3S2(objMass, parentMass);
+            double sgp_m = GeneralMath.StandardGravitationalParameter(objMass + parentMass);
             KeplerElements ke_m = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position_InMeters, velocity_InMetersSec, new DateTime());
 
             Game game = new Game();
             EntityManager man = new EntityManager(game, false);
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(man.ManagerGuid) { X_AU = 0, Y_AU = 0, Z_AU = 0 };
+            parentblobs[0] = new PositionDB(man.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(man, parentblobs);
@@ -310,7 +312,7 @@ namespace Pulsar4X.Tests
             var objM0 = objOrbit.MeanAnomalyAtEpoch;
             var keM0 = ke_m.MeanAnomalyAtEpoch;
             Assert.AreEqual(keM0, objM0, angleΔ);
-            Assert.AreEqual(objM0, OrbitMath.GetMeanAnomalyFromTime(objM0, objOrbit.MeanMotion_DegreesSec, 0), "meanAnomalyError");
+            Assert.AreEqual(objM0, OrbitMath.GetMeanAnomalyFromTime(objM0, Angle.ToDegrees(objOrbit.MeanMotion), 0), "meanAnomalyError");
 
             //checkEpoch
             var objEpoch = objOrbit.Epoch;
@@ -320,7 +322,8 @@ namespace Pulsar4X.Tests
             
             
             //check EccentricAnomaly:
-            var objE = (objOrbit.GetEccentricAnomaly(objOrbit.MeanAnomalyAtEpoch_Degrees));
+            // I feel like this should be in radians
+            var objE = (objOrbit.GetEccentricAnomaly(Angle.ToDegrees(objOrbit.MeanAnomalyAtEpoch)));
             //var keE =   (OrbitMath.Gete(position, ke.SemiMajorAxis, ke.LinearEccentricity, ke.AoP));
             /*
             if (objE != keE)
@@ -376,7 +379,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(ke_m.Periapsis, objOrbit.Periapsis, 1.0E-4 );
 
             Vector3 pos_m = position_InMeters;
-            Vector3 result_m = objOrbit.GetPosition_m(new DateTime());
+            Vector3 result_m = objOrbit.GetPosition(new DateTime());
 
             double keslr = EllipseMath.SemiLatusRectum(ke_m.SemiMajorAxis, ke_m.Eccentricity);
             double keradius = OrbitMath.RadiusAtAngle(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);
@@ -397,7 +400,7 @@ namespace Pulsar4X.Tests
             if (velocity_InMetersSec.Z == 0)
             {
                 Assert.IsTrue(ke_m.Inclination == 0);
-                Assert.IsTrue(objOrbit.Inclination_Degrees == 0);
+                Assert.IsTrue(objOrbit.Inclination == 0);
             }
 
             //var speedVectorAU = OrbitProcessor.PreciseOrbitalVector(sgp, position, ke.SemiMajorAxis);
@@ -416,7 +419,7 @@ namespace Pulsar4X.Tests
             EntityManager mgr = new EntityManager(game, false);
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { X_AU = 0, Y_AU = 0, Z_AU = 0 };
+            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = new Entity(mgr, parentblobs);
@@ -429,7 +432,7 @@ namespace Pulsar4X.Tests
             Vector3 targetObjVelocity = new Vector3 { Y = Distance.KmToM(35) };
 
 
-            double sgp_m = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass);
+            double sgp_m = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
             //KeplerElements ke = OrbitMath.KeplerFromVelocityAndPosition(sgp, targetObjPosition, targetObjVelocity);
 
             var currentDateTime = new DateTime(2000, 1, 1);
@@ -471,7 +474,9 @@ namespace Pulsar4X.Tests
             EntityManager mgr = new EntityManager(game, false);
             Entity parentEntity = TestingUtilities.BasicEarth(mgr);
 
-            PositionDB pos1 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
+            Vector3 absolutePosition = new Vector3(0, Distance.AuToMt(8.52699302490434E-05), 0);
+
+			PositionDB pos1 = new PositionDB(mgr.ManagerGuid, parentEntity) { AbsolutePosition = absolutePosition };
             var newt1 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs1 = new BaseDataBlob[4];
             objBlobs1[0] = pos1;
@@ -481,7 +486,7 @@ namespace Pulsar4X.Tests
             Entity objEntity1 = new Entity(mgr, objBlobs1);
             
             
-            PositionDB pos2 = new PositionDB(mgr.ManagerGuid, parentEntity) { X_AU = 0, Y_AU = 8.52699302490434E-05, Z_AU = 0 };
+            PositionDB pos2 = new PositionDB(mgr.ManagerGuid, parentEntity) { AbsolutePosition = absolutePosition };
             var newt2 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs2 = new BaseDataBlob[4];
             objBlobs2[0] = pos2;
@@ -500,10 +505,38 @@ namespace Pulsar4X.Tests
                 newt1.LastProcessDateTime -= TimeSpan.FromSeconds(1);
             }
             NewtonionMovementProcessor.NewtonMove(newt2, seconds);
-            var distance1 = (pos1.RelativePosition_m.Length());
-            var distance2 = (pos2.RelativePosition_m.Length());
+            var distance1 = (pos1.RelativePosition.Length());
+            var distance2 = (pos2.RelativePosition.Length());
             
             Assert.AreEqual(distance1, distance2); //if we put the variable timstep which is related to the speed of the object in we'll have to give this a delta
         }
+
+        [Test]
+        public void EccentricityVectorTimeStudy()
+        {
+            Stopwatch sw1 = new Stopwatch();
+            Stopwatch sw2 = new Stopwatch();
+
+            for (int i = 0; i < 1e6; i++)
+            {
+                Random r = new Random();
+
+                double sgp = r.NextDouble();
+                Vector3 position = Vector3.Random(r);
+                Vector3 velocity = Vector3.Random(r);
+
+                sw1.Start();
+                OrbitalMath.EccentricityVector(sgp, position, velocity);
+                sw1.Stop();
+
+				sw2.Start();
+				OrbitalMath.EccentricityVector2(sgp, position, velocity);
+				sw2.Stop();
+			}
+
+            Console.WriteLine("EccentricityVector:\t\t" + sw1.Elapsed.ToString());
+            Console.WriteLine("EccentricityVector2:\t" + sw2.Elapsed.ToString());
+        }
+
     }
 }

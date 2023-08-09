@@ -207,7 +207,7 @@ namespace Pulsar4X.SDL2UI
 
 
             _massTargetBody = TargetEntity.Entity.GetDataBlob<MassVolumeDB>().MassDry;
-            _stdGravParamTargetBody_m = OrbitMath.CalculateStandardGravityParameterInM3S2(_massOrderingEntity, _massTargetBody);
+            _stdGravParamTargetBody_m = GeneralMath.StandardGravitationalParameter(_massOrderingEntity + _massTargetBody);
             
             InsertionCalcs();
 
@@ -544,11 +544,11 @@ namespace Pulsar4X.SDL2UI
 
         Orbital.Vector3 GetTargetPosition()
         {
-            return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            return TargetEntity.Entity.GetDataBlob<PositionDB>().AbsolutePosition;
         }
         Orbital.Vector3 GetMyPosition()
         {
-            return OrderingEntityState.Entity.GetDataBlob<PositionDB>().AbsolutePosition_m;
+            return OrderingEntityState.Entity.GetDataBlob<PositionDB>().AbsolutePosition;
         }
 
         void DepartureCalcs()
@@ -573,11 +573,11 @@ namespace Pulsar4X.SDL2UI
         {
             _deltaV_MS = _newtonUI.DeltaV;
             OrbitDB targetOrbit = TargetEntity.Entity.GetDataBlob<OrbitDB>();
-            (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition_m(OrderingEntityState.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
+            (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition(OrderingEntityState.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
 
             DateTime estArivalDateTime = targetIntercept.eti; //rough calc. 
             
-            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector_m(_departureOrbitalVelocity_m, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
+            Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(_departureOrbitalVelocity_m, targetOrbit, estArivalDateTime);//_departureOrbitalVelocity - parentOrbitalVector;
             _insertionOrbitalVelocity_m = insertionVector;
 
             _insertionOrbitalVelocity_m +=  _deltaV_MS;

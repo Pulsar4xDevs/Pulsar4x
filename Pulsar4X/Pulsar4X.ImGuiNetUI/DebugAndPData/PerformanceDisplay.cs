@@ -105,6 +105,13 @@ namespace Pulsar4X.SDL2UI
                 var overtime = t_lpt - t_tf;
                 ImGui.TextColored(col, overtime.ToString());
                 
+                System.Diagnostics.Process p = System.Diagnostics.Process.GetCurrentProcess();
+                ImGui.Text("Physical mem usage:"); ImGui.SameLine();
+                ImGui.Text((p.WorkingSet64 / 1048576).ToString() + "MiB");
+                ImGui.Text("Paged system mem size:"); ImGui.SameLine();
+                ImGui.Text((p.PagedSystemMemorySize64 / 1048576).ToString() + "MiB");
+                ImGui.Text("Paged mem size:"); ImGui.SameLine();
+                ImGui.Text((p.PagedMemorySize64 / 1048576).ToString() + "MiB");
                 
                 //plot vars: (label, values, valueOffset, overlayText, scaleMin, scaleMax, graphSize, Stride)
                 //core game processing rate.

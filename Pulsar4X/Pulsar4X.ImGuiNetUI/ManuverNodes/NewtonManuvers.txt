@@ -1,0 +1,28 @@
+This file explains how I'm intending to implement newton manuvers. 
+
+We need to describe:
+
+
+A Manuver Node 
+    this describes how much thrust in the prograde & radial directions.
+    
+An Orbit
+    this describes the orbit the object is on, before, and after the manuver. 
+    This is just kepler elements.
+   
+An Orbit Segment:
+    this is an orbit arc between two Manuvers, at it's most basic it's two time positions on an Orbit.
+    However we're going to use this to also hold the ui drawing code.  
+    
+    
+Manuver Sequence:
+    This is basicaly a ui object, to accomplish manuvers a ship really just needs a flat list of manuvers 
+    and when they should happen. however in the ui multiple manuvers kind of should be grouped together into a tree.
+    For example:
+    Get To Luna orbit (from Earth orbit)
+        |_PhaseChange Manver
+            |_Manuver 1
+            |_Manuver 2
+        |_Homman Manuver
+            |_Manuver 1
+            |_Manuver 2

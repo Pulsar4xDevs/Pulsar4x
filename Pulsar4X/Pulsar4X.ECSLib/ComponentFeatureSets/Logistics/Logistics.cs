@@ -307,7 +307,7 @@ namespace Pulsar4X.ECSLib
                     else
                         odb = destinEntity.GetSOIParentEntity().GetDataBlob<OrbitDB>();
                         //throw new NotImplementedException("Currently we can only predict the movement of stable orbits - target must have an orbitDB");
-                    (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition_m
+                    (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition
                     (
                         shippingEntity, 
                         odb, 
@@ -418,7 +418,7 @@ namespace Pulsar4X.ECSLib
                         //moveto source(if requred)
                         var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
                         var at = ship.StarSysDateTime;
-                        var pos = ship.GetDataBlob<PositionDB>().RelativePosition_m;
+                        var pos = ship.GetDataBlob<PositionDB>().RelativePosition;
                         var state = ship.GetRelativeState();
                         var curstate = new ManuverState()
                         {
@@ -434,7 +434,7 @@ namespace Pulsar4X.ECSLib
                         
                         
                         var smass = sourceSOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
-                        var sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(curstate.Mass, smass);
+                        var sgp = GeneralMath.StandardGravitationalParameter(curstate.Mass + smass);
                         var sstate = currentSOIParent.GetRelativeFutureState(curstate.At);
                         var dvd = CargoTransferProcessor.CalcDVDifference_m(sgp, (curstate.Position, curstate.Velocity), sstate);
                         var svs = source.GetDataBlob<VolumeStorageDB>();
@@ -468,9 +468,9 @@ namespace Pulsar4X.ECSLib
 
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgpTgtBdy = OrbitMath.CalculateStandardGravityParameterInM3S2(shipMass, tgtBdyMass);
+            var sgpTgtBdy = GeneralMath.StandardGravitationalParameter(shipMass + tgtBdyMass);
             var curBdyMass = cur.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-            var sgpCurBdy = OrbitalMath.CalculateStandardGravityParameterInM3S2(shipMass, curBdyMass);
+            var sgpCurBdy = GeneralMath.StandardGravitationalParameter(shipMass + curBdyMass);
             var ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, startState.Position, startState.Velocity, startState.At);
             
             (ManuverState mstate, double fuelBurned) mfstate = (startState, fuelUse);

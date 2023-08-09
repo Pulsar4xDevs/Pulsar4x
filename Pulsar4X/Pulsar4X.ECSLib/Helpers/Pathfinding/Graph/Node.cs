@@ -126,12 +126,12 @@ namespace Pulsar4X.ECSLib
             {
                 if (jp1System == otherJP1System)
                 {
-                    cost = jp1PositionDB.GetDistanceTo_AU(otherJP1PositionDB);
+                    cost = jp1PositionDB.GetDistanceTo_m(otherJP1PositionDB);
                     return true;
                 }
                 if (jp1System == otherJP2System)
                 {
-                    cost = jp1PositionDB.GetDistanceTo_AU(otherJP2PositionDB);
+                    cost = jp1PositionDB.GetDistanceTo_m(otherJP2PositionDB);
                     return true;
                 }
             }
@@ -140,12 +140,12 @@ namespace Pulsar4X.ECSLib
             {
                 if (jp2System == otherJP1System)
                 {
-                    cost = jp2PositionDB.GetDistanceTo_AU(otherJP1PositionDB);
+                    cost = jp2PositionDB.GetDistanceTo_m(otherJP1PositionDB);
                     return true;
                 }
                 if (jp2System == otherJP2System)
                 {
-                    cost = jp2PositionDB.GetDistanceTo_AU(otherJP2PositionDB);
+                    cost = jp2PositionDB.GetDistanceTo_m(otherJP2PositionDB);
                     return true;
                 }
             }

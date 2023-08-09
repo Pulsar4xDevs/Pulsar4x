@@ -47,7 +47,7 @@ namespace ImGuiSDL2CS {
             io.KeyMap[(int)ImGuiKey.X] = (int) SDL.SDL_Keycode.SDLK_x;
             io.KeyMap[(int)ImGuiKey.Y] = (int) SDL.SDL_Keycode.SDLK_y;
             io.KeyMap[(int)ImGuiKey.Z] = (int) SDL.SDL_Keycode.SDLK_z;
-
+            io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
             //io.GetClipboardTextFn((userData) => SDL.SDL_GetClipboardText());
 

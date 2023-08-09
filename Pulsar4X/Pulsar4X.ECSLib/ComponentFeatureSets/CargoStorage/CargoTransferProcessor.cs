@@ -164,7 +164,7 @@ namespace Pulsar4X.ECSLib
             {
                 parent = soi1;
                 parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
-                sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(0, parentMass);
+                sgp = GeneralMath.StandardGravitationalParameter(parentMass);
                 
                 (Vector3 pos, Vector3 Velocity) state1 = entity1.GetRelativeState();
                 (Vector3 pos, Vector3 Velocity) state2 = entity2.GetRelativeState();

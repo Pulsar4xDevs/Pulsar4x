@@ -38,7 +38,7 @@ namespace Pulsar4X.SDL2UI
             get 
             { 
                 if (positionByDB) 
-                    return _positionDB.AbsolutePosition_m + _worldPosition_m; 
+                    return _positionDB.AbsolutePosition + _worldPosition_m; 
                 else 
                     return _worldPosition_m; 
             }
@@ -102,7 +102,7 @@ namespace Pulsar4X.SDL2UI
                 var mtxb = Matrix.IDTranslate(ViewScreenPos.x, ViewScreenPos.y);
                 DrawShapes[0] = CreatePrimitiveShapes.CenterWidget(mtxb);
 
-                var abspos = camera.ViewCoordinateV2_m(_positionDB.AbsolutePosition_m);
+                var abspos = camera.ViewCoordinateV2_m(_positionDB.AbsolutePosition);
                 Shape absCtr = new Shape();
                 absCtr.Points = CreatePrimitiveShapes.Crosshair();
                 byte r = 150;
@@ -113,7 +113,7 @@ namespace Pulsar4X.SDL2UI
                 absCtr.Color = colour;
                 DrawShapes[1] = absCtr;
                 
-                var ralpos = camera.ViewCoordinateV2_m(_positionDB.RelativePosition_m + _worldPosition_m);
+                var ralpos = camera.ViewCoordinateV2_m(_positionDB.RelativePosition + _worldPosition_m);
                 Shape ralCtr = new Shape();
                 ralCtr.Points = CreatePrimitiveShapes.Crosshair();
                  r = 200;
@@ -203,9 +203,9 @@ namespace Pulsar4X.SDL2UI
 
         bool positionByDB;
 
-        public Vector3 WorldPosition_AU
+        public Vector3 WorldPosition
         {
-            get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
+            get { if (positionByDB) return _positionDB.AbsolutePosition + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
         }
 
@@ -238,7 +238,7 @@ namespace Pulsar4X.SDL2UI
         {
 
 
-            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition_AU);
+            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition);
             var vsp = new Vector2
             {
                 X = ViewScreenPos.x ,
@@ -274,7 +274,7 @@ namespace Pulsar4X.SDL2UI
 
         public Orbital.Vector3 WorldPosition
         {
-            get { if (positionByDB) return _positionDB.AbsolutePosition_AU + _worldPosition; else return _worldPosition; }
+            get { if (positionByDB) return _positionDB.AbsolutePosition + _worldPosition; else return _worldPosition; }
             set { _worldPosition = value; }
         }
 
@@ -307,7 +307,7 @@ namespace Pulsar4X.SDL2UI
 
         public void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            ViewScreenPos = camera.ViewCoordinate_AU(WorldPosition);
+            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition);
             var vsp = new Orbital.Vector2()
             {
                 X = ViewScreenPos.x,

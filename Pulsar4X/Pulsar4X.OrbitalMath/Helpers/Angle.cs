@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Pulsar4X.Orbital
 {
@@ -20,13 +18,17 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// returns a number between -2 * pi and 2 * pi
+        /// returns a number between -pi and pi
         /// </summary>
         /// <returns>The radians.</returns>
         /// <param name="radians">Radians.</param>
         public static double NormaliseRadians(double radians)
         {
-            radians = radians % (2 * Math.PI);
+            radians = NormaliseRadiansPositive(radians);
+            if (radians > Math.PI)
+            {
+                radians -= 2 * Math.PI;
+            }
             return radians;
         }
 
@@ -37,10 +39,9 @@ namespace Pulsar4X.Orbital
         /// <returns></returns>
         public static double NormaliseRadiansPositive(double radians)
         {
-            radians = NormaliseRadians(radians);
-            if (radians < 0)
-                radians += (2 * Math.PI);
-            return radians;
+			radians %= 2 * Math.PI;
+			radians = (radians + 2 * Math.PI) % (2 * Math.PI);
+			return radians;
         }
 
         /// <summary>
@@ -50,18 +51,39 @@ namespace Pulsar4X.Orbital
         /// <param name="degrees">Degrees.</param>
         public static double NormaliseDegrees(double degrees)
         {
-            degrees = degrees % 360;
-            return degrees;
+            return ToDegrees(NormaliseRadians(ToRadians(degrees)));
         }
 
         public static double DifferenceBetweenRadians(double a1, double a2)
         {
-            return Math.PI - Math.Abs(Math.Abs(a1 - a2) - Math.PI);
+            return NormaliseRadiansPositive(a1 - a2);
         }
 
         public static double DifferenceBetweenDegrees(double a1, double a2)
         {
-            return 180 - Math.Abs(Math.Abs(a1 - a2) - 180);
+            return NormaliseDegrees(a1 - a2);
+        }
+
+        public static double RadiansFromVector2(Vector2 vector)
+        {
+            return Math.Atan2(vector.Y, vector.X);
+        }
+
+        public static Vector2 PositionFromAngle(double radians, double distance = 1)
+        {
+            double x = distance * Math.Cos(radians);
+            double y = distance * Math.Sin(radians);
+            return new Vector2(x, y);
+        }
+
+        /// <summary>
+        /// currently ignores Z
+        /// </summary>
+        /// <param name="vector"></param>
+        /// <returns></returns>
+        public static double RadiansFromVector3(Vector3 vector)
+        {
+            return Math.Atan2(vector.Y, vector.X);
         }
 
     }

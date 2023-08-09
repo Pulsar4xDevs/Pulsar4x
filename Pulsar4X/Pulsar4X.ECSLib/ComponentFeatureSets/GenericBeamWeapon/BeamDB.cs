@@ -39,10 +39,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             if (beamInfo.HitsTarget)
             {
                 //adjust the vector to ensure the visuals line up with the target
-                var state = (beamInfo.PosDB.AbsolutePosition_m, beamInfo.VelocityVector);
+                var state = (beamInfo.PosDB.AbsolutePosition, beamInfo.VelocityVector);
                 var nowTime = beamInfo.OwningEntity.StarSysDateTime;
                 var futurePosTime = PredictTgtPositionAndTime(state, nowTime, beamInfo.TargetEntity, beamInfo.VelocityVector.Length());
-                var normVector = Vector3.Normalise(futurePosTime.pos - state.AbsolutePosition_m);
+                var normVector = Vector3.Normalise(futurePosTime.pos - state.AbsolutePosition);
                 var absVector =  normVector * beamInfo.VelocityVector.Length();
                 
                 beamInfo.VelocityVector = absVector;
@@ -50,7 +50,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                 if (futurePosTime.seconds <= seconds)
                 {
                     //var ralitivePos = state.AbsolutePosition_m - futurePosTime.pos;
-                    var posRalitiveToTarget = futurePosTime.pos - state.AbsolutePosition_m;
+                    var posRalitiveToTarget = futurePosTime.pos - state.AbsolutePosition;
                     var beamAngle = Math.Atan2(posRalitiveToTarget.Y, posRalitiveToTarget.X);
                     var shipFutureVel = beamInfo.TargetEntity.GetAbsoluteFutureVelocity(nowTime + TimeSpan.FromSeconds(futurePosTime.seconds));
                     var shipHeading = Math.Atan2(shipFutureVel.Y, shipFutureVel.X);
@@ -74,7 +74,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
                 }
                 else
                 {
-                    beamInfo.PosDB.AbsolutePosition_m += beamInfo.VelocityVector * seconds;
+                    beamInfo.PosDB.AbsolutePosition += beamInfo.VelocityVector * seconds;
                     for (int j = 0; j < beamInfo.Positions.Length; j++)
                     {
                         beamInfo.Positions[j] += beamInfo.VelocityVector * seconds;
@@ -84,7 +84,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             
             else
             {
-                beamInfo.PosDB.AbsolutePosition_m += beamInfo.VelocityVector * seconds;
+                beamInfo.PosDB.AbsolutePosition += beamInfo.VelocityVector * seconds;
                 for (int j = 0; j < beamInfo.Positions.Length; j++)
                 {
                     beamInfo.Positions[j] += beamInfo.VelocityVector * seconds;
@@ -105,8 +105,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon
             var beamInfo = new BeamInfoDB(launchingEntity.Guid, targetEntity, hitsTarget);
             var beamlenInMeters = beamLenInSeconds * 299792458;
             beamInfo.Positions = new Vector3[2];
-            beamInfo.Positions[0] = startPos.AbsolutePosition_m ;
-            beamInfo.Positions[1] = startPos.AbsolutePosition_m - normVector * beamlenInMeters;
+            beamInfo.Positions[0] = startPos.AbsolutePosition ;
+            beamInfo.Positions[1] = startPos.AbsolutePosition - normVector * beamlenInMeters;
             beamInfo.VelocityVector = absVector;
             beamInfo.Frequency = freqency;
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();

@@ -35,7 +35,9 @@ namespace Pulsar4X.Orbital
 
             public const double AuPerLightYear = KmPerLightYear / KmPerAu;
 
-            public const double KmPerAu = MetersPerAu / 1000;
+            public const double MetersPerKm = 1000;
+
+            public const double KmPerAu = MetersPerAu / MetersPerKm;
 
             public const double MetersPerAu = 149597870700;  // this is exact, see: http://en.wikipedia.org/wiki/Astronomical_unit
 
@@ -69,6 +71,8 @@ namespace Pulsar4X.Orbital
             public const double SolarRadiusInKm = 696342.0;
 
             public const double SolarRadiusInAu = SolarRadiusInKm / KmPerAu;
+
+            public const double SolarRadius = SolarRadiusInKm * MetersPerKm;
 
             /// <summary>
             /// Earth's gravity in m/s^2. Aka 1g.

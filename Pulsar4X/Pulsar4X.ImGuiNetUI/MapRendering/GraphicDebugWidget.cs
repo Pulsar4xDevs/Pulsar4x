@@ -14,6 +14,15 @@ namespace Pulsar4X.SDL2UI
         public static GraphicDebugWindow _graphicDebugWindow;
         GraphicDebugWidget _debugWidget;
         bool _isEnabled = false;
+
+        private float _ellipseA = 25;
+        private float _ellipseB = 25;
+        private float _ellipseEccentricity = 0;
+        private float _ellipseLoP = 0;
+        private float _ellipseArcStart = 0;
+        private float _ellipseArcEnd = 0;
+        private int _ellipseRes = 180;
+        
         
         public GraphicDebugWindow(GlobalUIState state)
         {
@@ -83,27 +92,90 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             ImGui.Text("y" + _debugWidget.ViewScreenPos.y);
 
-            ImGui.SliderFloat("MatrixArrow Scale X", ref _debugWidget.MtxArwScaleX, -10, 10);
-            ImGui.SliderFloat("MatrixArrow Scale Y", ref _debugWidget.MtxArwScaleY, -10, 10);
-            ImGui.SliderAngle("MatrixArrow Rotate", ref _debugWidget.MtxArwAngle);
-            ImGui.Checkbox("MatrixArrow Mirror X", ref _debugWidget.MtxArwMirrorX);
-            ImGui.Checkbox("MatrixArrow Mirror Y", ref _debugWidget.MtxArwMirrorY);
-            ImGui.Text("Mirrors *around* the given axis, ie mirroring around X will flip Y");
-
-            ImGui.Checkbox("Scales With Zoom", ref _debugWidget.Scales);
-            ImGui.SliderFloat("X offset in AU", ref _debugWidget.XOffset, -2, 2);
-            ImGui.SliderFloat("Y offset in AU", ref _debugWidget.YOffset, -2, 2);
-            ImGui.SliderAngle("Angle", ref _debugWidget.TestingAngle);
-            foreach (var item in _debugWidget.ElementItems)
+            if(ImGui.CollapsingHeader("MatrixArrow test"))
             {
-                ImGui.Text(item.NameString);
-                if (ImGui.IsItemHovered())
-                    item.SetHighlight(true);
-                else
-                    item.SetHighlight(false);
-                ImGui.SameLine();
-                ImGui.Text(item.DataString);
+                _debugWidget.SetArrowEnabled = true;
+                ImGui.SliderFloat("MatrixArrow Scale X", ref _debugWidget.MtxArwScaleX, -10, 10);
+                ImGui.SliderFloat("MatrixArrow Scale Y", ref _debugWidget.MtxArwScaleY, -10, 10);
+                ImGui.SliderAngle("MatrixArrow Rotate", ref _debugWidget.MtxArwAngle);
+                ImGui.Checkbox("MatrixArrow Mirror X", ref _debugWidget.MtxArwMirrorX);
+                ImGui.Checkbox("MatrixArrow Mirror Y", ref _debugWidget.MtxArwMirrorY);
+                ImGui.Text("Mirrors *around* the given axis, ie mirroring around X will flip Y");
             }
+            else
+            {
+                _debugWidget.SetArrowEnabled = false;
+            }
+
+            if(ImGui.CollapsingHeader("Angle Arc test"))
+            {
+                _debugWidget.SetAngleArcEnabled = true;
+                ImGui.Checkbox("Scales With Zoom", ref _debugWidget.Scales);
+                ImGui.SliderFloat("X offset in AU", ref _debugWidget.XOffset, -2, 2);
+                ImGui.SliderFloat("Y offset in AU", ref _debugWidget.YOffset, -2, 2);
+                ImGui.SliderAngle("Angle", ref _debugWidget.TestingAngle);
+                foreach (var item in _debugWidget.ElementItems)
+                {
+                    ImGui.Text(item.NameString);
+                    if (ImGui.IsItemHovered())
+                        item.SetHighlight(true);
+                    else
+                        item.SetHighlight(false);
+                    ImGui.SameLine();
+                    ImGui.Text(item.DataString);
+                }
+            }
+            else
+            {
+                _debugWidget.SetAngleArcEnabled = false;
+            }
+
+            if (ImGui.CollapsingHeader("Bezier curve"))
+            {
+                _debugWidget.SetBezierEnabled = true;
+            }
+            else _debugWidget.SetBezierEnabled = false;
+
+            if (ImGui.CollapsingHeader("EllipseArc"))
+            {
+                if (ImGui.SliderFloat("a", ref _ellipseA, _ellipseB, 200))
+                {
+                    _ellipseEccentricity = (float)EllipseMath.EccentricityFromAxies(_ellipseA, _ellipseB);
+                }
+                if(ImGui.SliderFloat("b", ref _ellipseB, 25, _ellipseA))
+                {
+                    _ellipseEccentricity = (float)EllipseMath.EccentricityFromAxies(_ellipseA, _ellipseB);
+                }
+                if(ImGui.SliderFloat("Eccentricity", ref _ellipseEccentricity, 0, 1f))
+                {
+                    _ellipseB = (float)(_ellipseA * Math.Sqrt(1 - _ellipseEccentricity * _ellipseEccentricity));
+                }
+                ImGui.SliderAngle("Angle", ref _ellipseLoP);
+                ImGui.SliderAngle("Angle Start", ref _ellipseArcStart);
+                ImGui.SliderAngle("Angle End", ref _ellipseArcEnd);
+                ImGui.SliderInt("resolution", ref _ellipseRes, 3, 512);
+                Vector2 start = new Vector2(0, 0);
+                var points = CreatePrimitiveShapes.KeplerPoints(_ellipseLoP, _ellipseA, _ellipseB, _ellipseRes, _ellipseArcStart, _ellipseArcEnd);
+                _debugWidget.SetKeplerEllipsePoints = points;
+
+                double phi = Angle.NormaliseRadians(_ellipseLoP + Math.PI);
+                double startR = EllipseMath.RadiusFromFocal(_ellipseA, _ellipseEccentricity, phi, _ellipseArcStart);
+                double endR = EllipseMath.RadiusFromFocal(_ellipseA, _ellipseEccentricity, phi, _ellipseArcEnd);
+                Vector2 startPos = Angle.PositionFromAngle(_ellipseArcStart, startR);
+                Vector2 endPos = Angle.PositionFromAngle(_ellipseArcEnd, endR);
+                
+                
+                
+                var points2 = CreatePrimitiveShapes.KeplerPoints(_ellipseLoP, _ellipseA, _ellipseB, _ellipseRes, startPos, endPos);
+                _debugWidget.SetKeplerEllipsePoints2 = points2;
+                _debugWidget.SetKeplerEllipseEnabled = true;
+
+            }
+            else
+            {
+                _debugWidget.SetKeplerEllipseEnabled = false;
+            }
+            
             
         }
     }
@@ -115,12 +187,70 @@ namespace Pulsar4X.SDL2UI
         internal float YOffset = 0;
         internal bool Scales = false;
         internal List<ElementItem> ElementItems = new List<ElementItem>();
+
         private List<ComplexShape> DrawComplexShapes = new List<ComplexShape>();
         Orbital.Vector2 _ctrPnt { get { return new Orbital.Vector2() { X = XOffset, Y = YOffset }; } }
-        ElementItem _anglelineItem;
-        ElementItem _testAngleItem;
+        internal ElementItem _anglelineItem;
+        internal ElementItem _testAngleItem;
+        internal ElementItem _mtxArwItem;
+        private ElementItem _keplerEllipseItem;
+        private ElementItem _keplerEllipseItem2;
+        internal bool IsReflineEnabled
+        {
+            set
+            {
+                ElementItems[0].IsEnabled = value;
+            }
+        }
+        
+        internal bool SetAngleArcEnabled
+        {
+            set
+            {
+                ElementItems[0].IsEnabled = value;
+                ElementItems[1].IsEnabled = value;
+                ElementItems[2].IsEnabled = value;
+            }
+        }
+        
+        internal bool SetArrowEnabled
+        {
+            set { _mtxArwItem.IsEnabled = value; }
+        }
 
-        ElementItem _mtxArwItem;
+        internal bool SetBezierEnabled
+        {
+            set
+            {
+                _bezEnabled = value;
+            }
+        }
+        
+        internal bool SetKeplerEllipseEnabled
+        {
+            set
+            {
+                //_keplerEllipseItem.IsEnabled = value;
+                _keplerEllipseItem2.IsEnabled = value; 
+            }
+        }
+
+        internal Vector2[] SetKeplerEllipsePoints
+        {
+            set
+            {
+                _keplerEllipseItem.Shape.Points = value;
+            }
+        }
+        internal Vector2[] SetKeplerEllipsePoints2
+        {
+            set
+            {
+                _keplerEllipseItem2.Shape.Points = value;
+            }
+        }
+
+
         internal float MtxArwAngle;
         internal float MtxArwScaleX = 1;
         internal float MtxArwScaleY = 1;
@@ -128,6 +258,7 @@ namespace Pulsar4X.SDL2UI
         internal bool MtxArwMirrorY;
 
         private BezierCurve _bc;
+        private bool _bezEnabled = false;
 
         public GraphicDebugWidget(Vector3 positionM) : base(positionM)
         {
@@ -160,8 +291,8 @@ namespace Pulsar4X.SDL2UI
                 },
             };
             ElementItems.Add(refline);
-
-
+            refline.IsEnabled = true;
+            
 
             SDL.SDL_Color[] anglelineColour =
             {   new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 }};
@@ -190,6 +321,7 @@ namespace Pulsar4X.SDL2UI
                 },
             };
             ElementItems.Add(_anglelineItem);
+            _anglelineItem.IsEnabled = false;
 
 
 
@@ -216,6 +348,7 @@ namespace Pulsar4X.SDL2UI
                 }
             };
             ElementItems.Add(_testAngleItem);
+            _testAngleItem.IsEnabled = false;
 
 
 
@@ -242,6 +375,54 @@ namespace Pulsar4X.SDL2UI
                 }
             };
 
+            
+            SDL.SDL_Color[] ellipse1Colour =
+                {new SDL.SDL_Color() {r=255, g=255, b= 0, a=100} };
+            SDL.SDL_Color[] ellipse2Colour =
+                {new SDL.SDL_Color() {r=255, g=0, b= 255, a=100} };
+            _keplerEllipseItem = new ElementItem()
+            {
+                NameString = "Ellipse",
+                IsEnabled = false,
+                Colour = ellipse1Colour,
+                HighlightColour = ellipse1Colour,
+                DataItem = Angle.ToDegrees(MtxArwAngle),
+                DataString = Angle.ToDegrees(MtxArwAngle).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    //Points = CreatePrimitiveShapes.KeplerPoints(128),
+                    Colors = ellipse1Colour,
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_keplerEllipseItem);
+
+            
+            _keplerEllipseItem2 = new ElementItem()
+            {
+                NameString = "Ellipse",
+                IsEnabled = false,
+                Colour = ellipse2Colour ,
+                HighlightColour = ellipse2Colour,
+                DataItem = Angle.ToDegrees(MtxArwAngle),
+                DataString = Angle.ToDegrees(MtxArwAngle).ToString() + "°",
+                Shape = new ComplexShape()
+                {
+                    //Points = CreatePrimitiveShapes.KeplerPoints(128),
+                    Colors = ellipse2Colour,
+                    ColourChanges = new (int pointIndex, int colourIndex)[]
+                    {
+                        (0,0),
+                    },
+                    Scales = false
+                }
+            };
+            ElementItems.Add(_keplerEllipseItem2);
+            
 
             var bcp0 = new Vector2(0,0);
             var bcp1 = new Vector2(0.5, 0) ;
@@ -276,7 +457,8 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            _bc.OnFrameUpdate(matrix, camera);
+            if(_bezEnabled)
+                _bc.OnFrameUpdate(matrix, camera);
             UpdateElements();
 
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
@@ -285,8 +467,12 @@ namespace Pulsar4X.SDL2UI
 
             DrawComplexShapes = new List<ComplexShape>() { };
 
-            foreach (var item in ElementItems)
+            for (int index = 0; index < ElementItems.Count; index++)
             {
+                ElementItem item = ElementItems[index];
+                if(!item.IsEnabled)
+                    continue;
+                
                 var shape = item.Shape;
                 var startPoint = matrix.TransformD(shape.StartPoint.X, shape.StartPoint.Y); //add zoom transformation. 
 
@@ -307,41 +493,29 @@ namespace Pulsar4X.SDL2UI
                     x = (int)(ViewScreenPos.x + transformedPoint.X + startPoint.X);
                     y = (int)(ViewScreenPos.y + transformedPoint.Y + startPoint.Y);
                     points[i] = new Orbital.Vector2() { X = x, Y = y };
-
                 }
 
-                DrawComplexShapes.Add(new ComplexShape()
+                DrawComplexShapes.Add(new ComplexShape() { Points = points, Colors = shape.Colors, ColourChanges = shape.ColourChanges });
+            }
+
+
+            if(_mtxArwItem.IsEnabled)
+            {
+                Orbital.Vector2[] mtxArwPts = new Orbital.Vector2[_mtxArwItem.Shape.Points.Length];
+                var mm = Matrix.IDMirror(MtxArwMirrorX, MtxArwMirrorY);
+                var mr = Matrix.IDRotate(MtxArwAngle);
+                var ms = Matrix.IDScale(MtxArwScaleX, MtxArwScaleY);
+                var tl = mm * ms * mr;
+                for (int i = 0; i < _mtxArwItem.Shape.Points.Length; i++)
                 {
-                    Points = points,
-                    Colors = shape.Colors,
-                    ColourChanges = shape.ColourChanges
-                });
+                    var pnt = _mtxArwItem.Shape.Points[i];
+                    var transformedPoint = tl.TransformD(pnt.X, pnt.Y);
+
+                    mtxArwPts[i] = new Orbital.Vector2() { X = ViewScreenPos.x + transformedPoint.X, Y = ViewScreenPos.y + transformedPoint.Y };
+                }
+
+                DrawComplexShapes.Add(new ComplexShape() { Points = mtxArwPts, Colors = _mtxArwItem.Shape.Colors, ColourChanges = _mtxArwItem.Shape.ColourChanges });
             }
-
-
-            Orbital.Vector2[] mtxArwPts = new Orbital.Vector2[_mtxArwItem.Shape.Points.Length];
-            var mm = Matrix.IDMirror(MtxArwMirrorX, MtxArwMirrorY);
-            var mr = Matrix.IDRotate(MtxArwAngle);
-            var ms = Matrix.IDScale(MtxArwScaleX, MtxArwScaleY);
-            var tl = mm * ms * mr;
-            for (int i = 0; i < _mtxArwItem.Shape.Points.Length; i++)
-            {
-                var pnt = _mtxArwItem.Shape.Points[i];
-                var transformedPoint = tl.TransformD(pnt.X, pnt.Y);
-                
-                mtxArwPts[i] = new Orbital.Vector2(){
-                 X = ViewScreenPos.x + transformedPoint.X,
-                 Y = ViewScreenPos.y + transformedPoint.Y 
-                 };
-            }
-
-            DrawComplexShapes.Add(new ComplexShape()
-            {
-                Points = mtxArwPts,
-                Colors = _mtxArwItem.Shape.Colors,
-                ColourChanges = _mtxArwItem.Shape.ColourChanges
-      
-            });
 
         }
 
@@ -370,7 +544,8 @@ namespace Pulsar4X.SDL2UI
                     SDL.SDL_RenderDrawLine(rendererPtr, x1, y1, x2, y2);
                 }
             }
-            _bc.Draw(rendererPtr, camera);
+            if(_bezEnabled)
+                _bc.Draw(rendererPtr, camera);
         }
     }
 }

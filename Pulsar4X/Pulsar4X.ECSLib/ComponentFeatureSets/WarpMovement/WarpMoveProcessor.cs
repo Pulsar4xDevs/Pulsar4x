@@ -77,7 +77,7 @@ namespace Pulsar4X.ECSLib
             EnergyGenProcessor.EnergyGen(entity, entity.StarSysDateTime);
             positionDB.SetParent(positionDB.Root);
             Vector3 targetPosMt = moveDB.ExitPointAbsolute;
-            Vector3 currentPositionMt = positionDB.AbsolutePosition_m;
+            Vector3 currentPositionMt = positionDB.AbsolutePosition;
 
             Vector3 postionDelta = currentPositionMt - targetPosMt;
             double totalDistance = postionDelta.Length();
@@ -125,7 +125,7 @@ namespace Pulsar4X.ECSLib
             double deltaT = (dateTimeFuture - dateTimeFrom).TotalSeconds;
             var positionDB = entity.GetDataBlob<PositionDB>();
 
-            Vector3 currentPositionMt = positionDB.AbsolutePosition_m;
+            Vector3 currentPositionMt = positionDB.AbsolutePosition;
 
             Vector3 targetPosMt = moveDB.ExitPointAbsolute;
             
@@ -146,7 +146,7 @@ namespace Pulsar4X.ECSLib
                 var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
                 positionDB.SetParent(moveDB.TargetEntity);
                 //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
-                positionDB.RelativePosition_m = moveDB.ExitPointrelative;
+                positionDB.RelativePosition = moveDB.ExitPointrelative;
                 
                 if(_gameSettings.StrictNewtonion)
                     SetOrbitHere(entity, positionDB, moveDB, dateTimeFuture);
@@ -161,7 +161,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                positionDB.AbsolutePosition_m = newPositionMt;
+                positionDB.AbsolutePosition = newPositionMt;
             }
 
 
@@ -213,7 +213,7 @@ namespace Pulsar4X.ECSLib
             OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
 
             
-            Vector3 insertionVector_m = OrbitProcessor.GetOrbitalInsertionVector_m(moveDB.SavedNewtonionVector, targetOrbit, atDateTime);
+            Vector3 insertionVector_m = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector, targetOrbit, atDateTime);
             
             positionDB.SetParent(targetEntity);
 
@@ -235,7 +235,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                OrbitDB newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
+                OrbitDB newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);
                 
                 if(newOrbit.Eccentricity >= 1)
                 {
@@ -249,8 +249,8 @@ namespace Pulsar4X.ECSLib
                 else if (newOrbit.Periapsis > targetSOI) //closest point outside soi
                 {
                     //find who's SOI we are in, and create an orbit around that.
-                    targetEntity = OrbitProcessor.FindSOIForPosition((StarSystem)entity.Manager, positionDB.AbsolutePosition_m);
-                    newOrbit = OrbitDB.FromVelocity_m(targetEntity, entity, insertionVector_m, atDateTime);
+                    targetEntity = OrbitProcessor.FindSOIForPosition((StarSystem)entity.Manager, positionDB.AbsolutePosition);
+                    newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);
                     entity.SetDataBlob(newOrbit);
 
                 }

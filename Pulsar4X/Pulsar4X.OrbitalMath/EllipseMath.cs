@@ -22,10 +22,12 @@ namespace Pulsar4X.Orbital
         {
             return (apoapsis + periapsis) / 2;
         }
+
         public static double SemiMajorAxisFromLinearEccentricity(double linearEccentricity, double eccentricity)
         {
             return linearEccentricity * eccentricity;
         }
+
         public static double SemiMinorAxis(double semiMajorAxis, double eccentricity)
         {
             if (eccentricity < 1)
@@ -36,26 +38,40 @@ namespace Pulsar4X.Orbital
 
         public static double SemiMinorAxisFromApsis(double apoapsis, double periapsis)
         {
-            return Math.Sqrt(Math.Abs(apoapsis) * Math.Abs(periapsis));
+            return Math.Sqrt(Math.Abs(apoapsis * periapsis));
         }
 
-        public static double LinearEccentricity(double appoapsis, double semiMajorAxis)
+        public static double LinearEccentricity(double apoapsis, double semiMajorAxis)
         {
-            return appoapsis - semiMajorAxis;
+            return apoapsis - semiMajorAxis;
         }
+
         public static double LinearEccentricityFromEccentricity(double semiMajorAxis, double eccentricity)
         {
             return semiMajorAxis * eccentricity;
         }
+
+        public static double LinearEccentricityFromAxies(double a, double b)
+        {
+            return Math.Sqrt(a * a - b * b);
+            
+        }
+        
         public static double Eccentricity(double linearEccentricity, double semiMajorAxis)
         {
             return linearEccentricity / semiMajorAxis;
+        }
+
+        public static double EccentricityFromAxies(double a, double b)
+        {
+            return Math.Sqrt(1 - (b * b) / (a * a));
         }
 
         public static double Apoapsis(double eccentricity, double semiMajorAxis)
         {
             return (1 + eccentricity) * semiMajorAxis;
         }
+
         public static double Periapsis(double eccentricity, double semiMajorAxis)
         {
             return (1 - eccentricity) * semiMajorAxis;
@@ -90,6 +106,34 @@ namespace Pulsar4X.Orbital
             var area = semiMaj * semiMin / 2 * (theta3 - foo2 + foo3);
 
             return area;
+        }
+
+        /// <summary>
+        /// https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_center
+        /// </summary>
+        /// <param name="b">semi minor</param>
+        /// <param name="e">eccentricity</param>
+        /// <param name="theta">angle</param>
+        /// <returns></returns>
+        public static double RadiusFromCenter(double b, double e, double theta)
+        {
+            return b / Math.Sqrt(1 - (e * Math.Cos(theta)) * (e * Math.Cos(theta)));
+        }
+
+        /// <summary>
+        /// https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_focus
+        /// </summary>
+        /// <param name="a">semi major</param>
+        /// <param name="e">eccentricy</param>
+        /// <param name="phi">angle from focal 1 to focal 2 (or center)</param>
+        /// <param name="theta">angle</param>
+        /// <returns></returns>
+        public static double RadiusFromFocal(double a, double e, double phi, double theta)
+        {
+            double dividend = a * (1 - e * e);
+            double divisor = 1 - e * Math.Cos(theta - phi);
+            double quotent = dividend / divisor;
+            return quotent;
         }
 
     }

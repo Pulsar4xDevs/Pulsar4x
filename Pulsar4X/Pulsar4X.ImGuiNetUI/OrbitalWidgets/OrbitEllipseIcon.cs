@@ -104,7 +104,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             //adjust so moons get the right positions  
-            Vector4 pos = _bodyPositionDB.AbsolutePosition;// - _positionDB.AbsolutePosition;   
+            Vector4 pos = _bodyPositionDB.AbsolutePosition;// - ParentPositionDB.AbsolutePosition;   
             PointD pointD = new PointD() { x = pos.X, y = pos.Y };
 
              
@@ -132,9 +132,9 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            Vector3 pos = BodyPositionDB.RelativePosition_m; 
+            Vector3 pos = BodyPositionDB.RelativePosition; 
             _bodyrelativePos = new Vector2() { X = pos.X, Y = pos.Y };
-            var apos = BodyPositionDB.AbsolutePosition_m;
+            var apos = BodyPositionDB.AbsolutePosition;
             _bodyAbsolutePos = new Vector2(apos.X, apos.Y);
             
             //we find the point in the ellipse which is closest to the body so we can start drawing from the body.

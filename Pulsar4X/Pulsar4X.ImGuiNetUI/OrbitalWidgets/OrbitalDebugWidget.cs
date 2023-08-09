@@ -200,7 +200,9 @@ namespace Pulsar4X.SDL2UI
         HeadingElement _headingItemRel;
         HeadingElement _headingItemRel2;
         HeadingElement _headingItemAbs;
-        //private VelVecElement _velvecItem;
+        
+        
+        private VelVecElement _velvecItem;
 
         List<ComplexShape> _drawComplexShapes = new List<ComplexShape>();
 
@@ -215,14 +217,14 @@ namespace Pulsar4X.SDL2UI
             
 
             
-            //NOTE! _positionDB references the focal point (ie parent's position) *not* the orbiting object position.
+            //NOTE! ParentPositionDB references the focal point (ie parent's position) *not* the orbiting object position.
             
             var parentEntity = _entity.GetSOIParentEntity();
             _positionDB = parentEntity.GetDataBlob<PositionDB>();
 
             var parentMass = parentEntity.GetDataBlob<MassVolumeDB>().MassDry;
             var myMass = _entity.GetDataBlob<MassVolumeDB>().MassDry;
-            _sgp = OrbitMath.CalculateStandardGravityParameterInM3S2(myMass, parentMass); 
+            _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass); 
 
             EntityGuid = entityState.Entity.Guid;
             parentname = parentEntity.GetOwnersName();
@@ -259,8 +261,8 @@ namespace Pulsar4X.SDL2UI
             _loP = _orbitIcon.LoP_radians;
             
 
-            var cP_a = new Vector2() { X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
-            _f1a = new Vector2(){ X = _orbitIcon.ParentPosDB.AbsolutePosition_m.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition_m.Y };
+            var cP_a = new Vector2() { X = _orbitIcon.ParentPosDB.AbsolutePosition.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition.Y };
+            _f1a = new Vector2(){ X = _orbitIcon.ParentPosDB.AbsolutePosition.X, Y = _orbitIcon.ParentPosDB.AbsolutePosition.Y };
             //_f1r = new Vector2(){ X = _orbitIcon.ParentPosDB.RelativePosition_m.X, Y = _orbitIcon.ParentPosDB.RelativePosition_m.Y };
             cP_a.X -= _orbitIcon.LinearEccent;
             
@@ -323,8 +325,8 @@ namespace Pulsar4X.SDL2UI
             
             _bodyPosPnt_m = new Vector2()
             {
-                X = (_bodyPosition.AbsolutePosition_m ).X,
-                Y = (_bodyPosition.AbsolutePosition_m ).Y
+                X = (_bodyPosition.AbsolutePosition ).X,
+                Y = (_bodyPosition.AbsolutePosition ).Y
             };
 
         }
@@ -1076,8 +1078,8 @@ namespace Pulsar4X.SDL2UI
                 NameString = "Radius (r)",
                 Colour = trueAnomColour,
                 HighlightColour = trueAnomHColour,
-                DataItem = _bodyPosition.RelativePosition_m.Length(),
-                DataString = Stringify.Distance(_bodyPosition.RelativePosition_m.Length())  ,
+                DataItem = _bodyPosition.RelativePosition.Length(),
+                DataString = Stringify.Distance(_bodyPosition.RelativePosition.Length())  ,
                 Shape = new ComplexShape()
                 {
                     Points = new Vector2[]{
@@ -1299,16 +1301,16 @@ namespace Pulsar4X.SDL2UI
             _headingItemAbs.NameString = "Heading (abs)";
             ElementItems.Add(_headingItemAbs);
 
-            /*
+            
             _velvecItem = new VelVecElement(
                 _keplerElements, 
                 _sgp, 
                 _worldPosition_m, 
                 _bodyPosition, 
                 _trueAnom, 
-                (Vector3)vel);
+                (Vector3)vel_m);
             ElementItems.Add(_velvecItem);
-            */
+            
             
         }
 
@@ -1370,8 +1372,8 @@ namespace Pulsar4X.SDL2UI
             
             _bodyPosPnt_m = new Vector2() 
             { 
-                X = (_bodyPosition.AbsolutePosition_m ).X, 
-                Y = (_bodyPosition.AbsolutePosition_m ).Y 
+                X = (_bodyPosition.AbsolutePosition ).X, 
+                Y = (_bodyPosition.AbsolutePosition ).Y 
             };
             _bodyPosItem.Shape.StartPoint = _bodyPosPnt_m;
 
@@ -1382,8 +1384,8 @@ namespace Pulsar4X.SDL2UI
             {
                 new Vector2{X = _f1a.X, Y = _f1a.Y },
                 new Vector2{X = _bodyPosPnt_m.X, Y = _bodyPosPnt_m.Y }};
-            _radiusToBody.DataItem = _bodyPosition.RelativePosition_m.Length();
-            _radiusToBody.DataString = Stringify.Distance(_bodyPosition.RelativePosition_m.Length());
+            _radiusToBody.DataItem = _bodyPosition.RelativePosition.Length();
+            _radiusToBody.DataString = Stringify.Distance(_bodyPosition.RelativePosition.Length());
             
             _meanAnomalyItem.Shape.Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 67, 6, 0, _meanAnom, 128);
             _meanAnomalyItem.DataItem = Angle.ToDegrees(_meanAnom);
@@ -1460,15 +1462,15 @@ namespace Pulsar4X.SDL2UI
             _aopItem_FromCalc4.DataString = Angle.ToDegrees(_aopFromCalc4).ToString() + "°";
 
             
-            _headingItemRel.Update(_trueAnom, (Vector3)vel_m);
+            _headingItemRel.Update( vel_m);
 
             var vel2 = OrbitalMath.HackVelocityVector(_keplerElements, systemDateTime);
-            _headingItemRel2.Update(_trueAnom, (Vector3)vel2);
+            _headingItemRel2.Update( vel2);
             
             var absVel = _entity.GetAbsoluteState().Velocity;
-            _headingItemAbs.Update(_trueAnom, (Vector3)absVel);
+            _headingItemAbs.Update( absVel);
             
-            //_velvecItem.Update(_trueAnom, (Vector3)vel_m);
+            _velvecItem.Update(vel_m);
 
         }
 
@@ -1565,32 +1567,31 @@ namespace Pulsar4X.SDL2UI
                 _bodyPosition = bodyPos;
                 _bodyPosPnt_m = new Vector2()
                 {
-                    X = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).X,
-                    Y = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).Y
+                    X = (_bodyPosition.AbsolutePosition + _worldPosition_m).X,
+                    Y = (_bodyPosition.AbsolutePosition + _worldPosition_m).Y
                 };
                 double lop = _ke.LoAN + _ke.AoP;
                 
                 
                 
-                double speed = OrbitMath.InstantaneousOrbitalSpeed(_sgp, _bodyPosition.RelativePosition_m.Length(), _ke.SemiMajorAxis);
+                double speed = OrbitalMath.InstantaneousOrbitalSpeed(_sgp, _bodyPosition.RelativePosition.Length(), _ke.SemiMajorAxis);
             
 
                 SDL.SDL_Color[] headingColour = 
                 { 
-                    new SDL.SDL_Color() { r = 100, g = 100, b = 100, a = 100 },
-                    new SDL.SDL_Color() {a = 0} 
+                    new () { r = 100, g = 100, b = 100, a = 100 },
+                    new () {a = 0} 
                 };
                 SDL.SDL_Color[] headingHColour = 
                 { 
-                    new SDL.SDL_Color() { r = 100, g = 100, b = 100, a = 255 },
-                    new SDL.SDL_Color() {a = 0} 
+                    new () { r = 100, g = 100, b = 100, a = 255 },
+                    new () {a = 0} 
                 };
 
                 NameString = "Heading";
                 Colour = headingColour;
                 HighlightColour = headingHColour;
-                //DataItem = Angle.ToDegrees(_eccentricAnom),
-                //DataString = Angle.ToDegrees(heading).ToString() + "°";
+
                 Shape = new ComplexShape()
                 {
                     StartPoint = new Vector2( _bodyPosPnt_m.X, _bodyPosPnt_m.Y),
@@ -1599,35 +1600,32 @@ namespace Pulsar4X.SDL2UI
                     Scales = false
                 };
                 
-                Update(trueAnomaly, vel_m);
+                Update(vel_m);
 
             }
 
-            public void Update(double trueAnomaly, Vector3 vel_m)
+            public void Update( Vector3 vel_m)
             {
                 _bodyPosPnt_m = new Vector2()
                 {
-                    X = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).X,
-                    Y = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).Y
+                    X = (_bodyPosition.AbsolutePosition ).X,
+                    Y = (_bodyPosition.AbsolutePosition ).Y
                 };
-                double lop = _ke.LoAN + _ke.AoP;
+
+                var vnorm = Vector3.Normalise(vel_m) * 60;
                 
-                //OrbitMath.GlobalToOrbitVector(vel_m)
-                //var headingPoints = CreatePrimitiveShapes.AngleArc(new Vector2() { X = 0, Y = 0 }, 32, 6, 0, heading, 128);
-                
-                var vnorm = Vector3.Normalise((Vector3)vel_m) * 60;
-                Vector2[] headingLine = 
-                { 
-                    
-                    new Vector2() { X = 0, Y = 0 }, 
-                    new Vector2() { X = vnorm.X, Y = vnorm.Y}, 
-                };
                 Shape.StartPoint = new Vector2( _bodyPosPnt_m.X, _bodyPosPnt_m.Y);
-                Shape.Points = headingLine; //headingPoints.Concat(headingLine).ToArray(); 
-                var heading = Math.Atan2(vel_m.Y, vel_m.X);
-                //double heading = OrbitMath.ObjectLocalHeading(_bodyPosition.RelativePosition_m, _ke.Eccentricity, _ke.SemiMajorAxis, trueAnomaly, _ke.AoP);
-                //heading += lop;
-                DataString = Angle.ToDegrees(heading).ToString() + "°";
+                Vector2[] headingLine = 
+                {
+                    new () { X = 0, Y = 0 }, 
+                    new () { X = vnorm.X, Y = vnorm.Y}, 
+                };
+               
+                Shape.Points = headingLine;
+                
+                var heading = Angle.RadiansFromVector3(vel_m);
+
+                DataString = Angle.ToDegrees(heading) + "°";
             }
 
 
@@ -1651,8 +1649,8 @@ namespace Pulsar4X.SDL2UI
                 _bodyPosition = bodyPos;
                 _bodyPosPnt_m = new Vector2()
                 {
-                    X = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).X,
-                    Y = (_bodyPosition.AbsolutePosition_m + _worldPosition_m).Y
+                    X = (_bodyPosition.AbsolutePosition ).X,
+                    Y = (_bodyPosition.AbsolutePosition ).Y
                 };
                 double lop = _ke.LoAN + _ke.AoP;
                 
@@ -1663,20 +1661,18 @@ namespace Pulsar4X.SDL2UI
 
                 SDL.SDL_Color[] headingColour = 
                 { 
-                    new SDL.SDL_Color() { r = 255, g = 100, b = 100, a = 100 },
+                    new() { r = 255, g = 100, b = 100, a = 100 },
                     new SDL.SDL_Color() {a = 0} 
                 };
                 SDL.SDL_Color[] headingHColour = 
                 { 
-                    new SDL.SDL_Color() { r = 255, g = 100, b = 100, a = 255 },
+                    new() { r = 255, g = 100, b = 100, a = 255 },
                     new SDL.SDL_Color() {a = 0} 
                 };
 
                 NameString = "VelocityVector";
                 Colour = headingColour;
                 HighlightColour = headingHColour;
-                //DataItem = Angle.ToDegrees(_eccentricAnom),
-                //DataString = Angle.ToDegrees(heading).ToString() + "°";
                 Shape = new ComplexShape()
                 {
                     StartPoint = new Vector2(_bodyPosPnt_m.X, _bodyPosPnt_m.Y),
@@ -1685,40 +1681,46 @@ namespace Pulsar4X.SDL2UI
                     Scales = false
                 };
                 
-                Update(trueAnomaly, vel_m);
+                Update(vel_m);
 
             }
 
-            public void Update(double trueAnomaly, Vector3 vel_m)
+            public void Update( Vector3 vel_m)
             {
                 _bodyPosPnt_m = new Vector2()
                 {
-                    X = (_bodyPosition.AbsolutePosition_m).X,
-                    Y = (_bodyPosition.AbsolutePosition_m).Y
+                    X = (_bodyPosition.AbsolutePosition).X,
+                    Y = (_bodyPosition.AbsolutePosition).Y
                 };
-                double lop = _ke.LoAN + _ke.AoP;
-                //double heading = OrbitMath.ObjectLocalHeading(_bodyPosition.RelativePosition_m, _ke.Eccentricity, _ke.SemiMajorAxis, trueAnomaly, _ke.AoP);
-                //OrbitMath.GlobalToOrbitVector(vel_m)
-                //heading += lop;
-                var vnorm = Vector3.Normalise((Vector3)vel_m) * 64;
-                //var headingPoints = CreatePrimitiveShapes.AngleArc(new PointD() { X = 0, Y = 0 }, 32, 6, 0, heading, 128);
 
-                Vector3 progradeVector = new Vector3(0, 100, 0);
-                var v2 = OrbitMath.ProgradeToParentVector(progradeVector, trueAnomaly, _ke.AoP, _ke.LoAN, _ke.Inclination);
-                var v2norm = Vector3.Normalise(v2) * 64;
+
+                var ptp = OrbitalMath.StateToProgradeVector(vel_m, _ke.TrueAnomalyAtEpoch, _ke.AoP, _ke.LoAN, _ke.Inclination);
+
+                var stp = OrbitalMath.ProgradeToStateVector(new(0, 60, 0), _ke.TrueAnomalyAtEpoch, _ke.AoP, _ke.LoAN, _ke.Inclination);
+
+
+                var pgd = new Vector3(0, vel_m.Length(), 0);
+                pgd = Vector3.Normalise(pgd) * 60;
                 
-                //var v3 = OrbitMath.ProgradeToParentVector(_sgp, progradeVector, pos 
-                //var v3norm = Vector3.Normalise(v2) * 64;
-                
+                var vnorm = Vector3.Normalise(ptp) * 60;
+
                 Shape.StartPoint = new Vector2(_bodyPosPnt_m.X,_bodyPosPnt_m.Y);
-                //Shape.StartPoint = new Vector2(Distance.MToAU( _bodyPosPnt_m.X),Distance.MToAU( _bodyPosPnt_m.Y));
+                Vector2[] vline =
+                {
+                    new () { X = 0, Y = 0 }, 
+                    new () { X = vnorm.X, Y = vnorm.Y },
+                    new () { X = 0, Y = 0 }, 
+                    new () { X = pgd.X, Y = pgd.Y },
+                    new () { X = 0, Y = 0 }, 
+                    new () { X = stp.X, Y = stp.Y }
+                };
+
                 
-                //PointD[] velLine = { new PointD() { X = 0, Y = 0 }, new PointD() { X = vnorm.X, Y = vnorm.Y } };
-                Vector2[] vline2 = { new Vector2() { X = 0, Y = 0 }, new Vector2() { X = v2norm.X, Y = v2norm.Y } };
-                
-                Shape.Points = vline2; 
-                
-                //DataString = Angle.ToDegrees(heading).ToString() + "°";
+                Shape.Points = vline;
+                double ang = Angle.RadiansFromVector3(ptp);
+                double ang2 = Angle.RadiansFromVector3(pgd);
+                double ang3 = Angle.RadiansFromVector3(stp);
+                DataString = Angle.ToDegrees(ang) + "° " + Angle.ToDegrees(ang2) + " " + Angle.ToDegrees(ang2);
             }
         }
     }
