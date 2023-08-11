@@ -11,10 +11,19 @@ A fan-made project to recreate a more user-friendly and better optimized version
 #### Here are some [FAQs](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/FAQ).  
 #### Here are our current [Tasks](https://github.com/Pulsar4xDevs/Pulsar4x/wiki/Issues-&-Projects).  
 #### Our current [Projects](https://github.com/Pulsar4xDevs/Pulsar4x/projects).
-#### Documentation is available on the [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/projects).
+#### Documentation is available on the [Wiki](https://github.com/Pulsar4xDevs/Pulsar4x/wiki).
 #### We track bugs in [Issues](https://github.com/Pulsar4xDevs/Pulsar4x/issues).
 
-
+### Contributing:  
+* Create a fork of the project.  
+* Ensure you're on the DevBranch. 
+* Find an issue you'd like to look at, either by looking through the issues on github or something that looks like it needs doing just from compiling and running the project (some low hanging fruit ie ui improvements, we've not created issues for).  
+* Ask questions, either in Discord, creating a github issue, or gitter.
+* Fix issue.
+* Create a pull request. 
+* Wait for it to get looked at, fix any minor pointers brought up in the pull request if any.
+* Celebrate your first successfull PR to the project. 
+Once you've got a couple of PRs under your belt we'll consider adding you to the group which will give you permisisons to push directly.  
 ***
 
 ### Community

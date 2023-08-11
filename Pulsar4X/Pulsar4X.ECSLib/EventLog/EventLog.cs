@@ -19,16 +19,28 @@ namespace Pulsar4X.ECSLib
         private Guid _spaceMaster => _game.GameMasterFaction.Guid;
         //internal EventLog() { }
 
-        internal EventLog(Game game) 
+        internal EventLog(Game game)
         {
             _loadTime = StaticRefLib.CurrentDateTime;
             _game = game;
-            
-            //_newEvents.Add(_game.GameMasterFaction.Guid, new List<Event>());
-            foreach (Entity faction in _game.Factions)
-            {
-                _newEvents.Add(faction.Guid, new List<Event>());
-            }
+
+            InitNewEventsMapping();
+        }
+
+        /// <summary>
+        /// ensures _newEvents holds events for factions in the current game and only factions in the current game.
+        /// </summary>
+        private void InitNewEventsMapping()
+        {
+            var factionKeys = _game.Factions.Select((f) => f.Guid);
+
+            // Remove _newEvent entries that are not for a faction in the current game
+            foreach (Guid f in _newEvents.Keys.Where((k) => !factionKeys.Contains(k)).ToList())
+                _newEvents.Remove(f);
+
+            // Add _newEvent entries for factions in the current game that don't have _newEvent entries 
+            foreach (Guid f in factionKeys.Where((k) => !_newEvents.ContainsKey(k)).ToList())
+                _newEvents.Add(f, new List<Event>());
         }
 
         internal void AddPlayer(Entity faction)
@@ -44,7 +56,7 @@ namespace Pulsar4X.ECSLib
         public List<Event> GetAllEvents(Guid factionID)
         {
             Entity faction = _game.GlobalManager.GetGlobalEntityByGuid(factionID);
-            
+
 
             if (faction == null)
             {
@@ -93,7 +105,19 @@ namespace Pulsar4X.ECSLib
         internal void AddEvent(Event @event)
         {
             _events.Add(@event);
+
+            // If _spaceMaster or any concerned factions do not have a _newEvent container, reinitialize the _newEvents collection
+            if (!_newEvents.ContainsKey(_spaceMaster) || @event.ConcernedFaction.Where((f) => !_newEvents.ContainsKey(f)).Count() != 0)
+            {
+                InitNewEventsMapping();
+
+                // If that did not fix the issue, do not try to log this event per faction.
+                if (!_newEvents.ContainsKey(_spaceMaster) || @event.ConcernedFaction.Where((f) => !_newEvents.ContainsKey(f)).Count() != 0)
+                    return;
+            }
+
             @event.ConcernedFaction.Add(_game.SpaceMaster.ID);
+
             _newEvents[_spaceMaster].Add(@event);
 
             foreach (Entity faction in _game.Factions.Where(faction => IsFactionConcerned(@event, faction)))
@@ -101,7 +125,7 @@ namespace Pulsar4X.ECSLib
                 @event.ConcernedFaction.Add(faction.Guid);
                 _newEvents[faction.Guid].Add(@event);
                 var facInfo = faction.GetDataBlob<FactionInfoDB>();
-                if(facInfo.HaltsOnEvent.ContainsKey(@event.EventType) && facInfo.HaltsOnEvent[@event.EventType] == true)                 
+                if (facInfo.HaltsOnEvent.ContainsKey(@event.EventType) && facInfo.HaltsOnEvent[@event.EventType] == true)
                     // will future events ever be needed? if so, check timedate here as well
                     // and add a future halt interupt to the gameloop if it's a future event.
                     _game.GamePulse.PauseTime(); //hit the pause button.
@@ -131,7 +155,7 @@ namespace Pulsar4X.ECSLib
             //_newEvents[entity.FactionOwner]
         }
 
-                /// <summary>
+        /// <summary>
         /// checks if the given player should be aware of this event. 
         /// </summary>
         /// <param name="event"></param>
@@ -231,7 +255,7 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
-        
+
         /// <summary>
         /// checks if the given player should be aware of this event. 
         /// </summary>
