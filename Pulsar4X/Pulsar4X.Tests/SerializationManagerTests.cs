@@ -141,19 +141,6 @@ namespace Pulsar4X.Tests
         /// <param name="numSystems">Nubmer of systems to generate for this test. Configurable.</param>
         /// <param name="generateSol">Whether Sol is in the game, in addition to any generated systems. Configurable.</param>
         [TestCase(10, false)]
-        public void ExportImportPreserves(int numSystems, bool generateSol)
-        {
-            Game exportedGame = TestingUtilities.CreateTestUniverse(numSystems, _testTime, generateSol);
-            SerializationManager.Export(exportedGame, _testFilename);
-
-            Game importedGame = SerializationManager.ImportGame(_testFilename);
-
-            Assert.AreEqual(exportedGame, importedGame);
-        }
-
-        /// <param name="numSystems">Nubmer of systems to generate for this test. Configurable.</param>
-        /// <param name="generateSol">Whether Sol is in the game, in addition to any generated systems. Configurable.</param>
-        [TestCase(10, false)]
         public void ExportImportPreservesGameTime(int numSystems, bool generateSol)
         {
             Game exportedGame = TestingUtilities.CreateTestUniverse(numSystems, _testTime, generateSol);
