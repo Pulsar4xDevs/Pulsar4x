@@ -14,7 +14,11 @@
             "cwd": "${workspaceFolder}/Pulsar4X/Pulsar4X.ImGuiNetUI/bin/Debug/net6.0",
             "stopAtEntry": false,
             "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
         }
-
     ]
 }
