@@ -144,14 +144,12 @@ namespace Pulsar4X.Tests
         public void ExportImportPreservesGameTime(int numSystems, bool generateSol)
         {
             Game exportedGame = TestingUtilities.CreateTestUniverse(numSystems, _testTime, generateSol);
+            SerializationManager.Export(exportedGame, _testFilename);
 
             Game gameToChangeTime = TestingUtilities.CreateTestUniverse(0, DateTime.UnixEpoch, false);
             Assert.AreNotEqual(_testTime, StaticRefLib.CurrentDateTime);
 
-            SerializationManager.Export(exportedGame, _testFilename);
-
             Game importedGame = SerializationManager.ImportGame(_testFilename);
-
             Assert.AreEqual(_testTime, StaticRefLib.CurrentDateTime);
         }
 
