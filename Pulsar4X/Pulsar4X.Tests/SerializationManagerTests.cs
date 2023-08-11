@@ -119,9 +119,10 @@ namespace Pulsar4X.Tests
             SerializationManager.Export(exportedGame, _testFilename);
 
             Game importedGame = SerializationManager.ImportGame(_testFilename);
-            AuthenticationToken importedAuthToken = new AuthenticationToken(exportedGame.SpaceMaster);
+            AuthenticationToken importedAuthToken = new AuthenticationToken(importedGame.SpaceMaster);
 
-            Assert.AreEqual(exportedAuthToken, importedAuthToken);
+            Assert.AreEqual(exportedAuthToken.PlayerID, importedAuthToken.PlayerID);
+            Assert.AreEqual(exportedAuthToken.Password, importedAuthToken.Password);
         }
 
         /// <param name="numSystems">Nubmer of systems to generate for this test. Configurable.</param>
