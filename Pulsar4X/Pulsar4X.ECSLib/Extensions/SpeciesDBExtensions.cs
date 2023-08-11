@@ -112,9 +112,9 @@ namespace Pulsar4X.ECSLib
             var totalPressure = atmosphere.GetAtmosphericPressure();
             if (totalPressure > species.MaximumPressureConstraint)
             {
-                // AuroraWiki: If the pressure is too high, the colony cost will be equal to the Atmospheric Pressure 
+                // AuroraWiki: If the pressure is too high, the colony cost will be equal to the Atmospheric Pressure
                 //             divided by the species maximum pressure with a minimum of 2.0
-                
+
                 return Math.Round(Math.Max(totalPressure / species.MaximumPressureConstraint, 2.0), 6);
             }
 
@@ -127,11 +127,10 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public static double ColonyTemperatureCost(this SpeciesDB species, Entity planet)
         {
-            // AuroraWiki : The colony cost for a temperature outside the range is Temperature Difference / Temperature Deviation. 
+            // http://aurorawiki.pentarch.org/index.php?title=C-System_Bodies
+            // AuroraWiki : The colony cost for a temperature outside the range is Temperature Difference / Temperature Deviation.
             //              So if the deviation was 22 and the temperature was 48 degrees below the minimum, the colony cost would be 48/22 = 2.18
-            double tempRange = species.MaximumTemperatureConstraint - species.MinimumTemperatureConstraint;
             SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
-            double cost;
 
             double planetTemp = sysBody.BaseTemperature;
             if (planet.HasDataBlob<AtmosphereDB>())
@@ -139,7 +138,7 @@ namespace Pulsar4X.ECSLib
                 planetTemp = planet.GetDataBlob<AtmosphereDB>().SurfaceTemperature;
             }
 
-            if (planetTemp <= species.MaximumTemperatureConstraint  && planetTemp >= species.MinimumTemperatureConstraint)
+            if (planetTemp <= species.MaximumTemperatureConstraint && planetTemp >= species.MinimumTemperatureConstraint)
             {
                 return 0;
             }
@@ -147,14 +146,12 @@ namespace Pulsar4X.ECSLib
             //More Math (the | | signs are for Absolute Value in case you forgot)
             //TempColCost = | Ideal Temp - Current Temp | / TRU (temps in Kelvin)
             // Converting to Kelvin.  It probably doesn't matter, but just in case
-            var deviation = tempRange / 2.0;
-            var diff = planetTemp < species.MinimumTemperatureConstraint 
-                        ? Math.Abs(planetTemp - species.MinimumTemperatureConstraint) 
+            var deviation = (species.MaximumTemperatureConstraint - species.MinimumTemperatureConstraint) / 2.0;
+            var diff = planetTemp < species.MinimumTemperatureConstraint
+                        ? Math.Abs(planetTemp - species.MinimumTemperatureConstraint)
                         : Math.Abs(planetTemp - species.MaximumTemperatureConstraint);
 
-            cost = diff / deviation;
-
-            return cost;
+            return diff / deviation;
         }
 
 
