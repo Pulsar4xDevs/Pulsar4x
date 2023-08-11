@@ -376,7 +376,10 @@ namespace Pulsar4X.Tests
             try
             {
                 testFilename2 = Path.GetTempFileName();
-                File.Delete(testFilename2);
+                if (File.Exists(testFilename2))
+                    File.Delete(testFilename2);
+                string filePart = Path.ChangeExtension(Path.GetFileNameWithoutExtension(testFilename2), "json");
+                testFilename2 = Path.Combine(SerializationManager.GetWorkingDirectory(), filePart);
 
                 for (int numTries = 0; numTries < maxTries; numTries++)
                 {
