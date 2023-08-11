@@ -45,51 +45,30 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public static double ColonyToxicityCost(this SpeciesDB species, Entity planet)
         {
-            double cost = 0.0;
-            double totalPressure = 0.0;
-            SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
+            double totalPressure = atmosphere.Composition.Values.Sum();
 
-            Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
-
-            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
+            foreach(var gas in atmosphere.Composition.Keys)
             {
-                string symbol = kvp.Key.ChemicalSymbol;
-                totalPressure += kvp.Value;
+                // FIXME: where do the 3.0 and 2.0 come from?
+                // If we hit a cost return it
+                if(gas.IsHighlyToxic) return 3.0;
+                if(gas.IsToxic) return 2.0;
 
-                if (kvp.Key.IsHighlyToxic)
+                if(gas.IsHighlyToxicAtPercentage.HasValue)
                 {
-                    cost = Math.Max(cost, 3.0);
+                    var percentageOfAtmosphere = Math.Round(atmosphere.Composition[gas] / totalPressure * 100.0f, 4);
+                    if(percentageOfAtmosphere >= gas.IsHighlyToxicAtPercentage.Value) return 3.0;
                 }
-                else if (kvp.Key.IsToxic)
+
+                if(gas.IsToxicAtPercentage.HasValue)
                 {
-                    cost = Math.Max(cost, 2.0);
+                    var percentageOfAtmosphere = Math.Round(atmosphere.Composition[gas] / totalPressure * 100.0f, 4);
+                    if(percentageOfAtmosphere >= gas.IsToxicAtPercentage.Value) return 2.0;
                 }
             }
 
-            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
-            {
-                if (kvp.Key.IsHighlyToxicAtPercentage.HasValue)
-                {
-                    var percentageOfAtmosphere = Math.Round(kvp.Value / totalPressure * 100.0f, 4);
-                    // if current % of atmosphere for this gas is over toxicity threshold
-                    if (percentageOfAtmosphere >= kvp.Key.IsHighlyToxicAtPercentage.Value)
-                    {
-                        cost = Math.Max(cost, 3.0);
-                    }
-                }
-                if (kvp.Key.IsToxicAtPercentage.HasValue)
-                {
-                    var percentageOfAtmosphere = Math.Round(kvp.Value / totalPressure * 100.0f, 4);
-                    // if current % of atmosphere for this gas is over toxicity threshold
-                    if (percentageOfAtmosphere >= kvp.Key.IsToxicAtPercentage.Value)
-                    {
-                        cost = Math.Max(cost, 2.0);
-                    }
-                }
-            }
-
-            return cost;
+            return 0;
         }
 
         /// <summary>
