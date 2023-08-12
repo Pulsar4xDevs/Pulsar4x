@@ -1,15 +1,10 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Numerics;
 using SDL2;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using System.Drawing;
 using Pulsar4X.ECSLib;
 using System.Linq;
 using System.Threading;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
-using Pulsar4X.SDL2UI.Combat;
 using Vector3 = System.Numerics.Vector3;
 
 
@@ -32,14 +27,7 @@ namespace Pulsar4X.SDL2UI
     {
         private GlobalUIState _state; 
 
-
-        //private MemoryEditor _MemoryEditor = new MemoryEditor();
-        //private byte[] _MemoryEditorData;
-
-        //private FileDialog _Dialog = new FileDialog(false, false, true, false, false, false);
-
-        Vector3 backColor = new Vector3(0 / 255f, 0 / 255f, 28 / 255f);
-
+        Vector3 backColor;
         int mouseDownX;
         int mouseDownY;
         int mouseDownAltX;
@@ -48,35 +36,16 @@ namespace Pulsar4X.SDL2UI
         public PulsarMainWindow()
             : base("Pulsar4X")
         {
-            
             _state = new GlobalUIState(this);
-            //_uiState.MainWinSize = this.Size;
-            //_uiState.ShowMetrixWindow = true;
-            // Create any managed resources and set up the main game window here.
-            /*
-            _MemoryEditorData = new byte[1024];
-            Random rnd = new Random();
-            for (int i = 0; i < _MemoryEditorData.Length; i++)
-            {
-                _MemoryEditorData[i] = (byte)rnd.Next(255);
-            }
-            */
-            backColor = new Vector3(0 / 255f, 0 / 255f, 28 / 255f);
-
             _state.GalacticMap = new GalacticMapRender(this, _state);
-            //_uiState.MapRendering = new SystemMapRendering(this, _uiState);
-
-
+            backColor = new Vector3(0 / 255f, 0 / 255f, 28 / 255f);
             OnEvent = MyEventHandler;
         }
 
         private bool MyEventHandler(SDL2Window window, SDL.SDL_Event e)
         {
+            SDL.SDL_GetMouseState(out int mouseX, out int mouseY);
 
-            int mouseX;
-            int mouseY;
-            SDL.SDL_GetMouseState(out mouseX, out mouseY);
-            
             if (!ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed))
                 return false;
 
@@ -89,14 +58,14 @@ namespace Pulsar4X.SDL2UI
                 mouseDownX = mouseX;
                 mouseDownY = mouseY;
             }
+
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 1)
             {
-                //_uiState.onFocusMoved();
                 _state.Camera.IsGrabbingMap = false;
 
-                if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.  
+                if (mouseDownX == mouseX && mouseDownY == mouseY) //click on map.
                 {
-                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Primary);//sdl and imgu use different numbers for buttons.
+                    _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Primary); //sdl and imgu use different numbers for buttons.
                 }
             }
 
@@ -106,12 +75,13 @@ namespace Pulsar4X.SDL2UI
                 mouseDownAltX = mouseX;
                 mouseDownAltY = mouseY;
             }
+
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 3)
             {
                 _state.onFocusMoved();
                 _state.Camera.IsGrabbingMap = false;
 
-                if (mouseDownAltX == mouseX && mouseDownAltY == mouseY) //click on map.  
+                if (mouseDownAltX == mouseX && mouseDownAltY == mouseY) //click on map.
                 {
                     _state.MapClicked(_state.Camera.WorldCoordinate_m(mouseX, mouseY), MouseButtons.Alt);//sdl and imgu use different numbers for buttons.
                 }
@@ -153,8 +123,6 @@ namespace Pulsar4X.SDL2UI
             return true;
         }
 
-
-
         public override void ImGuiRender()
         {
             foreach (var systemState in _state.StarSystemStates.Values)
@@ -166,7 +134,6 @@ namespace Pulsar4X.SDL2UI
             GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
 
             _state.GalacticMap.Draw();
-            //_uiState.MapRendering.Draw();
 
             // Render ImGui on top of the rest. this eventualy calls overide void ImGuiLayout();
             base.ImGuiRender();
@@ -181,7 +148,6 @@ namespace Pulsar4X.SDL2UI
         {
             if (_state.ShowImgDbg)
             {
-                
                 ImGui.NewLine();
                 SDL.SDL_RendererInfo renderInfo;
                 SDL.SDL_GetRendererInfo(_state.rendererPtr, out renderInfo);
@@ -191,9 +157,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("MaxTexH: " +renderInfo.max_texture_height.ToString());
                 ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
                 ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
-                //ImGui.Text("Flags: " +renderInfo.texture_formats.ToString());
-                        
-                        
+
                 SDL.SDL_GetRenderDriverInfo(0, out renderInfo);
                 ImGui.Text("SDL RenderDriverInfo:");
                 ImGui.Text("Name : " + renderInfo.name.ToString());
@@ -202,12 +166,10 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("MaxTexW: " +renderInfo.max_texture_width.ToString());
                 ImGui.Text("NumTxtFormats: " +renderInfo.num_texture_formats.ToString());
                 ImGui.NewLine();
-                
+
                 foreach (var kvp in _state.SDLImageDictionary)
                 {
-                    int h, w, a;
-                    uint f;
-                    int q = SDL.SDL_QueryTexture(kvp.Value, out f, out a, out w, out h);
+                    int q = SDL.SDL_QueryTexture(kvp.Value, out uint f, out int a, out int w, out int h);
                     if (q != 0)
                     {
                         ImGui.Text("QueryResult: " + q);
@@ -219,6 +181,7 @@ namespace Pulsar4X.SDL2UI
 
             if (_state.ShowMetrixWindow)
                 ImGui.ShowMetricsWindow(ref _state.ShowMetrixWindow);
+
             if (_state.ShowDemoWindow)
             {
                 ImGui.ShowDemoWindow();
@@ -253,8 +216,7 @@ namespace Pulsar4X.SDL2UI
                     _state.SelectedSysLastUpdateTime = curTime;
                 }
             }
-            
-            
+
             foreach (var item in _state.LoadedWindows.Values.ToArray())
             {
                 item.Display();
@@ -278,16 +240,11 @@ namespace Pulsar4X.SDL2UI
         }
 
     }
+
     public enum MouseButtons
     {
         Primary,
         Alt,
         Middle
     }
-    public class MouseState
-    {
-        
-    }
-
-
 }
