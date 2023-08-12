@@ -182,6 +182,42 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void TestHighColonyPressureCost()
+        {
+            AtmosphericGasSD gas = new() {
+                MeltingPoint = 0,
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(gas, 10f);
+            Entity pressurizedPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(2.5, _humans.ColonyPressureCost(pressurizedPlanet), 0.1, "ColonyPressureCost (High)");
+        }
+
+        [Test]
+        public void TestSlightlyHighColonyPressureCost()
+        {
+            AtmosphericGasSD gas = new() {
+                MeltingPoint = 0,
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(gas, 5f);
+            Entity pressurizedPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(2, _humans.ColonyPressureCost(pressurizedPlanet), 0.1, "ColonyPressureCost (Slightly High)");
+        }
+
+        [Test]
+        public void TestLowColonyPressureCost()
+        {
+            AtmosphericGasSD gas = new() {
+                MeltingPoint = 0,
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(gas, 0f);
+            Entity pressurizedPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(0, _humans.ColonyPressureCost(pressurizedPlanet), 0.1, "ColonyPressureCost (Low)");
+        }
+
+        [Test]
         public void TestColdColonyTemperatureCost()
         {
             // Human Range: (-10, 38)
