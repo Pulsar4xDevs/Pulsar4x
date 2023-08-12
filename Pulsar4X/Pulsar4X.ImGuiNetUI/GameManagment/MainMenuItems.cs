@@ -59,7 +59,6 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Button("Connect to a Network Game", buttonSize);
                 }
 
-
                 if (ImGui.Button("SM Mode", buttonSize))
                 {
                     var pannel = SMPannel.GetInstance();
@@ -68,8 +67,11 @@ namespace Pulsar4X.SDL2UI
                     _uiState.ToggleGameMaster();
                     this.IsActive = false;
                 }
-                //ImGui.GetForegroundDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
-                //if (_saveGame)
+
+                if(ImGui.Button("Exit to Desktop", buttonSize))
+                {
+                    _uiState.ViewPort.IsAlive = false;
+                }
 
                 ImGui.End();
                 ImGui.PopStyleVar();
