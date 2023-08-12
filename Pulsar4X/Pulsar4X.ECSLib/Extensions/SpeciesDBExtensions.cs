@@ -46,6 +46,8 @@ namespace Pulsar4X.ECSLib
         public static double ColonyToxicityCost(this SpeciesDB species, Entity planet)
         {
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
+            if(atmosphere == null) return 0;
+
             double totalPressure = atmosphere.Composition.Values.Sum();
 
             foreach(var gas in atmosphere.Composition.Keys)
