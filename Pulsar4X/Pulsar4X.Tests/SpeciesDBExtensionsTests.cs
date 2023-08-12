@@ -1,21 +1,13 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using NuGet.Frameworks;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {
     [TestFixture, Description("Test the SpeciesDBExtension methods")]
-    class SpeciesDBExtensionsTests
+    class SpeciesDBExtensionsTests : TestHelper
     {
-        private Game _game;
-        private EntityManager _entityManager;
-        private Dictionary<string, AtmosphericGasSD> _gasDictionary;
-        private SpeciesDB _humans;
-        private AtmosphereDB _atmosphere;
-
         [SetUp]
         public void Init()
         {
@@ -292,20 +284,6 @@ namespace Pulsar4X.Tests
             _atmosphere.Composition.Add(gas2, .71f);
             Entity pressurizedPlanet = GetPlanet(10, 1f, 1, _atmosphere);
             Assert.AreEqual(SpeciesDBExtensions.NO_COST, _humans.ColonyGasCost(pressurizedPlanet), 0.1, "ColonyGasCost (Good Atmosphere)");
-        }
-
-        private Entity GetPlanet(float baseTemperature, float albedo, double gravity, AtmosphereDB atmosphere = null)
-        {
-            SystemBodyInfoDB planetBodyDB = new() {
-                BodyType = BodyType.Terrestrial,
-                SupportsPopulations = true,
-                Gravity = gravity,
-                BaseTemperature = baseTemperature,
-                Albedo = new PercentValue(albedo)
-            };
-            NameDB planetNameDB = new("Test Planet");
-
-            return new(_entityManager, new List<BaseDataBlob> { planetBodyDB, planetNameDB, atmosphere });
         }
     }
 }
