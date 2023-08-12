@@ -10,9 +10,6 @@ namespace Pulsar4X.Tests
     [TestFixture, Description("Test the SpeciesDBExtension methods")]
     class SpeciesDBExtensionsTests
     {
-        private readonly double HIGHLY_TOXIC_COST = 3.0;
-        private readonly double TOXIC_COST = 2.0;
-        private readonly double NOT_TOXIC_COST = 0;
         private Game _game;
         private EntityManager _entityManager;
         private Dictionary<string, AtmosphericGasSD> _gasDictionary;
@@ -35,6 +32,7 @@ namespace Pulsar4X.Tests
                 baseGravity: 1, minGravity: 0.1, maxGravity: 1.9,
                 basePressure: 1, minPressure: 0, maxPressure: 4,
                 baseTemp: 14, minTemp: -10, maxTemp: 38);
+            _humans.BreathableGasSymbol = "O2";
 
             _gasDictionary = new Dictionary<string, AtmosphericGasSD>();
             foreach (WeightedValue<AtmosphericGasSD> atmos in _game.StaticData.AtmosphericGases)
@@ -92,7 +90,7 @@ namespace Pulsar4X.Tests
             _atmosphere.Composition.Clear();
             _atmosphere.Composition.Add(notToxicGas, 1f);
             Entity notToxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
-            Assert.AreEqual(NOT_TOXIC_COST, _humans.ColonyToxicityCost(notToxicPlanet), "ColonyToxicityCost (Not Toxic)");
+            Assert.AreEqual(SpeciesDBExtensions.NO_COST, _humans.ColonyToxicityCost(notToxicPlanet), "ColonyToxicityCost (Not Toxic)");
         }
 
         [Test]
@@ -105,7 +103,7 @@ namespace Pulsar4X.Tests
             _atmosphere.Composition.Clear();
             _atmosphere.Composition.Add(highlyToxicGas, 1f);
             Entity highlyToxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
-            Assert.AreEqual(HIGHLY_TOXIC_COST, _humans.ColonyToxicityCost(highlyToxicPlanet), "ColonyToxicityCost (Is Highly Toxic)");
+            Assert.AreEqual(SpeciesDBExtensions.MAX_COST, _humans.ColonyToxicityCost(highlyToxicPlanet), "ColonyToxicityCost (Is Highly Toxic)");
         }
 
         [Test]
@@ -118,7 +116,7 @@ namespace Pulsar4X.Tests
             _atmosphere.Composition.Clear();
             _atmosphere.Composition.Add(highlyToxicGas, 1f);
             Entity highlyToxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
-            Assert.AreEqual(HIGHLY_TOXIC_COST, _humans.ColonyToxicityCost(highlyToxicPlanet), "ColonyToxicityCost (Highly Toxic Percentage - Above)");
+            Assert.AreEqual(SpeciesDBExtensions.MAX_COST, _humans.ColonyToxicityCost(highlyToxicPlanet), "ColonyToxicityCost (Highly Toxic Percentage - Above)");
         }
 
         [Test]
@@ -135,7 +133,7 @@ namespace Pulsar4X.Tests
             _atmosphere.Composition.Add(highlyToxicGas, 0.1f);
             _atmosphere.Composition.Add(notToxicGas, 0.5f);
             Entity highlyToxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
-            Assert.AreEqual(NOT_TOXIC_COST, _humans.ColonyToxicityCost(highlyToxicPlanet), "ColonyToxicityCost (Highly Toxic Percentage - Below)");
+            Assert.AreEqual(SpeciesDBExtensions.NO_COST, _humans.ColonyToxicityCost(highlyToxicPlanet), "ColonyToxicityCost (Highly Toxic Percentage - Below)");
         }
 
         [Test]
@@ -148,7 +146,7 @@ namespace Pulsar4X.Tests
             _atmosphere.Composition.Clear();
             _atmosphere.Composition.Add(toxicGas, 1f);
             Entity toxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
-            Assert.AreEqual(TOXIC_COST, _humans.ColonyToxicityCost(toxicPlanet), "ColonyToxicityCost (Is Toxic)");
+            Assert.AreEqual(SpeciesDBExtensions.MIN_COST, _humans.ColonyToxicityCost(toxicPlanet), "ColonyToxicityCost (Is Toxic)");
         }
 
         [Test]
@@ -161,7 +159,7 @@ namespace Pulsar4X.Tests
             _atmosphere.Composition.Clear();
             _atmosphere.Composition.Add(toxicGas, 1f);
             Entity toxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
-            Assert.AreEqual(TOXIC_COST, _humans.ColonyToxicityCost(toxicPlanet), "ColonyToxicityCost (Toxic Percentage - Above)");
+            Assert.AreEqual(SpeciesDBExtensions.MIN_COST, _humans.ColonyToxicityCost(toxicPlanet), "ColonyToxicityCost (Toxic Percentage - Above)");
         }
 
         [Test]
@@ -178,7 +176,7 @@ namespace Pulsar4X.Tests
             _atmosphere.Composition.Add(toxicGas, 0.1f);
             _atmosphere.Composition.Add(notToxicGas, 0.5f);
             Entity toxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
-            Assert.AreEqual(NOT_TOXIC_COST, _humans.ColonyToxicityCost(toxicPlanet), "ColonyToxicityCost (Toxic Percentage - Below)");
+            Assert.AreEqual(SpeciesDBExtensions.NO_COST, _humans.ColonyToxicityCost(toxicPlanet), "ColonyToxicityCost (Toxic Percentage - Below)");
         }
 
         [Test]
@@ -214,7 +212,7 @@ namespace Pulsar4X.Tests
             _atmosphere.Composition.Clear();
             _atmosphere.Composition.Add(gas, 0f);
             Entity pressurizedPlanet = GetPlanet(10, 1f, 1, _atmosphere);
-            Assert.AreEqual(0, _humans.ColonyPressureCost(pressurizedPlanet), 0.1, "ColonyPressureCost (Low)");
+            Assert.AreEqual(SpeciesDBExtensions.NO_COST, _humans.ColonyPressureCost(pressurizedPlanet), 0.1, "ColonyPressureCost (Low)");
         }
 
         [Test]
@@ -246,7 +244,54 @@ namespace Pulsar4X.Tests
         {
             // Entities in the species temperature range return 0 as the cost
             Entity inRangePlanet = GetPlanet(baseTemperature: 10, 1f, 1);
-            Assert.AreEqual(0, _humans.ColonyTemperatureCost(inRangePlanet), 0.1, "ColonyTemperatureCost (In Range)");
+            Assert.AreEqual(SpeciesDBExtensions.NO_COST, _humans.ColonyTemperatureCost(inRangePlanet), 0.1, "ColonyTemperatureCost (In Range)");
+        }
+
+        [Test]
+        public void TestOnlyBreathableColonyGasCost()
+        {
+            AtmosphericGasSD gas = new() {
+                ChemicalSymbol = "O2"
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(gas, 1f);
+            Entity pressurizedPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(SpeciesDBExtensions.MIN_COST, _humans.ColonyGasCost(pressurizedPlanet), 0.1, "ColonyGasCost (Only Breathable Atmosphere)");
+        }
+
+        [Test]
+        public void TestNoAtmosphereColonyGasCost()
+        {
+            Entity planet = GetPlanet(10, 1f, 1);
+            Assert.AreEqual(SpeciesDBExtensions.MIN_COST, _humans.ColonyGasCost(planet), "ColonyGasCost (No Atmosphere)");
+        }
+
+        [Test]
+        public void TestAtmosphereButNoPressureColonyGasCost()
+        {
+            AtmosphericGasSD gas = new() {
+                ChemicalSymbol = "H"
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(gas, 0f);
+            Entity planet = GetPlanet(10, 1f, 1);
+            Assert.AreEqual(SpeciesDBExtensions.MIN_COST, _humans.ColonyGasCost(planet), "ColonyGasCost (Atmosphere But No Pressure)");
+        }
+
+        [Test]
+        public void TestGoodAtmosphereColonyGasCost()
+        {
+            AtmosphericGasSD gas1 = new() {
+                ChemicalSymbol = "O2"
+            };
+            AtmosphericGasSD gas2 = new() {
+                ChemicalSymbol = "H"
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(gas1, .29f);
+            _atmosphere.Composition.Add(gas2, .71f);
+            Entity pressurizedPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(SpeciesDBExtensions.NO_COST, _humans.ColonyGasCost(pressurizedPlanet), 0.1, "ColonyGasCost (Good Atmosphere)");
         }
 
         private Entity GetPlanet(float baseTemperature, float albedo, double gravity, AtmosphereDB atmosphere = null)
