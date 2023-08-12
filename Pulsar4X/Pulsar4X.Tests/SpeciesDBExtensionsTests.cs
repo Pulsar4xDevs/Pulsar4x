@@ -7,9 +7,12 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {
-    [TestFixture, Description("Atmosphere and Species Habitablilty Tests based on entities from runs in Aurora")]
+    [TestFixture, Description("Test the SpeciesDBExtension methods")]
     class SpeciesDBExtensionsTests
     {
+        private readonly double HIGHLY_TOXIC_COST = 3.0;
+        private readonly double TOXIC_COST = 2.0;
+        private readonly double NOT_TOXIC_COST = 0;
         private Game _game;
         private EntityManager _entityManager;
         private Dictionary<string, AtmosphericGasSD> _gasDictionary;
@@ -60,24 +63,122 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void TestHighCanSurviveOnGravity()
+        public void TestHighCanSurviveGravityOn()
         {
             Entity highGravityPlanet = GetPlanet(10, 1f, gravity: 20);
-            Assert.AreEqual(false, _humans.CanSurviveGravityOn(highGravityPlanet), "CanSurviveOnGravity (Too High Gravity)");
+            Assert.AreEqual(false, _humans.CanSurviveGravityOn(highGravityPlanet), "CanSurviveGravityOn (Too High Gravity)");
         }
 
         [Test]
-        public void TestLowCanSurviveOnGravity()
+        public void TestLowCanSurviveGravityOn()
         {
             Entity lowGravityPlanet = GetPlanet(10, 1f, gravity: 0.001);
-            Assert.AreEqual(false, _humans.CanSurviveGravityOn(lowGravityPlanet), "CanSurviveOnGravity (Too Low Gravity)");
+            Assert.AreEqual(false, _humans.CanSurviveGravityOn(lowGravityPlanet), "CanSurviveGravityOn (Too Low Gravity)");
         }
 
         [Test]
-        public void TestInRangeCanSurviveOnGravity()
+        public void TestInRangeCanSurviveGravityOn()
         {
             Entity inRangeGravityPlanet = GetPlanet(10, 1f, gravity: 1);
-            Assert.AreEqual(true, _humans.CanSurviveGravityOn(inRangeGravityPlanet), "CanSurviveOnGravity (In Range Gravity)");
+            Assert.AreEqual(true, _humans.CanSurviveGravityOn(inRangeGravityPlanet), "CanSurviveGravityOn (In Range Gravity)");
+        }
+
+        [Test]
+        public void TestNotToxicColonyToxicityCost()
+        {
+            AtmosphericGasSD notToxicGas = new() {
+                ChemicalSymbol = "NOT",
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(notToxicGas, 1f);
+            Entity notToxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(NOT_TOXIC_COST, _humans.ColonyToxicityCost(notToxicPlanet), "ColonyToxicityCost (Not Toxic)");
+        }
+
+        [Test]
+        public void TestHighlyToxicColonyToxicityCost()
+        {
+            AtmosphericGasSD highlyToxicGas = new() {
+                ChemicalSymbol = "TOX",
+                IsHighlyToxic = true
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(highlyToxicGas, 1f);
+            Entity highlyToxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(HIGHLY_TOXIC_COST, _humans.ColonyToxicityCost(highlyToxicPlanet), "ColonyToxicityCost (Is Highly Toxic)");
+        }
+
+        [Test]
+        public void TestHighlyToxicPercentageAboveColonyToxicityCost()
+        {
+            AtmosphericGasSD highlyToxicGas = new() {
+                ChemicalSymbol = "TOX",
+                IsHighlyToxicAtPercentage = 50f,
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(highlyToxicGas, 1f);
+            Entity highlyToxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(HIGHLY_TOXIC_COST, _humans.ColonyToxicityCost(highlyToxicPlanet), "ColonyToxicityCost (Highly Toxic Percentage - Above)");
+        }
+
+        [Test]
+        public void TestHighlyToxicPercentageBelowColonyToxicityCost()
+        {
+            AtmosphericGasSD highlyToxicGas = new() {
+                ChemicalSymbol = "TOX",
+                IsHighlyToxicAtPercentage = 50f,
+            };
+            AtmosphericGasSD notToxicGas = new() {
+                ChemicalSymbol = "NOT",
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(highlyToxicGas, 0.1f);
+            _atmosphere.Composition.Add(notToxicGas, 0.5f);
+            Entity highlyToxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(NOT_TOXIC_COST, _humans.ColonyToxicityCost(highlyToxicPlanet), "ColonyToxicityCost (Highly Toxic Percentage - Below)");
+        }
+
+        [Test]
+        public void TestToxicColonyToxicityCost()
+        {
+            AtmosphericGasSD toxicGas = new() {
+                ChemicalSymbol = "TOX",
+                IsToxic = true
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(toxicGas, 1f);
+            Entity toxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(TOXIC_COST, _humans.ColonyToxicityCost(toxicPlanet), "ColonyToxicityCost (Is Toxic)");
+        }
+
+        [Test]
+        public void TestToxicPercentageAboveColonyToxicityCost()
+        {
+            AtmosphericGasSD toxicGas = new() {
+                ChemicalSymbol = "TOX",
+                IsToxicAtPercentage = 50f
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(toxicGas, 1f);
+            Entity toxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(TOXIC_COST, _humans.ColonyToxicityCost(toxicPlanet), "ColonyToxicityCost (Toxic Percentage - Above)");
+        }
+
+        [Test]
+        public void TestToxicPercentageBelowColonyToxicityCost()
+        {
+            AtmosphericGasSD toxicGas = new() {
+                ChemicalSymbol = "TOX",
+                IsToxicAtPercentage = 50f
+            };
+            AtmosphericGasSD notToxicGas = new() {
+                ChemicalSymbol = "NOT",
+            };
+            _atmosphere.Composition.Clear();
+            _atmosphere.Composition.Add(toxicGas, 0.1f);
+            _atmosphere.Composition.Add(notToxicGas, 0.5f);
+            Entity toxicPlanet = GetPlanet(10, 1f, 1, _atmosphere);
+            Assert.AreEqual(NOT_TOXIC_COST, _humans.ColonyToxicityCost(toxicPlanet), "ColonyToxicityCost (Toxic Percentage - Below)");
         }
 
         [Test]
