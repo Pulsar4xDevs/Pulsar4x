@@ -89,6 +89,8 @@ namespace Pulsar4X.SDL2UI
         internal SpaceMasterVM SpaceMasterVM;
         internal bool SMenabled = false;
 
+        internal Dictionary<Guid, EntityWindow> EntityWindows { get; private set; } = new();
+
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
             ViewPort = viewport;
@@ -291,6 +293,12 @@ namespace Pulsar4X.SDL2UI
                 PrimaryEntity = LastClickedEntity;
             
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
+
+            if(!EntityWindows.ContainsKey(entityGuid))
+            {
+                EntityWindows.Add(entityGuid, new EntityWindow(entityState));
+            }
+            EntityWindows[entityGuid].ToggleActive();
         }
         
         internal void EntityClicked(EntityState entityState, MouseButtons button)
