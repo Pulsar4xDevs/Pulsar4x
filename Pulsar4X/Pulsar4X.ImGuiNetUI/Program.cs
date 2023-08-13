@@ -222,6 +222,11 @@ namespace Pulsar4X.SDL2UI
                 item.Display();
             }
 
+            foreach (var entityWindow in _state.EntityWindows.Values.ToArray())
+            {
+                entityWindow.Display();
+            }
+
             foreach (var item in _state.LoadedNonUniqueWindows.Values.ToArray())
             {
                 item.Display();
@@ -238,7 +243,6 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(AssemblyInfo.GetGitHash());
             }
         }
-
     }
 
     public enum MouseButtons
