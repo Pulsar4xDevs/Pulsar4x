@@ -39,11 +39,7 @@ namespace Pulsar4X.SDL2UI
                         StarInfoDB starInfo = (StarInfoDB)db;
                         if(ImGui.BeginTabItem("Star Info"))
                         {
-                            ImGui.Text("Spectral Type: " + starInfo.SpectralType.ToDescription() + starInfo.SpectralSubDivision);
-                            ImGui.Text("Luminosity: " + starInfo.Luminosity + " " + starInfo.LuminosityClass.ToString() + " (" + starInfo.LuminosityClass.ToDescription() + ")");
-                            ImGui.Text("Class: " + starInfo.Class);
-                            ImGui.Text("Age: " + Stringify.Quantity(starInfo.Age));
-                            ImGui.Text("Habitable Zone: " + starInfo.MinHabitableRadius_AU.ToString("0.##") + "AU - " + starInfo.MaxHabitableRadius_AU.ToString("0.##") + "AU");
+                            starInfo.Display(EntityState, _uiState);
                             ImGui.EndTabItem();
                         }
                     }
