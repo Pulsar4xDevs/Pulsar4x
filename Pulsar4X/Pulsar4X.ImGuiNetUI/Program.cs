@@ -222,7 +222,7 @@ namespace Pulsar4X.SDL2UI
                 item.Display();
             }
 
-            foreach (var entityWindow in _state.EntityWindows.Values)
+            foreach (var entityWindow in _state.EntityWindows.Values.ToArray())
             {
                 entityWindow.Display();
             }
