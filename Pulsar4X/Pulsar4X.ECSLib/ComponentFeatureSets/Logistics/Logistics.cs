@@ -34,9 +34,16 @@ namespace Pulsar4X.ECSLib
         {
             
         }
+
+        private LogiBaseDB(LogiBaseDB db)
+        {
+            ListedItems = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>(db.ListedItems);
+            ItemsWaitingPickup = new Dictionary<ICargoable, (Guid shipingEntity, double amountVolume)>(db.ItemsWaitingPickup);
+            TradeShipBids = new List<(Entity ship, LogisticsCycle.CargoTask cargoTask)>(db.TradeShipBids);
+        }
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new LogiBaseDB(this);
         }
     }
 
@@ -91,9 +98,22 @@ namespace Pulsar4X.ECSLib
                 //StaticRefLib.Game.OrderHandler.HandleOrder(order);
             }
         }
+
+        private LogiShipperDB(LogiShipperDB db)
+        {
+            StateString = db.StateString;
+            From = db.From;
+            ItemsToShip = new List<(ICargoable item, int count)>(db.ItemsToShip);
+            TradeSpace = new Dictionary<Guid, double>(db.TradeSpace);
+            MaxTradeMass = db.MaxTradeMass;
+            To = db.To;
+            CurrentState = db.CurrentState;
+            BiddingTasks = new List<LogisticsCycle.CargoTask>(db.BiddingTasks);
+            ActiveCargoTasks = new List<LogisticsCycle.CargoTask>(db.ActiveCargoTasks);
+        }
         public override object Clone()
         {
-            throw new NotImplementedException();
+            return new LogiShipperDB(this);
         }
     }
 
