@@ -32,9 +32,10 @@ namespace Pulsar4X.SDL2UI
         {
             if(!IsActive) return;
 
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(264, 325), ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new System.Numerics.Vector2(512, 325), ImGuiCond.Once);
             if (ImGui.Begin(Title + " (" + EntityState.BodyType.ToDescription() + ")###" + Entity.Guid, ref IsActive, _flags))
             {
+                // Pin Camera
                 ImGui.PushID(0);
                 if(ImGui.ImageButton(_uiState.Img_Pin(), ButtonSize))
                 {
@@ -45,7 +46,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PopID();
 
                 ImGui.BeginTabBar("Tab bar!###Tabs" + Entity.Guid);
-                
+
                 if(ImGui.BeginTabItem("Stats"))
                 {
                     if(Entity.HasDataBlob<MassVolumeDB>())
@@ -81,6 +82,11 @@ namespace Pulsar4X.SDL2UI
                     if(db is ComponentInstancesDB && ImGui.BeginTabItem("Components"))
                     {
                         ((ComponentInstancesDB)db).Display(EntityState, _uiState);
+                        ImGui.EndTabItem();
+                    }
+                    if(db is VolumeStorageDB && ImGui.BeginTabItem("Storage"))
+                    {
+                        ((VolumeStorageDB)db).Display(EntityState, _uiState);
                         ImGui.EndTabItem();
                     }
                 }
