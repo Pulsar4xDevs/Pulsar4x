@@ -11,13 +11,13 @@ namespace Pulsar4X.Tests
     internal class ShipEntityTests
     {
         private Game _game;
-        private EntityManager _entityManager;
+        // private EntityManager _entityManager;
         private Entity _faction;
         private StarSystem _starSystem;
         private ShipDesign _shipDesign;
         private Entity _ship;
         private ComponentDesign _engineComponentDesign;
-        private ComponentTemplateSD _engineSD;
+        // private ComponentTemplateSD _engineSD;
         private Entity _sol;
 
         [SetUp]

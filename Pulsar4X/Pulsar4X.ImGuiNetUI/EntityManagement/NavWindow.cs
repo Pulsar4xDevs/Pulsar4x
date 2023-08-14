@@ -614,7 +614,6 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         void DisplayInterPlanetaryHohmannMode()
         {
             double mySMA = _currentKE.SemiMajorAxis;
-            float smaMin = 1;
             float smaMax = (float)_orderEntity.GetSOIParentEntity().GetSOI_m();
 
             if (ImGui.Combo("Target Object", ref _selectedUncle, _uncleNames, _uncleNames.Length))

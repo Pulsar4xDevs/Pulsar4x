@@ -9,11 +9,11 @@ namespace Pulsar4X.Tests
     [TestFixture]
     class PathfindingTests
     {
-        private Game _game;
+        // private Game _game;
         private PathfindingManager _pathfindingManager;
-        private Entity _humanFaction;
-        private Player _testPlayer;
-        private AuthenticationToken _authToken;
+        // private Entity _humanFaction;
+        // private Player _testPlayer;
+        // private AuthenticationToken _authToken;
 
         [Test]
         public void GraphTest()
@@ -98,6 +98,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(node3, pathStack.Pop());
         }
         
+        /*
         [Test]
         [Ignore("Incomplete Test")]
         public void PathfindingTest()
@@ -134,5 +135,6 @@ namespace Pulsar4X.Tests
 
             factionInfoDB.KnownSystems.Add(starSystem.Guid);
         }
+        */
     }
 }

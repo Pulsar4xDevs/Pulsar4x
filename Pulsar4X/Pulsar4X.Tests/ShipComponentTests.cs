@@ -12,15 +12,11 @@ namespace Pulsar4X.Tests
     internal class ComponentTests
     {
         private Game _game;
-        private EntityManager _entityManager;
         private Entity _faction;
-        private Entity _colonyEntity;
-        private MineralSD _duraniumSD;
-        private MineralSD _corundiumSD;
         private StarSystem _starSystem;
         //private Entity _shipClass;
-        private Entity _ship;
-        private Entity _engineComponent;
+        // private Entity _ship;
+        // private Entity _engineComponent;
         [SetUp]
         public void Init()
         {

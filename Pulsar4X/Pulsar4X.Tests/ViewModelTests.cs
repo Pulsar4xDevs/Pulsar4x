@@ -12,9 +12,9 @@ namespace Pulsar4X.Tests
     [Description("ViewModel and Generic Game Tests")]
     class ViewModelTests
     {
-        private Game _game;
+        // private Game _game;
         private GameVM _gameVM;
-        private NewGameOptionsVM _newGameOptions;
+        // private NewGameOptionsVM _newGameOptions;
 
         [Test]
         public void NewGame()

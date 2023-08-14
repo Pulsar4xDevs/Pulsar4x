@@ -243,10 +243,8 @@ namespace Pulsar4X.Tests
         [Test]
         public void OrbitMath_KeplerFromPositionAndVelocity_When_ZeroXPositiveYVelocity_Should_GiveCorrectResults()
         {
-            double parentMass = 1.989e30;
-            double objMass = 10000;
-
-
+            // double parentMass = 1.989e30;
+            // double objMass = 10000;
         }
 
         [Test]
