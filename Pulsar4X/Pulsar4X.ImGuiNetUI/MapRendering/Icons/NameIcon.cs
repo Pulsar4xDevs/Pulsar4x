@@ -178,7 +178,7 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-                ImGui.Begin(nameIconGrouping[0].NameString, ref nameIconGrouping[0].IsActive, nameIconGrouping[0]._flags);
+                ImGui.Begin(nameIconGrouping[0].NameString, ref nameIconGrouping[0].IsActive, nameIconGrouping[0]._flags | ImGuiWindowFlags.NoDocking);
                 foreach(var finalNameIcon in nameIconGrouping){
                    finalNameIcon.Draw(rendererPtr, camera, false);
                 }
