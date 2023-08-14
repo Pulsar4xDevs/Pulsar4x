@@ -326,8 +326,6 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NewLine();
             }
 
-
-            int i = 0;
             //_techSDs = new TechSD[attribute.GuidDictionary.Count];
             _listNames = Enum.GetNames(attribute.EnumType);
 

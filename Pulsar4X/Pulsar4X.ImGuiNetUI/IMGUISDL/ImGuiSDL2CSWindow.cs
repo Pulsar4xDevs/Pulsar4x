@@ -100,7 +100,7 @@ namespace ImGuiSDL2CS {
 
             // Build texture atlas
             byte* pixels;
-            int width, height, bytesPerPixel;
+            int width, height;
 
             io.Fonts.GetTexDataAsAlpha8(out pixels, out width, out height);
             

@@ -322,11 +322,6 @@ namespace Pulsar4X.SDL2UI
                     foreach (var cargoItemKvp in typeStore.Value.CurrentStoreInUnits.ToArray())
                     {
                         ICargoable cargoItem = _stores[typeStore.Key].Cargoables[cargoItemKvp.Key];
-                        if (cargoItem == null)
-                        {
-                            FactionInfoDB factionInfoDB;
-                            //factionInfoDB.
-                        }
 
                         var cname = cargoItem.Name;
                         var unitsStored = Math.Max(0, cargoItemKvp.Value);
