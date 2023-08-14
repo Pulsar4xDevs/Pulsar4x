@@ -19,12 +19,12 @@ namespace Pulsar4X.SDL2UI
                 double percent = ((storageType.MaxVolume - storageType.FreeVolume) / storageType.MaxVolume) * 100;
 
                 ImGui.PushID(entityState.Entity.Guid.ToString());
-                if(ImGui.CollapsingHeader(header + " (" + percent.ToString("0.#") + "% full)###" + headerId, ImGuiTreeNodeFlags.CollapsingHeader ))
+                if(ImGui.CollapsingHeader(header + " (" + percent.ToString("0.#") + "% full)###" + headerId, ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     ImGui.Columns(4);
                     ImGui.Text("Item");
                     ImGui.NextColumn();
-                    ImGui.Text("Count");
+                    ImGui.Text("Quantity");
                     ImGui.NextColumn();
                     ImGui.Text("Mass");
                     ImGui.NextColumn();

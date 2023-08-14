@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.BeginTabBar("Tab bar!###Tabs" + Entity.Guid);
 
-                if(ImGui.BeginTabItem("Stats"))
+                if(ImGui.BeginTabItem("Info"))
                 {
                     if(Entity.HasDataBlob<MassVolumeDB>())
                     {
