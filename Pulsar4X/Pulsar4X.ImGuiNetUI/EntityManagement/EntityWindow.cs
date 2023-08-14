@@ -2,6 +2,7 @@ using System;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ImGuiNetUI;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -44,6 +45,54 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Pin camera");
                 ImGui.PopID();
+
+                if(Entity.HasDataBlob<VolumeStorageDB>())
+                {
+                    // Cargo Transfer
+                    ImGui.PushID(1);
+                    ImGui.SameLine();
+                    if(ImGui.ImageButton(_uiState.Img_Cargo(), ButtonSize))
+                    {
+                        var instance = CargoTransfer.GetInstance(_uiState.Game.StaticData, EntityState);
+                        instance.ToggleActive();
+                        _uiState.ActiveWindow = instance;
+                    }
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Cargo Transfer");
+                    ImGui.PopID();
+                }
+
+                if(Entity.HasDataBlob<FireControlAbilityDB>())
+                {
+                    // Fire Control
+                    ImGui.PushID(2);
+                    ImGui.SameLine();
+                    if(ImGui.ImageButton(_uiState.Img_Firecon(), ButtonSize))
+                    {
+                        var instance = FireControl.GetInstance(EntityState);
+                        instance.SetActive(true);
+                        _uiState.ActiveWindow = instance;
+                    }
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Open Fire Control");
+                    ImGui.PopID();
+                }
+
+                if(Entity.HasDataBlob<ColonyInfoDB>())
+                {
+                    // Colony
+                    ImGui.PushID(3);
+                    ImGui.SameLine();
+                    if(ImGui.ImageButton(_uiState.Img_Industry(), ButtonSize))
+                    {
+                        var instance = ColonyPanel.GetInstance(_uiState.Game.StaticData, EntityState);
+                        instance.SetActive(true);
+                        _uiState.ActiveWindow = instance;
+                    }
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Open Industry");
+                    ImGui.PopID();
+                }
 
                 ImGui.BeginTabBar("Tab bar!###Tabs" + Entity.Guid);
 
