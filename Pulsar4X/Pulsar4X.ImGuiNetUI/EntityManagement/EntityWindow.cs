@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using ImGuiNET;
+using Microsoft.VisualBasic;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ImGuiNetUI;
 
@@ -92,6 +93,51 @@ namespace Pulsar4X.SDL2UI
                     if (ImGui.IsItemHovered())
                         ImGui.SetTooltip("Open Industry");
                     ImGui.PopID();
+                }
+
+                if(Entity.HasDataBlob<WarpAbilityDB>())
+                {
+                    ImGui.SameLine();
+                    bool buttonresult = ImGui.SmallButton("Warp");
+                    EntityUIWindows.OpenUIWindow(typeof(WarpOrderWindow), EntityState, _uiState, buttonresult);
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Open warp menu");
+                }
+
+                if(Entity.HasDataBlob<NewtonThrustAbilityDB>())
+                {
+                    ImGui.SameLine();
+                    bool buttonresult = ImGui.SmallButton("Change current orbit");
+                    EntityUIWindows.OpenUIWindow(typeof(ChangeCurrentOrbitWindow), EntityState, _uiState, buttonresult);
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Change current orbit");
+                }
+
+                if(EntityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship)
+                {
+                    ImGui.SameLine();
+                    bool buttonresult = ImGui.SmallButton("Planetary Window");
+                    EntityUIWindows.OpenUIWindow(typeof(PlanetaryWindow), EntityState, _uiState, buttonresult);
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Open planetary window");
+                }
+
+                if(Entity.HasDataBlob<VolumeStorageDB>() && !Entity.HasDataBlob<NewtonThrustAbilityDB>())
+                {
+                    ImGui.SameLine();
+                    bool buttonresult = ImGui.SmallButton("Logistics");
+                    EntityUIWindows.OpenUIWindow(typeof(LogiBaseWindow), EntityState, _uiState, buttonresult);
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Open logistics window");
+                }
+
+                if(Entity.HasDataBlob<VolumeStorageDB>() && Entity.HasDataBlob<NewtonThrustAbilityDB>())
+                {
+                    ImGui.SameLine();
+                    bool buttonresult = ImGui.SmallButton("Logistics");
+                    EntityUIWindows.OpenUIWindow(typeof(LogiShipWindow), EntityState, _uiState, buttonresult);
+                    if (ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Open logistics window");
                 }
 
                 ImGui.BeginTabBar("Tab bar!###Tabs" + Entity.Guid);
