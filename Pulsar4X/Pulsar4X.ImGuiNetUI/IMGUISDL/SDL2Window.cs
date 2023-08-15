@@ -117,12 +117,10 @@ namespace ImGuiSDL2CS {
             Show();
             IsAlive = true;
             do {
-                while (IsAlive && OnLoop == null) {
+                while(IsAlive)
+                {
                     PollEvents();
-                }
-                while (IsAlive && OnLoop != null) {
-                    PollEvents();
-                    OnLoop(this);
+                    OnLoop?.Invoke(this);
                 }
             } while (IsAlive);
             IsAlive = false;
