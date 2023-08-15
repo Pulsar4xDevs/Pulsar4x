@@ -7,15 +7,18 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Display(this ComponentInstancesDB db, EntityState entityState, GlobalUIState uiState)
         {
-            var instancesDB = entityState.Entity.GetDataBlob<ComponentInstancesDB>();
-
-            BorderGroup.Begin("Components:");
-            ImGui.Columns(3);
+            ImGui.Columns(3); 
             ImGui.SetColumnWidth(0, 164);
-            ImGui.SetColumnWidth(1, 42);
-            ImGui.SetColumnWidth(2, 42);
+            ImGui.Text("Type");
+            ImGui.NextColumn();
+            ImGui.SetColumnWidth(1, 62);
+            ImGui.Text("Health");
+            ImGui.NextColumn();
+            ImGui.SetColumnWidth(2, 62);
+            ImGui.Text("Enabled");
+            ImGui.NextColumn();
 
-            foreach(var listPerDesign in instancesDB.ComponentsByDesign.Values)
+            foreach(var listPerDesign in db.ComponentsByDesign.Values)
             {
                 foreach(var instance in listPerDesign)
                 {
@@ -38,7 +41,6 @@ namespace Pulsar4X.SDL2UI
                 }
             }
             ImGui.Columns(1);
-            BorderGroup.End();
         }
     }
 }
