@@ -10,7 +10,6 @@ namespace Pulsar4X.SDL2UI
         public static void Display(this VolumeStorageDB storage, EntityState entityState, GlobalUIState uiState)
         {
             Vector2 size = ImGui.GetContentRegionAvail();
-            ImGui.BeginChild("###Cargo" + entityState.Entity.Guid, size, true, ImGuiWindowFlags.AlwaysAutoResize);
 
             foreach(var (sid, storageType) in storage.TypeStores)
             {
@@ -54,8 +53,6 @@ namespace Pulsar4X.SDL2UI
                 }
                 ImGui.PopID();
             }
-
-            ImGui.EndChild();
         }
     }
 }
