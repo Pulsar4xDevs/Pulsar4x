@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
         public static RawBmp CreateShipBmp(EntityDamageProfileDB shipProfile)
         {
-            byte armorID = 255;//shipProfile.Armor.IDCode;
+            // byte armorID = 255;//shipProfile.Armor.IDCode;
             var po = shipProfile.PlacementOrder;
             
             List<(Guid typeID, RawBmp bmp)> typeBitmaps = shipProfile.TypeBitmaps;
@@ -112,7 +112,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
           
 
 
-            float addedLineThickness = 5;
+            // float addedLineThickness = 5;
 
             //adding margins to the bitmap(white space around its edges to make it look cleaner once displayed)
             Vector2 shipbmpMargins = new Vector2(shipBmp.Width*0.1,shipBmp.Height*0.1);

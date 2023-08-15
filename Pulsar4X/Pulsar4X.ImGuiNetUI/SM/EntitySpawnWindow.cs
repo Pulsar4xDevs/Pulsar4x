@@ -218,7 +218,7 @@ namespace Pulsar4X.SDL2UI
                 else if (bandRadius > zones.outer.Min && bandRadius < zones.outer.Max)
                 {
                     zone = zones.outer;
-                    // band = SystemBand.OuterBand;
+                    //band = SystemBand.OuterBand;
                 }
                 //else throw new Exception("bad radius");
                 

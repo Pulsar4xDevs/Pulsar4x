@@ -250,11 +250,11 @@ namespace Pulsar4X.ECSLib
                 // var hohmann = InterceptCalcs.Hohmann(sgp, r1, r2); //need to calculate the ideal ranges 
                 // var dvDif = hohmann[0].deltaV.Length() + hohmann[1].deltaV.Length();
                 
-                double loadtime = 3600;
+                // double loadtime = 3600;
                 
-                double unloadTime = 3600;
+                // double unloadTime = 3600;
 
-                double profit = 0; //this is used by the ship to decide where it should source and destination from. 
+                // double profit = 0; //this is used by the ship to decide where it should source and destination from. 
 
                 foreach(var cargoSpace in shiperdb.TradeSpace) //for each type of cargospace
                 {
@@ -477,7 +477,7 @@ namespace Pulsar4X.ECSLib
         {
             
             var shipMass = startState.Mass;
-            double tsec = 0;
+            // double tsec = 0;
             DateTime dateTime = startState.At;
             double fuelUse = 0;
             Vector3 pos = startState.Position;

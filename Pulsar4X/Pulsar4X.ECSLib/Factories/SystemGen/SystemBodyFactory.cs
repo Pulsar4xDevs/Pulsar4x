@@ -85,9 +85,9 @@ namespace Pulsar4X.ECSLib
                 return;
 
             // Now calculate the "Bands."
-            MinMaxStruct innerZone_m;
-            MinMaxStruct habitableZone_m;
-            MinMaxStruct outerZone_m;
+            // MinMaxStruct innerZone_m;
+            // MinMaxStruct habitableZone_m;
+            // MinMaxStruct outerZone_m;
 
             var zones = HabitibleZones(_galaxyGen.Settings, starInfo);
             bool skipHabitableZone = !zones.hasHabitible;

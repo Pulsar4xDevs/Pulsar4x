@@ -390,7 +390,6 @@ namespace Pulsar4X.ECSLib
             for (int i = 0; i < WpnIDs.Length; i++)
             {
                 bool keep = true;
-                int j = 0;
                 foreach (var wpn in wpns)
                 {
                     if (WpnIDs[i] == wpn.ID)

@@ -437,7 +437,7 @@ namespace Pulsar4X.ECSLib.Industry
 
 
         private Entity _factionEntity;
-        private ComponentDesign _design;
+        // private ComponentDesign _design;
         private IndustryJob _job;
 
 

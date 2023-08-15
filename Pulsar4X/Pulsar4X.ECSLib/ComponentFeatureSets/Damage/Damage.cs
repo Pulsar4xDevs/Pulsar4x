@@ -63,13 +63,13 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             {0, new DamageResist() {IDCode = 0, HitPoints = 0}} //emptyspace
         };
 
-        struct Bitmap
-        {
-            public int Height;
-            public int Width;
-            public int Stride;
-            public byte[] PxArray;
-        }
+        // struct Bitmap
+        // {
+        //     public int Height;
+        //     public int Width;
+        //     public int Stride;
+        //     public byte[] PxArray;
+        // }
         
         public static RawBmp LoadFromBitMap(string file)
         {
