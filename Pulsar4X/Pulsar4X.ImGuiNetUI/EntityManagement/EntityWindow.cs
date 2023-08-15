@@ -37,157 +37,199 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(512, 325), ImGuiCond.Once);
             if (ImGui.Begin(Title + " (" + EntityState.BodyType.ToDescription() + ")###" + Entity.Guid, ref IsActive, _flags))
             {
-                // Pin Camera
-                ImGui.PushID(0);
-                if(ImGui.ImageButton(_uiState.Img_Pin(), ButtonSize))
+                DisplayActions();
+
+                ImGui.BeginTabBar("Tab bar!###Tabs" + Entity.Guid);
+
+                DisplayInfoTab();
+                DisplayConditionalTabs();
+
+                ImGui.EndTabBar();
+                ImGui.End();
+            }
+        }
+
+        private void DisplayActions()
+        {
+            // Pin Camera
+            ImGui.PushID(0);
+            if(ImGui.ImageButton(_uiState.Img_Pin(), ButtonSize))
+            {
+                _uiState.Camera.PinToEntity(Entity);
+            }
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("Pin camera");
+            ImGui.PopID();
+
+            if(Entity.HasDataBlob<VolumeStorageDB>())
+            {
+                // Cargo Transfer
+                ImGui.PushID(1);
+                ImGui.SameLine();
+                if(ImGui.ImageButton(_uiState.Img_Cargo(), ButtonSize))
                 {
-                    _uiState.Camera.PinToEntity(Entity);
+                    var instance = CargoTransfer.GetInstance(_uiState.Game.StaticData, EntityState);
+                    instance.ToggleActive();
+                    _uiState.ActiveWindow = instance;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Pin camera");
+                    ImGui.SetTooltip("Cargo Transfer");
                 ImGui.PopID();
+            }
 
-                if(Entity.HasDataBlob<VolumeStorageDB>())
+            if(Entity.HasDataBlob<FireControlAbilityDB>())
+            {
+                // Fire Control
+                ImGui.PushID(2);
+                ImGui.SameLine();
+                if(ImGui.ImageButton(_uiState.Img_Firecon(), ButtonSize))
                 {
-                    // Cargo Transfer
-                    ImGui.PushID(1);
-                    ImGui.SameLine();
-                    if(ImGui.ImageButton(_uiState.Img_Cargo(), ButtonSize))
-                    {
-                        var instance = CargoTransfer.GetInstance(_uiState.Game.StaticData, EntityState);
-                        instance.ToggleActive();
-                        _uiState.ActiveWindow = instance;
-                    }
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Cargo Transfer");
-                    ImGui.PopID();
+                    var instance = FireControl.GetInstance(EntityState);
+                    instance.SetActive(true);
+                    _uiState.ActiveWindow = instance;
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Open Fire Control");
+                ImGui.PopID();
+            }
+
+            if(Entity.HasDataBlob<ColonyInfoDB>())
+            {
+                // Colony
+                ImGui.PushID(3);
+                ImGui.SameLine();
+                if(ImGui.ImageButton(_uiState.Img_Industry(), ButtonSize))
+                {
+                    var instance = ColonyPanel.GetInstance(_uiState.Game.StaticData, EntityState);
+                    instance.SetActive(true);
+                    _uiState.ActiveWindow = instance;
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Open Industry");
+                ImGui.PopID();
+            }
+
+            if(Entity.HasDataBlob<WarpAbilityDB>())
+            {
+                ImGui.SameLine();
+                bool buttonresult = ImGui.SmallButton("Warp");
+                EntityUIWindows.OpenUIWindow(typeof(WarpOrderWindow), EntityState, _uiState, buttonresult);
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Open warp menu");
+            }
+
+            if(Entity.HasDataBlob<NewtonThrustAbilityDB>())
+            {
+                ImGui.SameLine();
+                bool buttonresult = ImGui.SmallButton("Change current orbit");
+                EntityUIWindows.OpenUIWindow(typeof(ChangeCurrentOrbitWindow), EntityState, _uiState, buttonresult);
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Change current orbit");
+            }
+
+            if(EntityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship)
+            {
+                ImGui.SameLine();
+                bool buttonresult = ImGui.SmallButton("Planetary Window");
+                EntityUIWindows.OpenUIWindow(typeof(PlanetaryWindow), EntityState, _uiState, buttonresult);
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Open planetary window");
+            }
+
+            if(Entity.HasDataBlob<VolumeStorageDB>() && !Entity.HasDataBlob<NewtonThrustAbilityDB>())
+            {
+                ImGui.SameLine();
+                bool buttonresult = ImGui.SmallButton("Logistics");
+                EntityUIWindows.OpenUIWindow(typeof(LogiBaseWindow), EntityState, _uiState, buttonresult);
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Open logistics window");
+            }
+
+            if(Entity.HasDataBlob<VolumeStorageDB>() && Entity.HasDataBlob<NewtonThrustAbilityDB>())
+            {
+                ImGui.SameLine();
+                bool buttonresult = ImGui.SmallButton("Logistics");
+                EntityUIWindows.OpenUIWindow(typeof(LogiShipWindow), EntityState, _uiState, buttonresult);
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Open logistics window");
+            }
+        }
+
+        private void DisplayInfoTab()
+        {
+            if(ImGui.BeginTabItem("Info"))
+            {
+                if(Entity.HasDataBlob<SystemBodyInfoDB>())
+                {
+                    ImGui.Text("Body Type: " + Entity.GetDataBlob<SystemBodyInfoDB>().BodyType.ToDescription());
                 }
 
-                if(Entity.HasDataBlob<FireControlAbilityDB>())
+                if(Entity.HasDataBlob<MassVolumeDB>())
                 {
-                    // Fire Control
-                    ImGui.PushID(2);
-                    ImGui.SameLine();
-                    if(ImGui.ImageButton(_uiState.Img_Firecon(), ButtonSize))
-                    {
-                        var instance = FireControl.GetInstance(EntityState);
-                        instance.SetActive(true);
-                        _uiState.ActiveWindow = instance;
-                    }
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Open Fire Control");
-                    ImGui.PopID();
+                    MassVolumeDB mvDb = Entity.GetDataBlob<MassVolumeDB>();
+                    ImGui.Text("Radius: " + Stringify.Distance(mvDb.RadiusInM));
+                    ImGui.Text("Mass: " + mvDb.MassDry.ToString() + " kg");
+                    ImGui.Text("Volume: " + Stringify.Volume(mvDb.Volume_m3));
+                    ImGui.Text("Density: " + mvDb.DensityDry_gcm.ToString("##0.000") + " kg/m^3");
                 }
 
                 if(Entity.HasDataBlob<ColonyInfoDB>())
                 {
-                    // Colony
-                    ImGui.PushID(3);
-                    ImGui.SameLine();
-                    if(ImGui.ImageButton(_uiState.Img_Industry(), ButtonSize))
+                    foreach(var (species, population) in Entity.GetDataBlob<ColonyInfoDB>().Population)
                     {
-                        var instance = ColonyPanel.GetInstance(_uiState.Game.StaticData, EntityState);
-                        instance.SetActive(true);
-                        _uiState.ActiveWindow = instance;
+                        ImGui.Text(species.GetDefaultName() + ": " + Stringify.Quantity(population, "0.##", true));
                     }
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Open Industry");
-                    ImGui.PopID();
                 }
 
-                if(Entity.HasDataBlob<WarpAbilityDB>())
+                if(Entity.HasDataBlob<PositionDB>())
                 {
-                    ImGui.SameLine();
-                    bool buttonresult = ImGui.SmallButton("Warp");
-                    EntityUIWindows.OpenUIWindow(typeof(WarpOrderWindow), EntityState, _uiState, buttonresult);
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Open warp menu");
-                }
-
-                if(Entity.HasDataBlob<NewtonThrustAbilityDB>())
-                {
-                    ImGui.SameLine();
-                    bool buttonresult = ImGui.SmallButton("Change current orbit");
-                    EntityUIWindows.OpenUIWindow(typeof(ChangeCurrentOrbitWindow), EntityState, _uiState, buttonresult);
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Change current orbit");
-                }
-
-                if(EntityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship)
-                {
-                    ImGui.SameLine();
-                    bool buttonresult = ImGui.SmallButton("Planetary Window");
-                    EntityUIWindows.OpenUIWindow(typeof(PlanetaryWindow), EntityState, _uiState, buttonresult);
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Open planetary window");
-                }
-
-                if(Entity.HasDataBlob<VolumeStorageDB>() && !Entity.HasDataBlob<NewtonThrustAbilityDB>())
-                {
-                    ImGui.SameLine();
-                    bool buttonresult = ImGui.SmallButton("Logistics");
-                    EntityUIWindows.OpenUIWindow(typeof(LogiBaseWindow), EntityState, _uiState, buttonresult);
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Open logistics window");
-                }
-
-                if(Entity.HasDataBlob<VolumeStorageDB>() && Entity.HasDataBlob<NewtonThrustAbilityDB>())
-                {
-                    ImGui.SameLine();
-                    bool buttonresult = ImGui.SmallButton("Logistics");
-                    EntityUIWindows.OpenUIWindow(typeof(LogiShipWindow), EntityState, _uiState, buttonresult);
-                    if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Open logistics window");
-                }
-
-                ImGui.BeginTabBar("Tab bar!###Tabs" + Entity.Guid);
-
-                if(ImGui.BeginTabItem("Info"))
-                {
-                    if(Entity.HasDataBlob<MassVolumeDB>())
+                    Entity parent = Entity.GetDataBlob<PositionDB>().Parent;
+                    if(parent != null)
                     {
-                        ImGui.Text("Volume: " + Stringify.Volume(Entity.GetDataBlob<MassVolumeDB>().Volume_m3));
-                        ImGui.Text("Mass: " + Stringify.Mass(Entity.GetDataBlob<MassVolumeDB>().MassTotal));
-                    }
-
-                    if(Entity.HasDataBlob<PositionDB>())
-                    {
-                        Entity parent = Entity.GetDataBlob<PositionDB>().Parent;
-                        if(parent != null)
+                        ImGui.Text("Orbiting: ");
+                        ImGui.SameLine();
+                        if(ImGui.SmallButton(parent.GetName(_uiState.Faction.Guid)))
                         {
-                            ImGui.Text("Orbiting: ");
-                            ImGui.SameLine();
-                            if(ImGui.SmallButton(parent.GetName(_uiState.Faction.Guid)))
-                            {
-                                _uiState.EntityClicked(parent.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
-                            }
+                            _uiState.EntityClicked(parent.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                         }
                     }
+                }
 
+                ImGui.EndTabItem();
+            }
+        }
+
+        private void DisplayConditionalTabs()
+        {
+            foreach(var db in Entity.DataBlobs)
+            {
+                if(db is AtmosphereDB && ImGui.BeginTabItem("Atmosphere"))
+                {
+                    ((AtmosphereDB)db).Display(EntityState, _uiState);
                     ImGui.EndTabItem();
                 }
 
-                foreach(var db in Entity.DataBlobs)
+                if(db is SystemBodyInfoDB && ImGui.BeginTabItem("Minerals"))
                 {
-                    if(db is StarInfoDB && ImGui.BeginTabItem("Star Info"))
-                    {
-                        ((StarInfoDB)db).Display(EntityState, _uiState);
-                        ImGui.EndTabItem();
-                    }
-                    if(db is ComponentInstancesDB && ImGui.BeginTabItem("Components"))
-                    {
-                        ((ComponentInstancesDB)db).Display(EntityState, _uiState);
-                        ImGui.EndTabItem();
-                    }
-                    if(db is VolumeStorageDB && ImGui.BeginTabItem("Storage"))
-                    {
-                        ((VolumeStorageDB)db).Display(EntityState, _uiState);
-                        ImGui.EndTabItem();
-                    }
+                    ((SystemBodyInfoDB)db).Display(EntityState, _uiState);
+                    ImGui.EndTabItem();
                 }
 
-                ImGui.EndTabBar();
-                ImGui.End();
+                if(db is StarInfoDB && ImGui.BeginTabItem("Star Info"))
+                {
+                    ((StarInfoDB)db).Display(EntityState, _uiState);
+                    ImGui.EndTabItem();
+                }
+                if(db is ComponentInstancesDB && ImGui.BeginTabItem("Components"))
+                {
+                    ((ComponentInstancesDB)db).Display(EntityState, _uiState);
+                    ImGui.EndTabItem();
+                }
+                if(db is VolumeStorageDB && ImGui.BeginTabItem("Storage"))
+                {
+                    ((VolumeStorageDB)db).Display(EntityState, _uiState);
+                    ImGui.EndTabItem();
+                }
             }
         }
     }
