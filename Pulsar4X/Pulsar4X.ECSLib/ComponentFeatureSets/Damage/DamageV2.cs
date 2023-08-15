@@ -24,51 +24,51 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
         public PointData[] Data;
     }
 
-    public class Interaction
-    {
-        //types of projectile:
-        //em (light/laser particles)
-            //converts to heat.
-            //passes through if wavelength high enough.
-            //reflects if     
-        //joined solid mass particles
-        //individial mass particles
-            //connect strength to nehbors
-            //temprature
-            //timed or impact or prox trigger
-            //Material density
+    // public class Interaction
+    // {
+    //     //types of projectile:
+    //     //em (light/laser particles)
+    //         //converts to heat.
+    //         //passes through if wavelength high enough.
+    //         //reflects if     
+    //     //joined solid mass particles
+    //     //individial mass particles
+    //         //connect strength to nehbors
+    //         //temprature
+    //         //timed or impact or prox trigger
+    //         //Material density
         
         
-        private double heatTransfer;
+    //     private double heatTransfer;
         
-    }
+    // }
 
-    public static class DamageV2
-    {
+    // public static class DamageV2
+    // {
 
-        public static DamageMap CreateDamageMap(ShipDesign design)
-        {
-            var dm = new DamageMap();
-            double tlen = 0;
-            double twid = 0;
-            foreach ((ComponentDesign design, int count) component in design.Components)
-            {
-                var cd = component.design;
-                var volm3 = cd.VolumePerUnit;
-                //we convert 3d volume to 2d area
-                var area = Math.Cbrt(volm3) * 2;
-                var len = Math.Sqrt(area * cd.AspectRatio);
-                var wid = area / len;
-                tlen = len * component.count;
-            }
+    //     public static DamageMap CreateDamageMap(ShipDesign design)
+    //     {
+    //         var dm = new DamageMap();
+    //         double tlen = 0;
+    //         double twid = 0;
+    //         foreach ((ComponentDesign design, int count) component in design.Components)
+    //         {
+    //             var cd = component.design;
+    //             var volm3 = cd.VolumePerUnit;
+    //             //we convert 3d volume to 2d area
+    //             var area = Math.Cbrt(volm3) * 2;
+    //             var len = Math.Sqrt(area * cd.AspectRatio);
+    //             var wid = area / len;
+    //             tlen = len * component.count;
+    //         }
             
-            throw new NotImplementedException();
-        }
+    //         throw new NotImplementedException();
+    //     }
 
-        public static void DealDamage()
-        {
-        }
+    //     public static void DealDamage()
+    //     {
+    //     }
 
 
-    }
+    // }
 }

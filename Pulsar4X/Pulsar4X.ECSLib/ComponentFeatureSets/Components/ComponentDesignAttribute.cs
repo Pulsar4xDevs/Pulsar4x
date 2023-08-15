@@ -112,7 +112,6 @@ namespace Pulsar4X.ECSLib
             if (_templateSD.GuiIsEnabledFormula != null)
             {
                 IsEnabledFormula = new ChainedExpression(_templateSD.GuiIsEnabledFormula, this, factionTech, staticData);
-                var ghint = GuiHint.GuiTextDisplay | GuiHint.GuiDisplayBool;
             }
 
             if (GuiHint == GuiHint.GuiOrdnanceSelectionList)

@@ -51,38 +51,38 @@ namespace Pulsar4X.ECSLib
 
         public Guid ID { get { return Entity.Guid; } }
 
-        private string _starClass;
+        // private string _starClass;
 
-        private int _age;
+        // private int _age;
 
-        private double _ecoSphereRadius;
+        // private double _ecoSphereRadius;
 
-        private double _luminosity;
+        // private double _luminosity;
 
-        private int _temperature;
+        // private int _temperature;
 
-        // in solar masses would be best.
-        private double _mass;
+        // // in solar masses would be best.
+        // private double _mass;
 
-        private double _density;
+        // private double _density;
 
-        private double _radius;
+        // private double _radius;
 
-        private double _volume;
+        // private double _volume;
 
-        private double _surfaceGravity;
+        // private double _surfaceGravity;
 
-        private double _semiMajorAxis;
+        // private double _semiMajorAxis;
 
-        private double _apoapsis;
+        // private double _apoapsis;
 
-        private double _periapsis;
+        // private double _periapsis;
 
-        private double _eccentricity;
+        // private double _eccentricity;
 
-        private double _inclination;
+        // private double _inclination;
 
-        private TimeSpan _year;
+        // private TimeSpan _year;
 
         /// <summary>
         /// relative to parent orbit.

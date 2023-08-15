@@ -59,8 +59,8 @@ namespace Pulsar4X.ECSLib
                     j--;
                 }
                 double shipMass = shippingEntity.GetDataBlob<MassVolumeDB>().MassTotal;
-                double totalDeltaV = 0;
-                double TotalSeconds = 0;
+                // double totalDeltaV = 0;
+                // double TotalSeconds = 0;
                 var pos = shippingEntity.GetRalitivePosition();
                 var time = shippingEntity.StarSysDateTime;
                 List<(double deltav, double secTillNextManuver)> dvandTimes = new List<(double deltav, double secTillNextManuver)>();
