@@ -173,14 +173,6 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Density: " + mvDb.DensityDry_gcm.ToString("##0.000") + " kg/m^3");
                 }
 
-                if(Entity.HasDataBlob<ColonyInfoDB>())
-                {
-                    foreach(var (species, population) in Entity.GetDataBlob<ColonyInfoDB>().Population)
-                    {
-                        ImGui.Text(species.GetDefaultName() + ": " + Stringify.Quantity(population, "0.##", true));
-                    }
-                }
-
                 if(Entity.HasDataBlob<PositionDB>())
                 {
                     Entity parent = Entity.GetDataBlob<PositionDB>().Parent;
@@ -193,6 +185,11 @@ namespace Pulsar4X.SDL2UI
                             _uiState.EntityClicked(parent.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                         }
                     }
+                }
+
+                if(Entity.HasDataBlob<ColonyInfoDB>())
+                {
+                    Entity.GetDataBlob<ColonyInfoDB>().Display(EntityState, _uiState);
                 }
 
                 ImGui.EndTabItem();
