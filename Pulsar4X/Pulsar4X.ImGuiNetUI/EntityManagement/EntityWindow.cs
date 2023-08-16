@@ -206,9 +206,9 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndTabItem();
                 }
 
-                if(db is SystemBodyInfoDB && ImGui.BeginTabItem("Minerals"))
+                if(db is MineralsDB && ImGui.BeginTabItem("Minerals"))
                 {
-                    ((SystemBodyInfoDB)db).Display(EntityState, _uiState);
+                    ((MineralsDB)db).Display(EntityState, _uiState);
                     ImGui.EndTabItem();
                 }
 

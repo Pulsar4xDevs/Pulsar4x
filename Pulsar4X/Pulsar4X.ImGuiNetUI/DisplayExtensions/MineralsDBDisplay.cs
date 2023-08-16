@@ -4,9 +4,9 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
 {
-    public static class SystemBodyInfoDBDisplay
+    public static class MineralsDBDisplay
     {
-        public static void Display(this SystemBodyInfoDB systemBodyInfo, EntityState entityState, GlobalUIState uiState)
+        public static void Display(this MineralsDB mineralsDB, EntityState entityState, GlobalUIState uiState)
         {
             var minerals = uiState.Game.StaticData.CargoGoods.GetMineralsList();
 
@@ -18,7 +18,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableSetupColumn("Mining Rate");
                 ImGui.TableHeadersRow();
 
-                foreach(var (id, mineral) in systemBodyInfo.Minerals)
+                foreach(var (id, mineral) in mineralsDB.Minerals)
                 {
                     var mineralData = minerals.FirstOrDefault(x => x.ID == id);
                     if (mineralData != null)

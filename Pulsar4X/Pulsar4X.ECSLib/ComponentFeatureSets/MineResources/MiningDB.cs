@@ -7,7 +7,7 @@ namespace Pulsar4X.ECSLib
     {
         public Dictionary<Guid, long> MineingRate { get; set; }
 
-        public Dictionary<Guid, MineralDepositInfo> MineralDeposit => OwningEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().Minerals;
+        public Dictionary<Guid, MineralDeposit> MineralDeposit => OwningEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
 
         public MiningDB()
         {

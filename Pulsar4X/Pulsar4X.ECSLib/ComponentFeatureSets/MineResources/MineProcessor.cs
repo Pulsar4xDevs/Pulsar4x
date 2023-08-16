@@ -39,7 +39,7 @@ namespace Pulsar4X.ECSLib
         private void MineResources(Entity colonyEntity)
         {
             Dictionary<Guid, long> actualMiningRates = MiningHelper.CalculateActualMiningRates(colonyEntity);
-            Dictionary<Guid,MineralDepositInfo> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().Minerals;
+            Dictionary<Guid,MineralDeposit> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
             VolumeStorageDB stockpile = colonyEntity.GetDataBlob<VolumeStorageDB>();
 
             foreach (var kvp in actualMiningRates)
@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
                     StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity,EventType.Storage, erstr);
                 }
 
-                MineralDepositInfo mineralDeposit = planetMinerals[kvp.Key];
+                MineralDeposit mineralDeposit = planetMinerals[kvp.Key];
                 long newAmount = mineralDeposit.Amount -= unitsMinedThisTick;
 
                 var accessability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
