@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
             
-            colonyEntity.GetDataBlob<MiningDB>().MineingRate = rates;
+            colonyEntity.GetDataBlob<MiningDB>().MiningRate = rates;
         }
 
         public byte ProcessPriority { get; set; } = 100;

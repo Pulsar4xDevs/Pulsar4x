@@ -86,7 +86,7 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(10, miningInstallations.Count);
             Assert.AreEqual(500000000, earthColony.Population.Values.First());
-            Assert.AreEqual(1800, earthColony.OwningEntity.GetDataBlob<MiningDB>().MineingRate.Sum(x => x.Value));
+            Assert.AreEqual(1800, earthColony.OwningEntity.GetDataBlob<MiningDB>().MiningRate.Sum(x => x.Value));
 
             _game.GamePulse.Ticklength = TimeSpan.FromHours(24);
             var targetDate = _game.GamePulse.GameGlobalDateTime.AddHours(24);

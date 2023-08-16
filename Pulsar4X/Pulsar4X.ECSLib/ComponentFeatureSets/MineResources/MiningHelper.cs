@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
     {
         public static Dictionary<Guid, long> CalculateActualMiningRates(Entity colonyEntity)
         {
-            Dictionary<Guid, long> mineRates = colonyEntity.GetDataBlob<MiningDB>().MineingRate.ToDictionary(k => k.Key, v => v.Value);
+            Dictionary<Guid, long> mineRates = colonyEntity.GetDataBlob<MiningDB>().MiningRate.ToDictionary(k => k.Key, v => v.Value);
             Dictionary<Guid, MineralDeposit> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
             float miningBonuses = colonyEntity.HasDataBlob<ColonyBonusesDB>() ? colonyEntity.GetDataBlob<ColonyBonusesDB>().GetBonus(AbilityType.Mine) : 1.0f;
 
