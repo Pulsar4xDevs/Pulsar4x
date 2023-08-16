@@ -10,12 +10,11 @@ namespace Pulsar4X.SDL2UI
         {
             var minerals = uiState.Game.StaticData.CargoGoods.GetMineralsList();
 
-            if(ImGui.BeginTable("###MineralTable" + entityState.Entity.Guid, 4))
+            if(ImGui.BeginTable("###MineralTable" + entityState.Entity.Guid, 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name");
                 ImGui.TableSetupColumn("Amount");
                 ImGui.TableSetupColumn("Accessibility");
-                ImGui.TableSetupColumn("Mining Rate");
                 ImGui.TableHeadersRow();
 
                 foreach(var (id, mineral) in mineralsDB.Minerals)
@@ -30,8 +29,6 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(mineral.Amount.ToString("#,###,###,###,###,###,##0"));
                         ImGui.TableNextColumn();
                         ImGui.Text(mineral.Accessibility.ToString("0.00"));
-                        ImGui.TableNextColumn();
-                        ImGui.Text(""); // TODO: add this
                     }
                 }
 
