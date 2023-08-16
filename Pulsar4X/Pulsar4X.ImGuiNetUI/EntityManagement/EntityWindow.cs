@@ -4,6 +4,7 @@ using ImGuiNET;
 using Microsoft.VisualBasic;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ImGuiNetUI;
+using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -125,6 +126,12 @@ namespace Pulsar4X.SDL2UI
                 EntityUIWindows.OpenUIWindow(typeof(ChangeCurrentOrbitWindow), EntityState, _uiState, buttonresult);
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Change current orbit");
+
+                ImGui.SameLine();
+                buttonresult = ImGui.SmallButton("Nav window");
+                EntityUIWindows.OpenUIWindow(typeof(NavWindow), EntityState, _uiState, buttonresult);
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Open nav window");
             }
 
             if(EntityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship)
