@@ -228,6 +228,16 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndTabItem();
                 }
             }
+
+            // Mining tab
+            if(Entity.CanShowMiningTab())
+            {
+                if(ImGui.BeginTabItem("Mining"))
+                {
+                    Entity.DisplayMining(_uiState);
+                    ImGui.EndTabItem();
+                }
+            }
         }
     }
 }
