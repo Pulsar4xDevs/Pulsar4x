@@ -22,8 +22,9 @@ namespace Pulsar4X.ECSLib
         }
         
         public void ProcessEntity(Entity entity, int deltaSeconds)
-        {           
-            MineResources(entity);
+        {
+            if(entity.HasDataBlob<ColonyInfoDB>() && entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.HasDataBlob<MineralsDB>())
+                MineResources(entity);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
@@ -84,7 +85,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         internal static void CalcMaxRate(Entity colonyEntity)
         {
-            Dictionary<Guid, long> rates = new Dictionary<Guid, long>();
+            var rates = new Dictionary<Guid, long>();
             var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
 
             if (instancesDB.TryGetComponentsByAttribute<MineResourcesAtbDB>(out var instances))
