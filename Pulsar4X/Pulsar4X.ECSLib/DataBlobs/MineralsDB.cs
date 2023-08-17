@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public struct MineralDeposit
+    public class MineralDeposit
     {
         [JsonProperty]
         public long Amount { get; internal set; }
