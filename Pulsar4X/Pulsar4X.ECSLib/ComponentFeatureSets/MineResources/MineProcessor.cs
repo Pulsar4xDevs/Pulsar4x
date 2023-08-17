@@ -39,7 +39,7 @@ namespace Pulsar4X.ECSLib
     
         private void MineResources(Entity colonyEntity)
         {
-            Dictionary<Guid, long> actualMiningRates = MiningHelper.CalculateActualMiningRates(colonyEntity);
+            Dictionary<Guid, long> actualMiningRates = colonyEntity.GetDataBlob<MiningDB>().ActualMiningRate;
             Dictionary<Guid,MineralDeposit> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
             VolumeStorageDB stockpile = colonyEntity.GetDataBlob<VolumeStorageDB>();
 
@@ -102,7 +102,13 @@ namespace Pulsar4X.ECSLib
                 }
             }
             
-            colonyEntity.GetDataBlob<MiningDB>().MiningRate = rates;
+            colonyEntity.GetDataBlob<MiningDB>().BaseMiningRate = rates;
+
+            // Calculate the actual mining rates if the planet entity has minerals
+            if(colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.HasDataBlob<MineralsDB>())
+            {
+                colonyEntity.GetDataBlob<MiningDB>().ActualMiningRate = MiningHelper.CalculateActualMiningRates(colonyEntity);
+            }
         }
 
         public byte ProcessPriority { get; set; } = 100;
