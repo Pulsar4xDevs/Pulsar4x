@@ -149,10 +149,10 @@ namespace Pulsar4X.SDL2UI
                     //Makes a small button if it is usable in this situation
                         if (EntityUIWindows.CheckIfCanOpenWindow(T,_entityState))
                         {
-                            bool buttonresult = ImGui.SmallButton(GlobalUIState.namesForMenus[T]);
+                            bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[T]);
                             EntityUIWindows.OpenUIWindow(T, _entityState, _uiState, buttonresult);
                             if (ImGui.IsItemHovered())
-                                ImGui.SetTooltip(GlobalUIState.namesForMenus[T]);
+                                ImGui.SetTooltip(GlobalUIState.NamesForMenus[T]);
                         }
                     }
 

@@ -5,13 +5,10 @@ using Pulsar4X.Orbital;
 using SDL2;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.IO;
-using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
-using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -20,15 +17,15 @@ namespace Pulsar4X.SDL2UI
     {
         public bool debugnewgame = true;
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
-        internal static readonly Dictionary<Type, string> namesForMenus = new Dictionary<Type, string>{
+        internal static readonly Dictionary<Type, string> NamesForMenus = new Dictionary<Type, string>{
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},
             {typeof(WarpOrderWindow), "Warp to a new orbit"},
             {typeof(ChangeCurrentOrbitWindow), "Change current orbit"},
             {typeof(FireControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
-            {typeof(LogiBaseWindow), "TradeBase"},
-            {typeof(LogiShipWindow), "TradeShip"},
+            {typeof(LogiBaseWindow), "Logistics"},
+            {typeof(LogiShipWindow), "Logistics"},
             {typeof(ColonyPanel), "Economy"},
             {typeof(GotoSystemBlankMenuHelper), "Go to system"},
             {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
@@ -279,7 +276,7 @@ namespace Pulsar4X.SDL2UI
         {
             var entityState = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
             LastClickedEntity = entityState;
-            
+
             if (ActiveWindow != null)
                 ActiveWindow.EntityClicked(entityState, button);
 
@@ -291,7 +288,7 @@ namespace Pulsar4X.SDL2UI
 
             if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
                 PrimaryEntity = LastClickedEntity;
-            
+
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
 
             if(button == MouseButtons.Primary)
@@ -302,13 +299,12 @@ namespace Pulsar4X.SDL2UI
                 }
                 EntityWindows[entityGuid].ToggleActive();
             }
-            
         }
-        
+
         internal void EntityClicked(EntityState entityState, MouseButtons button)
         {
             LastClickedEntity = entityState;
-            
+
             if (ActiveWindow != null)
                 ActiveWindow.EntityClicked(entityState, button);
 
@@ -320,7 +316,7 @@ namespace Pulsar4X.SDL2UI
 
             if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
                 PrimaryEntity = LastClickedEntity;
-            
+
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
         }
     }

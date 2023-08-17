@@ -59,7 +59,7 @@ namespace Pulsar4X.SDL2UI
                 _uiState.Camera.PinToEntity(Entity);
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Pin camera");
+                ImGui.SetTooltip(GlobalUIState.NamesForMenus[typeof(PinCameraBlankMenuHelper)]);
             ImGui.PopID();
 
             if(Entity.HasDataBlob<VolumeStorageDB>())
@@ -74,7 +74,7 @@ namespace Pulsar4X.SDL2UI
                     _uiState.ActiveWindow = instance;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Cargo Transfer");
+                    ImGui.SetTooltip(GlobalUIState.NamesForMenus[typeof(CargoTransfer)]);
                 ImGui.PopID();
             }
 
@@ -90,7 +90,7 @@ namespace Pulsar4X.SDL2UI
                     _uiState.ActiveWindow = instance;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Open Fire Control");
+                    ImGui.SetTooltip(GlobalUIState.NamesForMenus[typeof(FireControl)]);
                 ImGui.PopID();
             }
 
@@ -113,7 +113,7 @@ namespace Pulsar4X.SDL2UI
             if(Entity.HasDataBlob<WarpAbilityDB>())
             {
                 ImGui.SameLine();
-                bool buttonresult = ImGui.SmallButton("Warp");
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[typeof(WarpOrderWindow)]);
                 EntityUIWindows.OpenUIWindow(typeof(WarpOrderWindow), EntityState, _uiState, buttonresult);
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Open warp menu");
@@ -122,13 +122,13 @@ namespace Pulsar4X.SDL2UI
             if(Entity.HasDataBlob<NewtonThrustAbilityDB>())
             {
                 ImGui.SameLine();
-                bool buttonresult = ImGui.SmallButton("Change current orbit");
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[typeof(ChangeCurrentOrbitWindow)]);
                 EntityUIWindows.OpenUIWindow(typeof(ChangeCurrentOrbitWindow), EntityState, _uiState, buttonresult);
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Change current orbit");
 
                 ImGui.SameLine();
-                buttonresult = ImGui.SmallButton("Nav window");
+                buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[typeof(NavWindow)]);
                 EntityUIWindows.OpenUIWindow(typeof(NavWindow), EntityState, _uiState, buttonresult);
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Open nav window");
@@ -137,7 +137,7 @@ namespace Pulsar4X.SDL2UI
             if(EntityState.BodyType != UserOrbitSettings.OrbitBodyType.Ship)
             {
                 ImGui.SameLine();
-                bool buttonresult = ImGui.SmallButton("Planetary Window");
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[typeof(PlanetaryWindow)]);
                 EntityUIWindows.OpenUIWindow(typeof(PlanetaryWindow), EntityState, _uiState, buttonresult);
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Open planetary window");
@@ -146,7 +146,7 @@ namespace Pulsar4X.SDL2UI
             if(Entity.HasDataBlob<VolumeStorageDB>() && !Entity.HasDataBlob<NewtonThrustAbilityDB>())
             {
                 ImGui.SameLine();
-                bool buttonresult = ImGui.SmallButton("Logistics");
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[typeof(LogiBaseWindow)]);
                 EntityUIWindows.OpenUIWindow(typeof(LogiBaseWindow), EntityState, _uiState, buttonresult);
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Open logistics window");
@@ -155,7 +155,7 @@ namespace Pulsar4X.SDL2UI
             if(Entity.HasDataBlob<VolumeStorageDB>() && Entity.HasDataBlob<NewtonThrustAbilityDB>())
             {
                 ImGui.SameLine();
-                bool buttonresult = ImGui.SmallButton("Logistics");
+                bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[typeof(LogiShipWindow)]);
                 EntityUIWindows.OpenUIWindow(typeof(LogiShipWindow), EntityState, _uiState, buttonresult);
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip("Open logistics window");
