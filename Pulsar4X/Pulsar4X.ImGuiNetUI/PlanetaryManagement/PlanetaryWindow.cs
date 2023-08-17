@@ -108,7 +108,8 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>() && _lookedAtEntity.Entity.GetDataBlob<MineralsDB>().Minerals.Any())
+            MineralsDB mindb;
+            if (_lookedAtEntity.Entity.TryGetDatablob<MineralsDB>(out mindb) && mindb.Minerals.Any() )
             {
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Mineral Deposits"))
