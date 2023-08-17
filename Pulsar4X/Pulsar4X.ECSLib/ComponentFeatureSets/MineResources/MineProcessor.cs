@@ -90,6 +90,8 @@ namespace Pulsar4X.ECSLib
 
             if (instancesDB.TryGetComponentsByAttribute<MineResourcesAtbDB>(out var instances))
             {
+                colonyEntity.GetDataBlob<MiningDB>().NumberOfMines = instances.Count;
+
                 foreach (var instance in instances)
                 {
                     float healthPercent = instance.HealthPercent();

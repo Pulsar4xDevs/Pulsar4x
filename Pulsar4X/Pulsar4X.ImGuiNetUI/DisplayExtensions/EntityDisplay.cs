@@ -14,7 +14,7 @@ namespace Pulsar4X.SDL2UI
             var miningRates = entity.GetDataBlob<MiningDB>().ActualMiningRate;
             var storage = entity.GetDataBlob<VolumeStorageDB>().TypeStores;
 
-            ImGui.Text("Number of Mines: " + 1); // TODO: add the actual number of mines
+            ImGui.Text("Number of Mines: " + entity.GetDataBlob<MiningDB>().NumberOfMines); // TODO: add the actual number of mines
 
             if(ImGui.BeginTable("###MineralTable" + entity.Guid, 6, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {
