@@ -294,11 +294,15 @@ namespace Pulsar4X.SDL2UI
             
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
 
-            if(!EntityWindows.ContainsKey(entityGuid))
+            if(button == MouseButtons.Primary)
             {
-                EntityWindows.Add(entityGuid, new EntityWindow(entityState));
+                if(!EntityWindows.ContainsKey(entityGuid))
+                {
+                    EntityWindows.Add(entityGuid, new EntityWindow(entityState));
+                }
+                EntityWindows[entityGuid].ToggleActive();
             }
-            EntityWindows[entityGuid].ToggleActive();
+            
         }
         
         internal void EntityClicked(EntityState entityState, MouseButtons button)
