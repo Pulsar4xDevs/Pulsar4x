@@ -5,13 +5,15 @@ namespace Pulsar4X.ECSLib
 {
     public class MiningDB : BaseDataBlob, IAbilityDescription
     {
-        public Dictionary<Guid, long> MiningRate { get; set; }
+        public Dictionary<Guid, long> BaseMiningRate { get; set; }
+        public Dictionary<Guid, long> ActualMiningRate { get; set; }
 
         public Dictionary<Guid, MineralDeposit> MineralDeposit => OwningEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
 
         public MiningDB()
         {
-            MiningRate = new Dictionary<Guid, long>();
+            BaseMiningRate = new Dictionary<Guid, long>();
+            ActualMiningRate = new Dictionary<Guid, long>();
         }
 
         public MiningDB(MiningDB db)
@@ -33,7 +35,7 @@ namespace Pulsar4X.ECSLib
         {
             string time = StaticRefLib.Game.Settings.EconomyCycleTime.ToString();
             string desc = "Mines Resources at Rates of: \n";
-            foreach (var kvp in MiningRate)
+            foreach (var kvp in BaseMiningRate)
             {
                 string resourceName = StaticRefLib.StaticData.CargoGoods.GetMineral(kvp.Key).Name;
                 desc += resourceName + "\t" + Stringify.Number(kvp.Value) + "\n";

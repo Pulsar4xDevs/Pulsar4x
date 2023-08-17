@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
@@ -10,6 +11,7 @@ namespace Pulsar4X.SDL2UI
         {
             var mineralStaticInfo = uiState.Game.StaticData.CargoGoods.GetMineralsList();
             var minerals = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
+            var miningRates = entity.GetDataBlob<MiningDB>().ActualMiningRate;
             var storage = entity.GetDataBlob<VolumeStorageDB>().TypeStores;
 
             ImGui.Text("Number of Mines: " + 1); // TODO: add the actual number of mines
@@ -28,6 +30,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     var mineralData = mineralStaticInfo.FirstOrDefault(x => x.ID == id);
                     var stockpileData = storage.FirstOrDefault(x => x.Value.CurrentStoreInUnits.ContainsKey(id)).Value;
+                    var annualProduction = miningRates.ContainsKey(id) ? 365 * miningRates[id] : 0;
                     if (mineralData != null)
                     {
                         ImGui.TableNextRow();
@@ -38,9 +41,23 @@ namespace Pulsar4X.SDL2UI
                         ImGui.TableNextColumn();
                         ImGui.Text(mineral.Accessibility.ToString("0.00"));
                         ImGui.TableNextColumn();
-                        ImGui.Text(""); // TODO: add annual production
+                        if(miningRates.ContainsKey(id))
+                        {
+                            ImGui.Text(annualProduction.ToString("#,###,###"));
+                        }
+                        else
+                        {
+                            ImGui.Text("-");
+                        }
                         ImGui.TableNextColumn();
-                        ImGui.Text(""); // TODO: add years to depletion
+                        if(annualProduction > 0)
+                        {
+                            ImGui.Text(Math.Round((double)mineral.Amount / (double)annualProduction, 4).ToString("#.0"));
+                        }
+                        else
+                        {
+                            ImGui.Text("-");
+                        }
                         ImGui.TableNextColumn();
                         if(stockpileData != null)
                         {
