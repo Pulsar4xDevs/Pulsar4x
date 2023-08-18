@@ -14,9 +14,9 @@ namespace Pulsar4X.ECSLib
         public string Name { get; internal set; }
 
         public Guid ID { get; private set; }
-        
+
         public ComponentInstance ComponentInstance { get; private set; }
-        
+
         public ComponentAbilityState(ComponentInstance componentInstance)
         {
             ComponentInstance = componentInstance;
@@ -36,11 +36,11 @@ namespace Pulsar4X.ECSLib
         public ComponentTreeHeirarchyAbilityState ParentState { get; private set; }
         public List<ComponentTreeHeirarchyAbilityState> ChildrenStates { get; private set; } = new List<ComponentTreeHeirarchyAbilityState>();
 
-        
+
 
         public ComponentTreeHeirarchyAbilityState(ComponentInstance componentInstance) : base(componentInstance)
         {
-            
+
         }
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace Pulsar4X.ECSLib
             foreach (ComponentTreeHeirarchyAbilityState orphan in oldChilders)
             {
                 orphan.SetParent(null);
-            }         
-            
+            }
+
             foreach (var child in children)
             {
                 child.SetParent(this);
@@ -84,16 +84,16 @@ namespace Pulsar4X.ECSLib
          /// <summary>
          ///some ideas, implement if actualy needed
         /// </summary>
-        public BaseDataBlob ThisRelatedDatablob; 
-        
+        public BaseDataBlob ThisRelatedDatablob;
+
         public InstancesDB ThisEntitesInstancesDB;
-                
+
         (call this from Set Parent, virtual would be empty, inherited classes would have something below eg)
-        protected virtual void FilterParents(ComponentTreeHeirarchyAbilityState parentToSet) 
+        protected virtual void FilterParents(ComponentTreeHeirarchyAbilityState parentToSet)
         {
             Type T = typeof(FireControlAbilityState)
             if(parentToSet is T)
-            {            
+            {
                 if (ParentState != null)
                 {
                     ParentState.ChildrenStates.Remove(this);
@@ -106,16 +106,16 @@ namespace Pulsar4X.ECSLib
             else
                 throw exception? fail silently? log?
         }
-        
-        protected virtual void FilterChildren(ComponentTreeHeirarchyAbilityState childToAdd) 
+
+        protected virtual void FilterChildren(ComponentTreeHeirarchyAbilityState childToAdd)
         {
             if(childToAdd is T)
                 ChildrenState.Add(childToAdd);
             else
                 throw exception? fail silently? log?
         }
-        
-        
+
+
                 /// <summary>
         /// If parent is null, will return an empty list
         /// </summary>
@@ -128,8 +128,8 @@ namespace Pulsar4X.ECSLib
                 return new List<T>();
             return ParentState.GetChildrenOfType<T>();
         }
-        
-        
+
+
         public List<T> GetChildrenOfType<T>() where T: ComponentTreeHeirarchyAbilityState
         {
             List<T> children = new List<T>();
@@ -140,7 +140,7 @@ namespace Pulsar4X.ECSLib
             }
             return children;
         }
-        
+
         public ComponentInstance[] GetChildrenInstancesOfType<T>() where T: ComponentTreeHeirarchyAbilityState
         {
             var childrenStates = GetChildrenOfType<T>();
@@ -151,7 +151,7 @@ namespace Pulsar4X.ECSLib
             }
             return instances;
         }
-        
+
         */
 
         public ComponentTreeHeirarchyAbilityState GetRoot()
@@ -162,8 +162,8 @@ namespace Pulsar4X.ECSLib
                 return this;
         }
 
-        
-        
+
+
         public ComponentInstance GetRootInstance()
         {
             return GetRoot().ComponentInstance;
@@ -173,7 +173,7 @@ namespace Pulsar4X.ECSLib
         {
             return ParentState.ChildrenStates;
         }
-        
+
         public ComponentInstance[] GetChildrenInstances()
         {
             ComponentInstance[] instances = new ComponentInstance[ChildrenStates.Count];
@@ -183,7 +183,7 @@ namespace Pulsar4X.ECSLib
             }
             return instances;
         }
-        
+
 
         public Guid[] GetChildrenIDs()
         {
@@ -195,8 +195,8 @@ namespace Pulsar4X.ECSLib
 
             return ids;
         }
-        
-        
+
+
     }
 
     public class ComponentInstance : ICargoable
@@ -225,7 +225,7 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         /// <summary>
-        /// This is the entity that this component  is mounted on. 
+        /// This is the entity that this component  is mounted on.
         /// </summary>
         /// <value>The parent entity.</value>
         [JsonProperty]
@@ -240,7 +240,7 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public ComponentInstancesDB ParentInstances { get; private set; }
         /// <summary>
-        /// This is the design of this component. 
+        /// This is the design of this component.
         /// </summary>
         /// <value>The design entity.</value>
         [JsonProperty]
@@ -248,12 +248,12 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public bool IsEnabled { get; internal set; }
         [JsonProperty]
-        public PercentValue ComponentLoadPercent { get; internal set; }        
+        public PercentValue ComponentLoadPercent { get; internal set; }
         [JsonProperty]
         public int HTKRemaining { get; internal set; }
         [JsonProperty]
         public int HTKMax { get; private set; }
-        
+
 
         private Dictionary<Type, ComponentAbilityState> _instanceAbilities = new Dictionary<Type, ComponentAbilityState>();
 
@@ -268,12 +268,12 @@ namespace Pulsar4X.ECSLib
             return _instanceAbilities.ContainsKey(typeof(T));
         }
 
-        public T GetAbilityState<T>() 
+        public T GetAbilityState<T>()
             where T : ComponentAbilityState
         {
             return (T)_instanceAbilities[typeof(T)];
         }
-        
+
         public bool TryGetAbilityState<T>(out T attribute)
             where T : ComponentAbilityState
         {
@@ -324,7 +324,7 @@ namespace Pulsar4X.ECSLib
             HTKMax = design.HTK;
             CargoTypeID = design.CargoTypeID;
             Name = design.Name;
-            
+
 
         }
 
@@ -341,7 +341,7 @@ namespace Pulsar4X.ECSLib
             Name = instance.Name;
 
         }
-        
+
 
         public float HealthPercent()
         { return HTKRemaining / HTKMax; }
