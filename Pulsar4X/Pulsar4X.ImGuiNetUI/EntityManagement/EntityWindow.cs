@@ -1,7 +1,6 @@
 using System;
 using System.Numerics;
 using ImGuiNET;
-using Microsoft.VisualBasic;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;

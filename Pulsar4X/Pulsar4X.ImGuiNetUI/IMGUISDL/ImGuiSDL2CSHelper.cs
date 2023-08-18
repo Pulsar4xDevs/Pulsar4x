@@ -1,23 +1,20 @@
 ﻿using SDL2;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ImGuiNET;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Vector2 = System.Numerics.Vector2;
 
-namespace ImGuiSDL2CS {
-    public static class ImGuiSDL2CSHelper {
-
+namespace ImGuiSDL2CS
+{
+    public static class ImGuiSDL2CSHelper
+    {
         private static bool _Initialized = false;
         public static bool Initialized => _Initialized;
         public static IntPtr FontTextureID;
-        public static void Init() {
+        public static void Init()
+        {
             if (_Initialized)
                 return;
             _Initialized = true;
@@ -26,7 +23,6 @@ namespace ImGuiSDL2CS {
             ImGui.SetCurrentContext(context);
 
             ImGuiIOPtr io = ImGui.GetIO();
-
 
             io.KeyMap[(int)ImGuiKey.Tab] = (int) SDL.SDL_Keycode.SDLK_TAB;
             io.KeyMap[(int)ImGuiKey.LeftArrow] = (int) SDL.SDL_Scancode.SDL_SCANCODE_LEFT;
@@ -53,33 +49,30 @@ namespace ImGuiSDL2CS {
 
             //io.SetSetClipboardTextFn((userData, text) => SDL.SDL_SetClipboardText(text));
 
-            
             unsafe
             {
                 string rf = "Resources";
-                
+
                 ImFontAtlasPtr fontAtlas = ImGui.GetIO().Fonts;
-                ImFontConfigPtr config = new ImFontConfigPtr(ImGuiNative.ImFontConfig_ImFontConfig());
-                ImFontGlyphRangesBuilderPtr builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
-                
+                ImFontConfigPtr config = new (ImGuiNative.ImFontConfig_ImFontConfig());
+                ImFontGlyphRangesBuilderPtr builder = new (ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
+
                 builder.AddText("ΩωΝνΔδθΘϖ"); //Omega, Nu, Delta, Theta (UPPER and lower cases)
                 //builder.AddRanges(fontAtlas.GetGlyphRangesDefault());
                 builder.BuildRanges(out ImVector ranges);
-                
+
                 config.PixelSnapH = true;
                 fontAtlas.AddFontFromFileTTF(Path.Combine(rf, "ProggyClean.ttf"), 13, config);
                 config.MergeMode = true;
                 fontAtlas.AddFontFromFileTTF(Path.Combine(rf, "DejaVuSans.ttf"), 13, config, ranges.Data);
-                
             }
-            
+
             if (io.Fonts.Fonts.Size == 0)
                 io.Fonts.AddFontDefault();
         }
 
-
-
-        public static void NewFrame(Vector2 size, Vector2 scale, Vector2 mousePosition, uint mouseMask, ref float mouseWheel, bool[] mousePressed, ref double g_Time) {
+        public static void NewFrame(Vector2 size, Vector2 scale, Vector2 mousePosition, uint mouseMask, ref float mouseWheel, bool[] mousePressed, ref double g_Time)
+        {
             ImGuiIOPtr io = ImGui.GetIO();
             io.DisplaySize = size;
             io.DisplayFramebufferScale = scale;
@@ -103,18 +96,20 @@ namespace ImGuiSDL2CS {
             ImGui.NewFrame();
         }
 
-        public static void Render(Vector2 size) {
+        public static void Render(Vector2 size)
+        {
             ImGui.Render();
             //if (ImGui.GetIO().RenderDrawListsFn == IntPtr.Zero)
                 RenderDrawData(ImGui.GetDrawData(), (int) Math.Round(size.X), (int) Math.Round(size.Y));
         }
-        
-        public static void RenderDrawData(ImDrawDataPtr drawData, int displayW, int displayH) {
+
+        public static void RenderDrawData(ImDrawDataPtr drawData, int displayW, int displayH)
+        {
             // We are using the OpenGL fixed pipeline to make the example code simpler to read!
             // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, vertex/texcoord/color pointers.
-            int lastTexture; GL.GetIntegerv(GL.Enum.GL_TEXTURE_BINDING_2D, out lastTexture);
-            Int4 lastViewport; GL.GetIntegerv4(GL.Enum.GL_VIEWPORT, out lastViewport);
-            Int4 lastScissorBox; GL.GetIntegerv4(GL.Enum.GL_SCISSOR_BOX, out lastScissorBox);
+            GL.GetIntegerv(GL.Enum.GL_TEXTURE_BINDING_2D, out int lastTexture);
+            GL.GetIntegerv4(GL.Enum.GL_VIEWPORT, out Int4 lastViewport);
+            GL.GetIntegerv4(GL.Enum.GL_SCISSOR_BOX, out Int4 lastScissorBox);
 
             GL.PushAttrib(GL.Enum.GL_ENABLE_BIT | GL.Enum.GL_COLOR_BUFFER_BIT | GL.Enum.GL_TRANSFORM_BIT);
             GL.Enable(GL.Enum.GL_BLEND);
@@ -153,7 +148,8 @@ namespace ImGuiSDL2CS {
 
             // Render command lists
 
-            for (int n = 0; n < drawData.CmdListsCount; n++) {
+            for (int n = 0; n < drawData.CmdListsCount; n++)
+            {
                 ImDrawListPtr cmdList = drawData.CmdListsRange[n];
                 //ImDrawList cmdList = drawData[n];
                 ImPtrVector<ImDrawVertPtr> vtxBuffer = cmdList.VtxBuffer;
@@ -167,7 +163,8 @@ namespace ImGuiSDL2CS {
                 GL.ColorPointer(4, GL.Enum.GL_UNSIGNED_BYTE, Unsafe.SizeOf<ImDrawVert>(), new IntPtr((long) vtxBuffer.Data + colOffset));
 
                 long idxBufferOffset = 0;
-                for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; cmdi++) {
+                for (int cmdi = 0; cmdi < cmdList.CmdBuffer.Size; cmdi++)
+                {
                     ImDrawCmdPtr pcmd = cmdList.CmdBuffer[cmdi];
 
                     if (pcmd.UserCallback != IntPtr.Zero)
@@ -222,9 +219,11 @@ namespace ImGuiSDL2CS {
             GL.Scissor(lastScissorBox.X, lastScissorBox.Y, lastScissorBox.Z, lastScissorBox.W);
         }
 
-        public static bool HandleEvent(SDL.SDL_Event e, ref float mouseWheel, bool[] mousePressed) {
+        public static bool HandleEvent(SDL.SDL_Event e, ref float mouseWheel, bool[] mousePressed)
+        {
             ImGuiIOPtr io = ImGui.GetIO();
-            switch (e.type) {
+            switch (e.type)
+            {
                 case SDL.SDL_EventType.SDL_MOUSEWHEEL:
                     if (e.wheel.y > 0)
                         mouseWheel = 1;
@@ -309,12 +308,8 @@ namespace ImGuiSDL2CS {
 
             IntPtr sdlSurface = SDL.SDL_CreateRGBSurfaceFrom(pxls, w, h, d, s, rmask, gmask, bmask, amask);
             texture = SDL.SDL_CreateTextureFromSurface(rendererPtr, sdlSurface);
-                
-            int a;
-            uint f;
-            int qw;
-            int qh;
-            int q = SDL.SDL_QueryTexture(texture, out f, out a, out qw, out qh);
+
+            int q = SDL.SDL_QueryTexture(texture, out uint f, out int a, out int qw, out int qh);
             if (q != 0)
             {
                 ImGui.Text("QueryResult: " + q);
@@ -323,6 +318,5 @@ namespace ImGuiSDL2CS {
             ImGui.Text("a: " + a +" f: " + f +" w: "+ qw +" h: "+ qh);
             return texture;
         }
-
     }
 }

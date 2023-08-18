@@ -1,11 +1,11 @@
 ﻿using SDL2;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace ImGuiSDL2CS {
-    public class SDL2Window : IDisposable {
+namespace ImGuiSDL2CS
+{
+    public class SDL2Window : IDisposable
+    {
+        private const String defaultTitle = "SDL2 Window";
 
         protected IntPtr _Handle;
         public IntPtr Handle => _Handle;
@@ -13,6 +13,9 @@ namespace ImGuiSDL2CS {
         protected IntPtr _GLContext;
         public IntPtr GLContext => _GLContext;
 
+        /// <summary>
+        /// Window title
+        /// </summary>
         public string Title {
             get {
                 return SDL.SDL_GetWindowTitle(_Handle);
@@ -22,54 +25,58 @@ namespace ImGuiSDL2CS {
             }
         }
 
+        /// <summary>
+        /// X coordinate of the window screen position
+        /// </summary>
         public int X {
             get {
-                int x, y;
-                SDL.SDL_GetWindowPosition(_Handle, out x, out y);
+                SDL.SDL_GetWindowPosition(_Handle, out int x, out _);
                 return x;
             }
             set {
-                int x, y;
-                SDL.SDL_GetWindowPosition(_Handle, out x, out y);
+                SDL.SDL_GetWindowPosition(_Handle, out _, out int y);
                 SDL.SDL_SetWindowPosition(_Handle, value, y);
             }
         }
 
+        /// <summary>
+        /// Y coordinate of the window screen position
+        /// </summary>
         public int Y {
             get {
-                int x, y;
-                SDL.SDL_GetWindowPosition(_Handle, out x, out y);
+                SDL.SDL_GetWindowPosition(_Handle, out _, out int y);
                 return y;
             }
             set {
-                int x, y;
-                SDL.SDL_GetWindowPosition(_Handle, out x, out y);
+                SDL.SDL_GetWindowPosition(_Handle, out int x, out _);
                 SDL.SDL_SetWindowPosition(_Handle, x, value);
             }
         }
 
+        /// <summary>
+        /// Width of the window
+        /// </summary>
         public int Width {
             get {
-                int x, y;
-                SDL.SDL_GetWindowSize(_Handle, out x, out y);
+                SDL.SDL_GetWindowSize(_Handle, out int x, out _);
                 return x;
             }
             set {
-                int x, y;
-                SDL.SDL_GetWindowSize(_Handle, out x, out y);
+                SDL.SDL_GetWindowSize(_Handle, out _, out int y);
                 SDL.SDL_SetWindowSize(_Handle, value, y);
             }
         }
 
+        /// <summary>
+        /// Height of the window
+        /// </summary>
         public int Height {
             get {
-                int x, y;
-                SDL.SDL_GetWindowSize(_Handle, out x, out y);
+                SDL.SDL_GetWindowSize(_Handle, out _, out int y);
                 return y;
             }
             set {
-                int x, y;
-                SDL.SDL_GetWindowSize(_Handle, out x, out y);
+                SDL.SDL_GetWindowSize(_Handle, out int x, out _);
                 SDL.SDL_SetWindowSize(_Handle, x, value);
             }
         }
@@ -81,21 +88,22 @@ namespace ImGuiSDL2CS {
         public bool IsAlive = false;
 
         public SDL2Window(
-            string title = "SDL2 Window",
+            string title = defaultTitle,
             int x = SDL.SDL_WINDOWPOS_CENTERED, int y = SDL.SDL_WINDOWPOS_CENTERED,
             int width = 800, int height = 600,
             SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
-        ) 
+        )
         {
             Init(title, x, y, width, height, flags);
         }
 
         public void Init(
-            string title = "SDL2 Window",
+            string title = defaultTitle,
             int x = SDL.SDL_WINDOWPOS_CENTERED, int y = SDL.SDL_WINDOWPOS_CENTERED,
             int width = 800, int height = 600,
             SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
-        ) {
+        )
+        {
             SDL2Helper.Init();
 
             if (_Handle != IntPtr.Zero)
@@ -112,8 +120,10 @@ namespace ImGuiSDL2CS {
         public bool IsVisible => (Flags & SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN) == 0;
         public void Show() => SDL.SDL_ShowWindow(_Handle);
         public void Hide() => SDL.SDL_HideWindow(_Handle);
+        public virtual void Swap() => SDL.SDL_GL_SwapWindow(_Handle);
 
-        public virtual void Run() {
+        public virtual void Run()
+        {
             Show();
             IsAlive = true;
             do {
@@ -123,24 +133,23 @@ namespace ImGuiSDL2CS {
                     OnLoop?.Invoke(this);
                 }
             } while (IsAlive);
-            IsAlive = false;
         }
 
-        public virtual void PollEvents() {
-            SDL.SDL_Event e;
-            while (SDL.SDL_PollEvent(out e) != 0)
+        public virtual void PollEvents()
+        {
+            while (SDL.SDL_PollEvent(out var e) != 0)
                 if (OnEvent == null || OnEvent.Invoke(this, e))
                     HandleEvent(e);
         }
 
-        public virtual void HandleEvent(SDL.SDL_Event e) {
+        public virtual void HandleEvent(SDL.SDL_Event e)
+        {
             if (e.type == SDL.SDL_EventType.SDL_QUIT)
                 IsAlive = false;
         }
 
-        public virtual void Swap() => SDL.SDL_GL_SwapWindow(_Handle);
-
-        protected virtual void Dispose(bool disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
             if (disposing) {
                 // Dispose managed state (managed objects).
             }
@@ -154,14 +163,15 @@ namespace ImGuiSDL2CS {
             }
         }
 
-        ~SDL2Window() {
+        ~SDL2Window()
+        {
             Dispose(false);
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
     }
 }
