@@ -11,11 +11,6 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.CollapsingHeader("Population", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 ImGui.Columns(2);
-                ImGui.Text("Species");
-                ImGui.NextColumn();
-                ImGui.Text("Quantity");
-                ImGui.NextColumn();
-                ImGui.Separator();
 
                 foreach(var (species, population) in colony.Population)
                 {

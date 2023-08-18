@@ -16,9 +16,10 @@ namespace Pulsar4X.SDL2UI
                 string header = uiState.Game.StaticData.CargoTypes[sid].Name;
                 string headerId = uiState.Game.StaticData.CargoTypes[sid].ID.ToString();
                 double percent = ((storageType.MaxVolume - storageType.FreeVolume) / storageType.MaxVolume) * 100;
+                header += " (" + percent.ToString("0.#") + "% full)";
 
                 ImGui.PushID(entityState.Entity.Guid.ToString());
-                if(ImGui.CollapsingHeader(header + " (" + percent.ToString("0.#") + "% full)###" + headerId, ImGuiTreeNodeFlags.DefaultOpen))
+                if(ImGui.CollapsingHeader(header + "###" + headerId, ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     ImGui.Columns(4);
                     ImGui.Text("Item");
@@ -28,6 +29,8 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Mass");
                     ImGui.NextColumn();
                     ImGui.Text("Volume");
+                    if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Max Volume: " + Stringify.Volume(storageType.MaxVolume) + "\nFree Volume: " + Stringify.Volume(storageType.FreeVolume));
                     ImGui.NextColumn();
                     ImGui.Separator();
 
@@ -44,8 +47,12 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(Stringify.Number(itemsStored));
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Mass(massStored));
+                        if(ImGui.IsItemHovered())
+                            ImGui.SetTooltip(Stringify.Mass(cargoType.MassPerUnit) + " per unit");
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Volume(volumeStored));
+                        if(ImGui.IsItemHovered())
+                            ImGui.SetTooltip(Stringify.Volume(volumePerItem) + " per unit");
                         ImGui.NextColumn();
                         //ImGui.SetTooltip(ctype.ToDescription);
                     }

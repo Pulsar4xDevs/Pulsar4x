@@ -12,7 +12,10 @@ namespace Pulsar4X.SDL2UI
         public static void DisplaySummary(this Entity entity, EntityState entityState, GlobalUIState uiState)
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("ColonySummary1", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
+            var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
+            var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
+            var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
+            if(ImGui.BeginChild("ColonySummary1", firstChildSize, true))
             {
                 if(ImGui.CollapsingHeader("Parent Information", ImGuiTreeNodeFlags.DefaultOpen))
                 {
@@ -36,16 +39,37 @@ namespace Pulsar4X.SDL2UI
                     PrintRow("Tilt", bodyInfoDb.AxialTilt.ToString("#"));
                     PrintRow("Magnetic Field", bodyInfoDb.MagneticField.ToString("#"));
                     PrintRow("Radiation Level", bodyInfoDb.RadiationLevel.ToString("#"));
-                    PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), false);
+                    PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), separator: false);
                 }
                 ImGui.Columns(1);
                 entity.GetDataBlob<ColonyInfoDB>().Display(entityState, uiState);
                 ImGui.EndChild();
             }
             ImGui.SameLine();
-            if(ImGui.BeginChild("ColonySummary2", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), true))
+            if(ImGui.BeginChild("ColonySummary2", secondChildSize, true))
             {
-                ImGui.Text("Some summary stuff");
+                if(ImGui.CollapsingHeader("Installations"))
+                {
+
+                }
+
+                ImGui.EndChild();
+            }
+            ImGui.SameLine();
+            if(ImGui.BeginChild("ColonySummary3", thirdChildSize, true))
+            {
+                if(ImGui.CollapsingHeader("Stockpile"))
+                {
+                    if(entity.TryGetDatablob<VolumeStorageDB>(out var storage))
+                    {
+                        ImGui.Columns(2);
+                        PrintRow("Total Mass in Storage", Stringify.Mass(storage.TotalStoredMass));
+                        PrintRow("Transfer Rate", storage.TransferRateInKgHr.ToString() + " kg/hr");
+                        PrintRow("Transfer Range", storage.TransferRangeDv_mps.ToString("0.#") + " dV m/s", tooltipOne: "This is confusing as hell :D");
+                        ImGui.Columns(1);
+                        storage.Display(entityState, uiState);
+                    }
+                }
                 ImGui.EndChild();
             }
         }
@@ -165,9 +189,22 @@ namespace Pulsar4X.SDL2UI
             ColonyLogisticsDisplay.GetInstance(StaticRefLib.StaticData, entityState).Display();
         }
 
-        private static void PrintRow(string one, string two, bool separator = true)
+        private static void PrintRow(string one, string two, string tooltipOne = null, string tooltipTwo = null, bool separator = true)
         {
-            ImGui.Text(one); ImGui.NextColumn(); ImGui.Text(two); ImGui.NextColumn();
+            ImGui.Text(one);
+            if(tooltipOne != null)
+            {
+                if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipOne);
+            }
+            ImGui.NextColumn();
+
+            ImGui.Text(two);
+            if(tooltipTwo != null)
+            {
+                if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipTwo);
+            }
+            ImGui.NextColumn();
+
             if(separator)
                 ImGui.Separator();
         }
