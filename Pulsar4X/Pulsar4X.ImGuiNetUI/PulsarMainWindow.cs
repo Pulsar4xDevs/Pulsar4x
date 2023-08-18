@@ -77,7 +77,7 @@ namespace Pulsar4X.SDL2UI
 
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 1 & !ImGui.GetIO().WantCaptureMouse)
             {
-                _state.onFocusMoved();
+                _state.OnFocusMoved();
                 _state.Camera.IsGrabbingMap = true;
                 _state.Camera.MouseFrameIncrementX = e.motion.x;
                 _state.Camera.MouseFrameIncrementY = e.motion.y;
@@ -97,14 +97,14 @@ namespace Pulsar4X.SDL2UI
 
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN && e.button.button == 3 & !ImGui.GetIO().WantCaptureMouse)
             {
-                _state.onFocusMoved();
+                _state.OnFocusMoved();
                 mouseDownAltX = mouseX;
                 mouseDownAltY = mouseY;
             }
 
             if (e.type == SDL.SDL_EventType.SDL_MOUSEBUTTONUP && e.button.button == 3)
             {
-                _state.onFocusMoved();
+                _state.OnFocusMoved();
                 _state.Camera.IsGrabbingMap = false;
 
                 if (mouseDownAltX == mouseX && mouseDownAltY == mouseY) //click on map.
@@ -136,7 +136,7 @@ namespace Pulsar4X.SDL2UI
 
             if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL &! ImGui.GetIO().WantCaptureMouse)
             {
-                _state.onFocusMoved();
+                _state.OnFocusMoved();
                 if (e.wheel.y > 0)
                 {
                     _state.Camera.ZoomIn(mouseX, mouseY);
