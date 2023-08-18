@@ -27,7 +27,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     if(ImGui.SmallButton(colonyInfoDb.PlanetEntity.GetDefaultName()))
                     {
-                        // TODO: open the EntityWindow for the parent
+                        uiState.EntityClicked(colonyInfoDb.PlanetEntity.Guid, uiState.SelectedStarSysGuid, MouseButtons.Primary);
                     }
                     ImGui.NextColumn();
                     ImGui.Separator();
