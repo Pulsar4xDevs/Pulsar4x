@@ -48,9 +48,12 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonySummary2", secondChildSize, true))
             {
-                if(ImGui.CollapsingHeader("Installations"))
+                if(ImGui.CollapsingHeader("Installations", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-
+                    if(entity.TryGetDatablob<ComponentInstancesDB>(out var componentInstances))
+                    {
+                        componentInstances.Display(entityState, uiState);
+                    }
                 }
 
                 ImGui.EndChild();
@@ -58,7 +61,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonySummary3", thirdChildSize, true))
             {
-                if(ImGui.CollapsingHeader("Stockpile"))
+                if(ImGui.CollapsingHeader("Stockpile", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     if(entity.TryGetDatablob<VolumeStorageDB>(out var storage))
                     {
@@ -67,7 +70,7 @@ namespace Pulsar4X.SDL2UI
                         PrintRow("Transfer Rate", storage.TransferRateInKgHr.ToString() + " kg/hr");
                         PrintRow("Transfer Range", storage.TransferRangeDv_mps.ToString("0.#") + " dV m/s", tooltipOne: "This is confusing as hell :D");
                         ImGui.Columns(1);
-                        storage.Display(entityState, uiState);
+                        storage.Display(entityState, uiState, ImGuiTreeNodeFlags.None);
                     }
                 }
                 ImGui.EndChild();

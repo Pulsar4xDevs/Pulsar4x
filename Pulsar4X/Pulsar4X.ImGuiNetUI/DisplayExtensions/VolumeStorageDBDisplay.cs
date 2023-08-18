@@ -7,7 +7,7 @@ namespace Pulsar4X.SDL2UI
 {
     public static class VolumeStorageDBDisplay
     {
-        public static void Display(this VolumeStorageDB storage, EntityState entityState, GlobalUIState uiState)
+        public static void Display(this VolumeStorageDB storage, EntityState entityState, GlobalUIState uiState, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.DefaultOpen)
         {
             Vector2 size = ImGui.GetContentRegionAvail();
 
@@ -19,7 +19,7 @@ namespace Pulsar4X.SDL2UI
                 header += " (" + percent.ToString("0.#") + "% full)";
 
                 ImGui.PushID(entityState.Entity.Guid.ToString());
-                if(ImGui.CollapsingHeader(header + "###" + headerId, ImGuiTreeNodeFlags.DefaultOpen))
+                if(ImGui.CollapsingHeader(header + "###" + headerId, flags))
                 {
                     ImGui.Columns(4);
                     ImGui.Text("Item");
