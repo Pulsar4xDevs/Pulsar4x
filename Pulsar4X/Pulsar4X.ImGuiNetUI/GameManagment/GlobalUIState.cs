@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
             {typeof(FireControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
-            {typeof(LogiBaseWindow), "Logistics"},
+            {typeof(ColonyLogisticsDisplay), "Logistics"},
             {typeof(LogiShipWindow), "Logistics"},
             {typeof(ColonyPanel), "Economy"},
             {typeof(GotoSystemBlankMenuHelper), "Go to system"},
