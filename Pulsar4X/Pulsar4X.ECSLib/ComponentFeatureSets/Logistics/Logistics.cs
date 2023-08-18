@@ -679,30 +679,29 @@ namespace Pulsar4X.ECSLib
 
         public static void CreateCommand(Entity entity, OrderTypes ordertype )
         {
-
-            SetLogisticsOrder cmd = new SetLogisticsOrder();
-            cmd.EntityCommandingGuid = entity.Guid;
-            cmd.RequestingFactionGuid = entity.FactionOwnerID;
-            cmd._type = ordertype;
-
+            SetLogisticsOrder cmd = new SetLogisticsOrder()
+            {
+                EntityCommandingGuid = entity.Guid,
+                RequestingFactionGuid = entity.FactionOwnerID,
+                _type = ordertype
+            };
 
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
-            
         }
 
         public static void CreateCommand_SetBaseItems(Entity entity, Dictionary<ICargoable,(int count, int demandSupplyWeight)> changes )
         {
-
-            SetLogisticsOrder cmd = new SetLogisticsOrder();
-            cmd.EntityCommandingGuid = entity.Guid;
-            cmd.RequestingFactionGuid = entity.FactionOwnerID;
-            cmd._type = OrderTypes.SetBaseItems;
-            cmd._baseChanges = changes;
-
+            SetLogisticsOrder cmd = new SetLogisticsOrder()
+            {
+                EntityCommandingGuid = entity.Guid,
+                RequestingFactionGuid = entity.FactionOwnerID,
+                _type = OrderTypes.SetBaseItems,
+                _baseChanges = changes
+            };
 
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         }
-        
+
         public class Changes//maybe should be a struct, but would need to not use a dictionary and need to check mutability. 
         {
             public Dictionary<Guid, double> VolumeAmounts;

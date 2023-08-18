@@ -121,7 +121,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 else
                 {
-                    if(ImGui.Button("Disable this entity as an inporter/exporter"))
+                    if(ImGui.Button("Disable this entity as an importer/exporter"))
                     {
                         SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.RemoveLogiBaseDB);
                     }
@@ -154,9 +154,9 @@ namespace Pulsar4X.SDL2UI
                             if(_stores[stypeID].Cargoables.ContainsKey(ctype.ID)) 
                                 itemsStored = (int)_stores[stypeID].CurrentStoreInUnits[ctype.ID];
                             var volumePerItem = ctype.VolumePerUnit;
-                            ImGui.Text(ctype.Name);
+                            ImGui.Text(cname);
                             ImGui.NextColumn();
-                            ImGui.Text(Stringify.Number(itemsStored));
+                            ImGui.Text(Stringify.Number(itemsStored, "#,###"));
                             ImGui.NextColumn();
                             if(ImGui.SmallButton("+##"+ctype.ID))
                             {
