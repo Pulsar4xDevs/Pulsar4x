@@ -143,15 +143,6 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SetTooltip("Open planetary window");
             }
 
-            if(Entity.HasDataBlob<VolumeStorageDB>() && !Entity.HasDataBlob<NewtonThrustAbilityDB>())
-            {
-                ImGui.SameLine();
-                bool buttonresult = ImGui.SmallButton(GlobalUIState.NamesForMenus[typeof(LogiBaseWindow)]);
-                EntityUIWindows.OpenUIWindow(typeof(LogiBaseWindow), EntityState, _uiState, buttonresult);
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Open logistics window");
-            }
-
             if(Entity.HasDataBlob<VolumeStorageDB>() && Entity.HasDataBlob<NewtonThrustAbilityDB>())
             {
                 ImGui.SameLine();

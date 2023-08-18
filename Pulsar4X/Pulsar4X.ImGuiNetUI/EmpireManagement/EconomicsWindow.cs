@@ -106,6 +106,11 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("Shipyards");
                         ImGui.EndTabItem();
                     }
+                    if(ImGui.BeginTabItem("Logistics"))
+                    {
+                        selectedEntity.Entity.DisplayLogistics(selectedEntity, _uiState);
+                        ImGui.EndTabItem();
+                    }
 
                     ImGui.EndTabBar();
                     ImGui.EndChild();
