@@ -145,10 +145,6 @@ namespace Pulsar4X.SDL2UI
             {
                 return true;
             }
-            else if (_entityState.Entity.HasDataBlob<VolumeStorageDB>() && !_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(LogiBaseWindow))
-            {
-                return true;
-            }
             else if (
                 _entityState.Entity.HasDataBlob<VolumeStorageDB>() &&
                 _entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() &&

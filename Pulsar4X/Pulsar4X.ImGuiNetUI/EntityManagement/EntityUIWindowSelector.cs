@@ -161,7 +161,6 @@ namespace Pulsar4X.SDL2UI
                     ActionButton(typeof(GotoSystemBlankMenuHelper));
                     ActionButton(typeof(WarpOrderWindow));
                     ActionButton(typeof(ChangeCurrentOrbitWindow));
-                    ActionButton(typeof(LogiBaseWindow));
                     ActionButton(typeof(LogiShipWindow));
                 }
                 ImGui.End();
