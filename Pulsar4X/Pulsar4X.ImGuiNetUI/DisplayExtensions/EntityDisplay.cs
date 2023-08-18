@@ -50,9 +50,9 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        public static void DisplayIndustry(this Entity entity, GlobalUIState uiState)
+        public static void DisplayIndustry(this Entity entity, EntityState entityState, GlobalUIState uiState)
         {
-            ImGui.Text("Industry");
+            IndustryDisplay.GetInstance(entityState).Display(uiState);
         }
         public static void DisplayMining(this Entity entity, GlobalUIState uiState)
         {

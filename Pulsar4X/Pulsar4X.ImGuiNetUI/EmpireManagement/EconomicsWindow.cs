@@ -88,7 +88,7 @@ namespace Pulsar4X.SDL2UI
                     }
                     if(ImGui.BeginTabItem("Industry"))
                     {
-                        selectedEntity.Entity.DisplayIndustry(_uiState);
+                        selectedEntity.Entity.DisplayIndustry(selectedEntity, _uiState);
                         ImGui.EndTabItem();
                     }
                     if(ImGui.BeginTabItem("Mining"))

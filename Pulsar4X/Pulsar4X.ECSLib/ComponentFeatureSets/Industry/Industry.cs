@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib.Industry
         Installations   = 1 << 2,
         ShipComponents  = 1 << 3,
         Fighters        = 1 << 4,
-        Ordnance        = 1 << 5,
+        Ordinance        = 1 << 5,
     }
 
     public interface IIndustryDB
