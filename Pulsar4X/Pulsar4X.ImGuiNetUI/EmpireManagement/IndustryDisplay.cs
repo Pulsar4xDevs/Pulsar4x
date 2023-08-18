@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
         {
             get
             {
-                if (_selectedProdLine != Guid.Empty 
+                if (_selectedProdLine != Guid.Empty
                     && _selectedExistingIndex > -1
                     && _prodLines[_selectedProdLine].Jobs.Count > _selectedExistingIndex)
                 {
@@ -81,8 +81,8 @@ namespace Pulsar4X.SDL2UI
         private void Update()
         {
             Entity = EntityState.Entity;
-            _industryDB = Entity.GetDataBlob<IndustryAbilityDB>();
-            //_job = job;
+            if(!Entity.TryGetDatablob<IndustryAbilityDB>(out _industryDB))
+                return;
 
             _prodLines = _industryDB.ProductionLines;
 
@@ -92,7 +92,7 @@ namespace Pulsar4X.SDL2UI
             var constructablesIDs = new Guid[count];
 
             int i = 0;
-            Dictionary<Guid, List<int>> _constructablesIndexesByType = new Dictionary<Guid, List<int>>();
+            Dictionary<Guid, List<int>> _constructablesIndexesByType = new ();
             foreach (var kvp in _factionInfoDB.IndustryDesigns)
             {
                 //_constructableDesigns[i] = kvp.Value;
@@ -150,6 +150,12 @@ namespace Pulsar4X.SDL2UI
 
         public void ProductionLineDisplay(GlobalUIState state)
         {
+            if(_prodLines == null)
+            {
+                ImGui.Text("No capacity for construction at this colony.");
+                return;
+            }
+
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
             if(ImGui.BeginChild("ColonyProductionLines", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
             {
@@ -216,7 +222,7 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.ImageButton(state.Img_Up(), new Vector2(16, 8)) && _selectedExistingConJob != null)
             {
                 var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, Entity, _selectedProdLine, _selectedExistingConJob.JobID, -1);
-                StaticRefLib.OrderHandler.HandleOrder(cmd); 
+                StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
 
             if (ImGui.ImageButton(state.Img_Down(), new Vector2(16, 8)) && _selectedExistingConJob != null)
@@ -251,14 +257,14 @@ namespace Pulsar4X.SDL2UI
                 if (_lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeInstalled)
                 {
                     ImGui.Checkbox("Auto Install on colony", ref _newJobAutoInstall);
-                    
+
                     if (_newJobAutoInstall)
                         _lastClickedJob.InstallOn = Entity;
                     else
                         _lastClickedJob.InstallOn = null;
-                    
+
                 }
-                
+
                 if (_lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeLaunched)
                 {
                     if (Entity.HasDataBlob<ColonyInfoDB>())
@@ -266,12 +272,12 @@ namespace Pulsar4X.SDL2UI
                         var s = (ShipDesign)_lastClickedDesign;
                         var planet = Entity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
                         var lowOrbit = planet.GetDataBlob<MassVolumeDB>().RadiusInM * 0.33333;
-                    
+
                         var mass = s.MassPerUnit;
-                    
+
                         var fuelCost = OrbitMath.FuelCostToLowOrbit(planet, mass);
 
-                    
+
                         if (ImGui.Button("Launch to Low Orbit"))
                         {
                             LaunchShipCmd.CreateCommand(_factionID, Entity, _selectedProdLine, _lastClickedJob.JobID);
@@ -280,15 +286,15 @@ namespace Pulsar4X.SDL2UI
 
 
                         ImGui.Text("Fuel Cost: " + fuelCost);
-                    
+
                     }
                 }
             }
 
             //ImGui.EndGroup();
-            
+
             //ImGui.Button("Install On Parent")
-            
+
         }
 
         void NewJobDisplay(GlobalUIState state)
@@ -313,7 +319,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Checkbox("Repeat Job", ref _newJobRepeat);
                 ImGui.SameLine();
                 //if the selected item can be installed on a colony:
-                
+
 
                 if (ImGui.Button("Create New Job"))
                 {
@@ -354,7 +360,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(item.Value.ToString());
                 ImGui.NextColumn();
             }
-            
+
             ImGui.EndChild();
         }
     }
