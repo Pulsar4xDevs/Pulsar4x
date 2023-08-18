@@ -91,9 +91,9 @@ namespace Pulsar4X.SDL2UI
             Vector2 topSize = ImGui.GetContentRegionAvail();
             if(ImGui.BeginChild("NumberOfMines" + entity.Guid, new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                if(entity.HasDataBlob<MiningDB>())
+                if(entity.TryGetDatablob<MiningDB>(out var miningDB))
                 {
-                    ImGui.Text("Number of Mines: " + entity.GetDataBlob<MiningDB>().NumberOfMines);
+                    ImGui.Text("Number of Mines: " + miningDB.NumberOfMines);
                 }
                 else
                 {
@@ -184,6 +184,23 @@ namespace Pulsar4X.SDL2UI
                 {
                     ImGui.Text("No minerals available.");
                 }
+            }
+        }
+
+        public static void DisplayResearch(this Entity entity, EntityState entityState, GlobalUIState uiState)
+        {
+            Vector2 topSize = ImGui.GetContentRegionAvail();
+            if(ImGui.BeginChild("NumberOfResearchLabs" + entity.Guid, new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            {
+                if(entity.TryGetDatablob<EntityResearchDB>(out var researchDB))
+                {
+                    ImGui.Text("Number of Research Labs: " + researchDB.Labs.Values.Sum());
+                }
+                else
+                {
+                    ImGui.Text("Number of Research Labs: 0");
+                }
+                ImGui.EndChild();
             }
         }
 

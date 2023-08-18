@@ -15,7 +15,7 @@ namespace Pulsar4X.SDL2UI
         EntityState _entityState;
         VolumeStorageDB _volStorageDB;
         Dictionary<Guid, TypeStore> _stores = new Dictionary<Guid, TypeStore>();
-        
+
         public CargoListPannelSimple(StaticDataStore staticData, EntityState entity)
         {
             _staticData = staticData;
@@ -34,7 +34,7 @@ namespace Pulsar4X.SDL2UI
 
         public void Update()
         {
-            if (_volStorageDB == null) //if this colony does not have any storage. 
+            if (_volStorageDB == null) //if this colony does not have any storage.
                 return;
             //we do a deep copy clone so as to avoid a thread collision when we loop through.
             var newDict = new Dictionary<Guid, TypeStore>();
@@ -49,24 +49,24 @@ namespace Pulsar4X.SDL2UI
             }
 
             _stores = newDict;
-            
+
         }
 
 
-        
+
         public void Display()
         {
             var width = ImGui.GetWindowWidth() * 0.5f;
-            
+
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true, ImGuiWindowFlags.AlwaysAutoResize);
             foreach (var typeStore in _stores)
             {
                 CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
-                var freeVolume = typeStore.Value.FreeVolume;
+                var freeVolume = _volStorageDB.GetFreeVolume(typeStore.Key);
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
-                
-                
+
+
                 ImGui.PushID(_entityState.Entity.Guid.ToString());//this helps the ui diferentiate between the left and right side
                 //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
                 //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
@@ -107,9 +107,9 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Columns(1);
                 }
             }
-            
-            
-            ImGui.EndChild(); 
+
+
+            ImGui.EndChild();
         }
 
         public override bool GetActive()
@@ -130,8 +130,8 @@ namespace Pulsar4X.SDL2UI
         {
             throw new NotImplementedException();
         }
-        
-        
+
+
     }
 
     public delegate void CargoItemSelectedHandler(CargoListPannelComplex cargoPannel);
@@ -145,7 +145,7 @@ namespace Pulsar4X.SDL2UI
         Dictionary<ICargoable, long> _cargoToMoveUI = new Dictionary<ICargoable, long>();
         Dictionary<ICargoable, long> _cargoToMoveOrders = new Dictionary<ICargoable, long>();
         Dictionary<ICargoable, long> _cargoToMoveDatablob = new Dictionary<ICargoable, long>();
-        
+
         //Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
         //public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
         public ICargoable selectedCargo;
@@ -157,10 +157,10 @@ namespace Pulsar4X.SDL2UI
             _entityState = entity;
             _volStorageDB = entity.Entity.GetDataBlob<VolumeStorageDB>();
             HeadersIsOpenDict = headersOpenDict;
-            
+
             Update();
         }
-        
+
 
         public event CargoItemSelectedHandler CargoItemSelectedEvent;
 
@@ -178,8 +178,8 @@ namespace Pulsar4X.SDL2UI
             }
             _stores = newDict;
 
-            
-            
+
+
             if (_entityState.Entity.HasDataBlob<CargoTransferDB>())
             {
                 var itemsToXfer = _entityState.Entity.GetDataBlob<CargoTransferDB>().GetItemsToTransfer();
@@ -194,7 +194,7 @@ namespace Pulsar4X.SDL2UI
             if (_entityState.Entity.HasDataBlob<OrderableDB>())
             {
                 var orders = _entityState.Entity.GetDataBlob<OrderableDB>().GetActionList();
-                var newxferDict = new Dictionary<ICargoable, long>(); 
+                var newxferDict = new Dictionary<ICargoable, long>();
                 foreach (var order in orders)
                 {
                     if (order is CargoUnloadToOrder)
@@ -225,7 +225,7 @@ namespace Pulsar4X.SDL2UI
                 if(item.Value < 0)
                     listToMove.Add((item.Key, item.Value * -1));
             }
-            return listToMove; 
+            return listToMove;
         }
 
         internal void ClearUINumbers()
@@ -237,7 +237,7 @@ namespace Pulsar4X.SDL2UI
         internal bool CanStore(Guid cargoTypeID)
         {
             return _stores.ContainsKey(cargoTypeID);
-            
+
         }
 
         internal void AddUICargoIn(ICargoable cargoItem, long itemCount)
@@ -289,7 +289,7 @@ namespace Pulsar4X.SDL2UI
 
         public void Display()
         {
-            
+
             ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(260, 200), true);
             ImGui.Text(_entityState.Name);
             ImGui.Text("Transfer Rate: " + _volStorageDB.TransferRateInKgHr);
@@ -298,7 +298,7 @@ namespace Pulsar4X.SDL2UI
             foreach (var typeStore in _stores)
             {
                 CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
-                var freeVolume = typeStore.Value.FreeVolume;
+                var freeVolume = _volStorageDB.GetFreeVolume(typeStore.Key);
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
                 ImGui.PushID(_entityState.Entity.Guid.ToString()); //this helps the ui diferentiate between the left and right side
@@ -380,8 +380,8 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Columns(1);
                 }
             }
-            
-            
+
+
             ImGui.EndChild();
         }
 
@@ -392,7 +392,7 @@ namespace Pulsar4X.SDL2UI
         StaticDataStore _staticData;
         EntityState _selectedEntityLeft;
         EntityState _selectedEntityRight;
-        
+
         CargoListPannelComplex _cargoList1;
         CargoListPannelComplex CargoListLeft
         {
@@ -403,11 +403,11 @@ namespace Pulsar4X.SDL2UI
         CargoListPannelComplex CargoListRight
         {
             get { return _cargoList2; }
-            set 
-            { 
+            set
+            {
                 _cargoList2 = value;
                 if(value != null)
-                    value.CargoItemSelectedEvent += OnCargoItemSelectedEvent; 
+                    value.CargoItemSelectedEvent += OnCargoItemSelectedEvent;
             }
         }
         CargoListPannelComplex SelectedCargoPannel;
@@ -416,20 +416,20 @@ namespace Pulsar4X.SDL2UI
         bool _isSelectingRight = false;
         bool _hasCargoAbilityRight;
         Dictionary<Guid, bool> headersOpenDict = new Dictionary<Guid, bool>();
-        
+
         int _transferRate = 0;
         double _dvDifference_ms;
         double _dvMaxRangeDiff_ms;
-        
+
         private CargoTransfer()
         {
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
-            //ClickedEntityIsPrimary = false;            
+            //ClickedEntityIsPrimary = false;
         }
-        
+
         public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
         {
-            
+
             CargoTransfer instance;
             if (!_uiState.LoadedWindows.ContainsKey(typeof(CargoTransfer)))
             {
@@ -478,8 +478,8 @@ namespace Pulsar4X.SDL2UI
             }
             else
                 _hasCargoAbilityLeft = false;
-            
-            
+
+
             if (_uiState.PrimaryEntity != _uiState.LastClickedEntity)
             {
                 if(_isSelectingRight)
@@ -515,20 +515,20 @@ namespace Pulsar4X.SDL2UI
                 {
                     CargoListRight = null;
                     _hasCargoAbilityRight = false;
-                    _transferRate = 0; 
+                    _transferRate = 0;
                 }
             }
         }
 
         void CalcTransferRate()
         {
-            
+
             double? dvDif;
             OrbitDB leftOrbit;
-            //TODO: the logic here has places where it's going to break, needs fixing. 
+            //TODO: the logic here has places where it's going to break, needs fixing.
             //I think I'm checking if it's a colony here?
             //but I'm not checking for NewtonMoveDB or OrbitUpdateOftenDB
-            if (!_selectedEntityLeft.Entity.HasDataBlob<OrbitDB>()) 
+            if (!_selectedEntityLeft.Entity.HasDataBlob<OrbitDB>())
             {
                 dvDif = _selectedEntityRight.Entity.GetDataBlob<OrbitDB>().MeanOrbitalVelocityInm();
             }
@@ -566,7 +566,7 @@ namespace Pulsar4X.SDL2UI
 
             if(UnselectedCargoPannel != null)
                 UnselectedCargoPannel.selectedCargo = null;
-            
+
         }
 
 
@@ -581,7 +581,7 @@ namespace Pulsar4X.SDL2UI
                     HardRefresh();
                 }
 
-                
+
             }
         }
 
@@ -599,7 +599,7 @@ namespace Pulsar4X.SDL2UI
             CargoUnloadToOrder.CreateCommand(
                 _uiState.Faction.Guid,
                 _selectedEntityLeft.Entity,
-                _selectedEntityRight.Entity, 
+                _selectedEntityRight.Entity,
                 CargoListLeft.GetAllToMoveOut());
 
             //create order for items to go to left
@@ -608,7 +608,7 @@ namespace Pulsar4X.SDL2UI
                 _selectedEntityRight.Entity,
                 _selectedEntityLeft.Entity,
                 CargoListRight.GetAllToMoveOut());
-            
+
             CargoListLeft.ClearUINumbers();
             CargoListRight.ClearUINumbers();
         }
@@ -650,12 +650,12 @@ namespace Pulsar4X.SDL2UI
                         ImGui.SameLine();
                         if (_hasCargoAbilityRight)
                         {
-                            
+
                             CargoListRight.Display();
                             ImGui.Text("DeltaV Difference: " + Stringify.Velocity(_dvDifference_ms));
                             ImGui.Text("Max DeltaV Difference: " + Stringify.Velocity(_dvMaxRangeDiff_ms));
                             ImGui.Text("Transfer Rate Kg/h: " + _transferRate);
-                            
+
                         }
 
                         string label = "Click to Select Entity For Transfer";
@@ -668,7 +668,7 @@ namespace Pulsar4X.SDL2UI
                                 ClickedEntityIsPrimary = false;
                             else
                                 ClickedEntityIsPrimary = true;
-                            
+
                         }
                         if(!_isSelectingRight)
                             ClickedEntityIsPrimary = true;

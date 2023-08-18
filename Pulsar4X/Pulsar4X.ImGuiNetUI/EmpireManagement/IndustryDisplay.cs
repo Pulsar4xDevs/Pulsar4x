@@ -46,7 +46,6 @@ namespace Pulsar4X.SDL2UI
 
         Guid SelectedConstrucableID
         {
-
             get
             {
                 if(_contructablesByPline.Count != _industryDB.ProductionLines.Count)
@@ -80,10 +79,6 @@ namespace Pulsar4X.SDL2UI
 
         private void Update()
         {
-            Entity = EntityState.Entity;
-            if(!Entity.TryGetDatablob<IndustryAbilityDB>(out _industryDB))
-                return;
-
             _prodLines = _industryDB.ProductionLines;
 
             int count = _factionInfoDB.IndustryDesigns.Count;
@@ -129,7 +124,10 @@ namespace Pulsar4X.SDL2UI
 
         public void Display(GlobalUIState state)
         {
-            _factionInfoDB = state.Faction.GetDataBlob<FactionInfoDB>();
+            Entity = EntityState.Entity;
+            if(!Entity.TryGetDatablob<IndustryAbilityDB>(out _industryDB) || !state.Faction.TryGetDatablob<FactionInfoDB>(out _factionInfoDB))
+                return;
+
             _factionID = state.Faction.Guid;
             Update();
 
@@ -159,22 +157,21 @@ namespace Pulsar4X.SDL2UI
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
             if(ImGui.BeginChild("ColonyProductionLines", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
             {
-                foreach (var kvp in _prodLines)
+                foreach (var (id, line) in _prodLines)
                 {
-                    IndustryAbilityDB.ProductionLine ud = kvp.Value;
-                    ImGui.PushID(kvp.Key.ToString());
+                    ImGui.PushID(id.ToString());
                     //ImGui.Selectable()
 
-                    if (ImGui.CollapsingHeader(ud.FacName))
+                    if (ImGui.CollapsingHeader(line.FacName))
                     {
                         ImGui.Columns(2);
                         ImGui.SetColumnWidth(0, 128);
-                        Vector2 progsize = new Vector2(128, ImGui.GetTextLineHeight());
-                        for (int ji = 0; ji < ud.Jobs.Count; ji++)
+                        var progsize = new Vector2(128, ImGui.GetTextLineHeight());
+                        for (int ji = 0; ji < line.Jobs.Count; ji++)
                         {
                             var cpos = ImGui.GetCursorPos();
-                            var batchJob = ud.Jobs[ji];
-                            string jobname = ud.Jobs[ji].Name;
+                            var batchJob = line.Jobs[ji];
+                            string jobname = line.Jobs[ji].Name;
 
                             bool selected = _selectedExistingIndex ==  ji;
                             float percent = 1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost;
@@ -203,7 +200,7 @@ namespace Pulsar4X.SDL2UI
 
                     if (ImGui.IsItemClicked())
                     {
-                        _selectedProdLine = kvp.Key;
+                        _selectedProdLine = id;
                         _newjobSelectionIndex = (_selectedProdLine, 0);
                         _lastClickedJob = _selectedExistingConJob;
                         _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
