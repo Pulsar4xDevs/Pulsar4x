@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
-    
+
     public class VolumeStorageDB : BaseDataBlob, IAbilityDescription
     {
         public Dictionary<Guid, TypeStore> TypeStores = new Dictionary<Guid, TypeStore>();
@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
         {
             TypeStores.Add(type, new TypeStore(maxVolume));
         }
-        
+
 
         public VolumeStorageDB(VolumeStorageDB db)
         {
@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
                 string name = StaticRefLib.StaticData.CargoTypes[kvp.Key].Name;
                 desc += name + "\t" + kvp.Value.MaxVolume + "\n";
             }
-            
+
             return desc;
         }
     }
@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib
     public class TypeStore
     {
         public double MaxVolume;
-        public double FreeVolume;
+        internal double FreeVolume;
         public Dictionary<Guid, long> CurrentStoreInUnits = new Dictionary<Guid, long>();
         public Dictionary<Guid, ICargoable> Cargoables =  new Dictionary<Guid, ICargoable>();
         public TypeStore(double maxVolume)
@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
         }
 
     }
-    
+
     public class VolumeStorageAtb : IComponentDesignAttribute
     {
         public Guid StoreTypeID;
@@ -119,7 +119,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
-        
+
         public string AtbName()
         {
             return "Cargo Volume";

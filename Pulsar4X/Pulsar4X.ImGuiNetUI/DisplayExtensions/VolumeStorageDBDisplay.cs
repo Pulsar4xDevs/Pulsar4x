@@ -15,7 +15,8 @@ namespace Pulsar4X.SDL2UI
             {
                 string header = uiState.Game.StaticData.CargoTypes[sid].Name;
                 string headerId = uiState.Game.StaticData.CargoTypes[sid].ID.ToString();
-                double percent = ((storageType.MaxVolume - storageType.FreeVolume) / storageType.MaxVolume) * 100;
+                double freeVolume = storage.GetFreeVolume(sid);
+                double percent = ((storageType.MaxVolume - freeVolume) / storageType.MaxVolume) * 100;
                 header += " (" + percent.ToString("0.#") + "% full)";
 
                 ImGui.PushID(entityState.Entity.Guid.ToString());
@@ -30,17 +31,17 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     ImGui.Text("Volume");
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Max Volume: " + Stringify.Volume(storageType.MaxVolume) + "\nFree Volume: " + Stringify.Volume(storageType.FreeVolume));
+                        ImGui.SetTooltip("Max Volume: " + Stringify.Volume(storageType.MaxVolume) + "\nFree Volume: " + Stringify.Volume(freeVolume));
                     ImGui.NextColumn();
                     ImGui.Separator();
 
                     foreach(var (id, value) in storageType.CurrentStoreInUnits)
                     {
                         ICargoable cargoType = storageType.Cargoables[id];
-                        var volumeStored = value;
+                        var volumeStored = storage.GetVolumeStored(cargoType);
                         var volumePerItem = cargoType.VolumePerUnit;
-                        var massStored = volumeStored * cargoType.MassPerUnit;
-                        var itemsStored = storageType.CurrentStoreInUnits[id];
+                        var massStored = storage.GetMassStored(cargoType);
+                        var itemsStored = value;
 
                         if(ImGui.Selectable(cargoType.Name)) {}
                         ImGui.NextColumn();
@@ -52,7 +53,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Volume(volumeStored));
                         if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip(Stringify.Volume(volumePerItem) + " per unit");
+                            ImGui.SetTooltip(Stringify.Volume(volumePerItem, "#.#####") + " per unit");
                         ImGui.NextColumn();
                         //ImGui.SetTooltip(ctype.ToDescription);
                     }

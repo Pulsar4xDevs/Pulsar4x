@@ -34,8 +34,8 @@ namespace Pulsar4X.ECSLib
         public int MaxLevel;
         public string DataFormula;
 
-        public ResearchCategories Category;        
-        public Dictionary<Guid,int> Requirements;        
-        public string CostFormula; 
+        public ResearchCategories Category;
+        public Dictionary<Guid,int> Requirements;
+        public string CostFormula;
     }
 }

@@ -98,7 +98,7 @@ namespace Pulsar4X.SDL2UI
                     }
                     if(ImGui.BeginTabItem("Research"))
                     {
-                        ImGui.Text("Research");
+                        selectedEntity.Entity.DisplayResearch(selectedEntity, _uiState);
                         ImGui.EndTabItem();
                     }
                     if(ImGui.BeginTabItem("Shipyards"))
