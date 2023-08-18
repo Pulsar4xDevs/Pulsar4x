@@ -72,7 +72,7 @@ namespace Pulsar4X.SDL2UI
             
         };
 
-        private bool _showSizesDemo = false;
+        
         
         private DebugWindow() 
         {
@@ -234,9 +234,7 @@ namespace Pulsar4X.SDL2UI
                     }
 
 
-                    ImGui.Checkbox("Sizes Demo", ref _showSizesDemo);
-                    if(_showSizesDemo)
-                        SizesDemo.Display();
+
 
                     if (ImGui.CollapsingHeader("UI Examples"))
                     {

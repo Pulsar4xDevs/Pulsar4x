@@ -18,8 +18,10 @@ public static class SizesDemo
         
     public static void Display()
     {
+        _wdl = ImGui.GetForegroundDrawList();
         if (ImGui.Begin("Size Demo"))
         {
+
             var getCursorScreenPos1st = ImGui.GetCursorScreenPos();
             var getCursorPos1st = ImGui.GetCursorPos();
             ImGui.Columns(2, "", true);
@@ -131,86 +133,86 @@ public static class SizesDemo
             ImGui.Columns(0);
             ImGui.NewLine();
             ImGui.NewLine();
+            
             ImGui.Text("Note: DrawList.AddRect takes two positions, not position and size");
-
-            ImGui.End();
-            
         }
-
-        void DoPoint(string name, Vector2 point, FrameOfReference foR)
-        {
-            ImGui.Text(name);
-            if (ImGui.IsItemHovered())
-            {
-                if(foR == FrameOfReference.Window)
-                    DrawCrosshair(_windowPos + point, 3);
-                else
-                    DrawCrosshair(point, 3);
-            }
-            ImGui.NextColumn();
-            ImGui.Text(point.ToString());
-            ImGui.SameLine();
-            if(foR == FrameOfReference.Window)
-                ImGui.Text("Frame of Reference: Window");
-            else
-                ImGui.Text("Frame of Reference: Screen");
-            ImGui.NextColumn();
-        }
-
-        void DoRectangle(string name, Vector2 start, Vector2 size)
-        {
-            ImGui.Text(name);
-            if (ImGui.IsItemHovered())
-            {
-                var endRect = start + size;
-                _wdl.AddRect(start, endRect, _lineColour);
-                DrawCrosshair(start, 3);
-            }
-            ImGui.NextColumn();
-            ImGui.Text(size.ToString());
-            ImGui.NextColumn();
-        }
-
-        void DoHLine(string name, Vector2 start, float width)
-        {
-            ImGui.Text(name);
-            if (ImGui.IsItemHovered())
-            {
-                var endPos = start;
-                endPos.X += width;
-                _wdl.AddLine(start, endPos, _lineColour);
-                DrawCrosshair(start, 3);
-
-            }
-            ImGui.NextColumn();
-            ImGui.Text(width.ToString());
-            ImGui.NextColumn();
-        }
-            
-        void DoVLine(string name, Vector2 start, float height)
-        {
-            ImGui.Text(name);
-            if (ImGui.IsItemHovered())
-            {
-                var endPos = start;
-                endPos.Y += height;
-                _wdl.AddLine(start, endPos, _lineColour);
-                DrawCrosshair(start, 3);
-
-            }
-            ImGui.NextColumn();
-            ImGui.Text(height.ToString());
-            ImGui.NextColumn();
-        }
-
-        void DrawCrosshair(Vector2 atPos, float radius)
-        {
-            var p1 = new Vector2(atPos.X - radius, atPos.Y);
-            var p2 = new Vector2(atPos.X + radius, atPos.Y);
-            var p3 = new Vector2(atPos.X, atPos.Y - radius);
-            var p4 = new Vector2(atPos.X, atPos.Y + radius);
-            _wdl.AddLine(p1, p2, _pointColour);
-            _wdl.AddLine(p3, p4, _pointColour);
-        }
+        ImGui.End();
     }
+    
+    static void DoPoint(string name, Vector2 point, FrameOfReference foR)
+    {
+        ImGui.Text(name);
+        if (ImGui.IsItemHovered())
+        {
+            if(foR == FrameOfReference.Window)
+                DrawCrosshair(_windowPos + point, 3);
+            else
+                DrawCrosshair(point, 3);
+        }
+        ImGui.NextColumn();
+        ImGui.Text(point.ToString());
+        ImGui.SameLine();
+        if(foR == FrameOfReference.Window)
+            ImGui.Text("Frame of Reference: Window");
+        else
+            ImGui.Text("Frame of Reference: Screen");
+        ImGui.NextColumn();
+    }
+
+    static void DoRectangle(string name, Vector2 start, Vector2 size)
+    {
+        ImGui.Text(name);
+        if (ImGui.IsItemHovered())
+        {
+            var endRect = start + size;
+            _wdl.AddRect(start, endRect, _lineColour);
+            DrawCrosshair(start, 3);
+        }
+        ImGui.NextColumn();
+        ImGui.Text(size.ToString());
+        ImGui.NextColumn();
+    }
+
+    static void DoHLine(string name, Vector2 start, float width)
+    {
+        ImGui.Text(name);
+        if (ImGui.IsItemHovered())
+        {
+            var endPos = start;
+            endPos.X += width;
+            _wdl.AddLine(start, endPos, _lineColour);
+            DrawCrosshair(start, 3);
+
+        }
+        ImGui.NextColumn();
+        ImGui.Text(width.ToString());
+        ImGui.NextColumn();
+    }
+            
+    static void DoVLine(string name, Vector2 start, float height)
+    {
+        ImGui.Text(name);
+        if (ImGui.IsItemHovered())
+        {
+            var endPos = start;
+            endPos.Y += height;
+            _wdl.AddLine(start, endPos, _lineColour);
+            DrawCrosshair(start, 3);
+
+        }
+        ImGui.NextColumn();
+        ImGui.Text(height.ToString());
+        ImGui.NextColumn();
+    }
+
+    static void DrawCrosshair(Vector2 atPos, float radius)
+    {
+        var p1 = new Vector2(atPos.X - radius, atPos.Y);
+        var p2 = new Vector2(atPos.X + radius, atPos.Y);
+        var p3 = new Vector2(atPos.X, atPos.Y - radius);
+        var p4 = new Vector2(atPos.X, atPos.Y + radius);
+        _wdl.AddLine(p1, p2, _pointColour);
+        _wdl.AddLine(p3, p4, _pointColour);
+    }
+    
 }

@@ -19,7 +19,7 @@ namespace Pulsar4X.SDL2UI
         private bool _enforceSingleThread;
         private bool _relativeOrbitVelocity;
         private bool _strictNewtonion;
-
+        private bool _showSizesDemo = false;
         private OrbitalDebugWindow _orbitalDebugWindow;
         private GameLogWindow _logWindow;
         private SettingsWindow()
@@ -115,6 +115,12 @@ namespace Pulsar4X.SDL2UI
                         else
                             DamageViewer.GetInstance().SetActive(false);
                         
+                    }
+                    
+                    ImGui.Checkbox("Show Sizes Demo", ref _showSizesDemo);
+                    if(_showSizesDemo)
+                    {
+                        SizesDemo.Display();
                     }
 
 
