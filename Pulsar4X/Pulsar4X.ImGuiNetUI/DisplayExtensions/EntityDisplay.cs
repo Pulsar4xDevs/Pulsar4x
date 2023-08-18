@@ -144,6 +144,11 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        public static void DisplayLogistics(this Entity entity, EntityState entityState, GlobalUIState uiState)
+        {
+            ColonyLogisticsDisplay.GetInstance(StaticRefLib.StaticData, entityState).Display();
+        }
+
         private static void PrintRow(string one, string two, bool separator = true)
         {
             ImGui.Text(one); ImGui.NextColumn(); ImGui.Text(two); ImGui.NextColumn();
