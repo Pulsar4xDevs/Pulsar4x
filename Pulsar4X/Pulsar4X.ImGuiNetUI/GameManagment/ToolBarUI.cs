@@ -55,6 +55,16 @@ namespace Pulsar4X.SDL2UI
 
             btn =  new ToolbuttonData()
             {
+                Picture = _uiState.Img_Industry(),
+                TooltipText = "Economy Management",
+                OnClick = new Action(EconomicsWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(EconomicsWindow.GetInstance().GetActive)
+                //Opens up the ship design menu
+            };
+            ToolButtons.Add(btn);
+
+            btn =  new ToolbuttonData()
+            {
                 Picture = _uiState.Img_Research(),
                 TooltipText = "Research",
                 OnClick = new Action(ResearchWindow.GetInstance().ToggleActive),
