@@ -9,8 +9,6 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Display(this VolumeStorageDB storage, EntityState entityState, GlobalUIState uiState, ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.DefaultOpen)
         {
-            Vector2 size = ImGui.GetContentRegionAvail();
-
             foreach(var (sid, storageType) in storage.TypeStores)
             {
                 string header = uiState.Game.StaticData.CargoTypes[sid].Name;
