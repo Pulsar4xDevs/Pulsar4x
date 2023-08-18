@@ -86,7 +86,7 @@ namespace Pulsar4X.SDL2UI
                         selectedEntity.Entity.DisplaySummary(selectedEntity, _uiState);
                         ImGui.EndTabItem();
                     }
-                    if(ImGui.BeginTabItem("Industry"))
+                    if(ImGui.BeginTabItem("Construction"))
                     {
                         selectedEntity.Entity.DisplayIndustry(selectedEntity, _uiState);
                         ImGui.EndTabItem();
