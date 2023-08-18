@@ -2,6 +2,7 @@
 Pulsar4X/*/bin
 Pulsar4X/*/obj
 Pulsar4X/packages/*
+Pulsar4X/Pulsar4X.ImGuiNetUI/*.ini
 
 # Doxygen output
 doc/doxygen/html/
