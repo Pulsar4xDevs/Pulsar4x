@@ -1,15 +1,11 @@
 ﻿using SDL2;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using ImGuiNET;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Numerics;
 
-
-namespace ImGuiSDL2CS {
+namespace ImGuiSDL2CS
+{
     public class ImGuiSDL2CSWindow : SDL2Window {
 
         protected readonly bool _IsSuperClass;
@@ -19,24 +15,28 @@ namespace ImGuiSDL2CS {
         protected float g_MouseWheel = 0.0f;
         protected IntPtr g_FontTexture = IntPtr.Zero;
 
-        public Vector2 Position {
-            get {
-                int x, y;
-                SDL.SDL_GetWindowPosition(Handle, out x, out y);
+        public Vector2 Position
+        {
+            get
+            {
+                SDL.SDL_GetWindowPosition(Handle, out int x, out int y);
                 return new Vector2(x, y);
             }
-            set {
+            set
+            {
                 SDL.SDL_SetWindowPosition(Handle, (int) Math.Round(value.X), (int) Math.Round(value.Y));
             }
         }
 
-        public System.Numerics.Vector2 Size {
-            get {
-                int x, y;
-                SDL.SDL_GetWindowSize(Handle, out x, out y);
-                return new System.Numerics.Vector2(x, y);
+        public Vector2 Size
+        {
+            get
+            {
+                SDL.SDL_GetWindowSize(Handle, out int x, out int y);
+                return new Vector2(x, y);
             }
-            set {
+            set
+            {
                 SDL.SDL_SetWindowSize(Handle, (int) Math.Round(value.X), (int) Math.Round(value.Y));
             }
         }
@@ -46,7 +46,8 @@ namespace ImGuiSDL2CS {
             int x = SDL.SDL_WINDOWPOS_CENTERED, int y = SDL.SDL_WINDOWPOS_CENTERED,
             int width = 800, int height = 600,
             SDL.SDL_WindowFlags flags = SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL | SDL.SDL_WindowFlags.SDL_WINDOW_RESIZABLE | SDL.SDL_WindowFlags.SDL_WINDOW_HIDDEN
-        ) : base(title, x, y, width, height, flags) {
+        ) : base(title, x, y, width, height, flags)
+        {
             _IsSuperClass = GetType() == typeof(ImGuiSDL2CSWindow);
             var io = ImGui.GetIO();
             ImGuiSDL2CSHelper.Init();
@@ -55,7 +56,8 @@ namespace ImGuiSDL2CS {
             SDL.SDL_SetHint("SDL_RENDER_LINE_METHOD", "2"); //https://github.com/libsdl-org/SDL/blob/1fc7f681187f80ccd6b9625214b47db665cd9aaf/include/SDL_hints.h#L1304-L1315
         }
 
-        public override void Run() {
+        public override void Run()
+        {
             if (!File.Exists("imgui.ini"))
                 File.WriteAllText("imgui.ini", "");
 
@@ -67,50 +69,48 @@ namespace ImGuiSDL2CS {
         public bool ImGuiOnEvent(SDL2Window window, SDL.SDL_Event e)
             => ImGuiSDL2CSHelper.HandleEvent(e, ref g_MouseWheel, g_MousePressed);
 
-        public void ImGuiOnLoop(SDL2Window window) {
+        public void ImGuiOnLoop(SDL2Window window)
+        {
             GL.ClearColor(0.1f, 0.125f, 0.15f, 1f);
             GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
 
             ImGuiRender();
-
             Swap();
         }
 
-        public virtual void ImGuiRender() {
-            int mouseX, mouseY;
-            uint mouseMask = SDL.SDL_GetMouseState(out mouseX, out mouseY);
+        public virtual void ImGuiRender()
+        {
+            uint mouseMask = SDL.SDL_GetMouseState(out int mouseX, out int mouseY);
             if ((SDL.SDL_GetWindowFlags(Handle) & (uint) SDL.SDL_WindowFlags.SDL_WINDOW_MOUSE_FOCUS) == 0)
                 mouseX = mouseY = -1;
-            ImGuiSDL2CSHelper.NewFrame(Size, System.Numerics.Vector2.One, new System.Numerics.Vector2(mouseX, mouseY), mouseMask, ref g_MouseWheel, g_MousePressed, ref g_Time);
+
+            ImGuiSDL2CSHelper.NewFrame(Size, Vector2.One, new Vector2(mouseX, mouseY), mouseMask, ref g_MouseWheel, g_MousePressed, ref g_Time);
 
             ImGuiLayout();
 
             ImGuiSDL2CSHelper.Render(Size);
         }
 
-        public virtual void ImGuiLayout() {
+        public virtual void ImGuiLayout()
+        {
             if (_IsSuperClass)
                 ImGui.Text($"Create a new class inheriting {GetType().FullName}, overriding {nameof(ImGuiLayout)}!");
             else
                 ImGui.Text($"Override {nameof(ImGuiLayout)} in {GetType().FullName}!");
         }
 
-        protected unsafe virtual void Create() {
+        protected unsafe virtual void Create()
+        {
             var io = ImGui.GetIO();
 
             // Build texture atlas
-            byte* pixels;
-            int width, height;
+            io.Fonts.GetTexDataAsAlpha8(out byte* pixels, out int width, out int height);
 
-            io.Fonts.GetTexDataAsAlpha8(out pixels, out width, out height);
-            
-            int lastTexture;
-            GL.GetIntegerv(GL.Enum.GL_TEXTURE_BINDING_2D, out lastTexture);
+            GL.GetIntegerv(GL.Enum.GL_TEXTURE_BINDING_2D, out int lastTexture);
 
             // Create OpenGL texture
-            int fonttxtureID;
-            GL.GenTextures(1, out fonttxtureID);
-            GL.BindTexture(GL.Enum.GL_TEXTURE_2D, fonttxtureID);
+            GL.GenTextures(1, out int fontTextureID);
+            GL.BindTexture(GL.Enum.GL_TEXTURE_2D, fontTextureID);
             GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MIN_FILTER, (int) GL.Enum.GL_LINEAR);
             GL.TexParameteri(GL.Enum.GL_TEXTURE_2D, GL.Enum.GL_TEXTURE_MAG_FILTER, (int) GL.Enum.GL_LINEAR);
             GL.PixelStorei(GL.Enum.GL_UNPACK_ROW_LENGTH, 0);
@@ -125,7 +125,7 @@ namespace ImGuiSDL2CS {
                 GL.Enum.GL_UNSIGNED_BYTE,
                 new IntPtr(pixels)
             );
-            g_FontTexture = new IntPtr(fonttxtureID);
+            g_FontTexture = new IntPtr(fontTextureID);
             // Store the texture identifier in the ImFontAtlas substructure.
             io.Fonts.SetTexID(g_FontTexture);
             ImGuiSDL2CSHelper.FontTextureID = g_FontTexture;
@@ -133,9 +133,8 @@ namespace ImGuiSDL2CS {
             GL.BindTexture(GL.Enum.GL_TEXTURE_2D, lastTexture);
         }
 
-
-
-        protected override void Dispose(bool disposing) {
+        protected override void Dispose(bool disposing)
+        {
             ImGuiIOPtr io = ImGui.GetIO();
 
             if (disposing) {
@@ -155,9 +154,9 @@ namespace ImGuiSDL2CS {
             base.Dispose(disposing);
         }
 
-        ~ImGuiSDL2CSWindow() {
+        ~ImGuiSDL2CSWindow()
+        {
             Dispose(false);
         }
-
     }
 }
