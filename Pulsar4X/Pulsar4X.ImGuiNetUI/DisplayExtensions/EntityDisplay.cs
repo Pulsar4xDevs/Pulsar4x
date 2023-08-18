@@ -78,11 +78,11 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.BeginTable("###MineralTable" + entity.Guid, 6, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Mineral");
-                ImGui.TableSetupColumn("Quantity (tons)");
+                ImGui.TableSetupColumn("Stockpile (tons)");
+                ImGui.TableSetupColumn("Mineable (tons)");
                 ImGui.TableSetupColumn("Accessibility");
                 ImGui.TableSetupColumn("Annual Production");
                 ImGui.TableSetupColumn("Years to Depletion");
-                ImGui.TableSetupColumn("Stockpile (tons)");
                 ImGui.TableHeadersRow();
 
                 if(minerals == null) minerals = new Dictionary<Guid, MineralDeposit>();
@@ -99,6 +99,18 @@ namespace Pulsar4X.SDL2UI
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
                     ImGui.Text(mineralData.Name);
+                    ImGui.TableNextColumn();
+                    if(stockpileData != null)
+                    {
+                        ImGui.Text(stockpileData.CurrentStoreInUnits[id].ToString("#,###,###,###,###,###,##0"));
+                    }
+                    else
+                    {
+                        if(storage == null)
+                            ImGui.Text("Unavailable");
+                        else
+                            ImGui.Text("0");
+                    }
                     ImGui.TableNextColumn();
                     ImGui.Text(mineral.Amount.ToString("#,###,###,###,###,###,##0"));
                     ImGui.TableNextColumn();
@@ -120,18 +132,6 @@ namespace Pulsar4X.SDL2UI
                     else
                     {
                         ImGui.Text("-");
-                    }
-                    ImGui.TableNextColumn();
-                    if(stockpileData != null)
-                    {
-                        ImGui.Text(stockpileData.CurrentStoreInUnits[id].ToString("#,###,###,###,###,###,##0"));
-                    }
-                    else
-                    {
-                        if(storage == null)
-                            ImGui.Text("Unavailable");
-                        else
-                            ImGui.Text("0");
                     }
                 }
 
