@@ -148,7 +148,7 @@ namespace Pulsar4X.ECSLib.Industry
 
         long IndustryPointCosts { get; }
         Guid IndustryTypeID { get; }
-
+        ushort OutputAmount { get; }
         void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo);
 
     }
@@ -313,12 +313,7 @@ namespace Pulsar4X.ECSLib.Industry
             industryEntity.Manager.FindEntityByGuid(industryEntity.FactionOwnerID, out faction);
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
-
-            //var pointRates = industryDB.IndustryTypeRates;
-            //int maxPoints = industryDB.ConstructionPoints;
-
-
-            //List<JobBase> constructionJobs = new List<JobBase>(industryDB.JobBatchList);
+            
             foreach (var kvp in industryDB.ProductionLines.ToArray())
             {
                 Guid prodLineID = kvp.Key;

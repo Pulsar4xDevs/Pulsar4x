@@ -102,6 +102,10 @@ namespace Pulsar4X.ECSLib
         public int CrewReq;
         public long IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
+        public ushort OutputAmount
+        {
+            get { return 1; }
+        }
 
 
         public int CreditCost;

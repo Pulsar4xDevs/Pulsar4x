@@ -7,13 +7,13 @@ namespace Pulsar4X.ECSLib
     [StaticData(true, IDPropertyName = "ID")]
     public class ProcessedMaterialSD : ICargoable, IConstrucableDesign
     {
-        public string Name { get; set; }
+        public string Name { get; init; }
         public Dictionary<Guid, long> ResourceCosts { get; } = new Dictionary<Guid, long>();
 
         public long IndustryPointCosts
         {
             get; 
-            set;
+            init;
         }
         public Guid IndustryTypeID { get; set; }
         
@@ -37,15 +37,15 @@ namespace Pulsar4X.ECSLib
 
         public string Description;
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.None;
-        public Guid ID { get; set; }
+        public Guid ID { get; init; }
 
         public Dictionary<Guid, long> MineralsRequired;
         public Dictionary<Guid, long> MaterialsRequired;
 
         public ushort WealthCost;
-        public ushort OutputAmount;
-        public Guid CargoTypeID { get; set; }
-        public long MassPerUnit { get; set; }
-        public double VolumePerUnit { get; set; }
+        public ushort OutputAmount { get; init; }
+        public Guid CargoTypeID { get; init; }
+        public long MassPerUnit { get; init; }
+        public double VolumePerUnit { get; init; }
     }
 }
