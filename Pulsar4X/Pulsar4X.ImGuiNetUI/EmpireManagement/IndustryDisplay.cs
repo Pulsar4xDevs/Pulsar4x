@@ -30,6 +30,7 @@ namespace Pulsar4X.SDL2UI
         private IConstrucableDesign _lastClickedDesign;
         private Entity Entity;
         private IndustryAbilityDB _industryDB;
+        private VolumeStorageDB _volStorageDB;
         private IndustryJob _selectedExistingConJob
         {
             get
@@ -127,7 +128,7 @@ namespace Pulsar4X.SDL2UI
             Entity = EntityState.Entity;
             if(!Entity.TryGetDatablob<IndustryAbilityDB>(out _industryDB) || !state.Faction.TryGetDatablob<FactionInfoDB>(out _factionInfoDB))
                 return;
-
+            Entity.TryGetDatablob(out _volStorageDB);
             _factionID = state.Faction.Guid;
             Update();
 
@@ -436,8 +437,17 @@ namespace Pulsar4X.SDL2UI
                     _lastClickedJob = _newConJob;
                     _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                 }
-
+                var wid1 = ImGui.GetItemRectSize().X;
                 ImGui.Text("Enter the quantity:");
+                if(_lastClickedDesign.OutputAmount > 1)
+                {
+                    
+                    ImGui.Text(_lastClickedDesign.OutputAmount.ToString() + "x");
+                    var wid2 = ImGui.GetCursorPosX();
+                    
+                    ImGui.SameLine();
+                    ImGui.PushItemWidth(wid1 - wid2);
+                }
                 ImGui.InputInt("##batchcount", ref _newJobbatchCount);
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("The production line will move to the next job in the queue\nafter finished the number of items requested.");
@@ -472,12 +482,16 @@ namespace Pulsar4X.SDL2UI
             ImGui.NewLine();
             ImGui.Text("Job Cost:");
             ImGui.Separator();
-            ImGui.Columns(2);
+            ImGui.Columns(4);
             ImGui.SetColumnWidth(0, 140);
-            ImGui.SetColumnWidth(1, 128);
+            ImGui.SetColumnWidth(1, 48);
+            ImGui.SetColumnWidth(2, 48);
+            ImGui.SetColumnWidth(3, 128);
             ImGui.Text("Industry Points");
             ImGui.NextColumn();
             ImGui.Text(selectedJob.ProductionPointsLeft.ToString());
+            ImGui.NextColumn();
+            ImGui.NextColumn();
             ImGui.NextColumn();
 
             foreach (var item in selectedJob.ResourcesRequiredRemaining)
@@ -488,6 +502,16 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(cargoItem.Name);
                 ImGui.NextColumn();
                 ImGui.Text(item.Value.ToString());
+                ImGui.NextColumn();
+                ImGui.Text((selectedJob.NumberOrdered * item.Value).ToString());
+                ImGui.NextColumn();
+                if (_volStorageDB != null)
+                {
+                    var resource = StaticRefLib.StaticData.GetICargoable(item.Key);
+                    var stored = CargoExtensionMethods.GetUnitsStored(_volStorageDB, resource);
+                    ImGui.Text(Stringify.Quantity(stored));
+                }
+                
                 ImGui.NextColumn();
             }
 
