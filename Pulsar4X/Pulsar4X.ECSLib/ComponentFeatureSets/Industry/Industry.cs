@@ -160,7 +160,20 @@ namespace Pulsar4X.ECSLib.Industry
         public Guid ItemGuid { get; protected set; }
         public ushort NumberOrdered { get; internal set; }
         public ushort NumberCompleted { get; internal set; }
-        public long ProductionPointsLeft { get; internal set; }
+
+        /// <summary>
+        /// for single item under construction. 
+        /// </summary>
+        public long ProductionPointsLeft
+        {
+            get { return _ppl;}
+            internal set { _ppl = value; }
+        }
+
+        private long _ppl;
+        /// <summary>
+        /// Per Item
+        /// </summary>
         public long ProductionPointsCost { get; protected set; }
         public bool Auto { get; internal set; }
 
@@ -312,7 +325,7 @@ namespace Pulsar4X.ECSLib.Industry
                 var prodLine = kvp.Value;
                 var industryPointsRemaining = new Dictionary<Guid, int>( prodLine.IndustryTypeRates);
                 List<IndustryJob> Joblist = prodLine.Jobs;
-                float productionPercentage = 1; //0 to 1
+                //float productionPercentage = 1; //0 to 1
                 
                 
 
@@ -320,14 +333,16 @@ namespace Pulsar4X.ECSLib.Industry
                 {
                     IndustryJob batchJob = Joblist[i];
                     IConstrucableDesign designInfo = factionInfo.IndustryDesigns[batchJob.ItemGuid];
-                    float pointsToUse = industryPointsRemaining[designInfo.IndustryTypeID] * productionPercentage;
+                    float pointsToUse = industryPointsRemaining[designInfo.IndustryTypeID];// * productionPercentage;
+                    
                     //total number of resources requred for a single job in this batch
                     var resourceSum = designInfo.ResourceCosts.Sum(item => item.Value);
                     //how many construction points each resourcepoint is worth.
+                    if (resourceSum == 0)
+                        throw new Exception("whyZero");
                     float pointPerResource = (float)designInfo.IndustryPointCosts / resourceSum;
 
                     while (
-                        productionPercentage > 0 && 
                         batchJob.NumberCompleted < batchJob.NumberOrdered &&
                         pointsToUse > 0)
                     {
@@ -348,16 +363,17 @@ namespace Pulsar4X.ECSLib.Industry
                         pointsToUse = Math.Min(industryPointsRemaining[designInfo.IndustryTypeID], batchJob.ProductionPointsLeft);
                         pointsToUse = Math.Min(pointsToUse, useableResourcePoints * pointPerResource);
 
-                        var remainingPoints = industryPointsRemaining[designInfo.IndustryTypeID] - pointsToUse;
+                        //var remainingPoints = industryPointsRemaining[designInfo.IndustryTypeID] - pointsToUse;
                         
                         
                         if(pointsToUse < 0)
                             throw new Exception("Can't have negative production");
-                        
+                        if (pointsToUse > batchJob.ProductionPointsCost)
+                            throw new Exception("cant have more points than needed for job");
                         //construct only enough for the amount of resources we have. 
                         batchJob.ProductionPointsLeft -= (int)Math.Floor(pointsToUse);
-                        
-                        productionPercentage -= remainingPoints * productionPercentage;    
+                        industryPointsRemaining[designInfo.IndustryTypeID] -= (int)Math.Floor(pointsToUse);
+                        //productionPercentage -= remainingPoints * productionPercentage;    
                         
                         if (batchJob.ProductionPointsLeft == 0)
                         {

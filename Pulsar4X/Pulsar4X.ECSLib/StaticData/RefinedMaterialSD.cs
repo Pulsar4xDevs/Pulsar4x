@@ -9,7 +9,12 @@ namespace Pulsar4X.ECSLib
     {
         public string Name { get; set; }
         public Dictionary<Guid, long> ResourceCosts { get; } = new Dictionary<Guid, long>();
-        public long IndustryPointCosts { get; set; }
+
+        public long IndustryPointCosts
+        {
+            get; 
+            set;
+        }
         public Guid IndustryTypeID { get; set; }
         
         public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
@@ -17,13 +22,14 @@ namespace Pulsar4X.ECSLib
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             ProcessedMaterialSD material = (ProcessedMaterialSD)designInfo;
             storage.AddCargoByUnit(material, OutputAmount);
-            batchJob.ProductionPointsLeft = material.IndustryPointCosts; //and reset the points left for the next job in the batch.
-            
+            batchJob.ProductionPointsLeft = batchJob.ProductionPointsCost; //and reset the points left for the next job in the batch.
+            batchJob.NumberCompleted += 1;
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
             {
                 industryDB.ProductionLines[productionLine].Jobs.Remove(batchJob);
                 if (batchJob.Auto)
                 {
+                    batchJob.NumberCompleted = 0;
                     industryDB.ProductionLines[productionLine].Jobs.Add(batchJob);
                 }
             }
