@@ -9,6 +9,8 @@ namespace Pulsar4X.SDL2UI
 {
     public static class EntityDisplay
     {
+        public static Vector4 HighlightColor = new(0.25f, 1f, 0.25f, 0.9f);
+        public static Vector4 GoodColor = new (0.25f, 1f, 0.25f, 0.9f);
         public static void DisplaySummary(this Entity entity, EntityState entityState, GlobalUIState uiState)
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
@@ -68,7 +70,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Columns(2);
                         PrintRow("Total Mass in Storage", Stringify.Mass(storage.TotalStoredMass));
                         PrintRow("Transfer Rate", storage.TransferRateInKgHr.ToString() + " kg/hr");
-                        PrintRow("Transfer Range", storage.TransferRangeDv_mps.ToString("0.#") + " dV m/s", tooltipOne: "This is confusing as hell :D");
+                        PrintRow("Transfer Range", storage.TransferRangeDv_mps.ToString("0.#") + " dV m/s", tooltipOne: "This is confusing as hell :D", separator: false);
                         ImGui.Columns(1);
                         storage.Display(entityState, uiState, ImGuiTreeNodeFlags.None);
                     }
@@ -194,7 +196,17 @@ namespace Pulsar4X.SDL2UI
             {
                 if(entity.TryGetDatablob<EntityResearchDB>(out var researchDB))
                 {
-                    ImGui.Text("Number of Research Labs: " + researchDB.Labs.Values.Sum());
+                    ImGui.Text("Number of Research Labs:");
+                    ImGui.SameLine();
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 1f, 0.25f, 0.9f));
+                    ImGui.Text(researchDB.Labs.Count.ToString("0"));
+                    ImGui.PopStyleColor();
+                    ImGui.SameLine();
+                    ImGui.Text("Research Points:");
+                    ImGui.SameLine();
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 1f, 0.25f, 0.9f));
+                    ImGui.Text(researchDB.Labs.Values.Sum().ToString());
+                    ImGui.PopStyleColor();
                 }
                 else
                 {
