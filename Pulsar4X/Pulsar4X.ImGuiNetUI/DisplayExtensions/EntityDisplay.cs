@@ -95,7 +95,14 @@ namespace Pulsar4X.SDL2UI
             {
                 if(entity.TryGetDatablob<MiningDB>(out var miningDB))
                 {
-                    ImGui.Text("Number of Mines: " + miningDB.NumberOfMines);
+                    ImGui.Text("Number of Mines:");
+                    if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip("You can build more mines on this colony using the Production tab.");
+                    ImGui.SameLine();
+                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.25f, 1f, 0.25f, 0.9f));
+                    ImGui.Text(miningDB.NumberOfMines.ToString());
+                    ImGui.PopStyleColor();
+
                 }
                 else
                 {
