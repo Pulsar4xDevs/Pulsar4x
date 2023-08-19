@@ -7,9 +7,6 @@ namespace Pulsar4X.SDL2UI
 {
     public static class ComponentInstancesDBDisplay
     {
-        public static Vector4 GoodColor = new (0.25f, 1f, 0.25f, 0.9f);
-        public static Vector4 OkColor = new (1.0f, 1.0f, 0.25f, 0.9f);
-        public static Vector4 BadColor = new (1.0f, 0.25f, 0.25f, 0.9f);
         public static void Display(this ComponentInstancesDB db, EntityState entityState, GlobalUIState uiState)
         {
             ImGui.Columns(3);
@@ -38,19 +35,19 @@ namespace Pulsar4X.SDL2UI
 
                 if(onCount > 0 && offCount > 0)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, OkColor);
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
                     ImGui.Text("Degraded");
                     ImGui.PopStyleColor();
                 }
                 else if(onCount == 0)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, BadColor);
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
                     ImGui.Text("Disabled");
                     ImGui.PopStyleColor();
                 }
                 else
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, GoodColor);
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
                     ImGui.Text("Operational");
                     ImGui.PopStyleColor();
                 }

@@ -9,8 +9,6 @@ namespace Pulsar4X.SDL2UI
 {
     public static class EntityDisplay
     {
-        public static Vector4 HighlightColor = new(0.25f, 1f, 0.25f, 0.9f);
-        public static Vector4 GoodColor = new (0.25f, 1f, 0.25f, 0.9f);
         public static void DisplaySummary(this Entity entity, EntityState entityState, GlobalUIState uiState)
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
@@ -25,7 +23,9 @@ namespace Pulsar4X.SDL2UI
                     var bodyInfoDb = colonyInfoDb.PlanetEntity.GetDataBlob<SystemBodyInfoDB>();
 
                     ImGui.Columns(2);
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                     ImGui.Text("Name");
+                    ImGui.PopStyleColor();
                     ImGui.NextColumn();
                     if(ImGui.SmallButton(colonyInfoDb.PlanetEntity.GetDefaultName()))
                     {
@@ -99,7 +99,7 @@ namespace Pulsar4X.SDL2UI
                     if(ImGui.IsItemHovered())
                         ImGui.SetTooltip("You can build more mines on this colony using the Production tab.");
                     ImGui.SameLine();
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.25f, 1f, 0.25f, 0.9f));
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
                     ImGui.Text(miningDB.NumberOfMines.ToString());
                     ImGui.PopStyleColor();
 
@@ -205,13 +205,13 @@ namespace Pulsar4X.SDL2UI
                 {
                     ImGui.Text("Number of Research Labs:");
                     ImGui.SameLine();
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 1f, 0.25f, 0.9f));
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
                     ImGui.Text(researchDB.Labs.Count.ToString("0"));
                     ImGui.PopStyleColor();
                     ImGui.SameLine();
                     ImGui.Text("Research Points:");
                     ImGui.SameLine();
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 1f, 0.25f, 0.9f));
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
                     ImGui.Text(researchDB.Labs.Values.Sum().ToString());
                     ImGui.PopStyleColor();
                 }
@@ -230,7 +230,9 @@ namespace Pulsar4X.SDL2UI
 
         private static void PrintRow(string one, string two, string tooltipOne = null, string tooltipTwo = null, bool separator = true)
         {
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
             ImGui.Text(one);
+            ImGui.PopStyleColor();
             if(tooltipOne != null)
             {
                 if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipOne);
