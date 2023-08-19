@@ -166,18 +166,18 @@ namespace Pulsar4X.ECSLib.Industry
         /// </summary>
         public long ProductionPointsLeft
         {
-            get { return _ppl;}
-            internal set { _ppl = value; }
+            get;
+            internal set;
         }
 
-        private long _ppl;
         /// <summary>
         /// Per Item
         /// </summary>
         public long ProductionPointsCost { get; protected set; }
         public bool Auto { get; internal set; }
 
-        public Dictionary<Guid, long> ResourcesRequired { get; internal set; } = new Dictionary<Guid, long>();
+        public Dictionary<Guid, long> ResourcesRequiredRemaining { get; internal set; } = new Dictionary<Guid, long>();
+        public Dictionary<Guid, long> ResourcesCosts { get; internal set; } = new Dictionary<Guid, long>();
         
         
         public JobBase()
@@ -208,7 +208,8 @@ namespace Pulsar4X.ECSLib.Industry
             var design = factionInfo.IndustryDesigns[itemID];
             TypeID = design.IndustryTypeID;
             Name = design.Name;
-            ResourcesRequired = design.ResourceCosts;
+            ResourcesRequiredRemaining = new Dictionary<Guid, long>(design.ResourceCosts);
+            ResourcesCosts = design.ResourceCosts;
             ProductionPointsLeft = design.IndustryPointCosts;
             ProductionPointsCost = design.IndustryPointCosts;
             NumberOrdered = 1;
@@ -336,10 +337,10 @@ namespace Pulsar4X.ECSLib.Industry
                     float pointsToUse = industryPointsRemaining[designInfo.IndustryTypeID];// * productionPercentage;
                     
                     //total number of resources requred for a single job in this batch
-                    var resourceSum = designInfo.ResourceCosts.Sum(item => item.Value);
+                    var resourceSum = batchJob.ResourcesCosts.Sum(item => item.Value);
                     //how many construction points each resourcepoint is worth.
                     if (resourceSum == 0)
-                        throw new Exception("whyZero");
+                        throw new Exception("resources can't cost 0");
                     float pointPerResource = (float)designInfo.IndustryPointCosts / resourceSum;
 
                     while (
@@ -349,7 +350,7 @@ namespace Pulsar4X.ECSLib.Industry
                         //gather availible resorces for this job.
                         //right now we take all the resources we can, for an individual item in the batch. 
                         //even if we're taking more than we can use in this turn, we're using/storing it. 
-                        IDictionary<Guid, long> resourceCosts = batchJob.ResourcesRequired;
+                        IDictionary<Guid, long> resourceCosts = batchJob.ResourcesRequiredRemaining;
                         //Note: this is editing batchjob.ResourcesRequired variable. 
                         ConsumeResources(stockpile, ref resourceCosts);
                         //we calculate the difference between the design resources and the amount of resources we've squirreled away. 

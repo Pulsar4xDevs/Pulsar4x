@@ -124,8 +124,7 @@ namespace Pulsar4X.ECSLib
         {
             var colonyConstruction = industryEntity.GetDataBlob<IndustryAbilityDB>();
             batchJob.NumberCompleted++;
-            batchJob.ResourcesRequired = designInfo.ResourceCosts;
-
+            batchJob.ResourcesRequiredRemaining = new Dictionary<Guid, long>(designInfo.ResourceCosts);
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
 
 

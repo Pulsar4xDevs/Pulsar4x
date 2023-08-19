@@ -347,7 +347,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.NextColumn();
             ImGui.Text(selectedJob.ProductionPointsLeft.ToString());
             ImGui.NextColumn();
-            foreach (var item in selectedJob.ResourcesRequired)
+            foreach (var item in selectedJob.ResourcesRequiredRemaining)
             {
                 ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(item.Key);
                 if (cargoItem == null)
