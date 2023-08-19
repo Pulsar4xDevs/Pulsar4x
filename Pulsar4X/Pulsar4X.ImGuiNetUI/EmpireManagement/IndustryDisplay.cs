@@ -213,7 +213,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.SameLine();
                                 ImGui.Text("Progress per day:");
                                 ImGui.SameLine();
-                                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.25f, 1f, 0.25f, 0.9f));
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
                                 ImGui.Text(rate.ToString());
                                 ImGui.PopStyleColor();
                                 if(ImGui.IsItemHovered())
@@ -241,9 +241,8 @@ namespace Pulsar4X.SDL2UI
 
                                     bool selected = _selectedExistingIndex ==  ji && id == _selectedProdLine;
                                     float percent = 1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost;
-                                    //ImGui.ProgressBar(percent, progsize, "");
+
                                     ImGui.TableNextColumn();
-                                    //ImGui.SetCursorPos(cpos);
                                     if (ImGui.Selectable(jobname, ref selected))
                                     {
                                         _selectedExistingIndex =  ji;
@@ -262,7 +261,18 @@ namespace Pulsar4X.SDL2UI
                                     }
 
                                     ImGui.TableNextColumn();
-                                    ImGui.Text((batchJob.ProductionPointsCost - batchJob.ProductionPointsLeft) + "/" + batchJob.ProductionPointsCost);
+                                    ImGui.Text("IP " + (batchJob.ProductionPointsCost - batchJob.ProductionPointsLeft) + "/" + batchJob.ProductionPointsCost);
+
+                                    string hoverText = "";
+                                    foreach(var (rId, amountRemaining) in line.Jobs[ji].ResourcesRequiredRemaining)
+                                    {
+                                        ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(rId);
+                                        if (cargoItem == null)
+                                            cargoItem = state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[rId];
+                                        hoverText += cargoItem.Name;
+                                        hoverText += " x" + amountRemaining.ToString() + "\n";
+                                    }
+                                    ImGui.Text(hoverText);
                                     ImGui.TableNextColumn();
                                     ImGui.PushID(line.Jobs[ji].JobID.ToString());
                                     ImGui.Text("");
@@ -437,7 +447,7 @@ namespace Pulsar4X.SDL2UI
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("A repeat job will run until cancelled.");
 
-                if (ImGui.Button("Add Job to " + _prodLines[_selectedProdLine].Name))
+                if (ImGui.Button("Queue the job to " + _prodLines[_selectedProdLine].Name))
                 {
 
                     _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);

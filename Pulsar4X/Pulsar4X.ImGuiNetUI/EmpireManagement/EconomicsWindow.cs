@@ -38,7 +38,7 @@ namespace Pulsar4X.SDL2UI
 
                 if(ImGui.BeginChild("Colonies", new Vector2(204f, windowContentSize.Y), true))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.45f, 0.45f, 0.45f, 1f));
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                     ImGui.Text("Select Colony to Manage");
                     ImGui.PopStyleColor();
                     ImGui.Separator();
@@ -99,11 +99,6 @@ namespace Pulsar4X.SDL2UI
                     if(ImGui.BeginTabItem("Research"))
                     {
                         selectedEntity.Entity.DisplayResearch(selectedEntity, _uiState);
-                        ImGui.EndTabItem();
-                    }
-                    if(ImGui.BeginTabItem("Shipyards"))
-                    {
-                        ImGui.Text("Shipyards");
                         ImGui.EndTabItem();
                     }
                     if(ImGui.BeginTabItem("Logistics"))
