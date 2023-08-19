@@ -33,7 +33,10 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     ImGui.Separator();
 
-                    foreach(var (id, value) in storageType.CurrentStoreInUnits)
+                    // Sort the display by the cargoables name
+                    var sortedUnitsByCargoablesName = storageType.CurrentStoreInUnits.OrderBy(e => storageType.Cargoables[e.Key].Name);
+
+                    foreach(var (id, value) in sortedUnitsByCargoablesName)
                     {
                         ICargoable cargoType = storageType.Cargoables[id];
                         var volumeStored = storage.GetVolumeStored(cargoType);
