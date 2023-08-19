@@ -325,10 +325,7 @@ namespace Pulsar4X.ECSLib.Industry
                 var prodLine = kvp.Value;
                 var industryPointsRemaining = new Dictionary<Guid, int>( prodLine.IndustryTypeRates);
                 List<IndustryJob> Joblist = prodLine.Jobs;
-                float productionPercentage = 1; //0 to 1
-
-
-
+                
                 for (int i = 0; i < Joblist.Count; i++)
                 {
                     IndustryJob batchJob = Joblist[i];
@@ -343,7 +340,6 @@ namespace Pulsar4X.ECSLib.Industry
                     float pointPerResource = (float)designInfo.IndustryPointCosts / resourceSum;
 
                     while (
-                        productionPercentage > 0 &&
                         batchJob.NumberCompleted < batchJob.NumberOrdered &&
                         pointsToUse > 0)
                     {
@@ -354,8 +350,7 @@ namespace Pulsar4X.ECSLib.Industry
                         //Note: this is editing batchjob.ResourcesRequired variable.
                         ConsumeResources(stockpile, ref resourceCosts);
                         //we calculate the difference between the design resources and the amount of resources we've squirreled away.
-
-
+                        
                         // this is the total of the resources that we don't have access to for this item.
                         var unusableResourceSum = resourceCosts.Sum(item => item.Value);
                         // this is the total resources that can be used on this item.
@@ -363,18 +358,14 @@ namespace Pulsar4X.ECSLib.Industry
 
                         pointsToUse = Math.Min(industryPointsRemaining[designInfo.IndustryTypeID], batchJob.ProductionPointsLeft);
                         pointsToUse = Math.Min(pointsToUse, useableResourcePoints * pointPerResource);
-
-                        var remainingPoints = industryPointsRemaining[designInfo.IndustryTypeID] - pointsToUse;
-
-
+                        
                         if(pointsToUse < 0)
                             throw new Exception("Can't have negative production");
 
                         //construct only enough for the amount of resources we have.
                         batchJob.ProductionPointsLeft -= (int)Math.Floor(pointsToUse);
-
-                        productionPercentage -= remainingPoints * productionPercentage;
-
+                        industryPointsRemaining[designInfo.IndustryTypeID] -= (int)Math.Floor(pointsToUse);
+                        
                         if (batchJob.ProductionPointsLeft == 0)
                         {
                             designInfo.OnConstructionComplete(industryEntity, stockpile, prodLineID, batchJob, designInfo);
