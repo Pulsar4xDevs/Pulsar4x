@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib.Industry
     public interface IIndustryDB
     {
         int ConstructionPoints { get; }
-        
+
         List<JobBase> JobBatchList { get; }
 
         List<IConstrucableDesign> GetJobItems(FactionInfoDB factionInfoDB);
@@ -62,16 +62,16 @@ namespace Pulsar4X.ECSLib.Industry
 
     public class IndustryAtb : IComponentDesignAttribute
     {
-        [JsonProperty] 
+        [JsonProperty]
         public Dictionary<Guid, int> IndustryPoints { get; private set; } = new Dictionary<Guid, int>();
 
-        [JsonProperty] 
+        [JsonProperty]
         private double MaxProductionVolume;
 
         public IndustryAtb(Dictionary<Guid, double> industryRates)
         {
             MaxProductionVolume = double.PositiveInfinity;
-            
+
             int i = 0;
             foreach (var kvp in industryRates)
             {
@@ -79,11 +79,11 @@ namespace Pulsar4X.ECSLib.Industry
                 i++;
             }
         }
-        
+
         public IndustryAtb(Dictionary<Guid, double> industryRates, double maxProductionVolume)
         {
             MaxProductionVolume = maxProductionVolume;
-            
+
             int i = 0;
             foreach (var kvp in industryRates)
             {
@@ -98,8 +98,8 @@ namespace Pulsar4X.ECSLib.Industry
             IndustryAbilityDB.ProductionLine newline = new IndustryAbilityDB.ProductionLine();
             newline.MaxVolume = MaxProductionVolume;
             newline.IndustryTypeRates = IndustryPoints;
-            newline.FacName = componentInstance.Name;
-            
+            newline.Name = componentInstance.Name;
+
             if (db == null)
             {
                 db = new IndustryAbilityDB(componentInstance.ID, newline);
@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib.Industry
                 db.ProductionLines.Add(componentInstance.ID, newline);
             }
         }
-        
+
         public string AtbName()
         {
             return "Industry";
@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib.Industry
             }
             return industryTypesAndPoints;
         }
-        
+
     }
     public enum ConstructableGuiHints
     {
@@ -140,7 +140,7 @@ namespace Pulsar4X.ECSLib.Industry
     public interface IConstrucableDesign
     {
         ConstructableGuiHints GuiHints { get; }
-        
+
         Guid ID { get;  }
         string Name { get;  } //player defined name. ie "5t 2kn Thruster".
 
@@ -148,7 +148,7 @@ namespace Pulsar4X.ECSLib.Industry
 
         long IndustryPointCosts { get; }
         Guid IndustryTypeID { get; }
-        
+
         void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo);
 
     }
@@ -176,10 +176,9 @@ namespace Pulsar4X.ECSLib.Industry
         public long ProductionPointsCost { get; protected set; }
         public bool Auto { get; internal set; }
 
-        public Dictionary<Guid, long> ResourcesRequiredRemaining { get; internal set; } = new Dictionary<Guid, long>();
-        public Dictionary<Guid, long> ResourcesCosts { get; internal set; } = new Dictionary<Guid, long>();
-        
-        
+        public Dictionary<Guid, long> ResourcesRequired { get; internal set; } = new Dictionary<Guid, long>();
+
+
         public JobBase()
         {
         }
@@ -195,7 +194,7 @@ namespace Pulsar4X.ECSLib.Industry
         }
 
         public abstract void InitialiseJob(ushort numberOrderd, bool auto);
-        
+
     }
 
     public class IndustryJob : JobBase
@@ -214,7 +213,7 @@ namespace Pulsar4X.ECSLib.Industry
             ProductionPointsCost = design.IndustryPointCosts;
             NumberOrdered = 1;
 
-            
+
         }
 
         public Entity InstallOn { get; set; }
@@ -230,12 +229,12 @@ namespace Pulsar4X.ECSLib.Industry
     public static class IndustryTools
     {
 
-        public static void AddJob(Entity industryEntity, Guid plineID, IndustryJob job) 
+        public static void AddJob(Entity industryEntity, Guid plineID, IndustryJob job)
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             AddJob(industryDB, plineID, job);
         }
-        
+
         public static void AddJob(IndustryAbilityDB industryDB, Guid plineID, IndustryJob job)
         {
             lock(industryDB.ProductionLines[plineID])
@@ -244,8 +243,8 @@ namespace Pulsar4X.ECSLib.Industry
                 pline.Jobs.Add(job);
             }
         }
-        
-        public static void ChangeJobPriority(Entity industryEntity, Guid prodLine, Guid jobID, int delta) 
+
+        public static void ChangeJobPriority(Entity industryEntity, Guid prodLine, Guid jobID, int delta)
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             var jobList = industryDB.ProductionLines[prodLine].Jobs;
@@ -272,8 +271,8 @@ namespace Pulsar4X.ECSLib.Industry
                 }
             }
         }
-        
-        
+
+
 
 
         public static void EditExsistingJob(Entity industryEntity, Guid prodLine, Guid jobID, bool RepeatJob = false, ushort NumberOrderd = 1, bool autoInstall = false)
@@ -291,11 +290,11 @@ namespace Pulsar4X.ECSLib.Industry
                     var cj = (ConstructJob)job;
                     cj.InstallOn = industryEntity;
                 }*/
-                
+
             }
         }
-        
-        public static void CancelExsistingJob(Entity industryEntity, Guid prodLine, Guid jobID) 
+
+        public static void CancelExsistingJob(Entity industryEntity, Guid prodLine, Guid jobID)
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             var jobList = industryDB.ProductionLines[prodLine].Jobs;
@@ -316,9 +315,9 @@ namespace Pulsar4X.ECSLib.Industry
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
 
             //var pointRates = industryDB.IndustryTypeRates;
-            //int maxPoints = industryDB.ConstructionPoints; 
+            //int maxPoints = industryDB.ConstructionPoints;
 
-            
+
             //List<JobBase> constructionJobs = new List<JobBase>(industryDB.JobBatchList);
             foreach (var kvp in industryDB.ProductionLines.ToArray())
             {
@@ -326,9 +325,9 @@ namespace Pulsar4X.ECSLib.Industry
                 var prodLine = kvp.Value;
                 var industryPointsRemaining = new Dictionary<Guid, int>( prodLine.IndustryTypeRates);
                 List<IndustryJob> Joblist = prodLine.Jobs;
-                //float productionPercentage = 1; //0 to 1
-                
-                
+                float productionPercentage = 1; //0 to 1
+
+
 
                 for (int i = 0; i < Joblist.Count; i++)
                 {
@@ -344,38 +343,38 @@ namespace Pulsar4X.ECSLib.Industry
                     float pointPerResource = (float)designInfo.IndustryPointCosts / resourceSum;
 
                     while (
+                        productionPercentage > 0 &&
                         batchJob.NumberCompleted < batchJob.NumberOrdered &&
                         pointsToUse > 0)
                     {
                         //gather availible resorces for this job.
-                        //right now we take all the resources we can, for an individual item in the batch. 
-                        //even if we're taking more than we can use in this turn, we're using/storing it. 
-                        IDictionary<Guid, long> resourceCosts = batchJob.ResourcesRequiredRemaining;
-                        //Note: this is editing batchjob.ResourcesRequired variable. 
+                        //right now we take all the resources we can, for an individual item in the batch.
+                        //even if we're taking more than we can use in this turn, we're using/storing it.
+                        IDictionary<Guid, long> resourceCosts = batchJob.ResourcesRequired;
+                        //Note: this is editing batchjob.ResourcesRequired variable.
                         ConsumeResources(stockpile, ref resourceCosts);
-                        //we calculate the difference between the design resources and the amount of resources we've squirreled away. 
-                    
-                        
-                        // this is the total of the resources that we don't have access to for this item. 
+                        //we calculate the difference between the design resources and the amount of resources we've squirreled away.
+
+
+                        // this is the total of the resources that we don't have access to for this item.
                         var unusableResourceSum = resourceCosts.Sum(item => item.Value);
-                        // this is the total resources that can be used on this item. 
+                        // this is the total resources that can be used on this item.
                         var useableResourcePoints = resourceSum - unusableResourceSum;
-                        
+
                         pointsToUse = Math.Min(industryPointsRemaining[designInfo.IndustryTypeID], batchJob.ProductionPointsLeft);
                         pointsToUse = Math.Min(pointsToUse, useableResourcePoints * pointPerResource);
 
-                        //var remainingPoints = industryPointsRemaining[designInfo.IndustryTypeID] - pointsToUse;
-                        
-                        
+                        var remainingPoints = industryPointsRemaining[designInfo.IndustryTypeID] - pointsToUse;
+
+
                         if(pointsToUse < 0)
                             throw new Exception("Can't have negative production");
-                        if (pointsToUse > batchJob.ProductionPointsCost)
-                            throw new Exception("cant have more points than needed for job");
-                        //construct only enough for the amount of resources we have. 
+
+                        //construct only enough for the amount of resources we have.
                         batchJob.ProductionPointsLeft -= (int)Math.Floor(pointsToUse);
-                        industryPointsRemaining[designInfo.IndustryTypeID] -= (int)Math.Floor(pointsToUse);
-                        //productionPercentage -= remainingPoints * productionPercentage;    
-                        
+
+                        productionPercentage -= remainingPoints * productionPercentage;
+
                         if (batchJob.ProductionPointsLeft == 0)
                         {
                             designInfo.OnConstructionComplete(industryEntity, stockpile, prodLineID, batchJob, designInfo);
@@ -384,13 +383,13 @@ namespace Pulsar4X.ECSLib.Industry
                 }
             }
         }
-        
+
         internal static void ConsumeResources(VolumeStorageDB fromCargo, ref IDictionary<Guid, long> toUse)
-        {   
+        {
             foreach (KeyValuePair<Guid, long> kvp in toUse.ToArray())
-            {             
+            {
                 ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);//fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(kvp.Key);
-                
+
                 Guid cargoTypeID = cargoItem.CargoTypeID;
                 long amountUsedThisTick = 0;
                 if (fromCargo.TypeStores.ContainsKey(cargoTypeID))
@@ -406,14 +405,14 @@ namespace Pulsar4X.ECSLib.Industry
                     long used = fromCargo.RemoveCargoByUnit(cargoItem, amountUsedThisTick);
                     toUse[kvp.Key] -= used;
                 }
-            }         
+            }
         }
-        
+
     }
 
 
-    
-    public class IndustryOrder2:EntityCommand 
+
+    public class IndustryOrder2:EntityCommand
     {
 
         public override string Name
@@ -435,15 +434,15 @@ namespace Pulsar4X.ECSLib.Industry
             EditJob
         }
         public OrderTypeEnum OrderType;
-        
+
         public Guid ItemID { get; set; }
         public ushort NumberOrderd { get; set; }
         public bool RepeatJob { get; set; } = false;
         public bool AutoInstall { get; set; } = false;
-        
+
         public short Delta { get; set; }
-        
-        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf; 
+
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
         public override bool IsBlocking => true; //?why block?
 
 
@@ -464,7 +463,7 @@ namespace Pulsar4X.ECSLib.Industry
             IndustryJob jobItem
         )
         {
-            
+
             IndustryOrder2 order = new IndustryOrder2(factionGuid, thisEntity);
             order._job = jobItem;
             order.OrderType = OrderTypeEnum.NewJob;
@@ -473,8 +472,8 @@ namespace Pulsar4X.ECSLib.Industry
             return order;
         }
 
-        
-        
+
+
         public static IndustryOrder2 CreateCancelJobOrder(
             Guid factionGuid, Entity thisEntity, Guid productionLineID,
             Guid OrderID
@@ -486,7 +485,7 @@ namespace Pulsar4X.ECSLib.Industry
             order.productionLineID = productionLineID;
             return order;
         }
-        
+
         public static IndustryOrder2 CreateChangePriorityOrder(
             Guid factionGuid, Entity thisEntity,
             Guid productionLineID,
@@ -500,7 +499,7 @@ namespace Pulsar4X.ECSLib.Industry
             order.productionLineID = productionLineID;
             return order;
         }
-        
+
         public static IndustryOrder2 CreateEditJobOrder(
             Guid factionGuid, Entity thisEntity, Guid productionLineID,
             Guid OrderID, ushort quantity = 1, bool repeatJob = false, bool autoInstall = false
@@ -515,8 +514,8 @@ namespace Pulsar4X.ECSLib.Industry
             order.productionLineID = productionLineID;
             return order;
         }
-        
-        
+
+
         private IndustryOrder2(Guid factionGuid, Entity thisEntity)
         {
             RequestingFactionGuid = factionGuid;
@@ -524,7 +523,7 @@ namespace Pulsar4X.ECSLib.Industry
             CreatedDate = thisEntity.StarSysDateTime;
             UseActionLanes = false;
         }
-        
+
 
         internal override void ActionCommand(DateTime atDateTime)
         {
@@ -545,20 +544,20 @@ namespace Pulsar4X.ECSLib.Industry
                         IndustryTools.ChangeJobPriority(_entityCommanding, productionLineID, ItemID, Delta);
                         break;
                 }
-                
+
 
                 IsRunning = true;
             }
         }
 
         internal override bool IsValidCommand(Game game)
-        {       
-            
+        {
+
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
                 var factionInfo = _factionEntity.GetDataBlob<FactionInfoDB>();
                 //_job.InitialiseJob(factionInfo, _entityCommanding, ItemID, NumberOrderd, RepeatJob);
-                
+
                 /* TODO: should we check this? do we need to?
                 if (factionInfo.ComponentDesigns.ContainsKey(ItemID))
                 {
@@ -567,7 +566,7 @@ namespace Pulsar4X.ECSLib.Industry
                     if (_design.IndustryTypeID.HasFlag(IndustryTypeID.Installations))
                         _job.InstallOn = _entityCommanding;
                     return true;
-                    
+
                 }
                 */
                 return true;
@@ -583,6 +582,6 @@ namespace Pulsar4X.ECSLib.Industry
             }
             return false;
         }
-    
+
     }
 }

@@ -15,7 +15,7 @@ using Vector3 = Pulsar4X.Orbital.Vector3;
 
 namespace Pulsar4X.ImGuiNetUI.EntityManagement
 {
-    
+
     public class IndustryPannel2 : UpdateWindowState
     {
         private Guid _factionID;
@@ -34,7 +34,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         {
             get
             {
-                if (_selectedProdLine != Guid.Empty 
+                if (_selectedProdLine != Guid.Empty
                     && _selectedExistingIndex > -1
                     && _prodLines[_selectedProdLine].Jobs.Count > _selectedExistingIndex)
                 {
@@ -47,26 +47,26 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         private IndustryJob _lastClickedJob { get; set; }
         private IConstrucableDesign _lastClickedDesign;
-        
+
         private Entity _selectedEntity;
         private IndustryAbilityDB _industryDB;
         private GlobalUIState _state;
 
-     
-        
+
+
         public IndustryPannel2(GlobalUIState state, Entity selectedEntity, IndustryAbilityDB industryDB)
         {
-            
+
             _state = state;
             _selectedEntity = selectedEntity;
             _industryDB = industryDB;
             //_job = job;
             _factionInfoDB = state.Faction.GetDataBlob<FactionInfoDB>();
             _factionID = state.Faction.Guid;
-            
+
             OnUpdate();
         }
-        
+
 
         void OnUpdate()
         {
@@ -76,7 +76,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             //_constructableDesigns = new IConstrucableDesign[count];
             var constructablesNames = new string[count];
             var constructablesIDs = new Guid[count];
-            
+
             int i = 0;
             Dictionary<Guid, List<int>> _constructablesIndexesByType = new Dictionary<Guid, List<int>>();
             foreach (var kvp in _factionInfoDB.IndustryDesigns)
@@ -85,14 +85,14 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 constructablesNames[i] = kvp.Value.Name;
                 constructablesIDs[i] = kvp.Key;
                 Guid typeID = kvp.Value.IndustryTypeID;
-                
+
                 if(!_constructablesIndexesByType.ContainsKey(typeID))
                     _constructablesIndexesByType.Add(typeID, new List<int>());
                 _constructablesIndexesByType[typeID].Add(i);
                 i++;
             }
-            
-            
+
+
             foreach (var plineKVP in _prodLines)
             {
                 Guid componentID = plineKVP.Key;
@@ -112,7 +112,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 }
                 _contructablesByPline[componentID] = (itemIDs.ToArray(), itemNames.ToArray());
             }
-            
+
         }
 
 
@@ -130,15 +130,15 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         public void Display()
         {
-  
+
             ImGui.Columns(2);
             ImGui.SetColumnWidth(0, 285);
             ImGui.SetColumnWidth(1, 308);
             //ImGui.SetColumnWidth(1, 190);
-            
+
             ProdLineDisplay();
-            
-            
+
+
             ImGui.NextColumn();
             ImGui.BeginGroup();
             EditButtonsDisplay();
@@ -148,9 +148,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.EndGroup();
             //ImGui.NextColumn();
 
-            
-            
-                
+
+
+
         }
 
         public void ProdLineDisplay()
@@ -160,12 +160,12 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             foreach (var kvp in _prodLines)
             {
-                
+
                 IndustryAbilityDB.ProductionLine ud = kvp.Value;
                 ImGui.PushID(kvp.Key.ToString());
                 //ImGui.Selectable()
-                
-                if (ImGui.CollapsingHeader(ud.FacName))
+
+                if (ImGui.CollapsingHeader(ud.Name))
                 {
                     ImGui.Columns(2);
                     ImGui.SetColumnWidth(0, 128);
@@ -207,7 +207,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                     _lastClickedJob = _selectedExistingConJob;
                     _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                 }
-                
+
                 ImGui.PopID();
             }
             ImGui.EndChild();
@@ -222,7 +222,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             if (ImGui.ImageButton(_state.Img_Up(), new Vector2(16, 8)) && _selectedExistingConJob != null)
             {
                 var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, -1);
-                StaticRefLib.OrderHandler.HandleOrder(cmd); 
+                StaticRefLib.OrderHandler.HandleOrder(cmd);
             }
 
             if (ImGui.ImageButton(_state.Img_Down(), new Vector2(16, 8)) && _selectedExistingConJob != null)
@@ -257,14 +257,14 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 if (_lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeInstalled)
                 {
                     ImGui.Checkbox("Auto Install on colony", ref _newJobAutoInstall);
-                    
+
                     if (_newJobAutoInstall)
                         _lastClickedJob.InstallOn = _selectedEntity;
                     else
                         _lastClickedJob.InstallOn = null;
-                    
+
                 }
-                
+
                 if (_lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeLaunched)
                 {
                     if (_selectedEntity.HasDataBlob<ColonyInfoDB>())
@@ -272,12 +272,12 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         var s = (ShipDesign)_lastClickedDesign;
                         var planet = _selectedEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
                         var lowOrbit = planet.GetDataBlob<MassVolumeDB>().RadiusInM * 0.33333;
-                    
+
                         var mass = s.MassPerUnit;
-                    
+
                         var fuelCost = OrbitMath.FuelCostToLowOrbit(planet, mass);
 
-                    
+
                         if (ImGui.Button("Launch to Low Orbit"))
                         {
                             LaunchShipCmd.CreateCommand(_factionID, _selectedEntity, _selectedProdLine, _lastClickedJob.JobID);
@@ -286,15 +286,15 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
 
                         ImGui.Text("Fuel Cost: " + fuelCost);
-                    
+
                     }
                 }
             }
 
             ImGui.EndGroup();
-            
+
             //ImGui.Button("Install On Parent")
-            
+
         }
 
         void NewJobDisplay()
@@ -319,7 +319,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 ImGui.Checkbox("Repeat Job", ref _newJobRepeat);
                 ImGui.SameLine();
                 //if the selected item can be installed on a colony:
-                
+
 
                 if (ImGui.Button("Create New Job"))
                 {
@@ -339,7 +339,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             //ImGui.EndChild();
         }
-        
+
         void CostsDisplay(JobBase selectedJob)
         {
             ImGui.BeginChild("Resources Requred", new Vector2(294, 184 ), true, ImGuiWindowFlags.ChildWindow);
@@ -360,7 +360,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 ImGui.Text(item.Value.ToString());
                 ImGui.NextColumn();
             }
-            
+
             ImGui.EndChild();
         }
 
