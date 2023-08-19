@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
@@ -134,8 +135,10 @@ namespace Pulsar4X.SDL2UI
             ProductionLineDisplay(state);
             ImGui.SameLine();
 
-            ImGui.SameLine();
-            if(ImGui.BeginChild("ColonySummary2", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), true))
+            if(_selectedProdLine == Guid.Empty)
+                return;
+
+            if(ImGui.BeginChild("JobDescriptionPane", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), true))
             {
                 if(_prodLines.ContainsKey(_selectedProdLine) &&_prodLines[_selectedProdLine] != null)
                 {
@@ -186,7 +189,7 @@ namespace Pulsar4X.SDL2UI
 
                     if (ImGui.CollapsingHeader(headerTitle, ImGuiTreeNodeFlags.DefaultOpen))
                     {
-                        if(ImGui.Button("Add Job"))
+                        if(ImGui.Button("Add New Job"))
                         {
                             _selectedProdLine = id;
                             _newjobSelectionIndex = (_selectedProdLine, 0);
@@ -214,7 +217,7 @@ namespace Pulsar4X.SDL2UI
                                 var batchJob = line.Jobs[ji];
                                 string jobname = line.Jobs[ji].Name;
 
-                                bool selected = _selectedExistingIndex ==  ji;
+                                bool selected = _selectedExistingIndex ==  ji && id == _selectedProdLine;
                                 float percent = 1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost;
                                 //ImGui.ProgressBar(percent, progsize, "");
                                 ImGui.TableNextColumn();
@@ -222,6 +225,7 @@ namespace Pulsar4X.SDL2UI
                                 if (ImGui.Selectable(jobname, ref selected))
                                 {
                                     _selectedExistingIndex =  ji;
+                                    _selectedProdLine = id;
                                     _lastClickedJob = _selectedExistingConJob;
                                     _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                                 }
@@ -238,6 +242,37 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.TableNextColumn();
                                 ImGui.Text((batchJob.ProductionPointsCost - batchJob.ProductionPointsLeft) + "/" + batchJob.ProductionPointsCost);
                                 ImGui.TableNextColumn();
+                                ImGui.PushID(line.Jobs[ji].JobID.ToString());
+                                ImGui.Text("");
+                                if(ji > 0)
+                                {
+                                    ImGui.SameLine();
+                                    if (ImGui.ImageButton(state.Img_Up(), new Vector2(16, 16)))
+                                    {
+                                        var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, Entity, id, line.Jobs[ji].JobID, -1);
+                                        StaticRefLib.OrderHandler.HandleOrder(cmd);
+                                    }
+                                }
+
+                                if(ji < line.Jobs.Count - 1)
+                                {
+                                    ImGui.SameLine();
+                                    if (ImGui.ImageButton(state.Img_Down(), new Vector2(16, 16)))
+                                    {
+                                        var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, Entity, id, line.Jobs[ji].JobID, 1);
+                                        StaticRefLib.OrderHandler.HandleOrder(cmd);
+                                    }
+                                }
+
+                                ImGui.SameLine();
+                                if (ImGui.ImageButton(state.Img_Cancel(), new Vector2(16, 16)))
+                                {
+                                    //new ConstructCancelJob(_uiState.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
+                                    var cmd = IndustryOrder2.CreateCancelJobOrder(_factionID, Entity, id, line.Jobs[ji].JobID);
+
+                                    StaticRefLib.OrderHandler.HandleOrder(cmd);
+                                }
+                                ImGui.PopID();
                                 ImGui.TableNextRow();
                             }
                             ImGui.EndTable();
@@ -340,9 +375,12 @@ namespace Pulsar4X.SDL2UI
             {
                 int curItemIndex = _newjobSelectionIndex.item;
 
-                var constructableNames = _contructablesByPline[_selectedProdLine].itemNames;
+                // TODO: improve this, preferably store the array of names and update it during Update()
+                var sortedConstructableNames = new List<string>(_contructablesByPline[_selectedProdLine].itemNames);
+                sortedConstructableNames.Sort();
+                var constructableNames = sortedConstructableNames.ToArray();
 
-                ImGui.Text("Select the production method:");
+                ImGui.Text("Select a production method:");
                 if (ImGui.Combo("", ref curItemIndex, constructableNames, constructableNames.Length))
                 {
                     _newjobSelectionIndex = (_newjobSelectionIndex.pline, curItemIndex);
