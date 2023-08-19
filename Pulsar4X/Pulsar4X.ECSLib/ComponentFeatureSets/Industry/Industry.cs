@@ -158,7 +158,7 @@ namespace Pulsar4X.ECSLib.Industry
         public virtual string Name { get; internal set; }
         public Guid JobID = Guid.NewGuid();
         public Guid ItemGuid { get; protected set; }
-        public ushort NumberOrdered { get; internal set; }
+        public ushort NumberOrdered { get; set; }
         public ushort NumberCompleted { get; internal set; }
 
         /// <summary>

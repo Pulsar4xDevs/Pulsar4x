@@ -197,7 +197,9 @@ namespace Pulsar4X.SDL2UI
                             {
                                 _selectedProdLine = id;
                                 _newjobSelectionIndex = (_selectedProdLine, 0);
-                                _lastClickedJob = _selectedExistingConJob;
+                                
+                                _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
+                                _lastClickedJob = _newConJob;
                                 _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                             }
 
@@ -448,7 +450,11 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     ImGui.PushItemWidth(wid1 - wid2);
                 }
-                ImGui.InputInt("##batchcount", ref _newJobbatchCount);
+
+                if (ImGui.InputInt("##batchcount", ref _newJobbatchCount))
+                {
+                    _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
+                }
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("The production line will move to the next job in the queue\nafter finished the number of items requested.");
 
