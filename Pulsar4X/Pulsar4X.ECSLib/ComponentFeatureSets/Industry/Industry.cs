@@ -176,8 +176,8 @@ namespace Pulsar4X.ECSLib.Industry
         public long ProductionPointsCost { get; protected set; }
         public bool Auto { get; internal set; }
 
-        public Dictionary<Guid, long> ResourcesRequired { get; internal set; } = new Dictionary<Guid, long>();
-
+        public Dictionary<Guid, long> ResourcesRequiredRemaining { get; internal set; } = new Dictionary<Guid, long>();
+        public Dictionary<Guid, long> ResourcesCosts { get; internal set; } = new Dictionary<Guid, long>();
 
         public JobBase()
         {
@@ -350,7 +350,7 @@ namespace Pulsar4X.ECSLib.Industry
                         //gather availible resorces for this job.
                         //right now we take all the resources we can, for an individual item in the batch.
                         //even if we're taking more than we can use in this turn, we're using/storing it.
-                        IDictionary<Guid, long> resourceCosts = batchJob.ResourcesRequired;
+                        IDictionary<Guid, long> resourceCosts = batchJob.ResourcesRequiredRemaining;
                         //Note: this is editing batchjob.ResourcesRequired variable.
                         ConsumeResources(stockpile, ref resourceCosts);
                         //we calculate the difference between the design resources and the amount of resources we've squirreled away.
