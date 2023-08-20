@@ -23,6 +23,8 @@ namespace Pulsar4X.SDL2UI
         private int _newJobbatchCount = 1;
         private bool _newJobRepeat = false;
         private bool _newJobAutoInstall = true;
+        private bool _newJobCanAutoInstall = false;
+        private Entity _newJobAutoInstallEntity = null;
         private Dictionary<Guid,IndustryAbilityDB.ProductionLine> _prodLines;
         private Guid _selectedProdLine;
         private int _selectedExistingIndex = -1;
@@ -362,33 +364,67 @@ namespace Pulsar4X.SDL2UI
                     _lastClickedJob = _newConJob;
                     _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                     _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
+                    _newJobCanAutoInstall = _lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeInstalled;
+                    if(_lastClickedDesign is ComponentDesign)
+                    {
+                        ComponentDesign cDesign = (ComponentDesign)_lastClickedDesign;
+                        // TODO: check the mount type and display options for the player to auto-install on
+                    }
                 }
 
                 ImGui.Text("Enter the quantity:");
-
-                // FIXME: player can put 0 or negative numbers here :(
                 if (ImGui.InputInt("##batchcount", ref _newJobbatchCount))
                 {
+                    if(_newJobbatchCount < 1)
+                        _newJobbatchCount = 1;
+
                     _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
                 }
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("The production line will move to the next job in the queue\nafter finishing the number of items requested.");
-
-                ImGui.Text("Repeat this job?");
-                ImGui.Checkbox("##repeat", ref _newJobRepeat);
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("A repeat job will run until cancelled.");
 
                 if(_lastClickedJob != null)
                     CostsDisplay(_lastClickedJob, state);
 
                 ImGui.Columns(1);
                 ImGui.NewLine();
+                ImGui.Text("Repeat this job?");
+                ImGui.Checkbox("##repeat", ref _newJobRepeat);
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("A repeat job will run until cancelled.");
+
+                if(_newJobCanAutoInstall)
+                {
+                    ImGui.Text("Auto-install on completion?");
+                    ImGui.Checkbox("##autoinstall", ref _newJobAutoInstall);
+
+                    // TODO: need to allow the player to select what to install the component on
+                    // depending on the mount type in the component design
+                }
+
+                ImGui.NewLine();
 
                 if (ImGui.Button("Queue the job to " + _prodLines[_selectedProdLine].Name))
                 {
 
                     _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
+
+                    if(_newJobCanAutoInstall && _newJobAutoInstall && _lastClickedDesign is ComponentDesign)
+                    {
+                        ComponentDesign cDesign = (ComponentDesign)_lastClickedDesign;
+                        switch(cDesign.ComponentMountType)
+                        {
+                            case ComponentMountType.PlanetInstallation:
+                                _newConJob.InstallOn = Entity;
+                                break;
+                            case ComponentMountType.Fighter:
+                            case ComponentMountType.Missile:
+                            case ComponentMountType.ShipCargo:
+                            case ComponentMountType.ShipComponent:
+                                _newConJob.InstallOn = _newJobAutoInstallEntity;
+                                break;
+                        }
+                    }
 
                     var cmd = IndustryOrder2.CreateNewJobOrder(_factionID, Entity, _selectedProdLine, _newConJob);
                     _newConJob.InitialiseJob((ushort)_newJobbatchCount, _newJobRepeat);
