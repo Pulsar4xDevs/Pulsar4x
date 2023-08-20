@@ -513,8 +513,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn();
                 if (_volStorageDB != null)
                 {
-                    var resource = StaticRefLib.StaticData.GetICargoable(item.Key);
-                    var stored = CargoExtensionMethods.GetUnitsStored(_volStorageDB, resource);
+                    var stored = CargoExtensionMethods.GetUnitsStored(_volStorageDB, cargoItem);
                     ImGui.Text(Stringify.Quantity(stored));
                 }
                 
