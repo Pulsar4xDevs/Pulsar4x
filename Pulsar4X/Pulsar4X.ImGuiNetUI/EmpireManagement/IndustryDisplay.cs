@@ -127,7 +127,16 @@ namespace Pulsar4X.SDL2UI
         {
             Entity = EntityState.Entity;
             if(!Entity.TryGetDatablob<IndustryAbilityDB>(out _industryDB) || !state.Faction.TryGetDatablob<FactionInfoDB>(out _factionInfoDB))
+            {
+                Vector2 topSize = ImGui.GetContentRegionAvail();
+                if(ImGui.BeginChild("NoProductionAvailable", new Vector2(topSize.X, 56f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                {
+                    ImGui.Text("You need an installation capable of production. Consider importing one.\n\nExamples: Factory, Shipyard or Refinery");
+                    ImGui.EndChild();
+                }
                 return;
+            }
+
             Entity.TryGetDatablob(out _volStorageDB);
             _factionID = state.Faction.Guid;
             Update();
@@ -352,6 +361,7 @@ namespace Pulsar4X.SDL2UI
                     _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                     _lastClickedJob = _newConJob;
                     _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
+                    _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
                 }
 
                 ImGui.Text("Enter the quantity:");
