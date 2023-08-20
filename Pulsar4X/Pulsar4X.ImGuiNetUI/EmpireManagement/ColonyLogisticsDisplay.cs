@@ -113,11 +113,12 @@ namespace Pulsar4X.SDL2UI
             {
                 if(!_selectedEntity.HasDataBlob<LogiBaseDB>())
                 {
+                    /*
                     if(ImGui.Button("Set this entity as an importer/exporter"))
                     {
                         SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.AddLogiBaseDB);
                         _tradebaseDB = _selectedEntity.GetDataBlob<LogiBaseDB>();
-                    }
+                    }*/
                 }
                 else
                 {
