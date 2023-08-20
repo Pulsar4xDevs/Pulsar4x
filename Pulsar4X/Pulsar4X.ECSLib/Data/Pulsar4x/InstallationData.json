@@ -480,6 +480,56 @@
         }
       },
       {
+        "Key": "5B5034C1-8DA1-4645-8F5C-A52B65BB8369",
+        "Value": {
+          "Name": "Logistics Office",
+          "DescriptionFormula": "'Handles import and Export of goods'",
+          "ID": "5B5034C1-8DA1-4645-8F5C-A52B65BB8369",
+          "MassFormula": "5000",
+          "VolumeFormula": "[Mass]",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "10",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Logistic Capacity",
+              "DescriptionFormula": "'How many different items this office can handle'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "100",
+              "MinFormula": "5",
+              "StepFormula": "5",
+              "AttributeFormula": "5"
+            },
+            {
+              "Name": "db",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('Logistic Capacity'))",
+              "AttributeType": "Pulsar4X.ECSLib.LogiBaseAtb"
+            }
+          ]
+        }
+      },
+      {
         "Key": "B8239721-B60E-4C11-8E45-5F64F6BA5FA5",
         "Value": {
           "Name": "General Storage",
