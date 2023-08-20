@@ -218,7 +218,25 @@ namespace Pulsar4X.SDL2UI
                         ImGui.NextColumn();
                         //object value = memberInfo.GetValue(obj);
                         if (value != null)
-                            ImGui.Text(value.ToString());
+                        {
+                            if (value is Guid && StaticRefLib.Game.GlobalManager.TryGetEntityByGuid((Guid)value, out Entity entity))
+                            {
+                                ImGui.Text(entity.GetOwnersName());
+                                if(ImGui.IsItemHovered())
+                                    ImGui.SetTooltip(value.ToString());
+                            }
+                            else if(value is Entity)
+                            {
+                                entity = (Entity)value;
+                                ImGui.Text(entity.GetOwnersName());
+                                if (ImGui.IsItemHovered())
+                                    ImGui.SetTooltip(entity.Guid.ToString());
+                            }
+                            else
+                            {
+                                ImGui.Text(value.ToString());
+                            }
+                        }
                         else ImGui.Text("null");
                         ImGui.NextColumn();
                     }
