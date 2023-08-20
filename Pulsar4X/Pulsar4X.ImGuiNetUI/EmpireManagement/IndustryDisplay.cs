@@ -23,6 +23,8 @@ namespace Pulsar4X.SDL2UI
         private int _newJobbatchCount = 1;
         private bool _newJobRepeat = false;
         private bool _newJobAutoInstall = true;
+        private bool _newJobCanAutoInstall = false;
+        private Entity _newJobAutoInstallEntity = null;
         private Dictionary<Guid,IndustryAbilityDB.ProductionLine> _prodLines;
         private Guid _selectedProdLine;
         private int _selectedExistingIndex = -1;
@@ -127,7 +129,16 @@ namespace Pulsar4X.SDL2UI
         {
             Entity = EntityState.Entity;
             if(!Entity.TryGetDatablob<IndustryAbilityDB>(out _industryDB) || !state.Faction.TryGetDatablob<FactionInfoDB>(out _factionInfoDB))
+            {
+                Vector2 topSize = ImGui.GetContentRegionAvail();
+                if(ImGui.BeginChild("NoProductionAvailable", new Vector2(topSize.X, 56f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                {
+                    ImGui.Text("You need an installation capable of production. Consider importing one.\n\nExamples: Factory, Shipyard or Refinery");
+                    ImGui.EndChild();
+                }
                 return;
+            }
+
             Entity.TryGetDatablob(out _volStorageDB);
             _factionID = state.Faction.Guid;
             Update();
@@ -352,33 +363,68 @@ namespace Pulsar4X.SDL2UI
                     _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                     _lastClickedJob = _newConJob;
                     _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
+                    _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
+                    _newJobCanAutoInstall = _lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeInstalled;
+                    if(_lastClickedDesign is ComponentDesign)
+                    {
+                        ComponentDesign cDesign = (ComponentDesign)_lastClickedDesign;
+                        // TODO: check the mount type and display options for the player to auto-install on
+                    }
                 }
 
                 ImGui.Text("Enter the quantity:");
-
-                // FIXME: player can put 0 or negative numbers here :(
                 if (ImGui.InputInt("##batchcount", ref _newJobbatchCount))
                 {
+                    if(_newJobbatchCount < 1)
+                        _newJobbatchCount = 1;
+
                     _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
                 }
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("The production line will move to the next job in the queue\nafter finishing the number of items requested.");
-
-                ImGui.Text("Repeat this job?");
-                ImGui.Checkbox("##repeat", ref _newJobRepeat);
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("A repeat job will run until cancelled.");
 
                 if(_lastClickedJob != null)
                     CostsDisplay(_lastClickedJob, state);
 
                 ImGui.Columns(1);
                 ImGui.NewLine();
+                ImGui.Text("Repeat this job?");
+                ImGui.Checkbox("##repeat", ref _newJobRepeat);
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("A repeat job will run until cancelled.");
+
+                if(_newJobCanAutoInstall)
+                {
+                    ImGui.Text("Auto-install on completion?");
+                    ImGui.Checkbox("##autoinstall", ref _newJobAutoInstall);
+
+                    // TODO: need to allow the player to select what to install the component on
+                    // depending on the mount type in the component design
+                }
+
+                ImGui.NewLine();
 
                 if (ImGui.Button("Queue the job to " + _prodLines[_selectedProdLine].Name))
                 {
 
                     _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
+
+                    if(_newJobCanAutoInstall && _newJobAutoInstall && _lastClickedDesign is ComponentDesign)
+                    {
+                        ComponentDesign cDesign = (ComponentDesign)_lastClickedDesign;
+                        switch(cDesign.ComponentMountType)
+                        {
+                            case ComponentMountType.PlanetInstallation:
+                                _newConJob.InstallOn = Entity;
+                                break;
+                            case ComponentMountType.Fighter:
+                            case ComponentMountType.Missile:
+                            case ComponentMountType.ShipCargo:
+                            case ComponentMountType.ShipComponent:
+                                _newConJob.InstallOn = _newJobAutoInstallEntity;
+                                break;
+                        }
+                    }
 
                     var cmd = IndustryOrder2.CreateNewJobOrder(_factionID, Entity, _selectedProdLine, _newConJob);
                     _newConJob.InitialiseJob((ushort)_newJobbatchCount, _newJobRepeat);
@@ -408,7 +454,7 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.BeginTable("JobCostsTables", 4, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("Cost Per Batch", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Cost Per Quantity", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableSetupColumn("Total Cost", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableSetupColumn("Available", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableHeadersRow();
@@ -420,7 +466,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableNextColumn();
                 ImGui.Text((selectedJob.ProductionPointsLeft * selectedJob.NumberOrdered).ToString());
                 if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Total Cost = Cost Per Output * Quantity Ordered");
+                        ImGui.SetTooltip("Total Cost = Cost Per Quantity * Quantity Ordered");
                 ImGui.TableNextColumn();
                 ImGui.Text("-");
                 ImGui.TableNextRow();
@@ -479,7 +525,7 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.BeginTable("JobOutputsTables", 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("Amount Per Batch", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Amount Per Quantity", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableSetupColumn("Total", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableHeadersRow();
 
