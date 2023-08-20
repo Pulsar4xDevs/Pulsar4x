@@ -408,7 +408,7 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.BeginTable("JobCostsTables", 4, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("Cost Per Batch", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Cost Per Quantity", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableSetupColumn("Total Cost", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableSetupColumn("Available", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableHeadersRow();
@@ -420,7 +420,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableNextColumn();
                 ImGui.Text((selectedJob.ProductionPointsLeft * selectedJob.NumberOrdered).ToString());
                 if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Total Cost = Cost Per Output * Quantity Ordered");
+                        ImGui.SetTooltip("Total Cost = Cost Per Quantity * Quantity Ordered");
                 ImGui.TableNextColumn();
                 ImGui.Text("-");
                 ImGui.TableNextRow();
@@ -479,7 +479,7 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.BeginTable("JobOutputsTables", 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("Amount Per Batch", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Amount Per Quantity", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableSetupColumn("Total", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableHeadersRow();
 
