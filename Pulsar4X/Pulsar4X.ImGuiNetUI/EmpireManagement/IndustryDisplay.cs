@@ -143,7 +143,7 @@ namespace Pulsar4X.SDL2UI
             {
                 if(_prodLines.ContainsKey(_selectedProdLine) &&_prodLines[_selectedProdLine] != null)
                 {
-                    ImGui.Text("Add job to " + _prodLines[_selectedProdLine].Name);
+                    ImGui.Text("Create a new job for: " + _prodLines[_selectedProdLine].Name);
                 }
                 else
                 {
@@ -151,10 +151,7 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 ImGui.Separator();
-                //EditButtonsDisplay(state);
                 NewJobDisplay(state);
-                if(_lastClickedJob != null)
-                    CostsDisplay(_lastClickedJob, state);
                 ImGui.EndChild();
             }
         }
@@ -327,89 +324,6 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        void EditButtonsDisplay(GlobalUIState state)
-        {
-            //ImGui.BeginChild("Buttons", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
-            ImGui.BeginGroup();
-
-            if (ImGui.ImageButton(state.Img_Up(), new Vector2(16, 8)) && _selectedExistingConJob != null)
-            {
-                var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, Entity, _selectedProdLine, _selectedExistingConJob.JobID, -1);
-                StaticRefLib.OrderHandler.HandleOrder(cmd);
-            }
-
-            if (ImGui.ImageButton(state.Img_Down(), new Vector2(16, 8)) && _selectedExistingConJob != null)
-            {
-                var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, Entity, _selectedProdLine, _selectedExistingConJob.JobID, 1);
-                StaticRefLib.OrderHandler.HandleOrder(cmd);
-            }
-
-            ImGui.EndGroup();
-            ImGui.SameLine();
-            if (ImGui.ImageButton(state.Img_Repeat(), new Vector2(16, 16)) && _selectedExistingConJob != null)
-            {
-
-                var jobcount = _selectedExistingConJob.NumberOrdered;
-                var jobrepeat = _selectedExistingConJob.Auto;
-
-                var cmd = IndustryOrder2.CreateEditJobOrder(_factionID, Entity, _selectedProdLine,_selectedExistingConJob.JobID, jobcount, !jobrepeat);
-                StaticRefLib.OrderHandler.HandleOrder(cmd);
-            }
-
-            ImGui.SameLine();
-            if (ImGui.ImageButton(state.Img_Cancel(), new Vector2(16, 16)) && _selectedExistingConJob != null)
-            {
-                //new ConstructCancelJob(_uiState.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
-                var cmd = IndustryOrder2.CreateCancelJobOrder(_factionID, Entity, _selectedProdLine, _selectedExistingConJob.JobID);
-
-                StaticRefLib.OrderHandler.HandleOrder(cmd);
-            }
-
-            if (_lastClickedDesign != null)
-            {
-                if (_lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeInstalled)
-                {
-                    ImGui.Checkbox("Auto Install on colony", ref _newJobAutoInstall);
-
-                    if (_newJobAutoInstall)
-                        _lastClickedJob.InstallOn = Entity;
-                    else
-                        _lastClickedJob.InstallOn = null;
-
-                }
-
-                if (_lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeLaunched)
-                {
-                    if (Entity.HasDataBlob<ColonyInfoDB>())
-                    {
-                        var s = (ShipDesign)_lastClickedDesign;
-                        var planet = Entity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
-                        var lowOrbit = planet.GetDataBlob<MassVolumeDB>().RadiusInM * 0.33333;
-
-                        var mass = s.MassPerUnit;
-
-                        var fuelCost = OrbitMath.FuelCostToLowOrbit(planet, mass);
-
-
-                        if (ImGui.Button("Launch to Low Orbit"))
-                        {
-                            LaunchShipCmd.CreateCommand(_factionID, Entity, _selectedProdLine, _lastClickedJob.JobID);
-                        }
-                        //ImGui.SameLine();
-
-
-                        ImGui.Text("Fuel Cost: " + fuelCost);
-
-                    }
-                }
-            }
-
-            //ImGui.EndGroup();
-
-            //ImGui.Button("Install On Parent")
-
-        }
-
         void NewJobDisplay(GlobalUIState state)
         {
             //ImGui.BeginChild("InitialiseJob", new Vector2(404, 84), true, ImGuiWindowFlags.ChildWindow);
@@ -439,29 +353,27 @@ namespace Pulsar4X.SDL2UI
                     _lastClickedJob = _newConJob;
                     _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                 }
-                var wid1 = ImGui.GetItemRectSize().X;
-                ImGui.Text("Enter the quantity:");
-                if(_lastClickedDesign.OutputAmount > 1)
-                {
-                    
-                    ImGui.Text(_lastClickedDesign.OutputAmount.ToString() + "x");
-                    var wid2 = ImGui.GetCursorPosX();
-                    
-                    ImGui.SameLine();
-                    ImGui.PushItemWidth(wid1 - wid2);
-                }
 
+                ImGui.Text("Enter the quantity:");
+
+                // FIXME: player can put 0 or negative numbers here :(
                 if (ImGui.InputInt("##batchcount", ref _newJobbatchCount))
                 {
                     _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
                 }
                 if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("The production line will move to the next job in the queue\nafter finished the number of items requested.");
+                    ImGui.SetTooltip("The production line will move to the next job in the queue\nafter finishing the number of items requested.");
 
                 ImGui.Text("Repeat this job?");
                 ImGui.Checkbox("##repeat", ref _newJobRepeat);
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("A repeat job will run until cancelled.");
+
+                if(_lastClickedJob != null)
+                    CostsDisplay(_lastClickedJob, state);
+
+                ImGui.Columns(1);
+                ImGui.NewLine();
 
                 if (ImGui.Button("Queue the job to " + _prodLines[_selectedProdLine].Name))
                 {
@@ -484,43 +396,102 @@ namespace Pulsar4X.SDL2UI
 
         void CostsDisplay(JobBase selectedJob, GlobalUIState state)
         {
-            //ImGui.BeginChild("Resources Requred", new Vector2(294, 184 ), true, ImGuiWindowFlags.ChildWindow);
             ImGui.NewLine();
-            ImGui.Text("Job Cost:");
-            ImGui.Separator();
-            ImGui.Columns(4);
-            ImGui.SetColumnWidth(0, 140);
-            ImGui.SetColumnWidth(1, 48);
-            ImGui.SetColumnWidth(2, 48);
-            ImGui.SetColumnWidth(3, 128);
-            ImGui.Text("Industry Points");
-            ImGui.NextColumn();
-            ImGui.Text(selectedJob.ProductionPointsLeft.ToString());
-            ImGui.NextColumn();
-            ImGui.NextColumn();
-            ImGui.NextColumn();
+            var sizeAvailable = ImGui.GetContentRegionAvail();
+            string inputs = "Inputs Needed";
+            float textSize = ImGui.CalcTextSize(inputs).X / 2;
 
-            foreach (var item in selectedJob.ResourcesRequiredRemaining)
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+            ImGui.SetCursorPosX(sizeAvailable.X / 2 - textSize);
+            ImGui.Text(inputs);
+            ImGui.PopStyleColor();
+            if(ImGui.BeginTable("JobCostsTables", 4, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {
-                ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(item.Key);
-                if (cargoItem == null)
-                    cargoItem = state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[item.Key];
-                ImGui.Text(cargoItem.Name);
-                ImGui.NextColumn();
-                ImGui.Text(item.Value.ToString());
-                ImGui.NextColumn();
-                ImGui.Text((selectedJob.NumberOrdered * item.Value).ToString());
-                ImGui.NextColumn();
-                if (_volStorageDB != null)
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
+                ImGui.TableSetupColumn("Cost Per Batch", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Total Cost", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Available", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableHeadersRow();
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Industry Points");
+                ImGui.TableNextColumn();
+                ImGui.Text(selectedJob.ProductionPointsLeft.ToString());
+                ImGui.TableNextColumn();
+                ImGui.Text((selectedJob.ProductionPointsLeft * selectedJob.NumberOrdered).ToString());
+                if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Total Cost = Cost Per Output * Quantity Ordered");
+                ImGui.TableNextColumn();
+                ImGui.Text("-");
+                ImGui.TableNextRow();
+
+                foreach (var item in selectedJob.ResourcesRequiredRemaining)
                 {
-                    var stored = CargoExtensionMethods.GetUnitsStored(_volStorageDB, cargoItem);
-                    ImGui.Text(Stringify.Quantity(stored));
+                    ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(item.Key);
+                    if (cargoItem == null)
+                        cargoItem = state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[item.Key];
+                    var totalCost = selectedJob.NumberOrdered * item.Value;
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text(cargoItem.Name);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(item.Value.ToString());
+                    ImGui.TableNextColumn();
+                    ImGui.Text(totalCost.ToString());
+                    if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Total Cost = Cost Per Output * Quantity Ordered\n" + totalCost + " = " + item.Value + " * " + selectedJob.NumberOrdered);
+                    ImGui.TableNextColumn();
+                    if (_volStorageDB != null)
+                    {
+                        var stored = CargoExtensionMethods.GetUnitsStored(_volStorageDB, cargoItem);
+                        if(stored < totalCost)
+                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+
+                        ImGui.Text(Stringify.Quantity(stored));
+
+                        if(stored < totalCost)
+                        {
+                            if(ImGui.IsItemHovered())
+                                ImGui.SetTooltip("Not enough " + cargoItem.Name + " available on this colony.\nImport or produce some!");
+                            ImGui.PopStyleColor();
+                        }
+                    }
+                    else
+                    {
+                        ImGui.Text("No Local Storage Available");
+                    }
+                    ImGui.TableNextRow();
                 }
-                
-                ImGui.NextColumn();
+
+                ImGui.EndTable();
             }
 
-            //ImGui.EndChild();
+            ImGui.NewLine();
+            sizeAvailable = ImGui.GetContentRegionAvail();
+            string outputs = "Outputs";
+            textSize = ImGui.CalcTextSize(outputs).X / 2;
+
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+            ImGui.SetCursorPosX(sizeAvailable.X / 2 - textSize);
+            ImGui.Text(outputs);
+            ImGui.PopStyleColor();
+
+            if(ImGui.BeginTable("JobOutputsTables", 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+            {
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
+                ImGui.TableSetupColumn("Amount Per Batch", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Total", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableHeadersRow();
+
+                ImGui.TableNextColumn();
+                ImGui.Text(_lastClickedDesign.Name);
+                ImGui.TableNextColumn();
+                ImGui.Text(_lastClickedDesign.OutputAmount.ToString());
+                ImGui.TableNextColumn();
+                ImGui.Text((_lastClickedDesign.OutputAmount * selectedJob.NumberOrdered).ToString());
+
+                ImGui.EndTable();
+            }
         }
     }
 }
