@@ -81,6 +81,9 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public Dictionary<Guid, ComponentTemplateSD> ComponentTemplates = new Dictionary<Guid, ComponentTemplateSD>();
 
+        [JsonIgnore]
+        public Dictionary<ComponentTemplateAttributeSD, List<ComponentTemplateSD>> ComponentTemplatesByAttribute;
+        
         /// <summary>
         /// Dictionary to store CargoTypes
         /// </summary>
@@ -345,10 +348,19 @@ namespace Pulsar4X.ECSLib
         {
             if (components != null)
             {
+                ComponentTemplatesByAttribute = new Dictionary<ComponentTemplateAttributeSD, List<ComponentTemplateSD>>();
                 foreach (KeyValuePair<Guid, ComponentTemplateSD> component in components)
                 {
                     ComponentTemplates[component.Key] = component.Value;
-
+                    foreach (ComponentTemplateAttributeSD attrbSD in component.Value.ComponentAtbSDs)
+                    {
+                        if (!ComponentTemplatesByAttribute.TryGetValue(attrbSD, out List<ComponentTemplateSD> lst))
+                        {
+                            lst = new List<ComponentTemplateSD>();
+                            ComponentTemplatesByAttribute.Add(attrbSD, lst);
+                        }
+                        lst.Add(component.Value);
+                    }
                 }
             }
         }
