@@ -22,11 +22,10 @@ namespace Pulsar4X.SDL2UI
         private EntityState _entityState;
         private Entity _selectedEntity;
         private LogiBaseDB _logisticsDB;
-
         private VolumeStorageDB _volStorageDB;
-
         private Dictionary<Guid, TypeStore> _stores;
         private StaticDataStore _staticData;
+        private bool isEnabled;
         private ColonyLogisticsDisplay(EntityState entity)
         {
             SetEntity(entity);
@@ -110,6 +109,196 @@ namespace Pulsar4X.SDL2UI
             if(_volStorageDB == null || _logisticsDB == null)
                 DisplayDisabledMessage();
 
+            Vector2 topSize = ImGui.GetContentRegionAvail();
+            if(ImGui.BeginChild("LogisticsHeader", new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            {
+                ImGui.Text("Logistics Capacity:");
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                ImGui.SameLine();
+                ImGui.Text(Stringify.Quantity(_logisticsDB.ListedItems.Count));
+                ImGui.PopStyleColor();
+                ImGui.SameLine();
+                ImGui.Text("/");
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                ImGui.SameLine();
+                ImGui.Text(Stringify.Quantity(_logisticsDB.Capacity));
+                ImGui.PopStyleColor();
+
+                ImGui.SameLine();
+                ImGui.Text(" Items in Transit:");
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                ImGui.SameLine();
+                ImGui.Text(Stringify.Quantity(_logisticsDB.ItemsInTransit.Count));
+                ImGui.PopStyleColor();
+
+                ImGui.SameLine();
+                ImGui.Text(" Waiting for Pickup:");
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                ImGui.SameLine();
+                ImGui.Text(Stringify.Quantity(_logisticsDB.ItemsWaitingPickup.Count));
+                ImGui.PopStyleColor();
+
+                ImGui.EndChild();
+            }
+
+            Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+            var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
+            var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
+            var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
+            if(ImGui.BeginChild("ColonyLogistics1", firstChildSize, true))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Imports");
+                ImGui.PopStyleColor();
+                ImGui.Separator();
+
+                if(ImGui.BeginTable("LogisticsImportsTable", 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                {
+                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1f);
+                    ImGui.TableSetupColumn("Quantity Desired", ImGuiTableColumnFlags.None, 1f);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.25f);
+                    ImGui.TableHeadersRow();
+
+                    foreach(var (cargoable, trade) in _logisticsDB.ListedItems)
+                    {
+                        // Greater than zero is for exports
+                        if(trade.count >= 0) continue;
+
+                        ImGui.TableNextColumn();
+                        ImGui.Text(cargoable.Name);
+                        ImGui.TableNextColumn();
+                        ImGui.Text(Stringify.Quantity(trade.count * -1)); // display as a positive number
+                        ImGui.TableNextColumn();
+                        if(ImGui.SmallButton(">"))
+                        {
+                            // TODO: move the item off the listed items
+                        }
+                    }
+
+                    ImGui.EndTable();
+                }
+
+                ImGui.EndChild();
+            }
+            ImGui.SameLine();
+            if(ImGui.BeginChild("ColonyLogistics2", secondChildSize, true))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Goods Available to Import or Export");
+                ImGui.PopStyleColor();
+                ImGui.Separator();
+
+                if(ImGui.BeginTable("LogisticsAvailableItemsTable", 4, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                {
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.25f);
+                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1f);
+                    ImGui.TableSetupColumn("In Local Storage", ImGuiTableColumnFlags.None, 1f);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.25f);
+                    ImGui.TableHeadersRow();
+
+                    bool hasCapacityForMore = _logisticsDB.Capacity > _logisticsDB.ListedItems.Count;
+                    // FIXME: this should show every item and component in the game? if so, it should
+                    // allow the player to filter the list by searching
+                    foreach (var typeStore in _displayedResources)
+                    {
+                        CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
+                        var stypeID = typeStore.Key;
+                        var stypeName = stype.Name;
+                        foreach (var item in _changes)
+                        {
+                            var typeID = item.Key.CargoTypeID;
+                            if(_displayedResources.ContainsKey(typeID))
+                            {
+                                if(!_displayedResources[typeID].ContainsKey(item.Key))
+                                    _displayedResources[typeID].Add(item.Key, item.Value);
+                                else
+                                    _displayedResources[typeID][item.Key] = item.Value;
+                            }
+                            else
+                                {//this base cannot store this item.
+                                }
+                        }
+
+                        foreach (var kvp in typeStore.Value)
+                        {
+                            var ctype = kvp.Key;
+                            var cname = ctype.Name;
+                            var itemsStored = 0;
+                            if(_stores[stypeID].Cargoables.ContainsKey(ctype.ID))
+                                itemsStored = (int)_stores[stypeID].CurrentStoreInUnits[ctype.ID];
+                            var volumePerItem = ctype.VolumePerUnit;
+
+                            ImGui.TableNextColumn();
+                            if(!hasCapacityForMore)
+                                ImGui.BeginDisabled();
+                            if(ImGui.SmallButton("<"))
+                            {
+
+                            }
+                            if(!hasCapacityForMore)
+                                ImGui.EndDisabled();
+
+                            ImGui.TableNextColumn();
+                            ImGui.Text(cname);
+
+                            ImGui.TableNextColumn();
+                            ImGui.Text(Stringify.Number(itemsStored, "#,###"));
+
+                            ImGui.TableNextColumn();
+                            if(!hasCapacityForMore)
+                                ImGui.BeginDisabled();
+                            if(ImGui.SmallButton(">"))
+                            {
+
+                            }
+                            if(!hasCapacityForMore)
+                                ImGui.EndDisabled();
+                        }
+                    }
+
+                    ImGui.EndTable();
+                }
+
+                ImGui.EndChild();
+            }
+            ImGui.SameLine();
+            if(ImGui.BeginChild("ColonyLogistics3", thirdChildSize, true))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Exports");
+                ImGui.PopStyleColor();
+                ImGui.Separator();
+
+                if(ImGui.BeginTable("LogisticsImportsTable", 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                {
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.25f);
+                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1f);
+                    ImGui.TableSetupColumn("Quantity Available", ImGuiTableColumnFlags.None, 1f);
+                    ImGui.TableHeadersRow();
+
+                    foreach(var (cargoable, trade) in _logisticsDB.ListedItems)
+                    {
+                        // Less than zero is for imports
+                        if(trade.count < 0) continue;
+
+                        ImGui.TableNextColumn();
+                        if(ImGui.SmallButton("<"))
+                        {
+                            // TODO: move the item off the listed items
+                        }
+                        ImGui.TableNextColumn();
+                        ImGui.Text(cargoable.Name);
+                        ImGui.TableNextColumn();
+                        ImGui.Text(Stringify.Quantity(trade.count));
+                    }
+
+                    ImGui.EndTable();
+                }
+
+                ImGui.EndChild();
+            }
+
+            /*
             if (ImGui.BeginChild("Colony Logistics Base"))
             {
                 if(ImGui.Button("Disable this entity as an importer/exporter"))
@@ -218,6 +407,7 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.EndChild();
             }
+            */
         }
 
         private void DisplayDisabledMessage()
