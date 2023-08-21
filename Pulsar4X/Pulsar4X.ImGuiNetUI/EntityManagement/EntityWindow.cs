@@ -175,7 +175,10 @@ namespace Pulsar4X.SDL2UI
                     Entity parent = Entity.GetDataBlob<PositionDB>().Parent;
                     if(parent != null)
                     {
-                        ImGui.Text("Orbiting: ");
+                        if(Entity.HasDataBlob<WarpMovingDB>())
+                            ImGui.Text("Warping");
+                        else
+                            ImGui.Text("Orbiting: ");
                         ImGui.SameLine();
                         if(ImGui.SmallButton(parent.GetName(_uiState.Faction.Guid)))
                         {
