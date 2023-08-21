@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
         private static ComponentDesign _cargoHold;
         private static ComponentDesign _cargoCompartment;
         private static ComponentDesign _shipYard;
-        private static ComponentDesign _logiOffic;
+        private static ComponentDesign _logiOffice;
         private static ComponentDesign _missileTube;
         private static ComponentDesign _ordnanceStore;
         private static ShipDesign _defaultShipDesign;
@@ -543,15 +543,15 @@ namespace Pulsar4X.ECSLib
         }
         public static ComponentDesign LogisticsOffice(Entity faction)
         {
-            if (_logiOffic != null)
-                return _logiOffic;
+            if (_logiOffice != null)
+                return _logiOffice;
             ComponentDesigner logofficeDesigner;
             ComponentTemplateSD logofficeSD = StaticRefLib.StaticData.ComponentTemplates[new Guid("5B5034C1-8DA1-4645-8F5C-A52B65BB8369")];
             logofficeDesigner = new ComponentDesigner(logofficeSD, faction.GetDataBlob<FactionTechDB>());
             logofficeDesigner.Name = "Logistics Office";
-            _logiOffic = logofficeDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_logiOffic.TechID);
-            return _logiOffic;
+            _logiOffice = logofficeDesigner.CreateDesign(faction);
+            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_logiOffice.TechID);
+            return _logiOffice;
         }
         public static ComponentDesign DefaultThrusterDesign(Game game, Entity faction)
         {
