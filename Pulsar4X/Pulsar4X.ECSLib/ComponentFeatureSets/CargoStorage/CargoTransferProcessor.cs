@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
 
         public TimeSpan RunFrequency
         {
-            get { return TimeSpan.FromHours(1); }
+            get { return TimeSpan.FromMinutes(1); }
         }
 
         public TimeSpan FirstRunOffset => TimeSpan.FromHours(0);
@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
             CargoTransferDB transferDB = entity.GetDataBlob<CargoTransferDB>();
-            
+            SetTransferRate(entity, transferDB);
             for (int i = 0; i < transferDB.ItemsLeftToTransfer.Count; i++)
             {
                 (ICargoable item, long amount) itemsToXfer = transferDB.ItemsLeftToTransfer[i];
@@ -70,13 +70,6 @@ namespace Pulsar4X.ECSLib
             
         }
 
-        internal static void FirstRun(Entity entity)
-        {
-            CargoTransferDB transferDB = entity.GetDataBlob<CargoTransferDB>();
-            double dv_mps = CalcDVDifference_m(entity, transferDB.CargoToEntity);    
-            var rate = CalcTransferRate(dv_mps, transferDB.CargoFromDB, transferDB.CargoToDB);
-            transferDB.TransferRateInKG = rate;
-        }
 
 
         /// <summary>
@@ -178,7 +171,8 @@ namespace Pulsar4X.ECSLib
             }
 
             var hohmann = OrbitalMath.Hohmann(sgp, r1, r2);
-            return dvDif = hohmann[0].deltaV.Length() + hohmann[1].deltaV.Length();
+            dvDif = hohmann[0].deltaV.Length() + hohmann[1].deltaV.Length();
+            return dvDif;
 
 
         }
@@ -249,6 +243,14 @@ namespace Pulsar4X.ECSLib
             return (int)transferRate;
         }
 
+        internal static void SetTransferRate(Entity entity, CargoTransferDB transferDB)
+        {
+            double dv_mps = CalcDVDifference_m(entity, transferDB.CargoToEntity);    
+            var rate = CalcTransferRate(dv_mps, transferDB.CargoFromDB, transferDB.CargoToDB);
+            transferDB.TransferRateInKG = rate;
+        }
+
+        
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             List<Entity> entitysWithCargoTransfers = manager.GetAllEntitiesWithDataBlob<CargoTransferDB>();

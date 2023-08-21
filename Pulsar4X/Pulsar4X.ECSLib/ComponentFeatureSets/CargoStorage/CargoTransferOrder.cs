@@ -83,7 +83,7 @@ namespace Pulsar4X.ECSLib
                 _cargoTransferDB.OrderedToTransfer = ItemICargoablesToTransfer;
 
                 EntityCommanding.Manager.SetDataBlob(EntityCommanding.ID, _cargoTransferDB);
-                CargoTransferProcessor.FirstRun(EntityCommanding);
+                CargoTransferProcessor.SetTransferRate(EntityCommanding, _cargoTransferDB);
                 IsRunning = true;
             }
         }

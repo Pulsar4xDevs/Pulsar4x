@@ -224,10 +224,12 @@ namespace Pulsar4X.ECSLib
             colonyEntity.AddComponent(_sensorInstalation);
             colonyEntity.AddComponent(ShipYard(factionEntity));
             colonyEntity.AddComponent(LogisticsOffice(factionEntity));
+            
             colonyEntity.AddComponent(_ordnanceStore, 10);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
             marsColony.AddComponent(_cargoInstalation);
+            marsColony.AddComponent(LogisticsOffice(factionEntity));
             ReCalcProcessor.ReCalcAbilities(marsColony);
 
             var earthCargo = colonyEntity.GetDataBlob<VolumeStorageDB>();
@@ -245,11 +247,11 @@ namespace Pulsar4X.ECSLib
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, stainless, 1000);
             CargoTransferProcessor.AddCargoItems(colonyEntity, _missile, 100);
             CargoTransferProcessor.AddCargoItems(colonyEntity, _merlin, 5);
-            LogiBaseDB earthlogiBase = new LogiBaseDB();
+            LogiBaseDB earthlogiBase = colonyEntity.GetDataBlob<LogiBaseDB>();
             earthlogiBase.ListedItems.Add(iron, (1000, 1));
             colonyEntity.SetDataBlob(earthlogiBase);
 
-            LogiBaseDB marslogiBase = new LogiBaseDB();
+            LogiBaseDB marslogiBase = marsColony.GetDataBlob<LogiBaseDB>();
             marslogiBase.ListedItems.Add(iron, (-1000, 1));
             marsColony.SetDataBlob(marslogiBase);       
 
