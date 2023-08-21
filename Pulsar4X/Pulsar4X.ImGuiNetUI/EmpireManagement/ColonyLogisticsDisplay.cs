@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -20,7 +21,7 @@ namespace Pulsar4X.SDL2UI
         private Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedResources;
         private EntityState _entityState;
         private Entity _selectedEntity;
-        private LogiBaseDB _tradebaseDB;
+        private LogiBaseDB _logisticsDB;
 
         private VolumeStorageDB _volStorageDB;
 
@@ -63,19 +64,16 @@ namespace Pulsar4X.SDL2UI
             _selectedEntity = _entityState.Entity;
             if (entityState.DataBlobs.ContainsKey(typeof(OrderableDB)))
             {
-                if(_selectedEntity.HasDataBlob<LogiBaseDB>())
-                    _tradebaseDB = _selectedEntity.GetDataBlob<LogiBaseDB>();
-                else{_tradebaseDB = null;}
-                if(_selectedEntity.HasDataBlob<VolumeStorageDB>())
-                    _volStorageDB = _selectedEntity.GetDataBlob<VolumeStorageDB>();
-                else{_volStorageDB = null;}
+                _selectedEntity.TryGetDatablob<LogiBaseDB>(out _logisticsDB);
+                _selectedEntity.TryGetDatablob<VolumeStorageDB>(out _volStorageDB);
+
                 Update();
             }
         }
 
         public void Update()
         {
-            if (_volStorageDB == null) //if this colony does not have any storage.
+            if (_volStorageDB == null || _logisticsDB == null) //if this colony does not have any storage.
                 return;
 
             _changes = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
@@ -109,129 +107,127 @@ namespace Pulsar4X.SDL2UI
 
         public void Display()
         {
+            if(_volStorageDB == null || _logisticsDB == null)
+                DisplayDisabledMessage();
+
             if (ImGui.BeginChild("Colony Logistics Base"))
             {
-                if(!_selectedEntity.HasDataBlob<LogiBaseDB>())
+                if(ImGui.Button("Disable this entity as an importer/exporter"))
                 {
-                    /*
-                    if(ImGui.Button("Set this entity as an importer/exporter"))
-                    {
-                        SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.AddLogiBaseDB);
-                        _tradebaseDB = _selectedEntity.GetDataBlob<LogiBaseDB>();
-                    }*/
+                    SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.RemoveLogiBaseDB);
                 }
-                else
+                ImGui.Columns(4);
+                foreach (var typeStore in _displayedResources)
                 {
-                    if(ImGui.Button("Disable this entity as an importer/exporter"))
+                    CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
+                    var stypeID = typeStore.Key;
+                    var stypeName = stype.Name;
+                    foreach (var item in _changes)
                     {
-                        SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.RemoveLogiBaseDB);
-                    }
-                    ImGui.Columns(4);
-                    foreach (var typeStore in _displayedResources)
-                    {
-                        CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
-                        var stypeID = typeStore.Key;
-                        var stypeName = stype.Name;
-                        foreach (var item in _changes)
+                        var typeID = item.Key.CargoTypeID;
+                        if(_displayedResources.ContainsKey(typeID))
                         {
-                            var typeID = item.Key.CargoTypeID;
-                            if(_displayedResources.ContainsKey(typeID))
-                            {
-                                if(!_displayedResources[typeID].ContainsKey(item.Key))
-                                    _displayedResources[typeID].Add(item.Key, item.Value);
-                                else
-                                    _displayedResources[typeID][item.Key] = item.Value;
-                            }
+                            if(!_displayedResources[typeID].ContainsKey(item.Key))
+                                _displayedResources[typeID].Add(item.Key, item.Value);
                             else
-                                {//this base cannot store this item.
-                                }
+                                _displayedResources[typeID][item.Key] = item.Value;
                         }
-
-                        foreach (var kvp in typeStore.Value)
-                        {
-                            var ctype = kvp.Key;
-                            var cname = ctype.Name;
-                            var itemsStored = 0;
-                            if(_stores[stypeID].Cargoables.ContainsKey(ctype.ID)) 
-                                itemsStored = (int)_stores[stypeID].CurrentStoreInUnits[ctype.ID];
-                            var volumePerItem = ctype.VolumePerUnit;
-                            ImGui.Text(cname);
-                            ImGui.NextColumn();
-                            ImGui.Text(Stringify.Number(itemsStored, "#,###"));
-                            ImGui.NextColumn();
-                            if(ImGui.SmallButton("+##"+ctype.ID))
-                            {
-                                if(!_changes.ContainsKey(ctype))
-                                    _changes.Add(ctype, (1, 1));
-                                else
-                                { 
-                                    _changes[ctype] = (_changes[ctype].count + 1, 1);
-                                }
+                        else
+                            {//this base cannot store this item.
                             }
-                            ImGui.SameLine();
-                            if(ImGui.SmallButton("-##"+ctype.ID))
-                            {
-                                if(!_changes.ContainsKey(ctype))
-                                    _changes.Add(ctype, (-1, 1));
-                                else
-                                { 
-                                    _changes[ctype] = (_changes[ctype].count - 1, 1);
-                                }
-                            }
-                            if(_changes.ContainsKey(ctype) && _changes[ctype].count == 0)
-                                    {_changes.Remove(ctype);}
-                            ImGui.NextColumn();
-                            if(_tradebaseDB.ListedItems.ContainsKey(ctype))
-                            {
-                                int total = _tradebaseDB.ListedItems[ctype].count;
-                                
-                                if(_changes.ContainsKey(ctype))
-                                {
-                                    total += _changes[ctype].count;   
-                                }
-                                ImGui.Text(Stringify.Number(total));
-                            }
-                            else if(_changes.ContainsKey(ctype))
-                            {
-                                double total = _changes[ctype].count;
-                                ImGui.Text(Stringify.Number(total));
-                            }
-
-                            ImGui.NextColumn();
-                        }
                     }
 
-                    /*
-                    if(ImGui.InputTextWithHint("Add Demand", _demandHint, _demandBuff, 32 ))
+                    foreach (var kvp in typeStore.Value)
                     {
-
-                    }
-                    */
-                    //ImGui.BeginCombo()
-                    if(ImGui.Combo("Add Demand", ref _allResourceIndex, _allResourceNames, 10))
-                    {
-                        var resource = _allResources[_allResourceIndex];
-                        if(!_changes.ContainsKey(resource))
-                            _changes.Add(resource, (-1, 1));
-                    }
-
-                    if(_changes.Count > 0)
-                    {
-                        if(ImGui.Button("Make it so"))
-                        {
-                            SetLogisticsOrder.CreateCommand_SetBaseItems(_selectedEntity, _changes);
-                        }
-                    }
-                    ImGui.Columns(2);
-                    foreach (var item in _tradebaseDB.ListedItems)
-                    {
-                        ImGui.Text(item.Key.Name);
+                        var ctype = kvp.Key;
+                        var cname = ctype.Name;
+                        var itemsStored = 0;
+                        if(_stores[stypeID].Cargoables.ContainsKey(ctype.ID)) 
+                            itemsStored = (int)_stores[stypeID].CurrentStoreInUnits[ctype.ID];
+                        var volumePerItem = ctype.VolumePerUnit;
+                        ImGui.Text(cname);
                         ImGui.NextColumn();
-                        ImGui.Text(Stringify.Number(item.Value.count));
+                        ImGui.Text(Stringify.Number(itemsStored, "#,###"));
+                        ImGui.NextColumn();
+                        if(ImGui.SmallButton("+##"+ctype.ID))
+                        {
+                            if(!_changes.ContainsKey(ctype))
+                                _changes.Add(ctype, (1, 1));
+                            else
+                            { 
+                                _changes[ctype] = (_changes[ctype].count + 1, 1);
+                            }
+                        }
+                        ImGui.SameLine();
+                        if(ImGui.SmallButton("-##"+ctype.ID))
+                        {
+                            if(!_changes.ContainsKey(ctype))
+                                _changes.Add(ctype, (-1, 1));
+                            else
+                            { 
+                                _changes[ctype] = (_changes[ctype].count - 1, 1);
+                            }
+                        }
+                        if(_changes.ContainsKey(ctype) && _changes[ctype].count == 0)
+                                {_changes.Remove(ctype);}
+                        ImGui.NextColumn();
+                        if(_logisticsDB.ListedItems.ContainsKey(ctype))
+                        {
+                            int total = _logisticsDB.ListedItems[ctype].count;
+                            
+                            if(_changes.ContainsKey(ctype))
+                            {
+                                total += _changes[ctype].count;
+                            }
+                            ImGui.Text(Stringify.Number(total));
+                        }
+                        else if(_changes.ContainsKey(ctype))
+                        {
+                            double total = _changes[ctype].count;
+                            ImGui.Text(Stringify.Number(total));
+                        }
+
                         ImGui.NextColumn();
                     }
-                    ImGui.Columns(1);
                 }
+
+                //ImGui.BeginCombo()
+                if(ImGui.Combo("Add Demand", ref _allResourceIndex, _allResourceNames, 10))
+                {
+                    var resource = _allResources[_allResourceIndex];
+                    if(!_changes.ContainsKey(resource))
+                        _changes.Add(resource, (-1, 1));
+                }
+
+                if(_changes.Count > 0)
+                {
+                    if(ImGui.Button("Make it so"))
+                    {
+                        SetLogisticsOrder.CreateCommand_SetBaseItems(_selectedEntity, _changes);
+                    }
+                }
+                ImGui.Columns(2);
+                foreach (var item in _logisticsDB.ListedItems)
+                {
+                    ImGui.Text(item.Key.Name);
+                    ImGui.NextColumn();
+                    ImGui.Text(Stringify.Number(item.Value.count));
+                    ImGui.NextColumn();
+                }
+                ImGui.Columns(1);
+
+                ImGui.EndChild();
+            }
+        }
+
+        private void DisplayDisabledMessage()
+        {
+            Vector2 topSize = ImGui.GetContentRegionAvail();
+            if(ImGui.BeginChild("LogisticsDisabled", new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
+                ImGui.Text("You need an Installation with a Logistics component to enable logistics on this colony.");
+                ImGui.PopStyleColor();
 
                 ImGui.EndChild();
             }
