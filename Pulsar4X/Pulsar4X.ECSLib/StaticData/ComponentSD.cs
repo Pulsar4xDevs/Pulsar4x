@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
 
         public string MassFormula;
         public string VolumeFormula;
-        public string HTKFormula;       
+        public string HTKFormula;
         public string CrewReqFormula;
         public Dictionary<Guid,string> ResourceCostFormula; //mins, mats and components can also be included here.
         public string ResearchCostFormula;
@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
     {
         public string Name;
         public string DescriptionFormula;
-        public string Unit;
+        public string Units;
         public GuiHint GuiHint; //if AttributeFormula uses AbilityArgs(), this should be none!
 
         public string GuiIsEnabledFormula; //if this attribute should be displayed/enabled

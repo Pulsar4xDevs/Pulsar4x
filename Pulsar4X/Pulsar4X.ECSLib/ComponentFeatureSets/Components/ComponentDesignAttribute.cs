@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
         private ComponentTemplateAttributeSD _templateSD;
         public string Name { get { return _templateSD.Name; } }
 
-        public string Unit { get { return _templateSD.Unit; } }
+        public string Unit { get { return _templateSD.Units; } }
         public GuiHint GuiHint { get { return _templateSD.GuiHint; } }
         public bool IsEnabled {
             get
