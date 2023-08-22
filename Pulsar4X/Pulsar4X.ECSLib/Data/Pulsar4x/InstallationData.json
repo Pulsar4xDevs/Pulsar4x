@@ -578,7 +578,7 @@
                 "Entries": []
               },
               "AttributeFormula": "Ability('Warehouse Size') * 0.01"
-            },                      
+            },
             {
               "Name": "Cargo Transfer Rate",
               "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
@@ -658,12 +658,14 @@
             },
             {
               "Name": "Tank Volume",
+              "Units": "m^3",
               "DescriptionFormula": "'The volume of this tank.'",
               "GuiHint": "GuiTextDisplay",
               "AttributeFormula": "(4 / 3) * Pi * Pow(Ability('Tank Radius'), 3)"
             },
             {
               "Name": "Dry Weight",
+              "Units": "kg",
               "DescriptionFormula": "'The weight of the empty tank'",
               "GuiHint": "GuiTextDisplay",
               "AttributeFormula": "(4 * Pi * Ability('Tank Radius') * Ability('Tank Radius')) * 23.5 "
