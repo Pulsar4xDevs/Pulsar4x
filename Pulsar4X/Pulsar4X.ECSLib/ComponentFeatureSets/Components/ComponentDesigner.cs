@@ -290,23 +290,25 @@ namespace Pulsar4X.ECSLib
             
             //set up the research
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
-            TechSD tech = new TechSD();
-            tech.ID = Guid.NewGuid();
-            tech.Name = _design.Name + " Design Research";
-            tech.Description = "Research into building " + _design.Name;
-            tech.MaxLevel = 1;
-            tech.CostFormula = _design.ResearchCostValue.ToString();
-
+            TechSD tech = new TechSD()
+            {
+                ID = Guid.NewGuid(),
+                Name = _design.Name + " Design Research",
+                Description = "Research into building " + _design.Name,
+                MaxLevel = 1,
+                CostFormula = _design.ResearchCostValue.ToString(),
+                Faction = factionEntity,
+                Design = _design
+            };
 
             _design.TechID = tech.ID;
             factionTech.MakeResearchable(tech); //add it to researchable techs 
-            
+
             SetAttributes();
 
             faction.InternalComponentDesigns[_design.ID] = _design;
-            faction.IndustryDesigns[_design.ID] = _design;
+            //faction.IndustryDesigns[_design.ID] = _design;
             return _design;
-            
         }
 
 

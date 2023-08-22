@@ -116,6 +116,12 @@ namespace Pulsar4X.ECSLib
                     if (factionTechs.GetLevelforTech(project) > currentLvl)
                     {
                         scientist.ProjectQueue.RemoveAt(0);
+
+                        if(project.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfo) && project.Design != null)
+                        {
+                            factionInfo.IndustryDesigns[project.ID] = project.Design;
+                        }
+
                         if(cycleProject)
                             scientist.ProjectQueue.Add((project.ID, true));
                     }

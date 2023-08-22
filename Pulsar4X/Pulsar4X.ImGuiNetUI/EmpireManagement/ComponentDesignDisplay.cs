@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
@@ -61,14 +62,59 @@ namespace Pulsar4X.SDL2UI
             if(!Template.HasValue) return;
 
             var windowContentSize = ImGui.GetContentRegionAvail();
-            if (ImGui.BeginChild("ComponentDesignChildWindow", windowContentSize, true))
+            if (ImGui.BeginChild("ComponentDesignChildWindow", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
             {
-
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Specifications");
+                ImGui.SameLine();
+                ImGui.Text("[?]");
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Configure the specifications for the component below.\n\n" +
+                        "Different settings will determine the statistics and capabilities\n" +
+                        "of the component.");
+                ImGui.PopStyleColor();
+                ImGui.Separator();
                 GuiDesignUI(uiState); //Part design
+
+                ImGui.EndChild();
+            }
+            ImGui.SameLine();
+
+            var position = ImGui.GetCursorPos();
+            if (ImGui.BeginChild("ComponentDesignChildWindow2", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.5f), true))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Statistics");
+                // ImGui.SameLine();
+                // ImGui.Text("[?]");
+                // if(ImGui.IsItemHovered())
+                //     ImGui.SetTooltip("Configure the specifications for the component below.\n\n" +
+                //         "Different settings will determine the statistics and capabilities\n" +
+                //         "of the component.");
+                ImGui.PopStyleColor();
+                ImGui.Separator();
+                GuiCostText(uiState); //Print cost
+
+                ImGui.EndChild();
+            }
+
+            ImGui.SetCursorPos(new Vector2(position.X, position.Y + windowContentSize.Y * 0.512f));
+            if (ImGui.BeginChild("ComponentDesignChildWindow3", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.49f), true))
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Finalize the Design");
+                // ImGui.SameLine();
+                // ImGui.Text("[?]");
+                // if(ImGui.IsItemHovered())
+                //     ImGui.SetTooltip("Configure the specifications for the component below.\n\n" +
+                //         "Different settings will determine the statistics and capabilities\n" +
+                //         "of the component.");
+                ImGui.PopStyleColor();
+                ImGui.Separator();
 
                 ImGui.Text("Name");
                 ImGui.InputText("", _nameInputBuffer, 32);
-                if (ImGui.Button("Create Design"))
+                if (ImGui.Button("Create"))
                 {
                     _componentDesigner.Name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
                     _componentDesigner.CreateDesign(uiState.Faction);
@@ -77,22 +123,19 @@ namespace Pulsar4X.SDL2UI
                     _componentDesigner = new ComponentDesigner(Template.Value, factionTech);
                 }
 
-                GuiCostText(uiState); //Print cost
                 ImGui.EndChild();
             }
         }
 
         internal void GuiDesignUI(GlobalUIState uiState) //Creates all UI elements need for designing the Component
         {
-            ImGui.Text("Component Specifications");
-            ImGui.SameLine(ImGui.GetContentRegionAvail().X - 70);
-            if (ImGui.Button("Compact"))
-            {
-                compactmod = !compactmod;
-            }
+            // FIXME: compact mode should be an option in the game settings?
+            // if (ImGui.Button("Compact"))
+            // {
+            //     compactmod = !compactmod;
+            // }
 
-
-            ImGui.NewLine();
+            //ImGui.NewLine();
 
             if (_componentDesigner != null) //Make sure comp is selected
             {
@@ -141,45 +184,82 @@ namespace Pulsar4X.SDL2UI
 
         private void GuiCostText(GlobalUIState uiState) //Prints a 2 col table with the costs of the part
         {
-            //ImGui.BeginChild("Cost");
             if (_componentDesigner != null) //If a part time is selected
             {
-                ImGui.Columns(2);
-                ImGui.BeginTabItem("Cost");
-
-                ImGui.Text("Mass");
-                ImGui.Text("Volume_km3");
-                ImGui.Text("Crew Requred");
-                ImGui.Text("Cost");
-                ImGui.Text("Research Cost");
-                ImGui.Text("Build Cost");
-                ImGui.Text("Resource Costs");
-                ImGui.NextColumn(); //Add all the cost names to col 1
-
-
-                ImGui.Text(Stringify.Mass(_componentDesigner.MassValue));
-                ImGui.Text(Stringify.Volume(_componentDesigner.VolumeM3Value));
-                ImGui.Text(_componentDesigner.CrewReqValue.ToString());
-                ImGui.Text(_componentDesigner.CreditCostValue.ToString());
-                ImGui.Text(_componentDesigner.ResearchCostValue.ToString() + " RP");
-                ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString() + " BP");
-                ImGui.NextColumn(); //Add all the price values to col 2
-
-
-                foreach (var kvp in _componentDesigner.ResourceCostValues)
+                if(ImGui.BeginTable("JobCostsTables", 2, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
                 {
-                    var resource = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);
-                    if (resource == null)
-                        resource = (ICargoable)uiState.Faction.GetDataBlob<FactionInfoDB>().IndustryDesigns[kvp.Key];
-                    var xpos = ImGui.GetCursorPosX();
-                    ImGui.SetCursorPosX(xpos + 12);
-                    ImGui.Text(resource.Name);
-                    ImGui.NextColumn();
-                    ImGui.Text(kvp.Value.ToString());
-                    ImGui.NextColumn();
+                    ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.None);
+                    ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None);
+                    ImGui.TableHeadersRow();
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Mass");
+                    ImGui.TableNextColumn();
+                    ImGui.Text(Stringify.Mass(_componentDesigner.MassValue));
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Volume");
+                    ImGui.TableNextColumn();
+                    ImGui.Text(Stringify.Volume(_componentDesigner.VolumeM3Value));
+
+                    if(_componentDesigner.CrewReqValue > 0)
+                    {
+                        ImGui.TableNextColumn();
+                        ImGui.Text("Crew Required");
+                        ImGui.TableNextColumn();
+                        ImGui.Text(_componentDesigner.CrewReqValue.ToString());
+                    }
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Cost");
+                    ImGui.TableNextColumn();
+                    ImGui.Text(_componentDesigner.CreditCostValue.ToString());
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Research Cost");
+                    ImGui.TableNextColumn();
+                    ImGui.Text(_componentDesigner.ResearchCostValue.ToString() + " RP");
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text("Production Cost");
+                    ImGui.TableNextColumn();
+                    ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString() + " IP");
+
+                    ImGui.EndTable();
+                }
+
+                ImGui.NewLine();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Resource Cost");
+                // ImGui.SameLine();
+                // ImGui.Text("[?]");
+                // if(ImGui.IsItemHovered())
+                //     ImGui.SetTooltip("Configure the specifications for the component below.\n\n" +
+                //         "Different settings will determine the statistics and capabilities\n" +
+                //         "of the component.");
+                ImGui.PopStyleColor();
+                ImGui.Separator();
+
+                if(ImGui.BeginTable("JobCostsTables", 2, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                {
+                    ImGui.TableSetupColumn("Resource", ImGuiTableColumnFlags.None);
+                    ImGui.TableSetupColumn("Quantity Needed", ImGuiTableColumnFlags.None);
+                    ImGui.TableHeadersRow();
+
+                    foreach (var kvp in _componentDesigner.ResourceCostValues)
+                    {
+                        var resource = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);
+                        if (resource == null)
+                            resource = (ICargoable)uiState.Faction.GetDataBlob<FactionInfoDB>().IndustryDesigns[kvp.Key];
+
+                        ImGui.TableNextColumn();
+                        ImGui.Text(resource.Name);
+                        ImGui.TableNextColumn();
+                        ImGui.Text(kvp.Value.ToString());
+                    }
+                    ImGui.EndTable();
                 }
             }
-            //ImGui.EndChild();
         }
 
         private void GuiHintText(ComponentDesignAttribute attribute)
@@ -315,7 +395,7 @@ namespace Pulsar4X.SDL2UI
             _listNames = Enum.GetNames(attribute.EnumType);
 
 
-            ImGui.TextWrapped(attribute.Value.ToString());
+            //ImGui.TextWrapped(attribute.Value.ToString());
 
             if (ImGui.Combo("Select", ref attribute.ListSelection, _listNames, (int)attribute.MaxValue + 1))
             {
