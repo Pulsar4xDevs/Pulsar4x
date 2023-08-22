@@ -37,8 +37,8 @@ namespace Pulsar4X.SDL2UI
             {
                 Picture = _uiState.Img_DesComponent(),
                 TooltipText = "Design a new component or facility",
-                OnClick = new Action(ComponentDesignUI.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(ComponentDesignUI.GetInstance().GetActive)
+                OnClick = new Action(ComponentDesignWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(ComponentDesignWindow.GetInstance().GetActive)
                 //Opens up the component design menu
             };
             ToolButtons.Add(btn);

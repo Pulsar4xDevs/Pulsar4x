@@ -7,24 +7,23 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
 {
-    public class ComponentDesignUI : PulsarGuiWindow
+    public class ComponentDesignWindow : PulsarGuiWindow
     {
-
         private static List<ComponentTemplateSD> templates = new();
-        private ComponentDesignUI() { }
+        private ComponentDesignWindow() { }
 
-        internal static ComponentDesignUI GetInstance()
+        internal static ComponentDesignWindow GetInstance()
         {
-            ComponentDesignUI thisitem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(ComponentDesignUI)))
+            ComponentDesignWindow thisitem;
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(ComponentDesignWindow)))
             {
-                thisitem = new ComponentDesignUI();
+                thisitem = new ComponentDesignWindow();
 
                 // FIXME: doing this here is efficient but it will never update the list if new templates are available
                 templates = StaticRefLib.StaticData.ComponentTemplates.Values.ToList();
                 templates.Sort((a, b) => a.Name.CompareTo(b.Name));
             }
-            thisitem = (ComponentDesignUI)_uiState.LoadedWindows[typeof(ComponentDesignUI)];
+            thisitem = (ComponentDesignWindow)_uiState.LoadedWindows[typeof(ComponentDesignWindow)];
 
             return thisitem;
         }

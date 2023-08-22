@@ -9,11 +9,22 @@ using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.SDL2UI
 {
+
+    /// <summary>
+    /// If no component template is selected what should we show?
+    /// </summary>
+    public enum NoTemplateState
+    {
+        PleaseSelect,
+        Created
+    }
+
     public sealed class ComponentDesignDisplay
     {
         private static ComponentDesignDisplay instance = null;
         private static readonly object padlock = new object();
 
+        private NoTemplateState NoTemplateState = NoTemplateState.PleaseSelect;
         private ComponentDesigner _componentDesigner;
         [CanBeNull]
         public ComponentTemplateSD? Template { get; private set;}
@@ -26,6 +37,7 @@ namespace Pulsar4X.SDL2UI
         private static int _techSelectedIndex = -1;
         //private TechSD[] _techSDs;
         private static string[] _listNames;
+
 
         private ComponentDesignDisplay() { }
 
@@ -55,11 +67,25 @@ namespace Pulsar4X.SDL2UI
             }
 
             _componentDesigner = new ComponentDesigner(Template.Value, factionTech);
+
+            NoTemplateState = NoTemplateState.Created;
         }
 
         internal void Display(GlobalUIState uiState)
         {
-            if(!Template.HasValue) return;
+            if(!Template.HasValue)
+            {
+                switch (NoTemplateState)
+                {
+                    case NoTemplateState.PleaseSelect:
+                        DisplayPleaseSelectTemplate();
+                        break;
+                    case NoTemplateState.Created:
+                        DisplayCreatedTemplate();
+                        break;
+                }
+                return;
+            }
 
             var windowContentSize = ImGui.GetContentRegionAvail();
             if (ImGui.BeginChild("ComponentDesignChildWindow", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
@@ -116,11 +142,19 @@ namespace Pulsar4X.SDL2UI
                 ImGui.InputText("", _nameInputBuffer, 32);
                 if (ImGui.Button("Create"))
                 {
-                    _componentDesigner.Name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
-                    _componentDesigner.CreateDesign(uiState.Faction);
-                    //we reset the designer here, so we don't end up trying to edit the precious design. 
-                    var factionTech = uiState.Faction.GetDataBlob<FactionTechDB>();
-                    _componentDesigner = new ComponentDesigner(Template.Value, factionTech);
+                    string name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
+                    if(name.IsNotNullOrEmpty())
+                    {
+                        _componentDesigner.Name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
+                        _componentDesigner.CreateDesign(uiState.Faction);
+                        //we reset the designer here, so we don't end up trying to edit the precious design. 
+                        var factionTech = uiState.Faction.GetDataBlob<FactionTechDB>();
+                        _componentDesigner = new ComponentDesigner(Template.Value, factionTech);
+
+                        NoTemplateState = NoTemplateState.Created;
+                        Template = null;
+                        _nameInputBuffer = new byte[128];
+                    }
                 }
 
                 ImGui.EndChild();
@@ -477,6 +511,34 @@ namespace Pulsar4X.SDL2UI
                 var key = _listNames[attribute.ListSelection];
                 var value = attribute.GuidDictionary[key];
                 attribute.SetValueFromDictionaryExpression(_listNames[attribute.ListSelection]);
+            }
+        }
+
+        private void DisplayPleaseSelectTemplate()
+        {
+            var windowContentSize = ImGui.GetContentRegionAvail();
+            if (ImGui.BeginChild("ComponentDesignSelectTemplate", windowContentSize, false))
+            {
+                string message = "Please select a template on the left.";
+                var size = ImGui.GetContentRegionAvail();
+                var textSize = ImGui.CalcTextSize(message);
+                ImGui.SetCursorPos(new Vector2(size.X / 2 - textSize.X / 2, size.Y / 2 - textSize.Y / 2));
+                ImGui.Text(message);
+                ImGui.EndChild();
+            }
+        }
+
+        private void DisplayCreatedTemplate()
+        {
+            var windowContentSize = ImGui.GetContentRegionAvail();
+            if (ImGui.BeginChild("ComponentDesignCreated", windowContentSize, false))
+            {
+                string message = "Design has been created, it will now be availble to Research.";
+                var size = ImGui.GetContentRegionAvail();
+                var textSize = ImGui.CalcTextSize(message);
+                ImGui.SetCursorPos(new Vector2(size.X / 2 - textSize.X / 2, size.Y / 2 - textSize.Y / 2));
+                ImGui.Text(message);
+                ImGui.EndChild();
             }
         }
     }
