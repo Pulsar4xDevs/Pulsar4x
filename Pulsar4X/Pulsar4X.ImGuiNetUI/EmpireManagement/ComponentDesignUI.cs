@@ -1,25 +1,17 @@
 using System;
-using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using ImGuiNET;
-using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
-using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
     public class ComponentDesignUI : PulsarGuiWindow
     {
-        // private int _designType;
-        // private string[] _designTypes;
-        // private List<ComponentTemplateSD> _designables;
-        // private byte[] _nameInputBuffer = new byte[128];
 
-        private ComponentDesignUI()
-        {
-            //_flags = ImGuiWindowFlags.NoCollapse;
-        }
+        private static List<ComponentTemplateSD> templates = new();
+        private ComponentDesignUI() { }
 
         internal static ComponentDesignUI GetInstance()
         {
@@ -27,6 +19,8 @@ namespace Pulsar4X.SDL2UI
             if (!_uiState.LoadedWindows.ContainsKey(typeof(ComponentDesignUI)))
             {
                 thisitem = new ComponentDesignUI();
+                templates = StaticRefLib.StaticData.ComponentTemplates.Values.ToList();
+                templates.Sort((a, b) => a.Name.CompareTo(b.Name));
             }
             thisitem = (ComponentDesignUI)_uiState.LoadedWindows[typeof(ComponentDesignUI)];
 
@@ -55,17 +49,17 @@ namespace Pulsar4X.SDL2UI
                     ImGui.PopStyleColor();
                     ImGui.Separator();
 
-                    foreach(var template in StaticRefLib.StaticData.ComponentTemplates.Values)
+                    foreach(var template in templates)
                     {
                         var selected = ComponentDesignDisplay.GetInstance().Template?.Name.Equals(template.Name);
 
                         if(selected.HasValue && selected.Value)
                         {
-                            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.75f, 0.25f, 0.25f, 1f));
+                            ImGui.PushStyleColor(ImGuiCol.Button, Styles.SelectedColor);
                         }
                         else
                         {
-                            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 0, 0, 0f));
+                            ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
                         }
                         if(ImGui.SmallButton(template.Name))
                         {
