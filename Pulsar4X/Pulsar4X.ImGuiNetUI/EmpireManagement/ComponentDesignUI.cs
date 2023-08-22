@@ -19,6 +19,8 @@ namespace Pulsar4X.SDL2UI
             if (!_uiState.LoadedWindows.ContainsKey(typeof(ComponentDesignUI)))
             {
                 thisitem = new ComponentDesignUI();
+
+                // FIXME: doing this here is efficient but it will never update the list if new templates are available
                 templates = StaticRefLib.StaticData.ComponentTemplates.Values.ToList();
                 templates.Sort((a, b) => a.Name.CompareTo(b.Name));
             }

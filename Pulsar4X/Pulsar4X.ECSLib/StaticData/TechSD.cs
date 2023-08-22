@@ -37,5 +37,8 @@ namespace Pulsar4X.ECSLib
         public ResearchCategories Category;
         public Dictionary<Guid,int> Requirements;
         public string CostFormula;
+
+        public Entity Faction;
+        public ComponentDesign Design;
     }
 }
