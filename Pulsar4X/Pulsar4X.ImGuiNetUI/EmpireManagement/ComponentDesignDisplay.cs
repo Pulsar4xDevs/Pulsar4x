@@ -1,46 +1,50 @@
 using System;
-using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
-using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
-    public class PartDesignUI : NonUniquePulsarGuiWindow
+    public sealed class ComponentDesignDisplay
     {
+        private static ComponentDesignDisplay instance = null;
+        private static readonly object padlock = new object();
+
         private ComponentDesigner _componentDesigner;
-        private int _designType;
+        [CanBeNull]
+        public ComponentTemplateSD? Template { get; private set;}
         private string[] _designTypes;
         private ComponentTemplateSD[] _designables;
         private static byte[] _nameInputBuffer = new byte[128];
         public static bool compactmod = false;
-        string _windowname;
-
-
         private static TechSD[] _techSDs;
         private static string[] _techNames;
         private static int _techSelectedIndex = -1;
-
         //private TechSD[] _techSDs;
         private static string[] _listNames;
 
-        //new internal static GlobalUIState _uiState;
+        private ComponentDesignDisplay() { }
 
-        public PartDesignUI(int designType, GlobalUIState state)
+        internal static ComponentDesignDisplay GetInstance() {
+            lock(padlock)
+            {
+                if(instance == null)
+                {
+                    instance = new ComponentDesignDisplay();
+                }
+            }
+
+            return instance;
+        }
+
+        public void SetTemplate(ComponentTemplateSD template, GlobalUIState state)
         {
+            Template = template;
 
-            _designType = designType;
-            _state = state;
-            SetName("Part Designer " + _designType.ToString());
-            //_flags = ImGuiWindowFlags.Popup;
-
-            var factionTech = _state.Faction.GetDataBlob<FactionTechDB>();
-            var staticdata = StaticRefLib.StaticData;
-            IsActive = true;
+            var factionTech = state.Faction.GetDataBlob<FactionTechDB>();
             _designables = StaticRefLib.StaticData.ComponentTemplates.Values.ToArray();
             int count = _designables.Length;
             _designTypes = new string[count];
@@ -49,13 +53,36 @@ namespace Pulsar4X.SDL2UI
                 _designTypes[i] = _designables[i].Name;
             }
 
-            _componentDesigner = new ComponentDesigner(_designables[_designType], factionTech);
-            _windowname = _componentDesigner.Name;
-            StartDisplay();
-
+            _componentDesigner = new ComponentDesigner(Template.Value, factionTech);
         }
 
-        internal static void GuiDesignUI(ComponentDesigner componentDesigner ) //Creates all UI elements need for designing the Component
+        internal void Display(GlobalUIState uiState)
+        {
+            if(!Template.HasValue) return;
+
+            var windowContentSize = ImGui.GetContentRegionAvail();
+            if (ImGui.BeginChild("ComponentDesignChildWindow", windowContentSize, true))
+            {
+
+                GuiDesignUI(uiState); //Part design
+
+                ImGui.Text("Name");
+                ImGui.InputText("", _nameInputBuffer, 32);
+                if (ImGui.Button("Create Design"))
+                {
+                    _componentDesigner.Name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
+                    _componentDesigner.CreateDesign(uiState.Faction);
+                    //we reset the designer here, so we don't end up trying to edit the precious design. 
+                    var factionTech = uiState.Faction.GetDataBlob<FactionTechDB>();
+                    _componentDesigner = new ComponentDesigner(Template.Value, factionTech);
+                }
+
+                GuiCostText(uiState); //Print cost
+                ImGui.EndChild();
+            }
+        }
+
+        internal void GuiDesignUI(GlobalUIState uiState) //Creates all UI elements need for designing the Component
         {
             ImGui.Text("Component Specifications");
             ImGui.SameLine(ImGui.GetContentRegionAvail().X - 70);
@@ -67,12 +94,11 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.NewLine();
 
-            if (componentDesigner != null) //Make sure comp is selected
+            if (_componentDesigner != null) //Make sure comp is selected
             {
-                foreach (ComponentDesignAttribute attribute in componentDesigner.ComponentDesignAttributes.Values) //For each property of the comp type
+                foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values) //For each property of the comp type
                 {
                     ImGui.PushID(attribute.Name);
-
 
                     if (attribute.IsEnabled)
                     {
@@ -93,7 +119,7 @@ namespace Pulsar4X.SDL2UI
                                 GuiHintEnumSelection(attribute);
                                 break;
                             case GuiHint.GuiOrdnanceSelectionList:
-                                GuiHintOrdnanceSelection(attribute);
+                                GuiHintOrdnanceSelection(attribute, uiState);
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
@@ -102,10 +128,6 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.PopID();
                 }
-
-
-
-
 
                 ImGui.NewLine();
             }
@@ -117,43 +139,10 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-
-
-
-
-        internal override void Display()
-        {
-
-            if (IsActive && ImGui.Begin(_windowname, ref IsActive, _flags))
-            {
-
-                GuiDesignUI(_componentDesigner); //Part design
-
-                ImGui.Text("Name");
-                ImGui.InputText("", _nameInputBuffer, 32);
-                if (ImGui.Button("Create Design"))
-                {
-                    _componentDesigner.Name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
-                    _componentDesigner.CreateDesign(_state.Faction);
-                    //we reset the designer here, so we don't end up trying to edit the precious design. 
-                    var factionTech = _state.Faction.GetDataBlob<FactionTechDB>();
-                    _componentDesigner = new ComponentDesigner(_designables[_designType], factionTech);
-                }
-                
-                
-                GuiCostText(_componentDesigner); //Print cost
-                ImGui.End();
-            }
-
-
-            
-
-        }
-
-        static void GuiCostText(ComponentDesigner componentDesigner) //Prints a 2 col table with the costs of the part
+        private void GuiCostText(GlobalUIState uiState) //Prints a 2 col table with the costs of the part
         {
             //ImGui.BeginChild("Cost");
-            if (componentDesigner != null) //If a part time is selected
+            if (_componentDesigner != null) //If a part time is selected
             {
                 ImGui.Columns(2);
                 ImGui.BeginTabItem("Cost");
@@ -168,20 +157,20 @@ namespace Pulsar4X.SDL2UI
                 ImGui.NextColumn(); //Add all the cost names to col 1
 
 
-                ImGui.Text(Stringify.Mass(componentDesigner.MassValue));
-                ImGui.Text(Stringify.Volume(componentDesigner.VolumeM3Value));
-                ImGui.Text(componentDesigner.CrewReqValue.ToString());
-                ImGui.Text(componentDesigner.CreditCostValue.ToString());
-                ImGui.Text(componentDesigner.ResearchCostValue.ToString() + " RP");
-                ImGui.Text(componentDesigner.IndustryPointCostsValue.ToString() + " BP");
+                ImGui.Text(Stringify.Mass(_componentDesigner.MassValue));
+                ImGui.Text(Stringify.Volume(_componentDesigner.VolumeM3Value));
+                ImGui.Text(_componentDesigner.CrewReqValue.ToString());
+                ImGui.Text(_componentDesigner.CreditCostValue.ToString());
+                ImGui.Text(_componentDesigner.ResearchCostValue.ToString() + " RP");
+                ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString() + " BP");
                 ImGui.NextColumn(); //Add all the price values to col 2
 
 
-                foreach (var kvp in componentDesigner.ResourceCostValues)
+                foreach (var kvp in _componentDesigner.ResourceCostValues)
                 {
                     var resource = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);
                     if (resource == null)
-                        resource = (ICargoable)_state.Faction.GetDataBlob<FactionInfoDB>().IndustryDesigns[kvp.Key];
+                        resource = (ICargoable)uiState.Faction.GetDataBlob<FactionInfoDB>().IndustryDesigns[kvp.Key];
                     var xpos = ImGui.GetCursorPosX();
                     ImGui.SetCursorPosX(xpos + 12);
                     ImGui.Text(resource.Name);
@@ -189,15 +178,11 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(kvp.Value.ToString());
                     ImGui.NextColumn();
                 }
-
-
-
             }
-
             //ImGui.EndChild();
         }
 
-        static void GuiHintText(ComponentDesignAttribute attribute)
+        private void GuiHintText(ComponentDesignAttribute attribute)
         {
             if (compactmod)
             {
@@ -213,7 +198,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        static void GuiHintMaxMin(ComponentDesignAttribute attribute)
+        private void GuiHintMaxMin(ComponentDesignAttribute attribute)
         {
             if (compactmod)
             {
@@ -273,7 +258,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.NewLine();
         }
 
-        static void GuiHintTechSelection(ComponentDesignAttribute attribute)
+        private void GuiHintTechSelection(ComponentDesignAttribute attribute)
         {
             if (compactmod)
             {
@@ -311,7 +296,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.NewLine();
         }
 
-        static void GuiHintEnumSelection(ComponentDesignAttribute attribute)
+        private void GuiHintEnumSelection(ComponentDesignAttribute attribute)
         {
             if (compactmod)
             {
@@ -341,9 +326,9 @@ namespace Pulsar4X.SDL2UI
             ImGui.NewLine();
         }
 
-        static void GuiHintOrdnanceSelection(ComponentDesignAttribute attribute)
+        private void GuiHintOrdnanceSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
         {
-            var dict = _state.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns;
+            var dict = uiState.Faction.GetDataBlob<FactionInfoDB>().MissileDesigns;
             _listNames = new string[dict.Count];
             OrdnanceDesign[] ordnances = new OrdnanceDesign[dict.Count];
             int i = 0;
@@ -379,7 +364,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.NewLine();
         }
 
-        static void GuiHintTextSelectionFormula(ComponentDesignAttribute attribute)
+        private void GuiHintTextSelectionFormula(ComponentDesignAttribute attribute)
         {
             
             Dictionary<string, ChainedExpression> dict = new Dictionary<string, ChainedExpression>();

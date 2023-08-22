@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing.Printing;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Pulsar4X.Orbital;
 
@@ -64,7 +60,7 @@ namespace Pulsar4X.ECSLib
             DefaultThrusterDesign(game, factionEntity);
             DefaultWarpDesign(game, factionEntity);
             DefaultFuelTank(game, factionEntity);
-            DefaultCargoInstalation(game, factionEntity);
+            DefaultCargoInstallation(game, factionEntity);
             DefaultSimpleLaser(game, factionEntity);
             DefaultBFC(game, factionEntity);
             ShipDefaultCargoHold(game, factionEntity);
@@ -199,7 +195,7 @@ namespace Pulsar4X.ECSLib
             DefaultWarpDesign(game, factionEntity);
             DefaultFuelTank(game, factionEntity);
             LargeFuelTank(game, factionEntity);
-            DefaultCargoInstalation(game, factionEntity);
+            DefaultCargoInstallation(game, factionEntity);
             DefaultSimpleLaser(game, factionEntity);
             DefaultBFC(game, factionEntity);
             ShipDefaultCargoHold(game, factionEntity);
@@ -218,13 +214,12 @@ namespace Pulsar4X.ECSLib
             colonyEntity.AddComponent(mineDesign);
             colonyEntity.AddComponent(refinaryDesign);
             colonyEntity.AddComponent(labEntity);
-            colonyEntity.AddComponent(facEntity);           
-            colonyEntity.AddComponent(_fuelTank_1000);            
+            colonyEntity.AddComponent(facEntity);
+            colonyEntity.AddComponent(_fuelTank_1000);
             colonyEntity.AddComponent(_cargoInstalation);
             colonyEntity.AddComponent(_sensorInstalation);
             colonyEntity.AddComponent(ShipYard(factionEntity));
             colonyEntity.AddComponent(LogisticsOffice(factionEntity));
-            
             colonyEntity.AddComponent(_ordnanceStore, 10);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
@@ -782,13 +777,13 @@ namespace Pulsar4X.ECSLib
             return _fireControl;
         }
 
-        public static ComponentDesign DefaultCargoInstalation(Game game, Entity faction)
+        public static ComponentDesign DefaultCargoInstallation(Game game, Entity faction)
         {
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{B8239721-B60E-4C11-8E45-5F64F6BA5FA5}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
             componentDesigner.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000000);
-            componentDesigner.Name = "CargoInstalation1";
+            componentDesigner.Name = "CargoInstallation1";
             //return cargoInstalation.CreateDesign(faction);
             _cargoInstalation = componentDesigner.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_cargoInstalation.TechID);

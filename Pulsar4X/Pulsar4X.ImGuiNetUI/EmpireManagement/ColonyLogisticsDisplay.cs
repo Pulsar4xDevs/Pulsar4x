@@ -237,7 +237,6 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.BeginDisabled();
                             if(ImGui.SmallButton("<"))
                             {
-
                             }
                             if(!hasCapacityForMore)
                                 ImGui.EndDisabled();
