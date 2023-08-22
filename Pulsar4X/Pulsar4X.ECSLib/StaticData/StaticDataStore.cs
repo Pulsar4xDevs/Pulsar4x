@@ -81,8 +81,11 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public Dictionary<Guid, ComponentTemplateSD> ComponentTemplates = new Dictionary<Guid, ComponentTemplateSD>();
 
-        [JsonIgnore]
-        public Dictionary<ComponentTemplateAttributeSD, List<ComponentTemplateSD>> ComponentTemplatesByAttribute;
+        /// <summary>
+        /// Stores ComponentTemplates by the Attribute Type Name. 
+        /// </summary>
+        [JsonIgnore] 
+        public Dictionary<string, List<ComponentTemplateSD>> ComponentTemplatesByAttribute = new Dictionary<string, List<ComponentTemplateSD>>();
         
         /// <summary>
         /// Dictionary to store CargoTypes
@@ -348,18 +351,22 @@ namespace Pulsar4X.ECSLib
         {
             if (components != null)
             {
-                ComponentTemplatesByAttribute = new Dictionary<ComponentTemplateAttributeSD, List<ComponentTemplateSD>>();
+                //ComponentTemplatesByAttribute = new Dictionary<string, List<ComponentTemplateSD>>();
                 foreach (KeyValuePair<Guid, ComponentTemplateSD> component in components)
                 {
                     ComponentTemplates[component.Key] = component.Value;
                     foreach (ComponentTemplateAttributeSD attrbSD in component.Value.ComponentAtbSDs)
                     {
-                        if (!ComponentTemplatesByAttribute.TryGetValue(attrbSD, out List<ComponentTemplateSD> lst))
+                        if(attrbSD.AttributeType != null)
                         {
-                            lst = new List<ComponentTemplateSD>();
-                            ComponentTemplatesByAttribute.Add(attrbSD, lst);
+                            if (!ComponentTemplatesByAttribute.TryGetValue(attrbSD.AttributeType, out List<ComponentTemplateSD> lst))
+                            {
+                                lst = new List<ComponentTemplateSD>();
+                                ComponentTemplatesByAttribute.Add(attrbSD.AttributeType, lst);
+                            }
+
+                            lst.Add(component.Value);
                         }
-                        lst.Add(component.Value);
                     }
                 }
             }
