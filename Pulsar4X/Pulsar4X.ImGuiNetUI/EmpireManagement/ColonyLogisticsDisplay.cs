@@ -222,6 +222,10 @@ namespace Pulsar4X.SDL2UI
                         foreach (var kvp in typeStore.Value)
                         {
                             var ctype = kvp.Key;
+
+                            if(_logisticsDB.ListedItems.ContainsKey(ctype))
+                                continue;
+
                             var cname = ctype.Name;
                             var itemsStored = 0;
                             if(_stores[stypeID].Cargoables.ContainsKey(ctype.ID))
@@ -233,7 +237,6 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.BeginDisabled();
                             if(ImGui.SmallButton("<"))
                             {
-
                             }
                             if(!hasCapacityForMore)
                                 ImGui.EndDisabled();
