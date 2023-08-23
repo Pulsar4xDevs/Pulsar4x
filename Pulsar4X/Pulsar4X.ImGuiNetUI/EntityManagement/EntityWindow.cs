@@ -227,6 +227,11 @@ namespace Pulsar4X.SDL2UI
                     ((VolumeStorageDB)db).Display(EntityState, _uiState);
                     ImGui.EndTabItem();
                 }
+                if(db is EnergyGenAbilityDB && ImGui.BeginTabItem("Power"))
+                {
+                    ((EnergyGenAbilityDB)db).Display(EntityState, _uiState);
+                    ImGui.EndTabItem();
+                }
             }
 
             // Mining tab
