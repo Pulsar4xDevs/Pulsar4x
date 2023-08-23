@@ -14,21 +14,21 @@ public static class PowerDBDisplay
         
         ImGui.Text("Current Load: ");
         ImGui.SameLine();
-        ImGui.Text(_energyGenDB.Load.ToString());
+        ImGui.TextUnformatted(_energyGenDB.Load.ToString("P1"));
         
         ImGui.Text("Current Output: ");
         ImGui.SameLine();
         
-        ImGui.Text(_energyGenDB.Output.ToString() + " / " + _energyGenDB.TotalOutputMax);
+        ImGui.Text(Stringify.Power(_energyGenDB.Output) + " / " + Stringify.Power(_energyGenDB.TotalOutputMax));
         
         ImGui.Text("Current Demand: ");
         ImGui.SameLine();
-        ImGui.Text(_energyGenDB.Demand.ToString());
+        ImGui.Text(Stringify.Power(_energyGenDB.Demand));
         
         ImGui.Text("Stored: ");
         ImGui.SameLine();
-        string stor = _energyGenDB.EnergyStored[_energyGenDB.EnergyType.ID].ToString();
-        string max = _energyGenDB.EnergyStoreMax[_energyGenDB.EnergyType.ID].ToString();
+        string stor = Stringify.Energy(_energyGenDB.EnergyStored[_energyGenDB.EnergyType.ID]);
+        string max = Stringify.Energy(_energyGenDB.EnergyStoreMax[_energyGenDB.EnergyType.ID]);
         ImGui.Text(stor + " / " + max);
 
         //
