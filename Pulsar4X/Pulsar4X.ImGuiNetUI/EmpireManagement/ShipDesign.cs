@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing.Printing;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 
 
 namespace Pulsar4X.SDL2UI
@@ -21,8 +18,7 @@ namespace Pulsar4X.SDL2UI
         private int _selectedDesign = -1;
         bool _imagecreated = false;
         
-        private ComponentDesign[] _componentDesigns;
-        private string[] _componentNames;
+        private List<ComponentDesign> _componentDesigns;
         private int _selectedDesignsIndex;
         
         private string[] _shipComponentNames;
@@ -65,28 +61,14 @@ namespace Pulsar4X.SDL2UI
 
 
             RefreshComponentDesigns();
-
-            _armorNames = new string[StaticRefLib.StaticData.ArmorTypes.Count];
-            int i = 0;
-            foreach (var kvp in StaticRefLib.StaticData.ArmorTypes)
-            {
-                var armorMat = _uiState.Game.StaticData.GetICargoable(kvp.Key);
-                _armorSelection.Add(kvp.Value);
-                
-                _armorNames[i]= armorMat.Name;
-                i++;
-            }
-            //TODO: bleed over from mod data to get a default armor...
-            _armor = StaticRefLib.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
-            _armorThickness = 3;
-            _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
+            RefreshArmor();
+            RefreshExistingClasses();
         }
 
         public override void OnSystemTickChange(DateTime newDateTime)
         {
             RefreshComponentDesigns();
-            _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
-
+            RefreshExistingClasses();
         }
 
         internal static ShipDesignUI GetInstance()
@@ -104,95 +86,71 @@ namespace Pulsar4X.SDL2UI
 
         void RefreshComponentDesigns()
         {
-            _componentDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray();
-            _componentNames = new string[_componentDesigns.Length];
-            for (int i = 0; i < _componentDesigns.Length; i++)
+            _componentDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToList();
+            _componentDesigns.Sort((a, b) => a.Name.CompareTo(b.Name));
+        }
+
+        void RefreshExistingClasses()
+        {
+            _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
+            _exsistingClasses.Sort((a, b) => a.Name.CompareTo(b.Name));
+        }
+
+        void RefreshArmor()
+        {
+            _armorNames = new string[StaticRefLib.StaticData.ArmorTypes.Count];
+            int i = 0;
+            foreach (var kvp in StaticRefLib.StaticData.ArmorTypes)
             {
-                _componentNames[i] = _componentDesigns[i].Name;
+                var armorMat = _uiState.Game.StaticData.GetICargoable(kvp.Key);
+                _armorSelection.Add(kvp.Value);
+                
+                _armorNames[i]= armorMat.Name;
+                i++;
             }
+            //TODO: bleed over from mod data to get a default armor...
+            _armor = StaticRefLib.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            _armorThickness = 3;
         }
 
         internal override void Display()
         {
             if (IsActive && ImGui.Begin("Ship Design", ref IsActive, _flags))
             {
-
-                
-
                 if(_exsistingClasses.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList().Count)
                 {
                     _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
                 }
-                if (_componentDesigns.Length != _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray().Length)
+                if (_componentDesigns.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray().Length)
                 {
                     RefreshComponentDesigns();
                 }
 
-                
+                DisplayExistingDesigns();
+                ImGui.SameLine();
+                ImGui.SetCursorPosY(27f);
 
-                float imageheight = ImGui.GetContentRegionAvail().Y / 3;
-                float height = ImGui.GetContentRegionAvail().Y - imageheight;
-                float partlistwidth = 350;
-                float shortwindowwidth = ImGui.GetContentRegionAvail().X - partlistwidth;
-                bool compactimage = CheckDisplayImage(1, imageheight, shortwindowwidth);
-
-                if (compactimage || !displayimage)
+                Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
+                var secondChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
+                var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
+                if(ImGui.BeginChild("ShipDesign1", firstChildSize, true))
                 {
-                    ImGui.BeginChild("ShipDesign", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y));
-                    imageheight = ImGui.GetContentRegionAvail().Y / 2;
-                    height = ImGui.GetContentRegionAvail().Y - imageheight;
-                }
-                else
-                {
-                    ImGui.BeginChild("ShipDesign", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, height));
-                }
-
-                //imageheight = imageheight * 0.9f;
-                ImGui.Columns(2);
-                ImGui.SetColumnWidth(0, shortwindowwidth);
-                //ImGui.SetColumnWidth(1, 350);
-                //ImGui.SetColumnWidth(2, 278);
-                //ImGui.SetColumnWidth(3, 278);
-                    if (compactimage)
-                    {
-                        ImGui.BeginChild("Small Design Windows", new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y- imageheight));
-                    }
-                    else
-                    {
-                        ImGui.BeginChild("Small Design Windows");
-                    }
-                    
-                    ImGui.Columns(3);
-                        DisplayShips();             
-                
-                        ImGui.NextColumn();
-
-                        DisplayStats();
-
-                        ImGui.NextColumn();
-
-                        DisplayComponents();
-                    ImGui.EndChild();
-
-                    if (compactimage)
-                    {
-                        DisplayImage(shortwindowwidth, imageheight);
-                    }
-
-                    ImGui.NextColumn();
-                    
                     DisplayComponentSelection();
-
-                    ImGui.NextColumn();
-                ImGui.EndChild();
-
-                if(!compactimage && displayimage)
-                {
-                    ImGui.Separator();
-                    ImGui.Columns(1);
-                    DisplayImage(ImGui.GetWindowWidth(), imageheight);
+                    ImGui.EndChild();
                 }
-                
+                ImGui.SameLine();
+                if(ImGui.BeginChild("ShipDesign2", secondChildSize, true))
+                {
+                    DisplayComponents();
+                    ImGui.EndChild();
+                }
+                ImGui.SameLine();
+                if(ImGui.BeginChild("ShipDesign3", thirdChildSize, true))
+                {
+                    DisplayStats();
+                    ImGui.EndChild();
+                }
             }
         }
 
@@ -216,15 +174,26 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        internal void DisplayShips()
+        internal void DisplayExistingDesigns()
         {
-            if (ImGui.CollapsingHeader("Exsisting Designs", ImGuiTreeNodeFlags.DefaultOpen))
+            Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+
+            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(204f, windowContentSize.Y - 24f), true))
             {
-                ImGui.BeginChild("exsistingdesigns");
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text("Existing Designs");
+                // ImGui.SameLine();
+                // ImGui.Text("[?]");
+                // if(ImGui.IsItemHovered())
+                //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
+                //         "Select a template and then design the attributes of the component to your specification.\n" +
+                //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
+                //         "installations.");
+                ImGui.PopStyleColor();
+                ImGui.Separator();
 
                 for (int i = 0; i < _exsistingClasses.Count; i++)
                 {
-
                     string name = _exsistingClasses[i].Name;
                     if (ImGui.Selectable(name))
                     {
@@ -238,191 +207,204 @@ namespace Pulsar4X.SDL2UI
                         designChanged = true;
                     }
                 }
-
                 ImGui.EndChild();
+            }
+
+            if(ImGui.Button("Create New Design", new Vector2(204f, 0f)))
+            {
+                _selectedDesign = -1;
+                _designName = new byte[32];
+                _shipComponents = new List<(ComponentDesign design, int count)>();
+                GenImage();
+                RefreshArmor();
+                designChanged = true;
             }
         }
 
         internal void DisplayComponents()
         {
-            ImGui.BeginChild("ShipDesign");
-
-            ImGui.Columns(2, "Ship Components", true);
-            ImGui.SetColumnWidth(0, 150);
-            ImGui.SetColumnWidth(1, 128);
-            ImGui.Text("Component");
-            ImGui.NextColumn();
-            ImGui.Text("Count"); ImGui.NextColumn();
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text("Current Design");
+            // ImGui.SameLine();
+            // ImGui.Text("[?]");
+            // if(ImGui.IsItemHovered())
+            //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
+            //         "Select a template and then design the attributes of the component to your specification.\n" +
+            //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
+            //         "installations.");
+            ImGui.PopStyleColor();
             ImGui.Separator();
-            int selectedItem = -1;
-            for (int i = 0; i < _shipComponents.Count; i++)
+
+            if(ImGui.BeginTable("CurrentShipDesignTable", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
-                string name = _shipComponents[i].design.Name;
-                int number = _shipComponents[i].count;
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
+                ImGui.TableSetupColumn("Amount", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableHeadersRow();
 
-                /*
-                if (ImGui.Selectable(name, selectedItem == i, ImGuiSelectableFlags.SpanAllColumns))
+                int selectedItem = -1;
+                for (int i = 0; i < _shipComponents.Count; i++)
                 {
-                    selectedItem = i;
-                }
-                */
-                ImGui.Text(name);
+                    string name = _shipComponents[i].design.Name;
+                    int number = _shipComponents[i].count;
 
-                bool hovered = ImGui.IsItemHovered();
-                if (hovered)
-                    selectedItem = i;
+                    ImGui.TableNextColumn();
+                    ImGui.Text(name);
 
-                ImGui.NextColumn();
-                ImGui.Text(number.ToString());
+                    bool hovered = ImGui.IsItemHovered();
+                    if (hovered)
+                        selectedItem = i;
 
-                //if (hovered)
-                //{
-                ImGui.SameLine();
-                if (ImGui.SmallButton("+##" + i)) //todo: imagebutton
-                {
-                    _shipComponents[i] = (_shipComponents[i].design, _shipComponents[i].count + 1);
-                    designChanged = true;
-                }
-                ImGui.SameLine();
-                if (ImGui.SmallButton("-##" + i) && number > 0) //todo: imagebutton
-                {
-                    _shipComponents[i] = (_shipComponents[i].design, _shipComponents[i].count - 1);
-                    designChanged = true;
-                }
-                ImGui.SameLine();
-                if (ImGui.SmallButton("x##" + i)) //todo: imagebutton
-                {
-                    _shipComponents.RemoveAt(i);
-                    designChanged = true;
-                }
+                    ImGui.TableNextColumn();
+                    ImGui.Text(number.ToString());
 
-                if (i > 0)
-                {
                     ImGui.SameLine();
-                    if (ImGui.SmallButton("^##" + i)) //todo: imagebutton
+                    if (ImGui.SmallButton("+##" + i)) //todo: imagebutton
                     {
-
-                        (ComponentDesign design, int count) item = _shipComponents[i];
-                        _shipComponents.RemoveAt(i);
-                        _shipComponents.Insert(i - 1, item);
-
+                        _shipComponents[i] = (_shipComponents[i].design, _shipComponents[i].count + 1);
                         designChanged = true;
                     }
-                }
-                if (i < _shipComponents.Count - 1)
-                {
                     ImGui.SameLine();
-                    if (ImGui.SmallButton("v##" + i)) //todo: imagebutton
+                    if (ImGui.SmallButton("-##" + i) && number > 0) //todo: imagebutton
                     {
-                        (ComponentDesign design, int count) item = _shipComponents[i];
-                        _shipComponents.RemoveAt(i);
-                        _shipComponents.Insert(i + 1, item);
+                        _shipComponents[i] = (_shipComponents[i].design, _shipComponents[i].count - 1);
                         designChanged = true;
+                    }
+                    ImGui.TableNextColumn();
+                    if (ImGui.SmallButton("x##" + i)) //todo: imagebutton
+                    {
+                        _shipComponents.RemoveAt(i);
+                        designChanged = true;
+                    }
+
+                    if (i > 0)
+                    {
+                        ImGui.SameLine();
+                        if (ImGui.SmallButton("^##" + i)) //todo: imagebutton
+                        {
+
+                            (ComponentDesign design, int count) item = _shipComponents[i];
+                            _shipComponents.RemoveAt(i);
+                            _shipComponents.Insert(i - 1, item);
+
+                            designChanged = true;
+                        }
+                    }
+                    if (i < _shipComponents.Count - 1)
+                    {
+                        ImGui.SameLine();
+                        if (ImGui.SmallButton("v##" + i)) //todo: imagebutton
+                        {
+                            (ComponentDesign design, int count) item = _shipComponents[i];
+                            _shipComponents.RemoveAt(i);
+                            _shipComponents.Insert(i + 1, item);
+                            designChanged = true;
+                        }
                     }
                 }
 
-                //}
-
-
-                ImGui.NextColumn();
-
+                ImGui.EndTable();
             }
+
+            ImGui.NewLine();
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text("Armor");
+            // ImGui.SameLine();
+            // ImGui.Text("[?]");
+            // if(ImGui.IsItemHovered())
+            //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
+            //         "Select a template and then design the attributes of the component to your specification.\n" +
+            //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
+            //         "installations.");
+            ImGui.PopStyleColor();
             ImGui.Separator();
-            //ImGui.BeginChild("armorchild");
-            //ImGui.Columns(2);
-            ImGui.Text("Armor: Density");
-            ImGui.NextColumn();
-            ImGui.Text("Thickness ");
-            ImGui.NextColumn();
-            if (ImGui.Combo("##Armor Selection", ref _armorIndex, _armorNames, _armorNames.Length))
+            if(ImGui.BeginTable("CurrentShipDesignTable", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
-                _armor = _armorSelection[_armorIndex];
-                designChanged = true;
-            }
-            ImGui.SameLine();
-            ImGui.Text(_armorSelection[_armorIndex].Density.ToString());
-            //ImGui.EndChild();
-            ImGui.NextColumn();
-            ImGui.Text(_armorThickness.ToString());
+                ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.None, 1.5f);
+                ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableHeadersRow();
 
-            ImGui.SameLine();
-            if (ImGui.SmallButton("+##armor")) //todo: imagebutton
-            {
-                _armorThickness++;
-                designChanged = true;
-            }
-            ImGui.SameLine();
-            if (ImGui.SmallButton("-##armor") && _armorThickness > 0) //todo: imagebutton
-            {
-                _armorThickness--;
-                designChanged = true;
-            }
+                ImGui.TableNextColumn();
+                ImGui.Text("Type");
+                ImGui.TableNextColumn();
+                if (ImGui.Combo("##Armor Selection", ref _armorIndex, _armorNames, _armorNames.Length))
+                {
+                    _armor = _armorSelection[_armorIndex];
+                    designChanged = true;
+                }
 
-            ImGui.NextColumn();
-            ImGui.EndChild();
+                ImGui.TableNextColumn();
+                ImGui.Text("Density");
+                ImGui.TableNextColumn();
+                ImGui.Text(_armorSelection[_armorIndex].Density.ToString());
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Thickness");
+                ImGui.TableNextColumn();
+                ImGui.Text(_armorThickness.ToString());
+
+                ImGui.SameLine();
+                if (ImGui.SmallButton("+##armor")) //todo: imagebutton
+                {
+                    _armorThickness++;
+                    designChanged = true;
+                }
+                ImGui.SameLine();
+                if (ImGui.SmallButton("-##armor") && _armorThickness > 0) //todo: imagebutton
+                {
+                    _armorThickness--;
+                    designChanged = true;
+                }
+
+                ImGui.EndTable();
+            }
         }
 
         internal void DisplayComponentSelection()
         {
-            ImGui.BeginChild("ComponentSelection");
-            //ImGui.BeginGroup();
-            ImGui.Columns(3);
-            ImGui.SetColumnWidth(0, 150);
-            ImGui.SetColumnWidth(1, 100);
-            ImGui.SetColumnWidth(2, 100);
-
-            ImGui.Text("Component");
-            ImGui.NextColumn();
-            ImGui.Text("Mass");
-            ImGui.NextColumn();
-            ImGui.Text("Volume_m3");
-            ImGui.NextColumn();
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text("Available Components");
+            // ImGui.SameLine();
+            // ImGui.Text("[?]");
+            // if(ImGui.IsItemHovered())
+            //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
+            //         "Select a template and then design the attributes of the component to your specification.\n" +
+            //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
+            //         "installations.");
+            ImGui.PopStyleColor();
             ImGui.Separator();
 
-            for (int i = 0; i < _componentDesigns.Length; i++)
+            if(ImGui.BeginTable("DesignStatsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
-                var design = _componentDesigns[i];
-                string name = design.Name;
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 2f);
+                ImGui.TableSetupColumn("Mass", ImGuiTableColumnFlags.None, 0.7f);
+                ImGui.TableHeadersRow();
 
-                if (ImGui.Selectable(name, _selectedDesignsIndex == i, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick))
+                for (int i = 0; i < _componentDesigns.Count; i++)
                 {
-                    _selectedDesignsIndex = i;
-                    if (ImGui.IsMouseDoubleClicked(0))
+                    if(!_componentDesigns[i].ComponentMountType.HasFlag(ComponentMountType.ShipComponent))
+                        continue;
+
+                    var design = _componentDesigns[i];
+                    string name = design.Name;
+
+                    ImGui.TableNextColumn();
+                    if (ImGui.Selectable(name, _selectedDesignsIndex == i, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick))
                     {
-                        _shipComponents.Add((_componentDesigns[_selectedDesignsIndex], 1));
-                        designChanged = true;
+                        _selectedDesignsIndex = i;
+                        if (ImGui.IsMouseDoubleClicked(0))
+                        {
+                            _shipComponents.Add((_componentDesigns[_selectedDesignsIndex], 1));
+                            designChanged = true;
+                        }
                     }
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text(Stringify.Mass(design.MassPerUnit));
                 }
 
-                ImGui.NextColumn();
-                ImGui.Text(design.MassPerUnit.ToString());
-                ImGui.NextColumn();
-                ImGui.Text(Stringify.Volume(design.VolumePerUnit));
-                ImGui.NextColumn();
-
+                ImGui.EndTable();
             }
-
-            ImGui.Columns(2);
-            ImGui.Separator();
-            ImGui.SetColumnWidth(0, 250);
-            ImGui.SetColumnWidth(1, 50);
-            var selectedComponent = _componentDesigns[_selectedDesignsIndex];
-
-            ImGui.Text(selectedComponent.Name);
-            ImGui.NextColumn();
-            if (ImGui.Button("Add"))
-            {
-                _shipComponents.Add((selectedComponent, 1));
-                designChanged = true;
-            }
-            ImGui.Columns(1);
-            ImGui.NextColumn();
-            ImGui.Text(selectedComponent.Description ?? "");
-
-            //ImGui.Text();
-
-
-            ImGui.EndChild();
         }
 
         internal void GenImage()
@@ -436,11 +418,82 @@ namespace Pulsar4X.SDL2UI
 
         internal void DisplayStats()
         {
-            
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text("Statistics");
+            // ImGui.SameLine();
+            // ImGui.Text("[?]");
+            // if(ImGui.IsItemHovered())
+            //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
+            //         "Select a template and then design the attributes of the component to your specification.\n" +
+            //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
+            //         "installations.");
+            ImGui.PopStyleColor();
+            ImGui.Separator();
 
-            ImGui.BeginChild("Ship Stats");
+            UpdateShipStats();
+            if(ImGui.BeginTable("DesignStatsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            {
+                ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.None);
+                ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None);
+                ImGui.TableHeadersRow();
 
-            ImGui.Columns(1);
+                ImGui.TableNextColumn();
+                ImGui.Text("Mass");
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Mass(_massDry));
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Total Thrust");
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Thrust(_tn));
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Thrust to Mass Ratio");
+                ImGui.TableNextColumn();
+                ImGui.Text(_ttwr.ToString("0.####"));
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Fuel Capacity");
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Mass(_fuelStore));
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Delta V");
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Velocity(_dv));
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Warp Speed");
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Velocity(_wspd));
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Warp Bubble Creation");
+                ImGui.TableNextColumn();
+                ImGui.Text(_wcc.ToString());
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Warp Bubble Sustain");
+                ImGui.TableNextColumn();
+                ImGui.Text(_wsc.ToString());
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Warp Bubble Collapse");
+                ImGui.TableNextColumn();
+                ImGui.Text(_wec.ToString());
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Energy Output");
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Power(_egen));
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Energy Storage");
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Power(_estor));
+
+                ImGui.EndTable();
+            }
 
             ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
             NewShipButton();
@@ -448,118 +501,104 @@ namespace Pulsar4X.SDL2UI
             ImGui.Checkbox("Show Pic", ref displayimage);
             ImGui.NewLine();
 
-            
-
-            ImGui.Text("Ship Stats");
-            if (designChanged)
-            {
-                if(displayimage)
-                {
-                    GenImage();
-                }
-
-                double mass = 0;
-                double fu = 0;
-                double tn = 0;
-                double ev = 0;
-
-                double wp = 0;
-                double wcc = 0;
-                double wsc = 0;
-                double wec = 0;
-                double egen = 0;
-                double estor = 0;
-                Guid thrusterFuel = Guid.Empty;
-                Dictionary<Guid, double> cstore = new Dictionary<Guid, double>();
-
-                foreach (var component in _shipComponents)
-                {
-                    mass += component.design.MassPerUnit * component.count;
-                    if (component.design.HasAttribute<NewtonionThrustAtb>())
-                    {
-                        var atb = component.design.GetAttribute<NewtonionThrustAtb>();
-                        ev = atb.ExhaustVelocity;
-                        fu += atb.FuelBurnRate * component.count;
-                        tn += ev * atb.FuelBurnRate * component.count;
-                        thrusterFuel = atb.FuelType;
-                    }
-
-                    if (component.design.HasAttribute<WarpDriveAtb>())
-                    {
-                        var atb = component.design.GetAttribute<WarpDriveAtb>();
-                        wp += atb.WarpPower * component.count;
-                        wcc += atb.BubbleCreationCost * component.count;
-                        wsc += atb.BubbleSustainCost * component.count;
-                        wec += atb.BubbleCollapseCost * component.count;
-
-                    }
-
-                    if (component.design.HasAttribute<EnergyGenerationAtb>())
-                    {
-                        var atb = component.design.GetAttribute<EnergyGenerationAtb>();
-                        egen += atb.PowerOutputMax * component.count;
-
-                    }
-
-                    if (component.design.HasAttribute<EnergyStoreAtb>())
-                    {
-                        var atb = component.design.GetAttribute<EnergyStoreAtb>();
-                        estor += atb.MaxStore * component.count;
-                    }
-
-                    if (component.design.HasAttribute<VolumeStorageAtb>())
-                    {
-                        var atb = component.design.GetAttribute<VolumeStorageAtb>();
-                        var typeid = atb.StoreTypeID;
-                        var amount = atb.MaxVolume * component.count;
-                        if (!cstore.ContainsKey(typeid))
-                            cstore.Add(typeid, amount);
-                        else
-                            cstore[typeid] += amount;
-
-                    }
-                }
-
-                _massDry = mass;
-                _tn = tn;
-                _ttwr = (tn / mass) * 0.01;
-                _wcc = wcc;
-                _wec = wec;
-                _wsc = wsc;
-                _wspd = ShipMovementProcessor.MaxSpeedCalc(wp, mass);
-                _egen = egen;
-                _estor = estor;
-                //double fuelMass = 0;
-                if (thrusterFuel != Guid.Empty)
-                {
-                    var fuel = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
-                    if (cstore.ContainsKey(fuel.CargoTypeID))
-                        _fuelStore = cstore[fuel.CargoTypeID];
-                }
-
-                _massWet = _massDry + _fuelStore;
-                _dv = OrbitMath.TsiolkovskyRocketEquation(_massWet, _massDry, ev);
-
-            }
-            designChanged = false;
-            ImGui.Text("Mass: " + Stringify.Mass(_massDry));
-            ImGui.Text("Total Thrust: " + Stringify.Thrust(_tn));
-            ImGui.Text("Thrust To Mass Ratio: " + _ttwr);
-            ImGui.Text("Fuel Capacity: " + Stringify.Mass(_fuelStore));
-
-            ImGui.Text("Delta V: " + Stringify.Velocity(_dv));
-            ImGui.Text("Warp Speed:" + Stringify.Velocity(_wspd));
-            ImGui.Text("Warp Bubble Creation: " + _wcc);
-            ImGui.Text("Warp Bubble Sustain: " + _wsc);
-            ImGui.Text("Warp Bubble Collapse: " + _wec);
-            ImGui.Text("Energy Output: " + _egen);
-            ImGui.Text("Energy Store:" + _estor);
-
-
-            ImGui.Separator();
+            var size = ImGui.GetContentRegionAvail();
+            DisplayImage(size.X, size.Y);
 
             ImGui.EndChild();
+        }
 
+        private void UpdateShipStats()
+        {
+            if(!designChanged) return;
+
+            if(displayimage)
+            {
+                GenImage();
+            }
+
+            double mass = 0;
+            double fu = 0;
+            double tn = 0;
+            double ev = 0;
+
+            double wp = 0;
+            double wcc = 0;
+            double wsc = 0;
+            double wec = 0;
+            double egen = 0;
+            double estor = 0;
+            Guid thrusterFuel = Guid.Empty;
+            Dictionary<Guid, double> cstore = new Dictionary<Guid, double>();
+
+            foreach (var component in _shipComponents)
+            {
+                mass += component.design.MassPerUnit * component.count;
+                if (component.design.HasAttribute<NewtonionThrustAtb>())
+                {
+                    var atb = component.design.GetAttribute<NewtonionThrustAtb>();
+                    ev = atb.ExhaustVelocity;
+                    fu += atb.FuelBurnRate * component.count;
+                    tn += ev * atb.FuelBurnRate * component.count;
+                    thrusterFuel = atb.FuelType;
+                }
+
+                if (component.design.HasAttribute<WarpDriveAtb>())
+                {
+                    var atb = component.design.GetAttribute<WarpDriveAtb>();
+                    wp += atb.WarpPower * component.count;
+                    wcc += atb.BubbleCreationCost * component.count;
+                    wsc += atb.BubbleSustainCost * component.count;
+                    wec += atb.BubbleCollapseCost * component.count;
+
+                }
+
+                if (component.design.HasAttribute<EnergyGenerationAtb>())
+                {
+                    var atb = component.design.GetAttribute<EnergyGenerationAtb>();
+                    egen += atb.PowerOutputMax * component.count;
+
+                }
+
+                if (component.design.HasAttribute<EnergyStoreAtb>())
+                {
+                    var atb = component.design.GetAttribute<EnergyStoreAtb>();
+                    estor += atb.MaxStore * component.count;
+                }
+
+                if (component.design.HasAttribute<VolumeStorageAtb>())
+                {
+                    var atb = component.design.GetAttribute<VolumeStorageAtb>();
+                    var typeid = atb.StoreTypeID;
+                    var amount = atb.MaxVolume * component.count;
+                    if (!cstore.ContainsKey(typeid))
+                        cstore.Add(typeid, amount);
+                    else
+                        cstore[typeid] += amount;
+
+                }
+            }
+
+            _massDry = mass;
+            _tn = tn;
+            _ttwr = (tn / mass) * 0.01;
+            _wcc = wcc;
+            _wec = wec;
+            _wsc = wsc;
+            _wspd = ShipMovementProcessor.MaxSpeedCalc(wp, mass);
+            _egen = egen;
+            _estor = estor;
+            //double fuelMass = 0;
+            if (thrusterFuel != Guid.Empty)
+            {
+                var fuel = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
+                if (cstore.ContainsKey(fuel.CargoTypeID))
+                    _fuelStore = cstore[fuel.CargoTypeID];
+            }
+
+            _massWet = _massDry + _fuelStore;
+            _dv = OrbitMath.TsiolkovskyRocketEquation(_massWet, _massDry, ev);
+
+            designChanged = false;
         }
 
         internal bool CheckDisplayImage(float maxwidth, float maxheight, float checkwidth)
