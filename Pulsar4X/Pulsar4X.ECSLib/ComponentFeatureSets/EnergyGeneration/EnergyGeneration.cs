@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib
         
         public Guid EnergyTypeID;
         
-        public double PowerOutputMax; //Mw
+        public double PowerOutputMax; //Kw
 
         public double Lifetime;
         
@@ -89,6 +89,9 @@ namespace Pulsar4X.ECSLib
     {
         //<type, amount>
         public Guid EnergyTypeID;
+        /// <summary>
+        /// In Kjouls
+        /// </summary>
         public double MaxStore;
 
         public EnergyStoreAtb(Guid energyTypeID, double maxStore)
@@ -142,9 +145,15 @@ namespace Pulsar4X.ECSLib
 
         public double Demand { get; private set; }
         
-        //as a percentage of max output. 
+        
+        /// <summary>
+        /// as a percentage of max output. 
+        /// </summary>
         public double Load { get; internal set; }
 
+        /// <summary>
+        /// In Kw
+        /// </summary>
         public double Output { get; internal set; }
         public void AddDemand(double demand, DateTime atDateTime)
         {
@@ -152,7 +161,13 @@ namespace Pulsar4X.ECSLib
             Demand += demand;
         }
 
+        /// <summary>
+        /// In Kjoules
+        /// </summary>
         public Dictionary<Guid, double > EnergyStored = new Dictionary<Guid, double>();
+        /// <summary>
+        /// In Kjoules
+        /// </summary>
         public Dictionary<Guid, double > EnergyStoreMax = new Dictionary<Guid, double>();
         
         public double LocalFuel;
@@ -308,9 +323,6 @@ namespace Pulsar4X.ECSLib
                     _energyGenDB.HistogramIndex++;
                 }
             }
-            
-            
-
         }
 
 

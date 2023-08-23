@@ -281,21 +281,21 @@
             },
             {
               "Name": "Bubble Creation Energy Cost",
-              "Units": "J",
+              "Units": "KJ",
               "DescriptionFormula": "'How much energy required to create the warp bubble.'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('EnginePower') * 0.001 * TechData('c534d9f0-0d63-424f-9780-d124235903de') * 0.5"
+              "AttributeFormula": "Ability('EnginePower') * TechData('c534d9f0-0d63-424f-9780-d124235903de') * 0.5"
             },
             {
               "Name": "Bubble Sustain Energy Cost",
-              "Units": "W",
+              "Units": "KW",
               "DescriptionFormula": "'How much energy required to sustain the warp bubble per second during the warp'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('EnginePower') * 0.00001 * TechData('7fa0dc05-5e58-4678-be44-afaad014e096')"
+              "AttributeFormula": "Ability('EnginePower') * 0.001 * TechData('7fa0dc05-5e58-4678-be44-afaad014e096')"
             },
             {
               "Name": "Bubble Collapse Energy Returned",
-              "Units": "J",
+              "Units": "KJ",
               "DescriptionFormula": "'How much energy we get back from collapsing the warp bubble'",
               "GuiHint": "GuiTextDisplay",
               "AttributeFormula": "Ability('Bubble Creation Energy Cost') * TechData('d48e1883-2069-441f-ba55-69f63f47add7')"

@@ -497,7 +497,7 @@ namespace Pulsar4X.ECSLib
                 (_fuelTank_2500, 1),
                 (_cargoHold, 1),   
                 (_warpDrive, 4),
-                (_battery, 3),
+                (_battery, 2),
                 (_reactor, 1),
                 (_rs25, 4),
             };
@@ -808,9 +808,8 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{1de23a8b-d44b-4e0f-bacd-5463a8eb939d}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
-            componentDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1000);
-            componentDesigner.Name = "Battery900";
-            //return cargoInstalation.CreateDesign(faction);
+            componentDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(2000);
+            componentDesigner.Name = "Battery2t";
             _battery = componentDesigner.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_battery.TechID);
             return _battery;
