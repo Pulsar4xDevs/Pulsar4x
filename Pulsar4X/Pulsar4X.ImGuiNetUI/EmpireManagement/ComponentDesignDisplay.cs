@@ -485,8 +485,8 @@ namespace Pulsar4X.SDL2UI
 
 
             //ImGui.TextWrapped(attribute.Value.ToString());
-
-            if (ImGui.Combo("Select", ref attribute.ListSelection, _listNames, (int)attribute.MaxValue + 1))
+            int listCount = Math.Min((int)attribute.MaxValue, _listNames.Length);
+            if (ImGui.Combo("Select", ref attribute.ListSelection, _listNames, listCount))
             {
                 int enumVal = (int)Enum.Parse(attribute.EnumType, _listNames[attribute.ListSelection]);
                 attribute.SetValueFromInput(enumVal);

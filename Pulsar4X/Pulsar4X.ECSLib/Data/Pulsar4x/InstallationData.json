@@ -165,7 +165,7 @@
               "Name": "Bonus",
               "GuiHint": "GuiEnumSelectionList",
               "EnumTypeName" : "Pulsar4X.ECSLib.ResearchCategories",
-              "MaxFormula": "25",
+              "MaxFormula": "18",
               "MinFormula": "1",
               "StepFormula": "1",
               "AttributeFormula": "0"

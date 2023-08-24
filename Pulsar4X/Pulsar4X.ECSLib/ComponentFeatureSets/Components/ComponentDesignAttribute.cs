@@ -105,6 +105,12 @@ namespace Pulsar4X.ECSLib
                 EnumType = Type.GetType(_templateSD.EnumTypeName);
                 if(EnumType == null)
                     throw new Exception("EnumTypeName not found: " + _templateSD.EnumTypeName);
+                //don't allow a value less than 0
+                if (MinValue < 0)
+                    MinValue = 0;
+                //Dont set a max value above the max length of the enum list. 
+                MaxValue = Math.Min(MaxValue , Enum.GetNames(EnumType).Length);
+                
                 ListSelection = (int)Value;
                 //string[] names = Enum.GetNames(EnumType);
             }
