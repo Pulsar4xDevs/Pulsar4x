@@ -152,7 +152,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PopStyleColor();
                 ImGui.Separator();
 
-                if(ImGui.BeginTable("LogisticsImportsTable", 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                if(ImGui.BeginTable("LogisticsImportsTable", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1f);
                     ImGui.TableSetupColumn("Quantity Desired", ImGuiTableColumnFlags.None, 1f);
@@ -188,7 +188,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PopStyleColor();
                 ImGui.Separator();
 
-                if(ImGui.BeginTable("LogisticsAvailableItemsTable", 4, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                if(ImGui.BeginTable("LogisticsAvailableItemsTable", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
                     ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.25f);
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1f);
@@ -272,7 +272,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PopStyleColor();
                 ImGui.Separator();
 
-                if(ImGui.BeginTable("LogisticsImportsTable", 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                if(ImGui.BeginTable("LogisticsExportsTable", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
                     ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, 0.25f);
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1f);

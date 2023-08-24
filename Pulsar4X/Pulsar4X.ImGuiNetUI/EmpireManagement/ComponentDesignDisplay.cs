@@ -221,18 +221,22 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PopStyleColor();
                 ImGui.Separator();
 
-                if(ImGui.BeginTable("DesignStatsTables", 2, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                if(ImGui.BeginTable("DesignStatsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
                     ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.None);
                     ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None);
                     ImGui.TableHeadersRow();
 
                     ImGui.TableNextColumn();
+                    ImGui.Text("");
+                    ImGui.SameLine();
                     ImGui.Text("Mass");
                     ImGui.TableNextColumn();
                     ImGui.Text(Stringify.Mass(_componentDesigner.MassValue));
 
                     ImGui.TableNextColumn();
+                    ImGui.Text("");
+                    ImGui.SameLine();
                     ImGui.Text("Volume");
                     ImGui.TableNextColumn();
                     ImGui.Text(Stringify.Volume(_componentDesigner.VolumeM3Value));
@@ -240,6 +244,8 @@ namespace Pulsar4X.SDL2UI
                     if(_componentDesigner.CrewReqValue > 0)
                     {
                         ImGui.TableNextColumn();
+                        ImGui.Text("");
+                        ImGui.SameLine();
                         ImGui.Text("Crew Required");
                         ImGui.TableNextColumn();
                         ImGui.Text(_componentDesigner.CrewReqValue.ToString());
@@ -250,6 +256,8 @@ namespace Pulsar4X.SDL2UI
                         if(attribute.IsEnabled && attribute.GuiHint == GuiHint.GuiTextDisplay)
                         {
                             ImGui.TableNextColumn();
+                            ImGui.Text("");
+                            ImGui.SameLine();
                             ImGui.Text(attribute.Name);
                             if(ImGui.IsItemHovered())
                                 ImGui.SetTooltip(attribute.Description);
@@ -277,23 +285,29 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PopStyleColor();
                 ImGui.Separator();
 
-                if(ImGui.BeginTable("DesignCostsTables", 2, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                if(ImGui.BeginTable("DesignCostsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
                     ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None);
                     ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None);
                     ImGui.TableHeadersRow();
 
                     ImGui.TableNextColumn();
+                    ImGui.Text("");
+                    ImGui.SameLine();
                     ImGui.Text("Cost");
                     ImGui.TableNextColumn();
                     ImGui.Text(_componentDesigner.CreditCostValue.ToString());
 
                     ImGui.TableNextColumn();
+                    ImGui.Text("");
+                    ImGui.SameLine();
                     ImGui.Text("Research");
                     ImGui.TableNextColumn();
                     ImGui.Text(_componentDesigner.ResearchCostValue.ToString() + " RP");
 
                     ImGui.TableNextColumn();
+                    ImGui.Text("");
+                    ImGui.SameLine();
                     ImGui.Text("Production");
                     ImGui.TableNextColumn();
                     ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString() + " IP");
@@ -313,7 +327,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PopStyleColor();
                 ImGui.Separator();
 
-                if(ImGui.BeginTable("DesignResourceCostsTables", 2, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                if(ImGui.BeginTable("DesignResourceCostsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
                     ImGui.TableSetupColumn("Resource", ImGuiTableColumnFlags.None);
                     ImGui.TableSetupColumn("Quantity Needed", ImGuiTableColumnFlags.None);
@@ -326,6 +340,8 @@ namespace Pulsar4X.SDL2UI
                             resource = (ICargoable)uiState.Faction.GetDataBlob<FactionInfoDB>().IndustryDesigns[kvp.Key];
 
                         ImGui.TableNextColumn();
+                        ImGui.Text("");
+                        ImGui.SameLine();
                         ImGui.Text(resource.Name);
                         ImGui.TableNextColumn();
                         ImGui.Text(kvp.Value.ToString());
