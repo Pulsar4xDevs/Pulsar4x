@@ -47,8 +47,8 @@ namespace Pulsar4X.SDL2UI
             {
                 Picture = _uiState.Img_DesignShip(),
                 TooltipText = "Design a new Ship",
-                OnClick = new Action(ShipDesignUI.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(ShipDesignUI.GetInstance().GetActive)
+                OnClick = new Action(ShipDesignWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(ShipDesignWindow.GetInstance().GetActive)
                 //Opens up the ship design menu
             };
             ToolButtons.Add(btn);

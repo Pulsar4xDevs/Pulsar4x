@@ -9,25 +9,28 @@ using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
 {
-    public class ShipDesignUI : PulsarGuiWindow
+    public class ShipDesignWindow : PulsarGuiWindow
     {
-        private byte[] _designName =  ImGuiSDL2CSHelper.BytesFromString("foo", 32);
+        private bool ShowNoDesigns = false;
+
+        private byte[] SelectedDesignName =  ImGuiSDL2CSHelper.BytesFromString("foo", 32);
 
         private string[] _exsistingDesigns;
-        private List<ShipDesign> _exsistingClasses;
-        private int _selectedDesign = -1;
+        private List<ShipDesign> ExistingShipDesigns;
+        private Guid SelectedExistingDesignID = Guid.Empty;
+        private bool SelectedDesignObsolete;
         bool _imagecreated = false;
-        
-        private List<ComponentDesign> _componentDesigns;
+
+        private List<ComponentDesign> AvailableShipComponents;
         private int _selectedDesignsIndex;
-        
+
         private string[] _shipComponentNames;
         private int _selectedShipIndex;
- 
-        List<(ComponentDesign design, int count)> _shipComponents = new List<(ComponentDesign design, int count)>();
-        
+
+        List<(ComponentDesign design, int count)> SelectedComponents = new List<(ComponentDesign design, int count)>();
+
         private IntPtr _shipImgPtr;
-        
+
         //TODO: armor, temporary, maybe density should be an "equvelent" and have a different mass? (damage calcs use density for penetration)
         List<ArmorSD> _armorSelection = new List<ArmorSD>();
         private string[] _armorNames;
@@ -53,12 +56,14 @@ namespace Pulsar4X.SDL2UI
         bool displayimage = true;
 
         private bool existingdesignsstatus = true;
-        bool designChanged = false;
+        bool DesignChanged = false;
 
-        private ShipDesignUI()
+        private FactionInfoDB _factionInfoDB;
+
+        private ShipDesignWindow()
         {
             //_flags = ImGuiWindowFlags.NoCollapse;
-
+            _factionInfoDB = _uiState.Faction.GetDataBlob<FactionInfoDB>();
 
             RefreshComponentDesigns();
             RefreshArmor();
@@ -71,29 +76,41 @@ namespace Pulsar4X.SDL2UI
             RefreshExistingClasses();
         }
 
-        internal static ShipDesignUI GetInstance()
+        internal static ShipDesignWindow GetInstance()
         {
-            ShipDesignUI thisitem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(ShipDesignUI)))
+            ShipDesignWindow thisitem;
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(ShipDesignWindow)))
             {
-                thisitem = new ShipDesignUI();
+                thisitem = new ShipDesignWindow();
+                thisitem.RefreshComponentDesigns();
+                thisitem.RefreshExistingClasses();
             }
             else
-                thisitem = (ShipDesignUI)_uiState.LoadedWindows[typeof(ShipDesignUI)];
-            
+                thisitem = (ShipDesignWindow)_uiState.LoadedWindows[typeof(ShipDesignWindow)];
+
             return thisitem;
         }
 
         void RefreshComponentDesigns()
         {
-            _componentDesigns = _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToList();
-            _componentDesigns.Sort((a, b) => a.Name.CompareTo(b.Name));
+            AvailableShipComponents = _factionInfoDB.ComponentDesigns.Values.ToList();
+            AvailableShipComponents.Sort((a, b) => a.Name.CompareTo(b.Name));
         }
 
         void RefreshExistingClasses()
         {
-            _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
-            _exsistingClasses.Sort((a, b) => a.Name.CompareTo(b.Name));
+            ExistingShipDesigns = _factionInfoDB.ShipDesigns.Values.Where(d => !d.IsObsolete).ToList();
+            ExistingShipDesigns.Sort((a, b) => a.Name.CompareTo(b.Name));
+
+            if(ExistingShipDesigns.Count == 0)
+            {
+                ShowNoDesigns = true;
+                return;
+            }
+            if(SelectedExistingDesignID == Guid.Empty && ExistingShipDesigns.Count > 0)
+                Select(ExistingShipDesigns[0]);
+
+            ShowNoDesigns = false;
         }
 
         void RefreshArmor()
@@ -104,7 +121,7 @@ namespace Pulsar4X.SDL2UI
             {
                 var armorMat = _uiState.Game.StaticData.GetICargoable(kvp.Key);
                 _armorSelection.Add(kvp.Value);
-                
+
                 _armorNames[i]= armorMat.Name;
                 i++;
             }
@@ -113,15 +130,28 @@ namespace Pulsar4X.SDL2UI
             _armorThickness = 3;
         }
 
+        void Select(ShipDesign design)
+        {
+            SelectedExistingDesignID = design.ID;
+            SelectedDesignName = ImGuiSDL2CSHelper.BytesFromString(design.Name, 32);
+            SelectedComponents = design.Components;
+            SelectedDesignObsolete = design.IsObsolete;
+            _armor = design.Armor.type;
+            GenImage();
+            _armorIndex = _armorSelection.IndexOf(_armor);
+            _armorThickness = design.Armor.thickness;
+            DesignChanged = true;
+        }
+
         internal override void Display()
         {
             if (IsActive && ImGui.Begin("Ship Design", ref IsActive, _flags))
             {
-                if(_exsistingClasses.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList().Count)
+                if(ExistingShipDesigns.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.Count)
                 {
-                    _exsistingClasses = _uiState.Faction.GetDataBlob<FactionInfoDB>().ShipDesigns.Values.ToList();
+                    RefreshExistingClasses();
                 }
-                if (_componentDesigns.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.ToArray().Length)
+                if (AvailableShipComponents.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.Count)
                 {
                     RefreshComponentDesigns();
                 }
@@ -129,6 +159,12 @@ namespace Pulsar4X.SDL2UI
                 DisplayExistingDesigns();
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(27f);
+
+                if(ShowNoDesigns)
+                {
+                    ImGui.Text("Create a new design to begin editing.");
+                    return;
+                }
 
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
                 var firstChildSize = new Vector2(windowContentSize.X * 0.33f, windowContentSize.Y);
@@ -156,21 +192,38 @@ namespace Pulsar4X.SDL2UI
 
         internal void NewShipButton()
         {
-            if (ImGui.Button("Create Design"))
+            if (ImGui.Button("Save Design"))
             {
                 int version = 0;
-                var strName = ImGuiSDL2CSHelper.StringFromBytes(_designName);
-                foreach (var shipclass in _exsistingClasses)
-                {
-                    if (shipclass.Name == strName)
-                    {
-                        if (shipclass.DesignVersion >= version)
-                            version = shipclass.DesignVersion + 1;
-                    }
-                }
-                ShipDesign shipDesign = new ShipDesign(_uiState.Faction.GetDataBlob<FactionInfoDB>(), strName, _shipComponents, (_armor, _armorThickness));
-                shipDesign.DesignVersion = version;
+                var name = ImGuiSDL2CSHelper.StringFromBytes(SelectedDesignName);
 
+                if(name.IsNotNullOrEmpty())
+                {
+                    foreach (var shipclass in ExistingShipDesigns)
+                    {
+                        if (shipclass.Name.Equals(name))
+                        {
+                            if (shipclass.DesignVersion >= version)
+                                version = shipclass.DesignVersion + 1;
+                        }
+                    }
+                    var design = _factionInfoDB.ShipDesigns[SelectedExistingDesignID];
+                    design.Name = name;
+                    design.Components = SelectedComponents;
+                    design.Armor = (_armor, _armorThickness);
+                    design.IsObsolete = SelectedDesignObsolete;
+
+                    if(design.IsObsolete)
+                    {
+                        SelectedExistingDesignID = Guid.Empty;
+                    }
+
+                    RefreshExistingClasses();
+                    // var shipDesign = new ShipDesign(_uiState.Faction.GetDataBlob<FactionInfoDB>(), name, SelectedComponents, (_armor, _armorThickness))
+                    // {
+                    //     DesignVersion = version
+                    // };
+                }
             }
         }
 
@@ -182,29 +235,29 @@ namespace Pulsar4X.SDL2UI
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                 ImGui.Text("Existing Designs");
-                // ImGui.SameLine();
-                // ImGui.Text("[?]");
-                // if(ImGui.IsItemHovered())
-                //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
-                //         "Select a template and then design the attributes of the component to your specification.\n" +
-                //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
-                //         "installations.");
+                ImGui.SameLine();
+                ImGui.Text("[?]");
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Select an existing ship design to edit or create a new design.");
                 ImGui.PopStyleColor();
                 ImGui.Separator();
 
-                for (int i = 0; i < _exsistingClasses.Count; i++)
+                foreach(var design in ExistingShipDesigns)
                 {
-                    string name = _exsistingClasses[i].Name;
-                    if (ImGui.Selectable(name))
+                    string name = design.Name;
+                    if (ImGui.Selectable(name + "###existing-design-" + design.ID, design.ID == SelectedExistingDesignID))
                     {
-                        _selectedDesign = i;
-                        _designName = ImGuiSDL2CSHelper.BytesFromString(_exsistingClasses[i].Name, 32);
-                        _shipComponents = _exsistingClasses[i].Components;
-                        _armor = _exsistingClasses[i].Armor.type;
-                        GenImage();
-                        _armorIndex = _armorSelection.IndexOf(_armor);
-                        _armorThickness = _exsistingClasses[i].Armor.thickness;
-                        designChanged = true;
+                        Select(design);
+                    }
+                    if(ImGui.BeginPopupContextItem())
+                    {
+                        if(ImGui.MenuItem("Delete###delete-" + design.ID))
+                        {
+                            _factionInfoDB.ShipDesigns.Remove(design.ID);
+                            SelectedExistingDesignID = Guid.Empty;
+                            RefreshExistingClasses();
+                        }
+                        ImGui.EndPopup();
                     }
                 }
                 ImGui.EndChild();
@@ -212,12 +265,22 @@ namespace Pulsar4X.SDL2UI
 
             if(ImGui.Button("Create New Design", new Vector2(204f, 0f)))
             {
-                _selectedDesign = -1;
-                _designName = new byte[32];
-                _shipComponents = new List<(ComponentDesign design, int count)>();
+                string originalName = "auto-gen names pls", name = originalName;
+                int counter = 1;
+                while(_factionInfoDB.ShipDesigns.Values.Any(d => d.Name.Equals(name)))
+                {
+                    name = originalName + " " + counter.ToString();
+                    counter++;
+                }
+                SelectedDesignName = ImGuiSDL2CSHelper.BytesFromString(name);
+                SelectedComponents = new List<(ComponentDesign design, int count)>();
                 GenImage();
                 RefreshArmor();
-                designChanged = true;
+                DesignChanged = true;
+
+                ShipDesign design = new(_factionInfoDB, name, SelectedComponents, (_armor, _armorThickness));
+                RefreshExistingClasses();
+                SelectedExistingDesignID = design.ID;
             }
         }
 
@@ -243,10 +306,10 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableHeadersRow();
 
                 int selectedItem = -1;
-                for (int i = 0; i < _shipComponents.Count; i++)
+                for (int i = 0; i < SelectedComponents.Count; i++)
                 {
-                    string name = _shipComponents[i].design.Name;
-                    int number = _shipComponents[i].count;
+                    string name = SelectedComponents[i].design.Name;
+                    int number = SelectedComponents[i].count;
 
                     ImGui.TableNextColumn();
                     ImGui.Text(name);
@@ -261,20 +324,20 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     if (ImGui.SmallButton("+##" + i)) //todo: imagebutton
                     {
-                        _shipComponents[i] = (_shipComponents[i].design, _shipComponents[i].count + 1);
-                        designChanged = true;
+                        SelectedComponents[i] = (SelectedComponents[i].design, SelectedComponents[i].count + 1);
+                        DesignChanged = true;
                     }
                     ImGui.SameLine();
                     if (ImGui.SmallButton("-##" + i) && number > 0) //todo: imagebutton
                     {
-                        _shipComponents[i] = (_shipComponents[i].design, _shipComponents[i].count - 1);
-                        designChanged = true;
+                        SelectedComponents[i] = (SelectedComponents[i].design, SelectedComponents[i].count - 1);
+                        DesignChanged = true;
                     }
                     ImGui.TableNextColumn();
                     if (ImGui.SmallButton("x##" + i)) //todo: imagebutton
                     {
-                        _shipComponents.RemoveAt(i);
-                        designChanged = true;
+                        SelectedComponents.RemoveAt(i);
+                        DesignChanged = true;
                     }
 
                     if (i > 0)
@@ -283,22 +346,22 @@ namespace Pulsar4X.SDL2UI
                         if (ImGui.SmallButton("^##" + i)) //todo: imagebutton
                         {
 
-                            (ComponentDesign design, int count) item = _shipComponents[i];
-                            _shipComponents.RemoveAt(i);
-                            _shipComponents.Insert(i - 1, item);
+                            (ComponentDesign design, int count) item = SelectedComponents[i];
+                            SelectedComponents.RemoveAt(i);
+                            SelectedComponents.Insert(i - 1, item);
 
-                            designChanged = true;
+                            DesignChanged = true;
                         }
                     }
-                    if (i < _shipComponents.Count - 1)
+                    if (i < SelectedComponents.Count - 1)
                     {
                         ImGui.SameLine();
                         if (ImGui.SmallButton("v##" + i)) //todo: imagebutton
                         {
-                            (ComponentDesign design, int count) item = _shipComponents[i];
-                            _shipComponents.RemoveAt(i);
-                            _shipComponents.Insert(i + 1, item);
-                            designChanged = true;
+                            (ComponentDesign design, int count) item = SelectedComponents[i];
+                            SelectedComponents.RemoveAt(i);
+                            SelectedComponents.Insert(i + 1, item);
+                            DesignChanged = true;
                         }
                     }
                 }
@@ -330,7 +393,7 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.Combo("##Armor Selection", ref _armorIndex, _armorNames, _armorNames.Length))
                 {
                     _armor = _armorSelection[_armorIndex];
-                    designChanged = true;
+                    DesignChanged = true;
                 }
 
                 ImGui.TableNextColumn();
@@ -347,13 +410,13 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.SmallButton("+##armor")) //todo: imagebutton
                 {
                     _armorThickness++;
-                    designChanged = true;
+                    DesignChanged = true;
                 }
                 ImGui.SameLine();
                 if (ImGui.SmallButton("-##armor") && _armorThickness > 0) //todo: imagebutton
                 {
                     _armorThickness--;
-                    designChanged = true;
+                    DesignChanged = true;
                 }
 
                 ImGui.EndTable();
@@ -380,12 +443,12 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableSetupColumn("Mass", ImGuiTableColumnFlags.None, 0.7f);
                 ImGui.TableHeadersRow();
 
-                for (int i = 0; i < _componentDesigns.Count; i++)
+                for (int i = 0; i < AvailableShipComponents.Count; i++)
                 {
-                    if(!_componentDesigns[i].ComponentMountType.HasFlag(ComponentMountType.ShipComponent))
+                    if(!AvailableShipComponents[i].ComponentMountType.HasFlag(ComponentMountType.ShipComponent))
                         continue;
 
-                    var design = _componentDesigns[i];
+                    var design = AvailableShipComponents[i];
                     string name = design.Name;
 
                     ImGui.TableNextColumn();
@@ -394,8 +457,8 @@ namespace Pulsar4X.SDL2UI
                         _selectedDesignsIndex = i;
                         if (ImGui.IsMouseDoubleClicked(0))
                         {
-                            _shipComponents.Add((_componentDesigns[_selectedDesignsIndex], 1));
-                            designChanged = true;
+                            SelectedComponents.Add((AvailableShipComponents[_selectedDesignsIndex], 1));
+                            DesignChanged = true;
                         }
                     }
 
@@ -409,7 +472,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void GenImage()
         {
-            EntityDamageProfileDB _profile = new EntityDamageProfileDB(_shipComponents, (_armor, _armorThickness));
+            EntityDamageProfileDB _profile = new EntityDamageProfileDB(SelectedComponents, (_armor, _armorThickness));
             _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _profile.DamageProfile, _imagecreated);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;
@@ -495,7 +558,18 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndTable();
             }
 
-            ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
+            ImGui.NewLine();
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text("Details");
+            ImGui.PopStyleColor();
+            ImGui.Separator();
+
+            ImGui.Text("Design Name:");
+            ImGui.InputText("###Design Name", SelectedDesignName, (uint)SelectedDesignName.Length);
+            ImGui.NewLine();
+            ImGui.Text("Is Obsolete?");
+            ImGui.Checkbox("###IsObsolete", ref SelectedDesignObsolete);
+            ImGui.NewLine();
             NewShipButton();
             ImGui.SameLine();
             ImGui.Checkbox("Show Pic", ref displayimage);
@@ -509,7 +583,7 @@ namespace Pulsar4X.SDL2UI
 
         private void UpdateShipStats()
         {
-            if(!designChanged) return;
+            if(!DesignChanged) return;
 
             if(displayimage)
             {
@@ -530,7 +604,7 @@ namespace Pulsar4X.SDL2UI
             Guid thrusterFuel = Guid.Empty;
             Dictionary<Guid, double> cstore = new Dictionary<Guid, double>();
 
-            foreach (var component in _shipComponents)
+            foreach (var component in SelectedComponents)
             {
                 mass += component.design.MassPerUnit * component.count;
                 if (component.design.HasAttribute<NewtonionThrustAtb>())
@@ -598,7 +672,7 @@ namespace Pulsar4X.SDL2UI
             _massWet = _massDry + _fuelStore;
             _dv = OrbitMath.TsiolkovskyRocketEquation(_massWet, _massDry, ev);
 
-            designChanged = false;
+            DesignChanged = false;
         }
 
         internal bool CheckDisplayImage(float maxwidth, float maxheight, float checkwidth)
@@ -606,7 +680,7 @@ namespace Pulsar4X.SDL2UI
             if (_shipImgPtr != IntPtr.Zero && displayimage)
             {
 
-                maxwidth = ImGui.GetWindowWidth();// ImGui.GetColumnWidth();;// 
+                maxwidth = ImGui.GetWindowWidth();// ImGui.GetColumnWidth();;//
                 int maxheightint = (int)(maxheight / 4);
                 maxheight = maxheightint * 4;//ImGui.GetWindowHeight() * _imageratio;
                 float scalew = 1;
