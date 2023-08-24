@@ -410,18 +410,16 @@ namespace Pulsar4X.SDL2UI
 
                     if(_newJobCanAutoInstall && _newJobAutoInstall && _lastClickedDesign is ComponentDesign design)
                     {
-                        ComponentDesign cDesign = design;
-                        switch(cDesign.ComponentMountType)
+                        if(design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation))
                         {
-                            case ComponentMountType.PlanetInstallation:
-                                _newConJob.InstallOn = Entity;
-                                break;
-                            case ComponentMountType.Fighter:
-                            case ComponentMountType.Missile:
-                            case ComponentMountType.ShipCargo:
-                            case ComponentMountType.ShipComponent:
-                                _newConJob.InstallOn = _newJobAutoInstallEntity;
-                                break;
+                            _newConJob.InstallOn = Entity;
+                        }
+                        else if(design.ComponentMountType.HasFlag(ComponentMountType.ShipComponent)
+                            || design.ComponentMountType.HasFlag(ComponentMountType.ShipCargo)
+                            || design.ComponentMountType.HasFlag(ComponentMountType.Fighter)
+                            || design.ComponentMountType.HasFlag(ComponentMountType.Missile))
+                        {
+                            _newConJob.InstallOn = _newJobAutoInstallEntity;
                         }
                     }
 
