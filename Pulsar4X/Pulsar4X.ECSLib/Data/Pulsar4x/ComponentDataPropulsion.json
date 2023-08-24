@@ -84,7 +84,7 @@
           "DescriptionFormula": "'A Newtonian Thruster'",
           "ID": "B03FE82F-EE70-4A9A-AC61-5A7D44A3364E",
           "MassFormula": "Ability('Mass')",
-          "VolumeFormula": "Ability('Mass') / 285",
+          "VolumeFormula": "Max(1, Ability('Mass') / 285)",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "0",
           "ResourceCostFormula": {
@@ -159,7 +159,7 @@
           "DescriptionFormula": "'Hydogen engines tend to have a higher fuel efficency, but the fuel is less dense requring larger tanks'",
           "ID": "A0F3E5BB-0AA6-41D0-9873-5A7AC9080B69",
           "MassFormula": "Ability('Mass')",
-          "VolumeFormula": "Ability('Mass') / 130",
+          "VolumeFormula": "Max(1, Ability('Mass') / 130)",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "0",
           "ResourceCostFormula": {
@@ -234,7 +234,7 @@
           "DescriptionFormula": "'Warps a ship through non newtonion space'",
           "ID": "7d0b867f-e239-4b93-9b30-c6d4b769b5e4",
           "MassFormula": "Ability('Mass')",
-          "VolumeFormula": "Ability('Mass')",
+          "VolumeFormula": "Max(1, Ability('Mass'))",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "[Mass]",
           "ResourceCostFormula": {
