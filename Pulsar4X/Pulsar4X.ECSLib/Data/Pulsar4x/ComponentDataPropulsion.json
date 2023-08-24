@@ -9,7 +9,7 @@
           "DescriptionFormula": "'A Newtonian Thruster'",
           "ID": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
           "MassFormula": "Ability('Mass')",
-          "VolumeFormula": "Ability('Mass') / 150",
+          "VolumeFormula": "Max(1, Ability('Mass') / 150)",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "0",
           "ResourceCostFormula": {
@@ -309,7 +309,7 @@
           ]
         }
       }
- 
+
     ]
   }
 }

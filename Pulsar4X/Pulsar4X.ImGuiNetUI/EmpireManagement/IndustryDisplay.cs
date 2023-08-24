@@ -205,7 +205,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 _selectedProdLine = id;
                                 _newjobSelectionIndex = (_selectedProdLine, 0);
-                                
+
                                 _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
                                 _lastClickedJob = _newConJob;
                                 _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
@@ -406,12 +406,11 @@ namespace Pulsar4X.SDL2UI
 
                 if (ImGui.Button("Queue the job to " + _prodLines[_selectedProdLine].Name))
                 {
-
                     _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
 
-                    if(_newJobCanAutoInstall && _newJobAutoInstall && _lastClickedDesign is ComponentDesign)
+                    if(_newJobCanAutoInstall && _newJobAutoInstall && _lastClickedDesign is ComponentDesign design)
                     {
-                        ComponentDesign cDesign = (ComponentDesign)_lastClickedDesign;
+                        ComponentDesign cDesign = design;
                         switch(cDesign.ComponentMountType)
                         {
                             case ComponentMountType.PlanetInstallation:
@@ -428,8 +427,6 @@ namespace Pulsar4X.SDL2UI
 
                     var cmd = IndustryOrder2.CreateNewJobOrder(_factionID, Entity, _selectedProdLine, _newConJob);
                     _newConJob.InitialiseJob((ushort)_newJobbatchCount, _newJobRepeat);
-                    if(_newJobAutoInstall)
-                        _newConJob.InstallOn = Entity;
                     _lastClickedJob = _newConJob;
                     _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                     StaticRefLib.OrderHandler.HandleOrder(cmd);
