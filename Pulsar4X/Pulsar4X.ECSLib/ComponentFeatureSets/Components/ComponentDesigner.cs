@@ -148,11 +148,12 @@ namespace Pulsar4X.ECSLib
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
             {
-               colonyConstruction.ProductionLines[productionLine].Jobs.Remove(batchJob);
-               if (batchJob.Auto)
-               {
-                   colonyConstruction.ProductionLines[productionLine].Jobs.Add(batchJob);
-               }
+                colonyConstruction.ProductionLines[productionLine].Jobs.Remove(batchJob);
+                if (batchJob.Auto)
+                {
+                    batchJob.NumberCompleted = 0;
+                    colonyConstruction.ProductionLines[productionLine].Jobs.Add(batchJob);
+                }
             }
         }
 
