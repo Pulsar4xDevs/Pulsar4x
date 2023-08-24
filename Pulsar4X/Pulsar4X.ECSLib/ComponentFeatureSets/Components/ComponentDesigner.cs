@@ -306,8 +306,12 @@ namespace Pulsar4X.ECSLib
 
             SetAttributes();
 
+            if(_design.ResearchCostValue == 0)
+            {
+                faction.IndustryDesigns[_design.ID] = _design;
+            }
+
             faction.InternalComponentDesigns[_design.ID] = _design;
-            //faction.IndustryDesigns[_design.ID] = _design;
             return _design;
         }
 

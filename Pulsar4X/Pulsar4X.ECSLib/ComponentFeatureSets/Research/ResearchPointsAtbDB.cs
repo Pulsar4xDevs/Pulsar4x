@@ -5,7 +5,7 @@ namespace Pulsar4X.ECSLib
     public class ResearchPointsAtbDB : IComponentDesignAttribute
     {
         [JsonProperty]
-        private int _pointsPerEconTick;        
+        private int _pointsPerEconTick;
         public int PointsPerEconTick { get { return _pointsPerEconTick; } internal set { _pointsPerEconTick = value; } }
 
         public ResearchPointsAtbDB()
@@ -33,12 +33,17 @@ namespace Pulsar4X.ECSLib
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            if (!parentEntity.HasDataBlob<EntityResearchDB>())
+            if (parentEntity.TryGetDatablob<EntityResearchDB>(out var db))
             {
-                var db = new EntityResearchDB();
+                db.Labs.Add(componentInstance, _pointsPerEconTick);
+            }
+            else
+            {
+                db = new EntityResearchDB();
                 db.Labs.Add(componentInstance, _pointsPerEconTick);
                 parentEntity.SetDataBlob(db);
             }
+
             if(!parentEntity.HasDataBlob<TeamsHousedDB>())
                 parentEntity.SetDataBlob(new TeamsHousedDB());
         }

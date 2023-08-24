@@ -198,26 +198,33 @@ namespace Pulsar4X.SDL2UI
 
         public static void DisplayResearch(this Entity entity, EntityState entityState, GlobalUIState uiState)
         {
+            if(!entity.TryGetDatablob<EntityResearchDB>(out var researchDB)) return;
+
             Vector2 topSize = ImGui.GetContentRegionAvail();
             if(ImGui.BeginChild("NumberOfResearchLabs" + entity.Guid, new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                if(entity.TryGetDatablob<EntityResearchDB>(out var researchDB))
+                ImGui.Text("Universities:");
+                ImGui.SameLine();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                ImGui.Text(researchDB.Labs.Count.ToString("0"));
+                ImGui.PopStyleColor();
+                ImGui.SameLine();
+                ImGui.Text("Research Points:");
+                ImGui.SameLine();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                ImGui.Text(researchDB.Labs.Values.Sum().ToString());
+                ImGui.PopStyleColor();
+
+                ImGui.EndChild();
+            }
+
+            Vector2 sizeAvailable = ImGui.GetContentRegionAvail();
+            if(ImGui.BeginChild("UniversityList", sizeAvailable, true))
+            {
+                foreach(var (instance, value) in researchDB.Labs)
                 {
-                    ImGui.Text("Number of Research Labs:");
-                    ImGui.SameLine();
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                    ImGui.Text(researchDB.Labs.Count.ToString("0"));
-                    ImGui.PopStyleColor();
-                    ImGui.SameLine();
-                    ImGui.Text("Research Points:");
-                    ImGui.SameLine();
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                    ImGui.Text(researchDB.Labs.Values.Sum().ToString());
-                    ImGui.PopStyleColor();
-                }
-                else
-                {
-                    ImGui.Text("Number of Research Labs: 0");
+                    ImGui.Text(instance.Name);
+                    ImGui.Text(value.ToString());
                 }
                 ImGui.EndChild();
             }

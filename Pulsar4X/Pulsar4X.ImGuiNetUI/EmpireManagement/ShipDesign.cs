@@ -470,7 +470,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableNextColumn();
                 ImGui.Text("Warp Bubble Creation");
                 ImGui.TableNextColumn();
-                ImGui.Text(Stringify.Energy(_wcc));
+                ImGui.Text(Stringify.Power(_wcc));
 
                 ImGui.TableNextColumn();
                 ImGui.Text("Warp Bubble Sustain");
@@ -480,7 +480,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableNextColumn();
                 ImGui.Text("Warp Bubble Collapse");
                 ImGui.TableNextColumn();
-                ImGui.Text(Stringify.Energy(_wec));
+                ImGui.Text(Stringify.Power(_wec));
 
                 ImGui.TableNextColumn();
                 ImGui.Text("Energy Output");
