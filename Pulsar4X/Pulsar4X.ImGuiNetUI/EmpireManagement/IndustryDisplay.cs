@@ -451,7 +451,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetCursorPosX(sizeAvailable.X / 2 - textSize);
             ImGui.Text(inputs);
             ImGui.PopStyleColor();
-            if(ImGui.BeginTable("JobCostsTables", 4, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("JobCostsTables", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
                 ImGui.TableSetupColumn("Cost Per Quantity", ImGuiTableColumnFlags.None, 1f);
@@ -460,6 +460,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableHeadersRow();
 
                 ImGui.TableNextColumn();
+                ImGui.Text("");
+                ImGui.SameLine();
                 ImGui.Text("Industry Points");
                 ImGui.TableNextColumn();
                 ImGui.Text(selectedJob.ProductionPointsLeft.ToString());
@@ -479,6 +481,8 @@ namespace Pulsar4X.SDL2UI
                     var totalCost = selectedJob.NumberOrdered * item.Value;
 
                     ImGui.TableNextColumn();
+                    ImGui.Text("");
+                    ImGui.SameLine();
                     ImGui.Text(cargoItem.Name);
                     ImGui.TableNextColumn();
                     ImGui.Text(item.Value.ToString());
@@ -522,7 +526,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.Text(outputs);
             ImGui.PopStyleColor();
 
-            if(ImGui.BeginTable("JobOutputsTables", 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("JobOutputsTables", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
                 ImGui.TableSetupColumn("Amount Per Quantity", ImGuiTableColumnFlags.None, 1f);
@@ -530,6 +534,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableHeadersRow();
 
                 ImGui.TableNextColumn();
+                ImGui.Text("");
+                ImGui.SameLine();
                 ImGui.Text(_lastClickedDesign.Name);
                 ImGui.TableNextColumn();
                 ImGui.Text(_lastClickedDesign.OutputAmount.ToString());
