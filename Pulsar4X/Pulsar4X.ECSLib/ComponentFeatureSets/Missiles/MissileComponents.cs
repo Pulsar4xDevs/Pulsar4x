@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
     public enum TriggerTypes
     {
         Contact,
-        Timer, 
+        Timer,
         Prox,
         Depth,
     }
@@ -33,8 +33,8 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         Submunitions
     }
 
-    
-    
+
+
     public class OrdnancePayloadAtb : IComponentDesignAttribute
     {
         public TriggerTypes Trigger;
@@ -47,7 +47,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            
+
         }
         public string AtbName()
         {
@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public double FragMass;
         public double FragCount;
         public double FragCone;
-        
+
         public OrdnanceExplosivePayload(int trigger, double totalMass, double tntEqMass, double fragMass, double fragCount, double fragCone) : base((TriggerTypes)trigger, totalMass)
         {
             ExposiveTnTEQMass = tntEqMass;
@@ -76,10 +76,10 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             FragCone = fragCone;
         }
     }
-    
+
     public class OrdnanceShapedPayload : OrdnancePayloadAtb
     {
-        double ExposiveTnTEQMass; 
+        double ExposiveTnTEQMass;
         double LinerRadius;
         double LinerDepth;
         double LinerAngle;
@@ -106,14 +106,15 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         }
     }
 
-    
-    
-    
+
+
+
     public class OrdnanceDesign : ICargoable, IConstrucableDesign, ISerializable
     {
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.IsOrdinance;
         public Guid ID { get; } = Guid.NewGuid();
         public string Name { get; set; }
+        public bool IsValid {get; set; } = true;
         public Guid CargoTypeID { get; }
         public int DesignVersion = 0;
         public bool IsObsolete = false;
@@ -128,7 +129,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public double DryMass { get; }
         public double ExaustVelocity { get; }
         public double BurnRate { get; }
-        
+
         public double Volume;
         public List<(ComponentDesign design, int count)> Components;
         public (ArmorSD type, float thickness) Armor;
@@ -139,7 +140,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         public Dictionary<Guid, long> ShipInstanceCost = new Dictionary<Guid, long>();
         public int CrewReq;
         public long IndustryPointCosts { get; }
-        
+
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ordinance Construction"
         public Guid IndustryTypeID { get; } = new Guid("5ADBF620-3740-4FD7-98BE-E8670D58945F");
@@ -149,7 +150,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
         }
 
         public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
-        { 
+        {
             var industrydb = industryEntity.GetDataBlob<IndustryAbilityDB>();
         }
 
@@ -167,9 +168,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             faction.IndustryDesigns[ID] = this;
             Name = name;
             Components = components;
-            
-            //TODO! we're leaking softcode into hard code here! this is the "ordnance" cargo type, tells us to store this missile in "ordnance" type cargo. 
-            CargoTypeID = new Guid("055E2026-20A4-4CFA-A8CA-A01915A48B5E"); 
+
+            //TODO! we're leaking softcode into hard code here! this is the "ordnance" cargo type, tells us to store this missile in "ordnance" type cargo.
+            CargoTypeID = new Guid("055E2026-20A4-4CFA-A8CA-A01915A48B5E");
             BurnRate = 0;
             Guid fuelType = Guid.Empty;
             double fuelMass = fuelAmountKG;
@@ -177,7 +178,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             double vol = 0;
             foreach (var component in components)
             {
-                //If the mounttype does not include missiles, it will just ignore the component and wont add it. 
+                //If the mounttype does not include missiles, it will just ignore the component and wont add it.
                 if((component.design.ComponentMountType & ComponentMountType.Missile) == ComponentMountType.Missile)
                 {
                     mass += component.design.MassPerUnit * component.count;
@@ -207,7 +208,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             WetMass = mass + fuelMass;
             DryMass = mass;
             Density = WetMass / 1000;
-            
+
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
@@ -215,7 +216,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
             MassPerUnit = (int)WetMass;
             VolumePerUnit = vol;
         }
-        
+
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -241,9 +242,9 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            
+
         }
-        
+
         public string AtbName()
         {
             return "EW Suite";
@@ -278,7 +279,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
     {
         public GuidanceTypes GetGuidenceType => GuidanceTypes.Active;
     }
-    
+
     interface ITriggerType
     {
         TriggerTypes GetTriggerType { get; }

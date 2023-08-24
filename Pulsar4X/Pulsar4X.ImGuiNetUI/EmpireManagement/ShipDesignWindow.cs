@@ -212,6 +212,15 @@ namespace Pulsar4X.SDL2UI
                     design.Components = SelectedComponents;
                     design.Armor = (_armor, _armorThickness);
                     design.IsObsolete = SelectedDesignObsolete;
+                    if(design.IsObsolete)
+                    {
+                        // If the design is obsolete mark it is invalid so it can't be produced
+                        design.IsValid = false;
+                    }
+                    else
+                    {
+                        design.IsValid = IsDesignValid();
+                    }
 
                     if(design.IsObsolete)
                     {
@@ -278,7 +287,10 @@ namespace Pulsar4X.SDL2UI
                 RefreshArmor();
                 DesignChanged = true;
 
-                ShipDesign design = new(_factionInfoDB, name, SelectedComponents, (_armor, _armorThickness));
+                ShipDesign design = new(_factionInfoDB, name, SelectedComponents, (_armor, _armorThickness))
+                {
+                    IsValid = false
+                };
                 RefreshExistingClasses();
                 SelectedExistingDesignID = design.ID;
             }
@@ -483,13 +495,10 @@ namespace Pulsar4X.SDL2UI
         {
             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
             ImGui.Text("Statistics");
-            // ImGui.SameLine();
-            // ImGui.Text("[?]");
-            // if(ImGui.IsItemHovered())
-            //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
-            //         "Select a template and then design the attributes of the component to your specification.\n" +
-            //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
-            //         "installations.");
+            ImGui.SameLine();
+            ImGui.Text("[?]");
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("The attributes of the ship are calculated based on the components you have added to the design.");
             ImGui.PopStyleColor();
             ImGui.Separator();
 
@@ -569,6 +578,18 @@ namespace Pulsar4X.SDL2UI
             ImGui.NewLine();
             ImGui.Text("Is Obsolete?");
             ImGui.Checkbox("###IsObsolete", ref SelectedDesignObsolete);
+
+            if(!IsDesignValid())
+            {
+                ImGui.NewLine();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                ImGui.Text("Current design is invalid!");
+                // TODO: tell the player what is invalid about their design
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("You will not be able to construct ships with an invalid design.");
+                ImGui.PopStyleColor();
+            }
+
             ImGui.NewLine();
             NewShipButton();
             ImGui.SameLine();
@@ -673,6 +694,15 @@ namespace Pulsar4X.SDL2UI
             _dv = OrbitMath.TsiolkovskyRocketEquation(_massWet, _massDry, ev);
 
             DesignChanged = false;
+        }
+
+        private bool IsDesignValid()
+        {
+            return _massDry > 0 &&
+                    _tn > 0 &&
+                    _ttwr > 0 &&
+                    _egen > 0 &&
+                    _estor > 0;
         }
 
         internal bool CheckDisplayImage(float maxwidth, float maxheight, float checkwidth)

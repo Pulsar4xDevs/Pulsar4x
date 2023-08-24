@@ -8,15 +8,16 @@ namespace Pulsar4X.ECSLib
     public class ProcessedMaterialSD : ICargoable, IConstrucableDesign
     {
         public string Name { get; init; }
+        public bool IsValid {get; set; } = true;
         public Dictionary<Guid, long> ResourceCosts { get; } = new Dictionary<Guid, long>();
 
         public long IndustryPointCosts
         {
-            get; 
+            get;
             init;
         }
         public Guid IndustryTypeID { get; set; }
-        
+
         public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();

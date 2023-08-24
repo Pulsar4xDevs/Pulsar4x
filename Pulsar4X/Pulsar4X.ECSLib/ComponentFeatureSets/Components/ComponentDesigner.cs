@@ -86,6 +86,8 @@ namespace Pulsar4X.ECSLib
         public Guid ID { get; internal set; }
         public string Name { get; internal set; } //player defined name. ie "5t 2kn Thruster".
 
+        public bool IsValid {get; set; } = true;
+
         public Guid CargoTypeID { get; internal set; }
         public long MassPerUnit { get; internal set; }
 

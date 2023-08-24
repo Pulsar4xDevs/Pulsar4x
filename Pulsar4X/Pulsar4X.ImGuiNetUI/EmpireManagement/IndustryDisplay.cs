@@ -94,7 +94,8 @@ namespace Pulsar4X.SDL2UI
             Dictionary<Guid, List<int>> _constructablesIndexesByType = new ();
             foreach (var (id, design) in _factionInfoDB.IndustryDesigns)
             {
-                //_constructableDesigns[i] = kvp.Value;
+                if(!design.IsValid) continue;
+
                 constructablesNames[i] = design.Name;
                 constructablesIDs[i] = id;
                 Guid typeID = design.IndustryTypeID;

@@ -109,6 +109,8 @@ namespace Pulsar4X.ECSLib.Industry
         Guid ID { get;  }
         string Name { get;  } //player defined name. ie "5t 2kn Thruster".
 
+        bool IsValid { get; }
+
         Dictionary<Guid, long> ResourceCosts { get; }
 
         long IndustryPointCosts { get; }
