@@ -615,9 +615,7 @@ namespace Pulsar4X.ECSLib
         {
             if (_rs25 != null)
                 return _rs25;
-            
             ComponentDesigner engineDesigner;
-
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("A0F3E5BB-0AA6-41D0-9873-5A7AC9080B69")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
             engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(3527); 
@@ -779,6 +777,8 @@ namespace Pulsar4X.ECSLib
 
         public static ComponentDesign DefaultCargoInstallation(Game game, Entity faction)
         {
+            if (_cargoInstalation != null)
+                return _cargoInstalation;
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{B8239721-B60E-4C11-8E45-5F64F6BA5FA5}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
@@ -792,6 +792,8 @@ namespace Pulsar4X.ECSLib
         
         public static ComponentDesign DefaultFisionReactor(Game game, Entity faction)
         {
+            if (_reactor != null)
+                return _reactor;
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{97cf75a1-5ca3-4037-8832-4d81a89f97fa}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
@@ -805,6 +807,8 @@ namespace Pulsar4X.ECSLib
         
         public static ComponentDesign DefaultBatteryBank(Game game, Entity faction)
         {
+            if (_battery != null)
+                return _battery;
             ComponentDesigner componentDesigner;
             ComponentTemplateSD template = game.StaticData.ComponentTemplates[new Guid("{1de23a8b-d44b-4e0f-bacd-5463a8eb939d}")];
             componentDesigner = new ComponentDesigner(template, faction.GetDataBlob<FactionTechDB>());
