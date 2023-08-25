@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionTechs"></param>
         internal void DoResearch(Entity entity)
         {
-            
+
             Entity faction;
             entity.Manager.FindEntityByGuid(entity.FactionOwnerID, out faction);
             FactionAbilitiesDB factionAbilities = faction.GetDataBlob<FactionAbilitiesDB>();
@@ -69,20 +69,20 @@ namespace Pulsar4X.ECSLib
                     allLabs.Add((labInstance, points));
                 }
             }
-            
+
             int labIndex = 0;
             int maxLabs = allLabs.Count;
-            
+
             foreach (Scientist scientist in entity.GetDataBlob<TeamsHousedDB>().TeamsByType[TeamTypes.Science])
             {
-    
+
                 if (scientist.ProjectQueue.Count == 0)
                 {
                     continue;
                 }
                 Guid projectGuid = scientist.ProjectQueue[0].techID;
                 bool cycleProject = scientist.ProjectQueue[0].cycle;
-                
+
                 if(!factionTechs.IsResearchable(projectGuid))
                 {
                     scientist.ProjectQueue.RemoveAt(0);
@@ -91,7 +91,7 @@ namespace Pulsar4X.ECSLib
 
                 int assignedLabs = scientist.AssignedLabs;
                 //(TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
-                
+
                 TechSD project = factionTechs.GetResarchableTech(projectGuid).tech;//_staticData.Techs[projectGuid];
                 //int numProjectLabs = scientist.TeamSize;
                 float bonus = 1;
@@ -106,9 +106,9 @@ namespace Pulsar4X.ECSLib
                 {
                     researchPoints += allLabs[i].pnts;
                 }
-                
+
                 researchPoints = (int)(researchPoints * bonus);
-                
+
                 if (factionTechs.IsResearchable(project.ID))
                 {
                     int currentLvl = factionTechs.GetLevelforTech(project);
@@ -117,7 +117,7 @@ namespace Pulsar4X.ECSLib
                     {
                         scientist.ProjectQueue.RemoveAt(0);
 
-                        if(project.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfo) && project.Design != null)
+                        if(project.Faction != null && project.Faction.TryGetDatablob<FactionInfoDB>(out var factionInfo) && project.Design != null)
                         {
                             factionInfo.IndustryDesigns[project.ID] = project.Design;
                         }
@@ -140,14 +140,14 @@ namespace Pulsar4X.ECSLib
             //TODO: ensure that the labs are availible to assign.
             scientist.AssignedLabs = Math.Min(scientist.MaxLabs, labs);
         }
-        
+
         public static void AddLabs(Scientist scientist, int labs)
         {
             //TODO: ensure that the labs are availible to assign.
             byte numlabs = (byte)(scientist.AssignedLabs + labs);
             AssignLabs(scientist, numlabs);
         }
-        
+
 
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// maybe techsd should link up as well as down. it would make this more efficent, but harder on the modder. 
+        /// maybe techsd should link up as well as down. it would make this more efficent, but harder on the modder.
         /// </summary>
         /// <param name="techdb"></param>
         internal static void CheckRequrements(FactionTechDB techdb)
@@ -194,7 +194,7 @@ namespace Pulsar4X.ECSLib
                 }
                 if (requrementsMet)
                 {
-                    requrementsMetTechs.Add(kvpTech);             
+                    requrementsMetTechs.Add(kvpTech);
                 }
             }
             foreach (var item in requrementsMetTechs)
