@@ -118,7 +118,10 @@ public class SetLogisticsOrder : EntityCommand
                     var db = EntityCommanding.GetDataBlob<LogiBaseDB>();
                     foreach (var item in _baseChanges)
                     {
-                        db.ListedItems[item.Key] = item.Value;
+                        if (item.Value.count == 0)
+                            db.ListedItems.Remove(item.Key);
+                        else
+                            db.ListedItems[item.Key] = item.Value;
                     }
                     //NOTE: possibly some conflict here. 
                     //we might need to consider what to do if a ship is already contracted to grab stuff, 

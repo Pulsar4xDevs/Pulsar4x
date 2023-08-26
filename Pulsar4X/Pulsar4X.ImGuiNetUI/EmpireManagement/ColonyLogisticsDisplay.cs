@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Security.Cryptography;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -18,7 +19,8 @@ namespace Pulsar4X.SDL2UI
         private string[] _allResourceNames;
         private List<Guid> _allResourceID;
         private int _allResourceIndex = 0;
-        private Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedResources;
+        private Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedStoredResources;
+        private Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedUnstored;
         private EntityState _entityState;
         private Entity _selectedEntity;
         private LogiBaseDB _logisticsDB;
@@ -28,8 +30,8 @@ namespace Pulsar4X.SDL2UI
         private bool isEnabled;
         private ColonyLogisticsDisplay(EntityState entity)
         {
-            SetEntity(entity);
-            var allgoods = StaticRefLib.StaticData.CargoGoods.GetAll();
+            _staticData = StaticRefLib.StaticData;
+            var allgoods = _staticData.CargoGoods.GetAll();
             var allResourceNames = new List<string>();
             _allResourceID = new List<Guid>();
             _allResources = new List<ICargoable>();
@@ -40,7 +42,8 @@ namespace Pulsar4X.SDL2UI
                 _allResources.Add(item.Value);
             }
             _allResourceNames = allResourceNames.ToArray();
-            _staticData = StaticRefLib.StaticData;
+            
+            SetEntity(entity);
         }
         string _demandHint = "";
         string _demandBuff = "";
@@ -76,8 +79,8 @@ namespace Pulsar4X.SDL2UI
                 return;
 
             _changes = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
-            _displayedResources = new Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>>();
-
+            _displayedStoredResources = new Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>>();
+            _displayedUnstored = new Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>>();
             //we do a deep copy clone so as to avoid a thread collision when we loop through.
             var newDict = new Dictionary<Guid, TypeStore>();
 
@@ -93,13 +96,32 @@ namespace Pulsar4X.SDL2UI
             foreach (var kvp in _stores)
             {
                 var stypeID = kvp.Key;
-                _displayedResources.Add(stypeID, new Dictionary<ICargoable, (int count, int demandSupplyWeight)>());
+                _displayedStoredResources.Add(stypeID, new Dictionary<ICargoable, (int count, int demandSupplyWeight)>());
                 foreach (var item in kvp.Value.Cargoables)
                 {
                     var ctypeID = item.Key;
                     var ctype = item.Value;
                     var numUnits = kvp.Value.CurrentStoreInUnits[ctypeID];
-                    _displayedResources[stypeID].Add(ctype, ((int)numUnits, 1));
+                    _displayedStoredResources[stypeID].Add(ctype, ((int)numUnits, 1));
+                }
+            }
+            
+            for (int i = 0; i < _allResources.Count; i++)
+            {
+                var ctypeID = _allResourceID[i];
+                var ctype = _allResources[i];
+                var stypeID = ctype.CargoTypeID;
+                if (_stores.ContainsKey(stypeID))
+                {
+                    if (!_displayedUnstored.TryGetValue(stypeID, out Dictionary<ICargoable, (int count, int demandSupplyWeight)> indic))
+                    {
+                        indic = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
+                        _displayedUnstored.Add(stypeID, indic);
+                    }
+                    if (!_displayedStoredResources[stypeID].ContainsKey(ctype))//don't add anything already in stored
+                    {
+                        indic.TryAdd(ctype, (0, 1));
+                    }
                 }
             }
         }
@@ -169,9 +191,11 @@ namespace Pulsar4X.SDL2UI
                         ImGui.TableNextColumn();
                         ImGui.Text(Stringify.Quantity(trade.count * -1)); // display as a positive number
                         ImGui.TableNextColumn();
-                        if(ImGui.SmallButton(">"))
+                        if(ImGui.SmallButton(">##impt"+cargoable.Name))
                         {
-                            // TODO: move the item off the listed items
+                            _changes = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
+                            _changes.TryAdd(cargoable, (0,0));
+                            SetLogisticsOrder.CreateCommand_SetBaseItems(_selectedEntity, _changes);
                         }
                     }
 
@@ -199,63 +223,86 @@ namespace Pulsar4X.SDL2UI
                     bool hasCapacityForMore = _logisticsDB.Capacity > _logisticsDB.ListedItems.Count;
                     // FIXME: this should show every item and component in the game? if so, it should
                     // allow the player to filter the list by searching
-                    foreach (var typeStore in _displayedResources)
+                    displayResources(_displayedStoredResources);
+                    
+                    ImGui.TableNextColumn();
+                    ImGui.Separator();
+                    ImGui.TableNextColumn();
+                    ImGui.Separator();
+                    ImGui.TableNextColumn();
+                    ImGui.Separator();
+                    ImGui.TableNextColumn();
+                    ImGui.Separator();
+                    
+                    displayResources(_displayedUnstored);
+                    void displayResources(Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> dict)
                     {
-                        CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
-                        var stypeID = typeStore.Key;
-                        var stypeName = stype.Name;
-                        foreach (var item in _changes)
+                        foreach (var typeStore in dict)
                         {
-                            var typeID = item.Key.CargoTypeID;
-                            if(_displayedResources.ContainsKey(typeID))
+                            CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
+                            var stypeID = typeStore.Key;
+                            var stypeName = stype.Name;
+                            foreach (var item in _changes)
                             {
-                                if(!_displayedResources[typeID].ContainsKey(item.Key))
-                                    _displayedResources[typeID].Add(item.Key, item.Value);
-                                else
-                                    _displayedResources[typeID][item.Key] = item.Value;
-                            }
-                            else
-                                {//this base cannot store this item.
+                                var typeID = item.Key.CargoTypeID;
+                                if (dict.ContainsKey(typeID))
+                                {
+                                    if (!dict[typeID].ContainsKey(item.Key))
+                                        dict[typeID].Add(item.Key, item.Value);
+                                    else
+                                        dict[typeID][item.Key] = item.Value;
                                 }
-                        }
-
-                        foreach (var kvp in typeStore.Value)
-                        {
-                            var ctype = kvp.Key;
-
-                            if(_logisticsDB.ListedItems.ContainsKey(ctype))
-                                continue;
-
-                            var cname = ctype.Name;
-                            var itemsStored = 0;
-                            if(_stores[stypeID].Cargoables.ContainsKey(ctype.ID))
-                                itemsStored = (int)_stores[stypeID].CurrentStoreInUnits[ctype.ID];
-                            var volumePerItem = ctype.VolumePerUnit;
-
-                            ImGui.TableNextColumn();
-                            if(!hasCapacityForMore)
-                                ImGui.BeginDisabled();
-                            if(ImGui.SmallButton("<"))
-                            {
+                                else
+                                {
+                                    //this base cannot store this item.
+                                }
                             }
-                            if(!hasCapacityForMore)
-                                ImGui.EndDisabled();
 
-                            ImGui.TableNextColumn();
-                            ImGui.Text(cname);
-
-                            ImGui.TableNextColumn();
-                            ImGui.Text(Stringify.Number(itemsStored, "#,###"));
-
-                            ImGui.TableNextColumn();
-                            if(!hasCapacityForMore)
-                                ImGui.BeginDisabled();
-                            if(ImGui.SmallButton(">"))
+                            foreach (var kvp in typeStore.Value)
                             {
+                                var ctype = kvp.Key;
 
+                                if (_logisticsDB.ListedItems.ContainsKey(ctype))
+                                    continue;
+
+                                var cname = ctype.Name;
+                                var itemsStored = 0;
+                                if (_stores[stypeID].Cargoables.ContainsKey(ctype.ID))
+                                    itemsStored = (int)_stores[stypeID].CurrentStoreInUnits[ctype.ID];
+                                var volumePerItem = ctype.VolumePerUnit;
+
+                                ImGui.TableNextColumn();
+                                if (!hasCapacityForMore)
+                                    ImGui.BeginDisabled();
+                                if (ImGui.SmallButton("<##"+cname))
+                                {
+                                    _changes = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
+                                    _changes.TryAdd(ctype, (-1,1));
+                                    SetLogisticsOrder.CreateCommand_SetBaseItems(_selectedEntity, _changes);
+                                }
+
+                                if (!hasCapacityForMore)
+                                    ImGui.EndDisabled();
+
+                                ImGui.TableNextColumn();
+                                ImGui.Text(cname);
+
+                                ImGui.TableNextColumn();
+                                ImGui.Text(Stringify.Number(itemsStored, "#,###"));
+
+                                ImGui.TableNextColumn();
+                                if (!hasCapacityForMore)
+                                    ImGui.BeginDisabled();
+                                if (ImGui.SmallButton(">##"+cname))
+                                {
+                                    _changes = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
+                                    _changes.TryAdd(ctype, (1,1));
+                                    SetLogisticsOrder.CreateCommand_SetBaseItems(_selectedEntity, _changes);
+                                }
+
+                                if (!hasCapacityForMore)
+                                    ImGui.EndDisabled();
                             }
-                            if(!hasCapacityForMore)
-                                ImGui.EndDisabled();
                         }
                     }
 
@@ -285,9 +332,11 @@ namespace Pulsar4X.SDL2UI
                         if(trade.count < 0) continue;
 
                         ImGui.TableNextColumn();
-                        if(ImGui.SmallButton("<"))
+                        if(ImGui.SmallButton("<##xpt"+cargoable.Name))
                         {
-                            // TODO: move the item off the listed items
+                            _changes = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
+                            _changes.TryAdd(cargoable, (0,0));
+                            SetLogisticsOrder.CreateCommand_SetBaseItems(_selectedEntity, _changes);
                         }
                         ImGui.TableNextColumn();
                         ImGui.Text(cargoable.Name);
@@ -309,7 +358,7 @@ namespace Pulsar4X.SDL2UI
                     SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.RemoveLogiBaseDB);
                 }
                 ImGui.Columns(4);
-                foreach (var typeStore in _displayedResources)
+                foreach (var typeStore in _displayedStoredResources)
                 {
                     CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
                     var stypeID = typeStore.Key;
@@ -317,12 +366,12 @@ namespace Pulsar4X.SDL2UI
                     foreach (var item in _changes)
                     {
                         var typeID = item.Key.CargoTypeID;
-                        if(_displayedResources.ContainsKey(typeID))
+                        if(_displayedStoredResources.ContainsKey(typeID))
                         {
-                            if(!_displayedResources[typeID].ContainsKey(item.Key))
-                                _displayedResources[typeID].Add(item.Key, item.Value);
+                            if(!_displayedStoredResources[typeID].ContainsKey(item.Key))
+                                _displayedStoredResources[typeID].Add(item.Key, item.Value);
                             else
-                                _displayedResources[typeID][item.Key] = item.Value;
+                                _displayedStoredResources[typeID][item.Key] = item.Value;
                         }
                         else
                             {//this base cannot store this item.
