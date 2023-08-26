@@ -159,7 +159,18 @@ namespace Pulsar4X.ECSLib.Industry
             foreach (KeyValuePair<Guid, long> kvp in toUse.ToArray())
             {
                 ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);//fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(kvp.Key);
-
+                if (cargoItem is null)
+                {
+                    if (fromCargo.OwningEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().InternalComponentDesigns.TryGetValue(kvp.Key, out var design))
+                    {
+                        if (design != null)
+                            cargoItem = (ICargoable)design;
+                    }
+                    else
+                    {
+                        throw new Exception("Cant build from non ICargoable Items");
+                    }
+                }
                 Guid cargoTypeID = cargoItem.CargoTypeID;
                 long amountUsedThisTick = 0;
                 if (fromCargo.TypeStores.ContainsKey(cargoTypeID))
@@ -176,6 +187,65 @@ namespace Pulsar4X.ECSLib.Industry
                     toUse[kvp.Key] -= used;
                 }
             }
+        }
+
+        public static void AutoAddSubJobs(Entity industryEntity, IndustryJob job)
+        {
+            if(!industryEntity.TryGetDatablob<VolumeStorageDB>(out var stockpile))
+            {
+                throw new Exception("Tried to ConstructStuff on an entity with no VolumeStorageDB");
+            }
+            if(!industryEntity.TryGetDatablob<IndustryAbilityDB>(out var industryDB))
+            {
+                throw new Exception("Unable to find IndustryAbilityDB");
+            }
+            
+            var resReq = job.ResourcesRequiredRemaining;
+            foreach (var kvp in resReq)
+            {
+                ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);
+                if (cargoItem is null)
+                {
+                    if (industryEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().IndustryDesigns.TryGetValue(kvp.Key, out var design))
+                    {
+                        if (design != null)
+                            cargoItem = (ICargoable)design;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                var numStored = CargoExtensionMethods.GetUnitsStored(stockpile, cargoItem);
+                var numReq = kvp.Value - numStored;
+                if (numReq > 0)
+                {
+                    if (cargoItem is IConstrucableDesign)
+                    {
+                        IConstrucableDesign des = (IConstrucableDesign)cargoItem;
+                        IndustryJob newjob = new IndustryJob(des);
+                        newjob.InitialiseJob((ushort)numReq, false);
+                        SetJobToFastest(industryDB, newjob);
+                    }
+                }
+            }
+            
+
+        }
+        internal static void SetJobToFastest(IndustryAbilityDB industrydb, IndustryJob job)
+        {
+            var typID = job.TypeID;
+            (Guid lineID, int rate) bestLine = (Guid.Empty, 0);
+            var plines = industrydb.ProductionLines;
+            foreach (var line in plines)
+            {
+                if (!line.Value.IndustryTypeRates.TryGetValue(typID, out int rate))
+                    rate = -1;
+                if (rate > bestLine.rate)
+                    bestLine = (line.Key, rate);
+            }
+            if(bestLine.lineID != Guid.Empty)
+                AddJob(industrydb, bestLine.lineID, job);
         }
     }
 }

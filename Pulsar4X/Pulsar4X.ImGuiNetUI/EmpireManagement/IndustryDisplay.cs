@@ -491,14 +491,32 @@ namespace Pulsar4X.SDL2UI
                     {
                         var stored = CargoExtensionMethods.GetUnitsStored(_volStorageDB, cargoItem);
                         if(stored < totalCost)
-                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                        {
+                            if(_factionInfoDB.IndustryDesigns.ContainsKey(cargoItem.ID))
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                            else
+                            {
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
+                            }
+                            
+                        }
 
                         ImGui.Text(Stringify.Quantity(stored));
 
                         if(stored < totalCost)
                         {
-                            if(ImGui.IsItemHovered())
-                                ImGui.SetTooltip("Not enough " + cargoItem.Name + " available on this colony.\nImport or produce some!");
+                            if (ImGui.IsItemHovered())
+                            {
+                                if (_factionInfoDB.IndustryDesigns.ContainsKey(cargoItem.ID))
+                                {
+                                    ImGui.SetTooltip("Not enough " + cargoItem.Name + " available on this colony.\nImport or produce some!");
+                                }
+                                else
+                                {
+                                    ImGui.SetTooltip("Not enough " + cargoItem.Name + " available on this colony.\nAnd we can't build this item!");
+                                }
+                            }
+
                             ImGui.PopStyleColor();
                         }
                     }

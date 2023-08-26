@@ -181,6 +181,18 @@ namespace Pulsar4X.ECSLib.Industry
             NumberOrdered = 1;
         }
 
+        internal IndustryJob(IConstrucableDesign design)
+        {
+            ItemGuid = design.ID;
+            TypeID = design.IndustryTypeID;
+            Name = design.Name;
+            ResourcesRequiredRemaining = new Dictionary<Guid, long>(design.ResourceCosts);
+            ResourcesCosts = design.ResourceCosts;
+            ProductionPointsLeft = design.IndustryPointCosts;
+            ProductionPointsCost = design.IndustryPointCosts;
+            NumberOrdered = 1;
+        }
+
         public Entity InstallOn { get; set; } = null;
 
         public override void InitialiseJob(ushort numberOrderd, bool auto)
@@ -219,6 +231,7 @@ namespace Pulsar4X.ECSLib.Industry
         public bool RepeatJob { get; set; } = false;
         public bool AutoInstall { get; set; } = false;
 
+        public bool AutoAddSubJobs { get; set; } = true;
         public short Delta { get; set; }
 
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.IneteractWithSelf;
@@ -311,7 +324,11 @@ namespace Pulsar4X.ECSLib.Industry
                 switch (OrderType)
                 {
                     case OrderTypeEnum.NewJob:
-                        IndustryTools.AddJob( _entityCommanding, productionLineID, _job);
+                    {
+                        IndustryTools.AddJob(_entityCommanding, productionLineID, _job);
+                        if(AutoAddSubJobs)
+                            IndustryTools.AutoAddSubJobs(_entityCommanding, _job);
+                    }
                         break;
                     case OrderTypeEnum.CancelJob:
                         IndustryTools.CancelExsistingJob(_entityCommanding, productionLineID, ItemID);
