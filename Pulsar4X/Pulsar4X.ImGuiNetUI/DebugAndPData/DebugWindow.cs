@@ -32,12 +32,15 @@ namespace Pulsar4X.SDL2UI
                     _selectedEntity = value;
                     _selectedEntityName = SelectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
                     if(_systemState.EntityStatesWithNames.ContainsKey(_selectedEntity.Guid))
+                    {
                         _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
+                        _uiState.EntityClicked(_selectedEntityState, MouseButtons.Primary);
+                    }
                     else
                     {
                         _selectedEntityState = null;
                     }
-                    _uiState.EntityClicked(_selectedEntityState, MouseButtons.Primary);
+                    
                     OnSelectedEntityChanged();
                 }
             }
@@ -817,10 +820,21 @@ namespace Pulsar4X.SDL2UI
             }
             
             _allEntites = new List<(string name, Entity entity, string faction)>();
+
+            foreach (var entity in StaticRefLib.Game.Factions)
+            {
+                addEntity(entity);
+            }
+            
             foreach (var entity in _uiState.SelectedSystem.GetAllEntites())
             {
+                addEntity(entity);
+            }
+
+            void addEntity(Entity entity)
+            {
                 if(entity == null)
-                    continue;
+                    return;
                 string name = entity.Guid.ToString();
                 if(entity.HasDataBlob<NameDB>())
                     name = entity.GetDataBlob<NameDB>().OwnersName;
