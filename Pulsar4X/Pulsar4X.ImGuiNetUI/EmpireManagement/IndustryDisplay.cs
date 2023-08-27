@@ -507,7 +507,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             if (ImGui.IsItemHovered())
                             {
-                                if (_factionInfoDB.IndustryDesigns.ContainsKey(cargoItem.ID))
+                                if (_factionInfoDB.IndustryDesigns.ContainsKey(cargoItem.ID) || StaticRefLib.StaticData.CargoGoods.IsMineral(cargoItem.ID))
                                 {
                                     ImGui.SetTooltip("Not enough " + cargoItem.Name + " available on this colony.\nImport or produce some!");
                                 }

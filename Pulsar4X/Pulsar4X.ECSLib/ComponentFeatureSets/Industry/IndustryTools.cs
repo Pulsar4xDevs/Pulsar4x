@@ -226,6 +226,7 @@ namespace Pulsar4X.ECSLib.Industry
                         IndustryJob newjob = new IndustryJob(des);
                         newjob.InitialiseJob((ushort)numReq, false);
                         SetJobToFastest(industryDB, newjob);
+                        AutoAddSubJobs(industryEntity, newjob); //recursivly add jobs. 
                     }
                 }
             }
