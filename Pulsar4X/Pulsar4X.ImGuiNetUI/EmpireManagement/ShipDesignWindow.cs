@@ -381,6 +381,13 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndTable();
             }
 
+            if(SelectedComponents.Count == 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
+                ImGui.Text("Add components from the available components");
+                ImGui.PopStyleColor();
+            }
+
             ImGui.NewLine();
             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
             ImGui.Text("Armor");
