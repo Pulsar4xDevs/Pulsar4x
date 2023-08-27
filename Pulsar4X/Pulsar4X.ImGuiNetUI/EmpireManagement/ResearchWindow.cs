@@ -10,7 +10,6 @@ namespace Pulsar4X.SDL2UI
         private FactionTechDB _factionTechDB;
         private Dictionary<Guid, (TechSD tech, int amountDone, int amountMax)> _researchableTechsByGuid;
         private List<(TechSD tech, int amountDone, int amountMax)> _researchableTechs;
-        private EntityState _currentEntity;
         private List<(Scientist scientist, Entity atEntity)> _scienceTeams;
         private int _selectedTeam = -1;
 
@@ -36,13 +35,6 @@ namespace Pulsar4X.SDL2UI
                 thisitem = new ResearchWindow();
             }
             thisitem = (ResearchWindow)_uiState.LoadedWindows[typeof(ResearchWindow)];
-            if (_uiState.LastClickedEntity != thisitem._currentEntity)
-            {
-                if (_uiState.LastClickedEntity.Entity.HasDataBlob<TeamsHousedDB>())
-                {
-                    thisitem.OnEntityChange(_uiState.LastClickedEntity);
-                }
-            }
 
             return thisitem;
         }
@@ -52,11 +44,6 @@ namespace Pulsar4X.SDL2UI
             _factionTechDB = _uiState.Faction.GetDataBlob<FactionTechDB>();
             _scienceTeams = _factionTechDB.AllScientists;
             RefreshTechs();
-        }
-
-        private void OnEntityChange(EntityState entityState)
-        {
-            _currentEntity = entityState;
         }
 
         private void RefreshTechs()
@@ -135,7 +122,7 @@ namespace Pulsar4X.SDL2UI
             {
                 bool isSelected = _selectedTeam == i;
 
-                Scientist scint = _scienceTeams[i].scientist;
+                Scientist scientist = _scienceTeams[i].scientist;
                 if (ImGui.Selectable(_scienceTeams[i].Item1.Name, isSelected))
                 {
                     _selectedTeam = i;
@@ -143,13 +130,10 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.NextColumn();
                 int allfacs = 0;
-                int facsAssigned = scint.AssignedLabs;
-                //int facsFree = 0;
-                if (
-                _scienceTeams[i].atEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<ResearchPointsAtbDB>(out var foo))
+                int facsAssigned = scientist.AssignedLabs;
+                if (_scienceTeams[i].atEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<ResearchPointsAtbDB>(out var foo))
                 {
                     allfacs = foo.Count;
-                    //facsFree = allfacs - facsAssigned;
                 }
                 ImGui.Text(facsAssigned.ToString() + "/" + allfacs.ToString());
                 if (ImGui.IsItemHovered())
@@ -161,7 +145,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (ImGui.SmallButton("+"))//If so allow the user to add more labs
                     {
-                        ResearchProcessor.AddLabs(scint, 1);
+                        ResearchProcessor.AddLabs(scientist, 1);
                     }
                 }
                 else// Otherwise create an invisible button for spacing
@@ -170,19 +154,23 @@ namespace Pulsar4X.SDL2UI
                     ImGui.InvisibleButton(" ", buttonsize);
                 }
 
-                ImGui.SameLine();
-                if (ImGui.SmallButton("-"))
+                if(facsAssigned > 0)
                 {
-                    if (facsAssigned == 0)//If there are no labs to remove
-                        ResearchProcessor.AddLabs(scint, allfacs);//Roll over to max number of labs
-                    else
-                        ResearchProcessor.AddLabs(scint, -1);//Otherwise remove a lab
+                    ImGui.SameLine();
+                    if (ImGui.SmallButton("-"))
+                    {
+                        if (facsAssigned == 0)//If there are no labs to remove
+                            ResearchProcessor.AddLabs(scientist, allfacs);//Roll over to max number of labs
+                        else
+                            ResearchProcessor.AddLabs(scientist, -1);//Otherwise remove a lab
+                    }
                 }
+                
 
                 ImGui.NextColumn();
-                if (scint.ProjectQueue.Count > 0 && _factionTechDB.IsResearchable(scint.ProjectQueue[0].techID))
+                if (scientist.ProjectQueue.Count > 0 && _factionTechDB.IsResearchable(scientist.ProjectQueue[0].techID))
                 {
-                    var proj = _researchableTechsByGuid[scint.ProjectQueue[0].techID];
+                    var proj = _researchableTechsByGuid[scientist.ProjectQueue[0].techID];
 
                     float frac = (float)proj.amountDone / proj.amountMax;
                     var size = ImGui.GetTextLineHeight();
