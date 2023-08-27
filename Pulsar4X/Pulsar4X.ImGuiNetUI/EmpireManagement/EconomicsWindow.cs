@@ -96,11 +96,6 @@ namespace Pulsar4X.SDL2UI
                         selectedEntity.Entity.DisplayMining(_uiState);
                         ImGui.EndTabItem();
                     }
-                    if(ImGui.BeginTabItem("Research"))
-                    {
-                        selectedEntity.Entity.DisplayResearch(selectedEntity, _uiState);
-                        ImGui.EndTabItem();
-                    }
                     if(ImGui.BeginTabItem("Logistics"))
                     {
                         selectedEntity.Entity.DisplayLogistics(selectedEntity, _uiState);
