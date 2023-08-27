@@ -143,6 +143,9 @@ namespace Pulsar4X.ECSLib
             
             //}
             //TESTING STUFF
+
+            ComponentDesigner.StartResearched = true;//any components we design should be researched already. turn this off at the end.
+            
             var log = StaticRefLib.EventLog;
             StarSystemFactory starfac = new StarSystemFactory(game);
             StarSystem solSys = starfac.CreateSol(game);
@@ -387,6 +390,8 @@ namespace Pulsar4X.ECSLib
             {
                 StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem, StaticRefLib.CurrentDateTime);
             }
+
+            ComponentDesigner.StartResearched = false;
             return factionEntity;
         }
 

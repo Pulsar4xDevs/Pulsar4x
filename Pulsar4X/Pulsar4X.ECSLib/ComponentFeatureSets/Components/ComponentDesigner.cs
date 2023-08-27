@@ -196,7 +196,7 @@ namespace Pulsar4X.ECSLib
     public class ComponentDesigner
     {
         ComponentDesign _design = new ComponentDesign();
-
+        internal static bool StartResearched = false;
         public ComponentDesigner(ComponentTemplateSD componentSD, FactionTechDB factionTech)
         {
             var staticData = StaticRefLib.StaticData;
@@ -308,7 +308,7 @@ namespace Pulsar4X.ECSLib
 
             SetAttributes();
 
-            if(_design.ResearchCostValue == 0)
+            if(_design.ResearchCostValue == 0 || StartResearched)
             {
                 faction.IndustryDesigns[_design.ID] = _design;
             }
