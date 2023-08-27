@@ -123,9 +123,37 @@ namespace Pulsar4X.SDL2UI
                     value = GetValue(memberInfo, obj);
                     if(value == null)
                         continue;
-                    if (typeof(IList).IsAssignableFrom(value.GetType()))
+                    if (typeof(ICollection).IsAssignableFrom(value.GetType()))
                     {
-                        var items = (IList)GetValue(memberInfo, obj);
+                        var items = (ICollection)GetValue(memberInfo, obj);
+                        int itemsCount = items.Count;
+                        
+                        if (ImGui.TreeNode(memberInfo.Name))
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                            _numLines += itemsCount;
+                            lock (items)//TODO: IDK the best way to fix this.
+                            {
+                                foreach (var item in items)  
+                                {
+                                    RecursiveReflection(item);
+                                }
+                            }
+
+                            ImGui.TreePop();
+                        }
+                        else
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                        }
+                    }
+                    else if (typeof(HashSet<TechSD>).IsAssignableFrom(value.GetType()))
+                    {
+                        var items = (HashSet<TechSD>)GetValue(memberInfo, obj);
                         int itemsCount = items.Count;
                         
                         if (ImGui.TreeNode(memberInfo.Name))
@@ -225,10 +253,32 @@ namespace Pulsar4X.SDL2UI
                             if(value is Guid)
                             {
                                 var guid = (Guid)value;
+                                displayStr = guid.ToString();
                                 if (StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(guid, out Entity entity))
                                 {
                                     displayStr = entity.GetOwnersName();
                                     tooltipStr = (value.ToString());
+                                }
+                                else if (StaticRefLib.StaticData.Techs.TryGetValue(guid, out TechSD techSD))
+                                {
+                                    displayStr = techSD.Name;
+                                }
+                                else if (StaticRefLib.StaticData.ComponentTemplates.TryGetValue(guid, out ComponentTemplateSD ctempSD))
+                                {
+                                    displayStr = "ComponentTemplateSD" + ctempSD.Name;
+                                    tooltipStr = ctempSD.ID.ToString();
+                                }
+                                else if (_dataBlobs[_selectedDB] is FactionTechDB)
+                                {
+                                    var db = (FactionTechDB)_dataBlobs[_selectedDB];
+                                    if (db.ResearchedTechs.ContainsKey(guid))
+                                    {
+                                        var facInfo = db.OwningEntity.GetDataBlob<FactionInfoDB>();
+                                        if (facInfo.ComponentDesigns.TryGetValue(guid, out ComponentDesign component))
+                                        {
+                                            displayStr = component.Name;
+                                        }
+                                    }
                                 }
                                 else
                                 {
@@ -256,6 +306,11 @@ namespace Pulsar4X.SDL2UI
                             {
                                 IConstrucableDesign constD = (IConstrucableDesign)value;
                                 displayStr = "Constructable: " + constD.Name;
+                            }
+                            if (value is (TechSD tech ,int pointsResearched, int pointCost))
+                            {
+                                (TechSD tech ,int pointsResearched, int pointCost) tval = ((TechSD tech ,int pointsResearched, int pointCost))value;
+                                displayStr = "TechSD: " + tval.tech.Name + " Points Researched: " + tval.pointsResearched + " / " +tval.pointCost;
                             }
                         }
                         ImGui.Text(displayStr);
