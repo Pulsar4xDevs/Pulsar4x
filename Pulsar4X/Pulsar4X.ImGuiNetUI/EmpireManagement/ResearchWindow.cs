@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Xml.Schema;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -28,9 +25,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (IsActive)
             {
-                
-                _researchableTechs = _factionTechDB.GetResearchableTechs();
-                _researchableTechsByGuid = _factionTechDB.GetResearchablesDic();
+                RefreshTechs();
             }
         }
 
@@ -59,9 +54,8 @@ namespace Pulsar4X.SDL2UI
         private void OnFactionChange()
         {
             _factionTechDB = _uiState.Faction.GetDataBlob<FactionTechDB>();
-            _researchableTechs = _factionTechDB.GetResearchableTechs();
-            _researchableTechsByGuid = _factionTechDB.GetResearchablesDic();
             _scienceTeams = _factionTechDB.AllScientists;
+            RefreshTechs();
         }
 
  
@@ -69,6 +63,14 @@ namespace Pulsar4X.SDL2UI
         private void OnEntityChange(EntityState entityState)
         {
             _currentEntity = entityState;
+        }
+
+        private void RefreshTechs()
+        {
+            _researchableTechs = _factionTechDB.GetResearchableTechs();
+            _researchableTechsByGuid = _factionTechDB.GetResearchablesDic();
+
+            _researchableTechs.Sort((a,b) => a.tech.Name.CompareTo(b.tech.Name));
         }
 
         internal override void Display()
