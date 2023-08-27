@@ -66,17 +66,7 @@ namespace Pulsar4X.SDL2UI
 
                 if(ImGui.BeginChild("Teams", firstChildSize, true))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.Text("Teams");
-                    // ImGui.SameLine();
-                    // ImGui.Text("[?]");
-                    // if(ImGui.IsItemHovered())
-                    //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
-                    //         "Select a template and then design the attributes of the component to your specification.\n" +
-                    //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
-                    //         "installations.");
-                    ImGui.PopStyleColor();
-                    ImGui.Separator();
+                    DisplayHelpers.Header("Teams");
 
                     float width = ImGui.GetContentRegionAvail().X;
                     float height = ImGui.GetTextLineHeightWithSpacing() * (_scienceTeams.Count + 2);
@@ -86,17 +76,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SameLine();
                 if(ImGui.BeginChild("Techs", secondChildSize, true))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.Text("Available Techs");
-                    // ImGui.SameLine();
-                    // ImGui.Text("[?]");
-                    // if(ImGui.IsItemHovered())
-                    //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
-                    //         "Select a template and then design the attributes of the component to your specification.\n" +
-                    //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
-                    //         "installations.");
-                    ImGui.PopStyleColor();
-                    ImGui.Separator();
+                    DisplayHelpers.Header("Available Techs");
 
                     DisplayTechs();
                     ImGui.EndChild();
@@ -204,11 +184,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             ImGui.NewLine();
-            ImGui.BeginChild("Separator", new System.Numerics.Vector2(width, ImGui.GetTextLineHeightWithSpacing() + 1));
-            ImGui.Columns(1);
-            ImGui.Text("Tech Que");
-            ImGui.Separator();
-            ImGui.EndChild();
+            DisplayHelpers.Header("Tech Queue");
 
             if (_selectedTeam > -1)
             {
@@ -254,7 +230,6 @@ namespace Pulsar4X.SDL2UI
                         {
                             ImGui.Text("-");
                         }
-                        
                     }
                 }
 
