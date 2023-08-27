@@ -1,4 +1,5 @@
 using System.Numerics;
+using ImGuiNET;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -14,5 +15,7 @@ namespace Pulsar4X.SDL2UI
 
         public static Vector4 SelectedColor = new Vector4(0.75f, 0.25f, 0.25f, 1f);
         public static Vector4 InvisibleColor = new Vector4(0, 0, 0, 0f);
+
+        public static ImGuiTableFlags TableFlags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg;
     }
 }

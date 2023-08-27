@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -59,32 +60,47 @@ namespace Pulsar4X.SDL2UI
 
             if (IsActive && ImGui.Begin("Research and Development", ref IsActive, _flags))
             {
-                float width = ImGui.GetContentRegionAvail().X - 300;
-                float height = ImGui.GetTextLineHeightWithSpacing() * (_scienceTeams.Count + 2);
-                ImGui.Columns(2);
-                ImGui.SetColumnWidth(0, width);
-                ImGui.Text("Science Teams");
-                ImGui.NextColumn();
-                ImGui.Text("Projects");
-                ImGui.NextColumn();
-                ImGui.Separator();
+                Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                var firstChildSize = new Vector2(windowContentSize.X * 0.75f, windowContentSize.Y);
+                var secondChildSize = new Vector2(windowContentSize.X * 0.245f, windowContentSize.Y);
 
-                DisplayTeams(width, height);
-
-                ImGui.BeginChild("Separator", new System.Numerics.Vector2(width, ImGui.GetTextLineHeightWithSpacing() + 1));
-                ImGui.Columns(1);
-                ImGui.Text("Tech Que");
-                ImGui.Separator();
-                ImGui.EndChild();
-
-                if (_selectedTeam > -1)
+                if(ImGui.BeginChild("Teams", firstChildSize, true))
                 {
-                    SelectedSci(_selectedTeam);
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.Text("Teams");
+                    // ImGui.SameLine();
+                    // ImGui.Text("[?]");
+                    // if(ImGui.IsItemHovered())
+                    //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
+                    //         "Select a template and then design the attributes of the component to your specification.\n" +
+                    //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
+                    //         "installations.");
+                    ImGui.PopStyleColor();
+                    ImGui.Separator();
+
+                    float width = ImGui.GetContentRegionAvail().X;
+                    float height = ImGui.GetTextLineHeightWithSpacing() * (_scienceTeams.Count + 2);
+                    DisplayTeams(width, height);
+                    ImGui.EndChild();
                 }
+                ImGui.SameLine();
+                if(ImGui.BeginChild("Techs", secondChildSize, true))
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.Text("Available Techs");
+                    // ImGui.SameLine();
+                    // ImGui.Text("[?]");
+                    // if(ImGui.IsItemHovered())
+                    //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
+                    //         "Select a template and then design the attributes of the component to your specification.\n" +
+                    //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
+                    //         "installations.");
+                    ImGui.PopStyleColor();
+                    ImGui.Separator();
 
-                ImGui.NextColumn();
-
-                DisplayTechs();
+                    DisplayTechs();
+                    ImGui.EndChild();
+                }
 
                 if (_selectedTeam == -1)
                 {
@@ -165,7 +181,6 @@ namespace Pulsar4X.SDL2UI
                             ResearchProcessor.AddLabs(scientist, -1);//Otherwise remove a lab
                     }
                 }
-                
 
                 ImGui.NextColumn();
                 if (scientist.ProjectQueue.Count > 0 && _factionTechDB.IsResearchable(scientist.ProjectQueue[0].techID))
@@ -194,52 +209,57 @@ namespace Pulsar4X.SDL2UI
             }
             ImGui.EndChild();
 
-        }
-        private void DisplayTechs()
-        {
-            ImGui.BeginChild("ResearchablesHeader", new System.Numerics.Vector2(300, ImGui.GetTextLineHeightWithSpacing() + 2));
-            ImGui.Columns(2);
-            ImGui.SetColumnWidth(0, 250);
-            ImGui.Text("Tech");
-            ImGui.NextColumn();
-            ImGui.Text("Level");
-            ImGui.NextColumn();
+            ImGui.BeginChild("Separator", new System.Numerics.Vector2(width, ImGui.GetTextLineHeightWithSpacing() + 1));
+            ImGui.Columns(1);
+            ImGui.Text("Tech Que");
             ImGui.Separator();
             ImGui.EndChild();
 
-            var contentSize = ImGui.GetContentRegionAvail();
-            ImGui.BeginChild("techlist", contentSize);
-            ImGui.Columns(2);
-            ImGui.SetColumnWidth(0, 250);
-
-            for (int i = 0; i < _researchableTechs.Count; i++)
+            if (_selectedTeam > -1)
             {
-                if (_researchableTechs[i].amountMax > 0) //could happen if bad json data?
+                SelectedSci(_selectedTeam);
+            }
+        }
+        private void DisplayTechs()
+        {
+            if(ImGui.BeginTable("ResearchableTechs", 2, ImGuiTableFlags.BordersInnerV))
+            {
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
+                ImGui.TableSetupColumn("Level", ImGuiTableColumnFlags.None, 0.25f);
+                ImGui.TableHeadersRow();
+
+                for (int i = 0; i < _researchableTechs.Count; i++)
                 {
-                    float frac = (float)_researchableTechs[i].amountDone / _researchableTechs[i].amountMax;
-                    var size = ImGui.GetTextLineHeight();
-                    var pos = ImGui.GetCursorPos();
-                    ImGui.ProgressBar(frac, new System.Numerics.Vector2(245, size), "");
-                    ImGui.SetCursorPos(pos);
-                    ImGui.Text(_researchableTechs[i].tech.Name);
-
-                    if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
+                    if (_researchableTechs[i].amountMax > 0) //could happen if bad json data?
                     {
-                        if (_selectedTeam > -1)
-                            ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].tech.ID);
-                    }
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.SetTooltip(_researchableTechs[i].tech.Description);
-                    }
-                    ImGui.NextColumn();
-                    ImGui.Text(_factionTechDB.GetLevelforTech(_researchableTechs[i].tech).ToString());
+                        ImGui.TableNextColumn();
 
-                    ImGui.NextColumn();
+                        float frac = (float)_researchableTechs[i].amountDone / _researchableTechs[i].amountMax;
+                        var size = ImGui.GetTextLineHeight();
+                        var pos = ImGui.GetCursorPos();
+                        ImGui.ProgressBar(frac, new System.Numerics.Vector2(245, size), "");
+                        ImGui.SetCursorPos(pos);
+                        ImGui.Text(_researchableTechs[i].tech.Name);
+
+                        if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
+                        {
+                            if (_selectedTeam > -1)
+                                ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].tech.ID);
+                        }
+                        if (ImGui.IsItemHovered() && !_researchableTechs[i].tech.Description.IsNullOrEmpty())
+                        {
+                            ImGui.SetTooltip(_researchableTechs[i].tech.Description);
+                        }
+                        ImGui.TableNextColumn();
+                        ImGui.Text(_factionTechDB.GetLevelforTech(_researchableTechs[i].tech).ToString());
+                    }
                 }
+
+                ImGui.EndTable();
             }
             ImGui.EndChild();
         }
+
         private void SelectedSci(int selected)
         {
             ImGui.BeginChild("SelectedSci");
