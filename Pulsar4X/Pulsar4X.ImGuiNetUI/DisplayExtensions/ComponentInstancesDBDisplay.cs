@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -21,7 +20,9 @@ namespace Pulsar4X.SDL2UI
             ImGui.NextColumn();
             ImGui.Separator();
 
-            foreach(var (designID, listPerDesign) in db.ComponentsByDesign)
+            // FIXME: we should probably not do this every frame
+            var sortedData = db.ComponentsByDesign.OrderBy(entry => entry.Value.First().Name).ToDictionary(entry => entry.Key, entry => entry.Value);
+            foreach(var (designID, listPerDesign) in sortedData)
             {
                 if(listPerDesign.Count == 0) continue;
 
@@ -53,26 +54,6 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 ImGui.NextColumn();
-
-                // foreach(var instance in listPerDesign)
-                // {
-                //     ImGui.Text(instance.Name);
-
-                //     ImGui.NextColumn();
-                //     ImGui.Text((100 * instance.HealthPercent()) + "%%");
-
-                //     ImGui.NextColumn();
-                //     if(instance.IsEnabled)
-                //     {
-                //         ImGui.Text("On");
-                //     }
-                //     else
-                //     {
-                //         ImGui.Text("Off");
-                //     }
-
-                //     ImGui.NextColumn();
-                // }
             }
             ImGui.Columns(1);
         }
