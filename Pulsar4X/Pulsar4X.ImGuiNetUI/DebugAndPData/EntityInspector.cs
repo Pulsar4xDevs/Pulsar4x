@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Reflection;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.Industry;
 using Pulsar4X.Orbital;
 
 namespace Pulsar4X.SDL2UI
@@ -109,7 +110,7 @@ namespace Pulsar4X.SDL2UI
 
         static void RecursiveReflection(object obj)
         {
-            
+            object value = null;
             Type objType = obj.GetType();
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             MemberInfo[] memberInfos = objType.GetMembers(flags);
@@ -118,7 +119,8 @@ namespace Pulsar4X.SDL2UI
                 if (typeof(FieldInfo).IsAssignableFrom(memberInfo.GetType()) || typeof(PropertyInfo).IsAssignableFrom(memberInfo.GetType()))
                 {
                     MemberTypes membertype = memberInfo.MemberType;
-                    object value = GetValue(memberInfo, obj);
+                    object prevVal = value;
+                    value = GetValue(memberInfo, obj);
                     if(value == null)
                         continue;
                     if (typeof(IList).IsAssignableFrom(value.GetType()))
@@ -201,7 +203,6 @@ namespace Pulsar4X.SDL2UI
                                     else ImGui.Text("null");
                                     ImGui.NextColumn();
                                 }
-                            
 
                             ImGui.TreePop();
                         }
@@ -217,27 +218,49 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(memberInfo.Name);
                         ImGui.NextColumn();
                         //object value = memberInfo.GetValue(obj);
+                        string displayStr = "null";
+                        string tooltipStr = "";
                         if (value != null)
                         {
-                            if (value is Guid && StaticRefLib.Game.GlobalManager.TryGetEntityByGuid((Guid)value, out Entity entity))
+                            if(value is Guid)
                             {
-                                ImGui.Text(entity.GetOwnersName());
-                                if(ImGui.IsItemHovered())
-                                    ImGui.SetTooltip(value.ToString());
+                                var guid = (Guid)value;
+                                if (StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(guid, out Entity entity))
+                                {
+                                    displayStr = entity.GetOwnersName();
+                                    tooltipStr = (value.ToString());
+                                }
+                                else
+                                {
+                                    displayStr = guid.ToString();
+                                }
                             }
                             else if(value is Entity)
                             {
-                                entity = (Entity)value;
-                                ImGui.Text(entity.GetOwnersName());
-                                if (ImGui.IsItemHovered())
-                                    ImGui.SetTooltip(entity.Guid.ToString());
+                                var entity = (Entity)value;
+                                displayStr = (entity.GetOwnersName());
+                                tooltipStr = (entity.Guid.ToString());
                             }
                             else
                             {
-                                ImGui.Text(value.ToString());
+                                displayStr = (value.ToString());
+                            }
+
+                            if (value is ProcessedMaterialSD)
+                            {
+                                ProcessedMaterialSD mat = (ProcessedMaterialSD)value;
+                                displayStr = ("MaterialSD: " + mat.Name);
+                            }
+
+                            if (value is IConstrucableDesign)
+                            {
+                                IConstrucableDesign constD = (IConstrucableDesign)value;
+                                displayStr = "Constructable: " + constD.Name;
                             }
                         }
-                        else ImGui.Text("null");
+                        ImGui.Text(displayStr);
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip(tooltipStr);
                         ImGui.NextColumn();
                     }
                 }
