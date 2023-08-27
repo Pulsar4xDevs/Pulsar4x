@@ -101,7 +101,7 @@ namespace Pulsar4X.ECSLib
 
                 int researchPoints = 0;
 
-                var maxIndex = Math.Max(labIndex + assignedLabs, maxLabs); //shouldn't happen unless assigned labs is more than the labs availible.
+                var maxIndex = Math.Min(labIndex + assignedLabs, maxLabs); //shouldn't happen unless assigned labs is more than the labs availible.
                 for (int i = labIndex; i < maxIndex; i++)
                 {
                     researchPoints += allLabs[i].pnts;
