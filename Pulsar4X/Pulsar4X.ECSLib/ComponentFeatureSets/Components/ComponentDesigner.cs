@@ -294,7 +294,7 @@ namespace Pulsar4X.ECSLib
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
             TechSD tech = new TechSD()
             {
-                ID = Guid.NewGuid(),
+                ID = _design.ID,
                 Name = _design.Name + " Design Research",
                 Description = "Research into building " + _design.Name,
                 MaxLevel = 1,
