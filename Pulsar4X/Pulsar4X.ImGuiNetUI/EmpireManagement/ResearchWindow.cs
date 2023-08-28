@@ -13,6 +13,7 @@ namespace Pulsar4X.SDL2UI
         private List<(TechSD tech, int amountDone, int amountMax)> _researchableTechs;
         private List<(Scientist scientist, Entity atEntity)> _scienceTeams;
         private int _selectedTeam = -1;
+        private int hoveredi = -1;
 
         private ResearchWindow()
         {
@@ -92,8 +93,6 @@ namespace Pulsar4X.SDL2UI
 
             }
         }
-
-        private int hoveredi = -1;
 
         private void DisplayTeams(float width, float height)
         {
@@ -240,13 +239,33 @@ namespace Pulsar4X.SDL2UI
 
         private void SelectedSci(int selected)
         {
-            ImGui.BeginChild("SelectedSci");
-            Scientist scientist = _scienceTeams[selected].scientist;
+            if(ImGui.BeginTable("TechQueue", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            {
+                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("Options", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableHeadersRow();
+
+                Scientist scientist = _scienceTeams[selected].scientist;
+                int index = 0;
+                foreach(var (techID, cycle) in scientist.ProjectQueue.ToArray())
+                {
+                    ImGui.TableNextColumn();
+                    ImGui.Text(_researchableTechsByGuid[techID].tech.Name);
+                    ImGui.TableNextColumn();
+                    Buttons(scientist, (techID, cycle), index);
+                    index++;
+                }
+
+                ImGui.EndTable();
+            }
+
+            //ImGui.BeginChild("SelectedSci");
+            
 
             //ImGui.Columns(2);
             //ImGui.SetColumnWidth(0, 300);
             //ImGui.SetColumnWidth(1, 150);
-
+            /*
             int loopto = scientist.ProjectQueue.Count;
             if (hoveredi >= scientist.ProjectQueue.Count)
                 hoveredi = -1;
@@ -343,15 +362,14 @@ namespace Pulsar4X.SDL2UI
             }
 
             ImGui.EndChild();
-
+            */
         }
 
         void Buttons(Scientist scientist, (Guid techID, bool cycle) queueItem, int i)
         {
             ImGui.BeginGroup();
-            string cyclestr = "*";
-            if (queueItem.cycle)
-                cyclestr = "O";
+            string cyclestr = queueItem.cycle ? "O": "*";
+
             if (ImGui.SmallButton(cyclestr + "##" + i))
             {
                 scientist.ProjectQueue[i] = (queueItem.techID, !queueItem.cycle);
@@ -361,14 +379,14 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SetTooltip("Requeue Project");
 
             ImGui.SameLine();
-            if (ImGui.SmallButton("^" + "##" + i) && i > 0)
+            if (i > 0 && ImGui.SmallButton("^" + "##" + i))
             {
                 scientist.ProjectQueue.RemoveAt(i);
                 scientist.ProjectQueue.Insert(i - 1, queueItem);
             }
 
             ImGui.SameLine();
-            if (ImGui.SmallButton("v" + "##" + i) && i < scientist.ProjectQueue.Count - 1)
+            if (i < scientist.ProjectQueue.Count - 1 && ImGui.SmallButton("v" + "##" + i))
             {
 
                 scientist.ProjectQueue.RemoveAt(i);
