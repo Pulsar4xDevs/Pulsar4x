@@ -51,10 +51,10 @@
             },
             {
               "Name": "Power Output",
-              "Units": "w",
-              "DescriptionFormula": "'in w'",
+              "Units": "Kw",
+              "DescriptionFormula": "'in Kw'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "50000 * [Mass]"
+              "AttributeFormula": "50 * [Mass]"
             },
             {
               "Name": "Fuel Consumption",
@@ -137,10 +137,10 @@
             },
             {
               "Name": "Energy Storage",
-              "Units": "J",
+              "Units": "KJ",
               "DescriptionFormula": "'Energy capacity of this part'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Mass') * 500000"
+              "AttributeFormula": "Ability('Mass') * 500"
             },
             {
               "Name": "DB",

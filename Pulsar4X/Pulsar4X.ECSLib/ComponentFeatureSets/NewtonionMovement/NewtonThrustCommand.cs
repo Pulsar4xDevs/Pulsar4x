@@ -236,14 +236,14 @@ namespace Pulsar4X.ECSLib
 
         Entity _factionEntity;
         Entity _entityCommanding;
-        private OrdnanceDesign _missileDesign;
+        // private OrdnanceDesign _missileDesign;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
         private Entity _targetEntity;
         NewtonMoveDB _newtonMovedb;
         NewtonThrustAbilityDB _newtonAbilityDB;
         private double _startDV;
-        private double _startBurnTime;
+        // private double _startBurnTime;
         private double _fuelBurnRate;
         private double _totalFuel;
 
@@ -452,14 +452,14 @@ namespace Pulsar4X.ECSLib
 
         Entity _factionEntity;
         Entity _entityCommanding;
-        private OrdnanceDesign _missileDesign;
+        // private OrdnanceDesign _missileDesign;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
 
         private Entity _targetEntity;
         NewtonMoveDB _newtonMovedb;
         NewtonThrustAbilityDB _newtonAbilityDB;
         private double _startDV;
-        private double _startBurnTime;
+        // private double _startBurnTime;
         private double _fuelBurnRate;
         private double _totalFuel;
         private double _soiParentMass;

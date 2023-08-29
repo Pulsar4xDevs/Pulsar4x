@@ -108,7 +108,8 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>() && _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>().Minerals.Any())
+            MineralsDB mindb;
+            if (_lookedAtEntity.Entity.TryGetDatablob<MineralsDB>(out mindb) && mindb.Minerals.Any() )
             {
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Mineral Deposits"))
@@ -223,10 +224,11 @@ namespace Pulsar4X.SDL2UI
                 new KeyValuePair<string, TextAlign>("Accessibility", TextAlign.Right)
             };
 
-            if (_lookedAtEntity.Entity.HasDataBlob<SystemBodyInfoDB>())
+            if (_lookedAtEntity.Entity.HasDataBlob<MineralsDB>())
             {
                 Dictionary<Guid, long> mineRates = new Dictionary<Guid, long>();
 
+                MineralsDB mineralsDB = _lookedAtEntity.Entity.GetDataBlob<MineralsDB>();
                 SystemBodyInfoDB systemBodyInfo = _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>();
                 if (systemBodyInfo.Colonies.Any())
                 {
@@ -246,20 +248,20 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
 
-                var deposits = systemBodyInfo.Minerals.Where(x => x.Value.Amount > 0);
+                var deposits = mineralsDB.Minerals.Where(x => x.Value.Amount > 0);
                 if (deposits.Any())
                 {
-                    var maxMineralQuantity = systemBodyInfo.Minerals.Values.Max(x => x.Amount).ToString(_amountFormat).Length;
+                    var maxMineralQuantity = mineralsDB.Minerals.Values.Max(x => x.Amount).ToString(_amountFormat).Length;
 
                     List<string[]> rowData = new List<string[]>();
                     var row = new List<string>();
-                    foreach (var key in systemBodyInfo.Minerals.Keys)
+                    foreach (var key in mineralsDB.Minerals.Keys)
                     {
                         row.Clear();
                         var mineralData = _mineralDefinitions.FirstOrDefault(x => x.ID == key);
                         if (mineralData != null)
                         {
-                            var mineralValues = systemBodyInfo.Minerals[key];
+                            var mineralValues = mineralsDB.Minerals[key];
                             
                             row.Add(mineralData.Name);
                             row.Add(mineralValues.Amount.ToString(_amountFormat));

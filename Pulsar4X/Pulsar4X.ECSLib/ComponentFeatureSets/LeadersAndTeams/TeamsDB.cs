@@ -225,7 +225,7 @@ namespace Pulsar4X.ECSLib
             ProjectQueue = dB.ProjectQueue;
         }
 
-        public object Clone()
+        public new object Clone()
         {
             return new Scientist(this);
         }

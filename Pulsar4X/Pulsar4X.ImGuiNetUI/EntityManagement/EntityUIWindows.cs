@@ -145,10 +145,6 @@ namespace Pulsar4X.SDL2UI
             {
                 return true;
             }
-            else if (_entityState.Entity.HasDataBlob<VolumeStorageDB>() && !_entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() && T == typeof(LogiBaseWindow))
-            {
-                return true;
-            }
             else if (
                 _entityState.Entity.HasDataBlob<VolumeStorageDB>() &&
                 _entityState.Entity.HasDataBlob<NewtonThrustAbilityDB>() &&
@@ -227,12 +223,12 @@ namespace Pulsar4X.SDL2UI
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
-                else if (T == typeof(LogiBaseWindow))
-                {
-                    var instance = LogiBaseWindow.GetInstance(_state.Game.StaticData, _entityState);
-                    instance.ToggleActive();
-                    _state.ActiveWindow = instance;
-                }
+                // else if (T == typeof(LogiBaseWindow))
+                // {
+                //     var instance = LogiBaseWindow.GetInstance(_state.Game.StaticData, _entityState);
+                //     instance.ToggleActive();
+                //     _state.ActiveWindow = instance;
+                // }
                 else if (T == typeof(LogiShipWindow))
                 {
                     var instance = LogiShipWindow.GetInstance(_state.Game.StaticData, _entityState);

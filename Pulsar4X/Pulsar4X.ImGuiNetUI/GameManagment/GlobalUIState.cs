@@ -5,13 +5,10 @@ using Pulsar4X.Orbital;
 using SDL2;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.IO;
-using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
-using Pulsar4X.SDL2UI;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -20,15 +17,15 @@ namespace Pulsar4X.SDL2UI
     {
         public bool debugnewgame = true;
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
-        internal static readonly Dictionary<Type, string> namesForMenus = new Dictionary<Type, string>{
+        internal static readonly Dictionary<Type, string> NamesForMenus = new() {
             {typeof(PinCameraBlankMenuHelper), "Pin camera"},
             {typeof(WarpOrderWindow), "Warp to a new orbit"},
             {typeof(ChangeCurrentOrbitWindow), "Change current orbit"},
             {typeof(FireControl), "Fire Control" },
             {typeof(RenameWindow), "Rename"},
             {typeof(CargoTransfer), "Cargo"},
-            {typeof(LogiBaseWindow), "TradeBase"},
-            {typeof(LogiShipWindow), "TradeShip"},
+            {typeof(ColonyLogisticsDisplay), "Logistics"},
+            {typeof(LogiShipWindow), "Logistics"},
             {typeof(ColonyPanel), "Economy"},
             {typeof(GotoSystemBlankMenuHelper), "Go to system"},
             {typeof(SelectPrimaryBlankMenuHelper), "Select as primary"},
@@ -47,47 +44,35 @@ namespace Pulsar4X.SDL2UI
         internal bool ShowDamageWindow;
         internal IntPtr rendererPtr;
         internal Guid _lastContextMenuOpenedEntityGuid = Guid.Empty;
-
         internal GalacticMapRender GalacticMap;
-
-        internal List<UpdateWindowState> UpdateableWindows = new List<UpdateWindowState>();
-        internal DateTime LastGameUpdateTime = new DateTime();
+        internal List<UpdateWindowState> UpdateableWindows = new ();
+        internal DateTime LastGameUpdateTime = new ();
         internal StarSystem SelectedSystem { get { return StarSystemStates[SelectedStarSysGuid].StarSystem; } }
         internal DateTime SelectedSystemTime { get { return StarSystemStates[SelectedStarSysGuid].StarSystem.StarSysDateTime; } }
-        internal DateTime SelectedSysLastUpdateTime = new DateTime();
+        internal DateTime SelectedSysLastUpdateTime = new ();
         internal Guid SelectedStarSysGuid { get { return GalacticMap.SelectedStarSysGuid; } }
         internal SystemMapRendering SelectedSysMapRender { get { return GalacticMap.SelectedSysMapRender; } }
-        internal DateTime PrimarySystemDateTime; //= new DateTime();
-
+        internal DateTime PrimarySystemDateTime;
         internal EntityContextMenu ContextMenu { get; set; }
-
-        internal Dictionary<Guid, SystemState> StarSystemStates = new Dictionary<Guid, SystemState>();
-
-        internal Camera Camera;// = new Camera();
+        internal Dictionary<Guid, SystemState> StarSystemStates = new ();
+        internal Camera Camera;
         internal ImGuiSDL2CSWindow ViewPort;
         internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
 
-        internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new Dictionary<Type, PulsarGuiWindow>();
-        internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new Dictionary<String, NonUniquePulsarGuiWindow>();
+        internal Dictionary<Type, PulsarGuiWindow> LoadedWindows = new ();
+        internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new ();
         internal PulsarGuiWindow ActiveWindow { get; set; }
-
-        internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new List<List<UserOrbitSettings>>();
-        internal List<float> DrawNameZoomLvl = new List<float>();
-
-        internal Dictionary<string, IntPtr> SDLImageDictionary = new Dictionary<string, IntPtr>();
-        internal Dictionary<string, int> GLImageDictionary = new Dictionary<string, int>();
-
+        internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new ();
+        internal List<float> DrawNameZoomLvl = new ();
+        internal Dictionary<string, IntPtr> SDLImageDictionary = new ();
+        internal Dictionary<string, int> GLImageDictionary = new ();
         public event EntityClickedEventHandler EntityClickedEvent;
-        
         internal EntityState LastClickedEntity = null;
-        
         internal EntityState PrimaryEntity { get; private set; }
         internal Orbital.Vector3 LastWorldPointClicked_m { get; set; }
-
-
-
         internal SpaceMasterVM SpaceMasterVM;
         internal bool SMenabled = false;
+        internal Dictionary<Guid, EntityWindow> EntityWindows { get; private set; } = new();
 
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
@@ -97,8 +82,6 @@ namespace Pulsar4X.SDL2UI
             SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_DRIVER, "opengl");
             //var surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
             rendererPtr = SDL.SDL_CreateRenderer(windowPtr, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
-            
-
 
             for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
             {
@@ -128,8 +111,10 @@ namespace Pulsar4X.SDL2UI
             */
         }
 
-        private void deactivateAllClosableWindows(){
-            foreach(var window in LoadedWindows){
+        private void DeactivateAllClosableWindows()
+        {
+            foreach(var window in LoadedWindows)
+            {
                 window.Value.SetActive(false);
             }
         }
@@ -149,7 +134,7 @@ namespace Pulsar4X.SDL2UI
         internal void SetActiveSystem(Guid activeSysID, bool refresh = false)
         {
             if(activeSysID != SelectedStarSysGuid || refresh){
-                deactivateAllClosableWindows();
+                DeactivateAllClosableWindows();
                 var SelectedSys = StarSystemStates[activeSysID].StarSystem;
                 PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
                 GalacticMap.SelectedStarSysGuid = activeSysID;
@@ -157,10 +142,11 @@ namespace Pulsar4X.SDL2UI
                 LastClickedEntity = null;
                 PrimaryEntity = null;
             }
-            
+
         }
 
-        internal void refreshStarSystemStates(){
+        internal void RefreshStarSystemStates()
+        {
             SetFaction(Faction);
             SetActiveSystem(SelectedStarSysGuid ,true);
         }
@@ -172,28 +158,24 @@ namespace Pulsar4X.SDL2UI
             var masterFaction = StaticRefLib.Game.GameMasterFaction;
             SetFaction(masterFaction);
             if(Game != null)
+            {
                 foreach (var system in Game.Systems)
                 {
                     StarSystemStates[system.Key] = SystemState.GetMasterState(system.Value);
                 }
-            
+            }
         }
 
         internal void ToggleGameMaster()
         {
-            if(SMenabled == true) 
-            {
-                SMenabled = false;
-            }
-            else
-            {
-                SMenabled = true;
+            SMenabled = !SMenabled;
+            if(SMenabled)
                 EnableGameMaster();
-            }
         }
 
         //checks wether any event changed the mouse position after a new mouse click, indicating the user is doing something else with the mouse as he was doing before.
-        internal void onFocusMoved(){
+        internal void OnFocusMoved()
+        {
             _lastContextMenuOpenedEntityGuid = Guid.Empty;
         }
 
@@ -203,83 +185,74 @@ namespace Pulsar4X.SDL2UI
             if (button == MouseButtons.Primary)
                 LastWorldPointClicked_m = worldCoord;
 
-            if (ActiveWindow != null)
-                ActiveWindow.MapClicked(worldCoord, button);
+            ActiveWindow?.MapClicked(worldCoord, button);
 
             if (LoadedWindows.ContainsKey(typeof(DistanceRuler)))
                 LoadedWindows[typeof(DistanceRuler)].MapClicked(worldCoord, button);
 
             Dictionary<Guid, EntityState> allEntities = null;
-            if(StarSystemStates.ContainsKey(SelectedStarSysGuid)){
+            if(StarSystemStates.ContainsKey(SelectedStarSysGuid))
                 allEntities = StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames;
-            }
+
             //gets all entities with a position on the map
             double closestEntityDistInM = double.MaxValue;
             Entity closestEntity = null;
             //iterates over entities. Compares the next one with the previous closest-to-click one, if next one is closer, set that one as the closest, repeat for all entities.
-            if(allEntities != null){
-            
-                foreach(var oneEntityState in allEntities){
+            if(allEntities != null)
+            {
+                foreach(var oneEntityState in allEntities)
+                {
                     var oneEntity = oneEntityState.Value.Entity;
                     if(oneEntity.HasDataBlob<PositionDB>()){
                         var thisDistanceInM = Math.Sqrt(Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition.X-worldCoord.X, 2) + Math.Pow(oneEntity.GetDataBlob<PositionDB>().AbsolutePosition.Y -worldCoord.Y,2));
-                        if(thisDistanceInM <= closestEntityDistInM){
-                            
+                        if(thisDistanceInM <= closestEntityDistInM)
+                        {
                             closestEntityDistInM = thisDistanceInM;
                             closestEntity = oneEntity;
-                        
-                        
                         }
                     }
-                
                 }
             }
 
-
-                
             //checks if there is a closest entity
-            if(closestEntity != null){
-                if(closestEntity.HasDataBlob<MassVolumeDB>()){
+            if(closestEntity != null)
+            {
+                if(closestEntity.HasDataBlob<MassVolumeDB>())
+                {
                     int minPixelRadius = 20;
-                        
-                        
+
                     //var distanceBetweenMouseAndEntity = Math.Sqrt(Math.Pow(closestEntity.GetDataBlob<PositionDB>().AbsolutePosition_m - worldCoord,2) + Math.Pow(entityPositionInScreenPixels.Y- mousePosInPixels.Y,2));
                     //int distComp = (int)Math.Sqrt(Math.Pow(50,2)/2);
 
                     if(closestEntityDistInM <= closestEntity.GetDataBlob<MassVolumeDB>().RadiusInM || Camera.WorldDistance_AU(minPixelRadius) >=  Distance.MToAU(closestEntityDistInM)){
                         ImGui.Begin("--crash fixer--(this menu`s whole purpose is preventing a ImGui global state related game crash)");
-                           
+
                         EntityClicked(closestEntity.Guid, SelectedStarSysGuid, button);
                         ImGui.End();
-                            
+
                         if(button == MouseButtons.Alt){
                             _lastContextMenuOpenedEntityGuid = closestEntity.Guid;
                         }
-                            
                     }
                 }
             }
-                
 
             if (LoadedWindows.ContainsKey(typeof(ToolBarUI)))
                 LoadedWindows[typeof(ToolBarUI)].MapClicked(worldCoord, button);
-            
-            
         }
 
-        internal void EntitySelectedAsPrimary(Guid entityGuid, Guid starSys){
+        internal void EntitySelectedAsPrimary(Guid entityGuid, Guid starSys)
+        {
             PrimaryEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
-            if(ActiveWindow != null)
-                ActiveWindow.EntitySelectedAsPrimary(PrimaryEntity);
+            ActiveWindow?.EntitySelectedAsPrimary(PrimaryEntity);
         }
 
         internal void EntityClicked(Guid entityGuid, Guid starSys, MouseButtons button)
         {
             var entityState = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
             LastClickedEntity = entityState;
-            
-            if (ActiveWindow != null)
-                ActiveWindow.EntityClicked(entityState, button);
+
+            ActiveWindow?.EntityClicked(entityState, button);
 
             SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
             if(LastClickedEntity.DebugOrbitOrder != null)
@@ -289,16 +262,34 @@ namespace Pulsar4X.SDL2UI
 
             if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
                 PrimaryEntity = LastClickedEntity;
-            
+
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
+
+            if(button == MouseButtons.Primary)
+            {
+                if(!EntityWindows.ContainsKey(entityGuid))
+                {
+                    EntityWindows.Add(entityGuid, new EntityWindow(entityState));
+                }
+                EntityWindows[entityGuid].ToggleActive();
+
+                if(!ImGui.GetIO().KeyCtrl)
+                {
+                    foreach(var (id, window) in EntityWindows)
+                    {
+                        if(id == entityGuid) continue;
+
+                        window.SetActive(false);
+                    }
+                }
+            }
         }
-        
+
         internal void EntityClicked(EntityState entityState, MouseButtons button)
         {
             LastClickedEntity = entityState;
-            
-            if (ActiveWindow != null)
-                ActiveWindow.EntityClicked(entityState, button);
+
+            ActiveWindow?.EntityClicked(entityState, button);
 
             SelectedSysMapRender.SelectedEntityExtras = new List<IDrawData>();
             if(LastClickedEntity.DebugOrbitOrder != null)
@@ -308,7 +299,7 @@ namespace Pulsar4X.SDL2UI
 
             if(ActiveWindow == null || ActiveWindow.GetActive() == false || ActiveWindow.ClickedEntityIsPrimary)
                 PrimaryEntity = LastClickedEntity;
-            
+
             EntityClickedEvent?.Invoke(LastClickedEntity, button);
         }
     }

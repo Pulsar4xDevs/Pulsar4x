@@ -204,21 +204,21 @@ namespace Pulsar4X.SDL2UI
                 var bandRadius = _parentObect.GetAbsoluteFuturePosition(_parentStar.StarSysDateTime).Length();
                 var zones = SystemBodyFactory.HabitibleZones(_sysGensettings, _starInfo);
                 MinMaxStruct zone;
-                SystemBand band; 
+                // SystemBand band; 
                 if (zones.hasHabitible && bandRadius > zones.habitible.Min && bandRadius < zones.habitible.Max)
                 {
                     zone = zones.habitible;
-                    band = SystemBand.HabitableBand;
+                    // band = SystemBand.HabitableBand;
                 }
                 else if (bandRadius < zones.inner.Max && bandRadius > zones.inner.Min)
                 {
                     zone = zones.inner;
-                    band = SystemBand.InnerBand;
+                    // band = SystemBand.InnerBand;
                 }
                 else if (bandRadius > zones.outer.Min && bandRadius < zones.outer.Max)
                 {
                     zone = zones.outer;
-                    band = SystemBand.OuterBand;
+                    //band = SystemBand.OuterBand;
                 }
                 //else throw new Exception("bad radius");
                 

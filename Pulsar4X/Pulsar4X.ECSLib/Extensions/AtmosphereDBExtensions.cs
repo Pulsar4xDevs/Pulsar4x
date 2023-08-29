@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// Information on the calculations can be found here:
+    /// http://aurorawiki.pentarch.org/index.php?title=Terraforming
+    /// </summary>
     public static class AtmosphereDBExtensions
     {
         public static bool WouldBeFrozenAtGivenTemperature(this AtmosphericGasSD gas, float temperatureInC)
@@ -14,15 +18,13 @@ namespace Pulsar4X.ECSLib
         public static float GetAtmosphericPressure(this AtmosphereDB atmosphere)
         {
             double totalPressure = 0;
-            Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
-
             var baseTemp = atmosphere.GetParentBaseTemperature();
-            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
+
+            foreach (var (gas, pressure) in atmosphere.Composition)
             {
-                if (!kvp.Key.WouldBeFrozenAtGivenTemperature(baseTemp))
+                if (!gas.WouldBeFrozenAtGivenTemperature(baseTemp))
                 {
-                    var pressureContribution = kvp.Value;
-                    totalPressure += pressureContribution;
+                    totalPressure += pressure;
                 }
             }
 
@@ -32,13 +34,12 @@ namespace Pulsar4X.ECSLib
         public static float GetGreenhousePressure(this AtmosphereDB atmosphere)
         {
             float totalPressure = 0;
-            Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
-
             var baseTemp = atmosphere.GetParentBaseTemperature();
-            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
+
+            foreach (var (gas, pressure) in atmosphere.Composition)
             {
-                if (kvp.Key.GreenhouseEffect > 0 && !kvp.Key.WouldBeFrozenAtGivenTemperature(baseTemp)) {
-                    totalPressure += kvp.Value;
+                if (gas.GreenhouseEffect > 0 && !gas.WouldBeFrozenAtGivenTemperature(baseTemp)) {
+                    totalPressure += pressure;
                 }
             }
 
@@ -48,14 +49,13 @@ namespace Pulsar4X.ECSLib
         public static float GetAntiGreenhousePressure(this AtmosphereDB atmosphere)
         {
             float totalPressure = 0;
-            Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
-
             var baseTemp = atmosphere.GetParentBaseTemperature();
-            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
+
+            foreach (var (gas, pressure) in atmosphere.Composition)
             {
-                if (kvp.Key.GreenhouseEffect < 0 && !kvp.Key.WouldBeFrozenAtGivenTemperature(baseTemp))
+                if (gas.GreenhouseEffect < 0 && !gas.WouldBeFrozenAtGivenTemperature(baseTemp))
                 {
-                    totalPressure += kvp.Value;
+                    totalPressure += pressure;
                 }
             }
 

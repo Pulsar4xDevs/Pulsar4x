@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using NUnit.Framework;
 using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
@@ -196,6 +197,44 @@ namespace Pulsar4X.ECSLib
             return Manager.GetDataBlob<T>(ID, typeIndex);
         }
 
+        /// <summary>
+        /// Returns true with out datablob if found.
+        /// </summary>
+        /// <param name="typeIndex"></param>
+        /// <param name="datablob"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>True if has datablob</returns>
+        public bool TryGetDatablob<T>(int typeIndex, out T datablob) where T : BaseDataBlob
+        {
+            bool hasDB = HasDataBlob(typeIndex);
+            if (!hasDB)
+            {
+                datablob = default(T);
+                return hasDB;
+            }
+            datablob = Manager.GetDataBlob<T>(ID, typeIndex);
+            return hasDB;
+        }
+        
+        /// <summary>
+        /// Returns true with out datablob if found. 
+        /// </summary>
+        /// <param name="datablob">datablob if found</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>True if has datablob</returns>
+        public bool TryGetDatablob<T>(out T datablob) where T : BaseDataBlob
+        {
+            int typeIndex = EntityManager.GetTypeIndex<T>();
+            bool hasDB = HasDataBlob(typeIndex);
+            if (!hasDB)
+            {
+                datablob = default(T);
+                return hasDB;
+            }
+            datablob = Manager.GetDataBlob<T>(ID, typeIndex);
+            return hasDB;
+        }
+        
         /// <summary>
         /// Sets the dataBlob to this entity. Slightly slower than SetDataBlob(dataBlob, typeIndex);
         /// </summary>

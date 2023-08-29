@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Reflection;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.Industry;
 using Pulsar4X.Orbital;
 
 namespace Pulsar4X.SDL2UI
@@ -109,7 +110,7 @@ namespace Pulsar4X.SDL2UI
 
         static void RecursiveReflection(object obj)
         {
-            
+            object value = null;
             Type objType = obj.GetType();
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             MemberInfo[] memberInfos = objType.GetMembers(flags);
@@ -118,12 +119,41 @@ namespace Pulsar4X.SDL2UI
                 if (typeof(FieldInfo).IsAssignableFrom(memberInfo.GetType()) || typeof(PropertyInfo).IsAssignableFrom(memberInfo.GetType()))
                 {
                     MemberTypes membertype = memberInfo.MemberType;
-                    object value = GetValue(memberInfo, obj);
+                    object prevVal = value;
+                    value = GetValue(memberInfo, obj);
                     if(value == null)
                         continue;
-                    if (typeof(IList).IsAssignableFrom(value.GetType()))
+                    if (typeof(ICollection).IsAssignableFrom(value.GetType()))
                     {
-                        var items = (IList)GetValue(memberInfo, obj);
+                        var items = (ICollection)GetValue(memberInfo, obj);
+                        int itemsCount = items.Count;
+                        
+                        if (ImGui.TreeNode(memberInfo.Name))
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                            _numLines += itemsCount;
+                            lock (items)//TODO: IDK the best way to fix this.
+                            {
+                                foreach (var item in items)  
+                                {
+                                    RecursiveReflection(item);
+                                }
+                            }
+
+                            ImGui.TreePop();
+                        }
+                        else
+                        {
+                            ImGui.NextColumn();
+                            ImGui.Text("Count: " + itemsCount);
+                            ImGui.NextColumn();
+                        }
+                    }
+                    else if (typeof(HashSet<TechSD>).IsAssignableFrom(value.GetType()))
+                    {
+                        var items = (HashSet<TechSD>)GetValue(memberInfo, obj);
                         int itemsCount = items.Count;
                         
                         if (ImGui.TreeNode(memberInfo.Name))
@@ -201,7 +231,6 @@ namespace Pulsar4X.SDL2UI
                                     else ImGui.Text("null");
                                     ImGui.NextColumn();
                                 }
-                            
 
                             ImGui.TreePop();
                         }
@@ -217,9 +246,76 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(memberInfo.Name);
                         ImGui.NextColumn();
                         //object value = memberInfo.GetValue(obj);
+                        string displayStr = "null";
+                        string tooltipStr = "";
                         if (value != null)
-                            ImGui.Text(value.ToString());
-                        else ImGui.Text("null");
+                        {
+                            if(value is Guid)
+                            {
+                                var guid = (Guid)value;
+                                displayStr = guid.ToString();
+                                if (StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(guid, out Entity entity))
+                                {
+                                    displayStr = entity.GetOwnersName();
+                                    tooltipStr = (value.ToString());
+                                }
+                                else if (StaticRefLib.StaticData.Techs.TryGetValue(guid, out TechSD techSD))
+                                {
+                                    displayStr = techSD.Name;
+                                }
+                                else if (StaticRefLib.StaticData.ComponentTemplates.TryGetValue(guid, out ComponentTemplateSD ctempSD))
+                                {
+                                    displayStr = "ComponentTemplateSD" + ctempSD.Name;
+                                    tooltipStr = ctempSD.ID.ToString();
+                                }
+                                else if (_dataBlobs[_selectedDB] is FactionTechDB)
+                                {
+                                    var db = (FactionTechDB)_dataBlobs[_selectedDB];
+                                    if (db.ResearchedTechs.ContainsKey(guid))
+                                    {
+                                        var facInfo = db.OwningEntity.GetDataBlob<FactionInfoDB>();
+                                        if (facInfo.ComponentDesigns.TryGetValue(guid, out ComponentDesign component))
+                                        {
+                                            displayStr = component.Name;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    displayStr = guid.ToString();
+                                }
+                            }
+                            else if(value is Entity)
+                            {
+                                var entity = (Entity)value;
+                                displayStr = (entity.GetOwnersName());
+                                tooltipStr = (entity.Guid.ToString());
+                            }
+                            else
+                            {
+                                displayStr = (value.ToString());
+                            }
+
+                            if (value is ProcessedMaterialSD)
+                            {
+                                ProcessedMaterialSD mat = (ProcessedMaterialSD)value;
+                                displayStr = ("MaterialSD: " + mat.Name);
+                            }
+
+                            if (value is IConstrucableDesign)
+                            {
+                                IConstrucableDesign constD = (IConstrucableDesign)value;
+                                displayStr = "Constructable: " + constD.Name;
+                            }
+                            if (value is (TechSD tech ,int pointsResearched, int pointCost))
+                            {
+                                (TechSD tech ,int pointsResearched, int pointCost) tval = ((TechSD tech ,int pointsResearched, int pointCost))value;
+                                displayStr = "TechSD: " + tval.tech.Name + " Points Researched: " + tval.pointsResearched + " / " +tval.pointCost;
+                            }
+                        }
+                        ImGui.Text(displayStr);
+                        if (ImGui.IsItemHovered())
+                            ImGui.SetTooltip(tooltipStr);
                         ImGui.NextColumn();
                     }
                 }

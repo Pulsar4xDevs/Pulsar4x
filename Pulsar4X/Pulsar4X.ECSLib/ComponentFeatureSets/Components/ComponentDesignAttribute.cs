@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
         private ComponentTemplateAttributeSD _templateSD;
         public string Name { get { return _templateSD.Name; } }
 
-        public string Unit { get { return _templateSD.Unit; } }
+        public string Unit { get { return _templateSD.Units; } }
         public GuiHint GuiHint { get { return _templateSD.GuiHint; } }
         public bool IsEnabled {
             get
@@ -105,6 +105,12 @@ namespace Pulsar4X.ECSLib
                 EnumType = Type.GetType(_templateSD.EnumTypeName);
                 if(EnumType == null)
                     throw new Exception("EnumTypeName not found: " + _templateSD.EnumTypeName);
+                //don't allow a value less than 0
+                if (MinValue < 0)
+                    MinValue = 0;
+                //Dont set a max value above the max length of the enum list. 
+                MaxValue = Math.Min(MaxValue , Enum.GetNames(EnumType).Length);
+                
                 ListSelection = (int)Value;
                 //string[] names = Enum.GetNames(EnumType);
             }
@@ -112,7 +118,6 @@ namespace Pulsar4X.ECSLib
             if (_templateSD.GuiIsEnabledFormula != null)
             {
                 IsEnabledFormula = new ChainedExpression(_templateSD.GuiIsEnabledFormula, this, factionTech, staticData);
-                var ghint = GuiHint.GuiTextDisplay | GuiHint.GuiDisplayBool;
             }
 
             if (GuiHint == GuiHint.GuiOrdnanceSelectionList)

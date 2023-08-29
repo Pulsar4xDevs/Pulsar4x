@@ -37,8 +37,8 @@ namespace Pulsar4X.SDL2UI
             {
                 Picture = _uiState.Img_DesComponent(),
                 TooltipText = "Design a new component or facility",
-                OnClick = new Action(ComponentDesignUI.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(ComponentDesignUI.GetInstance().GetActive)
+                OnClick = new Action(ComponentDesignWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(ComponentDesignWindow.GetInstance().GetActive)
                 //Opens up the component design menu
             };
             ToolButtons.Add(btn);
@@ -47,8 +47,18 @@ namespace Pulsar4X.SDL2UI
             {
                 Picture = _uiState.Img_DesignShip(),
                 TooltipText = "Design a new Ship",
-                OnClick = new Action(ShipDesignUI.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(ShipDesignUI.GetInstance().GetActive)
+                OnClick = new Action(ShipDesignWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(ShipDesignWindow.GetInstance().GetActive)
+                //Opens up the ship design menu
+            };
+            ToolButtons.Add(btn);
+
+            btn =  new ToolbuttonData()
+            {
+                Picture = _uiState.Img_Industry(),
+                TooltipText = "Economy Management",
+                OnClick = new Action(EconomicsWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(EconomicsWindow.GetInstance().GetActive)
                 //Opens up the ship design menu
             };
             ToolButtons.Add(btn);

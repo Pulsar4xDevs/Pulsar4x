@@ -193,30 +193,37 @@ namespace Pulsar4X.Tests
         {
             Dictionary<Guid, ProcessedMaterialSD> mats = new Dictionary<Guid, ProcessedMaterialSD>();
 
-            ProcessedMaterialSD soriumFuel = new ProcessedMaterialSD();
-            soriumFuel.Name = "Sorium Fuel";
-            soriumFuel.Description = "Fuel for SpaceShips";
-            soriumFuel.ID = new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A");
-            soriumFuel.MineralsRequired = new Dictionary<Guid, long>();
+            ProcessedMaterialSD soriumFuel = new ProcessedMaterialSD()
+            {
+                Name = "Sorium Fuel",
+                Description = "Fuel for SpaceShips",
+                ID = new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"),
+                MineralsRequired = new Dictionary<Guid, long>(),
+                
+                MassPerUnit = 1,
+                //soriumFuel.CargoType = CargoType.Fuel;
+                IndustryPointCosts = 10,
+                OutputAmount = 1
+            };
             soriumFuel.MineralsRequired.Add(new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9"), 1);
-            soriumFuel.MassPerUnit = 1;
-            //soriumFuel.CargoType = CargoType.Fuel;
-            soriumFuel.IndustryPointCosts = 10;
-            soriumFuel.OutputAmount = 1;
             mats.Add(soriumFuel.ID, soriumFuel);
 
-            ProcessedMaterialSD DepleatedDuranuim = new ProcessedMaterialSD();
-            DepleatedDuranuim.Name = "Depleated Duranuim";
-            DepleatedDuranuim.Description = "A mix of Duranium and refined fuel to teset refinarys";
-            DepleatedDuranuim.ID = new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB");
-            DepleatedDuranuim.MineralsRequired = new Dictionary<Guid, long>();
+            ProcessedMaterialSD DepleatedDuranuim = new ProcessedMaterialSD()
+            {
+                Name = "Depleated Duranuim",
+                Description = "A mix of Duranium and refined fuel to teset refinarys",
+                ID = new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB"),
+                MineralsRequired = new Dictionary<Guid, long>(),
+                
+                MaterialsRequired = new Dictionary<Guid, long>(),
+                
+                MassPerUnit = 1,
+                //DepleatedDuranuim.CargoType = CargoType.General;
+                IndustryPointCosts = 20,
+                OutputAmount = 6
+            };
             DepleatedDuranuim.MineralsRequired.Add(new Guid("2dfc78ea-f8a4-4257-bc04-47279bf104ef"), 5);
-            DepleatedDuranuim.MaterialsRequired = new Dictionary<Guid, long>();
             DepleatedDuranuim.MaterialsRequired.Add(new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"), 1);
-            DepleatedDuranuim.MassPerUnit = 1;
-            //DepleatedDuranuim.CargoType = CargoType.General;
-            DepleatedDuranuim.IndustryPointCosts = 20;
-            DepleatedDuranuim.OutputAmount = 6;
             mats.Add(DepleatedDuranuim.ID, DepleatedDuranuim);
 
             StaticDataManager.ExportStaticData(mats, "ReinfedMaterialsDataExportTest.json");

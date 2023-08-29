@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
             try
             {
                 designer = new ComponentDesigner(componentSD, factionTech);
-                
+
                 List<ChainedExpression> allExpressions = new List<ChainedExpression>()
                 {
                     designer.MassFormula,
@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
                     designer.CreditCostFormula
                 };
                 allExpressions.AddRange(designer.ResourceCostFormulas.Values);
-                
+
                 //allExpressions.AddRange(designer.MineralCostFormulas.Values);
                 //allExpressions.AddRange(designer.MaterialCostFormulas.Values);
                 //allExpressions.AddRange(designer.ComponentCostFormulas.Values);
@@ -82,10 +82,12 @@ namespace Pulsar4X.ECSLib
 
     public class ComponentDesign : ICargoable, IConstrucableDesign
     {
-        public ConstructableGuiHints GuiHints { get; set; } 
+        public ConstructableGuiHints GuiHints { get; set; }
         public Guid ID { get; internal set; }
         public string Name { get; internal set; } //player defined name. ie "5t 2kn Thruster".
-        
+
+        public bool IsValid {get; set; } = true;
+
         public Guid CargoTypeID { get; internal set; }
         public long MassPerUnit { get; internal set; }
 
@@ -102,10 +104,14 @@ namespace Pulsar4X.ECSLib
         public int CrewReq;
         public long IndustryPointCosts { get; set; }
         public Guid IndustryTypeID { get; set; }
+        public ushort OutputAmount
+        {
+            get { return 1; }
+        }
 
 
         public int CreditCost;
-        
+
         //public int ResearchCostValue;
         public Dictionary<Guid, long> ResourceCosts { get; internal set; } = new Dictionary<Guid, long>();
 
@@ -113,25 +119,23 @@ namespace Pulsar4X.ECSLib
         //public List<ComponentDesignAtbData> ComponentDesignAttributes;
 
         [JsonIgnore]
-        public Dictionary<Type, IComponentDesignAttribute> AttributesByType = new Dictionary<Type, IComponentDesignAttribute>();
+        public Dictionary<Type, IComponentDesignAttribute> AttributesByType = new();
 
         public Connections Connections = 0;
         public float AspectRatio = 1f;
         public DamageResist DamageResistance;
-        
-        
+
+
         public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         {
             var colonyConstruction = industryEntity.GetDataBlob<IndustryAbilityDB>();
             batchJob.NumberCompleted++;
-            batchJob.ResourcesRequired = designInfo.ResourceCosts;
-
+            batchJob.ResourcesRequiredRemaining = new Dictionary<Guid, long>(designInfo.ResourceCosts);
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
-
 
             if (batchJob.InstallOn != null)
             {
-               ComponentInstance specificComponent = new ComponentInstance((ComponentDesign)designInfo);
+               ComponentInstance specificComponent = new((ComponentDesign)designInfo);
                if (batchJob.InstallOn == industryEntity || storage.HasSpecificEntity(batchJob.InstallOn.GetDataBlob<CargoAbleTypeDB>()))
                {
                    batchJob.InstallOn.AddComponent(specificComponent);
@@ -146,31 +150,32 @@ namespace Pulsar4X.ECSLib
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
             {
-               colonyConstruction.ProductionLines[productionLine].Jobs.Remove(batchJob);
-               if (batchJob.Auto)
-               {
-                   colonyConstruction.ProductionLines[productionLine].Jobs.Add(batchJob);
-               }
+                colonyConstruction.ProductionLines[productionLine].Jobs.Remove(batchJob);
+                if (batchJob.Auto)
+                {
+                    batchJob.NumberCompleted = 0;
+                    colonyConstruction.ProductionLines[productionLine].Jobs.Add(batchJob);
+                }
             }
         }
-     
+
         public bool HasAttribute<T>()
             where T : IComponentDesignAttribute
         {
             return AttributesByType.ContainsKey(typeof(T));
         }
-        
+
         /// <summary>
         /// Will throw an exception if it doesn't have the type of attribute.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T GetAttribute<T>() 
+        public T GetAttribute<T>()
             where T : IComponentDesignAttribute
         {
             return (T)AttributesByType[typeof(T)];
         }
-        
+
         public bool TryGetAttribute<T>(out T attribute)
             where T : IComponentDesignAttribute
         {
@@ -183,7 +188,7 @@ namespace Pulsar4X.ECSLib
             return false;
         }
     }
-    
+
     /// <summary>
     /// This object is what the UI manipulates to create a player design
     /// the ComponentDesignData is then set.
@@ -191,13 +196,13 @@ namespace Pulsar4X.ECSLib
     public class ComponentDesigner
     {
         ComponentDesign _design = new ComponentDesign();
-        
+        internal static bool StartResearched = false;
         public ComponentDesigner(ComponentTemplateSD componentSD, FactionTechDB factionTech)
         {
             var staticData = StaticRefLib.StaticData;
             TypeName = componentSD.Name;
             Name = componentSD.Name;
-            
+
             _design.ID = Guid.NewGuid();
             MassFormula = new ChainedExpression(componentSD.MassFormula, this, factionTech, staticData);
             VolumeFormula = new ChainedExpression(componentSD.VolumeFormula, this, factionTech, staticData);
@@ -226,7 +231,7 @@ namespace Pulsar4X.ECSLib
             }
 
             ResourceCostFormulas = resourceCostForulas;
-            
+
             foreach (ComponentTemplateAttributeSD attrbSD in componentSD.ComponentAtbSDs)
             {
                 ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this, attrbSD, factionTech);
@@ -247,7 +252,7 @@ namespace Pulsar4X.ECSLib
                 {
                     //if (designAttribute.AtbConstrArgs == null)
                     designAttribute.SetValue();  //force recalc.
-                                 
+
                     object[] constructorArgs = designAttribute.AtbConstrArgs;
                     try
                     {
@@ -261,12 +266,12 @@ namespace Pulsar4X.ECSLib
                         foreach (var arg in constructorArgs)
                         {
                             argTypes += arg.GetType() + ": " + constructorArgs[i].ToString() + ",\n";
-                            
+
                             i++;
                         }
-                        
+
                         string exstr = "The Attribute: " + designAttribute.AttributeType + " in "+ _design.Name + " was found, but the arguments did not match any constructors.\nThe given arguments are:\n"
-                                       + argTypes 
+                                       + argTypes
                                        + "The full exception is as follows:\n" + e;
                         throw new Exception(exstr);
                     }
@@ -282,28 +287,34 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public ComponentDesign CreateDesign(Entity factionEntity)
         {
- 
+
             FactionInfoDB faction = factionEntity.GetDataBlob<FactionInfoDB>();
-            
+
             //set up the research
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
-            TechSD tech = new TechSD();
-            tech.ID = Guid.NewGuid();
-            tech.Name = _design.Name + " Design Research";
-            tech.Description = "Research into building " + _design.Name;
-            tech.MaxLevel = 1;
-            tech.CostFormula = _design.ResearchCostValue.ToString();
-
+            TechSD tech = new TechSD()
+            {
+                ID = _design.ID,
+                Name = _design.Name + " Design Research",
+                Description = "Research into building " + _design.Name,
+                MaxLevel = 1,
+                CostFormula = _design.ResearchCostValue.ToString(),
+                Faction = factionEntity,
+                Design = _design
+            };
 
             _design.TechID = tech.ID;
-            factionTech.MakeResearchable(tech); //add it to researchable techs 
-            
+            factionTech.MakeResearchable(tech); //add it to researchable techs
+
             SetAttributes();
 
+            if(_design.ResearchCostValue == 0 || StartResearched)
+            {
+                faction.IndustryDesigns[_design.ID] = _design;
+            }
+
             faction.InternalComponentDesigns[_design.ID] = _design;
-            faction.IndustryDesigns[_design.ID] = _design;
             return _design;
-            
         }
 
 
@@ -326,15 +337,15 @@ namespace Pulsar4X.ECSLib
             set { _design.TypeName = value; }
         }
 
-        public string Name 
-        {             
+        public string Name
+        {
             get { return _design.Name; }
-            set { _design.Name = value; } 
+            set { _design.Name = value; }
         }
 
 
         internal ChainedExpression DescriptionFormula { get; set; }
-        
+
         public string Description
         {
             get
@@ -346,7 +357,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        
+
 
         public long MassValue
         {
@@ -410,11 +421,11 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in ResourceCostFormulas)
             {
                 kvp.Value.Evaluate();
-                dict.Add(kvp.Key, kvp.Value.LongResult);  
+                dict.Add(kvp.Key, kvp.Value.LongResult);
             }
             _design.ResourceCosts = dict;
         }
-        
+
         /*
         public Dictionary<Guid, int> MineralCostValues => _design.MineralCosts;
         internal Dictionary<Guid, ChainedExpression> MineralCostFormulas { get; set; }
@@ -424,11 +435,11 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in MineralCostFormulas)
             {
                 kvp.Value.Evaluate();
-                dict.Add(kvp.Key, kvp.Value.IntResult);  
+                dict.Add(kvp.Key, kvp.Value.IntResult);
             }
             _design.MineralCosts = dict;
         }
-        
+
         public Dictionary<Guid, int> MaterialCostValues => _design.MaterialCosts;
         internal Dictionary<Guid, ChainedExpression> MaterialCostFormulas { get; set; }
         public void SetMaterialCosts()
@@ -437,11 +448,11 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in MaterialCostFormulas)
             {
                 kvp.Value.Evaluate();
-                dict.Add(kvp.Key, kvp.Value.IntResult);  
+                dict.Add(kvp.Key, kvp.Value.IntResult);
             }
             _design.MaterialCosts = dict;
         }
-        
+
         public Dictionary<Guid, int> ComponentCostValues => _design.ComponentCosts;
         internal Dictionary<Guid, ChainedExpression> ComponentCostFormulas { get; set; }
         public void SetComponentCosts()
@@ -450,12 +461,12 @@ namespace Pulsar4X.ECSLib
             foreach (var kvp in ComponentCostFormulas)
             {
                 kvp.Value.Evaluate();
-                dict.Add(kvp.Key, kvp.Value.IntResult);  
+                dict.Add(kvp.Key, kvp.Value.IntResult);
             }
             _design.ComponentCosts = dict;
         }
         */
-        
+
         public int CreditCostValue => _design.CreditCost;
         internal ChainedExpression CreditCostFormula { get; set; }
         public void SetCreditCost()
@@ -466,34 +477,34 @@ namespace Pulsar4X.ECSLib
 
         public ComponentMountType ComponentMountType
         {
-            get { return _design.ComponentMountType;} 
+            get { return _design.ComponentMountType;}
             internal set { _design.ComponentMountType = value; } }
         public Guid IndustryType
         {
             get { return _design.IndustryTypeID; }
             internal set { _design.IndustryTypeID = value; }
         }
-        public Guid CargoTypeID 
-        {             
+        public Guid CargoTypeID
+        {
             get { return _design.CargoTypeID; }
-            internal set { _design.CargoTypeID = value; } 
+            internal set { _design.CargoTypeID = value; }
         }
-        
+
         [Obsolete]//don't use this, TODO: get rid of this once json data is rewritten to use names instead of indexes
         internal List<ComponentDesignAttribute> ComponentDesignAttributeList = new List<ComponentDesignAttribute>();
-        
+
         public Dictionary<string, ComponentDesignAttribute> ComponentDesignAttributes = new Dictionary<string, ComponentDesignAttribute>();
         public Dictionary<Type, IComponentDesignAttribute> Attributes
         {
             get { return _design.AttributesByType; }
         }
 
-        public T GetAttribute<T>() 
+        public T GetAttribute<T>()
             where T : IComponentDesignAttribute
         {
             return (T)_design.AttributesByType[typeof(T)];
         }
-        
+
         public bool TryGetAttribute<T>(out T attribute)
             where T : IComponentDesignAttribute
         {

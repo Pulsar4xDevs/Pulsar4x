@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
         public static Dictionary<string, double> GetTotalSystemMinerals(this StarSystem system, StaticDataStore staticData)
         {
             var minerals = new Dictionary<Guid, double>();
-            var bodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>().Select(x => x.GetDataBlob<SystemBodyInfoDB>());
+            var bodies = system.GetAllEntitiesWithDataBlob<MineralsDB>().Select(x => x.GetDataBlob<MineralsDB>());
             foreach (var body in bodies)
             {
                 foreach (var kvp in body.Minerals)

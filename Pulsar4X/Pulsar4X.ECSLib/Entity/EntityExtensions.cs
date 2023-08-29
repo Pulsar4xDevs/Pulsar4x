@@ -88,7 +88,9 @@ namespace Pulsar4X.ECSLib
                 var daylen = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<SystemBodyInfoDB>().LengthOfDay.TotalSeconds;
                 var radius = pos.Length();
                 var d = 2 * Math.PI * radius;
-                var speed = d / daylen;
+                double speed = 0;
+                if(daylen !=0)
+                   speed = d / daylen;
 
                 Vector3 vel = new Vector3(0, speed, 0);
 

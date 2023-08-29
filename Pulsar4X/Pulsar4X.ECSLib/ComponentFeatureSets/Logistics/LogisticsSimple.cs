@@ -24,7 +24,7 @@ namespace Pulsar4X.ECSLib
         public static (ManuverState endState, double fuelBurned) ManuverToParentColony(Entity ship, Entity cur, Entity target, ManuverState startState)
         {
             var shipMass = startState.Mass;
-            double tsec = 0;
+            // double tsec = 0;
             DateTime dateTime = startState.At;
             double fuelUse = 0;
             Vector3 pos = startState.Position;
@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
         public static (ManuverState endState, double fuelBurned) ManuverToSiblingObject(Entity ship, Entity cur, Entity target, ManuverState startState)
         {
             var shipMass = startState.Mass;
-            double tsec = 0;
+            // double tsec = 0;
             DateTime dateTime = startState.At;
             double fuelUse = 0;
             Vector3 pos = startState.Position;

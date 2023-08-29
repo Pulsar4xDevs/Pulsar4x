@@ -34,9 +34,10 @@ namespace Pulsar4X.SDL2UI
                 }
                 catch (Exception e)
                 {
-
+                    _githash = e.Message;
                 }
 
+                _hasRun = true;
             }
 
             return _githash;

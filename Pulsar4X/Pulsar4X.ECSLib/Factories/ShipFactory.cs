@@ -16,8 +16,9 @@ namespace Pulsar4X.ECSLib
         public Guid ID { get; private set; } = Guid.NewGuid();
         public string Name { get; set; }
         public Guid CargoTypeID { get; }
-        public int DesignVersion = 0;
-        public bool IsObsolete = false;
+        public int DesignVersion { get; set; }= 0;
+        public bool IsObsolete { get; set; } = false;
+        public bool IsValid { get; set; } = true; // Used by ship designer & production
         public long MassPerUnit { get; private set; }
         public double VolumePerUnit { get; private set; }
         public double Density { get; }
@@ -28,7 +29,7 @@ namespace Pulsar4X.ECSLib
         /// m^3
         /// </summary>
         //public double Volume;
-        
+
         /// <summary>
         /// This lists all the components in order for the design, from front to back, and how many "wide".
         /// note that component types can be split/arranged ie:
@@ -44,13 +45,14 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, long> ShipInstanceCost = new Dictionary<Guid, long>();
         public int CrewReq;
         public long IndustryPointCosts { get; private set; }
-        
+
         //TODO: this is one of those places where moddata has bled into hardcode...
         //the guid here is from IndustryTypeData.json "Ship Assembly"
         public Guid IndustryTypeID { get; } = new Guid("91823C5B-A71A-4364-A62C-489F0183EFB5");
+        public ushort OutputAmount { get; } = 1;
 
         public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
-        { 
+        {
             var industrydb = industryEntity.GetDataBlob<IndustryAbilityDB>();
         }
 
@@ -72,7 +74,7 @@ namespace Pulsar4X.ECSLib
 
         public ShipDesign(SerializationInfo info, StreamingContext context)
         {
-            if (info == null) 
+            if (info == null)
                 throw new ArgumentNullException("info");
 
             ID = (Guid)info.GetValue(nameof(ID), typeof(Guid));
@@ -89,7 +91,7 @@ namespace Pulsar4X.ECSLib
             Name = name;
             Components = components;
             Armor = armor;
-             
+
             foreach (var component in components)
             {
                 MassPerUnit += component.design.MassPerUnit * component.count;
@@ -139,7 +141,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public static Entity CreateShip(ShipDesign shipDesign, Entity ownerFaction, Entity parent, string shipName = null)
         {
-            
+
             double distanceFromParent = parent.GetDataBlob<MassVolumeDB>().RadiusInM * 2;
             var pos = new Vector3(distanceFromParent, 0, 0);
             var orbit = OrbitDB.FromPosition(parent, pos, shipDesign.MassPerUnit, parent.StarSysDateTime);
@@ -157,22 +159,22 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public static Entity CreateShip(ShipDesign shipDesign, Entity ownerFaction, Entity parent, double angleRad, string shipName = null)
         {
-            
-            
+
+
             var distanceFromParent = parent.GetDataBlob<MassVolumeDB>().RadiusInM * 2;
 
             var x = distanceFromParent * Math.Cos(angleRad);
             var y = distanceFromParent * Math.Sin(angleRad);
-            
+
             var pos = new Vector3( x,  y, 0);
-            
+
             StarSystem starsys = (StarSystem)parent.Manager;
             var orbit = OrbitDB.FromPosition(parent, pos, shipDesign.MassPerUnit, parent.StarSysDateTime);
             return CreateShip(shipDesign, ownerFaction, orbit, parent, shipName);
         }
 
         /// <summary>
-        /// new ship in a circular orbit at a given position from the parent. 
+        /// new ship in a circular orbit at a given position from the parent.
         /// </summary>
         /// <param name="shipDesign"></param>
         /// <param name="ownerFaction"></param>
@@ -209,36 +211,21 @@ namespace Pulsar4X.ECSLib
             var parentPosition = parent.GetDataBlob<PositionDB>().AbsolutePosition;
             var position = OrbitProcessor.GetPosition(orbit.GetElements(), parent.StarSysDateTime);
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
-            
+
             var shipinfo = new ShipInfoDB(shipDesign);
             dataBlobs.Add(shipinfo);
             var mvdb = MassVolumeDB.NewFromMassAndVolume(shipDesign.MassPerUnit, shipDesign.VolumePerUnit);
             dataBlobs.Add(mvdb);
             PositionDB posdb = new PositionDB(position, starsys.ManagerGuid, parent);
             dataBlobs.Add(posdb);
-            EntityDamageProfileDB damagedb = (EntityDamageProfileDB)shipDesign.DamageProfileDB.Clone(); 
+            EntityDamageProfileDB damagedb = (EntityDamageProfileDB)shipDesign.DamageProfileDB.Clone();
             dataBlobs.Add(damagedb);
             ComponentInstancesDB compInstances = new ComponentInstancesDB();
             dataBlobs.Add(compInstances);
             OrderableDB ordable = new OrderableDB();
             dataBlobs.Add(ordable);
             var ship = Entity.Create(starsys, ownerFaction.Guid, dataBlobs);
-
-            StaticDataStore staticdata = StaticRefLib.StaticData;
-            ComponentDesigner fireControlDesigner;
-            ComponentDesign integratedfireControl;
-
-
-            ComponentTemplateSD bfcSD = staticdata.ComponentTemplates[new Guid("33fcd1f5-80ab-4bac-97be-dbcae19ab1a0")];
-            fireControlDesigner = new ComponentDesigner(bfcSD, ownerFaction.GetDataBlob<FactionTechDB>());
-            fireControlDesigner.Name = "Bridge Computer Systems";
-            fireControlDesigner.ComponentDesignAttributes["Range"].SetValueFromInput(0);
-            fireControlDesigner.ComponentDesignAttributes["Tracking Speed"].SetValueFromInput(0);
-            fireControlDesigner.ComponentDesignAttributes["Size vs Range"].SetValueFromInput(0);
-
-            //return fireControlDesigner.CreateDesign(faction);
-            integratedfireControl = fireControlDesigner.CreateDesign(ownerFaction);
-            ownerFaction.GetDataBlob<FactionTechDB>().IncrementLevel(integratedfireControl.TechID);
+            
 
             //some DB's need tobe created after the entity.
             var namedb = new NameDB(ship.Guid.ToString());
@@ -247,8 +234,6 @@ namespace Pulsar4X.ECSLib
             ship.SetDataBlob(namedb);
             ship.SetDataBlob(orbit);
             
-            EntityManipulation.AddComponentToEntity(ship, integratedfireControl, 1);
-
             foreach (var item in shipDesign.Components)
             {
                 EntityManipulation.AddComponentToEntity(ship, item.design, item.count);
@@ -258,9 +243,9 @@ namespace Pulsar4X.ECSLib
             {
                 NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship);
             }
-            
-            
-            
+
+
+
             return ship;
         }
     }

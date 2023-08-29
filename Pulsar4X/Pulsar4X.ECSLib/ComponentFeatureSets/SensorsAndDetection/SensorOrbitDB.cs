@@ -101,10 +101,10 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public bool IsStationary { get; private set; }
 
-        [JsonProperty]
-        private double _parentMass;
-        [JsonProperty]
-        private double _myMass;
+        // [JsonProperty]
+        // private double _parentMass;
+        // [JsonProperty]
+        // private double _myMass;
 
         public override object Clone()
         {

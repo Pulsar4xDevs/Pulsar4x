@@ -43,7 +43,6 @@
               "GuiHint": "None",
               "AttributeFormula": "Ability('Antenna Size') * TechData('6F9AB80D-0331-47C0-9C5A-7586D06DE59D')"
             },
-            
             {
               "Name": "Ideal Detection Wavelength",
               "Units": "nm",

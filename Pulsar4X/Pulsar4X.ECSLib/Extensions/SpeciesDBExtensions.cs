@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Text;
 
 namespace Pulsar4X.ECSLib
 {
     public static class SpeciesDBExtensions
     {
+        public static readonly double UNSURVIVABLE_COST = -1;
+        public static readonly double NO_COST = 0;
+        public static readonly double MIN_COST = 2;
+        public static readonly double MAX_COST = 3;
+
         public static bool CanSurviveGravityOn(this SpeciesDB species, Entity planet)
         {
             SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
@@ -23,7 +26,7 @@ namespace Pulsar4X.ECSLib
         public static double ColonyCost(this SpeciesDB species, Entity planet)
         {
             if (!species.CanSurviveGravityOn(planet))
-                return -1.0; // invalid - cannot create colony here
+                return UNSURVIVABLE_COST; // invalid - cannot create colony here
 
             List<double> costs = new List<double>
             {
@@ -45,51 +48,32 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public static double ColonyToxicityCost(this SpeciesDB species, Entity planet)
         {
-            double cost = 0.0;
-            double totalPressure = 0.0;
-            SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
+            if(atmosphere == null) return NO_COST;
 
-            Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
+            double totalPressure = atmosphere.Composition.Values.Sum();
 
-            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
+            foreach(var gas in atmosphere.Composition.Keys)
             {
-                string symbol = kvp.Key.ChemicalSymbol;
-                totalPressure += kvp.Value;
+                // FIXME: where do the 3.0 and 2.0 come from?
+                // If we hit a cost return it
+                if(gas.IsHighlyToxic) return MAX_COST;
+                if(gas.IsToxic) return MIN_COST;
 
-                if (kvp.Key.IsHighlyToxic)
+                if(gas.IsHighlyToxicAtPercentage.HasValue)
                 {
-                    cost = Math.Max(cost, 3.0);
+                    var percentageOfAtmosphere = Math.Round(atmosphere.Composition[gas] / totalPressure * 100.0f, 4);
+                    if(percentageOfAtmosphere >= gas.IsHighlyToxicAtPercentage.Value) return MAX_COST;
                 }
-                else if (kvp.Key.IsToxic)
+
+                if(gas.IsToxicAtPercentage.HasValue)
                 {
-                    cost = Math.Max(cost, 2.0);
+                    var percentageOfAtmosphere = Math.Round(atmosphere.Composition[gas] / totalPressure * 100.0f, 4);
+                    if(percentageOfAtmosphere >= gas.IsToxicAtPercentage.Value) return MIN_COST;
                 }
             }
 
-            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
-            {
-                if (kvp.Key.IsHighlyToxicAtPercentage.HasValue)
-                {
-                    var percentageOfAtmosphere = Math.Round(kvp.Value / totalPressure * 100.0f, 4);
-                    // if current % of atmosphere for this gas is over toxicity threshold
-                    if (percentageOfAtmosphere >= kvp.Key.IsHighlyToxicAtPercentage.Value)
-                    {
-                        cost = Math.Max(cost, 3.0);
-                    }
-                }
-                if (kvp.Key.IsToxicAtPercentage.HasValue)
-                {
-                    var percentageOfAtmosphere = Math.Round(kvp.Value / totalPressure * 100.0f, 4);
-                    // if current % of atmosphere for this gas is over toxicity threshold
-                    if (percentageOfAtmosphere >= kvp.Key.IsToxicAtPercentage.Value)
-                    {
-                        cost = Math.Max(cost, 2.0);
-                    }
-                }
-            }
-
-            return cost;
+            return NO_COST;
         }
 
         /// <summary>
@@ -106,19 +90,19 @@ namespace Pulsar4X.ECSLib
             {
                 // No atmosphere on the planet, return 1.0?
                 // @todo - some other rule for no atmosphere planets?
-                return 2.0;
+                return MIN_COST;
             }
 
             var totalPressure = atmosphere.GetAtmosphericPressure();
             if (totalPressure > species.MaximumPressureConstraint)
             {
-                // AuroraWiki: If the pressure is too high, the colony cost will be equal to the Atmospheric Pressure 
+                // AuroraWiki: If the pressure is too high, the colony cost will be equal to the Atmospheric Pressure
                 //             divided by the species maximum pressure with a minimum of 2.0
-                
+
                 return Math.Round(Math.Max(totalPressure / species.MaximumPressureConstraint, 2.0), 6);
             }
 
-            return 0;
+            return NO_COST;
         }
 
 
@@ -127,11 +111,10 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public static double ColonyTemperatureCost(this SpeciesDB species, Entity planet)
         {
-            // AuroraWiki : The colony cost for a temperature outside the range is Temperature Difference / Temperature Deviation. 
+            // http://aurorawiki.pentarch.org/index.php?title=C-System_Bodies
+            // AuroraWiki : The colony cost for a temperature outside the range is Temperature Difference / Temperature Deviation.
             //              So if the deviation was 22 and the temperature was 48 degrees below the minimum, the colony cost would be 48/22 = 2.18
-            double tempRange = species.MaximumTemperatureConstraint - species.MinimumTemperatureConstraint;
             SystemBodyInfoDB sysBody = planet.GetDataBlob<SystemBodyInfoDB>();
-            double cost;
 
             double planetTemp = sysBody.BaseTemperature;
             if (planet.HasDataBlob<AtmosphereDB>())
@@ -139,22 +122,20 @@ namespace Pulsar4X.ECSLib
                 planetTemp = planet.GetDataBlob<AtmosphereDB>().SurfaceTemperature;
             }
 
-            if (planetTemp <= species.MaximumTemperatureConstraint  && planetTemp >= species.MinimumTemperatureConstraint)
+            if (planetTemp <= species.MaximumTemperatureConstraint && planetTemp >= species.MinimumTemperatureConstraint)
             {
-                return 0;
+                return NO_COST;
             }
 
             //More Math (the | | signs are for Absolute Value in case you forgot)
             //TempColCost = | Ideal Temp - Current Temp | / TRU (temps in Kelvin)
             // Converting to Kelvin.  It probably doesn't matter, but just in case
-            var deviation = tempRange / 2.0;
-            var diff = planetTemp < species.MinimumTemperatureConstraint 
-                        ? Math.Abs(planetTemp - species.MinimumTemperatureConstraint) 
+            var deviation = (species.MaximumTemperatureConstraint - species.MinimumTemperatureConstraint) / 2.0;
+            var diff = planetTemp < species.MinimumTemperatureConstraint
+                        ? Math.Abs(planetTemp - species.MinimumTemperatureConstraint)
                         : Math.Abs(planetTemp - species.MaximumTemperatureConstraint);
 
-            cost = diff / deviation;
-
-            return cost;
+            return diff / deviation;
         }
 
 
@@ -163,7 +144,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public static double ColonyGasCost(this SpeciesDB species, Entity planet)
         {
-            double cost = 0.0;  // if everything is good then this planet doesnt require infrastructure.
+            // if everything is good then this planet doesnt require infrastructure.
             float speciesBreathablePressure = 0.0f;
             float totalPressure = 0.0f;
             AtmosphereDB atmosphere = planet.GetDataBlob<AtmosphereDB>();
@@ -172,12 +153,10 @@ namespace Pulsar4X.ECSLib
             {
                 // No atmosphere on the planet, return 2.0?
                 // @todo - some other rule for no atmosphere planets?
-                return 2.0;
+                return MIN_COST;
             }
 
-            Dictionary<AtmosphericGasSD, float> atmosphereComp = atmosphere.Composition;
-
-            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphereComp)
+            foreach (KeyValuePair<AtmosphericGasSD, float> kvp in atmosphere.Composition)
             {
                 string symbol = kvp.Key.ChemicalSymbol;
                 totalPressure += kvp.Value;
@@ -185,19 +164,13 @@ namespace Pulsar4X.ECSLib
                     speciesBreathablePressure = kvp.Value;
             }
 
-            //if (totalPressure >= 4.0f && speciesBreathablePressure <= 0.31f)
-            //    cost = cost; // created for the break point
-
             if (totalPressure == 0.0f) // No atmosphere, obviously not breathable
-                return 2.0;
+                return MIN_COST;
 
-            if (speciesBreathablePressure < 0.1f || speciesBreathablePressure > 0.3f)  // wrong amount of species Breathable Gas
-                return 2.0;
+            if ((speciesBreathablePressure / totalPressure) > 0.3f) // Species Breathable Gas cannot be more than 30% of atmosphere to be breathable
+                return MIN_COST;
 
-            if (speciesBreathablePressure / totalPressure > 0.3f) // Species Breathable Gas cannot be more than 30% of atmosphere to be breathable
-                return 2.0;
-
-            return cost;
+            return NO_COST;
         }
     }
 }

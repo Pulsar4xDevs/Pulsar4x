@@ -39,11 +39,19 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Dictionary<Guid, OrdnanceDesign> MissileDesigns = new Dictionary<Guid, OrdnanceDesign>();
         
+        /// <summary>
+        /// This includes non researched and not constructible designs.
+        /// Does Not Include Refined Materials
+        /// </summary>
         public ReadOnlyDictionary<Guid, ComponentDesign> ComponentDesigns => new ReadOnlyDictionary<Guid, ComponentDesign>(InternalComponentDesigns);
         [JsonProperty]
         internal Dictionary<Guid, ComponentDesign> InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>();
 
 
+        /// <summary>
+        /// this shoudl only be designs we can construct.
+        /// Does Include Refined Materials.  
+        /// </summary>
         public Dictionary<Guid, IConstrucableDesign> IndustryDesigns = new Dictionary<Guid, IConstrucableDesign>();
         
         

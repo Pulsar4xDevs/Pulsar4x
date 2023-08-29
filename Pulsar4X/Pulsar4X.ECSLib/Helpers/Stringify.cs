@@ -160,6 +160,12 @@ namespace Pulsar4X.ECSLib
         }
 
 
+        /// <summary>
+        /// Energy over time
+        /// </summary>
+        /// <param name="amountInKw"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
         public static string Power(double amountInKw, string format = "0.###")
         {
             string stringPower = "0 Kw";
@@ -185,6 +191,41 @@ namespace Pulsar4X.ECSLib
             }
 
             else { stringPower = amountInKw.ToString(format) + " kW"; }
+
+            return stringPower;
+        }
+        
+        /// <summary>
+        /// stored energy
+        /// </summary>
+        /// <param name="amountInKj"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        public static string Energy(double amountInKj, string format = "0.###")
+        {
+            string stringPower = "0 Kw";
+            if (amountInKj > 100000000)
+            {
+                amountInKj = amountInKj * 0.00000001;
+                stringPower = amountInKj.ToString(format) + " GJ";
+            }
+            else if (amountInKj > 100000)
+            {
+                amountInKj = amountInKj * 0.00001;
+                stringPower = amountInKj.ToString(format) + " MJ";
+            }
+            else if (amountInKj < 0.1)
+            {
+                amountInKj = amountInKj * 1000;
+                stringPower = amountInKj.ToString(format) + " J";
+            }
+            else if (amountInKj < 0.0001)
+            {
+                amountInKj = amountInKj * 1000000;
+                stringPower = amountInKj.ToString(format) + " mJ";
+            }
+
+            else { stringPower = amountInKj.ToString(format) + " kJ"; }
 
             return stringPower;
         }

@@ -205,7 +205,7 @@ namespace Pulsar4X.SDL2UI
 
                 if(_engineDesigner != null)
                 {
-                    PartDesignUI.GuiDesignUI(_engineDesigner);
+                    //PartDesignUI.GuiDesignUI(_engineDesigner);
                     _thrusterSizeKG = _engineDesigner.MassValue;
                     RefreshMass();
                 }

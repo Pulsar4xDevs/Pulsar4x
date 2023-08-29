@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib.Industry
         public double FuelCost;
 
         private Vector3 targetPosition;
-        private Entity orbitalParent;
+        private Entity orbitalParent = null;
         private bool _hasLaunched = false;
         
         public static void CreateCommand(Guid faction, Entity orderEntity, Guid lauchSlot, Guid jobID)

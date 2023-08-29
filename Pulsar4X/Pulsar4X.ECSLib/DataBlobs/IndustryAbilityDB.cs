@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     {
         public class ProductionLine
         {
-            public string FacName;
+            public string Name;
             public double MaxVolume;
             public Dictionary<Guid, int> IndustryTypeRates = new Dictionary<Guid, int>();
             public List<IndustryJob> Jobs = new List<IndustryJob>();
@@ -68,14 +68,14 @@ namespace Pulsar4X.ECSLib
             string desc = "Refines and Constructs Materials and Items at Rates of: \n";
             foreach (var kvpLines in ProductionLines)
             {
-                
-                desc += kvpLines.Value.FacName + "\n";
+
+                desc += kvpLines.Value.Name + "\n";
                 foreach (var kvpRates in kvpLines.Value.IndustryTypeRates)
                 {
                     string industryName =  "   " + StaticRefLib.StaticData.IndustryTypes[kvpRates.Key].Name;
                     desc += industryName + "\t" + kvpRates.Value + "\n";
                 }
-                 
+
             }
 
             return desc + "per " + time;

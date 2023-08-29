@@ -120,37 +120,62 @@
       {
         "Key": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
         "Value": {
-          "Name": "ResearchLab",
-          "DescriptionFormula": "'Creates Research Points'",
+          "Name": "University",
+          "DescriptionFormula": "'Researches new technologies'",
           "ID": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
-          "MassFormula": "500000",
-          "VolumeFormula": "[Mass]",
+          "MassFormula": "Ability('Size') * 100",
+          "VolumeFormula": "Ability('Size') * 0.1",
           "HTKFormula": "[Mass]",
-          "CrewReqFormula": "1000000",
+          "CrewReqFormula": "Ability('Size')",
           "ResourceCostFormula": {
             "Entries": [
               {
                 "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                "Value": "60"
+                "Value": "Ability('Size') / 100 * 60"
               },
               {
                 "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
-                "Value": "60"
+                "Value": "Ability('Size') / 100 * 60"
               }
             ]
           },
-          "ResearchCostFormula": "0",
+          "ResearchCostFormula": "10",
           "CreditCostFormula": "120",
-          "BuildPointCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass] / 2",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
           "ComponentAtbSDs": [
             {
+              "Name": "Size",
+              "DescriptionFormula": "'Size of the university'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "50000",
+              "MinFormula": "500",
+              "StepFormula": "100",
+              "AttributeFormula": "1000"
+            },
+            {
+              "Name": "Research Points",
+              "DescriptionFormula": "'Research points produced per update'",
+              "GuiHint": "GuiTextDisplay",
+              "AttributeFormula": "Ability('Size') * 0.01"
+            },
+            {
+              "Name": "Bonus",
+              "GuiHint": "GuiEnumSelectionList",
+              "EnumTypeName" : "Pulsar4X.ECSLib.ResearchCategories",
+              "MaxFormula": "18",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AttributeFormula": "0"
+            },
+            
+            {
               "Name": "RP Amount Per EconTick",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(20)",
+              "AttributeFormula": "AtbConstrArgs(Ability('Research Points'))",
               "AttributeType": "Pulsar4X.ECSLib.ResearchPointsAtbDB"
             }
           ]
@@ -480,6 +505,56 @@
         }
       },
       {
+        "Key": "5B5034C1-8DA1-4645-8F5C-A52B65BB8369",
+        "Value": {
+          "Name": "Logistics Office",
+          "DescriptionFormula": "'Handles import and Export of goods'",
+          "ID": "5B5034C1-8DA1-4645-8F5C-A52B65BB8369",
+          "MassFormula": "5000",
+          "VolumeFormula": "[Mass]",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "10",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipCargo, PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Logistic Capacity",
+              "DescriptionFormula": "'How many different items this office can handle'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "100",
+              "MinFormula": "5",
+              "StepFormula": "5",
+              "AttributeFormula": "5"
+            },
+            {
+              "Name": "db",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('Logistic Capacity'))",
+              "AttributeType": "Pulsar4X.ECSLib.LogiBaseAtb"
+            }
+          ]
+        }
+      },
+      {
         "Key": "B8239721-B60E-4C11-8E45-5F64F6BA5FA5",
         "Value": {
           "Name": "General Storage",
@@ -528,7 +603,7 @@
                 "Entries": []
               },
               "AttributeFormula": "Ability('Warehouse Size') * 0.01"
-            },                      
+            },
             {
               "Name": "Cargo Transfer Rate",
               "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
@@ -608,12 +683,14 @@
             },
             {
               "Name": "Tank Volume",
+              "Units": "m^3",
               "DescriptionFormula": "'The volume of this tank.'",
               "GuiHint": "GuiTextDisplay",
               "AttributeFormula": "(4 / 3) * Pi * Pow(Ability('Tank Radius'), 3)"
             },
             {
               "Name": "Dry Weight",
+              "Units": "kg",
               "DescriptionFormula": "'The weight of the empty tank'",
               "GuiHint": "GuiTextDisplay",
               "AttributeFormula": "(4 * Pi * Ability('Tank Radius') * Ability('Tank Radius')) * 23.5 "

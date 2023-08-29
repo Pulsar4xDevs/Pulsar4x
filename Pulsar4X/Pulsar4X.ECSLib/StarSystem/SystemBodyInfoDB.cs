@@ -64,19 +64,6 @@ namespace Pulsar4X.ECSLib
     }
 
     /// <summary>
-    /// Small struct to store specifics of a minerial deposit.
-    /// </summary>
-    public class MineralDepositInfo
-    {
-        [JsonProperty]
-        public long Amount { get; internal set; }
-        [JsonProperty]
-        public long HalfOriginalAmount { get; internal set; }
-        [JsonProperty]
-        public double Accessibility { get; internal set; }
-    }
-
-    /// <summary>
     /// SystemBodyInfoDB defines an entity as having properties like planets/asteroids/coments.
     /// </summary>
     /// <remarks>
@@ -189,13 +176,12 @@ namespace Pulsar4X.ECSLib
         /// Stores the amount of the various minerials. the guid can be used to lookup the
         /// minerial definition (MineralSD) from the StaticDataStore.
         /// </summary>
-        [PublicAPI]
-        [JsonProperty]
-        public Dictionary<Guid, MineralDepositInfo> Minerals { get; internal set; }
+        // [PublicAPI]
+        // [JsonProperty]
+        // public Dictionary<Guid, MineralDepositInfo> Minerals { get; internal set; }
 
         public SystemBodyInfoDB()
         {
-            Minerals = new Dictionary<Guid, MineralDepositInfo>();
         }
 
         public SystemBodyInfoDB(SystemBodyInfoDB systemBodyDB)
@@ -210,7 +196,6 @@ namespace Pulsar4X.ECSLib
             SupportsPopulations = systemBodyDB.SupportsPopulations;
             LengthOfDay = systemBodyDB.LengthOfDay;
             Gravity = systemBodyDB.Gravity;
-            Minerals = new Dictionary<Guid, MineralDepositInfo>(systemBodyDB.Minerals);
         }
 
         public override object Clone()
@@ -251,7 +236,6 @@ namespace Pulsar4X.ECSLib
             SupportsPopulations = originalDB.SupportsPopulations;
             LengthOfDay = originalDB.LengthOfDay;
             Gravity = originalDB.Gravity;
-            Minerals = new Dictionary<Guid, MineralDepositInfo>(originalDB.Minerals); //This really needs to be handled properly
             Colonies = new List<Entity>(originalDB.Colonies); //this needs to only have owned colonies and sensor entites of unowned colonies.
         }
 

@@ -22,6 +22,7 @@ namespace Pulsar4X.ECSLib
             var position = new PositionDB(Vector3.Zero, Guid.Empty);
             var massVolume = new MassVolumeDB();
             var planetInfo = new SystemBodyInfoDB();
+            var minerals = new MineralsDB();
             var name = new NameDB("ProtoBody");
             var orbit = new OrbitDB();
             var atmo = new AtmosphereDB();
@@ -32,6 +33,7 @@ namespace Pulsar4X.ECSLib
                 position,
                 massVolume,
                 planetInfo,
+                minerals,
                 name,
                 orbit,
                 atmo,
@@ -85,9 +87,9 @@ namespace Pulsar4X.ECSLib
                 return;
 
             // Now calculate the "Bands."
-            MinMaxStruct innerZone_m;
-            MinMaxStruct habitableZone_m;
-            MinMaxStruct outerZone_m;
+            // MinMaxStruct innerZone_m;
+            // MinMaxStruct habitableZone_m;
+            // MinMaxStruct outerZone_m;
 
             var zones = HabitibleZones(_galaxyGen.Settings, starInfo);
             bool skipHabitableZone = !zones.hasHabitible;
@@ -926,6 +928,7 @@ namespace Pulsar4X.ECSLib
         {
             var bodyInfo = body.GetDataBlob<SystemBodyInfoDB>();
             var bodyMass = body.GetDataBlob<MassVolumeDB>();
+            var mineralInfo = body.GetDataBlob<MineralsDB>();
 
             // get the mass ratio for this body to planet:
             double massRatio = bodyMass.MassDry / UniversalConstants.Units.EarthMassInKG;
@@ -940,11 +943,17 @@ namespace Pulsar4X.ECSLib
                 return;
             }
 
+            if(mineralInfo == null)
+            {
+                body.SetDataBlob<MineralsDB>(new());
+                mineralInfo = body.GetDataBlob<MineralsDB>();
+            }
+
             // this body has at least some minerals, lets generate them:
             foreach (var min in staticData.CargoGoods.GetMineralsList())
             {
                 // create a MineralDepositInfo
-                MineralDepositInfo mdi = new MineralDepositInfo();
+                MineralDeposit mdi = new MineralDeposit();
 
                 // get a genChance:
                 double abundance = min.Abundance[bodyInfo.BodyType];
@@ -956,9 +965,9 @@ namespace Pulsar4X.ECSLib
                     mdi.Amount = (long)Math.Round(_galaxyGen.Settings.MaxMineralAmmountByBodyType[bodyInfo.BodyType] * genChance);
                     mdi.HalfOriginalAmount = mdi.Amount / 2;
 
-                    if (!bodyInfo.Minerals.ContainsKey(min.ID))
+                    if (!mineralInfo.Minerals.ContainsKey(min.ID))
                     {
-                        bodyInfo.Minerals.Add(min.ID, mdi);
+                        mineralInfo.Minerals.Add(min.ID, mdi);
                     }
                 }
             }
@@ -974,19 +983,27 @@ namespace Pulsar4X.ECSLib
         public void HomeworldMineralGeneration(StaticDataStore staticData, StarSystem system, Entity body)
         {
             var bodyInfo = body.GetDataBlob<SystemBodyInfoDB>();
-            bodyInfo.Minerals.Clear();  // because this function can be called on existing bodies we need to clear any existing minerals.
+            var mineralInfo = body.GetDataBlob<MineralsDB>();
+
+            if(mineralInfo == null)
+            {
+                body.SetDataBlob<MineralsDB>(new());
+                mineralInfo = body.GetDataBlob<MineralsDB>();
+            }
+
+            mineralInfo.Minerals.Clear();  // because this function can be called on existing bodies we need to clear any existing minerals.
 
             foreach (var min in staticData.CargoGoods.GetMineralsList())
             {
                 // create a MineralDepositInfo
-                MineralDepositInfo mdi = new MineralDepositInfo
+                MineralDeposit mdi = new MineralDeposit
                 {
                     Accessibility = GeneralMath.Clamp(_galaxyGen.Settings.MinHomeworldMineralAccessibility + system.RNGNextDouble() * min.Abundance[bodyInfo.BodyType], 0, 1), 
                     Amount = (long)Math.Round(_galaxyGen.Settings.MinHomeworldMineralAmmount + _galaxyGen.Settings.HomeworldMineralAmmount * system.RNGNextDouble() * min.Abundance[bodyInfo.BodyType])
                 };
                 mdi.HalfOriginalAmount = mdi.Amount / 2;
 
-                bodyInfo.Minerals.Add(min.ID, mdi);
+                mineralInfo.Minerals.Add(min.ID, mdi);
             }
         }
 
