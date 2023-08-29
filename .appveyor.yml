@@ -13,7 +13,7 @@ branches:
   # except:
 
 
-os: Visual Studio 2015
+os: Visual Studio 2022
 cache:
 - packages -> **\packages.config
 before_build:
