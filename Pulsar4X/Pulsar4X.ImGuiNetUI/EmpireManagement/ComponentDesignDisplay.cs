@@ -262,11 +262,62 @@ namespace Pulsar4X.SDL2UI
                             if(ImGui.IsItemHovered())
                                 ImGui.SetTooltip(attribute.Description);
                             ImGui.TableNextColumn();
-                            ImGui.Text(attribute.Value.ToString());
+                            
                             if(attribute.Unit.IsNotNullOrEmpty())
                             {
-                                ImGui.SameLine();
-                                ImGui.Text(attribute.Unit);
+                                var value = attribute.Value;
+                                var strUnit = attribute.Unit;
+                                var displayStr = "";
+                            
+                                switch (strUnit)
+                                {
+                                    case "KJ":
+                                    {
+                                        displayStr = Stringify.Energy(value);
+                                        break;
+                                    }
+                                    case "KW":
+                                    {
+                                        displayStr = Stringify.Power(value);
+                                        break;
+                                    }
+                                    case "m^2":
+                                    {
+                                        displayStr = Stringify.Volume(value);
+                                        break;
+                                    }
+                                    case "nm":
+                                    {
+                                        displayStr = Stringify.DistanceSmall(value);
+                                        break;
+                                    }
+                                    case "kg":
+                                    {
+                                        displayStr = Stringify.Mass(value);
+                                        break;
+                                    }
+                                    case "m":
+                                    {
+                                        displayStr = Stringify.Distance(value);
+                                        break;
+                                    }
+                                    case "N":
+                                    {
+                                        displayStr = Stringify.Thrust(value);
+                                        break;
+                                    }
+                                    default:
+                                    {
+                                        displayStr = attribute.Value.ToString() + " " + attribute.Unit;
+                                        break;
+                                    }
+                                }
+                                
+                                ImGui.Text(displayStr);
+                            }
+                            else
+                            {
+                                ImGui.Text(attribute.Value.ToString());
                             }
                         }
                     }
@@ -353,16 +404,36 @@ namespace Pulsar4X.SDL2UI
 
         private void GuiHintText(ComponentDesignAttribute attribute)
         {
+            var value = attribute.Value;
+            var strUnit = attribute.Unit;
+            var displayStr = "";
+            switch (strUnit)
+            {
+                case "KJ":
+                {
+                    displayStr = Stringify.Energy(value);
+                    break;
+                }
+                default:
+                {
+                    displayStr = attribute.Value.ToString() + " " + attribute.Unit;
+                    break;
+                }
+                    
+                
+            }
+            
+            
             if (compactmod)
             {
-                ImGui.TextWrapped(attribute.Name + ": " + attribute.Value.ToString() + " " + attribute.Unit);
+                ImGui.TextWrapped(attribute.Name + ": " + displayStr);
                 ImGui.NewLine();
             }
             else
             {
                 ImGui.TextWrapped(attribute.Name + ":");
                 ImGui.SameLine();
-                ImGui.TextWrapped(attribute.Value.ToString() + " " + attribute.Unit);
+                ImGui.TextWrapped(displayStr);
                 ImGui.NewLine();
             }
         }
