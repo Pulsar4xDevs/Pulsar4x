@@ -242,14 +242,7 @@ namespace Pulsar4X.SDL2UI
 
             if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(204f, windowContentSize.Y - 24f), true))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Existing Designs");
-                ImGui.SameLine();
-                ImGui.Text("[?]");
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Select an existing ship design to edit or create a new design.");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Existing Designs", "Select an existing ship design to edit it.");
 
                 foreach(var design in ExistingShipDesigns)
                 {
@@ -298,18 +291,65 @@ namespace Pulsar4X.SDL2UI
 
         internal void DisplayComponents()
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.Text("Current Design");
-            // ImGui.SameLine();
-            // ImGui.Text("[?]");
-            // if(ImGui.IsItemHovered())
-            //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
-            //         "Select a template and then design the attributes of the component to your specification.\n" +
-            //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
-            //         "installations.");
-            ImGui.PopStyleColor();
-            ImGui.Separator();
+            DisplayHelpers.Header("Current Design");
 
+            if(SelectedComponents.Count == 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
+                ImGui.Text("Add components from the available components list");
+                ImGui.PopStyleColor();
+            }
+            else
+            {
+                DisplayComponentsTable();
+            }
+
+            ImGui.NewLine();
+            DisplayHelpers.Header("Armor");
+            if(ImGui.BeginTable("CurrentShipDesignTable", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            {
+                ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.None, 1.5f);
+                ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableHeadersRow();
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Type");
+                ImGui.TableNextColumn();
+                if (ImGui.Combo("##Armor Selection", ref _armorIndex, _armorNames, _armorNames.Length))
+                {
+                    _armor = _armorSelection[_armorIndex];
+                    DesignChanged = true;
+                }
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Density");
+                ImGui.TableNextColumn();
+                ImGui.Text(_armorSelection[_armorIndex].Density.ToString());
+
+                ImGui.TableNextColumn();
+                ImGui.Text("Thickness");
+                ImGui.TableNextColumn();
+                ImGui.Text(_armorThickness.ToString());
+
+                ImGui.SameLine();
+                if (ImGui.SmallButton("+##armor")) //todo: imagebutton
+                {
+                    _armorThickness++;
+                    DesignChanged = true;
+                }
+                ImGui.SameLine();
+                if (ImGui.SmallButton("-##armor") && _armorThickness > 0) //todo: imagebutton
+                {
+                    _armorThickness--;
+                    DesignChanged = true;
+                }
+
+                ImGui.EndTable();
+            }
+        }
+
+        internal void DisplayComponentsTable()
+        {
             if(ImGui.BeginTable("CurrentShipDesignTable", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
@@ -380,81 +420,11 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.EndTable();
             }
-
-            if(SelectedComponents.Count == 0)
-            {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
-                ImGui.Text("Add components from the available components");
-                ImGui.PopStyleColor();
-            }
-
-            ImGui.NewLine();
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.Text("Armor");
-            // ImGui.SameLine();
-            // ImGui.Text("[?]");
-            // if(ImGui.IsItemHovered())
-            //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
-            //         "Select a template and then design the attributes of the component to your specification.\n" +
-            //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
-            //         "installations.");
-            ImGui.PopStyleColor();
-            ImGui.Separator();
-            if(ImGui.BeginTable("CurrentShipDesignTable", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
-            {
-                ImGui.TableSetupColumn("Attribute", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.None, 1f);
-                ImGui.TableHeadersRow();
-
-                ImGui.TableNextColumn();
-                ImGui.Text("Type");
-                ImGui.TableNextColumn();
-                if (ImGui.Combo("##Armor Selection", ref _armorIndex, _armorNames, _armorNames.Length))
-                {
-                    _armor = _armorSelection[_armorIndex];
-                    DesignChanged = true;
-                }
-
-                ImGui.TableNextColumn();
-                ImGui.Text("Density");
-                ImGui.TableNextColumn();
-                ImGui.Text(_armorSelection[_armorIndex].Density.ToString());
-
-                ImGui.TableNextColumn();
-                ImGui.Text("Thickness");
-                ImGui.TableNextColumn();
-                ImGui.Text(_armorThickness.ToString());
-
-                ImGui.SameLine();
-                if (ImGui.SmallButton("+##armor")) //todo: imagebutton
-                {
-                    _armorThickness++;
-                    DesignChanged = true;
-                }
-                ImGui.SameLine();
-                if (ImGui.SmallButton("-##armor") && _armorThickness > 0) //todo: imagebutton
-                {
-                    _armorThickness--;
-                    DesignChanged = true;
-                }
-
-                ImGui.EndTable();
-            }
         }
 
         internal void DisplayComponentSelection()
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.Text("Available Components");
-            // ImGui.SameLine();
-            // ImGui.Text("[?]");
-            // if(ImGui.IsItemHovered())
-            //     ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
-            //         "Select a template and then design the attributes of the component to your specification.\n" +
-            //         "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
-            //         "installations.");
-            ImGui.PopStyleColor();
-            ImGui.Separator();
+            DisplayHelpers.Header("Available Components");
 
             if(ImGui.BeginTable("DesignStatsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
@@ -500,14 +470,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void DisplayStats()
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.Text("Statistics");
-            ImGui.SameLine();
-            ImGui.Text("[?]");
-            if(ImGui.IsItemHovered())
-                ImGui.SetTooltip("The attributes of the ship are calculated based on the components you have added to the design.");
-            ImGui.PopStyleColor();
-            ImGui.Separator();
+            DisplayHelpers.Header("Statisitcs", "The attributes of the ship are calculated based on the components you have added to the design.");
 
             UpdateShipStats();
             if(ImGui.BeginTable("DesignStatsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
