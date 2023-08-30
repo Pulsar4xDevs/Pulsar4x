@@ -155,14 +155,13 @@ namespace Pulsar4X.SDL2UI
             {
                 if(_prodLines.ContainsKey(_selectedProdLine) &&_prodLines[_selectedProdLine] != null)
                 {
-                    ImGui.Text("Create a new job for: " + _prodLines[_selectedProdLine].Name);
+                    DisplayHelpers.Header("Create a new job for: " + _prodLines[_selectedProdLine].Name);
                 }
                 else
                 {
-                    ImGui.Text("Select a production line on the left");
+                    DisplayHelpers.Header("Select a production line on the left");
                 }
 
-                ImGui.Separator();
                 NewJobDisplay(state);
                 ImGui.EndChild();
             }
@@ -179,65 +178,49 @@ namespace Pulsar4X.SDL2UI
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
             if(ImGui.BeginChild("ColonyProductionLines", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
             {
-                ImGui.Text("Production Lines");
-                ImGui.Separator();
+                DisplayHelpers.Header("Production Lines");
 
                 foreach (var (id, line) in _prodLines)
                 {
-                    ImGui.PushID(id.ToString());
-                    // ImGui.Text(Stringify.Volume(line.MaxVolume));
-                    // foreach(var (rid, rate) in line.IndustryTypeRates)
-                    // {
-                    //     ImGui.Text(rid.ToString());
-                    //     ImGui.SameLine();
-                    //     ImGui.Text(rate.ToString());
-                    // }
-
                     string headerTitle = line.Name;
                     if(line.Jobs.Count == 0)
                         headerTitle += " (Idle)";
 
                     if (ImGui.CollapsingHeader(headerTitle, ImGuiTreeNodeFlags.DefaultOpen))
                     {
-                        Vector2 topSize = ImGui.GetContentRegionAvail();
-                        if(ImGui.BeginChild("", new Vector2(topSize.X, 36f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                        if(ImGui.Button("Add New Job"))
                         {
-                            if(ImGui.Button("Add New Job"))
-                            {
-                                _selectedProdLine = id;
-                                _newjobSelectionIndex = (_selectedProdLine, 0);
+                            _selectedProdLine = id;
+                            _newjobSelectionIndex = (_selectedProdLine, 0);
 
-                                _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
-                                _lastClickedJob = _newConJob;
-                                _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
-                            }
+                            _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
+                            _lastClickedJob = _newConJob;
+                            _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
+                        }
 
-                            ImGui.SameLine();
-                            if(ImGui.Button("Upgrade " + line.Name))
-                            {
-                                // TODO: add upgrade functionality
-                            }
-
-                            if(line.Jobs.Count > 0)
-                            {
-                                IConstrucableDesign designInfo = _factionInfoDB.IndustryDesigns[line.Jobs[0].ItemGuid];
-                                var rate = line.IndustryTypeRates[designInfo.IndustryTypeID];
-                                ImGui.SameLine();
-                                ImGui.Text("Progress per day:");
-                                ImGui.SameLine();
-                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                                ImGui.Text(rate.ToString());
-                                ImGui.PopStyleColor();
-                                if(ImGui.IsItemHovered())
-                                    ImGui.SetTooltip("Assuming all resources needed are available.");
-                            }
-
-                            ImGui.EndChild();
+                        ImGui.SameLine();
+                        if(ImGui.Button("Upgrade " + line.Name))
+                        {
+                            // TODO: add upgrade functionality
                         }
 
                         if(line.Jobs.Count > 0)
                         {
-                            if(ImGui.BeginTable(line.Name, 4, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+                            IConstrucableDesign designInfo = _factionInfoDB.IndustryDesigns[line.Jobs[0].ItemGuid];
+                            var rate = line.IndustryTypeRates[designInfo.IndustryTypeID];
+                            ImGui.SameLine();
+                            ImGui.Text("Progress per day:");
+                            ImGui.SameLine();
+                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                            ImGui.Text(rate.ToString());
+                            ImGui.PopStyleColor();
+                            if(ImGui.IsItemHovered())
+                                ImGui.SetTooltip("Assuming all resources needed are available.");
+                        }
+
+                        if(line.Jobs.Count > 0)
+                        {
+                            if(ImGui.BeginTable(line.Name, 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                             {
                                 ImGui.TableSetupColumn("Job");
                                 ImGui.TableSetupColumn("Batch Size");
@@ -328,9 +311,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.EndTable();
                             }
                         }
-                        ImGui.Columns(1);
                     }
-                    ImGui.PopID();
                 }
                 ImGui.EndChild();
             }
@@ -357,7 +338,8 @@ namespace Pulsar4X.SDL2UI
                 // var groupedBack = sorted.GroupBy(x => x.ParentKey)
                 //     .ToDictionary(g => g.Key, g => (itemIDs: g.Select(x => x.Id).ToArray(), itemNames: g.Select(x => x.Name).ToArray()));
 
-                ImGui.Text("Select a production method:");
+                ImGui.NewLine();
+                ImGui.Text("Select a design:");
                 if (ImGui.Combo("", ref curItemIndex, constructableNames, constructableNames.Length))
                 {
                     _newjobSelectionIndex = (_newjobSelectionIndex.pline, curItemIndex);
@@ -373,6 +355,7 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
 
+                ImGui.NewLine();
                 ImGui.Text("Enter the quantity:");
                 if (ImGui.InputInt("##batchcount", ref _newJobbatchCount))
                 {
@@ -439,14 +422,7 @@ namespace Pulsar4X.SDL2UI
         void CostsDisplay(JobBase selectedJob, GlobalUIState state)
         {
             ImGui.NewLine();
-            var sizeAvailable = ImGui.GetContentRegionAvail();
-            string inputs = "Inputs Needed";
-            float textSize = ImGui.CalcTextSize(inputs).X / 2;
-
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-            ImGui.SetCursorPosX(sizeAvailable.X / 2 - textSize);
-            ImGui.Text(inputs);
-            ImGui.PopStyleColor();
+            ImGui.Text("Inputs Needed:");
             if(ImGui.BeginTable("JobCostsTables", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
@@ -498,7 +474,6 @@ namespace Pulsar4X.SDL2UI
                             {
                                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
                             }
-                            
                         }
 
                         ImGui.Text(Stringify.Quantity(stored));
@@ -531,14 +506,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             ImGui.NewLine();
-            sizeAvailable = ImGui.GetContentRegionAvail();
-            string outputs = "Outputs";
-            textSize = ImGui.CalcTextSize(outputs).X / 2;
-
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-            ImGui.SetCursorPosX(sizeAvailable.X / 2 - textSize);
-            ImGui.Text(outputs);
-            ImGui.PopStyleColor();
+            ImGui.Text("Outputs:");
 
             if(ImGui.BeginTable("JobOutputsTables", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
