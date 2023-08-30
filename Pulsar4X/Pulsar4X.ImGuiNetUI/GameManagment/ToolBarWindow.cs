@@ -2,20 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 namespace Pulsar4X.SDL2UI
 {
-    public class ToolBarUI : PulsarGuiWindow
+    public class ToolBarWindow : PulsarGuiWindow
     {
-        private float _btnSize = 32;                                                //Button size
-        public System.Numerics.Vector2 BtnSizes = new System.Numerics.Vector2(32, 32);                              //Button size
-        private List<ToolbuttonData> ToolButtons = new List<ToolbuttonData>();      //Stores the data for each button
-        private List<ToolbuttonData> SMToolButtons = new List<ToolbuttonData>();    //Stores the data for each button
+        public Vector2 ButtonSize = new Vector2(32, 32);
+        private uint UnClickedColour;
+        private uint ClickedColour;
+        private List<ToolBarOption> ToolButtons = new ();      //Stores the data for each button
+        private List<ToolBarOption> SMToolButtons = new ();    //Stores the data for each button
 
-        public class ToolbuttonData
+        public class ToolBarOption
         //data for a toolbar button, requires an SDL image(for Picture)
         {
             public IntPtr Picture;          //Requires an SDL image(for Picture)
@@ -29,11 +28,19 @@ namespace Pulsar4X.SDL2UI
         }
 
         //constructs the toolbar with the given buttons
-        private ToolBarUI()
+        private ToolBarWindow()
         {
             _flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.AlwaysAutoResize;
 
-            ToolbuttonData btn = new ToolbuttonData()
+            unsafe
+            {
+                Vector4* unclickedcolorv = ImGui.GetStyleColorVec4(ImGuiCol.Button);
+                Vector4* clickedcolorv = ImGui.GetStyleColorVec4(ImGuiCol.ButtonActive);
+                UnClickedColour = ImGui.ColorConvertFloat4ToU32(*unclickedcolorv);
+                ClickedColour = ImGui.ColorConvertFloat4ToU32(*clickedcolorv);
+            }
+
+            ToolBarOption btn = new ToolBarOption()
             {
                 Picture = _uiState.Img_DesComponent(),
                 TooltipText = "Design a new component or facility",
@@ -43,7 +50,7 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
 
-            btn =  new ToolbuttonData()
+            btn =  new ToolBarOption()
             {
                 Picture = _uiState.Img_DesignShip(),
                 TooltipText = "Design a new Ship",
@@ -53,7 +60,7 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
 
-            btn =  new ToolbuttonData()
+            btn =  new ToolBarOption()
             {
                 Picture = _uiState.Img_Industry(),
                 TooltipText = "Economy Management",
@@ -63,7 +70,7 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
 
-            btn =  new ToolbuttonData()
+            btn =  new ToolBarOption()
             {
                 Picture = _uiState.Img_Research(),
                 TooltipText = "Research",
@@ -73,7 +80,17 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
 
-            btn = new ToolbuttonData()
+            btn =  new ToolBarOption()
+            {
+                Picture = _uiState.Img_Select(),
+                TooltipText = "Fleet Management",
+                OnClick = new Action(FleetWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(FleetWindow.GetInstance().GetActive)
+                //Opens up the fleet menu
+            };
+            ToolButtons.Add(btn);
+
+            btn = new ToolBarOption()
             {
                 Picture = _uiState.Img_GalaxyMap(),
                 TooltipText = "Galaxy Browser",
@@ -83,7 +100,7 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
 
-            btn = new ToolbuttonData()
+            btn = new ToolBarOption()
             {
                 Picture = _uiState.Img_Ruler(),
                 TooltipText = "Measure distance",
@@ -93,7 +110,7 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
 
-            btn = new ToolbuttonData()
+            btn = new ToolBarOption()
             {
                 Picture = _uiState.Img_Tree(),
                 TooltipText = "View objects in the system",
@@ -103,7 +120,7 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
 
-            btn = new ToolbuttonData()
+            btn = new ToolBarOption()
             {
                 Picture = _uiState.Img_Tree(),
                 TooltipText = "Design orders and assign to entities",
@@ -113,7 +130,7 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
 
-            btn = new ToolbuttonData()
+            btn = new ToolBarOption()
             {
                 Picture = _uiState.Img_Tree(),
                 TooltipText = "Spawn ships and planets",
@@ -123,7 +140,7 @@ namespace Pulsar4X.SDL2UI
             };
             SMToolButtons.Add(btn);
 
-            btn = new ToolbuttonData()
+            btn = new ToolBarOption()
             {
                 Picture = _uiState.Img_Tree(),
                 TooltipText = "View SM debug info about a body",
@@ -134,17 +151,17 @@ namespace Pulsar4X.SDL2UI
             SMToolButtons.Add(btn);
         }
 
-        internal static ToolBarUI GetInstance()
+        internal static ToolBarWindow GetInstance()
         {
-            if (!PulsarGuiWindow._uiState.LoadedWindows.ContainsKey(typeof(ToolBarUI)))
+            if (!PulsarGuiWindow._uiState.LoadedWindows.ContainsKey(typeof(ToolBarWindow)))
             {
-                return new ToolBarUI();
+                return new ToolBarWindow();
             }
 
-            return (ToolBarUI)PulsarGuiWindow._uiState.LoadedWindows[typeof(ToolBarUI)];
+            return (ToolBarWindow)PulsarGuiWindow._uiState.LoadedWindows[typeof(ToolBarWindow)];
         }
 
-        internal void SetButtons(List<ToolbuttonData> buttons)
+        internal void SetButtons(List<ToolBarOption> buttons)
         {
             ToolButtons = buttons;
         }
@@ -158,42 +175,31 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        void DisplayButtons(string name, List<ToolbuttonData> DisplayToolButtons)
+        void DisplayButtons(string name, List<ToolBarOption> DisplayToolButtons)
         {
             if (ImGui.Begin(name, _flags))
             {
-                uint unclickedcolor;
-                uint clickedcolour;
                 ImGuiCol buttonidx = ImGuiCol.Button;
-                unsafe
-                {
-                    Vector4* unclickedcolorv = ImGui.GetStyleColorVec4(ImGuiCol.Button);
-                    Vector4* clickedcolorv = ImGui.GetStyleColorVec4(ImGuiCol.ButtonActive);
-                    unclickedcolor = ImGui.ColorConvertFloat4ToU32(*unclickedcolorv);
-                    clickedcolour = ImGui.ColorConvertFloat4ToU32(*clickedcolorv);
-                }
-                //Store the colors for pressed and unpressed buttons
 
                 uint iterations = 0;
                 //displays the default toolbar menu icons
                 foreach (var button in DisplayToolButtons)//For each button
                 {
-                    string id = iterations.ToString();
-                    ImGui.PushID(id);
+                    ImGui.PushID(iterations.ToString());
 
                     if (button.GetActive != null)//If the windows state can be checked
                     {
                         if (button.GetActive())//If the window is open
                         {
-                            ImGui.PushStyleColor(buttonidx, clickedcolour);//Have the button be "pressed"
+                            ImGui.PushStyleColor(buttonidx, ClickedColour);//Have the button be "pressed"
                         }
                         else//If closed
                         {
-                            ImGui.PushStyleColor(buttonidx, unclickedcolor);//Have the button be colored normally
+                            ImGui.PushStyleColor(buttonidx, UnClickedColour);//Have the button be colored normally
                         }
                     }
 
-                    if (ImGui.ImageButton(button.Picture, BtnSizes))//Make the button
+                    if (ImGui.ImageButton(button.Picture, ButtonSize))//Make the button
                     {
                         button.OnClick();
                     }
@@ -205,7 +211,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.PopID();
                     iterations++;
                 }
-                ImGui.PushStyleColor(buttonidx, unclickedcolor);
+                ImGui.PushStyleColor(buttonidx, UnClickedColour);
 
                 ImGui.End();
             }

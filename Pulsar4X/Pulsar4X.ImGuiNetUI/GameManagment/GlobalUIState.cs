@@ -237,8 +237,8 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            if (LoadedWindows.ContainsKey(typeof(ToolBarUI)))
-                LoadedWindows[typeof(ToolBarUI)].MapClicked(worldCoord, button);
+            if (LoadedWindows.ContainsKey(typeof(ToolBarWindow)))
+                LoadedWindows[typeof(ToolBarWindow)].MapClicked(worldCoord, button);
         }
 
         internal void EntitySelectedAsPrimary(Guid entityGuid, Guid starSys)
