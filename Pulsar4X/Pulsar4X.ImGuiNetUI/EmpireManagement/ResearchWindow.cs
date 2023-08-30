@@ -205,18 +205,18 @@ namespace Pulsar4X.SDL2UI
                         float frac = (float)_researchableTechs[i].amountDone / _researchableTechs[i].amountMax;
                         var size = ImGui.GetTextLineHeight();
                         var pos = ImGui.GetCursorPos();
-                        ImGui.ProgressBar(frac, new System.Numerics.Vector2(245, size), "");
-                        ImGui.SetCursorPos(pos);
+                        ImGui.ProgressBar(frac, new Vector2(245, size), "");
+                        if (ImGui.IsItemHovered() && !_researchableTechs[i].tech.Description.IsNullOrEmpty())
+                        {
+                            ImGui.SetTooltip(_researchableTechs[i].tech.Description);
+                        }
+                        ImGui.SetCursorPos(new Vector2(pos.X + 2f, pos.Y));
                         ImGui.Text(_researchableTechs[i].tech.Name);
 
                         if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
                         {
                             if (_selectedTeam > -1)
                                 ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].tech.ID);
-                        }
-                        if (ImGui.IsItemHovered() && !_researchableTechs[i].tech.Description.IsNullOrEmpty())
-                        {
-                            ImGui.SetTooltip(_researchableTechs[i].tech.Description);
                         }
                         ImGui.TableNextColumn();
                         if(_researchableTechs[i].tech.MaxLevel > 1)
