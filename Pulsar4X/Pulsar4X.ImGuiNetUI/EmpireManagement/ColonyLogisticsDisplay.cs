@@ -169,10 +169,7 @@ namespace Pulsar4X.SDL2UI
             var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
             if(ImGui.BeginChild("ColonyLogistics1", firstChildSize, true))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Imports");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Imports");
 
                 if(ImGui.BeginTable("LogisticsImportsTable", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
@@ -207,10 +204,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonyLogistics2", secondChildSize, true))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Goods Available to Import or Export");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Goods Available to Import or Export");
 
                 if(ImGui.BeginTable("LogisticsAvailableItemsTable", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
@@ -224,7 +218,7 @@ namespace Pulsar4X.SDL2UI
                     // FIXME: this should show every item and component in the game? if so, it should
                     // allow the player to filter the list by searching
                     displayResources(_displayedStoredResources);
-                    
+
                     ImGui.TableNextColumn();
                     ImGui.Separator();
                     ImGui.TableNextColumn();
@@ -233,7 +227,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Separator();
                     ImGui.TableNextColumn();
                     ImGui.Separator();
-                    
+
                     displayResources(_displayedUnstored);
                     void displayResources(Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> dict)
                     {
@@ -314,10 +308,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonyLogistics3", thirdChildSize, true))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Exports");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Exports");
 
                 if(ImGui.BeginTable("LogisticsExportsTable", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
