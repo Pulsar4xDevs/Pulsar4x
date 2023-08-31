@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
                 {
                     //var actionList = new List<EntityCommand>(_actionList);
                     int mask = 0;
-                    var list = orderableDB.CommandList;
+                    var list = orderableDB.ActionList;
 
                     int i = 0;
                     while (i < list.Count)

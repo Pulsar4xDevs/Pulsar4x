@@ -5,10 +5,9 @@ namespace Pulsar4X.ECSLib
     public class OrderableDB : BaseDataBlob
     {
         private readonly object _lockObj = new object();
-        //private readonly object _lockListAccess = new object();
         private List<EntityCommand> _actionList = new List<EntityCommand>();
 
-        public List<EntityCommand> CommandList
+        public List<EntityCommand> ActionList
         {
             get
             {
@@ -18,25 +17,14 @@ namespace Pulsar4X.ECSLib
 
         public object Lock { get { return _lockObj; }}
 
-        internal void AddCommandToList(EntityCommand command)
+        internal void AddCommand(EntityCommand command)
         {
-            if (command.ActionOnDate > OwningEntity.StarSysDateTime)
-            {
-                OwningEntity.Manager.ManagerSubpulses.AddEntityInterupt(command.ActionOnDate, nameof(OrderableProcessor), OwningEntity);
-            }
             lock (_lockObj)
             {
                 _actionList.Add(command);
             }
         }
 
-        private void localAdd(EntityCommand command)
-        {
-            lock (_lockObj)
-            {
-                _actionList.Add(command);
-            }
-        }
         internal void RemoveAt(int index)
         {
             lock (_lockObj)
