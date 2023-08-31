@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
                 {
                     var orderableDB = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>();
                     orderableDB.AddCommandToList(entityCommand);
-                    orderableDB.ProcessOrderList(entityCommand.EntityCommanding.StarSysDateTime);
+                    StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(OrderableProcessor)).ProcessEntity(orderableDB.OwningEntity, StaticRefLib.CurrentDateTime);
                 }
                 else
                 {
@@ -39,7 +39,7 @@ namespace Pulsar4X.ECSLib
                         entityCommand.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityCommand.ActionOnDate, nameof(OrderableProcessor), entityCommand.EntityCommanding);
                     }
                 }
-            }                            
+            }
         }
     }
 
