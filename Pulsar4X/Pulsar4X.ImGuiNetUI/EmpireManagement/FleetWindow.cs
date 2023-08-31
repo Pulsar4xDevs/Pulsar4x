@@ -1,7 +1,8 @@
 using System;
 using System.Numerics;
-using Antlr.Runtime;
+using System.Runtime.InteropServices;
 using ImGuiNET;
+using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
@@ -48,8 +49,33 @@ namespace Pulsar4X.SDL2UI
                 foreach(var fleet in factionInfoDB.Fleets.ToArray())
                 {
                     string name = fleet.GetDataBlob<NameDB>().GetName(factionID);
+                    if(ImGui.TreeNodeEx(name))
+                    {
+                        ImGui.TreePop();
+                    }
                     if(ImGui.TreeNode(name + "###" + fleet.Guid))
                     {
+                        // Begin drag source
+                        if(ImGui.BeginDragDropSource(ImGuiDragDropFlags.SourceNoDisableHover))
+                        {
+                            var (ptr, length) = ImGuiSDL2CSHelper.GuidToIntPtr(fleet.Guid);
+                            ImGui.SetDragDropPayload("FLEET", ptr, length);
+                            ImGui.Text(name);
+                            ImGui.EndDragDropSource();
+                            Marshal.FreeHGlobal(ptr);
+                        }
+
+                        // Begin Drag Target
+                        if (ImGui.BeginDragDropTarget())
+                        {
+                            //var payload = ImGui.AcceptDragDropPayload("FLEET", ImGuiDragDropFlags.None);
+                            //if(payload.IsDelivery())
+                            //{
+                            //    var draggedFleetGuid = payload.Data; // convert to appropriate type
+                                // TODO: Handle the logic to nest the dragged fleet under the current fleet.
+                            //}
+                            ImGui.EndDragDropTarget();
+                        }
                         ImGui.TreePop();
                     }
                     if(ImGui.BeginPopupContextItem())
@@ -71,26 +97,6 @@ namespace Pulsar4X.SDL2UI
                 Entity fleet = FleetFactory.Create(_uiState.Game.GlobalManager, factionID, name);
 
                 factionInfoDB.Fleets.Add(fleet);
-
-                // string originalName = "auto-gen names pls", name = originalName;
-                // int counter = 1;
-                // while(_factionInfoDB.ShipDesigns.Values.Any(d => d.Name.Equals(name)))
-                // {
-                //     name = originalName + " " + counter.ToString();
-                //     counter++;
-                // }
-                // SelectedDesignName = ImGuiSDL2CSHelper.BytesFromString(name);
-                // SelectedComponents = new List<(ComponentDesign design, int count)>();
-                // GenImage();
-                // RefreshArmor();
-                // DesignChanged = true;
-
-                // ShipDesign design = new(_factionInfoDB, name, SelectedComponents, (_armor, _armorThickness))
-                // {
-                //     IsValid = false
-                // };
-                // RefreshExistingClasses();
-                // SelectedExistingDesignID = design.ID;
             }
         }
     }

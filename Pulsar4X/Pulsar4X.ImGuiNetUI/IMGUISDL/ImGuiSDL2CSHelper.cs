@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Vector2 = System.Numerics.Vector2;
+using System.Runtime.InteropServices;
 
 namespace ImGuiSDL2CS
 {
@@ -282,6 +283,14 @@ namespace ImGuiSDL2CS
         public static string StringFromBytes(byte[] byteArray)
         {
             return System.Text.Encoding.UTF8.GetString(byteArray);
+        }
+
+        public static (IntPtr, uint) GuidToIntPtr(Guid guid)
+        {
+            byte[] bytes = guid.ToByteArray();
+            IntPtr ptr = Marshal.AllocHGlobal(bytes.Length);
+            Marshal.Copy(bytes, 0, ptr, bytes.Length);
+            return (ptr, (uint)bytes.Length);
         }
 
 
