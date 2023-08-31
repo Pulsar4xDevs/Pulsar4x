@@ -12,9 +12,9 @@ namespace Pulsar4X.ECSLib
     /// <remarks>
     /// An example of this is our 2-body OrbitDB's.
     /// Earth's OrbitDB is a child of the Sun's OrbitDB in the tree hierarchy.
-    /// 
+    ///
     /// Another example would be a subordinate fleet is a child to a higher-level fleet in the fleet heirarchy
-    /// 
+    ///
     /// DataBlobs that derive from this type have functions to maintain the tree hierarchy as changes are made.
     /// </remarks>
     public abstract class TreeHierarchyDB : BaseDataBlob
@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
         public Entity Parent { get; private set; }
 
         /// <summary>
-        /// Same type DataBlob of my parent node. 
+        /// Same type DataBlob of my parent node.
         /// </summary>
         /// <example>
         /// EarthOrbitDB.ParentDB == SunOrbitDB;
@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
         public Entity Root => ParentDB?.Root ?? OwningEntity;
 
         /// <summary>
-        /// Same type DataBlob of my root node. 
+        /// Same type DataBlob of my root node.
         /// </summary>
         [NotNull]
         [PublicAPI]
@@ -112,7 +112,7 @@ namespace Pulsar4X.ECSLib
         /// Sets the parent of this node to another node, adjusting hierarchy as needed.
         /// </summary>
         /// <param name="parent"></param>
-        internal virtual void SetParent(Entity parent)
+        public virtual void SetParent(Entity parent)
         {
             ParentDB?.RemoveChild(OwningEntity);
             Parent = parent;
@@ -123,7 +123,7 @@ namespace Pulsar4X.ECSLib
         {
             if (child.Guid == Guid.Empty)
             {
-                
+
             }
             if (Children.Contains(child))
             {
