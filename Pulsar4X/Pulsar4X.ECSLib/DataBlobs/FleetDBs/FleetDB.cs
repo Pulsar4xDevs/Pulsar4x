@@ -5,7 +5,7 @@ namespace Pulsar4X.ECSLib
 {
     public class FleetDB : TreeHierarchyDB
     {
-        public List<Guid> Ships = new ();
+        public List<Entity> Ships = new ();
 
         public FleetDB() : base(null) {}
 
