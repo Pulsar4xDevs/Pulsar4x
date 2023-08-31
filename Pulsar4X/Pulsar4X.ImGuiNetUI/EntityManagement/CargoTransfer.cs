@@ -193,14 +193,14 @@ namespace Pulsar4X.SDL2UI
 
             if (_entityState.Entity.HasDataBlob<OrderableDB>())
             {
-                var orders = _entityState.Entity.GetDataBlob<OrderableDB>().GetActionList();
+                var orders = _entityState.Entity.GetDataBlob<OrderableDB>().ActionList.ToArray();
                 var newxferDict = new Dictionary<ICargoable, long>();
                 foreach (var order in orders)
                 {
                     if (order is CargoUnloadToOrder)
                     {
                         var xferOrder = (CargoUnloadToOrder)order;
-                        foreach (var tuple in xferOrder.ItemICargoablesToTransfer)
+                        foreach (var tuple in xferOrder.ItemICargoablesToTransfer.ToArray())
                         {
                             if (!newxferDict.ContainsKey(tuple.item))
                                 newxferDict.Add(tuple.item, tuple.amount);
