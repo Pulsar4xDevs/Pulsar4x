@@ -185,7 +185,7 @@ namespace Pulsar4X.SDL2UI
                     string headerTitle = line.Name;
                     if(line.Jobs.Count == 0)
                         headerTitle += " (Idle)";
-
+                    ImGui.PushID(id.ToString());
                     if (ImGui.CollapsingHeader(headerTitle, ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         if(ImGui.Button("Add New Job"))
@@ -312,6 +312,7 @@ namespace Pulsar4X.SDL2UI
                             }
                         }
                     }
+                    ImGui.PopID();
                 }
                 ImGui.EndChild();
             }
