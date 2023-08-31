@@ -43,34 +43,12 @@ namespace Pulsar4X.SDL2UI
         private void DisplayFleetList()
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-            if(ImGui.BeginChild("FleetListSelection", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y - 24f), true))
+            if(ImGui.BeginChild("FleetListSelection", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y - 24f), true))
             {
                 DisplayHelpers.Header("Fleets", "Select a fleet to manage it.");
 
                 // We need a drop target here so nested items can be un-nested to the root of the tree
-                if(ImGui.BeginDragDropTarget())
-                {
-                    var payload = ImGui.AcceptDragDropPayload("FLEET", ImGuiDragDropFlags.None);
-                    if(ImGui.IsMouseReleased(ImGuiMouseButton.Left) && dragEntity != Entity.InvalidEntity)
-                    {
-                        // Remove the dragEntity from the parent tree or the facction Fleets
-                        var sourceFleetInfo = dragEntity.GetDataBlob<FleetDB>();
-
-                        // Check if nested
-                        if(sourceFleetInfo.Root != dragEntity)
-                        {
-                            sourceFleetInfo.ParentDB.Children.Remove(dragEntity);
-                        }
-
-                        // Drop the dragEntity
-                        if(!factionInfoDB.Fleets.Contains(dragEntity))
-                        {
-                            factionInfoDB.Fleets.Add(dragEntity);
-                        }
-                        dragEntity = Entity.InvalidEntity;
-                    }
-                    ImGui.EndDragDropTarget();
-                }
+                DisplayEmptyDropTarget();
 
                 foreach(var fleet in factionInfoDB.Fleets.ToArray())
                 {
@@ -79,7 +57,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
 
-            if(ImGui.Button("Create New Fleet", new Vector2(204f, 0f)))
+            if(ImGui.Button("Create New Fleet", new Vector2(Styles.LeftColumnWidthLg, 0f)))
             {
                 string name = "auto-gen names pls " + nameCounter++;
                 Entity fleet = FleetFactory.Create(_uiState.Game.GlobalManager, factionID, name);
@@ -93,7 +71,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushID(fleet.Guid.ToString());
             string name = fleet.GetDataBlob<NameDB>().GetName(factionID);
             var fleetInfo = fleet.GetDataBlob<FleetDB>();
-            var flags = ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.FramePadding;
+            var flags = ImGuiTreeNodeFlags.DefaultOpen;
 
             if(fleetInfo.Children.Count == 0)
             {
@@ -145,6 +123,34 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        private void DisplayEmptyDropTarget()
+        {
+            if(ImGui.BeginDragDropTarget())
+            {
+                ImGui.AcceptDragDropPayload("FLEET", ImGuiDragDropFlags.None);
+                if(ImGui.IsMouseReleased(ImGuiMouseButton.Left) && dragEntity != Entity.InvalidEntity)
+                {
+                    // Remove the dragEntity from the parent tree or the facction Fleets
+                    var sourceFleetInfo = dragEntity.GetDataBlob<FleetDB>();
+
+                    // Check if nested
+                    if(sourceFleetInfo.Root != dragEntity)
+                    {
+                        sourceFleetInfo.ParentDB.Children.Remove(dragEntity);
+                        sourceFleetInfo.ClearParent();
+                    }
+
+                    // Drop the dragEntity
+                    if(!factionInfoDB.Fleets.Contains(dragEntity))
+                    {
+                        factionInfoDB.Fleets.Add(dragEntity);
+                    }
+                    dragEntity = Entity.InvalidEntity;
+                }
+                ImGui.EndDragDropTarget();
+            }
+        }
+
         private void DisplayDropTarget(Entity fleet)
         {
             // Begin Drag Target
@@ -160,6 +166,7 @@ namespace Pulsar4X.SDL2UI
                     if(sourceFleetInfo.Root != dragEntity)
                     {
                         sourceFleetInfo.ParentDB.Children.Remove(dragEntity);
+                        sourceFleetInfo.ClearParent();
                     }
 
                     if(factionInfoDB.Fleets.Contains(dragEntity))

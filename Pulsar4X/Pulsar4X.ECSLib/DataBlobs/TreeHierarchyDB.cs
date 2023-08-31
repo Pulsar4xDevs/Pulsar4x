@@ -119,6 +119,11 @@ namespace Pulsar4X.ECSLib
             ParentDB?.AddChild(OwningEntity);
         }
 
+        public virtual void ClearParent()
+        {
+            Parent = null;
+        }
+
         private void AddChild(Entity child)
         {
             if (child.Guid == Guid.Empty)
