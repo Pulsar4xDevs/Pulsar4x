@@ -55,6 +55,11 @@ namespace Pulsar4X.SDL2UI
                 {
                     DisplayFleetItem(fleet);
                 }
+
+                var sizeLeft = ImGui.GetContentRegionAvail();
+                ImGui.InvisibleButton("invis-droptarget", sizeLeft);
+                DisplayEmptyDropTarget();
+
                 ImGui.EndChild();
             }
 
