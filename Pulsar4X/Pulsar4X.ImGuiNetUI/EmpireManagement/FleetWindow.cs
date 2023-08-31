@@ -11,6 +11,7 @@ namespace Pulsar4X.SDL2UI
         private Guid factionID;
         private IntPtr dragPayload;
         private Entity dragEntity = Entity.InvalidEntity;
+        private Entity selectedFleet = null;
         int nameCounter = 1;
 
         private FleetWindow()
@@ -64,12 +65,32 @@ namespace Pulsar4X.SDL2UI
 
                 factionInfoDB.Fleets.Add(fleet);
             }
+
+            if(selectedFleet == null) return;
+
+            ImGui.SameLine();
+            ImGui.SetCursorPosY(27f);
+
+            if(ImGui.BeginChild("FleetTabs"))
+            {
+                ImGui.BeginTabBar("FleetTabBar", ImGuiTabBarFlags.None);
+
+                if(ImGui.BeginTabItem("Summary"))
+                {
+                    string name = Name(selectedFleet);
+                    ImGui.Text("Fleet name: " + name);
+                    ImGui.EndTabItem();
+                }
+
+                ImGui.EndTabBar();
+                ImGui.EndChild();
+            }
         }
 
         private void DisplayFleetItem(Entity fleet)
         {
             ImGui.PushID(fleet.Guid.ToString());
-            string name = fleet.GetDataBlob<NameDB>().GetName(factionID);
+            string name = Name(fleet);
             var fleetInfo = fleet.GetDataBlob<FleetDB>();
             var flags = ImGuiTreeNodeFlags.DefaultOpen;
 
@@ -82,6 +103,10 @@ namespace Pulsar4X.SDL2UI
 
             if(isTreeOpen)
             {
+                if(ImGui.IsItemClicked())
+                {
+                    selectedFleet = fleet;
+                }
                 DisplayContextMenu(fleet);
                 DisplayDropSource(fleet, name);
                 DisplayDropTarget(fleet);
@@ -193,6 +218,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(name);
                 ImGui.EndDragDropSource();
             }
+        }
+
+        private string Name(Entity fleet)
+        {
+            return fleet.GetDataBlob<NameDB>().GetName(factionID);
         }
     }
 }
