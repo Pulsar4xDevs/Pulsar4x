@@ -17,5 +17,6 @@ namespace Pulsar4X.SDL2UI
         public static Vector4 InvisibleColor = new Vector4(0, 0, 0, 0f);
 
         public static ImGuiTableFlags TableFlags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg;
+        public static float LeftColumnWidth = 204f;
     }
 }

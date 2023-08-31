@@ -35,6 +35,9 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public Dictionary<Guid, ShipDesign> ShipDesigns = new Dictionary<Guid, ShipDesign>();
+
+        [JsonProperty]
+        public List<Entity> Fleets { get; internal set; } = new ();
         
         [JsonProperty]
         public Dictionary<Guid, OrdnanceDesign> MissileDesigns = new Dictionary<Guid, OrdnanceDesign>();
