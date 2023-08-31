@@ -1,86 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
     public class OrderableDB : BaseDataBlob
     {
         private readonly object _lockObj = new object();
-        //private readonly object _lockListAccess = new object();
         private List<EntityCommand> _actionList = new List<EntityCommand>();
-        internal void ProcessOrderList(DateTime atDateTime)
+
+        public List<EntityCommand> ActionList
         {
-            
-            lock (_lockObj)
+            get
             {
-                //var actionList = new List<EntityCommand>(_actionList);
-                int mask = 0;
-
-                int i = 0;
-                while (i < _actionList.Count)
-                {   var j = _actionList.Count;
-                    EntityCommand entityCommand = _actionList[i];
-
-                    if ((mask & ((int)entityCommand.ActionLanes)) == 0) //bitwise and
-                    {
-                        if (entityCommand.IsBlocking)
-                        {
-                            mask = mask | ((int)entityCommand.ActionLanes); //bitwise or
-                        }
-                        if (atDateTime >= entityCommand.ActionOnDate)
-                        {
-                            if(entityCommand.PauseOnAction &! entityCommand.IsRunning)
-                            {
-                                Event newEvent = new Event(atDateTime, "Command Halt");
-                                newEvent.EventType = EventType.OrdersHalt;
-                                newEvent.Entity = OwningEntity;
-                                newEvent.Faction = OwningEntity.GetFactionOwner;
-                                StaticRefLib.EventLog.AddEvent(newEvent);
-                                
-
-                            }
-                            entityCommand.ActionCommand(atDateTime);
-                        }
-                    }
-
-                    if (entityCommand.IsFinished())
-                    {
-                        if(j != _actionList.Count)
-                            throw new Exception ("List Changed");
-                        if(_actionList[i] != entityCommand)
-                            throw new Exception("How is this possible");
-                        _actionList.RemoveAt(i);
-                    }
-                    else
-                    {
-                        i++;
-                    }
-                }
-                //_actionList = actionList;
+                return _actionList;
             }
         }
-        
-        internal void AddCommandToList(EntityCommand command)
-        {
-            if (command.ActionOnDate > OwningEntity.StarSysDateTime)
-            {
-                OwningEntity.Manager.ManagerSubpulses.AddEntityInterupt(command.ActionOnDate, nameof(OrderableProcessor), OwningEntity);
-            }
-            lock (_lockObj)
-            {
-                _actionList.Add(command);
-            }
-        }
-        
-        //public int Count => _actionList.Count;
 
-        private void localAdd(EntityCommand command)
+        public object Lock { get { return _lockObj; }}
+
+        internal void AddCommand(EntityCommand command)
         {
             lock (_lockObj)
             {
                 _actionList.Add(command);
             }
         }
+
         internal void RemoveAt(int index)
         {
             lock (_lockObj)
@@ -96,7 +40,6 @@ namespace Pulsar4X.ECSLib
             {
                 return new List<EntityCommand>(_actionList);
             }
-            
         }
 
         public OrderableDB()
@@ -113,6 +56,4 @@ namespace Pulsar4X.ECSLib
             return new OrderableDB(this);
         }
     }
-
-
 }

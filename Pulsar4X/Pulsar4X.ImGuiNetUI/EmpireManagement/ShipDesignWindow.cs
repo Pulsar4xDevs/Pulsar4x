@@ -239,8 +239,7 @@ namespace Pulsar4X.SDL2UI
         internal void DisplayExistingDesigns()
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-
-            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(204f, windowContentSize.Y - 24f), true))
+            if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y - 24f), true))
             {
                 DisplayHelpers.Header("Existing Designs", "Select an existing ship design to edit it.");
 

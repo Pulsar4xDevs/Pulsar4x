@@ -325,9 +325,9 @@ namespace Pulsar4X.ECSLib.Industry
                 {
                     case OrderTypeEnum.NewJob:
                     {
-                        IndustryTools.AddJob(_entityCommanding, productionLineID, _job);
                         if(AutoAddSubJobs)
                             IndustryTools.AutoAddSubJobs(_entityCommanding, _job);
+                        IndustryTools.AddJob(_entityCommanding, productionLineID, _job);
                     }
                         break;
                     case OrderTypeEnum.CancelJob:

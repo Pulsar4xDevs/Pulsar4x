@@ -7,6 +7,8 @@ namespace Pulsar4X.ECSLib
     {
         public List<Guid> Ships = new ();
 
+        public FleetDB() : base(null) {}
+
         public FleetDB(FleetDB fleetDB) : base(null)
         {
             Ships = new(fleetDB.Ships);
