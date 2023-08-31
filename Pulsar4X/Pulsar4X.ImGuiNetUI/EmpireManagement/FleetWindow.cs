@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
@@ -12,6 +13,7 @@ namespace Pulsar4X.SDL2UI
         private Entity dragEntity = Entity.InvalidEntity;
         private Entity selectedFleet = null;
         int nameCounter = 1;
+        private Dictionary<Entity, bool> selectedShips = new ();
 
         private FleetWindow()
         {
@@ -29,6 +31,13 @@ namespace Pulsar4X.SDL2UI
 
             return thisitem;
         }
+
+        private void SelectFleet(Entity fleet)
+        {
+            selectedFleet = fleet;
+            selectedShips = new ();
+        }
+
         internal override void Display()
         {
             if(!IsActive) return;
@@ -100,20 +109,31 @@ namespace Pulsar4X.SDL2UI
                     {
                         if(ImGui.CollapsingHeader("Assigned Ships", ImGuiTreeNodeFlags.DefaultOpen))
                         {
-                            ImGui.Columns(2);
-                            foreach(var ship in selectedFleet.GetDataBlob<FleetDB>().Ships.ToArray())
+                            ImGui.PushStyleColor(ImGuiCol.FrameBg, Styles.InvisibleColor);
+                            if(ImGui.BeginListBox("###assigned-ships", ImGui.GetContentRegionAvail()))
                             {
-                                ImGui.PushID(ship.Guid.ToString());
-                                ImGui.Text(Name(ship));
-                                ImGui.NextColumn();
-                                if(ImGui.SmallButton("View"))
+                                ImGui.Columns(2, "assigned-ships-list", true);
+                                foreach(var ship in selectedFleet.GetDataBlob<FleetDB>().Ships.ToArray())
                                 {
-                                    _uiState.EntityClicked(ship.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                                    if(!selectedShips.ContainsKey(ship))
+                                    {
+                                        selectedShips.Add(ship, false);
+                                    }
+
+                                    if(ImGui.Selectable(Name(ship), selectedShips[ship], ImGuiSelectableFlags.SpanAllColumns))
+                                    {
+                                        selectedShips[ship] = !selectedShips[ship];
+                                    }
+                                    DisplayShipContextMenu();
+                                    ImGui.NextColumn();
+                                    ImGui.Text("TODO: Commander Name");
+                                    ImGui.NextColumn();
+                                    ImGui.Separator();
                                 }
-                                ImGui.NextColumn();
-                                ImGui.Separator();
-                                ImGui.PopID();
+                                ImGui.Columns(1);
+                                ImGui.EndListBox();
                             }
+                            ImGui.PopStyleColor();
                         }
                         ImGui.EndChild();
                     }
@@ -179,7 +199,7 @@ namespace Pulsar4X.SDL2UI
             {
                 if(ImGui.IsItemClicked())
                 {
-                    selectedFleet = fleet;
+                    SelectFleet(fleet);
                 }
                 DisplayContextMenu(fleet);
                 DisplayDropSource(fleet, name);
@@ -217,6 +237,44 @@ namespace Pulsar4X.SDL2UI
                         var fleetInfo = fleet.GetDataBlob<FleetDB>();
                         fleetInfo.ParentDB.Children.Remove(fleet);
                     }
+                }
+                ImGui.EndPopup();
+            }
+        }
+
+        private void DisplayShipContextMenu()
+        {
+            if(ImGui.BeginPopupContextItem())
+            {
+                ImGui.Text("Re-assign selected ships to:");
+                ImGui.Separator();
+
+                foreach(var fleet in factionInfoDB.Fleets.ToArray())
+                {
+                    if(fleet == selectedFleet)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                        ImGui.Text(Name(fleet));
+                        ImGui.PopStyleColor();
+                        continue;
+                    }
+
+                    ImGui.PushID(fleet.Guid.ToString());
+                    if(ImGui.MenuItem(Name(fleet)))
+                    {
+                        // FIXME: we probably want some logic that doesn't instantly re-assign the ship
+                        foreach(var (ship, selected) in selectedShips)
+                        {
+                            if(!selected) continue;
+
+                            // Remove the ship from the current fleet
+                            selectedFleet.GetDataBlob<FleetDB>().Ships.Remove(ship);
+
+                            // Add it to the new fleet
+                            fleet.GetDataBlob<FleetDB>().Ships.Add(ship);
+                        }
+                    }
+                    ImGui.PopID();
                 }
                 ImGui.EndPopup();
             }
