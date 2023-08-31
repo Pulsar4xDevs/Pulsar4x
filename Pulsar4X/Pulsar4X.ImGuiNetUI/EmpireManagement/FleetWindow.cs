@@ -9,7 +9,6 @@ namespace Pulsar4X.SDL2UI
     {
         private FactionInfoDB factionInfoDB;
         private Guid factionID;
-        private IntPtr dragPayload;
         private Entity dragEntity = Entity.InvalidEntity;
         private Entity selectedFleet = null;
         int nameCounter = 1;
@@ -37,7 +36,92 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.Begin("Fleet Management", ref IsActive, _flags))
             {
                 DisplayFleetList();
+
+                if(selectedFleet == null) return;
+
+                ImGui.SameLine();
+                ImGui.SetCursorPosY(27f);
+
+                DisplayTabs();
+
                 ImGui.End();
+            }
+        }
+
+        private void DisplayTabs()
+        {
+            if(ImGui.BeginChild("FleetTabs"))
+            {
+                ImGui.BeginTabBar("FleetTabBar", ImGuiTabBarFlags.None);
+
+                if(ImGui.BeginTabItem("Summary"))
+                {
+                    Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+                    var firstChildSize = new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y);
+                    var secondChildSize = new Vector2(windowContentSize.X * 0.5f - (windowContentSize.X * 0.01f), windowContentSize.Y);
+                    if(ImGui.BeginChild("FleetSummary1", firstChildSize, true))
+                    {
+                        if(ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
+                        {
+                            ImGui.Columns(2);
+                            DisplayHelpers.PrintRow("Name", Name(selectedFleet));
+
+                            // Current system
+                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                            ImGui.Text("Current System");
+                            ImGui.PopStyleColor();
+                            ImGui.NextColumn();
+                            if(ImGui.SmallButton("TODO"))
+                            {
+                                // open the system?
+                            }
+                            ImGui.NextColumn();
+                            ImGui.Separator();
+
+                            // Orbiting
+                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                            ImGui.Text("Orbiting");
+                            ImGui.PopStyleColor();
+                            ImGui.NextColumn();
+                            if(ImGui.SmallButton("TODO"))
+                            {
+                                // open the entity
+                            }
+                            ImGui.NextColumn();
+                            ImGui.Separator();
+                            DisplayHelpers.PrintRow("Commander", "TODO");
+                            DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<FleetDB>().Ships.Count.ToString());
+                            DisplayHelpers.PrintRow("Orders", "TODO", separator: false);
+                        }
+                        ImGui.EndChild();
+                    }
+                    ImGui.SameLine();
+                    if(ImGui.BeginChild("FleetSummary2", secondChildSize, true))
+                    {
+                        if(ImGui.CollapsingHeader("Assigned Ships", ImGuiTreeNodeFlags.DefaultOpen))
+                        {
+                            ImGui.Columns(2);
+                            foreach(var ship in selectedFleet.GetDataBlob<FleetDB>().Ships.ToArray())
+                            {
+                                ImGui.PushID(ship.Guid.ToString());
+                                ImGui.Text(Name(ship));
+                                ImGui.NextColumn();
+                                if(ImGui.SmallButton("View"))
+                                {
+                                    _uiState.EntityClicked(ship.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                                }
+                                ImGui.NextColumn();
+                                ImGui.Separator();
+                                ImGui.PopID();
+                            }
+                        }
+                        ImGui.EndChild();
+                    }
+                    ImGui.EndTabItem();
+                }
+
+                ImGui.EndTabBar();
+                ImGui.EndChild();
             }
         }
 
@@ -70,26 +154,6 @@ namespace Pulsar4X.SDL2UI
 
                 factionInfoDB.Fleets.Add(fleet);
             }
-
-            if(selectedFleet == null) return;
-
-            ImGui.SameLine();
-            ImGui.SetCursorPosY(27f);
-
-            if(ImGui.BeginChild("FleetTabs"))
-            {
-                ImGui.BeginTabBar("FleetTabBar", ImGuiTabBarFlags.None);
-
-                if(ImGui.BeginTabItem("Summary"))
-                {
-                    string name = Name(selectedFleet);
-                    ImGui.Text("Fleet name: " + name);
-                    ImGui.EndTabItem();
-                }
-
-                ImGui.EndTabBar();
-                ImGui.EndChild();
-            }
         }
 
         private void DisplayFleetItem(Entity fleet)
@@ -102,6 +166,11 @@ namespace Pulsar4X.SDL2UI
             if(fleetInfo.Children.Count == 0)
             {
                 flags |= ImGuiTreeNodeFlags.Leaf;
+            }
+
+            if(selectedFleet == fleet)
+            {
+                flags |= ImGuiTreeNodeFlags.Selected;
             }
 
             bool isTreeOpen = ImGui.TreeNodeEx(name, flags);
@@ -225,9 +294,9 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private string Name(Entity fleet)
+        private string Name(Entity entity)
         {
-            return fleet.GetDataBlob<NameDB>().GetName(factionID);
+            return entity.GetDataBlob<NameDB>().GetName(factionID);
         }
     }
 }

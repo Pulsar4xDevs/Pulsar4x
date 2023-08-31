@@ -18,5 +18,27 @@ namespace Pulsar4X.SDL2UI
             ImGui.PopStyleColor();
             ImGui.Separator();
         }
+
+        public static void PrintRow(string one, string two, string tooltipOne = null, string tooltipTwo = null, bool separator = true)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+            ImGui.Text(one);
+            ImGui.PopStyleColor();
+            if(tooltipOne != null)
+            {
+                if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipOne);
+            }
+            ImGui.NextColumn();
+
+            ImGui.Text(two);
+            if(tooltipTwo != null)
+            {
+                if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipTwo);
+            }
+            ImGui.NextColumn();
+
+            if(separator)
+                ImGui.Separator();
+        }
     }
 }
