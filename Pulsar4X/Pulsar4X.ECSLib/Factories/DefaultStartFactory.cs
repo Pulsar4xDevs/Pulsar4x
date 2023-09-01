@@ -262,8 +262,9 @@ namespace Pulsar4X.ECSLib
 
             factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "UEF");
 
+
             Entity defaultFleet = FleetFactory.Create(game.GlobalManager, factionEntity.Guid, "Default Fleet");
-            factionEntity.GetDataBlob<FactionInfoDB>().Fleets.Add(defaultFleet);
+            factionEntity.GetDataBlob<NavyDB>().AddChild(defaultFleet);
 
             // Todo: handle this in CreateShip
             ShipDesign shipDesign = DefaultShipDesign(game, factionEntity);
@@ -282,14 +283,14 @@ namespace Pulsar4X.ECSLib
             var methalox = NameLookup.GetMaterialSD(game, "Methalox");
             var hydrolox = NameLookup.GetMaterialSD(game, "Hydrolox");
 
-            var fleetDB = defaultFleet.GetDataBlob<FleetDB>();
-            fleetDB.Ships.Add(gunShip0);
-            fleetDB.Ships.Add(ship2);
-            fleetDB.Ships.Add(ship3);
-            fleetDB.Ships.Add(gunShip1);
-            fleetDB.Ships.Add(courier);
-            fleetDB.Ships.Add(courier2);
-            fleetDB.Ships.Add(starship);
+            var fleetDB = defaultFleet.GetDataBlob<NavyDB>();
+            fleetDB.AddChild(gunShip0);
+            fleetDB.AddChild(ship2);
+            fleetDB.AddChild(ship3);
+            fleetDB.AddChild(gunShip1);
+            fleetDB.AddChild(courier);
+            fleetDB.AddChild(courier2);
+            fleetDB.AddChild(starship);
 
             CargoTransferProcessor.AddCargoItems(colonyEntity, rp1, 10000);
             CargoTransferProcessor.AddCargoItems(colonyEntity, methalox, 10000);

@@ -113,7 +113,7 @@ namespace Pulsar4X.ECSLib
         /// Can be null.
         /// </summary>
         /// <param name="newParent"></param>
-        public override void SetParent(Entity newParent)
+        internal override void SetParent(Entity newParent)
         {
             if (newParent != null && !newParent.HasDataBlob<PositionDB>())
                 throw new Exception("newParent must have a PositionDB");

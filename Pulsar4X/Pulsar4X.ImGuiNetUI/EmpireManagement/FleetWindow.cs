@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
@@ -8,8 +9,8 @@ namespace Pulsar4X.SDL2UI
 {
     public class FleetWindow : PulsarGuiWindow
     {
-        private FactionInfoDB factionInfoDB;
-        private Guid factionID;
+        private readonly NavyDB factionRoot;
+        private readonly Guid factionID;
         private Entity dragEntity = Entity.InvalidEntity;
         private Entity selectedFleet = null;
         int nameCounter = 1;
@@ -17,19 +18,16 @@ namespace Pulsar4X.SDL2UI
 
         private FleetWindow()
         {
-            factionInfoDB = _uiState.Faction.GetDataBlob<FactionInfoDB>();
             factionID = _uiState.Faction.Guid;
+            factionRoot = _uiState.Faction.GetDataBlob<NavyDB>();
         }
         internal static FleetWindow GetInstance()
         {
-            FleetWindow thisitem;
             if (!_uiState.LoadedWindows.ContainsKey(typeof(FleetWindow)))
             {
-                thisitem = new FleetWindow();
+                return new FleetWindow();
             }
-            thisitem = (FleetWindow)_uiState.LoadedWindows[typeof(FleetWindow)];
-
-            return thisitem;
+            return (FleetWindow)_uiState.LoadedWindows[typeof(FleetWindow)];
         }
 
         private void SelectFleet(Entity fleet)
@@ -99,8 +97,8 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                             ImGui.Separator();
                             DisplayHelpers.PrintRow("Commander", "TODO");
-                            DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<FleetDB>().Ships.Count.ToString());
-                            DisplayHelpers.PrintRow("Orders", "TODO", separator: false);
+                            DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<NavyDB>().GetChildren().Count().ToString());
+                            DisplayHelpers.PrintRow("Current Orders", "TODO", separator: false);
                         }
                         ImGui.EndChild();
                     }
@@ -113,8 +111,11 @@ namespace Pulsar4X.SDL2UI
                             if(ImGui.BeginListBox("###assigned-ships", ImGui.GetContentRegionAvail()))
                             {
                                 ImGui.Columns(2, "assigned-ships-list", true);
-                                foreach(var ship in selectedFleet.GetDataBlob<FleetDB>().Ships.ToArray())
+                                foreach(var ship in selectedFleet.GetDataBlob<NavyDB>().GetChildren())
                                 {
+                                    // Don't display other fleets
+                                    if(ship.HasDataBlob<NavyDB>()) continue;
+
                                     if(!selectedShips.ContainsKey(ship))
                                     {
                                         selectedShips.Add(ship, false);
@@ -155,7 +156,7 @@ namespace Pulsar4X.SDL2UI
                 // We need a drop target here so nested items can be un-nested to the root of the tree
                 DisplayEmptyDropTarget();
 
-                foreach(var fleet in factionInfoDB.Fleets.ToArray())
+                foreach(var fleet in factionRoot.GetChildren())
                 {
                     DisplayFleetItem(fleet);
                 }
@@ -170,20 +171,23 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.Button("Create New Fleet", new Vector2(Styles.LeftColumnWidthLg, 0f)))
             {
                 string name = "auto-gen names pls " + nameCounter++;
-                Entity fleet = FleetFactory.Create(_uiState.Game.GlobalManager, factionID, name);
-
-                factionInfoDB.Fleets.Add(fleet);
+                var order = FleetOrder.CreateFleetOrder(name, _uiState.Faction);
+                StaticRefLib.OrderHandler.HandleOrder(order);
             }
         }
 
         private void DisplayFleetItem(Entity fleet)
         {
+            if(!fleet.TryGetDatablob<NavyDB>(out var fleetInfo))
+            {
+                return;
+            }
+
             ImGui.PushID(fleet.Guid.ToString());
             string name = Name(fleet);
-            var fleetInfo = fleet.GetDataBlob<FleetDB>();
             var flags = ImGuiTreeNodeFlags.DefaultOpen;
 
-            if(fleetInfo.Children.Count == 0)
+            if(fleetInfo.GetChildren().Where(x => x.HasDataBlob<NavyDB>()).Count() == 0)
             {
                 flags |= ImGuiTreeNodeFlags.Leaf;
             }
@@ -204,7 +208,7 @@ namespace Pulsar4X.SDL2UI
                 DisplayContextMenu(fleet);
                 DisplayDropSource(fleet, name);
                 DisplayDropTarget(fleet);
-                foreach(var child in fleetInfo.Children.ToArray())
+                foreach(var child in fleetInfo.GetChildren())
                 {
                     DisplayFleetItem(child);
                 }
@@ -224,20 +228,25 @@ namespace Pulsar4X.SDL2UI
         {
             if(ImGui.BeginPopupContextItem())
             {
-                if(ImGui.MenuItem("Disband###delete-" + fleet.Guid))
+                if(factionRoot.GetChildren().Count() <= 1)
                 {
-                    // FIXME: needs some checking to make sure the fleet has no ships
-                    // FIXME: needs to make sure the entity is removed from the game
-                    if(factionInfoDB.Fleets.Contains(fleet))
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.Text("Unable to Disband");
+                    ImGui.PopStyleColor();
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                    ImGui.Text("Must have at least one fleet");
+                    ImGui.PopStyleColor();
+                }
+                else
+                {
+                    if(ImGui.MenuItem("Disband###delete-" + fleet.Guid))
                     {
-                        factionInfoDB.Fleets.Remove(fleet);
-                    }
-                    else
-                    {
-                        var fleetInfo = fleet.GetDataBlob<FleetDB>();
-                        fleetInfo.ParentDB.Children.Remove(fleet);
+                        var order = FleetOrder.DisbandFleet(factionID, fleet);
+                        StaticRefLib.OrderHandler.HandleOrder(order);
+                        SelectFleet(null);
                     }
                 }
+
                 ImGui.EndPopup();
             }
         }
@@ -249,7 +258,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("Re-assign selected ships to:");
                 ImGui.Separator();
 
-                foreach(var fleet in factionInfoDB.Fleets.ToArray())
+                foreach(var fleet in factionRoot.GetChildren())
                 {
                     if(fleet == selectedFleet)
                     {
@@ -263,16 +272,16 @@ namespace Pulsar4X.SDL2UI
                     if(ImGui.MenuItem(Name(fleet)))
                     {
                         // FIXME: we probably want some logic that doesn't instantly re-assign the ship
-                        foreach(var (ship, selected) in selectedShips)
-                        {
-                            if(!selected) continue;
+                        // foreach(var (ship, selected) in selectedShips)
+                        // {
+                        //     if(!selected) continue;
 
-                            // Remove the ship from the current fleet
-                            selectedFleet.GetDataBlob<FleetDB>().Ships.Remove(ship);
+                        //     // Remove the ship from the current fleet
+                        //     selectedFleet.GetDataBlob<NavyDB>().RemoveChild(ship);
 
-                            // Add it to the new fleet
-                            fleet.GetDataBlob<FleetDB>().Ships.Add(ship);
-                        }
+                        //     // Add it to the new fleet
+                        //     fleet.GetDataBlob<NavyDB>().AddChild(ship);
+                        // }
                     }
                     ImGui.PopID();
                 }
@@ -287,22 +296,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.AcceptDragDropPayload("FLEET", ImGuiDragDropFlags.None);
                 if(ImGui.IsMouseReleased(ImGuiMouseButton.Left) && dragEntity != Entity.InvalidEntity)
                 {
-                    // Remove the dragEntity from the parent tree or the facction Fleets
-                    var sourceFleetInfo = dragEntity.GetDataBlob<FleetDB>();
-
-                    // Check if nested
-                    if(sourceFleetInfo.Root != dragEntity)
-                    {
-                        sourceFleetInfo.ParentDB.Children.Remove(dragEntity);
-                        sourceFleetInfo.ClearParent();
-                    }
-
-                    // Drop the dragEntity
-                    if(!factionInfoDB.Fleets.Contains(dragEntity))
-                    {
-                        factionInfoDB.Fleets.Add(dragEntity);
-                    }
-                    dragEntity = Entity.InvalidEntity;
+                    var order = FleetOrder.ChangeParent(factionID, dragEntity, factionRoot.OwningEntity);
+                    StaticRefLib.OrderHandler.HandleOrder(order);
                 }
                 ImGui.EndDragDropTarget();
             }
@@ -316,24 +311,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.AcceptDragDropPayload("FLEET", ImGuiDragDropFlags.None);
                 if(ImGui.IsMouseReleased(ImGuiMouseButton.Left) && dragEntity != Entity.InvalidEntity)
                 {
-                    // Remove the dragEntity from the parent tree or the facction Fleets
-                    var sourceFleetInfo = dragEntity.GetDataBlob<FleetDB>();
-
-                    // Check if nested
-                    if(sourceFleetInfo.Root != dragEntity)
-                    {
-                        sourceFleetInfo.ParentDB.Children.Remove(dragEntity);
-                        sourceFleetInfo.ClearParent();
-                    }
-
-                    if(factionInfoDB.Fleets.Contains(dragEntity))
-                    {
-                        factionInfoDB.Fleets.Remove(dragEntity);
-                    }
-
-                    // Drop the dragEntity
-                    sourceFleetInfo.SetParent(fleet);
-                    dragEntity = Entity.InvalidEntity;
+                    var order = FleetOrder.ChangeParent(factionID, dragEntity, fleet);
+                    StaticRefLib.OrderHandler.HandleOrder(order);
                 }
                 ImGui.EndDragDropTarget();
             }
