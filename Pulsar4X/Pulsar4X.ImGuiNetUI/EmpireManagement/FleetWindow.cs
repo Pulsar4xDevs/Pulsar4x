@@ -97,7 +97,7 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                             ImGui.Separator();
                             DisplayHelpers.PrintRow("Commander", "TODO");
-                            DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<NavyDB>().GetChildren().Count().ToString());
+                            DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<NavyDB>().GetChildren().Where(x => !x.HasDataBlob<NavyDB>()).Count().ToString());
                             DisplayHelpers.PrintRow("Current Orders", "TODO", separator: false);
                         }
                         ImGui.EndChild();
@@ -260,32 +260,50 @@ namespace Pulsar4X.SDL2UI
 
                 foreach(var fleet in factionRoot.GetChildren())
                 {
-                    if(fleet == selectedFleet)
-                    {
-                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                        ImGui.Text(Name(fleet));
-                        ImGui.PopStyleColor();
-                        continue;
-                    }
-
-                    ImGui.PushID(fleet.Guid.ToString());
-                    if(ImGui.MenuItem(Name(fleet)))
-                    {
-                        // FIXME: we probably want some logic that doesn't instantly re-assign the ship
-                        // foreach(var (ship, selected) in selectedShips)
-                        // {
-                        //     if(!selected) continue;
-
-                        //     // Remove the ship from the current fleet
-                        //     selectedFleet.GetDataBlob<NavyDB>().RemoveChild(ship);
-
-                        //     // Add it to the new fleet
-                        //     fleet.GetDataBlob<NavyDB>().AddChild(ship);
-                        // }
-                    }
-                    ImGui.PopID();
+                    DisplayShipAssignmentOption(fleet);
                 }
                 ImGui.EndPopup();
+            }
+        }
+
+        private void DisplayShipAssignmentOption(Entity fleet, int depth = 0)
+        {
+            if(!fleet.HasDataBlob<NavyDB>()) return;
+
+            for(int i = 0; i < depth; i++)
+            {
+                ImGui.InvisibleButton("invis", new Vector2(8, 8));
+                ImGui.SameLine();
+            }
+
+            if(fleet == selectedFleet)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.Text(Name(fleet));
+                ImGui.PopStyleColor();
+            }
+            else
+            {
+                ImGui.PushID(fleet.Guid.ToString());
+                if(ImGui.MenuItem(Name(fleet)))
+                {
+                    foreach(var (ship, selected) in selectedShips)
+                    {
+                        if(!selected) continue;
+
+                        var unassignOrder = FleetOrder.UnassignShip(factionID, selectedFleet, ship);
+                        StaticRefLib.OrderHandler.HandleOrder(unassignOrder);
+
+                        var assignOrder = FleetOrder.AssignShip(factionID, fleet, ship);
+                        StaticRefLib.OrderHandler.HandleOrder(assignOrder);
+                    }
+                }
+                ImGui.PopID();
+            }
+
+            foreach(var child in fleet.GetDataBlob<NavyDB>().GetChildren())
+            {
+                DisplayShipAssignmentOption(child, depth + 1);
             }
         }
 

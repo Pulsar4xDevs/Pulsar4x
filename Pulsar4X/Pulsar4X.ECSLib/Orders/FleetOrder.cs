@@ -7,6 +7,8 @@ namespace Pulsar4X.ECSLib
         Create,
         Disband,
         ChangeParent,
+        AssignShip,
+        UnassignShip,
     }
     public class FleetOrder : EntityCommand
     {
@@ -77,6 +79,28 @@ namespace Pulsar4X.ECSLib
             return order;
         }
 
+        public static FleetOrder AssignShip(Guid requestinFaction, Entity fleet, Entity ship)
+        {
+            var order = new FleetOrder(requestinFaction, fleet)
+            {
+                OrderType = FleetOrderType.AssignShip,
+                _targetEntity = ship
+            };
+
+            return order;
+        }
+
+        public static FleetOrder UnassignShip(Guid requestinFaction, Entity fleet, Entity ship)
+        {
+            var order = new FleetOrder(requestinFaction, fleet)
+            {
+                OrderType = FleetOrderType.UnassignShip,
+                _targetEntity = ship
+            };
+
+            return order;
+        }
+
         internal override void ActionCommand(DateTime atDateTime)
         {
             var factionRoot = _factionEntity.GetDataBlob<NavyDB>();
@@ -116,6 +140,12 @@ namespace Pulsar4X.ECSLib
 
                     // Drop the dragEntity
                     sourceFleetInfo.SetParent(_targetEntity);
+                    break;
+                case FleetOrderType.AssignShip:
+                    _entityCommanding.GetDataBlob<NavyDB>().AddChild(_targetEntity);
+                    break;
+                case FleetOrderType.UnassignShip:
+                    _entityCommanding.GetDataBlob<NavyDB>().RemoveChild(_targetEntity);
                     break;
             }
 
