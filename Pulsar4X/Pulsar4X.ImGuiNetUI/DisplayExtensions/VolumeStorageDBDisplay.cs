@@ -44,7 +44,7 @@ namespace Pulsar4X.SDL2UI
                         var massStored = storage.GetMassStored(cargoType);
                         var itemsStored = value;
 
-                        if(ImGui.Selectable(cargoType.Name)) {}
+                        if(ImGui.Selectable(cargoType.Name, false, ImGuiSelectableFlags.SpanAllColumns)) {}
                         ImGui.NextColumn();
                         ImGui.Text(Stringify.Number(itemsStored));
                         ImGui.NextColumn();
