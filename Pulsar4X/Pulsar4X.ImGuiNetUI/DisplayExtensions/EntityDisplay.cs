@@ -130,7 +130,7 @@ namespace Pulsar4X.SDL2UI
                     if(mineralData == null) continue;
 
                     var stockpileData = storage?.FirstOrDefault(x => x.Value.CurrentStoreInUnits.ContainsKey(id)).Value;
-                    var stockpileUnits = stockpileData?.CurrentStoreInUnits.Get();
+                    var stockpileUnits = stockpileData?.CurrentStoreInUnits;
                     var annualProduction = miningRates.ContainsKey(id) ? 365 * miningRates[id] : 0;
 
                     ImGui.TableNextRow();

@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
                 var cargoables = typeStore.Value.GetCargoables();
-                var unitsInStore = typeStore.Value.CurrentStoreInUnits.Get();
+                var unitsInStore = typeStore.Value.CurrentStoreInUnits;
 
 
                 ImGui.PushID(_entityState.Entity.Guid.ToString());//this helps the ui diferentiate between the left and right side
@@ -319,7 +319,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Separator();
 
                     var cargoables = _stores[typeStore.Key].GetCargoables();
-                    foreach (var cargoItemKvp in typeStore.Value.CurrentStoreInUnits.Get())
+                    foreach (var cargoItemKvp in typeStore.Value.CurrentStoreInUnits)
                     {
                         ICargoable cargoItem = cargoables[cargoItemKvp.Key];
 

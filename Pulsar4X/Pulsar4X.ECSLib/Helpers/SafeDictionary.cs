@@ -1,8 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
-    public class SafeDictionary<TKey, TValue>
+    public class SafeDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     {
         private readonly Dictionary<TKey, TValue> _innerDictionary = new Dictionary<TKey, TValue>();
         private readonly object _lock = new object();
@@ -47,7 +49,7 @@ namespace Pulsar4X.ECSLib
 
         public SafeDictionary(SafeDictionary<TKey, TValue> dictionary)
         {
-            foreach(var (key, value) in dictionary.Get())
+            foreach(var (key, value) in dictionary)
             {
                 _innerDictionary.Add(key, value);
             }
@@ -99,9 +101,19 @@ namespace Pulsar4X.ECSLib
             lock(_lock) return _innerDictionary.ContainsKey(key);
         }
 
-        public IDictionary<TKey, TValue> Get()
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
-            return new Dictionary<TKey, TValue>(_innerDictionary);
+            List<KeyValuePair<TKey, TValue>> snapshot;
+            lock(_lock)
+            {
+                snapshot = _innerDictionary.ToList();
+            }
+            return snapshot.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

@@ -97,7 +97,7 @@ namespace Pulsar4X.SDL2UI
             {
                 var stypeID = kvp.Key;
                 _displayedStoredResources.Add(stypeID, new Dictionary<ICargoable, (int count, int demandSupplyWeight)>());
-                var unitsInStore = kvp.Value.CurrentStoreInUnits.Get();
+                var unitsInStore = kvp.Value.CurrentStoreInUnits;
                 foreach (var item in kvp.Value.GetCargoables())
                 {
                     var ctypeID = item.Key;
@@ -254,7 +254,7 @@ namespace Pulsar4X.SDL2UI
                             }
 
                             var cargoables = _stores[stypeID].GetCargoables();
-                            var unitsInStore = _stores[stypeID].CurrentStoreInUnits.Get();
+                            var unitsInStore = _stores[stypeID].CurrentStoreInUnits;
                             foreach (var kvp in typeStore.Value)
                             {
                                 var ctype = kvp.Key;
