@@ -410,13 +410,10 @@ namespace Pulsar4X.ImGuiNetUI
                     continue;
                 if (_orderEntity.GetDataBlob<VolumeStorageDB>().TypeStores.ContainsKey(cargoType))
                 {
-                    ICollection shipOrdnances = _orderEntity.GetDataBlob<VolumeStorageDB>().TypeStores[cargoType].GetCurrentStoreInUnits();
+                    var shipOrdnances = _orderEntity.GetDataBlob<VolumeStorageDB>().TypeStores[cargoType].CurrentStoreInUnits.Get();
 
-                    lock (shipOrdnances.SyncRoot)
-                    {
-                        foreach (KeyValuePair<Guid, long> ordType in shipOrdnances)
-                            _storedOrdnance[ordType.Key] = ordType.Value;
-                    }
+                    foreach (KeyValuePair<Guid, long> ordType in shipOrdnances)
+                        _storedOrdnance[ordType.Key] = ordType.Value;
                 }
             }
 
