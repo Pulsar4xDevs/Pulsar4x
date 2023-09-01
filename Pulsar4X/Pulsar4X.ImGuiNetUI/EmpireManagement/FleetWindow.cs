@@ -126,7 +126,7 @@ namespace Pulsar4X.SDL2UI
                                     {
                                         selectedShips[ship] = !selectedShips[ship];
                                     }
-                                    DisplayShipContextMenu(selectedShips);
+                                    DisplayShipContextMenu(selectedShips, ship);
                                     ImGui.NextColumn();
                                     ImGui.Text("TODO: Commander Name");
                                     ImGui.NextColumn();
@@ -139,6 +139,12 @@ namespace Pulsar4X.SDL2UI
                         }
                         ImGui.EndChild();
                     }
+                    ImGui.EndTabItem();
+                }
+
+                if(ImGui.BeginTabItem("Standing Orders"))
+                {
+                    ImGui.Text("Standing orders");
                     ImGui.EndTabItem();
                 }
 
@@ -183,7 +189,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             selectedUnattachedShips[ship] = !selectedUnattachedShips[ship];
                         }
-                        DisplayShipContextMenu(selectedUnattachedShips, isUnattached: true);
+                        DisplayShipContextMenu(selectedUnattachedShips, ship, isUnattached: true);
                     }
                 }
 
@@ -250,7 +256,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(ImGui.BeginPopupContextItem())
             {
-                if(factionRoot.GetChildren().Count() <= 1)
+                if(factionRoot.GetChildren().Where(x => x.HasDataBlob<NavyDB>()).Count() <= 1)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                     ImGui.Text("Unable to Disband");
@@ -273,16 +279,25 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void DisplayShipContextMenu(Dictionary<Entity, bool> selected, bool isUnattached = false)
+        private void DisplayShipContextMenu(Dictionary<Entity, bool> selected, Entity ship, bool isUnattached = false)
         {
             if(ImGui.BeginPopupContextItem())
             {
-                ImGui.Text("Re-assign selected ships to:");
+                if(ImGui.MenuItem("View Ship"))
+                {
+                    _uiState.EntityClicked(ship.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                }
                 ImGui.Separator();
 
-                foreach(var fleet in factionRoot.GetChildren())
+                if(ImGui.BeginMenu("Re-assign selected ships"))
                 {
-                    DisplayShipAssignmentOption(selected, fleet, isUnattached: isUnattached);
+                    ImGui.Text("Re-assign selected ships to:");
+                    ImGui.Separator();
+                    foreach(var fleet in factionRoot.GetChildren())
+                    {
+                        DisplayShipAssignmentOption(selected, fleet, isUnattached: isUnattached);
+                    }
+                    ImGui.EndMenu();
                 }
                 ImGui.EndPopup();
             }
