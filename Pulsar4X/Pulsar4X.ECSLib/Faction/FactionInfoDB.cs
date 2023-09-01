@@ -37,11 +37,8 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, ShipDesign> ShipDesigns = new Dictionary<Guid, ShipDesign>();
 
         [JsonProperty]
-        public List<Entity> Fleets { get; internal set; } = new ();
-        
-        [JsonProperty]
         public Dictionary<Guid, OrdnanceDesign> MissileDesigns = new Dictionary<Guid, OrdnanceDesign>();
-        
+
         /// <summary>
         /// This includes non researched and not constructible designs.
         /// Does Not Include Refined Materials
@@ -53,20 +50,20 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// this shoudl only be designs we can construct.
-        /// Does Include Refined Materials.  
+        /// Does Include Refined Materials.
         /// </summary>
         public Dictionary<Guid, IConstrucableDesign> IndustryDesigns = new Dictionary<Guid, IConstrucableDesign>();
-        
-        
+
+
 
         [JsonProperty]
         /// <summary>
-        /// stores sensor contacts for the entire faction, when a contact is created it gets added here. 
+        /// stores sensor contacts for the entire faction, when a contact is created it gets added here.
         /// </summary>
         internal Dictionary<Guid, SensorContact> SensorContacts = new Dictionary<Guid, SensorContact>();
-        
+
         public Dictionary<EventType, bool> HaltsOnEvent { get; } = new Dictionary<EventType, bool>();
-        
+
         [JsonProperty]
         private Dictionary<Entity, uint> FactionAccessRoles { get; set; } = new Dictionary<Entity, uint>();
         internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
@@ -97,7 +94,7 @@ namespace Pulsar4X.ECSLib
             SetIndustryDesigns(componentDesigns, shipClasses);
             HaltsOnEvent.Add(EventType.OrdersHalt, true);
         }
-        
+
 
         public FactionInfoDB(FactionInfoDB factionDB)
         {
@@ -106,12 +103,12 @@ namespace Pulsar4X.ECSLib
             KnownFactions = new List<Entity>(factionDB.KnownFactions);
             Colonies = new List<Entity>(factionDB.Colonies);
             InternalKnownJumpPoints = new Dictionary<Guid, List<Entity>>(factionDB.KnownJumpPoints);
-            
+
             ShipDesigns = new Dictionary<Guid, ShipDesign>(factionDB.ShipDesigns);
             InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>(factionDB.ComponentDesigns);
             IndustryDesigns = new Dictionary<Guid, IConstrucableDesign>(factionDB.IndustryDesigns);
             HaltsOnEvent.Add(EventType.OrdersHalt, true);
-            
+
         }
 
         public override object Clone()
@@ -119,7 +116,7 @@ namespace Pulsar4X.ECSLib
             return new FactionInfoDB(this);
         }
 
-        void SetIndustryDesigns(            
+        void SetIndustryDesigns(
             Dictionary<Guid, ComponentDesign> componentDesigns,
             Dictionary<Guid, ShipDesign> shipClasses)
         {
@@ -169,7 +166,7 @@ namespace Pulsar4X.ECSLib
             {
                 hash = Misc.ValueHash(item.Key, hash);
                 hash = Misc.ValueHash(item.Value.ID, hash);
-            } 
+            }
             foreach (var system in InternalKnownJumpPoints)
             {
                 hash = Misc.ValueHash(system.Key, hash);

@@ -112,41 +112,41 @@ namespace Pulsar4X.ECSLib
         /// Sets the parent of this node to another node, adjusting hierarchy as needed.
         /// </summary>
         /// <param name="parent"></param>
-        public virtual void SetParent(Entity parent)
+        internal virtual void SetParent(Entity parent)
         {
             ParentDB?.RemoveChild(OwningEntity);
             Parent = parent;
             ParentDB?.AddChild(OwningEntity);
         }
 
-        public virtual void ClearParent()
+        internal virtual void ClearParent()
         {
             Parent = null;
         }
 
-        private void AddChild(Entity child)
+        internal void AddChild(Entity child)
         {
-            if (child.Guid == Guid.Empty)
-            {
-
-            }
             if (Children.Contains(child))
             {
                 return;
             }
             Children.Add(child);
-            Children.Sort((entity1, entity2) => entity1.ID.CompareTo(entity2.ID));
+            //Children.Sort((entity1, entity2) => entity1.ID.CompareTo(entity2.ID));
         }
 
-        private void RemoveChild(Entity child)
+        internal void RemoveChild(Entity child)
         {
             Children.Remove(child);
         }
 
+        public IEnumerable<Entity> GetChildren()
+        {
+            return Children.ToArray();
+        }
+
         private TreeHierarchyDB GetSameTypeDB(Entity entity)
         {
-            int typeIndex;
-            EntityManager.TryGetTypeIndex(GetType(), out typeIndex);
+            EntityManager.TryGetTypeIndex(GetType(), out var typeIndex);
 
             return !entity.IsValid ? null : entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
         }

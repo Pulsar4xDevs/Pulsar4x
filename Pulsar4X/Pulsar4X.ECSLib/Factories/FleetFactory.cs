@@ -12,8 +12,11 @@ namespace Pulsar4X.ECSLib
             var nameDB = new NameDB(name, factionID, name);
             dataBlobs.Add(nameDB);
 
-            var fleetDB = new FleetDB();
+            var fleetDB = new NavyDB();
             dataBlobs.Add(fleetDB);
+
+            var orderableDB = new OrderableDB();
+            dataBlobs.Add(orderableDB);
 
             return Entity.Create(manager, factionID, dataBlobs);
         }
