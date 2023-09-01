@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 
@@ -33,12 +32,13 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     ImGui.Separator();
 
+                    var cargoables = storageType.GetCargoables();
                     // Sort the display by the cargoables name
-                    var sortedUnitsByCargoablesName = storageType.CurrentStoreInUnits.OrderBy(e => storageType.Cargoables[e.Key].Name);
+                    var sortedUnitsByCargoablesName = storageType.GetCurrentStoreInUnits().OrderBy(e => cargoables[e.Key].Name);
 
                     foreach(var (id, value) in sortedUnitsByCargoablesName)
                     {
-                        ICargoable cargoType = storageType.Cargoables[id];
+                        ICargoable cargoType = cargoables[id];
                         var volumeStored = storage.GetVolumeStored(cargoType);
                         var volumePerItem = cargoType.VolumePerUnit;
                         var massStored = storage.GetMassStored(cargoType);

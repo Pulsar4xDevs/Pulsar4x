@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using NUnit.Framework.Constraints;
 using Pulsar4X.ECSLib;
 namespace Pulsar4X.SDL2UI
 {
@@ -58,13 +57,15 @@ namespace Pulsar4X.SDL2UI
         {
             var width = ImGui.GetWindowWidth() * 0.5f;
 
-            ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(240, 200), true, ImGuiWindowFlags.AlwaysAutoResize);
+            ImGui.BeginChild(_entityState.Name, new Vector2(240, 200), true, ImGuiWindowFlags.AlwaysAutoResize);
             foreach (var typeStore in _stores)
             {
                 CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
                 var freeVolume = _volStorageDB.GetFreeVolume(typeStore.Key);
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
+                var cargoables = typeStore.Value.GetCargoables();
+                var unitsInStore = typeStore.Value.GetCurrentStoreInUnits();
 
 
                 ImGui.PushID(_entityState.Entity.Guid.ToString());//this helps the ui diferentiate between the left and right side
@@ -82,14 +83,14 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     ImGui.Text("Volume");
                     ImGui.Separator();
-                    foreach (var cargoType in typeStore.Value.CurrentStoreInUnits)
+                    foreach (var cargoType in unitsInStore)
                     {
-                        ICargoable ctype = typeStore.Value.Cargoables[cargoType.Key];
+                        ICargoable ctype = cargoables[cargoType.Key];
                         var cname = ctype.Name;
                         var volumeStored = cargoType.Value;
                         var volumePerItem = ctype.VolumePerUnit;
                         var massStored = cargoType.Value * ctype.MassPerUnit;
-                        var itemsStored = typeStore.Value.CurrentStoreInUnits[ctype.ID];
+                        var itemsStored = unitsInStore[ctype.ID];
                         if (ImGui.Selectable(cname))
                         {
                         }
@@ -107,7 +108,6 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Columns(1);
                 }
             }
-
 
             ImGui.EndChild();
         }
@@ -282,7 +282,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (_stores.ContainsKey(cargoItem.CargoTypeID))
             {
-                return _stores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID);
+                return _stores[cargoItem.CargoTypeID].HasCargoInStore(cargoItem.ID);
             }
             return false;
         }
@@ -290,7 +290,7 @@ namespace Pulsar4X.SDL2UI
         public void Display()
         {
 
-            ImGui.BeginChild(_entityState.Name, new System.Numerics.Vector2(260, 200), true);
+            ImGui.BeginChild(_entityState.Name, new Vector2(260, 200), true);
             ImGui.Text(_entityState.Name);
             ImGui.Text("Transfer Rate: " + _volStorageDB.TransferRateInKgHr);
             ImGui.Text("At DeltaV < " + Stringify.Velocity(_volStorageDB.TransferRangeDv_mps));
@@ -318,10 +318,10 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
                     ImGui.Separator();
 
-
-                    foreach (var cargoItemKvp in typeStore.Value.CurrentStoreInUnits.ToArray())
+                    var cargoables = _stores[typeStore.Key].GetCargoables();
+                    foreach (var cargoItemKvp in typeStore.Value.GetCurrentStoreInUnits())
                     {
-                        ICargoable cargoItem = _stores[typeStore.Key].Cargoables[cargoItemKvp.Key];
+                        ICargoable cargoItem = cargoables[cargoItemKvp.Key];
 
                         var cname = cargoItem.Name;
                         var unitsStored = Math.Max(0, cargoItemKvp.Value);
