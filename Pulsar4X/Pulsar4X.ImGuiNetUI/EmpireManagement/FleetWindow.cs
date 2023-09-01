@@ -183,7 +183,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             selectedUnattachedShips[ship] = !selectedUnattachedShips[ship];
                         }
-                        DisplayShipContextMenu(selectedUnattachedShips);
+                        DisplayShipContextMenu(selectedUnattachedShips, isUnattached: true);
                     }
                 }
 
@@ -273,7 +273,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void DisplayShipContextMenu(Dictionary<Entity, bool> selected)
+        private void DisplayShipContextMenu(Dictionary<Entity, bool> selected, bool isUnattached = false)
         {
             if(ImGui.BeginPopupContextItem())
             {
@@ -282,13 +282,13 @@ namespace Pulsar4X.SDL2UI
 
                 foreach(var fleet in factionRoot.GetChildren())
                 {
-                    DisplayShipAssignmentOption(selected, fleet);
+                    DisplayShipAssignmentOption(selected, fleet, isUnattached: isUnattached);
                 }
                 ImGui.EndPopup();
             }
         }
 
-        private void DisplayShipAssignmentOption(Dictionary<Entity, bool> selected, Entity fleet, int depth = 0)
+        private void DisplayShipAssignmentOption(Dictionary<Entity, bool> selected, Entity fleet, int depth = 0, bool isUnattached = false)
         {
             if(!fleet.HasDataBlob<NavyDB>()) return;
 
@@ -298,7 +298,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SameLine();
             }
 
-            if(fleet == selectedFleet)
+            if(fleet == selectedFleet && !isUnattached)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                 ImGui.Text(Name(fleet));
@@ -320,13 +320,15 @@ namespace Pulsar4X.SDL2UI
                         var assignOrder = FleetOrder.AssignShip(factionID, fleet, ship);
                         StaticRefLib.OrderHandler.HandleOrder(assignOrder);
                     }
+                    // Clean up the selections
+                    selected.Clear();
                 }
                 ImGui.PopID();
             }
 
             foreach(var child in fleet.GetDataBlob<NavyDB>().GetChildren())
             {
-                DisplayShipAssignmentOption(selected, child, depth + 1);
+                DisplayShipAssignmentOption(selected, child, depth + 1, isUnattached);
             }
         }
 
