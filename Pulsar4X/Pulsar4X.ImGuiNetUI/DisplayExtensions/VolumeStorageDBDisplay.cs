@@ -34,7 +34,7 @@ namespace Pulsar4X.SDL2UI
 
                     var cargoables = storageType.GetCargoables();
                     // Sort the display by the cargoables name
-                    var sortedUnitsByCargoablesName = storageType.GetCurrentStoreInUnits().OrderBy(e => cargoables[e.Key].Name);
+                    var sortedUnitsByCargoablesName = storageType.CurrentStoreInUnits.OrderBy(e => cargoables[e.Key].Name);
 
                     foreach(var (id, value) in sortedUnitsByCargoablesName)
                     {
