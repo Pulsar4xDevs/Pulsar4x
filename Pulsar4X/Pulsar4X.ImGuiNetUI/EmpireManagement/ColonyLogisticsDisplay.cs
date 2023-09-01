@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
                 _allResources.Add(item.Value);
             }
             _allResourceNames = allResourceNames.ToArray();
-            
+
             SetEntity(entity);
         }
         string _demandHint = "";
@@ -97,15 +97,16 @@ namespace Pulsar4X.SDL2UI
             {
                 var stypeID = kvp.Key;
                 _displayedStoredResources.Add(stypeID, new Dictionary<ICargoable, (int count, int demandSupplyWeight)>());
-                foreach (var item in kvp.Value.Cargoables)
+                var unitsInStore = kvp.Value.GetCurrentStoreInUnits();
+                foreach (var item in kvp.Value.GetCargoables())
                 {
                     var ctypeID = item.Key;
                     var ctype = item.Value;
-                    var numUnits = kvp.Value.CurrentStoreInUnits[ctypeID];
+                    var numUnits = unitsInStore[ctypeID];
                     _displayedStoredResources[stypeID].Add(ctype, ((int)numUnits, 1));
                 }
             }
-            
+
             for (int i = 0; i < _allResources.Count; i++)
             {
                 var ctypeID = _allResourceID[i];
@@ -252,6 +253,8 @@ namespace Pulsar4X.SDL2UI
                                 }
                             }
 
+                            var cargoables = _stores[stypeID].GetCargoables();
+                            var unitsInStore = _stores[stypeID].GetCurrentStoreInUnits();
                             foreach (var kvp in typeStore.Value)
                             {
                                 var ctype = kvp.Key;
@@ -261,8 +264,8 @@ namespace Pulsar4X.SDL2UI
 
                                 var cname = ctype.Name;
                                 var itemsStored = 0;
-                                if (_stores[stypeID].Cargoables.ContainsKey(ctype.ID))
-                                    itemsStored = (int)_stores[stypeID].CurrentStoreInUnits[ctype.ID];
+                                if (cargoables.ContainsKey(ctype.ID))
+                                    itemsStored = (int)unitsInStore[ctype.ID];
                                 var volumePerItem = ctype.VolumePerUnit;
 
                                 ImGui.TableNextColumn();
@@ -374,7 +377,7 @@ namespace Pulsar4X.SDL2UI
                         var ctype = kvp.Key;
                         var cname = ctype.Name;
                         var itemsStored = 0;
-                        if(_stores[stypeID].Cargoables.ContainsKey(ctype.ID)) 
+                        if(_stores[stypeID].Cargoables.ContainsKey(ctype.ID))
                             itemsStored = (int)_stores[stypeID].CurrentStoreInUnits[ctype.ID];
                         var volumePerItem = ctype.VolumePerUnit;
                         ImGui.Text(cname);
@@ -386,7 +389,7 @@ namespace Pulsar4X.SDL2UI
                             if(!_changes.ContainsKey(ctype))
                                 _changes.Add(ctype, (1, 1));
                             else
-                            { 
+                            {
                                 _changes[ctype] = (_changes[ctype].count + 1, 1);
                             }
                         }
@@ -396,7 +399,7 @@ namespace Pulsar4X.SDL2UI
                             if(!_changes.ContainsKey(ctype))
                                 _changes.Add(ctype, (-1, 1));
                             else
-                            { 
+                            {
                                 _changes[ctype] = (_changes[ctype].count - 1, 1);
                             }
                         }
@@ -406,7 +409,7 @@ namespace Pulsar4X.SDL2UI
                         if(_logisticsDB.ListedItems.ContainsKey(ctype))
                         {
                             int total = _logisticsDB.ListedItems[ctype].count;
-                            
+
                             if(_changes.ContainsKey(ctype))
                             {
                                 total += _changes[ctype].count;
