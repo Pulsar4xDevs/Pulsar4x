@@ -164,9 +164,18 @@ namespace Pulsar4X.ECSLib.Industry
 
     }
 
+    public enum IndustryJobStatus
+    {
+        Queued,
+        MissingResources,
+        Processing,
+        Completed,
+    }
+
     public class IndustryJob : JobBase
     {
         internal Guid TypeID;
+        public IndustryJobStatus Status { get; internal set; } = IndustryJobStatus.Queued;
 
         public IndustryJob(FactionInfoDB factionInfo, Guid itemID)
         {

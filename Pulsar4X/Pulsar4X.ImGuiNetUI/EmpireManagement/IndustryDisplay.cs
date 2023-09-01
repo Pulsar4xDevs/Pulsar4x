@@ -228,7 +228,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 ImGui.TableSetupColumn("Job", ImGuiTableColumnFlags.None, 1f);
                                 ImGui.TableSetupColumn("Batch", ImGuiTableColumnFlags.None, 0.5f);
-                                ImGui.TableSetupColumn("Progress", ImGuiTableColumnFlags.None, 1f);
+                                ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 1f);
                                 ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.None, 1f);
                                 ImGui.TableHeadersRow();
                                 var progsize = new Vector2(128, ImGui.GetTextLineHeight());
@@ -239,7 +239,7 @@ namespace Pulsar4X.SDL2UI
                                     string jobname = line.Jobs[ji].Name;
 
                                     //bool selected = _selectedExistingIndex ==  ji && id == _selectedProdLine;
-                                    //float percent = 1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost;
+                                    float percent = 1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost;
 
                                     ImGui.TableNextColumn();
                                     ImGui.Text(jobname);
@@ -254,11 +254,20 @@ namespace Pulsar4X.SDL2UI
                                     }
 
                                     ImGui.TableNextColumn();
-                                    var anyResourcesNeeded = line.Jobs[ji].ResourcesRequiredRemaining.Values.Sum() > 0;
-                                    var color = anyResourcesNeeded ? Styles.BadColor : Styles.GoodColor;
+                                    var color = batchJob.Status == IndustryJobStatus.MissingResources ? Styles.BadColor : Styles.GoodColor;
 
                                     ImGui.PushStyleColor(ImGuiCol.Text, color);
-                                    ImGui.Text("IP " + (batchJob.ProductionPointsCost - batchJob.ProductionPointsLeft) + "/" + batchJob.ProductionPointsCost);
+                                    switch(batchJob.Status)
+                                    {
+                                        case IndustryJobStatus.Processing:
+                                            string status = "Processing (" + percent.ToString("0.#") + "%%)";
+                                            ImGui.Text(status);
+                                            break;
+                                        default:
+                                            ImGui.Text(batchJob.Status.ToString());
+                                            break;
+                                    }
+                                    //ImGui.Text("IP " + (batchJob.ProductionPointsCost - batchJob.ProductionPointsLeft) + "/" + batchJob.ProductionPointsCost);
                                     ImGui.PopStyleColor();
 
                                     if(ImGui.IsItemHovered())
@@ -272,6 +281,10 @@ namespace Pulsar4X.SDL2UI
                                             ImGui.TableSetupColumn("Resource Required");
                                             ImGui.TableSetupColumn("Quantity Needed");
                                             ImGui.TableHeadersRow();
+                                            ImGui.TableNextColumn();
+                                            ImGui.Text("Industry Points");
+                                            ImGui.TableNextColumn();
+                                            ImGui.Text(batchJob.ProductionPointsLeft.ToString());
 
                                             foreach(var (rId, amountRemaining) in line.Jobs[ji].ResourcesRequiredRemaining)
                                             {

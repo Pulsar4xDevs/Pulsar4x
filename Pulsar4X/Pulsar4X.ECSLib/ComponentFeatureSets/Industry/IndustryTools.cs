@@ -117,11 +117,19 @@ namespace Pulsar4X.ECSLib.Industry
                     if (resourceSum == 0)
                         throw new Exception("resources can't cost 0");
                     float pointPerResource = (float)designInfo.IndustryPointCosts / resourceSum;
+                    float startingPointsLeft = batchJob.ProductionPointsLeft;
+                    float startingPointsToUse = pointsToUse;
+
+                    if(batchJob.Status != IndustryJobStatus.Completed)
+                    {
+                        batchJob.Status = IndustryJobStatus.Queued;
+                    }
 
                     while (
                         batchJob.NumberCompleted < batchJob.NumberOrdered &&
                         pointsToUse > 0)
                     {
+                        batchJob.Status = IndustryJobStatus.Processing;
                         //gather availible resorces for this job.
                         //right now we take all the resources we can, for an individual item in the batch.
                         //even if we're taking more than we can use in this turn, we're using/storing it.
@@ -145,8 +153,16 @@ namespace Pulsar4X.ECSLib.Industry
                         batchJob.ProductionPointsLeft -= (int)Math.Floor(pointsToUse);
                         industryPointsRemaining[designInfo.IndustryTypeID] -= (int)Math.Floor(pointsToUse);
 
-                        if (batchJob.ProductionPointsLeft == 0)
+                        if(startingPointsLeft == batchJob.ProductionPointsLeft
+                            && batchJob.ProductionPointsCost > startingPointsToUse)
                         {
+                            // Didn't make any progress mark as missing resources
+                            batchJob.Status = IndustryJobStatus.MissingResources;
+                        }
+
+                        if (batchJob.ProductionPointsLeft == 0 && unusableResourceSum == 0)
+                        {
+                            batchJob.Status = IndustryJobStatus.Completed;
                             designInfo.OnConstructionComplete(industryEntity, stockpile, prodLineID, batchJob, designInfo);
                         }
                     }
@@ -199,7 +215,7 @@ namespace Pulsar4X.ECSLib.Industry
             {
                 throw new Exception("Unable to find IndustryAbilityDB");
             }
-            
+
             var resReq = job.ResourcesRequiredRemaining;
             foreach (var kvp in resReq)
             {
@@ -226,11 +242,11 @@ namespace Pulsar4X.ECSLib.Industry
                         IndustryJob newjob = new IndustryJob(des);
                         newjob.InitialiseJob((ushort)numReq, false);
                         SetJobToFastest(industryDB, newjob);
-                        AutoAddSubJobs(industryEntity, newjob); //recursivly add jobs. 
+                        AutoAddSubJobs(industryEntity, newjob); //recursivly add jobs.
                     }
                 }
             }
-            
+
 
         }
         internal static void SetJobToFastest(IndustryAbilityDB industrydb, IndustryJob job)
