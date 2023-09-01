@@ -188,6 +188,9 @@ namespace Pulsar4X.SDL2UI
                             case GuiHint.GuiOrdnanceSelectionList:
                                 GuiHintOrdnanceSelection(attribute, uiState);
                                 break;
+                            case GuiHint.GuiTextSelectionFormula:
+                                GuiHintTextSelectionFormula(attribute);
+                                break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
@@ -603,18 +606,16 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.NewLine();
         }
-
+        
         private void GuiHintTextSelectionFormula(ComponentDesignAttribute attribute)
         {
-            
-            Dictionary<string, ChainedExpression> dict = new Dictionary<string, ChainedExpression>();
-
-            _listNames = new string[dict.Count];
+            _listNames = new string[attribute.GuidDictionary.Count];
             
             int i = 0;
             foreach (var kvp in attribute.GuidDictionary)
             {
                 _listNames[i] = (string)kvp.Key;
+                i++;
             }
             
             if (compactmod)
