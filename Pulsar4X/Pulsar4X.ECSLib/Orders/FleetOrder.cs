@@ -108,18 +108,42 @@ namespace Pulsar4X.ECSLib
             {
                 case FleetOrderType.Create:
                     var fleet = FleetFactory.Create(_manager, RequestingFactionGuid, _requestedName);
-                    _factionEntity.GetDataBlob<NavyDB>().AddChild(fleet);
+                    fleet.GetDataBlob<NavyDB>().SetParent(_factionEntity);
                     break;
                 case FleetOrderType.Disband:
+                    var navyDB = _entityCommanding.GetDataBlob<NavyDB>();
+
+                    // Handle the children of the disbanding fleet
+                    // Sub-fleets:
+                    //  - Should assign to the parent of the disbanding fleet
+                    // Ships:
+                    //  - Should assign un-attached to the root
+                    if(navyDB.Children.Count > 0)
+                    {
+                        foreach(var child in navyDB.GetChildren())
+                        {
+                            // Fleet
+                            if(child.HasDataBlob<NavyDB>())
+                            {
+                                var childDB = child.GetDataBlob<NavyDB>();
+                                childDB.SetParent(navyDB.Parent);
+                            }
+                            // Ship
+                            else
+                            {
+                                factionRoot.AddChild(child);
+                            }
+                        }
+                    }
+
                     if(factionRoot.Children.Contains(_entityCommanding))
                     {
                         factionRoot.RemoveChild(_entityCommanding);
                     }
                     else
                     {
-                        var fleetInfo = _entityCommanding.GetDataBlob<NavyDB>();
-                        fleetInfo.Children.Clear();
-                        fleetInfo.ParentDB.RemoveChild(_entityCommanding);
+                        navyDB.Children.Clear();
+                        navyDB.ParentDB.RemoveChild(_entityCommanding);
                     }
                     break;
                 case FleetOrderType.ChangeParent:

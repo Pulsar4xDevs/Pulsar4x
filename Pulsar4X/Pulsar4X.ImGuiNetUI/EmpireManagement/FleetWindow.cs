@@ -15,6 +15,7 @@ namespace Pulsar4X.SDL2UI
         private Entity selectedFleet = null;
         int nameCounter = 1;
         private Dictionary<Entity, bool> selectedShips = new ();
+        private Dictionary<Entity, bool> selectedUnattachedShips = new ();
 
         private FleetWindow()
         {
@@ -113,7 +114,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.Columns(2, "assigned-ships-list", true);
                                 foreach(var ship in selectedFleet.GetDataBlob<NavyDB>().GetChildren())
                                 {
-                                    // Don't display other fleets
+                                    // Only display ships
                                     if(ship.HasDataBlob<NavyDB>()) continue;
 
                                     if(!selectedShips.ContainsKey(ship))
@@ -125,7 +126,7 @@ namespace Pulsar4X.SDL2UI
                                     {
                                         selectedShips[ship] = !selectedShips[ship];
                                     }
-                                    DisplayShipContextMenu();
+                                    DisplayShipContextMenu(selectedShips);
                                     ImGui.NextColumn();
                                     ImGui.Text("TODO: Commander Name");
                                     ImGui.NextColumn();
@@ -162,8 +163,29 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 var sizeLeft = ImGui.GetContentRegionAvail();
-                ImGui.InvisibleButton("invis-droptarget", sizeLeft);
+                ImGui.InvisibleButton("invis-droptarget", new Vector2(sizeLeft.X, 32f));
                 DisplayEmptyDropTarget();
+
+                if(factionRoot.GetChildren().Where(x => !x.HasDataBlob<NavyDB>()).Count() > 0)
+                {
+                    DisplayHelpers.Header("Unattached Ships");
+
+                    foreach(var ship in factionRoot.GetChildren())
+                    {
+                        if(ship.HasDataBlob<NavyDB>()) continue;
+
+                        if(!selectedUnattachedShips.ContainsKey(ship))
+                        {
+                            selectedUnattachedShips.Add(ship, false);
+                        }
+
+                        if(ImGui.Selectable(Name(ship), selectedUnattachedShips[ship]))
+                        {
+                            selectedUnattachedShips[ship] = !selectedUnattachedShips[ship];
+                        }
+                        DisplayShipContextMenu(selectedUnattachedShips);
+                    }
+                }
 
                 ImGui.EndChild();
             }
@@ -251,7 +273,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void DisplayShipContextMenu()
+        private void DisplayShipContextMenu(Dictionary<Entity, bool> selected)
         {
             if(ImGui.BeginPopupContextItem())
             {
@@ -260,13 +282,13 @@ namespace Pulsar4X.SDL2UI
 
                 foreach(var fleet in factionRoot.GetChildren())
                 {
-                    DisplayShipAssignmentOption(fleet);
+                    DisplayShipAssignmentOption(selected, fleet);
                 }
                 ImGui.EndPopup();
             }
         }
 
-        private void DisplayShipAssignmentOption(Entity fleet, int depth = 0)
+        private void DisplayShipAssignmentOption(Dictionary<Entity, bool> selected, Entity fleet, int depth = 0)
         {
             if(!fleet.HasDataBlob<NavyDB>()) return;
 
@@ -287,11 +309,12 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushID(fleet.Guid.ToString());
                 if(ImGui.MenuItem(Name(fleet)))
                 {
-                    foreach(var (ship, selected) in selectedShips)
+                    foreach(var (ship, isSelected) in selected)
                     {
-                        if(!selected) continue;
+                        if(!isSelected) continue;
 
-                        var unassignOrder = FleetOrder.UnassignShip(factionID, selectedFleet, ship);
+                        var unassignFrom = factionRoot.Children.Contains(ship) ? factionRoot.OwningEntity : selectedFleet;
+                        var unassignOrder = FleetOrder.UnassignShip(factionID, unassignFrom, ship);
                         StaticRefLib.OrderHandler.HandleOrder(unassignOrder);
 
                         var assignOrder = FleetOrder.AssignShip(factionID, fleet, ship);
@@ -303,7 +326,7 @@ namespace Pulsar4X.SDL2UI
 
             foreach(var child in fleet.GetDataBlob<NavyDB>().GetChildren())
             {
-                DisplayShipAssignmentOption(child, depth + 1);
+                DisplayShipAssignmentOption(selected, child, depth + 1);
             }
         }
 
