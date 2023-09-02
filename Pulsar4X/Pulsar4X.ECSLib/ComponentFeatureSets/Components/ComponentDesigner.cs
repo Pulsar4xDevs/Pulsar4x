@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib
 
         public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         {
-            var colonyConstruction = industryEntity.GetDataBlob<IndustryAbilityDB>();
+            var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             batchJob.NumberCompleted++;
             batchJob.ResourcesRequiredRemaining = new Dictionary<Guid, long>(designInfo.ResourceCosts);
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
@@ -150,11 +150,11 @@ namespace Pulsar4X.ECSLib
 
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
             {
-                colonyConstruction.ProductionLines[productionLine].Jobs.Remove(batchJob);
+                industryDB.ProductionLines[productionLine].Jobs.Remove(batchJob);
                 if (batchJob.Auto)
                 {
                     batchJob.NumberCompleted = 0;
-                    colonyConstruction.ProductionLines[productionLine].Jobs.Add(batchJob);
+                    industryDB.ProductionLines[productionLine].Jobs.Add(batchJob);
                 }
             }
         }
