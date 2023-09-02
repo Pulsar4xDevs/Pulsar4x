@@ -383,6 +383,53 @@
             ]
           }
         }
+      },
+      {
+        "Key":"88175550-6323-4260-9846-a3f74998f343",
+        "Value": {
+          "Name": "Silicon",
+          "Description": "A naturally-occurring mineral in large deposits.",
+          "ID": "88175550-6323-4260-9846-a3f74998f343",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.000429185,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.2
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.3
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.3
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.2
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.6
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 1.0
+              }
+            ]
+          }
+        }
       }
     ]
   }

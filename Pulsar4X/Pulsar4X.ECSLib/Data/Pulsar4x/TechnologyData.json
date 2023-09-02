@@ -39,7 +39,7 @@
           "Description": "",
           "ID": "1167a255-b004-4a68-91af-1192169b5a37",
           "MaxLevel": 10,
-          "DataFormula": "[Level] * 5",
+          "DataFormula": "1 * [Level]",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []

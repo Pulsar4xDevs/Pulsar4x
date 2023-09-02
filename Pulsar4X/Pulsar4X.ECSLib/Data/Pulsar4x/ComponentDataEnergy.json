@@ -91,6 +91,137 @@
           ]
         }
       },
+      {
+        "Key": "e906013f-ca1e-45cc-bfa4-9662afdea60c",
+        "Value": {
+          "Name": "RTG",
+          "DescriptionFormula": "'A non refuelable reactor, Generates power for a ship'",
+          "ID": "97cf75a1-5ca3-4037-8832-4d81a89f97fa",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "Ability('Mass')",
+          "HTKFormula": "Max(1, [Mass] / 100)",
+          "CrewReqFormula": "1",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "d554fb70-bd28-459c-a1b3-d7b2019f685a",
+                "Value": "Ability('Structural Material')"
+              },
+              {
+                "Key": "978f67d9-62fb-4b3a-a12a-8626ac3cb91b",
+                "Value": "Ability('Fuel')"
+              },
+              {
+                "Key": "88175550-6323-4260-9846-a3f74998f343",
+                "Value": "Ability('Thermoelectric Materials')"
+              },
+              {
+                "Key": "66f15e2f-7a24-4ff6-9b68-03fcd93686f9",
+                "Value": "Ability('Electrics and wiring')"
+              }
+            ]
+          },
+          "ResearchCostFormula": "[Mass] * 0.5",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo, Fighter",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Mass",
+              "Units": "kg",
+              "DescriptionFormula": "'Mass of the reactor'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "25000",
+              "MinFormula": "25",
+              "StepFormula": "1",
+              "AttributeFormula": "1000"
+            },
+            {
+              "Name": "Power Output",
+              "Units": "Kw",
+              "DescriptionFormula": "'Max output of this unit when new, output will degrade over lifetime of the unit'",
+              "GuiHint": "GuiTextDisplay",
+              "AttributeFormula": "Ability('Fuel') * Ability('Efficiency') * Ability('Fuel Consumption')"
+            },
+            {
+              "Name": "Fuel Consumption",
+              "Units": "kg/s",
+              "DescriptionFormula": "'Fuel Consumption kg per second at Max Output'",
+              "GuiHint": "GuiTextDisplay",
+              "AttributeFormula": "0.001 / Ability('Operational Lifetime')"
+            },
+            {
+              "Name": "Operational Lifetime",
+              "Units": "years",
+              "DescriptionFormula": "'Output vs lifetime'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "25",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AttributeFormula": "5"
+            },
+            {
+              "Name": "Efficiency",
+              "Units": "percent",
+              "DescriptionFormula": "'The efficiency of this RTG to turn heat into electrical power, increased by research'",
+              "GuiHint": "GuiTextDisplay",
+              "AttributeFormula": "TechData('1167a255-b004-4a68-91af-1192169b5a37') + 10"
+            },
+            {
+              "Name": "Watt per kg",
+              "Units": "Watt",
+              "DescriptionFormula": "''",
+              "GuiHint": "GuiTextDisplay",
+              "AttributeFormula": "(1000 * Ability('Power Output')) / [Mass]"
+            },
+            {
+              "Name": "Structural Material",
+              "Units": "kg",
+              "DescriptionFormula": "'Structural material amount'",
+              "GuiHint": "None",
+              "AttributeFormula": "[Mass] * 0.3"
+            },
+            {
+              "Name": "Fuel",
+              "Units": "kg",
+              "DescriptionFormula": "'Fuel Amount'",
+              "GuiHint": "None",
+              "AttributeFormula": "[Mass] * 0.5"
+            },
+            {
+              "Name": "Thermoelectric Materials",
+              "Units": "kg",
+              "DescriptionFormula": "'Amount of Material used for energy conversion'",
+              "GuiHint": "None",
+              "AttributeFormula": "[Mass] * 0.1"
+            },
+            {
+              "Name": "Electrics and wiring",
+              "Units": "kg",
+              "DescriptionFormula": "'Structural material amount'",
+              "GuiHint": "None",
+              "AttributeFormula": "[Mass] * 0.1"
+            },
+            {
+              "Name": "DB",
+              "DescriptionFormula": "''",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(GuidString('978f67d9-62fb-4b3a-a12a-8626ac3cb91b'), Ability('Fuel Consumption'), GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Power Output'), Ability('Operational Lifetime'))",
+              "AttributeType": "Pulsar4X.ECSLib.EnergyGenerationAtb"
+            },
+            {
+              "Name": "Sensor Signature",
+              "Units": "unknown",
+              "DescriptionFormula": "''",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(1700, Ability('Power Output') * 0.1 * [Mass])",
+              "AttributeType": "Pulsar4X.ECSLib.SensorSignatureAtbDB"
+            }
+          ]
+        }
+      },
 
       {
         "Key": "1de23a8b-d44b-4e0f-bacd-5463a8eb939d",
