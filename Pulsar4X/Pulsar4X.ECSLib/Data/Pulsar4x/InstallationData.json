@@ -724,7 +724,7 @@
           },
           "ResearchCostFormula": "0",
           "CreditCostFormula": "[Mass]",
-          "BuildPointCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass] * 0.1",
           "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
