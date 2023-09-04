@@ -2,6 +2,9 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/owpp4y7ruyn0skm1/branch/Master?svg=true)](https://ci.appveyor.com/project/intercross21/pulsar4x/branch/Master)
 [![Join the chat at https://gitter.im/Pulsar4x/Lobby](https://badges.gitter.im/Pulsar4x/Lobby.svg)](https://gitter.im/Pulsar4x/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+### Special Thanks to:
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" width="200" alt="JetBrains Logo (Main) logo.">
+
 # Welcome to Pulsar4x.
   
 A fan-made project to recreate a more user-friendly and better optimized version of Aurora, a 4x space sim created by Steve Walmsley. Pulsar4x is developed in C#. The long term goal of the project was originally to reproduce a feature-complete clone of Aurora. However, due to Steve Walmsley picking up development on his own C# version of Aurora, this has started to vear off on its own path, and has become a flexible, moddable aurora-like engine.
