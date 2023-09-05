@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
                 new FactionAbilitiesDB(),
                 new FactionTechDB(game.StaticData.Techs.Values.ToList()),
                 new FactionOwnerDB(),
-                new NavyDB(),
+                new FleetDB(),
                 new OrderableDB(),
             };
             var factionEntity = new Entity(game.GlobalManager, blobs);

@@ -115,15 +115,15 @@ namespace Pulsar4X.ECSLib
 
         internal override void ActionCommand(DateTime atDateTime)
         {
-            var factionRoot = _factionEntity.GetDataBlob<NavyDB>();
+            var factionRoot = _factionEntity.GetDataBlob<FleetDB>();
             switch(OrderType)
             {
                 case FleetOrderType.Create:
                     var fleet = FleetFactory.Create(_manager, RequestingFactionGuid, _requestedName);
-                    fleet.GetDataBlob<NavyDB>().SetParent(_factionEntity);
+                    fleet.GetDataBlob<FleetDB>().SetParent(_factionEntity);
                     break;
                 case FleetOrderType.Disband:
-                    var navyDB = _entityCommanding.GetDataBlob<NavyDB>();
+                    var navyDB = _entityCommanding.GetDataBlob<FleetDB>();
 
                     // Handle the children of the disbanding fleet
                     // Sub-fleets:
@@ -135,9 +135,9 @@ namespace Pulsar4X.ECSLib
                         foreach(var child in navyDB.GetChildren())
                         {
                             // Fleet
-                            if(child.HasDataBlob<NavyDB>())
+                            if(child.HasDataBlob<FleetDB>())
                             {
-                                var childDB = child.GetDataBlob<NavyDB>();
+                                var childDB = child.GetDataBlob<FleetDB>();
                                 childDB.SetParent(navyDB.Parent);
                             }
                             // Ship
@@ -160,7 +160,7 @@ namespace Pulsar4X.ECSLib
                     break;
                 case FleetOrderType.ChangeParent:
                     // Remove the entity from the parent tree
-                    var sourceFleetInfo = _entityCommanding.GetDataBlob<NavyDB>();
+                    var sourceFleetInfo = _entityCommanding.GetDataBlob<FleetDB>();
 
                     // Check if nested
                     if(sourceFleetInfo.Root != _entityCommanding)
@@ -178,10 +178,10 @@ namespace Pulsar4X.ECSLib
                     sourceFleetInfo.SetParent(_targetEntity);
                     break;
                 case FleetOrderType.AssignShip:
-                    _entityCommanding.GetDataBlob<NavyDB>().AddChild(_targetEntity);
+                    _entityCommanding.GetDataBlob<FleetDB>().AddChild(_targetEntity);
                     break;
                 case FleetOrderType.UnassignShip:
-                    navyDB = _entityCommanding.GetDataBlob<NavyDB>();
+                    navyDB = _entityCommanding.GetDataBlob<FleetDB>();
                     navyDB.RemoveChild(_targetEntity);
 
                     if(_targetEntity.Guid == navyDB.FlagShipID)
@@ -190,7 +190,7 @@ namespace Pulsar4X.ECSLib
                     }
                     break;
                 case FleetOrderType.SetFlagShip:
-                _entityCommanding.GetDataBlob<NavyDB>().FlagShipID = _targetEntity.Guid;
+                _entityCommanding.GetDataBlob<FleetDB>().FlagShipID = _targetEntity.Guid;
                     break;
             }
 

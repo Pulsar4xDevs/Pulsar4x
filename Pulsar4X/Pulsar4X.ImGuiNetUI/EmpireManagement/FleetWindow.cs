@@ -9,7 +9,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class FleetWindow : PulsarGuiWindow
     {
-        private readonly NavyDB factionRoot;
+        private readonly FleetDB factionRoot;
         private readonly Guid factionID;
         private Entity dragEntity = Entity.InvalidEntity;
         private Entity selectedFleet = null;
@@ -22,7 +22,7 @@ namespace Pulsar4X.SDL2UI
         private FleetWindow()
         {
             factionID = _uiState.Faction.Guid;
-            factionRoot = _uiState.Faction.GetDataBlob<NavyDB>();
+            factionRoot = _uiState.Faction.GetDataBlob<FleetDB>();
         }
         internal static FleetWindow GetInstance()
         {
@@ -38,7 +38,7 @@ namespace Pulsar4X.SDL2UI
             selectedFleet = fleet;
             selectedShips = new ();
 
-            var navyDB = selectedFleet.GetDataBlob<NavyDB>();
+            var navyDB = selectedFleet.GetDataBlob<FleetDB>();
             if(navyDB.FlagShipID == Guid.Empty)
             {
                 selectedFleetFlagship = null;
@@ -131,7 +131,7 @@ namespace Pulsar4X.SDL2UI
                             }
                             ImGui.NextColumn();
                             ImGui.Separator();
-                            DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<NavyDB>().GetChildren().Where(x => !x.HasDataBlob<NavyDB>()).Count().ToString());
+                            DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
                             DisplayHelpers.PrintRow("Current Orders", "TODO", separator: false);
                         }
                         ImGui.EndChild();
@@ -145,11 +145,11 @@ namespace Pulsar4X.SDL2UI
                             if(ImGui.BeginListBox("###assigned-ships", ImGui.GetContentRegionAvail()))
                             {
                                 ImGui.Columns(2, "assigned-ships-list", true);
-                                var fleet = selectedFleet.GetDataBlob<NavyDB>();
+                                var fleet = selectedFleet.GetDataBlob<FleetDB>();
                                 foreach(var ship in fleet.GetChildren())
                                 {
                                     // Only display ships
-                                    if(ship.HasDataBlob<NavyDB>()) continue;
+                                    if(ship.HasDataBlob<FleetDB>()) continue;
 
                                     if(!selectedShips.ContainsKey(ship))
                                     {
@@ -211,13 +211,13 @@ namespace Pulsar4X.SDL2UI
                 ImGui.InvisibleButton("invis-droptarget", new Vector2(sizeLeft.X, 32f));
                 DisplayEmptyDropTarget();
 
-                if(factionRoot.GetChildren().Where(x => !x.HasDataBlob<NavyDB>()).Count() > 0)
+                if(factionRoot.GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count() > 0)
                 {
                     DisplayHelpers.Header("Unattached Ships");
 
                     foreach(var ship in factionRoot.GetChildren())
                     {
-                        if(ship.HasDataBlob<NavyDB>()) continue;
+                        if(ship.HasDataBlob<FleetDB>()) continue;
 
                         if(!selectedUnattachedShips.ContainsKey(ship))
                         {
@@ -245,7 +245,7 @@ namespace Pulsar4X.SDL2UI
 
         private void DisplayFleetItem(Entity fleet)
         {
-            if(!fleet.TryGetDatablob<NavyDB>(out var fleetInfo))
+            if(!fleet.TryGetDatablob<FleetDB>(out var fleetInfo))
             {
                 return;
             }
@@ -254,7 +254,7 @@ namespace Pulsar4X.SDL2UI
             string name = Name(fleet);
             var flags = ImGuiTreeNodeFlags.DefaultOpen;
 
-            if(fleetInfo.GetChildren().Where(x => x.HasDataBlob<NavyDB>()).Count() == 0)
+            if(fleetInfo.GetChildren().Where(x => x.HasDataBlob<FleetDB>()).Count() == 0)
             {
                 flags |= ImGuiTreeNodeFlags.Leaf;
             }
@@ -295,7 +295,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(ImGui.BeginPopupContextItem())
             {
-                if(factionRoot.GetChildren().Where(x => x.HasDataBlob<NavyDB>()).Count() <= 1)
+                if(factionRoot.GetChildren().Where(x => x.HasDataBlob<FleetDB>()).Count() <= 1)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                     ImGui.Text("Unable to Disband");
@@ -350,7 +350,7 @@ namespace Pulsar4X.SDL2UI
 
         private void DisplayShipAssignmentOption(Dictionary<Entity, bool> selected, Entity ship, Entity fleet, int depth = 0, bool isUnattached = false)
         {
-            if(!fleet.HasDataBlob<NavyDB>()) return;
+            if(!fleet.HasDataBlob<FleetDB>()) return;
 
             for(int i = 0; i < depth; i++)
             {
@@ -398,7 +398,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PopID();
             }
 
-            foreach(var child in fleet.GetDataBlob<NavyDB>().GetChildren())
+            foreach(var child in fleet.GetDataBlob<FleetDB>().GetChildren())
             {
                 DisplayShipAssignmentOption(selected, ship, child, depth + 1, isUnattached);
             }

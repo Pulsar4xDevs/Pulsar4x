@@ -280,7 +280,7 @@ namespace Pulsar4X.ECSLib
 
 
             Entity defaultFleet = FleetFactory.Create(game.GlobalManager, factionEntity.Guid, "Default Fleet");
-            defaultFleet.GetDataBlob<NavyDB>().SetParent(factionEntity);
+            defaultFleet.GetDataBlob<FleetDB>().SetParent(factionEntity);
 
             // Todo: handle this in CreateShip
             ShipDesign shipDesign = DefaultShipDesign(game, factionEntity);
@@ -301,7 +301,7 @@ namespace Pulsar4X.ECSLib
             var hydrolox = NameLookup.GetMaterialSD(game, "Hydrolox");
             
 
-            var fleetDB = defaultFleet.GetDataBlob<NavyDB>();
+            var fleetDB = defaultFleet.GetDataBlob<FleetDB>();
             fleetDB.AddChild(gunShip0);
             fleetDB.AddChild(ship2);
             fleetDB.AddChild(ship3);

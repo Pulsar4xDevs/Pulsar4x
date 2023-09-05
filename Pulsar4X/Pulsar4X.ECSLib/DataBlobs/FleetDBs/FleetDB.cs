@@ -2,15 +2,15 @@ using System;
 
 namespace Pulsar4X.ECSLib
 {
-    public class NavyDB : TreeHierarchyDB
+    public class FleetDB : TreeHierarchyDB
     {
         public Guid FlagShipID { get; internal set; } = Guid.Empty;
 
-        public NavyDB() : base(null) {}
+        public FleetDB() : base(null) {}
 
         public override object Clone()
         {
-            return new NavyDB();
+            return new FleetDB();
         }
     }
 }
