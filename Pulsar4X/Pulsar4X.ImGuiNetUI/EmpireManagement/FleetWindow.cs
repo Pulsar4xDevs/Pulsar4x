@@ -326,11 +326,19 @@ namespace Pulsar4X.SDL2UI
                 {
                     _uiState.EntityClicked(ship.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                 }
+                if(ship.Guid == selectedFleetFlagship.Guid)
+                {
+                    ImGui.BeginDisabled();
+                }
                 if(ImGui.MenuItem("Promote to Flagship"))
                 {
                     var setFlagshipOrder = FleetOrder.SetFlagShip(factionID, selectedFleet, ship);
                     StaticRefLib.OrderHandler.HandleOrder(setFlagshipOrder);
                     SelectFleet(selectedFleet);
+                }
+                if(ship.Guid == selectedFleetFlagship.Guid)
+                {
+                    ImGui.EndDisabled();
                 }
                 ImGui.Separator();
 
