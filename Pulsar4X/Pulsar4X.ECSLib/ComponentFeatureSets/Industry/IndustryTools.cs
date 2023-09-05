@@ -113,6 +113,13 @@ namespace Pulsar4X.ECSLib.Industry
                     IConstrucableDesign designInfo = factionInfo.IndustryDesigns[batchJob.ItemGuid];
                     float industryPointsToUse = industryPointsRemaining[designInfo.IndustryTypeID];// * productionPercentage;
 
+                    if(batchJob.Status != IndustryJobStatus.Completed)
+                    {
+                        batchJob.Status = IndustryJobStatus.Queued;
+                    }
+
+                    if(industryPointsToUse < 1) continue;
+
                     //total number of resources requred for a single job in this batch
                     var resourceSum = batchJob.ResourcesCosts.Sum(item => item.Value);
                     //how many construction points each resourcepoint is worth.
@@ -123,16 +130,10 @@ namespace Pulsar4X.ECSLib.Industry
                     float startingPointsLeft = batchJob.ProductionPointsLeft;
                     float startingPointsToUse = industryPointsToUse;
 
-                    if(batchJob.Status != IndustryJobStatus.Completed)
-                    {
-                        batchJob.Status = IndustryJobStatus.Queued;
-                    }
-
                     while (
                         batchJob.NumberCompleted < batchJob.NumberOrdered &&
                         industryPointsToUse >= 1)
                     {
-                        batchJob.Status = IndustryJobStatus.Processing;
                         //gather availible resorces for this job.
                         //right now we take all the resources we can, for an individual item in the batch.
                         //even if we're taking more than we can use in this turn, we're using/storing it.
@@ -174,8 +175,10 @@ namespace Pulsar4X.ECSLib.Industry
                             // Didn't make any progress mark as missing resources
                             batchJob.Status = IndustryJobStatus.MissingResources;
                         }
-
-
+                        else if(pointsToUse >= 1 || totalResourcesUsed > 0)
+                        {
+                            batchJob.Status = IndustryJobStatus.Processing;
+                        }
 
                         if (batchJob.ProductionPointsLeft == 0 && totalResourceStillReq == 0)
                         {

@@ -13,6 +13,8 @@ namespace Pulsar4X.SDL2UI
         private readonly Guid factionID;
         private Entity dragEntity = Entity.InvalidEntity;
         private Entity selectedFleet = null;
+        private Entity selectedFleetFlagship = null;
+        private Entity selectedFleetSystem = null;
         int nameCounter = 1;
         private Dictionary<Entity, bool> selectedShips = new ();
         private Dictionary<Entity, bool> selectedUnattachedShips = new ();
@@ -35,6 +37,19 @@ namespace Pulsar4X.SDL2UI
         {
             selectedFleet = fleet;
             selectedShips = new ();
+
+            var navyDB = selectedFleet.GetDataBlob<NavyDB>();
+            if(navyDB.FlagShipID == Guid.Empty)
+            {
+                selectedFleetFlagship = null;
+                selectedFleetSystem = null;
+            }
+            else
+            {
+                _uiState.Game.GlobalManager.FindEntityByGuid(navyDB.FlagShipID, out selectedFleetFlagship);
+                selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB);
+                selectedFleetSystem = positionDB.Root;
+            }
         }
 
         internal override void Display()
@@ -74,30 +89,48 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Columns(2);
                             DisplayHelpers.PrintRow("Name", Name(selectedFleet));
 
+                            DisplayHelpers.PrintRow("Commander", "TODO");
+                            if(selectedFleetFlagship != null)
+                                DisplayHelpers.PrintRow("Flagship", Name(selectedFleetFlagship));
+                            else
+                                DisplayHelpers.PrintRow("Flagship", "-");
+
                             // Current system
                             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                             ImGui.Text("Current System");
                             ImGui.PopStyleColor();
                             ImGui.NextColumn();
-                            if(ImGui.SmallButton("TODO"))
+                            if(selectedFleetFlagship != null && selectedFleetSystem != null && selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB))
                             {
-                                // open the system?
-                            }
-                            ImGui.NextColumn();
-                            ImGui.Separator();
+                                if(ImGui.SmallButton(Name(selectedFleetSystem)))
+                                {
+                                    _uiState.EntityClicked(selectedFleetSystem.Guid, selectedFleetSystem.Guid, MouseButtons.Primary);
+                                }
+                                ImGui.NextColumn();
+                                ImGui.Separator();
 
-                            // Orbiting
-                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                            ImGui.Text("Orbiting");
-                            ImGui.PopStyleColor();
-                            ImGui.NextColumn();
-                            if(ImGui.SmallButton("TODO"))
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                                ImGui.Text("Orbiting");
+                                ImGui.PopStyleColor();
+                                ImGui.NextColumn();
+                                if(ImGui.SmallButton(Name(positionDB.Parent)))
+                                {
+                                    _uiState.EntityClicked(positionDB.Parent.Guid, positionDB.SystemGuid, MouseButtons.Primary);
+                                }
+                            }
+                            else
                             {
-                                // open the entity
+                                ImGui.Text("Unknown");
+                                ImGui.NextColumn();
+                                ImGui.Separator();
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                                ImGui.Text("Orbiting");
+                                ImGui.PopStyleColor();
+                                ImGui.NextColumn();
+                                ImGui.Text("Unknown");
                             }
                             ImGui.NextColumn();
                             ImGui.Separator();
-                            DisplayHelpers.PrintRow("Commander", "TODO");
                             DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<NavyDB>().GetChildren().Where(x => !x.HasDataBlob<NavyDB>()).Count().ToString());
                             DisplayHelpers.PrintRow("Current Orders", "TODO", separator: false);
                         }
@@ -112,7 +145,8 @@ namespace Pulsar4X.SDL2UI
                             if(ImGui.BeginListBox("###assigned-ships", ImGui.GetContentRegionAvail()))
                             {
                                 ImGui.Columns(2, "assigned-ships-list", true);
-                                foreach(var ship in selectedFleet.GetDataBlob<NavyDB>().GetChildren())
+                                var fleet = selectedFleet.GetDataBlob<NavyDB>();
+                                foreach(var ship in fleet.GetChildren())
                                 {
                                     // Only display ships
                                     if(ship.HasDataBlob<NavyDB>()) continue;
@@ -122,7 +156,12 @@ namespace Pulsar4X.SDL2UI
                                         selectedShips.Add(ship, false);
                                     }
 
-                                    if(ImGui.Selectable(Name(ship), selectedShips[ship], ImGuiSelectableFlags.SpanAllColumns))
+                                    string name = Name(ship);
+                                    if(fleet.FlagShipID == ship.Guid)
+                                    {
+                                        name = "(F) " + name;
+                                    }
+                                    if(ImGui.Selectable(name, selectedShips[ship], ImGuiSelectableFlags.SpanAllColumns))
                                     {
                                         selectedShips[ship] = !selectedShips[ship];
                                     }
@@ -287,6 +326,12 @@ namespace Pulsar4X.SDL2UI
                 {
                     _uiState.EntityClicked(ship.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                 }
+                if(ImGui.MenuItem("Promote to Flagship"))
+                {
+                    var setFlagshipOrder = FleetOrder.SetFlagShip(factionID, selectedFleet, ship);
+                    StaticRefLib.OrderHandler.HandleOrder(setFlagshipOrder);
+                    SelectFleet(selectedFleet);
+                }
                 ImGui.Separator();
 
                 if(ImGui.BeginMenu("Re-assign ships"))
@@ -404,6 +449,11 @@ namespace Pulsar4X.SDL2UI
         private string Name(Entity entity)
         {
             return entity.GetDataBlob<NameDB>().GetName(factionID);
+        }
+
+        private string Name(StarSystem system)
+        {
+            return system.NameDB.GetName(factionID);
         }
     }
 }
