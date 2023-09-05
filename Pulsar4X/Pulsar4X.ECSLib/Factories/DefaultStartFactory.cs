@@ -309,6 +309,7 @@ namespace Pulsar4X.ECSLib
             fleetDB.AddChild(courier);
             fleetDB.AddChild(courier2);
             fleetDB.AddChild(starship);
+            fleetDB.FlagShipID = starship.Guid;
 
             CargoTransferProcessor.AddCargoItems(colonyEntity, rp1, 10000);
             CargoTransferProcessor.AddCargoItems(colonyEntity, methalox, 10000);

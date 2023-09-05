@@ -89,6 +89,12 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Columns(2);
                             DisplayHelpers.PrintRow("Name", Name(selectedFleet));
 
+                            DisplayHelpers.PrintRow("Commander", "TODO");
+                            if(selectedFleetFlagship != null)
+                                DisplayHelpers.PrintRow("Flagship", Name(selectedFleetFlagship));
+                            else
+                                DisplayHelpers.PrintRow("Flagship", "-");
+
                             // Current system
                             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                             ImGui.Text("Current System");
@@ -125,7 +131,6 @@ namespace Pulsar4X.SDL2UI
                             }
                             ImGui.NextColumn();
                             ImGui.Separator();
-                            DisplayHelpers.PrintRow("Commander", "TODO");
                             DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<NavyDB>().GetChildren().Where(x => !x.HasDataBlob<NavyDB>()).Count().ToString());
                             DisplayHelpers.PrintRow("Current Orders", "TODO", separator: false);
                         }
