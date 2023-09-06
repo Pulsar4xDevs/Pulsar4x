@@ -9,20 +9,34 @@ namespace Pulsar4X.SDL2UI
 {
     public class FleetWindow : PulsarGuiWindow
     {
-        private readonly NavyDB factionRoot;
+        private readonly FleetDB factionRoot;
         private readonly Guid factionID;
         private Entity dragEntity = Entity.InvalidEntity;
         private Entity selectedFleet = null;
         private Entity selectedFleetFlagship = null;
         private Entity selectedFleetSystem = null;
+        private bool selectedFleetInheritOrders = false;
         int nameCounter = 1;
         private Dictionary<Entity, bool> selectedShips = new ();
         private Dictionary<Entity, bool> selectedUnattachedShips = new ();
 
+        private int orderConditionIndex = -1;
+        private string[] orderConditions = { "Fuel" };
+        private int orderComparisonIndex = 0;
+        private string[] orderComparisons;
+        private int orderValue = 0;
+
         private FleetWindow()
         {
             factionID = _uiState.Faction.Guid;
-            factionRoot = _uiState.Faction.GetDataBlob<NavyDB>();
+            factionRoot = _uiState.Faction.GetDataBlob<FleetDB>();
+
+            orderComparisons = new string[5];
+            orderComparisons[0] = ComparisonType.LessThan.ToDescription();
+            orderComparisons[1] = ComparisonType.LessThanOrEqual.ToDescription();
+            orderComparisons[2] = ComparisonType.EqualTo.ToDescription();
+            orderComparisons[3] = ComparisonType.GreaterThan.ToDescription();
+            orderComparisons[4] = ComparisonType.GreaterThanOrEqual.ToDescription();
         }
         internal static FleetWindow GetInstance()
         {
@@ -38,8 +52,9 @@ namespace Pulsar4X.SDL2UI
             selectedFleet = fleet;
             selectedShips = new ();
 
-            var navyDB = selectedFleet.GetDataBlob<NavyDB>();
-            if(navyDB.FlagShipID == Guid.Empty)
+            FleetDB navyDB = null;
+            selectedFleet?.TryGetDatablob<FleetDB>(out navyDB);
+            if(navyDB == null || navyDB.FlagShipID == Guid.Empty)
             {
                 selectedFleetFlagship = null;
                 selectedFleetSystem = null;
@@ -49,6 +64,7 @@ namespace Pulsar4X.SDL2UI
                 _uiState.Game.GlobalManager.FindEntityByGuid(navyDB.FlagShipID, out selectedFleetFlagship);
                 selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB);
                 selectedFleetSystem = positionDB.Root;
+                selectedFleetInheritOrders = navyDB.InheritOrders;
             }
         }
 
@@ -131,7 +147,7 @@ namespace Pulsar4X.SDL2UI
                             }
                             ImGui.NextColumn();
                             ImGui.Separator();
-                            DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<NavyDB>().GetChildren().Where(x => !x.HasDataBlob<NavyDB>()).Count().ToString());
+                            DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
                             DisplayHelpers.PrintRow("Current Orders", "TODO", separator: false);
                         }
                         ImGui.EndChild();
@@ -145,11 +161,11 @@ namespace Pulsar4X.SDL2UI
                             if(ImGui.BeginListBox("###assigned-ships", ImGui.GetContentRegionAvail()))
                             {
                                 ImGui.Columns(2, "assigned-ships-list", true);
-                                var fleet = selectedFleet.GetDataBlob<NavyDB>();
+                                var fleet = selectedFleet.GetDataBlob<FleetDB>();
                                 foreach(var ship in fleet.GetChildren())
                                 {
                                     // Only display ships
-                                    if(ship.HasDataBlob<NavyDB>()) continue;
+                                    if(ship.HasDataBlob<FleetDB>()) continue;
 
                                     if(!selectedShips.ContainsKey(ship))
                                     {
@@ -183,7 +199,53 @@ namespace Pulsar4X.SDL2UI
 
                 if(ImGui.BeginTabItem("Standing Orders"))
                 {
-                    ImGui.Text("Standing orders");
+                    var size = ImGui.GetContentRegionAvail();
+                    var firstChildSize = new Vector2(size.X * 0.33f, size.Y);
+                    var secondChildSize = new Vector2(size.X * 0.67f - (size.X * 0.01f), size.Y);
+                    if(ImGui.BeginChild("StandingOrders-List", firstChildSize, true))
+                    {
+                        DisplayHelpers.Header("Order List");
+                        if(selectedFleet.GetDataBlob<FleetDB>().Parent.Guid != factionID)
+                        {
+                            if(ImGui.Checkbox("Inherit Orders###fleet-inherit-orders", ref selectedFleetInheritOrders))
+                            {
+                                var order = FleetOrder.ToggleInheritOrders(factionID, selectedFleet);
+                                StaticRefLib.OrderHandler.HandleOrder(order);
+                            }
+                            if(ImGui.IsItemHovered())
+                            {
+                                ImGui.SetTooltip("If checked the fleet will inherit it's orders from the fleet above it in the command heirarchy.");
+                            }
+                        }
+                        ImGui.Text("standing orders");
+                        ImGui.EndChild();
+                    }
+                    ImGui.SameLine();
+                    if(ImGui.BeginChild("StandingOrders-edit", secondChildSize, true))
+                    {
+                        DisplayHelpers.Header("Order Condition");
+
+                        var sizeAvailable = ImGui.GetContentRegionAvail();
+                        ImGui.SetNextItemWidth(sizeAvailable.Y * 0.5f);
+                        if(ImGui.Combo("###orderCondition", ref orderConditionIndex, orderConditions, orderConditions.Length))
+                        {
+                        }
+                        ImGui.SameLine();
+                        ImGui.SetNextItemWidth(sizeAvailable.Y * 0.1f);
+                        if(ImGui.Combo("###orderComparison", ref orderComparisonIndex, orderComparisons, orderComparisons.Length))
+                        {
+                        }
+                        ImGui.SameLine();
+                        ImGui.SetNextItemWidth(sizeAvailable.Y * 0.2f);
+                        if(ImGui.InputInt("percent###orderValue", ref orderValue, 1, 5))
+                        {
+                            if(orderValue < 0) orderValue = 0;
+                            if(orderValue > 100) orderValue = 100;
+                        }
+
+                        DisplayHelpers.Header("Order Actions");
+                        ImGui.EndChild();
+                    }
                     ImGui.EndTabItem();
                 }
 
@@ -211,13 +273,13 @@ namespace Pulsar4X.SDL2UI
                 ImGui.InvisibleButton("invis-droptarget", new Vector2(sizeLeft.X, 32f));
                 DisplayEmptyDropTarget();
 
-                if(factionRoot.GetChildren().Where(x => !x.HasDataBlob<NavyDB>()).Count() > 0)
+                if(factionRoot.GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count() > 0)
                 {
                     DisplayHelpers.Header("Unattached Ships");
 
                     foreach(var ship in factionRoot.GetChildren())
                     {
-                        if(ship.HasDataBlob<NavyDB>()) continue;
+                        if(ship.HasDataBlob<FleetDB>()) continue;
 
                         if(!selectedUnattachedShips.ContainsKey(ship))
                         {
@@ -245,7 +307,7 @@ namespace Pulsar4X.SDL2UI
 
         private void DisplayFleetItem(Entity fleet)
         {
-            if(!fleet.TryGetDatablob<NavyDB>(out var fleetInfo))
+            if(!fleet.TryGetDatablob<FleetDB>(out var fleetInfo))
             {
                 return;
             }
@@ -254,7 +316,7 @@ namespace Pulsar4X.SDL2UI
             string name = Name(fleet);
             var flags = ImGuiTreeNodeFlags.DefaultOpen;
 
-            if(fleetInfo.GetChildren().Where(x => x.HasDataBlob<NavyDB>()).Count() == 0)
+            if(fleetInfo.GetChildren().Where(x => x.HasDataBlob<FleetDB>()).Count() == 0)
             {
                 flags |= ImGuiTreeNodeFlags.Leaf;
             }
@@ -295,25 +357,12 @@ namespace Pulsar4X.SDL2UI
         {
             if(ImGui.BeginPopupContextItem())
             {
-                if(factionRoot.GetChildren().Where(x => x.HasDataBlob<NavyDB>()).Count() <= 1)
+                if(ImGui.MenuItem("Disband###delete-" + fleet.Guid))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.Text("Unable to Disband");
-                    ImGui.PopStyleColor();
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
-                    ImGui.Text("Must have at least one fleet");
-                    ImGui.PopStyleColor();
+                    var order = FleetOrder.DisbandFleet(factionID, fleet);
+                    StaticRefLib.OrderHandler.HandleOrder(order);
+                    SelectFleet(null);
                 }
-                else
-                {
-                    if(ImGui.MenuItem("Disband###delete-" + fleet.Guid))
-                    {
-                        var order = FleetOrder.DisbandFleet(factionID, fleet);
-                        StaticRefLib.OrderHandler.HandleOrder(order);
-                        SelectFleet(null);
-                    }
-                }
-
                 ImGui.EndPopup();
             }
         }
@@ -326,11 +375,22 @@ namespace Pulsar4X.SDL2UI
                 {
                     _uiState.EntityClicked(ship.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                 }
-                if(ImGui.MenuItem("Promote to Flagship"))
+                if(!isUnattached)
                 {
-                    var setFlagshipOrder = FleetOrder.SetFlagShip(factionID, selectedFleet, ship);
-                    StaticRefLib.OrderHandler.HandleOrder(setFlagshipOrder);
-                    SelectFleet(selectedFleet);
+                    if(ship.Guid == selectedFleetFlagship.Guid)
+                    {
+                        ImGui.BeginDisabled();
+                    }
+                    if(ImGui.MenuItem("Promote to Flagship"))
+                    {
+                        var setFlagshipOrder = FleetOrder.SetFlagShip(factionID, selectedFleet, ship);
+                        StaticRefLib.OrderHandler.HandleOrder(setFlagshipOrder);
+                        SelectFleet(selectedFleet);
+                    }
+                    if(ship.Guid == selectedFleetFlagship.Guid)
+                    {
+                        ImGui.EndDisabled();
+                    }
                 }
                 ImGui.Separator();
 
@@ -350,7 +410,7 @@ namespace Pulsar4X.SDL2UI
 
         private void DisplayShipAssignmentOption(Dictionary<Entity, bool> selected, Entity ship, Entity fleet, int depth = 0, bool isUnattached = false)
         {
-            if(!fleet.HasDataBlob<NavyDB>()) return;
+            if(!fleet.HasDataBlob<FleetDB>()) return;
 
             for(int i = 0; i < depth; i++)
             {
@@ -398,7 +458,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PopID();
             }
 
-            foreach(var child in fleet.GetDataBlob<NavyDB>().GetChildren())
+            foreach(var child in fleet.GetDataBlob<FleetDB>().GetChildren())
             {
                 DisplayShipAssignmentOption(selected, ship, child, depth + 1, isUnattached);
             }

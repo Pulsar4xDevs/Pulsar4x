@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
             var nameDB = new NameDB(name, factionID, name);
             dataBlobs.Add(nameDB);
 
-            var fleetDB = new NavyDB();
+            var fleetDB = new FleetDB();
             dataBlobs.Add(fleetDB);
 
             var orderableDB = new OrderableDB();
