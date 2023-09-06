@@ -37,6 +37,7 @@ namespace Pulsar4X.SDL2UI
         private int _armorIndex = 0;
         private float _armorThickness = 10;
         private ArmorSD _armor;
+        private double _armorMass = 0;
 
         private int rawimagewidth;
         private int rawimageheight;
@@ -52,9 +53,11 @@ namespace Pulsar4X.SDL2UI
         private double _tn;
         private double _estor;
         private double _egen;
-        private double _fuelStore;
+        private double _fuelStoreMass;
+        private double _fuelStoreVolume;
+        private ICargoable _fuelType;
         bool displayimage = true;
-
+        private EntityDamageProfileDB _profile;
         private bool existingdesignsstatus = true;
         bool DesignChanged = false;
 
@@ -137,10 +140,11 @@ namespace Pulsar4X.SDL2UI
             SelectedComponents = design.Components;
             SelectedDesignObsolete = design.IsObsolete;
             _armor = design.Armor.type;
-            GenImage();
             _armorIndex = _armorSelection.IndexOf(_armor);
             _armorThickness = design.Armor.thickness;
             DesignChanged = true;
+            UpdateShipStats();
+            GenImage();
         }
 
         internal override void Display()
@@ -342,7 +346,13 @@ namespace Pulsar4X.SDL2UI
                     _armorThickness--;
                     DesignChanged = true;
                 }
+                
+                ImGui.TableNextColumn();
+                ImGui.Text("Mass");
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Mass(_armorMass));
 
+                ImGui.SameLine();
                 ImGui.EndTable();
             }
         }
@@ -460,7 +470,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void GenImage()
         {
-            EntityDamageProfileDB _profile = new EntityDamageProfileDB(SelectedComponents, (_armor, _armorThickness));
+            
             _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _profile.DamageProfile, _imagecreated);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;
@@ -479,9 +489,13 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableHeadersRow();
 
                 ImGui.TableNextColumn();
-                ImGui.Text("Mass");
+                ImGui.Text("Mass (Dry)");
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Mass(_massDry));
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Wet: " + Stringify.Mass(_massDry + _fuelStoreMass));
+                }
 
                 ImGui.TableNextColumn();
                 ImGui.Text("Total Thrust");
@@ -494,10 +508,12 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(_ttwr.ToString("0.####"));
 
                 ImGui.TableNextColumn();
-                ImGui.Text("Fuel Capacity");
+                ImGui.Text("Fuel Capacity (" + _fuelType.Name + ")");
                 ImGui.TableNextColumn();
-                ImGui.Text(Stringify.Mass(_fuelStore));
-
+                ImGui.Text(Stringify.Mass(_fuelStoreMass));
+                ImGui.SameLine();
+                ImGui.Text(Stringify.Volume(_fuelStoreVolume));
+                
                 ImGui.TableNextColumn();
                 ImGui.Text("Delta V");
                 ImGui.TableNextColumn();
@@ -574,7 +590,7 @@ namespace Pulsar4X.SDL2UI
         private void UpdateShipStats()
         {
             if(!DesignChanged) return;
-
+            _profile = new EntityDamageProfileDB(SelectedComponents, (_armor, _armorThickness));
             if(displayimage)
             {
                 GenImage();
@@ -642,6 +658,9 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
+            _armorMass = ShipDesign.GetArmorMass(_profile, (_armor, _armorThickness));
+            mass += _armorMass;
+
             _massDry = mass;
             _tn = tn;
             _ttwr = (tn / mass) * 0.01;
@@ -654,12 +673,17 @@ namespace Pulsar4X.SDL2UI
             //double fuelMass = 0;
             if (thrusterFuel != Guid.Empty)
             {
-                var fuel = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
-                if (cstore.ContainsKey(fuel.CargoTypeID))
-                    _fuelStore = cstore[fuel.CargoTypeID];
+                _fuelType = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
+                if (cstore.ContainsKey(_fuelType.CargoTypeID))
+                {
+                    _fuelStoreVolume = cstore[_fuelType.CargoTypeID];
+                    var fuelDensity = _fuelType.MassPerUnit / _fuelType.VolumePerUnit;
+                    _fuelStoreMass = _fuelStoreVolume * fuelDensity;
+
+                }
             }
 
-            _massWet = _massDry + _fuelStore;
+            _massWet = _massDry + _fuelStoreMass;
             _dv = OrbitMath.TsiolkovskyRocketEquation(_massWet, _massDry, ev);
 
             DesignChanged = false;

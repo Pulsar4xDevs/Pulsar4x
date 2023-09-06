@@ -11,6 +11,11 @@ namespace Pulsar4X.ECSLib
     public class EntityDamageProfileDB : BaseDataBlob
     {
         public (ArmorSD armorType, float thickness) Armor;
+        /// <summary>
+        /// This is a list of points where x is the length of a component and y the height.
+        /// starting from the front of the ship and is 0,0
+        /// </summary>
+        public List<(int x, int y)> ArmorVertex = new List<(int x, int y)>();
         
         /// <summary>
         /// this is the same list as the ship design's List<(ComponentDesign design, int count)> Components

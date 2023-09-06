@@ -94,7 +94,7 @@ namespace Pulsar4X.ECSLib
             Name = name;
             Components = components;
             Armor = armor;
-
+            MassPerUnit = 0;
             foreach (var component in components)
             {
                 MassPerUnit += component.design.MassPerUnit * component.count;
@@ -111,15 +111,37 @@ namespace Pulsar4X.ECSLib
                 }
 
             }
-            var r = Math.Cbrt(VolumePerUnit * 3 / 4 / Math.PI);
-            var s = 4 * Math.PI * r * r;
-            var v = s * armor.thickness * 0.001; //armor thickness is in mm, volume is in m^3
-            var m = v * armor.armorType.Density;
-            MassPerUnit += (long)Math.Round(m);
+            DamageProfileDB = new EntityDamageProfileDB(components, armor);
+            var armorMass = GetArmorMass(DamageProfileDB, armor);
+            MassPerUnit += (long)Math.Round(armorMass);
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
-            IndustryPointCosts = MassPerUnit;
+            IndustryPointCosts = (long)(MassPerUnit * 0.1);
+        }
+
+        public static double GetArmorMass(EntityDamageProfileDB damageProfile, (ArmorSD armorType, double thickness)armor)
+        {
+            double surfaceArea = 0;
+            (int x, int y) v1 = damageProfile.ArmorVertex[0];
+            for (int index = 1; index < damageProfile.ArmorVertex.Count; index++)
+            {
+                (int x, int y) v2 = damageProfile.ArmorVertex[index];
+                
+                var r1 = v1.y; //radius of top
+                var r2 = v2.y; //radius of bottom
+                var h = v2.x - v1.x; //height
+                var c1 = 2* Math.PI * r1; //circumference of top
+                var c2 = 2 * Math.PI * r2; //circumference of bottom
+                var sl = Math.Sqrt(h * h + (r1 - r2) * (r1 - r2)); //slope of side
+
+                surfaceArea = 0.5 * sl * (c1 + c2);
+                
+                v1 = v2;
+            }
+
+            var armorVolume = surfaceArea * armor.thickness * 0.001;
+            return armorVolume;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
