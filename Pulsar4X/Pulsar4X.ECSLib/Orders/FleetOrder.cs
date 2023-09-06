@@ -10,6 +10,7 @@ namespace Pulsar4X.ECSLib
         AssignShip,
         UnassignShip,
         SetFlagShip,
+        ToggleInheritOrders,
     }
     public class FleetOrder : EntityCommand
     {
@@ -113,6 +114,16 @@ namespace Pulsar4X.ECSLib
             return order;
         }
 
+        public static FleetOrder ToggleInheritOrders(Guid requestingFaction, Entity fleet)
+        {
+            var order = new FleetOrder(requestingFaction, fleet)
+            {
+                OrderType = FleetOrderType.ToggleInheritOrders
+            };
+
+            return order;
+        }
+
         internal override void ActionCommand(DateTime atDateTime)
         {
             var factionRoot = _factionEntity.GetDataBlob<FleetDB>();
@@ -178,7 +189,15 @@ namespace Pulsar4X.ECSLib
                     sourceFleetInfo.SetParent(_targetEntity);
                     break;
                 case FleetOrderType.AssignShip:
-                    _entityCommanding.GetDataBlob<FleetDB>().AddChild(_targetEntity);
+                    navyDB = _entityCommanding.GetDataBlob<FleetDB>();
+
+                    // If no children or no flagship set the ship as the flagship
+                    if(navyDB.Children.Count == 0 || navyDB.FlagShipID == Guid.Empty)
+                    {
+                        navyDB.FlagShipID = _targetEntity.Guid;
+                    }
+
+                    navyDB.AddChild(_targetEntity);
                     break;
                 case FleetOrderType.UnassignShip:
                     navyDB = _entityCommanding.GetDataBlob<FleetDB>();
@@ -190,7 +209,11 @@ namespace Pulsar4X.ECSLib
                     }
                     break;
                 case FleetOrderType.SetFlagShip:
-                _entityCommanding.GetDataBlob<FleetDB>().FlagShipID = _targetEntity.Guid;
+                    _entityCommanding.GetDataBlob<FleetDB>().FlagShipID = _targetEntity.Guid;
+                    break;
+                case FleetOrderType.ToggleInheritOrders:
+                    navyDB = _entityCommanding.GetDataBlob<FleetDB>();
+                    navyDB.InheritOrders = !navyDB.InheritOrders;
                     break;
             }
 
