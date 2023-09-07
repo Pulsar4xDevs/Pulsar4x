@@ -250,6 +250,18 @@ namespace Pulsar4X.SDL2UI
                                 }
                                 if(ImGui.BeginPopupContextItem())
                                 {
+                                    if(i > 0 && ImGui.MenuItem("Move Up"))
+                                    {
+                                        var temp = selectedFleetDB.StandingOrders[i - 1];
+                                        selectedFleetDB.StandingOrders[i - 1] = selectedFleetDB.StandingOrders[i];
+                                        selectedFleetDB.StandingOrders[i] = temp;
+                                    }
+                                    if(i < count - 1 && ImGui.MenuItem("Move Down"))
+                                    {
+                                        var temp = selectedFleetDB.StandingOrders[i + 1];
+                                        selectedFleetDB.StandingOrders[i + 1] = selectedFleetDB.StandingOrders[i];
+                                        selectedFleetDB.StandingOrders[i] = temp;
+                                    }
                                     if(ImGui.MenuItem("Delete Order"))
                                     {
                                         selectedFleetDB.StandingOrders.Remove(orders[i]);
