@@ -1,6 +1,6 @@
 namespace Pulsar4X.ECSLib
 {
-    public class MoveToNearestColonyAction : IAction
+    public class RefuelAction : IAction
     {
         public void Execute(Entity fleet)
         {

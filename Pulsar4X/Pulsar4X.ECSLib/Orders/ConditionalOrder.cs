@@ -1,29 +1,30 @@
+using System.Collections.Generic;
+
 namespace Pulsar4X.ECSLib
 {
     public class ConditionalOrder
     {
         public CompoundCondition Condition { get; }
-        public IAction Action { get; set; }
+        public List<IAction> Actions { get; }
 
         public bool IsValid
         {
             get
             {
-                return Condition != null && Action != null;
+                return Condition != null && Actions != null;
             }
         }
 
         public ConditionalOrder()
         {
             Condition = new CompoundCondition();
-            Action = null;
-
+            Actions = new ();
         }
 
-        public ConditionalOrder(CompoundCondition condition, IAction action)
+        public ConditionalOrder(CompoundCondition condition, List<IAction> actions)
         {
             Condition = condition;
-            Action = action;
+            Actions = actions;
         }
     }
 }

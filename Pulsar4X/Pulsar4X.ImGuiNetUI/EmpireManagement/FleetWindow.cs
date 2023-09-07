@@ -25,9 +25,9 @@ namespace Pulsar4X.SDL2UI
         private Dictionary<ConditionItem, int> orderConditionIndexes = new Dictionary<ConditionItem, int>();
         private int orderComparisonIndex = 0;
         private string[] orderComparisons;
-        private int orderValue = 0;
-
         private readonly Dictionary<string, ICondition> orderConditions = new ();
+        private string[] orderActions;
+        private int orderActionsIndex = 0;
 
         private FleetWindow()
         {
@@ -42,6 +42,11 @@ namespace Pulsar4X.SDL2UI
             orderComparisons[4] = ComparisonType.GreaterThanOrEqual.ToDescription();
 
             orderConditions.Add("Fuel", new FuelCondition(30f, ComparisonType.LessThan));
+
+            orderActions = new string[3];
+            orderActions[0] = "Move To Nearest Colony";
+            orderActions[1] = "Refuel";
+            orderActions[2] = "Resupply";
         }
         internal static FleetWindow GetInstance()
         {
@@ -239,7 +244,7 @@ namespace Pulsar4X.SDL2UI
                             ImGui.PushID(conditionItem.Guid.ToString());
                             if(!orderConditionIndexes.ContainsKey(conditionItem)) orderConditionIndexes.Add(conditionItem, 0);
                             var index = orderConditionIndexes[conditionItem];
-                            ImGui.SetNextItemWidth(sizeAvailable.Y * 0.5f);
+                            ImGui.SetNextItemWidth(Math.Max(sizeAvailable.X * 0.4f, 128f));
                             if(ImGui.Combo("###orderCondition" + conditionItem.Guid, ref index, orderConditions.Keys.ToArray(), orderConditions.Keys.Count))
                             {
                                 orderConditionIndexes[conditionItem] = index;
@@ -254,17 +259,17 @@ namespace Pulsar4X.SDL2UI
                                     int value = (int)comparisonCondition.Threshold;
                                     int comparisonIndex = Array.IndexOf(orderComparisons, comparisonCondition.ComparisionType.ToDescription());
                                     ImGui.SameLine();
-                                    ImGui.SetNextItemWidth(sizeAvailable.Y * 0.1f);
+                                    ImGui.SetNextItemWidth(Math.Max(sizeAvailable.X * 0.075f, 16f));
                                     if(ImGui.Combo("###orderComparison", ref comparisonIndex, orderComparisons, orderComparisons.Length))
                                     {
                                         comparisonCondition.ComparisionType = (ComparisonType)Enum.GetValues(typeof(ComparisonType)).GetValue(comparisonIndex);
                                     }
                                     ImGui.SameLine();
-                                    ImGui.SetNextItemWidth(sizeAvailable.Y * 0.2f);
+                                    ImGui.SetNextItemWidth(Math.Max(sizeAvailable.X * 0.15f, 32f));
                                     if(ImGui.InputInt(comparisonCondition.Description + "###orderValue", ref value, 1, 5))
                                     {
-                                        if(value < comparisonCondition.MinValue) orderValue = (int)comparisonCondition.MinValue;
-                                        if(value > comparisonCondition.MaxValue) orderValue = (int)comparisonCondition.MaxValue;
+                                        if(value < comparisonCondition.MinValue) value = (int)comparisonCondition.MinValue;
+                                        if(value > comparisonCondition.MaxValue) value = (int)comparisonCondition.MaxValue;
 
                                         comparisonCondition.Threshold = value;
                                     }
@@ -299,8 +304,8 @@ namespace Pulsar4X.SDL2UI
                             }
                             ImGui.SameLine();
                             ImGui.SetCursorPos(position);
-                            ImGui.SetCursorPosX(sizeAvailable.X - 8f);
-                            if(ImGui.Button("X"))
+                            ImGui.SetCursorPosX(sizeAvailable.X - 12f);
+                            if(ImGui.Button("x"))
                             {
                                 selectedOrder.Condition.ConditionItems.Remove(conditionItem);
                             }
@@ -313,6 +318,31 @@ namespace Pulsar4X.SDL2UI
                         }
 
                         DisplayHelpers.Header("Order Actions");
+
+                        foreach(var action in selectedOrder.Actions.ToArray())
+                        {
+                            DisplayActionItem(action);
+                        }
+
+                        if(ImGui.Button("Add Action"))
+                        {
+                            switch(orderActionsIndex)
+                            {
+                                case 0:
+                                    selectedOrder.Actions.Add(new MoveToNearestColonyAction());
+                                    break;
+                                case 1:
+                                    selectedOrder.Actions.Add(new RefuelAction());
+                                    break;
+                                case 2:
+                                    selectedOrder.Actions.Add(new ResupplyAction());
+                                    break;
+                            }
+                        }
+                        ImGui.SameLine();
+                        if(ImGui.Combo("###order-add-action-list", ref orderActionsIndex, orderActions, orderActions.Length))
+                        {
+                        }
                         ImGui.EndChild();
                     }
                     ImGui.EndTabItem();
@@ -573,6 +603,20 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(name);
                 ImGui.EndDragDropSource();
             }
+        }
+
+        private void DisplayActionItem(IAction action)
+        {
+            ImGui.PushID(action.GetHashCode());
+            var size = ImGui.GetContentRegionAvail();
+            ImGui.Text(action.GetType().Name);
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(size.X - 12f);
+            if(ImGui.Button("x"))
+            {
+                selectedOrder.Actions.Remove(action);
+            }
+            ImGui.PopID();
         }
 
         private string Name(Entity entity)
