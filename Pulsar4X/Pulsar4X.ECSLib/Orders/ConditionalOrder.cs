@@ -4,6 +4,7 @@ namespace Pulsar4X.ECSLib
 {
     public class ConditionalOrder
     {
+        public string Name { get; set; }
         public CompoundCondition Condition { get; }
         public List<IAction> Actions { get; }
 
