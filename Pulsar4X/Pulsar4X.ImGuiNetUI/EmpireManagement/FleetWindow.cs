@@ -25,9 +25,10 @@ namespace Pulsar4X.SDL2UI
         private Dictionary<ConditionItem, int> orderConditionIndexes = new Dictionary<ConditionItem, int>();
         private int orderComparisonIndex = 0;
         private string[] orderComparisons;
-        private readonly Dictionary<string, ICondition> orderConditions = new ();
-        private string[] orderActions;
-        private int orderActionsIndex = 0;
+        private int orderActionsIndex = -1;
+        private int orderConditionsIndex = -1;
+        private string[] orderActionDescriptions = OrderRegistry.Actions.Keys.ToArray();
+        private string[] orderConditionDescriptions = OrderRegistry.Conditions.Keys.ToArray();
 
         private FleetWindow()
         {
@@ -40,13 +41,6 @@ namespace Pulsar4X.SDL2UI
             orderComparisons[2] = ComparisonType.EqualTo.ToDescription();
             orderComparisons[3] = ComparisonType.GreaterThan.ToDescription();
             orderComparisons[4] = ComparisonType.GreaterThanOrEqual.ToDescription();
-
-            orderConditions.Add("Fuel", new FuelCondition(30f, ComparisonType.LessThan));
-
-            orderActions = new string[3];
-            orderActions[0] = "Move To Nearest Colony";
-            orderActions[1] = "Refuel";
-            orderActions[2] = "Resupply";
         }
         internal static FleetWindow GetInstance()
         {
@@ -233,7 +227,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     if(ImGui.BeginChild("StandingOrders-edit", secondChildSize, true))
                     {
-                        DisplayHelpers.Header("Order Condition");
+                        DisplayHelpers.Header("Conditions", "If the conditions listed are true, the actions will execute.");
 
                         var sizeAvailable = ImGui.GetContentRegionAvail();
                         var count = selectedOrder.Condition.ConditionItems.Count;
@@ -244,14 +238,9 @@ namespace Pulsar4X.SDL2UI
                             ImGui.PushID(conditionItem.Guid.ToString());
                             if(!orderConditionIndexes.ContainsKey(conditionItem)) orderConditionIndexes.Add(conditionItem, 0);
                             var index = orderConditionIndexes[conditionItem];
-                            ImGui.SetNextItemWidth(Math.Max(sizeAvailable.X * 0.4f, 128f));
-                            if(ImGui.Combo("###orderCondition" + conditionItem.Guid, ref index, orderConditions.Keys.ToArray(), orderConditions.Keys.Count))
-                            {
-                                orderConditionIndexes[conditionItem] = index;
-                            }
-
-                            // TODO: this looks horrible
                             var condition = conditionItem.Condition;
+                            ImGui.Button(OrderRegistry.ConditionDescriptions[conditionItem.Condition.GetType()], new Vector2(Math.Max(sizeAvailable.X * 0.4f, 128f), 0f));
+
                             switch(condition.DisplayType)
                             {
                                 case ConditionDisplayType.Comparison:
@@ -314,10 +303,19 @@ namespace Pulsar4X.SDL2UI
 
                         if(ImGui.Button("Add Condition"))
                         {
-                            selectedOrder.Condition.ConditionItems.Add(new ConditionItem(new FuelCondition(30f, ComparisonType.LessThan)));
+                            if(orderConditionsIndex >= 0 && orderConditionsIndex < orderConditionDescriptions.Length)
+                            {
+                                ConditionItem item = OrderRegistry.Conditions[orderConditionDescriptions[orderConditionsIndex]]();
+                                selectedOrder.Condition.ConditionItems.Add(item);
+                            }
+                        }
+                        ImGui.SameLine();
+                        if(ImGui.Combo("###order-add-condition-list", ref orderConditionsIndex, orderConditionDescriptions, orderConditionDescriptions.Length))
+                        {
                         }
 
-                        DisplayHelpers.Header("Order Actions");
+                        ImGui.NewLine();
+                        DisplayHelpers.Header("Actions", "The actions listed will execute in the order in which they are listed.");
 
                         foreach(var action in selectedOrder.Actions.ToArray())
                         {
@@ -326,21 +324,14 @@ namespace Pulsar4X.SDL2UI
 
                         if(ImGui.Button("Add Action"))
                         {
-                            switch(orderActionsIndex)
+                            if(orderActionsIndex >= 0 && orderActionsIndex < orderActionDescriptions.Length)
                             {
-                                case 0:
-                                    selectedOrder.Actions.Add(new MoveToNearestColonyAction());
-                                    break;
-                                case 1:
-                                    selectedOrder.Actions.Add(new RefuelAction());
-                                    break;
-                                case 2:
-                                    selectedOrder.Actions.Add(new ResupplyAction());
-                                    break;
+                                IAction selectedAction = OrderRegistry.Actions[orderActionDescriptions[orderActionsIndex]]();
+                                selectedOrder.Actions.Add(selectedAction);
                             }
                         }
                         ImGui.SameLine();
-                        if(ImGui.Combo("###order-add-action-list", ref orderActionsIndex, orderActions, orderActions.Length))
+                        if(ImGui.Combo("###order-add-action-list", ref orderActionsIndex, orderActionDescriptions, orderActionDescriptions.Length))
                         {
                         }
                         ImGui.EndChild();
@@ -609,7 +600,7 @@ namespace Pulsar4X.SDL2UI
         {
             ImGui.PushID(action.GetHashCode());
             var size = ImGui.GetContentRegionAvail();
-            ImGui.Text(action.GetType().Name);
+            ImGui.Text(OrderRegistry.ActionDescriptions[action.GetType()]);
             ImGui.SameLine();
             ImGui.SetCursorPosX(size.X - 12f);
             if(ImGui.Button("x"))
