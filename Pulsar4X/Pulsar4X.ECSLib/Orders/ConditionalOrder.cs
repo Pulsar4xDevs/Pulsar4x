@@ -2,8 +2,8 @@ namespace Pulsar4X.ECSLib
 {
     public class ConditionalOrder
     {
-        public ICondition Condition { get; }
-        public IAction Action { get; }
+        public CompoundCondition Condition { get; }
+        public IAction Action { get; set; }
 
         public bool IsValid
         {
@@ -13,7 +13,14 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public ConditionalOrder(ICondition condition, IAction action)
+        public ConditionalOrder()
+        {
+            Condition = new CompoundCondition();
+            Action = null;
+
+        }
+
+        public ConditionalOrder(CompoundCondition condition, IAction action)
         {
             Condition = condition;
             Action = action;

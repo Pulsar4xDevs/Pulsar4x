@@ -20,11 +20,14 @@ namespace Pulsar4X.SDL2UI
         private Dictionary<Entity, bool> selectedShips = new ();
         private Dictionary<Entity, bool> selectedUnattachedShips = new ();
 
-        private int orderConditionIndex = -1;
-        private string[] orderConditions = { "Fuel" };
+        private ConditionalOrder selectedOrder = new ConditionalOrder();
+
+        private Dictionary<ConditionItem, int> orderConditionIndexes = new Dictionary<ConditionItem, int>();
         private int orderComparisonIndex = 0;
         private string[] orderComparisons;
         private int orderValue = 0;
+
+        private readonly Dictionary<string, ICondition> orderConditions = new ();
 
         private FleetWindow()
         {
@@ -37,6 +40,8 @@ namespace Pulsar4X.SDL2UI
             orderComparisons[2] = ComparisonType.EqualTo.ToDescription();
             orderComparisons[3] = ComparisonType.GreaterThan.ToDescription();
             orderComparisons[4] = ComparisonType.GreaterThanOrEqual.ToDescription();
+
+            orderConditions.Add("Fuel", new FuelCondition(30f, ComparisonType.LessThan));
         }
         internal static FleetWindow GetInstance()
         {
@@ -226,21 +231,83 @@ namespace Pulsar4X.SDL2UI
                         DisplayHelpers.Header("Order Condition");
 
                         var sizeAvailable = ImGui.GetContentRegionAvail();
-                        ImGui.SetNextItemWidth(sizeAvailable.Y * 0.5f);
-                        if(ImGui.Combo("###orderCondition", ref orderConditionIndex, orderConditions, orderConditions.Length))
+                        var count = selectedOrder.Condition.ConditionItems.Count;
+                        var items = selectedOrder.Condition.ConditionItems.ToArray();
+                        for(int i = 0; i < count; i++)
                         {
+                            var conditionItem = items[i];
+                            ImGui.PushID(conditionItem.Guid.ToString());
+                            if(!orderConditionIndexes.ContainsKey(conditionItem)) orderConditionIndexes.Add(conditionItem, 0);
+                            var index = orderConditionIndexes[conditionItem];
+                            ImGui.SetNextItemWidth(sizeAvailable.Y * 0.5f);
+                            if(ImGui.Combo("###orderCondition" + conditionItem.Guid, ref index, orderConditions.Keys.ToArray(), orderConditions.Keys.Count))
+                            {
+                                orderConditionIndexes[conditionItem] = index;
+                            }
+
+                            // TODO: this looks horrible
+                            var condition = conditionItem.Condition;
+                            switch(condition.DisplayType)
+                            {
+                                case ConditionDisplayType.Comparison:
+                                    ComparisonCondition comparisonCondition = (ComparisonCondition)condition;
+                                    int value = (int)comparisonCondition.Threshold;
+                                    int comparisonIndex = Array.IndexOf(orderComparisons, comparisonCondition.ComparisionType.ToDescription());
+                                    ImGui.SameLine();
+                                    ImGui.SetNextItemWidth(sizeAvailable.Y * 0.1f);
+                                    if(ImGui.Combo("###orderComparison", ref comparisonIndex, orderComparisons, orderComparisons.Length))
+                                    {
+                                        comparisonCondition.ComparisionType = (ComparisonType)Enum.GetValues(typeof(ComparisonType)).GetValue(comparisonIndex);
+                                    }
+                                    ImGui.SameLine();
+                                    ImGui.SetNextItemWidth(sizeAvailable.Y * 0.2f);
+                                    if(ImGui.InputInt(comparisonCondition.Description + "###orderValue", ref value, 1, 5))
+                                    {
+                                        if(value < comparisonCondition.MinValue) orderValue = (int)comparisonCondition.MinValue;
+                                        if(value > comparisonCondition.MaxValue) orderValue = (int)comparisonCondition.MaxValue;
+
+                                        comparisonCondition.Threshold = value;
+                                    }
+                                    break;
+                            }
+
+                            // Show the logical operators UI on all but the last item
+                            if(i < count - 1)
+                            {
+                                ImGui.SameLine();
+                                if(conditionItem.LogicalOperation == null)
+                                    conditionItem.LogicalOperation = LogicalOperation.And;
+
+                                if(conditionItem.LogicalOperation == LogicalOperation.And)
+                                {
+                                    ImGui.SetCursorPosX(sizeAvailable.X - 82f);
+                                    if(ImGui.Button("AND"))
+                                    {
+                                        conditionItem.LogicalOperation = LogicalOperation.Or;
+                                    }
+                                }
+                                else
+                                {
+                                    ImGui.SetCursorPosX(sizeAvailable.X - 48f);
+                                    if(ImGui.Button("OR"))
+                                    {
+                                        conditionItem.LogicalOperation = LogicalOperation.And;
+                                    }
+                                }
+                            }
+
+                            ImGui.SameLine();
+                            ImGui.SetCursorPosX(sizeAvailable.X - 8f);
+                            if(ImGui.Button("X"))
+                            {
+                                selectedOrder.Condition.ConditionItems.Remove(conditionItem);
+                            }
+                            ImGui.PopID();
                         }
-                        ImGui.SameLine();
-                        ImGui.SetNextItemWidth(sizeAvailable.Y * 0.1f);
-                        if(ImGui.Combo("###orderComparison", ref orderComparisonIndex, orderComparisons, orderComparisons.Length))
+
+                        if(ImGui.Button("Add Condition"))
                         {
-                        }
-                        ImGui.SameLine();
-                        ImGui.SetNextItemWidth(sizeAvailable.Y * 0.2f);
-                        if(ImGui.InputInt("percent###orderValue", ref orderValue, 1, 5))
-                        {
-                            if(orderValue < 0) orderValue = 0;
-                            if(orderValue > 100) orderValue = 100;
+                            selectedOrder.Condition.ConditionItems.Add(new ConditionItem(new FuelCondition(30f, ComparisonType.LessThan)));
                         }
 
                         DisplayHelpers.Header("Order Actions");

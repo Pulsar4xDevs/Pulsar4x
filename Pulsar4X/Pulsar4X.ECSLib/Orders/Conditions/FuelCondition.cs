@@ -4,16 +4,16 @@ namespace Pulsar4X.ECSLib
 {
     public class FuelCondition : ComparisonCondition
     {
-        private readonly float _threshold;
-
-        public FuelCondition(float threshold, ComparisonType comparisonType) : base(comparisonType)
+        public FuelCondition(float threshold, ComparisonType comparisonType) : base(threshold, comparisonType)
         {
-            _threshold = threshold;
+            Description = "percent";
+            MaxValue = 100;
+            MinValue = 0;
         }
 
         public override bool Evaluate(Entity fleet)
         {
-            switch(_comparisionType)
+            switch(ComparisionType)
             {
                 case ComparisonType.LessThan:
                     return false;
