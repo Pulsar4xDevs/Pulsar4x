@@ -59,9 +59,13 @@ namespace Pulsar4X.ECSLib
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
 
             var faction = industryEntity.GetFactionOwner;
-            
-            ShipFactory.CreateShip((ShipDesign)designInfo, faction, industryEntity.GetSOIParentEntity());
-            
+
+            var ship = ShipFactory.CreateShip((ShipDesign)designInfo, faction, industryEntity.GetSOIParentEntity());
+            if(faction.TryGetDatablob<FleetDB>(out var fleetDB))
+            {
+                fleetDB.AddChild(ship);
+            }
+
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
             {
                 industryDB.ProductionLines[productionLine].Jobs.Remove(batchJob);
@@ -141,7 +145,7 @@ namespace Pulsar4X.ECSLib
             for (int index = 1; index < damageProfile.ArmorVertex.Count; index++)
             {
                 (int x, int y) v2 = damageProfile.ArmorVertex[index];
-                
+
                 var r1 = v1.y; //radius of top
                 var r2 = v2.y; //radius of bottom
                 var h = v2.x - v1.x; //height
@@ -150,7 +154,7 @@ namespace Pulsar4X.ECSLib
                 var sl = Math.Sqrt(h * h + (r1 - r2) * (r1 - r2)); //slope of side
 
                 surfaceArea = 0.5 * sl * (c1 + c2);
-                
+
                 v1 = v2;
             }
 
@@ -264,7 +268,7 @@ namespace Pulsar4X.ECSLib
             OrderableDB ordable = new OrderableDB();
             dataBlobs.Add(ordable);
             var ship = Entity.Create(starsys, ownerFaction.Guid, dataBlobs);
-            
+
 
             //some DB's need tobe created after the entity.
             var namedb = new NameDB(ship.Guid.ToString());
@@ -272,12 +276,12 @@ namespace Pulsar4X.ECSLib
             {
                 shipName = "UnNamed " + shipDesign.Name;
             }
-            
+
             namedb.SetName(ownerFaction.Guid, shipName);
 
             ship.SetDataBlob(namedb);
             ship.SetDataBlob(orbit);
-            
+
             foreach (var item in shipDesign.Components)
             {
                 EntityManipulation.AddComponentToEntity(ship, item.design, item.count);
