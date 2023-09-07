@@ -272,12 +272,14 @@ namespace Pulsar4X.SDL2UI
                             }
 
                             // Show the logical operators UI on all but the last item
+                            ImGui.SameLine();
+                            var position = ImGui.GetCursorPos();
                             if(i < count - 1)
                             {
-                                ImGui.SameLine();
                                 if(conditionItem.LogicalOperation == null)
                                     conditionItem.LogicalOperation = LogicalOperation.And;
 
+                                ImGui.SetCursorPosY(position.Y + 12f);
                                 if(conditionItem.LogicalOperation == LogicalOperation.And)
                                 {
                                     ImGui.SetCursorPosX(sizeAvailable.X - 82f);
@@ -295,8 +297,8 @@ namespace Pulsar4X.SDL2UI
                                     }
                                 }
                             }
-
                             ImGui.SameLine();
+                            ImGui.SetCursorPos(position);
                             ImGui.SetCursorPosX(sizeAvailable.X - 8f);
                             if(ImGui.Button("X"))
                             {
