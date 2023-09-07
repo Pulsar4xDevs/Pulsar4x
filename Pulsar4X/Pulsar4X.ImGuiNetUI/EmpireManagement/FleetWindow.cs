@@ -469,7 +469,8 @@ namespace Pulsar4X.SDL2UI
 
             if(ImGui.Button("Create New Fleet", new Vector2(Styles.LeftColumnWidthLg, 0f)))
             {
-                string name = "auto-gen names pls " + nameCounter++;
+                var theme = StaticRefLib.StaticData.FleetNameThemes.First(t => t.ThemeName.Equals("Default"));
+                string name = theme.Names[StaticRefLib.Game.RNG.Next(0, theme.Names.Count)];
                 var order = FleetOrder.CreateFleetOrder(name, _uiState.Faction);
                 StaticRefLib.OrderHandler.HandleOrder(order);
             }
