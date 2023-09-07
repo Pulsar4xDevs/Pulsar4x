@@ -165,7 +165,8 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                             ImGui.Separator();
                             DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
-                            DisplayHelpers.PrintRow("Current Orders", "TODO", separator: false);
+                            string orderName = selectedFleetDB.CurrentOrders.Count == 0 ? "None" : OrderRegistry.ActionDescriptions[selectedFleetDB.CurrentOrders.Peek().GetType()];
+                            DisplayHelpers.PrintRow("Current Orders", orderName, separator: false);
                         }
                         ImGui.EndChild();
                     }

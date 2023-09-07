@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
     {
         public string Name { get; set; }
         public CompoundCondition Condition { get; }
-        public List<IAction> Actions { get; }
+        public SafeList<IAction> Actions { get; }
 
         public bool IsValid
         {
@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
             Actions = new ();
         }
 
-        public ConditionalOrder(CompoundCondition condition, List<IAction> actions)
+        public ConditionalOrder(CompoundCondition condition, SafeList<IAction> actions)
         {
             Condition = condition;
             Actions = actions;
