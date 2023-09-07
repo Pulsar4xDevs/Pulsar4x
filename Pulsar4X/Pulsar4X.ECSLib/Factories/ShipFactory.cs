@@ -57,6 +57,20 @@ namespace Pulsar4X.ECSLib
             batchJob.NumberCompleted++;
             batchJob.ResourcesRequiredRemaining = new Dictionary<Guid, long>(designInfo.ResourceCosts);
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
+
+            var faction = industryEntity.GetFactionOwner;
+            
+            ShipFactory.CreateShip((ShipDesign)designInfo, faction, industryEntity.GetSOIParentEntity());
+            
+            if (batchJob.NumberCompleted == batchJob.NumberOrdered)
+            {
+                industryDB.ProductionLines[productionLine].Jobs.Remove(batchJob);
+                if (batchJob.Auto)
+                {
+                    batchJob.NumberCompleted = 0;
+                    industryDB.ProductionLines[productionLine].Jobs.Add(batchJob);
+                }
+            }
         }
 
         public int CreditCost;
@@ -254,6 +268,11 @@ namespace Pulsar4X.ECSLib
 
             //some DB's need tobe created after the entity.
             var namedb = new NameDB(ship.Guid.ToString());
+            if (shipName == null)
+            {
+                shipName = "UnNamed " + shipDesign.Name;
+            }
+            
             namedb.SetName(ownerFaction.Guid, shipName);
 
             ship.SetDataBlob(namedb);
