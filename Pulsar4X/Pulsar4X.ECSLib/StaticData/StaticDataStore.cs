@@ -68,6 +68,11 @@ namespace Pulsar4X.ECSLib
         public List<FleetNameThemeSD> FleetNameThemes = new List<FleetNameThemeSD>();
 
         /// <summary>
+        /// List which stores all the Ship Name themes
+        /// </summary>
+        public List<ShipNameThemeSD> ShipNameThemes = new List<ShipNameThemeSD>();
+
+        /// <summary>
         /// Dictionary which stores all the Minerals.
         /// </summary>
         [JsonIgnore]
@@ -143,6 +148,9 @@ namespace Pulsar4X.ECSLib
                     "FleetNameThemes", typeof(List<FleetNameThemeSD>)
                 },
                 {
+                    "ShipNameThemes", typeof(List<ShipNameThemeSD>)
+                },
+                {
                     "Minerals", typeof(Dictionary<Guid, MineralSD>)
                 },
                 {
@@ -189,6 +197,9 @@ namespace Pulsar4X.ECSLib
                 },
                 {
                     typeof(List<FleetNameThemeSD>), "FleetNameThemes"
+                },
+                {
+                    typeof(List<ShipNameThemeSD>), "ShipNameThemes"
                 },
                 {
                     typeof(List<MineralSD>), "Minerals"
@@ -335,6 +346,25 @@ namespace Pulsar4X.ECSLib
                 else
                 {
                     FleetNameThemes.Add(theme);
+                }
+            }
+        }
+
+        internal void Store(List<ShipNameThemeSD> shipNameThemes)
+        {
+            if(shipNameThemes == null)
+                return;
+
+            foreach(var theme in shipNameThemes)
+            {
+                if(ShipNameThemes.Contains(theme))
+                {
+                    int index = ShipNameThemes.IndexOf(theme);
+                    ShipNameThemes[index] = theme;
+                }
+                else
+                {
+                    ShipNameThemes.Add(theme);
                 }
             }
         }

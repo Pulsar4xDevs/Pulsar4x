@@ -149,6 +149,9 @@
     <None Update="Data\Pulsar4x\FleetNamingThemes.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Data\Pulsar4x\ShipNamingThemes.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\Pulsar4x\ComponentDataMisc.json">

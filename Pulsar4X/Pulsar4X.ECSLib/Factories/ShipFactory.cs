@@ -274,7 +274,9 @@ namespace Pulsar4X.ECSLib
             var namedb = new NameDB(ship.Guid.ToString());
             if (shipName == null)
             {
-                shipName = "UnNamed " + shipDesign.Name;
+                var theme = StaticRefLib.StaticData.ShipNameThemes.First(t => t.ThemeName.Equals("Default"));
+                shipName = theme.Names[StaticRefLib.Game.RNG.Next(0, theme.Names.Count)];
+                // shipName = "UnNamed " + shipDesign.Name;
             }
 
             namedb.SetName(ownerFaction.Guid, shipName);
