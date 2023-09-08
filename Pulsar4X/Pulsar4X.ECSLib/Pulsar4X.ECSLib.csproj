@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Authors>Pulsar4XDevs</Authors>
@@ -79,10 +79,10 @@
     </NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="CoreCLR-NCalc" Version="2.2.110" />
+    <PackageReference Include="CoreCLR-NCalc" Version="2.2.113" />
     <PackageReference Include="Hjson" Version="3.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <Compile Remove="Helpers\EllipseMath.cs" />
     <Compile Remove="Helpers\Matrix3d.cs" />
