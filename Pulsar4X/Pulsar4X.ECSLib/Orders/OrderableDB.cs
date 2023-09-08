@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Pulsar4X.ECSLib
+﻿namespace Pulsar4X.ECSLib
 {
     public class OrderableDB : BaseDataBlob
     {

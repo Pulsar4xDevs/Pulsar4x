@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
             switch(ComparisionType)
             {
                 case ComparisonType.LessThan:
-                    return false;
+                    return true;
                 case ComparisonType.LessThanOrEqual:
                     return false;
                 case ComparisonType.EqualTo:

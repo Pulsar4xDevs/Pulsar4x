@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
 
         public override bool IsFinished()
         {
-            return true;
+            return false;
         }
 
         internal override void Execute(DateTime atDateTime)
