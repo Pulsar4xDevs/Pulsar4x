@@ -9,9 +9,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Pulsar4X/Pulsar4X.ImGuiNetUI/bin/Debug/net6.0/Pulsar4X.ImGuiNetUI.dll",
+            "program": "${workspaceFolder}/Pulsar4X/Pulsar4X.ImGuiNetUI/bin/Debug/net7.0/Pulsar4X.ImGuiNetUI.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/Pulsar4X/Pulsar4X.ImGuiNetUI/bin/Debug/net6.0",
+            "cwd": "${workspaceFolder}/Pulsar4X/Pulsar4X.ImGuiNetUI/bin/Debug/net7.0",
             "stopAtEntry": false,
             "console": "internalConsole"
         },
