@@ -9,6 +9,12 @@ namespace Pulsar4X.ECSLib
         private readonly List<T> _innerList = new List<T>();
         private readonly object _lock = new object();
 
+        public SafeList() { }
+        public SafeList(SafeList<T> list)
+        {
+            _innerList = new List<T>(list);
+        }
+
         public void Add(T item)
         {
             lock(_lock)
@@ -22,6 +28,14 @@ namespace Pulsar4X.ECSLib
             lock(_lock)
             {
                 return _innerList.Remove(item);
+            }
+        }
+
+        public void RemoveAt(int index)
+        {
+            lock(_lock)
+            {
+                _innerList.RemoveAt(index);
             }
         }
 

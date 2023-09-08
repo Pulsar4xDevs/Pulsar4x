@@ -22,15 +22,15 @@ public class ShipLogisticsOrders : EntityCommand
 
     public override bool IsFinished()
     {
-            
+
         if(_logiShipperDB != null && _entityCommanding.HasDataBlob<LogiShipperDB>())
             return false;
         return true;
     }
 
-    internal override void ActionCommand(DateTime atDateTime)
+    internal override void Execute(DateTime atDateTime)
     {
-            
+
     }
     public override void UpdateDetailString()
     {

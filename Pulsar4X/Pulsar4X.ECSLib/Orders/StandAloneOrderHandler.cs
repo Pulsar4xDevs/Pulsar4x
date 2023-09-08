@@ -21,13 +21,13 @@ namespace Pulsar4X.ECSLib
                         entityCommand.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityCommand.ActionOnDate, nameof(OrderableProcessor), entityCommand.EntityCommanding);
                     }
                     var orderableDB = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>();
-                    orderableDB.AddCommand(entityCommand);
+                    orderableDB.ActionList.Add(entityCommand);
                     StaticRefLib.ProcessorManager.GetInstanceProcessor(nameof(OrderableProcessor)).ProcessEntity(orderableDB.OwningEntity, StaticRefLib.CurrentDateTime);
                 }
                 else
                 {
                     if(entityCommand.EntityCommanding.StarSysDateTime >= entityCommand.ActionOnDate)
-                        entityCommand.ActionCommand(entityCommand.EntityCommanding.StarSysDateTime);
+                        entityCommand.Execute(entityCommand.EntityCommanding.StarSysDateTime);
                     else
                     {
                         entityCommand.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityCommand.ActionOnDate, nameof(OrderableProcessor), entityCommand.EntityCommanding);

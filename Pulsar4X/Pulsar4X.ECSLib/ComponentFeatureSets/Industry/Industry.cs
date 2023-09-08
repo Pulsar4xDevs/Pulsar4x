@@ -326,7 +326,7 @@ namespace Pulsar4X.ECSLib.Industry
         }
 
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             if (!IsRunning)
             {

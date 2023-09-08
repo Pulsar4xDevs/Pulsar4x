@@ -22,10 +22,10 @@ public class SetLogisticsOrder : EntityCommand
 
     public override string Name { get; } = "Set TradeObject";
 
-    public override string Details { get; } = "Set Logi"; 
-        
+    public override string Details { get; } = "Set Logi";
 
-        
+
+
     internal override Entity EntityCommanding { get { return _entityCommanding; } }
     Entity _entityCommanding;
     Entity _factionEntity;
@@ -35,7 +35,7 @@ public class SetLogisticsOrder : EntityCommand
 
     internal override bool IsValidCommand(Game game)
     {
-            
+
         if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
         {
             if (_type == OrderTypes.SetBaseItems && _entityCommanding.TryGetDatablob<LogiBaseDB>(out LogiBaseDB lbdb))
@@ -77,7 +77,7 @@ public class SetLogisticsOrder : EntityCommand
         StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
     }
 
-    public class Changes//maybe should be a struct, but would need to not use a dictionary and need to check mutability. 
+    public class Changes//maybe should be a struct, but would need to not use a dictionary and need to check mutability.
     {
         public Dictionary<Guid, double> VolumeAmounts;
         public int MaxMass;
@@ -88,7 +88,7 @@ public class SetLogisticsOrder : EntityCommand
             MaxMass = 0;
         }
     }
-        
+
     public static void CreateCommand_SetShipTypeAmounts(Entity entity, Changes changes )
     {
 
@@ -99,13 +99,13 @@ public class SetLogisticsOrder : EntityCommand
         cmd._shipChanges = changes;
 
         StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
-            
+
         StaticRefLib.ProcessorManager.GetProcessor<LogiShipperDB>().ProcessEntity(entity, 0);
         StaticRefLib.ProcessorManager.GetProcessor<LogiBaseDB>().ProcessManager(entity.Manager, 0);
         cmd.UpdateDetailString();
     }
 
-    internal override void ActionCommand(DateTime atDateTime)
+    internal override void Execute(DateTime atDateTime)
     {
         if (!IsRunning)
         {
@@ -123,10 +123,10 @@ public class SetLogisticsOrder : EntityCommand
                         else
                             db.ListedItems[item.Key] = item.Value;
                     }
-                    //NOTE: possibly some conflict here. 
-                    //we might need to consider what to do if a ship is already contracted to grab stuff, 
+                    //NOTE: possibly some conflict here.
+                    //we might need to consider what to do if a ship is already contracted to grab stuff,
                     //and then we change this and remove the items before the ship has collected them.
-                        
+
                     break;
                 }
 
@@ -151,10 +151,10 @@ public class SetLogisticsOrder : EntityCommand
                     }
 
                     db.MaxTradeMass = _shipChanges.MaxMass;
-                        
+
                     break;
                 }
-                    
+
             }
         }
     }

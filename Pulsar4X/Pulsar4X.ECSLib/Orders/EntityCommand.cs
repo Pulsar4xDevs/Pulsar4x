@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public Guid CmdID { get; internal set; } = Guid.NewGuid();
         public bool UseActionLanes = true;
-        public abstract ActionLaneTypes ActionLanes { get;  }
+        public abstract ActionLaneTypes ActionLanes { get; }
         public abstract bool IsBlocking { get; }
         public abstract string Name { get; }
         public abstract string Details { get; }
@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
         /// Actions the command.
         /// </summary>
         /// <param name="game">Game.</param>
-        internal abstract void ActionCommand(DateTime atDateTime);
+        internal abstract void Execute(DateTime atDateTime);
 
         public bool PauseOnAction = false;
 
@@ -157,7 +157,7 @@ namespace Pulsar4X.ECSLib
             game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             var namedb = _entityCommanding.GetDataBlob<NameDB>();
             namedb.SetName(_factionEntity.Guid, NewName);

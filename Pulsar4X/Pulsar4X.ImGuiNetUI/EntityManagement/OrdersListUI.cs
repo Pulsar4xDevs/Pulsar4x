@@ -9,8 +9,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
     public class OrdersListUI : NonUniquePulsarGuiWindow
     {
         private Entity _orderEntity;
-        private OrderableDB _orderableDB;        
-        
+        private OrderableDB _orderableDB;
+
         private OrdersListUI(EntityState entity, GlobalUIState state)
         {
             _state = state;
@@ -47,7 +47,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         public override void OnSystemTickChange(DateTime newDate)
         {
-            foreach (var item in _orderableDB.GetActionList())
+            foreach (var item in _orderableDB.ActionList)
             {
                 item.UpdateDetailString();
             }
@@ -55,7 +55,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         internal override void Display()
         {
-            var orders = _orderableDB.GetActionList();
+            var orders = _orderableDB.ActionList;
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(550, 325), ImGuiCond.Once);
             if (IsActive == true && ImGui.Begin("Orders: " + _orderEntity.GetOwnersName(), ref IsActive, _flags))
             {
@@ -126,7 +126,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 else
                 {
                     ImGui.Text("No Orders");
-                    
+
                     ImGui.NextColumn();
                     if (ImGui.Selectable("* Double Click to add some now *"))
                     {
@@ -136,7 +136,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                 ImGui.Columns(1);
             }
-            
+
         }
     }
 }

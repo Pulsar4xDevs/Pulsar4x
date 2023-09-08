@@ -41,49 +41,45 @@ namespace Pulsar4X.ECSLib
         {
             if(entity.TryGetDatablob<OrderableDB>(out var orderableDB))
             {
-                lock (orderableDB.Lock)
-                {
-                    //var actionList = new List<EntityCommand>(_actionList);
-                    int mask = 0;
-                    var list = orderableDB.ActionList;
+                int mask = 0;
+                var list = orderableDB.ActionList;
 
-                    int i = 0;
-                    while (i < list.Count)
-                    {   var j = list.Count;
-                        EntityCommand entityCommand = list[i];
+                int i = 0;
+                while (i < list.Count)
+                {   var j = list.Count;
+                    EntityCommand entityCommand = list[i];
 
-                        if ((mask & ((int)entityCommand.ActionLanes)) == 0) //bitwise and
+                    if ((mask & ((int)entityCommand.ActionLanes)) == 0) //bitwise and
+                    {
+                        if (entityCommand.IsBlocking)
                         {
-                            if (entityCommand.IsBlocking)
+                            mask = mask | ((int)entityCommand.ActionLanes); //bitwise or
+                        }
+                        if (atDateTime >= entityCommand.ActionOnDate)
+                        {
+                            if(entityCommand.PauseOnAction &! entityCommand.IsRunning)
                             {
-                                mask = mask | ((int)entityCommand.ActionLanes); //bitwise or
+                                Event newEvent = new Event(atDateTime, "Command Halt");
+                                newEvent.EventType = EventType.OrdersHalt;
+                                newEvent.Entity = orderableDB.OwningEntity;
+                                newEvent.Faction = orderableDB.OwningEntity.GetFactionOwner;
+                                StaticRefLib.EventLog.AddEvent(newEvent);
                             }
-                            if (atDateTime >= entityCommand.ActionOnDate)
-                            {
-                                if(entityCommand.PauseOnAction &! entityCommand.IsRunning)
-                                {
-                                    Event newEvent = new Event(atDateTime, "Command Halt");
-                                    newEvent.EventType = EventType.OrdersHalt;
-                                    newEvent.Entity = orderableDB.OwningEntity;
-                                    newEvent.Faction = orderableDB.OwningEntity.GetFactionOwner;
-                                    StaticRefLib.EventLog.AddEvent(newEvent);
-                                }
-                                entityCommand.ActionCommand(atDateTime);
-                            }
+                            entityCommand.Execute(atDateTime);
                         }
+                    }
 
-                        if (entityCommand.IsFinished())
-                        {
-                            if(j != list.Count)
-                                throw new Exception ("List Changed");
-                            if(list[i] != entityCommand)
-                                throw new Exception("How is this possible");
-                            list.RemoveAt(i);
-                        }
-                        else
-                        {
-                            i++;
-                        }
+                    if (entityCommand.IsFinished())
+                    {
+                        if(j != list.Count)
+                            throw new Exception ("List Changed");
+                        if(list[i] != entityCommand)
+                            throw new Exception("How is this possible");
+                        orderableDB.ActionList.RemoveAt(i);
+                    }
+                    else
+                    {
+                        i++;
                     }
                 }
             }

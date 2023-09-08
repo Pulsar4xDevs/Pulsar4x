@@ -4,7 +4,7 @@ using Pulsar4X.ECSLib;
 
 public static class OrderRegistry
 {
-    public static Dictionary<string, Func<IAction>> Actions = new Dictionary<string, Func<IAction>>()
+    public static Dictionary<string, Func<EntityCommand>> Actions = new Dictionary<string, Func<EntityCommand>>()
     {
         { "Move to Nearest Colony", () => new MoveToNearestColonyAction() },
         { "Refuel", () => new RefuelAction() },

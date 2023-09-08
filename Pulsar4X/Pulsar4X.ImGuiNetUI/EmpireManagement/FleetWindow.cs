@@ -177,7 +177,8 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                             ImGui.Separator();
                             DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
-                            string orderName = selectedFleetDB.CurrentOrders.Count == 0 ? "None" : OrderRegistry.ActionDescriptions[selectedFleetDB.CurrentOrders.Peek().GetType()];
+                            selectedFleet.TryGetDatablob<OrderableDB>(out var orderableDB);
+                            string orderName = orderableDB.ActionList.Count == 0 ? "None" : orderableDB.ActionList[0].Name; // FIXME: is 0 always the current action?
                             DisplayHelpers.PrintRow("Current Orders", orderName, separator: false);
                         }
                         ImGui.EndChild();
@@ -416,7 +417,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             if(orderActionsIndex >= 0 && orderActionsIndex < orderActionDescriptions.Length)
                             {
-                                IAction selectedAction = OrderRegistry.Actions[orderActionDescriptions[orderActionsIndex]]();
+                                var selectedAction = OrderRegistry.Actions[orderActionDescriptions[orderActionsIndex]]();
                                 selectedOrder.Actions.Add(selectedAction);
                             }
                         }
@@ -697,7 +698,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void DisplayActionItem(IAction action)
+        private void DisplayActionItem(EntityCommand action)
         {
             ImGui.PushID(action.GetHashCode());
             var size = ImGui.GetContentRegionAvail();

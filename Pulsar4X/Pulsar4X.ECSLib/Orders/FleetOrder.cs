@@ -124,7 +124,7 @@ namespace Pulsar4X.ECSLib
             return order;
         }
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             var factionRoot = _factionEntity.GetDataBlob<FleetDB>();
             switch(OrderType)

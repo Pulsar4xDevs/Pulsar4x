@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib.Industry
         private Vector3 targetPosition;
         private Entity orbitalParent = null;
         private bool _hasLaunched = false;
-        
+
         public static void CreateCommand(Guid faction, Entity orderEntity, Guid lauchSlot, Guid jobID)
         {
             var cmd = new LaunchShipCmd()
@@ -35,16 +35,16 @@ namespace Pulsar4X.ECSLib.Industry
             };
 
             var parent = orderEntity.GetSOIParentEntity();
-            
+
             StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             if (!IsRunning)
             {
                 var portDB = _entityCommanding.GetDataBlob<IndustryAbilityDB>();
-                
+
                 foreach (var job in portDB.ProductionLines[_launchSlot].Jobs)
                 {
                     if (job.ItemGuid == _jobID)
@@ -54,7 +54,7 @@ namespace Pulsar4X.ECSLib.Industry
                         if(_entityCommanding.HasDataBlob<ColonyInfoDB>())
                         {
                             var planet = _entityCommanding.GetDataBlob<ColonyInfoDB>().PlanetEntity;
-                            
+
                             FuelCost = OrbitMath.FuelCostToLowOrbit(planet, design.MassPerUnit);
                             targetPosition = new Vector3(0, OrbitMath.LowOrbitRadius(planet), 0);
                             IsRunning = true;
@@ -66,7 +66,7 @@ namespace Pulsar4X.ECSLib.Industry
                             targetPosition = _entityCommanding.GetDataBlob<PositionDB>().RelativePosition;
                             IsRunning = true;
                         }
-                        
+
                     }
                 }
             }

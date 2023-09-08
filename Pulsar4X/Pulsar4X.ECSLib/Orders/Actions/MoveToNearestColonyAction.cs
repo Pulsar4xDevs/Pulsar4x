@@ -1,12 +1,14 @@
+using System;
+
 namespace Pulsar4X.ECSLib
 {
-    public class MoveToNearestColonyAction : IAction
+    public class MoveToNearestColonyAction : BaseFleetCommand
     {
-        public void Execute(Entity fleet)
+        public override string Name => "Move to Nearest Colony";
+        public override string Details => "Moves the fleet to the nearest colony.";
+        internal override void Execute(DateTime atDateTime)
         {
-            // TODO
+            base.Execute(atDateTime);
         }
-
-        public bool IsFinished { get; private set; } = false;
     }
 }

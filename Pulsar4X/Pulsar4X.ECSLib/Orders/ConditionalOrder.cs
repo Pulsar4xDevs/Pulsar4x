@@ -1,12 +1,10 @@
-using System.Collections.Generic;
-
 namespace Pulsar4X.ECSLib
 {
     public class ConditionalOrder
     {
         public string Name { get; set; }
         public CompoundCondition Condition { get; }
-        public SafeList<IAction> Actions { get; }
+        public SafeList<EntityCommand> Actions { get; }
 
         public bool IsValid
         {
@@ -22,7 +20,7 @@ namespace Pulsar4X.ECSLib
             Actions = new ();
         }
 
-        public ConditionalOrder(CompoundCondition condition, SafeList<IAction> actions)
+        public ConditionalOrder(CompoundCondition condition, SafeList<EntityCommand> actions)
         {
             Condition = condition;
             Actions = actions;
