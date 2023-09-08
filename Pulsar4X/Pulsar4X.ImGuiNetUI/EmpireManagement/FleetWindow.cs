@@ -469,8 +469,8 @@ namespace Pulsar4X.SDL2UI
 
             if(ImGui.Button("Create New Fleet", new Vector2(Styles.LeftColumnWidthLg, 0f)))
             {
-                var theme = StaticRefLib.StaticData.FleetNameThemes.First(t => t.ThemeName.Equals("Default"));
-                string name = theme.Names[StaticRefLib.Game.RNG.Next(0, theme.Names.Count)];
+                var theme = StaticRefLib.StaticData.Themes["default"];
+                string name = theme.FleetNames[StaticRefLib.Game.RNG.Next(0, theme.FleetNames.Count)];
                 var order = FleetOrder.CreateFleetOrder(name, _uiState.Faction);
                 StaticRefLib.OrderHandler.HandleOrder(order);
             }

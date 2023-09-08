@@ -29,6 +29,13 @@ namespace Pulsar4X.ECSLib
             Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
         };
 
+        private static readonly JsonSerializer Serializer2 = new JsonSerializer
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            Formatting = Formatting.Indented,
+            Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
+        };
+
         /// <summary>
         /// Returns a list of DataVersionInfo objects representing the datasets that the StaticDataManager
         /// could find and are available for loading.
@@ -240,11 +247,19 @@ namespace Pulsar4X.ECSLib
             // we are alreading checking the types via StaticDataStore.*Type, so we 
             // can rely on there being an overload of StaticDataStore.Store
             // that supports that type.
-            dynamic data = obj["Data"].ToObject(type, Serializer);
+            dynamic data;
+            string typeStr = obj["Type"].ToString();
+            switch(typeStr)
+            {
+                case "Theme":
+                    data = obj["Data"].ToObject(type, Serializer2);
+                    break;
+                default:
+                    data = obj["Data"].ToObject(type, Serializer);
+                    break;
+            }
 
             staticDataStore.Store(data);
-            
-
         }
 
         /// <summary>

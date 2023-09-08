@@ -73,6 +73,11 @@ namespace Pulsar4X.ECSLib
         public List<ShipNameThemeSD> ShipNameThemes = new List<ShipNameThemeSD>();
 
         /// <summary>
+        /// List which stores all the themes
+        /// </summary>
+        public Dictionary<string, ThemeSD> Themes = new Dictionary<string, ThemeSD>();
+
+        /// <summary>
         /// Dictionary which stores all the Minerals.
         /// </summary>
         [JsonIgnore]
@@ -151,6 +156,9 @@ namespace Pulsar4X.ECSLib
                     "ShipNameThemes", typeof(List<ShipNameThemeSD>)
                 },
                 {
+                    "Theme", typeof(Dictionary<string, ThemeSD>)
+                },
+                {
                     "Minerals", typeof(Dictionary<Guid, MineralSD>)
                 },
                 {
@@ -200,6 +208,9 @@ namespace Pulsar4X.ECSLib
                 },
                 {
                     typeof(List<ShipNameThemeSD>), "ShipNameThemes"
+                },
+                {
+                    typeof(Dictionary<string, ThemeSD>), "Theme"
                 },
                 {
                     typeof(List<MineralSD>), "Minerals"
@@ -304,6 +315,16 @@ namespace Pulsar4X.ECSLib
                         AtmosphericGases.Add(atmosphericGas);
                     }
                 }
+            }
+        }
+
+        internal void Store(Dictionary<string, ThemeSD> themes)
+        {
+            if(themes == null) return;
+
+            foreach(var (key, theme) in themes)
+            {
+                Themes[key] = theme;
             }
         }
 
