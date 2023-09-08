@@ -96,6 +96,11 @@ namespace Pulsar4X.ECSLib
             }
             return false;
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class SetTargetFireControlOrder : EntityCommand
@@ -188,6 +193,11 @@ namespace Pulsar4X.ECSLib
                 }
             }
             return false;
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -293,6 +303,11 @@ namespace Pulsar4X.ECSLib
             }
             return false;
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class SetOrdinanceToWpnOrder : EntityCommand
@@ -372,6 +387,11 @@ namespace Pulsar4X.ECSLib
                 }
             }
             return false;
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
         }
     }
 }

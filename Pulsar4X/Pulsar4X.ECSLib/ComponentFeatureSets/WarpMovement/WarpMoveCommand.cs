@@ -132,5 +132,10 @@ namespace Pulsar4X.ECSLib
                 return _db.IsAtTarget;
             return false;
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

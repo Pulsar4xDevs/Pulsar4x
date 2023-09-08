@@ -163,4 +163,9 @@ public class SetLogisticsOrder : EntityCommand
     {
         return true;
     }
+
+    public override EntityCommand Clone()
+    {
+        throw new NotImplementedException();
+    }
 }

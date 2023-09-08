@@ -55,13 +55,11 @@ namespace Pulsar4X.ECSLib
                     // and stop processing further standing orders
                     foreach(var action in order.Actions)
                     {
-                        // FIXME: we need to clone the action
-                        orderableDB.ActionList.Add(action);
+                        orderableDB.ActionList.Add(action.Clone());
                     }
                     break;
                 }
             }
-            Console.WriteLine(fleetDB.OwningEntity.Guid.ToString());
         }
     }
 }

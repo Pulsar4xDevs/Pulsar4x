@@ -90,4 +90,9 @@ public class ShipLogisticsOrders : EntityCommand
         }
         return false;
     }
+
+    public override EntityCommand Clone()
+    {
+        throw new NotImplementedException();
+    }
 }

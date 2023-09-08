@@ -94,5 +94,10 @@ namespace Pulsar4X.ECSLib.Industry
             else
                 return false;
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

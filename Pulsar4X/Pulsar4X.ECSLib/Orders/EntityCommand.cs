@@ -79,6 +79,8 @@ namespace Pulsar4X.ECSLib
 
         public bool IsRunning { get; protected set; } = false;
         public abstract bool IsFinished();
+
+        public abstract EntityCommand Clone();
     }
 
     public static class CommandHelpers
@@ -176,6 +178,11 @@ namespace Pulsar4X.ECSLib
                 return true;
             }
             return false;
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
         }
     }
 }

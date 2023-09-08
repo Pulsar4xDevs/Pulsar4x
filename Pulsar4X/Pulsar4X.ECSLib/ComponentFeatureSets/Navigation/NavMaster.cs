@@ -29,6 +29,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Navigation
         {
             throw new NotImplementedException();
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 

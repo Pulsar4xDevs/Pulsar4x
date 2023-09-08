@@ -212,7 +212,7 @@ namespace Pulsar4X.ECSLib.Industry
         }
     }
 
-    public class IndustryOrder2:EntityCommand
+    public class IndustryOrder2 : EntityCommand
     {
 
         public override string Name
@@ -386,6 +386,11 @@ namespace Pulsar4X.ECSLib.Industry
                 return true;
             }
             return false;
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
         }
 
     }

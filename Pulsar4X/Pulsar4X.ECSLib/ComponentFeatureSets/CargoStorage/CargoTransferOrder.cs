@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class CargoUnloadToOrder:EntityCommand
+    public class CargoUnloadToOrder : EntityCommand
     {
         public List<(Guid ID, long amount)> ItemsGuidsToTransfer;
 
@@ -118,7 +118,12 @@ namespace Pulsar4X.ECSLib
                 amount += tup.Item2;
             }
             return amount;
-         }
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class CargoLoadFromOrder : EntityCommand
@@ -200,6 +205,11 @@ namespace Pulsar4X.ECSLib
         public override bool IsFinished()
         {
             return Order.IsFinished();
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
         }
     }
 }

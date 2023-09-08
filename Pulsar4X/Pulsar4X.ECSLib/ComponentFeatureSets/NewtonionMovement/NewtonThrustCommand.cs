@@ -215,6 +215,11 @@ namespace Pulsar4X.ECSLib
             else
                 return false;
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class ThrustToTargetCmd : EntityCommand
@@ -426,6 +431,11 @@ namespace Pulsar4X.ECSLib
             else
                 return false;
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 
@@ -625,6 +635,11 @@ namespace Pulsar4X.ECSLib
                 return true;
             else
                 return false;
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
         }
     }
 

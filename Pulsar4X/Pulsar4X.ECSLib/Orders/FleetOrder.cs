@@ -252,5 +252,10 @@ namespace Pulsar4X.ECSLib
             }
             return false;
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
