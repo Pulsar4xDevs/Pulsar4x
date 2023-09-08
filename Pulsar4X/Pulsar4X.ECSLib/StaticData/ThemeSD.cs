@@ -9,6 +9,8 @@ namespace Pulsar4X.ECSLib
         public List<string> FleetNames;
         public List<string> ShipNames;
         public List<string> CommanderNames;
+        public Dictionary<int, string> NavyRanks;
+        public Dictionary<int, string> NavyRanksAbbreviations;
 
         public bool Equals(ThemeSD other)
         {

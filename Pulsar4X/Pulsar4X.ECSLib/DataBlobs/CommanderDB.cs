@@ -12,34 +12,6 @@ namespace Pulsar4X.ECSLib
 
     public class CommanderDB : BaseDataBlob
     {
-        public static readonly Dictionary<int, string> NavyRanks = new Dictionary<int, string>()
-        {
-            { 1, "Ensign" },
-            { 2, "Lieutenant (JG)" },
-            { 3, "Lieutenant" },
-            { 4, "Lieutenant Commander" },
-            { 5, "Commander" },
-            { 6, "Captain" },
-            { 7, "Rear Admiral (lower half)" },
-            { 8, "Rear Admiral" },
-            { 9, "Vice Admiral" },
-            { 10, "Admiral" }
-        };
-
-        public static readonly Dictionary<int, string> NavyRanksAbbreviations = new Dictionary<int, string>()
-        {
-            { 1, "ENS" },
-            { 2, "LTJG" },
-            { 3, "LT" },
-            { 4, "LTCR" },
-            { 5, "CDR" },
-            { 6, "CAPT" },
-            { 7, "RDML" },
-            { 8, "RADM" },
-            { 9, "VADM" },
-            { 10, "ADM" }
-        };
-
         [JsonProperty]
         public string Name { get; internal set; }
 
@@ -77,7 +49,7 @@ namespace Pulsar4X.ECSLib
             switch(Type)
             {
                 case CommanderTypes.Navy:
-                    return NavyRanksAbbreviations[Rank] + " " + Name;
+                    return StaticRefLib.StaticData.Themes["default"].NavyRanksAbbreviations[Rank] + " " + Name;
                 default:
                     return Name;
             }
