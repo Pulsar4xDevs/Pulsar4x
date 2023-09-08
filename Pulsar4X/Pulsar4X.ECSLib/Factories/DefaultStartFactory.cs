@@ -278,8 +278,9 @@ namespace Pulsar4X.ECSLib
 
             factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "UEF");
 
-
-            Entity defaultFleet = FleetFactory.Create(game.GlobalManager, factionEntity.Guid, "Default Fleet");
+            var theme = StaticRefLib.StaticData.Themes["default"];
+            var fleetName = theme.FleetNames[StaticRefLib.Game.RNG.Next(0, theme.FleetNames.Count)];
+            Entity defaultFleet = FleetFactory.Create(game.GlobalManager, factionEntity.Guid, fleetName);
             defaultFleet.GetDataBlob<FleetDB>().SetParent(factionEntity);
 
             // Todo: handle this in CreateShip
