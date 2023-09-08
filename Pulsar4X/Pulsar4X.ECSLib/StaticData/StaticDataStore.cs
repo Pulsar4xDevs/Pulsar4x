@@ -57,22 +57,6 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// List which stores all the Commander Name themes.
-        /// </summary>
-        [JsonIgnore]
-        public List<CommanderNameThemeSD> CommanderNameThemes = new List<CommanderNameThemeSD>();
-
-        /// <summary>
-        /// List which stores all the Fleet Name themes
-        /// </summary>
-        public List<FleetNameThemeSD> FleetNameThemes = new List<FleetNameThemeSD>();
-
-        /// <summary>
-        /// List which stores all the Ship Name themes
-        /// </summary>
-        public List<ShipNameThemeSD> ShipNameThemes = new List<ShipNameThemeSD>();
-
-        /// <summary>
         /// List which stores all the themes
         /// </summary>
         public Dictionary<string, ThemeSD> Themes = new Dictionary<string, ThemeSD>();
@@ -147,15 +131,6 @@ namespace Pulsar4X.ECSLib
                     "AtmosphericGases", typeof(WeightedList<AtmosphericGasSD>)
                 },
                 {
-                    "CommanderNameThemes", typeof(List<CommanderNameThemeSD>)
-                },
-                {
-                    "FleetNameThemes", typeof(List<FleetNameThemeSD>)
-                },
-                {
-                    "ShipNameThemes", typeof(List<ShipNameThemeSD>)
-                },
-                {
                     "Theme", typeof(Dictionary<string, ThemeSD>)
                 },
                 {
@@ -199,15 +174,6 @@ namespace Pulsar4X.ECSLib
             {
                 {
                     typeof(WeightedList<AtmosphericGasSD>), "AtmosphericGases"
-                },
-                {
-                    typeof(List<CommanderNameThemeSD>), "CommanderNameThemes"
-                },
-                {
-                    typeof(List<FleetNameThemeSD>), "FleetNameThemes"
-                },
-                {
-                    typeof(List<ShipNameThemeSD>), "ShipNameThemes"
                 },
                 {
                     typeof(Dictionary<string, ThemeSD>), "Theme"
@@ -325,68 +291,6 @@ namespace Pulsar4X.ECSLib
             foreach(var (key, theme) in themes)
             {
                 Themes[key] = theme;
-            }
-        }
-
-        /// <summary>
-        /// Stores Commander Name Themes.
-        /// </summary>
-        internal void Store(List<CommanderNameThemeSD> commanderNameThemes)
-        {
-            if (commanderNameThemes != null)
-            {
-                foreach (CommanderNameThemeSD commanderNameThemeSD in commanderNameThemes)
-                {
-                    if (CommanderNameThemes.Contains(commanderNameThemeSD))
-                    {
-                        // Update existing value.
-                        int index = CommanderNameThemes.IndexOf(commanderNameThemeSD);
-                        CommanderNameThemes[index] = commanderNameThemeSD;
-                    }
-                    else
-                    {
-                        // Add new value.
-                        CommanderNameThemes.Add(commanderNameThemeSD);
-                    }
-                }
-            }
-        }
-
-        internal void Store(List<FleetNameThemeSD> fleetNameThemes)
-        {
-            if(fleetNameThemes == null)
-                return;
-
-            foreach(var theme in fleetNameThemes)
-            {
-                if(FleetNameThemes.Contains(theme))
-                {
-                    int index = FleetNameThemes.IndexOf(theme);
-                    FleetNameThemes[index] = theme;
-                }
-                else
-                {
-                    FleetNameThemes.Add(theme);
-                }
-            }
-        }
-
-        internal void Store(List<ShipNameThemeSD> shipNameThemes)
-        {
-            if(shipNameThemes == null)
-                return;
-
-            foreach(var theme in shipNameThemes)
-            {
-                if(ShipNameThemes.Contains(theme))
-                {
-                    int index = ShipNameThemes.IndexOf(theme);
-                    ShipNameThemes[index] = theme;
-                }
-                else
-                {
-                    ShipNameThemes.Add(theme);
-                }
             }
         }
 
@@ -511,7 +415,10 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public static Type GetType(string typeString)
         {
-            return StringsToTypes[typeString];
+            if(StringsToTypes.ContainsKey(typeString))
+                return StringsToTypes[typeString];
+            else
+                return null;
         }
 
         [OnDeserialized]

@@ -10,7 +10,7 @@ using Hjson;
 namespace Pulsar4X.ECSLib
 {
     /// <summary>
-    /// This class manages the games static data. This includes import/export of static data 
+    /// This class manages the games static data. This includes import/export of static data
     /// for an existing game as well as the initial import of the static data for a new game.
     /// </summary>
     public class StaticDataManager
@@ -108,8 +108,8 @@ namespace Pulsar4X.ECSLib
                     newStore.LoadedDataSets.Add(dataVInfo);
                 }
                 newStore.SetStorageTypeMap();
-                
-                
+
+
                 //Test the components formula for parsability
                 List<Guid> badComponents = new List<Guid>();
                 foreach (var componentKVP in newStore.ComponentTemplates)
@@ -131,12 +131,12 @@ namespace Pulsar4X.ECSLib
                 }
 
             }
-            
+
             catch (Exception e)
             {
                 if (e.GetType() == typeof(JsonSerializationException) || e.GetType() == typeof(JsonReaderException) || e.GetType() == typeof(ArgumentException))
                     throw new StaticDataLoadException("Bad Json provided in directory: " + dataDir , e);
-                
+
 
                 throw;  // rethrow exception if not known ;)
             }
@@ -202,7 +202,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Checks for a valid vinfo file in the specified directory, if the file is found it loads it and 
+        /// Checks for a valid vinfo file in the specified directory, if the file is found it loads it and
         /// checks that it is compatible with previously loaded data and the library.
         /// </summary>
         /// <param name="directory">Directory to check.</param>
@@ -242,9 +242,12 @@ namespace Pulsar4X.ECSLib
             // we need to work out the type:
             Type type = StaticDataStore.GetType(obj["Type"].ToString());
 
+            if(type == null)
+                return;
+
             // grab the data:
             // use dynamic here to avoid having to know/use the exact the types.
-            // we are alreading checking the types via StaticDataStore.*Type, so we 
+            // we are alreading checking the types via StaticDataStore.*Type, so we
             // can rely on there being an overload of StaticDataStore.Store
             // that supports that type.
             dynamic data;
@@ -327,7 +330,7 @@ namespace Pulsar4X.ECSLib
 
     /// <summary>
     /// Exception which is thown when an error occurs during loading of atatic data.
-    /// usually InnerException is set to the original exception which caused the error. 
+    /// usually InnerException is set to the original exception which caused the error.
     /// </summary>
     public class StaticDataLoadException : Exception
     {
@@ -350,8 +353,8 @@ namespace Pulsar4X.ECSLib
     }
 
     /// <summary>
-    /// This is a simple attribute that should be attached to Static Data structs. It assists reflection in finding 
-    /// Static data and dealing with it. It has two properties, HasID and IDPropertyName, that are used to 
+    /// This is a simple attribute that should be attached to Static Data structs. It assists reflection in finding
+    /// Static data and dealing with it. It has two properties, HasID and IDPropertyName, that are used to
     /// signal that this piece of static data has a unique guid that represents it.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
