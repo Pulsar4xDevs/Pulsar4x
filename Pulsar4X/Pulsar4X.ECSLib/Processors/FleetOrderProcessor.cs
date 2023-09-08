@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
             {
                 ProcessEntity(entity, deltaSeconds);
             }
-            return entities.Count;
+            return Math.Max(entities.Count, 1);
         }
     }
 }

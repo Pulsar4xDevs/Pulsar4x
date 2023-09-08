@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
                 return entity.GetDataBlob<NameDB>().OwnersName;
             return "Unknown";
         }
-        
+
         public static string GetName(this Entity entity, Guid factionID)
         {
             if (entity.HasDataBlob<NameDB>())
@@ -44,7 +44,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Gets the Sphere of influence parent (the entity this object is orbiting) for a given entity.
-        /// *Does not check if the entity is infact within the sphere of influence, just the current position heirarchy.* 
+        /// *Does not check if the entity is infact within the sphere of influence, just the current position heirarchy.*
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="positionDB">provide this to save looking it up</param>
@@ -53,7 +53,8 @@ namespace Pulsar4X.ECSLib
         {
             if (positionDB == null)
                 positionDB = entity.GetDataBlob<PositionDB>();
-            return positionDB.Parent;
+
+            return positionDB == null ? null : positionDB.Parent;
         }
 
         public static (Vector3 pos, Vector3 Velocity) GetRelativeState(this Entity entity)
@@ -294,7 +295,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// For more efficent, get and store a reference to PositionDB. 
+        /// For more efficent, get and store a reference to PositionDB.
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>

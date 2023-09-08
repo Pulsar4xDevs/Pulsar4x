@@ -195,6 +195,8 @@ namespace Pulsar4X.ECSLib
                     if(navyDB.Children.Count == 0 || navyDB.FlagShipID == Guid.Empty)
                     {
                         navyDB.FlagShipID = _targetEntity.Guid;
+                        // update to the ships manager
+                        _entityCommanding.Transfer(_targetEntity.Manager);
                     }
 
                     navyDB.AddChild(_targetEntity);
@@ -206,9 +208,15 @@ namespace Pulsar4X.ECSLib
                     if(_targetEntity.Guid == navyDB.FlagShipID)
                     {
                         navyDB.FlagShipID = Guid.Empty;
+                        // if we have no flagship, move to the global entity manager
+                        _entityCommanding.Transfer(_manager);
                     }
                     break;
                 case FleetOrderType.SetFlagShip:
+                    if(_entityCommanding.Manager != _targetEntity.Manager)
+                    {
+                        _entityCommanding.Transfer(_targetEntity.Manager);
+                    }
                     _entityCommanding.GetDataBlob<FleetDB>().FlagShipID = _targetEntity.Guid;
                     break;
                 case FleetOrderType.ToggleInheritOrders:
