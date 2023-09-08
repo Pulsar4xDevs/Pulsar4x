@@ -34,28 +34,6 @@ namespace Pulsar4X.Tests
 
             StaticDataManager.ExportStaticData(atmoGases, "AtmoGasesExportTest.json");
 
-            List<CommanderNameThemeSD> nameThemes = new List<CommanderNameThemeSD>();
-            CommanderNameThemeSD nameTheme = new CommanderNameThemeSD();
-            nameTheme.NameList = new List<CommanderNameSD>();
-            nameTheme.ThemeName = "The Creators";
-
-            CommanderNameSD name = new CommanderNameSD();
-            name.First = "Greg";
-            name.Last = "Nott";
-            name.IsFemale = false;
-
-            nameTheme.NameList.Add(name);
-
-            name.First = "Rod";
-            name.Last = "Serling";
-            name.IsFemale = false;
-
-            nameTheme.NameList.Add(name);
-
-            nameThemes.Add(nameTheme);
-
-            StaticDataManager.ExportStaticData(nameThemes, "CommanderNameThemeExportTest.json");
-
             StaticDataManager.ExportStaticData(VersionInfo.PulsarVersionInfo, "VersionInfoExportTest.vinfo");
 
             List<MineralSD> minList = new List<MineralSD>();
@@ -120,7 +98,7 @@ namespace Pulsar4X.Tests
 
             //installations.Add(install);
 
-            
+
 
             //ComponentAbilitySD launchAbility = new ComponentAbilitySD();
             //launchAbility.Ability = AbilityType.LaunchMissileSize;
@@ -199,7 +177,7 @@ namespace Pulsar4X.Tests
                 Description = "Fuel for SpaceShips",
                 ID = new Guid("33E6AC88-0235-4917-A7FF-35C8886AAD3A"),
                 MineralsRequired = new Dictionary<Guid, long>(),
-                
+
                 MassPerUnit = 1,
                 //soriumFuel.CargoType = CargoType.Fuel;
                 IndustryPointCosts = 10,
@@ -214,9 +192,9 @@ namespace Pulsar4X.Tests
                 Description = "A mix of Duranium and refined fuel to teset refinarys",
                 ID = new Guid("6DA93677-EE08-4853-A8A5-0F46D93FE0EB"),
                 MineralsRequired = new Dictionary<Guid, long>(),
-                
+
                 MaterialsRequired = new Dictionary<Guid, long>(),
-                
+
                 MassPerUnit = 1,
                 //DepleatedDuranuim.CargoType = CargoType.General;
                 IndustryPointCosts = 20,
@@ -227,7 +205,7 @@ namespace Pulsar4X.Tests
             mats.Add(DepleatedDuranuim.ID, DepleatedDuranuim);
 
             StaticDataManager.ExportStaticData(mats, "ReinfedMaterialsDataExportTest.json");
-            
+
         }
 
         [Test]
@@ -319,7 +297,7 @@ namespace Pulsar4X.Tests
             techs.Add(EngineTech4.ID, EngineTech4);
 
             StaticDataManager.ExportStaticData(techs, "TechnologyDataExportTest.json");
-            
+
         }
 
         [Test]
@@ -369,10 +347,10 @@ namespace Pulsar4X.Tests
             int mineralsNum = staticDataStore.CargoGoods.GetMineralsList().Count;
             Guid someGuid = new Guid("08f15d35-ea1d-442f-a2e3-bde04c5c22e9");
             string someName = staticDataStore.CargoGoods.GetMineral(someGuid).Name;
-            
+
             StaticDataManager.LoadData("Other", game);
             staticDataStore = game.StaticData;
-            
+
             // now check that overwriting occured and that there were no duplicates:
             Assert.AreEqual(mineralsNum, staticDataStore.CargoGoods.GetMineralsList().Count);
             //check the name has been overwritten
@@ -402,7 +380,7 @@ namespace Pulsar4X.Tests
             testObj = staticDataStore.FindDataObjectUsingID(testID);
             Assert.IsNotNull(testObj);
             Assert.AreEqual(testID, ((MineralSD)testObj).ID);
-            
+
             testObj = staticDataStore.FindDataObjectUsingID(testID);
             Assert.IsNotNull(testObj);
 
@@ -414,7 +392,7 @@ namespace Pulsar4X.Tests
 
         //for want of a better place to put it.
         [Test]
-        public void TestJdicExtension() 
+        public void TestJdicExtension()
         {
             Dictionary<int, int> dict = new Dictionary<int, int>();
             dict.Add(1,1);
