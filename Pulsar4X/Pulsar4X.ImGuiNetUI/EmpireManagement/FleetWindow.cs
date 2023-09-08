@@ -122,11 +122,23 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Columns(2);
                             DisplayHelpers.PrintRow("Name", Name(selectedFleet));
 
-                            DisplayHelpers.PrintRow("Commander", "TODO");
                             if(selectedFleetFlagship != null)
+                            {
                                 DisplayHelpers.PrintRow("Flagship", Name(selectedFleetFlagship));
+                                if(selectedFleetFlagship.TryGetDatablob<CommanderDB>(out var commanderDB))
+                                {
+                                    DisplayHelpers.PrintRow("Commander", commanderDB.ToString());
+                                }
+                                else
+                                {
+                                    DisplayHelpers.PrintRow("Commander", "-");
+                                }
+                            }
                             else
+                            {
                                 DisplayHelpers.PrintRow("Flagship", "-");
+                                DisplayHelpers.PrintRow("Commander", "-");
+                            }
 
                             // Current system
                             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
@@ -201,7 +213,14 @@ namespace Pulsar4X.SDL2UI
                                     }
                                     DisplayShipContextMenu(selectedShips, ship);
                                     ImGui.NextColumn();
-                                    ImGui.Text("TODO: Commander Name");
+                                    if(ship.TryGetDatablob<CommanderDB>(out var commanderDB))
+                                    {
+                                        ImGui.Text(commanderDB.ToString());
+                                    }
+                                    else
+                                    {
+                                        ImGui.Text("-");
+                                    }
                                     ImGui.NextColumn();
                                     ImGui.Separator();
                                 }
@@ -548,7 +567,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 if(!isUnattached)
                 {
-                    if(ship.Guid == selectedFleetFlagship.Guid)
+                    if(selectedFleetFlagship != null && ship.Guid == selectedFleetFlagship.Guid)
                     {
                         ImGui.BeginDisabled();
                     }
@@ -558,7 +577,7 @@ namespace Pulsar4X.SDL2UI
                         StaticRefLib.OrderHandler.HandleOrder(setFlagshipOrder);
                         SelectFleet(selectedFleet);
                     }
-                    if(ship.Guid == selectedFleetFlagship.Guid)
+                    if(selectedFleetFlagship != null && ship.Guid == selectedFleetFlagship.Guid)
                     {
                         ImGui.EndDisabled();
                     }

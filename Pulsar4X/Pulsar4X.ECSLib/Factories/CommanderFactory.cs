@@ -1,9 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Pulsar4X.ECSLib
 {
     public static class CommanderFactory
     {
+        public static CommanderDB CreateShipCaptain(Random rng, string themeName)
+        {
+            var theme = StaticRefLib.StaticData.Themes[themeName];
+            var commander = new CommanderDB()
+            {
+                Name = theme.CommanderNames[rng.Next(0, theme.CommanderNames.Count)],
+                Rank = 6,
+                Type = CommanderTypes.Navy
+            };
+
+            return commander;
+        }
+
         public static Scientist CreateScientist(Entity faction, Entity location)
         {
             //all this stuff needs a proper bit of code to get names from a file or something

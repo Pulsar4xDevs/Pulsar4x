@@ -281,8 +281,11 @@ namespace Pulsar4X.ECSLib
 
             namedb.SetName(ownerFaction.Guid, shipName);
 
+            var commander = CommanderFactory.CreateShipCaptain(StaticRefLib.Game.RNG, "default");
+
             ship.SetDataBlob(namedb);
             ship.SetDataBlob(orbit);
+            ship.SetDataBlob(commander);
 
             foreach (var item in shipDesign.Components)
             {

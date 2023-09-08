@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -11,8 +12,36 @@ namespace Pulsar4X.ECSLib
 
     public class CommanderDB : BaseDataBlob
     {
+        public static readonly Dictionary<int, string> NavyRanks = new Dictionary<int, string>()
+        {
+            { 1, "Ensign" },
+            { 2, "Lieutenant (JG)" },
+            { 3, "Lieutenant" },
+            { 4, "Lieutenant Commander" },
+            { 5, "Commander" },
+            { 6, "Captain" },
+            { 7, "Rear Admiral (lower half)" },
+            { 8, "Rear Admiral" },
+            { 9, "Vice Admiral" },
+            { 10, "Admiral" }
+        };
+
+        public static readonly Dictionary<int, string> NavyRanksAbbreviations = new Dictionary<int, string>()
+        {
+            { 1, "ENS" },
+            { 2, "LTJG" },
+            { 3, "LT" },
+            { 4, "LTCR" },
+            { 5, "CDR" },
+            { 6, "CAPT" },
+            { 7, "RDML" },
+            { 8, "RADM" },
+            { 9, "VADM" },
+            { 10, "ADM" }
+        };
+
         [JsonProperty]
-        public CommanderNameSD Name { get; internal set; }
+        public string Name { get; internal set; }
 
         [JsonProperty]
         public int Rank { get; internal set; }
@@ -22,7 +51,7 @@ namespace Pulsar4X.ECSLib
 
         public CommanderDB() { }
 
-        public CommanderDB(CommanderNameSD name, int rank, CommanderTypes type)
+        public CommanderDB(string name, int rank, CommanderTypes type)
         {
             Name = name;
             Rank = rank;
@@ -41,6 +70,17 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new CommanderDB(this);
+        }
+
+        public override string ToString()
+        {
+            switch(Type)
+            {
+                case CommanderTypes.Navy:
+                    return NavyRanksAbbreviations[Rank] + " " + Name;
+                default:
+                    return Name;
+            }
         }
     }
 }
