@@ -211,6 +211,7 @@ namespace Pulsar4X.SDL2UI
                                     {
                                         selectedShips[ship] = !selectedShips[ship];
                                     }
+                                    DisplayHelpers.ShipTooltip(ship);
                                     DisplayShipContextMenu(selectedShips, ship);
                                     ImGui.NextColumn();
                                     if(ship.TryGetDatablob<CommanderDB>(out var commanderDB))
@@ -479,6 +480,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             selectedUnattachedShips[ship] = !selectedUnattachedShips[ship];
                         }
+                        DisplayHelpers.ShipTooltip(ship);
                         DisplayShipContextMenu(selectedUnattachedShips, ship, isUnattached: true);
                     }
                 }

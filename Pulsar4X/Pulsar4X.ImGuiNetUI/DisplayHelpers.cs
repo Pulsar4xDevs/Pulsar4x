@@ -1,4 +1,5 @@
 using ImGuiNET;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -39,6 +40,19 @@ namespace Pulsar4X.SDL2UI
 
             if(separator)
                 ImGui.Separator();
+        }
+
+        public static void ShipTooltip(Entity ship)
+        {
+            if(!ship.TryGetDatablob<ShipInfoDB>(out var shipInfo))
+                return;
+
+            if(ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.Text("Design: " + shipInfo.Design.Name);
+                ImGui.EndTooltip();
+            }
         }
     }
 }
