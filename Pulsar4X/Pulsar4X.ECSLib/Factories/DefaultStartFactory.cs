@@ -249,16 +249,16 @@ namespace Pulsar4X.ECSLib
 
             var stainless = NameLookup.GetMaterialSD(game, "Stainless Steel");
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, stainless, 100000);
-            
+
             var chromium = NameLookup.GetMineralSD(game, "Chromium");
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, chromium, 50000);
-            
+
             var fisiles = NameLookup.GetMineralSD(game, "Fissionables");
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, fisiles, 50000);
-            
+
             var copper = NameLookup.GetMineralSD(game, "Copper");
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, copper, 50000);
-            
+
             CargoTransferProcessor.AddCargoItems(colonyEntity, _missile, 100);
             CargoTransferProcessor.AddCargoItems(colonyEntity, _merlin, 5);
             LogiBaseDB earthlogiBase = colonyEntity.GetDataBlob<LogiBaseDB>();
@@ -278,8 +278,7 @@ namespace Pulsar4X.ECSLib
 
             factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "UEF");
 
-            var theme = StaticRefLib.StaticData.Themes["default"];
-            var fleetName = theme.FleetNames[StaticRefLib.Game.RNG.Next(0, theme.FleetNames.Count)];
+            var fleetName = NameFactory.GetFleetName();
             Entity defaultFleet = FleetFactory.Create(game.GlobalManager, factionEntity.Guid, fleetName);
             defaultFleet.GetDataBlob<FleetDB>().SetParent(factionEntity);
 
@@ -300,7 +299,7 @@ namespace Pulsar4X.ECSLib
             var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
             var methalox = NameLookup.GetMaterialSD(game, "Methalox");
             var hydrolox = NameLookup.GetMaterialSD(game, "Hydrolox");
-            
+
 
             var fleetDB = defaultFleet.GetDataBlob<FleetDB>();
             fleetDB.AddChild(gunShip0);
@@ -543,7 +542,7 @@ namespace Pulsar4X.ECSLib
             shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
             return shipdesign;
         }
-        
+
         public static ShipDesign CargoCourierDesign(Game game, Entity faction)
         {
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
@@ -705,7 +704,7 @@ namespace Pulsar4X.ECSLib
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_warpDrive.TechID);
             return _warpDrive;
         }
-        
+
         public static ComponentDesign LargeWarpDesign(Game game, Entity faction)
         {
             if (_largeWarpDrive != null)
@@ -715,7 +714,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("7d0b867f-e239-4b93-9b30-c6d4b769b5e4")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(4000); 
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(4000);
             engineDesigner.Name = "Alcuberi-White 2k";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 
@@ -752,7 +751,7 @@ namespace Pulsar4X.ECSLib
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_2500.TechID);
             return _fuelTank_2500;
         }
-        
+
         public static ComponentDesign VLargeFuelTank(Game game, Entity faction)
         {
             if (_fuelTank_3000 != null)

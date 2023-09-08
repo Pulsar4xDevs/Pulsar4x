@@ -5,12 +5,11 @@ namespace Pulsar4X.ECSLib
 {
     public static class CommanderFactory
     {
-        public static CommanderDB CreateShipCaptain(Random rng, string themeName)
+        public static CommanderDB CreateShipCaptain()
         {
-            var theme = StaticRefLib.StaticData.Themes[themeName];
             var commander = new CommanderDB()
             {
-                Name = theme.CommanderNames[rng.Next(0, theme.CommanderNames.Count)],
+                Name = NameFactory.GetCommanderName(),
                 Rank = 6,
                 Type = CommanderTypes.Navy
             };
@@ -31,11 +30,11 @@ namespace Pulsar4X.ECSLib
             sci.Age = 30;
             sci.MaxLabs = 25;
             sci.Bonuses = bonuses;
-            
+
             var factionTech = faction.GetDataBlob<FactionTechDB>();
             factionTech.AllScientists.Add((sci, location));
-            
-            return sci;    
+
+            return sci;
         }
     }
 }

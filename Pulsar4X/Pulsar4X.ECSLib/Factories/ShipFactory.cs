@@ -274,14 +274,12 @@ namespace Pulsar4X.ECSLib
             var namedb = new NameDB(ship.Guid.ToString());
             if (shipName == null)
             {
-                var theme = StaticRefLib.StaticData.Themes["default"];
-                shipName = theme.ShipNames[StaticRefLib.Game.RNG.Next(0, theme.ShipNames.Count)];
-                // shipName = "UnNamed " + shipDesign.Name;
+                shipName = NameFactory.GetShipName();
             }
 
             namedb.SetName(ownerFaction.Guid, shipName);
 
-            var commander = CommanderFactory.CreateShipCaptain(StaticRefLib.Game.RNG, "default");
+            var commander = CommanderFactory.CreateShipCaptain();
 
             ship.SetDataBlob(namedb);
             ship.SetDataBlob(orbit);
