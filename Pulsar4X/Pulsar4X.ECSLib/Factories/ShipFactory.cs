@@ -159,7 +159,8 @@ namespace Pulsar4X.ECSLib
             }
 
             var armorVolume = surfaceArea * armor.thickness * 0.001;
-            return armorVolume;
+            var armorMass = armorVolume * armor.armorType.Density;
+            return armorMass;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
