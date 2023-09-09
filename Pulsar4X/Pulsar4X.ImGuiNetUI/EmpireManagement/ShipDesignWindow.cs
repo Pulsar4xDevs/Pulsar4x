@@ -596,7 +596,7 @@ namespace Pulsar4X.SDL2UI
                 GenImage();
             }
 
-            double mass = 0;
+            long mass = 0;
             double fu = 0;
             double tn = 0;
             double ev = 0;
@@ -658,8 +658,8 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            _armorMass = ShipDesign.GetArmorMass(_profile, (_armor, _armorThickness));
-            mass += _armorMass;
+            _armorMass = ShipDesign.GetArmorMass(_profile);
+            mass += (long)Math.Round(_armorMass);
 
             _massDry = mass;
             _tn = tn;

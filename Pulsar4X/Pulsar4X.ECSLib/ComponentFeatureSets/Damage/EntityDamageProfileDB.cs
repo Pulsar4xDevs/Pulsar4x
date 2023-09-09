@@ -226,6 +226,7 @@ namespace Pulsar4X.ECSLib
         public EntityDamageProfileDB(EntityDamageProfileDB db )
         {
             Armor = db.Armor;
+            ArmorVertex = db.ArmorVertex;
             PlacementOrder = db.PlacementOrder;
             TypeBitmaps = db.TypeBitmaps;
             DamageProfile = db.DamageProfile;

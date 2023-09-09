@@ -16,30 +16,28 @@ namespace Pulsar4X.ECSLib
             ShipInfoDB shipInfo = shipEntity.GetDataBlob<ShipInfoDB>();
             ComponentInstancesDB componentInstances = shipEntity.GetDataBlob<ComponentInstancesDB>();
             int totalHTK = componentInstances.GetTotalHTK();
-            float totalTonnage = componentInstances.GetTotalTonnage();
+            
+            
+            long dryMass = componentInstances.GetTotalDryMass();
             double totalVolume = componentInstances.GetTotalVolume();
             MassVolumeDB mvDB = shipEntity.GetDataBlob<MassVolumeDB>();
-            if (mvDB.MassTotal != totalTonnage)
-            {
-                if (shipEntity.HasDataBlob<WarpAbilityDB>())
-                {
-                    ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(shipEntity);
-                }
-            }
 
-            var armor = shipInfo.Design.Armor;
-            var r = Math.Cbrt(totalVolume * 3 / 4 / Math.PI);
-            var s = 4 * Math.PI * r * r;
-            var v = s * armor.thickness * 0.001; //armor thickness is in mm, volume is in m^3
-            var m = v * armor.type.Density;
-            totalTonnage += (long)Math.Round(m);
 
+            var armorMass = ShipDesign.GetArmorMass(shipEntity.GetDataBlob<EntityDamageProfileDB>());
+            dryMass += (long)Math.Round(armorMass);
             shipInfo.InternalHTK = totalHTK;
             
-            mvDB.MassDry = totalTonnage;
+            mvDB.MassDry = dryMass;
             mvDB.Volume_m3 = totalVolume;
-            mvDB.DensityDry_gcm = MassVolumeDB.CalculateDensity(totalTonnage, totalVolume);
-            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius_Au(totalTonnage, mvDB.DensityDry_gcm);
+            mvDB.DensityDry_gcm = MassVolumeDB.CalculateDensity(dryMass, totalVolume);
+            mvDB.RadiusInAU = MassVolumeDB.CalculateRadius_Au(dryMass, mvDB.DensityDry_gcm);
+            if (shipEntity.TryGetDatablob<VolumeStorageDB>(out var storedb))
+                mvDB.UpdateMassTotal(storedb);
+            if (shipEntity.HasDataBlob<WarpAbilityDB>())
+            {
+                ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(shipEntity);
+            }
+            
         }
     }
 

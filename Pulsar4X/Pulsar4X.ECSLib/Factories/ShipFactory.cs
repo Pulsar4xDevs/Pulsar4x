@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using Newtonsoft.Json;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.Industry;
@@ -130,7 +131,7 @@ namespace Pulsar4X.ECSLib
 
             }
             DamageProfileDB = new EntityDamageProfileDB(components, armor);
-            var armorMass = GetArmorMass(DamageProfileDB, armor);
+            var armorMass = GetArmorMass(DamageProfileDB);
             MassPerUnit += (long)Math.Round(armorMass);
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
@@ -138,8 +139,9 @@ namespace Pulsar4X.ECSLib
             IndustryPointCosts = (long)(MassPerUnit * 0.1);
         }
 
-        public static double GetArmorMass(EntityDamageProfileDB damageProfile, (ArmorSD armorType, double thickness)armor)
+        public static double GetArmorMass(EntityDamageProfileDB damageProfile)
         {
+            var armor = damageProfile.Armor;
             double surfaceArea = 0;
             (int x, int y) v1 = damageProfile.ArmorVertex[0];
             for (int index = 1; index < damageProfile.ArmorVertex.Count; index++)
@@ -153,13 +155,17 @@ namespace Pulsar4X.ECSLib
                 var c2 = 2 * Math.PI * r2; //circumference of bottom
                 var sl = Math.Sqrt(h * h + (r1 - r2) * (r1 - r2)); //slope of side
 
-                surfaceArea = 0.5 * sl * (c1 + c2);
+                surfaceArea += 0.5 * sl * (c1 + c2);
 
                 v1 = v2;
             }
 
+            var aresource = StaticRefLib.StaticData.GetICargoable(armor.armorType.ResourceID);
+            var amass = aresource.MassPerUnit;
+            var avol = aresource.VolumePerUnit;
+            var aden = amass / avol;
             var armorVolume = surfaceArea * armor.thickness * 0.001;
-            var armorMass = armorVolume * armor.armorType.Density;
+            var armorMass = armorVolume * aden;
             return armorMass;
         }
 
