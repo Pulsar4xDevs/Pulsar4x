@@ -4,11 +4,11 @@ using Pulsar4X.ECSLib;
 
 public static class OrderRegistry
 {
-    public static Dictionary<string, Func<EntityCommand>> Actions = new Dictionary<string, Func<EntityCommand>>()
+    public static Dictionary<string, Func<Guid, Entity, EntityCommand>> Actions = new Dictionary<string, Func<Guid, Entity, EntityCommand>>()
     {
-        { "Move to Nearest Colony", () => new MoveToNearestColonyAction() },
-        { "Refuel", () => new RefuelAction() },
-        { "Resupply", () => new ResupplyAction() }
+        { "Move to Nearest Colony", (factionId, fleet) => MoveToNearestColonyAction.CreateCommand(factionId, fleet) },
+        { "Refuel", (factionId, fleet) => new RefuelAction() },
+        { "Resupply", (factionId, fleet) => new ResupplyAction() }
     };
 
     public static Dictionary<Type, string> ActionDescriptions = new Dictionary<Type, string>()

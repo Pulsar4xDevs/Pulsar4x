@@ -180,6 +180,13 @@ namespace Pulsar4X.SDL2UI
                             selectedFleet.TryGetDatablob<OrderableDB>(out var orderableDB);
                             string orderName = orderableDB.ActionList.Count == 0 ? "None" : orderableDB.ActionList[0].Name; // FIXME: is 0 always the current action?
                             DisplayHelpers.PrintRow("Current Orders", orderName, separator: false);
+                            if(orderableDB.ActionList.Count > 0 && ImGui.IsItemHovered())
+                            {
+                                ImGui.BeginTooltip();
+                                ImGui.Text("IsRunning: " + orderableDB.ActionList[0].IsRunning);
+                                ImGui.Text("IsFinished(): " + orderableDB.ActionList[0].IsFinished());
+                                ImGui.EndTooltip();
+                            }
                         }
                         ImGui.EndChild();
                     }
@@ -417,7 +424,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             if(orderActionsIndex >= 0 && orderActionsIndex < orderActionDescriptions.Length)
                             {
-                                var selectedAction = OrderRegistry.Actions[orderActionDescriptions[orderActionsIndex]]();
+                                var selectedAction = OrderRegistry.Actions[orderActionDescriptions[orderActionsIndex]](factionID, selectedFleet);
                                 selectedOrder.Actions.Add(selectedAction);
                             }
                         }

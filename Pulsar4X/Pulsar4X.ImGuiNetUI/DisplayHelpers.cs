@@ -47,10 +47,30 @@ namespace Pulsar4X.SDL2UI
             if(!ship.TryGetDatablob<ShipInfoDB>(out var shipInfo))
                 return;
 
+            if(!ship.TryGetDatablob<OrderableDB>(out var orderableDB))
+                return;
+
             if(ImGui.IsItemHovered())
             {
                 ImGui.BeginTooltip();
                 ImGui.Text("Design: " + shipInfo.Design.Name);
+                if(orderableDB.ActionList.Count > 0)
+                {
+                    ImGui.Text("Orders:");
+                    foreach(var action in orderableDB.ActionList)
+                    {
+                        ImGui.Text(action.Name);
+                        ImGui.SameLine();
+                        if(action.IsRunning)
+                            ImGui.Text("(running)");
+                        else
+                            ImGui.Text("not running");
+                    }
+                }
+                else
+                {
+                    ImGui.Text("No orders");
+                }
                 ImGui.EndTooltip();
             }
         }

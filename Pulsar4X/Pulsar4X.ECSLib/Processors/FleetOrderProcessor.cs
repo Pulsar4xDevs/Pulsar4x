@@ -39,6 +39,9 @@ namespace Pulsar4X.ECSLib
             // We only care about fleets with standing orders
             if(fleetDB.StandingOrders.Count == 0) return;
 
+            // Fleet must have a flagship to use standing orders
+            if(fleetDB.FlagShipID == Guid.Empty) return;
+
             // Make sure the fleet entity is orderable
             if(!fleetDB.OwningEntity.TryGetDatablob<OrderableDB>(out var orderableDB)) return;
 
