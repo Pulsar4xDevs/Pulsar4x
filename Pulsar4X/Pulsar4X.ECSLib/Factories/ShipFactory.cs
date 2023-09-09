@@ -141,6 +141,8 @@ namespace Pulsar4X.ECSLib
 
         public static double GetArmorMass(EntityDamageProfileDB damageProfile)
         {
+            if (damageProfile.ArmorVertex.Count == 0)
+                return 0;
             var armor = damageProfile.Armor;
             double surfaceArea = 0;
             (int x, int y) v1 = damageProfile.ArmorVertex[0];

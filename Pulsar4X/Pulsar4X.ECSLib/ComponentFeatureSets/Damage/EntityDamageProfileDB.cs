@@ -63,10 +63,20 @@ namespace Pulsar4X.ECSLib
             List<(Guid, RawBmp)> typeBitmap = new List<(Guid, RawBmp)>();
             List<(Guid id, int count)> placementOrder = new List<(Guid, int)>();
             List<ComponentInstance> instances = new List<ComponentInstance>();
+            int avIndex = 0;
+            
+            ArmorVertex.Add((0, 0));
             foreach (var componenttype in components)
             {
                 
                 Guid typeGuid = componenttype.component.ID;
+                
+                var volm3 = componenttype.component.VolumePerUnit;
+                var area = Math.Cbrt(volm3);
+                var len = Math.Sqrt(area * componenttype.component.AspectRatio);
+                var wid = area / len;
+                ArmorVertex.Add(((int)len,(int)(wid * (componenttype.count) * 0.5)));
+                
                 
                 RawBmp compBmp = DamageTools.CreateComponentByteArray(componenttype.component, (byte)typeBitmap.Count);
                 typeBitmap.Add((typeGuid, compBmp));

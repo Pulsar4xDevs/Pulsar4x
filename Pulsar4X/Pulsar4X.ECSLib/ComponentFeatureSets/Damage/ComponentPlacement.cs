@@ -129,7 +129,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
 
             shipBmp = finalShipBmp;
 
-            List<(int x, int y)> linePoints = shipProfile.ArmorVertex;
+            List<(int x, int y)> linePoints = new List<(int x, int y)>();
             List<int> lineHeight = new List<int>();
             
 
