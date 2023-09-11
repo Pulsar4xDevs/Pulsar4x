@@ -27,8 +27,8 @@ namespace Pulsar4X.SDL2UI
         private Dictionary<ConditionItem, int> orderConditionIndexes = new Dictionary<ConditionItem, int>();
         private int orderComparisonIndex = 0;
         private string[] orderComparisons;
-        private int orderActionsIndex = -1;
-        private int orderConditionsIndex = -1;
+        private int orderActionsIndex = 0;
+        private int orderConditionsIndex = 0;
         private string[] orderActionDescriptions = OrderRegistry.Actions.Keys.ToArray();
         private string[] orderConditionDescriptions = OrderRegistry.Conditions.Keys.ToArray();
         private byte[] orderNameBuffer = new byte[32];
@@ -37,6 +37,8 @@ namespace Pulsar4X.SDL2UI
         {
             factionID = _uiState.Faction.Guid;
             factionRoot = _uiState.Faction.GetDataBlob<FleetDB>();
+            var firstFleet = factionRoot.Children.Where(c => c.HasDataBlob<FleetDB>()).First();
+            if(firstFleet != null) SelectFleet(firstFleet);
 
             orderComparisons = new string[5];
             orderComparisons[0] = ComparisonType.LessThan.ToDescription();
