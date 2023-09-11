@@ -46,12 +46,12 @@ namespace Pulsar4X.ECSLib
 
 
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             if (!IsRunning)
             {
                 var fcState = _fireControlComponent.GetAbilityState<FireControlAbilityState>();
-                
+
                 fcState.SetChildren(_weaponsAssigned.ToArray());
                 IsRunning = true;
             }
@@ -75,15 +75,15 @@ namespace Pulsar4X.ECSLib
                     if (fc.HasAblity<FireControlAbilityState>())
                     {
                         _fireControlComponent = fc;
-                        
+
                         if (instancesdb.TryGetComponentStates<WeaponState>(out var wpns))
                         {
-                            
+
                             foreach (var wpnGuid in WeaponsAssigned)
                             {
                                 foreach (var wpnState in wpns)
                                 {
-                                    if (wpnState.ComponentInstance.ID == wpnGuid) 
+                                    if (wpnState.ComponentInstance.ID == wpnGuid)
                                         _weaponsAssigned.Add(wpnState);
                                 }
                             }
@@ -96,6 +96,11 @@ namespace Pulsar4X.ECSLib
             }
             return false;
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class SetTargetFireControlOrder : EntityCommand
@@ -103,11 +108,11 @@ namespace Pulsar4X.ECSLib
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.InstantOrder;
 
         public override bool IsBlocking => false;
-        
+
         public override string Name { get; } = "Fire Control Set Target";
         public override string Details { get; } = "";
-        
-        
+
+
         [JsonIgnore]
         Entity _entityCommanding;
         internal override Entity EntityCommanding { get { return _entityCommanding; } }
@@ -142,7 +147,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             if (!IsRunning)
             {
@@ -156,21 +161,21 @@ namespace Pulsar4X.ECSLib
             if (IsRunning)
                 return true;
             return false;
-            //if target is dead? or not seen for x amount of time? 
+            //if target is dead? or not seen for x amount of time?
         }
 
         internal override bool IsValidCommand(Game game)
         {
-            //see if we can successfully turn the guids into entites. 
+            //see if we can successfully turn the guids into entites.
             //the reason we use guids is to make it easier to serialise for network play.
             //getting the entites makes it a bit easier to ActionCommand though
             //it may also be a good idea to double check that the entites we're looking for have specific DBs to prevent a crash...
-            //IsCommandValid also checks that the entity we're commanding is owned by our faction. 
+            //IsCommandValid also checks that the entity we're commanding is owned by our faction.
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
                 if (game.GlobalManager.FindEntityByGuid(TargetSensorEntityGuid, out _targetSensorEntity))
                 {
-                    if (_targetSensorEntity.HasDataBlob<SensorInfoDB>()) //we want to damage the actual entity, not the sensor clone. 
+                    if (_targetSensorEntity.HasDataBlob<SensorInfoDB>()) //we want to damage the actual entity, not the sensor clone.
                         _targetActualEntity = _targetSensorEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
                     else
                         _targetActualEntity = _targetSensorEntity;
@@ -189,17 +194,22 @@ namespace Pulsar4X.ECSLib
             }
             return false;
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class SetOpenFireControlOrder : EntityCommand
     {
-        public enum FireModes:byte //this could be made more complex, rapid/overdrive, staggered, alphastrike, 
+        public enum FireModes:byte //this could be made more complex, rapid/overdrive, staggered, alphastrike,
         {
             OpenFire,
             CeaseFire
         }
-        
-        
+
+
         public override string Name { get; } = "Fire Control Set Firemode";
         public override string Details {
             get
@@ -240,7 +250,7 @@ namespace Pulsar4X.ECSLib
             game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             if (!IsRunning)
             {
@@ -293,11 +303,16 @@ namespace Pulsar4X.ECSLib
             }
             return false;
         }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
     }
-    
+
     public class SetOrdinanceToWpnOrder : EntityCommand
     {
-        
+
         public override string Name { get; } = "Fire Control Set Ordnance";
         public override string Details { get; } = "";
 
@@ -338,7 +353,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             if (!IsRunning)
             {
@@ -372,6 +387,11 @@ namespace Pulsar4X.ECSLib
                 }
             }
             return false;
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
         }
     }
 }

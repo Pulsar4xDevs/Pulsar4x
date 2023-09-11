@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-//this allows the test project to see internal functions of this project. 
+//this allows the test project to see internal functions of this project.
 using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
@@ -29,7 +29,7 @@ namespace Pulsar4X.ECSLib
         [PublicAPI]
         public bool IsLoaded { get; internal set; } = false;
 
-        //internal ProcessorManager ProcessorManager; 
+        //internal ProcessorManager ProcessorManager;
 
         /// <summary>
         /// List of StarSystems currently in the game.
@@ -57,12 +57,14 @@ namespace Pulsar4X.ECSLib
         internal GalaxyFactory GalaxyGen { get; private set; }
 
 
-        
+
         private PathfindingManager _pathfindingManager;
 
         [PublicAPI]
         [JsonProperty]
         public GameSettings Settings { get { return StaticRefLib.GameSettings; } }//TODO remove from here and get from RefLib
+
+        public Random RNG { get; } = new Random(12345689);
 
         #endregion
 
@@ -80,8 +82,8 @@ namespace Pulsar4X.ECSLib
         {
 
             OrderHandler = new StandAloneOrderHandler(this);
-            
-            
+
+
             StaticRefLib.Setup(this);
 
             GlobalManager = new EntityManager(this, true);
@@ -101,7 +103,7 @@ namespace Pulsar4X.ECSLib
 
             StaticRefLib.GameSettings = newGameSettings;
             GamePulse.GameGlobalDateTime = newGameSettings.StartDateTime;
-            
+
             // Load Static Data
             if (newGameSettings.DataSets != null)
             {
@@ -120,11 +122,11 @@ namespace Pulsar4X.ECSLib
             SpaceMaster.ChangePassword(new AuthenticationToken(SpaceMaster, ""), newGameSettings.SMPassword);
             GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
 
-            
-            
+
+
             if (newGameSettings.CreatePlayerFaction ?? false)
             {
-                
+
                 foreach (var kvp in newGameSettings.DefaultHaltOnEvents)
                 {
                     //defaultPlayer.HaltsOnEvent.Add(kvp.Key, kvp.Value);

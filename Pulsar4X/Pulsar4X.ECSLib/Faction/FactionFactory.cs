@@ -21,9 +21,9 @@ namespace Pulsar4X.ECSLib
          *  -Non Owned Entites
          *      -Colones
          *      -Ships
-         * 
+         *
          *Sensor Types
-         *  - Grav, ie detecting anomalies in paths of known objects. - slow, but will find large dark planets. 
+         *  - Grav, ie detecting anomalies in paths of known objects. - slow, but will find large dark planets.
          *  - Passive EM Spectrum:
          *      - Emited visable light (suns)
          *      - Reflected visable light (planets, moons)
@@ -31,11 +31,11 @@ namespace Pulsar4X.ECSLib
          *      - Reflected IR
          *      - Comms emmisions (colonies, ships)
          *  - Active EM:
-         *      - Emmitting EM and looking for an echo. (radar) 
-         * 
-         * Owned Enties and Sensor Contacts need to be broken down by system. 
-         * 
-         * 
+         *      - Emmitting EM and looking for an echo. (radar)
+         *
+         * Owned Enties and Sensor Contacts need to be broken down by system.
+         *
+         *
          */
 
 
@@ -44,13 +44,15 @@ namespace Pulsar4X.ECSLib
             var name = new NameDB(factionName);
 
             //var facinfo = new FactionInfoDB(new List<Entity>(), new List<Guid>(), );
-            
-            var blobs = new List<BaseDataBlob> { 
-                name, 
-                new FactionInfoDB(), 
-                new FactionAbilitiesDB(), 
-                new FactionTechDB(game.StaticData.Techs.Values.ToList()), 
+
+            var blobs = new List<BaseDataBlob> {
+                name,
+                new FactionInfoDB(),
+                new FactionAbilitiesDB(),
+                new FactionTechDB(game.StaticData.Techs.Values.ToList()),
                 new FactionOwnerDB(),
+                new FleetDB(),
+                new OrderableDB(),
             };
             var factionEntity = new Entity(game.GlobalManager, blobs);
 
@@ -89,8 +91,8 @@ namespace Pulsar4X.ECSLib
         public FactionSystemInfoDB(StarSystem starSystem)
         {
             this.StarSystem = starSystem;
-            //TODO move this to a processor and require sensors of some kind. 
-            //will also need to figure out how much a faction knows about the body. 
+            //TODO move this to a processor and require sensors of some kind.
+            //will also need to figure out how much a faction knows about the body.
             foreach (var body in starSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>())
             {
                 KnownSystemBodies.Add(body);

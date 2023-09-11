@@ -12,9 +12,9 @@ namespace Pulsar4X.ECSLib
     /// <remarks>
     /// An example of this is our 2-body OrbitDB's.
     /// Earth's OrbitDB is a child of the Sun's OrbitDB in the tree hierarchy.
-    /// 
+    ///
     /// Another example would be a subordinate fleet is a child to a higher-level fleet in the fleet heirarchy
-    /// 
+    ///
     /// DataBlobs that derive from this type have functions to maintain the tree hierarchy as changes are made.
     /// </remarks>
     public abstract class TreeHierarchyDB : BaseDataBlob
@@ -45,7 +45,7 @@ namespace Pulsar4X.ECSLib
         public Entity Parent { get; private set; }
 
         /// <summary>
-        /// Same type DataBlob of my parent node. 
+        /// Same type DataBlob of my parent node.
         /// </summary>
         /// <example>
         /// EarthOrbitDB.ParentDB == SunOrbitDB;
@@ -76,7 +76,7 @@ namespace Pulsar4X.ECSLib
         public Entity Root => ParentDB?.Root ?? OwningEntity;
 
         /// <summary>
-        /// Same type DataBlob of my root node. 
+        /// Same type DataBlob of my root node.
         /// </summary>
         [NotNull]
         [PublicAPI]
@@ -119,29 +119,34 @@ namespace Pulsar4X.ECSLib
             ParentDB?.AddChild(OwningEntity);
         }
 
-        private void AddChild(Entity child)
+        internal virtual void ClearParent()
         {
-            if (child.Guid == Guid.Empty)
-            {
-                
-            }
+            Parent = null;
+        }
+
+        internal void AddChild(Entity child)
+        {
             if (Children.Contains(child))
             {
                 return;
             }
             Children.Add(child);
-            Children.Sort((entity1, entity2) => entity1.ID.CompareTo(entity2.ID));
+            //Children.Sort((entity1, entity2) => entity1.ID.CompareTo(entity2.ID));
         }
 
-        private void RemoveChild(Entity child)
+        internal void RemoveChild(Entity child)
         {
             Children.Remove(child);
         }
 
+        public IEnumerable<Entity> GetChildren()
+        {
+            return Children.ToArray();
+        }
+
         private TreeHierarchyDB GetSameTypeDB(Entity entity)
         {
-            int typeIndex;
-            EntityManager.TryGetTypeIndex(GetType(), out typeIndex);
+            EntityManager.TryGetTypeIndex(GetType(), out var typeIndex);
 
             return !entity.IsValid ? null : entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
         }

@@ -164,9 +164,18 @@ namespace Pulsar4X.ECSLib.Industry
 
     }
 
+    public enum IndustryJobStatus
+    {
+        Queued,
+        MissingResources,
+        Processing,
+        Completed,
+    }
+
     public class IndustryJob : JobBase
     {
         internal Guid TypeID;
+        public IndustryJobStatus Status { get; internal set; } = IndustryJobStatus.Queued;
 
         public IndustryJob(FactionInfoDB factionInfo, Guid itemID)
         {
@@ -203,7 +212,7 @@ namespace Pulsar4X.ECSLib.Industry
         }
     }
 
-    public class IndustryOrder2:EntityCommand
+    public class IndustryOrder2 : EntityCommand
     {
 
         public override string Name
@@ -317,7 +326,7 @@ namespace Pulsar4X.ECSLib.Industry
         }
 
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             if (!IsRunning)
             {
@@ -325,9 +334,9 @@ namespace Pulsar4X.ECSLib.Industry
                 {
                     case OrderTypeEnum.NewJob:
                     {
-                        IndustryTools.AddJob(_entityCommanding, productionLineID, _job);
                         if(AutoAddSubJobs)
                             IndustryTools.AutoAddSubJobs(_entityCommanding, _job);
+                        IndustryTools.AddJob(_entityCommanding, productionLineID, _job);
                     }
                         break;
                     case OrderTypeEnum.CancelJob:
@@ -377,6 +386,11 @@ namespace Pulsar4X.ECSLib.Industry
                 return true;
             }
             return false;
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
         }
 
     }

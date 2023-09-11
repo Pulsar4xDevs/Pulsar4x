@@ -57,10 +57,9 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// List which stores all the Commander Name themes.
+        /// List which stores all the themes
         /// </summary>
-        [JsonIgnore]
-        public List<CommanderNameThemeSD> CommanderNameThemes = new List<CommanderNameThemeSD>();
+        public Dictionary<string, ThemeSD> Themes = new Dictionary<string, ThemeSD>();
 
         /// <summary>
         /// Dictionary which stores all the Minerals.
@@ -74,7 +73,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         [JsonIgnore]
         public Dictionary<Guid, TechSD> Techs = new Dictionary<Guid, TechSD>();
-        
+
         /// <summary>
         /// Dictionary which stores all Components.
         /// </summary>
@@ -82,11 +81,11 @@ namespace Pulsar4X.ECSLib
         public Dictionary<Guid, ComponentTemplateSD> ComponentTemplates = new Dictionary<Guid, ComponentTemplateSD>();
 
         /// <summary>
-        /// Stores ComponentTemplates by the Attribute Type Name. 
+        /// Stores ComponentTemplates by the Attribute Type Name.
         /// </summary>
-        [JsonIgnore] 
+        [JsonIgnore]
         public Dictionary<string, List<ComponentTemplateSD>> ComponentTemplatesByAttribute = new Dictionary<string, List<ComponentTemplateSD>>();
-        
+
         /// <summary>
         /// Dictionary to store CargoTypes
         /// </summary>
@@ -95,11 +94,11 @@ namespace Pulsar4X.ECSLib
 
         [JsonIgnore]
         public Dictionary<Guid, IndustryTypeSD> IndustryTypes = new Dictionary<Guid, IndustryTypeSD>();
-        
+
         public Dictionary<Guid, ArmorSD> ArmorTypes = new Dictionary<Guid, ArmorSD>();
-        
+
         /// <summary>
-        /// Settings used by system generation. 
+        /// Settings used by system generation.
         /// @todo make Galaxy gen use this instead of default data (DO NOT DELETE THE HARD CODED DATA THO, that should be a fall back).
         /// </summary>
         public SystemGenSettingsSD SystemGenSettings;
@@ -132,7 +131,7 @@ namespace Pulsar4X.ECSLib
                     "AtmosphericGases", typeof(WeightedList<AtmosphericGasSD>)
                 },
                 {
-                    "CommanderNameThemes", typeof(List<CommanderNameThemeSD>)
+                    "Theme", typeof(Dictionary<string, ThemeSD>)
                 },
                 {
                     "Minerals", typeof(Dictionary<Guid, MineralSD>)
@@ -177,7 +176,7 @@ namespace Pulsar4X.ECSLib
                     typeof(WeightedList<AtmosphericGasSD>), "AtmosphericGases"
                 },
                 {
-                    typeof(List<CommanderNameThemeSD>), "CommanderNameThemes"
+                    typeof(Dictionary<string, ThemeSD>), "Theme"
                 },
                 {
                     typeof(List<MineralSD>), "Minerals"
@@ -225,7 +224,7 @@ namespace Pulsar4X.ECSLib
             var cargoGood = CargoGoods.GetAny(id);
             if (cargoGood != null)
                 return cargoGood;
-            
+
             if (Techs.ContainsKey(id))
                 return Techs[id];
 
@@ -243,7 +242,7 @@ namespace Pulsar4X.ECSLib
         {
             StorageTypeMap.Clear();
             var allCargoDefs = CargoGoods.GetAll();
-            foreach (var item in allCargoDefs)          
+            foreach (var item in allCargoDefs)
                 StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
             foreach (var item in ComponentTemplates)
                 StorageTypeMap.Add(item.Key, item.Value.CargoTypeID);
@@ -285,27 +284,13 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        /// <summary>
-        /// Stores Commander Name Themes.
-        /// </summary>
-        internal void Store(List<CommanderNameThemeSD> commanderNameThemes)
+        internal void Store(Dictionary<string, ThemeSD> themes)
         {
-            if (commanderNameThemes != null)
+            if(themes == null) return;
+
+            foreach(var (key, theme) in themes)
             {
-                foreach (CommanderNameThemeSD commanderNameThemeSD in commanderNameThemes)
-                {
-                    if (CommanderNameThemes.Contains(commanderNameThemeSD))
-                    {
-                        // Update existing value.
-                        int index = CommanderNameThemes.IndexOf(commanderNameThemeSD);
-                        CommanderNameThemes[index] = commanderNameThemeSD;
-                    }
-                    else
-                    {
-                        // Add new value.
-                        CommanderNameThemes.Add(commanderNameThemeSD);
-                    }
-                }
+                Themes[key] = theme;
             }
         }
 
@@ -394,7 +379,7 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
-        
+
         internal void Store(Dictionary<Guid, ArmorSD> armorTypes)
         {
             if (armorTypes != null)
@@ -414,8 +399,8 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         /// <summary>
-        /// Returns a type custom string for a type of static data. This string is used to tell 
-        /// what type of static data is being imported (and is thus exported as well). 
+        /// Returns a type custom string for a type of static data. This string is used to tell
+        /// what type of static data is being imported (and is thus exported as well).
         /// </summary>
         public static string GetTypeString(Type type)
         {
@@ -425,12 +410,15 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Gets the matching type for a type string. Used when importing previously exported 
+        /// Gets the matching type for a type string. Used when importing previously exported
         /// static data to know what type to import it as.
         /// </summary>
         public static Type GetType(string typeString)
         {
-            return StringsToTypes[typeString];
+            if(StringsToTypes.ContainsKey(typeString))
+                return StringsToTypes[typeString];
+            else
+                return null;
         }
 
         [OnDeserialized]
@@ -446,5 +434,5 @@ namespace Pulsar4X.ECSLib
 
     }
 
-   
+
 }

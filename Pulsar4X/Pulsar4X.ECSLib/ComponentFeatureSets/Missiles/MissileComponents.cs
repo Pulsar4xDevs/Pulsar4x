@@ -151,7 +151,11 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Missiles
 
         public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         {
-            var industrydb = industryEntity.GetDataBlob<IndustryAbilityDB>();
+            var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
+            batchJob.NumberCompleted++;
+            batchJob.ResourcesRequiredRemaining = new Dictionary<Guid, long>(designInfo.ResourceCosts);
+            batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
+
         }
 
         public int CreditCost;

@@ -42,7 +42,7 @@ namespace Pulsar4X.SDL2UI
                 _allResources.Add(item.Value);
             }
             _allResourceNames = allResourceNames.ToArray();
-            
+
             SetEntity(entity);
         }
         string _demandHint = "";
@@ -97,15 +97,16 @@ namespace Pulsar4X.SDL2UI
             {
                 var stypeID = kvp.Key;
                 _displayedStoredResources.Add(stypeID, new Dictionary<ICargoable, (int count, int demandSupplyWeight)>());
-                foreach (var item in kvp.Value.Cargoables)
+                var unitsInStore = kvp.Value.CurrentStoreInUnits;
+                foreach (var item in kvp.Value.GetCargoables())
                 {
                     var ctypeID = item.Key;
                     var ctype = item.Value;
-                    var numUnits = kvp.Value.CurrentStoreInUnits[ctypeID];
+                    var numUnits = unitsInStore[ctypeID];
                     _displayedStoredResources[stypeID].Add(ctype, ((int)numUnits, 1));
                 }
             }
-            
+
             for (int i = 0; i < _allResources.Count; i++)
             {
                 var ctypeID = _allResourceID[i];
@@ -169,10 +170,7 @@ namespace Pulsar4X.SDL2UI
             var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
             if(ImGui.BeginChild("ColonyLogistics1", firstChildSize, true))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Imports");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Imports");
 
                 if(ImGui.BeginTable("LogisticsImportsTable", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
@@ -207,10 +205,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonyLogistics2", secondChildSize, true))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Goods Available to Import or Export");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Goods Available to Import or Export");
 
                 if(ImGui.BeginTable("LogisticsAvailableItemsTable", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
@@ -224,7 +219,7 @@ namespace Pulsar4X.SDL2UI
                     // FIXME: this should show every item and component in the game? if so, it should
                     // allow the player to filter the list by searching
                     displayResources(_displayedStoredResources);
-                    
+
                     ImGui.TableNextColumn();
                     ImGui.Separator();
                     ImGui.TableNextColumn();
@@ -233,7 +228,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Separator();
                     ImGui.TableNextColumn();
                     ImGui.Separator();
-                    
+
                     displayResources(_displayedUnstored);
                     void displayResources(Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> dict)
                     {
@@ -258,6 +253,8 @@ namespace Pulsar4X.SDL2UI
                                 }
                             }
 
+                            var cargoables = _stores[stypeID].GetCargoables();
+                            var unitsInStore = _stores[stypeID].CurrentStoreInUnits;
                             foreach (var kvp in typeStore.Value)
                             {
                                 var ctype = kvp.Key;
@@ -267,8 +264,8 @@ namespace Pulsar4X.SDL2UI
 
                                 var cname = ctype.Name;
                                 var itemsStored = 0;
-                                if (_stores[stypeID].Cargoables.ContainsKey(ctype.ID))
-                                    itemsStored = (int)_stores[stypeID].CurrentStoreInUnits[ctype.ID];
+                                if (cargoables.ContainsKey(ctype.ID))
+                                    itemsStored = (int)unitsInStore[ctype.ID];
                                 var volumePerItem = ctype.VolumePerUnit;
 
                                 ImGui.TableNextColumn();
@@ -314,10 +311,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SameLine();
             if(ImGui.BeginChild("ColonyLogistics3", thirdChildSize, true))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Exports");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Exports");
 
                 if(ImGui.BeginTable("LogisticsExportsTable", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
@@ -383,7 +377,7 @@ namespace Pulsar4X.SDL2UI
                         var ctype = kvp.Key;
                         var cname = ctype.Name;
                         var itemsStored = 0;
-                        if(_stores[stypeID].Cargoables.ContainsKey(ctype.ID)) 
+                        if(_stores[stypeID].Cargoables.ContainsKey(ctype.ID))
                             itemsStored = (int)_stores[stypeID].CurrentStoreInUnits[ctype.ID];
                         var volumePerItem = ctype.VolumePerUnit;
                         ImGui.Text(cname);
@@ -395,7 +389,7 @@ namespace Pulsar4X.SDL2UI
                             if(!_changes.ContainsKey(ctype))
                                 _changes.Add(ctype, (1, 1));
                             else
-                            { 
+                            {
                                 _changes[ctype] = (_changes[ctype].count + 1, 1);
                             }
                         }
@@ -405,7 +399,7 @@ namespace Pulsar4X.SDL2UI
                             if(!_changes.ContainsKey(ctype))
                                 _changes.Add(ctype, (-1, 1));
                             else
-                            { 
+                            {
                                 _changes[ctype] = (_changes[ctype].count - 1, 1);
                             }
                         }
@@ -415,7 +409,7 @@ namespace Pulsar4X.SDL2UI
                         if(_logisticsDB.ListedItems.ContainsKey(ctype))
                         {
                             int total = _logisticsDB.ListedItems[ctype].count;
-                            
+
                             if(_changes.ContainsKey(ctype))
                             {
                                 total += _changes[ctype].count;

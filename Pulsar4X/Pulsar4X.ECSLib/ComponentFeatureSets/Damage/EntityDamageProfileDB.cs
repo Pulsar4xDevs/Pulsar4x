@@ -11,6 +11,11 @@ namespace Pulsar4X.ECSLib
     public class EntityDamageProfileDB : BaseDataBlob
     {
         public (ArmorSD armorType, float thickness) Armor;
+        /// <summary>
+        /// This is a list of points where x is the length of a component and y the height.
+        /// starting from the front of the ship and is 0,0
+        /// </summary>
+        public List<(int x, int y)> ArmorVertex = new List<(int x, int y)>();
         
         /// <summary>
         /// this is the same list as the ship design's List<(ComponentDesign design, int count)> Components
@@ -58,10 +63,20 @@ namespace Pulsar4X.ECSLib
             List<(Guid, RawBmp)> typeBitmap = new List<(Guid, RawBmp)>();
             List<(Guid id, int count)> placementOrder = new List<(Guid, int)>();
             List<ComponentInstance> instances = new List<ComponentInstance>();
+            int avIndex = 0;
+            
+            ArmorVertex.Add((0, 0));
             foreach (var componenttype in components)
             {
                 
                 Guid typeGuid = componenttype.component.ID;
+                
+                var volm3 = componenttype.component.VolumePerUnit;
+                var area = Math.Cbrt(volm3);
+                var len = Math.Sqrt(area * componenttype.component.AspectRatio);
+                var wid = area / len;
+                ArmorVertex.Add(((int)len,(int)(wid * (componenttype.count) * 0.5)));
+                
                 
                 RawBmp compBmp = DamageTools.CreateComponentByteArray(componenttype.component, (byte)typeBitmap.Count);
                 typeBitmap.Add((typeGuid, compBmp));
@@ -221,6 +236,7 @@ namespace Pulsar4X.ECSLib
         public EntityDamageProfileDB(EntityDamageProfileDB db )
         {
             Armor = db.Armor;
+            ArmorVertex = db.ArmorVertex;
             PlacementOrder = db.PlacementOrder;
             TypeBitmaps = db.TypeBitmaps;
             DamageProfile = db.DamageProfile;

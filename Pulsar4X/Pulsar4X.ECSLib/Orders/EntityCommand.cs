@@ -12,26 +12,23 @@ namespace Pulsar4X.ECSLib
             Movement = 1,
             InteractWithExternalEntity = 2,
             InteractWithEntitySameFleet = 4,
-
             IneteractWithSelf = 8,
-            
         }
 
         [JsonProperty]
         public Guid CmdID { get; internal set; } = Guid.NewGuid();
         public bool UseActionLanes = true;
-        public abstract ActionLaneTypes ActionLanes { get;  }
+        public abstract ActionLaneTypes ActionLanes { get; }
         public abstract bool IsBlocking { get; }
-
         public abstract string Name { get; }
         public abstract string Details { get; }
 
         public virtual void UpdateDetailString()
         {}
-        
+
         [JsonProperty]
         /// <summary>
-        /// This is the faction that has requested the command. 
+        /// This is the faction that has requested the command.
         /// </summary>
         /// <value>The requesting faction GUID.</value>
         internal Guid RequestingFactionGuid { get; set; }
@@ -44,22 +41,22 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         /// <summary>
-        /// Gets or sets the datetime this command was created by the player/client. 
+        /// Gets or sets the datetime this command was created by the player/client.
         /// </summary>
         /// <value>The created date.</value>
         public DateTime CreatedDate{ get; set; }
 
         /// <summary>
         /// This sets the datetime that the order should be actioned on (ie delayed from creation)
-        /// 
+        ///
         /// </summary>
         [JsonProperty]
         public DateTime ActionOnDate { get; set; }
 
         [JsonProperty]
         /// <summary>
-        /// Gets or sets the datetime this command was actioned/processed by the server. 
-        /// this may be needed by the client to ensure it stays in synch with the server. 
+        /// Gets or sets the datetime this command was actioned/processed by the server.
+        /// this may be needed by the client to ensure it stays in synch with the server.
         /// </summary>
         /// <value>The actioned on date.</value>
         public DateTime ActionedOnDate { get; set; }
@@ -69,19 +66,21 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// checks that the entities exsist and that the entity is owned by the faction.
-        /// may eventualy need to return a responce instead of just bool. 
+        /// may eventualy need to return a responce instead of just bool.
         /// </summary>
         internal abstract bool IsValidCommand(Game game);
         /// <summary>
         /// Actions the command.
         /// </summary>
         /// <param name="game">Game.</param>
-        internal abstract void ActionCommand(DateTime atDateTime);
+        internal abstract void Execute(DateTime atDateTime);
 
         public bool PauseOnAction = false;
-        
+
         public bool IsRunning { get; protected set; } = false;
-        public abstract bool IsFinished(); 
+        public abstract bool IsFinished();
+
+        public abstract EntityCommand Clone();
     }
 
     public static class CommandHelpers
@@ -90,7 +89,7 @@ namespace Pulsar4X.ECSLib
         {
             if(globalManager.FindEntityByGuid(targetEntityGuid, out targetEntity)) {
                 if(globalManager.FindEntityByGuid(factionGuid, out factionEntity)) {
-                    if(targetEntity.FactionOwnerID == factionEntity.Guid) 
+                    if(targetEntity.FactionOwnerID == factionEntity.Guid)
                         return true;
                 }
             }
@@ -160,7 +159,7 @@ namespace Pulsar4X.ECSLib
             game.OrderHandler.HandleOrder(cmd);
         }
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             var namedb = _entityCommanding.GetDataBlob<NameDB>();
             namedb.SetName(_factionEntity.Guid, NewName);
@@ -179,6 +178,11 @@ namespace Pulsar4X.ECSLib
                 return true;
             }
             return false;
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
         }
     }
 }

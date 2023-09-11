@@ -116,7 +116,7 @@ namespace Pulsar4X.SDL2UI
             IsActive = false;
             //we initialize window instances so that they get always displayed and automatically open after new game is created.
             TimeControl.GetInstance().SetActive();
-            ToolBarUI.GetInstance().SetActive();
+            ToolBarWindow.GetInstance().SetActive();
             //EntityUIWindowSelector.GetInstance().SetActive();
             //EntityInfoPanel.GetInstance().SetActive();
         }

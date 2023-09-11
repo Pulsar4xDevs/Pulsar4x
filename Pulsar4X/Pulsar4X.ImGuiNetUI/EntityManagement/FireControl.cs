@@ -73,7 +73,7 @@ namespace Pulsar4X.ImGuiNetUI
 
             return thisitem;
         }
-        
+
         internal override void Display()
         {
             if (!IsActive)
@@ -84,15 +84,15 @@ namespace Pulsar4X.ImGuiNetUI
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 400);
                 DisplayFC();
-                
+
                 UnAssignedWeapons();
-                
+
                 ImGui.NewLine();
 
                 DisplayOrdnance();
-                
+
                 ImGui.NextColumn();
-                
+
                 DisplayTargetColumn();
 
             }
@@ -132,7 +132,7 @@ namespace Pulsar4X.ImGuiNetUI
                     //wpn.ComponentInstance.GetAbilityState<WeaponState>().InternalMagCurAmount
                     var reloadState = _reloadState[wpn.ID];
                     ImGui.Text("Reload:" + reloadState.reload + "/" + reloadState.min + "/" + reloadState.max);
-                    
+
                     if (ImGui.BeginDragDropSource())
                     {
                         ImGui.Text(wpn.Name);
@@ -201,7 +201,7 @@ namespace Pulsar4X.ImGuiNetUI
                 }
                 ImGui.NewLine();
             }
-            
+
         }
 
         void UnAssignedWeapons()
@@ -352,7 +352,7 @@ namespace Pulsar4X.ImGuiNetUI
 
             BorderGroup.End();
         }
-        
+
         void HardRefresh(EntityState orderEntity)
         {
 
@@ -381,7 +381,7 @@ namespace Pulsar4X.ImGuiNetUI
                     _wpnDict[wpn.ID] = wpn;
                 }
             }
-            
+
             var sysstate = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             var contacts = sysstate.SystemContacts;
             _allSensorContacts = new SensorContact[0];
@@ -391,7 +391,7 @@ namespace Pulsar4X.ImGuiNetUI
             }
             _ownEntites = sysstate.EntityStatesWithPosition.Values.ToArray();
             RefreshWpnNamesCashe();
-            RefreshReloadStateCashe();           
+            RefreshReloadStateCashe();
         }
 
         public override void OnSystemTickChange(DateTime newdate)
@@ -403,33 +403,30 @@ namespace Pulsar4X.ImGuiNetUI
                 if (!ctypes.Contains(ordDes.CargoTypeID))
                     ctypes.Add(ordDes.CargoTypeID);
             }
-            
+
             foreach (var cargoType in ctypes)
             {
                 if(!_orderEntity.HasDataBlob<VolumeStorageDB>())
                     continue;
                 if (_orderEntity.GetDataBlob<VolumeStorageDB>().TypeStores.ContainsKey(cargoType))
                 {
-                    ICollection shipOrdnances = _orderEntity.GetDataBlob<VolumeStorageDB>().TypeStores[cargoType].CurrentStoreInUnits;
+                    var shipOrdnances = _orderEntity.GetDataBlob<VolumeStorageDB>().TypeStores[cargoType].CurrentStoreInUnits;
 
-                    lock (shipOrdnances.SyncRoot)
-                    {
-                        foreach (KeyValuePair<Guid, long> ordType in shipOrdnances)
-                            _storedOrdnance[ordType.Key] = ordType.Value;
-                    }
+                    foreach (KeyValuePair<Guid, long> ordType in shipOrdnances)
+                        _storedOrdnance[ordType.Key] = ordType.Value;
                 }
             }
 
             RefreshWpnNamesCashe();
             RefreshReloadStateCashe();
         }
-        
+
         void RefreshWpnNamesCashe()
         {
             _weaponNames = new Dictionary<Guid, string>();
             for (int i = 0; i < _allWeaponsStates.Length; i++)
             {
-                
+
                 var wpn = _allWeaponsStates[i];
 
                 var assOrdName = "";
@@ -492,7 +489,7 @@ namespace Pulsar4X.ImGuiNetUI
             newArry[curWpnIDs.Length] = wpnID;
             SetWeapons(newArry, fcState.ID);
         }
-        
+
         void SetWeapons(Guid[] wpnsAssignd, Guid firecontrolID)
         {
             SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, firecontrolID, wpnsAssignd);
@@ -501,7 +498,7 @@ namespace Pulsar4X.ImGuiNetUI
         void SetOrdnance(WeaponState wpn, Guid ordnanceAssigned)
         {
             SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, wpn.ID, ordnanceAssigned);
-            RefreshWpnNamesCashe(); //refresh this or it wont show the change till after a systemtick. 
+            RefreshWpnNamesCashe(); //refresh this or it wont show the change till after a systemtick.
             RefreshReloadStateCashe();
         }
 

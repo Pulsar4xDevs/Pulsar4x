@@ -128,7 +128,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             }
 
             shipBmp = finalShipBmp;
-          
+
             List<(int x, int y)> linePoints = new List<(int x, int y)>();
             List<int> lineHeight = new List<int>();
             
@@ -168,10 +168,14 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Damage
             float thickness = (shipProfile.Armor.thickness - 3) / 10 + 3;
             float maxdensity = 7900;//TODO read this from armor data
             byte armorcolor = (byte)Math.Min(255 * ((shipProfile.Armor.armorType.Density / 2 + maxdensity / 2) / maxdensity), 255);
+            float armorMass = 0;
             for (int i = 1; i < linePoints.Count; i++)
             {
                 //Draws the bottom line
                 var bottomcoordEnd = linePoints[i];
+                
+                
+                
                 bottomcoordEnd = (bottomcoordEnd.x, halfwidth + bottomcoordEnd.y);
 
                 DrawLine(shipBmp, bottomcoordStart, bottomcoordEnd, thickness, armorcolor, 255, 255, 255, shipbmpMargins);

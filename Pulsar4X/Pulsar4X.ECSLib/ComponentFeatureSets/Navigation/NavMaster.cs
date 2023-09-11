@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Navigation
         public override string Name { get; } = "";
 
         public override string Details { get; } = "";
-    
+
         public bool CycleCommand = false;
         List<EntityCommand> Orders = new List<EntityCommand>();
         List<EntityCommand> OrdersForOthers = new List<EntityCommand>();
@@ -20,12 +20,17 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.Navigation
             return true;
         }
 
-        internal override void ActionCommand(DateTime atDateTime)
+        internal override void Execute(DateTime atDateTime)
         {
             throw new NotImplementedException();
         }
 
         public override bool IsFinished()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override EntityCommand Clone()
         {
             throw new NotImplementedException();
         }

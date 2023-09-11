@@ -33,15 +33,15 @@ namespace Pulsar4X.SDL2UI
                     }
                     ImGui.NextColumn();
                     ImGui.Separator();
-                    PrintRow("Type", bodyInfoDb.BodyType.ToDescription());
-                    PrintRow("Tectonic Activity", bodyInfoDb.Tectonics.ToDescription());
-                    PrintRow("Gravity", bodyInfoDb.Gravity.ToString("#"));
-                    PrintRow("Temperature", bodyInfoDb.BaseTemperature.ToString("#.#") + " C");
-                    PrintRow("Length of Day", bodyInfoDb.LengthOfDay.ToString("hh") + " hours");
-                    PrintRow("Tilt", bodyInfoDb.AxialTilt.ToString("#"));
-                    PrintRow("Magnetic Field", bodyInfoDb.MagneticField.ToString("#"));
-                    PrintRow("Radiation Level", bodyInfoDb.RadiationLevel.ToString("#"));
-                    PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), separator: false);
+                    DisplayHelpers.PrintRow("Type", bodyInfoDb.BodyType.ToDescription());
+                    DisplayHelpers.PrintRow("Tectonic Activity", bodyInfoDb.Tectonics.ToDescription());
+                    DisplayHelpers.PrintRow("Gravity", bodyInfoDb.Gravity.ToString("#"));
+                    DisplayHelpers.PrintRow("Temperature", bodyInfoDb.BaseTemperature.ToString("#.#") + " C");
+                    DisplayHelpers.PrintRow("Length of Day", bodyInfoDb.LengthOfDay.ToString("hh") + " hours");
+                    DisplayHelpers.PrintRow("Tilt", bodyInfoDb.AxialTilt.ToString("#"));
+                    DisplayHelpers.PrintRow("Magnetic Field", bodyInfoDb.MagneticField.ToString("#"));
+                    DisplayHelpers.PrintRow("Radiation Level", bodyInfoDb.RadiationLevel.ToString("#"));
+                    DisplayHelpers.PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), separator: false);
                 }
                 ImGui.Columns(1);
                 entity.GetDataBlob<ColonyInfoDB>().Display(entityState, uiState);
@@ -68,9 +68,9 @@ namespace Pulsar4X.SDL2UI
                     if(entity.TryGetDatablob<VolumeStorageDB>(out var storage))
                     {
                         ImGui.Columns(2);
-                        PrintRow("Total Mass in Storage", Stringify.Mass(storage.TotalStoredMass));
-                        PrintRow("Transfer Rate", storage.TransferRateInKgHr.ToString() + " kg/hr");
-                        PrintRow("Transfer Range", storage.TransferRangeDv_mps.ToString("0.#") + " dV m/s", tooltipOne: "This is confusing as hell :D", separator: false);
+                        DisplayHelpers.PrintRow("Total Mass in Storage", Stringify.Mass(storage.TotalStoredMass));
+                        DisplayHelpers.PrintRow("Transfer Rate", storage.TransferRateInKgHr.ToString() + " kg/hr");
+                        DisplayHelpers.PrintRow("Transfer Range", storage.TransferRangeDv_mps.ToString("0.#") + " dV m/s", tooltipOne: "This is confusing as hell :D", separator: false);
                         ImGui.Columns(1);
                         storage.Display(entityState, uiState, ImGuiTreeNodeFlags.None);
                     }
@@ -130,6 +130,7 @@ namespace Pulsar4X.SDL2UI
                     if(mineralData == null) continue;
 
                     var stockpileData = storage?.FirstOrDefault(x => x.Value.CurrentStoreInUnits.ContainsKey(id)).Value;
+                    var stockpileUnits = stockpileData?.CurrentStoreInUnits;
                     var annualProduction = miningRates.ContainsKey(id) ? 365 * miningRates[id] : 0;
 
                     ImGui.TableNextRow();
@@ -140,7 +141,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.TableNextColumn();
                     if(stockpileData != null)
                     {
-                        ImGui.Text(stockpileData.CurrentStoreInUnits[id].ToString("#,###,###,###,###,###,##0"));
+                        ImGui.Text(stockpileUnits[id].ToString("#,###,###,###,###,###,##0"));
                     }
                     else
                     {
@@ -233,28 +234,6 @@ namespace Pulsar4X.SDL2UI
         public static void DisplayLogistics(this Entity entity, EntityState entityState, GlobalUIState uiState)
         {
             ColonyLogisticsDisplay.GetInstance(StaticRefLib.StaticData, entityState).Display();
-        }
-
-        private static void PrintRow(string one, string two, string tooltipOne = null, string tooltipTwo = null, bool separator = true)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-            ImGui.Text(one);
-            ImGui.PopStyleColor();
-            if(tooltipOne != null)
-            {
-                if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipOne);
-            }
-            ImGui.NextColumn();
-
-            ImGui.Text(two);
-            if(tooltipTwo != null)
-            {
-                if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipTwo);
-            }
-            ImGui.NextColumn();
-
-            if(separator)
-                ImGui.Separator();
         }
     }
 }

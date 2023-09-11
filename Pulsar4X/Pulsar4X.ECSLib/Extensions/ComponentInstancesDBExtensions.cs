@@ -42,9 +42,9 @@ namespace Pulsar4X.ECSLib
             return totalHTK;
         }
 
-        public static float GetTotalTonnage(this ComponentInstancesDB componentInstances)
+        public static long GetTotalDryMass(this ComponentInstancesDB componentInstances)
         {
-            float totalTonnage = 0;
+            long totalTonnage = 0;
 
             foreach (KeyValuePair<Guid, List<ComponentInstance>> instance in componentInstances.GetComponentsByDesigns())
             {

@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\matia\source\repos\Pulsar4x\Pulsar4X\Backup2\</UpgradeBackupLocation>
@@ -275,7 +275,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  
+
   <Target Name="WriteGitHash" BeforeTargets="CoreCompile">
     <!-- names the obj/.../CustomAssemblyInfo.cs file -->
     <PropertyGroup>
@@ -295,5 +295,5 @@
     <!-- writes the attribute to the customAssemblyInfo file -->
     <WriteCodeFragment Language="C#" OutputFile="$(CustomAssemblyInfoFile)" AssemblyAttributes="@(AssemblyAttributes)" />
   </Target>
-  
+
 </Project>

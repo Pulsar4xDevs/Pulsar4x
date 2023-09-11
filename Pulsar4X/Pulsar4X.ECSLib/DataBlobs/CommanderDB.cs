@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -12,7 +13,7 @@ namespace Pulsar4X.ECSLib
     public class CommanderDB : BaseDataBlob
     {
         [JsonProperty]
-        public CommanderNameSD Name { get; internal set; }
+        public string Name { get; internal set; }
 
         [JsonProperty]
         public int Rank { get; internal set; }
@@ -22,7 +23,7 @@ namespace Pulsar4X.ECSLib
 
         public CommanderDB() { }
 
-        public CommanderDB(CommanderNameSD name, int rank, CommanderTypes type)
+        public CommanderDB(string name, int rank, CommanderTypes type)
         {
             Name = name;
             Rank = rank;
@@ -41,6 +42,17 @@ namespace Pulsar4X.ECSLib
         public override object Clone()
         {
             return new CommanderDB(this);
+        }
+
+        public override string ToString()
+        {
+            switch(Type)
+            {
+                case CommanderTypes.Navy:
+                    return StaticRefLib.StaticData.Themes["default"].NavyRanksAbbreviations[Rank] + " " + Name;
+                default:
+                    return Name;
+            }
         }
     }
 }

@@ -102,6 +102,8 @@ namespace Pulsar4X.ECSLib.Industry
                 throw new Exception("Unable to find IndustryAbilityDB");
             }
 
+            
+            
             foreach (var (prodLineID, prodLine) in industryDB.ProductionLines.ToArray())
             {
                 var industryPointsRemaining = new Dictionary<Guid, int>(prodLine.IndustryTypeRates);
@@ -109,44 +111,78 @@ namespace Pulsar4X.ECSLib.Industry
                 foreach(var batchJob in prodLine.Jobs.ToArray())
                 {
                     IConstrucableDesign designInfo = factionInfo.IndustryDesigns[batchJob.ItemGuid];
-                    float pointsToUse = industryPointsRemaining[designInfo.IndustryTypeID];// * productionPercentage;
+                    float industryPointsToUse = industryPointsRemaining[designInfo.IndustryTypeID];// * productionPercentage;
+
+                    if(batchJob.Status != IndustryJobStatus.Completed)
+                    {
+                        batchJob.Status = IndustryJobStatus.Queued;
+                    }
+
+                    if(industryPointsToUse < 1) continue;
 
                     //total number of resources requred for a single job in this batch
                     var resourceSum = batchJob.ResourcesCosts.Sum(item => item.Value);
                     //how many construction points each resourcepoint is worth.
                     if (resourceSum == 0)
                         throw new Exception("resources can't cost 0");
-                    float pointPerResource = (float)designInfo.IndustryPointCosts / resourceSum;
+                    
+                    float pointPerResource = (float)designInfo.IndustryPointCosts / (float)resourceSum;
+                    float startingPointsLeft = batchJob.ProductionPointsLeft;
+                    float startingPointsToUse = industryPointsToUse;
 
                     while (
                         batchJob.NumberCompleted < batchJob.NumberOrdered &&
-                        pointsToUse > 0)
+                        industryPointsToUse >= 1)
                     {
                         //gather availible resorces for this job.
                         //right now we take all the resources we can, for an individual item in the batch.
                         //even if we're taking more than we can use in this turn, we're using/storing it.
                         IDictionary<Guid, long> resourceCosts = batchJob.ResourcesRequiredRemaining;
-                        //Note: this is editing batchjob.ResourcesRequired variable.
+                        
+                        var totalResourceReq = resourceCosts.Sum(item => item.Value);
+                        
+                        //Note: this is editing batchjob.ResourcesRequired variable (as ref resourceCosts).
                         ConsumeResources(stockpile, ref resourceCosts);
                         //we calculate the difference between the design resources and the amount of resources we've squirreled away.
 
                         // this is the total of the resources that we don't have access to for this item.
-                        var unusableResourceSum = resourceCosts.Sum(item => item.Value);
+                        var totalResourceStillReq = resourceCosts.Sum(item => item.Value);
+
                         // this is the total resources that can be used on this item.
-                        var useableResourcePoints = resourceSum - unusableResourceSum;
+                        var totalResourcesUsed = totalResourceReq - totalResourceStillReq;
+                        // the industry Points equivelent of total used resources.  
+                        var totalIPEquvelent = totalResourcesUsed * pointPerResource;
 
-                        pointsToUse = Math.Min(industryPointsRemaining[designInfo.IndustryTypeID], batchJob.ProductionPointsLeft);
-                        pointsToUse = Math.Min(pointsToUse, useableResourcePoints * pointPerResource);
-
-                        if(pointsToUse < 0)
-                            throw new Exception("Can't have negative production");
-
-                        //construct only enough for the amount of resources we have.
-                        batchJob.ProductionPointsLeft -= (int)Math.Floor(pointsToUse);
-                        industryPointsRemaining[designInfo.IndustryTypeID] -= (int)Math.Floor(pointsToUse);
-
-                        if (batchJob.ProductionPointsLeft == 0)
+                        int pointsToUse = 0;
+                        industryPointsToUse = Math.Min(industryPointsRemaining[designInfo.IndustryTypeID], batchJob.ProductionPointsLeft);
+                        if (totalResourceStillReq == 0)
                         {
+                            pointsToUse = Math.Max((int)industryPointsToUse, 1);
+                        }
+                        else
+                        {
+                            industryPointsToUse = Math.Min(industryPointsToUse, totalIPEquvelent);
+                            pointsToUse = (int)Math.Floor(industryPointsToUse);
+                        }
+                        
+                        //construct only enough for the amount of resources we have.
+                        batchJob.ProductionPointsLeft -= pointsToUse;
+                        industryPointsRemaining[designInfo.IndustryTypeID] -= pointsToUse;
+                        
+                        if(startingPointsLeft == batchJob.ProductionPointsLeft
+                            && batchJob.ProductionPointsCost > startingPointsToUse)
+                        {
+                            // Didn't make any progress mark as missing resources
+                            batchJob.Status = IndustryJobStatus.MissingResources;
+                        }
+                        else if(pointsToUse >= 1 || totalResourcesUsed > 0)
+                        {
+                            batchJob.Status = IndustryJobStatus.Processing;
+                        }
+
+                        if (batchJob.ProductionPointsLeft == 0 && totalResourceStillReq == 0)
+                        {
+                            batchJob.Status = IndustryJobStatus.Completed;
                             designInfo.OnConstructionComplete(industryEntity, stockpile, prodLineID, batchJob, designInfo);
                         }
                     }
@@ -199,7 +235,7 @@ namespace Pulsar4X.ECSLib.Industry
             {
                 throw new Exception("Unable to find IndustryAbilityDB");
             }
-            
+
             var resReq = job.ResourcesRequiredRemaining;
             foreach (var kvp in resReq)
             {
@@ -226,11 +262,11 @@ namespace Pulsar4X.ECSLib.Industry
                         IndustryJob newjob = new IndustryJob(des);
                         newjob.InitialiseJob((ushort)numReq, false);
                         SetJobToFastest(industryDB, newjob);
-                        AutoAddSubJobs(industryEntity, newjob); //recursivly add jobs. 
+                        AutoAddSubJobs(industryEntity, newjob); //recursivly add jobs.
                     }
                 }
             }
-            
+
 
         }
         internal static void SetJobToFastest(IndustryAbilityDB industrydb, IndustryJob job)

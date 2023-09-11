@@ -35,13 +35,9 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.Begin("Manage Economy", ref IsActive))
             {
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-
-                if(ImGui.BeginChild("Colonies", new Vector2(204f, windowContentSize.Y), true))
+                if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y), true))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.Text("Select Colony to Manage");
-                    ImGui.PopStyleColor();
-                    ImGui.Separator();
+                    DisplayHelpers.Header("Select Colony to Manage");
                     foreach(var (id, systemState) in _uiState.StarSystemStates)
                     {
                         if(!isExpanded.ContainsKey(id)) isExpanded.Add(id, true);

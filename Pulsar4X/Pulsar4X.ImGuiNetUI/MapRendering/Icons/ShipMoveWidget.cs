@@ -27,7 +27,6 @@ namespace Pulsar4X.SDL2UI
             if (entity.HasDataBlob<OrderableDB>())
             {
                 var orderable = entity.GetDataBlob<OrderableDB>();
-                var lst = orderable.GetActionList();
             }
             _positionDB = entity.GetDataBlob<PositionDB>();
 
@@ -36,7 +35,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-            _currentPosition = _positionDB.AbsolutePosition; 
+            _currentPosition = _positionDB.AbsolutePosition;
 
         }
 
@@ -62,7 +61,7 @@ namespace Pulsar4X.SDL2UI
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
 
-                SDL.SDL_SetRenderDrawColor(rendererPtr, Red, Grn, Blu, alpha); 
+                SDL.SDL_SetRenderDrawColor(rendererPtr, Red, Grn, Blu, alpha);
                 SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[0].x, _drawPoints[0].y, _drawPoints[1].x, _drawPoints[1].y);
 
         }

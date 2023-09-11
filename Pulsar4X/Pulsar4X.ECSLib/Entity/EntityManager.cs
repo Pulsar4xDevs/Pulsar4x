@@ -43,7 +43,7 @@ namespace Pulsar4X.ECSLib
                 return new SystemSensorContacts(this, GetGlobalEntityByGuid(factionGuid));
             return FactionSensorContacts[factionGuid];
         }
-        Dictionary<Guid, List<Entity>> EntitesByFaction = new Dictionary<Guid, List<Entity>>();  
+        Dictionary<Guid, List<Entity>> EntitesByFaction = new Dictionary<Guid, List<Entity>>();
         public List<Entity> GetEntitiesByFaction(Guid factionGuid)
         {
             if (factionGuid == StaticRefLib.Game.GameMasterFaction.Guid)
@@ -54,8 +54,8 @@ namespace Pulsar4X.ECSLib
                 return new List<Entity>();
         }
         [JsonProperty]
-        public ManagerSubPulse ManagerSubpulses { 
-            get; 
+        public ManagerSubPulse ManagerSubpulses {
+            get;
             protected set; }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
         [NotNull]
         [PublicAPI]
         public static readonly EntityManager InvalidManager = new EntityManager();
-        
+
         #region Constructors
         protected EntityManager() { }
         internal EntityManager(Game game, bool isGlobalManager = false)
@@ -110,7 +110,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Used to add the provided entity to this entity manager.
-        /// Sets up the entity slot and assigns it to the entity while preserving 
+        /// Sets up the entity slot and assigns it to the entity while preserving
         /// entity object references.
         /// </summary>
         internal void SetupEntity(Entity entity, IEnumerable<BaseDataBlob> dataBlobs = null)
@@ -169,7 +169,7 @@ namespace Pulsar4X.ECSLib
             entity.ID = entityID;
             entity.SetMask();
 
-            //the below chunk of code was moved from Entity constructor. this allows the entity to be fully populated and helps with entityChangeLisnters. 
+            //the below chunk of code was moved from Entity constructor. this allows the entity to be fully populated and helps with entityChangeLisnters.
             if(dataBlobs != null)
             foreach (BaseDataBlob dataBlob in dataBlobs)
             {
@@ -187,7 +187,7 @@ namespace Pulsar4X.ECSLib
                     EntitesByFaction.Add(entity.FactionOwnerID, new List<Entity>());
                 EntitesByFaction[entity.FactionOwnerID].Add(entity);
             }
-                //return entityID; //commented this out since we're now setting the entity.ID in here instead of returning the ID to be set by the entity. this was due to UpdateListners needing a valid entity. 
+                //return entityID; //commented this out since we're now setting the entity.ID in here instead of returning the ID to be set by the entity. this was due to UpdateListners needing a valid entity.
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace Pulsar4X.ECSLib
             {
                 throw new ArgumentException("Provided Entity is not valid in this manager.");
             }
-            
+
             Event logevent = new Event(StaticRefLib.CurrentDateTime, "Entity Removed From Manager");
             logevent.Entity = entity;
             if(entity.FactionOwnerID != Guid.Empty)
@@ -224,10 +224,10 @@ namespace Pulsar4X.ECSLib
             logevent.EventType = EventType.EntityDestroyed;
             if (entity.IsValid && entity.HasDataBlob<NameDB>())
                 logevent.EntityName = entity.GetDataBlob<NameDB>().OwnersName;
-            
-            
-            StaticRefLib.EventLog.AddEvent(logevent);          
-            
+
+
+            StaticRefLib.EventLog.AddEvent(logevent);
+
             int entityID = entity.ID;
             _entities[entityID] = null;
             EntityMasks[entityID] = null;
@@ -256,7 +256,7 @@ namespace Pulsar4X.ECSLib
                 {
                     _globalGuidDictionaryLock.ExitWriteLock();
                 }
-                
+
             }
             else
             {
@@ -367,7 +367,7 @@ namespace Pulsar4X.ECSLib
 
         private void UpdateListners(Entity entity, BaseDataBlob db, EntityChangeType change)
         {
-            //listners to this work on thier own threads and are not affected by this one. 
+            //listners to this work on thier own threads and are not affected by this one.
             if (EntityListners.Count > 0)
             {
                 var changeData = new EntityChangeData() {
@@ -383,7 +383,7 @@ namespace Pulsar4X.ECSLib
 
 
             //this one works on the active (ie this) thread
-            entity.InvokeChangeEvent(change, db); 
+            entity.InvokeChangeEvent(change, db);
         }
 
         #region Public API Functions
@@ -440,7 +440,7 @@ namespace Pulsar4X.ECSLib
 
             return GetAllEntitiesWithDataBlobs(dataBlobMask);
         }
-        
+
         /// <summary>
         /// Returns a list of entities that have datablob type T.
         /// <para></para>
@@ -543,7 +543,7 @@ namespace Pulsar4X.ECSLib
             return authorizedEntities;
         }
 
-        internal virtual List<Entity> GetAllEntitiesWithOUTDataBlobs([NotNull] ComparableBitArray dataBlobMask) 
+        internal virtual List<Entity> GetAllEntitiesWithOUTDataBlobs([NotNull] ComparableBitArray dataBlobMask)
         {
             if (dataBlobMask == null)
             {
@@ -691,7 +691,7 @@ namespace Pulsar4X.ECSLib
             if (_localEntityDictionary.ContainsKey(entityGuid))
                 return true;
             return false;
-               
+
         }
 
         /// <summary>
@@ -845,7 +845,7 @@ namespace Pulsar4X.ECSLib
                 }
                 else
                 {
-                    // Entity has not been previously deserialized. TODO: check whether the faction guid will deserialise after this or if we need to read it and input it into the constructor here. 
+                    // Entity has not been previously deserialized. TODO: check whether the faction guid will deserialise after this or if we need to read it and input it into the constructor here.
                     Entity.Create(this, Guid.Empty, protoEntity);
                 }
             }

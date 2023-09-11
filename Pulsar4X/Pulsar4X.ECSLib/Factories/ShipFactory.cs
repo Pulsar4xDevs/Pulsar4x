@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Cryptography;
 using Newtonsoft.Json;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ECSLib.Industry;
@@ -53,7 +54,28 @@ namespace Pulsar4X.ECSLib
 
         public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
         {
-            var industrydb = industryEntity.GetDataBlob<IndustryAbilityDB>();
+            var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
+            batchJob.NumberCompleted++;
+            batchJob.ResourcesRequiredRemaining = new Dictionary<Guid, long>(designInfo.ResourceCosts);
+            batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
+
+            var faction = industryEntity.GetFactionOwner;
+
+            var ship = ShipFactory.CreateShip((ShipDesign)designInfo, faction, industryEntity.GetSOIParentEntity());
+            if(faction.TryGetDatablob<FleetDB>(out var fleetDB))
+            {
+                fleetDB.AddChild(ship);
+            }
+
+            if (batchJob.NumberCompleted == batchJob.NumberOrdered)
+            {
+                industryDB.ProductionLines[productionLine].Jobs.Remove(batchJob);
+                if (batchJob.Auto)
+                {
+                    batchJob.NumberCompleted = 0;
+                    industryDB.ProductionLines[productionLine].Jobs.Add(batchJob);
+                }
+            }
         }
 
         public int CreditCost;
@@ -91,7 +113,7 @@ namespace Pulsar4X.ECSLib
             Name = name;
             Components = components;
             Armor = armor;
-
+            MassPerUnit = 0;
             foreach (var component in components)
             {
                 MassPerUnit += component.design.MassPerUnit * component.count;
@@ -108,15 +130,45 @@ namespace Pulsar4X.ECSLib
                 }
 
             }
-            var r = Math.Cbrt(VolumePerUnit * 3 / 4 / Math.PI);
-            var s = 4 * Math.PI * r * r;
-            var v = s * armor.thickness * 0.001; //armor thickness is in mm, volume is in m^3
-            var m = v * armor.armorType.Density;
-            MassPerUnit += (long)Math.Round(m);
+            DamageProfileDB = new EntityDamageProfileDB(components, armor);
+            var armorMass = GetArmorMass(DamageProfileDB);
+            MassPerUnit += (long)Math.Round(armorMass);
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             ComponentCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
-            IndustryPointCosts = MassPerUnit;
+            IndustryPointCosts = (long)(MassPerUnit * 0.1);
+        }
+
+        public static double GetArmorMass(EntityDamageProfileDB damageProfile)
+        {
+            if (damageProfile.ArmorVertex.Count == 0)
+                return 0;
+            var armor = damageProfile.Armor;
+            double surfaceArea = 0;
+            (int x, int y) v1 = damageProfile.ArmorVertex[0];
+            for (int index = 1; index < damageProfile.ArmorVertex.Count; index++)
+            {
+                (int x, int y) v2 = damageProfile.ArmorVertex[index];
+
+                var r1 = v1.y; //radius of top
+                var r2 = v2.y; //radius of bottom
+                var h = v2.x - v1.x; //height
+                var c1 = 2* Math.PI * r1; //circumference of top
+                var c2 = 2 * Math.PI * r2; //circumference of bottom
+                var sl = Math.Sqrt(h * h + (r1 - r2) * (r1 - r2)); //slope of side
+
+                surfaceArea += 0.5 * sl * (c1 + c2);
+
+                v1 = v2;
+            }
+
+            var aresource = StaticRefLib.StaticData.GetICargoable(armor.armorType.ResourceID);
+            var amass = aresource.MassPerUnit;
+            var avol = aresource.VolumePerUnit;
+            var aden = amass / avol;
+            var armorVolume = surfaceArea * armor.thickness * 0.001;
+            var armorMass = armorVolume * aden;
+            return armorMass;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -225,15 +277,23 @@ namespace Pulsar4X.ECSLib
             OrderableDB ordable = new OrderableDB();
             dataBlobs.Add(ordable);
             var ship = Entity.Create(starsys, ownerFaction.Guid, dataBlobs);
-            
+
 
             //some DB's need tobe created after the entity.
             var namedb = new NameDB(ship.Guid.ToString());
+            if (shipName == null)
+            {
+                shipName = NameFactory.GetShipName();
+            }
+
             namedb.SetName(ownerFaction.Guid, shipName);
+
+            var commander = CommanderFactory.CreateShipCaptain();
 
             ship.SetDataBlob(namedb);
             ship.SetDataBlob(orbit);
-            
+            ship.SetDataBlob(commander);
+
             foreach (var item in shipDesign.Components)
             {
                 EntityManipulation.AddComponentToEntity(ship, item.design, item.count);
