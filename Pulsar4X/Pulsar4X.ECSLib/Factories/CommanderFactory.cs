@@ -5,6 +5,19 @@ namespace Pulsar4X.ECSLib
 {
     public static class CommanderFactory
     {
+        public static CommanderDB CreateAcademyGraduate()
+        {
+            var commander = new CommanderDB()
+            {
+                Name = NameFactory.GetCommanderName(),
+                Rank = 1,
+                Type = CommanderTypes.Navy,
+                Experience = 10
+            };
+
+            return commander;
+        }
+
         public static CommanderDB CreateShipCaptain()
         {
             var commander = new CommanderDB()

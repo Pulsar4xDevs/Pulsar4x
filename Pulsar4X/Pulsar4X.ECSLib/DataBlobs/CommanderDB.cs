@@ -21,6 +21,9 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public CommanderTypes Type { get; internal set; }
 
+        [JsonProperty]
+        public int Experience { get; internal set; } = 0;
+
         public CommanderDB() { }
 
         public CommanderDB(string name, int rank, CommanderTypes type)
@@ -34,9 +37,9 @@ namespace Pulsar4X.ECSLib
         {
             //Should we create new commander? I think no but we have rank in there and same commander with different ranks is not good.
             Name = commanderDB.Name;
-
             Rank = commanderDB.Rank;
             Type = commanderDB.Type;
+            Experience = commanderDB.Experience;
         }
 
         public override object Clone()
