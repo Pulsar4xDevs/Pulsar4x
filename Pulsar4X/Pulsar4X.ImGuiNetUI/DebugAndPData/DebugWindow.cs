@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
                 {
 
                     _selectedEntity = value;
-                    _selectedEntityName = SelectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
+                    _selectedEntityName = SelectedEntity.HasDataBlob<NameDB>() ? SelectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction) : "Unknown";
                     if(_systemState.EntityStatesWithNames.ContainsKey(_selectedEntity.Guid))
                     {
                         _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
@@ -803,7 +803,7 @@ namespace Pulsar4X.SDL2UI
         {
             _factionOwnedEntites = new List<(string name, Entity entity)>();
             var factionEntites = _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Guid);
-            foreach (var entity in factionEntites)
+            foreach (var entity in factionEntites.ToArray())
             {
                 string name = entity.Guid.ToString();
                 if(entity.HasDataBlob<NameDB>())
