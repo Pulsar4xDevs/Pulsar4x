@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
             switch(Type)
             {
                 case CommanderTypes.Navy:
-                    return StaticRefLib.StaticData.Themes["default"].NavyRanksAbbreviations[Rank] + " " + Name;
+                    return StaticRefLib.StaticData.Themes[StaticRefLib.GameSettings.CurrentTheme].NavyRanksAbbreviations[Rank] + " " + Name;
                 default:
                     return Name;
             }
