@@ -858,6 +858,53 @@
             }
           ]
         }
+      },
+      {
+        "Key": "89a944e8-bb95-49dd-b8e1-84e5be84791c",
+        "Value": {
+          "Name": "Naval Academy",
+          "DescriptionFormula": "'Graduates Naval officers'",
+          "ID": "89a944e8-bb95-49dd-b8e1-84e5be84791c",
+          "MassFormula": "Ability('Class Size') * 100",
+          "VolumeFormula": "[Mass] * 0.1",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "Ability('Class Size') * 0.25",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "60"
+              },
+              {
+                "Key": "c3bcb597-a2d1-4b12-9349-26586c8a921c",
+                "Value": "60"
+              }
+            ]
+          },
+          "ResearchCostFormula": "Ability('Class Size') * 0.5",
+          "CreditCostFormula": "120",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "PlanetInstallation",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Class Size",
+              "DescriptionFormula": "'How big the graduating class size of the academy will be each year'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "MaxFormula": "2500",
+              "MinFormula": "10",
+              "StepFormula": "10",
+              "AttributeFormula": "1000"
+            },
+            {
+              "Name": "DBargs",
+              "GuiHint": "None",
+              "AttributeFormula": "AtbConstrArgs(Ability('Class Size'))",
+              "AttributeType": "Pulsar4X.ECSLib.NavalAcademyAtbDB"
+            }
+          ]
+        }
       }
     ]
   }
