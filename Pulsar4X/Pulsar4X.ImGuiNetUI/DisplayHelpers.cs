@@ -1,3 +1,4 @@
+using System;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 

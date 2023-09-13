@@ -122,15 +122,17 @@ namespace Pulsar4X.SDL2UI
                         if(ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
                         {
                             ImGui.Columns(2);
-                            DisplayHelpers.PrintRow("Name", Name(selectedFleet));
+                            DisplayHelpers.PrintRow("Name", selectedFleet.GetName(factionID));
 
                             if(selectedFleetFlagship != null)
                             {
-                                DisplayHelpers.PrintRow("Flagship", Name(selectedFleetFlagship));
-                                if(selectedFleetFlagship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && shipInfoDB.CommanderID != Guid.Empty)
+                                DisplayHelpers.PrintRow("Flagship", selectedFleetFlagship.GetName(factionID));
+                                if(selectedFleetFlagship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) 
+                                    && shipInfoDB.CommanderID != Guid.Empty
+                                    && shipInfoDB.OwningEntity.Manager.FindEntityByGuid(shipInfoDB.CommanderID, out var commanderEntity))
                                 {
 
-                                    DisplayHelpers.PrintRow("Commander", Name(shipInfoDB));
+                                    DisplayHelpers.PrintRow("Commander", commanderEntity.GetName(factionID));
                                 }
                                 else
                                 {
@@ -150,7 +152,7 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                             if(selectedFleetFlagship != null && selectedFleetSystem != null && selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB))
                             {
-                                if(ImGui.SmallButton(Name(selectedFleetSystem)))
+                                if(ImGui.SmallButton(selectedFleetSystem.GetName(factionID)))
                                 {
                                     _uiState.EntityClicked(selectedFleetSystem.Guid, selectedFleetSystem.Guid, MouseButtons.Primary);
                                 }
@@ -161,7 +163,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.Text("Orbiting");
                                 ImGui.PopStyleColor();
                                 ImGui.NextColumn();
-                                if(ImGui.SmallButton(Name(positionDB.Parent)))
+                                if(ImGui.SmallButton(positionDB.Parent.GetName(factionID)))
                                 {
                                     _uiState.EntityClicked(positionDB.Parent.Guid, positionDB.SystemGuid, MouseButtons.Primary);
                                 }
@@ -213,7 +215,7 @@ namespace Pulsar4X.SDL2UI
                                         selectedShips.Add(ship, false);
                                     }
 
-                                    string name = Name(ship);
+                                    string name = ship.GetName(factionID);
                                     if(fleet.FlagShipID == ship.Guid)
                                     {
                                         name = "(F) " + name;
@@ -225,9 +227,11 @@ namespace Pulsar4X.SDL2UI
                                     DisplayHelpers.ShipTooltip(ship);
                                     DisplayShipContextMenu(selectedShips, ship);
                                     ImGui.NextColumn();
-                                    if(ship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && shipInfoDB.CommanderID != Guid.Empty)
+                                    if(ship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) 
+                                        && shipInfoDB.CommanderID != Guid.Empty
+                                        && shipInfoDB.OwningEntity.Manager.FindEntityByGuid(shipInfoDB.CommanderID, out var commanderEntity))
                                     {
-                                        ImGui.Text(Name(shipInfoDB));
+                                        ImGui.Text(commanderEntity.GetName(factionID));
                                     }
                                     else
                                     {
@@ -487,7 +491,7 @@ namespace Pulsar4X.SDL2UI
                             selectedUnattachedShips.Add(ship, false);
                         }
 
-                        if(ImGui.Selectable(Name(ship), selectedUnattachedShips[ship]))
+                        if(ImGui.Selectable(ship.GetName(factionID), selectedUnattachedShips[ship]))
                         {
                             selectedUnattachedShips[ship] = !selectedUnattachedShips[ship];
                         }
@@ -515,7 +519,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             ImGui.PushID(fleet.Guid.ToString());
-            string name = Name(fleet);
+            string name = fleet.GetName(factionID);
             var flags = ImGuiTreeNodeFlags.DefaultOpen;
 
             if(fleetInfo.GetChildren().Where(x => x.HasDataBlob<FleetDB>()).Count() == 0)
@@ -623,13 +627,13 @@ namespace Pulsar4X.SDL2UI
             if(fleet == selectedFleet && !isUnattached)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text(Name(fleet));
+                ImGui.Text(fleet.GetName(factionID));
                 ImGui.PopStyleColor();
             }
             else
             {
                 ImGui.PushID(fleet.Guid.ToString());
-                if(ImGui.MenuItem(Name(fleet)))
+                if(ImGui.MenuItem(fleet.GetName(factionID)))
                 {
                     if(!selected.Any(x => x.Value))
                     {
@@ -720,23 +724,6 @@ namespace Pulsar4X.SDL2UI
                 selectedOrder.Actions.Remove(action);
             }
             ImGui.PopID();
-        }
-
-        private string Name(Entity entity)
-        {
-            return entity.GetDataBlob<NameDB>().GetName(factionID);
-        }
-
-        private string Name(StarSystem system)
-        {
-            return system.NameDB.GetName(factionID);
-        }
-
-        private string Name(ShipInfoDB shipInfoDB)
-        {
-            if(!shipInfoDB.OwningEntity.Manager.FindEntityByGuid(shipInfoDB.CommanderID, out var entity)) return "-";
-
-            return Name(entity);
         }
     }
 }
