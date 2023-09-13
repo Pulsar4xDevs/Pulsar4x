@@ -127,9 +127,10 @@ namespace Pulsar4X.SDL2UI
                             if(selectedFleetFlagship != null)
                             {
                                 DisplayHelpers.PrintRow("Flagship", Name(selectedFleetFlagship));
-                                if(selectedFleetFlagship.TryGetDatablob<CommanderDB>(out var commanderDB))
+                                if(selectedFleetFlagship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && shipInfoDB.CommanderID != Guid.Empty)
                                 {
-                                    DisplayHelpers.PrintRow("Commander", commanderDB.ToString());
+
+                                    DisplayHelpers.PrintRow("Commander", Name(shipInfoDB));
                                 }
                                 else
                                 {
@@ -224,9 +225,9 @@ namespace Pulsar4X.SDL2UI
                                     DisplayHelpers.ShipTooltip(ship);
                                     DisplayShipContextMenu(selectedShips, ship);
                                     ImGui.NextColumn();
-                                    if(ship.TryGetDatablob<CommanderDB>(out var commanderDB))
+                                    if(ship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && shipInfoDB.CommanderID != Guid.Empty)
                                     {
-                                        ImGui.Text(commanderDB.ToString());
+                                        ImGui.Text(Name(shipInfoDB));
                                     }
                                     else
                                     {
@@ -729,6 +730,13 @@ namespace Pulsar4X.SDL2UI
         private string Name(StarSystem system)
         {
             return system.NameDB.GetName(factionID);
+        }
+
+        private string Name(ShipInfoDB shipInfoDB)
+        {
+            if(!shipInfoDB.OwningEntity.Manager.FindEntityByGuid(shipInfoDB.CommanderID, out var entity)) return "-";
+
+            return Name(entity);
         }
     }
 }

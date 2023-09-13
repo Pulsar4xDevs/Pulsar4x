@@ -288,11 +288,8 @@ namespace Pulsar4X.ECSLib
 
             namedb.SetName(ownerFaction.Guid, shipName);
 
-            var commander = CommanderFactory.CreateShipCaptain();
-
             ship.SetDataBlob(namedb);
             ship.SetDataBlob(orbit);
-            ship.SetDataBlob(commander);
 
             foreach (var item in shipDesign.Components)
             {
@@ -303,8 +300,6 @@ namespace Pulsar4X.ECSLib
             {
                 NewtonionMovementProcessor.UpdateNewtonThrustAbilityDB(ship);
             }
-
-
 
             return ship;
         }

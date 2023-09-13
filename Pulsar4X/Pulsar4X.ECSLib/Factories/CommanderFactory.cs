@@ -5,6 +5,15 @@ namespace Pulsar4X.ECSLib
 {
     public static class CommanderFactory
     {
+        public static Entity Create(EntityManager manager, Guid factionID, CommanderDB commanderDB)
+        {
+            var blobs = new List<BaseDataBlob>();
+            var nameDB = new NameDB(commanderDB.ToString(), factionID, commanderDB.ToString());
+            blobs.Add(commanderDB);
+            blobs.Add(nameDB);
+            return Entity.Create(manager, factionID, blobs);
+        }
+
         public static CommanderDB CreateAcademyGraduate()
         {
             var commander = new CommanderDB()

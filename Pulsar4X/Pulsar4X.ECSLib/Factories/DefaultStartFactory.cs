@@ -300,6 +300,21 @@ namespace Pulsar4X.ECSLib
             var methalox = NameLookup.GetMaterialSD(game, "Methalox");
             var hydrolox = NameLookup.GetMaterialSD(game, "Hydrolox");
 
+            for(int i = 0; i < 7; i++)
+            {
+                var commanderDB = CommanderFactory.CreateShipCaptain();
+                commanderDB.CommissionedOn = factionEntity.StarSysDateTime;
+                commanderDB.RankedOn = factionEntity.StarSysDateTime;
+                var entity = CommanderFactory.Create(earth.Manager, factionEntity.Guid, commanderDB);
+
+                if(i == 0) gunShip0.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
+                if(i == 1) ship2.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
+                if(i == 2) ship3.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
+                if(i == 3) gunShip1.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
+                if(i == 4) courier.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
+                if(i == 5) courier2.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
+                if(i == 6) starship.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
+            }
 
             var fleetDB = defaultFleet.GetDataBlob<FleetDB>();
             fleetDB.AddChild(gunShip0);

@@ -40,11 +40,7 @@ namespace Pulsar4X.ECSLib
                     commanderDB.Experience = 0;
                 }
 
-                var blobs = new List<BaseDataBlob>();
-                var nameDB = new NameDB(commanderDB.ToString(), entity.FactionOwnerID, commanderDB.ToString());
-                blobs.Add(commanderDB);
-                blobs.Add(nameDB);
-                Entity.Create(entity.Manager, entity.FactionOwnerID, blobs);
+                CommanderFactory.Create(entity.Manager, entity.FactionOwnerID, commanderDB);
             }
 
             // Remove the graduated class

@@ -12,6 +12,8 @@ namespace Pulsar4X.ECSLib
 
         #region Properties
 
+        public Guid CommanderID { get; internal set; } = Guid.Empty;
+
         public ShipDesign Design { get; private set; }
         
         public bool Conscript { get; set; }
@@ -52,6 +54,7 @@ namespace Pulsar4X.ECSLib
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)
         {
+            CommanderID = shipInfoDB.CommanderID;
             Conscript = shipInfoDB.Conscript;
             Tanker = shipInfoDB.Tanker;
             Collier = shipInfoDB.Collier;
