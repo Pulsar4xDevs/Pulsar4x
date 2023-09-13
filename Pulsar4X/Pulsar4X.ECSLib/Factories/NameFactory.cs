@@ -17,7 +17,9 @@ namespace Pulsar4X.ECSLib
         public static string GetCommanderName()
         {
             var theme = GetTheme();
-            return theme.CommanderNames[StaticRefLib.Game.RNG.Next(0, theme.CommanderNames.Count)];
+            var rng = StaticRefLib.Game.RNG;
+            var name = theme.FirstNames[rng.Next(0, theme.FirstNames.Count)] + " " + theme.LastNames[rng.Next(0, theme.LastNames.Count)];
+            return name;
         }
 
         private static ThemeSD GetTheme()

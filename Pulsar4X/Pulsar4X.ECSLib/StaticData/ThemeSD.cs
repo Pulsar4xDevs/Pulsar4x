@@ -8,7 +8,8 @@ namespace Pulsar4X.ECSLib
         public string Name;
         public List<string> FleetNames;
         public List<string> ShipNames;
-        public List<string> CommanderNames;
+        public List<string> FirstNames;
+        public List<string> LastNames;
         public Dictionary<int, string> NavyRanks;
         public Dictionary<int, string> NavyRanksAbbreviations;
 
