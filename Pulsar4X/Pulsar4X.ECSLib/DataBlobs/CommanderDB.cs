@@ -24,6 +24,9 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int Experience { get; internal set; } = 0;
 
+        [JsonProperty]
+        public int ExperienceCap { get; internal set; } = 0;
+
         public CommanderDB() { }
 
         public CommanderDB(string name, int rank, CommanderTypes type)
@@ -40,6 +43,7 @@ namespace Pulsar4X.ECSLib
             Rank = commanderDB.Rank;
             Type = commanderDB.Type;
             Experience = commanderDB.Experience;
+            ExperienceCap = commanderDB.ExperienceCap;
         }
 
         public override object Clone()

@@ -11,8 +11,7 @@ namespace Pulsar4X.ECSLib
             {
                 Name = NameFactory.GetCommanderName(),
                 Rank = 1,
-                Type = CommanderTypes.Navy,
-                Experience = 10
+                Type = CommanderTypes.Navy
             };
 
             return commander;

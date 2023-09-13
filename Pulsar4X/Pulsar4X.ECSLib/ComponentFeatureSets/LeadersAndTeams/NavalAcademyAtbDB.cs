@@ -5,20 +5,24 @@ namespace Pulsar4X.ECSLib
     public class NavalAcademyAtbDB : BaseDataBlob, IComponentDesignAttribute
     {
         public int ClassSize { get; internal set; }
+        public int TrainingPeriodInMonths { get; internal set; }
 
-        public NavalAcademyAtbDB(double classSize)
+        public NavalAcademyAtbDB(double classSize, double period)
         {
             ClassSize = (int)classSize;
+            TrainingPeriodInMonths = (int)period;
         }
 
-        public NavalAcademyAtbDB(int classSize)
+        public NavalAcademyAtbDB(int classSize, int period)
         {
             ClassSize = classSize;
+            TrainingPeriodInMonths = period;
         }
 
         public NavalAcademyAtbDB(NavalAcademyAtbDB db)
         {
             ClassSize = db.ClassSize;
+            TrainingPeriodInMonths = db.TrainingPeriodInMonths;
         }
 
         public override object Clone()
@@ -28,7 +32,7 @@ namespace Pulsar4X.ECSLib
 
         public string AtbDescription()
         {
-            return "Class Size: " + ClassSize.ToString();
+            return "Class Size: " + ClassSize.ToString() + "\nTraining Length: " + TrainingPeriodInMonths.ToString() + " months";
         }
 
         public string AtbName()
@@ -38,12 +42,13 @@ namespace Pulsar4X.ECSLib
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            DateTime graduationDate = parentEntity.StarSysDateTime + TimeSpan.FromDays(NavalAcademyProcessor.DaysUntilGraduation);
+            DateTime graduationDate = parentEntity.StarSysDateTime + TimeSpan.FromDays(TrainingPeriodInMonths * 30);
             if (parentEntity.TryGetDatablob<NavalAcademyDB>(out var academyDB))
             {
                 academyDB.Academies.Add(new NavalAcademy() {
                     ClassSize = this.ClassSize,
-                    GraduationDate = graduationDate
+                    GraduationDate = graduationDate,
+                    TrainingPeriodInMonths = this.TrainingPeriodInMonths
                 });
             }
             else

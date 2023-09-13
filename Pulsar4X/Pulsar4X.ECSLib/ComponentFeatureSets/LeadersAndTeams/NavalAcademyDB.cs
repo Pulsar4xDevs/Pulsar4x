@@ -6,6 +6,7 @@ namespace Pulsar4X.ECSLib
     {
         public int ClassSize;
         public DateTime GraduationDate;
+        public int TrainingPeriodInMonths;
     }
 
     public class NavalAcademyDB : BaseDataBlob
