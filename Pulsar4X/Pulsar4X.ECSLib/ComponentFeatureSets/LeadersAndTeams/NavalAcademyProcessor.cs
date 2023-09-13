@@ -6,7 +6,6 @@ namespace Pulsar4X.ECSLib
 {
     public class NavalAcademyProcessor : IInstanceProcessor
     {
-        public static readonly int DaysUntilGraduation = 365;
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
             if(!entity.TryGetDatablob<NavalAcademyDB>(out var academyDB)) return;
@@ -19,11 +18,15 @@ namespace Pulsar4X.ECSLib
             {
                 var commanderDB = CommanderFactory.CreateAcademyGraduate();
 
+                // Set the officers commission date and rank date
+                commanderDB.CommissionedOn = entity.StarSysDateTime.Date;
+                commanderDB.RankedOn = entity.StarSysDateTime.Date;
+
                 // Generate an experience cap for the graduate on a bell curve from 0-200
                 commanderDB.ExperienceCap = generator.NextBellCurve(StaticRefLib.Game.RNG, 0, 200, 100, 33.333);
 
                 // Only give starting experience to graduates with some potential
-                if(commanderDB.ExperienceCap > 20)
+                if(commanderDB.ExperienceCap > 30)
                 {
                     // The starting experience for graduates ranges from 0-30
                     // Setup the mean and standard deviation such that low training times give low starting experience
@@ -38,7 +41,7 @@ namespace Pulsar4X.ECSLib
                 }
 
                 var blobs = new List<BaseDataBlob>();
-                var nameDB = new NameDB(commanderDB.ToString());
+                var nameDB = new NameDB(commanderDB.ToString(), entity.FactionOwnerID, commanderDB.ToString());
                 blobs.Add(commanderDB);
                 blobs.Add(nameDB);
                 Entity.Create(entity.Manager, entity.FactionOwnerID, blobs);

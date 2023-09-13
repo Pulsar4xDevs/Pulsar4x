@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
@@ -27,6 +28,9 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         public int ExperienceCap { get; internal set; } = 0;
 
+        public DateTime CommissionedOn { get; internal set; }
+        public DateTime RankedOn {get; internal set; }
+
         public CommanderDB() { }
 
         public CommanderDB(string name, int rank, CommanderTypes type)
@@ -44,6 +48,8 @@ namespace Pulsar4X.ECSLib
             Type = commanderDB.Type;
             Experience = commanderDB.Experience;
             ExperienceCap = commanderDB.ExperienceCap;
+            CommissionedOn = commanderDB.CommissionedOn;
+            RankedOn = commanderDB.RankedOn;
         }
 
         public override object Clone()
