@@ -20,11 +20,11 @@ public static class OrderRegistry
 
     public static Dictionary<string, Func<ConditionItem>> Conditions = new Dictionary<string, Func<ConditionItem>>()
     {
-        { "Fuel", () => new ConditionItem(new FuelCondition(30f, ComparisonType.LessThan))}
+        { "Fuel (Fleet Avg)", () => new ConditionItem(new FuelCondition(30f, ComparisonType.LessThan))}
     };
 
     public static Dictionary<Type, string> ConditionDescriptions = new Dictionary<Type, string>()
     {
-        { typeof(FuelCondition), "Fuel" }
+        { typeof(FuelCondition), "Fuel (Fleet Avg)" }
     };
 }

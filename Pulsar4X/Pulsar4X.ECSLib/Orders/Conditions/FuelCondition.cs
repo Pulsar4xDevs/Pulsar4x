@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -13,18 +14,33 @@ namespace Pulsar4X.ECSLib
 
         public override bool Evaluate(Entity fleet)
         {
+            var fleetDB = fleet.GetDataBlob<FleetDB>();
+            var ships = fleetDB.Children.Where(c => c.HasDataBlob<ShipInfoDB>());
+
+            if(ships.Count() == 0) return false;
+
+            double totalFuelPercentage = 0;
+            foreach(var ship in ships)
+            {
+                double fuelPercent = ship.GetFuelPercent();
+                totalFuelPercentage += fuelPercent;
+            }
+
+            // Round the average so the equals to have a change to fire in the comparisons
+            var average = Math.Round(totalFuelPercentage / ships.Count());
+
             switch(ComparisionType)
             {
                 case ComparisonType.LessThan:
-                    return true;
+                    return average < Threshold;
                 case ComparisonType.LessThanOrEqual:
-                    return false;
+                    return average <= Threshold;
                 case ComparisonType.EqualTo:
-                    return false;
+                    return average == Threshold;
                 case ComparisonType.GreaterThan:
-                    return false;
+                    return average > Threshold;
                 case ComparisonType.GreaterThanOrEqual:
-                    return false;
+                    return average >= Threshold;
                 default:
                     throw new InvalidOperationException("Unknown comparison type.");
             }
