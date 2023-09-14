@@ -127,10 +127,10 @@ namespace Pulsar4X.SDL2UI
                         if(iterations != nestedIterations && !alreadyGroupedItems[nestedIterations])
                         {
                             //check if two names are within the same pixel of distance, if so groups them together into a single window to prevent name overlapping.
-                            var distance = Helpers.GetDistanceSquared(
-                                                nameIcon.X , nameIcon.Y,
-                                                nestedNameIcon.X, nestedNameIcon.Y);
-                            if(distance < 4096)
+                            var xDistance = Helpers.GetSingleDistanceSquared(nameIcon.X, nestedNameIcon.X);
+                            var yDistance = Helpers.GetSingleDistanceSquared(nameIcon.Y, nestedNameIcon.Y);
+
+                            if(yDistance < 256 && xDistance < 9216)
                             {
                                 nameIconGroupings[nameIconGroupings.Count -1].Add(nestedNameIcon);
                                 alreadyGroupedItems[nestedIterations] = true;
@@ -232,12 +232,12 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
             ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
             ImGui.Begin(icon.NameString, ref icon.IsActive, icon._flags | ImGuiWindowFlags.NoDocking);
+            ImGui.PopStyleColor(); //have to pop the color change after pushing it.
+            ImGui.PopStyleVar(3);
         }
 
         private static void EndNameIcon(NameIcon icon)
         {
-            ImGui.PopStyleColor(); //have to pop the color change after pushing it.
-            ImGui.PopStyleVar(3);
             ImGui.End();
         }
 

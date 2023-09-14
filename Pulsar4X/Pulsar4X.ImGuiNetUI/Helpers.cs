@@ -159,6 +159,11 @@ namespace Pulsar4X.SDL2UI
             return (byte)(Math.Max(0, Math.Min(255, (int)Math.Floor(color * 256.0))));
         }
 
+        public static double GetSingleDistanceSquared(float x, float y)
+        {
+            return (x - y) * (x - y);
+        }
+
         public static double GetDistanceSquared(float x1, float y1, float x2, float y2)
         {
             return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
