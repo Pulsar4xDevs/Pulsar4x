@@ -11,7 +11,15 @@ namespace Pulsar4X.ECSLib
             var nameDB = new NameDB(commanderDB.ToString(), factionID, commanderDB.ToString());
             blobs.Add(commanderDB);
             blobs.Add(nameDB);
-            return Entity.Create(manager, factionID, blobs);
+            var entity = Entity.Create(manager, factionID, blobs);
+
+            var faction = manager.GetGlobalEntityByGuid(factionID);
+            if(faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
+            {
+                factionInfoDB.Commanders.Add(entity.Guid);
+            }
+
+            return entity;
         }
 
         public static CommanderDB CreateAcademyGraduate()

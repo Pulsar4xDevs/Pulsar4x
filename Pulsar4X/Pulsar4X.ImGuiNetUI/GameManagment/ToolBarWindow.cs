@@ -90,6 +90,15 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
 
+            btn =  new ToolBarOption()
+            {
+                Picture = _uiState.Img_Select(),
+                TooltipText = "Commanders",
+                OnClick = new Action(CommanderWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(CommanderWindow.GetInstance().GetActive)
+            };
+            ToolButtons.Add(btn);
+
             btn = new ToolBarOption()
             {
                 Picture = _uiState.Img_GalaxyMap(),

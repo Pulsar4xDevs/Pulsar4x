@@ -34,6 +34,9 @@ namespace Pulsar4X.ECSLib
         public List<Entity> Colonies { get; internal set; } = new List<Entity>();
 
         [JsonProperty]
+        public SafeList<Guid> Commanders { get; internal set; } = new SafeList<Guid>();
+
+        [JsonProperty]
         public Dictionary<Guid, ShipDesign> ShipDesigns = new Dictionary<Guid, ShipDesign>();
 
         [JsonProperty]
