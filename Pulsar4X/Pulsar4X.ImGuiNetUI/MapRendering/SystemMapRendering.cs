@@ -16,7 +16,6 @@ namespace Pulsar4X.SDL2UI
     {
         internal enum OrbitBodyType
         {
-            Unknown,
             Star,
             Planet,
             Moon,
@@ -24,6 +23,7 @@ namespace Pulsar4X.SDL2UI
             Comet,
             Colony,
             Ship,
+            Unknown,
 
             [Description("Number Of")]
             NumberOf
@@ -43,19 +43,19 @@ namespace Pulsar4X.SDL2UI
             NonNewtonionTranslation,
 
             [Description("Number Of")]
-            NumberOf         
+            NumberOf
         }
-        //the arc thats actualy drawn, ie we don't normaly draw a full 360 degree (6.28rad) orbit, but only 
-        //a section of it ie 3/4 of the orbit (4.71rad) and this is player adjustable. 
+        //the arc thats actualy drawn, ie we don't normaly draw a full 360 degree (6.28rad) orbit, but only
+        //a section of it ie 3/4 of the orbit (4.71rad) and this is player adjustable.
         public float EllipseSweepRadians = 4.71239f;
         //we stop showing names when zoomed out further than this number
         public float ShowNameAtZoom = 100;
-        
+
         /// <summary>
         /// Number of segments in a full ellipse. this is basicaly the resolution of the orbits.
-        /// 32 is a good low number, slightly ugly. 180 is a little overkill till you get really big orbits. 
+        /// 32 is a good low number, slightly ugly. 180 is a little overkill till you get really big orbits.
         /// </summary>
-        public byte NumberOfArcSegments = 180; 
+        public byte NumberOfArcSegments = 180;
 
         public byte Red = 0;
         public byte Grn = 0;
@@ -96,13 +96,13 @@ namespace Pulsar4X.SDL2UI
             windowPtr = window.Handle;
             surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
             rendererPtr = SDL.SDL_GetRenderer(windowPtr);
-            //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position. 
+            //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position.
             foreach (var item in TestDrawIconData.GetTestIcons())
             {
                 _testIcons.TryAdd(Guid.NewGuid(), item);
             }
         }
-        
+
 
         internal void SetSystem(StarSystem starSys)
         {
@@ -121,7 +121,7 @@ namespace Pulsar4X.SDL2UI
 
 
             _faction = _state.Faction;
-            
+
             _sensorMgr = starSys.GetSensorContacts(_faction.Guid);
 
 
@@ -166,7 +166,7 @@ namespace Pulsar4X.SDL2UI
                 var hyp = entityItem.GetDataBlob<NewtonMoveDB>();
                 Icon orb;
                 //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
-                //NewtonMoveIcon 
+                //NewtonMoveIcon
                 orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
                 _orbitRings.TryAdd(entityItem.Guid, orb);
             }
@@ -231,8 +231,8 @@ namespace Pulsar4X.SDL2UI
                         OrbitDB orbit = (OrbitDB)changeData.Datablob;
                         if (orbit.Parent == null)
                             continue;
-                        
-                        
+
+
                         if (!orbit.IsStationary)
                         {
                             if (_sysState.EntityStatesWithPosition.ContainsKey(changeData.Entity.Guid))
@@ -257,7 +257,7 @@ namespace Pulsar4X.SDL2UI
 
                     if (changeData.Datablob is NewtonMoveDB)
                     {
-                        if(entityState.Entity.HasDataBlob<NewtonMoveDB>()) //because sometimes it can be added and removed in a single tick. 
+                        if(entityState.Entity.HasDataBlob<NewtonMoveDB>()) //because sometimes it can be added and removed in a single tick.
                         {
                             Icon orb;
                             //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
@@ -290,7 +290,7 @@ namespace Pulsar4X.SDL2UI
                     //if (changeData.Datablob is NameDB)
                     //TextIconList.Remove(changeData.Entity.ID);
                 }
-                
+
             }
         }
 
@@ -470,7 +470,7 @@ namespace Pulsar4X.SDL2UI
         {
             foreach (var item in icons)
                 item.OnFrameUpdate(matrix, _camera);
-            foreach (var item in icons)           
+            foreach (var item in icons)
                 item.Draw(rendererPtr, _camera);
         }
         void UpdateAndDraw(Dictionary<Guid, IDrawData> icons, Matrix matrix)
@@ -498,7 +498,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnGameTickChange(DateTime newDate)
         {
-            
+
         }
 
         public override void OnSystemTickChange(DateTime newDate)

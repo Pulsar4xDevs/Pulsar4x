@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using SDL2;
@@ -143,7 +144,11 @@ namespace Pulsar4X.SDL2UI
 
             foreach(var nameIconGrouping in nameIconGroupings)
             {
-                System.Numerics.Vector2 pos = new System.Numerics.Vector2(nameIconGrouping[0].X, nameIconGrouping[0].Y);
+                nameIconGrouping.OrderBy(i => i._bodyType);
+
+                var yOffset = nameIconGrouping[0].Height / 2;
+                var xOffset = 4;
+                System.Numerics.Vector2 pos = new System.Numerics.Vector2(nameIconGrouping[0].X + xOffset, nameIconGrouping[0].Y - yOffset);
 
                 ImGui.PushStyleColor(ImGuiCol.WindowBg, Styles.InvisibleColor); //make the background transperent.
 
