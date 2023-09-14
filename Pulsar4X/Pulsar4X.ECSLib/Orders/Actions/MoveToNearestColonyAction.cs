@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
         public override string Name => "Move to Nearest Colony";
         public override string Details => "Moves the fleet to the nearest colony.";
 
-        public override ActionLaneTypes ActionLanes { get; } = ActionLaneTypes.IneteractWithSelf | ActionLaneTypes.InteractWithEntitySameFleet;
+        public override ActionLaneTypes ActionLanes { get; } = ActionLaneTypes.IneteractWithSelf | ActionLaneTypes.InteractWithEntitySameFleet | ActionLaneTypes.Movement;
 
         public override bool IsBlocking => true;
 
