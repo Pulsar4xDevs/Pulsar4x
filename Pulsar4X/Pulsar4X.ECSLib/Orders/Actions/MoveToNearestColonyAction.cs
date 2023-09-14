@@ -72,6 +72,8 @@ namespace Pulsar4X.ECSLib
             foreach(var ship in ships)
             {
                 if(!ship.HasDataBlob<WarpAbilityDB>()) continue;
+                if(!ship.TryGetDatablob<PositionDB>(out var shipPositionDB)) continue;
+                if(shipPositionDB.Parent == closestColonyPositionDB.Parent) continue;
 
                 var shipMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
 
