@@ -182,15 +182,42 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                             ImGui.Separator();
                             DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
+                        }
+                        ImGui.Columns(1);
+                        if(ImGui.CollapsingHeader("Fleet Orders", ImGuiTreeNodeFlags.DefaultOpen))
+                        {
                             selectedFleet.TryGetDatablob<OrderableDB>(out var orderableDB);
-                            string orderName = orderableDB.ActionList.Count == 0 ? "None" : orderableDB.ActionList[0].Name; // FIXME: is 0 always the current action?
-                            DisplayHelpers.PrintRow("Current Orders", orderName, separator: false);
-                            if(orderableDB.ActionList.Count > 0 && ImGui.IsItemHovered())
+
+                            if(orderableDB.ActionList.Count == 0)
                             {
-                                ImGui.BeginTooltip();
-                                ImGui.Text("IsRunning: " + orderableDB.ActionList[0].IsRunning);
-                                ImGui.Text("IsFinished(): " + orderableDB.ActionList[0].IsFinished());
-                                ImGui.EndTooltip();
+                                ImGui.Text("None");
+                            }
+                            else
+                            {
+                                if(ImGui.BeginTable("FleetOrdersTable", 2, Styles.TableFlags))
+                                {
+                                    ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
+                                    ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 1f);
+                                    ImGui.TableHeadersRow();
+                                    
+                                    var actions = orderableDB.ActionList.ToArray();
+                                    for(int i = 0; i < actions.Length; i++)
+                                    {
+                                        ImGui.TableNextColumn();
+                                        ImGui.Text((i + 1).ToString());
+                                        ImGui.TableNextColumn();
+                                        ImGui.Text(actions[i].Name);
+                                        if(ImGui.IsItemHovered())
+                                        {
+                                            ImGui.BeginTooltip();
+                                            ImGui.Text("IsRunning: " + actions[i].IsRunning);
+                                            ImGui.Text("IsFinished(): " + actions[i].IsFinished());
+                                            ImGui.EndTooltip();
+                                        }
+                                    }
+
+                                    ImGui.EndTable();
+                                }
                             }
                         }
                         ImGui.EndChild();
