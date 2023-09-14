@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -42,7 +43,7 @@ namespace Pulsar4X.ECSLib
             if(entity.TryGetDatablob<OrderableDB>(out var orderableDB))
             {
                 int mask = 0;
-                var list = orderableDB.ActionList;
+                var list = orderableDB.ActionList.ToList();
 
                 int i = 0;
                 while (i < list.Count)
@@ -77,10 +78,7 @@ namespace Pulsar4X.ECSLib
                             throw new Exception("How is this possible");
                         orderableDB.ActionList.RemoveAt(i);
                     }
-                    else
-                    {
-                        i++;
-                    }
+                    i++;
                 }
             }
         }
