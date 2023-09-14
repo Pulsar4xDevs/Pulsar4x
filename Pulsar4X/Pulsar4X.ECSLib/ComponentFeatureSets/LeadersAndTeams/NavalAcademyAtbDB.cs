@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                parentEntity.SetDataBlob(new NavalAcademyDB(ClassSize, graduationDate));
+                parentEntity.SetDataBlob(new NavalAcademyDB(ClassSize, graduationDate, TrainingPeriodInMonths));
             }
             parentEntity.Manager.ManagerSubpulses.AddEntityInterupt(graduationDate, nameof(NavalAcademyProcessor), parentEntity);
         }

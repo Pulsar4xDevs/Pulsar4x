@@ -14,11 +14,12 @@ namespace Pulsar4X.ECSLib
         public SafeList<NavalAcademy> Academies = new SafeList<NavalAcademy>();
 
         public NavalAcademyDB() { }
-        public NavalAcademyDB(int classSize, DateTime graduationDate)
+        public NavalAcademyDB(int classSize, DateTime graduationDate, int trainingPeriod)
         {
             Academies.Add(new NavalAcademy(){
                 ClassSize = classSize,
-                GraduationDate = graduationDate
+                GraduationDate = graduationDate,
+                TrainingPeriodInMonths = trainingPeriod
             });
         }
 
