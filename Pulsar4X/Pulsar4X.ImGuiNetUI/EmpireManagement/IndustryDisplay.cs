@@ -182,8 +182,9 @@ namespace Pulsar4X.SDL2UI
 
                 foreach (var (id, line) in _prodLines)
                 {
+                    var jobs = line.Jobs.ToList();
                     string headerTitle = line.Name;
-                    if(line.Jobs.Count == 0)
+                    if(jobs.Count == 0)
                         headerTitle += " (Idle)";
                     ImGui.PushID(id.ToString());
                     if(_selectedProdLine == id)
@@ -208,7 +209,7 @@ namespace Pulsar4X.SDL2UI
                             // TODO: add upgrade functionality
                         }
 
-                        if(line.Jobs.Count > 0)
+                        if(jobs.Count > 0)
                         {
                             IConstrucableDesign designInfo = _factionInfoDB.IndustryDesigns[line.Jobs[0].ItemGuid];
                             var rate = line.IndustryTypeRates[designInfo.IndustryTypeID];
@@ -220,10 +221,7 @@ namespace Pulsar4X.SDL2UI
                             ImGui.PopStyleColor();
                             if(ImGui.IsItemHovered())
                                 ImGui.SetTooltip("Assuming all resources needed are available.");
-                        }
 
-                        if(line.Jobs.Count > 0)
-                        {
                             if(ImGui.BeginTable(line.Name, 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                             {
                                 ImGui.TableSetupColumn("Job", ImGuiTableColumnFlags.None, 1f);
@@ -232,11 +230,11 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.None, 1f);
                                 ImGui.TableHeadersRow();
                                 var progsize = new Vector2(128, ImGui.GetTextLineHeight());
-                                for (int ji = 0; ji < line.Jobs.Count; ji++)
+                                for (int ji = 0; ji < jobs.Count; ji++)
                                 {
                                     var cpos = ImGui.GetCursorPos();
-                                    var batchJob = line.Jobs[ji];
-                                    string jobname = line.Jobs[ji].Name;
+                                    var batchJob = jobs[ji];
+                                    string jobname = jobs[ji].Name;
 
                                     //bool selected = _selectedExistingIndex ==  ji && id == _selectedProdLine;
                                     float percent = 1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost;
@@ -276,7 +274,7 @@ namespace Pulsar4X.SDL2UI
                                         ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 0f);
                                         ImGui.PushStyleColor(ImGuiCol.PopupBg, new Vector4(0.1f, 0.1f, 0.1f, 1f));
                                         ImGui.BeginTooltip();
-                                        if(ImGui.BeginTable(line.Jobs[ji].ItemGuid.ToString(), 2, ImGuiTableFlags.Borders))
+                                        if(ImGui.BeginTable(jobs[ji].ItemGuid.ToString(), 2, ImGuiTableFlags.Borders))
                                         {
                                             ImGui.TableSetupColumn("Resource Required");
                                             ImGui.TableSetupColumn("Quantity Needed");
@@ -286,7 +284,7 @@ namespace Pulsar4X.SDL2UI
                                             ImGui.TableNextColumn();
                                             ImGui.Text(batchJob.ProductionPointsLeft.ToString());
 
-                                            foreach(var (rId, amountRemaining) in line.Jobs[ji].ResourcesRequiredRemaining)
+                                            foreach(var (rId, amountRemaining) in jobs[ji].ResourcesRequiredRemaining)
                                             {
                                                 ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(rId);
                                                 if (cargoItem == null)
