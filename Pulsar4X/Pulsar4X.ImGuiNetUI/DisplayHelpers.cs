@@ -54,7 +54,8 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.IsItemHovered())
             {
                 ImGui.BeginTooltip();
-                ImGui.Text("Design: " + shipInfo.Design.Name);
+                ImGui.Text(shipInfo.Design.Name);
+                ImGui.Separator();
                 if(orderableDB.ActionList.Count > 0)
                 {
                     ImGui.Text("Orders:");

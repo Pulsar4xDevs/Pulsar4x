@@ -25,13 +25,13 @@ namespace Pulsar4X.SDL2UI
         {
             Owner,
             Default,
-            Faction, 
+            Faction,
             Guids
         }
         private Entity[] _entities;
         private string[] _names;
         private int _index = 0;
-        
+
         public EntityNameSelector(Entity[] entities, NameType nameType, Guid? factionID = null)
         {
             _entities = entities;
@@ -51,7 +51,7 @@ namespace Pulsar4X.SDL2UI
                     _names[i] = _entities[i].GetOwnersName();
                 }
             }
-            
+
             if (nameType == NameType.Faction)
             {
                 for (int i = 0; i < entities.Length; i++)
@@ -59,7 +59,7 @@ namespace Pulsar4X.SDL2UI
                     _names[i] = _entities[i].GetName((Guid)factionID);
                 }
             }
-            
+
             if (nameType == NameType.Guids)
             {
                 for (int i = 0; i < entities.Length; i++)
@@ -83,7 +83,7 @@ namespace Pulsar4X.SDL2UI
         {
             return _names[_index];
         }
-        
+
         public bool IsItemSelected
         {
             get { return _index > -1; }
@@ -159,6 +159,10 @@ namespace Pulsar4X.SDL2UI
             return (byte)(Math.Max(0, Math.Min(255, (int)Math.Floor(color * 256.0))));
         }
 
+        public static double GetDistanceSquared(float x1, float y1, float x2, float y2)
+        {
+            return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+        }
     }
 
     public static class BorderListOptions
@@ -174,12 +178,12 @@ namespace Pulsar4X.SDL2UI
             internal  float _yctr1;
             internal  float _yctr2;
             internal  float _ybot;
-        
+
             internal  uint _colour;
-            
+
             internal  float _lhHeight;
         }
-        
+
         private static BorderListState[] _states = new BorderListState[8];
         private static float _dentFactor = 4;
         private static int _nestIndex = 0;
@@ -195,52 +199,52 @@ namespace Pulsar4X.SDL2UI
         private static float _yctr1;
         private static float _yctr2;
         private static float _ybot;
-        
+
         private static uint _colour;
         private static float _dentMulitpier = 3;
         private static float _lhHeight;
         */
-        
+
         public static bool Begin(string id, string[] list, ref int selected, float width)
         {
             bool selectedChanged = false;
             ImGui.PushID(id);
-            var state = new BorderListState();  
+            var state = new BorderListState();
             state._colour = ImGui.GetColorU32(ImGuiCol.Border);
             state._labelSize = new System.Numerics.Vector2( width, ImGui.GetTextLineHeight());
             colomnCount = ImGui.GetColumnsCount();
             ImGui.Columns(2, id, false);
             ImGui.SetColumnWidth(0, width);
-            
+
             state._xleft = ImGui.GetCursorScreenPos().X;
             state._ytop = ImGui.GetCursorScreenPos().Y;
             state._xcentr = state._xleft + width;
 
             var vpad = ImGui.GetTextLineHeightWithSpacing() - ImGui.GetTextLineHeight();
 
-            
+
             ImGui.Indent(_dentFactor);
             //display the list of items:
             for (int i = 0; i < list.Length; i++)
             {
                 var pos = ImGui.GetCursorScreenPos();
- 
+
                 ImGui.Text(list[i]);
                 if (ImGui.IsItemClicked())
                 {
                     selected = i;
                     selectedChanged = true;
                 }
-                
+
                 if(i == selected)
-                {   
+                {
                     state._yctr1 = pos.Y - vpad * 0.5f;
                     state._yctr2 = state._yctr1 + ImGui.GetTextLineHeightWithSpacing();
                 }
-                
+
             }
-            
-            
+
+
             state._ybot = ImGui.GetCursorScreenPos().Y;
             state._lhHeight = ImGui.GetContentRegionAvail().Y;
             //if nothing is selected we'll draw a line at the bottom instead of around one of the items:
@@ -249,7 +253,7 @@ namespace Pulsar4X.SDL2UI
                 state._yctr1 = state._ybot;
                 state._yctr2 = state._ybot;
             }
-            
+
             ImGui.NextColumn(); //set nextColomn so the imgui.items placed after this get put into the righthand side
             ImGui.Indent(_dentFactor * (_nestIndex + 1));
             _states[_nestIndex] = state;
@@ -259,12 +263,12 @@ namespace Pulsar4X.SDL2UI
         /*
         public static void Begin(string id, ref int selected, string[] list)
         {
-            Begin(id, list, ref selected, ImGui.GetColorU32(ImGuiCol.Border)); 
+            Begin(id, list, ref selected, ImGui.GetColorU32(ImGuiCol.Border));
         }
-        
+
         public static void Begin(string id, string[] list, ref int selected, ImGuiCol colorIdx)
         {
-            Begin(id, list, ref selected, ImGui.GetColorU32(colorIdx)); 
+            Begin(id, list, ref selected, ImGui.GetColorU32(colorIdx));
         }
 */
         public static void End(System.Numerics.Vector2 sizeRight)
@@ -273,21 +277,21 @@ namespace Pulsar4X.SDL2UI
             _nestIndex--;
             var state = _states[_nestIndex];
             var winpos = ImGui.GetCursorPos();
-            
+
             var rgnSize = ImGui.GetContentRegionAvail();
-            
+
             ImGui.NextColumn();
-            ImGui.Columns(colomnCount); 
+            ImGui.Columns(colomnCount);
             var scpos = ImGui.GetCursorScreenPos();
             ImGui.Unindent(_dentFactor);
-            
+
             state._xright = state._xcentr + sizeRight.X + _dentFactor;
 
             float boty = Math.Max(state._ybot, state._ytop + sizeRight.Y); //is the list bigger, or the items drawn after it.
 
             ImDrawListPtr wdl = ImGui.GetWindowDrawList();
-            
-            
+
+
             System.Numerics.Vector2[] pts = new System.Numerics.Vector2[9];
             pts[0] = new System.Numerics.Vector2(state._xleft, state._yctr1);          //topleft of the selected item
             pts[1] = new System.Numerics.Vector2(state._xleft, state._yctr2);          //botomleft of the selected item
@@ -301,9 +305,9 @@ namespace Pulsar4X.SDL2UI
 
             var plflag = ImGuiNET.ImDrawFlags.None;
             wdl.AddPolyline(ref pts[0], pts.Length, state._colour, plflag, 1.0f);
-            
+
             ImGui.PopID();
-            
+
         }
     }
 
@@ -324,7 +328,7 @@ namespace Pulsar4X.SDL2UI
         public static void Begin(string label, uint colour)
         {
             ImGui.PushID(label);
-            
+
             _colour[_nestIndex] = colour;
             _startPos[_nestIndex] = ImGui.GetCursorScreenPos();
             _startPos[_nestIndex].X -= _dentMulitpier;
@@ -334,15 +338,15 @@ namespace Pulsar4X.SDL2UI
             _nestIndex++;
             ImGui.Indent(_dentMulitpier * _nestIndex);
         }
-        
+
         public static void Begin(string label)
         {
-            Begin(label, ImGui.GetColorU32(ImGuiCol.Border)); 
+            Begin(label, ImGui.GetColorU32(ImGuiCol.Border));
         }
-        
+
         public static void Begin(string label, ImGuiCol colorIdx)
         {
-            Begin(label, ImGui.GetColorU32(colorIdx)); 
+            Begin(label, ImGui.GetColorU32(colorIdx));
         }
 
         public static void End()
@@ -351,17 +355,17 @@ namespace Pulsar4X.SDL2UI
         }
 
         public static void End(float width)
-        { 
+        {
             ImGui.Unindent(_dentMulitpier * _nestIndex);
             _nestIndex--;
             var pos = ImGui.GetCursorScreenPos();
-            
+
             _size[_nestIndex] = new System.Numerics.Vector2(width, pos.Y - _startPos[_nestIndex].Y);
             ImDrawListPtr wdl = ImGui.GetWindowDrawList();
 
             float by = _startPos[_nestIndex].Y + _size[_nestIndex].Y + _dentMulitpier -_dentMulitpier * _nestIndex;
             float rx = _startPos[_nestIndex].X + _size[_nestIndex].X - _dentMulitpier * _nestIndex;
-            
+
             System.Numerics.Vector2[] pts = new System.Numerics.Vector2[6];
             pts[0] = new System.Numerics.Vector2(_startPos[_nestIndex].X + _dentMulitpier, _startPos[_nestIndex].Y);
             pts[1] = _startPos[_nestIndex]; //top left
@@ -371,9 +375,9 @@ namespace Pulsar4X.SDL2UI
             pts[5] = new System.Numerics.Vector2(_startPos[_nestIndex].X + _labelSize[_nestIndex].X + _dentMulitpier, _startPos[_nestIndex].Y);
             var plflag = ImGuiNET.ImDrawFlags.None;
             wdl.AddPolyline(ref pts[0], pts.Length, _colour[_nestIndex], plflag, 1.0f);
-            
+
             ImGui.PopID();
-            
+
         }
     }
 
@@ -400,13 +404,13 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetCursorPos(new System.Numerics.Vector2(x, y));
             ImGui.Text(strstate);
             ImGui.PopItemWidth();
-            
+
 
             return false;
         }
-        
-        
-        
+
+
+
     }
 
 
@@ -417,7 +421,7 @@ namespace Pulsar4X.SDL2UI
             Au,
             MKm,
             Km,
-            m 
+            m
         }
 
         public enum DisplayType
@@ -427,7 +431,7 @@ namespace Pulsar4X.SDL2UI
             Au,
             Mkm,
             Km,
-            m 
+            m
         }
 
         static DisplayType GlobalDisplayType = DisplayType.Km;
@@ -455,13 +459,13 @@ namespace Pulsar4X.SDL2UI
 
     }
 
- 
+
     public static class LargeRangeSliderInt
     {
         public delegate int Step (int value);
 
         public static Step StepMethod = Step1;
-        
+
         public static int Step1(int value)
         {
             return 1;
@@ -471,7 +475,7 @@ namespace Pulsar4X.SDL2UI
         {
             return Convert.ToInt32(Math.Log2(value)) ;
         }
-        
+
 
         public static bool Display(string label, ref int value, int min, int max)
         {
@@ -506,7 +510,7 @@ namespace Pulsar4X.SDL2UI
             {
                 changed = true;
             }ImGui.SameLine();
-            
+
             if (ImGui.Button("100k"))
             {
                 value = Math.Min(max, value - 100000);
@@ -528,7 +532,7 @@ namespace Pulsar4X.SDL2UI
                 changed = true;
             }
             ImGui.PopID();
-            
+
             return changed;
 
         }
@@ -538,12 +542,12 @@ namespace Pulsar4X.SDL2UI
     {
         public static bool ButtonED(string label, bool IsEnabled)
         {
-            
+
             if(!IsEnabled)
                 ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
-                
+
             bool clicked = ImGui.Button(label);
-            
+
             if(!IsEnabled)
             {
                 ImGui.PopStyleVar();
@@ -551,15 +555,15 @@ namespace Pulsar4X.SDL2UI
             }
             return clicked;
         }
-        
+
         public static bool SliderAngleED(string label, ref float v_rad, bool IsEnabled)
         {
             var rad = v_rad;
             if(!IsEnabled)
                 ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * 0.5f);
-                
+
             bool clicked = ImGui.SliderAngle(label, ref v_rad);
-            
+
             if(!IsEnabled)
             {
                 ImGui.PopStyleVar();
@@ -604,7 +608,7 @@ namespace Pulsar4X.SDL2UI
             }
             return changed;
         }
-        
+
         public static bool DragDouble(string label, ref double value, float v_speed, double min, double max, string format, ImGuiSliderFlags flags)
         {
             //double step = attribute.StepValue;
@@ -637,7 +641,7 @@ namespace Pulsar4X.SDL2UI
 
 
     }
-    
+
     public static class VectorWidget2d
     {
         public enum Style
@@ -648,9 +652,9 @@ namespace Pulsar4X.SDL2UI
 
         private static Style _valueStyle = Style.Cartesian;
         private static Style _displayStyle = Style.Polar;
-        
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="values">x,y or r,θ</param>
         /// <param name="minVal"></param>
@@ -673,7 +677,7 @@ namespace Pulsar4X.SDL2UI
                     nextStyle = 0;
                 _displayStyle = (Style)nextStyle;
             }
-                
+
             if (_displayStyle == Style.Cartesian)
             {
                 changed = CartInt(ref values, minVal, maxVal);
@@ -686,9 +690,9 @@ namespace Pulsar4X.SDL2UI
             ImGui.PopID();
             return changed;
         }
-        
+
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="values">x,y or r,θ</param>
         /// <param name="minVal"></param>
@@ -711,7 +715,7 @@ namespace Pulsar4X.SDL2UI
                     nextStyle = 0;
                 _displayStyle = (Style)nextStyle;
             }
-                
+
             if (_displayStyle == Style.Cartesian)
             {
                 changed = CartDouble(ref values, minVal, maxVal);
@@ -731,7 +735,7 @@ namespace Pulsar4X.SDL2UI
 
             int x = 0;
             int y = 0;
-            
+
             if (_valueStyle == Style.Cartesian)
             {
                 x = (int)Math.Round(values.X);
@@ -748,7 +752,7 @@ namespace Pulsar4X.SDL2UI
                 changed = true;
             if (ImGui.SliderInt("Y", ref y, minVal, maxVal))
                 changed = true;
-                 
+
 
             if (changed)
             {
@@ -765,14 +769,14 @@ namespace Pulsar4X.SDL2UI
             }
             return changed;
         }
-        
+
         static bool CartDouble(ref Pulsar4X.Orbital.Vector2 values, double minVal, double maxVal)
         {
             bool changed = false;
 
             double x = 0;
             double y = 0;
-            
+
             if (_valueStyle == Style.Cartesian)
             {
                 x = Math.Round(values.X);
@@ -789,7 +793,7 @@ namespace Pulsar4X.SDL2UI
                 changed = true;
             if (ImGuiExt.SliderDouble("Y", ref y, minVal, maxVal, Stringify.Distance(x), ImGuiSliderFlags.AlwaysClamp))
                 changed = true;
-                 
+
 
             if (changed)
             {
@@ -809,7 +813,7 @@ namespace Pulsar4X.SDL2UI
 
         static bool PolarDouble(ref Pulsar4X.Orbital.Vector2 values, double maxVal)
         {
-            
+
             bool changed = false;
             double r = 0;
             float theta = 0;
@@ -841,8 +845,8 @@ namespace Pulsar4X.SDL2UI
             //ImGui.Text("mdelta:" + mdelta);
             //ImGui.Text("step:" + step);
             //ImGui.Text("speed:" + speed);
-            
-            
+
+
             if(ImGuiExt.DragDouble("r", ref r, speed, 0, maxVal, Stringify.Distance(r), ImGuiSliderFlags.AlwaysClamp))
                 changed = true;
             if(ImGui.IsItemHovered())
@@ -852,7 +856,7 @@ namespace Pulsar4X.SDL2UI
                 changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Angle");
-            
+
             if (changed)
             {
                 if (_valueStyle == Style.Cartesian)
@@ -868,7 +872,7 @@ namespace Pulsar4X.SDL2UI
             }
             return changed;
         }
-        
+
 
         static bool PolarInt(ref Pulsar4X.Orbital.Vector2 values, int maxVal)
         {
@@ -903,8 +907,8 @@ namespace Pulsar4X.SDL2UI
             //ImGui.Text("mdelta:" + mdelta);
             //ImGui.Text("step:" + step);
             //ImGui.Text("speed:" + speed);
-            
-            
+
+
             if(ImGui.DragInt("r", ref r, speed, 0, maxVal, r.ToString(), ImGuiSliderFlags.AlwaysClamp))
                 changed = true;
             if(ImGui.IsItemHovered())
@@ -914,7 +918,7 @@ namespace Pulsar4X.SDL2UI
                 changed = true;
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Angle");
-            
+
             if (changed)
             {
                 if (_valueStyle == Style.Cartesian)
