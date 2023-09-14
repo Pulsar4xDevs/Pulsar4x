@@ -383,8 +383,8 @@ namespace Pulsar4X.ECSLib
                 var fuelType = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
                 var typeStore = volumeStorageDB.TypeStores[fuelType.CargoTypeID];
                 var freeVolume = volumeStorageDB.GetFreeVolume(fuelType.CargoTypeID);
-                var percentFree = (freeVolume / typeStore.MaxVolume) * 100;
-                var percentStored = Math.Round( 100 - percentFree, 3);
+                var percentFree = freeVolume / typeStore.MaxVolume;
+                var percentStored = Math.Round( 1 - percentFree, 3);
 
                 return (fuelType, percentStored);
             }

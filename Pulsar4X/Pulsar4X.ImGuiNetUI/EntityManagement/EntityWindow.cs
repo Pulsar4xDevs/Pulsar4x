@@ -156,6 +156,19 @@ namespace Pulsar4X.SDL2UI
         {
             if(ImGui.BeginTabItem("Info"))
             {
+                if(Entity.HasDataBlob<ShipInfoDB>() && Entity.HasDataBlob<VolumeStorageDB>())
+                {
+                    var (fuelType, fuelPercent) = Entity.GetFuelInfo();
+                    var size = ImGui.GetContentRegionAvail();
+                    ImGui.PushStyleColor(ImGuiCol.PlotHistogram, Styles.SelectedColor);
+                    ImGui.ProgressBar((float)fuelPercent, new Vector2(size.X, 24), "Fuel (" + (fuelPercent * 100) + "%)");
+                    ImGui.PopStyleColor();
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip(fuelType.Name);
+                    }
+                }
+
                 if(Entity.HasDataBlob<SystemBodyInfoDB>())
                 {
                     ImGui.Text("Body Type: " + Entity.GetDataBlob<SystemBodyInfoDB>().BodyType.ToDescription());
@@ -194,16 +207,6 @@ namespace Pulsar4X.SDL2UI
                 if(Entity.HasDataBlob<ColonyInfoDB>())
                 {
                     Entity.GetDataBlob<ColonyInfoDB>().Display(EntityState, _uiState);
-                }
-
-                if(Entity.HasDataBlob<ShipInfoDB>() && Entity.HasDataBlob<VolumeStorageDB>())
-                {
-                    var (fuelType, fuelPercent) = Entity.GetFuelInfo();
-                    ImGui.Text("Fuel Level: " + fuelPercent + "%%");
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.SetTooltip(fuelType.Name);
-                    }
                 }
 
                 ImGui.EndTabItem();
