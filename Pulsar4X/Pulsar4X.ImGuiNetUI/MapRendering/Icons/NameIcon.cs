@@ -130,7 +130,7 @@ namespace Pulsar4X.SDL2UI
                             var distance = Helpers.GetDistanceSquared(
                                                 nameIcon.X , nameIcon.Y,
                                                 nestedNameIcon.X, nestedNameIcon.Y);
-                            if(distance < 9216)
+                            if(distance < 4096)
                             {
                                 nameIconGroupings[nameIconGroupings.Count -1].Add(nestedNameIcon);
                                 alreadyGroupedItems[nestedIterations] = true;
@@ -144,28 +144,101 @@ namespace Pulsar4X.SDL2UI
 
             foreach(var nameIconGrouping in nameIconGroupings)
             {
-                nameIconGrouping.OrderBy(i => i._bodyType);
-
-                var yOffset = nameIconGrouping[0].Height / 2;
-                var xOffset = 4;
-                System.Numerics.Vector2 pos = new System.Numerics.Vector2(nameIconGrouping[0].X + xOffset, nameIconGrouping[0].Y - yOffset);
-
-                ImGui.PushStyleColor(ImGuiCol.WindowBg, Styles.InvisibleColor); //make the background transperent.
-
-                ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
-                ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
-
-                ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
-                ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
-                ImGui.Begin(nameIconGrouping[0].NameString, ref nameIconGrouping[0].IsActive, nameIconGrouping[0]._flags | ImGuiWindowFlags.NoDocking);
-                foreach(var finalNameIcon in nameIconGrouping)
+                var orderedGroupedIcons = nameIconGrouping.GroupBy(i => i._bodyType).OrderBy(g => g.Key).ToList();
+                var highestPriorityGroup = orderedGroupedIcons.First().ToList();
+                orderedGroupedIcons.RemoveAt(0);
+                for(int i = 0; i < highestPriorityGroup.Count; i++)
                 {
-                   finalNameIcon.Draw(rendererPtr, camera, false);
+                    if(i == 0)
+                        BeginNameIcon(highestPriorityGroup[i]);
+
+                    DisplayNameIcon(camera, highestPriorityGroup[i], orderedGroupedIcons);
+
+                    if(i == highestPriorityGroup.Count - 1)
+                        EndNameIcon(highestPriorityGroup[i]);
                 }
-                ImGui.PopStyleColor(); //have to pop the color change after pushing it.
-                ImGui.PopStyleVar(3);
-                ImGui.End();
             }
+        }
+
+        private static void DisplayNameIcon(Camera camera, NameIcon icon, List<IGrouping<UserOrbitSettings.OrbitBodyType, NameIcon>> subIcons)
+        {
+            if (camera.ZoomLevel < icon.DrawAtZoom)
+                return;
+
+            if(!subIcons.Any())
+            {
+                ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
+                if (ImGui.Button(icon.NameString + "##" + icon._entityGuid.ToString()))
+                {
+                    icon._state.EntityClicked(icon._entityGuid, icon._starSysGuid, MouseButtons.Primary);
+                }
+                ImGui.PopStyleColor();
+                return;
+            }
+
+            if(ImGui.BeginMenu(icon.NameString))
+            {
+                if(ImGui.MenuItem("View " + icon.NameString))
+                {
+                    icon._state.EntityClicked(icon._entityGuid, icon._starSysGuid, MouseButtons.Primary);
+                }
+
+                if(subIcons.Any())
+                    ImGui.Separator();
+
+                // If there is only a single type of subIcon it doesn't need to be buried in another menu
+                if(subIcons.Count == 1)
+                {
+                    foreach(var subIcon in subIcons[0])
+                    {
+                        if(ImGui.MenuItem(subIcon.NameString))
+                        {
+                            subIcon._state.EntityClicked(subIcon._entityGuid, subIcon._starSysGuid, MouseButtons.Primary);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach(var group in subIcons)
+                    {
+                        if(ImGui.BeginMenu(group.Key.ToString()))
+                        {
+                            foreach(var subIcon in group)
+                            {
+                                if(ImGui.MenuItem(subIcon.NameString))
+                                {
+                                    subIcon._state.EntityClicked(subIcon._entityGuid, subIcon._starSysGuid, MouseButtons.Primary);
+                                }
+                            }
+                            ImGui.EndMenu();
+                        }
+                    }
+                }
+                ImGui.EndMenu();
+            }
+        }
+
+        private static void BeginNameIcon(NameIcon icon)
+        {
+            var yOffset = 10;
+            var xOffset = icon._bodyType == UserOrbitSettings.OrbitBodyType.Star ? 14 : icon._bodyType == UserOrbitSettings.OrbitBodyType.Ship ? 4 : 10;
+            System.Numerics.Vector2 pos = new System.Numerics.Vector2(icon.X + xOffset, icon.Y - yOffset);
+
+            ImGui.PushStyleColor(ImGuiCol.WindowBg, Styles.InvisibleColor); //make the background transperent.
+
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 2);
+
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
+            ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
+            ImGui.Begin(icon.NameString, ref icon.IsActive, icon._flags | ImGuiWindowFlags.NoDocking);
+        }
+
+        private static void EndNameIcon(NameIcon icon)
+        {
+            ImGui.PopStyleColor(); //have to pop the color change after pushing it.
+            ImGui.PopStyleVar(3);
+            ImGui.End();
         }
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
