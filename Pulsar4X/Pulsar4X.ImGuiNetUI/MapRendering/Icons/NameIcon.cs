@@ -3,35 +3,9 @@ using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
 using SDL2;
-using System.Numerics;
-using System.Collections;
-using System.Linq;
-//using Vector2 = ImGuiNET.Vector2;
 
 namespace Pulsar4X.SDL2UI
 {
-
-    public static class ListExtra
-    {
-        public static void Resize<T>(this List<T> list, int sz, T c)
-        {
-            int cur = list.Count;
-            if(sz < cur)
-                list.RemoveRange(sz, cur - sz);
-            else if(sz > cur)
-            {
-                if(sz > list.Capacity)//this bit is purely an optimisation, to avoid multiple automatic capacity changes.
-                  list.Capacity = sz;
-                list.AddRange(Enumerable.Repeat(c, sz - cur));
-            }
-        }
-        public static void Resize<T>(this List<T> list, int sz) where T : new()
-        {
-            Resize(list, sz, new T());
-        }
-    }
-
-
     public class NameIcon : Icon, IComparable<NameIcon>, IRectangle
     {
 
@@ -123,7 +97,8 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void setUpContextMenu(Guid entityGuid){
+        private void SetUpContextMenu(Guid entityGuid)
+        {
             _state.EntityClicked(entityGuid, _starSysGuid, MouseButtons.Alt);
             _state.ContextMenu = new EntityContextMenu(_state, entityGuid);
             _state.ContextMenu.Display();
@@ -131,13 +106,14 @@ namespace Pulsar4X.SDL2UI
 
 
         //use to correctly draw all passed name icons
-        public static void DrawAll(IntPtr rendererPtr, Camera camera, List<NameIcon> nameIcons){
+        public static void DrawAll(IntPtr rendererPtr, Camera camera, List<NameIcon> nameIcons)
+        {
             List<List<NameIcon>> nameIconGroupings = new List<List<NameIcon>>();
             List<bool> alreadyGroupedItems = new List<bool>();
-            ListExtra.Resize<bool>(alreadyGroupedItems, nameIcons.Count, false);
-            
+            alreadyGroupedItems.Resize<bool>(nameIcons.Count, false);
+
           // while(true){
-           
+
            //}
 
             //ImGui.Begin("");
@@ -145,16 +121,21 @@ namespace Pulsar4X.SDL2UI
             //ImGui.End();
 
             int iterations = 0;
-            foreach(var nameIcon in nameIcons){
-                if(!alreadyGroupedItems[iterations]){
+            foreach(var nameIcon in nameIcons)
+            {
+                if(!alreadyGroupedItems[iterations])
+                {
                     nameIconGroupings.Add(new List<NameIcon>());
                     nameIconGroupings[nameIconGroupings.Count -1].Add(nameIcon);
                     alreadyGroupedItems[iterations] = true;
                     int nestedIterations = 0;
-                    foreach(var nestedNameIcon in nameIcons){
-                        if(iterations != nestedIterations && !alreadyGroupedItems[nestedIterations]){
+                    foreach(var nestedNameIcon in nameIcons)
+                    {
+                        if(iterations != nestedIterations && !alreadyGroupedItems[nestedIterations])
+                        {
                             //check if two names are within the same pixel of distance, if so groups them together into a single window to prevent name overlapping.
-                            if((Math.Pow((nameIcon.X+nameIcon.ViewOffset.X)-(nestedNameIcon.X+nestedNameIcon.ViewOffset.X),2)+Math.Pow((nameIcon.Y+nameIcon.ViewOffset.Y)-(nestedNameIcon.Y+nestedNameIcon.ViewOffset.Y),2)) < Math.Pow(2,2)){
+                            if((Math.Pow((nameIcon.X+nameIcon.ViewOffset.X)-(nestedNameIcon.X+nestedNameIcon.ViewOffset.X),2)+Math.Pow((nameIcon.Y+nameIcon.ViewOffset.Y)-(nestedNameIcon.Y+nestedNameIcon.ViewOffset.Y),2)) < Math.Pow(2,2))
+                            {
                                 nameIconGroupings[nameIconGroupings.Count -1].Add(nestedNameIcon);
                                 alreadyGroupedItems[nestedIterations] = true;
                             }
@@ -164,9 +145,9 @@ namespace Pulsar4X.SDL2UI
                 }
                 iterations++;
             }
-            
-            
-            foreach(var nameIconGrouping in nameIconGroupings){
+
+            foreach(var nameIconGrouping in nameIconGroupings)
+            {
                 int x = (int)(nameIconGrouping[0].X + nameIconGrouping[0].ViewOffset.X);
                 int y = (int)(nameIconGrouping[0].Y + nameIconGrouping[0].ViewOffset.Y);
                 System.Numerics.Vector2 pos = new System.Numerics.Vector2(x, y);
@@ -179,7 +160,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new System.Numerics.Vector2(1, 2));
                 ImGui.SetNextWindowPos(pos, ImGuiCond.Always);
                 ImGui.Begin(nameIconGrouping[0].NameString, ref nameIconGrouping[0].IsActive, nameIconGrouping[0]._flags | ImGuiWindowFlags.NoDocking);
-                foreach(var finalNameIcon in nameIconGrouping){
+                foreach(var finalNameIcon in nameIconGrouping)
+                {
                    finalNameIcon.Draw(rendererPtr, camera, false);
                 }
                 ImGui.PopStyleColor(); //have to pop the color change after pushing it.
@@ -200,12 +182,12 @@ namespace Pulsar4X.SDL2UI
             if (camera.ZoomLevel < DrawAtZoom)
                 return;
 
-
             int x = (int)(X + ViewOffset.X);
             int y = (int)(Y + ViewOffset.Y);
             System.Numerics.Vector2 pos = new System.Numerics.Vector2(x, y);
 
-            if(createNewWindow){
+            if(createNewWindow)
+            {
                 ImGui.PushStyleColor(ImGuiCol.WindowBg, new System.Numerics.Vector4(0, 0, 0, 0)); //make the background transperent. 
 
                 ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
@@ -217,36 +199,32 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.Begin(NameString, ref IsActive, _flags);
             }
-            
+
             ImGui.PushStyleColor(ImGuiCol.Button, new System.Numerics.Vector4(0, 0, 0, 0));
             if (ImGui.Button(NameString+"##"+_entityGuid.ToString())) //If the name gets clicked, we tell the state. 
             {
-                
                 _state.EntityClicked(_entityGuid, _starSysGuid, MouseButtons.Primary);
 
             }
-            
-            
-            
+
             if (ImGui.BeginPopupContextItem("NameContextMenu"+_entityGuid.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
             {
-                
-                setUpContextMenu(_entityGuid);
+                SetUpContextMenu(_entityGuid);
                 ImGui.EndPopup();
-               
-               
             }
             //checks the state if the icon of the entity with this nameicon was altClicked, if yes then display the normal context menu
-            if(_state._lastContextMenuOpenedEntityGuid == _entityGuid){
-                if(ImGui.BeginPopupContextVoid()){
-                   setUpContextMenu(_entityGuid);
+            if(_state._lastContextMenuOpenedEntityGuid == _entityGuid)
+            {
+                if(ImGui.BeginPopupContextVoid())
+                {
+                   SetUpContextMenu(_entityGuid);
                    ImGui.EndPopup();
                 }
             }
-            if(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.HasDataBlob<JPSurveyableDB>() && _state.StarSystemStates.ContainsKey(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid)){
+            if(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.HasDataBlob<JPSurveyableDB>() && _state.StarSystemStates.ContainsKey(_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid))
+            {
                 ImGui.Text("Jumps to: "+_state.StarSystemStates[_state.StarSystemStates[_starSysGuid].EntityStatesWithNames[_entityGuid].Entity.GetDataBlob<JPSurveyableDB>().SystemToGuid].StarSystem.NameDB.DefaultName);
             }
-
 
             //ImGui.BeginChild("subnames");
             foreach (var name in SubNames)
@@ -257,19 +235,20 @@ namespace Pulsar4X.SDL2UI
                 }
                 if (ImGui.BeginPopupContextItem("subNameContextMenu"+name.Key+name.Value+_entityGuid.ToString()+NameString, ImGuiPopupFlags.MouseButtonRight))
                 {
-                    setUpContextMenu(name.Key);
+                    SetUpContextMenu(name.Key);
 
                     ImGui.EndPopup();
                 }
                 //checks the state if the icon of the entity with this subNameicon was altClicked, if yes then display the normal context menu for the the subname
-                if(_state._lastContextMenuOpenedEntityGuid == name.Key){
-                    if(ImGui.BeginPopupContextVoid()){
-                        setUpContextMenu(name.Key);
+                if(_state._lastContextMenuOpenedEntityGuid == name.Key)
+                {
+                    if(ImGui.BeginPopupContextVoid())
+                    {
+                        SetUpContextMenu(name.Key);
                         ImGui.EndPopup();
                     }
                 }
             }
-
             //ImGui.EndChild();
 
             //var size = ImGui.GetItemRectSize();
@@ -285,13 +264,7 @@ namespace Pulsar4X.SDL2UI
                ImGui.PopStyleVar(3);
                ImGui.End();
             }
-
-            
-            
-
-
         }
-
     }
 
     /// <summary>
