@@ -326,6 +326,16 @@ namespace Pulsar4X.ECSLib
             fleetDB.AddChild(starship);
             fleetDB.FlagShipID = starship.Guid;
 
+            // This can be removed, only for testing orders without having to set them up in game
+            ConditionItem conditionItem = new ConditionItem(new FuelCondition(30f, ComparisonType.GreaterThan));
+            CompoundCondition compoundCondition = new CompoundCondition(conditionItem);
+            SafeList<EntityCommand> actions = new SafeList<EntityCommand>();
+            actions.Add(MoveToNearestColonyAction.CreateCommand(factionEntity.Guid, defaultFleet));
+            var conditionalOrder = new ConditionalOrder(compoundCondition, actions);
+            conditionalOrder.Name = "Test";
+
+            fleetDB.StandingOrders.Add(conditionalOrder);
+
             CargoTransferProcessor.AddCargoItems(colonyEntity, rp1, 10000);
             CargoTransferProcessor.AddCargoItems(colonyEntity, methalox, 10000);
             CargoTransferProcessor.AddCargoItems(colonyEntity, hydrolox, 10000);

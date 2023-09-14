@@ -12,10 +12,10 @@ namespace Pulsar4X.ECSLib
 {
 
     /// <summary>
-    /// handles and processes entities for a specific datetime. 
+    /// handles and processes entities for a specific datetime.
     /// TODO:  handle removal of entities from the system.
     /// TODO:  handle removal of ability datablobs from an entity
-    /// TODO:  handle passing an entity from this system to another, and carry it's subpulses/interupts across. 
+    /// TODO:  handle passing an entity from this system to another, and carry it's subpulses/interupts across.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class ManagerSubPulse
@@ -72,13 +72,13 @@ namespace Pulsar4X.ECSLib
         class ProcessSet : ISerializable
         {
 
-            [JsonIgnore] //this should get added on initialization. 
+            [JsonIgnore] //this should get added on initialization.
             internal List<IHotloopProcessor> SystemProcessors = new List<IHotloopProcessor>();
 
-            [JsonProperty] //this needs to get saved. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly). 
+            [JsonProperty] //this needs to get saved. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly).
             internal Dictionary<string, List<Entity>> InstanceProcessors = new Dictionary<string, List<Entity>>();
 
-            //todo: need to get a list of InstanceProcessors that have entites owned by a specific faction. 
+            //todo: need to get a list of InstanceProcessors that have entites owned by a specific faction.
 
             internal ProcessSet()
             {
@@ -249,9 +249,9 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Fires when the system date is updated, 
+        /// Fires when the system date is updated,
         /// Any entitys that have move (though not neccicarly orbits) will have updated
-        /// other systems may not be in sync on this event. 
+        /// other systems may not be in sync on this event.
         /// </summary>
         public event DateChangedEventHandler SystemDateChangedEvent;
 
@@ -277,14 +277,14 @@ namespace Pulsar4X.ECSLib
             private set
             {
                 if (value < _systemLocalDateTime)
-                    throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
+                    throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow.
                 _systemLocalDateTime = value;
                 if (StaticRefLib.SyncContext != null)
                     StaticRefLib.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
-                //NOTE: the above marshaling does not apear to work correctly, it's possible for it to work, the context needs to be in an await state or something. 
+                //NOTE: the above marshaling does not apear to work correctly, it's possible for it to work, the context needs to be in an await state or something.
                 //do not rely on the above being run on the main thread! (maybe we should remove the marshaling?)
                 else //if context is null, we're probibly running tests or headless.
-                    InvokeDateChange(value); //in this case we're not going to marshal this. (event will fire on *THIS* thread)   
+                    InvokeDateChange(value); //in this case we're not going to marshal this. (event will fire on *THIS* thread)
             }
         }
 
@@ -311,7 +311,7 @@ namespace Pulsar4X.ECSLib
             InitHotloopProcessors();
         }
 
-        internal void PostLoadInit(StreamingContext context, EntityManager entityManager) //this one is used after loading a game. 
+        internal void PostLoadInit(StreamingContext context, EntityManager entityManager) //this one is used after loading a game.
         {
             _entityManager = entityManager;
             _processManager = StaticRefLib.ProcessorManager;
@@ -322,20 +322,21 @@ namespace Pulsar4X.ECSLib
         {
             foreach (var item in _processManager.HotloopProcessors)
             {
-                //the date time here is going to be inconsistant when a game is saved then loaded, vs running without a save/load. needs fixing. 
-                //also we may want to run many of these before the first turn, and still have this offset. 
+                //the date time here is going to be inconsistant when a game is saved then loaded, vs running without a save/load. needs fixing.
+                //also we may want to run many of these before the first turn, and still have this offset.
                 AddSystemInterupt(StarSysDateTime + item.Value.FirstRunOffset, item.Value);
             }
         }
 
         /// <summary>
-        /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime 
+        /// adds a system(non pausing) interupt, causing this system to process an entity with a given processor on a specific datetime
         /// </summary>
         /// <param name="nextDateTime"></param>
         /// <param name="action"></param>
         /// <param name="entity"></param>
         internal void AddEntityInterupt(DateTime nextDateTime, string actionProcessor, Entity entity)
         {
+            if(nextDateTime < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
             if (!QueuedProcesses.ContainsKey(nextDateTime))
                 QueuedProcesses.Add(nextDateTime, new ProcessSet());
             if (!QueuedProcesses[nextDateTime].InstanceProcessors.ContainsKey(actionProcessor))
@@ -357,7 +358,7 @@ namespace Pulsar4X.ECSLib
             if (!QueuedProcesses[nextDateTime].SystemProcessors.Contains(actionProcessor))
                 QueuedProcesses[nextDateTime].SystemProcessors.Add(actionProcessor);
         }
-        
+
         internal void AddSystemInterupt(BaseDataBlob db)
         {
             //we need to use _processToDateTime in this function instead of StarSysDateTime (or _systemLocalDateTime)
@@ -365,13 +366,13 @@ namespace Pulsar4X.ECSLib
             //ie if a datablob gets added to the manager, this gets called. a datablob can get added at any time.
             //we want to add processors to the correct timeslots (processor offset and frequency)
             //using StarSysDateTime we were adding a processor in a timeslot that would end up after the current datetime,
-            //but before the NextInterupt dateTime, which would cause a Temporal Anomaly Exception. 
-            
+            //but before the NextInterupt dateTime, which would cause a Temporal Anomaly Exception.
+
             if (!StaticRefLib.ProcessorManager.HotloopProcessors.ContainsKey(db.GetType()))
                 return;
             var proc = StaticRefLib.ProcessorManager.HotloopProcessors[db.GetType()];
-            DateTime startDate = StaticRefLib.GameSettings.StartDateTime; 
-            var elapsed = _processToDateTime - startDate;  
+            DateTime startDate = StaticRefLib.GameSettings.StartDateTime;
+            var elapsed = _processToDateTime - startDate;
             elapsed -= proc.FirstRunOffset;
 
             var nextInSec = proc.RunFrequency.TotalSeconds - elapsed.TotalSeconds % proc.RunFrequency.TotalSeconds;
@@ -390,7 +391,7 @@ namespace Pulsar4X.ECSLib
         internal void RemoveEntity(Entity entity)
         {
             //possibly need to implement a reverse dictionary so entities can be looked up backwards, rather than itterating through?
-            //MUST remove empty entries in the dictionary as an empty entitylist will be seen as a systemInterupt. 
+            //MUST remove empty entries in the dictionary as an empty entitylist will be seen as a systemInterupt.
             //throw new NotImplementedException();
 
             List<DateTime> removekeys = new List<DateTime>();
@@ -405,7 +406,7 @@ namespace Pulsar4X.ECSLib
             {
                 QueuedProcesses.Remove(item);
             }
-            
+
         }
 
         /// <summary>
@@ -420,7 +421,7 @@ namespace Pulsar4X.ECSLib
 
             Dictionary<DateTime, List<string>> procDict = GetInstanceProcForEntity(entity);
             List<DateTime> removekeys = new List<DateTime>();
-            
+
             //get the dates and processors associated with this entity
             foreach (var kvp in QueuedProcesses)
             {
@@ -430,14 +431,14 @@ namespace Pulsar4X.ECSLib
                 if(kvp.Value.IsEmpty())
                     removekeys.Add(kvp.Key);
             }
-            
+
             //cleanup
             foreach (var item in removekeys)
             {
                 QueuedProcesses.Remove(item);
             }
-            
-            
+
+
             //add the processors to the new system
             starsys.ManagerSubpulses.ImportProcDictForEntity(entity, procDict);
         }
@@ -446,7 +447,7 @@ namespace Pulsar4X.ECSLib
         internal void ProcessSystem(DateTime targetDateTime)
         {
             if(targetDateTime < StarSysDateTime)
-                throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
+                throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow.
             //the system may need to run several times for a target datetime
             //keep processing the system till we've reached the wanted datetime
             _masterPulseStopwatch.Restart();
@@ -459,13 +460,13 @@ namespace Pulsar4X.ECSLib
                 //calculate max time the system can run/time to next interupt
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
                 TimeSpan timeDeltaMax = targetDateTime - StarSysDateTime;
-                
+
                 //this bit is a bit messy, we're storing this as a class variable
                 //the reason we're storing it, is because one of the functions (AddSystemInterupt)
                     //is called from elsewhere, possibly during the processing loop.
-                    //we may need to make this more flexable and shorten the processing loop if this happens? 
-                    //that might cause issues elsewhere. 
-                _processToDateTime = GetNextInterupt(timeDeltaMax); 
+                    //we may need to make this more flexable and shorten the processing loop if this happens?
+                    //that might cause issues elsewhere.
+                _processToDateTime = GetNextInterupt(timeDeltaMax);
 
                 ProcessToNextInterupt();
                 _subPulseStopwatch.Stop();
@@ -476,7 +477,7 @@ namespace Pulsar4X.ECSLib
             _masterPulseStopwatch.Stop();
             _fullPulseTimeMS = _masterPulseStopwatch.Elapsed.TotalMilliseconds;
             AddPerfHistory();
-            
+
             IsProcessing = false;
         }
 
@@ -488,7 +489,7 @@ namespace Pulsar4X.ECSLib
                 nextInteruptDateTime = QueuedProcesses.Keys.Min();
             }
             if (nextInteruptDateTime < StarSysDateTime)
-                throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow. 
+                throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow.
             return nextInteruptDateTime;
         }
 
@@ -538,9 +539,9 @@ namespace Pulsar4X.ECSLib
                     _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
                 }
 
-                QueuedProcesses.Remove(_processToDateTime); //once all the processes have been run for that datetime, remove it from the dictionary. 
+                QueuedProcesses.Remove(_processToDateTime); //once all the processes have been run for that datetime, remove it from the dictionary.
             }
-            StarSysDateTime = _processToDateTime; //update the localDateTime and invoke the SystemDateChangedEvent                   
+            StarSysDateTime = _processToDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
         }
 
         public int GetTotalNumberOfProceses()
