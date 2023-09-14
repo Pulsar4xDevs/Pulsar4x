@@ -196,28 +196,13 @@ namespace Pulsar4X.SDL2UI
                     Entity.GetDataBlob<ColonyInfoDB>().Display(EntityState, _uiState);
                 }
 
-                if(Entity.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && Entity.TryGetDatablob<VolumeStorageDB>(out var volumeStorageDB))
+                if(Entity.HasDataBlob<ShipInfoDB>() && Entity.HasDataBlob<VolumeStorageDB>())
                 {
-                    Guid thrusterFuel = Guid.Empty;
-                    foreach(var component in shipInfoDB.Design.Components.ToArray())
+                    var (fuelType, fuelPercent) = Entity.GetFuelInfo();
+                    ImGui.Text("Fuel Level: " + fuelPercent + "%%");
+                    if (ImGui.IsItemHovered())
                     {
-                        if(!component.design.TryGetAttribute<NewtonionThrustAtb>(out var newtonionThrustAtb)) continue;
-                        thrusterFuel = newtonionThrustAtb.FuelType;
-                        break;
-                    }
-
-                    if(thrusterFuel != Guid.Empty)
-                    {
-                        var fuelType = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
-                        var typeStore = volumeStorageDB.TypeStores[fuelType.CargoTypeID];
-                        var freeVolume = volumeStorageDB.GetFreeVolume(fuelType.CargoTypeID);
-                        var percentFree = (freeVolume / typeStore.MaxVolume) * 100;
-                        var percentStored = Math.Round( 100 - percentFree, 3);
-                        ImGui.Text("Fuel Level: " + percentStored + "%%");
-                        if (ImGui.IsItemHovered())
-                        {
-                            ImGui.SetTooltip(fuelType.Name);
-                        }
+                        ImGui.SetTooltip(fuelType.Name);
                     }
                 }
 

@@ -339,5 +339,57 @@ namespace Pulsar4X.ECSLib
         {
             return Distance.MToAU(entity.GetSOI_m());
         }
+
+        public static double GetFuelPercent(this Entity entity)
+        {
+            if(entity.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && entity.TryGetDatablob<VolumeStorageDB>(out var volumeStorageDB))
+            {
+                Guid thrusterFuel = Guid.Empty;
+                foreach(var component in shipInfoDB.Design.Components.ToArray())
+                {
+                    if(!component.design.TryGetAttribute<NewtonionThrustAtb>(out var newtonionThrustAtb)) continue;
+                    thrusterFuel = newtonionThrustAtb.FuelType;
+                    break;
+                }
+
+                if(thrusterFuel == Guid.Empty) return 0;
+
+                var fuelType = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
+                var typeStore = volumeStorageDB.TypeStores[fuelType.CargoTypeID];
+                var freeVolume = volumeStorageDB.GetFreeVolume(fuelType.CargoTypeID);
+                var percentFree = (freeVolume / typeStore.MaxVolume) * 100;
+                var percentStored = Math.Round( 100 - percentFree, 3);
+
+                return percentStored;
+            }
+
+            return 0;
+        }
+
+        public static (ICargoable, double) GetFuelInfo(this Entity entity)
+        {
+            if(entity.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && entity.TryGetDatablob<VolumeStorageDB>(out var volumeStorageDB))
+            {
+                Guid thrusterFuel = Guid.Empty;
+                foreach(var component in shipInfoDB.Design.Components.ToArray())
+                {
+                    if(!component.design.TryGetAttribute<NewtonionThrustAtb>(out var newtonionThrustAtb)) continue;
+                    thrusterFuel = newtonionThrustAtb.FuelType;
+                    break;
+                }
+
+                if(thrusterFuel == Guid.Empty) return (null, 0);
+
+                var fuelType = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
+                var typeStore = volumeStorageDB.TypeStores[fuelType.CargoTypeID];
+                var freeVolume = volumeStorageDB.GetFreeVolume(fuelType.CargoTypeID);
+                var percentFree = (freeVolume / typeStore.MaxVolume) * 100;
+                var percentStored = Math.Round( 100 - percentFree, 3);
+
+                return (fuelType, percentStored);
+            }
+
+            return (null, 0);
+        }
     }
 }
