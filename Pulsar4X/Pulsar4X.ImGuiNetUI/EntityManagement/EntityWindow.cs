@@ -187,9 +187,9 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Density: " + mvDb.DensityDry_gcm.ToString("##0.000") + " kg/m^3");
                 }
 
-                if(Entity.HasDataBlob<PositionDB>())
+                if(Entity.TryGetDatablob<PositionDB>(out var positionDB))
                 {
-                    Entity parent = Entity.GetDataBlob<PositionDB>().Parent;
+                    Entity parent = positionDB.Parent;
                     if(parent != null)
                     {
                         if(Entity.HasDataBlob<WarpMovingDB>())
@@ -200,6 +200,17 @@ namespace Pulsar4X.SDL2UI
                         if(ImGui.SmallButton(parent.GetName(_uiState.Faction.Guid)))
                         {
                             _uiState.EntityClicked(parent.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                        }
+                    }
+                    if(positionDB.Children.Count > 0)
+                    {
+                        ImGui.Text("Children:");
+                        foreach(var child in positionDB.Children.ToArray())
+                        {
+                            if(ImGui.SmallButton(child.GetName(_uiState.Faction.Guid)))
+                            {
+                                _uiState.EntityClicked(child.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                            }
                         }
                     }
                 }
