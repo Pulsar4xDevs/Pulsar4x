@@ -14,8 +14,9 @@ namespace Pulsar4X.ECSLib
 
         public bool Evaluate(Entity fleet)
         {
+            // If there aren't any conditions this is always true
             if(!ConditionItems.Any())
-                return false;
+                return true;
 
             List<bool> orResults = new ();
             bool? andResult = null;
