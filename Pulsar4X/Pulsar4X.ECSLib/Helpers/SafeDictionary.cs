@@ -1,10 +1,14 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public class SafeDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
+    [JsonConverter(typeof(SafeDictionaryConverter))]
+    public class SafeDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IEquatable<SafeDictionary<TKey, TValue>>
     {
         private readonly Dictionary<TKey, TValue> _innerDictionary = new Dictionary<TKey, TValue>();
         private readonly object _lock = new object();
@@ -115,5 +119,76 @@ namespace Pulsar4X.ECSLib
         {
             return GetEnumerator();
         }
+
+        public bool Equals(SafeDictionary<TKey, TValue> other)
+        {
+            if(other is null) return false;
+            if(ReferenceEquals(this, other)) return true;
+
+            lock(_lock)
+            {
+                lock(other._lock)
+                {
+                    if(_innerDictionary.Count != other._innerDictionary.Count)
+                    {
+                        return false;
+                    }
+
+                    foreach(var kvp in _innerDictionary)
+                    {
+                        if (!other._innerDictionary.TryGetValue(kvp.Key, out var value))
+                            return false;
+
+                        if (!EqualityComparer<TValue>.Default.Equals(value, kvp.Value))
+                            return false;
+                    }
+
+                    return true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Needed for serialization
+        /// </summary>
+        [JsonIgnore]
+        internal Dictionary<TKey, TValue> InnerDictionary
+        {
+            get
+            {
+                lock(_lock)
+                {
+                    return new Dictionary<TKey, TValue>(_innerDictionary);
+                }
+            }
+        }
     }
+
+    public class SafeDictionaryConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(SafeDictionary<,>);
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            Type keyType = objectType.GetGenericArguments()[0];
+            Type valueType = objectType.GetGenericArguments()[1];
+            var constructedDictType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
+
+            var innerDict = serializer.Deserialize(reader, constructedDictType) as IDictionary;
+            var result = Activator.CreateInstance(objectType, innerDict);
+            return result;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var objectType = value.GetType();
+            var innerDictionaryProperty = objectType.GetProperty("InnerDictionary", BindingFlags.NonPublic | BindingFlags.Instance);
+            var innerDictionaryValue = innerDictionaryProperty.GetValue(value);
+            serializer.Serialize(writer, innerDictionaryValue);
+        }
+    }
+
 }

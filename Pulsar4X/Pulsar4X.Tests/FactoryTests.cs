@@ -27,13 +27,11 @@ namespace Pulsar4X.Tests
 
             Entity faction = FactionFactory.CreateFaction(_game, factionName);
             NameDB nameDB = faction.GetDataBlob<NameDB>();
-            Assert.IsTrue(nameDB.GetName(faction) == factionName);
+            Assert.IsTrue(nameDB.GetName(faction).Equals(factionName));
 
             Entity factioncopy = faction.Clone(faction.Manager);
 
             Assert.IsTrue(faction.GetValueCompareHash() == factioncopy.GetValueCompareHash(), "Hashes don't match");
-            
-
         }
 
         [Test]
@@ -50,7 +48,7 @@ namespace Pulsar4X.Tests
             Entity species = SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
             var requiredDataBlobs = new List<Type>()
             {
-                typeof(ColonyInfoDB), 
+                typeof(ColonyInfoDB),
                 typeof(NameDB),
                 typeof(InstallationsDB)
 
@@ -83,7 +81,7 @@ namespace Pulsar4X.Tests
             //Assert.IsTrue(HasAllRequiredDatablobs(scientist, requiredDataBlobs), "Scientist Entity doesn't contains all required datablobs");
         }
 
-     
+
 
     }
 }
