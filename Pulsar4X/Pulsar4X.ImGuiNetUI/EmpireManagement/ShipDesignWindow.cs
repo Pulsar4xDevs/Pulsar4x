@@ -396,7 +396,10 @@ namespace Pulsar4X.SDL2UI
 
                     bool hovered = ImGui.IsItemHovered();
                     if (hovered)
+                    {
                         selectedItem = i;
+                        ShowComponentToolTip(SelectedComponents[i].design);
+                    }
 
                     ImGui.TableNextColumn();
                     ImGui.Text(number.ToString());
@@ -487,27 +490,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(name);
                     if(ImGui.IsItemHovered())
                     {
-                        ImGui.SetNextWindowSize(Styles.ToolTipsize);
-                        ImGui.BeginTooltip();
-                        ImGui.Text(AvailableShipComponents[i].Name);
-                        if(AvailableShipComponents[i].TypeName.IsNotNullOrEmpty())
-                        {
-                            var size = ImGui.GetContentRegionAvail();
-                            var textSize = ImGui.CalcTextSize(AvailableShipComponents[i].TypeName);
-                            ImGui.SameLine();
-                            ImGui.SetCursorPosX(size.X - textSize.X);
-                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                            ImGui.Text(AvailableShipComponents[i].TypeName);
-                            ImGui.PopStyleColor();
-                        }
-                        if(AvailableShipComponents[i].Description.IsNotNullOrEmpty())
-                        {
-                            ImGui.Separator();
-                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                            ImGui.TextWrapped(AvailableShipComponents[i].Description);
-                            ImGui.PopStyleColor();
-                        }
-                        ImGui.EndTooltip();
+                        ShowComponentToolTip(AvailableShipComponents[i]);
                     }
                     ImGui.TableNextColumn();
                     ImGui.Text(design.ComponentType);
@@ -796,6 +779,31 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(rawimagewidth * scale, rawimageheight * scale));
             }
+        }
+
+        private void ShowComponentToolTip(ComponentDesign componentDesign)
+        {
+            ImGui.SetNextWindowSize(Styles.ToolTipsize);
+            ImGui.BeginTooltip();
+            ImGui.Text(componentDesign.Name);
+            if(componentDesign.TypeName.IsNotNullOrEmpty())
+            {
+                var size = ImGui.GetContentRegionAvail();
+                var textSize = ImGui.CalcTextSize(componentDesign.TypeName);
+                ImGui.SameLine();
+                ImGui.SetCursorPosX(size.X - textSize.X);
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                ImGui.Text(componentDesign.TypeName);
+                ImGui.PopStyleColor();
+            }
+            if(componentDesign.Description.IsNotNullOrEmpty())
+            {
+                ImGui.Separator();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                ImGui.TextWrapped(componentDesign.Description);
+                ImGui.PopStyleColor();
+            }
+            ImGui.EndTooltip();
         }
     }
 }
