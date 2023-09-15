@@ -32,7 +32,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(!IsActive) return;
 
-            if(ImGui.Begin("Component Design", ref IsActive, _flags))
+            if(ImGui.Begin("Designer", ref IsActive, _flags))
             {
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
 
@@ -52,31 +52,26 @@ namespace Pulsar4X.SDL2UI
                         {
                             ComponentDesignDisplay.GetInstance().SetTemplate(template, _uiState);
                         }
-                        if(ImGui.IsItemHovered() && template.DescriptionFormula.IsNotNullOrEmpty())
+                        if(ImGui.IsItemHovered())
                         {
+                            ImGui.SetNextWindowSize(new Vector2(384, 0));
                             ImGui.BeginTooltip();
+                            ImGui.Text(template.Name);
+                            if(template.ComponentType.IsNotNullOrEmpty())
+                            {
+                                var size = ImGui.GetContentRegionAvail();
+                                var textSize = ImGui.CalcTextSize(template.ComponentType);
+                                ImGui.SameLine();
+                                ImGui.SetCursorPosX(size.X - textSize.X);
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                                ImGui.Text(template.ComponentType);
+                                ImGui.PopStyleColor();
+                            }
                             if(template.DescriptionFormula.IsNotNullOrEmpty())
                             {
-                                ImGui.Text(template.DescriptionFormula);
                                 ImGui.Separator();
-                            }
-                            var activeMountTypes = GetActiveMountTypes(template.MountType);
-                            if(activeMountTypes.Count > 0)
-                            {
-                                ImGui.Text("Installs On: ");
-                                for(int i = 0; i < activeMountTypes.Count; i++)
-                                {
-                                    ImGui.SameLine();
-                                    if(i < activeMountTypes.Count - 1)
-                                        ImGui.Text(activeMountTypes[i].ToDescription() +  ",");
-                                    else
-                                        ImGui.Text(activeMountTypes[i].ToDescription());
-                                }
-                            }
-                            if(template.Group.IsNotNullOrEmpty())
-                            {
-                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                                ImGui.Text(template.Group);
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                                ImGui.TextWrapped(template.DescriptionFormula);
                                 ImGui.PopStyleColor();
                             }
                             ImGui.EndTooltip();
@@ -112,21 +107,6 @@ namespace Pulsar4X.SDL2UI
         public override void OnSelectedSystemChange(StarSystem newStarSys)
         {
             throw new NotImplementedException();
-        }
-
-        private List<ComponentMountType> GetActiveMountTypes(ComponentMountType value)
-        {
-            List<ComponentMountType> setFlags = new List<ComponentMountType>();
-
-            foreach (ComponentMountType flag in Enum.GetValues(typeof(ComponentMountType)))
-            {
-                if (flag != ComponentMountType.None && value.HasFlag(flag))
-                {
-                    setFlags.Add(flag);
-                }
-            }
-
-            return setFlags;
         }
     }
 }

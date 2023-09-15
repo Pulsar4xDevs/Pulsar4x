@@ -6,6 +6,7 @@
         "Key": "57614ddb-0756-44cf-857b-8a6578493792",
         "Value": {
           "Name": "TestWeight",
+          "ComponentType": "Misc",
           "ID": "57614ddb-0756-44cf-857b-8a6578493792",
           "MassFormula": "Ability('Mass')",
           "VolumeFormula": "[Mass]",

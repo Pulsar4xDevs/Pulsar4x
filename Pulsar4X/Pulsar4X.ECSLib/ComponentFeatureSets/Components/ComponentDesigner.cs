@@ -493,6 +493,12 @@ namespace Pulsar4X.ECSLib
             internal set { _design.CargoTypeID = value; }
         }
 
+        public string ComponentType
+        {
+            get { return _design.ComponentType; }
+            internal set { _design.ComponentType = value; }
+        }
+
         [Obsolete]//don't use this, TODO: get rid of this once json data is rewritten to use names instead of indexes
         internal List<ComponentDesignAttribute> ComponentDesignAttributeList = new List<ComponentDesignAttribute>();
 
@@ -518,6 +524,21 @@ namespace Pulsar4X.ECSLib
             }
             attribute = default(T);
             return false;
+        }
+
+        public List<ComponentMountType> GetActiveMountTypes()
+        {
+            List<ComponentMountType> setFlags = new List<ComponentMountType>();
+
+            foreach (ComponentMountType flag in Enum.GetValues(typeof(ComponentMountType)))
+            {
+                if (flag != ComponentMountType.None && ComponentMountType.HasFlag(flag))
+                {
+                    setFlags.Add(flag);
+                }
+            }
+
+            return setFlags;
         }
     }
 }

@@ -215,6 +215,35 @@ namespace Pulsar4X.SDL2UI
                     ImGui.TableNextColumn();
                     ImGui.Text("");
                     ImGui.SameLine();
+                    ImGui.Text("Type");
+                    ImGui.TableNextColumn();
+                    ImGui.Text(_componentDesigner.ComponentType);
+
+                    var activeMountTypes = _componentDesigner.GetActiveMountTypes();
+                    if(activeMountTypes.Count > 0)
+                    {
+                        ImGui.TableNextColumn();
+                        ImGui.Text("");
+                        ImGui.SameLine();
+                        ImGui.Text("Installs On");
+                        ImGui.TableNextColumn();
+                        for(int i = 0; i < activeMountTypes.Count; i++)
+                        {
+                            if(i < activeMountTypes.Count - 1)
+                            {
+                                ImGui.Text(activeMountTypes[i].ToDescription() +  ",");
+                                ImGui.SameLine();
+                            }
+                            else
+                            {
+                                ImGui.Text(activeMountTypes[i].ToDescription());
+                            }
+                        }
+                    }
+
+                    ImGui.TableNextColumn();
+                    ImGui.Text("");
+                    ImGui.SameLine();
                     ImGui.Text("Mass");
                     ImGui.TableNextColumn();
                     ImGui.Text(Stringify.Mass(_componentDesigner.MassValue));

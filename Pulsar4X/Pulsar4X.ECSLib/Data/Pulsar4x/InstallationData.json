@@ -41,7 +41,7 @@
                   {
                     "Key": "5eadda1f-43aa-44be-bdb4-395441a33f14",
                     "Value": "10"
-                  },                  
+                  },
                   {
                     "Key": "c8a64019-aef4-4453-bd9b-36b26b0e9684",
                     "Value": "10"
@@ -49,7 +49,7 @@
                   {
                     "Key": "d554fb70-bd28-459c-a1b3-d7b2019f685a",
                     "Value": "10"
-                  },                  
+                  },
                   {
                     "Key": "66f15e2f-7a24-4ff6-9b68-03fcd93686f9",
                     "Value": "10"
@@ -69,7 +69,7 @@
                   {
                     "Key": "2d4b2866-aa4a-4b9a-b8aa-755fe509c0b3",
                     "Value": "10"
-                  },                  
+                  },
                   {
                     "Key": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
                     "Value": "10"
@@ -123,6 +123,7 @@
         "Value": {
           "Name": "University",
           "DescriptionFormula": "'Researches new technologies'",
+          "ComponentType":"Facility",
           "ID": "c203b7cf-8b41-4664-8291-d20dfe1119ec",
           "MassFormula": "Ability('Size') * 100",
           "VolumeFormula": "Ability('Size') * 0.1",
@@ -171,7 +172,7 @@
               "StepFormula": "1",
               "AttributeFormula": "0"
             },
-            
+
             {
               "Name": "RP Amount Per EconTick",
               "DescriptionFormula": "''",
@@ -187,6 +188,7 @@
         "Value": {
           "Name": "Refinery",
           "DescriptionFormula": "'An installation designed to refine base minerals into materials'",
+          "ComponentType":"Facility",
           "ID": "90592586-0bd6-4885-8526-7181e08556b5",
           "MassFormula": "Ability('Size')",
           "VolumeFormula": "[Mass]",
@@ -250,6 +252,7 @@
         "Value": {
           "Name": "Factory",
           "DescriptionFormula": "'Constructs Facilities, Fighters Ammo and Components'",
+          "ComponentType":"Facility",
           "ID": "07817639-e0c6-43cd-b3dc-24ed15efb4ba",
           "MassFormula": "Ability('Size')",
           "VolumeFormula": "[Mass]",
@@ -333,6 +336,7 @@
         "Value": {
           "Name": "Ship Yard",
           "DescriptionFormula": "'Construction and launch facilities for ships'",
+          "ComponentType":"Facility",
           "ID": "0BD304FF-FDEA-493C-8979-15FE86B7123E",
           "MassFormula": "500000",
           "VolumeFormula": "[Mass]",
@@ -402,6 +406,7 @@
         "Value": {
           "Name": "Infrastructure",
           "DescriptionFormula": "'Component and buildings needed to keep colonists alive on hostile worlds: currently non functional other than as cargospace'",
+          "ComponentType":"Infrastructure",
           "ID": "08b3e64c-912a-4cd0-90b0-6d0f1014e9bb",
           "MassFormula": "1000",
           "VolumeFormula": "[Mass]",
@@ -448,6 +453,7 @@
         "Value": {
           "Name": "Space Port",
           "DescriptionFormula": "'Facilities for transfering cargo'",
+          "ComponentType":"Facility",
           "ID": "BBBB5B64-9EFA-467F-8437-F7CF45A1B4BB",
           "MassFormula": "500000",
           "VolumeFormula": "[Mass]",
@@ -510,6 +516,7 @@
         "Value": {
           "Name": "Logistics Office",
           "DescriptionFormula": "'Handles import and Export of goods'",
+          "ComponentType":"Facility",
           "ID": "5B5034C1-8DA1-4645-8F5C-A52B65BB8369",
           "MassFormula": "5000",
           "VolumeFormula": "[Mass]",
@@ -560,6 +567,7 @@
         "Value": {
           "Name": "General Storage",
           "DescriptionFormula": "'Stores General Cargo'",
+          "ComponentType":"Cargo Hold",
           "ID": "B8239721-B60E-4C11-8E45-5F64F6BA5FA5",
           "MassFormula": "Ability(0)",
           "VolumeFormula": "[Mass]",
@@ -649,6 +657,7 @@
         "Value": {
           "Name": "Fuel Storage",
           "DescriptionFormula": "'Stores Fuel'",
+          "ComponentType":"Fuel Storage",
           "ID": "e7ac4187-58e4-458b-9aea-c3e07fc993cb",
           "MassFormula": "Ability(0)",
           "VolumeFormula": "[Mass]",
@@ -710,6 +719,7 @@
         "Value": {
           "Name": "Stainless Steel Fuel Tank",
           "DescriptionFormula": "'Stores Fuel'",
+          "ComponentType":"Fuel Storage",
           "ID": "3528600E-3A1C-488C-BAE6-60251D1156AB",
           "MassFormula": "Ability('Dry Weight')",
           "VolumeFormula": "Ability('Tank Volume')",
@@ -750,7 +760,7 @@
               "Name": "Dry Weight",
               "DescriptionFormula": "'The weight of the empty tank'",
               "Units": "kg",
-              "GuiHint": "GuiTextDisplay", 
+              "GuiHint": "GuiTextDisplay",
               "AttributeFormula": "(1.333 * Pi * ( Pow(Ability('Tank Radius'),3) - Pow( Ability('Tank Radius') - 0.004, 3)  ) * 8000)"
             },
             {
@@ -767,6 +777,7 @@
         "Value": {
           "Name": "Planetary Spaceport Complex",
           "DescriptionFormula": "'A generic does everything space facility'",
+          "ComponentType":"Facility",
           "ID": "B2E9B32A-C760-4E30-9819-77871C920B9B",
           "MassFormula": "Ability(0)",
           "VolumeFormula": "[Mass]",
@@ -864,7 +875,8 @@
         "Key": "89a944e8-bb95-49dd-b8e1-84e5be84791c",
         "Value": {
           "Name": "Naval Academy",
-          "DescriptionFormula": "'Graduates Naval officers'",
+          "DescriptionFormula": "Graduates Naval officers",
+          "ComponentType": "Facility",
           "ID": "89a944e8-bb95-49dd-b8e1-84e5be84791c",
           "MassFormula": "Ability('Class Size') * 100",
           "VolumeFormula": "[Mass] * 0.1",

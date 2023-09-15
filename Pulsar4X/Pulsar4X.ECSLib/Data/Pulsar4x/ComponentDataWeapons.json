@@ -7,6 +7,7 @@
         "Value": {
           "Name": "LaserGun",
           "DescriptionFormula": "'Laser Gun'",
+          "ComponentType": "Weapon",
           "ID": "8923f0e1-1143-4926-a0c8-66b6c7969425",
           "MassFormula": "Ability('Power Input') / 1000 + Ability('Chamber Volume') + Ability('Radiator Volume')",
           "VolumeFormula": "Ability('Power Input') / 1000 + Ability('Chamber Volume')",
@@ -240,6 +241,7 @@
         "Value": {
           "Name": "RailGun",
           "DescriptionFormula": "'A Projectile thrower that uses electrical energy to propel a conductive projectile'",
+          "ComponentType": "Weapon",
           "ID": "fe9bf895-ac4d-4696-b121-d195c720d17b",
           "MassFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Mass'))",
           "VolumeFormula": "(Ability('Calibre') * 1.01) * (Ability('Calibre') * 1.01) * (Ability('Rail Length') + Ability('Auto Reloader Mass'))",
@@ -330,6 +332,7 @@
         "Value": {
           "Name": "Missile Launcher",
           "DescriptionFormula": "'A tube that houses missiles and launches them'",
+          "ComponentType": "Weapon",
           "ID": "978DFA9E-411E-4B4F-A618-85D642927503",
           "MassFormula": "Ability('Max Mass') * 1.5 ",
           "VolumeFormula": "[Mass] * 0.5",
@@ -428,7 +431,7 @@
               "AttributeFormula": "AtbConstrArgs(Ability('Max Mass'), Ability('ROF'), Ability('Launch Force'))",
               "AttributeType": "Pulsar4X.ECSLib.ComponentFeatureSets.Missiles.MissileLauncherAtb"
             }
-            
+
           ]
         }
       }

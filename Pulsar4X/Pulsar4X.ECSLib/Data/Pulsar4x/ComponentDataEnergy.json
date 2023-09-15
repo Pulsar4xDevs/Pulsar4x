@@ -7,6 +7,7 @@
         "Value": {
           "Name": "Reactor",
           "DescriptionFormula": "'A non refuelable reactor, Generates power for a ship'",
+          "ComponentType": "Facility",
           "ID": "97cf75a1-5ca3-4037-8832-4d81a89f97fa",
           "MassFormula": "Ability('Mass')",
           "VolumeFormula": "Ability('Mass')",
@@ -96,6 +97,7 @@
         "Value": {
           "Name": "RTG",
           "DescriptionFormula": "'A non refuelable reactor, Generates power for a ship'",
+          "ComponentType": "Energy Generator",
           "ID": "e906013f-ca1e-45cc-bfa4-9662afdea60c",
           "MassFormula": "Ability('Mass')",
           "VolumeFormula": "Ability('Mass')",
@@ -227,6 +229,7 @@
         "Value": {
           "Name": "Steam Turbine Reactor",
           "DescriptionFormula": "'A more powerful reactor that heats water to steam and passes it through a turbine'",
+          "ComponentType": "Energy Generator",
           "ID": "01524985-716d-4562-b828-3aa19eeb1570",
           "MassFormula": "Ability('Mass')",
           "VolumeFormula": "Ability('Mass')",
@@ -332,8 +335,8 @@
               "GuiHint": "None",
               "AttributeFormula": "[Mass] * 0.05"
             },
-            
-            
+
+
             {
               "Name": "Core",
               "Units": "kg",
@@ -395,6 +398,7 @@
         "Value": {
           "Name": "Battery Bank",
           "DescriptionFormula": "'Stores power for a ship'",
+          "ComponentType": "Energy Storage",
           "ID": "1de23a8b-d44b-4e0f-bacd-5463a8eb939d",
           "MassFormula": "Ability('Mass')",
           "VolumeFormula": "Ability('Mass')",

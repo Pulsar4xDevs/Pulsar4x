@@ -7,6 +7,7 @@
         "Value": {
           "Name": "Missile Payload",
           "DescriptionFormula": "'Payload of a missile'",
+          "ComponentType": "Weapon",
           "ID": "DF9954A7-C5C5-4B49-965C-446B483DA2BE",
           "MassFormula": "Ability('Mass')",
           "VolumeFormula": "Ability('Mass')",
@@ -228,6 +229,7 @@
         "Value": {
           "Name": "Missile Electronics Suite",
           "DescriptionFormula": "'Sensor components for missiles'",
+          "ComponentType": "Sensor",
           "ID": "BBC29A72-C4D3-4389-94DE-36C3BE3B7B0E",
           "MassFormula": "10",
           "VolumeFormula": "[Mass]",
@@ -373,6 +375,7 @@
         "Value": {
           "Name": "Missile SRB",
           "DescriptionFormula": "'A Newtonian Thruster'",
+          "ComponentType": "Engine",
           "ID": "9FDB2A15-4413-40A9-9229-19D05B3765FE",
           "MassFormula": "Ability('Engine Mass')",
           "VolumeFormula": "[Mass]",
@@ -446,6 +449,7 @@
         "Value": {
           "Name": "Ordnance Storage",
           "DescriptionFormula": "'Stores Ordinance'",
+          "ComponentType": "Cargo Hold",
           "ID": "11564F56-D52C-4A16-8434-C9BB50D8EB95",
           "MassFormula": "Ability(0)",
           "VolumeFormula": "[Mass]",
