@@ -207,6 +207,7 @@ namespace Pulsar4X.ECSLib
             if(!string.IsNullOrEmpty( componentSD.ComponentType))
                 _design.ComponentType = componentSD.ComponentType;
             _design.ID = Guid.NewGuid();
+            _design.Description = componentSD.DescriptionFormula;
             MassFormula = new ChainedExpression(componentSD.MassFormula, this, factionTech, staticData);
             VolumeFormula = new ChainedExpression(componentSD.VolumeFormula, this, factionTech, staticData);
             CrewFormula = new ChainedExpression(componentSD.CrewReqFormula, this, factionTech, staticData);

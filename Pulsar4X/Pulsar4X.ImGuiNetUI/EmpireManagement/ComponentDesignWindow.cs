@@ -81,7 +81,7 @@ namespace Pulsar4X.SDL2UI
                         }
                         if(ImGui.IsItemHovered())
                         {
-                            ImGui.SetNextWindowSize(new Vector2(384, 0));
+                            ImGui.SetNextWindowSize(Styles.ToolTipsize);
                             ImGui.BeginTooltip();
                             ImGui.Text(template.Name);
                             if(template.ComponentType.IsNotNullOrEmpty())
