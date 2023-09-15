@@ -235,5 +235,48 @@ namespace Pulsar4X.SDL2UI
         {
             ColonyLogisticsDisplay.GetInstance(StaticRefLib.StaticData, entityState).Display();
         }
+
+        public static void DisplayNavalAcademy(this Entity entity, EntityState entityState, GlobalUIState uiState)
+        {
+            if(!entity.TryGetDatablob<NavalAcademyDB>(out var navalAcademyDB)) return;
+
+            Vector2 topSize = ImGui.GetContentRegionAvail();
+            if(ImGui.BeginChild("NumberOfAcademies" + entity.Guid, new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            {
+                ImGui.Text("Academies:");
+                ImGui.SameLine();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                ImGui.Text(navalAcademyDB.Academies.Count.ToString("0"));
+                ImGui.PopStyleColor();
+                ImGui.EndChild();
+            }
+
+            Vector2 sizeAvailable = ImGui.GetContentRegionAvail();
+            if(ImGui.BeginChild("AcademyList", new Vector2(sizeAvailable.X * .25f, sizeAvailable.Y), true))
+            {
+                if(ImGui.BeginTable("AcademyListTable", 4, Styles.TableFlags))
+                {
+                    ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
+                    ImGui.TableSetupColumn("Class Size", ImGuiTableColumnFlags.None, 0.25f);
+                    ImGui.TableSetupColumn("Length", ImGuiTableColumnFlags.None, 0.2f);
+                    ImGui.TableSetupColumn("Graduation", ImGuiTableColumnFlags.None, 0.3f);
+                    ImGui.TableHeadersRow();
+
+                    for(int i = 0; i < navalAcademyDB.Academies.Count; i++)
+                    {
+                        ImGui.TableNextColumn();
+                        ImGui.Text((i + 1).ToString());
+                        ImGui.TableNextColumn();
+                        ImGui.Text(navalAcademyDB.Academies[i].ClassSize.ToString());
+                        ImGui.TableNextColumn();
+                        ImGui.Text(navalAcademyDB.Academies[i].TrainingPeriodInMonths.ToString() + " months");
+                        ImGui.TableNextColumn();
+                        ImGui.Text(navalAcademyDB.Academies[i].GraduationDate.ToShortDateString());
+                    }
+                    ImGui.EndTable();
+                }
+                ImGui.EndChild();
+            }
+        }
     }
 }

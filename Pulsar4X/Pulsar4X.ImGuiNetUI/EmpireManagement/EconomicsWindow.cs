@@ -32,7 +32,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(!IsActive) return;
 
-            if(ImGui.Begin("Manage Economy", ref IsActive))
+            if(ImGui.Begin("Manage Colonies", ref IsActive))
             {
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
                 if(ImGui.BeginChild("Colonies", new Vector2(Styles.LeftColumnWidth, windowContentSize.Y), true))
@@ -97,7 +97,11 @@ namespace Pulsar4X.SDL2UI
                         selectedEntity.Entity.DisplayLogistics(selectedEntity, _uiState);
                         ImGui.EndTabItem();
                     }
-
+                    if(selectedEntity.Entity.HasDataBlob<NavalAcademyDB>() && ImGui.BeginTabItem("Naval Academy"))
+                    {
+                        selectedEntity.Entity.DisplayNavalAcademy(selectedEntity, _uiState);
+                        ImGui.EndTabItem();
+                    }
                     ImGui.EndTabBar();
                     ImGui.EndChild();
                 }
