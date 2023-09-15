@@ -23,7 +23,11 @@ namespace Pulsar4X.ECSLib
                 commanderDB.RankedOn = entity.StarSysDateTime.Date;
 
                 // Generate an experience cap for the graduate on a bell curve from 0-200
-                commanderDB.ExperienceCap = generator.NextBellCurve(StaticRefLib.Game.RNG, 0, 200, 100, 33.333);
+                // Modify the default mean (100) by the length of training
+                // 1 month = mean of 77
+                // 48 months = mean of 124
+                double mean = 100 + (academy.TrainingPeriodInMonths - 24);
+                commanderDB.ExperienceCap = generator.NextBellCurve(StaticRefLib.Game.RNG, 0, 200, mean, 33.333);
 
                 // Only give starting experience to graduates with some potential
                 if(commanderDB.ExperienceCap > 30)

@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
                     }
                 }
             }
-            if (GuiHint == GuiHint.GuiSelectionMaxMin)
+            if (GuiHint == GuiHint.GuiSelectionMaxMin || GuiHint == GuiHint.GuiSelectionMaxMinInt)
             {
                 MaxValueFormula = new ChainedExpression(_templateSD.MaxFormula, this, factionTech, staticData);
                 MinValueFormula = new ChainedExpression(_templateSD.MinFormula, this, factionTech, staticData);

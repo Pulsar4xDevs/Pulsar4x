@@ -38,17 +38,11 @@ namespace Pulsar4X.SDL2UI
 
                 if(ImGui.BeginChild("ComponentDesignSelection", new Vector2(204f, windowContentSize.Y - 24f), true))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.Text("Select a Template");
-                    ImGui.SameLine();
-                    ImGui.Text("[?]");
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Component Templates act as a framework for designing components.\n\n" +
+                    DisplayHelpers.Header("Select a Template",
+                            "Component Templates act as a framework for designing components.\n\n" +
                             "Select a template and then design the attributes of the component to your specification.\n" +
                             "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
                             "installations.");
-                    ImGui.PopStyleColor();
-                    ImGui.Separator();
 
                     foreach(var template in templates)
                     {

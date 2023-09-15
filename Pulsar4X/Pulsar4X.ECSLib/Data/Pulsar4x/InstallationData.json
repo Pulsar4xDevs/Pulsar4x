@@ -891,7 +891,7 @@
             {
               "Name": "Class Size",
               "DescriptionFormula": "'How big the graduating class size of the academy will be each year.'",
-              "GuiHint": "GuiSelectionMaxMin",
+              "GuiHint": "GuiSelectionMaxMinInt",
               "MaxFormula": "2500",
               "MinFormula": "10",
               "StepFormula": "10",
@@ -899,8 +899,8 @@
             },
             {
               "Name": "Class Length",
-              "DescriptionFormula": "'How many months it takes to graduate a class, longer training gives more experienced graduates.'",
-              "GuiHint": "GuiSelectionMaxMin",
+              "DescriptionFormula": "'How many months it takes to graduate a class. Longer training graduates officers with better experience and potential.'",
+              "GuiHint": "GuiSelectionMaxMinInt",
               "MaxFormula": "48",
               "MinFormula": "1",
               "StepFormula": "1",

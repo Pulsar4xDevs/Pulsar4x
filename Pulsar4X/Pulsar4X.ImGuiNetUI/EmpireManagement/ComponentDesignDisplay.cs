@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
@@ -90,16 +91,11 @@ namespace Pulsar4X.SDL2UI
             var windowContentSize = ImGui.GetContentRegionAvail();
             if (ImGui.BeginChild("ComponentDesignChildWindow", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Specifications");
-                ImGui.SameLine();
-                ImGui.Text("[?]");
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Configure the specifications for the component below.\n\n" +
-                        "Different settings will determine the statistics and capabilities\n" +
-                        "of the component.");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Specifications", 
+                    "Configure the specifications for the component below.\n\n" +
+                    "Different settings will determine the statistics and capabilities\n" +
+                    "of the component.");
+
                 GuiDesignUI(uiState); //Part design
 
                 ImGui.EndChild();
@@ -117,16 +113,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetCursorPos(new Vector2(position.X, position.Y + windowContentSize.Y * 0.662f));
             if (ImGui.BeginChild("ComponentDesignChildWindow3", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.34f), true))
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Finalize the Design");
-                // ImGui.SameLine();
-                // ImGui.Text("[?]");
-                // if(ImGui.IsItemHovered())
-                //     ImGui.SetTooltip("Configure the specifications for the component below.\n\n" +
-                //         "Different settings will determine the statistics and capabilities\n" +
-                //         "of the component.");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Finalize the Design");
 
                 ImGui.Text("Name");
                 ImGui.InputText("", _nameInputBuffer, 32);
@@ -179,6 +166,9 @@ namespace Pulsar4X.SDL2UI
                             case GuiHint.GuiSelectionMaxMin: //Set a value
                                 GuiHintMaxMin(attribute);
                                 break;
+                            case GuiHint.GuiSelectionMaxMinInt:
+                                GuiHintMaxMinInt(attribute);
+                                break;
                             case GuiHint.GuiTextDisplay: //Display a stat
                                 //GuiHintText(attribute);
                                 break;
@@ -213,16 +203,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (_componentDesigner != null) //If a part time is selected
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Statistics");
-                // ImGui.SameLine();
-                // ImGui.Text("[?]");
-                // if(ImGui.IsItemHovered())
-                //     ImGui.SetTooltip("Configure the specifications for the component below.\n\n" +
-                //         "Different settings will determine the statistics and capabilities\n" +
-                //         "of the component.");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Statistics");
 
                 if(ImGui.BeginTable("DesignStatsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
@@ -265,13 +246,13 @@ namespace Pulsar4X.SDL2UI
                             if(ImGui.IsItemHovered())
                                 ImGui.SetTooltip(attribute.Description);
                             ImGui.TableNextColumn();
-                            
+
                             if(attribute.Unit.IsNotNullOrEmpty())
                             {
                                 var value = attribute.Value;
                                 var strUnit = attribute.Unit;
                                 var displayStr = "";
-                            
+
                                 switch (strUnit)
                                 {
                                     case "KJ":
@@ -315,7 +296,7 @@ namespace Pulsar4X.SDL2UI
                                         break;
                                     }
                                 }
-                                
+
                                 ImGui.Text(displayStr);
                             }
                             else
@@ -328,16 +309,7 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 ImGui.NewLine();
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Costs");
-                // ImGui.SameLine();
-                // ImGui.Text("[?]");
-                // if(ImGui.IsItemHovered())
-                //     ImGui.SetTooltip("Configure the specifications for the component below.\n\n" +
-                //         "Different settings will determine the statistics and capabilities\n" +
-                //         "of the component.");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Costs");
 
                 if(ImGui.BeginTable("DesignCostsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
@@ -370,16 +342,7 @@ namespace Pulsar4X.SDL2UI
                 }
 
                 ImGui.NewLine();
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.Text("Resources Required");
-                // ImGui.SameLine();
-                // ImGui.Text("[?]");
-                // if(ImGui.IsItemHovered())
-                //     ImGui.SetTooltip("Configure the specifications for the component below.\n\n" +
-                //         "Different settings will determine the statistics and capabilities\n" +
-                //         "of the component.");
-                ImGui.PopStyleColor();
-                ImGui.Separator();
+                DisplayHelpers.Header("Resources Required");
 
                 if(ImGui.BeginTable("DesignResourceCostsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
@@ -498,6 +461,36 @@ namespace Pulsar4X.SDL2UI
             //ImGui.PushItemWidth(-1);
             if (ImGui.InputScalar("##input" + attribute.Name, ImGuiDataType.Double, valPtr, stepPtr, fstepPtr))
                 attribute.SetValueFromInput(val);
+            ImGui.NewLine();
+        }
+
+        private void GuiHintMaxMinInt(ComponentDesignAttribute attribute)
+        {
+            ImGui.TextWrapped(attribute.Name + ":");
+            ImGui.SameLine();
+            ImGui.TextWrapped(attribute.Description);
+            ImGui.NewLine();
+
+            attribute.SetMax();
+            attribute.SetMin();
+            //attribute.SetValue();
+            attribute.SetStep();
+
+            var max = attribute.MaxValue;
+            var min = attribute.MinValue;
+            int val = (int)attribute.Value;
+            double step = attribute.StepValue;
+            double fstep = step * 10;
+
+            if(ImGui.SliderInt("##scaler" + attribute.Name, ref val, (int)min, (int)max))
+            {
+                attribute.SetValueFromInput(val);
+            }
+
+            if(ImGui.InputInt("##input" + attribute.Name, ref val, (int)step, (int)fstep))
+            {
+                attribute.SetValueFromInput(val);
+            }
             ImGui.NewLine();
         }
 
