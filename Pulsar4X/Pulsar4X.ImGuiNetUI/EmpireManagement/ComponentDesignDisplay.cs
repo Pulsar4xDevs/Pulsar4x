@@ -91,7 +91,7 @@ namespace Pulsar4X.SDL2UI
             var windowContentSize = ImGui.GetContentRegionAvail();
             if (ImGui.BeginChild("ComponentDesignChildWindow", new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y), true))
             {
-                DisplayHelpers.Header("Specifications", 
+                DisplayHelpers.Header("Specifications",
                     "Configure the specifications for the component below.\n\n" +
                     "Different settings will determine the statistics and capabilities\n" +
                     "of the component.");
@@ -113,18 +113,20 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetCursorPos(new Vector2(position.X, position.Y + windowContentSize.Y * 0.662f));
             if (ImGui.BeginChild("ComponentDesignChildWindow3", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.34f), true))
             {
-                DisplayHelpers.Header("Finalize the Design");
+                var sizeAvailable = ImGui.GetContentRegionAvail();
 
+                DisplayHelpers.Header("Finalize the Design");
                 ImGui.Text("Name");
                 ImGui.InputText("", _nameInputBuffer, 32);
-                if (ImGui.Button("Create"))
+                ImGui.SetCursorPosY(sizeAvailable.Y - 12f);
+                if(ImGui.Button("Save", new Vector2(sizeAvailable.X, 0)))
                 {
-                    string name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
-                    if(name.IsNotNullOrEmpty())
+                    if(!_nameInputBuffer.All(b => b == 0))
                     {
-                        _componentDesigner.Name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
+                        string name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
+                        _componentDesigner.Name = name;
                         _componentDesigner.CreateDesign(uiState.Faction);
-                        //we reset the designer here, so we don't end up trying to edit the precious design. 
+                        //we reset the designer here, so we don't end up trying to edit the precious design.
                         var factionTech = uiState.Faction.GetDataBlob<FactionTechDB>();
                         _componentDesigner = new ComponentDesigner(Template.Value, factionTech);
 
@@ -133,7 +135,6 @@ namespace Pulsar4X.SDL2UI
                         _nameInputBuffer = new byte[128];
                     }
                 }
-
                 ImGui.EndChild();
             }
         }
@@ -385,11 +386,11 @@ namespace Pulsar4X.SDL2UI
                     displayStr = attribute.Value.ToString() + " " + attribute.Unit;
                     break;
                 }
-                    
-                
+
+
             }
-            
-            
+
+
             if (compactmod)
             {
                 ImGui.TextWrapped(attribute.Name + ": " + displayStr);
@@ -599,18 +600,18 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.NewLine();
         }
-        
+
         private void GuiHintTextSelectionFormula(ComponentDesignAttribute attribute)
         {
             _listNames = new string[attribute.GuidDictionary.Count];
-            
+
             int i = 0;
             foreach (var kvp in attribute.GuidDictionary)
             {
                 _listNames[i] = (string)kvp.Key;
                 i++;
             }
-            
+
             if (compactmod)
             {
                 ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
@@ -623,7 +624,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TextWrapped(attribute.Description);
                 ImGui.NewLine();
             }
-            
+
             ImGui.TextWrapped(attribute.Value.ToString());
 
             if (ImGui.Combo("Select", ref attribute.ListSelection, _listNames, _listNames.Length))

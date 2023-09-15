@@ -2,18 +2,26 @@
 using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib.Industry;
+using System.ComponentModel;
 
 namespace Pulsar4X.ECSLib
 {
     [Flags]
     public enum ComponentMountType
     {
+        [Description("None")]
         None                = 0,
+        [Description("Ship")]
         ShipComponent       = 1 << 0,
+        [Description("Cargo Hold")]
         ShipCargo           = 1 << 1,
+        [Description("Colony")]
         PlanetInstallation  = 1 << 2,
+        [Description("PDC")]
         PDC                 = 1 << 3,
+        [Description("Fighter")]
         Fighter             = 1 << 4,
+        [Description("Missle")]
         Missile             = 1 << 5,
     }
 
@@ -45,7 +53,7 @@ namespace Pulsar4X.ECSLib
 
         [JsonProperty]
         public int CrewRequrements { get; internal set; }
-        
+
         [JsonProperty]
         public ComponentMountType ComponentMountType { get; internal set; }
 
@@ -58,7 +66,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="designGuid">this is the design GUID, NOT the SD GUID</param>
         /// <param name="size"></param>

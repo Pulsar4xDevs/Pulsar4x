@@ -48,19 +48,39 @@ namespace Pulsar4X.SDL2UI
                     {
                         var selected = ComponentDesignDisplay.GetInstance().Template?.Name.Equals(template.Name);
 
-                        if(selected.HasValue && selected.Value)
-                        {
-                            ImGui.PushStyleColor(ImGuiCol.Button, Styles.SelectedColor);
-                        }
-                        else
-                        {
-                            ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
-                        }
-                        if(ImGui.SmallButton(template.Name))
+                        if (ImGui.Selectable(template.Name + "###component-" + template.ID, selected.HasValue && selected.Value))
                         {
                             ComponentDesignDisplay.GetInstance().SetTemplate(template, _uiState);
                         }
-                        ImGui.PopStyleColor();
+                        if(ImGui.IsItemHovered() && template.DescriptionFormula.IsNotNullOrEmpty())
+                        {
+                            ImGui.BeginTooltip();
+                            if(template.DescriptionFormula.IsNotNullOrEmpty())
+                            {
+                                ImGui.Text(template.DescriptionFormula);
+                                ImGui.Separator();
+                            }
+                            var activeMountTypes = GetActiveMountTypes(template.MountType);
+                            if(activeMountTypes.Count > 0)
+                            {
+                                ImGui.Text("Installs On: ");
+                                for(int i = 0; i < activeMountTypes.Count; i++)
+                                {
+                                    ImGui.SameLine();
+                                    if(i < activeMountTypes.Count - 1)
+                                        ImGui.Text(activeMountTypes[i].ToDescription() +  ",");
+                                    else
+                                        ImGui.Text(activeMountTypes[i].ToDescription());
+                                }
+                            }
+                            if(template.Group.IsNotNullOrEmpty())
+                            {
+                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                                ImGui.Text(template.Group);
+                                ImGui.PopStyleColor();
+                            }
+                            ImGui.EndTooltip();
+                        }
                     }
 
                     ImGui.EndChild();
@@ -92,6 +112,21 @@ namespace Pulsar4X.SDL2UI
         public override void OnSelectedSystemChange(StarSystem newStarSys)
         {
             throw new NotImplementedException();
+        }
+
+        private List<ComponentMountType> GetActiveMountTypes(ComponentMountType value)
+        {
+            List<ComponentMountType> setFlags = new List<ComponentMountType>();
+
+            foreach (ComponentMountType flag in Enum.GetValues(typeof(ComponentMountType)))
+            {
+                if (flag != ComponentMountType.None && value.HasFlag(flag))
+                {
+                    setFlags.Add(flag);
+                }
+            }
+
+            return setFlags;
         }
     }
 }
