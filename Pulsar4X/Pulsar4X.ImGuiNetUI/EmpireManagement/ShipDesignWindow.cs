@@ -22,6 +22,9 @@ namespace Pulsar4X.SDL2UI
         bool _imagecreated = false;
 
         private List<ComponentDesign> AvailableShipComponents;
+        private List<ComponentDesign> AllShipComponents;
+        private static string[] _sortedComponentNames;
+        private int _componentFilterIndex = 0;
         private int _selectedDesignsIndex;
 
         private string[] _shipComponentNames;
@@ -96,8 +99,24 @@ namespace Pulsar4X.SDL2UI
 
         void RefreshComponentDesigns()
         {
-            AvailableShipComponents = _factionInfoDB.ComponentDesigns.Values.ToList();
-            AvailableShipComponents.Sort((a, b) => a.Name.CompareTo(b.Name));
+            AllShipComponents = _factionInfoDB.ComponentDesigns.Values.ToList();
+            AllShipComponents.Sort((a, b) => a.Name.CompareTo(b.Name));
+
+            if(_componentFilterIndex == 0)
+            {
+                AvailableShipComponents = new List<ComponentDesign>(AllShipComponents);
+            }
+            else
+            {
+                AvailableShipComponents = AllShipComponents.Where(t => t.ComponentType.Equals(_sortedComponentNames[_componentFilterIndex])).ToList();
+            }
+
+            var templatesByGroup = AllShipComponents.GroupBy(t => t.ComponentType);
+            var groupNames = templatesByGroup.Select(g => g.Key).ToList();
+            var sortedTempGroupNames = groupNames.OrderBy(name => name).ToArray();
+            _sortedComponentNames = new string[sortedTempGroupNames.Length + 1];
+            _sortedComponentNames[0] = "All";
+            Array.Copy(sortedTempGroupNames, 0, _sortedComponentNames, 1, sortedTempGroupNames.Length);
         }
 
         void RefreshExistingClasses()
@@ -155,7 +174,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     RefreshExistingClasses();
                 }
-                if (AvailableShipComponents.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.Count)
+                if (AllShipComponents.Count != _uiState.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns.Values.Count)
                 {
                     RefreshComponentDesigns();
                 }
@@ -346,7 +365,7 @@ namespace Pulsar4X.SDL2UI
                     _armorThickness--;
                     DesignChanged = true;
                 }
-                
+
                 ImGui.TableNextColumn();
                 ImGui.Text("Mass");
                 ImGui.TableNextColumn();
@@ -435,10 +454,25 @@ namespace Pulsar4X.SDL2UI
         {
             DisplayHelpers.Header("Available Components");
 
-            if(ImGui.BeginTable("DesignStatsTables", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+            var availableSize = ImGui.GetContentRegionAvail();
+            ImGui.SetNextItemWidth(availableSize.X);
+            if(ImGui.Combo("###component-filter", ref _componentFilterIndex, _sortedComponentNames, _sortedComponentNames.Length))
+            {
+                if(_componentFilterIndex == 0)
+                {
+                    AvailableShipComponents = new List<ComponentDesign>(AllShipComponents);
+                }
+                else
+                {
+                    AvailableShipComponents = AllShipComponents.Where(t => t.ComponentType.Equals(_sortedComponentNames[_componentFilterIndex])).ToList();
+                }
+            }
+
+            if(ImGui.BeginTable("DesignStatsTables", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 2f);
-                ImGui.TableSetupColumn("Mass", ImGuiTableColumnFlags.None, 0.7f);
+                ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None, .6f);
                 ImGui.TableHeadersRow();
 
                 for (int i = 0; i < AvailableShipComponents.Count; i++)
@@ -450,18 +484,17 @@ namespace Pulsar4X.SDL2UI
                     string name = design.Name;
 
                     ImGui.TableNextColumn();
-                    if (ImGui.Selectable(name, _selectedDesignsIndex == i, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick))
-                    {
-                        _selectedDesignsIndex = i;
-                        if (ImGui.IsMouseDoubleClicked(0))
-                        {
-                            SelectedComponents.Add((AvailableShipComponents[_selectedDesignsIndex], 1));
-                            DesignChanged = true;
-                        }
-                    }
-
+                    ImGui.Text(name);
                     ImGui.TableNextColumn();
-                    ImGui.Text(Stringify.Mass(design.MassPerUnit));
+                    ImGui.Text(design.ComponentType);
+                    ImGui.TableNextColumn();
+                    ImGui.InvisibleButton("", new Vector2(4, 8));
+                    ImGui.SameLine();
+                    if(ImGui.SmallButton("+ Add###add-component-" + i))
+                    {
+                        SelectedComponents.Add((AvailableShipComponents[i], 1));
+                        DesignChanged = true;
+                    }
                 }
 
                 ImGui.EndTable();
@@ -470,7 +503,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void GenImage()
         {
-            
+
             _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _profile.DamageProfile, _imagecreated);
             rawimagewidth = _profile.DamageProfile.Width;
             rawimageheight = _profile.DamageProfile.Height;
@@ -513,7 +546,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(Stringify.Mass(_fuelStoreMass));
                 ImGui.SameLine();
                 ImGui.Text(Stringify.Volume(_fuelStoreVolume));
-                
+
                 ImGui.TableNextColumn();
                 ImGui.Text("Delta V");
                 ImGui.TableNextColumn();
