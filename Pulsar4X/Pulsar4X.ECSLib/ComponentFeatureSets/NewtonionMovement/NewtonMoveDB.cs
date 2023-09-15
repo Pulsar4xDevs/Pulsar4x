@@ -294,8 +294,10 @@ namespace Pulsar4X.ECSLib
             {
                 OwningEntity.RemoveDataBlob<WarpMovingDB>();
             }
-            
-            UpdateKeplerElements();
+            if(OwningEntity.HasDataBlob<MassVolumeDB>())
+            {
+                UpdateKeplerElements();
+            }
         }
 
         public KeplerElements GetElements()

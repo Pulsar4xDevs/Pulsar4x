@@ -15,15 +15,19 @@ namespace Pulsar4X.ECSLib
         #region Properties
 
         [PublicAPI]
-        [JsonProperty]
+        [JsonProperty(Order = 3)]
+        public StaticDataStore StaticData { get; } = new StaticDataStore();
+
+        [PublicAPI]
+        [JsonProperty(Order = 7)]
         public List<Player> Players = new List<Player>();
         public List<Entity> Factions = new List<Entity>();
         [PublicAPI]
-        [JsonProperty]
+        [JsonProperty(Order = 8)]
         public Player SpaceMaster = new Player("Space Master", "");
 
         [PublicAPI]
-        [JsonProperty]
+        [JsonProperty(Order = 9)]
         public Entity GameMasterFaction;
 
         [PublicAPI]
@@ -34,15 +38,12 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// List of StarSystems currently in the game.
         /// </summary>
-        [JsonProperty]
+        [JsonProperty(Order = 5)]
         public Dictionary<Guid, StarSystem> Systems { get; private set; } = new Dictionary<Guid, StarSystem>();
 
-        [JsonProperty]
+        [JsonProperty(Order = 4)]
         public readonly EntityManager GlobalManager;
         internal readonly Dictionary<Guid, EntityManager> GlobalManagerDictionary = new Dictionary<Guid, EntityManager>();
-        [PublicAPI]
-        [JsonProperty]
-        public StaticDataStore StaticData { get; } = new StaticDataStore();
 
         internal IOrderHandler OrderHandler { get; set; }
 
@@ -50,10 +51,10 @@ namespace Pulsar4X.ECSLib
 
 
         [PublicAPI]
-        [JsonProperty]
+        [JsonProperty(Order = 2)]
         public MasterTimePulse GamePulse { get { return StaticRefLib.GamePulse; } }
 
-            [JsonProperty]
+        [JsonProperty(Order = 6)]
         internal GalaxyFactory GalaxyGen { get; private set; }
 
 
@@ -61,7 +62,7 @@ namespace Pulsar4X.ECSLib
         private PathfindingManager _pathfindingManager;
 
         [PublicAPI]
-        [JsonProperty]
+        [JsonProperty(Order = 1)]
         public GameSettings Settings { get { return StaticRefLib.GameSettings; } }//TODO remove from here and get from RefLib
 
         public Random RNG { get; } = new Random(12345689);
