@@ -303,8 +303,8 @@ namespace Pulsar4X.ECSLib
             for(int i = 0; i < 7; i++)
             {
                 var commanderDB = CommanderFactory.CreateShipCaptain();
-                commanderDB.CommissionedOn = factionEntity.StarSysDateTime;
-                commanderDB.RankedOn = factionEntity.StarSysDateTime;
+                commanderDB.CommissionedOn = StaticRefLib.CurrentDateTime - TimeSpan.FromDays(365.25 * 10);
+                commanderDB.RankedOn = StaticRefLib.CurrentDateTime - TimeSpan.FromDays(365);
                 var entity = CommanderFactory.Create(earth.Manager, factionEntity.Guid, commanderDB);
 
                 if(i == 0) gunShip0.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;

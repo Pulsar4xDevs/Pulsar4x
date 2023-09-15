@@ -34,10 +34,11 @@ namespace Pulsar4X.SDL2UI
 
             if(ImGui.Begin("Commanders", ref IsActive, _flags))
             {
-                if(ImGui.BeginTable("CommanderTable", 2, Styles.TableFlags))
+                if(ImGui.BeginTable("CommanderTable", 3, Styles.TableFlags))
                 {
                     ImGui.TableSetupColumn("Commander");
                     ImGui.TableSetupColumn("Yrs of Service");
+                    ImGui.TableSetupColumn("Yrs in Rank");
                     ImGui.TableHeadersRow();
 
                     foreach(var commanderID in _factionInfoDB.Commanders)
@@ -59,6 +60,13 @@ namespace Pulsar4X.SDL2UI
                         var commanderDB = commander.GetDataBlob<CommanderDB>();
                         var experience = commander.StarSysDateTime - commanderDB.CommissionedOn;
                         ImGui.Text(experience.ToYears().ToString("F0"));
+                        if(ImGui.IsItemHovered())
+                            ImGui.SetTooltip("Commissioned on: " + commanderDB.CommissionedOn.ToShortDateString());
+                        ImGui.TableNextColumn();
+                        var rankTime = commander.StarSysDateTime - commanderDB.RankedOn;
+                        ImGui.Text(rankTime.ToYears().ToString("F0"));
+                        if(ImGui.IsItemHovered())
+                            ImGui.SetTooltip("Promoted on: " + commanderDB.RankedOn.ToShortDateString());
                     }
 
                     ImGui.EndTable();
