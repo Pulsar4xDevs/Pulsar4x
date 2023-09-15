@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -10,6 +11,9 @@ namespace Pulsar4X.SDL2UI
     public class ComponentDesignWindow : PulsarGuiWindow
     {
         private static List<ComponentTemplateSD> templates = new();
+        private static List<ComponentTemplateSD> filteredTemplates = new ();
+        private static string[] sortedGroupNames;
+        private static int selectedFilterIndex = 0;
         private ComponentDesignWindow() { }
 
         internal static ComponentDesignWindow GetInstance()
@@ -22,6 +26,15 @@ namespace Pulsar4X.SDL2UI
                 // FIXME: doing this here is efficient but it will never update the list if new templates are available
                 templates = StaticRefLib.StaticData.ComponentTemplates.Values.ToList();
                 templates.Sort((a, b) => a.Name.CompareTo(b.Name));
+
+                var templatesByGroup = templates.GroupBy(t => t.ComponentType);
+                var groupNames = templatesByGroup.Select(g => g.Key).ToList();
+                var sortedTempGroupNames = groupNames.OrderBy(name => name).ToArray();
+                sortedGroupNames = new string[sortedTempGroupNames.Length + 1];
+                sortedGroupNames[0] = "All";
+                Array.Copy(sortedTempGroupNames, 0, sortedGroupNames, 1, sortedTempGroupNames.Length);
+
+                filteredTemplates = new List<ComponentTemplateSD>(templates);
             }
             thisitem = (ComponentDesignWindow)_uiState.LoadedWindows[typeof(ComponentDesignWindow)];
 
@@ -44,7 +57,21 @@ namespace Pulsar4X.SDL2UI
                             "Once the design is created it will be available to produce on the colonies with the appropriate\n" +
                             "installations.");
 
-                    foreach(var template in templates)
+                    var availableSize = ImGui.GetContentRegionAvail();
+                    ImGui.SetNextItemWidth(availableSize.X);
+                    if(ImGui.Combo("###template-filter", ref selectedFilterIndex, sortedGroupNames, sortedGroupNames.Length))
+                    {
+                        if(selectedFilterIndex == 0)
+                        {
+                            filteredTemplates = new List<ComponentTemplateSD>(templates);
+                        }
+                        else
+                        {
+                            filteredTemplates = templates.Where(t => t.ComponentType.Equals(sortedGroupNames[selectedFilterIndex])).ToList();
+                        }
+                    }
+
+                    foreach(var template in filteredTemplates)
                     {
                         var selected = ComponentDesignDisplay.GetInstance().Template?.Name.Equals(template.Name);
 
