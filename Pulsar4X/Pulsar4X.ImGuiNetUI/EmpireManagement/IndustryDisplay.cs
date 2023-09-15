@@ -193,7 +193,7 @@ namespace Pulsar4X.SDL2UI
                     }
                     if (ImGui.CollapsingHeader(headerTitle, ImGuiTreeNodeFlags.DefaultOpen ))
                     {
-                        if(ImGui.Button("Add New Job"))
+                        if(ImGui.Button("+ New Job"))
                         {
                             _selectedProdLine = id;
                             _newjobSelectionIndex = (_selectedProdLine, 0);
@@ -237,7 +237,7 @@ namespace Pulsar4X.SDL2UI
                                     string jobname = jobs[ji].Name;
 
                                     //bool selected = _selectedExistingIndex ==  ji && id == _selectedProdLine;
-                                    float percent = 1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost;
+                                    float percent = (1 - (float)batchJob.ProductionPointsLeft / batchJob.ProductionPointsCost) * 100;
 
                                     ImGui.TableNextColumn();
                                     ImGui.Text(jobname);
