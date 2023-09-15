@@ -86,6 +86,7 @@ namespace Pulsar4X.ECSLib
         public ConstructableGuiHints GuiHints { get; set; }
         public Guid ID { get; internal set; }
         public string Name { get; internal set; } //player defined name. ie "5t 2kn Thruster".
+        public string ComponentType { get; internal set; } = "";
 
         public bool IsValid {get; set; } = true;
 
@@ -203,7 +204,8 @@ namespace Pulsar4X.ECSLib
             var staticData = StaticRefLib.StaticData;
             TypeName = componentSD.Name;
             Name = componentSD.Name;
-
+            if(!string.IsNullOrEmpty( componentSD.ComponentType))
+                _design.ComponentType = componentSD.ComponentType;
             _design.ID = Guid.NewGuid();
             MassFormula = new ChainedExpression(componentSD.MassFormula, this, factionTech, staticData);
             VolumeFormula = new ChainedExpression(componentSD.VolumeFormula, this, factionTech, staticData);

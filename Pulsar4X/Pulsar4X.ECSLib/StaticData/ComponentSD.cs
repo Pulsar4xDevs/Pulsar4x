@@ -19,6 +19,8 @@ namespace Pulsar4X.ECSLib
         public string ResearchCostFormula;
         public string CreditCostFormula;
         public string BuildPointCostFormula;
+        //a string which is used in the ui for display and sorting. 
+        public string ComponentType;
         //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
         public ComponentMountType MountType;
         public Guid IndustryTypeID;

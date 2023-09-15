@@ -27,6 +27,7 @@
           "ResearchCostFormula": "0",
           "CreditCostFormula": "120",
           "BuildPointCostFormula": "[Mass]",
+          "ComponentType": "Facility",
           "MountType": "ShipCargo, PlanetInstallation",
           "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
           "IndustryTypeID": "EC717019-D9B2-4F24-ADE2-BFFC87294545",
