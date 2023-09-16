@@ -42,12 +42,12 @@ namespace Pulsar4X.SDL2UI
                             if(cargoType is MineralSD)
                             {
                                 var mineralSD = (MineralSD)cargoType;
-                                DisplayHelpers.DescriptiveTooltip(cargoType.Name, "", mineralSD.Description);
+                                DisplayHelpers.DescriptiveTooltip(cargoType.Name, "Mineral", mineralSD.Description);
                             }
                             else if(cargoType is ProcessedMaterialSD)
                             {
                                 var processedMaterialSD = (ProcessedMaterialSD)cargoType;
-                                DisplayHelpers.DescriptiveTooltip(cargoType.Name, "", processedMaterialSD.Description);
+                                DisplayHelpers.DescriptiveTooltip(cargoType.Name, "Processed Material", processedMaterialSD.Description);
                             }
                             else if(cargoType is ComponentInstance)
                             {
