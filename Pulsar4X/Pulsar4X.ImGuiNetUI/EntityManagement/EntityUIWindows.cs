@@ -77,13 +77,13 @@ namespace Pulsar4X.SDL2UI
         {
             //Checks if the power gen menu can be opened
             if (_entityState.Entity.HasDataBlob<EnergyGenAbilityDB>() && T == typeof(PowerGen))
-            { 
-                return true; 
+            {
+                return true;
             }
             //Check if the pin menu can be opened
             else if (T == typeof(PinCameraBlankMenuHelper))
-            { 
-                return true; 
+            {
+                return true;
             }
             //if can be used to go to another system
             else if (_entityState.Entity.HasDataBlob<JPSurveyableDB>() && T == typeof(GotoSystemBlankMenuHelper))
@@ -208,12 +208,12 @@ namespace Pulsar4X.SDL2UI
                 //Menu is rename menu
                 else if (T == typeof(RenameWindow))
                 {
-                    RenameWindow.GetInstance(_entityState).ToggleActive();
-                    _state.ActiveWindow = RenameWindow.GetInstance(_entityState);
-                    if (managesUIPopUps)
-                    {
-                        ImGui.CloseCurrentPopup();
-                    }
+                    // RenameWindow.GetInstance(_entityState).ToggleActive();
+                    // _state.ActiveWindow = RenameWindow.GetInstance(_entityState);
+                    // if (managesUIPopUps)
+                    // {
+                    //     ImGui.CloseCurrentPopup();
+                    // }
 
                 }
                 //Menu is cargo menu
@@ -283,7 +283,7 @@ namespace Pulsar4X.SDL2UI
             else if (T == typeof(WarpOrderWindow)) returnval = WarpOrderWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(ChangeCurrentOrbitWindow)) returnval = ChangeCurrentOrbitWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(FireControl)) returnval = FireControl.GetInstance(_entityState).GetActive();
-            else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
+            //else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(CargoTransfer)) returnval = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState).GetActive();
             else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState).GetActive();
@@ -297,4 +297,3 @@ namespace Pulsar4X.SDL2UI
     }
 
 }
-    

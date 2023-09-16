@@ -127,7 +127,7 @@ namespace Pulsar4X.SDL2UI
                             if(selectedFleetFlagship != null)
                             {
                                 DisplayHelpers.PrintRow("Flagship", selectedFleetFlagship.GetName(factionID));
-                                if(selectedFleetFlagship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) 
+                                if(selectedFleetFlagship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB)
                                     && shipInfoDB.CommanderID != Guid.Empty
                                     && shipInfoDB.OwningEntity.Manager.FindEntityByGuid(shipInfoDB.CommanderID, out var commanderEntity))
                                 {
@@ -199,7 +199,7 @@ namespace Pulsar4X.SDL2UI
                                     ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
                                     ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 1f);
                                     ImGui.TableHeadersRow();
-                                    
+
                                     var actions = orderableDB.ActionList.ToArray();
                                     for(int i = 0; i < actions.Length; i++)
                                     {
@@ -254,7 +254,7 @@ namespace Pulsar4X.SDL2UI
                                     DisplayHelpers.ShipTooltip(ship);
                                     DisplayShipContextMenu(selectedShips, ship);
                                     ImGui.NextColumn();
-                                    if(ship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) 
+                                    if(ship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB)
                                         && shipInfoDB.CommanderID != Guid.Empty
                                         && shipInfoDB.OwningEntity.Manager.FindEntityByGuid(shipInfoDB.CommanderID, out var commanderEntity))
                                     {
@@ -590,12 +590,20 @@ namespace Pulsar4X.SDL2UI
         {
             if(ImGui.BeginPopupContextItem())
             {
+                if(ImGui.MenuItem("Rename"))
+                {
+                    RenameWindow.GetInstance().SetEntity(fleet);
+                    RenameWindow.GetInstance().SetActive(true);
+                }
+                ImGui.Separator();
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
                 if(ImGui.MenuItem("Disband###delete-" + fleet.Guid))
                 {
                     var order = FleetOrder.DisbandFleet(factionID, fleet);
                     StaticRefLib.OrderHandler.HandleOrder(order);
                     SelectFleet(null);
                 }
+                ImGui.PopStyleColor();
                 ImGui.EndPopup();
             }
         }

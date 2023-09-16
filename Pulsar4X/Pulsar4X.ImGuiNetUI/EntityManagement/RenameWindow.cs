@@ -6,60 +6,69 @@ namespace Pulsar4X.SDL2UI
 {
     public class RenameWindow : PulsarGuiWindow
     {
-        EntityState _entityState;
-        byte[] nameInputBuffer; 
-        string nameString { get { return System.Text.Encoding.UTF8.GetString(nameInputBuffer); } }
+        private Entity _selectedEntity;
+        private byte[] _nameInputBuffer;
+        string nameString { get { return System.Text.Encoding.UTF8.GetString(_nameInputBuffer); } }
+        private bool _setFocus = true;
 
-
-        private void reset(EntityState entity){
-            _entityState = entity;
-            nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(_entityState.Name);
-        }
-
-        public RenameWindow(EntityState entity)
+        private RenameWindow()
         {
-            _flags = ImGuiWindowFlags.AlwaysAutoResize;
-            reset(entity);
+            _flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
         }
 
-        internal static RenameWindow GetInstance(EntityState entity)
+        public void SetEntity(Entity entity)
+        {
+            _selectedEntity = entity;
+            _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(entity.GetName(_uiState.Faction.Guid));
+            IsActive = true;
+            _setFocus = true;
+        }
+
+        internal static RenameWindow GetInstance()
         {
             if (!_uiState.LoadedWindows.ContainsKey(typeof(RenameWindow)))
             {
-                return new RenameWindow(entity);
+                return new RenameWindow();
             }
-            var retval = (RenameWindow)_uiState.LoadedWindows[typeof(RenameWindow)];
-            retval.reset(entity);
-            return retval;
+            return (RenameWindow)_uiState.LoadedWindows[typeof(RenameWindow)];
         }
 
         internal override void Display()
         {
-            if (IsActive)
+            if(IsActive) ImGui.OpenPopup("Rename");
+
+            if (ImGui.BeginPopupModal("Rename", ref IsActive, _flags))
             {
-                if (ImGui.Begin("Rename", ref IsActive, _flags))
+                //TODO: Move this to settings
+                uint umaxnamesize = 64;
+
+                Array.Resize(ref _nameInputBuffer, checked((int)umaxnamesize));//Resize the text buffer
+
+                if(_setFocus)
                 {
-                    //TODO: Move this to settings
-                    uint umaxnamesize = 64;
+                    ImGui.SetKeyboardFocusHere();
+                    _setFocus = false;
+                }
 
-                    Array.Resize(ref nameInputBuffer, checked((int)umaxnamesize));//Resize the text buffer
-                    ImGui.InputText("##name", nameInputBuffer, umaxnamesize);//Gets the text from the user and stores it into the buffer
+                ImGui.InputText("##name", _nameInputBuffer, umaxnamesize, ImGuiInputTextFlags.AutoSelectAll);//Gets the text from the user and stores it into the buffer
 
-                    ImGui.SameLine();
-                    if (ImGui.SmallButton("Set"))//Gives the user the option to set the name
-                    {
-                        if(nameInputBuffer[0] != 0){//If the user has not entered an empty name
-                        
-                            RenameCommand.CreateRenameCommand(_uiState.Game, _uiState.Faction, _entityState.Entity, nameString);
-                            _entityState.Name = nameString;//Rename the object
-                            _entityState.NameIcon.NameString = nameString;//Rename the name of the object on the map
-                            IsActive = false;//Close the window
-                        }
+                ImGui.SameLine();
+                if (ImGui.SmallButton("Save"))//Gives the user the option to set the name
+                {
+                    if(_nameInputBuffer[0] != 0){//If the user has not entered an empty name
 
-                        
+                        RenameCommand.CreateRenameCommand(_uiState.Game, _uiState.Faction, _selectedEntity, nameString);
+                        ImGui.CloseCurrentPopup();
+                        IsActive = false;
                     }
                 }
-                ImGui.End();
+                ImGui.SameLine();
+                if (ImGui.SmallButton("Cancel"))
+                {
+                    ImGui.CloseCurrentPopup();
+                    IsActive = false;
+                }
+                ImGui.EndPopup();
             }
         }
     }

@@ -6,7 +6,7 @@
         "Key": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
         "Value": {
           "Name": "RP1 Rocket Engine",
-          "DescriptionFormula": "'A Newtonian Thruster'",
+          "DescriptionFormula": "A Newtonian Thruster",
           "ComponentType": "Engine",
           "ID": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
           "MassFormula": "Ability('Mass')",
@@ -82,7 +82,7 @@
         "Key": "B03FE82F-EE70-4A9A-AC61-5A7D44A3364E",
         "Value": {
           "Name": "Methalox Rocket Engine",
-          "DescriptionFormula": "'A Newtonian Thruster'",
+          "DescriptionFormula": "A Newtonian Thruster",
           "ComponentType": "Engine",
           "ID": "B03FE82F-EE70-4A9A-AC61-5A7D44A3364E",
           "MassFormula": "Ability('Mass')",
@@ -158,7 +158,7 @@
         "Key": "A0F3E5BB-0AA6-41D0-9873-5A7AC9080B69",
         "Value": {
           "Name": "Hydrolox Rocket Engine",
-          "DescriptionFormula": "'Hydogen engines tend to have a higher fuel efficency, but the fuel is less dense requring larger tanks'",
+          "DescriptionFormula": "Hydogen engines tend to have a higher fuel efficency, but the fuel is less dense requring larger tanks",
           "ComponentType": "Engine",
           "ID": "A0F3E5BB-0AA6-41D0-9873-5A7AC9080B69",
           "MassFormula": "Ability('Mass')",
@@ -218,7 +218,6 @@
               "AttributeFormula": "AtbConstrArgs(Ability('Exhaust Velocity'), GuidString('A2AAF059-ED97-409D-883E-88DE918F6985'), Ability('Fuel Consumption'))",
               "AttributeType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
             },
-
             {
               "Name": "Sensor Signature",
               "Units": "unknown",
@@ -234,7 +233,7 @@
         "Key": "7d0b867f-e239-4b93-9b30-c6d4b769b5e4",
         "Value": {
           "Name": "Alcubierre Warp Drive",
-          "DescriptionFormula": "'Warps a ship through non newtonion space'",
+          "DescriptionFormula": "Warps a ship through non-newtonion space",
           "ComponentType": "Engine",
           "ID": "7d0b867f-e239-4b93-9b30-c6d4b769b5e4",
           "MassFormula": "Ability('Mass')",
@@ -269,7 +268,7 @@
               "Name": "Mass",
               "Units": "kg",
               "DescriptionFormula": "'Mass of the engine'",
-              "GuiHint": "GuiSelectionMaxMin",
+              "GuiHint": "GuiSelectionMaxMinInt",
               "MaxFormula": "25000",
               "MinFormula": "TechData('d814f1d7-329d-407f-b514-3a5a8451e655')",
               "StepFormula": "1",
@@ -286,7 +285,7 @@
               "AttributeFormula": "1"
             },
             {
-              "Name": "EnginePower",
+              "Name": "Engine Power",
               "Units": "EP",
               "DescriptionFormula": "'Move Power for ship'",
               "GuiHint": "GuiTextDisplay",
@@ -297,14 +296,14 @@
               "Units": "KJ",
               "DescriptionFormula": "'How much energy required to create the warp bubble.'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('EnginePower') * TechData('c534d9f0-0d63-424f-9780-d124235903de') * 0.5"
+              "AttributeFormula": "Ability('Engine Power') * TechData('c534d9f0-0d63-424f-9780-d124235903de') * 0.5"
             },
             {
               "Name": "Bubble Sustain Energy Cost",
               "Units": "KW",
               "DescriptionFormula": "'How much energy required to sustain the warp bubble per second during the warp'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('EnginePower') * 0.001 * TechData('7fa0dc05-5e58-4678-be44-afaad014e096')"
+              "AttributeFormula": "Ability('Engine Power') * 0.001 * TechData('7fa0dc05-5e58-4678-be44-afaad014e096')"
             },
             {
               "Name": "Bubble Collapse Energy Returned",
@@ -316,13 +315,12 @@
             {
               "Name": "db",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('EnginePower'), GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Bubble Creation Energy Cost'), Ability('Bubble Sustain Energy Cost'), -Ability('Bubble Collapse Energy Returned'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Engine Power'), GuidString('50AA0079-71A0-477A-8082-8D31212BFBA7'), Ability('Bubble Creation Energy Cost'), Ability('Bubble Sustain Energy Cost'), -Ability('Bubble Collapse Energy Returned'))",
               "AttributeType": "Pulsar4X.ECSLib.WarpDriveAtb"
             }
           ]
         }
       }
-
     ]
   }
 }
