@@ -23,30 +23,7 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.TableNextColumn();
                     ImGui.Text(listPerDesign[0].Name);
-                    if(ImGui.IsItemHovered())
-                    {
-                        ImGui.SetNextWindowSize(Styles.ToolTipsize);
-                        ImGui.BeginTooltip();
-                        ImGui.Text(listPerDesign[0].Name);
-                        if(listPerDesign[0].Design.TypeName.IsNotNullOrEmpty() && !listPerDesign[0].Design.TypeName.Equals(listPerDesign[0].Name))
-                        {
-                            var size = ImGui.GetContentRegionAvail();
-                            var textSize = ImGui.CalcTextSize(listPerDesign[0].Design.TypeName);
-                            ImGui.SameLine();
-                            ImGui.SetCursorPosX(size.X - textSize.X);
-                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                            ImGui.Text(listPerDesign[0].Design.TypeName);
-                            ImGui.PopStyleColor();
-                        }
-                        if(listPerDesign[0].Design.Description.IsNotNullOrEmpty())
-                        {
-                            ImGui.Separator();
-                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                            ImGui.TextWrapped(listPerDesign[0].Design.Description);
-                            ImGui.PopStyleColor();
-                        }
-                        ImGui.EndTooltip();
-                    }
+                    DisplayHelpers.DescriptiveTooltip(listPerDesign[0].Name, listPerDesign[0].Design.TypeName, listPerDesign[0].Design.Description, true);
                     ImGui.TableNextColumn();
                     ImGui.Text(listPerDesign.Count.ToString());
                     ImGui.TableNextColumn();

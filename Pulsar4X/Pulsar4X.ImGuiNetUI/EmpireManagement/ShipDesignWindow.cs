@@ -398,7 +398,7 @@ namespace Pulsar4X.SDL2UI
                     if (hovered)
                     {
                         selectedItem = i;
-                        ShowComponentToolTip(SelectedComponents[i].design);
+                        DisplayHelpers.DescriptiveTooltip(SelectedComponents[i].design.Name, SelectedComponents[i].design.TypeName, SelectedComponents[i].design.Description);
                     }
 
                     ImGui.TableNextColumn();
@@ -490,7 +490,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(name);
                     if(ImGui.IsItemHovered())
                     {
-                        ShowComponentToolTip(AvailableShipComponents[i]);
+                        DisplayHelpers.DescriptiveTooltip(AvailableShipComponents[i].Name, AvailableShipComponents[i].TypeName, AvailableShipComponents[i].Description);
                     }
                     ImGui.TableNextColumn();
                     ImGui.Text(design.ComponentType);
@@ -779,31 +779,6 @@ namespace Pulsar4X.SDL2UI
 
                 ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(rawimagewidth * scale, rawimageheight * scale));
             }
-        }
-
-        private void ShowComponentToolTip(ComponentDesign componentDesign)
-        {
-            ImGui.SetNextWindowSize(Styles.ToolTipsize);
-            ImGui.BeginTooltip();
-            ImGui.Text(componentDesign.Name);
-            if(componentDesign.TypeName.IsNotNullOrEmpty())
-            {
-                var size = ImGui.GetContentRegionAvail();
-                var textSize = ImGui.CalcTextSize(componentDesign.TypeName);
-                ImGui.SameLine();
-                ImGui.SetCursorPosX(size.X - textSize.X);
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                ImGui.Text(componentDesign.TypeName);
-                ImGui.PopStyleColor();
-            }
-            if(componentDesign.Description.IsNotNullOrEmpty())
-            {
-                ImGui.Separator();
-                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                ImGui.TextWrapped(componentDesign.Description);
-                ImGui.PopStyleColor();
-            }
-            ImGui.EndTooltip();
         }
     }
 }

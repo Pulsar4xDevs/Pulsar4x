@@ -76,5 +76,33 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndTooltip();
             }
         }
+
+        public static void DescriptiveTooltip(string name, string type, string description, bool hideTypeIfSameAsName = false)
+        {
+            if(ImGui.IsItemHovered())
+            {
+                ImGui.SetNextWindowSize(Styles.ToolTipsize);
+                ImGui.BeginTooltip();
+                ImGui.Text(name);
+                if(type.IsNotNullOrEmpty() && (!hideTypeIfSameAsName || (hideTypeIfSameAsName && !type.Equals(name))))
+                {
+                    var size = ImGui.GetContentRegionAvail();
+                    var textSize = ImGui.CalcTextSize(type);
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(size.X - textSize.X);
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                    ImGui.Text(type);
+                    ImGui.PopStyleColor();
+                }
+                if(description.IsNotNullOrEmpty())
+                {
+                    ImGui.Separator();
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                    ImGui.TextWrapped(description);
+                    ImGui.PopStyleColor();
+                }
+                ImGui.EndTooltip();
+            }
+        }
     }
 }

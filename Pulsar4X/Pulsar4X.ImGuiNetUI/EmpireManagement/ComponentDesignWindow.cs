@@ -79,30 +79,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             ComponentDesignDisplay.GetInstance().SetTemplate(template, _uiState);
                         }
-                        if(ImGui.IsItemHovered())
-                        {
-                            ImGui.SetNextWindowSize(Styles.ToolTipsize);
-                            ImGui.BeginTooltip();
-                            ImGui.Text(template.Name);
-                            if(template.ComponentType.IsNotNullOrEmpty())
-                            {
-                                var size = ImGui.GetContentRegionAvail();
-                                var textSize = ImGui.CalcTextSize(template.ComponentType);
-                                ImGui.SameLine();
-                                ImGui.SetCursorPosX(size.X - textSize.X);
-                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                                ImGui.Text(template.ComponentType);
-                                ImGui.PopStyleColor();
-                            }
-                            if(template.DescriptionFormula.IsNotNullOrEmpty())
-                            {
-                                ImGui.Separator();
-                                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                                ImGui.TextWrapped(template.DescriptionFormula);
-                                ImGui.PopStyleColor();
-                            }
-                            ImGui.EndTooltip();
-                        }
+                        DisplayHelpers.DescriptiveTooltip(template.Name, template.ComponentType, template.DescriptionFormula);
                     }
 
                     ImGui.EndChild();
