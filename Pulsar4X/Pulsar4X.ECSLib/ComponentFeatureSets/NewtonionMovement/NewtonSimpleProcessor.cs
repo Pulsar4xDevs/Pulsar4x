@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib;
 public class NewtonSimpleProcessor : IHotloopProcessor
 {
     private static readonly int _obtDBIdx = EntityManager.GetTypeIndex<OrbitDB>();
-    private static readonly int _nmDBIdx = EntityManager.GetTypeIndex<NewtonMoveDB>();
+    private static readonly int _nmDBIdx = EntityManager.GetTypeIndex<NewtonSimpleMoveDB>();
     private static readonly int _nthDBIdx = EntityManager.GetTypeIndex<NewtonThrustAbilityDB>();
     private static readonly int _posDBIdx = EntityManager.GetTypeIndex<PositionDB>();
     private static readonly int _massDBIdx = EntityManager.GetTypeIndex<MassVolumeDB>();
