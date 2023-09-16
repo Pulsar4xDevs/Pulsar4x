@@ -43,7 +43,7 @@
               "Units": "m/s",
               "DescriptionFormula": "'Specific Impulse in m/s, can be increased by research'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "3000 * TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
+              "AttributeFormula": "3000 + TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
             },
             {
               "Name": "Fuel Consumption",

@@ -320,6 +320,9 @@ namespace Pulsar4X.SDL2UI
                                         displayStr = Stringify.Thrust(value);
                                         break;
                                     }
+                                    case "m/s":
+                                        displayStr = Stringify.Velocity(value);
+                                        break;
                                     default:
                                     {
                                         displayStr = attribute.Value.ToString() + " " + attribute.Unit;
@@ -328,6 +331,8 @@ namespace Pulsar4X.SDL2UI
                                 }
 
                                 ImGui.Text(displayStr);
+                                if(ImGui.IsItemHovered())
+                                    ImGui.SetTooltip(attribute.Value.ToString("#,###,###,###,##0") + " " + attribute.Unit);
                             }
                             else
                             {
