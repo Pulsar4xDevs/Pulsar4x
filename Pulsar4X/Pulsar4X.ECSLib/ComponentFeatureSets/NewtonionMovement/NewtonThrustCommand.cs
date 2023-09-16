@@ -222,6 +222,155 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    
+    public class NewtonSimpeThrustCommand : EntityCommand
+    {
+        public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement;
+        public override bool IsBlocking => true;
+        public override string Name { get {return _name;}}
+
+        string _name = "Newtonion Simple thrust";
+
+        public override string Details
+        {
+            get
+            {
+                return _details;
+            }
+        }
+        string _details = "";
+
+        Entity _factionEntity;
+        Entity _entityCommanding;
+        internal override Entity EntityCommanding { get { return _entityCommanding; } }
+        public Vector3 OrbitrelativeDeltaV;
+        public KeplerElements StartKE;
+        public KeplerElements TargetKE;
+        
+        NewtonSimpleMoveDB _db;
+
+        DateTime _vectorDateTime;
+
+        public List<(string item, double value)> DebugDetails = new List<(string, double)>();
+
+        public static void CreateCommand(Guid faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name="Newtonion thrust")
+        {
+
+
+
+            var cmd = new NewtonSimpeThrustCommand()
+            {
+                RequestingFactionGuid = faction,
+                EntityCommandingGuid = orderEntity.Guid,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
+                OrbitrelativeDeltaV = expendDeltaV_m,
+
+
+                //var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2()
+
+                //_parentRalitiveDeltaV = pralitiveDV,
+                _vectorDateTime = manuverNodeTime,
+                ActionOnDate = manuverNodeTime - TimeSpan.FromSeconds(burnTime * 0.5),
+                _name = name,
+
+            };
+
+            StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+            cmd.UpdateDetailString();
+        }
+        public static void CreateCommand(Guid faction, Entity orderEntity, DateTime manuverNodeTime, KeplerElements startKE, KeplerElements finKE, string name="Newtonion Simple thrust")
+        {
+            
+            var startVec = OrbitalMath.GetStateVectors(startKE, manuverNodeTime);
+
+            var tgtVec = OrbitalMath.GetStateVectors(finKE, manuverNodeTime);
+
+            
+            var manuverVector = tgtVec.velocity - startVec.velocity;
+            var manuverDV = manuverVector.Length();
+
+            var cmd = new NewtonSimpeThrustCommand()
+            {
+                RequestingFactionGuid = faction,
+                EntityCommandingGuid = orderEntity.Guid,
+                CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
+                OrbitrelativeDeltaV = new Vector3(manuverVector.X, manuverVector.Y, 0),
+                StartKE = startKE,
+                TargetKE = finKE,
+                _vectorDateTime = manuverNodeTime,
+                ActionOnDate = manuverNodeTime,
+                _name = name,
+
+            };
+
+            StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
+            cmd.UpdateDetailString();
+        }
+        
+        internal override void Execute(DateTime atDateTime)
+        {
+            if (!IsRunning && atDateTime >= ActionOnDate)
+            {
+                 var parent = _entityCommanding.GetSOIParentEntity();
+                 var currentVel = _entityCommanding.GetRelativeFutureVelocity(atDateTime);
+
+                var parentMass = _entityCommanding.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+                var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
+                var sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
+
+                var futurePosition = _entityCommanding.GetRelativeFuturePosition(_vectorDateTime);
+                var futureVector = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
+
+
+
+                _db = new NewtonSimpleMoveDB();
+                _db.ActionOnDateTime = ActionOnDate;
+                _db.CurrentTrajectory = StartKE;
+                _db.TargetTrajectory = TargetKE;
+                _entityCommanding.SetDataBlob(_db);
+
+                UpdateDetailString();
+                IsRunning = true;
+            }
+        }
+
+        public override void UpdateDetailString()
+        {
+
+
+            if(ActionOnDate > _entityCommanding.StarSysDateTime)
+                _details = "Waiting " + (ActionOnDate - _entityCommanding.StarSysDateTime).ToString("d'd 'h'h 'm'm 's's'") + "\n"
+                + "   to expend  " + Stringify.Velocity(OrbitrelativeDeltaV.Length()) + " Δv";
+            else if(IsRunning)
+                _details = "Manuvering ";
+
+
+
+        }
+
+        public override bool IsFinished()
+        {
+            if (IsRunning && _db.IsComplete)
+                return true;
+            else
+                return false;
+        }
+
+        internal override bool IsValidCommand(Game game)
+        {
+            if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+                return true;
+            else
+                return false;
+        }
+
+        public override EntityCommand Clone()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    
     public class ThrustToTargetCmd : EntityCommand
     {
 

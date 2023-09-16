@@ -83,6 +83,7 @@ public class NewtonSimpleProcessor : IHotloopProcessor
             OrbitDB newOrbit = OrbitDB.FromKeplerElements(newtonMoveDB.SOIParent, newmass, tgtTraj, dateTimeNow);
             entity.SetDataBlob(newOrbit);
             OrbitProcessor.UpdateOrbit(entity, entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>(), dateTimeFuture);
+            newtonMoveDB.IsComplete = true;
         }
         else
         {
@@ -98,9 +99,11 @@ public class NewtonSimpleProcessor : IHotloopProcessor
 public class NewtonSimpleMoveDB : BaseDataBlob
 {
     internal DateTime LastProcessDateTime = new DateTime();
-
+    public DateTime ActionOnDateTime { get; internal set; }
     public KeplerElements CurrentTrajectory { get; internal set; }
     public KeplerElements TargetTrajectory { get; internal set; }
+
+    public bool IsComplete = false;
     public Entity SOIParent { get; internal set; }
     public double ParentMass { get; internal set; }
     public override object Clone()

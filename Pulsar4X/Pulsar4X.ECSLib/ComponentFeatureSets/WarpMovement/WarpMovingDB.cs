@@ -158,6 +158,10 @@ namespace Pulsar4X.ECSLib
             {
                 OwningEntity.RemoveDataBlob<NewtonMoveDB>();
             }
+            if (OwningEntity.HasDataBlob<NewtonSimpleMoveDB>())
+            {
+                OwningEntity.RemoveDataBlob<NewtonSimpleMoveDB>();
+            }
         
         }
     }

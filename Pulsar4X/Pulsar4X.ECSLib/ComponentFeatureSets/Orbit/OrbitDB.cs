@@ -479,6 +479,10 @@ namespace Pulsar4X.ECSLib
             {
                 OwningEntity.RemoveDataBlob<NewtonMoveDB>();
             }
+            if (OwningEntity.HasDataBlob<NewtonSimpleMoveDB>())
+            {
+                OwningEntity.RemoveDataBlob<NewtonSimpleMoveDB>();
+            }
             if (OwningEntity.HasDataBlob<OrbitUpdateOftenDB>())
             {
                 OwningEntity.RemoveDataBlob<OrbitUpdateOftenDB>();
@@ -572,6 +576,10 @@ namespace Pulsar4X.ECSLib
             if (OwningEntity.HasDataBlob<NewtonMoveDB>())
             {
                 OwningEntity.RemoveDataBlob<NewtonMoveDB>();
+            }
+            if (OwningEntity.HasDataBlob<NewtonSimpleMoveDB>())
+            {
+                OwningEntity.RemoveDataBlob<NewtonSimpleMoveDB>();
             }
             if (OwningEntity.HasDataBlob<WarpMovingDB>())
             {
