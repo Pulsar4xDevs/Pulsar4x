@@ -182,6 +182,9 @@ namespace Pulsar4X.SDL2UI
                             case GuiHint.GuiTextSelectionFormula:
                                 GuiHintTextSelectionFormula(attribute);
                                 break;
+                            case GuiHint.GuiCargoTypeSelection:
+                                GuiHintCargoTypeSelection(attribute, uiState);
+                                break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
@@ -633,6 +636,32 @@ namespace Pulsar4X.SDL2UI
             }
 
             ImGui.NewLine();
+        }
+
+        private void GuiHintCargoTypeSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
+        {
+            var cargoTypesToDisplay = new Dictionary<Guid, ICargoable>();
+            var names = new List<string>();
+
+            foreach(var cargoType in attribute.GuidDictionary.Keys)
+            {
+                Guid cargoTypeID = Guid.Parse(cargoType.ToString());
+                var cargos = uiState.Game.StaticData.CargoGoods.GetAll().Where(c => c.Value.CargoTypeID == cargoTypeID);
+                foreach(var cargo in cargos)
+                {
+                    cargoTypesToDisplay.Add(cargo.Key, cargo.Value);
+                    names.Add(cargo.Value.Name);
+                }
+            }
+
+            string[] arrayNames = names.ToArray();
+
+            ImGui.TextWrapped(attribute.Name + ":");
+            ImGui.SameLine();
+            ImGui.TextWrapped(attribute.Description);
+            ImGui.NewLine();
+
+            ImGui.Combo("###cargotypeselection", ref attribute.ListSelection, arrayNames, arrayNames.Length);
         }
 
         private void GuiHintTextSelectionFormula(ComponentDesignAttribute attribute)

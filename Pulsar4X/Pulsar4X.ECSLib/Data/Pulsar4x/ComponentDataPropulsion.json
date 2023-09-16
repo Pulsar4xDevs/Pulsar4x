@@ -46,6 +46,20 @@
               "AttributeFormula": "3000 + TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
             },
             {
+              "Name": "Fuel Type",
+              "DescriptionFormula": "'The type of fuel the engine burns'",
+              "GuiHint": "GuiCargoTypeSelection",
+              "GuidDictionary": {
+                "Entries": [
+                  {
+                    "Key": "d8e8da2d-8dc8-4a3f-b989-5f2e67c55e77",
+                    "Value": "10"
+                  }
+                ]
+              },
+              "AttributeFormula": "[GuidDict]"
+            },
+            {
               "Name": "Fuel Consumption",
               "Units": "kg/s",
               "DescriptionFormula": "'Fuel Consumption per second'",
