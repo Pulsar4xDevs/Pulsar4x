@@ -164,6 +164,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             Edit,
             Thrust,
             HohmannTransfer,
+            HohmannTransfer2,
             InterplanetaryTransfer,
             PhaseChange,
             HighDVIntercept,
@@ -246,6 +247,16 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         
                         _navMode = NavMode.HohmannTransfer;
                     }
+                    if (ImGui.Button("Hohmann Transfer2"))
+                    {
+                        _manuverLines.EditingNodes = new ManuverNode[2];
+                        _manuverLines.EditingNodes[0] = new ManuverNode(_orderEntity, _atDatetime);
+                        var halfOrbit = _manuverLines.EditingNodes[0].TargetOrbit.Period * 0.5;
+                        _manuverLines.EditingNodes[1] = new ManuverNode(_orderEntity, _atDatetime + TimeSpan.FromSeconds(halfOrbit));
+                        _manuverLines.RootSequence.ParentPosition = _orderEntity.GetSOIParentPositionDB();
+                        
+                        _navMode = NavMode.HohmannTransfer2;
+                    }
 
                     if (ImGui.Button("Interplanetary Transfer"))
                     {
@@ -292,6 +303,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         break;
                     case NavMode.HohmannTransfer:
                         DisplayHohmannMode();
+                        break;
+                    case NavMode.HohmannTransfer2:
+                        DisplayHohmannMode2();
                         break;
                     case NavMode.InterplanetaryTransfer:
                         DisplayInterPlanetaryHohmannMode();
@@ -611,6 +625,88 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             
         }
 
+        
+        void DisplayHohmannMode2()
+        {
+            double mySMA = _currentKE.SemiMajorAxis;
+            float smaMin = 1;
+            float smaMax = (float)_orderEntity.GetSOIParentEntity().GetSOI_m();
+            
+            if(ImGui.Combo("Target Object", ref _selectedSibling, _siblingNames, _siblingNames.Length  ))
+            {
+                Entity selectedSib = _siblingEntities[_selectedSibling];
+                if(selectedSib.HasDataBlob<OrbitDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitDB>().SemiMajorAxis;
+                if(selectedSib.HasDataBlob<OrbitUpdateOftenDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
+                if(selectedSib.HasDataBlob<NewtonMoveDB>())
+                    _targetSMA = (float)_siblingEntities[_selectedSibling].GetDataBlob<NewtonMoveDB >().GetElements().SemiMajorAxis;
+            }
+
+            //TODO this should be radius from orbiting body not major axies.  
+            ImGui.SliderFloat("Target SemiMajorAxis", ref _targetSMA, smaMin, smaMax);
+            _manuvers = OrbitalMath.Hohmann2(_sgp, mySMA, _targetSMA);
+
+            
+
+            double totalManuverDV = 0;
+            foreach (var manuver in _manuvers)
+            {
+                var dv = manuver.deltaV.Length();
+                totalManuverDV += dv;
+                double fuelBurned = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, dv);
+                double secondsBurn = fuelBurned / _burnRate;
+                ImGui.Text(dv + "Δv");
+                ImGui.Text(fuelBurned + " fuel");
+                ImGui.Text(Stringify.Number(secondsBurn, "0.###") + " Second Burn");
+
+            }
+            
+            if(totalManuverDV > _totalDV)
+                ImGui.TextColored(new Vector4(0.9f, 0, 0, 1), "Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
+            else
+                ImGui.Text("Total Δv for all manuvers: " + Stringify.Velocity(totalManuverDV));
+            if(totalManuverDV > 0)
+            {
+                DateTime t1 = _orderEntity.StarSysDateTime + TimeSpan.FromSeconds(_manuvers[0].tSec);
+                DateTime t2 = t1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
+                _manuverLines.EditingNodes[0].SetNode(_manuvers[0].deltaV, t1 );
+                _manuverLines.EditingNodes[1].PriorOrbit = _manuverLines.EditingNodes[0].TargetOrbit;
+                _manuverLines.EditingNodes[1].SetNode(_manuvers[1].deltaV, t2);
+            }
+            
+            if (ImGui.Button("Make it so"))
+            {
+                double fuelBurned1 = OrbitMath.TsiolkovskyFuelUse(_totalMass, _exhaustVelocity, _manuvers[0].deltaV.Length());
+                double secondsBurn1 = fuelBurned1 / _burnRate;
+                var manuverNodeTime1 = _atDatetime + TimeSpan.FromSeconds(secondsBurn1 * 0.5);
+
+                
+                var startObt = _manuverLines.EditingNodes[0].PriorOrbit;
+                var tgtObt = _manuverLines.EditingNodes[0].TargetOrbit;
+                NewtonSimpeThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime1, startObt, tgtObt );
+                
+                double mass2 = _totalMass - (fuelBurned1 * _fuelType.MassPerUnit); 
+                double fuelBurned2 = OrbitMath.TsiolkovskyFuelUse(mass2, _exhaustVelocity, _manuvers[1].deltaV.Length());
+                double secondsBurn2 = fuelBurned2 / _burnRate;
+                var manuverNodeTime2 = manuverNodeTime1 + TimeSpan.FromSeconds(_manuvers[1].tSec);
+
+                startObt = _manuverLines.EditingNodes[1].PriorOrbit;
+                tgtObt = _manuverLines.EditingNodes[1].TargetOrbit;
+                NewtonSimpeThrustCommand.CreateCommand(_orderEntity.FactionOwnerID, _orderEntity, manuverNodeTime2, startObt, tgtObt );
+                
+                var newseq = new ManuverSequence();
+                newseq.SequenceName = "Hohmann Transfer";
+                _manuverLines.EditingNodes[0].NodeName = "Raise Periapsis";
+                newseq.ManuverNodes.Add(_manuverLines.EditingNodes[0]);
+                _manuverLines.EditingNodes[1].NodeName = "Circularise";
+                newseq.ManuverNodes.Add(_manuverLines.EditingNodes[1]);
+                _manuverLines.SelectedSequence.ManuverSequences.Add(newseq);
+            }
+            
+        }
+
+        
         void DisplayInterPlanetaryHohmannMode()
         {
             double mySMA = _currentKE.SemiMajorAxis;

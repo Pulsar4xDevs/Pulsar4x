@@ -253,31 +253,14 @@ namespace Pulsar4X.ECSLib
 
         public List<(string item, double value)> DebugDetails = new List<(string, double)>();
 
-        public static void CreateCommand(Guid faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name="Newtonion thrust")
+        public static void CreateCommand(Guid faction, Entity orderEntity, Vector3 position, Vector3 startvelocity, Vector3 endvelocity, DateTime manuverNodeTime, string name="Newtonion thrust")
         {
-
-
-
-            var cmd = new NewtonSimpeThrustCommand()
-            {
-                RequestingFactionGuid = faction,
-                EntityCommandingGuid = orderEntity.Guid,
-                CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                OrbitrelativeDeltaV = expendDeltaV_m,
-
-
-                //var sgp = OrbitalMath.CalculateStandardGravityParameterInM3S2()
-
-                //_parentRalitiveDeltaV = pralitiveDV,
-                _vectorDateTime = manuverNodeTime,
-                ActionOnDate = manuverNodeTime - TimeSpan.FromSeconds(burnTime * 0.5),
-                _name = name,
-
-            };
-
-            StaticRefLib.Game.OrderHandler.HandleOrder(cmd);
-            cmd.UpdateDetailString();
+            var sgp = orderEntity.GetDataBlob<OrbitDB>().GravitationalParameter_m3S2;
+            KeplerElements startKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, startvelocity, manuverNodeTime);
+            KeplerElements tgtKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, endvelocity, manuverNodeTime);
+            CreateCommand(faction, orderEntity, manuverNodeTime, startKE, tgtKE);
         }
+        
         public static void CreateCommand(Guid faction, Entity orderEntity, DateTime manuverNodeTime, KeplerElements startKE, KeplerElements finKE, string name="Newtonion Simple thrust")
         {
             
