@@ -17,11 +17,12 @@ namespace Pulsar4X.SDL2UI
             var thirdChildSize = new Vector2(windowContentSize.X * 0.33f - (windowContentSize.X * 0.01f), windowContentSize.Y);
             if(ImGui.BeginChild("ColonySummary1", firstChildSize, true))
             {
-                if(ImGui.CollapsingHeader("Parent Information", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    var colonyInfoDb = entity.GetDataBlob<ColonyInfoDB>();
-                    var bodyInfoDb = colonyInfoDb.PlanetEntity.GetDataBlob<SystemBodyInfoDB>();
+                var colonyInfoDb = entity.GetDataBlob<ColonyInfoDB>();
+                var bodyInfoDb = colonyInfoDb.PlanetEntity.GetDataBlob<SystemBodyInfoDB>();
+                var headerName = colonyInfoDb.PlanetEntity.GetDefaultName() + " Information";
 
+                if(ImGui.CollapsingHeader(headerName, ImGuiTreeNodeFlags.DefaultOpen))
+                {
                     ImGui.Columns(2);
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                     ImGui.Text("Name");

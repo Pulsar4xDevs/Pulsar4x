@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
         [Description("?")]
         Unknown,
 
-        [Description("Terrestrial")]
+        [Description("Terrestrial Planet")]
         Terrestrial,    // Like Earth/Mars/Venus/etc.
 
         [Description("Gas Giant")]

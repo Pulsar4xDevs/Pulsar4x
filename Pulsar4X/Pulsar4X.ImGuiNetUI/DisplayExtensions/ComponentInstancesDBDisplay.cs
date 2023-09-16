@@ -8,54 +8,73 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Display(this ComponentInstancesDB db, EntityState entityState, GlobalUIState uiState)
         {
-            ImGui.Columns(3);
-            ImGui.SetColumnWidth(0, 164);
-            ImGui.Text("Type");
-            ImGui.NextColumn();
-            ImGui.SetColumnWidth(1, 48);
-            ImGui.Text("#");
-            ImGui.NextColumn();
-            ImGui.SetColumnWidth(2, 100);
-            ImGui.Text("Status");
-            ImGui.NextColumn();
-            ImGui.Separator();
-
-            // FIXME: we should probably not do this every frame
-            var sortedData = db.ComponentsByDesign.OrderBy(entry => entry.Value.First().Name).ToDictionary(entry => entry.Key, entry => entry.Value);
-            foreach(var (designID, listPerDesign) in sortedData)
+            if(ImGui.BeginTable("InstallationTable", 3, Styles.TableFlags))
             {
-                if(listPerDesign.Count == 0) continue;
+                ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.25f);
+                ImGui.TableSetupColumn("Status", ImGuiTableColumnFlags.None, 1f);
+                ImGui.TableHeadersRow();
 
-                ImGui.Text(listPerDesign[0].Name);
-                ImGui.NextColumn();
-                ImGui.Text(listPerDesign.Count.ToString());
-                ImGui.NextColumn();
-
-                var onCount = listPerDesign.Where(x => x.IsEnabled).Count();
-                var offCount = listPerDesign.Where(x => !x.IsEnabled).Count();
-
-                if(onCount > 0 && offCount > 0)
+                // FIXME: we should probably not do this every frame
+                var sortedData = db.ComponentsByDesign.OrderBy(entry => entry.Value.First().Name).ToDictionary(entry => entry.Key, entry => entry.Value);
+                foreach(var (designID, listPerDesign) in sortedData)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
-                    ImGui.Text("Degraded");
-                    ImGui.PopStyleColor();
-                }
-                else if(onCount == 0)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
-                    ImGui.Text("Disabled");
-                    ImGui.PopStyleColor();
-                }
-                else
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
-                    ImGui.Text("Operational");
-                    ImGui.PopStyleColor();
-                }
+                    if(listPerDesign.Count == 0) continue;
 
-                ImGui.NextColumn();
+                    ImGui.TableNextColumn();
+                    ImGui.Text(listPerDesign[0].Name);
+                    if(ImGui.IsItemHovered())
+                    {
+                        ImGui.SetNextWindowSize(Styles.ToolTipsize);
+                        ImGui.BeginTooltip();
+                        ImGui.Text(listPerDesign[0].Name);
+                        if(listPerDesign[0].Design.TypeName.IsNotNullOrEmpty() && !listPerDesign[0].Design.TypeName.Equals(listPerDesign[0].Name))
+                        {
+                            var size = ImGui.GetContentRegionAvail();
+                            var textSize = ImGui.CalcTextSize(listPerDesign[0].Design.TypeName);
+                            ImGui.SameLine();
+                            ImGui.SetCursorPosX(size.X - textSize.X);
+                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                            ImGui.Text(listPerDesign[0].Design.TypeName);
+                            ImGui.PopStyleColor();
+                        }
+                        if(listPerDesign[0].Design.Description.IsNotNullOrEmpty())
+                        {
+                            ImGui.Separator();
+                            ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                            ImGui.TextWrapped(listPerDesign[0].Design.Description);
+                            ImGui.PopStyleColor();
+                        }
+                        ImGui.EndTooltip();
+                    }
+                    ImGui.TableNextColumn();
+                    ImGui.Text(listPerDesign.Count.ToString());
+                    ImGui.TableNextColumn();
+
+                    var onCount = listPerDesign.Where(x => x.IsEnabled).Count();
+                    var offCount = listPerDesign.Where(x => !x.IsEnabled).Count();
+
+                    if(onCount > 0 && offCount > 0)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
+                        ImGui.Text("Degraded");
+                        ImGui.PopStyleColor();
+                    }
+                    else if(onCount == 0)
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.BadColor);
+                        ImGui.Text("Disabled");
+                        ImGui.PopStyleColor();
+                    }
+                    else
+                    {
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.HighlightColor);
+                        ImGui.Text("Operational");
+                        ImGui.PopStyleColor();
+                    }
+                }
+                ImGui.EndTable();
             }
-            ImGui.Columns(1);
         }
     }
 }
