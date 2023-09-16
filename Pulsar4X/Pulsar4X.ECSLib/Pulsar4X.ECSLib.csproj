@@ -169,7 +169,6 @@
     <Folder Include="ComponentFeatureSets\SimpleBeamWeapon" />
     <Folder Include="DataBlobs\ComponentInstanceDBs\" />
     <Folder Include="Factories\ShipComponents\" />
-    <Folder Include="ComponentFeatureSets\NewtonionMovement\" />
     <Folder Include="Factories\SystemGen\SolEntities\Asteroids\" />
   </ItemGroup>
   <ItemGroup>

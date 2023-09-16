@@ -95,6 +95,10 @@ namespace Pulsar4X.ECSLib
         /// (should be the mass of the ship plus any cargo including fuel not usable by this ship).
         /// </summary>
         //public double DryMass_kg { get; internal set; } 
+        
+        /// <summary>
+        /// Amount of DeltaV the ship has availible. 
+        /// </summary>
         public double DeltaV { get; private set; } = 0;
 
         /// <summary>
