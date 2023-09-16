@@ -1,6 +1,7 @@
 using System.Linq;
 using ImGuiNET;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -33,19 +34,47 @@ namespace Pulsar4X.SDL2UI
                         {
                             ICargoable cargoType = cargoables[id];
                             var volumeStored = storage.GetVolumeStored(cargoType);
-                            var volumePerItem = cargoType.VolumePerUnit;
                             var massStored = storage.GetMassStored(cargoType);
                             var itemsStored = value;
 
                             ImGui.TableNextColumn();
                             if(ImGui.Selectable(cargoType.Name, false, ImGuiSelectableFlags.SpanAllColumns)) {}
+                            if(cargoType is MineralSD)
+                            {
+                                var mineralSD = (MineralSD)cargoType;
+                                DisplayHelpers.DescriptiveTooltip(cargoType.Name, "", mineralSD.Description);
+                            }
+                            else if(cargoType is ProcessedMaterialSD)
+                            {
+                                var processedMaterialSD = (ProcessedMaterialSD)cargoType;
+                                DisplayHelpers.DescriptiveTooltip(cargoType.Name, "", processedMaterialSD.Description);
+                            }
+                            else if(cargoType is ComponentInstance)
+                            {
+                                var componentInstance = (ComponentInstance)cargoType;
+                                DisplayHelpers.DescriptiveTooltip(cargoType.Name, componentInstance.Design.ComponentType, componentInstance.Design.Description);
+                            }
+                            else if(cargoType is ComponentDesign)
+                            {
+                                var componentDesign = (ComponentDesign)cargoType;
+                                DisplayHelpers.DescriptiveTooltip(componentDesign.Name, componentDesign.ComponentType, componentDesign.Description);
+                            }
+                            else if(cargoType is OrdnanceDesign)
+                            {
+                                var ordnanceDesign = (OrdnanceDesign)cargoType;
+                                var components = ordnanceDesign.Components.Select(tuple => tuple.design).ToArray();
+                                foreach(var component in components)
+                                {
+                                    DisplayHelpers.DescriptiveTooltip(component.Name, component.ComponentType, component.Description);
+                                }
+                            }
                             ImGui.TableNextColumn();
                             ImGui.Text(Stringify.Number(itemsStored, "#,###,###,###,##0"));
                             if(ImGui.IsItemHovered())
                             {
                                 ImGui.BeginTooltip();
                                 ImGui.Text("Mass: " + Stringify.Mass(massStored) + " (" + Stringify.Mass(cargoType.MassPerUnit) + " each)");
-                                ImGui.Text("Volume: " + Stringify.Volume(volumeStored) + " (" + Stringify.Volume(volumePerItem, "#.#####") + " each)");
+                                ImGui.Text("Volume: " + Stringify.Volume(volumeStored) + " (" + Stringify.Volume(cargoType.VolumePerUnit, "#.#####") + " each)");
                                 ImGui.EndTooltip();
                             }
                         }
