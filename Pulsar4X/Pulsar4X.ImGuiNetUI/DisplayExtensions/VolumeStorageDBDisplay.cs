@@ -10,7 +10,7 @@ namespace Pulsar4X.SDL2UI
         {
             foreach(var (sid, storageType) in storage.TypeStores)
             {
-                string header = uiState.Game.StaticData.CargoTypes[sid].Name;
+                string header = uiState.Game.StaticData.CargoTypes[sid].Name + " Storage";
                 string headerId = uiState.Game.StaticData.CargoTypes[sid].ID.ToString();
                 double freeVolume = storage.GetFreeVolume(sid);
                 double percent = ((storageType.MaxVolume - freeVolume) / storageType.MaxVolume) * 100;
@@ -19,46 +19,39 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushID(entityState.Entity.Guid.ToString());
                 if(ImGui.CollapsingHeader(header + "###" + headerId, flags))
                 {
-                    ImGui.Columns(4);
-                    ImGui.Text("Item");
-                    ImGui.NextColumn();
-                    ImGui.Text("Quantity");
-                    ImGui.NextColumn();
-                    ImGui.Text("Mass");
-                    ImGui.NextColumn();
-                    ImGui.Text("Volume");
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Max Volume: " + Stringify.Volume(storageType.MaxVolume) + "\nFree Volume: " + Stringify.Volume(freeVolume));
-                    ImGui.NextColumn();
-                    ImGui.Separator();
-
-                    var cargoables = storageType.GetCargoables();
-                    // Sort the display by the cargoables name
-                    var sortedUnitsByCargoablesName = storageType.CurrentStoreInUnits.OrderBy(e => cargoables[e.Key].Name);
-
-                    foreach(var (id, value) in sortedUnitsByCargoablesName)
+                    if(ImGui.BeginTable(header + "table", 2, Styles.TableFlags))
                     {
-                        ICargoable cargoType = cargoables[id];
-                        var volumeStored = storage.GetVolumeStored(cargoType);
-                        var volumePerItem = cargoType.VolumePerUnit;
-                        var massStored = storage.GetMassStored(cargoType);
-                        var itemsStored = value;
+                        ImGui.TableSetupColumn("Item");
+                        ImGui.TableSetupColumn("Quantity");
+                        ImGui.TableHeadersRow();
 
-                        if(ImGui.Selectable(cargoType.Name, false, ImGuiSelectableFlags.SpanAllColumns)) {}
-                        ImGui.NextColumn();
-                        ImGui.Text(Stringify.Number(itemsStored));
-                        ImGui.NextColumn();
-                        ImGui.Text(Stringify.Mass(massStored));
-                        if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip(Stringify.Mass(cargoType.MassPerUnit) + " per unit");
-                        ImGui.NextColumn();
-                        ImGui.Text(Stringify.Volume(volumeStored));
-                        if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip(Stringify.Volume(volumePerItem, "#.#####") + " per unit");
-                        ImGui.NextColumn();
-                        //ImGui.SetTooltip(ctype.ToDescription);
+                        var cargoables = storageType.GetCargoables();
+                        // Sort the display by the cargoables name
+                        var sortedUnitsByCargoablesName = storageType.CurrentStoreInUnits.OrderBy(e => cargoables[e.Key].Name);
+
+                        foreach(var (id, value) in sortedUnitsByCargoablesName)
+                        {
+                            ICargoable cargoType = cargoables[id];
+                            var volumeStored = storage.GetVolumeStored(cargoType);
+                            var volumePerItem = cargoType.VolumePerUnit;
+                            var massStored = storage.GetMassStored(cargoType);
+                            var itemsStored = value;
+
+                            ImGui.TableNextColumn();
+                            if(ImGui.Selectable(cargoType.Name, false, ImGuiSelectableFlags.SpanAllColumns)) {}
+                            ImGui.TableNextColumn();
+                            ImGui.Text(Stringify.Number(itemsStored, "#,###,###,###,##0"));
+                            if(ImGui.IsItemHovered())
+                            {
+                                ImGui.BeginTooltip();
+                                ImGui.Text("Mass: " + Stringify.Mass(massStored) + " (" + Stringify.Mass(cargoType.MassPerUnit) + " each)");
+                                ImGui.Text("Volume: " + Stringify.Volume(volumeStored) + " (" + Stringify.Volume(volumePerItem, "#.#####") + " each)");
+                                ImGui.EndTooltip();
+                            }
+                        }
+
+                        ImGui.EndTable();
                     }
-                    ImGui.Columns(1);
                 }
                 ImGui.PopID();
             }

@@ -104,5 +104,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndTooltip();
             }
         }
+
+        public static void Indent()
+        {
+            ImGui.InvisibleButton("", Styles.Indent);
+            ImGui.SameLine();
+        }
     }
 }
