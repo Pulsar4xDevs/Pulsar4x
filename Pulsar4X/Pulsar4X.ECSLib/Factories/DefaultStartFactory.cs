@@ -679,9 +679,10 @@ namespace Pulsar4X.ECSLib
 
             ComponentDesigner engineDesigner;
 
-            ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("B03FE82F-EE70-4A9A-AC61-5A7D44A3364E")];
+            ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("b12f50f6-ac68-4a49-b147-281a9bb34b9b")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1500);
+            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(15);
+            engineDesigner.ComponentDesignAttributes["Fuel Type"].SetValueFromGuid(Guid.Parse("55FA0D2E-0BC7-44F5-A292-B593F2248C3B"));
             engineDesigner.Name = "Raptor-Vac";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 
@@ -696,9 +697,10 @@ namespace Pulsar4X.ECSLib
             if (_rs25 != null)
                 return _rs25;
             ComponentDesigner engineDesigner;
-            ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("A0F3E5BB-0AA6-41D0-9873-5A7AC9080B69")];
+            ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("b12f50f6-ac68-4a49-b147-281a9bb34b9b")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(3527);
+            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(10);
+            engineDesigner.ComponentDesignAttributes["Fuel Type"].SetValueFromGuid(Guid.Parse("A2AAF059-ED97-409D-883E-88DE918F6985"));
             engineDesigner.Name = "RS-25";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 
