@@ -5,7 +5,7 @@
       {
         "Key": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
         "Value": {
-          "Name": "RP1 Rocket Engine",
+          "Name": "Conventional Rocket Engine",
           "DescriptionFormula": "A Newtonian Thruster",
           "ComponentType": "Engine",
           "ID": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
@@ -43,7 +43,14 @@
               "Units": "m/s",
               "DescriptionFormula": "'Specific Impulse in m/s, can be increased by research'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "3000 + TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
+              "AttributeFormula": "ProcessedMaterialLookup(Ability('Fuel Type')) + TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
+            },
+            {
+              "Name": "Thrust",
+              "Units": "N",
+              "DescriptionFormula": "'The maximum thrust output of this engine'",
+              "GuiHint": "GuiTextDisplay",
+              "AttributeFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
             },
             {
               "Name": "Fuel Type",
@@ -57,7 +64,7 @@
                   }
                 ]
               },
-              "AttributeFormula": "[GuidDict]"
+              "AttributeFormula": "GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a')"
             },
             {
               "Name": "Fuel Consumption",
@@ -67,17 +74,10 @@
               "AttributeFormula": "Ability('Mass') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
             },
             {
-              "Name": "Thrust",
-              "Units": "N",
-              "DescriptionFormula": "'The maximum thrust output of this engine'",
-              "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Exhaust Velocity') * Ability('Fuel Consumption')"
-            },
-            {
               "Name": "DataBlob",
               "DescriptionFormula": "''",
               "GuiHint": "None",
-              "AttributeFormula": "AtbConstrArgs(Ability('Exhaust Velocity'), GuidString('8a4a3569-df2e-4090-9752-50ff137cef6a'), Ability('Fuel Consumption'))",
+              "AttributeFormula": "AtbConstrArgs(Ability('Exhaust Velocity'), Ability('Fuel Type'), Ability('Fuel Consumption'))",
               "AttributeType": "Pulsar4X.ECSLib.NewtonionThrustAtb"
             },
 

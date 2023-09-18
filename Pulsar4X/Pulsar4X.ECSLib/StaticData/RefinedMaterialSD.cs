@@ -51,5 +51,7 @@ namespace Pulsar4X.ECSLib
         public Guid CargoTypeID { get; init; }
         public long MassPerUnit { get; init; }
         public double VolumePerUnit { get; init; }
+
+        public string ExhaustVelocityFormula { get; init; }
     }
 }

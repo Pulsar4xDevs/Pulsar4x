@@ -360,6 +360,10 @@ namespace Pulsar4X.ECSLib
                     args.Result = _factionTechDB.ResearchedTechs[techGuid];
                 else args.Result = 0;
             }
+            if (name.Equals("FuelData"))
+            {
+                Guid fuelGuid = Guid.Parse((string)args.EvaluateParameters()[0]);
+            }
             //currently not used, but an future experiment to pass the CargoTypeSD as a parameter
             if (name == "CargoType")
             {
@@ -394,7 +398,12 @@ namespace Pulsar4X.ECSLib
                 args.Result = argList;
             }
 
-
+            if(name == "ProcessedMaterialLookup"))
+            {
+                var cargo = (ProcessedMaterialSD)_staticDataStore.CargoGoods.GetAny((Guid)args.EvaluateParameters()[0]);
+                Expression dataExpression = new Expression(cargo.ExhaustVelocityFormula);
+                args.Result = dataExpression.Evaluate();
+            }
         }
     }
 }

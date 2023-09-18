@@ -165,6 +165,13 @@ namespace Pulsar4X.ECSLib
             ParentComponent.SetAttributes();
         }
 
+        public void SetValueFromGuid(Guid id)
+        {
+            Formula.ReplaceExpression("GuidString('" + id.ToString() + "')");
+            Formula.Evaluate();
+            ParentComponent.SetAttributes();
+        }
+
         internal ChainedExpression Formula { get; set; }
         public void SetValue()
         {
@@ -187,6 +194,8 @@ namespace Pulsar4X.ECSLib
         }
 
         public double Value { get { return Formula.DResult; } }
+        public string ValueString {get { return Formula.StrResult; } }
+        public Guid ValueGuid { get { return Formula.GuidResult; } }
 
         public double MinValue;
         internal ChainedExpression MinValueFormula { get; set; }
@@ -376,6 +385,31 @@ namespace Pulsar4X.ECSLib
                             throw new Exception("Unexpected Result data Type " + Result.GetType() + " could not be cast to a string");
                         }
 
+                }
+            }
+        }
+
+        internal Guid GuidResult
+        {
+            get
+            {
+                if(Result is null) Evaluate();
+
+                if(Result is null)
+                {
+                    throw new Exception("Result is null");
+                }
+                else if(Result is Guid)
+                {
+                    return (Guid)Result;
+                }
+                else if(Result is string)
+                {
+                    return Guid.Parse(Result.ToString());
+                }
+                else
+                {
+                    throw new Exception("Unexpected Result data Type " + Result.GetType() + " could not be cast to a string");
                 }
             }
         }
@@ -777,6 +811,11 @@ namespace Pulsar4X.ECSLib
 
                     _designAttribute.AtbConstrArgs = argList.ToArray();
                     args.Result = argList;
+                    break;
+                case "ProcessedMaterialLookup":
+                    var cargo = (ProcessedMaterialSD)_staticDataStore.CargoGoods.GetAny((Guid)args.EvaluateParameters()[0]);
+                    Expression dataExpression = new Expression(cargo.ExhaustVelocityFormula);
+                    args.Result = dataExpression.Evaluate();
                     break;
             }
         }

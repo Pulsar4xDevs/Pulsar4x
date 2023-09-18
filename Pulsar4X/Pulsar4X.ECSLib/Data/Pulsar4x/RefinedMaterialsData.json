@@ -54,7 +54,8 @@
           "IndustryPointCosts": 10,
           "IndustryTypeID": "265B36EE-BAED-4F92-9AEC-BC8A7EA0DF1F",
           "WealthCost": 3,
-          "OutputAmount": 2
+          "OutputAmount": 2,
+          "ExhaustVelocityFormula": "2941"
         }
       },
       {
@@ -77,7 +78,8 @@
           "IndustryPointCosts": 10,
           "IndustryTypeID": "265B36EE-BAED-4F92-9AEC-BC8A7EA0DF1F",
           "WealthCost": 3,
-          "OutputAmount": 2
+          "OutputAmount": 2,
+          "ExhaustVelocityFormula": "3034"
         }
       },
       {
@@ -100,7 +102,8 @@
           "IndustryPointCosts": 10,
           "IndustryTypeID": "265B36EE-BAED-4F92-9AEC-BC8A7EA0DF1F",
           "WealthCost": 3,
-          "OutputAmount": 2
+          "OutputAmount": 2,
+          "ExhaustVelocityFormula": "3816"
         }
       },
       {
@@ -146,7 +149,8 @@
           "IndustryPointCosts": 10,
           "IndustryTypeID": "265B36EE-BAED-4F92-9AEC-BC8A7EA0DF1F",
           "WealthCost": 100,
-          "OutputAmount": 1
+          "OutputAmount": 1,
+          "ExhaustVelocityFormula": "291"
         }
       },
       {
@@ -193,10 +197,10 @@
           "IndustryPointCosts": 10,
           "IndustryTypeID": "265B36EE-BAED-4F92-9AEC-BC8A7EA0DF1F",
           "WealthCost": 0,
-          "OutputAmount": 1
+          "OutputAmount": 1,
+          "ExhaustVelocityFormula": "3997"
         }
       },
-      
       {
         "Key": "6da93677-ee08-4853-a8a5-0f46d93fe0eb",
         "Value": {

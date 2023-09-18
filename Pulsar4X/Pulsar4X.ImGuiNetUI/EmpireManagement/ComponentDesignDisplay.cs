@@ -342,6 +342,16 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.Text(attribute.Value.ToString());
                             }
                         }
+                        else if(attribute.IsEnabled && attribute.GuiHint == GuiHint.GuiCargoTypeSelection)
+                        {
+                            var cargo = uiState.Game.StaticData.CargoGoods.GetAny(attribute.ValueGuid);
+                            ImGui.TableNextColumn();
+                            ImGui.Text("");
+                            ImGui.SameLine();
+                            ImGui.Text("Fuel Type");
+                            ImGui.TableNextColumn();
+                            ImGui.Text(cargo.Name);
+                        }
                     }
                     ImGui.EndTable();
                 }
@@ -641,6 +651,7 @@ namespace Pulsar4X.SDL2UI
         private void GuiHintCargoTypeSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
         {
             var cargoTypesToDisplay = new Dictionary<Guid, ICargoable>();
+            var keys = new List<Guid>();
             var names = new List<string>();
 
             foreach(var cargoType in attribute.GuidDictionary.Keys)
@@ -650,6 +661,7 @@ namespace Pulsar4X.SDL2UI
                 foreach(var cargo in cargos)
                 {
                     cargoTypesToDisplay.Add(cargo.Key, cargo.Value);
+                    keys.Add(cargo.Key);
                     names.Add(cargo.Value.Name);
                 }
             }
@@ -661,7 +673,10 @@ namespace Pulsar4X.SDL2UI
             ImGui.TextWrapped(attribute.Description);
             ImGui.NewLine();
 
-            ImGui.Combo("###cargotypeselection", ref attribute.ListSelection, arrayNames, arrayNames.Length);
+            if(ImGui.Combo("###cargotypeselection", ref attribute.ListSelection, arrayNames, arrayNames.Length))
+            {
+                attribute.SetValueFromGuid(cargoTypesToDisplay[keys[attribute.ListSelection]].ID);
+            }
         }
 
         private void GuiHintTextSelectionFormula(ComponentDesignAttribute attribute)

@@ -128,7 +128,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInPackage>false</IncludeInPackage>
     </None>
-    <None Update="Data\Pulsar4x\ReinfedMaterialsData.json">
+    <None Update="Data\Pulsar4x\RefinedMaterialsData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Data\Pulsar4x\SystemGenSettings.json">
