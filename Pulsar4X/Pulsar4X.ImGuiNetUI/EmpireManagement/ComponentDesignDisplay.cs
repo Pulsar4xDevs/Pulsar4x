@@ -32,7 +32,6 @@ namespace Pulsar4X.SDL2UI
         private string[] _designTypes;
         private ComponentTemplateSD[] _designables;
         private static byte[] _nameInputBuffer = new byte[128];
-        public static bool compactmod = false;
         private static TechSD[] _techSDs;
         private static string[] _techNames;
         private static int _techSelectedIndex = -1;
@@ -439,35 +438,12 @@ namespace Pulsar4X.SDL2UI
 
             }
 
-
-            if (compactmod)
-            {
-                ImGui.TextWrapped(attribute.Name + ": " + displayStr);
-                ImGui.NewLine();
-            }
-            else
-            {
-                ImGui.TextWrapped(attribute.Name + ":");
-                ImGui.SameLine();
-                ImGui.TextWrapped(displayStr);
-                ImGui.NewLine();
-            }
+            Title(attribute.Name, displayStr);
         }
 
         private void GuiHintMaxMin(ComponentDesignAttribute attribute)
         {
-            if (compactmod)
-            {
-                ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
-                ImGui.NewLine();
-            }
-            else
-            {
-                ImGui.TextWrapped(attribute.Name + ":");
-                ImGui.SameLine();
-                ImGui.TextWrapped(attribute.Description);
-                ImGui.NewLine();
-            }
+            Title(attribute.Name, attribute.Description);
 
             attribute.SetMax();
             attribute.SetMin();
@@ -493,22 +469,14 @@ namespace Pulsar4X.SDL2UI
                 stepPtr = new IntPtr(&step);
                 fstepPtr = new IntPtr(&fstep);
             }
-            //ImGui.DragScalar("##slider" + attribute.Name, ImGuiDataType.Double, valPtr, 1f, minPtr, maxPtr);
 
-
-            if (compactmod)
+            var sizeAvailable = ImGui.GetContentRegionAvail();
+            ImGui.SetNextItemWidth(sizeAvailable.X);
+            if (ImGui.SliderScalar("##scaler" + attribute.Name, ImGuiDataType.Double, valPtr, minPtr, maxPtr))
             {
+                attribute.SetValueFromInput(val);
             }
-            else
-            {
-                //ImGui.PushItemWidth(-1);
-                if (ImGui.SliderScalar("##scaler" + attribute.Name, ImGuiDataType.Double, valPtr, minPtr, maxPtr))
-                {
-                    attribute.SetValueFromInput(val);
-                }
-            }
-
-            //ImGui.PushItemWidth(-1);
+            ImGui.SetNextItemWidth(sizeAvailable.X);
             if (ImGui.InputScalar("##input" + attribute.Name, ImGuiDataType.Double, valPtr, stepPtr, fstepPtr))
                 attribute.SetValueFromInput(val);
             ImGui.NewLine();
@@ -516,10 +484,7 @@ namespace Pulsar4X.SDL2UI
 
         private void GuiHintMaxMinInt(ComponentDesignAttribute attribute)
         {
-            ImGui.TextWrapped(attribute.Name + ":");
-            ImGui.SameLine();
-            ImGui.TextWrapped(attribute.Description);
-            ImGui.NewLine();
+            Title(attribute.Name, attribute.Description);
 
             attribute.SetMax();
             attribute.SetMin();
@@ -532,11 +497,14 @@ namespace Pulsar4X.SDL2UI
             double step = attribute.StepValue;
             double fstep = step * 10;
 
+            var sizeAvailable = ImGui.GetContentRegionAvail();
+            ImGui.SetNextItemWidth(sizeAvailable.X);
             if(ImGui.SliderInt("##scaler" + attribute.Name, ref val, (int)min, (int)max))
             {
                 attribute.SetValueFromInput(val);
             }
 
+            ImGui.SetNextItemWidth(sizeAvailable.X);
             if(ImGui.InputInt("##input" + attribute.Name, ref val, (int)step, (int)fstep))
             {
                 attribute.SetValueFromInput(val);
@@ -546,18 +514,7 @@ namespace Pulsar4X.SDL2UI
 
         private void GuiHintTechSelection(ComponentDesignAttribute attribute)
         {
-            if (compactmod)
-            {
-                ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
-                ImGui.NewLine();
-            }
-            else
-            {
-                ImGui.TextWrapped(attribute.Name + ":");
-                ImGui.SameLine();
-                ImGui.TextWrapped(attribute.Description);
-                ImGui.NewLine();
-            }
+            Title(attribute.Name, attribute.Description);
 
             int i = 0;
             _techSDs = new TechSD[attribute.GuidDictionary.Count];
@@ -572,8 +529,6 @@ namespace Pulsar4X.SDL2UI
 
             ImGui.TextWrapped(attribute.Value.ToString());
 
-
-
             if (ImGui.Combo("Select Tech", ref _techSelectedIndex, _techNames, _techNames.Length))
             {
                 attribute.SetValueFromGuidList(_techSDs[_techSelectedIndex].ID);
@@ -584,26 +539,14 @@ namespace Pulsar4X.SDL2UI
 
         private void GuiHintEnumSelection(ComponentDesignAttribute attribute)
         {
-            if (compactmod)
-            {
-                ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
-                ImGui.NewLine();
-            }
-            else
-            {
-                ImGui.TextWrapped(attribute.Name + ":");
-                ImGui.SameLine();
-                ImGui.TextWrapped(attribute.Description);
-                ImGui.NewLine();
-            }
-
-            //_techSDs = new TechSD[attribute.GuidDictionary.Count];
             _listNames = Enum.GetNames(attribute.EnumType);
 
+            Title(attribute.Name, attribute.Description);
 
-            //ImGui.TextWrapped(attribute.Value.ToString());
             int listCount = Math.Min((int)attribute.MaxValue, _listNames.Length);
-            if (ImGui.Combo("Select", ref attribute.ListSelection, _listNames, listCount))
+            var sizeAvailable = ImGui.GetContentRegionAvail();
+            ImGui.SetNextItemWidth(sizeAvailable.X);
+            if (ImGui.Combo("###Select", ref attribute.ListSelection, _listNames, listCount))
             {
                 int enumVal = (int)Enum.Parse(attribute.EnumType, _listNames[attribute.ListSelection]);
                 attribute.SetValueFromInput(enumVal);
@@ -624,25 +567,13 @@ namespace Pulsar4X.SDL2UI
                 ordnances[i] = kvp.Value;
             }
 
-
-
-            if (compactmod)
-            {
-                ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
-                ImGui.NewLine();
-            }
-            else
-            {
-                ImGui.TextWrapped(attribute.Name + ":");
-                ImGui.SameLine();
-                ImGui.TextWrapped(attribute.Description);
-                ImGui.NewLine();
-            }
-
+            Title(attribute.Name, attribute.Description);
 
             ImGui.TextWrapped(attribute.Value.ToString());
 
-            if (ImGui.Combo("Select", ref attribute.ListSelection, _listNames, _listNames.Length))
+            var sizeAvailable = ImGui.GetContentRegionAvail();
+            ImGui.SetNextItemWidth(sizeAvailable.X);
+            if (ImGui.Combo("###Select", ref attribute.ListSelection, _listNames, _listNames.Length))
             {
                 attribute.SetValueFromComponentList(ordnances[attribute.ListSelection].ID);
             }
@@ -673,11 +604,10 @@ namespace Pulsar4X.SDL2UI
 
             string[] arrayNames = names.ToArray();
 
-            ImGui.TextWrapped(attribute.Name + ":");
-            ImGui.SameLine();
-            ImGui.TextWrapped(attribute.Description);
-            ImGui.NewLine();
+            Title(attribute.Name, attribute.Description);
 
+            var sizeAvailable = ImGui.GetContentRegionAvail();
+            ImGui.SetNextItemWidth(sizeAvailable.X);
             if(ImGui.Combo("###cargotypeselection", ref attribute.ListSelection, arrayNames, arrayNames.Length))
             {
                 attribute.SetValueFromGuid(cargoTypesToDisplay[keys[attribute.ListSelection]].ID);
@@ -695,22 +625,13 @@ namespace Pulsar4X.SDL2UI
                 i++;
             }
 
-            if (compactmod)
-            {
-                ImGui.TextWrapped(attribute.Name + ": " + attribute.Description);
-                ImGui.NewLine();
-            }
-            else
-            {
-                ImGui.TextWrapped(attribute.Name + ":");
-                ImGui.SameLine();
-                ImGui.TextWrapped(attribute.Description);
-                ImGui.NewLine();
-            }
+            Title(attribute.Name, attribute.Description);
 
             ImGui.TextWrapped(attribute.Value.ToString());
 
-            if (ImGui.Combo("Select", ref attribute.ListSelection, _listNames, _listNames.Length))
+            var sizeAvailable = ImGui.GetContentRegionAvail();
+            ImGui.SetNextItemWidth(sizeAvailable.X);
+            if (ImGui.Combo("###Select", ref attribute.ListSelection, _listNames, _listNames.Length))
             {
                 var key = _listNames[attribute.ListSelection];
                 var value = attribute.GuidDictionary[key];
@@ -744,6 +665,18 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(message);
                 ImGui.EndChild();
             }
+        }
+
+        private void Title(string title, string tooltip)
+        {
+            ImGui.Text(title);
+
+            if(tooltip.IsNullOrEmpty()) return;
+
+            ImGui.SameLine();
+            ImGui.Text("[?]");
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip(tooltip);
         }
     }
 }
