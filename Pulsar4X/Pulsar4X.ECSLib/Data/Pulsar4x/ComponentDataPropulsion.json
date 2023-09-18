@@ -9,8 +9,8 @@
           "DescriptionFormula": "A Newtonian Thruster",
           "ComponentType": "Engine",
           "ID": "b12f50f6-ac68-4a49-b147-281a9bb34b9b",
-          "MassFormula": "Ability('Mass')",
-          "VolumeFormula": "Max(1, Ability('Mass') / 150)",
+          "MassFormula": "Ability('Size') * 50",
+          "VolumeFormula": "Max(1, [Mass] / 150)",
           "HTKFormula": "Max(1, [Mass] / 100)",
           "CrewReqFormula": "0",
           "ResourceCostFormula": {
@@ -29,14 +29,13 @@
           "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
           "ComponentAtbSDs": [
             {
-              "Name": "Mass",
-              "Units": "kg",
-              "DescriptionFormula": "'Mass of this engine'",
-              "GuiHint": "GuiSelectionMaxMin",
+              "Name": "Size",
+              "DescriptionFormula": "'The size of the engine'",
+              "GuiHint": "GuiSelectionMaxMinInt",
               "MaxFormula": "TechData('b056576a-124e-41c5-afcd-27d1f0bf6f4e')",
-              "MinFormula": "1",
+              "MinFormula": "TechData('9019f08e-747e-4318-95f0-775c1b31cd08')",
               "StepFormula": "1",
-              "AttributeFormula": "500"
+              "AttributeFormula": "20"
             },
             {
               "Name": "Exhaust Velocity",
@@ -71,7 +70,7 @@
               "Units": "kg/s",
               "DescriptionFormula": "'Fuel Consumption per second'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "Ability('Mass') * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
+              "AttributeFormula": "[Mass] * 0.3 * TechData('8557acb9-c764-44e7-8ee4-db2c2cebf0bc')"
             },
             {
               "Name": "DataBlob",

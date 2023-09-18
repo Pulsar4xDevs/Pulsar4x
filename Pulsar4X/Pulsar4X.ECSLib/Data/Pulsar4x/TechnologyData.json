@@ -155,11 +155,26 @@
       {
         "Key": "b056576a-124e-41c5-afcd-27d1f0bf6f4e",
         "Value": {
-          "Name": "LOX / Hydrocarbon Maximum Size",
+          "Name": "Rocket Engine Maximum Size",
           "Description": "Research into better cooling allows larger engine sizes",
           "ID": "b056576a-124e-41c5-afcd-27d1f0bf6f4e",
           "MaxLevel": 10,
-          "DataFormula": "8000 + [Level] * 250",
+          "DataFormula": "50 + [Level] * 5",
+          "Category": "PowerAndPropulsion",
+          "Requirements": {
+            "List": []
+          },
+          "CostFormula": "(1 + [Level]) * 500"
+        }
+      },
+      {
+        "Key": "9019f08e-747e-4318-95f0-775c1b31cd08",
+        "Value": {
+          "Name": "Rocket Engine Minimum Size",
+          "Description": "Research into miniaturization allows smaller engine sizes",
+          "ID": "9019f08e-747e-4318-95f0-775c1b31cd08",
+          "MaxLevel": 9,
+          "DataFormula": "10 - [Level]",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []
@@ -170,11 +185,11 @@
       {
         "Key": "fa2736ed-d0bf-44a5-bc00-d25d3adaa23c",
         "Value": {
-          "Name": "LOX / Hydrocarbon Exhaust Velocity",
+          "Name": "Rocket Engine Exhaust Velocity",
           "Description": "Research into higher exhaust velocities for engines, making them more efficient",
           "ID": "fa2736ed-d0bf-44a5-bc00-d25d3adaa23c",
           "MaxLevel": 10,
-          "DataFormula": "1 + [Level] * 100",
+          "DataFormula": "[Level] * 100",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []
@@ -185,11 +200,11 @@
       {
         "Key": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
         "Value": {
-          "Name": "LOX / Hydrocarbon Fuel Consumption",
-          "Description": "Research into better plumbing and pump layouts allows higher fuel consumption for a given size ",
+          "Name": "Rocket Engine Fuel Consumption",
+          "Description": "Research into better plumbing and pump layouts allows better fuel efficiency",
           "ID": "8557acb9-c764-44e7-8ee4-db2c2cebf0bc",
-          "MaxLevel": 12,
-          "DataFormula": "1 + [Level] * 0.01",
+          "MaxLevel": 20,
+          "DataFormula": "1 - [Level] * 0.01",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []

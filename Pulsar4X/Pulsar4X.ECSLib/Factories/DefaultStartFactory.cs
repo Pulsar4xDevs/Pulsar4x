@@ -637,7 +637,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("b12f50f6-ac68-4a49-b147-281a9bb34b9b")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(630);
+            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(30);
             engineDesigner.Name = "Merlin";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 
@@ -656,7 +656,7 @@ namespace Pulsar4X.ECSLib
 
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("b12f50f6-ac68-4a49-b147-281a9bb34b9b")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(18500);
+            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(50);
             engineDesigner.Name = "F1";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 
