@@ -35,7 +35,7 @@
               "MaxFormula": "TechData('b056576a-124e-41c5-afcd-27d1f0bf6f4e')",
               "MinFormula": "TechData('9019f08e-747e-4318-95f0-775c1b31cd08')",
               "StepFormula": "1",
-              "AttributeFormula": "20"
+              "AttributeFormula": "150"
             },
             {
               "Name": "Exhaust Velocity",

@@ -699,7 +699,7 @@ namespace Pulsar4X.ECSLib
             ComponentDesigner engineDesigner;
             ComponentTemplateSD engineSD = game.StaticData.ComponentTemplates[new Guid("b12f50f6-ac68-4a49-b147-281a9bb34b9b")];
             engineDesigner = new ComponentDesigner(engineSD, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(10);
+            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(100);
             engineDesigner.ComponentDesignAttributes["Fuel Type"].SetValueFromGuid(Guid.Parse("A2AAF059-ED97-409D-883E-88DE918F6985"));
             engineDesigner.Name = "RS-25";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput

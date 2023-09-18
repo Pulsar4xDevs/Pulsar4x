@@ -158,8 +158,8 @@
           "Name": "Rocket Engine Maximum Size",
           "Description": "Research into better cooling allows larger engine sizes",
           "ID": "b056576a-124e-41c5-afcd-27d1f0bf6f4e",
-          "MaxLevel": 10,
-          "DataFormula": "50 + [Level] * 5",
+          "MaxLevel": 20,
+          "DataFormula": "250 + [Level] * 25",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []
@@ -173,8 +173,8 @@
           "Name": "Rocket Engine Minimum Size",
           "Description": "Research into miniaturization allows smaller engine sizes",
           "ID": "9019f08e-747e-4318-95f0-775c1b31cd08",
-          "MaxLevel": 9,
-          "DataFormula": "10 - [Level]",
+          "MaxLevel": 20,
+          "DataFormula": "Max(1, 100 - [Level] * 5)",
           "Category": "PowerAndPropulsion",
           "Requirements": {
             "List": []
