@@ -812,7 +812,7 @@ namespace Pulsar4X.ECSLib
                     _designAttribute.AtbConstrArgs = argList.ToArray();
                     args.Result = argList;
                     break;
-                case "ProcessedMaterialLookup":
+                case "ExhaustVelocityLookup":
                     var cargo = (ProcessedMaterialSD)_staticDataStore.CargoGoods.GetAny((Guid)args.EvaluateParameters()[0]);
                     Expression dataExpression = new Expression(cargo.ExhaustVelocityFormula);
                     args.Result = dataExpression.Evaluate();

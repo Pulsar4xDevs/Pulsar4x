@@ -42,7 +42,7 @@
               "Units": "m/s",
               "DescriptionFormula": "'Specific Impulse in m/s, can be increased by research'",
               "GuiHint": "GuiTextDisplay",
-              "AttributeFormula": "ProcessedMaterialLookup(Ability('Fuel Type')) + TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
+              "AttributeFormula": "ExhaustVelocityLookup(Ability('Fuel Type')) + TechData('fa2736ed-d0bf-44a5-bc00-d25d3adaa23c')"
             },
             {
               "Name": "Thrust",
@@ -54,7 +54,7 @@
             {
               "Name": "Fuel Type",
               "DescriptionFormula": "'The type of fuel the engine burns'",
-              "GuiHint": "GuiCargoTypeSelection",
+              "GuiHint": "GuiFuelTypeSelection",
               "GuidDictionary": {
                 "Entries": [
                   {

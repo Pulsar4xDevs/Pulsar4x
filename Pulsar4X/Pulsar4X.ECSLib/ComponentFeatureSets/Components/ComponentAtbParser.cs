@@ -398,7 +398,7 @@ namespace Pulsar4X.ECSLib
                 args.Result = argList;
             }
 
-            if(name == "ProcessedMaterialLookup"))
+            if(name == "ExhaustVelocityLookup"))
             {
                 var cargo = (ProcessedMaterialSD)_staticDataStore.CargoGoods.GetAny((Guid)args.EvaluateParameters()[0]);
                 Expression dataExpression = new Expression(cargo.ExhaustVelocityFormula);

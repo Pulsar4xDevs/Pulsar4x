@@ -182,8 +182,8 @@ namespace Pulsar4X.SDL2UI
                             case GuiHint.GuiTextSelectionFormula:
                                 GuiHintTextSelectionFormula(attribute);
                                 break;
-                            case GuiHint.GuiCargoTypeSelection:
-                                GuiHintCargoTypeSelection(attribute, uiState);
+                            case GuiHint.GuiFuelTypeSelection:
+                                GuiHintFuelTypeSelection(attribute, uiState);
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
@@ -228,7 +228,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.TableNextColumn();
                         ImGui.Text("");
                         ImGui.SameLine();
-                        ImGui.Text("Installs On");
+                        ImGui.Text("Installs On or In");
                         ImGui.TableNextColumn();
                         for(int i = 0; i < activeMountTypes.Count; i++)
                         {
@@ -342,15 +342,17 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.Text(attribute.Value.ToString());
                             }
                         }
-                        else if(attribute.IsEnabled && attribute.GuiHint == GuiHint.GuiCargoTypeSelection)
+                        else if(attribute.IsEnabled && attribute.GuiHint == GuiHint.GuiFuelTypeSelection)
                         {
-                            var cargo = uiState.Game.StaticData.CargoGoods.GetAny(attribute.ValueGuid);
+                            var cargo = (ProcessedMaterialSD)uiState.Game.StaticData.CargoGoods.GetAny(attribute.ValueGuid);
                             ImGui.TableNextColumn();
                             ImGui.Text("");
                             ImGui.SameLine();
                             ImGui.Text("Fuel Type");
                             ImGui.TableNextColumn();
                             ImGui.Text(cargo.Name);
+                            if(ImGui.IsItemHovered())
+                                ImGui.SetTooltip(cargo.Description);
                         }
                     }
                     ImGui.EndTable();
@@ -648,7 +650,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.NewLine();
         }
 
-        private void GuiHintCargoTypeSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
+        private void GuiHintFuelTypeSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
         {
             var cargoTypesToDisplay = new Dictionary<Guid, ICargoable>();
             var keys = new List<Guid>();
@@ -660,9 +662,12 @@ namespace Pulsar4X.SDL2UI
                 var cargos = uiState.Game.StaticData.CargoGoods.GetAll().Where(c => c.Value.CargoTypeID == cargoTypeID);
                 foreach(var cargo in cargos)
                 {
-                    cargoTypesToDisplay.Add(cargo.Key, cargo.Value);
-                    keys.Add(cargo.Key);
-                    names.Add(cargo.Value.Name);
+                    if(cargo.Value is ProcessedMaterialSD && ((ProcessedMaterialSD)cargo.Value).ExhaustVelocityFormula.IsNotNullOrEmpty())
+                    {
+                        cargoTypesToDisplay.Add(cargo.Key, cargo.Value);
+                        keys.Add(cargo.Key);
+                        names.Add(cargo.Value.Name);
+                    }
                 }
             }
 

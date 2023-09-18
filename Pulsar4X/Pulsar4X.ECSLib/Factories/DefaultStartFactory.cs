@@ -296,7 +296,7 @@ namespace Pulsar4X.ECSLib
             Entity courier2 = ShipFactory.CreateShip(pexDesign, factionEntity, earth, 0, "PE2");
             Entity starship = ShipFactory.CreateShip(SpaceXStarShip(game, factionEntity), factionEntity, earth,  "Starship");
             var fuel = NameLookup.GetMaterialSD(game, "Sorium Fuel");
-            var rp1 = NameLookup.GetMaterialSD(game, "LOX/Hydrocarbon");
+            var rp1 = NameLookup.GetMaterialSD(game, "RP-1");
             var methalox = NameLookup.GetMaterialSD(game, "Methalox");
             var hydrolox = NameLookup.GetMaterialSD(game, "Hydrolox");
 
