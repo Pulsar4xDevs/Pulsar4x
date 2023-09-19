@@ -1,9 +1,10 @@
 ﻿using System;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.ECSLib
 {
     [StaticData(true, IDPropertyName = "ID")]
-    public struct CargoTypeSD
+    public class CargoTypeSD : SerializableGameData
     {
         public string Name;
         public string Description;

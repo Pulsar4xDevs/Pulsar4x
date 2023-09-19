@@ -7,6 +7,7 @@ using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
 using SDL2;
 using Microsoft.Extensions.Configuration;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -66,6 +67,11 @@ namespace Pulsar4X.SDL2UI
                 if(isMaximized)
                     SDL.SDL_MaximizeWindow(_Handle);
             }
+
+            ModLoader modLoader = new ModLoader();
+            ModDataStore modDataStore = new ModDataStore();
+            modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+            modLoader.LoadModManifest("Data/testingmod/modInfo.json", modDataStore);
         }
 
         private bool MyEventHandler(SDL2Window window, SDL.SDL_Event e)
