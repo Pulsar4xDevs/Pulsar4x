@@ -27,8 +27,7 @@ namespace Pulsar4X.SDL2UI
 
         private NoTemplateState NoTemplateState = NoTemplateState.PleaseSelect;
         private ComponentDesigner _componentDesigner;
-        [CanBeNull]
-        public ComponentTemplateSD? Template { get; private set;}
+        public ComponentTemplateSD Template { get; private set;}
         private string[] _designTypes;
         private ComponentTemplateSD[] _designables;
         private static byte[] _nameInputBuffer = new byte[128];
@@ -66,14 +65,14 @@ namespace Pulsar4X.SDL2UI
                 _designTypes[i] = _designables[i].Name;
             }
 
-            _componentDesigner = new ComponentDesigner(Template.Value, factionTech);
+            _componentDesigner = new ComponentDesigner(Template, factionTech);
 
             NoTemplateState = NoTemplateState.Created;
         }
 
         internal void Display(GlobalUIState uiState)
         {
-            if(!Template.HasValue)
+            if(Template != null)
             {
                 switch (NoTemplateState)
                 {
@@ -127,7 +126,7 @@ namespace Pulsar4X.SDL2UI
                         _componentDesigner.CreateDesign(uiState.Faction);
                         //we reset the designer here, so we don't end up trying to edit the precious design.
                         var factionTech = uiState.Faction.GetDataBlob<FactionTechDB>();
-                        _componentDesigner = new ComponentDesigner(Template.Value, factionTech);
+                        _componentDesigner = new ComponentDesigner(Template, factionTech);
 
                         NoTemplateState = NoTemplateState.Created;
                         Template = null;

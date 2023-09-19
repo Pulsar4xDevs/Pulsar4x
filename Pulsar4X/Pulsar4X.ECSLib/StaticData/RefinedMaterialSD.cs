@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib.Industry;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.ECSLib
 {
     [StaticData(true, IDPropertyName = "ID")]
-    public class ProcessedMaterialSD : ICargoable, IConstrucableDesign
+    public class ProcessedMaterialSD : SerializableGameData, ICargoable, IConstrucableDesign
     {
         public string Name { get; init; }
         public bool IsValid {get; set; } = true;

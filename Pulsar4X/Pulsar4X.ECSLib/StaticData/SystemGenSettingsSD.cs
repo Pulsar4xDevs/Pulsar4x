@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
@@ -19,7 +20,7 @@ namespace Pulsar4X.ECSLib
     /// could cause system generation to crash.
     /// </remarks>
     [StaticData(false)]
-    public struct SystemGenSettingsSD
+    public class SystemGenSettingsSD : SerializableGameData
     {
         public static SystemGenSettingsSD DefaultSettings
         {

@@ -4,6 +4,7 @@
     "Version": "0.1",
     "Namespace": "Pulsar4x",
     "DataFiles": [
-        "armor.json"
+        "armor.json",
+        "defaultTheme.json"
     ]
 }

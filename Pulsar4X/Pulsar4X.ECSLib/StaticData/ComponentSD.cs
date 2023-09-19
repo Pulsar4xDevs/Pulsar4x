@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib.Industry;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.ECSLib
 {
     [StaticDataAttribute(true, IDPropertyName = "ID")]
-    public struct ComponentTemplateSD
+    public class ComponentTemplateSD : SerializableGameData
     {
         public string Name;
         public string DescriptionFormula;

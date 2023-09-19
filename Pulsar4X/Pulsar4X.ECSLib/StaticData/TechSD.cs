@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.ECSLib
 {
@@ -26,7 +27,7 @@ namespace Pulsar4X.ECSLib
     }
 
     [StaticDataAttribute(true, IDPropertyName = "ID")]
-    public struct TechSD
+    public class TechSD : SerializableGameData
     {
         public string Name { get; set; }
         public string Description;

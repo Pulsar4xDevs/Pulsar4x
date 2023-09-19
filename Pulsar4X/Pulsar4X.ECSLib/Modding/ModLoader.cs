@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
@@ -39,9 +40,29 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.Armor:
                     ApplyModGeneric<ArmorSD>(baseData.Armor, mod, modNamespace);
                     break;
-
                 case ModInstruction.DataType.CargoType:
                     ApplyModGeneric<CargoTypeSD>(baseData.CargoTypes, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.ComponentTemplate:
+                    ApplyModGeneric<ComponentTemplateSD>(baseData.ComponentTemplates, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.Gas:
+                    ApplyModGeneric<AtmosphericGasSD>(baseData.AtmosphericGas, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.Mineral:
+                    ApplyModGeneric<MineralSD>(baseData.Minerals, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.ProcessedMaterial:
+                    ApplyModGeneric<ProcessedMaterialSD>(baseData.ProcessedMaterials, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.SystemGenSettings:
+                    ApplyModGeneric<SystemGenSettingsSD>(baseData.SystemGenSettings, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.Tech:
+                    ApplyModGeneric<TechSD>(baseData.Techs, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.Theme:
+                    ApplyModGeneric<ThemeSD>(baseData.Themes, mod, modNamespace);
                     break;
             }
         }
@@ -62,13 +83,68 @@ namespace Pulsar4X.Modding
                         var modValue = property.GetValue(instruction.Data);
                         if (modValue != null)
                         {
+                            // If property is a collection and CollectionModOperation is specified
+                            if (property.PropertyType.IsGenericType
+                                && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>)
+                                && instruction.CollectionOperation.HasValue)
+                            {
+                                var originalList = (IList)property.GetValue(existingData);
+                                var modList = (IList)modValue;
+
+                                switch(instruction.CollectionOperation.Value)
+                                {
+                                    case ModInstruction.CollectionOperationType.Add:
+                                        foreach(var item in modList)
+                                        {
+                                            originalList.Add(item);
+                                        }
+                                        break;
+                                    case ModInstruction.CollectionOperationType.Remove:
+                                        foreach(var item in modList)
+                                        {
+                                            originalList.Remove(item);
+                                        }
+                                        break;
+                                    case ModInstruction.CollectionOperationType.Overwrite:
+                                        property.SetValue(existingData, modValue);
+                                        break;
+                                }
+                            }
+                            // If property is a dictionary and DictModOperation is specified
+                            else if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Dictionary<,>) && instruction.CollectionOperation.HasValue)
+                            {
+                                var originalDict = (IDictionary)property.GetValue(existingData);
+                                var modDict = (IDictionary)modValue;
+
+                                switch(instruction.CollectionOperation.Value)
+                                {
+                                    case ModInstruction.CollectionOperationType.Add:
+                                        foreach(DictionaryEntry entry in modDict)
+                                        {
+                                            originalDict[entry.Key] = entry.Value;
+                                        }
+                                        break;
+                                    case ModInstruction.CollectionOperationType.Remove:
+                                        foreach(DictionaryEntry entry in modDict)
+                                        {
+                                            originalDict.Remove(entry.Key);
+                                        }
+                                        break;
+                                    case ModInstruction.CollectionOperationType.Overwrite:
+                                        property.SetValue(existingData, modValue);
+                                        break;
+                                }
+                            }
                             // Check if the property is of type Guid and if it's equal to Guid.Empty
-                            if (property.PropertyType == typeof(Guid) && (Guid)modValue == Guid.Empty)
+                            else if (property.PropertyType == typeof(Guid) && (Guid)modValue == Guid.Empty)
                             {
                                 // Skip overwriting for empty Guid values
                                 continue;
                             }
-                            property.SetValue(existingData, modValue);
+                            else
+                            {
+                                property.SetValue(existingData, modValue);
+                            }
                         }
                     }
                 }

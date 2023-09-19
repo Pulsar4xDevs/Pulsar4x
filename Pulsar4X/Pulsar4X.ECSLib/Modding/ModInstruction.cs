@@ -20,8 +20,10 @@ namespace Pulsar4X.Modding
             Theme,
         }
         public enum OperationType { Default, Remove }
+        public enum CollectionOperationType { Add, Remove, Overwrite }
         public DataType Type { get; set; }
         public OperationType Operation { get; set; } = OperationType.Default;
+        public CollectionOperationType? CollectionOperation { get; set;}
 
         [JsonIgnore]
         public SerializableGameData Data { get; set; }
@@ -47,6 +49,10 @@ namespace Pulsar4X.Modding
             {
                 instruction.Operation = jObject["Operation"].ToObject<ModInstruction.OperationType>();
             }
+            if(jObject["CollectionOperation"] != null)
+            {
+                instruction.CollectionOperation = jObject["CollectionOperation"].ToObject<ModInstruction.CollectionOperationType>();
+            }
 
             switch (instruction.Type)
             {
@@ -56,7 +62,27 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.CargoType:
                     instruction.Data = jObject["Payload"].ToObject<CargoTypeSD>();
                     break;
-                //... Handle other types accordingly
+                case ModInstruction.DataType.ComponentTemplate:
+                    instruction.Data = jObject["Payload"].ToObject<ComponentTemplateSD>();
+                    break;
+                case ModInstruction.DataType.Gas:
+                    instruction.Data = jObject["Payload"].ToObject<AtmosphericGasSD>();
+                    break;
+                case ModInstruction.DataType.Mineral:
+                    instruction.Data = jObject["Payload"].ToObject<MineralSD>();
+                    break;
+                case ModInstruction.DataType.ProcessedMaterial:
+                    instruction.Data = jObject["Payload"].ToObject<ProcessedMaterialSD>();
+                    break;
+                case ModInstruction.DataType.SystemGenSettings:
+                    instruction.Data = jObject["Payload"].ToObject<SystemGenSettingsSD>();
+                    break;
+                case ModInstruction.DataType.Tech:
+                    instruction.Data = jObject["Payload"].ToObject<TechSD>();
+                    break;
+                case ModInstruction.DataType.Theme:
+                    instruction.Data = jObject["Payload"].ToObject<ThemeSD>();
+                    break;
             }
 
             return instruction;

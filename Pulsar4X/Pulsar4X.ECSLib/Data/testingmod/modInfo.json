@@ -4,6 +4,6 @@
     "Version": "0.1",
     "Namespace": "Pulsar4x-Testing",
     "DataFiles": [
-        "armor.json"
+        "testData.json"
     ]
 }

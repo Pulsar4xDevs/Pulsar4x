@@ -1,7 +1,9 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using Pulsar4X.Modding;
+
+namespace Pulsar4X.ECSLib
 {
     [StaticData(false)]
-    public struct AtmosphericGasSD
+    public class AtmosphericGasSD : SerializableGameData
     {
         /// <summary>
         /// Common name of the gas.
