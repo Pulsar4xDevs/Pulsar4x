@@ -72,7 +72,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void Display(GlobalUIState uiState)
         {
-            if(Template != null)
+            if(Template == null)
             {
                 switch (NoTemplateState)
                 {
