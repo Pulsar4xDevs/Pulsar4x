@@ -2,7 +2,7 @@
   {
     "Type": "Theme",
     "Payload": {
-      "UniqueId": "default-theme",
+      "UniqueID": "default-theme",
       "Name": "Default",
       "NavyRanks": {
         "1": "Ensign",

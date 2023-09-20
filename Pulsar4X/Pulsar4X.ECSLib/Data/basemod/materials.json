@@ -1,0 +1,22 @@
+[
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "stainless-steel",
+      "Name": "Stainless Steel",
+      "Description": "Refined Iron",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.000125,
+      "MineralsRequired": {
+        "iron": 88,
+        "chromium": 11,
+        "hydrocarbons": 1
+      },
+      "IndustryPointCosts": 20,
+      "IndustryTypeID": "refining",
+      "WealthCost": 0,
+      "OutputAmount": 100
+    }
+  }
+]

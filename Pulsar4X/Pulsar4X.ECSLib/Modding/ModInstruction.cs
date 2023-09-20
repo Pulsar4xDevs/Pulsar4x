@@ -13,6 +13,7 @@ namespace Pulsar4X.Modding
             CargoType,
             ComponentTemplate,
             Gas,
+            IndustryType,
             Mineral,
             ProcessedMaterial,
             SystemGenSettings,
@@ -57,31 +58,34 @@ namespace Pulsar4X.Modding
             switch (instruction.Type)
             {
                 case ModInstruction.DataType.Armor:
-                    instruction.Data = jObject["Payload"].ToObject<ArmorSD>();
+                    instruction.Data = jObject["Payload"].ToObject<ArmorBlueprint>();
                     break;
                 case ModInstruction.DataType.CargoType:
-                    instruction.Data = jObject["Payload"].ToObject<CargoTypeSD>();
+                    instruction.Data = jObject["Payload"].ToObject<CargoTypeBlueprint>();
                     break;
                 case ModInstruction.DataType.ComponentTemplate:
-                    instruction.Data = jObject["Payload"].ToObject<ComponentTemplateSD>();
+                    instruction.Data = jObject["Payload"].ToObject<ComponentTemplateBlueprint>();
                     break;
                 case ModInstruction.DataType.Gas:
-                    instruction.Data = jObject["Payload"].ToObject<AtmosphericGasSD>();
+                    instruction.Data = jObject["Payload"].ToObject<GasBlueprint>();
+                    break;
+                case ModInstruction.DataType.IndustryType:
+                    instruction.Data = jObject["Payload"].ToObject<IndustryTypeBlueprint>();
                     break;
                 case ModInstruction.DataType.Mineral:
-                    instruction.Data = jObject["Payload"].ToObject<MineralSD>();
+                    instruction.Data = jObject["Payload"].ToObject<MineralBlueprint>();
                     break;
                 case ModInstruction.DataType.ProcessedMaterial:
-                    instruction.Data = jObject["Payload"].ToObject<ProcessedMaterialSD>();
+                    instruction.Data = jObject["Payload"].ToObject<ProcessedMaterialBlueprint>();
                     break;
                 case ModInstruction.DataType.SystemGenSettings:
-                    instruction.Data = jObject["Payload"].ToObject<SystemGenSettingsSD>();
+                    instruction.Data = jObject["Payload"].ToObject<SystemGenSettingsBlueprint>(serializer);
                     break;
                 case ModInstruction.DataType.Tech:
-                    instruction.Data = jObject["Payload"].ToObject<TechSD>();
+                    instruction.Data = jObject["Payload"].ToObject<TechBlueprint>();
                     break;
                 case ModInstruction.DataType.Theme:
-                    instruction.Data = jObject["Payload"].ToObject<ThemeSD>();
+                    instruction.Data = jObject["Payload"].ToObject<ThemeBlueprint>();
                     break;
             }
 

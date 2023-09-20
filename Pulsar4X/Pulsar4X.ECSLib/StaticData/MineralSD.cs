@@ -5,7 +5,7 @@ using Pulsar4X.Modding;
 namespace Pulsar4X.ECSLib
 {
     [StaticData(true, IDPropertyName = "ID")]
-    public class MineralSD : SerializableGameData, ICargoable
+    public class MineralSD : ICargoable
     {
         public string Name { get; set; }
         public string Description;

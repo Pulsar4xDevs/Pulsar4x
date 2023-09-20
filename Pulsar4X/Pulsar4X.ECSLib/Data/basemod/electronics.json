@@ -1,0 +1,120 @@
+[
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "passivesensor",
+      "Name": "Passive Sensor",
+      "Formulas": {
+        "Description": "'Detects emissions and reflections from other objects'",
+        "Mass": "Ability('Mass')",
+        "Volume": "Ability('Mass')",
+        "HTK": "Max(1, Ability('Mass') / 100)",
+        "CrewReq": "[Mass]",
+        "ResearchCost": "[Mass] * 2",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 0.5",
+        "plastic": "[Mass] * 0.2",
+        "aluminium": "[Mass] * 0.1",
+        "copper": "[Mass] * 0.1"
+      },
+      "ComponentType": "Sensor",
+      "MountType": "PlanetInstallation, ShipComponent, ShipCargo, Fighter",
+      "IndustryTypeID": "component-construction",
+      "CargoTypeID": "general-storage",
+      "Attributes": [
+        {
+          "Name": "Antenna Size",
+          "Units": "m^2",
+          "DescriptionFormula": "'Gives an effective area of:  '",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "2500",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "1.25"
+        },
+        {
+          "Name": "Effective Size",
+          "Units": "m^2",
+          "GuiHint": "None",
+          "AttributeFormula": "Ability('Antenna Size') * TechData('6F9AB80D-0331-47C0-9C5A-7586D06DE59D')"
+        },
+        {
+          "Name": "Ideal Detection Wavelength",
+          "Units": "nm",
+          "DescriptionFormula": "'The wavelength this sensor is most efficient at detecting'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "1e12",
+          "MinFormula": "0.01",
+          "StepFormula": "1",
+          "AttributeFormula": "600"
+        },
+        {
+          "Name": "Detection Bandwidth",
+          "Units": "nm",
+          "DescriptionFormula": "'How far from the ideal wavelength will this still detect a signal'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "TechData('903CAED7-522B-40E5-8B65-72AFC099997E')",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "250"
+        },
+        {
+          "Name": "Efficiency",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "1 / (Ability('Detection Bandwidth') / TechData('903CAED7-522B-40E5-8B65-72AFC099997E') )"
+        },
+        {
+          "Name": "Sensitivity at Ideal Wavelength",
+          "Units": "W",
+          "DescriptionFormula": "'Smallest signal this can detect at the ideal wavelength, lower is better.",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "TechData('E3B17143-D802-485C-A955-C9349B9FCBDA') / (Ability('Effective Size') * Ability('Effective Size') * Ability('Efficiency'))"
+        },
+        {
+          "Name": "Sensitivity at Worst Wavelength",
+          "Units": "W",
+          "DescriptionFormula": "'Smallest signal this can detect at the worst wavelength, lower is better.'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "TechData('E3B17143-D802-485C-A955-C9349B9FCBDA') / (Ability('Effective Size') * Ability('Effective Size') * Ability('Efficiency') * 0.1)"
+        },
+        {
+          "Name": "Resolution",
+          "Units": "MegaPixel",
+          "DescriptionFormula": "'How much detail it can get from a detection. affects likelyhood of component detection etc. '",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "1000",
+          "MinFormula": "0.1",
+          "StepFormula": "1",
+          "AttributeFormula": "1"
+        },
+        {
+          "Name": "Scan Time",
+          "Units": "s",
+          "DescriptionFormula": "'how long it takes to complete a full scan'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "86400",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "3600"
+        },
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass Calculation'",
+          "GuiHint": "None",
+          "AttributeFormula": "90 + 10 * Ability('Antenna Size') * Ability('Antenna Size')"
+        },
+        {
+          "Name": "DatablobArguments",
+          "DescriptionFormula": "'(double peakWaveLength, double bandwidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)'",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Bandwidth'), Ability('Sensitivity at Ideal Wavelength'), Ability('Sensitivity at Worst Wavelength'), Ability('Resolution'), Ability('Scan Time'))",
+          "AttributeType": "Pulsar4X.ECSLib.SensorReceverAtbDB"
+        }
+      ]
+    }
+  }
+]

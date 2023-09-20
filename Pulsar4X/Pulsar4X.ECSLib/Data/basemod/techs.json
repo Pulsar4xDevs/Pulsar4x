@@ -1,0 +1,14 @@
+[
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-mining-production",
+      "Name": "Mining Production Efficiency",
+      "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
+      "Category": "ConstructionProduction",
+      "MaxLevel": 11,
+      "DataFormula": "1 + [Level] * 1.5",
+      "CostFormula": "(1 + [Level]) * 100"
+    }
+  }
+]

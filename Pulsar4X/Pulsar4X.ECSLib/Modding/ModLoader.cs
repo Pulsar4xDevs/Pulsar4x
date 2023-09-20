@@ -24,7 +24,7 @@ namespace Pulsar4X.Modding
 
                 var modInstructions = JsonConvert.DeserializeObject<List<ModInstruction>>(
                     File.ReadAllText(modDataFilePath),
-                    new JsonSerializerSettings { Converters = new List<JsonConverter> { new ModInstructionJsonConverter() } });
+                    new JsonSerializerSettings { Converters = new List<JsonConverter> { new ModInstructionJsonConverter(), new WeightedListJsonConverter() } });
 
                 foreach (var mod in modInstructions)
                 {
@@ -38,31 +38,34 @@ namespace Pulsar4X.Modding
             switch (mod.Type)
             {
                 case ModInstruction.DataType.Armor:
-                    ApplyModGeneric<ArmorSD>(baseData.Armor, mod, modNamespace);
+                    ApplyModGeneric<ArmorBlueprint>(baseData.Armor, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.CargoType:
-                    ApplyModGeneric<CargoTypeSD>(baseData.CargoTypes, mod, modNamespace);
+                    ApplyModGeneric<CargoTypeBlueprint>(baseData.CargoTypes, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.ComponentTemplate:
-                    ApplyModGeneric<ComponentTemplateSD>(baseData.ComponentTemplates, mod, modNamespace);
+                    ApplyModGeneric<ComponentTemplateBlueprint>(baseData.ComponentTemplates, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.Gas:
-                    ApplyModGeneric<AtmosphericGasSD>(baseData.AtmosphericGas, mod, modNamespace);
+                    ApplyModGeneric<GasBlueprint>(baseData.AtmosphericGas, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.IndustryType:
+                    ApplyModGeneric<IndustryTypeBlueprint>(baseData.IndustryTypes, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.Mineral:
-                    ApplyModGeneric<MineralSD>(baseData.Minerals, mod, modNamespace);
+                    ApplyModGeneric<MineralBlueprint>(baseData.Minerals, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.ProcessedMaterial:
-                    ApplyModGeneric<ProcessedMaterialSD>(baseData.ProcessedMaterials, mod, modNamespace);
+                    ApplyModGeneric<ProcessedMaterialBlueprint>(baseData.ProcessedMaterials, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.SystemGenSettings:
-                    ApplyModGeneric<SystemGenSettingsSD>(baseData.SystemGenSettings, mod, modNamespace);
+                    ApplyModGeneric<SystemGenSettingsBlueprint>(baseData.SystemGenSettings, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.Tech:
-                    ApplyModGeneric<TechSD>(baseData.Techs, mod, modNamespace);
+                    ApplyModGeneric<TechBlueprint>(baseData.Techs, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.Theme:
-                    ApplyModGeneric<ThemeSD>(baseData.Themes, mod, modNamespace);
+                    ApplyModGeneric<ThemeBlueprint>(baseData.Themes, mod, modNamespace);
                     break;
             }
         }
@@ -70,7 +73,7 @@ namespace Pulsar4X.Modding
 
         private void ApplyModGeneric<T>(Dictionary<string, T> dataDict, ModInstruction instruction, string modNamespace) where T : SerializableGameData
         {
-            if (dataDict.TryGetValue(instruction.Data.UniqueId, out var existingData))
+            if (dataDict.TryGetValue(instruction.Data.UniqueID, out var existingData))
             {
                 if (instruction.Operation == ModInstruction.OperationType.Default)
                 {
@@ -83,7 +86,7 @@ namespace Pulsar4X.Modding
                         var modValue = property.GetValue(instruction.Data);
                         if (modValue != null)
                         {
-                            // If property is a collection and CollectionModOperation is specified
+                            // If property is a collection and CollectionOperation is specified
                             if (property.PropertyType.IsGenericType
                                 && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>)
                                 && instruction.CollectionOperation.HasValue)
@@ -110,8 +113,10 @@ namespace Pulsar4X.Modding
                                         break;
                                 }
                             }
-                            // If property is a dictionary and DictModOperation is specified
-                            else if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Dictionary<,>) && instruction.CollectionOperation.HasValue)
+                            // If property is a dictionary and CollectionOperation is specified
+                            else if (property.PropertyType.IsGenericType
+                                && property.PropertyType.GetGenericTypeDefinition() == typeof(Dictionary<,>)
+                                && instruction.CollectionOperation.HasValue)
                             {
                                 var originalDict = (IDictionary)property.GetValue(existingData);
                                 var modDict = (IDictionary)modValue;
@@ -150,17 +155,15 @@ namespace Pulsar4X.Modding
                 }
                 else if (instruction.Operation == ModInstruction.OperationType.Remove)
                 {
-                    dataDict.Remove(instruction.Data.UniqueId);
+                    dataDict.Remove(instruction.Data.UniqueID);
                     return;
                 }
             }
             else
             {
                 instruction.Data.SetFullIdentifier(modNamespace);
-                dataDict[instruction.Data.UniqueId] = (T)instruction.Data;
+                dataDict[instruction.Data.UniqueID] = (T)instruction.Data;
             }
         }
-
-
     }
 }

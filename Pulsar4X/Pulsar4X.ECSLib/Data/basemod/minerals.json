@@ -1,0 +1,23 @@
+[
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "hydrocarbons",
+      "Name": "Hydrocarbons",
+      "Description": "Cruid Oil, Coal and Natural Gas",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0011111,
+      "Abundance": {
+        "Asteroid": 0.00,
+        "Comet": 0.001,
+        "DwarfPlanet": 0.075,
+        "GasDwarf": 0.0,
+        "GasGiant": 0.0,
+        "IceGiant": 0.1,
+        "Moon": 0.1,
+        "Terrestrial": 2.0
+      }
+    }
+  }
+]

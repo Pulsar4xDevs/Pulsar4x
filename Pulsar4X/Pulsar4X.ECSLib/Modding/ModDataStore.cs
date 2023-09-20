@@ -5,14 +5,15 @@ namespace Pulsar4X.Modding
 {
     public class ModDataStore
     {
-        public Dictionary<string, ArmorSD> Armor { get; set; } = new Dictionary<string, ArmorSD>();
-        public Dictionary<string, AtmosphericGasSD> AtmosphericGas { get; set; } = new Dictionary<string, AtmosphericGasSD>();
-        public Dictionary<string, CargoTypeSD> CargoTypes { get; set; } = new Dictionary<string, CargoTypeSD>();
-        public Dictionary<string, ComponentTemplateSD> ComponentTemplates { get; set; } = new Dictionary<string, ComponentTemplateSD>();
-        public Dictionary<string, MineralSD> Minerals { get; set; } = new Dictionary<string, MineralSD>();
-        public Dictionary<string, ProcessedMaterialSD> ProcessedMaterials { get; set; } = new Dictionary<string, ProcessedMaterialSD>();
-        public Dictionary<string, SystemGenSettingsSD> SystemGenSettings { get; set; } = new Dictionary<string, SystemGenSettingsSD>();
-        public Dictionary<string, TechSD> Techs { get; set; } = new Dictionary<string, TechSD>();
-        public Dictionary<string, ThemeSD> Themes { get; set; } = new Dictionary<string, ThemeSD>();
+        public Dictionary<string, ArmorBlueprint> Armor { get; set; } = new ();
+        public Dictionary<string, GasBlueprint> AtmosphericGas { get; set; } = new ();
+        public Dictionary<string, CargoTypeBlueprint> CargoTypes { get; set; } = new ();
+        public Dictionary<string, ComponentTemplateBlueprint> ComponentTemplates { get; set; } = new ();
+        public Dictionary<string, IndustryTypeBlueprint> IndustryTypes { get; set; } = new();
+        public Dictionary<string, MineralBlueprint> Minerals { get; set; } = new ();
+        public Dictionary<string, ProcessedMaterialBlueprint> ProcessedMaterials { get; set; } = new ();
+        public Dictionary<string, SystemGenSettingsBlueprint> SystemGenSettings { get; set; } = new ();
+        public Dictionary<string, TechBlueprint> Techs { get; set; } = new ();
+        public Dictionary<string, ThemeBlueprint> Themes { get; set; } = new ();
     }
 }

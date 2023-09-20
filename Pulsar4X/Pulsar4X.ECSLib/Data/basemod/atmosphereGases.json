@@ -1,0 +1,17 @@
+[
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "ethane",
+      "Weight": 0.01,
+      "Name": "Ethane",
+      "ChemicalSymbol": "C2H6",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -88.5,
+      "MeltingPoint": -182.8,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 3.0
+    }
+  }
+]

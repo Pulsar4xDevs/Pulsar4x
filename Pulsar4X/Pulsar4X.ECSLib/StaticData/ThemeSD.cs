@@ -4,7 +4,7 @@ using Pulsar4X.Modding;
 namespace Pulsar4X.ECSLib
 {
     [StaticData(false)]
-    public class ThemeSD : SerializableGameData
+    public class ThemeSD
     {
         public string Name { get; set; }
         public List<string> FleetNames { get; set; }

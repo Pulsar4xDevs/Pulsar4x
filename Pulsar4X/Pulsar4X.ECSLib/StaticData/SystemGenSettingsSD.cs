@@ -20,7 +20,7 @@ namespace Pulsar4X.ECSLib
     /// could cause system generation to crash.
     /// </remarks>
     [StaticData(false)]
-    public class SystemGenSettingsSD : SerializableGameData
+    public class SystemGenSettingsSD
     {
         public static SystemGenSettingsSD DefaultSettings
         {

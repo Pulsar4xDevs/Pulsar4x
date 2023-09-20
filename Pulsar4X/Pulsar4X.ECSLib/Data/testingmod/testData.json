@@ -2,7 +2,7 @@
   {
     "Type": "Armor",
     "Payload": {
-      "UniqueId": "stainless-steel-armor",
+      "UniqueID": "stainless-steel-armor",
       "Density": "7901"
     }
   },
@@ -10,7 +10,7 @@
     "Type": "Theme",
     "CollectionOperation": "Add",
     "Payload": {
-      "UniqueId": "default-theme",
+      "UniqueID": "default-theme",
       "FirstNames": [
         "FakeFirstName1", "FakeFirstName2"
       ]
@@ -20,7 +20,7 @@
     "Type": "Theme",
     "CollectionOperation": "Remove",
     "Payload": {
-      "UniqueId": "default-theme",
+      "UniqueID": "default-theme",
       "FirstNames": [
         "Aria"
       ]
@@ -30,7 +30,7 @@
     "Type": "Theme",
     "CollectionOperation": "Overwrite",
     "Payload": {
-      "UniqueId": "default-theme",
+      "UniqueID": "default-theme",
       "NavyRanks": {
         "1": "Fake Ensign",
         "2": "Fake Lieutenant (JG)",

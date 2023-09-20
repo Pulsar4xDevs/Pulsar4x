@@ -1,0 +1,662 @@
+[
+  {
+    "Type": "SystemGenSettings",
+    "Payload": {
+      "UniqueID": "default-system-gen-settings",
+      "RealStarSystems": false,
+      "NPRGenerationChance": 0.3333,
+      "PlanetGenerationChance": 0.8,
+      "MaxNoOfPlanets": 25,
+      "MaxNoOfAsteroidsPerBelt": 150,
+      "MaxNoOfAsteroidBelts": 3,
+      "NumberOfAsteroidsPerDwarfPlanet": 20,
+      "MiniumCometsPerSystem": 0,
+      "MaxNoOfComets": 25,
+      "MaxAsteroidOrbitDeviation": 0.03,
+      "MaxBodyInclination": 45.0,
+      "MaxMoonMassRelativeToParentBody": 0.4,
+      "OrbitGravityFactor": 20.0,
+      "TerrestrialBodyTectonicActivityChance": 0.5,
+      "MiniumPossibleDayLength": 6,
+      "MinMoonOrbitMultiplier": 2.5,
+      "RunawayGreenhouseEffectChance": 0.25,
+      "RunawayGreenhouseEffectMultiplyer": 10.0,
+      "J2000": "2000-01-01T12:00:00",
+      "RuinsGenerationChance": 0.5,
+      "MinMineralAccessibility": 0.1,
+      "MinHomeworldMineralAccessibility": 0.5,
+      "MinHomeworldMineralAmmount": 50000.0,
+      "HomeworldMineralAmmount": 100000.0,
+      "MinMaxAtmosphericPressure": {
+        "Min": 1E-09,
+        "Max": 200.0
+      },
+      "StarTypeDistributionForRealStars": [
+        {
+          "Weight": 3E-05,
+          "Value": "O"
+        },
+        {
+          "Weight": 0.13,
+          "Value": "B"
+        },
+        {
+          "Weight": 0.6,
+          "Value": "A"
+        },
+        {
+          "Weight": 3.0,
+          "Value": "F"
+        },
+        {
+          "Weight": 7.6,
+          "Value": "G"
+        },
+        {
+          "Weight": 12.1,
+          "Value": "K"
+        },
+        {
+          "Weight": 76.45,
+          "Value": "M"
+        },
+        {
+          "Weight": 0.11997,
+          "Value": "M"
+        }
+      ],
+      "StarTypeDistributionForFakeStars": [
+        {
+          "Weight": 0.0,
+          "Value": "O"
+        },
+        {
+          "Weight": 0.0,
+          "Value": "B"
+        },
+        {
+          "Weight": 5.0,
+          "Value": "A"
+        },
+        {
+          "Weight": 15.0,
+          "Value": "F"
+        },
+        {
+          "Weight": 50.0,
+          "Value": "G"
+        },
+        {
+          "Weight": 15.0,
+          "Value": "K"
+        },
+        {
+          "Weight": 10.0,
+          "Value": "M"
+        },
+        {
+          "Weight": 5.0,
+          "Value": "M"
+        }
+      ],
+      "StarRadiusBySpectralType": {
+        "O": {
+          "Min": 0.030721407854904716,
+          "Max": 1.1636896914736636
+        },
+        "B": {
+          "Min": 0.0083785657786103786,
+          "Max": 0.030721407854904716
+        },
+        "A": {
+          "Min": 0.006516662272252516,
+          "Max": 0.0083785657786103786
+        },
+        "F": {
+          "Min": 0.0053529725807788522,
+          "Max": 0.006516662272252516
+        },
+        "G": {
+          "Min": 0.0044685684152588681,
+          "Max": 0.0053529725807788522
+        },
+        "K": {
+          "Min": 0.003258331136126258,
+          "Max": 0.0044685684152588681
+        },
+        "M": {
+          "Min": 0.00055857105190735851,
+          "Max": 0.003258331136126258
+        }
+      },
+      "StarTemperatureBySpectralType": {
+        "O": {
+          "Min": 30000.0,
+          "Max": 60000.0
+        },
+        "B": {
+          "Min": 10000.0,
+          "Max": 30000.0
+        },
+        "A": {
+          "Min": 7500.0,
+          "Max": 10000.0
+        },
+        "F": {
+          "Min": 6000.0,
+          "Max": 7500.0
+        },
+        "G": {
+          "Min": 5200.0,
+          "Max": 6000.0
+        },
+        "K": {
+          "Min": 3700.0,
+          "Max": 5200.0
+        },
+        "M": {
+          "Min": 2400.0,
+          "Max": 3700.0
+        }
+      },
+      "StarLuminosityBySpectralType": {
+        "O": {
+          "Min": 30000.0,
+          "Max": 1000000.0
+        },
+        "B": {
+          "Min": 25.0,
+          "Max": 30000.0
+        },
+        "A": {
+          "Min": 5.0,
+          "Max": 25.0
+        },
+        "F": {
+          "Min": 1.5,
+          "Max": 5.0
+        },
+        "G": {
+          "Min": 0.6,
+          "Max": 1.5
+        },
+        "K": {
+          "Min": 0.08,
+          "Max": 0.6
+        },
+        "M": {
+          "Min": 0.0001,
+          "Max": 0.08
+        }
+      },
+      "StarMassBySpectralType": {
+        "O": {
+          "Min": 3.18168E+31,
+          "Max": 5.2696575E+32
+        },
+        "B": {
+          "Min": 4.175955E+30,
+          "Max": 3.18168E+31
+        },
+        "A": {
+          "Min": 2.78397E+30,
+          "Max": 4.175955E+30
+        },
+        "F": {
+          "Min": 2.068092E+30,
+          "Max": 2.78397E+30
+        },
+        "G": {
+          "Min": 1.59084E+30,
+          "Max": 2.068092E+30
+        },
+        "K": {
+          "Min": 8.948475E+29,
+          "Max": 1.59084E+30
+        },
+        "M": {
+          "Min": 1.59084E+29,
+          "Max": 8.948475E+29
+        }
+      },
+      "StarAgeBySpectralType": {
+        "O": {
+          "Min": 0.0,
+          "Max": 6000000.0
+        },
+        "B": {
+          "Min": 0.0,
+          "Max": 100000000.0
+        },
+        "A": {
+          "Min": 0.0,
+          "Max": 350000000.0
+        },
+        "F": {
+          "Min": 0.0,
+          "Max": 3000000000.0
+        },
+        "G": {
+          "Min": 0.0,
+          "Max": 10000000000.0
+        },
+        "K": {
+          "Min": 0.0,
+          "Max": 13200000000.0
+        },
+        "M": {
+          "Min": 0.0,
+          "Max": 13200000000.0
+        }
+      },
+      "StarSpectralTypePlanetGenerationRatio": {
+        "O": 0.6,
+        "B": 0.7,
+        "A": 0.9,
+        "F": 0.9,
+        "G": 2.1,
+        "K": 2.4,
+        "M": 1.8
+      },
+      "SystemBodyMassByType": {
+        "GasGiant": {
+          "Min": 8.958285E+25,
+          "Max": 2.9860950000000004E+27
+        },
+        "IceGiant": {
+          "Min": 2.9860950000000003E+25,
+          "Max": 1.791657E+26
+        },
+        "GasDwarf": {
+          "Min": 5.97219E+24,
+          "Max": 8.958285E+25
+        },
+        "Terrestrial": {
+          "Min": 2.9860950000000002E+23,
+          "Max": 2.9860950000000003E+25
+        },
+        "Moon": {
+          "Min": 1E+16,
+          "Max": 5.97219E+24
+        },
+        "DwarfPlanet": {
+          "Min": 2E+20,
+          "Max": 5E+23
+        },
+        "Asteroid": {
+          "Min": 1E+15,
+          "Max": 9E+19
+        },
+        "Comet": {
+          "Min": 10000000000000.0,
+          "Max": 900000000000000.0
+        }
+      },
+      "SystemBodyDensityByType": {
+        "GasGiant": {
+          "Min": 0.5,
+          "Max": 10.0
+        },
+        "IceGiant": {
+          "Min": 1.0,
+          "Max": 5.0
+        },
+        "GasDwarf": {
+          "Min": 1.0,
+          "Max": 8.0
+        },
+        "Terrestrial": {
+          "Min": 3.0,
+          "Max": 8.0
+        },
+        "Moon": {
+          "Min": 1.4,
+          "Max": 5.0
+        },
+        "DwarfPlanet": {
+          "Min": 1.0,
+          "Max": 6.0
+        },
+        "Asteroid": {
+          "Min": 1.0,
+          "Max": 6.0
+        },
+        "Comet": {
+          "Min": 0.25,
+          "Max": 0.7
+        }
+      },
+      "OrbitalDistanceByStarSpectralType": {
+        "O": {
+          "Min": 1.0,
+          "Max": 200.0
+        },
+        "B": {
+          "Min": 0.5,
+          "Max": 100.0
+        },
+        "A": {
+          "Min": 0.3,
+          "Max": 90.0
+        },
+        "F": {
+          "Min": 0.2,
+          "Max": 60.0
+        },
+        "G": {
+          "Min": 0.1,
+          "Max": 40.0
+        },
+        "K": {
+          "Min": 0.01,
+          "Max": 18.0
+        },
+        "M": {
+          "Min": 0.005,
+          "Max": 9.0
+        }
+      },
+      "BodyEccentricityByType": {
+        "Asteroid": {
+          "Min": 0.0,
+          "Max": 0.5
+        },
+        "Comet": {
+          "Min": 0.6,
+          "Max": 0.8
+        },
+        "DwarfPlanet": {
+          "Min": 0.0,
+          "Max": 0.5
+        },
+        "GasDwarf": {
+          "Min": 0.0,
+          "Max": 0.5
+        },
+        "GasGiant": {
+          "Min": 0.0,
+          "Max": 0.5
+        },
+        "IceGiant": {
+          "Min": 0.0,
+          "Max": 0.5
+        },
+        "Moon": {
+          "Min": 0.0,
+          "Max": 0.5
+        },
+        "Terrestrial": {
+          "Min": 0.0,
+          "Max": 0.5
+        }
+      },
+      "PlanetAlbedoByType": {
+        "GasGiant": {
+          "Min": 0.5,
+          "Max": 0.7
+        },
+        "IceGiant": {
+          "Min": 0.5,
+          "Max": 0.7
+        },
+        "GasDwarf": {
+          "Min": 0.3,
+          "Max": 0.7
+        },
+        "Terrestrial": {
+          "Min": 0.05,
+          "Max": 0.5
+        },
+        "Moon": {
+          "Min": 0.05,
+          "Max": 0.5
+        },
+        "DwarfPlanet": {
+          "Min": 0.05,
+          "Max": 0.95
+        },
+        "Asteroid": {
+          "Min": 0.05,
+          "Max": 0.15
+        },
+        "Comet": {
+          "Min": 0.95,
+          "Max": 0.99
+        }
+      },
+      "PlanetMagneticFieldByType": {
+        "GasGiant": {
+          "Min": 10.0,
+          "Max": 2000.0
+        },
+        "IceGiant": {
+          "Min": 5.0,
+          "Max": 50.0
+        },
+        "GasDwarf": {
+          "Min": 0.1,
+          "Max": 20.0
+        },
+        "Terrestrial": {
+          "Min": 0.0001,
+          "Max": 45.0
+        },
+        "Moon": {
+          "Min": 0.0001,
+          "Max": 1.0
+        },
+        "DwarfPlanet": {
+          "Min": 1E-05,
+          "Max": 0.0001
+        },
+        "Asteroid": {
+          "Min": 1E-06,
+          "Max": 1E-05
+        },
+        "Comet": {
+          "Min": 1E-07,
+          "Max": 1E-06
+        }
+      },
+      "AtmosphereGenerationModifier": {
+        "GasGiant": 100000000.0,
+        "IceGiant": 100000000.0,
+        "GasDwarf": 100000000.0,
+        "Terrestrial": 1.0,
+        "Moon": 0.5,
+        "DwarfPlanet": 0.0,
+        "Asteroid": 0.0,
+        "Comet": 0.0
+      },
+      "MoonGenerationChanceByPlanetType": {
+        "GasGiant": 0.99999999,
+        "IceGiant": 0.99999999,
+        "GasDwarf": 0.99,
+        "Terrestrial": 0.5,
+        "DwarfPlanet": 0.0001,
+        "Moon": -1.0
+      },
+      "MaxMoonOrbitDistanceByPlanetType": {
+        "GasGiant": 0.40496359818843336,
+        "IceGiant": 0.32944987632100037,
+        "GasDwarf": 0.040496358481925912,
+        "Terrestrial": 0.012859407630592701,
+        "DwarfPlanet": 0.00016711467805671115
+      },
+      "MaxNoOfMoonsByPlanetType": {
+        "GasGiant": 20.0,
+        "IceGiant": 15.0,
+        "GasDwarf": 8.0,
+        "Terrestrial": 4.0,
+        "DwarfPlanet": 1.0
+      },
+      "BodyTectonicsThresholds": {
+        "Dead": 0.01,
+        "Minor": 0.2,
+        "EarthLike": 0.4,
+        "Major": 1.0
+      },
+      "BandBodyWeight": [
+        {
+          "Weight": 0.3,
+          "Value": "InnerBand"
+        },
+        {
+          "Weight": 0.1,
+          "Value": "HabitableBand"
+        },
+        {
+          "Weight": 0.6,
+          "Value": "OuterBand"
+        }
+      ],
+      "InnerBandTypeWeights": [
+        {
+          "Weight": 35.0,
+          "Value": "Asteroid"
+        },
+        {
+          "Weight": 10.0,
+          "Value": "GasDwarf"
+        },
+        {
+          "Weight": 5.0,
+          "Value": "GasGiant"
+        },
+        {
+          "Weight": 0.0,
+          "Value": "IceGiant"
+        },
+        {
+          "Weight": 50.0,
+          "Value": "Terrestrial"
+        }
+      ],
+      "HabitableBandTypeWeights": [
+        {
+          "Weight": 25.0,
+          "Value": "Asteroid"
+        },
+        {
+          "Weight": 10.0,
+          "Value": "GasDwarf"
+        },
+        {
+          "Weight": 5.0,
+          "Value": "GasGiant"
+        },
+        {
+          "Weight": 0.0,
+          "Value": "IceGiant"
+        },
+        {
+          "Weight": 60.0,
+          "Value": "Terrestrial"
+        }
+      ],
+      "OuterBandTypeWeights": [
+        {
+          "Weight": 15.0,
+          "Value": "Asteroid"
+        },
+        {
+          "Weight": 20.0,
+          "Value": "GasDwarf"
+        },
+        {
+          "Weight": 25.0,
+          "Value": "GasGiant"
+        },
+        {
+          "Weight": 20.0,
+          "Value": "IceGiant"
+        },
+        {
+          "Weight": 10.0,
+          "Value": "Terrestrial"
+        }
+      ],
+      "RuinsSizeDistribution": [
+        {
+          "Weight": 40.0,
+          "Value": "Outpost"
+        },
+        {
+          "Weight": 30.0,
+          "Value": "Settlement"
+        },
+        {
+          "Weight": 20.0,
+          "Value": "Colony"
+        },
+        {
+          "Weight": 10.0,
+          "Value": "City"
+        }
+      ],
+      "RuinsQualityDistribution": [
+        {
+          "Weight": 40.0,
+          "Value": "Destroyed"
+        },
+        {
+          "Weight": 30.0,
+          "Value": "Ruined"
+        },
+        {
+          "Weight": 15.0,
+          "Value": "PartiallyIntact"
+        },
+        {
+          "Weight": 15.0,
+          "Value": "Intact"
+        }
+      ],
+      "RuinsCountRangeBySize": {
+        "Outpost": {
+          "Min": 15.0,
+          "Max": 50.0
+        },
+        "Settlement": {
+          "Min": 50.0,
+          "Max": 100.0
+        },
+        "Colony": {
+          "Min": 100.0,
+          "Max": 200.0
+        },
+        "City": {
+          "Min": 500.0,
+          "Max": 1000.0
+        }
+      },
+      "RuinsQualityAdjustment": {
+        "Destroyed": 1.25,
+        "Ruined": 1.5,
+        "PartiallyIntact": 1.75,
+        "Intact": 2.0,
+        "MultipleIntact": 3.0
+      },
+      "MineralGenerationChanceByBodyType": {
+        "GasGiant": 0.4,
+        "IceGiant": 0.33,
+        "GasDwarf": 0.3,
+        "Terrestrial": 0.5,
+        "Moon": 0.15,
+        "DwarfPlanet": 0.15,
+        "Comet": 1.0,
+        "Asteroid": 0.1
+      },
+      "MaxMineralAmmountByBodyType": {
+        "GasGiant": 100000000,
+        "IceGiant": 50000000,
+        "GasDwarf": 10000000,
+        "Terrestrial": 5000000,
+        "Moon": 1000000,
+        "DwarfPlanet": 500000,
+        "Comet": 100000,
+        "Asteroid": 50000
+      }
+    }
+  }
+]

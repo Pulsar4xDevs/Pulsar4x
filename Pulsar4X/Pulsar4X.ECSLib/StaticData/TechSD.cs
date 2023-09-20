@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
     }
 
     [StaticDataAttribute(true, IDPropertyName = "ID")]
-    public class TechSD : SerializableGameData
+    public class TechSD
     {
         public string Name { get; set; }
         public string Description;

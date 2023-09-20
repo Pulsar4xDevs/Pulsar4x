@@ -5,7 +5,7 @@ using Pulsar4X.Modding;
 namespace Pulsar4X.ECSLib
 {
     [StaticData(true, IDPropertyName = "ResourceID")]
-    public class ArmorSD : SerializableGameData
+    public class ArmorSD
     {
         /// <summary>
         /// this should correlate to a mineral or refined material. 

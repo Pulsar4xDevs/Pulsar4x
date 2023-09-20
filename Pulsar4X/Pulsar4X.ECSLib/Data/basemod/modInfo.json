@@ -5,6 +5,14 @@
     "Namespace": "Pulsar4x",
     "DataFiles": [
         "armor.json",
-        "defaultTheme.json"
+        "atmosphereGases.json",
+        "cargoTypes.json",
+        "electronics.json",
+        "defaultTheme.json",
+        "industryTypes.json",
+        "materials.json",
+        "minerals.json",
+        "systemGenSettings.json",
+        "techs.json"
     ]
 }
