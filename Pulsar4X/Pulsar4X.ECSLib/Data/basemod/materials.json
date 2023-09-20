@@ -18,5 +18,115 @@
       "WealthCost": 0,
       "OutputAmount": 100
     }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "rp-1",
+      "Name": "RP-1",
+      "Description": "Highly refined Kerosene and Oxygen at a mix of 0.52:1 by volume",
+      "CargoTypeID": "fuel-storage",
+      "MassPerUnit": 1,
+      "VolumePerUnit": 0.0009446885,
+      "MineralsRequired": {
+        "hydrocarbons": 1
+      },
+      "IndustryPointCosts": 10,
+      "IndustryTypeID": "refining",
+      "WealthCost": 3,
+      "OutputAmount": 2,
+      "ExhaustVelocityFormula": "3510"
+    }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "methalox",
+      "Name": "Methalox",
+      "Description": "Highly refined Methane and Oxygen rocket fuel at a mix of 1:3.333 by mass",
+      "CargoTypeID": "fuel-storage",
+      "MassPerUnit": 1,
+      "VolumePerUnit": 0.000835561,
+      "MineralsRequired": {
+        "hydrocarbons": 1
+      },
+      "IndustryPointCosts": 10,
+      "IndustryTypeID": "refining",
+      "WealthCost": 3,
+      "OutputAmount": 2,
+      "ExhaustVelocityFormula": "3615"
+    }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "hydrolox",
+      "Name": "Hydrolox",
+      "Description": "Hydrogen and Oxygen rocket fuel at a mix of 2.7:1 by volume",
+      "CargoTypeID": "fuel-storage",
+      "MassPerUnit": 1,
+      "VolumePerUnit": 0.002777778,
+      "MineralsRequired": {
+        "hydrocarbons": 1
+      },
+      "IndustryPointCosts": 10,
+      "IndustryTypeID": "refining",
+      "WealthCost": 3,
+      "OutputAmount": 2,
+      "ExhaustVelocityFormula": "4462"
+    }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "plastic",
+      "Name": "Plastic",
+      "Description": "Rendered from Hydrocarbons",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1,
+      "VolumePerUnit": 0.0010638298,
+      "MineralsRequired": {
+        "hydrocarbons": 1
+      },
+      "IndustryPointCosts": 5,
+      "IndustryTypeID": "refining",
+      "WealthCost": 1,
+      "OutputAmount": 2
+    }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "fissile-fuels",
+      "Name": "Fissile fuels",
+      "Description": "Fuel for reactors",
+      "CargoTypeID": "fuel-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0000531915,
+      "MineralsRequired": {
+        "fissionables": 100
+      },
+      "IndustryPointCosts": 10,
+      "IndustryTypeID": "refining",
+      "WealthCost": 100,
+      "OutputAmount": 1
+    }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "electricity",
+      "Name": "Electricity",
+      "Description": "Electrical Energy",
+      "CargoTypeID": "battery-storage",
+      "MassPerUnit": 0.0,
+      "VolumePerUnit": 0,
+      "MineralsRequired": {
+      },
+      "IndustryPointCosts": 10,
+      "IndustryTypeID": "refining",
+      "WealthCost": 0,
+      "OutputAmount": 100
+    }
   }
 ]
