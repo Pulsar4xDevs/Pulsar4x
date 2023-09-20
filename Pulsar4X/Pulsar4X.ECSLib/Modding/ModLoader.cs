@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using Newtonsoft.Json;
 using Pulsar4X.ECSLib;
@@ -9,10 +10,17 @@ namespace Pulsar4X.Modding
 {
     public class ModLoader
     {
+        public Dictionary<string, ModManifest> LoadedMods { get; private set; } = new Dictionary<string, ModManifest>();
+
         public void LoadModManifest(string modManifestPath, ModDataStore baseData)
         {
             var manifestJson = File.ReadAllText(modManifestPath);
             var modManifest = JsonConvert.DeserializeObject<ModManifest>(manifestJson);
+
+            if(LoadedMods.ContainsKey(modManifest.Namespace))
+            {
+                throw new DuplicateNameException("A mod with the namespace " + modManifest.Namespace + " has already been loaded.");
+            }
 
             // Get the directory of the mod manifest
             string modDirectory = Path.GetDirectoryName(modManifestPath);
@@ -31,9 +39,11 @@ namespace Pulsar4X.Modding
                     ApplyMod(baseData, mod, modManifest.Namespace);
                 }
             }
+
+            LoadedMods.Add(modManifest.Namespace, modManifest);
         }
 
-        public void ApplyMod(ModDataStore baseData, ModInstruction mod, string modNamespace)
+        private void ApplyMod(ModDataStore baseData, ModInstruction mod, string modNamespace)
         {
             switch (mod.Type)
             {
