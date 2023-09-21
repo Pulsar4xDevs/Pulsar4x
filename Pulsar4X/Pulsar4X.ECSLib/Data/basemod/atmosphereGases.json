@@ -13,5 +13,619 @@
       "MinGravity": 0.001,
       "GreenhouseEffect": 3.0
     }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "cyanogen",
+      "Weight": 0.01,
+      "Name": "Cyanogen",
+      "ChemicalSymbol": "C2N2",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -21.1,
+      "MeltingPoint": -28.0,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 3.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "hydrogen-cyanide",
+      "Weight": 0.01,
+      "Name": "Hydrogen cyanide",
+      "ChemicalSymbol": "HCN",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": 26.0,
+      "MeltingPoint": -13.29,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 3.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "propane",
+      "Weight": 0.01,
+      "Name": "Propane",
+      "ChemicalSymbol": "C3H8",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -42.25,
+      "MeltingPoint": -187.7,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 3.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "ethyne",
+      "Weight": 0.01,
+      "Name": "Ethyne",
+      "ChemicalSymbol": "C2H2",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -84.0,
+      "MeltingPoint": -80.8,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 3.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "cyanoethyne",
+      "Weight": 0.01,
+      "Name": "Cyanoethyne",
+      "ChemicalSymbol": "C3HN",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": 42.5,
+      "MeltingPoint": 5.0,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 3.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "propyne",
+      "Weight": 0.01,
+      "Name": "Propyne",
+      "ChemicalSymbol": "C3H4",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -23.2,
+      "MeltingPoint": -102.7,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 3.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "butadiyne",
+      "Weight": 0.01,
+      "Name": "Butadiyne",
+      "ChemicalSymbol": "C4H2",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": 10.0,
+      "MeltingPoint": -36.4,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 3.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "ammonium-hydrosulphide",
+      "Weight": 0.1,
+      "Name": "Ammonium hydrosulphide",
+      "ChemicalSymbol": "NH5S",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": 56.6,
+      "MeltingPoint": -28.0,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "phosphine",
+      "Weight": 0.1,
+      "Name": "Phosphine",
+      "ChemicalSymbol": "PH3",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -87.7,
+      "MeltingPoint": -132.8,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "arsine",
+      "Weight": 0.1,
+      "Name": "Arsine",
+      "ChemicalSymbol": "AsH3",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -62.5,
+      "MeltingPoint": -111.2,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "germane",
+      "Weight": 0.1,
+      "Name": "Germane",
+      "ChemicalSymbol": "GeH3",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -88.0,
+      "MeltingPoint": -165.0,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "ozone",
+      "Weight": 0.1,
+      "Name": "Ozone",
+      "ChemicalSymbol": "O3",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -112.0,
+      "MeltingPoint": -192.2,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "sulphuric-acid",
+      "Weight": 0.001,
+      "Name": "Sulphuric acid",
+      "ChemicalSymbol": "H2SO4",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": 337.0,
+      "MeltingPoint": 10.31,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "hyrdogen-chloride",
+      "Weight": 0.1,
+      "Name": "Hydrogen chloride",
+      "ChemicalSymbol": "HCl",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -85.05,
+      "MeltingPoint": -114.22,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "hyrdogen-fluoride",
+      "Weight": 0.1,
+      "Name": "Hydrogen fluoride",
+      "ChemicalSymbol": "HF",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": 19.5,
+      "MeltingPoint": -83.6,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "kyrpton",
+      "Weight": 1.0,
+      "Name": "Krypton",
+      "ChemicalSymbol": "Kr",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -153.415,
+      "MeltingPoint": -157.37,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "xenon",
+      "Weight": 1.0,
+      "Name": "Xenon",
+      "ChemicalSymbol": "Xe",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -108.099,
+      "MeltingPoint": -111.75,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "titanium-oxide",
+      "Weight": 0.0001,
+      "Name": "Titanium(II) Oxide",
+      "ChemicalSymbol": "TiO",
+      "IsToxic": true,
+      "IsHighlyToxic": false,
+      "BoilingPoint": 2700.0,
+      "MeltingPoint": 1750.0,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "hyrdogen-deuteride",
+      "Weight": 0.0001,
+      "Name": "Hydrogen Deuteride",
+      "ChemicalSymbol": "HD",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -253,
+      "MeltingPoint": -259,
+      "MinGravity": 3.0,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "aestusium",
+      "Weight": 0.0000001,
+      "Name": "Aestusium",
+      "ChemicalSymbol": "SGG",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -273.0,
+      "MeltingPoint": -274.0,
+      "MinGravity": 1000,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "ammonia",
+      "Weight": 10.0,
+      "Name": "Ammonia",
+      "ChemicalSymbol": "NH3",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 0.005,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -23.0,
+      "MeltingPoint": -77.73,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "argon",
+      "Weight": 10.0,
+      "Name": "Argon",
+      "ChemicalSymbol": "Ar",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -186.0,
+      "MeltingPoint": -189.34,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "bromine",
+      "Weight": 1.0,
+      "Name": "Bromine",
+      "ChemicalSymbol": "Br",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "IsHighlyToxicAtPercentage": 0.0001,
+      "BoilingPoint": 59.0,
+      "MeltingPoint": -7.2,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "carbon-dioxide",
+      "Weight": 15.0,
+      "Name": "Carbon dioxide",
+      "ChemicalSymbol": "CO2",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 0.5,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -78.0,
+      "MeltingPoint": -87.5,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "carbon-monoxide",
+      "Weight": 10.0,
+      "Name": "Carbon monoxide",
+      "ChemicalSymbol": "CO",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 0.005,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -171.0,
+      "MeltingPoint": -205.02,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "chlorine",
+      "Weight": 1.0,
+      "Name": "Chlorine",
+      "ChemicalSymbol": "Cl",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "IsHighlyToxicAtPercentage": 0.0001,
+      "BoilingPoint": -34.0,
+      "MeltingPoint": -101.5,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "fluorine",
+      "Weight": 1.0,
+      "Name": "Fluorine",
+      "ChemicalSymbol": "F2",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "IsHighlyToxicAtPercentage": 0.0001,
+      "BoilingPoint": -188.0,
+      "MeltingPoint": -219.67,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "frigusium",
+      "Weight": 0.0000001,
+      "Name": "Frigusium",
+      "ChemicalSymbol": "AGG",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -272.0,
+      "MeltingPoint": -273.0,
+      "MinGravity": 10000,
+      "GreenhouseEffect": -1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "helium",
+      "Weight": 150.0,
+      "Name": "Helium",
+      "ChemicalSymbol": "He",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -269.0,
+      "MeltingPoint": -272.20,
+      "MinGravity": 2.5,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "hydrogen",
+      "Weight": 500.0,
+      "Name": "Hydrogen",
+      "ChemicalSymbol": "H2",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 0.05,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -253.0,
+      "MeltingPoint": -259.16,
+      "MinGravity": 3.0,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "hydrogen-sulphide",
+      "Weight": 1.0,
+      "Name": "Hydrogen sulphide",
+      "ChemicalSymbol": "H2S",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 0.002,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -61.0,
+      "MeltingPoint": -82.0,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "hydrogen-sulphide",
+      "Weight": 1.0,
+      "Name": "Iodine",
+      "ChemicalSymbol": "I2",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 0.0001,
+      "IsHighlyToxic": false,
+      "BoilingPoint": 184.0,
+      "MeltingPoint": 113.7,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "methane",
+      "Weight": 10.0,
+      "Name": "Methane",
+      "ChemicalSymbol": "CH4",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 0.05,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -164.0,
+      "MeltingPoint": -182.5,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "neon",
+      "Weight": 5.0,
+      "Name": "Neon",
+      "ChemicalSymbol": "Ne",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -246.0,
+      "MeltingPoint": -248.59,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "nitrogen",
+      "Weight": 50.0,
+      "Name": "Nitrogen",
+      "ChemicalSymbol": "N2",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -196.0,
+      "MeltingPoint": -210.00,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "nitrogen-dioxide",
+      "Weight": 1.0,
+      "Name": "Nitrogen dioxide",
+      "ChemicalSymbol": "NO2",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 0.0005,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -11.0,
+      "MeltingPoint": -11.2,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "nitrogen-oxide",
+      "Weight": 1.0,
+      "Name": "Nitrogen oxide",
+      "ChemicalSymbol": "NO",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 0.0005,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -152.0,
+      "MeltingPoint": -164.0,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "oxygen",
+      "Weight": 25.0,
+      "Name": "Oxygen",
+      "ChemicalSymbol": "O2",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 30.0,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -183.0,
+      "MeltingPoint": -218.79,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "sulphur-dioxide",
+      "Weight": 1.0,
+      "Name": "Sulphur dioxide",
+      "ChemicalSymbol": "SO2",
+      "IsToxic": false,
+      "IsToxicAtPercentage": 0.0005,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -10.0,
+      "MeltingPoint": -72.0,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Type": "Gas",
+    "Payload": {
+      "UniqueID": "water-vapour",
+      "Weight": 10.0,
+      "Name": "Water Vapour",
+      "ChemicalSymbol": "H2O",
+      "IsToxic": false,
+      "IsHighlyToxic": false,
+      "BoilingPoint": -18.0,
+      "MeltingPoint": -20.0,
+      "MinGravity": 0.001,
+      "GreenhouseEffect": 0.0
+    }
   }
 ]
