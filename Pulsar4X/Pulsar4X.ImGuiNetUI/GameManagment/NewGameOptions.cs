@@ -3,6 +3,7 @@ using Pulsar4X;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -88,7 +89,10 @@ namespace Pulsar4X.SDL2UI
 
         void CreateNewGame()
         {
- 
+            ModLoader modLoader = new ModLoader();
+            ModDataStore modDataStore = new ModDataStore();
+            modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+
             gameSettings = new ECSLib.NewGameSettings
             {
                 GameName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer),
@@ -103,7 +107,7 @@ namespace Pulsar4X.SDL2UI
             };
             //TODO: Tidyup: new Game(gameSettings) doesn't currently create a default faction as per the settings.
             //this should probilby be fixed, either we create it there or we... dont.
-            _uiState.Game = new ECSLib.Game(gameSettings);
+            _uiState.Game = new ECSLib.Game(gameSettings, modDataStore);
             
             var factionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer);
             var factionPasswd = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer);

@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib
     {
         [PublicAPI]
         [JsonProperty]
-        public Dictionary<Guid, MineralDeposit> Minerals { get; internal set; }
+        public Dictionary<string, MineralDeposit> Minerals { get; internal set; }
 
         public MineralsDB()
         {
@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
 
         public MineralsDB(MineralsDB other)
         {
-            Minerals = new Dictionary<Guid, MineralDeposit>(other.Minerals);
+            Minerals = new Dictionary<string, MineralDeposit>(other.Minerals);
         }
 
         public override object Clone()
