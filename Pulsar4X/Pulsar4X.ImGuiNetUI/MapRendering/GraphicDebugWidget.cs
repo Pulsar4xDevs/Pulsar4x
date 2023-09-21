@@ -166,7 +166,7 @@ namespace Pulsar4X.SDL2UI
                 
                 
                 
-                var points2 = CreatePrimitiveShapes.KeplerPoints(_ellipseLoP, _ellipseA, _ellipseB, _ellipseRes, startPos, endPos);
+                var points2 = CreatePrimitiveShapes.KeplerPoints(_ellipseA, _ellipseEccentricity, _ellipseLoP, startPos, endPos);
                 _debugWidget.SetKeplerEllipsePoints2 = points2;
                 _debugWidget.SetKeplerEllipseEnabled = true;
 
