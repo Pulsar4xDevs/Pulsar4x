@@ -1,4 +1,5 @@
-﻿using Pulsar4X.Orbital;
+﻿using Pulsar4X.Modding;
+using Pulsar4X.Orbital;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,9 +83,9 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        public static Dictionary<string, double> GetTotalSystemMinerals(this StarSystem system, StaticDataStore staticData)
+        public static Dictionary<string, double> GetTotalSystemMinerals(this StarSystem system, ModDataStore staticData)
         {
-            var minerals = new Dictionary<Guid, double>();
+            var minerals = new Dictionary<string, double>();
             var bodies = system.GetAllEntitiesWithDataBlob<MineralsDB>().Select(x => x.GetDataBlob<MineralsDB>());
             foreach (var body in bodies)
             {
@@ -101,8 +102,8 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            var mineralList = staticData.CargoGoods.GetMineralsList();
-            var mineralsByName = minerals.ToDictionary(k => mineralList.First(m => m.ID == k.Key).Name, v => v.Value);
+            var mineralList = staticData.Minerals.Values;
+            var mineralsByName = minerals.ToDictionary(k => mineralList.First(m => m.UniqueID == k.Key).Name, v => v.Value);
             return mineralsByName;
         }
 

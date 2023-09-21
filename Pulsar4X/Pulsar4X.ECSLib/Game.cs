@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 //this allows the test project to see internal functions of this project.
 using System.Runtime.CompilerServices;
+using Pulsar4X.Modding;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
 namespace Pulsar4X.ECSLib
@@ -13,10 +14,9 @@ namespace Pulsar4X.ECSLib
     public class Game
     {
         #region Properties
-
-        [PublicAPI]
-        [JsonProperty(Order = 3)]
-        public StaticDataStore StaticData { get; } = new StaticDataStore();
+        public SafeDictionary<string, ThemeBlueprint> Themes { get; private set; }
+        public SafeDictionary<string, GasBlueprint> Gases { get; private set; }
+        public SystemGenSettingsBlueprint SystemGenSettings { get; private set; }
 
         [PublicAPI]
         [JsonProperty(Order = 7)]
@@ -93,7 +93,7 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public Game([NotNull] NewGameSettings newGameSettings) : this()
+        public Game([NotNull] NewGameSettings newGameSettings, ModDataStore modDataStore) : this()
         {
             if (newGameSettings == null)
             {
@@ -105,59 +105,20 @@ namespace Pulsar4X.ECSLib
             StaticRefLib.GameSettings = newGameSettings;
             GamePulse.GameGlobalDateTime = newGameSettings.StartDateTime;
 
-            // Load Static Data
-            if (newGameSettings.DataSets != null)
-            {
-                foreach (string dataSet in newGameSettings.DataSets)
-                {
-                    StaticDataManager.LoadData(dataSet, this);
-                }
-            }
-            if (StaticData.LoadedDataSets.Count == 0)
-            {
-                StaticDataManager.LoadData("Pulsar4x", this);
-            }
+            // Load in the data from modDataStore
+            SystemGenSettings = modDataStore.SystemGenSettings["default-system-gen-settings"]; // FIXME: we can set the key via the NewGameSettings
+            Gases = new SafeDictionary<string, GasBlueprint>(modDataStore.AtmosphericGas);
+            Themes = new SafeDictionary<string, ThemeBlueprint>(modDataStore.Themes);
+
             // Create SM
-
-
             SpaceMaster.ChangePassword(new AuthenticationToken(SpaceMaster, ""), newGameSettings.SMPassword);
             GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
-
-
-
-            if (newGameSettings.CreatePlayerFaction ?? false)
-            {
-
-                foreach (var kvp in newGameSettings.DefaultHaltOnEvents)
-                {
-                    //defaultPlayer.HaltsOnEvent.Add(kvp.Key, kvp.Value);
-                }
-
-                if (newGameSettings.DefaultSolStart ?? false)
-                {
-                    //DefaultStartFactory.DefaultHumans(this, newGameSettings.DefaultFactionName);
-                }
-                else
-                {
-                    //FactionFactory.CreatePlayerFaction(this, defaultPlayer, newGameSettings.DefaultFactionName);
-                }
-            }
 
             // Temp: This will be reworked later.
             GenerateSystems(new AuthenticationToken(SpaceMaster, newGameSettings.SMPassword), newGameSettings.MaxSystems);
 
-            /*
-            GlobalManager.ManagerSubpulses.Init(GlobalManager);
-            foreach (StarSystem starSys in this.Systems.Values)
-            {
-                starSys.ManagerSubpulses.Init(starSys);
-            }*/
-
             // Fire PostLoad event
             PostLoad += (sender, args) => { InitializeProcessors(); };
-
-
-
         }
 
         #endregion

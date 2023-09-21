@@ -6,12 +6,12 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Pulsar4X.ECSLib.Industry;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.ECSLib
 {
     public class FactionInfoDB : BaseDataBlob, IGetValuesHash
     {
-
         [JsonProperty]
         public List<Entity> Species { get; internal set; } = new List<Entity>();
 
