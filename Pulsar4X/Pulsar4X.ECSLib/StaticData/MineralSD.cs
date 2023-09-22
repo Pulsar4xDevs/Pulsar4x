@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Pulsar4X.Modding;
 
 namespace Pulsar4X.ECSLib
 {

@@ -1,8 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage
 {
@@ -60,7 +58,7 @@ namespace Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage
             LoadDefinitions(minerals, processedMaterials, otherCargo);
         }
 
-        
+
         public void LoadDefinitions(List<MineralSD> minerals,
             List<ProcessedMaterialSD> processedMaterials,
             List<ICargoable> otherCargo)

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using Pulsar4X.ECSLib.Industry;
-using Pulsar4X.Modding;
 
 namespace Pulsar4X.ECSLib
 {

@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -9,6 +9,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulsar4X.ImGuiNetUI", "Pulsar4X.ImGuiNetUI\Pulsar4X.ImGuiNetUI.csproj", "{8F27EDF1-1680-4CD2-809C-A9D25B207168}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Orbital", "Pulsar4X.OrbitalMath\Pulsar4X.Orbital.csproj", "{5220F218-C3A8-4A23-A9B7-F70C591987F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameEngine", "GameEngine\GameEngine.csproj", "{73F73928-ECB3-416D-BC66-E348251BB6D3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,6 +88,22 @@ Global
 		{5220F218-C3A8-4A23-A9B7-F70C591987F4}.Release|Windows_x64.Build.0 = Release|Any CPU
 		{5220F218-C3A8-4A23-A9B7-F70C591987F4}.Release|Windows_x86.ActiveCfg = Release|Any CPU
 		{5220F218-C3A8-4A23-A9B7-F70C591987F4}.Release|Windows_x86.Build.0 = Release|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Debug|Linux_x64.ActiveCfg = Debug|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Debug|Linux_x64.Build.0 = Debug|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Debug|Windows_x64.ActiveCfg = Debug|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Debug|Windows_x64.Build.0 = Debug|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Debug|Windows_x86.ActiveCfg = Debug|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Debug|Windows_x86.Build.0 = Debug|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Linux_x64.ActiveCfg = Release|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Linux_x64.Build.0 = Release|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Windows_x64.ActiveCfg = Release|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Windows_x64.Build.0 = Release|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Windows_x86.ActiveCfg = Release|Any CPU
+		{73F73928-ECB3-416D-BC66-E348251BB6D3}.Release|Windows_x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

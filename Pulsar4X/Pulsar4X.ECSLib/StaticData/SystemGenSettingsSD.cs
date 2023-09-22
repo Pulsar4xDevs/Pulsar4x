@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ECSLib
@@ -9,7 +8,7 @@ namespace Pulsar4X.ECSLib
     /// This static data struct holds all the modder tweakable setting used
     /// by system generation.
     /// </summary>
-    /// <remarks> 
+    /// <remarks>
     /// Unlike other Static data this type is not stored in the StaticDataStore.
     /// Instead it is used to it is stored in GalaxyFactory.Settings.
     /// Note that some of these values can be modified by the Player when creating a new game,
@@ -76,7 +75,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// This Dictionary holds the minium and maximum Age values (in years) for a Star given its spectral type.
-        /// @note Max age of a star in the Milky Way is 13.2 billion years, the age of the milky way. A star could be older 
+        /// @note Max age of a star in the Milky Way is 13.2 billion years, the age of the milky way. A star could be older
         /// (like 100 billion years older if not for the fact that the universion is only about 14 billion years old) but then it wouldn't be in the milky way.
         /// This is used for both K and M type stars both of which can easly be older than the milky way).
         /// </summary>
@@ -125,9 +124,9 @@ namespace Pulsar4X.ECSLib
         public int MaxNoOfComets;
 
         /// <summary>
-        /// Asteroids and Dwarf planets are generated in belts. To do this a single orbit is first generate as the 
-        /// basis for the whole belt. Asteroids then apply a small fluctuation of + or - a percentage of the original orbit 
-        /// (except MeanAnomaly, which is the starting point on the orbit. that is random). 
+        /// Asteroids and Dwarf planets are generated in belts. To do this a single orbit is first generate as the
+        /// basis for the whole belt. Asteroids then apply a small fluctuation of + or - a percentage of the original orbit
+        /// (except MeanAnomaly, which is the starting point on the orbit. that is random).
         /// The value is a percentage as a number between 0 and 1, tho typically it should be less than 10% (or 0.1).
         /// </summary>
         public double MaxAsteroidOrbitDeviation;
@@ -218,9 +217,9 @@ namespace Pulsar4X.ECSLib
         public Dictionary<BodyType, MinMaxStruct> PlanetMagneticFieldByType;
 
         /// <summary>
-        /// This value is multiplied by (SystemBody Mass / Earth's Mass), then clamped between 0 and 1, to get the chance of an atmosphere for this planet. 
+        /// This value is multiplied by (SystemBody Mass / Earth's Mass), then clamped between 0 and 1, to get the chance of an atmosphere for this planet.
         /// a result of 1 will always have an atmosphere (use large numbers to always produce 1), and a result of 0 will never gen an atmoisphere
-        /// (use 0 to force this result). 
+        /// (use 0 to force this result).
         /// @note These numbers can be tweaked as desired for gameplay. They effect the chances of atmosphere generation.
         /// @note On some body types this number can also impact how thick an atmosphere will be, the higher the pre-clamped value the thicker the atmosphere.
         /// </summary>
@@ -256,7 +255,7 @@ namespace Pulsar4X.ECSLib
         public Dictionary<BodyType, double> MaxMoonOrbitDistanceByPlanetType;
 
         /// <summary>
-        /// The maximum number of moons a planet of a given type can have. 
+        /// The maximum number of moons a planet of a given type can have.
         /// The bigger the planets the more moons it can have and the closer it will get to having the maximum number.
         /// @note Given the way the calculation for max moons is done it is unlikely that any planet will ever have the maximum number of moon, so pad as desired.
         /// </summary>
@@ -264,7 +263,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// These are the maximum thresholds fore each type of tectonic activity a planet can have.
-        /// Tectonic activity is calculated by Mass (in planet masses) / Star Age. 
+        /// Tectonic activity is calculated by Mass (in planet masses) / Star Age.
         /// Earth has a tectonic activity of 0.217 by this calculation.
         /// So if the tectonic activing number is less than the threshold of Earth like but greater than Minor then it will be Earth like.
         /// </summary>
@@ -318,7 +317,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// The chance that ruins will be generated on a suitable planet or moon.
-        /// @note A suitable planet/moon includes an atmosphere between 2.5 and 0.01 atm. 
+        /// @note A suitable planet/moon includes an atmosphere between 2.5 and 0.01 atm.
         /// </summary>
         public double RuinsGenerationChance;
 
@@ -329,7 +328,7 @@ namespace Pulsar4X.ECSLib
         public WeightedList<RuinsDB.RSize> RuinsSizeDistribution;
 
         /// <summary>
-        /// The chance of any given ruins quality being generated. 
+        /// The chance of any given ruins quality being generated.
         /// @note There is some special additional logic for RuinsDB.RQuality.MultipleIntact.
         /// @note These values can be tweaked as desired for game play.
         /// </summary>
@@ -353,7 +352,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// This is the minium Accessibility of generated minerals.
-        /// This value is added onto the generated accessibility to make sure that 
+        /// This value is added onto the generated accessibility to make sure that
         /// the accessibility is never too low.
         /// @note These values can be tweaked as desired for game play.
         /// @note Should be a value between 0 and 1.
@@ -362,7 +361,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// This is the minium Accessibility of generated minerals for a player/NPR homeworld..
-        /// This value is added onto the generated accessibility to make sure that 
+        /// This value is added onto the generated accessibility to make sure that
         /// the accessibility is never too low.
         /// @note These values can be tweaked as desired for game play.
         /// @note Should be a value between 0 and 1.
@@ -371,7 +370,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// This is the minium ammount of generated minerals for a player/NPR homeworld.
-        /// This value is added onto the generated ammount to make sure that 
+        /// This value is added onto the generated ammount to make sure that
         /// the accessibility is never too low.
         /// @note This value can be tweaked as desired for game play.
         /// </summary>
@@ -383,11 +382,11 @@ namespace Pulsar4X.ECSLib
         /// This value only applies to player/NPR homeworlds.
         /// @note This value can be tweaked as desired for game play.
         /// </summary>
-        public double HomeworldMineralAmmount; 
+        public double HomeworldMineralAmmount;
 
         /// <summary>
-        /// Defines the chance of a body generating minerals, if a generate chance value is higher 
-        /// then these then the body will have minerals. 
+        /// Defines the chance of a body generating minerals, if a generate chance value is higher
+        /// then these then the body will have minerals.
         /// These values are used both for an initial check to see if any minerals will be on this body
         /// (This check is adjusted by mass, so larger bodies are more likely to succeded and have minerals).
         /// In addition these values are used for a check for the presence of each mineral (this check is
@@ -1056,7 +1055,7 @@ namespace Pulsar4X.ECSLib
 
             #region Ruins Generation
 
-            // note A suitable planet/moon includes an atmosphere between 2.5 and 0.01 atm. 
+            // note A suitable planet/moon includes an atmosphere between 2.5 and 0.01 atm.
             settings.RuinsGenerationChance = 0.5;
 
             // note These values can be tweaked as desired for game play.
