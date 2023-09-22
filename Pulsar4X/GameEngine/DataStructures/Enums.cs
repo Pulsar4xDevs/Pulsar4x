@@ -197,4 +197,31 @@ namespace Pulsar4X.DataStructures
         Processing,
         Completed,
     }
+
+    public enum ComparisonType
+    {
+        [Description("<")]
+        LessThan,
+        [Description("<=")]
+        LessThanOrEqual,
+        [Description("=")]
+        EqualTo,
+        [Description(">")]
+        GreaterThan,
+        [Description(">=")]
+        GreaterThanOrEqual
+    }
+
+    public enum LogicalOperation
+    {
+        And,
+        Or
+    }
+
+    public enum ConditionDisplayType
+    {
+        Comparison,
+        Boolean,
+
+    }
 }

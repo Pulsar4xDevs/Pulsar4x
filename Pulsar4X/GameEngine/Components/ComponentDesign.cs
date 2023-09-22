@@ -6,10 +6,11 @@ using Pulsar4X.Engine;
 using Pulsar4X.Engine.Industry;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Components
 {
-    public class ComponentDesign : ICargoable, IConstrucableDesign
+    public class ComponentDesign : ICargoable, IConstructableDesign
     {
         public ConstructableGuiHints GuiHints { get; set; }
         public string UniqueID { get; internal set; }
@@ -52,11 +53,11 @@ namespace Pulsar4X.Components
         public Dictionary<Type, IComponentDesignAttribute> AttributesByType = new();
         public float AspectRatio = 1f;
 
-        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, string productionLine, IndustryJob batchJob, IConstructableDesign designInfo)
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             batchJob.NumberCompleted++;
-            batchJob.ResourcesRequiredRemaining = new Dictionary<Guid, long>(designInfo.ResourceCosts);
+            batchJob.ResourcesRequiredRemaining = new Dictionary<string, long>(designInfo.ResourceCosts);
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
 
             if (batchJob.InstallOn != null)

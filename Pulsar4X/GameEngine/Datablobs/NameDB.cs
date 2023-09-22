@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Datablobs
 {
@@ -15,10 +16,10 @@ namespace Pulsar4X.Datablobs
         /// Each faction can have a different name for whatever entity has this blob.
         /// </summary>
         [JsonProperty]
-        private readonly Dictionary<Guid, string> _names = new Dictionary<Guid, string>();
+        private readonly Dictionary<string, string> _names = new ();
 
         [PublicAPI]
-        public string DefaultName => _names[Guid.Empty];
+        public string DefaultName => _names[String.Empty];
 
         public string OwnersName
         {
@@ -30,16 +31,16 @@ namespace Pulsar4X.Datablobs
             }
         }
 
-        public NameDB() { _names.Add(Guid.Empty, "Un-Named");}
+        public NameDB() { _names.Add(String.Empty, "Un-Named");}
 
         public NameDB(string defaultName)
         {
-            _names.Add(Guid.Empty, defaultName);
+            _names.Add(String.Empty, defaultName);
         }
 
-        public NameDB(string defaultName, Guid factionID, string factionsName)
+        public NameDB(string defaultName, string factionID, string factionsName)
         {
-            _names.Add(Guid.Empty, defaultName);
+            _names.Add(String.Empty, defaultName);
             _names.Add(factionID, factionsName);
         }
 
@@ -47,7 +48,7 @@ namespace Pulsar4X.Datablobs
 
         public NameDB(NameDB nameDB)
         {
-            _names = new Dictionary<Guid, string>(nameDB._names);
+            _names = new Dictionary<string, string>(nameDB._names);
         }
 
         public override object Clone()
@@ -58,24 +59,12 @@ namespace Pulsar4X.Datablobs
         #endregion
 
         [PublicAPI]
-        public string GetName(Guid requestingFaction)
+        public string GetName(string requestingFaction)
         {
-            string name;
-            if (!_names.TryGetValue(requestingFaction, out name))
+            if (!_names.TryGetValue(requestingFaction, out var name))
             {
-                // Entry not found for the specific entity.
-                // Return guid instead. TODO: call an automatic naming function
-                if (StaticRefLib.Game.GameMasterFaction.Guid == requestingFaction)
-                {
-                    name = OwnersName;
-                    SetName(requestingFaction, OwnersName);
-                }
-                else
-                {
-                    name = OwningEntity.Guid.ToString();
-                    SetName(requestingFaction, name);
-                }
-
+                name = OwningEntity.Guid.ToString();
+                SetName(requestingFaction, name);
             }
             return name;
         }
@@ -88,13 +77,9 @@ namespace Pulsar4X.Datablobs
 
 
         [PublicAPI]
-        public void SetName(Guid requestingFaction, string specifiedName)
+        public void SetName(string requestingFaction, string specifiedName)
         {
             _names[requestingFaction] = specifiedName;
-            if (requestingFaction == OwningEntity.FactionOwnerID)
-            {
-                _names[StaticRefLib.SpaceMaster.Guid] = specifiedName;
-            }
         }
 
         public BaseDataBlob SensorClone(SensorInfoDB sensorInfo)
@@ -106,8 +91,8 @@ namespace Pulsar4X.Datablobs
         {
             foreach (var item in _names)
             {
-                hash = Misc.ValueHash(item.Key, hash);
-                hash = Misc.ValueHash(item.Value, hash);
+                hash = ObjectExtensions.ValueHash(item.Key, hash);
+                hash = ObjectExtensions.ValueHash(item.Value, hash);
             }
             return hash;
         }
@@ -119,7 +104,7 @@ namespace Pulsar4X.Datablobs
 
         NameDB(NameDB db, SensorInfoDB sensorInfo)
         {
-            _names.Add(Guid.Empty, db.DefaultName);
+            _names.Add(String.Empty, db.DefaultName);
             _names[sensorInfo.Faction.Guid] = db.GetName(sensorInfo.Faction.Guid);
         }
     }

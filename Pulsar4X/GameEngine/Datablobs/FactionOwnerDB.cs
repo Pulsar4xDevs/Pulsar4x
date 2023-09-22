@@ -2,19 +2,20 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Datablobs
 {
     public class FactionOwnerDB : BaseDataBlob, IGetValuesHash
     {
         [JsonProperty]
-        internal Dictionary<Guid, Entity> OwnedEntities { get; set; } = new Dictionary<Guid, Entity>();
-        private Dictionary<Guid, List<Entity>> ByStarSystem { get; set; } = new Dictionary<Guid, List<Entity>>();
+        internal Dictionary<string, Entity> OwnedEntities { get; set; } = new ();
+        private Dictionary<string, List<Entity>> ByStarSystem { get; set; } = new ();
         public FactionOwnerDB() { }
 
         public FactionOwnerDB(FactionOwnerDB db)
         {
-            OwnedEntities = new Dictionary<Guid, Entity>(db.OwnedEntities);
+            OwnedEntities = new Dictionary<string, Entity>(db.OwnedEntities);
         }
 
         internal void SetOwned(Entity entity)
@@ -34,7 +35,7 @@ namespace Pulsar4X.Datablobs
             if (OwnedEntities.ContainsKey(entity.Guid))
             {
                 OwnedEntities.Remove(entity.Guid);
-                entity.FactionOwnerID = Guid.Empty;
+                entity.FactionOwnerID = String.Empty;
             }
         }
 
@@ -48,7 +49,7 @@ namespace Pulsar4X.Datablobs
         {
             foreach (var item in OwnedEntities)
             {
-                hash = Misc.ValueHash(item.Key, hash);
+                hash = ObjectExtensions.ValueHash(item.Key, hash);
             }
 
             return hash;

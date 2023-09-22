@@ -4,6 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine
 {
@@ -19,7 +20,7 @@ namespace Pulsar4X.Engine
         public List<BaseDataBlob> DataBlobs { get; set; } = EntityManager.BlankDataBlobList();
 
         [PublicAPI]
-        public Guid Guid { get; protected internal set; }
+        public string Guid { get; protected internal set; }
 
         [NotNull]
         [PublicAPI]
@@ -28,7 +29,7 @@ namespace Pulsar4X.Engine
         protected ComparableBitArray _protectedDataBlobMask_ = EntityManager.BlankDataBlobMask();
 
         [PublicAPI]
-        public static ProtoEntity Create(Guid guid, IEnumerable<BaseDataBlob> dataBlobs = null)
+        public static ProtoEntity Create(string guid, IEnumerable<BaseDataBlob> dataBlobs = null)
         {
             var protoEntity = new ProtoEntity
             {
@@ -51,7 +52,7 @@ namespace Pulsar4X.Engine
         [PublicAPI]
         public static ProtoEntity Create(IEnumerable<BaseDataBlob> dataBlobs = null)
         {
-            return Create(Guid.Empty, dataBlobs);
+            return Create("", dataBlobs);
         }
 
         [PublicAPI]
@@ -106,7 +107,7 @@ namespace Pulsar4X.Engine
                     if (item is IGetValuesHash)
                         hash = ((IGetValuesHash)item).GetValueCompareHash(hash);
                     else
-                        hash = Misc.ValueHash(item, hash);
+                        hash = ObjectExtensions.ValueHash(item, hash);
                 }
             }
             return hash;
@@ -126,7 +127,7 @@ namespace Pulsar4X.Engine
                 //StarObject (Entity)
                 reader.Read(); // PropertyName ID
                 reader.Read(); // Actual ID
-                protoEntity.Guid = serializer.Deserialize<Guid>(reader); // Deserialize the ID
+                protoEntity.Guid = serializer.Deserialize<string>(reader); // Deserialize the ID
                 //bool exists2 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
                 // Deserialize the dataBlobs
                 reader.Read(); // PropertyName DATABLOB

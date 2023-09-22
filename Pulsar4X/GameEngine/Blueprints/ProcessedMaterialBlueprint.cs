@@ -4,7 +4,7 @@ using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Blueprints
 {
-    public class ProcessedMaterialBlueprint : Blueprint, ICargoable
+    public class ProcessedMaterialBlueprint : Blueprint
     {
         public string Name { get; init; }
         public Dictionary<string, string> Formulas { get; set;}

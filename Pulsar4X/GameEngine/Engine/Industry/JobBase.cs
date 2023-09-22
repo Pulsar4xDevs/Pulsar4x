@@ -6,7 +6,7 @@ namespace Pulsar4X.Engine.Industry
     public abstract class JobBase
     {
         public virtual string Name { get; internal set; }
-        public Guid JobID = Guid.NewGuid();
+        public string JobID = Guid.NewGuid().ToString();
         public string ItemGuid { get; protected set; }
         public ushort NumberOrdered { get; set; }
         public ushort NumberCompleted { get; internal set; }

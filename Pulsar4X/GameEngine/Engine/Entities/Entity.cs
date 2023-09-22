@@ -29,7 +29,7 @@ namespace Pulsar4X.Engine
         [JsonIgnore]
         public EntityManager Manager { get; private set; }
         [JsonProperty]
-        public Guid FactionOwnerID { get; internal set; }
+        public string FactionOwnerID { get; internal set; }
         public Entity GetFactionOwner
         {
             get { return Manager.GetGlobalEntityByGuid(FactionOwnerID); }

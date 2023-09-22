@@ -7,7 +7,7 @@ using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.Interfaces
 {
-    public interface IConstrucableDesign
+    public interface IConstructableDesign
     {
         ConstructableGuiHints GuiHints { get; }
 
@@ -21,7 +21,7 @@ namespace Pulsar4X.Interfaces
         long IndustryPointCosts { get; }
         string IndustryTypeID { get; }
         ushort OutputAmount { get; }
-        void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo);
+        void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, string productionLine, IndustryJob batchJob, IConstructableDesign designInfo);
 
     }
 }

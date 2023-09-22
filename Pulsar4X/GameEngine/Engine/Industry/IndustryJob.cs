@@ -25,7 +25,7 @@ namespace Pulsar4X.Engine.Industry
             NumberOrdered = 1;
         }
 
-        internal IndustryJob(IConstrucableDesign design)
+        internal IndustryJob(IConstructableDesign design)
         {
             ItemGuid = design.UniqueID;
             TypeID = design.IndustryTypeID;

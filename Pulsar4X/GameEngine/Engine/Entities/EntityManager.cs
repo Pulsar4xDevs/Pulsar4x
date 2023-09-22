@@ -16,12 +16,12 @@ namespace Pulsar4X.Engine
     public class EntityManager : ISerializable
     {
         [CanBeNull]
-        internal Guid ManagerGuid;
+        internal string ManagerGuid;
         internal Game Game { get;  set; }
         protected readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
-        private readonly Dictionary<Guid, Entity> _localEntityDictionary = new Dictionary<Guid, Entity>();
-        private readonly Dictionary<Guid, EntityManager> _globalEntityDictionary;
+        private readonly Dictionary<string, Entity> _localEntityDictionary = new ();
+        private readonly Dictionary<string, EntityManager> _globalEntityDictionary;
         private readonly ReaderWriterLockSlim _globalGuidDictionaryLock;
         public int NumberOfEntites { get { return _entities.Count; } }
         public int NumberOfGlobalEntites { get { return _globalEntityDictionary.Count; } }
@@ -37,20 +37,18 @@ namespace Pulsar4X.Engine
 
         internal ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
 
-        internal List<AEntityChangeListener> EntityListners = new List<AEntityChangeListner>();
+        internal List<AEntityChangeListener> EntityListners = new ();
 
-        internal Dictionary<Guid, SystemSensorContacts> FactionSensorContacts = new Dictionary<Guid, SystemSensorContacts>();
-        public SystemSensorContacts GetSensorContacts(Guid factionGuid)
+        internal Dictionary<string, SystemSensorContacts> FactionSensorContacts = new ();
+        public SystemSensorContacts GetSensorContacts(string factionGuid)
         {
             if (!FactionSensorContacts.ContainsKey(factionGuid))
                 return new SystemSensorContacts(this, GetGlobalEntityByGuid(factionGuid));
             return FactionSensorContacts[factionGuid];
         }
-        Dictionary<Guid, List<Entity>> EntitesByFaction = new Dictionary<Guid, List<Entity>>();
-        public List<Entity> GetEntitiesByFaction(Guid factionGuid)
+        Dictionary<string, List<Entity>> EntitesByFaction = new ();
+        public List<Entity> GetEntitiesByFaction(string factionGuid)
         {
-            if (factionGuid == StaticRefLib.Game.GameMasterFaction.Guid)
-                return _entities;
             if (EntitesByFaction.ContainsKey(factionGuid))
                 return EntitesByFaction[factionGuid];
             else
@@ -73,7 +71,7 @@ namespace Pulsar4X.Engine
         internal EntityManager(Game game, bool isGlobalManager = false)
         {
             Game = game;
-            ManagerGuid = Guid.NewGuid();
+            ManagerGuid = Guid.NewGuid().ToString();
             game.GlobalManagerDictionary.Add(ManagerGuid, this);
             if (isGlobalManager)
             {
@@ -89,7 +87,7 @@ namespace Pulsar4X.Engine
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
-            ManagerSubpulses = new ManagerSubPulse(this, StaticRefLib.ProcessorManager);
+            ManagerSubpulses = new ManagerSubPulse(this, game.ProcessorManager);
         }
 
         private static Dictionary<Type, int> InitializeDataBlobTypes()
@@ -182,7 +180,7 @@ namespace Pulsar4X.Engine
                 }
             }
 
-            UpdateListners(_entities[entityID], null, EntityChangeType.EntityAdded);
+            UpdateListners(_entities[entityID], null, EntityChangeData.EntityChangeType.EntityAdded);
 
             if (entity.FactionOwnerID != null)
             {
@@ -219,17 +217,17 @@ namespace Pulsar4X.Engine
                 throw new ArgumentException("Provided Entity is not valid in this manager.");
             }
 
-            Event logevent = new Event(StaticRefLib.CurrentDateTime, "Entity Removed From Manager");
-            logevent.Entity = entity;
-            if(entity.FactionOwnerID != Guid.Empty)
-                logevent.Faction = GetGlobalEntityByGuid(entity.FactionOwnerID);
-            logevent.SystemGuid = ManagerGuid;
-            logevent.EventType = EventType.EntityDestroyed;
-            if (entity.IsValid && entity.HasDataBlob<NameDB>())
-                logevent.EntityName = entity.GetDataBlob<NameDB>().OwnersName;
+            // Event logevent = new Event(StaticRefLib.CurrentDateTime, "Entity Removed From Manager");
+            // logevent.Entity = entity;
+            // if(entity.FactionOwnerID != Guid.Empty)
+            //     logevent.Faction = GetGlobalEntityByGuid(entity.FactionOwnerID);
+            // logevent.SystemGuid = ManagerGuid;
+            // logevent.EventType = EventType.EntityDestroyed;
+            // if (entity.IsValid && entity.HasDataBlob<NameDB>())
+            //     logevent.EntityName = entity.GetDataBlob<NameDB>().OwnersName;
 
 
-            StaticRefLib.EventLog.AddEvent(logevent);
+            // StaticRefLib.EventLog.AddEvent(logevent);
 
             int entityID = entity.ID;
             _entities[entityID] = null;
@@ -248,7 +246,7 @@ namespace Pulsar4X.Engine
 
             if (Game != null)
             {
-                UpdateListners(entity, null, EntityChangeType.EntityRemoved);
+                UpdateListners(entity, null, EntityChangeData.EntityChangeType.EntityRemoved);
                 _globalGuidDictionaryLock.EnterWriteLock();
                 try
                 {
@@ -348,7 +346,7 @@ namespace Pulsar4X.Engine
             dataBlob.OnSetToEntity();
             dataBlob.OwningEntity.Manager.ManagerSubpulses.AddSystemInterupt(dataBlob);
             if(updateListners)
-                UpdateListners(_entities[entityID], dataBlob, EntityChangeType.DBAdded);
+                UpdateListners(_entities[entityID], dataBlob, EntityChangeData.EntityChangeType.DBAdded);
         }
 
         internal void RemoveDataBlob<T>(int entityID) where T : BaseDataBlob
@@ -363,7 +361,7 @@ namespace Pulsar4X.Engine
             _dataBlobMap[typeIndex][entityID].OwningEntity = null;
             _dataBlobMap[typeIndex][entityID] = null;
             EntityMasks[entityID][typeIndex] = false;
-            UpdateListners(_entities[entityID], db, EntityChangeType.DBRemoved);
+            UpdateListners(_entities[entityID], db, EntityChangeData.EntityChangeType.DBRemoved);
         }
 
         #endregion
@@ -416,7 +414,7 @@ namespace Pulsar4X.Engine
 
             foreach (Entity entity in allEntities)
             {
-                if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
+                if (AccessControl.IsAuthorized(Game, authToken, entity))
                 {
                     authorizedEntities.Add(entity);
                 }
@@ -479,7 +477,7 @@ namespace Pulsar4X.Engine
 
             foreach (Entity entity in allEntities)
             {
-                if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
+                if (AccessControl.IsAuthorized(Game, authToken, entity))
                 {
                     authorizedEntities.Add(entity);
                 }
@@ -537,7 +535,7 @@ namespace Pulsar4X.Engine
 
             foreach (Entity entity in allEntities)
             {
-                if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
+                if (AccessControl.IsAuthorized(Game, authToken, entity))
                 {
                     authorizedEntities.Add(entity);
                 }
@@ -611,7 +609,7 @@ namespace Pulsar4X.Engine
         {
             Entity entity = GetFirstEntityWithDataBlob(typeIndex);
 
-            if (EntityAccessControl.IsAuthorized(Game, authToken, entity))
+            if (AccessControl.IsAuthorized(Game, authToken, entity))
             {
                 return entity;
             }
@@ -667,7 +665,7 @@ namespace Pulsar4X.Engine
         /// <returns><c>true</c>, if entity does exist globaly <c>false</c> otherwise.</returns>
         /// <param name="entityGuid">Entity GUID.</param>
         [PublicAPI]
-        public bool EntityExistsGlobaly(Guid entityGuid)
+        public bool EntityExistsGlobaly(string entityGuid)
         {
             bool exsits;
             if (Game == null)
@@ -689,7 +687,7 @@ namespace Pulsar4X.Engine
         /// <returns><c>true</c>, if entity exsist localy <c>false</c> otherwise.</returns>
         /// <param name="entityGuid">Entity GUID.</param>
         [PublicAPI]
-        public bool EntityExistsLocaly(Guid entityGuid)
+        public bool EntityExistsLocaly(string entityGuid)
         {
             if (_localEntityDictionary.ContainsKey(entityGuid))
                 return true;
@@ -703,7 +701,7 @@ namespace Pulsar4X.Engine
         /// <returns>True if entityID is found.</returns>
         /// <exception cref="GuidNotFoundException">ID was found in Global list, but not locally. Should not be possible.</exception>
         [PublicAPI]
-        public bool FindEntityByGuid(Guid entityGuid, out Entity entity)
+        public bool FindEntityByGuid(string entityGuid, out Entity entity)
         {
             if (Game == null)
             {
@@ -726,7 +724,7 @@ namespace Pulsar4X.Engine
                 {
                     // Can only be reached if memory corruption or somehow the _guidLock thread synchronization fails.
                     // Entity must be removed from the local manager, but not the global list. Should not be possible.
-                    throw new GuidNotFoundException(entityGuid);
+                    throw new Exception(entityGuid);
                 }
                 return true;
             }
@@ -743,11 +741,11 @@ namespace Pulsar4X.Engine
         /// <returns>Entity if found</returns>
         /// <exception cref="GuidNotFoundException">ID was not found</exception>
         [PublicAPI]
-        public Entity GetGlobalEntityByGuid(Guid entityGuid)
+        public Entity GetGlobalEntityByGuid(string entityGuid)
         {
             Entity entity;
             if (!FindEntityByGuid(entityGuid, out entity))
-                throw new GuidNotFoundException(entityGuid);
+                throw new Exception(entityGuid);
             return entity;
         }
 
@@ -757,12 +755,12 @@ namespace Pulsar4X.Engine
         /// <returns>The Entity if found</returns>
         /// <exception cref="GuidNotFoundException">ID was not found in Global list, orlocally</exception>
         [PublicAPI]
-        public Entity GetLocalEntityByGuid(Guid entityGuid)
+        public Entity GetLocalEntityByGuid(string entityGuid)
         {
             Entity entity;
             if (!TryGetEntityByGuid(entityGuid, out entity))
             {
-                throw new GuidNotFoundException(entityGuid);
+                throw new Exception(entityGuid);
             }
             return entity;
         }
@@ -774,7 +772,7 @@ namespace Pulsar4X.Engine
         /// </summary>
         /// <returns>True if entityID exists in this manager.</returns>
         [PublicAPI]
-        public bool TryGetEntityByGuid(Guid entityGuid, out Entity entity)
+        public bool TryGetEntityByGuid(string entityGuid, out Entity entity)
         {
             if (Game != null)
             {

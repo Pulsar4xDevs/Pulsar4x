@@ -13,7 +13,7 @@ namespace Pulsar4X.Datablobs
     {
 
         [JsonProperty]
-        public Guid SystemGuid;
+        public string SystemGuid;
 
         /// <summary>
         /// The Position as a Vec3, in m.
@@ -64,7 +64,7 @@ namespace Pulsar4X.Datablobs
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>
         /// <param name="z">Z value.</param>
-        public PositionDB(double x, double y, double z, Guid systemGuid, Entity parent = null) : base(parent)
+        public PositionDB(double x, double y, double z, string systemGuid, Entity parent = null) : base(parent)
         {
             AbsolutePosition = new Vector3(x, y, z);
             SystemGuid = systemGuid;
@@ -76,13 +76,13 @@ namespace Pulsar4X.Datablobs
         /// <param name="relativePos_m"></param>
         /// <param name="systemGuid"></param>
         /// <param name="parent"></param>
-        public PositionDB(Vector3 relativePos, Guid systemGuid, Entity parent = null) : base(parent)
+        public PositionDB(Vector3 relativePos, string systemGuid, Entity parent = null) : base(parent)
         {
             RelativePosition = relativePos;
             SystemGuid = systemGuid;
         }
 
-        public PositionDB(Guid systemGuid, Entity parent = null) : base(parent)
+        public PositionDB(string systemGuid, Entity parent = null) : base(parent)
         {
             Vector3? parentPos = (ParentDB as PositionDB)?.AbsolutePosition;
             AbsolutePosition = parentPos ?? Vector3.Zero;
@@ -105,7 +105,7 @@ namespace Pulsar4X.Datablobs
 
 
         [UsedImplicitly]
-        private PositionDB() : this(Guid.Empty) { }
+        private PositionDB() : this(String.Empty) { }
 
         /// <summary>
         /// changes the positions relative to

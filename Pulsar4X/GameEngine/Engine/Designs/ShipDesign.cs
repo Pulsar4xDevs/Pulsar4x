@@ -15,7 +15,7 @@ using Pulsar4X.Orbital;
 namespace Pulsar4X.Engine.Designs
 {
     [JsonObject]
-    public class ShipDesign : ICargoable, IConstrucableDesign, ISerializable
+    public class ShipDesign : ICargoable, IConstructableDesign, ISerializable
     {
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;
         public string UniqueID { get; private set; } = Guid.NewGuid().ToString();
@@ -56,11 +56,11 @@ namespace Pulsar4X.Engine.Designs
         public string IndustryTypeID { get; } = "ship-assembly"; //new Guid("91823C5B-A71A-4364-A62C-489F0183EFB5");
         public ushort OutputAmount { get; } = 1;
 
-        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, string productionLine, IndustryJob batchJob, IConstructableDesign designInfo)
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             batchJob.NumberCompleted++;
-            batchJob.ResourcesRequiredRemaining = new Dictionary<Guid, long>(designInfo.ResourceCosts);
+            batchJob.ResourcesRequiredRemaining = new Dictionary<string, long>(designInfo.ResourceCosts);
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
 
             var faction = industryEntity.GetFactionOwner;

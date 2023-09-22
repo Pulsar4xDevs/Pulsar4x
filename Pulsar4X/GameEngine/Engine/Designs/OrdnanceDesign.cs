@@ -12,7 +12,7 @@ using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Engine.Designs
 {
-    public class OrdnanceDesign : ICargoable, IConstrucableDesign, ISerializable
+    public class OrdnanceDesign : ICargoable, IConstructableDesign, ISerializable
     {
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.IsOrdinance;
         public string UniqueID { get; } = Guid.NewGuid().ToString();
@@ -52,11 +52,11 @@ namespace Pulsar4X.Engine.Designs
             get { return 1; }
         }
 
-        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, Guid productionLine, IndustryJob batchJob, IConstrucableDesign designInfo)
+        public void OnConstructionComplete(Entity industryEntity, VolumeStorageDB storage, string productionLine, IndustryJob batchJob, IConstructableDesign designInfo)
         {
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             batchJob.NumberCompleted++;
-            batchJob.ResourcesRequiredRemaining = new Dictionary<Guid, long>(designInfo.ResourceCosts);
+            batchJob.ResourcesRequiredRemaining = new Dictionary<string, long>(designInfo.ResourceCosts);
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
 
         }

@@ -1,8 +1,10 @@
 using System;
 using Newtonsoft.Json;
+using Pulsar4X.Engine.Auth;
 using Pulsar4X.Modding;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Engine
 {
@@ -19,16 +21,21 @@ namespace Pulsar4X.Engine
         [JsonProperty(Order = 5)]
         public SafeDictionary<string, StarSystem> Systems { get; private set; } = new ();
         public EntityManager GlobalManager { get; }
+        internal readonly SafeDictionary<string, EntityManager> GlobalManagerDictionary = new ();
+        internal ProcessorManager ProcessorManager { get; private set; }
+        public Player SpaceMaster = new Player("Space Master", "");
+        public IOrderHandler OrderHandler { get; private set; }
 
         internal event EventHandler PostLoad;
 
         public Game()
         {
             GlobalManager = new EntityManager(this, true);
+            ProcessorManager = new ProcessorManager(this);
             Themes = new();
             AtmosphericGases = new();
             SystemGenSettings = new();
-            TimePulse = new ();
+            TimePulse = new (this);
         }
 
         public Game(ModDataStore modDataStore)

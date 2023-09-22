@@ -4,7 +4,7 @@ using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Blueprints
 {
-    public class MineralBlueprint : Blueprint, ICargoable
+    public class MineralBlueprint : Blueprint
     {
         public string Name { get; set; }
         public string Description { get; set; }

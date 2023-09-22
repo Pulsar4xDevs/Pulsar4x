@@ -8,7 +8,7 @@ namespace Pulsar4X.Components
     {
         public string Name { get; internal set; }
 
-        public Guid ID { get; private set; }
+        public string ID { get; private set; }
 
         public ComponentInstance ComponentInstance { get; private set; }
 
@@ -16,7 +16,7 @@ namespace Pulsar4X.Components
         {
             ComponentInstance = componentInstance;
             Name = componentInstance.Design.Name;
-            ID = componentInstance.ID;
+            ID = componentInstance.UniqueID;
         }
     }
 }

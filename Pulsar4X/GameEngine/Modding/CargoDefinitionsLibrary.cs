@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Pulsar4X.DataStructures;
-using Pulsar4X.Interfaces;
 using Pulsar4X.Blueprints;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Engine.Industry;
+using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Modding
 {
     public class CargoDefinitionsLibrary
     {
         private SafeDictionary<string, ICargoable> _definitions;
-        private SafeDictionary<string, MineralBlueprint> _minerals;
-        private SafeDictionary<string, ProcessedMaterialBlueprint> _processedMaterials;
+        private SafeDictionary<string, Mineral> _minerals;
+        private SafeDictionary<string, ProcessedMaterial> _processedMaterials;
 
         public CargoDefinitionsLibrary() : this(new List<MineralBlueprint>(),
             new List<ProcessedMaterialBlueprint>(),
@@ -23,8 +24,8 @@ namespace Pulsar4X.Modding
             List<ICargoable> otherCargo)
         {
             _definitions = new SafeDictionary<string, ICargoable>();
-            _minerals = new SafeDictionary<string, MineralBlueprint>();
-            _processedMaterials = new SafeDictionary<string, ProcessedMaterialBlueprint>();
+            _minerals = new SafeDictionary<string, Mineral>();
+            _processedMaterials = new SafeDictionary<string, ProcessedMaterial>();
 
             LoadDefinitions(minerals, processedMaterials, otherCargo);
         }
@@ -32,8 +33,8 @@ namespace Pulsar4X.Modding
         public CargoDefinitionsLibrary(CargoDefinitionsLibrary other)
         {
             _definitions = new SafeDictionary<string, ICargoable>(other._definitions);
-            _minerals = new SafeDictionary<string, MineralBlueprint>(other._minerals);
-            _processedMaterials = new SafeDictionary<string, ProcessedMaterialBlueprint>(other._processedMaterials);
+            _minerals = new SafeDictionary<string, Mineral>(other._minerals);
+            _processedMaterials = new SafeDictionary<string, ProcessedMaterial>(other._processedMaterials);
         }
 
 
@@ -52,7 +53,7 @@ namespace Pulsar4X.Modding
             {
                 foreach (var entry in minerals)
                 {
-                    Add(entry);
+                    Add(new Mineral(entry));
                 }
             }
         }
@@ -63,7 +64,7 @@ namespace Pulsar4X.Modding
             {
                 foreach (var entry in materials)
                 {
-                    Add(entry);
+                    Add(new ProcessedMaterial(entry));
                 }
             }
         }
@@ -84,13 +85,13 @@ namespace Pulsar4X.Modding
             _definitions[cargoable.UniqueID] = cargoable;
         }
 
-        public void Add(MineralBlueprint mineral)
+        public void Add(Mineral mineral)
         {
             _definitions[mineral.UniqueID] = mineral;
             _minerals[mineral.UniqueID] = mineral;
         }
 
-        public void Add(ProcessedMaterialBlueprint material)
+        public void Add(ProcessedMaterial material)
         {
             _definitions[material.UniqueID] = material;
             _processedMaterials[material.UniqueID] = material;
@@ -103,12 +104,12 @@ namespace Pulsar4X.Modding
             return _definitions.Remove(cargoable.UniqueID);
         }
 
-        public bool Remove(MineralBlueprint mineral)
+        public bool Remove(Mineral mineral)
         {
             return _definitions.Remove(mineral.UniqueID) && _minerals.Remove(mineral.UniqueID);
         }
 
-        public bool Remove(ProcessedMaterialBlueprint material)
+        public bool Remove(ProcessedMaterial material)
         {
             return _definitions.Remove(material.UniqueID) && _processedMaterials.Remove(material.UniqueID);
         }
@@ -132,22 +133,22 @@ namespace Pulsar4X.Modding
 
         public bool IsMineral(string id) => _minerals.ContainsKey(id);
 
-        public MineralBlueprint GetMineralByName(string name) => _minerals.Values.Where(m => m.Name.Equals(name)).First();
+        public Mineral GetMineralByName(string name) => _minerals.Values.Where(m => m.Name.Equals(name)).First();
 
-        public MineralBlueprint GetMineral(string id) => _minerals[id];
+        public Mineral GetMineral(string id) => _minerals[id];
 
-        public SafeDictionary<string, MineralBlueprint> GetMinerals() => _minerals;
+        public SafeDictionary<string, Mineral> GetMinerals() => _minerals;
 
-        public SafeList<MineralBlueprint> GetMineralsList() => new SafeList<MineralBlueprint>(_minerals.Values.ToList());
+        public SafeList<Mineral> GetMineralsList() => new SafeList<Mineral>(_minerals.Values.ToList());
 
         public bool IsMaterial(string id) => _processedMaterials.ContainsKey(id);
 
-        public ProcessedMaterialBlueprint GetMaterialByName(string name) => _processedMaterials.Values.Where(p => p.Name.Equals(name)).First();
+        public ProcessedMaterial GetMaterialByName(string name) => _processedMaterials.Values.Where(p => p.Name.Equals(name)).First();
 
-        public ProcessedMaterialBlueprint GetMaterial(string id) => _processedMaterials[id];
+        public ProcessedMaterial GetMaterial(string id) => _processedMaterials[id];
 
-        public SafeDictionary<string, ProcessedMaterialBlueprint> GetMaterials() => _processedMaterials;
+        public SafeDictionary<string, ProcessedMaterial> GetMaterials() => _processedMaterials;
 
-        public SafeList<ProcessedMaterialBlueprint> GetMaterialsList() => new SafeList<ProcessedMaterialBlueprint>(_processedMaterials.Values.ToList());
+        public SafeList<ProcessedMaterial> GetMaterialsList() => new SafeList<ProcessedMaterial>(_processedMaterials.Values.ToList());
     }
 }

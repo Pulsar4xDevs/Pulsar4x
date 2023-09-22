@@ -13,55 +13,59 @@ using Pulsar4X.Engine.Designs;
 using Pulsar4X.Engine.Events;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Interfaces;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.Datablobs
 {
     public class FactionInfoDB : BaseDataBlob, IGetValuesHash
     {
         [JsonProperty]
-        public List<Entity> Species { get; internal set; } = new List<Entity>();
+        public FactionDataStore Data { get; internal set; } = new FactionDataStore();
+
+        [JsonProperty]
+        public List<Entity> Species { get; internal set; } = new ();
 
 
         [JsonProperty]
-        public List<string> KnownSystems { get; internal set; } = new List<string>();
+        public List<string> KnownSystems { get; internal set; } = new ();
 
 
-        public ReadOnlyDictionary<Guid, List<Entity>> KnownJumpPoints => new ReadOnlyDictionary<Guid, List<Entity>>(InternalKnownJumpPoints);
+        public ReadOnlyDictionary<string, List<Entity>> KnownJumpPoints => new (InternalKnownJumpPoints);
         [JsonProperty]
-        internal Dictionary<Guid, List<Entity>> InternalKnownJumpPoints = new Dictionary<Guid, List<Entity>>();
+        internal Dictionary<string, List<Entity>> InternalKnownJumpPoints = new ();
 
 
         [JsonProperty]
-        public List<Entity> KnownFactions { get; internal set; } = new List<Entity>();
+        public List<Entity> KnownFactions { get; internal set; } = new ();
 
 
         [PublicAPI]
         [JsonProperty]
-        public List<Entity> Colonies { get; internal set; } = new List<Entity>();
+        public List<Entity> Colonies { get; internal set; } = new ();
 
         [JsonProperty]
-        public SafeList<Guid> Commanders { get; internal set; } = new SafeList<Guid>();
+        public SafeList<string> Commanders { get; internal set; } = new ();
 
         [JsonProperty]
-        public Dictionary<string, ShipDesign> ShipDesigns = new Dictionary<string, ShipDesign>();
+        public Dictionary<string, ShipDesign> ShipDesigns = new ();
 
         [JsonProperty]
-        public Dictionary<Guid, OrdnanceDesign> MissileDesigns = new Dictionary<Guid, OrdnanceDesign>();
+        public Dictionary<string, OrdnanceDesign> MissileDesigns = new ();
 
         /// <summary>
         /// This includes non researched and not constructible designs.
         /// Does Not Include Refined Materials
         /// </summary>
-        public ReadOnlyDictionary<Guid, ComponentDesign> ComponentDesigns => new ReadOnlyDictionary<Guid, ComponentDesign>(InternalComponentDesigns);
+        public ReadOnlyDictionary<string, ComponentDesign> ComponentDesigns => new (InternalComponentDesigns);
         [JsonProperty]
-        internal Dictionary<Guid, ComponentDesign> InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>();
+        internal Dictionary<string, ComponentDesign> InternalComponentDesigns = new ();
 
 
         /// <summary>
         /// this shoudl only be designs we can construct.
         /// Does Include Refined Materials.
         /// </summary>
-        public Dictionary<string, IConstrucableDesign> IndustryDesigns = new Dictionary<string, IConstrucableDesign>();
+        public Dictionary<string, IConstructableDesign> IndustryDesigns = new ();
 
 
 
@@ -69,31 +73,33 @@ namespace Pulsar4X.Datablobs
         /// <summary>
         /// stores sensor contacts for the entire faction, when a contact is created it gets added here.
         /// </summary>
-        internal Dictionary<Guid, SensorContact> SensorContacts = new Dictionary<Guid, SensorContact>();
+        internal Dictionary<string, SensorContact> SensorContacts = new ();
 
-        public Dictionary<EventType, bool> HaltsOnEvent { get; } = new Dictionary<EventType, bool>();
+        public Dictionary<EventType, bool> HaltsOnEvent { get; } = new ();
 
         [JsonProperty]
-        private Dictionary<Entity, uint> FactionAccessRoles { get; set; } = new Dictionary<Entity, uint>();
-        internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
+        private Dictionary<Entity, uint> FactionAccessRoles { get; set; } = new ();
+        internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new (FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
 
 
 
         public FactionInfoDB()
         {
-            Dictionary<Guid, ComponentDesign> componentDesigns = new Dictionary<Guid, ComponentDesign>();
-            Dictionary<Guid, ShipDesign> shipClasses = new Dictionary<Guid, ShipDesign>();
+            var componentDesigns = new Dictionary<string, ComponentDesign>();
+            var shipClasses = new Dictionary<string, ShipDesign>();
             SetIndustryDesigns(componentDesigns, shipClasses);
             HaltsOnEvent.Add(EventType.OrdersHalt, true);
         }
 
         public FactionInfoDB(
+            FactionDataStore factionDataStore,
             List<Entity> species,
-            List<Guid> knownSystems,
+            List<string> knownSystems,
             List<Entity> colonies,
-            Dictionary<Guid, ComponentDesign> componentDesigns,
-            Dictionary<Guid, ShipDesign> shipClasses)
+            Dictionary<string, ComponentDesign> componentDesigns,
+            Dictionary<string, ShipDesign> shipClasses)
         {
+            Data = factionDataStore;
             Species = species;
             KnownSystems = knownSystems;
             Colonies = colonies;
@@ -107,15 +113,16 @@ namespace Pulsar4X.Datablobs
 
         public FactionInfoDB(FactionInfoDB factionDB)
         {
+            Data = factionDB.Data;
             Species = new List<Entity>(factionDB.Species);
-            KnownSystems = new List<Guid>(factionDB.KnownSystems);
+            KnownSystems = new List<string>(factionDB.KnownSystems);
             KnownFactions = new List<Entity>(factionDB.KnownFactions);
             Colonies = new List<Entity>(factionDB.Colonies);
-            InternalKnownJumpPoints = new Dictionary<Guid, List<Entity>>(factionDB.KnownJumpPoints);
+            InternalKnownJumpPoints = new Dictionary<string, List<Entity>>(factionDB.KnownJumpPoints);
 
-            ShipDesigns = new Dictionary<Guid, ShipDesign>(factionDB.ShipDesigns);
-            InternalComponentDesigns = new Dictionary<Guid, ComponentDesign>(factionDB.ComponentDesigns);
-            IndustryDesigns = new Dictionary<Guid, IConstrucableDesign>(factionDB.IndustryDesigns);
+            ShipDesigns = new Dictionary<string, ShipDesign>(factionDB.ShipDesigns);
+            InternalComponentDesigns = new Dictionary<string, ComponentDesign>(factionDB.ComponentDesigns);
+            IndustryDesigns = new Dictionary<string, IConstructableDesign>(factionDB.IndustryDesigns);
             HaltsOnEvent.Add(EventType.OrdersHalt, true);
 
         }
@@ -126,12 +133,12 @@ namespace Pulsar4X.Datablobs
         }
 
         void SetIndustryDesigns(
-            Dictionary<Guid, ComponentDesign> componentDesigns,
-            Dictionary<Guid, ShipDesign> shipClasses)
+            Dictionary<string, ComponentDesign> componentDesigns,
+            Dictionary<string, ShipDesign> shipClasses)
         {
-            foreach (var mat in StaticRefLib.StaticData.CargoGoods.GetMaterialsList())
+            foreach (var mat in Data.CargoGoods.GetMaterialsList())
             {
-                IndustryDesigns[mat.ID] = mat;
+                IndustryDesigns[mat.UniqueID] = mat;
             }
             foreach (var design in componentDesigns)
             {
@@ -174,7 +181,7 @@ namespace Pulsar4X.Datablobs
             foreach (var item in InternalComponentDesigns)
             {
                 hash = ObjectExtensions.ValueHash(item.Key, hash);
-                hash = ObjectExtensions.ValueHash(item.Value.ID, hash);
+                hash = ObjectExtensions.ValueHash(item.Value.UniqueID, hash);
             }
             foreach (var system in InternalKnownJumpPoints)
             {
