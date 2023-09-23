@@ -11,6 +11,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Industry;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Orbital;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine.Designs
 {
@@ -28,7 +29,7 @@ namespace Pulsar4X.Engine.Designs
         public double VolumePerUnit { get; private set; }
         public double Density { get; }
 
-        private Guid _factionGuid;
+        private string _factionGuid;
 
         /// <summary>
         /// m^3
@@ -93,26 +94,27 @@ namespace Pulsar4X.Engine.Designs
         public ShipDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (ArmorBlueprint armorType, float thickness) armor)
         {
             _factionGuid = faction.OwningEntity.Guid;
-            faction.ShipDesigns.Add(ID, this);
-            faction.IndustryDesigns[ID] = this;
-            Initialise(name, components, armor);
+            faction.ShipDesigns.Add(UniqueID, this);
+            faction.IndustryDesigns[UniqueID] = this;
+            Initialise(faction.Data.CargoGoods, name, components, armor);
         }
 
-        public ShipDesign(SerializationInfo info, StreamingContext context)
-        {
-            if (info == null)
-                throw new ArgumentNullException("info");
+        // Fixme: needs to use the FactionDataStore somehow
+        // public ShipDesign(SerializationInfo info, StreamingContext context)
+        // {
+        //     if (info == null)
+        //         throw new ArgumentNullException("info");
 
-            ID = (Guid)info.GetValue(nameof(ID), typeof(Guid));
-            _factionGuid = (Guid)info.GetValue(nameof(_factionGuid), typeof(Guid));
-            var name = (string)info.GetValue(nameof(Name), typeof(string));
-            var components = (List<(ComponentDesign design, int count)>)info.GetValue(nameof(Components), typeof(List<(ComponentDesign design, int count)>));
-            var armor = ((ArmorSD armorType, float thickness))info.GetValue(nameof(Armor), typeof((ArmorSD armorType, float thickness)));
+        //     UniqueID = (string)info.GetValue(nameof(UniqueID), typeof(string));
+        //     _factionGuid = (string)info.GetValue(nameof(_factionGuid), typeof(string));
+        //     var name = (string)info.GetValue(nameof(Name), typeof(string));
+        //     var components = (List<(ComponentDesign design, int count)>)info.GetValue(nameof(Components), typeof(List<(ComponentDesign design, int count)>));
+        //     var armor = ((ArmorBlueprint armorType, float thickness))info.GetValue(nameof(Armor), typeof((ArmorBlueprint armorType, float thickness)));
 
-            Initialise(name, components, armor);
-        }
+        //     Initialise(name, components, armor);
+        // }
 
-        public void Initialise(string name, List<(ComponentDesign design, int count)> components, (ArmorBlueprint armorType, float thickness) armor)
+        public void Initialise(CargoDefinitionsLibrary cargoLibrary, string name, List<(ComponentDesign design, int count)> components, (ArmorBlueprint armorType, float thickness) armor)
         {
             Name = name;
             Components = components;
@@ -124,18 +126,18 @@ namespace Pulsar4X.Engine.Designs
                 CrewReq += component.design.CrewReq;
                 CreditCost += component.design.CreditCost;
                 VolumePerUnit += component.design.VolumePerUnit * component.count;
-                if (ComponentCosts.ContainsKey(component.design.ID))
+                if (ComponentCosts.ContainsKey(component.design.UniqueID))
                 {
-                    ComponentCosts[component.design.ID] = ComponentCosts[component.design.ID] + component.count;
+                    ComponentCosts[component.design.UniqueID] = ComponentCosts[component.design.UniqueID] + component.count;
                 }
                 else
                 {
-                    ComponentCosts.Add(component.design.ID, component.count);
+                    ComponentCosts.Add(component.design.UniqueID, component.count);
                 }
 
             }
             DamageProfileDB = new EntityDamageProfileDB(components, armor);
-            var armorMass = GetArmorMass(DamageProfileDB);
+            var armorMass = GetArmorMass(DamageProfileDB, cargoLibrary);
             MassPerUnit += (long)Math.Round(armorMass);
             MineralCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
             MaterialCosts.ToList().ForEach(x => ResourceCosts[x.Key] = x.Value);
@@ -143,7 +145,7 @@ namespace Pulsar4X.Engine.Designs
             IndustryPointCosts = (long)(MassPerUnit * 0.1);
         }
 
-        public static double GetArmorMass(EntityDamageProfileDB damageProfile)
+        public static double GetArmorMass(EntityDamageProfileDB damageProfile, CargoDefinitionsLibrary cargoLibrary)
         {
             if (damageProfile.ArmorVertex.Count == 0)
                 return 0;
@@ -166,7 +168,7 @@ namespace Pulsar4X.Engine.Designs
                 v1 = v2;
             }
 
-            var aresource = StaticRefLib.StaticData.GetICargoable(armor.armorType.ResourceID);
+            var aresource = cargoLibrary.GetAny(armor.armorType.ResourceID);
             var amass = aresource.MassPerUnit;
             var avol = aresource.VolumePerUnit;
             var aden = amass / avol;
@@ -177,7 +179,7 @@ namespace Pulsar4X.Engine.Designs
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue(nameof(ID), ID);
+            info.AddValue(nameof(UniqueID), UniqueID);
             info.AddValue(nameof(Name), Name);
             info.AddValue(nameof(_factionGuid), _factionGuid);
             info.AddValue(nameof(Armor), Armor);

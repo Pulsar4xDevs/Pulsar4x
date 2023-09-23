@@ -41,6 +41,8 @@ namespace Pulsar4X.Engine
         public PerformanceData[] PerfHistory = new PerformanceData[1];
         public int PerfHistoryIndex { get; private set; }
 
+        private Game _game;
+
         /// <summary>
         /// Threadsafe Change the amount of history we store for this Manager.
         /// </summary>
@@ -86,42 +88,43 @@ namespace Pulsar4X.Engine
             {
             }
 
-            internal ProcessSet(SerializationInfo info, StreamingContext context)
-            {
-                Game game = (Game)context.Context;
-                Dictionary<string, List<Guid>> instanceProcessors = (Dictionary<string, List<Guid>>)info.GetValue(nameof(InstanceProcessors), typeof(Dictionary<string, List<Guid>>));
-                ProcessorManager processManager = StaticRefLib.ProcessorManager;
-                foreach (var kvpItem in instanceProcessors)
-                {
+            // FIXME: needs to get rid of StaticRefLib references
+            // internal ProcessSet(SerializationInfo info, StreamingContext context)
+            // {
+            //     Game game = (Game)context.Context;
+            //     Dictionary<string, List<Guid>> instanceProcessors = (Dictionary<string, List<Guid>>)info.GetValue(nameof(InstanceProcessors), typeof(Dictionary<string, List<Guid>>));
+            //     ProcessorManager processManager = StaticRefLib.ProcessorManager;
+            //     foreach (var kvpItem in instanceProcessors)
+            //     {
 
-                    string typeName = kvpItem.Key;
+            //         string typeName = kvpItem.Key;
 
-                    //IInstanceProcessor processor = processManager.GetInstanceProcessor(typeName);
-                    if (!InstanceProcessors.ContainsKey(typeName))
-                        InstanceProcessors.Add(typeName, new List<Entity>());
+            //         //IInstanceProcessor processor = processManager.GetInstanceProcessor(typeName);
+            //         if (!InstanceProcessors.ContainsKey(typeName))
+            //             InstanceProcessors.Add(typeName, new List<Entity>());
 
-                    foreach (var entityGuid in kvpItem.Value)
-                    {
-                        if (game.GlobalManager.FindEntityByGuid(entityGuid, out Entity entity)) //might be a better way to do this, can we get the manager from here and just search localy?
-                        {
-                            InstanceProcessors[typeName].Add(entity);
-                        }
-                        else
-                        {
-                            // Entity has not been deserialized.
-                            // throw new Exception("Unfound Entity Exception, possibly this entity hasn't been deseralised yet?"); //I *think* we'll have the entitys all deseralised for this manager at this point...
-                        }
-                    }
-                }
-            }
+            //         foreach (var entityGuid in kvpItem.Value)
+            //         {
+            //             if (game.GlobalManager.FindEntityByGuid(entityGuid, out Entity entity)) //might be a better way to do this, can we get the manager from here and just search localy?
+            //             {
+            //                 InstanceProcessors[typeName].Add(entity);
+            //             }
+            //             else
+            //             {
+            //                 // Entity has not been deserialized.
+            //                 // throw new Exception("Unfound Entity Exception, possibly this entity hasn't been deseralised yet?"); //I *think* we'll have the entitys all deseralised for this manager at this point...
+            //             }
+            //         }
+            //     }
+            // }
 
             public void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                Dictionary<string, List<Guid>> instanceProcessors = new Dictionary<string, List<Guid>>();
+                Dictionary<string, List<string>> instanceProcessors = new Dictionary<string, List<string>>();
                 foreach (var kvpitem in InstanceProcessors)
                 {
                     string typeName = kvpitem.Key; //.TypeName;
-                    instanceProcessors.Add(typeName, new List<Guid>());
+                    instanceProcessors.Add(typeName, new List<string>());
                     foreach (var entityItem in kvpitem.Value)
                     {
                         instanceProcessors[typeName].Add(entityItem.Guid);
@@ -281,12 +284,13 @@ namespace Pulsar4X.Engine
                 if (value < _systemLocalDateTime)
                     throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow.
                 _systemLocalDateTime = value;
-                if (StaticRefLib.SyncContext != null)
-                    StaticRefLib.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
+                // FIXME: needs to get rid of StaticRefLib references
+                // if (StaticRefLib.SyncContext != null)
+                //     StaticRefLib.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
                 //NOTE: the above marshaling does not apear to work correctly, it's possible for it to work, the context needs to be in an await state or something.
                 //do not rely on the above being run on the main thread! (maybe we should remove the marshaling?)
-                else //if context is null, we're probibly running tests or headless.
-                    InvokeDateChange(value); //in this case we're not going to marshal this. (event will fire on *THIS* thread)
+                // else //if context is null, we're probibly running tests or headless.
+                //     InvokeDateChange(value); //in this case we're not going to marshal this. (event will fire on *THIS* thread)
             }
         }
 
@@ -305,8 +309,8 @@ namespace Pulsar4X.Engine
             PerformanceData newData = new PerformanceData() { FullPulseTimeMS = _fullPulseTimeMS, SubpulseTimes = _subpulseTimes.ToArray(), ProcessTimes = pTimes };
             PerfHistory[PerfHistoryIndex] = newData;
 
-
-            _systemLocalDateTime = StaticRefLib.CurrentDateTime;
+            _game = entityMan.Game;
+            _systemLocalDateTime = entityMan.Game.TimePulse.GameGlobalDateTime;
             _processToDateTime = _systemLocalDateTime;
             _entityManager = entityMan;
             _processManager = procMan;
@@ -316,7 +320,7 @@ namespace Pulsar4X.Engine
         internal void PostLoadInit(StreamingContext context, EntityManager entityManager) //this one is used after loading a game.
         {
             _entityManager = entityManager;
-            _processManager = StaticRefLib.ProcessorManager;
+            _processManager = entityManager.Game.ProcessorManager;
             InitHotloopProcessors();
         }
 
@@ -370,10 +374,10 @@ namespace Pulsar4X.Engine
             //using StarSysDateTime we were adding a processor in a timeslot that would end up after the current datetime,
             //but before the NextInterupt dateTime, which would cause a Temporal Anomaly Exception.
 
-            if (!StaticRefLib.ProcessorManager.HotloopProcessors.ContainsKey(db.GetType()))
+            if (!_game.ProcessorManager.HotloopProcessors.ContainsKey(db.GetType()))
                 return;
-            var proc = StaticRefLib.ProcessorManager.HotloopProcessors[db.GetType()];
-            DateTime startDate = StaticRefLib.GameSettings.StartDateTime;
+            var proc = _game.ProcessorManager.HotloopProcessors[db.GetType()];
+            DateTime startDate = _game.Settings.StartDateTime;
             var elapsed = _processToDateTime - startDate;
             elapsed -= proc.FirstRunOffset;
 

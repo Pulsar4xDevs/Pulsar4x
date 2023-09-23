@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.Orbital;
+using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
@@ -63,11 +64,11 @@ namespace Pulsar4X.Engine
             Manager = InvalidManager;
         }
 
-        internal Entity([NotNull] EntityManager manager, IEnumerable<BaseDataBlob> dataBlobs = null) : this(Guid.NewGuid(), manager, Guid.Empty, dataBlobs) { }
-        internal Entity([NotNull] EntityManager manager, Guid factionOwner, IEnumerable<BaseDataBlob> dataBlobs = null) : this(Guid.NewGuid(), manager,  factionOwner, dataBlobs) { }
+        internal Entity([NotNull] EntityManager manager, IEnumerable<BaseDataBlob> dataBlobs = null) : this(System.Guid.NewGuid().ToString(), manager, String.Empty, dataBlobs) { }
+        internal Entity([NotNull] EntityManager manager, string factionOwner, IEnumerable<BaseDataBlob> dataBlobs = null) : this(System.Guid.NewGuid().ToString(), manager,  factionOwner, dataBlobs) { }
 
 
-        internal Entity(Guid id, [NotNull] EntityManager manager, Guid factionOwnerID,  IEnumerable<BaseDataBlob> dataBlobs = null)
+        internal Entity(string id, [NotNull] EntityManager manager, string factionOwnerID,  IEnumerable<BaseDataBlob> dataBlobs = null)
         {
             Manager = manager;
             Guid = id;
@@ -75,9 +76,9 @@ namespace Pulsar4X.Engine
             //This is problematic, currently, if a datablob references it's own entity (ie namedb in faction entity) the entity will get a new guid.
             //and (presumably) the db will point to an empty entity.
             //TODO: should we throw an exception instead of just replacing the guid with a new one? I'm leaning towards yes.
-            while (Guid == Guid.Empty || manager.EntityExistsGlobaly(Guid)) //using a while here removes the infintisimal chance of creating a guid that already exsists.
+            while (Guid == String.Empty || manager.EntityExistsGlobaly(Guid)) //using a while here removes the infintisimal chance of creating a guid that already exsists.
             {
-                Guid = Guid.NewGuid();
+                Guid = System.Guid.NewGuid().ToString();
             }
 
             Manager.SetupEntity(this, dataBlobs);
@@ -101,8 +102,8 @@ namespace Pulsar4X.Engine
             */
         }
 
-        internal Entity([NotNull] EntityManager manager, Guid factionID, [NotNull] ProtoEntity protoEntity) : this(protoEntity.Guid, manager, factionID, protoEntity.DataBlobs) { }
-        internal Entity([NotNull] EntityManager manager, [NotNull] ProtoEntity protoEntity) : this(protoEntity.Guid, manager, Guid.Empty, protoEntity.DataBlobs) { }
+        internal Entity([NotNull] EntityManager manager, string factionID, [NotNull] ProtoEntity protoEntity) : this(protoEntity.Guid, manager, factionID, protoEntity.DataBlobs) { }
+        internal Entity([NotNull] EntityManager manager, [NotNull] ProtoEntity protoEntity) : this(protoEntity.Guid, manager, String.Empty, protoEntity.DataBlobs) { }
 
         /// <summary>
         /// Sets the mask, called by the manager during SetupEntity.
@@ -133,7 +134,7 @@ namespace Pulsar4X.Engine
         /// <param name="dataBlobs">Data blobs.</param>
         [PublicAPI]
 
-        public static Entity Create([NotNull] EntityManager manager, Guid faction, [CanBeNull] IEnumerable<BaseDataBlob> dataBlobs = null)
+        public static Entity Create([NotNull] EntityManager manager, string faction, [CanBeNull] IEnumerable<BaseDataBlob> dataBlobs = null)
         {
             if (manager == null)
             {
@@ -150,7 +151,7 @@ namespace Pulsar4X.Engine
         /// <param name="manager">Manager.</param>
         /// <param name="faction">the faction owner of this new entity. use ID.Empty for a non owned entity.</param>
         /// <param name="protoEntity">Proto entity.</param>
-        public static Entity Create(EntityManager manager, Guid faction, ProtoEntity protoEntity)
+        public static Entity Create(EntityManager manager, string faction, ProtoEntity protoEntity)
         {
             return new Entity(protoEntity.Guid, manager, faction, protoEntity.DataBlobs);
         }
@@ -369,7 +370,7 @@ namespace Pulsar4X.Engine
         public Entity Clone(EntityManager manager)
         {
             ProtoEntity clone = Clone();
-            clone.Guid = Guid.NewGuid();
+            clone.Guid = System.Guid.NewGuid().ToString();
             return new Entity(manager, clone);
         }
 
@@ -395,6 +396,44 @@ namespace Pulsar4X.Engine
                     hash = ObjectExtensions.ValueHash(item, hash);
             }
             return hash;
+        }
+
+        public void AddComponent(ComponentInstance componentInstance)
+        {
+            componentInstance.ParentEntity = this;
+            var instancesDB = GetDataBlob<ComponentInstancesDB>();
+            instancesDB.AddComponentInstance(componentInstance);
+
+            foreach (var atbkvp in componentInstance.Design.AttributesByType)
+            {
+                atbkvp.Value.OnComponentInstallation(this, componentInstance);
+            }
+
+            ReCalcProcessor.ReCalcAbilities(this);
+        }
+
+        public void AddComponent(ComponentDesign componentDesign, int count = 1)
+        {
+            for(int i = 0; i < count; i++)
+            {
+                AddComponent(new ComponentInstance(componentDesign));
+            }
+        }
+
+        public void AddComponent(List<ComponentInstance> instances)
+        {
+            foreach(var instance in instances)
+            {
+                AddComponent(instance);
+            }
+        }
+
+        public void AddComponent(List<ComponentDesign> designs)
+        {
+            foreach(var design in designs)
+            {
+                AddComponent(design);
+            }
         }
 
         /// <summary>
@@ -455,16 +494,16 @@ namespace Pulsar4X.Engine
                 Entity entity;
 
                 // Parse the ID from the reader.
-                Guid entityGuid = Guid.Parse(reader.Value.ToString());
+                string entityGuid = reader.Value.ToString();
 
                 // Lookup the entity using a global ID lookup.
-                if (entityGuid == Guid.Empty)
+                if (entityGuid == String.Empty)
                     return InvalidEntity;
                 if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
                     return entity;
 
                 // If no entity was found, create a new entity in the global manager. TODO: we need to get the FactionOwner guid from the json and use that here.
-                entity = new Entity(entityGuid, game.GlobalManager, Guid.Empty);
+                entity = new Entity(entityGuid, game.GlobalManager, String.Empty);
                 return entity;
             }
 

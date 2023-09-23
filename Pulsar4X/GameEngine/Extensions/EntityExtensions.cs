@@ -30,16 +30,6 @@ namespace Pulsar4X.Extensions
             return "Unknown";
         }
 
-        public static void AddComponent(this Entity entity, ComponentInstance component)
-        {
-            EntityManipulation.AddComponentToEntity(entity, component);
-        }
-
-        public static void AddComponent(this Entity entity, ComponentDesign componentDesign, int count = 1)
-        {
-            EntityManipulation.AddComponentToEntity(entity, componentDesign, count);
-        }
-
         public static PositionDB GetSOIParentPositionDB(this Entity entity)
         {
             return (PositionDB)entity.GetDataBlob<PositionDB>().ParentDB;
@@ -344,11 +334,11 @@ namespace Pulsar4X.Extensions
             return Distance.MToAU(entity.GetSOI_m());
         }
 
-        public static double GetFuelPercent(this Entity entity)
+        public static double GetFuelPercent(this Entity entity, CargoDefinitionsLibrary cargoLibrary)
         {
             if(entity.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && entity.TryGetDatablob<VolumeStorageDB>(out var volumeStorageDB))
             {
-                Guid thrusterFuel = Guid.Empty;
+                string thrusterFuel = String.Empty;
                 foreach(var component in shipInfoDB.Design.Components.ToArray())
                 {
                     if(!component.design.TryGetAttribute<NewtonionThrustAtb>(out var newtonionThrustAtb)) continue;
@@ -356,9 +346,9 @@ namespace Pulsar4X.Extensions
                     break;
                 }
 
-                if(thrusterFuel == Guid.Empty) return 0;
+                if(thrusterFuel == String.Empty) return 0;
 
-                var fuelType = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
+                var fuelType = cargoLibrary.GetAny(thrusterFuel);
                 var typeStore = volumeStorageDB.TypeStores[fuelType.CargoTypeID];
                 var freeVolume = volumeStorageDB.GetFreeVolume(fuelType.CargoTypeID);
                 var percentFree = (freeVolume / typeStore.MaxVolume) * 100;
@@ -370,11 +360,11 @@ namespace Pulsar4X.Extensions
             return 0;
         }
 
-        public static (ICargoable, double) GetFuelInfo(this Entity entity)
+        public static (ICargoable, double) GetFuelInfo(this Entity entity, CargoDefinitionsLibrary cargoLibrary)
         {
             if(entity.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && entity.TryGetDatablob<VolumeStorageDB>(out var volumeStorageDB))
             {
-                Guid thrusterFuel = Guid.Empty;
+                string thrusterFuel = String.Empty;
                 foreach(var component in shipInfoDB.Design.Components.ToArray())
                 {
                     if(!component.design.TryGetAttribute<NewtonionThrustAtb>(out var newtonionThrustAtb)) continue;
@@ -382,9 +372,9 @@ namespace Pulsar4X.Extensions
                     break;
                 }
 
-                if(thrusterFuel == Guid.Empty) return (null, 0);
+                if(thrusterFuel == String.Empty) return (null, 0);
 
-                var fuelType = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
+                var fuelType = cargoLibrary.GetAny(thrusterFuel);
                 var typeStore = volumeStorageDB.TypeStores[fuelType.CargoTypeID];
                 var freeVolume = volumeStorageDB.GetFreeVolume(fuelType.CargoTypeID);
                 var percentFree = freeVolume / typeStore.MaxVolume;

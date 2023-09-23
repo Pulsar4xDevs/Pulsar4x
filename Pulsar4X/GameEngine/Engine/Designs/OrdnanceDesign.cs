@@ -71,8 +71,8 @@ namespace Pulsar4X.Engine.Designs
 
         public OrdnanceDesign(FactionInfoDB faction, string name, double fuelAmountKG,  List<(ComponentDesign design, int count)> components)
         {
-            faction.MissileDesigns.Add(ID, this);
-            faction.IndustryDesigns[ID] = this;
+            faction.MissileDesigns.Add(UniqueID, this);
+            faction.IndustryDesigns[UniqueID] = this;
             Name = name;
             Components = components;
 
@@ -92,13 +92,13 @@ namespace Pulsar4X.Engine.Designs
                     vol += component.design.VolumePerUnit * component.count;
                     CreditCost += component.design.CreditCost;
 
-                    if (ComponentCosts.ContainsKey(component.design.ID))
+                    if (ComponentCosts.ContainsKey(component.design.UniqueID))
                     {
-                        ComponentCosts[component.design.ID] = ComponentCosts[component.design.ID] + component.count;
+                        ComponentCosts[component.design.UniqueID] = ComponentCosts[component.design.UniqueID] + component.count;
                     }
                     else
                     {
-                        ComponentCosts.Add(component.design.ID, component.count);
+                        ComponentCosts.Add(component.design.UniqueID, component.count);
                     }
 
                     if (component.design.TryGetAttribute<NewtonionThrustAtb>(out NewtonionThrustAtb thrAtb))

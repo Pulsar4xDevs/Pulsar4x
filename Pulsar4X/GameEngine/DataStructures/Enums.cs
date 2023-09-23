@@ -224,4 +224,64 @@ namespace Pulsar4X.DataStructures
         Boolean,
 
     }
+
+    public enum TeamTypes
+    {
+        Science,
+        ArmyCdr,
+        SpaceNavyCdr,
+        CivAdmin,
+    }
+
+    public enum AbilityType
+    {
+        ShipMaintenance,
+        GenericConstruction, //ship parts, installations.
+        OrdnanceConstruction,
+        FighterConstruction,
+        ShipAssembly,
+        Refinery,
+        Mine,
+        AtmosphericModification,
+        Research,
+        Commercial, //ie aurora "Finance Center"
+        Industrial, //intend to use this later on for civ economy and creating random tradegoods.
+        Agricultural, //as above.
+        MassDriver,
+        SpacePort, //loading/unloading speed;
+        GeneratesNavalOfficers,
+        GeneratesGroundOfficers,
+        GeneratesShipCrew,
+        GeneratesTroops, //not sure how we're going to do this yet.aurora kind of did toops and crew different.
+        GeneratesScientists,
+        GeneratesCivilianLeaders,
+        DetectionThermal, //radar
+        DetectionEM,    //radar
+        Terraforming,
+        BasicLiving, //ie Auroras infrastructure will have this ability.
+        //shipcomponent
+        ReducedSize,
+        LaunchMissileSize,
+        ReloadRateFromMag,
+        ReloadRateFromHanger,
+        ReloadRateMultiplyer,
+        MissileMagazine,
+
+        ComponentSize,
+        EnginePower,
+        EngineEfficency,
+        FuelConsumption,
+        ThermalSignature,
+        EMSignature,
+
+        Nothing
+
+    }
+
+    public enum CommanderTypes
+    {
+        Navy,
+        Ground,
+        Civilian
+    }
 }

@@ -75,7 +75,7 @@ namespace Pulsar4X.Engine
             game.GlobalManagerDictionary.Add(ManagerGuid, this);
             if (isGlobalManager)
             {
-                _globalEntityDictionary = new Dictionary<Guid,EntityManager>();
+                _globalEntityDictionary = new Dictionary<string, EntityManager>();
                 _globalGuidDictionaryLock = new ReaderWriterLockSlim();
             }
             else
@@ -217,7 +217,7 @@ namespace Pulsar4X.Engine
                 throw new ArgumentException("Provided Entity is not valid in this manager.");
             }
 
-            // Event logevent = new Event(StaticRefLib.CurrentDateTime, "Entity Removed From Manager");
+            // Event logevent = new Event(game.TimePulse.GameGlobalDateTime, "Entity Removed From Manager");
             // logevent.Entity = entity;
             // if(entity.FactionOwnerID != Guid.Empty)
             //     logevent.Faction = GetGlobalEntityByGuid(entity.FactionOwnerID);
@@ -847,7 +847,7 @@ namespace Pulsar4X.Engine
                 else
                 {
                     // Entity has not been previously deserialized. TODO: check whether the faction guid will deserialise after this or if we need to read it and input it into the constructor here.
-                    Entity.Create(this, Guid.Empty, protoEntity);
+                    Entity.Create(this, String.Empty, protoEntity);
                 }
             }
         }

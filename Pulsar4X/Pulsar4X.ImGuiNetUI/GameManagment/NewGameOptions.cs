@@ -93,8 +93,6 @@ namespace Pulsar4X.SDL2UI
             ModDataStore modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
 
-            Pulsar4X.Engine.Game game = new Pulsar4X.Engine.Game(modDataStore);
-
             gameSettings = new ECSLib.NewGameSettings
             {
                 GameName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer),
@@ -107,12 +105,33 @@ namespace Pulsar4X.SDL2UI
                 DefaultSolStart = true,
                 MasterSeed = _masterSeed
             };
+
+            Pulsar4X.Engine.NewGameSettings newGameSettings = new Engine.NewGameSettings()
+            {
+                GameName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer),
+                MaxSystems = _maxSystems,
+                SMPassword = ImGuiSDL2CSHelper.StringFromBytes(_smPassInputbuffer),
+                //DataSets = options.SelectedModList.Select(dvi => dvi.Directory),
+                CreatePlayerFaction = true,
+                DefaultFactionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer),
+                DefaultPlayerPassword = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer),
+                DefaultSolStart = true,
+                MasterSeed = _masterSeed
+            };
+
+            Pulsar4X.Engine.Game game = new Pulsar4X.Engine.Game(newGameSettings, modDataStore);
+
+            var factionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer);
+            var factionPasswd = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer);
+
+            var newGameFaction = Pulsar4X.Engine.DefaultStartFactory.DefaultHumans(game, factionName);
+
             //TODO: Tidyup: new Game(gameSettings) doesn't currently create a default faction as per the settings.
             //this should probilby be fixed, either we create it there or we... dont.
             _uiState.Game = new ECSLib.Game(gameSettings);
 
-            var factionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer);
-            var factionPasswd = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer);
+
+
             var factionEntity = DefaultStartFactory.DefaultHumans(StaticRefLib.Game, factionName);
             AuthProcessor.StorePasswordAsHash(StaticRefLib.Game, factionEntity, factionPasswd);
             _uiState.SetFaction(factionEntity);

@@ -18,46 +18,45 @@ namespace Pulsar4X.Components
     {
         ComponentDesign _design = new ComponentDesign();
         internal static bool StartResearched = false;
-        public ComponentDesigner(ComponentTemplateBlueprint componentSD, FactionTechDB factionTech)
+        public ComponentDesigner(ComponentTemplateBlueprint componentSD, FactionDataStore factionDataStore, FactionTechDB factionTech)
         {
-            var staticData = StaticRefLib.StaticData;
             TypeName = componentSD.Name;
             Name = componentSD.Name;
             if(!string.IsNullOrEmpty( componentSD.ComponentType))
                 _design.ComponentType = componentSD.ComponentType;
-            _design.ID = Guid.NewGuid();
-            _design.Description = componentSD.DescriptionFormula;
-            MassFormula = new ChainedExpression(componentSD.MassFormula, this, factionTech, staticData);
-            VolumeFormula = new ChainedExpression(componentSD.VolumeFormula, this, factionTech, staticData);
-            CrewFormula = new ChainedExpression(componentSD.CrewReqFormula, this, factionTech, staticData);
-            HTKFormula = new ChainedExpression(componentSD.HTKFormula, this, factionTech, staticData);
-            ResearchCostFormula = new ChainedExpression(componentSD.ResearchCostFormula, this, factionTech, staticData);
-            BuildCostFormula = new ChainedExpression(componentSD.BuildPointCostFormula, this, factionTech, staticData);
-            CreditCostFormula = new ChainedExpression(componentSD.CreditCostFormula, this, factionTech, staticData);
+            _design.UniqueID = Guid.NewGuid().ToString();
+            _design.Description = componentSD.Formulas["Description"];
+            MassFormula = new ChainedExpression(componentSD.Formulas["Mass"], this, factionDataStore, factionTech);
+            VolumeFormula = new ChainedExpression(componentSD.Formulas["Volume"], this, factionDataStore, factionTech);
+            CrewFormula = new ChainedExpression(componentSD.Formulas["CrewReq"], this, factionDataStore, factionTech);
+            HTKFormula = new ChainedExpression(componentSD.Formulas["HTK"], this, factionDataStore, factionTech);
+            ResearchCostFormula = new ChainedExpression(componentSD.Formulas["ResearchCost"], this, factionDataStore, factionTech);
+            BuildCostFormula = new ChainedExpression(componentSD.Formulas["BuildPointCost"], this, factionDataStore, factionTech);
+            CreditCostFormula = new ChainedExpression(componentSD.Formulas["CreditCost"], this, factionDataStore, factionTech);
             ComponentMountType = componentSD.MountType;
             IndustryType = componentSD.IndustryTypeID;
             CargoTypeID = componentSD.CargoTypeID;
             _design.CargoTypeID = componentSD.CargoTypeID;
             if (componentSD.MountType.HasFlag(ComponentMountType.PlanetInstallation))
                 _design.GuiHints = ConstructableGuiHints.CanBeInstalled;
-            if(!string.IsNullOrEmpty(componentSD.DescriptionFormula))
-                DescriptionFormula = new ChainedExpression(componentSD.DescriptionFormula, this, factionTech, staticData);
+            if(!string.IsNullOrEmpty(componentSD.Formulas["Description"]))
+                DescriptionFormula = new ChainedExpression(componentSD.Formulas["Description"], this, factionDataStore, factionTech);
 
-            Dictionary<Guid, ChainedExpression> resourceCostForulas = new Dictionary<Guid, ChainedExpression>();
+            var resourceCostForulas = new Dictionary<string, ChainedExpression>();
 
-            foreach (var kvp in componentSD.ResourceCostFormula)
+            foreach (var kvp in componentSD.ResourceCost)
             {
-                if(staticData.CargoGoods.GetAny(kvp.Key) != null)
-                    resourceCostForulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionTech));
+                if(factionDataStore.CargoGoods.GetAny(kvp.Key) != null)
+                    resourceCostForulas.Add(kvp.Key, new ChainedExpression(kvp.Value, this, factionDataStore, factionTech));
                 else //TODO: log don't crash.
                     throw new Exception("GUID object {" + kvp.Key + "} not found in resourceCosting for " + this.TypeName + " This object needs to be either a mineral, material or component defined in the Data folder");
             }
 
             ResourceCostFormulas = resourceCostForulas;
 
-            foreach (ComponentTemplateAttributeSD attrbSD in componentSD.ComponentAtbSDs)
+            foreach (var attrbSD in componentSD.Attributes)
             {
-                ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this, attrbSD, factionTech);
+                ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this, attrbSD, factionDataStore, factionTech);
                 ComponentDesignAttributes.Add(designAttribute.Name, designAttribute);
                 ComponentDesignAttributeList.Add(designAttribute);
             }
@@ -115,9 +114,9 @@ namespace Pulsar4X.Components
 
             //set up the research
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
-            TechSD tech = new TechSD()
+            Tech tech = new Tech()
             {
-                ID = _design.ID,
+                UniqueID = _design.UniqueID,
                 Name = _design.Name + " Design Research",
                 Description = "Research into building " + _design.Name,
                 MaxLevel = 1,
@@ -126,17 +125,17 @@ namespace Pulsar4X.Components
                 Design = _design
             };
 
-            _design.TechID = tech.ID;
+            _design.TechID = tech.UniqueID;
             factionTech.MakeResearchable(tech); //add it to researchable techs
 
             SetAttributes();
 
             if(_design.ResearchCostValue == 0 || StartResearched)
             {
-                faction.IndustryDesigns[_design.ID] = _design;
+                faction.IndustryDesigns[_design.UniqueID] = _design;
             }
 
-            faction.InternalComponentDesigns[_design.ID] = _design;
+            faction.InternalComponentDesigns[_design.UniqueID] = _design;
             return _design;
         }
 
@@ -236,11 +235,11 @@ namespace Pulsar4X.Components
             _design.IndustryPointCosts = BuildCostFormula.LongResult;
         }
 
-        public Dictionary<Guid, long> ResourceCostValues => _design.ResourceCosts;
-        internal Dictionary<Guid, ChainedExpression> ResourceCostFormulas { get; set; }
+        public Dictionary<string, long> ResourceCostValues => _design.ResourceCosts;
+        internal Dictionary<string, ChainedExpression> ResourceCostFormulas { get; set; }
         public void SetResourceCosts()
         {
-            Dictionary<Guid, long> dict = new Dictionary<Guid, long>();
+            Dictionary<string, long> dict = new Dictionary<string, long>();
             foreach (var kvp in ResourceCostFormulas)
             {
                 kvp.Value.Evaluate();
@@ -302,12 +301,12 @@ namespace Pulsar4X.Components
         {
             get { return _design.ComponentMountType;}
             internal set { _design.ComponentMountType = value; } }
-        public Guid IndustryType
+        public string IndustryType
         {
             get { return _design.IndustryTypeID; }
             internal set { _design.IndustryTypeID = value; }
         }
-        public Guid CargoTypeID
+        public string CargoTypeID
         {
             get { return _design.CargoTypeID; }
             internal set { _design.CargoTypeID = value; }

@@ -27,7 +27,7 @@ namespace Pulsar4X.Components
         public double Density { get; internal set; }
 
         public long ResearchCostValue;
-        public Guid TechID;
+        public string TechID;
         public string TypeName; //ie the name in staticData. ie "Newtonion Thruster".
         public string Description;
         //public int Volume_m3 = 1;

@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Static entity reference to an invalid entity.
-        /// 
+        ///
         /// Functions must never return a null entity. Instead, return InvalidEntity.
         /// </summary>
         [NotNull]
@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
 
         public void InvokeChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
         {
-            ChangeEvent?.Invoke(changeType, db); 
+            ChangeEvent?.Invoke(changeType, db);
         }
 
         #region Entity Constructors
@@ -69,10 +69,10 @@ namespace Pulsar4X.ECSLib
             Manager = manager;
             Guid = id;
             FactionOwnerID = factionOwnerID;
-            //This is problematic, currently, if a datablob references it's own entity (ie namedb in faction entity) the entity will get a new guid. 
-            //and (presumably) the db will point to an empty entity. 
-            //TODO: should we throw an exception instead of just replacing the guid with a new one? I'm leaning towards yes. 
-            while (Guid == Guid.Empty || manager.EntityExistsGlobaly(Guid)) //using a while here removes the infintisimal chance of creating a guid that already exsists. 
+            //This is problematic, currently, if a datablob references it's own entity (ie namedb in faction entity) the entity will get a new guid.
+            //and (presumably) the db will point to an empty entity.
+            //TODO: should we throw an exception instead of just replacing the guid with a new one? I'm leaning towards yes.
+            while (Guid == Guid.Empty || manager.EntityExistsGlobaly(Guid)) //using a while here removes the infintisimal chance of creating a guid that already exsists.
             {
                 Guid = Guid.NewGuid();
             }
@@ -114,7 +114,7 @@ namespace Pulsar4X.ECSLib
         #region Public API Functions
         /// <summary>
         /// Used to determine if an entity is valid.
-        /// 
+        ///
         /// Entities are considered valid if they are not the static InvalidEntity and are properly registered to a manager.
         /// </summary>
         [PublicAPI]
@@ -215,9 +215,9 @@ namespace Pulsar4X.ECSLib
             datablob = Manager.GetDataBlob<T>(ID, typeIndex);
             return hasDB;
         }
-        
+
         /// <summary>
-        /// Returns true with out datablob if found. 
+        /// Returns true with out datablob if found.
         /// </summary>
         /// <param name="datablob">datablob if found</param>
         /// <typeparam name="T"></typeparam>
@@ -234,7 +234,7 @@ namespace Pulsar4X.ECSLib
             datablob = Manager.GetDataBlob<T>(ID, typeIndex);
             return hasDB;
         }
-        
+
         /// <summary>
         /// Sets the dataBlob to this entity. Slightly slower than SetDataBlob(dataBlob, typeIndex);
         /// </summary>
@@ -303,7 +303,7 @@ namespace Pulsar4X.ECSLib
             if (!IsValid)
             {
                 throw new InvalidOperationException("Cannot remove a datablob from an invalid entity.");
-            } 
+            }
             if (!HasDataBlob(typeIndex))
             {
                 throw new InvalidOperationException("Entity does not contain this datablob.");
@@ -374,7 +374,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Simple override to display entities as their ID.
-        /// 
+        ///
         /// Used mostly in debugging.
         /// </summary>
         public override string ToString()
@@ -393,7 +393,7 @@ namespace Pulsar4X.ECSLib
             }
             return hash;
         }
-        
+
         /// <summary>
         /// Used to transfer an entity between managers.
         /// </summary>
@@ -430,7 +430,7 @@ namespace Pulsar4X.ECSLib
 
 
         /// <summary>
-        /// EntityConverter is responsible for deserializing entities when they are encountered as references. 
+        /// EntityConverter is responsible for deserializing entities when they are encountered as references.
         /// The EntityConverter must provide a proper reference to the object being deserialized.
         /// </summary>
         private class EntityConverter : JsonConverter
@@ -460,7 +460,7 @@ namespace Pulsar4X.ECSLib
                 if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
                     return entity;
 
-                // If no entity was found, create a new entity in the global manager. TODO: we need to get the FactionOwner guid from the json and use that here. 
+                // If no entity was found, create a new entity in the global manager. TODO: we need to get the FactionOwner guid from the json and use that here.
                 entity = new Entity(entityGuid, game.GlobalManager, Guid.Empty);
                 return entity;
             }

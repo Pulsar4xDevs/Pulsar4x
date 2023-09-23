@@ -13,7 +13,7 @@ namespace Pulsar4X.Engine.Sensors
 
     public class SensorContact
     {
-        public Guid ActualEntityGuid;
+        public string ActualEntityGuid;
         public Entity ActualEntity;
 
         public SensorInfoDB SensorInfo;

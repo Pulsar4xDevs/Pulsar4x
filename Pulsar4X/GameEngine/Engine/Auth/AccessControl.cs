@@ -40,13 +40,13 @@ namespace Pulsar4X.Engine.Auth
 
         private static bool IsOwnedEntityAuthorized(Player authorizedPlayer, Entity entity, ComparableBitArray entityMask)
         {
-            //TODO: TotalyHacked because fuck knows how we're going to do this now. 
+            //TODO: TotalyHacked because fuck knows how we're going to do this now.
             return true;
         }
 
         //private static bool IsOwnedEntityAuthorized(Player authorizedPlayer, Entity entity, ComparableBitArray entityMask)
         //{
-            
+
         //    if (entityMask[EntityManager.GetTypeIndex<OwnedDB>()])
         //    {
         //        var entityOwnedDB = entity.GetDataBlob<OwnedDB>();
@@ -115,7 +115,7 @@ namespace Pulsar4X.Engine.Auth
                 foreach (Entity faction in factions)
                 {
                     var factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
-                    foreach (Guid knownSystem in factionInfoDB.KnownSystems)
+                    foreach (var knownSystem in factionInfoDB.KnownSystems)
                     {
                         if (knownSystem == entityPositionDB.SystemGuid)
                         {
@@ -156,6 +156,6 @@ namespace Pulsar4X.Engine.Auth
                 }
             }
             return factions;
-        } 
+        }
     }
 }

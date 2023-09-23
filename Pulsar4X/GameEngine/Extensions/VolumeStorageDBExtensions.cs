@@ -2,14 +2,14 @@ using System;
 using System.Linq;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
-using Pulsar4X.Modding;
+using Pulsar4X.Engine;
 
 namespace Pulsar4X.Extensions
 {
     public static class VolumeStorageDBExtensions
     {
         /// <summary>
-        /// Add or remove cargo by volume. 
+        /// Add or remove cargo by volume.
         /// Ignores transfer rate. Does  not update MassVolumeDB
         /// </summary>
         /// <param name="cargoItem"></param>
@@ -17,7 +17,7 @@ namespace Pulsar4X.Extensions
         /// <returns>amount of volume successfuly added or removed</returns>
         internal static double AddRemoveCargoByVolume(this VolumeStorageDB db, ICargoable cargoItem, double volume)
         {
-            //check we're actualy capable of 
+            //check we're actualy capable of
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
             {
                 // FIXME:
@@ -26,7 +26,7 @@ namespace Pulsar4X.Extensions
                 return 0;
             }
             TypeStore store = db.TypeStores[cargoItem.CargoTypeID];
-            
+
             double unitsToTryStore = volume / cargoItem.VolumePerUnit;
             double unitsStorable = store.FreeVolume / cargoItem.VolumePerUnit;
 
@@ -43,15 +43,15 @@ namespace Pulsar4X.Extensions
             {
                 store.CurrentStoreInUnits[cargoItem.UniqueID] += unitsStoring;
             }
-            
+
             store.FreeVolume -= volumeStoring;
             db.TotalStoredMass += massStoring;
-            
+
             return volumeStoring;
         }
 
         /// <summary>
-        /// Add or removes cargo from storage, 
+        /// Add or removes cargo from storage,
         /// Ignores transfer rate. Does  not update MassVolumeDB
         /// </summary>
         /// <param name="cargoItem"></param>
@@ -59,8 +59,8 @@ namespace Pulsar4X.Extensions
         /// <returns>amount succesfully added or removed</returns>
         internal static double AddRemoveCargoByMass(this VolumeStorageDB db, ICargoable cargoItem, double mass)
         {
-            //check we're actualy capable of 
-            
+            //check we're actualy capable of
+
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
             {
                 // var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
@@ -70,7 +70,7 @@ namespace Pulsar4X.Extensions
             }
             TypeStore store = db.TypeStores[cargoItem.CargoTypeID];
 
-            
+
             double unitsToTryStore = cargoItem.MassPerUnit * mass;
             double unitsStorable = store.FreeVolume / cargoItem.VolumePerUnit;
 
@@ -87,16 +87,16 @@ namespace Pulsar4X.Extensions
             {
                 store.CurrentStoreInUnits[cargoItem.UniqueID] += unitsStoring;
             }
-            
+
             store.FreeVolume -= volumeStoring;
             db.TotalStoredMass += massStoring;
-            
+
             return massStoring;
         }
 
 
         /// <summary>
-        /// adds cargo by unit count. ie the minimum MassUnit. 
+        /// adds cargo by unit count. ie the minimum MassUnit.
         /// Ignores transfer rate. Does  not update MassVolumeDB
         /// </summary>
         /// <param name="cargoItem"></param>
@@ -104,8 +104,8 @@ namespace Pulsar4X.Extensions
         /// <returns>amount succesfully added</returns>
         internal static long AddCargoByUnit(this VolumeStorageDB db, ICargoable cargoItem, long count)
         {
-            //check we're actualy capable of 
-            
+            //check we're actualy capable of
+
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
             {
                 // var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
@@ -113,7 +113,7 @@ namespace Pulsar4X.Extensions
                 // StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity,EventType.Storage, errString);
                 return 0;
             }
-            
+
             double volumePerUnit = cargoItem.VolumePerUnit;
             if (volumePerUnit == 0.0)
             {
@@ -153,7 +153,7 @@ namespace Pulsar4X.Extensions
         /// <returns>amount successfuly removed</returns>
         internal static long RemoveCargoByUnit(this VolumeStorageDB db, ICargoable cargoItem, long count)
         {
-            //check we're actualy capable of 
+            //check we're actualy capable of
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
             {
                 // var type = StaticRefLib.StaticData.CargoTypes[cargoItem.CargoTypeID];
@@ -161,7 +161,7 @@ namespace Pulsar4X.Extensions
                 // StaticRefLib.EventLog.AddPlayerEntityErrorEvent(db.OwningEntity, EventType.Storage, errString);
                 return 0;
             }
-    
+
             double volumePerUnit = cargoItem.VolumePerUnit;
             double totalVolume = volumePerUnit * count;
             TypeStore store = db.TypeStores[cargoItem.CargoTypeID];
@@ -169,10 +169,10 @@ namespace Pulsar4X.Extensions
             {
                 return 0;
             }
-    
+
             long amountInStore = store.CurrentStoreInUnits[cargoItem.UniqueID];
             long amountToRemove = Math.Min(count, amountInStore);
-    
+
             store.CurrentStoreInUnits[cargoItem.UniqueID] -= amountToRemove;
             store.FreeVolume += amountToRemove * volumePerUnit;
             db.TotalStoredMass -= amountToRemove * cargoItem.MassPerUnit;
@@ -182,7 +182,7 @@ namespace Pulsar4X.Extensions
                 store.CurrentStoreInUnits.Remove(cargoItem.UniqueID);
                 store.Cargoables.Remove(cargoItem.UniqueID);
             }
-    
+
             return amountToRemove;
         }
 
@@ -219,7 +219,7 @@ namespace Pulsar4X.Extensions
 
             return units * cargoItem.MassPerUnit;
         }
-        
+
         /// <summary>
         /// Gives the max amount of mass storeable for a given item
         /// </summary>
@@ -310,7 +310,7 @@ namespace Pulsar4X.Extensions
         /// <summary>
         /// Will randomly dump cargo if volume to remove is more than the free volume.
         /// TODO: should be psudorandom.
-        /// TODO: should create an entity in space depending on type of cargo. 
+        /// TODO: should create an entity in space depending on type of cargo.
         /// </summary>
         /// <param name="typeID">cargo typeID</param>
         /// <param name="volumeChange">positive to add volume, negitive to remove volume</param>
@@ -337,7 +337,7 @@ namespace Pulsar4X.Extensions
                 }
             }
         }
-        
+
         internal static bool HasSpecificEntity(this VolumeStorageDB storeDB, CargoAbleTypeDB item)
         {
             if (storeDB.TypeStores[item.CargoTypeID].Cargoables.ContainsKey(item.UniqueID))

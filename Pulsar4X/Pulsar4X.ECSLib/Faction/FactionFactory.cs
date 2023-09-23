@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
-using Pulsar4X.Modding;
 
 namespace Pulsar4X.ECSLib
 {
@@ -50,7 +49,7 @@ namespace Pulsar4X.ECSLib
                 name,
                 new FactionInfoDB(),
                 new FactionAbilitiesDB(),
-                
+
                 new FactionTechDB(game.StaticData.Techs.Values.ToList()),
                 new FactionOwnerDB(),
                 new FleetDB(),

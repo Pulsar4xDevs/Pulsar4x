@@ -93,7 +93,7 @@ namespace Pulsar4X.Engine
 
     public class NetEntityChangeListener : EntityChangeListener
     {
-        internal List<EntityChangeListener> ManagerListners = new List<EntityChangeListener>(); //TODO: shoudl we rewrite this so we just have one concurrent queue and put all the changes into that (from each of the managers)
+        internal List<EntityChangeListener> ManagerListeners = new List<EntityChangeListener>(); //TODO: shoudl we rewrite this so we just have one concurrent queue and put all the changes into that (from each of the managers)
         public NetEntityChangeListener(EntityManager manager, Entity faction) : base(manager, faction, new List<int>())
         {
             var knownSystems = faction.GetDataBlob<FactionInfoDB>().KnownSystems;
@@ -101,7 +101,7 @@ namespace Pulsar4X.Engine
             {
                 StarSystem starSys = manager.Game.Systems[starSysGuid];
                 EntityManager starSysManager = starSys;
-                ManagerListners.Add(new EntityChangeListner(starSysManager, faction, new List<int>()));
+                ManagerListeners.Add(new EntityChangeListener(starSysManager, faction, new List<int>()));
             }
         }
     }

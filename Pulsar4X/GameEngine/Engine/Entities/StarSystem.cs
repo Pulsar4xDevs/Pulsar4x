@@ -15,7 +15,7 @@ namespace Pulsar4X.Engine
         private readonly Random RNG;
 
         [PublicAPI]
-        public Guid Guid
+        public string Guid
         {
             get
             {
@@ -84,7 +84,7 @@ namespace Pulsar4X.Engine
             game.Systems.Add(Guid, this);
         }
 
-        internal StarSystem(Game game, string name, int seed, Guid systemID): base(game, false)
+        internal StarSystem(Game game, string name, int seed, string systemID): base(game, false)
         {
             NameDB = new NameDB(name);
 
@@ -97,7 +97,7 @@ namespace Pulsar4X.Engine
         public StarSystem(SerializationInfo info, StreamingContext context) : base(info, context)
         {
 
-            ManagerGuid = (Guid)info.GetValue("ID", typeof(Guid));
+            ManagerGuid = (string)info.GetValue("ID", typeof(string));
             Seed = (int)info.GetValue("Seed", typeof(int));
             NameDB = (NameDB)info.GetValue("Name", typeof(NameDB));
         }

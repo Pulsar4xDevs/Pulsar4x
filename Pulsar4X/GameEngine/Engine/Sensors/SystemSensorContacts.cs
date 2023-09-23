@@ -15,7 +15,7 @@ namespace Pulsar4X.Engine.Sensors
         public Entity FactionEntity;
 
         public EntityManager ParentManager;
-        Dictionary<Guid, SensorContact> _sensorContactsByActualGuid = new Dictionary<Guid, SensorContact>();
+        Dictionary<string, SensorContact> _sensorContactsByActualGuid = new ();
 
         public XThreadData<EntityChangeData> Changes = new XThreadData<EntityChangeData>();
 
@@ -26,12 +26,12 @@ namespace Pulsar4X.Engine.Sensors
             parentManager.FactionSensorContacts.Add(faction.Guid, this);
         }
 
-        public bool SensorContactExists(Guid actualEntityGuid)
+        public bool SensorContactExists(string actualEntityGuid)
         {
             return _sensorContactsByActualGuid.ContainsKey(actualEntityGuid);
         }
 
-        public SensorContact GetSensorContact(Guid actualEntityGuid)
+        public SensorContact GetSensorContact(string actualEntityGuid)
         {
             return (_sensorContactsByActualGuid[actualEntityGuid]);
         }
@@ -44,7 +44,7 @@ namespace Pulsar4X.Engine.Sensors
                 ChangeType = EntityChangeData.EntityChangeType.EntityAdded
             });
         }
-        internal void RemoveContact(Guid ActualEntityGuid)
+        internal void RemoveContact(string ActualEntityGuid)
         {
             if (_sensorContactsByActualGuid.ContainsKey(ActualEntityGuid))
             {
@@ -61,7 +61,7 @@ namespace Pulsar4X.Engine.Sensors
         {
             return _sensorContactsByActualGuid.Values.ToList();
         }
-        public List<Guid> GetAllContactGuids()
+        public List<string> GetAllContactGuids()
         {
             return _sensorContactsByActualGuid.Keys.ToList();
         }

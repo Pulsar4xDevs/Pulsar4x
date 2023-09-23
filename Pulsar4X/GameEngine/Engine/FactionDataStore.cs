@@ -3,8 +3,9 @@ using System.Linq;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Modding;
 
-namespace Pulsar4X.Modding
+namespace Pulsar4X.Engine
 {
     /// <summary>
     /// Stores all the game data per faction, since the factions will unlock things at their own pace
@@ -18,13 +19,13 @@ namespace Pulsar4X.Modding
         public SafeDictionary<string, CargoTypeBlueprint> LockedCargoTypes { get; private set; }
         public SafeDictionary<string, ComponentTemplateBlueprint> LockedComponentTemplates { get; private set; }
         public SafeDictionary<string, IndustryTypeBlueprint> LockedIndustryTypes { get; private set; }
-        public SafeDictionary<string, TechBlueprint> LockedTechs { get; private set; }
+        public SafeDictionary<string, Tech> LockedTechs { get; private set; }
 
         public SafeDictionary<string, ArmorBlueprint> Armor { get; private set; }
         public SafeDictionary<string, CargoTypeBlueprint> CargoTypes { get; private set; }
         public SafeDictionary<string, ComponentTemplateBlueprint> ComponentTemplates { get; private set; }
         public SafeDictionary<string, IndustryTypeBlueprint> IndustryTypes { get; private set; }
-        public SafeDictionary<string, TechBlueprint> Techs { get; private set; }
+        public SafeDictionary<string, Tech> Techs { get; private set; }
 
         public CargoDefinitionsLibrary LockedCargoGoods { get; private set; }
         public CargoDefinitionsLibrary CargoGoods { get; private set; }
@@ -54,7 +55,11 @@ namespace Pulsar4X.Modding
             LockedCargoTypes = new SafeDictionary<string, CargoTypeBlueprint>(modDataStore.CargoTypes);
             LockedComponentTemplates = new SafeDictionary<string, ComponentTemplateBlueprint>(modDataStore.ComponentTemplates);
             LockedIndustryTypes = new SafeDictionary<string, IndustryTypeBlueprint>(modDataStore.IndustryTypes);
-            LockedTechs = new SafeDictionary<string, TechBlueprint>(modDataStore.Techs);
+            LockedTechs = new ();
+            foreach(var (id, techBlueprint) in modDataStore.Techs)
+            {
+                LockedTechs.Add(id, new Tech(techBlueprint));
+            }
 
             LockedCargoGoods = new CargoDefinitionsLibrary(modDataStore.Minerals.Values.ToList(), modDataStore.ProcessedMaterials.Values.ToList(), new List<ICargoable>());
             CargoGoods = new CargoDefinitionsLibrary();
@@ -65,13 +70,13 @@ namespace Pulsar4X.Modding
             LockedCargoTypes = new SafeDictionary<string, CargoTypeBlueprint>(other.LockedCargoTypes);
             LockedComponentTemplates = new SafeDictionary<string, ComponentTemplateBlueprint>(other.LockedComponentTemplates);
             LockedIndustryTypes = new SafeDictionary<string, IndustryTypeBlueprint>(other.LockedIndustryTypes);
-            LockedTechs = new SafeDictionary<string, TechBlueprint>(other.LockedTechs);
+            LockedTechs = new SafeDictionary<string, Tech>(other.LockedTechs);
 
             Armor = new SafeDictionary<string, ArmorBlueprint>(other.Armor);
             CargoTypes = new SafeDictionary<string, CargoTypeBlueprint>(other.CargoTypes);
             ComponentTemplates = new SafeDictionary<string, ComponentTemplateBlueprint>(other.ComponentTemplates);
             IndustryTypes = new SafeDictionary<string, IndustryTypeBlueprint>(other.IndustryTypes);
-            Techs = new SafeDictionary<string, TechBlueprint>(other.Techs);
+            Techs = new SafeDictionary<string, Tech>(other.Techs);
 
             LockedCargoGoods = new CargoDefinitionsLibrary(other.LockedCargoGoods);
             CargoGoods = new CargoDefinitionsLibrary(other.CargoGoods);
