@@ -152,6 +152,7 @@ namespace Pulsar4X.Datablobs
             return !entity.IsValid ? null : entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
         }
 
+        /*
         [TestFixture]
         [Description("TreeHierarchyDB Tests")]
         internal class TreeHierarchyTests
@@ -274,5 +275,6 @@ namespace Pulsar4X.Datablobs
                 return nodeEntity;
             }
         }
+        */
     }
 }

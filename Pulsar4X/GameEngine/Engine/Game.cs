@@ -41,15 +41,17 @@ namespace Pulsar4X.Engine
 
         public Game(NewGameSettings settings, ModDataStore modDataStore)
         {
+            StartingGameData = modDataStore;
+            Themes = new SafeDictionary<string, ThemeBlueprint>(modDataStore.Themes);
+            AtmosphericGases = new SafeDictionary<string, GasBlueprint>(modDataStore.AtmosphericGas);
+            SystemGenSettings = modDataStore.SystemGenSettings["default-system-gen-settings"];
+
             Settings = settings;
             TimePulse = new (this);
             ProcessorManager = new ProcessorManager(this);
             OrderHandler = new StandAloneOrderHandler(this);
             GlobalManager = new EntityManager(this, true);
-            Themes = new SafeDictionary<string, ThemeBlueprint>(modDataStore.Themes);
-            AtmosphericGases = new SafeDictionary<string, GasBlueprint>(modDataStore.AtmosphericGas);
-            SystemGenSettings = modDataStore.SystemGenSettings["default-system-gen-settings"];
-            StartingGameData = modDataStore;
+            GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
             GalaxyGen = new GalaxyFactory(SystemGenSettings, settings.MasterSeed);
         }
 

@@ -11,6 +11,6 @@ namespace Pulsar4X.Blueprints
         public string CostFormula { get; set; }
         public string DataFormula { get; set; }
         public ResearchCategories Category { get; set; }
-        public Dictionary<int, List<string>> Unlocks { get; set; } = new ();
+        public List<string> Unlocks { get; set; } = new ();
     }
 }

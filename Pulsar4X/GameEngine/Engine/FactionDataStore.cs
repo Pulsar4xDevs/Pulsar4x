@@ -61,6 +61,12 @@ namespace Pulsar4X.Engine
                 LockedTechs.Add(id, new Tech(techBlueprint));
             }
 
+            Armor = new ();
+            CargoTypes = new ();
+            ComponentTemplates = new ();
+            IndustryTypes = new ();
+            Techs = new ();
+
             LockedCargoGoods = new CargoDefinitionsLibrary(modDataStore.Minerals.Values.ToList(), modDataStore.ProcessedMaterials.Values.ToList(), new List<ICargoable>());
             CargoGoods = new CargoDefinitionsLibrary();
         }

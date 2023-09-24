@@ -56,6 +56,7 @@ namespace Pulsar4X.Engine
             //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
+            FactionDataStore factionDataStore = factionEntity.GetDataBlob<FactionInfoDB>().Data;
 
             var namedEntites = solSys.GetAllEntitiesWithDataBlob<NameDB>();
             foreach (var entity in namedEntites)
@@ -65,21 +66,21 @@ namespace Pulsar4X.Engine
             }
 
             //once per game init stuff
-            DefaultThrusterDesign(game, factionEntity);
-            DefaultWarpDesign(game, factionEntity);
-            DefaultFuelTank(game, factionEntity);
-            DefaultCargoInstallation(game, factionEntity);
-            DefaultSimpleLaser(game, factionEntity);
-            DefaultBFC(game, factionEntity);
-            ShipDefaultCargoHold(game, factionEntity);
-            ShipSmallCargo(game, factionEntity);
-            ShipPassiveSensor(game, factionEntity);
-            FacPassiveSensor(game, factionEntity);
-            DefaultFisionReactor(game, factionEntity);
-            DefaultBatteryBank(game, factionEntity);
-            DefaultFragPayload(game, factionEntity);
-            DefaultMissileSRB(game, factionEntity);
-            DefaultMissileSensors(game, factionEntity);
+            DefaultThrusterDesign(game, factionEntity, factionDataStore);
+            DefaultWarpDesign(game, factionEntity, factionDataStore);
+            DefaultFuelTank(game, factionEntity, factionDataStore);
+            DefaultCargoInstallation(game, factionEntity, factionDataStore);
+            DefaultSimpleLaser(game, factionEntity, factionDataStore);
+            DefaultBFC(game, factionEntity, factionDataStore);
+            ShipDefaultCargoHold(game, factionEntity, factionDataStore);
+            ShipSmallCargo(game, factionEntity, factionDataStore);
+            ShipPassiveSensor(game, factionEntity, factionDataStore);
+            FacPassiveSensor(game, factionEntity, factionDataStore);
+            DefaultFisionReactor(game, factionEntity, factionDataStore);
+            DefaultBatteryBank(game, factionEntity, factionDataStore);
+            DefaultFragPayload(game, factionEntity, factionDataStore);
+            DefaultMissileSRB(game, factionEntity, factionDataStore);
+            DefaultMissileSensors(game, factionEntity, factionDataStore);
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
             colonyEntity.AddComponent(_sensorInstalation);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
@@ -236,28 +237,28 @@ namespace Pulsar4X.Engine
             //TechProcessor.ApplyTech(factionTech, factionDataStore.Techs[new ID("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c")]); //add conventional engine for testing.
             //ResearchProcessor.CheckRequrements(factionTech);
 
-            DefaultThrusterDesign(game, factionEntity);
-            F1ThrusterDesign(game, factionEntity);
-            RaptorThrusterDesign(game, factionEntity);
-            RS25ThrusterDesign(game, factionEntity);
-            DefaultWarpDesign(game, factionEntity);
-            DefaultFuelTank(game, factionEntity);
-            LargeFuelTank(game, factionEntity);
-            DefaultCargoInstallation(game, factionEntity);
-            DefaultSimpleLaser(game, factionEntity);
-            DefaultBFC(game, factionEntity);
-            ShipDefaultCargoHold(game, factionEntity);
-            ShipSmallCargo(game, factionEntity);
-            ShipPassiveSensor(game, factionEntity);
-            FacPassiveSensor(game, factionEntity);
-            DefaultFisionReactor(game, factionEntity);
-            DefaultBatteryBank(game, factionEntity);
-            DefaultFragPayload(game, factionEntity);
-            DefaultMissileSRB(game, factionEntity);
-            DefaultMissileSensors(game, factionEntity);
-            DefaultMissileTube(game, factionEntity);
+            DefaultThrusterDesign(game, factionEntity, factionDataStore);
+            F1ThrusterDesign(game, factionEntity, factionDataStore);
+            RaptorThrusterDesign(game, factionEntity, factionDataStore);
+            RS25ThrusterDesign(game, factionEntity, factionDataStore);
+            DefaultWarpDesign(game, factionEntity, factionDataStore);
+            DefaultFuelTank(game, factionEntity, factionDataStore);
+            LargeFuelTank(game, factionEntity, factionDataStore);
+            DefaultCargoInstallation(game, factionEntity, factionDataStore);
+            DefaultSimpleLaser(game, factionEntity, factionDataStore);
+            DefaultBFC(game, factionEntity, factionDataStore);
+            ShipDefaultCargoHold(game, factionEntity, factionDataStore);
+            ShipSmallCargo(game, factionEntity, factionDataStore);
+            ShipPassiveSensor(game, factionEntity, factionDataStore);
+            FacPassiveSensor(game, factionEntity, factionDataStore);
+            DefaultFisionReactor(game, factionEntity, factionDataStore);
+            DefaultBatteryBank(game, factionEntity, factionDataStore);
+            DefaultFragPayload(game, factionEntity, factionDataStore);
+            DefaultMissileSRB(game, factionEntity, factionDataStore);
+            DefaultMissileSensors(game, factionEntity, factionDataStore);
+            DefaultMissileTube(game, factionEntity, factionDataStore);
             MissileDesign250(game, factionEntity);
-            ShipSmallOrdnanceStore(game, factionEntity);
+            ShipSmallOrdnanceStore(game, factionEntity, factionDataStore);
 
             colonyEntity.AddComponent(mineDesign);
             colonyEntity.AddComponent(refinaryDesign);
@@ -266,13 +267,13 @@ namespace Pulsar4X.Engine
             colonyEntity.AddComponent(_fuelTank_1000);
             colonyEntity.AddComponent(_cargoInstalation);
             colonyEntity.AddComponent(_sensorInstalation);
-            colonyEntity.AddComponent(ShipYard(factionEntity));
-            colonyEntity.AddComponent(LogisticsOffice(factionEntity));
+            colonyEntity.AddComponent(ShipYard(factionEntity, factionDataStore));
+            colonyEntity.AddComponent(LogisticsOffice(factionEntity, factionDataStore));
             colonyEntity.AddComponent(_ordnanceStore, 10);
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
 
             marsColony.AddComponent(_cargoInstalation);
-            marsColony.AddComponent(LogisticsOffice(factionEntity));
+            marsColony.AddComponent(LogisticsOffice(factionEntity, factionDataStore));
             ReCalcProcessor.ReCalcAbilities(marsColony);
 
             var earthCargo = colonyEntity.GetDataBlob<VolumeStorageDB>();
@@ -333,7 +334,7 @@ namespace Pulsar4X.Engine
             Entity gunShip1 = ShipFactory.CreateShip(gunShipDesign, factionEntity, earth,  "Prevailing Stillness");
             Entity courier = ShipFactory.CreateShip(pexDesign, factionEntity, earth, Math.PI, "Old Bessie");
             Entity courier2 = ShipFactory.CreateShip(pexDesign, factionEntity, earth, 0, "PE2");
-            Entity starship = ShipFactory.CreateShip(SpaceXStarShip(game, factionEntity), factionEntity, earth,  "Starship");
+            Entity starship = ShipFactory.CreateShip(SpaceXStarShip(game, factionEntity, factionDataStore), factionEntity, earth,  "Starship");
             var fuel = factionDataStore.CargoGoods["sorium-fuel"];
             var rp1 = factionDataStore.CargoGoods["rp-1"];
             var methalox = factionDataStore.CargoGoods["methalox"];
@@ -403,9 +404,9 @@ namespace Pulsar4X.Engine
             courier2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750;
 
 
-            Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (10 * Math.PI / 180), "Target Drone0");
-            Entity targetDrone1 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (22.5 * Math.PI / 180), "Target Drone1");
-            Entity targetDrone2 = ShipFactory.CreateShip(TargetDrone(game, targetFaction), targetFaction, earth, (45 * Math.PI / 180), "Target Drone2");
+            Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(game, targetFaction, factionDataStore), targetFaction, earth, (10 * Math.PI / 180), "Target Drone0");
+            Entity targetDrone1 = ShipFactory.CreateShip(TargetDrone(game, targetFaction, factionDataStore), targetFaction, earth, (22.5 * Math.PI / 180), "Target Drone1");
+            Entity targetDrone2 = ShipFactory.CreateShip(TargetDrone(game, targetFaction, factionDataStore), targetFaction, earth, (45 * Math.PI / 180), "Target Drone2");
             targetDrone0.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone0");
             targetDrone1.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone1");
             targetDrone2.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone2");
@@ -530,10 +531,10 @@ namespace Pulsar4X.Engine
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
-                (ShipPassiveSensor(game, faction), 1),
-                (ShipSmallCargo(game, faction), 1),
-                (LargeFuelTank(game, faction), 1),
-                (RaptorThrusterDesign(game, faction), 3), //3 for vac
+                (ShipPassiveSensor(game, faction, factionDataStore), 1),
+                (ShipSmallCargo(game, faction, factionDataStore), 1),
+                (LargeFuelTank(game, faction, factionDataStore), 1),
+                (RaptorThrusterDesign(game, faction, factionDataStore), 3), //3 for vac
 
             };
             ArmorBlueprint stainless = factionDataStore.Armor["stainless-steel-armor"];// factionDataStore.ArmorTypes[new Guid("05dce711-8846-488a-b0f3-57fd7924b268")];
@@ -590,8 +591,8 @@ namespace Pulsar4X.Engine
             var factionInfo = faction.GetDataBlob<FactionInfoDB>();
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
-                (DefaultSimpleLaser(game, faction), 1),
-                (DefaultBFC(game, faction), 1),
+                (DefaultSimpleLaser(game, faction, factionDataStore), 1),
+                (DefaultBFC(game, faction, factionDataStore), 1),
                 (_sensor_50, 1),
                 (_fuelTank_2500, 1),
                 (_fuelTank_2500, 1),
@@ -613,9 +614,9 @@ namespace Pulsar4X.Engine
             List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
             {
                 (_sensor_50, 1),
-                (VLargeFuelTank(game,faction), 1),
-                (ShipSmallCargo(game,faction), 1),
-                (LargeWarpDesign(game, faction), 1),
+                (VLargeFuelTank(game,faction, factionDataStore), 1),
+                (ShipSmallCargo(game,faction, factionDataStore), 1),
+                (LargeWarpDesign(game, faction, factionDataStore), 1),
                 (_battery, 2),
                 (_reactor, 1),
                 (_rs25, 1),
@@ -634,9 +635,9 @@ namespace Pulsar4X.Engine
 
             List<(ComponentDesign, int)> components = new List<(ComponentDesign, int)>()
             {
-                (DefaultFragPayload(game, faction), 1),
-                (DefaultMissileSensors(game, faction), 1),
-                (DefaultMissileSRB(game, faction), 1),
+                (DefaultFragPayload(game, faction, factionInfo.Data), 1),
+                (DefaultMissileSensors(game, faction, factionInfo.Data), 1),
+                (DefaultMissileSRB(game, faction, factionInfo.Data), 1),
             };
             double fuelkg = 225;
             _missile = new OrdnanceDesign(factionInfo, "Missile250", fuelkg, components);
@@ -674,7 +675,7 @@ namespace Pulsar4X.Engine
 
             ComponentDesigner engineDesigner;
 
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["rp-1-engine"];
+            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
             engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
             engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(30);
             engineDesigner.Name = "Merlin";
@@ -693,7 +694,7 @@ namespace Pulsar4X.Engine
 
             ComponentDesigner engineDesigner;
 
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["rp-1-engine"];
+            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
             engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
             engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(50);
             engineDesigner.Name = "F1";
@@ -718,10 +719,10 @@ namespace Pulsar4X.Engine
 
             ComponentDesigner engineDesigner;
 
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["rp-1-engine"];
+            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
             engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
             engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(15);
-            engineDesigner.ComponentDesignAttributes["Fuel Type"].SetValueFromGuid(Guid.Parse("55FA0D2E-0BC7-44F5-A292-B593F2248C3B"));
+            engineDesigner.ComponentDesignAttributes["Fuel Type"].SetValueFromString("methalox");
             engineDesigner.Name = "Raptor-Vac";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 
@@ -736,10 +737,10 @@ namespace Pulsar4X.Engine
             if (_rs25 != null)
                 return _rs25;
             ComponentDesigner engineDesigner;
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["rp-1-engine"];
+            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
             engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
             engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(100);
-            engineDesigner.ComponentDesignAttributes["Fuel Type"].SetValueFromGuid(Guid.Parse("A2AAF059-ED97-409D-883E-88DE918F6985"));
+            engineDesigner.ComponentDesignAttributes["Fuel Type"].SetValueFromString("hydrolox");
             engineDesigner.Name = "RS-25";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 
@@ -759,9 +760,9 @@ namespace Pulsar4X.Engine
 
             ComponentDesigner engineDesigner;
 
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["rp-1-engine"];
+            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
             engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(1000); //size 500 = 2500 power
+            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(500); //size 500 = 2500 power
             engineDesigner.Name = "Alcuberi-White 500";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 
@@ -778,9 +779,9 @@ namespace Pulsar4X.Engine
 
             ComponentDesigner engineDesigner;
 
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["rp-1-engine"];
+            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
             engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(4000);
+            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(400);
             engineDesigner.Name = "Alcuberi-White 2k";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 
@@ -795,7 +796,7 @@ namespace Pulsar4X.Engine
             if (_fuelTank_1000 != null)
                 return _fuelTank_1000;
             ComponentDesigner fuelTankDesigner;
-            ComponentTemplateBlueprint tankSD = factionDataStore.ComponentTemplates[new Guid("3528600E-3A1C-488C-BAE6-60251D1156AB")];
+            ComponentTemplateBlueprint tankSD = factionDataStore.ComponentTemplates["stainless-steel-fuel-tank"];
             fuelTankDesigner = new ComponentDesigner(tankSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
             fuelTankDesigner.ComponentDesignAttributes["Tank Volume"].SetValueFromInput(1000);
             fuelTankDesigner.Name = "Tank-1000m^3";

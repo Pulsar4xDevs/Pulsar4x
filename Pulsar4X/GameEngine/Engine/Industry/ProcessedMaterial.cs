@@ -14,6 +14,8 @@ namespace Pulsar4X.Engine.Industry
 
         public ProcessedMaterial(ProcessedMaterialBlueprint blueprint)
         {
+            FullIdentifier = blueprint.FullIdentifier;
+            UniqueID = blueprint.UniqueID;
             Name = blueprint.Name;
             Formulas = blueprint.Formulas;
             ResourceCosts = blueprint.ResourceCosts;

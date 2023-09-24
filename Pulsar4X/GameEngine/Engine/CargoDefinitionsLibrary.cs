@@ -95,8 +95,8 @@ namespace Pulsar4X.Engine
         {
             _definitions[material.UniqueID] = material;
             _processedMaterials[material.UniqueID] = material;
-            material.MineralsRequired?.ToList().ForEach(x => material.ResourceCosts[x.Key] = x.Value);
-            material.MaterialsRequired?.ToList().ForEach(x => material.ResourceCosts[x.Key] = x.Value);
+            // material.MineralsRequired?.ToList().ForEach(x => material.ResourceCosts[x.Key] = x.Value);
+            // material.MaterialsRequired?.ToList().ForEach(x => material.ResourceCosts[x.Key] = x.Value);
         }
 
         public bool Remove(ICargoable cargoable)

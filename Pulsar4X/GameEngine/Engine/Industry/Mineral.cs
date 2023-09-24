@@ -7,6 +7,8 @@ namespace Pulsar4X.Engine.Industry
     {
         public Mineral(MineralBlueprint blueprint)
         {
+            FullIdentifier = blueprint.FullIdentifier;
+            UniqueID = blueprint.UniqueID;
             Name = blueprint.Name;
             Description = blueprint.Description;
             CargoTypeID = blueprint.CargoTypeID;

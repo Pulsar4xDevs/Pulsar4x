@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Pulsar4X.Orbital;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Datablobs
 {
@@ -63,7 +64,7 @@ namespace Pulsar4X.Datablobs
             StateString = db.StateString;
             From = db.From;
             ItemsToShip = new List<(ICargoable item, int count)>(db.ItemsToShip);
-            TradeSpace = new Dictionary<Guid, double>(db.TradeSpace);
+            TradeSpace = new Dictionary<string, double>(db.TradeSpace);
             MaxTradeMass = db.MaxTradeMass;
             To = db.To;
             CurrentState = db.CurrentState;

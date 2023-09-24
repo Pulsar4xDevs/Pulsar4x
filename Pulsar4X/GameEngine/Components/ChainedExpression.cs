@@ -403,11 +403,10 @@ namespace Pulsar4X.Components
                     break;
 
                 case "GuidDict":
-                    Dictionary<Guid, double> dict = new Dictionary<Guid, double>();
+                    var dict = new Dictionary<string, double>();
                     foreach (var kvp in _designAttribute.GuidDictionary)
                     {
-                        //MakeThisDependant(kvp.Value);
-                        dict.Add((Guid.Parse(kvp.Key.ToString())), kvp.Value.DResult);
+                        dict.Add(kvp.Key.ToString(), kvp.Value.DResult);
                     }
 
                     args.Result = dict;

@@ -4,6 +4,9 @@ using Pulsar4X.Orbital;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Extensions;
+using Pulsar4X.Engine.Logistics;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.Engine;
 
@@ -120,7 +123,7 @@ public static class LogisticsCycle
 
 
 
-            if(StaticRefLib.GameSettings.StrictNewtonion)
+            if(shippingEntity.Manager.Game.Settings.StrictNewtonion)
             {
                 travelTimeToSource = LogisticsNewtonion.TravelTimeToSource(shippingEntity, tbase, odb, currentDateTime);
             }
@@ -393,7 +396,7 @@ public static class LogisticsCycle
             {
                 if (dvdif > dvMaxRangeDiff_ms * 0.01) //TODO:, whats the best dv dif for a colony on a planet? can we land? do we want to?
                 {
-                    if(StaticRefLib.GameSettings.StrictNewtonion)
+                    if(ship.Manager.Game.Settings.StrictNewtonion)
                         mfstate = LogisticsNewtonion.ManuverToParentColony(ship, cur, target, startState);
                     else
                         mfstate = LogisticsSimple.ManuverToParentColony(ship, cur, target, startState);
@@ -405,7 +408,7 @@ public static class LogisticsCycle
             {
                 if (dvdif > dvMaxRangeDiff_ms * 0.01)//if we're less than 10% of perfect
                 {
-                    if (StaticRefLib.GameSettings.StrictNewtonion)
+                    if (ship.Manager.Game.Settings.StrictNewtonion)
                         mfstate = LogisticsNewtonion.ManuverToSiblingObject(ship, cur, target, startState);
                     else
                         mfstate = LogisticsSimple.ManuverToSiblingObject(ship, cur, target, startState);
@@ -414,7 +417,7 @@ public static class LogisticsCycle
         }
         else //if we're not orbiting the same parent as the source, we have to warpmove
         {
-            if (StaticRefLib.GameSettings.StrictNewtonion)
+            if (ship.Manager.Game.Settings.StrictNewtonion)
                 mfstate = LogisticsNewtonion.ManuverToExternalObject(ship, cur, target, startState);
             else
             {

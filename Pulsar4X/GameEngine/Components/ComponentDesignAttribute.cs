@@ -162,6 +162,12 @@ namespace Pulsar4X.Components
             ParentComponent.SetAttributes();
         }
 
+        public void SetValueFromString(string id)
+        {
+            Formula.ReplaceExpression("'" + id + "'");
+            ParentComponent.SetAttributes();
+        }
+
         internal ChainedExpression Formula { get; set; }
         public void SetValue()
         {

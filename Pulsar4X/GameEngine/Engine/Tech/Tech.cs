@@ -12,6 +12,8 @@ namespace Pulsar4X.Engine
 
         public Tech(TechBlueprint blueprint)
         {
+            FullIdentifier = blueprint.FullIdentifier;
+            UniqueID = blueprint.UniqueID;
             Name = blueprint.Name;
             Description = blueprint.Description;
             MaxLevel = blueprint.MaxLevel;
