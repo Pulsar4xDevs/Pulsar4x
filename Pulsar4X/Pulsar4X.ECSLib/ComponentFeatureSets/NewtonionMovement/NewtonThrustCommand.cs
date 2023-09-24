@@ -306,10 +306,7 @@ namespace Pulsar4X.ECSLib
 
 
 
-                _db = new NewtonSimpleMoveDB();
-                _db.ActionOnDateTime = ActionOnDate;
-                _db.CurrentTrajectory = StartKE;
-                _db.TargetTrajectory = TargetKE;
+                _db = new NewtonSimpleMoveDB(_entityCommanding.GetSOIParentEntity(), StartKE, TargetKE, ActionOnDate);
                 _entityCommanding.SetDataBlob(_db);
 
                 UpdateDetailString();
