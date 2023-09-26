@@ -39,21 +39,21 @@ namespace Pulsar4X.Orbital
 
 			// If we run into negative eccentricity we have big problems
 			Debug.Assert(eccentricity >= 0, "Negative eccentricity, this is physically impossible");
+            
+            //note that a hyperbolic orbit will have a negitive semiMajorAxis
+            semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
             if (eccentricity > 1) //hypobola
             {
-                semiMajorAxis = -(-standardGravParam / (2 * specificOrbitalEnergy)); //in this case the sma is negitive
                 p = semiMajorAxis * (1 - eccentricity * eccentricity);
             }
             else if (eccentricity < 1) //ellipse
             {
-                semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
                 p = semiMajorAxis * (1 - eccentricity * eccentricity);
             }
-            else //parabola
+            else //parabola, currently forcing this to be a hyperbola. 
             {
                 p = angularSpeed * angularSpeed / standardGravParam;
                 eccentricity += 1.0E-15;
-                semiMajorAxis = -(-standardGravParam / (2 * specificOrbitalEnergy));
             }
 
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
@@ -608,7 +608,8 @@ namespace Pulsar4X.Orbital
             }
             else
             {
-                var hyperbolcMeanMotion = Math.Sqrt(sgp / Math.Pow(-a, 3));
+                var foo = sgp / Math.Pow(-a, 3);
+                var hyperbolcMeanMotion = Math.Sqrt(foo);
                 var hyperbolicMeanAnomaly = secondsFromEpoch * hyperbolcMeanMotion;
                 var hyperbolicAnomalyF = GetHyperbolicAnomalyNewtonsMethod(e, hyperbolicMeanAnomaly);
                 trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(ke.Eccentricity, hyperbolicAnomalyF);

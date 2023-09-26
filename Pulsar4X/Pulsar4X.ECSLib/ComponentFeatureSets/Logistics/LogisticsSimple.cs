@@ -182,9 +182,9 @@ namespace Pulsar4X.ECSLib
             var deltaV = insertionSpeed - idealSpeed;
 
             var ivecAng = Math.Atan2(insertionVector.Y, insertionVector.X);
-            var iAng = Angle.NormaliseRadians(ivecAng - Math.PI * 0.5);
-            var xpos = Math.Sin(iAng) * targetRad;
-            var ypos = Math.Cos(iAng) * targetRad;
+            //var iAng = Angle.NormaliseRadians(ivecAng - Math.PI * 0.5);
+            var xpos = Math.Sin(ivecAng) * targetRad;
+            var ypos = Math.Cos(ivecAng) * targetRad;
             
             var thrustVector = Vector3.Normalise(insertionVector) * -deltaV;
             

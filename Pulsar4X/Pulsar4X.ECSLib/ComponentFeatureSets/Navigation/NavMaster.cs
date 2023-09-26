@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
     public class NavSequenceDB : BaseDataBlob
     {
         public string CurrentActivity { get; internal set; }
-        internal List<Manuver> ManuverNodes = new List<Manuver>();
+        public List<Manuver> ManuverNodes = new List<Manuver>();
 
         internal void AddManuver(Manuver.ManuverType type, DateTime startDate, Entity StartParent, KeplerElements startKE, DateTime endDate, Entity EndParent, KeplerElements endKE)
         {

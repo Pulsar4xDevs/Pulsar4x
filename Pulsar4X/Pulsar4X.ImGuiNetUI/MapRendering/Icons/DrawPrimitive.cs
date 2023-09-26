@@ -232,8 +232,15 @@ namespace Pulsar4X.SDL2UI
             points[nPoints - 1] = new Vector2(xc + x, yc + y);
             return points;
         }
+
+        public static Vector2[] KeplerPoints(KeplerElements ke, Vector2 startPnt, Vector2 endPnt)
+        {
+            var a = ke.SemiMajorAxis;
+            var e = ke.Eccentricity;
+            var lop = ke.LoAN + ke.AoP;
+            return KeplerPoints(a, e, lop, startPnt, endPnt);
+        }
                 
-        
         /// <summary>
         /// Creates points for an ellipse.
         /// This formula creates more points at the periapsis and less at the apoapsis.
