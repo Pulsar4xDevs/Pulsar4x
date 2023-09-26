@@ -10,6 +10,7 @@
         "electronics.json",
         "energy.json",
         "engines.json",
+        "defaultItems.json",
         "defaultTheme.json",
         "industryTypes.json",
         "installations.json",

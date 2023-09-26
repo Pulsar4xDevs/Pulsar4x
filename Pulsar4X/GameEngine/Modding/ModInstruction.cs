@@ -12,6 +12,7 @@ namespace Pulsar4X.Modding
             Armor,
             CargoType,
             ComponentTemplate,
+            DefaultItems,
             Gas,
             IndustryType,
             Mineral,
@@ -65,6 +66,9 @@ namespace Pulsar4X.Modding
                     break;
                 case ModInstruction.DataType.ComponentTemplate:
                     instruction.Data = jObject["Payload"].ToObject<ComponentTemplateBlueprint>();
+                    break;
+                case ModInstruction.DataType.DefaultItems:
+                    instruction.Data = jObject["Payload"].ToObject<DefaultItemsBlueprint>();
                     break;
                 case ModInstruction.DataType.Gas:
                     instruction.Data = jObject["Payload"].ToObject<GasBlueprint>();

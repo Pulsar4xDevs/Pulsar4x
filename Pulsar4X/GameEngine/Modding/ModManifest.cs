@@ -9,5 +9,7 @@ namespace Pulsar4X.Modding
         public string Version { get; set; }
         public string Namespace { get; set; } // Unique mod identifier
         public List<string> DataFiles { get; set; } // List of paths to mod data files
+        public string PlayerFactionStartingItems { get; set; }
+        public string AIFactionStartingItems { get; set; }
     }
 }

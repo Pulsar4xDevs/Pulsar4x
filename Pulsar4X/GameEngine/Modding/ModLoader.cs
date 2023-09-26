@@ -6,6 +6,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Modding
 {
@@ -56,6 +57,9 @@ namespace Pulsar4X.Modding
                     break;
                 case ModInstruction.DataType.ComponentTemplate:
                     ApplyModGeneric<ComponentTemplateBlueprint>(baseData.ComponentTemplates, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.DefaultItems:
+                    ApplyModGeneric<DefaultItemsBlueprint>(baseData.DefaultItems, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.Gas:
                     ApplyModGeneric<GasBlueprint>(baseData.AtmosphericGas, mod, modNamespace);
