@@ -445,7 +445,7 @@ namespace Pulsar4X.SDL2UI
 
         static string StringifyValue(double value, string format = "0.###")
         {
-            return ECSLib.Stringify.Distance(value, format);
+            return Stringify.Distance(value, format);
         }
 
         public static void Display(string Id, double value, ValueType inputType, ref DisplayType displayType, ref string displayFormat )

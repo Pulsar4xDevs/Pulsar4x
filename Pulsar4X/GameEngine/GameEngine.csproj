@@ -20,4 +20,12 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <NoWarn>0414;0649;0169;8601,8602,8618,8714</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <None Update="Data\basemod\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\testingmod\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

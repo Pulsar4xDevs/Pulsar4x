@@ -4,7 +4,6 @@
     <TargetFramework>net7.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <FileUpgradeFlags>40</FileUpgradeFlags>
-    <UpgradeBackupLocation>C:\Users\matia\source\repos\Pulsar4x\Pulsar4X\Backup2\</UpgradeBackupLocation>
     <OldToolsVersion>Current</OldToolsVersion>
     <ApplicationIcon>Resources\pulsaricon.ico</ApplicationIcon>
   </PropertyGroup>
@@ -90,7 +89,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj" />
     <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
   </ItemGroup>
   <ItemGroup>

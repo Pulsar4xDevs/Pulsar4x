@@ -1,0 +1,436 @@
+{
+  "Type": "Minerals",
+  "Data": {
+    "List": [
+      {
+        "Key": "5eadda1f-43aa-44be-bdb4-395441a33f14",
+        "Value": {
+          "Name": "Hydrocarbons",
+          "Description": "Crude Oil, Coal, Natural Gas",
+          "ID": "5eadda1f-43aa-44be-bdb4-395441a33f14",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.0011111,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.00
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.001
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.075
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.1
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.1
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 2.0
+              }
+            ]
+          }
+        }
+      },
+ 
+      {
+        "Key":"c8a64019-aef4-4453-bd9b-36b26b0e9684",
+        "Value": {
+          "Name": "Iron",
+          "Description": "A naturally-occurring mineral in large deposits.",
+          "ID": "c8a64019-aef4-4453-bd9b-36b26b0e9684",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.0001270648,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.2
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.3
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.3
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.2
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.6
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 1.0
+              }
+            ]
+          }
+        }
+      },
+
+      {
+        "Key":"d554fb70-bd28-459c-a1b3-d7b2019f685a",
+        "Value": {
+          "Name": "Aluminium",
+          "Description": "A naturally-occurring mineral in large deposits.",
+          "ID": "d554fb70-bd28-459c-a1b3-d7b2019f685a",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.0003703703,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.2
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.3
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.3
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.2
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.6
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 1.0
+              }
+            ]
+          }
+        }
+      },
+
+      {
+        "Key":"66f15e2f-7a24-4ff6-9b68-03fcd93686f9",
+        "Value": {
+          "Name": "Copper",
+          "Description": "A naturally-occurring mineral in large deposits.",
+          "ID": "66f15e2f-7a24-4ff6-9b68-03fcd93686f9",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.0001118568,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.2
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.3
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.3
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.2
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.6
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 1.0
+              }
+            ]
+          }
+        }
+      },
+
+      {
+        "Key":"A11ABDF3-C7DA-4DB2-9146-AEA0A5026B3E",
+        "Value": {
+          "Name": "Titanium",
+          "Description": "A naturally-occurring mineral in large deposits.",
+          "ID": "A11ABDF3-C7DA-4DB2-9146-AEA0A5026B3E",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.0002202643,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.2
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.3
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.3
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.2
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.6
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 1.0
+              }
+            ]
+          }
+        }
+      },
+
+      {
+        "Key":"d6ebca8e-5a42-4664-a081-ca0190a6bb07",
+        "Value": {
+          "Name": "Lithium",
+          "Description": "A naturally-occurring mineral in large deposits.",
+          "ID": "d6ebca8e-5a42-4664-a081-ca0190a6bb07",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.0018691589,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.2
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.3
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.3
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.2
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.6
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 1.0
+              }
+            ]
+          }
+        }
+      },
+
+      {
+        "Key":"236b3092-29ca-4924-8c70-d09441757a30",
+        "Value": {
+          "Name": "Chromium",
+          "Description": "A naturally-occurring mineral in large deposits.",
+          "ID": "236b3092-29ca-4924-8c70-d09441757a30",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.0001388889,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.5
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.6
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.8
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.2
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.1
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 0.8
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Key":"b084913d-385c-49e1-9877-56e805014ab0",
+        "Value": {
+          "Name": "Fissionables",
+          "Description": "Un-refined Fissionable Metals",
+          "ID": "b084913d-385c-49e1-9877-56e805014ab0",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.0000531915,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.2
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.3
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.3
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.2
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.6
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 1.0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Key":"88175550-6323-4260-9846-a3f74998f343",
+        "Value": {
+          "Name": "Silicon",
+          "Description": "A naturally-occurring mineral in large deposits.",
+          "ID": "88175550-6323-4260-9846-a3f74998f343",
+          "CargoTypeID": "16B4C4F0-7292-4F4D-8FEA-22103C70B288",
+          "MassPerUnit": 1.0,
+          "VolumePerUnit": 0.000429185,
+          "Abundance": {
+            "List": [
+              {
+                "Key": "Asteroid",
+                "Value": 0.2
+              },
+              {
+                "Key": "Comet",
+                "Value": 0.3
+              },
+              {
+                "Key": "DwarfPlanet",
+                "Value": 0.3
+              },
+              {
+                "Key": "GasDwarf",
+                "Value": 0.0
+              },
+              {
+                "Key": "GasGiant",
+                "Value": 0.0
+              },
+              {
+                "Key": "IceGiant",
+                "Value": 0.2
+              },
+              {
+                "Key": "Moon",
+                "Value": 0.6
+              },
+              {
+                "Key": "Terrestrial",
+                "Value": 1.0
+              }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
