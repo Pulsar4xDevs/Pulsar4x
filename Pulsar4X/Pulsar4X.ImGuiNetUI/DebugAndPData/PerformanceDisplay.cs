@@ -8,7 +8,8 @@ using System.Reflection;
 using System.Text;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -95,11 +96,11 @@ namespace Pulsar4X.SDL2UI
             {
                 SetFrameRateArray();
                 ImGui.Text("Global Tick: "); ImGui.SameLine();
-                var t_lpt = _uiState.Game.GamePulse.LastProcessingTime.TotalMilliseconds;
-                var t_tf = _uiState.Game.GamePulse.TickFrequency.TotalMilliseconds;
+                var t_lpt = _uiState.Game.TimePulse.LastProcessingTime.TotalMilliseconds;
+                var t_tf = _uiState.Game.TimePulse.TickFrequency.TotalMilliseconds;
                 var txt_lpt = t_lpt.ToString();
                 var col = new Vector4(0, 1, 0, 1);
-                if (t_lpt > _uiState.Game.GamePulse.TickFrequency.TotalMilliseconds)
+                if (t_lpt > _uiState.Game.TimePulse.TickFrequency.TotalMilliseconds)
                     col = new Vector4(1, 0, 0, 1);
                 ImGui.Text(txt_lpt); ImGui.SameLine();
                 var overtime = t_lpt - t_tf;
@@ -173,7 +174,7 @@ namespace Pulsar4X.SDL2UI
                 
                 if(ImGui.CollapsingHeader("All Systems"))
                 {
-                    foreach (var starsys in StaticRefLib.Game.Systems.Values)
+                    foreach (var starsys in _uiState.Game.Systems.Select(kvp => kvp.Value))
                     {
                         ImGui.Text(starsys.Guid.ToString());
                         ImGui.Text($"    IsProcecssing: {starsys.ManagerSubpulses.IsProcessing}");
@@ -318,8 +319,8 @@ namespace Pulsar4X.SDL2UI
         void RecordToFile()
         {
             
-            var t_lpt = _uiState.Game.GamePulse.LastProcessingTime.TotalMilliseconds;
-            var t_tf = _uiState.Game.GamePulse.TickFrequency.TotalMilliseconds;
+            var t_lpt = _uiState.Game.TimePulse.LastProcessingTime.TotalMilliseconds;
+            var t_tf = _uiState.Game.TimePulse.TickFrequency.TotalMilliseconds;
             var overtime = t_lpt - t_tf;
             var starsysdata = _systemState.StarSystem.ManagerSubpulses.GetLastPerfData();
             var dirst = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -328,8 +329,8 @@ namespace Pulsar4X.SDL2UI
             string machine = Environment.MachineName;
             string gitver = AssemblyInfo.GetGitHash();
             string datetime = DateTime.Now.ToString();
-            string threaded = string.Format("{0,-28}{1,16}","Threaded:", StaticRefLib.GameSettings.EnableMultiThreading.ToString());
-            string timespan = string.Format("{0,-28}{1,16}","Time Span:" , _uiState.Game.GamePulse.Ticklength.ToString());
+            string threaded = string.Format("{0,-28}{1,16}","Threaded:", _uiState.Game.Settings.EnableMultiThreading.ToString());
+            string timespan = string.Format("{0,-28}{1,16}","Time Span:" , _uiState.Game.TimePulse.Ticklength.ToString());
             string txt_lpt =  string.Format("{0,-28}{1,16}","Full Process Time:", t_lpt.ToString());
             
             string sysname = _systemState.StarSystem.NameDB.OwnersName;
@@ -356,7 +357,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnGameTickChange(DateTime newDate)
         {
-            _currentGFPS = (float)_uiState.Game.GamePulse.LastSubtickTime.TotalSeconds;
+            _currentGFPS = (float)_uiState.Game.TimePulse.LastSubtickTime.TotalSeconds;
 
             if (_currentGFPS > largestGFPS)
             {

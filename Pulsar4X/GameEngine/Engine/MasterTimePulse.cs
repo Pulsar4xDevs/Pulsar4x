@@ -98,6 +98,7 @@ namespace Pulsar4X.Engine
         internal MasterTimePulse(Game game)
         {
             _game = game;
+            _gameGlobalDateTime = game.Settings.StartDateTime;
             _timer.Interval = _tickInterval.TotalMilliseconds;
             _timer.Enabled = false;
             _timer.Elapsed += Timer_Elapsed;

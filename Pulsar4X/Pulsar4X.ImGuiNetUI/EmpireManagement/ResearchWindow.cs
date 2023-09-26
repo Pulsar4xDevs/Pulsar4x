@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -10,15 +12,15 @@ namespace Pulsar4X.SDL2UI
     {
         private readonly Vector2 invisButtonSize = new (15, 15);
         private FactionTechDB _factionTechDB;
-        private Dictionary<Guid, (TechSD tech, int amountDone, int amountMax)> _researchableTechsByGuid;
-        private List<(TechSD tech, int amountDone, int amountMax)> _researchableTechs;
+        private Dictionary<string, (Tech tech, int amountDone, int amountMax)> _researchableTechsByGuid;
+        private List<(Tech tech, int amountDone, int amountMax)> _researchableTechs;
         private List<(Scientist scientist, Entity atEntity)> _scienceTeams;
         private int _selectedTeam = -1;
 
         private ResearchWindow()
         {
             OnFactionChange();
-            _uiState.Game.GamePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent; 
+            _uiState.Game.TimePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent; 
         }
 
         private void GameLoopOnGameGlobalDateChangedEvent(DateTime newdate)
@@ -216,7 +218,7 @@ namespace Pulsar4X.SDL2UI
                         if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
                         {
                             if (_selectedTeam > -1)
-                                ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].tech.ID);
+                                ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].tech.UniqueID);
                         }
                         ImGui.TableNextColumn();
                         if(_researchableTechs[i].tech.MaxLevel > 1)
@@ -362,7 +364,7 @@ namespace Pulsar4X.SDL2UI
             */
         }
 
-        void Buttons(Scientist scientist, (Guid techID, bool cycle) queueItem, int i)
+        void Buttons(Scientist scientist, (string techID, bool cycle) queueItem, int i)
         {
             ImGui.BeginGroup();
 

@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 using Pulsar4X.SDL2UI;
 using static Pulsar4X.SDL2UI.UserOrbitSettings;
 
@@ -14,7 +16,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         private OrderableDB _orderableDB = null;
 
-        private Guid _movementTargetGuid = new Guid();
+        private string _movementTargetGuid = String.Empty;
 
         private enum OrderCreationSubWindow
         {
@@ -158,7 +160,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             if (_orderableDB != null)
             {
-                if (_movementTargetGuid != new Guid())
+                if (_movementTargetGuid != string.Empty)
                 {
                     ImGui.Button("Add Order to\r\nSelected Entity");
                 }

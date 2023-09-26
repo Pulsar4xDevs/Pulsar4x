@@ -1,6 +1,9 @@
 ﻿using System;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
+using Pulsar4X.Engine.Orders;
 using Pulsar4X.Orbital;
 
 namespace Pulsar4X.SDL2UI
@@ -163,7 +166,8 @@ namespace Pulsar4X.SDL2UI
 
         void ActionCmd()
         {
-            NewtonThrustCommand.CreateCommand(OrderingEntity.Entity, (_deltaV_MS, 0));
+            //FIXME:
+            //NewtonThrustCommand.CreateCommand(OrderingEntity.Entity, (_deltaV_MS, 0));
             CloseWindow();
         }
 

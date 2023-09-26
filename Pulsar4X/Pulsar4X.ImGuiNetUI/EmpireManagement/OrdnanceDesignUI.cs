@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine.Designs;
+using Pulsar4X.Components;
+using Pulsar4X.Atb;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Blueprints;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -32,7 +37,7 @@ namespace Pulsar4X.SDL2UI
         
         private float _fuelKG;
         private long _thrusterSizeKG;
-        ComponentTemplateSD[] _engineTemplates = new ComponentTemplateSD[0];
+        ComponentTemplateBlueprint[] _engineTemplates = new ComponentTemplateBlueprint[0];
         private string[] _engineTypeNames = new string[0];
         private ComponentDesigner _engineDesigner;
         private int _engineDesignTypeIndex = -1;
@@ -109,7 +114,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         _payloadTypes.Add(cdes);
                     }
-                    if (cdes.AttributesByType.ContainsKey(typeof(SensorReceverAtbDB)))
+                    if (cdes.AttributesByType.ContainsKey(typeof(SensorReceiverAtbDB)))
                     {
                         _eleccPackTypes.Add(cdes);
                     }
@@ -134,11 +139,11 @@ namespace Pulsar4X.SDL2UI
             _selectedComponentDesigns[_eleccPackTypes[_electronicsSelectedIndex]] = 1;
             
             
-            var allDesignables = StaticRefLib.StaticData.ComponentTemplates.Values.ToArray();
-            List<ComponentTemplateSD> engineTemplates = new List<ComponentTemplateSD>();
+            var allDesignables = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.ComponentTemplates.Select(kvp => kvp.Value).ToArray();
+            List<ComponentTemplateBlueprint> engineTemplates = new List<ComponentTemplateBlueprint>();
             foreach (var designable in allDesignables)
             {
-                foreach (var atbSD in designable.ComponentAtbSDs)
+                foreach (var atbSD in designable.Attributes)
                 {
                     if( atbSD.AttributeType == typeof(NewtonionThrustAtb).ToString())
                     {
@@ -199,7 +204,7 @@ namespace Pulsar4X.SDL2UI
 
                 if (ImGui.Combo("Engine Types", ref _engineDesignTypeIndex, _engineTypeNames, _engineTypeNames.Length))
                 {
-                    _engineDesigner = new ComponentDesigner(_engineTemplates[_engineDesignTypeIndex], _factionTech);
+                    _engineDesigner = new ComponentDesigner(_engineTemplates[_engineDesignTypeIndex], _uiState.Faction.GetDataBlob<FactionInfoDB>().Data, _factionTech);
                     _engineDesigner.SetAttributes();
                 }
 

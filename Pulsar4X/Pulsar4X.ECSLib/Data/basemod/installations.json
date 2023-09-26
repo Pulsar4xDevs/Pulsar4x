@@ -563,5 +563,88 @@
         }
       ]
     }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "spaceport",
+      "Name": "Planetary Spaceport Complex",
+      "Formulas": {
+        "Description": "'A generic does everything space facility'",
+        "Mass": "Ability(0)",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "Ability(1) * 0.1",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "duranium": "60",
+        "mercassium": "60"
+      },
+      "ComponentType":"Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Warehouse Size",
+          "DescriptionFormula": "''",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "Size Efficency",
+          "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
+          "GuiHint": "GuiTextDisplay",
+          "GuidDictionary": {},
+          "AttributeFormula": "Ability(0) * 0.01"
+        },
+        {
+          "Name": "Cargo Transfer Rate",
+          "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "Transfer Range",
+          "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "Total Cargo Stored",
+          "DescriptionFormula": "'The volume of cargo this can store.'",
+          "GuiHint": "GuiTextDisplay",
+          "GuidDictionary": {},
+          "AttributeFormula": "Ability(0) - Ability(1) - Ability(2)"
+        },
+        {
+          "Name": "DBargsTransfer",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+          "AttributeType": "Pulsar4X.Datablobs.StorageTransferRateAtbDB"
+        },
+        {
+          "Name": "DBargsStorage",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs('general-storage', Ability('Total Cargo Stored'))",
+          "AttributeType": "Pulsar4X.Atb.VolumeStorageAtb"
+        }
+      ]
+    }
   }
 ]

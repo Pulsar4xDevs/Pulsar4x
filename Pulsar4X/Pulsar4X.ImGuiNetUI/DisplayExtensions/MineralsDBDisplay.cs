@@ -1,6 +1,6 @@
 using System.Linq;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -8,7 +8,7 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Display(this MineralsDB mineralsDB, EntityState entityState, GlobalUIState uiState)
         {
-            var minerals = uiState.Game.StaticData.CargoGoods.GetMineralsList();
+            var minerals = entityState.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList();
 
             if(ImGui.BeginTable("###MineralTable" + entityState.Entity.Guid, 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {
@@ -19,7 +19,7 @@ namespace Pulsar4X.SDL2UI
 
                 foreach(var (id, mineral) in mineralsDB.Minerals)
                 {
-                    var mineralData = minerals.FirstOrDefault(x => x.ID == id);
+                    var mineralData = minerals.FirstOrDefault(x => x.UniqueID == id);
                     if (mineralData != null)
                     {
                         ImGui.TableNextRow();

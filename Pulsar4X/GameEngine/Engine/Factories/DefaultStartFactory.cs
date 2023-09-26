@@ -9,6 +9,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Designs;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Engine.Orders;
+using Pulsar4X.Atb;
 
 namespace Pulsar4X.Engine
 {
@@ -165,44 +166,52 @@ namespace Pulsar4X.Engine
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             FactionDataStore factionDataStore = factionEntity.GetDataBlob<FactionInfoDB>().Data;
 
+            Entity targetFaction = FactionFactory.CreateFaction(game, "OpFor");
+            FactionDataStore opForDataStore = targetFaction.GetDataBlob<FactionInfoDB>().Data;
+
             // Need to unlock the starting data in the game
             // FIXME: this is totally just a placeholder, seriously, we shouldn't unlock everything here :D
             // FIXME: this should be configurable via JSON and not just load everything!
             foreach(var (id, armor) in game.StartingGameData.Armor)
             {
                 factionDataStore.Unlock(id);
+                opForDataStore.Unlock(id);
             }
             foreach(var (id, cargoTypes) in game.StartingGameData.CargoTypes)
             {
                 factionDataStore.Unlock(id);
+                opForDataStore.Unlock(id);
             }
             foreach(var (id, templates) in game.StartingGameData.ComponentTemplates)
             {
                 factionDataStore.Unlock(id);
+                opForDataStore.Unlock(id);
             }
             foreach(var (id, industryTypes) in game.StartingGameData.IndustryTypes)
             {
                 factionDataStore.Unlock(id);
+                opForDataStore.Unlock(id);
             }
             foreach(var (id, mineral) in game.StartingGameData.Minerals)
             {
                 factionDataStore.Unlock(id);
+                opForDataStore.Unlock(id);
             }
             foreach(var (id, material) in game.StartingGameData.ProcessedMaterials)
             {
                 factionDataStore.Unlock(id);
+                opForDataStore.Unlock(id);
             }
             foreach(var (id, tech) in game.StartingGameData.Techs)
             {
                 factionDataStore.Unlock(id);
+                opForDataStore.Unlock(id);
             }
 
             // Set the faction entity to own itself so it can issue orders to itself
             factionEntity.FactionOwnerID = factionEntity.Guid;
 
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
-
-            Entity targetFaction = FactionFactory.CreateFaction(game, "OpFor");
 
             var namedEntites = solSys.GetAllEntitiesWithDataBlob<NameDB>();
             foreach (var entity in namedEntites)
@@ -287,13 +296,13 @@ namespace Pulsar4X.Engine
             var hydrocarbon = factionDataStore.CargoGoods["hydrocarbons"];
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, hydrocarbon, 5000);
 
-            var stainless = factionDataStore.CargoGoods["stainless-Steel"];
+            var stainless = factionDataStore.CargoGoods["stainless-steel"];
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, stainless, 100000);
 
             var chromium = factionDataStore.CargoGoods["chromium"];
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, chromium, 50000);
 
-            var fisiles = factionDataStore.CargoGoods["Fissionables"];
+            var fisiles = factionDataStore.CargoGoods["fissionables"];
             CargoTransferProcessor.AddRemoveCargoMass(colonyEntity, fisiles, 50000);
 
             var copper = factionDataStore.CargoGoods["copper"];
@@ -395,7 +404,7 @@ namespace Pulsar4X.Engine
             //gunShip0.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);
             //gunShip1.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);
 
-            var elec = factionDataStore.CargoGoods["electrical-energy"];
+            var elec = factionDataStore.CargoGoods["electricity"];
             gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750;
             gunShip1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750;
             ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750;
@@ -649,7 +658,7 @@ namespace Pulsar4X.Engine
             if (_shipYard != null)
                 return _shipYard;
             ComponentDesigner spacePortDesigner;
-            ComponentTemplateBlueprint spaceportSD = factionDataStore.ComponentTemplates["spaceport"]; //StaticRefLib.StaticData.ComponentTemplates[new Guid("0BD304FF-FDEA-493C-8979-15FE86B7123E")];
+            ComponentTemplateBlueprint spaceportSD = factionDataStore.ComponentTemplates["shipyard"]; //StaticRefLib.StaticData.ComponentTemplates[new Guid("0BD304FF-FDEA-493C-8979-15FE86B7123E")];
             spacePortDesigner = new ComponentDesigner(spaceportSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
             spacePortDesigner.Name = "Ship Yard";
             _shipYard = spacePortDesigner.CreateDesign(faction);

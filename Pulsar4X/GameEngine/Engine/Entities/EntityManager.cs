@@ -17,7 +17,7 @@ namespace Pulsar4X.Engine
     {
         [CanBeNull]
         internal string ManagerGuid;
-        internal Game Game { get;  set; }
+        public Game Game { get;  internal set; }
         protected readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
         private readonly Dictionary<string, Entity> _localEntityDictionary = new ();
@@ -180,7 +180,7 @@ namespace Pulsar4X.Engine
                 }
             }
 
-            UpdateListners(_entities[entityID], null, EntityChangeData.EntityChangeType.EntityAdded);
+            UpdateListeners(_entities[entityID], null, EntityChangeData.EntityChangeType.EntityAdded);
 
             if (entity.FactionOwnerID != null)
             {
@@ -246,7 +246,7 @@ namespace Pulsar4X.Engine
 
             if (Game != null)
             {
-                UpdateListners(entity, null, EntityChangeData.EntityChangeType.EntityRemoved);
+                UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityRemoved);
                 _globalGuidDictionaryLock.EnterWriteLock();
                 try
                 {
@@ -346,7 +346,7 @@ namespace Pulsar4X.Engine
             dataBlob.OnSetToEntity();
             dataBlob.OwningEntity.Manager.ManagerSubpulses.AddSystemInterupt(dataBlob);
             if(updateListners)
-                UpdateListners(_entities[entityID], dataBlob, EntityChangeData.EntityChangeType.DBAdded);
+                UpdateListeners(_entities[entityID], dataBlob, EntityChangeData.EntityChangeType.DBAdded);
         }
 
         internal void RemoveDataBlob<T>(int entityID) where T : BaseDataBlob
@@ -361,12 +361,12 @@ namespace Pulsar4X.Engine
             _dataBlobMap[typeIndex][entityID].OwningEntity = null;
             _dataBlobMap[typeIndex][entityID] = null;
             EntityMasks[entityID][typeIndex] = false;
-            UpdateListners(_entities[entityID], db, EntityChangeData.EntityChangeType.DBRemoved);
+            UpdateListeners(_entities[entityID], db, EntityChangeData.EntityChangeType.DBRemoved);
         }
 
         #endregion
 
-        private void UpdateListners(Entity entity, BaseDataBlob db, EntityChangeData.EntityChangeType change)
+        private void UpdateListeners(Entity entity, BaseDataBlob db, EntityChangeData.EntityChangeType change)
         {
             //listners to this work on thier own threads and are not affected by this one.
             if (EntityListners.Count > 0)

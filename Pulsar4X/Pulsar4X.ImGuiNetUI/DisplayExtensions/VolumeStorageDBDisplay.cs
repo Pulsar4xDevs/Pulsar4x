@@ -1,7 +1,12 @@
 using System.Linq;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Engine.Industry;
+using Pulsar4X.Components;
+using Pulsar4X.Engine.Designs;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -11,8 +16,8 @@ namespace Pulsar4X.SDL2UI
         {
             foreach(var (sid, storageType) in storage.TypeStores)
             {
-                string header = uiState.Game.StaticData.CargoTypes[sid].Name + " Storage";
-                string headerId = uiState.Game.StaticData.CargoTypes[sid].ID.ToString();
+                string header = entityState.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoTypes[sid].Name + " Storage";
+                string headerId = entityState.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoTypes[sid].UniqueID.ToString();
                 double freeVolume = storage.GetFreeVolume(sid);
                 double percent = ((storageType.MaxVolume - freeVolume) / storageType.MaxVolume) * 100;
                 header += " (" + percent.ToString("0.#") + "% full)";
@@ -39,14 +44,14 @@ namespace Pulsar4X.SDL2UI
 
                             ImGui.TableNextColumn();
                             if(ImGui.Selectable(cargoType.Name, false, ImGuiSelectableFlags.SpanAllColumns)) {}
-                            if(cargoType is MineralSD)
+                            if(cargoType is Mineral)
                             {
-                                var mineralSD = (MineralSD)cargoType;
+                                var mineralSD = (Mineral)cargoType;
                                 DisplayHelpers.DescriptiveTooltip(cargoType.Name, "Mineral", mineralSD.Description);
                             }
-                            else if(cargoType is ProcessedMaterialSD)
+                            else if(cargoType is ProcessedMaterial)
                             {
-                                var processedMaterialSD = (ProcessedMaterialSD)cargoType;
+                                var processedMaterialSD = (ProcessedMaterial)cargoType;
                                 DisplayHelpers.DescriptiveTooltip(cargoType.Name, "Processed Material", processedMaterialSD.Description);
                             }
                             else if(cargoType is ComponentInstance)

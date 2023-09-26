@@ -547,7 +547,7 @@ namespace Pulsar4X.Components
                 case "TechLevel":
                     techGuid = (string)args.EvaluateParameters()[0];
                     if (_factionDataStore.Techs.ContainsKey(techGuid))
-                        args.Result = _factionDataStore.Techs[techGuid];
+                        args.Result = _factionDataStore.Techs[techGuid].Level;
                     else args.Result = 0;
                     break;
                 //currently not used, but an future experiment to pass the CargoTypeSD as a parameter

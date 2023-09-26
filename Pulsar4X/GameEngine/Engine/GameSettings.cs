@@ -31,7 +31,7 @@ namespace Pulsar4X.Engine
             { EventType.FuelExhausted, true }
         };
 
-        public string CurrentTheme { get; set; } = "default";
+        public string CurrentTheme { get; set; } = "default-theme";
 
         #endregion
 

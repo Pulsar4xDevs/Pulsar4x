@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
+using Pulsar4X.Atb;
 
 namespace Pulsar4X.Engine
 {
@@ -55,7 +56,7 @@ namespace Pulsar4X.Engine
             int i = 0;
             if (instancesDB.TryGetComponentsByAttribute<StorageTransferRateAtbDB>(out var componentTransferInstances))
             {
-                foreach (var instance in componentInstances)
+                foreach (var instance in componentTransferInstances)
                 {
                     var design = instance.Design;
                     if(!design.HasAttribute<StorageTransferRateAtbDB>())

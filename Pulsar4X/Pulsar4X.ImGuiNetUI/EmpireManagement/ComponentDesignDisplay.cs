@@ -5,8 +5,15 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
+using Pulsar4X.Blueprints;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Components;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Extensions;
+using Pulsar4X.Engine.Industry;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Engine.Designs;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -27,11 +34,11 @@ namespace Pulsar4X.SDL2UI
 
         private NoTemplateState NoTemplateState = NoTemplateState.PleaseSelect;
         private ComponentDesigner _componentDesigner;
-        public ComponentTemplateSD Template { get; private set;}
+        public ComponentTemplateBlueprint Template { get; private set;}
         private string[] _designTypes;
-        private ComponentTemplateSD[] _designables;
+        private ComponentTemplateBlueprint[] _designables;
         private static byte[] _nameInputBuffer = new byte[128];
-        private static TechSD[] _techSDs;
+        private static Tech[] _techSDs;
         private static string[] _techNames;
         private static int _techSelectedIndex = -1;
         //private TechSD[] _techSDs;
@@ -52,20 +59,13 @@ namespace Pulsar4X.SDL2UI
             return instance;
         }
 
-        public void SetTemplate(ComponentTemplateSD template, GlobalUIState state)
+        public void SetTemplate(ComponentTemplateBlueprint template, GlobalUIState state)
         {
             Template = template;
 
+            var factionData = state.Faction.GetDataBlob<FactionInfoDB>().Data;
             var factionTech = state.Faction.GetDataBlob<FactionTechDB>();
-            _designables = StaticRefLib.StaticData.ComponentTemplates.Values.ToArray();
-            int count = _designables.Length;
-            _designTypes = new string[count];
-            for (int i = 0; i < count; i++)
-            {
-                _designTypes[i] = _designables[i].Name;
-            }
-
-            _componentDesigner = new ComponentDesigner(Template, factionTech);
+            _componentDesigner = new ComponentDesigner(Template, factionData, factionTech);
 
             NoTemplateState = NoTemplateState.Created;
         }
@@ -125,8 +125,9 @@ namespace Pulsar4X.SDL2UI
                         _componentDesigner.Name = name;
                         _componentDesigner.CreateDesign(uiState.Faction);
                         //we reset the designer here, so we don't end up trying to edit the precious design.
+                        var factionData = uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
                         var factionTech = uiState.Faction.GetDataBlob<FactionTechDB>();
-                        _componentDesigner = new ComponentDesigner(Template, factionTech);
+                        _componentDesigner = new ComponentDesigner(Template, factionData, factionTech);
 
                         NoTemplateState = NoTemplateState.Created;
                         Template = null;
@@ -160,7 +161,7 @@ namespace Pulsar4X.SDL2UI
                             case GuiHint.None:
                                 break;
                             case GuiHint.GuiTechSelectionList: //Let the user pick a type from a list
-                                GuiHintTechSelection(attribute);
+                                GuiHintTechSelection(attribute, uiState);
                                 break;
                             case GuiHint.GuiSelectionMaxMin: //Set a value
                                 GuiHintMaxMin(attribute);
@@ -342,7 +343,7 @@ namespace Pulsar4X.SDL2UI
                         }
                         else if(attribute.IsEnabled && attribute.GuiHint == GuiHint.GuiFuelTypeSelection)
                         {
-                            var cargo = (ProcessedMaterialSD)uiState.Game.StaticData.CargoGoods.GetAny(attribute.ValueGuid);
+                            var cargo = (ProcessedMaterial)uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(attribute.ValueString);
                             ImGui.TableNextColumn();
                             ImGui.Text("");
                             ImGui.SameLine();
@@ -400,7 +401,7 @@ namespace Pulsar4X.SDL2UI
 
                     foreach (var kvp in _componentDesigner.ResourceCostValues)
                     {
-                        var resource = StaticRefLib.StaticData.CargoGoods.GetAny(kvp.Key);
+                        var resource = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(kvp.Key);
                         if (resource == null)
                             resource = (ICargoable)uiState.Faction.GetDataBlob<FactionInfoDB>().IndustryDesigns[kvp.Key];
 
@@ -511,16 +512,16 @@ namespace Pulsar4X.SDL2UI
             ImGui.NewLine();
         }
 
-        private void GuiHintTechSelection(ComponentDesignAttribute attribute)
+        private void GuiHintTechSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
         {
             Title(attribute.Name, attribute.Description);
 
             int i = 0;
-            _techSDs = new TechSD[attribute.GuidDictionary.Count];
+            _techSDs = new Tech[attribute.GuidDictionary.Count];
             _techNames = new string[attribute.GuidDictionary.Count];
             foreach (var kvp in attribute.GuidDictionary)
             {
-                TechSD sd = StaticRefLib.StaticData.Techs[Guid.Parse((string)kvp.Key)];
+                Tech sd = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.Techs[(string)kvp.Key];
                 _techSDs[i] = sd;
                 _techNames[i] = sd.Name;
                 i++;
@@ -530,7 +531,7 @@ namespace Pulsar4X.SDL2UI
 
             if (ImGui.Combo("Select Tech", ref _techSelectedIndex, _techNames, _techNames.Length))
             {
-                attribute.SetValueFromGuidList(_techSDs[_techSelectedIndex].ID);
+                attribute.SetValueFromString(_techSDs[_techSelectedIndex].UniqueID);
             }
 
             ImGui.NewLine();
@@ -574,7 +575,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextItemWidth(sizeAvailable.X);
             if (ImGui.Combo("###Select", ref attribute.ListSelection, _listNames, _listNames.Length))
             {
-                attribute.SetValueFromComponentList(ordnances[attribute.ListSelection].ID);
+                attribute.SetValueFromString(ordnances[attribute.ListSelection].UniqueID);
             }
 
             ImGui.NewLine();
@@ -582,17 +583,20 @@ namespace Pulsar4X.SDL2UI
 
         private void GuiHintFuelTypeSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
         {
-            var cargoTypesToDisplay = new Dictionary<Guid, ICargoable>();
-            var keys = new List<Guid>();
+            var cargoTypesToDisplay = new Dictionary<string, ICargoable>();
+            var keys = new List<string>();
             var names = new List<string>();
 
             foreach(var cargoType in attribute.GuidDictionary.Keys)
             {
-                Guid cargoTypeID = Guid.Parse(cargoType.ToString());
-                var cargos = uiState.Game.StaticData.CargoGoods.GetAll().Where(c => c.Value.CargoTypeID == cargoTypeID);
+                string cargoTypeID = cargoType.ToString();
+                var cargos = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAll().Where(c => c.Value.CargoTypeID.Equals(cargoTypeID));
                 foreach(var cargo in cargos)
                 {
-                    if(cargo.Value is ProcessedMaterialSD && ((ProcessedMaterialSD)cargo.Value).ExhaustVelocityFormula.IsNotNullOrEmpty())
+                    if(cargo.Value is ProcessedMaterial
+                        && ((ProcessedMaterial)cargo.Value).Formulas != null
+                        && ((ProcessedMaterial)cargo.Value).Formulas.ContainsKey("ExhaustVelocity")
+                        && ((ProcessedMaterial)cargo.Value).Formulas["ExhaustVelocity"].IsNotNullOrEmpty())
                     {
                         cargoTypesToDisplay.Add(cargo.Key, cargo.Value);
                         keys.Add(cargo.Key);
@@ -609,7 +613,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextItemWidth(sizeAvailable.X);
             if(ImGui.Combo("###cargotypeselection", ref attribute.ListSelection, arrayNames, arrayNames.Length))
             {
-                attribute.SetValueFromGuid(cargoTypesToDisplay[keys[attribute.ListSelection]].ID);
+                attribute.SetValueFromString(cargoTypesToDisplay[keys[attribute.ListSelection]].UniqueID);
             }
         }
 

@@ -3,7 +3,7 @@ using System;
 using ImGuiNET;
 using System.IO;
 using System.Runtime.CompilerServices;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.DataStructures;
 using Vector2 = System.Numerics.Vector2;
 using System.Runtime.InteropServices;
 

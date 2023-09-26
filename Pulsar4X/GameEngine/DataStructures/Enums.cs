@@ -284,4 +284,28 @@ namespace Pulsar4X.DataStructures
         Ground,
         Civilian
     }
+
+    public enum GuidanceTypes
+    {
+        Dumbfire,
+        Parent,
+        Passive,
+        Active
+    }
+
+    public enum TriggerTypes
+    {
+        Contact,
+        Timer,
+        Prox,
+        Depth,
+    }
+
+    public enum PayloadTypes
+    {
+        Explosive,
+        Shaped,
+        BombPumpedLaser,
+        Submunitions
+    }
 }

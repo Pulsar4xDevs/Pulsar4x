@@ -3,7 +3,10 @@ using System.Threading.Tasks;
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Industry;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 using SDL2;
 using System;
 using System.Linq;
@@ -13,7 +16,7 @@ namespace Pulsar4X.SDL2UI
 {
     class PlanetaryWindow : NonUniquePulsarGuiWindow
     {
-        private readonly List<MineralSD> _mineralDefinitions = null;
+        private readonly List<Mineral> _mineralDefinitions = null;
         private readonly int _maxMineralNameLength = 0;
         private const string _amountFormat = "#,###,###,###,###,###,##0";   // big enough to render 64 integers
 
@@ -30,7 +33,7 @@ namespace Pulsar4X.SDL2UI
             _state = state;
             SetName("PlanetaryWindow|" + entity.Entity.Guid.ToString());
             if (_mineralDefinitions == null) {
-                _mineralDefinitions = _uiState.Game.StaticData.CargoGoods.GetMineralsList();
+                _mineralDefinitions = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList().ToList();
                 _maxMineralNameLength = _mineralDefinitions.Max(x => x.Name.Length);
             }
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
@@ -226,7 +229,7 @@ namespace Pulsar4X.SDL2UI
 
             if (_lookedAtEntity.Entity.HasDataBlob<MineralsDB>())
             {
-                Dictionary<Guid, long> mineRates = new Dictionary<Guid, long>();
+                Dictionary<string, long> mineRates = new Dictionary<string, long>();
 
                 MineralsDB mineralsDB = _lookedAtEntity.Entity.GetDataBlob<MineralsDB>();
                 SystemBodyInfoDB systemBodyInfo = _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>();
@@ -258,7 +261,7 @@ namespace Pulsar4X.SDL2UI
                     foreach (var key in mineralsDB.Minerals.Keys)
                     {
                         row.Clear();
-                        var mineralData = _mineralDefinitions.FirstOrDefault(x => x.ID == key);
+                        var mineralData = _mineralDefinitions.FirstOrDefault(x => x.UniqueID == key);
                         if (mineralData != null)
                         {
                             var mineralValues = mineralsDB.Minerals[key];

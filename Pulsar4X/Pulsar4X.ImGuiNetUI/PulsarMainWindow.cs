@@ -4,7 +4,7 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
 using SDL2;
 using Microsoft.Extensions.Configuration;
 
@@ -214,9 +214,9 @@ namespace Pulsar4X.SDL2UI
             }
 
             //update and refresh state for GameDateTimechange
-            if(StaticRefLib.Game != null)
+            if(_state.Game != null)
             {
-                DateTime curTime = StaticRefLib.CurrentDateTime;
+                DateTime curTime = _state.Game.TimePulse.GameGlobalDateTime;
                 if (curTime != _state.LastGameUpdateTime)
                 {
                     foreach (var item in _state.UpdateableWindows)

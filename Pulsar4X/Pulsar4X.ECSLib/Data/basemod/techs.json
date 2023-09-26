@@ -270,7 +270,7 @@
   {
     "Type": "Tech",
     "Payload": {
-      "UniqueID": "tech-high-explovsives",
+      "UniqueID": "tech-high-explosives",
       "Name": "High Explosives",
       "Description": "Better explosive compounds increase the Relative effectiveness factor",
       "Category": "MissilesKineticWeapons",
@@ -282,7 +282,7 @@
   {
     "Type": "Tech",
     "Payload": {
-      "UniqueID": "tech-high-explovsives-warheads",
+      "UniqueID": "tech-high-explosives-warheads",
       "Name": "HE Warheads",
       "Description": "High Explosive Warheads that produce a large amount of heat and pressure",
       "Category": "MissilesKineticWeapons",
@@ -378,7 +378,7 @@
   {
     "Type": "Tech",
     "Payload": {
-      "UniqueID": "tech-antenna-efficiency",
+      "UniqueID": "tech-antenna-bandwidth",
       "Name": "Antenna Bandwidth",
       "Description": "Improvements to antennas increase the max bandwidth of an antenna",
       "Category": "MissilesKineticWeapons",

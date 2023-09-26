@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
-using Pulsar4X.ECSLib;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib.ComponentFeatureSets.GenericBeamWeapon;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
 using SDL2;
 using System.ComponentModel;
 using Pulsar4X.Orbital;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Sensors;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -75,12 +75,12 @@ namespace Pulsar4X.SDL2UI
         internal IntPtr surfacePtr;
         internal IntPtr rendererPtr;
         ImGuiSDL2CSWindow _window;
-        internal Dictionary<string, IDrawData> UIWidgets = new Dictionary<string, IDrawData>();
-        ConcurrentDictionary<Guid, Icon> _testIcons = new ConcurrentDictionary<Guid, Icon>();
-        ConcurrentDictionary<Guid, IDrawData> _entityIcons = new ConcurrentDictionary<Guid, IDrawData>();
-        ConcurrentDictionary<Guid, IDrawData> _orbitRings = new ConcurrentDictionary<Guid, IDrawData>();
-        ConcurrentDictionary<Guid, IDrawData> _moveIcons = new ConcurrentDictionary<Guid, IDrawData>();
-        internal ConcurrentDictionary<Guid, NameIcon> _nameIcons = new ConcurrentDictionary<Guid, NameIcon>();
+        internal Dictionary<string, IDrawData> UIWidgets = new ();
+        ConcurrentDictionary<string, Icon> _testIcons = new ();
+        ConcurrentDictionary<string, IDrawData> _entityIcons = new ();
+        ConcurrentDictionary<string, IDrawData> _orbitRings = new ();
+        ConcurrentDictionary<string, IDrawData> _moveIcons = new ();
+        internal ConcurrentDictionary<string, NameIcon> _nameIcons = new ();
 
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
         internal Vector2 GalacticMapPosition = new Vector2();
@@ -99,7 +99,7 @@ namespace Pulsar4X.SDL2UI
             //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position.
             foreach (var item in TestDrawIconData.GetTestIcons())
             {
-                _testIcons.TryAdd(Guid.NewGuid(), item);
+                _testIcons.TryAdd(Guid.NewGuid().ToString(), item);
             }
         }
 
@@ -198,7 +198,7 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        void RemoveIconable(Guid entityGuid)
+        void RemoveIconable(string entityGuid)
         {
             _testIcons.TryRemove(entityGuid, out var testIcon);
             _entityIcons.TryRemove(entityGuid, out IDrawData entityIcon);
@@ -473,17 +473,17 @@ namespace Pulsar4X.SDL2UI
             foreach (var item in icons)
                 item.Draw(rendererPtr, _camera);
         }
-        void UpdateAndDraw(Dictionary<Guid, IDrawData> icons, Matrix matrix)
-        {
-            lock (icons)
-            {
-                foreach (var item in icons.Values)
-                    item.OnFrameUpdate(matrix, _camera);
-                foreach (var item in icons.Values)
-                    item.Draw(rendererPtr, _camera);
-            }
-        }
-        void UpdateAndDraw(ConcurrentDictionary<Guid, IDrawData> icons, Matrix matrix)
+        // void UpdateAndDraw(Dictionary<string, IDrawData> icons, Matrix matrix)
+        // {
+        //     lock (icons)
+        //     {
+        //         foreach (var item in icons.Values)
+        //             item.OnFrameUpdate(matrix, _camera);
+        //         foreach (var item in icons.Values)
+        //             item.Draw(rendererPtr, _camera);
+        //     }
+        // }
+        void UpdateAndDraw(ConcurrentDictionary<string, IDrawData> icons, Matrix matrix)
         {
             foreach (var item in icons.Values)
                 item.OnFrameUpdate(matrix, _camera);

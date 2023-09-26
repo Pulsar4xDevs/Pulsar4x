@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 using Pulsar4X.ImGuiNetUI;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -11,12 +13,12 @@ namespace Pulsar4X.SDL2UI
     {
         private Entity _faction;
         private FactionInfoDB _factionInfoDB;
-        private Dictionary<Guid, Entity> _commanders;
+        private Dictionary<string, Entity> _commanders;
         private CommanderWindow()
         {
             _faction = _uiState.Faction;
             _factionInfoDB = _faction.GetDataBlob<FactionInfoDB>();
-            _commanders = new Dictionary<Guid, Entity>();
+            _commanders = new Dictionary<string, Entity>();
         }
 
         internal static CommanderWindow GetInstance()

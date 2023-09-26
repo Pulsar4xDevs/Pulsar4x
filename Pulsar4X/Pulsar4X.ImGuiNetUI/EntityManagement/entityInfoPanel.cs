@@ -1,6 +1,9 @@
 ﻿using System;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Components;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Interfaces;
 using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,7 +82,7 @@ namespace Pulsar4X.SDL2UI
                         var _parentEntity = _selectedEntity.GetDataBlob<PositionDB>().Parent;
                         bool _hasParentEntity = false;
                         SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
-                        Dictionary<Guid, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
+                        Dictionary<string, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
                         if (_parentEntity != null)
                         {
                             //checks if parent exists in the selected star system and has a name

@@ -4,7 +4,11 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Security.Cryptography;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Blueprints;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -17,23 +21,23 @@ namespace Pulsar4X.SDL2UI
 
         private List<ICargoable> _allResources;
         private string[] _allResourceNames;
-        private List<Guid> _allResourceID;
+        private List<string> _allResourceID;
         private int _allResourceIndex = 0;
-        private Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedStoredResources;
-        private Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedUnstored;
+        private Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedStoredResources;
+        private Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedUnstored;
         private EntityState _entityState;
         private Entity _selectedEntity;
         private LogiBaseDB _logisticsDB;
         private VolumeStorageDB _volStorageDB;
-        private Dictionary<Guid, TypeStore> _stores;
-        private StaticDataStore _staticData;
+        private Dictionary<string, TypeStore> _stores;
+        private FactionDataStore _staticData;
         private bool isEnabled;
         private ColonyLogisticsDisplay(EntityState entity)
         {
-            _staticData = StaticRefLib.StaticData;
+            _staticData = entity.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
             var allgoods = _staticData.CargoGoods.GetAll();
             var allResourceNames = new List<string>();
-            _allResourceID = new List<Guid>();
+            _allResourceID = new List<string>();
             _allResources = new List<ICargoable>();
             foreach (var item in allgoods)
             {
@@ -47,7 +51,7 @@ namespace Pulsar4X.SDL2UI
         }
         string _demandHint = "";
         string _demandBuff = "";
-        internal static ColonyLogisticsDisplay GetInstance(StaticDataStore staticData, EntityState state) {
+        internal static ColonyLogisticsDisplay GetInstance(FactionDataStore staticData, EntityState state) {
             lock(padlock)
             {
                 if(instance == null)
@@ -79,10 +83,10 @@ namespace Pulsar4X.SDL2UI
                 return;
 
             _changes = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
-            _displayedStoredResources = new Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>>();
-            _displayedUnstored = new Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>>();
+            _displayedStoredResources = new Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>>();
+            _displayedUnstored = new Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>>();
             //we do a deep copy clone so as to avoid a thread collision when we loop through.
-            var newDict = new Dictionary<Guid, TypeStore>();
+            var newDict = new Dictionary<string, TypeStore>();
 
             ICollection ic = _volStorageDB.TypeStores;
             lock (ic.SyncRoot)
@@ -230,11 +234,11 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Separator();
 
                     displayResources(_displayedUnstored);
-                    void displayResources(Dictionary<Guid, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> dict)
+                    void displayResources(Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> dict)
                     {
                         foreach (var typeStore in dict)
                         {
-                            CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
+                            CargoTypeBlueprint stype = _staticData.CargoTypes[typeStore.Key];
                             var stypeID = typeStore.Key;
                             var stypeName = stype.Name;
                             foreach (var item in _changes)
@@ -264,8 +268,8 @@ namespace Pulsar4X.SDL2UI
 
                                 var cname = ctype.Name;
                                 var itemsStored = 0;
-                                if (cargoables.ContainsKey(ctype.ID))
-                                    itemsStored = (int)unitsInStore[ctype.ID];
+                                if (cargoables.ContainsKey(ctype.UniqueID))
+                                    itemsStored = (int)unitsInStore[ctype.UniqueID];
                                 var volumePerItem = ctype.VolumePerUnit;
 
                                 ImGui.TableNextColumn();

@@ -47,9 +47,11 @@ namespace Pulsar4X.Atb
             }
             else
             {
+                // Set the fuel type equal to the engine fuel type
                 db = parentEntity.GetDataBlob<NewtonThrustAbilityDB>();
-                if(db.FuelType != FuelType)
-                    throw new Exception("prime entity can only have thrusters which use the same fuel type");
+                db.FuelType = FuelType;
+                // if(db.FuelType != FuelType)
+                //     throw new Exception("prime entity can only have thrusters which use the same fuel type");
                 //todo: fix so we can use different fuel types on the prime entity.
             }
 

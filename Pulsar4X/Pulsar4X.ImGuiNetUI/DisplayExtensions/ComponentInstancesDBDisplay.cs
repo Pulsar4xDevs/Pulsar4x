@@ -1,6 +1,9 @@
 using System.Linq;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Components;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -57,8 +60,8 @@ namespace Pulsar4X.SDL2UI
 
         private static void AddContextMenu(ComponentInstance component)
         {
-            ImGui.PushID(component.Design.ID.ToString());
-            if(ImGui.BeginPopupContextItem("###" + component.Design.ID))
+            ImGui.PushID(component.Design.UniqueID.ToString());
+            if(ImGui.BeginPopupContextItem("###" + component.Design.UniqueID))
             {
                 ImGui.Text(component.Name);
                 ImGui.Separator();

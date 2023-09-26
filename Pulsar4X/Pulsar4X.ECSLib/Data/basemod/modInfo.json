@@ -8,6 +8,7 @@
         "atmosphereGases.json",
         "cargoTypes.json",
         "electronics.json",
+        "energy.json",
         "engines.json",
         "defaultTheme.json",
         "industryTypes.json",
@@ -15,7 +16,9 @@
         "materials.json",
         "minerals.json",
         "mineralsAurora.json",
+        "ordnance.json",
         "systemGenSettings.json",
-        "techs.json"
+        "techs.json",
+        "weapons.json"
     ]
 }

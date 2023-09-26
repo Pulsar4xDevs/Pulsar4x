@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -86,7 +88,7 @@ namespace Pulsar4X.SDL2UI
         }
         public static void DisplayMining(this Entity entity, GlobalUIState uiState)
         {
-            var mineralStaticInfo = uiState.Game.StaticData.CargoGoods.GetMineralsList();
+            var mineralStaticInfo = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList();
             var minerals = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>()?.Minerals;
             var miningRates = entity.GetDataBlob<MiningDB>()?.ActualMiningRate;
             var storage = entity.GetDataBlob<VolumeStorageDB>()?.TypeStores;
@@ -122,11 +124,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableSetupColumn("Years to Depletion");
                 ImGui.TableHeadersRow();
 
-                if(minerals == null) minerals = new Dictionary<Guid, MineralDeposit>();
+                if(minerals == null) minerals = new Dictionary<string, MineralDeposit>();
 
                 foreach(var (id, mineral) in minerals)
                 {
-                    var mineralData = mineralStaticInfo.FirstOrDefault(x => x.ID == id);
+                    var mineralData = mineralStaticInfo.FirstOrDefault(x => x.UniqueID == id);
 
                     if(mineralData == null) continue;
 
@@ -234,7 +236,7 @@ namespace Pulsar4X.SDL2UI
 
         public static void DisplayLogistics(this Entity entity, EntityState entityState, GlobalUIState uiState)
         {
-            ColonyLogisticsDisplay.GetInstance(StaticRefLib.StaticData, entityState).Display();
+            ColonyLogisticsDisplay.GetInstance(entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data, entityState).Display();
         }
 
         public static void DisplayNavalAcademy(this Entity entity, EntityState entityState, GlobalUIState uiState)

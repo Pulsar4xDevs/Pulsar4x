@@ -5,8 +5,11 @@ using System.Linq;
 using System.Text;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Extensions;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -135,7 +138,7 @@ namespace Pulsar4X.SDL2UI
         KeplerElements _keplerElements;
         private IPosition _bodyPosition;
 
-        internal Guid EntityGuid;
+        internal string EntityGuid;
         internal string parentname;
         internal Vector3 parentPos;
         internal Vector2 _f1a;

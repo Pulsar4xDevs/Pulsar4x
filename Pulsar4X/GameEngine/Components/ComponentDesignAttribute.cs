@@ -165,6 +165,7 @@ namespace Pulsar4X.Components
         public void SetValueFromString(string id)
         {
             Formula.ReplaceExpression("'" + id + "'");
+            Formula.Evaluate();
             ParentComponent.SetAttributes();
         }
 

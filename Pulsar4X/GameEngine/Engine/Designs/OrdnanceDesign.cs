@@ -9,6 +9,7 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Industry;
 using Pulsar4X.Interfaces;
+using Pulsar4X.Atb;
 
 namespace Pulsar4X.Engine.Designs
 {

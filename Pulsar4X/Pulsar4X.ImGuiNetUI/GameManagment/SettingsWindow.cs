@@ -2,10 +2,11 @@
 using ImGuiNET;
 using System.Numerics;
 using System.Collections.Generic;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
 using Pulsar4X.SDL2UI.Combat;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {

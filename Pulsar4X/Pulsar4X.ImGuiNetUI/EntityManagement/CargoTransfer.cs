@@ -4,18 +4,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Orders;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Blueprints;
+using Pulsar4X.Extensions;
+using Pulsar4X.Interfaces;
+
 namespace Pulsar4X.SDL2UI
 {
 
     public class CargoListPannelSimple: UpdateWindowState
     {
-        StaticDataStore _staticData;
+        FactionDataStore _staticData;
         EntityState _entityState;
         VolumeStorageDB _volStorageDB;
-        Dictionary<Guid, TypeStore> _stores = new Dictionary<Guid, TypeStore>();
+        Dictionary<string, TypeStore> _stores = new Dictionary<string, TypeStore>();
 
-        public CargoListPannelSimple(StaticDataStore staticData, EntityState entity)
+        public CargoListPannelSimple(FactionDataStore staticData, EntityState entity)
         {
             _staticData = staticData;
             _entityState = entity;
@@ -36,7 +42,7 @@ namespace Pulsar4X.SDL2UI
             if (_volStorageDB == null) //if this colony does not have any storage.
                 return;
             //we do a deep copy clone so as to avoid a thread collision when we loop through.
-            var newDict = new Dictionary<Guid, TypeStore>();
+            var newDict = new Dictionary<string, TypeStore>();
 
             ICollection ic = _volStorageDB.TypeStores;
             lock (ic.SyncRoot)
@@ -60,7 +66,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.BeginChild(_entityState.Name, new Vector2(240, 200), true, ImGuiWindowFlags.AlwaysAutoResize);
             foreach (var typeStore in _stores)
             {
-                CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
+                CargoTypeBlueprint stype = _staticData.CargoTypes[typeStore.Key];
                 var freeVolume = _volStorageDB.GetFreeVolume(typeStore.Key);
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
@@ -71,7 +77,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.PushID(_entityState.Entity.Guid.ToString());//this helps the ui diferentiate between the left and right side
                 //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
                 //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
-                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.ID;
+                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.UniqueID;
                 if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
                 {
                     ImGui.Columns(4);
@@ -90,7 +96,7 @@ namespace Pulsar4X.SDL2UI
                         var volumeStored = cargoType.Value;
                         var volumePerItem = ctype.VolumePerUnit;
                         var massStored = cargoType.Value * ctype.MassPerUnit;
-                        var itemsStored = unitsInStore[ctype.ID];
+                        var itemsStored = unitsInStore[ctype.UniqueID];
                         if (ImGui.Selectable(cname))
                         {
                         }
@@ -137,21 +143,21 @@ namespace Pulsar4X.SDL2UI
     public delegate void CargoItemSelectedHandler(CargoListPannelComplex cargoPannel);
     public class CargoListPannelComplex
     {
-        StaticDataStore _staticData;
+        FactionDataStore _staticData;
         EntityState _entityState;
         VolumeStorageDB _volStorageDB;
-        Dictionary<Guid, TypeStore> _stores = new Dictionary<Guid, TypeStore>();
-        Dictionary<ICargoable, long> _cargoToMove = new Dictionary<ICargoable, long>();
-        Dictionary<ICargoable, long> _cargoToMoveUI = new Dictionary<ICargoable, long>();
-        Dictionary<ICargoable, long> _cargoToMoveOrders = new Dictionary<ICargoable, long>();
-        Dictionary<ICargoable, long> _cargoToMoveDatablob = new Dictionary<ICargoable, long>();
+        Dictionary<string, TypeStore> _stores = new ();
+        Dictionary<ICargoable, long> _cargoToMove = new ();
+        Dictionary<ICargoable, long> _cargoToMoveUI = new ();
+        Dictionary<ICargoable, long> _cargoToMoveOrders = new ();
+        Dictionary<ICargoable, long> _cargoToMoveDatablob = new ();
 
         //Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
         //public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
         public ICargoable selectedCargo;
         internal Dictionary<Guid,bool> HeadersIsOpenDict { get; set; }
 
-        public CargoListPannelComplex(StaticDataStore staticData, EntityState entity, Dictionary<Guid,bool> headersOpenDict)
+        public CargoListPannelComplex(FactionDataStore staticData, EntityState entity, Dictionary<Guid,bool> headersOpenDict)
         {
             _staticData = staticData;
             _entityState = entity;
@@ -167,7 +173,7 @@ namespace Pulsar4X.SDL2UI
         public void Update()
         {
             //we do a deep copy clone so as to avoid a thread collision when we loop through.
-            var newDict = new Dictionary<Guid, TypeStore>();
+            var newDict = new Dictionary<string, TypeStore>();
             ICollection ic = _volStorageDB.TypeStores;
             lock (ic.SyncRoot)
             {
@@ -234,7 +240,7 @@ namespace Pulsar4X.SDL2UI
             Update();
         }
 
-        internal bool CanStore(Guid cargoTypeID)
+        internal bool CanStore(string cargoTypeID)
         {
             return _stores.ContainsKey(cargoTypeID);
 
@@ -282,7 +288,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (_stores.ContainsKey(cargoItem.CargoTypeID))
             {
-                return _stores[cargoItem.CargoTypeID].HasCargoInStore(cargoItem.ID);
+                return _stores[cargoItem.CargoTypeID].HasCargoInStore(cargoItem.UniqueID);
             }
             return false;
         }
@@ -297,14 +303,14 @@ namespace Pulsar4X.SDL2UI
 
             foreach (var typeStore in _stores)
             {
-                CargoTypeSD stype = _staticData.CargoTypes[typeStore.Key];
+                CargoTypeBlueprint stype = _staticData.CargoTypes[typeStore.Key];
                 var freeVolume = _volStorageDB.GetFreeVolume(typeStore.Key);
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
                 ImGui.PushID(_entityState.Entity.Guid.ToString()); //this helps the ui diferentiate between the left and right side
                 //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
                 //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
-                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.ID;
+                string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.UniqueID;
                 if(ImGui.CollapsingHeader(headerText, ImGuiTreeNodeFlags.CollapsingHeader ))
                 {
                     ImGui.Columns(4);
@@ -389,7 +395,7 @@ namespace Pulsar4X.SDL2UI
 
     public class CargoTransfer : PulsarGuiWindow
     {
-        StaticDataStore _staticData;
+        FactionDataStore _staticData;
         EntityState _selectedEntityLeft;
         EntityState _selectedEntityRight;
 
@@ -427,7 +433,7 @@ namespace Pulsar4X.SDL2UI
             //ClickedEntityIsPrimary = false;
         }
 
-        public static CargoTransfer GetInstance(StaticDataStore staticData, EntityState selectedEntity1)
+        public static CargoTransfer GetInstance(FactionDataStore staticData, EntityState selectedEntity1)
         {
 
             CargoTransfer instance;

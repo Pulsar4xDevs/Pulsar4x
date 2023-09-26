@@ -21,21 +21,21 @@ namespace Pulsar4X.Datablobs
         [JsonProperty]
         public Dictionary<string, int> TechLevels { get; internal set; }
 
-        private Dictionary<string, (TechBlueprint tech ,int pointsResearched, int pointCost)> Researchables = new ();
+        private Dictionary<string, (Tech tech ,int pointsResearched, int pointCost)> Researchables = new ();
 
-        public (TechBlueprint tech, int pointsResearched, int pointCost) GetResarchableTech(string id)
+        public (Tech tech, int pointsResearched, int pointCost) GetResarchableTech(string id)
         {
             return Researchables[id];
         }
 
-        public List<(TechBlueprint tech, int pointsResearched, int pointCost)> GetResearchableTechs()
+        public List<(Tech tech, int pointsResearched, int pointCost)> GetResearchableTechs()
         {
             return Researchables.Values.ToList();
         }
 
-        public Dictionary<string, (TechBlueprint tech, int pointsResearched, int pointCost)> GetResearchablesDic()
+        public Dictionary<string, (Tech tech, int pointsResearched, int pointCost)> GetResearchablesDic()
         {
-            return new Dictionary<string, (TechBlueprint tech, int pointsResearched, int pointCost)>(Researchables);
+            return new Dictionary<string, (Tech tech, int pointsResearched, int pointCost)>(Researchables);
         }
 
         public bool IsResearchable(string id)
@@ -97,7 +97,7 @@ namespace Pulsar4X.Datablobs
 
         }
 
-        public void MakeResearchable(TechBlueprint tech)
+        public void MakeResearchable(Tech tech)
         {
             if(!Researchables.ContainsKey(tech.UniqueID))
             {
@@ -119,6 +119,8 @@ namespace Pulsar4X.Datablobs
         [PublicAPI]
         [JsonProperty]
         public int ResearchPoints { get; internal set; }
+
+        public List<(Scientist scientist, Entity atEntity)> AllScientists { get; internal set; } = new List<(Scientist, Entity)>();
 
         /// <summary>
         /// Constructor for datablob, this should only be used when a new faction is created.
