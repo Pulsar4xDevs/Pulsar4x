@@ -38,7 +38,7 @@ namespace Pulsar4X.Engine.Orders
         private void FindColonyAndSetupWarpCommands()
         {
             if(!EntityCommanding.TryGetDatablob<FleetDB>(out var fleetDB)) return;
-            if(fleetDB.FlagShipID == String.Empty) return;
+            if(fleetDB.FlagShipID.IsNullOrEmpty()) return;
             if(!EntityCommanding.Manager.TryGetEntityByGuid(fleetDB.FlagShipID, out var flagship)) return;
             if(!flagship.TryGetDatablob<PositionDB>(out var flagshipPositionDB)) return;
 

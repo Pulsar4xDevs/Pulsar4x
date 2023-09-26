@@ -769,9 +769,9 @@ namespace Pulsar4X.Engine
 
             ComponentDesigner engineDesigner;
 
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
+            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["alcubierre-warp-drive"];
             engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(500); //size 500 = 2500 power
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(500); //size 500 = 2500 power
             engineDesigner.Name = "Alcuberi-White 500";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 
@@ -788,9 +788,9 @@ namespace Pulsar4X.Engine
 
             ComponentDesigner engineDesigner;
 
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
+            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["alcubierre-warp-drive"];
             engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(400);
+            engineDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(2000);
             engineDesigner.Name = "Alcuberi-White 2k";
             //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
 

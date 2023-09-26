@@ -74,7 +74,7 @@
   {
     "Type": "Tech",
     "Payload": {
-      "UniqueID": "tech-alcubierre-collapse-efficienty",
+      "UniqueID": "tech-alcubierre-collapse-efficiency",
       "Name": "Alcubierre Collapse Efficency",
       "Description": "We can recover some of the energy put into creating the bubble when we collapse it in a controlled manner",
       "MaxLevel": 15,
@@ -86,7 +86,7 @@
   {
     "Type": "Tech",
     "Payload": {
-      "UniqueID": "tech-convential-engine-max-power",
+      "UniqueID": "tech-conventional-engine-max-power",
       "Name": "Maximum Engine Power Modifier",
       "Description": "",
       "MaxLevel": 7,
@@ -98,7 +98,7 @@
   {
     "Type": "Tech",
     "Payload": {
-      "UniqueID": "tech-convential-engine-min-power",
+      "UniqueID": "tech-conventional-engine-min-power",
       "Name": "Minimum Engine Power Modifier",
       "Description": "",
       "MaxLevel": 7,

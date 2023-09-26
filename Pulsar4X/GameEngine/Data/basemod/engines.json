@@ -79,5 +79,87 @@
         }
       ]
     }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "alcubierre-warp-drive",
+      "Name": "Alcubierre Warp Drive",
+      "Formulas": {
+        "Description": "Warps a ship through non-newtonion space",
+        "Mass": "Ability('Mass')",
+        "Volume": "Max(1, Ability('Mass'))",
+        "HTK": "Max(1, [Mass] / 100)",
+        "CrewReq": "[Mass]",
+        "ResearchCost": "[Mass] * 1",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "copper": "[Mass] * 0.25",
+        "aluminium": "[Mass] * 0.25",
+        "stainless-steel": "[Mass] * 0.5"
+      },
+      "ComponentType": "Engine",
+      "MountType": "ShipComponent, ShipCargo, Fighter",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Attributes": [
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the engine'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "25000",
+          "MinFormula": "TechData('tech-alcubierre-miniaturization')",
+          "StepFormula": "1",
+          "AttributeFormula": "2500"
+        },
+        {
+          "Name": "Efficency vs Power",
+          "Units": "EvP",
+          "DescriptionFormula": "'More Powerful engines are less efficient for a given size'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "TechData('tech-conventional-engine-max-power')",
+          "MinFormula": "TechData('tech-conventional-engine-min-power')",
+          "StepFormula": "0.1",
+          "AttributeFormula": "1"
+        },
+        {
+          "Name": "Engine Power",
+          "Units": "EP",
+          "DescriptionFormula": "'Move Power for ship'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Efficency vs Power') * [Mass] * 1000"
+        },
+        {
+          "Name": "Bubble Creation Energy Cost",
+          "Units": "KJ",
+          "DescriptionFormula": "'How much energy required to create the warp bubble.'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Engine Power') * TechData('tech-alcubierre-bubble-creation-cost') * 0.5"
+        },
+        {
+          "Name": "Bubble Sustain Energy Cost",
+          "Units": "KW",
+          "DescriptionFormula": "'How much energy required to sustain the warp bubble per second during the warp'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Engine Power') * 0.001 * TechData('tech-alcubierre-sustain-cost')"
+        },
+        {
+          "Name": "Bubble Collapse Energy Returned",
+          "Units": "KJ",
+          "DescriptionFormula": "'How much energy we get back from collapsing the warp bubble'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Bubble Creation Energy Cost') * TechData('tech-alcubierre-collapse-efficiency')"
+        },
+        {
+          "Name": "db",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Engine Power'), 'electricity', Ability('Bubble Creation Energy Cost'), Ability('Bubble Sustain Energy Cost'), -Ability('Bubble Collapse Energy Returned'))",
+          "AttributeType": "Pulsar4X.Atb.WarpDriveAtb"
+        }
+      ]
+    }
   }
 ]

@@ -1,12 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using Pulsar4X.Orbital;
-using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
-using Pulsar4X.Extensions;
-
 
 namespace Pulsar4X.Engine.Orders
 {
@@ -68,8 +63,8 @@ namespace Pulsar4X.Engine.Orders
                 TransitStartDateTime = transitStartDatetime,
                 ExpendDeltaV = expendDeltaV,
             };
-            // FIXME:
-            //StaticRefLib.OrderHandler.HandleOrder(cmd);
+
+            orderEntity.Manager.Game.OrderHandler.HandleOrder(cmd);
             if (expendDeltaV.Length() != 0)
             {
 

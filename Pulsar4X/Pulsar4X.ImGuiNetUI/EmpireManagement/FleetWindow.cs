@@ -132,7 +132,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 DisplayHelpers.PrintRow("Flagship", selectedFleetFlagship.GetName(factionID));
                                 if(selectedFleetFlagship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB)
-                                    && shipInfoDB.CommanderID != String.Empty
+                                    && shipInfoDB.CommanderID.IsNotNullOrEmpty()
                                     && shipInfoDB.OwningEntity.Manager.FindEntityByGuid(shipInfoDB.CommanderID, out var commanderEntity))
                                 {
 
