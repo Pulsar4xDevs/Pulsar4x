@@ -16,7 +16,7 @@ namespace Pulsar4X.Engine
     public class EntityManager : ISerializable
     {
         [CanBeNull]
-        internal string ManagerGuid;
+        public string ManagerGuid { get; internal set; }
         public Game Game { get;  internal set; }
         protected readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();

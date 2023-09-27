@@ -213,7 +213,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.ProgressBar(frac, new Vector2(245, size), "");
                         if (ImGui.IsItemHovered())
                         {
-                            DisplayHelpers.DescriptiveTooltip(_researchableTechs[i].Name, _researchableTechs[i].Category.ToString(), _researchableTechs[i].Description);
+                            DisplayHelpers.DescriptiveTooltip(_researchableTechs[i].Name, _researchableTechs[i].Category.ToString(), _researchableTechs[i].Description, "Max Level: " + _researchableTechs[i].MaxLevel);
                         }
                         ImGui.SetCursorPos(new Vector2(pos.X + 2f, pos.Y));
                         ImGui.Text(_researchableTechs[i].Name);

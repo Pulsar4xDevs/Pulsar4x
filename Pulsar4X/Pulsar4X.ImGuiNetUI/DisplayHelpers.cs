@@ -96,20 +96,24 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(type);
                     ImGui.PopStyleColor();
                 }
-                if(description.IsNotNullOrEmpty())
+                var showDescription = description.IsNotNullOrEmpty();
+                var showMetaInfo = metaInfo.IsNotNullOrEmpty();
+
+                if(showDescription || showMetaInfo)
                 {
                     ImGui.Separator();
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.TextWrapped(description);
-                    ImGui.PopStyleColor();
                 }
 
-                if(metaInfo.IsNotNullOrEmpty())
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                if(showDescription)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
-                    ImGui.Text(metaInfo);
-                    ImGui.PopStyleColor();
+                    ImGui.TextWrapped(description);
                 }
+                if(showMetaInfo)
+                {
+                    ImGui.Text(metaInfo);
+                }
+                ImGui.PopStyleColor();
                 ImGui.EndTooltip();
             }
         }

@@ -158,7 +158,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 if(ImGui.SmallButton(selectedFleetSystem.GetName(factionID)))
                                 {
-                                    _uiState.EntityClicked(selectedFleetSystem.Guid, selectedFleetSystem.Guid, MouseButtons.Primary);
+                                    _uiState.EntityClicked(selectedFleetSystem.Guid, selectedFleetSystem.Manager.ManagerGuid, MouseButtons.Primary);
                                 }
                                 ImGui.NextColumn();
                                 ImGui.Separator();
