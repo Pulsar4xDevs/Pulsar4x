@@ -14,6 +14,17 @@ namespace Pulsar4X.Datablobs
         public bool IsComplete = false;
         public Entity SOIParent { get; internal set; }
         public double ParentMass { get; internal set; }
+
+        public NewtonSimpleMoveDB(Entity SoiParent, KeplerElements start, KeplerElements end, DateTime onDateTime)
+        {
+            LastProcessDateTime = onDateTime;
+            ActionOnDateTime = onDateTime;
+            CurrentTrajectory = start;
+            TargetTrajectory = end;
+            SOIParent = SOIParent;
+            ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
+        }
+        
         public override object Clone()
         {
             throw new NotImplementedException();

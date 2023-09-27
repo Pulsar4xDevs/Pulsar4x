@@ -324,7 +324,7 @@ public static class LogisticsCycle
 
                     var shipOwner = ship.FactionOwnerID;//.GetDataBlob<ObjectOwnershipDB>().OwningEntity;
                     Entity currentSOIParent = ship.GetSOIParentEntity();
-                    Entity sourceSOIParent = destin.GetSOIParentEntity(); //might need some checks in here.
+                    Entity sourceSOIParent = source.GetSOIParentEntity(); //might need some checks in here.
                     //moveto source(if requred)
                     var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
                     var at = ship.StarSysDateTime;

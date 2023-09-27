@@ -57,9 +57,9 @@ namespace Pulsar4X.Engine.Logistics
 
             Vector3 targetPos = Vector3.Normalise(pos) * targetSMA;
 
-            var cargoLibary = ship.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+            var cargoLibrary = ship.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
             var cmd = WarpMoveCommand.CreateCommand(
-                cargoLibary,
+                cargoLibrary,
                 ship.FactionOwnerID,
                 ship,
                 targetBody,
@@ -122,9 +122,9 @@ namespace Pulsar4X.Engine.Logistics
 
             Vector3 targetPos = Vector3.Normalise(pos) * targetSMA;
 
-            var cargoLibary = ship.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+            var cargoLibrary = ship.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
             var cmd = WarpMoveCommand.CreateCommand(
-                cargoLibary,
+                cargoLibrary,
                 ship.FactionOwnerID,
                 ship,
                 targetBody,
@@ -167,7 +167,7 @@ namespace Pulsar4X.Engine.Logistics
             var sgpTgtBdy = GeneralMath.StandardGravitationalParameter(shipMass + tgtBdyMass);
             var curBdyMass = cur.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
             var sgpCurBdy = GeneralMath.StandardGravitationalParameter(shipMass + curBdyMass);
-            var ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, startState.Position, startState.Velocity, startState.At);
+            var startKE = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, startState.Position, startState.Velocity, startState.At);
 
             double mySMA = 0;
             if (ship.HasDataBlob<OrbitDB>())
@@ -185,19 +185,25 @@ namespace Pulsar4X.Engine.Logistics
             //var departTime = ship.StarSysDateTime;
             OrbitDB targetOrbit = targetBody.GetDataBlob<OrbitDB>();
             (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition(ship, targetOrbit, startState.At);
+            //get newtonion insertion vector (probibly our startState.Velocity)
             Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(startState.Velocity, targetOrbit, targetIntercept.eti);
             var insertionSpeed = insertionVector.Length();
             var idealSpeed = Math.Sqrt(targetRad / sgpTgtBdy);//for a circular orbit
             var deltaV = insertionSpeed - idealSpeed;
 
-            var targetInsertionPosition = Vector3.Normalise(startState.Velocity) * targetRad;
+            var ivecAng = Math.Atan2(insertionVector.Y, insertionVector.X);
+            //var iAng = Angle.NormaliseRadians(ivecAng - Math.PI * 0.5);
+            var xpos = Math.Sin(ivecAng) * targetRad;
+            var ypos = Math.Cos(ivecAng) * targetRad;
+            
             var thrustVector = Vector3.Normalise(insertionVector) * -deltaV;
-
+            
+            //position end of warp so we're 90 degrees to our newtonion insertion vector
+            var targetInsertionPosition = new Vector3(xpos, ypos, 0);
             var thrustV2 = OrbitalMath.ProgradeToStateVector(sgpTgtBdy, thrustVector, targetInsertionPosition, insertionVector);
-
-            var cargoLibary = ship.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+            
+            /*
             var cmd = WarpMoveCommand.CreateCommand(
-                cargoLibary,
                 ship.FactionOwnerID,
                 ship,
                 targetBody,
@@ -206,8 +212,15 @@ namespace Pulsar4X.Engine.Logistics
                 thrustV2,
                 shipMass);
 
-            var dv = cmd.Item2.OrbitrelativeDeltaV.Length();
+            
+            */
+            var dv = thrustV2.Length();
+            //KeplerElements endKE;
 
+            KeplerElements postWarpKE = OrbitMath.KeplerFromPositionAndVelocity(sgpTgtBdy, targetInsertionPosition, insertionVector, targetIntercept.eti);
+            
+            
+            
             double ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
             double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(shipMass, ve, dv);
             tsec += OrbitMath.BurnTime(ship, dv, shipMass);
@@ -215,16 +228,46 @@ namespace Pulsar4X.Engine.Logistics
             fuelUse += fuelBurned;
             shipMass -= fuelBurned;
 
-            var preManuverState = OrbitMath.GetStateVectors(ke, dateTime);
+            var preManuverState = OrbitMath.GetStateVectors(startKE, dateTime);
             pos = preManuverState.position;
             vel = new Vector3(preManuverState.velocity.X, preManuverState.velocity.Y, 0);
             vel += thrustV2;
 
-            ke = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, pos, vel, dateTime);
-            var postManuverState = OrbitMath.GetStateVectors(ke, dateTime);
+            var endKE = OrbitalMath.KeplerFromPositionAndVelocity(sgpCurBdy, pos, vel, dateTime);
+            var postManuverState = OrbitMath.GetStateVectors(startKE, dateTime);
             pos = postManuverState.position;
             vel = new Vector3(postManuverState.velocity.X, postManuverState.velocity.Y, 0);
 
+            if(!ship.TryGetDatablob<NavSequenceDB>(out NavSequenceDB navDB))
+            {
+                navDB = new NavSequenceDB();
+                ship.SetDataBlob(navDB);
+            }
+
+            DateTime startWarpTime = startState.At;
+            DateTime endWarpTime = targetIntercept.eti;
+            DateTime endNewtonThrustTime = targetIntercept.eti;
+            
+            navDB.AddManuver(
+                Manuver.ManuverType.Warp, 
+                startWarpTime,
+                cur,
+                startKE,
+                endWarpTime,
+                targetBody,
+                postWarpKE
+            );
+            navDB.AddManuver(
+                Manuver.ManuverType.NewtonSimple, 
+                endWarpTime,
+                targetBody,
+                postWarpKE,
+                endNewtonThrustTime,
+                targetBody,
+                endKE
+            );
+            
+            
             ManuverState mstate = new ManuverState()
             {
                 At = startState.At + TimeSpan.FromSeconds(tsec),
