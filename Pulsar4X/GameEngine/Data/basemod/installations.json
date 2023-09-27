@@ -646,5 +646,102 @@
         }
       ]
     }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "infrastructure",
+      "Name": "Infrastructure",
+      "Formulas": {
+        "Description": "'Component and buildings needed to keep colonists alive on hostile worlds: currently non functional other than as cargospace'",
+        "Mass": "1000",
+        "Volume": "[Mass]",
+        "HTK": "1000",
+        "CrewReq": "10",
+        "ResearchCost": "0",
+        "CreditCost": "0",
+        "BuildPointCost": "100"
+      },
+      "ResourceCost": {
+        "duranium": "100"
+      },
+      "ComponentType":"Infrastructure",
+      "MountType": "ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Support Colonists",
+          "DescriptionFormula": "'Keeps colonists alive on hostile worlds'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "500"
+        },
+        {
+          "Name": "Storage Amount",
+          "DescriptionFormula": "'The amount of space that is dedicated to storage space. '",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "500"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(GuidString('general-storage'), Ability('Storage Amount'))",
+          "AttributeType": "Pulsar4X.Atb.VolumeStorageAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "space-port",
+      "Name": "Space Port",
+      "Formulas": {
+        "Description": "'Facilities for transfering cargo'",
+        "Mass": "500000",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "1000000",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "duranium": "60",
+        "mercassium": "60"
+      },
+      "ComponentType":"Facility",
+      "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Cargo Transfer Rate",
+          "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "Transfer Range",
+          "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "db",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+          "AttributeType": "Pulsar4X.Atb.StorageTransferRateAtb"
+        }
+      ]
+    }
   }
 ]
