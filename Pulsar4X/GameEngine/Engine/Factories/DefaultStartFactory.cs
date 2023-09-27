@@ -162,63 +162,6 @@ namespace Pulsar4X.Engine
             Entity targetFaction = FactionFactory.CreateFaction(game, "OpFor");
             FactionDataStore opForDataStore = targetFaction.GetDataBlob<FactionInfoDB>().Data;
 
-            FactionTechDB factionTechDB = factionEntity.GetDataBlob<FactionTechDB>();
-            FactionTechDB opForTechDB = targetFaction.GetDataBlob<FactionTechDB>();
-
-            // Need to unlock the starting data in the game
-            // FIXME: this is totally just a placeholder, seriously, we shouldn't unlock everything here :D
-            // FIXME: this should be configurable via JSON and not just load everything!
-            foreach(var id in game.StartingGameData.DefaultItems["player-starting-items"].Items)
-            {
-                factionDataStore.Unlock(id);
-                opForDataStore.Unlock(id);
-
-                // Research any tech that is listed
-                if(factionDataStore.Techs.ContainsKey(id))
-                {
-                    factionTechDB.IncrementLevel(id);
-                }
-                if(opForDataStore.Techs.ContainsKey(id))
-                {
-                    opForTechDB.IncrementLevel(id);
-                }
-            }
-            // foreach(var (id, armor) in game.StartingGameData.Armor)
-            // {
-            //     factionDataStore.Unlock(id);
-            //     opForDataStore.Unlock(id);
-            // }
-            // foreach(var (id, cargoTypes) in game.StartingGameData.CargoTypes)
-            // {
-            //     factionDataStore.Unlock(id);
-            //     opForDataStore.Unlock(id);
-            // }
-            // foreach(var (id, templates) in game.StartingGameData.ComponentTemplates)
-            // {
-            //     factionDataStore.Unlock(id);
-            //     opForDataStore.Unlock(id);
-            // }
-            // foreach(var (id, industryTypes) in game.StartingGameData.IndustryTypes)
-            // {
-            //     factionDataStore.Unlock(id);
-            //     opForDataStore.Unlock(id);
-            // }
-            // foreach(var (id, mineral) in game.StartingGameData.Minerals)
-            // {
-            //     factionDataStore.Unlock(id);
-            //     opForDataStore.Unlock(id);
-            // }
-            // foreach(var (id, material) in game.StartingGameData.ProcessedMaterials)
-            // {
-            //     factionDataStore.Unlock(id);
-            //     opForDataStore.Unlock(id);
-            // }
-            // foreach(var (id, tech) in game.StartingGameData.Techs)
-            // {
-            //     factionDataStore.Unlock(id);
-            //     opForDataStore.Unlock(id);
-            // }
-
             // Set the faction entity to own itself so it can issue orders to itself
             factionEntity.FactionOwnerID = factionEntity.Guid;
 

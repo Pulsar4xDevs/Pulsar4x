@@ -49,16 +49,30 @@ namespace Pulsar4X.Engine
             var factionInfo = new FactionInfoDB();
             factionInfo.Data = new FactionDataStore(game.StartingGameData);
 
+            var factionTechDB = new FactionTechDB(factionInfo.Data);
+
             var blobs = new List<BaseDataBlob> {
                 name,
                 factionInfo,
                 new FactionAbilitiesDB(),
-                new FactionTechDB(factionInfo.Data),
+                factionTechDB,
                 new FactionOwnerDB(),
                 new FleetDB(),
                 new OrderableDB(),
             };
             var factionEntity = new Entity(game.GlobalManager, blobs);
+
+            // Need to unlock the starting data in the game
+            foreach(var id in game.StartingGameData.DefaultItems["player-starting-items"].Items)
+            {
+                factionInfo.Data.Unlock(id);
+
+                // Research any tech that is listed
+                if(factionInfo.Data.Techs.ContainsKey(id))
+                {
+                    factionTechDB.IncrementLevel(id);
+                }
+            }
 
             // Add this faction to the SM's access list.
             game.SpaceMaster.SetAccess(factionEntity, AccessRole.SM);
