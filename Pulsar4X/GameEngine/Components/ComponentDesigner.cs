@@ -126,12 +126,13 @@ namespace Pulsar4X.Components
             };
 
             _design.TechID = tech.UniqueID;
-            factionTech.MakeResearchable(tech); //add it to researchable techs
+            faction.Data.Techs.Add(tech.UniqueID, tech);
 
             SetAttributes();
 
             if(_design.ResearchCostValue == 0 || StartResearched)
             {
+                tech.Level = tech.MaxLevel;
                 faction.IndustryDesigns[_design.UniqueID] = _design;
             }
 

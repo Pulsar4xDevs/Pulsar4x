@@ -62,9 +62,8 @@ namespace Pulsar4X.Engine
             sci.MaxLabs = 25;
             sci.Bonuses = bonuses;
 
-            // FIXME?
-            // var factionTech = faction.GetDataBlob<FactionTechDB>();
-            // factionTech.AllScientists.Add((sci, location));
+            var factionTech = faction.GetDataBlob<FactionTechDB>();
+            factionTech.AllScientists.Add((sci, location));
 
             return sci;
         }

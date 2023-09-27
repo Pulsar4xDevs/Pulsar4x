@@ -112,9 +112,9 @@ namespace Pulsar4X.Engine
 
                 if (factionTechs.IsResearchable(project.UniqueID))
                 {
-                    int currentLvl = factionTechs.GetLevelforTech(project);
+                    int currentLvl = project.Level;
                     factionTechs.AddPoints(project.UniqueID, researchPoints);
-                    if (factionTechs.GetLevelforTech(project) > currentLvl)
+                    if (project.Level > currentLvl)
                     {
                         scientist.ProjectQueue.RemoveAt(0);
 

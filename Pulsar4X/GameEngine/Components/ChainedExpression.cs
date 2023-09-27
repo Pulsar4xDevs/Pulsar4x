@@ -539,7 +539,7 @@ namespace Pulsar4X.Components
 
                 case "TechData":
                     techGuid = (string)args.EvaluateParameters()[0];
-                    TechBlueprint techSD = _factionDataStore.Techs[techGuid];
+                    Tech techSD = _factionDataStore.Techs[techGuid];
                     args.Result = _factionTechDB.TechDataFormula(techSD);
                     break;
 

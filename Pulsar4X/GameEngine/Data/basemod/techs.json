@@ -178,15 +178,17 @@
       "DataFormula": "0.2",
       "Category": "PowerAndPropulsion",
       "CostFormula": "(1 + [Level]) * 500",
-      "Unlocks": [
-        "tech-convential-engine-max-power",
-        "tech-convential-engine-min-power",
-        "tech-convential-engine-max-size",
-        "tech-convential-engine-min-size",
-        "tech-convential-engine-exhaust-velocity",
-        "tech-convential-engine-fuel-consumption",
-        "tech-nuclear-engine"
-      ]
+      "Unlocks": {
+        "1": [
+          "tech-convential-engine-max-power",
+          "tech-convential-engine-min-power",
+          "tech-convential-engine-max-size",
+          "tech-convential-engine-min-size",
+          "tech-convential-engine-exhaust-velocity",
+          "tech-convential-engine-fuel-consumption",
+          "tech-nuclear-engine"
+        ]
+      }
     }
   },
   {
@@ -199,9 +201,11 @@
       "DataFormula": "5",
       "Category": "PowerAndPropulsion",
       "CostFormula": "(1 + [Level]) * 2500",
-      "Unlocks": [
-        "tech-nuclear-pulse-engine"
-      ]
+      "Unlocks": {
+        "1": [
+          "tech-nuclear-pulse-engine"
+        ]
+      }
     }
   },
   {
@@ -214,9 +218,11 @@
       "DataFormula": "5",
       "Category": "PowerAndPropulsion",
       "CostFormula": "(1 + [Level]) * 5000",
-      "Unlocks": [
-        "tech-ion-engine"
-      ]
+      "Unlocks": {
+        "1": [
+          "tech-ion-engine"
+        ]
+      }
     }
   },
   {

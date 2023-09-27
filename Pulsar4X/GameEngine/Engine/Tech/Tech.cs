@@ -8,6 +8,8 @@ namespace Pulsar4X.Engine
         public ComponentDesign Design { get; set; }
         public Entity Faction { get; set; }
         public int Level { get; set; } = 0;
+        public int ResearchProgress { get; set; } = 0;
+        public int ResearchCost { get; set; } = 0;
 
         public Tech() { }
 

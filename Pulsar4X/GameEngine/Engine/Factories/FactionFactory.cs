@@ -53,7 +53,7 @@ namespace Pulsar4X.Engine
                 name,
                 factionInfo,
                 new FactionAbilitiesDB(),
-                new FactionTechDB(game.StartingGameData.Techs.Values.ToList()),
+                new FactionTechDB(factionInfo.Data),
                 new FactionOwnerDB(),
                 new FleetDB(),
                 new OrderableDB(),

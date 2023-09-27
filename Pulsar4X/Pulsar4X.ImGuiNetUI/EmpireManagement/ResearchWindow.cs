@@ -5,15 +5,17 @@ using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
+using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
     public class ResearchWindow : PulsarGuiWindow
     {
         private readonly Vector2 invisButtonSize = new (15, 15);
+        private FactionDataStore _factionData;
         private FactionTechDB _factionTechDB;
-        private Dictionary<string, (Tech tech, int amountDone, int amountMax)> _researchableTechsByGuid;
-        private List<(Tech tech, int amountDone, int amountMax)> _researchableTechs;
+        private List<Tech> _researchableTechs;
+        private Dictionary<string, Tech> _researchableTechsByGuid;
         private List<(Scientist scientist, Entity atEntity)> _scienceTeams;
         private int _selectedTeam = -1;
 
@@ -45,6 +47,7 @@ namespace Pulsar4X.SDL2UI
 
         private void OnFactionChange()
         {
+            _factionData = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
             _factionTechDB = _uiState.Faction.GetDataBlob<FactionTechDB>();
             _scienceTeams = _factionTechDB.AllScientists;
             RefreshTechs();
@@ -52,10 +55,10 @@ namespace Pulsar4X.SDL2UI
 
         private void RefreshTechs()
         {
-            _researchableTechs = _factionTechDB.GetResearchableTechs();
-            _researchableTechsByGuid = _factionTechDB.GetResearchablesDic();
+            _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionTechDB.IsResearchable(t.UniqueID)).ToList();
+            _researchableTechs.Sort((a,b) => a.Name.CompareTo(b.Name));
 
-            _researchableTechs.Sort((a,b) => a.tech.Name.CompareTo(b.tech.Name));
+            _researchableTechsByGuid = new (_factionData.Techs);
         }
 
         internal override void Display()
@@ -158,18 +161,18 @@ namespace Pulsar4X.SDL2UI
                     {
                         var proj = _researchableTechsByGuid[scientist.ProjectQueue[0].techID];
 
-                        float frac = (float)proj.amountDone / proj.amountMax;
+                        float frac = (float)proj.ResearchProgress / proj.ResearchCost;
                         var size = ImGui.GetTextLineHeight();
                         var pos = ImGui.GetCursorPos();
                         ImGui.ProgressBar(frac, new System.Numerics.Vector2(245, size), "");
                         ImGui.SetCursorPos(pos);
-                        ImGui.Text(proj.tech.Name);
+                        ImGui.Text(proj.Name);
                         if (ImGui.IsItemHovered())
                         {
                             string queue = "";
                             foreach (var queueItem in _scienceTeams[i].scientist.ProjectQueue)
                             {
-                                queue += _researchableTechsByGuid[queueItem.techID].tech.Name + "\n";
+                                queue += _researchableTechsByGuid[queueItem.techID].Name + "\n";
                             }
                             ImGui.SetTooltip(queue);
                         }
@@ -200,30 +203,30 @@ namespace Pulsar4X.SDL2UI
 
                 for (int i = 0; i < _researchableTechs.Count; i++)
                 {
-                    if (_researchableTechs[i].amountMax > 0) //could happen if bad json data?
+                    if (_researchableTechs[i].ResearchCost > 0) //could happen if bad json data?
                     {
                         ImGui.TableNextColumn();
 
-                        float frac = (float)_researchableTechs[i].amountDone / _researchableTechs[i].amountMax;
+                        float frac = (float)_researchableTechs[i].ResearchProgress / _researchableTechs[i].ResearchCost;
                         var size = ImGui.GetTextLineHeight();
                         var pos = ImGui.GetCursorPos();
                         ImGui.ProgressBar(frac, new Vector2(245, size), "");
-                        if (ImGui.IsItemHovered() && !_researchableTechs[i].tech.Description.IsNullOrEmpty())
+                        if (ImGui.IsItemHovered() && !_researchableTechs[i].Description.IsNullOrEmpty())
                         {
-                            ImGui.SetTooltip(_researchableTechs[i].tech.Description);
+                            ImGui.SetTooltip(_researchableTechs[i].Description);
                         }
                         ImGui.SetCursorPos(new Vector2(pos.X + 2f, pos.Y));
-                        ImGui.Text(_researchableTechs[i].tech.Name);
+                        ImGui.Text(_researchableTechs[i].Name);
 
                         if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
                         {
                             if (_selectedTeam > -1)
-                                ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].tech.UniqueID);
+                                ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].UniqueID);
                         }
                         ImGui.TableNextColumn();
-                        if(_researchableTechs[i].tech.MaxLevel > 1)
+                        if(_researchableTechs[i].MaxLevel > 1)
                         {
-                            ImGui.Text(_factionTechDB.GetLevelforTech(_researchableTechs[i].tech).ToString());
+                            ImGui.Text(_researchableTechs[i].Level.ToString());
                         }
                         else
                         {
@@ -249,7 +252,7 @@ namespace Pulsar4X.SDL2UI
                 foreach(var (techID, cycle) in scientist.ProjectQueue.ToArray())
                 {
                     ImGui.TableNextColumn();
-                    ImGui.Text(_researchableTechsByGuid[techID].tech.Name);
+                    ImGui.Text(_researchableTechsByGuid[techID].Name);
                     ImGui.TableNextColumn();
                     Buttons(scientist, (techID, cycle), index);
                     index++;
@@ -368,7 +371,7 @@ namespace Pulsar4X.SDL2UI
         {
             ImGui.BeginGroup();
 
-            if(_researchableTechsByGuid[scientist.ProjectQueue[i].techID].tech.MaxLevel > 1)
+            if(_researchableTechsByGuid[scientist.ProjectQueue[i].techID].MaxLevel > 1)
             {
                 string cyclestr = queueItem.cycle ? "O": "*";
                 if (ImGui.SmallButton(cyclestr + "##" + i))

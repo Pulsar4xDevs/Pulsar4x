@@ -82,7 +82,7 @@ namespace Pulsar4X.Engine
                 // if (StaticRefLib.SyncContext != null)
                 //     StaticRefLib.SyncContext.Post(InvokeDateChange, value); //marshal to the main (UI) thread, so the event is invoked on that thread.
                 // else
-                //     InvokeDateChange(value);//if context is null, we're probibly running tests or headless. in this case we're not going to marshal this.
+                InvokeDateChange(value);//if context is null, we're probibly running tests or headless. in this case we're not going to marshal this.
             }
         }
         /// <summary>
