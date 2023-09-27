@@ -333,10 +333,10 @@
       "Name": "General Storage",
       "Formulas": {
         "Description": "'Stores General Cargo'",
-        "Mass": "Ability(0)",
+        "Mass": "Ability('Warehouse Size')",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
-        "CrewReq": "Ability(1) * 0.1",
+        "CrewReq": "Ability('Size Efficiency') * 0.1",
         "ResearchCost": "0",
         "CreditCost": "120",
         "BuildPointCost": "[Mass]"
@@ -361,7 +361,7 @@
           "AttributeFormula": "50000"
         },
         {
-          "Name": "Size Efficency",
+          "Name": "Size Efficiency",
           "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
           "GuiHint": "GuiTextDisplay",
           "GuidDictionary": {},
@@ -409,10 +409,10 @@
       "Name": "Fuel Storage",
       "Formulas": {
         "Description": "'Stores Fuel'",
-        "Mass": "Ability(0)",
+        "Mass": "Ability('Tank Radius')",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
-        "CrewReq": "Ability(1)",
+        "CrewReq": "Ability('Tank Volume')",
         "ResearchCost": "0",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
@@ -571,10 +571,10 @@
       "Name": "Planetary Spaceport Complex",
       "Formulas": {
         "Description": "'A generic does everything space facility'",
-        "Mass": "Ability(0)",
+        "Mass": "Ability('Warehouse Size')",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
-        "CrewReq": "Ability(1) * 0.1",
+        "CrewReq": "Ability('Size Efficiency') * 0.1",
         "ResearchCost": "0",
         "CreditCost": "120",
         "BuildPointCost": "[Mass]"
@@ -599,11 +599,11 @@
           "AttributeFormula": "50000"
         },
         {
-          "Name": "Size Efficency",
+          "Name": "Size Efficiency",
           "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
           "GuiHint": "GuiTextDisplay",
           "GuidDictionary": {},
-          "AttributeFormula": "Ability(0) * 0.01"
+          "AttributeFormula": "Ability('Warehouse Size') * 0.01"
         },
         {
           "Name": "Cargo Transfer Rate",
@@ -630,7 +630,7 @@
           "DescriptionFormula": "'The volume of cargo this can store.'",
           "GuiHint": "GuiTextDisplay",
           "GuidDictionary": {},
-          "AttributeFormula": "Ability(0) - Ability(1) - Ability(2)"
+          "AttributeFormula": "Ability('Warehouse Size') - Ability('Size Efficiency') - Ability('Cargo Transfer Rate')"
         },
         {
           "Name": "DBargsTransfer",

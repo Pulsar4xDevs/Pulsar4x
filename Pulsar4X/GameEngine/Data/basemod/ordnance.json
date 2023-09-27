@@ -439,10 +439,10 @@
       "Name": "Ordnance Storage",
       "Formulas": {
         "Description": "'Stores Ordinance'",
-        "Mass": "Ability(0)",
+        "Mass": "Ability('Rack Size')",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
-        "CrewReq": "Ability(1) * 0.1",
+        "CrewReq": "Ability('Size Efficiency') * 0.1",
         "ResearchCost": "0",
         "CreditCost": "120",
         "BuildPointCost": "[Mass]"
@@ -467,11 +467,11 @@
           "AttributeFormula": "50000"
         },
         {
-          "Name": "Size Efficency",
+          "Name": "Size Efficiency",
           "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
           "GuiHint": "GuiTextDisplay",
           "GuidDictionary": {},
-          "AttributeFormula": "Ability(0) * 0.01"
+          "AttributeFormula": "Ability('Rack Size') * 0.01"
         },
         {
           "Name": "Cargo Transfer Rate",
@@ -498,7 +498,7 @@
           "DescriptionFormula": "'The amount of cargo this can store.'",
           "GuiHint": "GuiTextDisplay",
           "GuidDictionary": {},
-          "AttributeFormula": "Ability(0) - Ability(1) - Ability(2)"
+          "AttributeFormula": "Ability('Rack Size') - Ability('Size Efficiency') - Ability('Cargo Transfer Rate')"
         },
         {
           "Name": "DBargsStor",

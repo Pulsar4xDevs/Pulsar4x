@@ -58,7 +58,6 @@ namespace Pulsar4X.Components
             {
                 ComponentDesignAttribute designAttribute = new ComponentDesignAttribute(this, attrbSD, factionDataStore, factionTech);
                 ComponentDesignAttributes.Add(designAttribute.Name, designAttribute);
-                ComponentDesignAttributeList.Add(designAttribute);
             }
 
             EvalAll();
@@ -320,9 +319,6 @@ namespace Pulsar4X.Components
             get { return _design.ComponentType; }
             internal set { _design.ComponentType = value; }
         }
-
-        [Obsolete]//don't use this, TODO: get rid of this once json data is rewritten to use names instead of indexes
-        internal List<ComponentDesignAttribute> ComponentDesignAttributeList = new List<ComponentDesignAttribute>();
 
         public Dictionary<string, ComponentDesignAttribute> ComponentDesignAttributes = new Dictionary<string, ComponentDesignAttribute>();
         public Dictionary<Type, IComponentDesignAttribute> Attributes

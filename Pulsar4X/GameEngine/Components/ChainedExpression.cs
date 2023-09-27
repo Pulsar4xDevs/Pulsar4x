@@ -432,29 +432,14 @@ namespace Pulsar4X.Components
                 case "Ability":
                     try
                     {
-                        //TODO: get rid of this once json data is rewritten to use names instead of indexes
-                        if (args.Parameters[0].Evaluate() is int)
-                        {
-                            index = (int)args.Parameters[0].Evaluate();
-                            ChainedExpression result = _designer.ComponentDesignAttributeList[index].Formula;
-                            if (result.Result == null)
-                                result.Evaluate();
-                            MakeThisDependant(result);
-                            args.Result = result.Result;
-                        }
-                        else
-                        {
-                            key = (string)args.Parameters[0].Evaluate();
+                        key = (string)args.Parameters[0].Evaluate();
 
-                            ChainedExpression result = _designer.ComponentDesignAttributes[key].Formula;
-                            if (result.Result == null)
-                                result.Evaluate();
-                            MakeThisDependant(result);
-                            args.Result = result.Result;
-                        }
-
+                        ChainedExpression result = _designer.ComponentDesignAttributes[key].Formula;
+                        if (result.Result == null)
+                            result.Evaluate();
+                        MakeThisDependant(result);
+                        args.Result = result.Result;
                     }
-                    //TODO: maybe log this catch and throw the component out. (instead of throwing)
                     catch (KeyNotFoundException e)
                     {
 
@@ -475,22 +460,10 @@ namespace Pulsar4X.Components
                 case "SetAbilityValue": //I might remove this..
                     try
                     {
+                        key = (string)args.Parameters[0].Evaluate();
 
-                        //TODO: get rid of this once json data is rewritten to use names instead of indexes
-                        if (args.Parameters[0].Evaluate() is int)
-                        {
-                            index = (int)args.Parameters[0].Evaluate();
-                            ChainedExpression expression = _designer.ComponentDesignAttributeList[index].Formula;
-                            expression.SetResult = args.Parameters[1].Evaluate();
-                        }
-                        else
-                        {
-                            key = (string)args.Parameters[0].Evaluate();
-
-                            ChainedExpression expression = _designer.ComponentDesignAttributes[key].Formula;
-                            expression.SetResult = args.Parameters[1].Evaluate();
-                        }
-
+                        ChainedExpression expression = _designer.ComponentDesignAttributes[key].Formula;
+                        expression.SetResult = args.Parameters[1].Evaluate();
                     }
                     //TODO: maybe log this catch and throw the component out. (instead of throwing)
                     catch (KeyNotFoundException e)

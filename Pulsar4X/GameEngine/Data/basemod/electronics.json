@@ -193,7 +193,7 @@
           "Name": "DBargs",
           "GuiHint": "None",
           "GuidDictionary": {},
-          "AttributeFormula": "AtbConstrArgs(Ability(0), Ability(1))",
+          "AttributeFormula": "AtbConstrArgs(Ability('Range'), Ability('Tracking Speed'))",
           "AttributeType": "Pulsar4X.Datablobs.BeamFireControlAtbDB"
         }
       ]

@@ -27,7 +27,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.TableNextColumn();
                     ImGui.Text(listPerDesign[0].Name);
                     AddContextMenu(listPerDesign[0]);
-                    DisplayHelpers.DescriptiveTooltip(listPerDesign[0].Name, listPerDesign[0].Design.TypeName, listPerDesign[0].Design.Description, true);
+                    DisplayHelpers.DescriptiveTooltip(listPerDesign[0].Name, listPerDesign[0].Design.TypeName, listPerDesign[0].Design.Description, "", true);
                     ImGui.TableNextColumn();
                     ImGui.Text(listPerDesign.Count.ToString());
                     ImGui.TableNextColumn();

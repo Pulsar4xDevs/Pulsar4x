@@ -79,7 +79,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        public static void DescriptiveTooltip(string name, string type, string description, bool hideTypeIfSameAsName = false)
+        public static void DescriptiveTooltip(string name, string type, string description, string metaInfo = "", bool hideTypeIfSameAsName = false)
         {
             if(ImGui.IsItemHovered())
             {
@@ -101,6 +101,13 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Separator();
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                     ImGui.TextWrapped(description);
+                    ImGui.PopStyleColor();
+                }
+
+                if(metaInfo.IsNotNullOrEmpty())
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
+                    ImGui.Text(metaInfo);
                     ImGui.PopStyleColor();
                 }
                 ImGui.EndTooltip();
