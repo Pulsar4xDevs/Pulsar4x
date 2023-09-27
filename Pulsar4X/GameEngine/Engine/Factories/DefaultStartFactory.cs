@@ -146,13 +146,6 @@ namespace Pulsar4X.Engine
 
         public static Entity DefaultHumans(Game game, string name)
         {
-            //USE THIS TO TEST CODE
-            //TESTING STUFFF
-            //return completeTest(game, name);
-           // while(true){
-
-            //}
-            //TESTING STUFF
 
             ComponentDesigner.StartResearched = true;//any components we design should be researched already. turn this off at the end.
 
@@ -169,6 +162,9 @@ namespace Pulsar4X.Engine
             Entity targetFaction = FactionFactory.CreateFaction(game, "OpFor");
             FactionDataStore opForDataStore = targetFaction.GetDataBlob<FactionInfoDB>().Data;
 
+            FactionTechDB factionTechDB = factionEntity.GetDataBlob<FactionTechDB>();
+            FactionTechDB opForTechDB = targetFaction.GetDataBlob<FactionTechDB>();
+
             // Need to unlock the starting data in the game
             // FIXME: this is totally just a placeholder, seriously, we shouldn't unlock everything here :D
             // FIXME: this should be configurable via JSON and not just load everything!
@@ -176,6 +172,16 @@ namespace Pulsar4X.Engine
             {
                 factionDataStore.Unlock(id);
                 opForDataStore.Unlock(id);
+
+                // Research any tech that is listed
+                if(factionDataStore.Techs.ContainsKey(id))
+                {
+                    factionTechDB.IncrementLevel(id);
+                }
+                if(opForDataStore.Techs.ContainsKey(id))
+                {
+                    opForTechDB.IncrementLevel(id);
+                }
             }
             // foreach(var (id, armor) in game.StartingGameData.Armor)
             // {

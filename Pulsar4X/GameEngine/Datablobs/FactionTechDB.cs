@@ -10,6 +10,12 @@ namespace Pulsar4X.Datablobs
     {
         private FactionDataStore _factionData;
 
+        [PublicAPI]
+        [JsonProperty]
+        public int ResearchPoints { get; internal set; }
+
+        public List<(Scientist scientist, Entity atEntity)> AllScientists { get; internal set; } = new List<(Scientist, Entity)>();
+
         public bool IsResearchable(string id)
         {
             return _factionData.Techs.ContainsKey(id)
@@ -31,6 +37,12 @@ namespace Pulsar4X.Datablobs
                 foreach(var item in tech.Unlocks[tech.Level])
                 {
                     _factionData.Unlock(item);
+
+                    if(_factionData.Techs.ContainsKey(item))
+                    {
+                        var unlockedTech = (Tech)_factionData.Techs[item];
+                        unlockedTech.ResearchCost = TechCostFormula(unlockedTech);
+                    }
                 }
             }
         }
@@ -52,12 +64,6 @@ namespace Pulsar4X.Datablobs
                 tech.ResearchProgress = newPointsTotal;
             }
         }
-
-        [PublicAPI]
-        [JsonProperty]
-        public int ResearchPoints { get; internal set; }
-
-        public List<(Scientist scientist, Entity atEntity)> AllScientists { get; internal set; } = new List<(Scientist, Entity)>();
 
         /// <summary>
         /// Constructor for datablob, this should only be used when a new faction is created.

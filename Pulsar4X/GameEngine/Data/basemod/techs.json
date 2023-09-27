@@ -87,8 +87,8 @@
     "Type": "Tech",
     "Payload": {
       "UniqueID": "tech-conventional-engine-max-power",
-      "Name": "Maximum Engine Power Modifier",
-      "Description": "",
+      "Name": "Rocket Engine Maximum Power",
+      "Description": "Research to increase the upper limits of conventional rocket power",
       "MaxLevel": 7,
       "DataFormula": "1 + ([Level] * 1.5)",
       "Category": "PowerAndPropulsion",
@@ -99,8 +99,8 @@
     "Type": "Tech",
     "Payload": {
       "UniqueID": "tech-conventional-engine-min-power",
-      "Name": "Minimum Engine Power Modifier",
-      "Description": "",
+      "Name": "Rocket Engine Minimum Power",
+      "Description": "Research to find the lower limits of conventional rocket power",
       "MaxLevel": 7,
       "DataFormula": "0.9 - [Level] * 0.1",
       "Category": "PowerAndPropulsion",
@@ -180,12 +180,12 @@
       "CostFormula": "(1 + [Level]) * 500",
       "Unlocks": {
         "1": [
-          "tech-convential-engine-max-power",
-          "tech-convential-engine-min-power",
-          "tech-convential-engine-max-size",
-          "tech-convential-engine-min-size",
-          "tech-convential-engine-exhaust-velocity",
-          "tech-convential-engine-fuel-consumption",
+          "tech-conventional-engine-max-power",
+          "tech-conventional-engine-min-power",
+          "tech-conventional-engine-max-size",
+          "tech-conventional-engine-min-size",
+          "tech-conventional-engine-exhaust-velocity",
+          "tech-conventional-engine-fuel-consumption",
           "tech-nuclear-engine"
         ]
       }
@@ -253,7 +253,7 @@
     "Type": "Tech",
     "Payload": {
       "UniqueID": "tech-jumpoint-stabilization-size-reduction",
-      "Name": "JumpPoint Stabilization Size Reduction",
+      "Name": "JumpPoint Size Reduction",
       "Description": "Reduces the size of a component required for Jump Point Stabilisation",
       "Category": "ConstructionProduction",
       "MaxLevel": 10,
@@ -265,7 +265,7 @@
     "Type": "Tech",
     "Payload": {
       "UniqueID": "tech-jumpoint-stabilization-time-reduction",
-      "Name": "JumpPoint Stabilization Time Reduction",
+      "Name": "JumpPoint Time Reduction",
       "Description": "Reduces the time it takes to stabilise a Jump Point",
       "Category": "ConstructionProduction",
       "MaxLevel": 10,
@@ -391,6 +391,44 @@
       "MaxLevel": 95,
       "DataFormula": "500 + [Level] * 100",
       "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-modern-technology",
+      "Name": "Modern Technology",
+      "Description": "Unlocks all modern technologies needed for space flight and exploration",
+      "Category": "ConstructionProduction",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "0",
+      "Unlocks": {
+        "1": [
+          "tech-mining-production",
+          "tech-capacitors",
+          "tech-conductors",
+          "tech-alcubierre-miniaturization",
+          "tech-alcubierre-bubble-creation-cost",
+          "tech-alcubierre-sustain-cost",
+          "tech-alcubierre-collapse-efficiency",
+          "tech-solid-fuel",
+          "tech-conventional-engine",
+          "tech-jumpoint-stabilization",
+          "tech-jumpoint-stabilization-size-reduction",
+          "tech-jumpoint-stabilization-time-reduction",
+          "tech-high-explosives",
+          "tech-high-explosives-warheads",
+          "tech-fragmentation-warheads",
+          "tech-fission-warheads",
+          "tech-laser-warheads",
+          "tech-triggers",
+          "tech-guidance",
+          "tech-antenna-sensitivity",
+          "tech-antenna-efficiency",
+          "tech-antenna-bandwidth"
+        ]
+      }
     }
   }
 ]

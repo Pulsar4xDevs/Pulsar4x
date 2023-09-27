@@ -211,9 +211,9 @@ namespace Pulsar4X.SDL2UI
                         var size = ImGui.GetTextLineHeight();
                         var pos = ImGui.GetCursorPos();
                         ImGui.ProgressBar(frac, new Vector2(245, size), "");
-                        if (ImGui.IsItemHovered() && !_researchableTechs[i].Description.IsNullOrEmpty())
+                        if (ImGui.IsItemHovered())
                         {
-                            ImGui.SetTooltip(_researchableTechs[i].Description);
+                            DisplayHelpers.DescriptiveTooltip(_researchableTechs[i].Name, _researchableTechs[i].Category.ToString(), _researchableTechs[i].Description);
                         }
                         ImGui.SetCursorPos(new Vector2(pos.X + 2f, pos.Y));
                         ImGui.Text(_researchableTechs[i].Name);
