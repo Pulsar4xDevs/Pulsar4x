@@ -18,6 +18,8 @@
         "beam-fire-control",
         "reactor",
         "battery-bank",
+        "rtg",
+        "steam-turbine-reactor",
         "conventional-engine",
         "alcubierre-warp-drive",
         "refining",
