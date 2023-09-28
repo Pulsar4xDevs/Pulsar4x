@@ -117,12 +117,24 @@ namespace Pulsar4X.ECSLib
                 orbit.Epoch += TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
             }
 
-            double m0 = orbit.MeanAnomalyAtEpoch;
-            double n = orbit.MeanMotion;
-            double currentMeanAnomaly = OrbitMath.GetMeanAnomalyFromTime(m0, n, timeSinceEpoch.TotalSeconds);
+            var secondsFromEpoch = timeSinceEpoch.TotalSeconds;
+            if (orbit.Eccentricity < 1)
+            {
+                double m0 = orbit.MeanAnomalyAtEpoch;
+                double n = orbit.MeanMotion;
+                double currentMeanAnomaly = OrbitMath.GetMeanAnomalyFromTime(m0, n, secondsFromEpoch);
 
-            double eccentricAnomaly = orbit.GetEccentricAnomaly(currentMeanAnomaly);
-            return OrbitMath.TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
+                double eccentricAnomaly = orbit.GetEccentricAnomaly(currentMeanAnomaly);
+                return OrbitMath.TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
+            }
+            else
+            {
+                var quotient = orbit.GravitationalParameter_m3S2 / Math.Pow(-orbit.SemiMajorAxis , 3);
+                var hyperbolcMeanMotion = Math.Sqrt(quotient);
+                var hyperbolicMeanAnomaly = secondsFromEpoch * hyperbolcMeanMotion;
+                var hyperbolicAnomalyF = OrbitMath.GetHyperbolicAnomalyNewtonsMethod(orbit.Eccentricity, hyperbolicMeanAnomaly);
+                return OrbitMath.TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, hyperbolicAnomalyF);
+            }
             /*
             var x = Math.Cos(eccentricAnomaly) - orbit.Eccentricity;
             var y = Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity) * Math.Sin(eccentricAnomaly);

@@ -420,6 +420,8 @@ namespace Pulsar4X.ECSLib
             GravitationalParameter_m3S2 = GeneralMath.StandardGravitationalParameter(_parentMass + _myMass);
 
             double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis, 3) / (GravitationalParameter_m3S2));
+            if (orbitalPeriod is double.NaN)
+                orbitalPeriod = double.PositiveInfinity;
             if (orbitalPeriod * 10000000 > long.MaxValue)
             {
                 OrbitalPeriod = TimeSpan.MaxValue;

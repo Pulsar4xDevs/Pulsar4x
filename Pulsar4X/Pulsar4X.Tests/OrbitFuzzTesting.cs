@@ -130,7 +130,23 @@ namespace Pulsar4X.Tests
                  111.33, //halleysAoP
                  38.38,     //halleysMeanAnomaly at Epoch
                  new System.DateTime(1994, 2, 17)),
-             "Elliptical Retrograde 3d Orbit")
+             "Elliptical Retrograde 3d Orbit"),
+            
+            (
+                OrbitDB.FromAsteroidFormat( //Hyperbolic orbit
+                    parentBody, 
+                    parentMassDB.MassDry, 
+                    2.2e14,          //halleysBodyMass
+                    -17.834,     //halleysSemiMajAxis 
+                    1.05,     //Hyperbolic Eccentricity
+                    0, 
+                    0, //halleysLoAN
+                    111.33, //halleysAoP
+                    38.38,     //halleysMeanAnomaly at Epoch
+                    new System.DateTime(1994, 2, 17)),
+                "Hyperbolic 2d 0 LoAN, 111.33 aop Orbit"
+            ),
+            
         };
 
         double epsilon, sgp, o_a, o_e, o_i, o_Ω, o_M0, o_n, o_ω, o_lop;
