@@ -295,4 +295,11 @@
     <WriteCodeFragment Language="C#" OutputFile="$(CustomAssemblyInfoFile)" AssemblyAttributes="@(AssemblyAttributes)" />
   </Target>
 
+  <Target Name="CopyJsonData" AfterTargets="Build">
+    <ItemGroup>
+      <JsonDataFiles Include="..\GameEngine\Data\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(OutputPath)\Data\%(RecursiveDir)" />
+  </Target>
+
 </Project>

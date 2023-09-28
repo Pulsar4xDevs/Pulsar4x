@@ -331,20 +331,20 @@
     "Type": "ComponentTemplate",
     "Payload": {
       "UniqueID": "general-cargo-hold",
-      "Name": "General Storage",
+      "Name": "General Cargo Hold",
       "Formulas": {
         "Description": "Stores General Cargo",
-        "Mass": "Ability('Warehouse Size')",
-        "Volume": "[Mass]",
+        "Mass": "Ability('Storage Volume') * 0.2",
+        "Volume": "Ability('Storage Volume')",
         "HTK": "[Mass]",
-        "CrewReq": "Ability('Size Efficiency') * 0.1",
+        "CrewReq": "Max(1, Ability('Cargo Transfer Rate') * 0.1)",
         "ResearchCost": "0",
-        "CreditCost": "120",
-        "BuildPointCost": "[Mass]"
+        "CreditCost": "Ability('Storage Volume') * 0.12",
+        "BuildPointCost": "Ability('Storage Volume') * 4.5"
       },
       "ResourceCost": {
-        "iron": "60",
-        "copper": "60"
+        "iron": "Ability('Storage Volume') * 10",
+        "copper": "Ability('Storage Volume')"
       },
       "ComponentType":"Cargo Hold",
       "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
@@ -352,52 +352,59 @@
       "IndustryTypeID": "installation-construction",
       "Attributes": [
         {
-          "Name": "Warehouse Size",
-          "DescriptionFormula": "''",
-          "GuiHint": "GuiSelectionMaxMin",
+          "Name": "Storage Volume",
+          "DescriptionFormula": "'Larger cargo holds store more goods but take longer to transfer cargo in and out'",
+          "GuiHint": "GuiSelectionMaxMinInt",
           "GuidDictionary": {},
-          "MaxFormula": "1000000",
-          "MinFormula": "100",
+          "MaxFormula": "10000",
+          "MinFormula": "10",
           "StepFormula": "100",
-          "AttributeFormula": "50000"
+          "AttributeFormula": "500"
         },
         {
           "Name": "Size Efficiency",
           "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
           "GuiHint": "GuiTextDisplay",
           "GuidDictionary": {},
-          "AttributeFormula": "Ability('Warehouse Size') * 0.01"
+          "AttributeFormula": "Max(1, Ability('Storage Volume') * 0.01)"
         },
         {
           "Name": "Cargo Transfer Rate",
           "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
-          "GuiHint": "GuiSelectionMaxMin",
+          "GuiHint": "GuiSelectionMaxMinInt",
           "GuidDictionary": {},
-          "MaxFormula": "1000000",
+          "MaxFormula": "100000",
           "MinFormula": "100",
           "StepFormula": "100",
-          "AttributeFormula": "50000"
+          "AttributeFormula": "1000"
         },
         {
           "Name": "Transfer Range",
           "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
-          "GuiHint": "GuiSelectionMaxMin",
+          "GuiHint": "GuiSelectionMaxMinInt",
           "GuidDictionary": {},
-          "MaxFormula": "1000000",
+          "MaxFormula": "100000",
           "MinFormula": "100",
           "StepFormula": "100",
-          "AttributeFormula": "50000"
+          "AttributeFormula": "10000"
+        },
+        {
+          "Name": "Transfer Rate",
+          "Units": "kg/hr",
+          "DescriptionFormula": "'The rate at which cargo can be loaded an unloaded from the hold'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Cargo Transfer Rate') * ((-0.5 / 10000) * Ability('Storage Volume') + 1)"
         },
         {
           "Name": "DBargsStor",
           "GuiHint": "None",
-          "AttributeFormula": "AtbConstrArgs('general-storage', Ability('Warehouse Size'))",
+          "AttributeFormula": "AtbConstrArgs('general-storage', Ability('Storage Volume'))",
           "AttributeType": "Pulsar4X.Atb.VolumeStorageAtb"
         },
         {
           "Name": "DBArgsXfer",
           "GuiHint": "None",
-          "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+          "AttributeFormula": "AtbConstrArgs(Ability('Transfer Rate'), Ability('Transfer Range'))",
           "AttributeType": "Pulsar4X.Atb.StorageTransferRateAtb"
         }
       ]

@@ -63,7 +63,7 @@ namespace Pulsar4X.SDL2UI
             btn =  new ToolBarOption()
             {
                 Picture = _uiState.Img_Industry(),
-                TooltipText = "Economy Management",
+                TooltipText = "Colony Management",
                 OnClick = new Action(EconomicsWindow.GetInstance().ToggleActive),
                 GetActive = new Func<bool>(EconomicsWindow.GetInstance().GetActive)
                 //Opens up the ship design menu

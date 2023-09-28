@@ -18,9 +18,9 @@ public class StorageTransferRateAtb : IComponentDesignAttribute
     /// <value>DeltaV in m/s, Low Earth Orbit is about 10000m/s</value>
     public double TransferRange_ms { get; internal set; }
 
-    public StorageTransferRateAtb(int rate_kgh, double rangeDV_ms)
+    public StorageTransferRateAtb(double rate_kgh, double rangeDV_ms)
     {
-        TransferRate_kgh = rate_kgh;
+        TransferRate_kgh = (int)rate_kgh;
         TransferRange_ms = rangeDV_ms;
     }
 

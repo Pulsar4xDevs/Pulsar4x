@@ -904,7 +904,7 @@ namespace Pulsar4X.Engine
             ComponentDesigner componentDesigner;
             ComponentTemplateBlueprint template = factionDataStore.ComponentTemplates["general-cargo-hold"];
             componentDesigner = new ComponentDesigner(template, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            componentDesigner.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000000);
+            componentDesigner.ComponentDesignAttributes["Storage Volume"].SetValueFromInput(1000000);
             componentDesigner.Name = "General Cargo Hold";
             //return cargoInstalation.CreateDesign(faction);
             _cargoInstalation = componentDesigner.CreateDesign(faction);
@@ -948,7 +948,7 @@ namespace Pulsar4X.Engine
             ComponentDesigner cargoComponent;
             ComponentTemplateBlueprint template = factionDataStore.ComponentTemplates["general-cargo-hold"];
             cargoComponent = new ComponentDesigner(template, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            cargoComponent.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(5000); //5t component
+            cargoComponent.ComponentDesignAttributes["Storage Volume"].SetValueFromInput(5000); //5t component
             cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(500);
             cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
             cargoComponent.Name = "CargoComponent5t";
@@ -964,7 +964,7 @@ namespace Pulsar4X.Engine
             ComponentDesigner cargoComponent;
             ComponentTemplateBlueprint template = factionDataStore.ComponentTemplates["general-cargo-hold"];
             cargoComponent = new ComponentDesigner(template, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            cargoComponent.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000); //5t component
+            cargoComponent.ComponentDesignAttributes["Storage Volume"].SetValueFromInput(1000); //5t component
             cargoComponent.ComponentDesignAttributes["Cargo Transfer Rate"].SetValueFromInput(500);
             cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
             cargoComponent.Name = "CargoComponent1t";
