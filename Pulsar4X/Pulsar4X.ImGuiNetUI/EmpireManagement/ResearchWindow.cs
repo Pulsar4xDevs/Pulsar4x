@@ -19,10 +19,14 @@ namespace Pulsar4X.SDL2UI
         private List<(Scientist scientist, Entity atEntity)> _scienceTeams;
         private int _selectedTeam = -1;
 
+        private string[] techCategoryNames;
+        private string[] techCategoryIds;
+        private int selectCategoryFilterIndex = 0;
+
         private ResearchWindow()
         {
             OnFactionChange();
-            _uiState.Game.TimePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent; 
+            _uiState.Game.TimePulse.GameGlobalDateChangedEvent += GameLoopOnGameGlobalDateChangedEvent;
         }
 
         private void GameLoopOnGameGlobalDateChangedEvent(DateTime newdate)
@@ -50,13 +54,39 @@ namespace Pulsar4X.SDL2UI
             _factionData = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
             _factionTechDB = _uiState.Faction.GetDataBlob<FactionTechDB>();
             _scienceTeams = _factionTechDB.AllScientists;
+
+            selectCategoryFilterIndex = 0;
+
+            var categories = _uiState.Game.TechCategories.Select(g => g.Value).ToList();
+            categories.Sort((a, b) => a.Name.CompareTo(b.Name));
+
+            var categoryNamesArray = categories.Select(c => c.Name).ToArray();
+            var categoryIdsArray = categories.Select(c => c.UniqueID).ToArray();
+
+            techCategoryNames = new string[_uiState.Game.TechCategories.Count + 1];
+            techCategoryNames[0] = "All";
+            Array.Copy(categoryNamesArray, 0, techCategoryNames, 1, categoryNamesArray.Length);
+
+            techCategoryIds = new string[techCategoryNames.Length];
+            techCategoryIds[0] = "";
+            Array.Copy(categoryIdsArray, 0, techCategoryIds, 1, categoryIdsArray.Length);
+
             RefreshTechs();
         }
 
         private void RefreshTechs()
         {
-            _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionTechDB.IsResearchable(t.UniqueID)).ToList();
-            _researchableTechs.Sort((a,b) => a.Name.CompareTo(b.Name));
+            if(selectCategoryFilterIndex == 0)
+            {
+                _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionTechDB.IsResearchable(t.UniqueID)).ToList();
+                _researchableTechs.Sort((a,b) => a.Name.CompareTo(b.Name));
+            }
+            else
+            {
+                var id = techCategoryIds[selectCategoryFilterIndex];
+                _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionTechDB.IsResearchable(t.UniqueID) && t.Category.Equals(id)).ToList();
+                _researchableTechs.Sort((a,b) => a.Name.CompareTo(b.Name));
+            }
 
             _researchableTechsByGuid = new (_factionData.Techs);
         }
@@ -73,6 +103,13 @@ namespace Pulsar4X.SDL2UI
                 if(ImGui.BeginChild("Techs", secondChildSize, true))
                 {
                     DisplayHelpers.Header("Available Techs", "Double click to add to research queue");
+
+                    var availableSize = ImGui.GetContentRegionAvail();
+                    ImGui.SetNextItemWidth(availableSize.X);
+                    if(ImGui.Combo("###template-filter", ref selectCategoryFilterIndex, techCategoryNames, techCategoryNames.Length))
+                    {
+                        RefreshTechs();
+                    }
 
                     DisplayTechs();
                     ImGui.EndChild();
@@ -197,9 +234,6 @@ namespace Pulsar4X.SDL2UI
         {
             if(ImGui.BeginTable("ResearchableTechs", 1, ImGuiTableFlags.BordersInnerV))
             {
-                ImGui.TableSetupColumn("Name");
-                ImGui.TableHeadersRow();
-
                 for (int i = 0; i < _researchableTechs.Count; i++)
                 {
                     if (_researchableTechs[i].ResearchCost > 0) //could happen if bad json data?
@@ -211,7 +245,7 @@ namespace Pulsar4X.SDL2UI
                         var height = ImGui.GetTextLineHeight();
                         var pos = ImGui.GetCursorPos();
                         ImGui.ProgressBar(frac, new Vector2(size.X, height), "");
-                        if (ImGui.IsItemHovered()) 
+                        if (ImGui.IsItemHovered())
                         {
                             string metaInfo = "";
                             if(_researchableTechs[i].Unlocks.ContainsKey(_researchableTechs[i].Level + 1))
@@ -228,9 +262,9 @@ namespace Pulsar4X.SDL2UI
                             }
 
                             DisplayHelpers.DescriptiveTooltip(
-                                _researchableTechs[i].DisplayName(), 
-                                _uiState.Game.TechCategories[_researchableTechs[i].Category].Name, 
-                                _researchableTechs[i].Description, 
+                                _researchableTechs[i].DisplayName(),
+                                _uiState.Game.TechCategories[_researchableTechs[i].Category].Name,
+                                _researchableTechs[i].Description,
                                 metaInfo);
                         }
                         ImGui.SetCursorPos(new Vector2(pos.X + 2f, pos.Y));
@@ -271,7 +305,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             //ImGui.BeginChild("SelectedSci");
-            
+
 
             //ImGui.Columns(2);
             //ImGui.SetColumnWidth(0, 300);
