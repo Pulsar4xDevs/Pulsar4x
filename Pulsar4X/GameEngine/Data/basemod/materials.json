@@ -8,7 +8,7 @@
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1.0,
       "VolumePerUnit": 0.000125,
-      "MineralsRequired": {
+      "ResourceCosts": {
         "iron": 88,
         "chromium": 11,
         "hydrocarbons": 1
@@ -28,7 +28,7 @@
       "CargoTypeID": "fuel-storage",
       "MassPerUnit": 1,
       "VolumePerUnit": 0.0009446885,
-      "MineralsRequired": {
+      "ResourceCosts": {
         "hydrocarbons": 1
       },
       "IndustryPointCosts": 10,
@@ -49,7 +49,7 @@
       "CargoTypeID": "fuel-storage",
       "MassPerUnit": 1,
       "VolumePerUnit": 0.000835561,
-      "MineralsRequired": {
+      "ResourceCosts": {
         "hydrocarbons": 1
       },
       "IndustryPointCosts": 10,
@@ -70,7 +70,7 @@
       "CargoTypeID": "fuel-storage",
       "MassPerUnit": 1,
       "VolumePerUnit": 0.002777778,
-      "MineralsRequired": {
+      "ResourceCosts": {
         "hydrocarbons": 1
       },
       "IndustryPointCosts": 10,
@@ -91,7 +91,7 @@
       "CargoTypeID": "general-storage",
       "MassPerUnit": 1,
       "VolumePerUnit": 0.0010638298,
-      "MineralsRequired": {
+      "ResourceCosts": {
         "hydrocarbons": 1
       },
       "IndustryPointCosts": 5,
@@ -109,7 +109,7 @@
       "CargoTypeID": "fuel-storage",
       "MassPerUnit": 1.0,
       "VolumePerUnit": 0.0000531915,
-      "MineralsRequired": {
+      "ResourceCosts": {
         "fissionables": 100
       },
       "IndustryPointCosts": 10,
@@ -127,7 +127,7 @@
       "CargoTypeID": "battery-storage",
       "MassPerUnit": 0.0,
       "VolumePerUnit": 0,
-      "MineralsRequired": {
+      "ResourceCosts": {
       },
       "IndustryPointCosts": 10,
       "IndustryTypeID": "refining",
@@ -144,7 +144,7 @@
       "CargoTypeID": "fuel-storage",
       "MassPerUnit": 1,
       "VolumePerUnit": 0.001,
-      "MineralsRequired": {
+      "ResourceCosts": {
         "sorium": 1
       },
       "IndustryPointCosts": 10,

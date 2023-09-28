@@ -4,6 +4,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Auth;
+using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Engine
 {
@@ -71,6 +72,11 @@ namespace Pulsar4X.Engine
                 if(factionInfo.Data.Techs.ContainsKey(id))
                 {
                     factionTechDB.IncrementLevel(id);
+                }
+
+                if(factionInfo.Data.CargoGoods.IsMaterial(id))
+                {
+                    factionInfo.IndustryDesigns[id] = (IConstructableDesign)factionInfo.Data.CargoGoods[id];
                 }
             }
 

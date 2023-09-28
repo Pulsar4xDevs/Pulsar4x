@@ -23,8 +23,6 @@ namespace Pulsar4X.Engine.Industry
             IndustryTypeID = blueprint.IndustryTypeID;
             Description = blueprint.Description;
             GuiHints = blueprint.GuiHints;
-            MineralsRequired = blueprint.MineralsRequired;
-            MaterialsRequired = blueprint.MaterialsRequired;
             WealthCost = blueprint.WealthCost;
             OutputAmount = blueprint.OutputAmount;
             CargoTypeID = blueprint.CargoTypeID;

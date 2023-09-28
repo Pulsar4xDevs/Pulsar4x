@@ -13,8 +13,6 @@ namespace Pulsar4X.Blueprints
         public string IndustryTypeID { get; set; }
         public string Description { get; set; }
         public ConstructableGuiHints GuiHints { get; set; }
-        public Dictionary<string, long> MineralsRequired { get; set;}
-        public Dictionary<string, long> MaterialsRequired { get; set;}
         public ushort WealthCost { get; set;}
         public ushort OutputAmount { get; set; }
         public string CargoTypeID { get; set; }

@@ -18,7 +18,14 @@ namespace Pulsar4X.Engine.Industry
             var design = factionInfo.IndustryDesigns[itemID];
             TypeID = design.IndustryTypeID;
             Name = design.Name;
-            ResourcesRequiredRemaining = new Dictionary<string, long>(design.ResourceCosts);
+            if(design.ResourceCosts != null)
+            {
+                ResourcesRequiredRemaining = new Dictionary<string, long>(design.ResourceCosts);
+            }
+            else
+            {
+                ResourcesRequiredRemaining = new ();
+            }
             ResourcesCosts = design.ResourceCosts;
             ProductionPointsLeft = design.IndustryPointCosts;
             ProductionPointsCost = design.IndustryPointCosts;

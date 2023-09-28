@@ -98,36 +98,25 @@ namespace Pulsar4X.SDL2UI
 
             int i = 0;
             Dictionary<string, List<int>> _constructablesIndexesByType = new ();
-            foreach (var (id, design) in _factionInfoDB.IndustryDesigns)
-            {
-                if(!design.IsValid) continue;
+            var sortedDesigns = _factionInfoDB.IndustryDesigns.Values.ToList();
+            sortedDesigns.Sort((a, b) => a.Name.CompareTo(b.Name));
 
-                constructablesNames[i] = design.Name;
-                constructablesIDs[i] = id;
-                string typeID = design.IndustryTypeID;
-
-                if(!_constructablesIndexesByType.ContainsKey(typeID))
-                    _constructablesIndexesByType.Add(typeID, new List<int>());
-                _constructablesIndexesByType[typeID].Add(i);
-                i++;
-            }
-
-            foreach (var (id, productionLine) in _prodLines)
+            foreach(var (id, productionLine) in _prodLines)
             {
                 List<string> itemIDs = new ();
                 List<string> itemNames = new ();
 
-                foreach (var typeID in productionLine.IndustryTypeRates.Keys)
+                foreach (var design in sortedDesigns)
                 {
-                    if(_constructablesIndexesByType.ContainsKey(typeID))
+                    if(!design.IsValid) continue;
+
+                    if(productionLine.IndustryTypeRates.ContainsKey(design.IndustryTypeID))
                     {
-                        foreach (var index in _constructablesIndexesByType[typeID])
-                        {
-                            itemIDs.Add(constructablesIDs[index]);
-                            itemNames.Add(constructablesNames[index]);
-                        }
+                        itemIDs.Add(design.UniqueID);
+                        itemNames.Add(design.Name);
                     }
                 }
+
                 _contructablesByPline[id] = (itemIDs.ToArray(), itemNames.ToArray());
             }
         }
