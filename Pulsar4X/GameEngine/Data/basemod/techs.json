@@ -426,9 +426,22 @@
           "tech-guidance",
           "tech-antenna-sensitivity",
           "tech-antenna-efficiency",
-          "tech-antenna-bandwidth"
+          "tech-antenna-bandwidth",
+          "tech-factory-max-size"
         ]
       }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-factory-max-size",
+      "Name": "Factory Maximum Size",
+      "Description": "Research into the logistics and design of larger factories",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 10,
+      "DataFormula": "(1 + [Level]) * 1000",
+      "CostFormula":"(1 + [Level]) * 2500"
     }
   }
 ]

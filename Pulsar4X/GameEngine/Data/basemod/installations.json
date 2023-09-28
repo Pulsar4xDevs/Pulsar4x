@@ -166,18 +166,20 @@
       "UniqueID": "factory",
       "Name": "Factory",
       "Formulas": {
-        "Description": "Constructs Facilities, Fighters Ammo and Components",
-        "Mass": "Ability('Size')",
-        "Volume": "[Mass]",
+        "Description": "Constructs Facilities, Fighters, Ammo and Components",
+        "Mass": "Ability('Size') * 1000",
+        "Volume": "Ability('Size') * 1.5",
         "HTK": "[Mass]",
-        "CrewReq": "[Mass] * 0.1",
+        "CrewReq": "Ability('Size') * 5",
         "ResearchCost": "0",
         "CreditCost": "120",
-        "BuildPointCost": "[Mass]"
+        "BuildPointCost": "Ability('Size') * 20"
       },
       "ResourceCost": {
         "iron": "[Mass] * 0.05",
-        "copper": "[Mass] * 0.005"
+        "copper": "[Mass] * 0.005",
+        "aluminium": "[Mass] * 0.005",
+        "plastic": "[Mass] * 0.001"
       },
       "ComponentType": "Facility",
       "MountType": "ShipCargo, PlanetInstallation",
@@ -186,21 +188,23 @@
       "Attributes": [
         {
           "Name": "Size",
-          "DescriptionFormula": "'Size of this installation'",
-          "GuiHint": "GuiSelectionMaxMin",
-          "MaxFormula": "10000",
+          "DescriptionFormula": "'Size of the factory, larger factories produce more construction points'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "TechData('tech-factory-max-size')",
           "MinFormula": "100",
           "StepFormula": "50",
-          "AttributeFormula": "5000"
+          "AttributeFormula": "500"
         },
         {
           "Name": "Component Construction Points",
+          "DescriptionFormula": "'Daily production towards components'",
           "GuiHint": "GuiTextDisplay",
-          "AttributeFormula": "[Mass] * 0.1"
+          "AttributeFormula": "Ability('Size') * 0.1"
         },            {
           "Name": "Installation Construction Points",
+          "DescriptionFormula": "'Daily production towards installations'",
           "GuiHint": "GuiTextDisplay",
-          "AttributeFormula": "[Mass] * 0.1"
+          "AttributeFormula": "Ability('Size') * 0.1"
         },
         {
           "Name": "Fighter Construction Points",
@@ -209,8 +213,9 @@
         },
         {
           "Name": "Ordnance Construction Points",
+          "DescriptionFormula": "'Daily production towards ordnance'",
           "GuiHint": "GuiTextDisplay",
-          "AttributeFormula": "[Mass] * 0.1"
+          "AttributeFormula": "Ability('Size') * 0.1"
         },
         {
           "Name": "Construction Points",
