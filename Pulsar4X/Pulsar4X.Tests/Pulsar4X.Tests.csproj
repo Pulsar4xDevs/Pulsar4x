@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj" />
+    <ProjectReference Include="..\GameEngine\GameEngine.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="mono_crash.197419f3c8.0.json" />
@@ -110,4 +111,10 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <Target Name="CopyJsonData" AfterTargets="Build">
+    <ItemGroup>
+      <JsonDataFiles Include="..\GameEngine\Data\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(JsonDataFiles)" DestinationFolder="$(OutputPath)\Data\%(RecursiveDir)" />
+  </Target>
 </Project>
