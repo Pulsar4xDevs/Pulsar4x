@@ -17,6 +17,7 @@ namespace Pulsar4X.Engine
 
         public SafeDictionary<string, ThemeBlueprint> Themes { get; internal set; }
         public SafeDictionary<string, GasBlueprint> AtmosphericGases { get; internal set; }
+        public SafeDictionary<string, TechCategoryBlueprint> TechCategories { get; internal set; }
         public SystemGenSettingsBlueprint SystemGenSettings { get; internal set; }
         /// <summary>
         /// List of StarSystems currently in the game.
@@ -44,6 +45,7 @@ namespace Pulsar4X.Engine
             StartingGameData = modDataStore;
             Themes = new SafeDictionary<string, ThemeBlueprint>(modDataStore.Themes);
             AtmosphericGases = new SafeDictionary<string, GasBlueprint>(modDataStore.AtmosphericGas);
+            TechCategories = new SafeDictionary<string, TechCategoryBlueprint>(modDataStore.TechCategories);
             SystemGenSettings = modDataStore.SystemGenSettings["default-system-gen-settings"];
 
             Settings = settings;

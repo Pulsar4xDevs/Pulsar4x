@@ -107,28 +107,6 @@ namespace Pulsar4X.DataStructures
         D,
     }
 
-    public enum ResearchCategories
-    {
-        BiologyGenetics,
-        ConstructionProduction,
-        DefensiveSystems,
-        EnergyWeapons,
-        LogisticsGroundCombat,
-        MissilesKineticWeapons,
-        PowerAndPropulsion,
-        SensorsAndFireControl,
-        FromStaticData00,
-        FromStaticData01,
-        FromStaticData02,
-        FromStaticData03,
-        FromStaticData04,
-        FromStaticData05,
-        FromStaticData06,
-        FromStaticData07,
-        FromStaticData08,
-        FromStaticData09,
-    }
-
     public enum SystemBand
     {
         InnerBand,
@@ -176,6 +154,7 @@ namespace Pulsar4X.DataStructures
         GuiTextSelectionFormula = 128,
         GuiSelectionMaxMinInt = 256,
         GuiFuelTypeSelection = 512,
+        GuiTechCategorySelection = 1024
     }
 
     public enum PulseActionEnum

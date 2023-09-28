@@ -53,8 +53,8 @@ namespace Pulsar4X.Engine
             //all this stuff needs a proper bit of code to get names from a file or something
 
             //this is going to have to be thought out properly.
-            Dictionary<ResearchCategories, float> bonuses = new Dictionary<ResearchCategories, float>();
-            bonuses.Add(ResearchCategories.PowerAndPropulsion, 1.1f);
+            Dictionary<string, float> bonuses = new Dictionary<string, float>();
+            bonuses.Add("tech-category-power-propulsion", 1.1f);
 
             Scientist sci = new Scientist();
             sci.Name = "Augusta King";

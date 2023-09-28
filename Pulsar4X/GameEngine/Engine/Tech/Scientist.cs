@@ -12,7 +12,7 @@ namespace Pulsar4X.Engine
         /// Bonuses that this scentist imparts.
         /// </summary>
         [JsonProperty]
-        public Dictionary<ResearchCategories, float> Bonuses { get; internal set; }
+        public Dictionary<string, float> Bonuses { get; internal set; }
 
         /// <summary>
         /// Max number of labs this scientist can manage.
@@ -38,7 +38,7 @@ namespace Pulsar4X.Engine
             TeamType = TeamTypes.Science;
         }
 
-        public Scientist(Dictionary<ResearchCategories,float> bonuses, byte maxLabs )
+        public Scientist(Dictionary<string, float> bonuses, byte maxLabs )
         {
             Bonuses = bonuses;
             MaxLabs = maxLabs;
@@ -48,7 +48,7 @@ namespace Pulsar4X.Engine
 
         public Scientist(Scientist dB)
         {
-            Bonuses = new Dictionary<ResearchCategories, float>(dB.Bonuses);
+            Bonuses = new Dictionary<string, float>(dB.Bonuses);
             MaxLabs = dB.MaxLabs;
             AssignedLabs = dB.AssignedLabs;
             ProjectQueue = dB.ProjectQueue;

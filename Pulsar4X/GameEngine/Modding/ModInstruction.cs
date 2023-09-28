@@ -19,6 +19,7 @@ namespace Pulsar4X.Modding
             ProcessedMaterial,
             SystemGenSettings,
             Tech,
+            TechCategory,
             Theme,
         }
         public enum OperationType { Default, Remove }
@@ -87,6 +88,9 @@ namespace Pulsar4X.Modding
                     break;
                 case ModInstruction.DataType.Tech:
                     instruction.Data = jObject["Payload"].ToObject<TechBlueprint>();
+                    break;
+                case ModInstruction.DataType.TechCategory:
+                    instruction.Data = jObject["Payload"].ToObject<TechCategoryBlueprint>();
                     break;
                 case ModInstruction.DataType.Theme:
                     instruction.Data = jObject["Payload"].ToObject<ThemeBlueprint>();

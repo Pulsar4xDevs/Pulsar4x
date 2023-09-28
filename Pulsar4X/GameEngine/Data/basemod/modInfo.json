@@ -19,6 +19,7 @@
         "mineralsAurora.json",
         "ordnance.json",
         "systemGenSettings.json",
+        "techCategories.json",
         "techs.json",
         "weapons.json"
     ]

@@ -184,6 +184,9 @@ namespace Pulsar4X.SDL2UI
                             case GuiHint.GuiFuelTypeSelection:
                                 GuiHintFuelTypeSelection(attribute, uiState);
                                 break;
+                            case GuiHint.GuiTechCategorySelection:
+                                GuiHintTechCategorySelection(attribute, uiState);
+                                break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
@@ -639,6 +642,28 @@ namespace Pulsar4X.SDL2UI
                 var key = _listNames[attribute.ListSelection];
                 var value = attribute.GuidDictionary[key];
                 attribute.SetValueFromDictionaryExpression(_listNames[attribute.ListSelection]);
+            }
+        }
+
+        private void GuiHintTechCategorySelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
+        {
+            _listNames = new string[uiState.Game.TechCategories.Count];
+
+            int i = 0;
+            foreach (var kvp in uiState.Game.TechCategories)
+            {
+                _listNames[i] = (string)kvp.Value.Name;
+                i++;
+            }
+
+            Title(attribute.Name, attribute.Description);
+            var sizeAvailable = ImGui.GetContentRegionAvail();
+            ImGui.SetNextItemWidth(sizeAvailable.X);
+            if (ImGui.Combo("###Select", ref attribute.ListSelection, _listNames, _listNames.Length))
+            {
+                var name = _listNames[attribute.ListSelection];
+                var value = uiState.Game.TechCategories.Where(c => c.Value.Name.Equals(name)).First();
+                attribute.SetValueFromString(value.Key);
             }
         }
 

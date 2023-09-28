@@ -79,6 +79,9 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.Tech:
                     ApplyModGeneric<TechBlueprint>(baseData.Techs, mod, modNamespace);
                     break;
+                case ModInstruction.DataType.TechCategory:
+                    ApplyModGeneric<TechCategoryBlueprint>(baseData.TechCategories, mod, modNamespace);
+                    break;
                 case ModInstruction.DataType.Theme:
                     ApplyModGeneric<ThemeBlueprint>(baseData.Themes, mod, modNamespace);
                     break;

@@ -94,14 +94,10 @@
         },
         {
           "Name": "Bonus",
-          "GuiHint": "GuiEnumSelectionList",
-          "EnumTypeName" : "Pulsar4X.DataStructures.ResearchCategories",
-          "MaxFormula": "18",
-          "MinFormula": "1",
-          "StepFormula": "1",
-          "AttributeFormula": "0"
+          "GuiHint": "GuiTechCategorySelection",
+          "GuidDictionary": {},
+          "AttributeFormula": "GuidString('tech-category-power-propulsion')"
         },
-
         {
           "Name": "RP Amount Per EconTick",
           "DescriptionFormula": "''",

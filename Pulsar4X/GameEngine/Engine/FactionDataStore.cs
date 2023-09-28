@@ -20,7 +20,6 @@ namespace Pulsar4X.Engine
         public SafeDictionary<string, ComponentTemplateBlueprint> LockedComponentTemplates { get; private set; }
         public SafeDictionary<string, IndustryTypeBlueprint> LockedIndustryTypes { get; private set; }
         public SafeDictionary<string, Tech> LockedTechs { get; private set; }
-
         public SafeDictionary<string, ArmorBlueprint> Armor { get; private set; }
         public SafeDictionary<string, CargoTypeBlueprint> CargoTypes { get; private set; }
         public SafeDictionary<string, ComponentTemplateBlueprint> ComponentTemplates { get; private set; }
