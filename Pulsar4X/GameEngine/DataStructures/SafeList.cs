@@ -48,6 +48,14 @@ namespace Pulsar4X.DataStructures
             }
         }
 
+        public void Insert(int index, T item)
+        {
+            lock(_lock)
+            {
+                _innerList.Insert(index, item);
+            }
+        }
+
         public int Count
         {
             get

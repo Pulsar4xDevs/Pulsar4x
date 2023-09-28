@@ -292,12 +292,12 @@ namespace Pulsar4X.SDL2UI
 
                 Scientist scientist = _scienceTeams[selected].scientist;
                 int index = 0;
-                foreach(var (techID, cycle) in scientist.ProjectQueue.ToArray())
+                foreach(var (techID, cycle) in scientist.ProjectQueue)
                 {
                     ImGui.TableNextColumn();
                     ImGui.Text(_researchableTechsByGuid[techID].Name);
                     ImGui.TableNextColumn();
-                    Buttons(scientist, (techID, cycle), index);
+                    Buttons(scientist, (techID, cycle), ref index);
                     index++;
                 }
 
@@ -410,7 +410,7 @@ namespace Pulsar4X.SDL2UI
             */
         }
 
-        void Buttons(Scientist scientist, (string techID, bool cycle) queueItem, int i)
+        void Buttons(Scientist scientist, (string techID, bool cycle) queueItem, ref int i)
         {
             ImGui.BeginGroup();
 
@@ -462,6 +462,7 @@ namespace Pulsar4X.SDL2UI
             if (ImGui.SmallButton("x" + "##" + i))
             {
                 scientist.ProjectQueue.RemoveAt(i);
+                i--;
             }
 
             ImGui.EndGroup();

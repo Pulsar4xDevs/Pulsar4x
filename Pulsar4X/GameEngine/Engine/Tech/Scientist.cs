@@ -29,7 +29,7 @@ namespace Pulsar4X.Engine
         /// <summary>
         /// Queue of projects currently being worked on by this scientist.
         /// </summary>
-        public List<(string techID, bool cycle)> ProjectQueue { get; internal set; } = new ();
+        public SafeList<(string techID, bool cycle)> ProjectQueue { get; internal set; } = new ();
 
         public new string Name { get; set; }
 
