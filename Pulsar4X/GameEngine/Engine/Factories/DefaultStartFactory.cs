@@ -174,7 +174,11 @@ namespace Pulsar4X.Engine
                 nameDB.SetName(factionEntity.Guid, nameDB.DefaultName);
             }
 
-            Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth);
+            long baseInitialPopulation = 9000000000;
+            long variablePopulation = (long)(baseInitialPopulation * .1);
+            long initialPopulationOfEarth = game.RNG.NextInt64(baseInitialPopulation - variablePopulation, baseInitialPopulation + variablePopulation);
+
+            Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth, initialPopulationOfEarth);
             Entity marsColony = ColonyFactory.CreateColony(factionEntity, speciesEntity, NameLookup.GetFirstEntityWithName(solSys, "Mars"));
 
             ComponentTemplateBlueprint mineSD = game.StartingGameData.ComponentTemplates["mine"];
@@ -241,7 +245,7 @@ namespace Pulsar4X.Engine
 
             var earthCargo = colonyEntity.GetDataBlob<VolumeStorageDB>();
 
-            colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
+            //colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             var rawSorium = factionDataStore.CargoGoods["sorium"];
 
             var iron = factionDataStore.CargoGoods["iron"];
