@@ -44,6 +44,11 @@ namespace Pulsar4X.Atb
             }
         }
 
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
         public string AtbName()
         {
             return "Energy Storage";

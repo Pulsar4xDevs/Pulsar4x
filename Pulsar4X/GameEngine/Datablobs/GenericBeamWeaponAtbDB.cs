@@ -24,12 +24,12 @@ namespace Pulsar4X.Datablobs
         public int ReloadRate { get; internal set; }
 
         [JsonProperty] public int Frequncy { get; internal set; } = 700;
-        
+
         public double LenPerPulseInSeconds = 1;
-        
+
         public double BeamSpeed { get; internal set; } = 299792458; //299792458 is speed of light.
         public float BaseHitChance { get; internal set; } = 0.95f;
-        
+
         public GenericBeamWeaponAtbDB() { }
 
         public GenericBeamWeaponAtbDB(double maxRange, double damageAmount, double reloadRate)
@@ -69,23 +69,23 @@ namespace Pulsar4X.Datablobs
 
         public void FireWeapon(Entity launchingEntity, Entity tgtEntity, int count)
         {
-            
+
             var beamLen = Math.Min(1, count * LenPerPulseInSeconds); //our beam can't be longer than the time period.
             var tohit = ToHitChance(launchingEntity, tgtEntity);
             var hitsTarget = (launchingEntity.Manager as StarSystem).RNGNexBool(tohit);
-            
-            
+
+
             //TODO: DELETE! (for testing purposes turning this on so always hitting)
             hitsTarget = true;
-            
+
             BeamWeaponProcessor.FireBeamWeapon(launchingEntity, tgtEntity, hitsTarget, Frequncy,BeamSpeed, beamLen);
         }
 
         public float ToHitChance(Entity launchingEntity, Entity tgtEntity)
         {
             double range = Math.Abs((launchingEntity.GetAbsolutePosition() - tgtEntity.GetAbsolutePosition()).Length());
-            
-            //var ttt = BeamWeapnProcessor.TimeToTarget(range, launchingEntity.)) 
+
+            //var ttt = BeamWeapnProcessor.TimeToTarget(range, launchingEntity.))
             //tempory timetotarget
             double ttt = range / BeamSpeed; //this should be the closing speed (ie the velocity of the two, the beam speed and the range)
             double missChance = ttt * ( 1 - BaseHitChance);
@@ -100,7 +100,7 @@ namespace Pulsar4X.Datablobs
                 var fcdb = new FireControlAbilityDB();
                 parentEntity.SetDataBlob(fcdb);
             }
-           
+
             if (!componentInstance.HasAblity<WeaponState>())
             {
                 var wpnState = new WeaponState(componentInstance, this);
@@ -112,7 +112,12 @@ namespace Pulsar4X.Datablobs
                 componentInstance.SetAbilityState<WeaponState>(wpnState);
             }
         }
-        
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
         public string AtbName()
         {
             return "Generic Beam Weapon";

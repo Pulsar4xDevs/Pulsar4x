@@ -41,7 +41,24 @@ namespace Pulsar4X.Datablobs
                 parentEntity.SetDataBlob(new MiningDB());
             MineResourcesProcessor.CalcMaxRate(parentEntity);
         }
-        
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if(parentEntity.TryGetDatablob<MiningDB>(out var miningDB))
+            {
+                miningDB.NumberOfMines--;
+
+                if(miningDB.NumberOfMines == 0)
+                {
+                    parentEntity.RemoveDataBlob<MiningDB>();
+                }
+                else
+                {
+                    MineResourcesProcessor.CalcMaxRate(parentEntity);
+                }
+            }
+        }
+
         public string AtbName()
         {
             return "Resource Mining";

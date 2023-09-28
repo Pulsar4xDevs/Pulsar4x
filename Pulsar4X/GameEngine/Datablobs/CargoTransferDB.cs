@@ -83,6 +83,11 @@ namespace Pulsar4X.Datablobs
             StorageSpaceProcessor.RecalcVolumeCapacityAndRates(parentEntity, factionDataStore.CargoGoods);
         }
 
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
         public string AtbName()
         {
             return "Cargo Transfer Rate";

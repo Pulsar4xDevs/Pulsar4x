@@ -30,26 +30,26 @@ namespace Pulsar4X.Datablobs
         }
 
         [JsonIgnore]
-        public long MassPerUnit => (long)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().MassDry); 
+        public long MassPerUnit => (long)Math.Ceiling(OwningEntity.GetDataBlob<MassVolumeDB>().MassDry);
 
         public double VolumePerUnit => OwningEntity.GetDataBlob<MassVolumeDB>().Volume_m3;
 
         public double Density => OwningEntity.GetDataBlob<MassVolumeDB>().DensityDry_kgm;
 
         /// <summary>
-        /// This should be set to true if the item has become damaged or in any other way needs to maintain state 
+        /// This should be set to true if the item has become damaged or in any other way needs to maintain state
         /// </summary>
         [JsonIgnore]
         public string Name
         {
-            
-            get 
+
+            get
             {
                 if (this.OwningEntity.GetDataBlob<NameDB>() != null)
                 {
                     return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.FactionOwnerID);
                 }
-                else return "Unknown Object"; 
+                else return "Unknown Object";
             }
         }
 
@@ -75,19 +75,17 @@ namespace Pulsar4X.Datablobs
         {
             return new CargoAbleTypeDB(this);
         }
-        
-        
-        public void OnComponentDeInstalation(Entity ship, Entity component)
-        {
-            throw new NotImplementedException();
-        }
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             if (!parentEntity.HasDataBlob<CargoAbleTypeDB>())
-                parentEntity.SetDataBlob(new CargoAbleTypeDB(this)); //basicaly just clone the design to the instance. 
+                parentEntity.SetDataBlob(new CargoAbleTypeDB(this)); //basicaly just clone the design to the instance.
         }
-        
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+        }
+
         public string AtbName()
         {
             return "Cargoable";

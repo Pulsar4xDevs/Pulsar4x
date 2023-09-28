@@ -34,7 +34,12 @@ public class StorageTransferRateAtb : IComponentDesignAttribute
         var cargoLibrary = parentEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
         StorageSpaceProcessor.RecalcVolumeCapacityAndRates(parentEntity, cargoLibrary);
     }
-    
+
+    public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+    {
+
+    }
+
     public string AtbName()
     {
         return "Cargo Transfer Rate";

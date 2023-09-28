@@ -102,6 +102,11 @@ namespace Pulsar4X.Datablobs
 
         }
 
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
         public string AtbName()
         {
             return "Sensor Recever";

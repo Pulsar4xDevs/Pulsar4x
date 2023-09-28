@@ -11,6 +11,8 @@ namespace Pulsar4X.Atb
         public int ClassSize { get; internal set; }
         public int TrainingPeriodInMonths { get; internal set; }
 
+        private NavalAcademy _academy;
+
         public NavalAcademyAtb(double classSize, double period)
         {
             ClassSize = (int)classSize;
@@ -42,19 +44,37 @@ namespace Pulsar4X.Atb
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             DateTime graduationDate = parentEntity.StarSysDateTime + TimeSpan.FromDays(TrainingPeriodInMonths * 30);
+
+            _academy = new NavalAcademy() {
+                ClassSize = this.ClassSize,
+                GraduationDate = graduationDate,
+                TrainingPeriodInMonths = this.TrainingPeriodInMonths
+            };
+
             if (parentEntity.TryGetDatablob<NavalAcademyDB>(out var academyDB))
             {
-                academyDB.Academies.Add(new NavalAcademy() {
-                    ClassSize = this.ClassSize,
-                    GraduationDate = graduationDate,
-                    TrainingPeriodInMonths = this.TrainingPeriodInMonths
-                });
+                academyDB.Academies.Add(_academy);
             }
             else
             {
-                parentEntity.SetDataBlob(new NavalAcademyDB(ClassSize, graduationDate, TrainingPeriodInMonths));
+                academyDB = new NavalAcademyDB();
+                academyDB.Academies.Add(_academy);
+                parentEntity.SetDataBlob(academyDB);
             }
             parentEntity.Manager.ManagerSubpulses.AddEntityInterupt(graduationDate, nameof(NavalAcademyProcessor), parentEntity);
+        }
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if(parentEntity.TryGetDatablob<NavalAcademyDB>(out var academyDB))
+            {
+                academyDB.Academies.Remove(_academy);
+
+                if(academyDB.Academies.Count == 0)
+                {
+                    parentEntity.RemoveDataBlob<NavalAcademyDB>();
+                }
+            }
         }
     }
 }

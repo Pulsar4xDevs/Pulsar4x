@@ -2,6 +2,14 @@
   {
     "Type": "TechCategory",
     "Payload": {
+      "UniqueID": "tech-category-designs",
+      "Name": "Designs",
+      "Description": "Research into custom designed components, ships and installations"
+    }
+  },
+  {
+    "Type": "TechCategory",
+    "Payload": {
       "UniqueID": "tech-category-biology-genetics",
       "Name": "Biology & Genetics",
       "Description": "Research into biology and human genetics"

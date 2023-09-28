@@ -12,7 +12,7 @@ namespace Pulsar4X.Atb
     public class WarpDriveAtb : IComponentDesignAttribute
     {
 
-        
+
         [JsonProperty]
         public int WarpPower { get; internal set; }
 
@@ -20,7 +20,7 @@ namespace Pulsar4X.Atb
         public double BubbleCreationCost { get; internal set; }
         public double BubbleSustainCost { get; internal set; }
         public double BubbleCollapseCost { get; internal set; }
-        
+
         public WarpDriveAtb()
         {
         }
@@ -51,7 +51,7 @@ namespace Pulsar4X.Atb
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            
+
             if (!parentEntity.HasDataBlob<WarpAbilityDB>())
             {
                 var ablty = new WarpAbilityDB();
@@ -70,7 +70,12 @@ namespace Pulsar4X.Atb
             }
             ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(parentEntity);
         }
-        
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
         public string AtbName()
         {
             return "Warp Drive";

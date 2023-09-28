@@ -27,6 +27,21 @@ public class LogiBaseAtb : IComponentDesignAttribute
             lbdb.Capacity = totalCap;
         }
     }
+
+    public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+    {
+        if(parentEntity.TryGetDatablob<LogiBaseDB>(out var logiBaseDB)
+            && parentEntity.TryGetDatablob<ComponentInstancesDB>(out var componentInstancesDB))
+        {
+            logiBaseDB.Capacity -= LogisicCapacity;
+
+            if(logiBaseDB.Capacity == 0)
+            {
+                parentEntity.RemoveDataBlob<LogiBaseDB>();
+            }
+        }
+    }
+
     public LogiBaseAtb() { }
 
     public LogiBaseAtb(double logisticCap)

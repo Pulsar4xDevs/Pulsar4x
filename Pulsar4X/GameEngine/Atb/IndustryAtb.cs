@@ -16,6 +16,8 @@ namespace Pulsar4X.Atb
         [JsonProperty]
         private double MaxProductionVolume;
 
+        private IndustryAbilityDB.ProductionLine _productionLine;
+
         public IndustryAtb(Dictionary<string, double> industryRates)
         {
             MaxProductionVolume = double.PositiveInfinity;
@@ -43,20 +45,27 @@ namespace Pulsar4X.Atb
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             var db = parentEntity.GetDataBlob<IndustryAbilityDB>();
-            IndustryAbilityDB.ProductionLine newline = new();
-            newline.MaxVolume = MaxProductionVolume;
-            newline.IndustryTypeRates = IndustryPoints;
-            newline.Name = componentInstance.Name;
+            _productionLine = new() {
+                MaxVolume = MaxProductionVolume,
+                IndustryTypeRates = IndustryPoints,
+                Name = componentInstance.Name
+            };
 
             if (db == null)
             {
-                db = new IndustryAbilityDB(componentInstance.UniqueID, newline);
+                db = new IndustryAbilityDB(componentInstance.UniqueID, _productionLine);
                 parentEntity.SetDataBlob(db);
             }
             else
             {
-                db.ProductionLines.Add(componentInstance.UniqueID, newline);
+                db.ProductionLines.Add(componentInstance.UniqueID, _productionLine);
             }
+        }
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            var db = parentEntity.GetDataBlob<IndustryAbilityDB>();
+            db.ProductionLines.Remove(componentInstance.UniqueID);
         }
 
         public string AtbName()

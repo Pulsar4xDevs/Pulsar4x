@@ -129,6 +129,7 @@ namespace Pulsar4X.Components
                 UniqueID = _design.UniqueID,
                 Name = _design.Name + " Design Research",
                 Description = "Research into building " + _design.Name,
+                Category = "tech-category-designs",
                 MaxLevel = 1,
                 CostFormula = _design.ResearchCostValue.ToString(),
                 Faction = factionEntity,

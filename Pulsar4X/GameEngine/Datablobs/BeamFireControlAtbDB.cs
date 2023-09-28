@@ -19,7 +19,7 @@ namespace Pulsar4X.Datablobs
         /// </summary>
         [JsonProperty]
         public int TrackingSpeed { get; internal set; }
-        
+
         /// <summary>
         /// Determines if this Beam Fire Control is only capable of FinalDefensiveFire (Like CIWS)
         /// </summary>
@@ -50,6 +50,11 @@ namespace Pulsar4X.Datablobs
             if (!componentInstance.HasAblity<FireControlAbilityState>())
                 componentInstance.SetAbilityState<FireControlAbilityState>(new FireControlAbilityState(componentInstance));
             ability.FireControlInstances.Add(componentInstance);
+        }
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
         }
 
         public string AtbName()

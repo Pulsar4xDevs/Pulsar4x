@@ -90,7 +90,7 @@ namespace Pulsar4X.SDL2UI
         {
             var mineralStaticInfo = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList();
             var minerals = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>()?.Minerals;
-            var miningRates = entity.GetDataBlob<MiningDB>()?.ActualMiningRate;
+            var miningRates = entity.HasDataBlob<MiningDB>() ? entity.GetDataBlob<MiningDB>().ActualMiningRate : new ();
             var storage = entity.GetDataBlob<VolumeStorageDB>()?.TypeStores;
 
             Vector2 topSize = ImGui.GetContentRegionAvail();

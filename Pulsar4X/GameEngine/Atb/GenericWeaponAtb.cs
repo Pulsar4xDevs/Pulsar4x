@@ -11,7 +11,7 @@ namespace Pulsar4X.Atb
         public int ReloadAmountPerSec;
         public int AmountPerShot;
         public int MinShotsPerfire;
-        
+
         private GenericWeaponAtb()
         {
         }
@@ -31,7 +31,7 @@ namespace Pulsar4X.Atb
             MinShotsPerfire = (int)minShotsPerfire;
             //WpnType = type;
         }
-        
+
         public GenericWeaponAtb(int magSize, int reloadPerSec, int amountPerShot, int minShotsPerfire)
         {
             InternalMagSize = magSize;
@@ -41,12 +41,17 @@ namespace Pulsar4X.Atb
             //WpnType = type;
         }
 
-        
+
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            
+
         }
-        
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
         public string AtbName()
         {
             return "Generic Weapon";
@@ -56,6 +61,6 @@ namespace Pulsar4X.Atb
         {
             return "";
         }
-        
+
     }
 }

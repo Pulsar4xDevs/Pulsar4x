@@ -13,7 +13,7 @@ namespace Pulsar4X.Atb
     {
 
         //public double SpecificImpulseASL; //maybe future do stuff with planet to space efficencies.
-        
+
         /// <summary>
         /// in m/s
         /// </summary>
@@ -22,7 +22,7 @@ namespace Pulsar4X.Atb
         /// this is a specific mineral/refined materal etc, rather than a cargo type
         /// </summary>
         public string FuelType;
-        
+
         /// <summary>
         /// in kg/s (mass)
         /// </summary>
@@ -35,7 +35,7 @@ namespace Pulsar4X.Atb
             FuelType = fuelType;
             FuelBurnRate = fuelBurnRate;
         }
-        
+
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
@@ -59,7 +59,7 @@ namespace Pulsar4X.Atb
             db.ExhaustVelocity = ExhaustVelocity;
             db.FuelBurnRate += FuelBurnRate;
             db.ThrustInNewtons += ExhaustVelocity * FuelBurnRate;
-            
+
             /*
             var wetmass = parentEntity.GetDataBlob<MassVolumeDB>().Mass;
             ProcessedMaterialSD foo = StaticRefLib.StaticData.CargoGoods.GetMaterials()[FuelType];
@@ -69,7 +69,12 @@ namespace Pulsar4X.Atb
             db.DeltaV = OrbitMath.TsiolkovskyRocketEquation(wetmass, dryMass, ExhaustVelocity);
             */
         }
-        
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
         public string AtbName()
         {
             return "Newton Thrust";

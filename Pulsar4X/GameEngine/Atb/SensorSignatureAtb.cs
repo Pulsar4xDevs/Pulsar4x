@@ -68,7 +68,7 @@ namespace Pulsar4X.Atb
 
             SensorProfileDB _PartSensorProfile = parentEntity.GetDataBlob<SensorProfileDB>();
 
-            if(_PartSensorProfile.EmittedEMSpectra.ContainsKey(PartWaveForm)) 
+            if(_PartSensorProfile.EmittedEMSpectra.ContainsKey(PartWaveForm))
             {
                 _PartSensorProfile.EmittedEMSpectra[PartWaveForm] = _PartSensorProfile.EmittedEMSpectra[PartWaveForm] + PartWaveFormMag;
             }
@@ -77,7 +77,12 @@ namespace Pulsar4X.Atb
 
             parentEntity.SetDataBlob<SensorProfileDB>(_PartSensorProfile);
         }
-        
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
         public string AtbName()
         {
             return "Sensor Signature";

@@ -20,6 +20,12 @@ namespace Pulsar4X.Atb
         {
 
         }
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
         public string AtbName()
         {
             return "Ordnance Payload";
@@ -76,7 +82,7 @@ namespace Pulsar4X.Atb
         {
         }
     }
- 
+
     public class ElectronicsSuite : IComponentDesignAttribute
     {
 
@@ -93,6 +99,11 @@ namespace Pulsar4X.Atb
         }
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
 
         }

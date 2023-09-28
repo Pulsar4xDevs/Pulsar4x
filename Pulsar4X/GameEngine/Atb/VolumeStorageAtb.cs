@@ -37,6 +37,11 @@ public class VolumeStorageAtb : IComponentDesignAttribute
         }
     }
 
+    public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+    {
+
+    }
+
     public string AtbName()
     {
         return "Cargo Volume";

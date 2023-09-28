@@ -51,6 +51,18 @@ namespace Pulsar4X.Datablobs
                 parentEntity.SetDataBlob(new TeamsHousedDB());
         }
 
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+            if (parentEntity.TryGetDatablob<EntityResearchDB>(out var db))
+            {
+                db.Labs.Remove(componentInstance);
+                if(db.Labs.Count == 0)
+                {
+                    parentEntity.RemoveDataBlob<EntityResearchDB>();
+                }
+            }
+        }
+
         public string AtbName()
         {
             return "Research Points";

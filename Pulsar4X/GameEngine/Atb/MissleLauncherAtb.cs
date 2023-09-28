@@ -54,7 +54,7 @@ namespace Pulsar4X.Atb
         public float ToHitChance(Entity launchingEntity, Entity tgtEntity)
         {
             //should change this to 1 or 0 depending if the missile is "in range"
-            //ie can actualy reach the target with the given amount of fuel on board. 
+            //ie can actualy reach the target with the given amount of fuel on board.
             return 1;
         }
 
@@ -77,7 +77,12 @@ namespace Pulsar4X.Atb
                 parentEntity.SetDataBlob(mla);
             }*/
         }
-        
+
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
+        {
+
+        }
+
         public string AtbName()
         {
             return "Missle Launcher";

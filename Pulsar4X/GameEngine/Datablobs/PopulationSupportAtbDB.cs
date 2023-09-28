@@ -6,8 +6,8 @@ using Pulsar4X.Engine;
 namespace Pulsar4X.Datablobs
 {
     /// <summary>
-    /// Provides the ability to support a number of colonists in a population.  
-    /// Dependent on the colony cost. 
+    /// Provides the ability to support a number of colonists in a population.
+    /// Dependent on the colony cost.
     /// Colony cost is infrastructure cost to house 10,000 population
     /// </summary>
     public class PopulationSupportAtbDB : BaseDataBlob, IComponentDesignAttribute
@@ -15,7 +15,7 @@ namespace Pulsar4X.Datablobs
         [JsonProperty]
         // Population capacity at 1.0 colony cost
         // Infrastructure = 10000
-        public int PopulationCapacity { get; internal set; }  
+        public int PopulationCapacity { get; internal set; }
 
         public PopulationSupportAtbDB() { }
 
@@ -31,21 +31,16 @@ namespace Pulsar4X.Datablobs
             return new PopulationSupportAtbDB(PopulationCapacity);
         }
 
-        public void OnComponentInstantiation(Entity component)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public void OnComponentInstallation(Entity ship, ComponentInstance component)
         {
             throw new System.NotImplementedException();
         }
 
-        public void OnComponentDeInstalation(Entity ship, Entity component)
+        public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            throw new System.NotImplementedException();
+
         }
-        
+
         public string AtbName()
         {
             return "Population Support";

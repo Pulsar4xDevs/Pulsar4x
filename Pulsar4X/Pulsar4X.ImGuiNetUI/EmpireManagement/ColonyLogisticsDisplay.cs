@@ -134,7 +134,10 @@ namespace Pulsar4X.SDL2UI
         public void Display()
         {
             if(_volStorageDB == null || _logisticsDB == null)
+            {
                 DisplayDisabledMessage();
+                return;
+            }
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
             if(ImGui.BeginChild("LogisticsHeader", new Vector2(topSize.X, 28f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))

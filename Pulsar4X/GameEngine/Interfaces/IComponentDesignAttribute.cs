@@ -13,7 +13,7 @@ namespace Pulsar4X.Interfaces
     {
         //void OnComponentInstantiation(Entity component);
         void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance);
-        //void OnComponentDeInstalation(Entity ship, Entity component);
+        void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance);
 
         string AtbName();
 

@@ -7,6 +7,8 @@ using Pulsar4X.Interfaces;
 using Pulsar4X.Engine.Industry;
 using Pulsar4X.Components;
 using Pulsar4X.Engine.Designs;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -58,6 +60,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 var componentInstance = (ComponentInstance)cargoType;
                                 DisplayHelpers.DescriptiveTooltip(cargoType.Name, componentInstance.Design.ComponentType, componentInstance.Design.Description);
+                                AddContextMenu(storage, componentInstance, uiState);
                             }
                             else if(cargoType is ComponentDesign)
                             {
@@ -89,6 +92,50 @@ namespace Pulsar4X.SDL2UI
                 }
                 ImGui.PopID();
             }
+        }
+
+        private static void AddContextMenu(VolumeStorageDB volumeStorageDB, ComponentInstance component, GlobalUIState uiState)
+        {
+            ImGui.PushID(component.Design.UniqueID.ToString());
+            if(ImGui.BeginPopupContextItem("###" + component.Design.UniqueID))
+            {
+                ImGui.Text(component.Name);
+                ImGui.Separator();
+
+                bool canInstall = false;
+                if(volumeStorageDB.OwningEntity.HasDataBlob<ColonyInfoDB>()
+                    && component.Design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation))
+                    {
+                        canInstall = true;
+                    }
+                else if(volumeStorageDB.OwningEntity.HasDataBlob<ShipInfoDB>()
+                    && component.Design.ComponentMountType.HasFlag(ComponentMountType.ShipComponent))
+                    {
+                        canInstall = true;
+                    }
+
+                if(canInstall && !volumeStorageDB.TypeStores.ContainsKey(component.CargoTypeID))
+                {
+                    canInstall = false;
+                }
+
+                if(canInstall && ImGui.MenuItem("Install"))
+                {
+                    var storageOrder = RemoveComponentFromStorageOrder.Create(component.ParentEntity, component, 1);
+                    uiState.Game.OrderHandler.HandleOrder(storageOrder);
+
+                    var installOrder = InstallComponentInstanceOrder.Create(component.ParentEntity, component);
+                    uiState.Game.OrderHandler.HandleOrder(installOrder);
+                }
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
+                if(ImGui.MenuItem("Destroy"))
+                {
+
+                }
+                ImGui.PopStyleColor();
+                ImGui.EndPopup();
+            }
+            ImGui.PopID();
         }
     }
 }

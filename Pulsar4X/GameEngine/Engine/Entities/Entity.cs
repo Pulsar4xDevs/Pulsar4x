@@ -437,6 +437,19 @@ namespace Pulsar4X.Engine
             }
         }
 
+        public void RemoveComponent(ComponentInstance instance)
+        {
+            instance.ParentEntity = this;
+            var instancesDB = GetDataBlob<ComponentInstancesDB>();
+
+            foreach (var atbkvp in instance.Design.AttributesByType)
+            {
+                atbkvp.Value.OnComponentUninstallation(this, instance);
+            }
+
+            instancesDB.RemoveComponentInstance(instance);
+        }
+
         /// <summary>
         /// Used to transfer an entity between managers.
         /// </summary>
