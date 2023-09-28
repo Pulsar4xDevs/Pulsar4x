@@ -55,7 +55,6 @@ namespace Pulsar4X.Engine
     /// </summary>
     public class WarpMoveProcessor : IHotloopProcessor
     {
-        //maybe shouldnt do this, however I can't currently see a reason we'd ever want to run with two different static data sets.
         private static GameSettings _gameSettings;
 
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
@@ -69,7 +68,7 @@ namespace Pulsar4X.Engine
             _gameSettings = game.Settings;
         }
 
-        public static void StartNonNewtTranslation(Entity entity)
+        public static bool StartNonNewtTranslation(Entity entity)
         {
             var moveDB = entity.GetDataBlob<WarpMovingDB>();
             var warpDB = entity.GetDataBlob<WarpAbilityDB>();
@@ -88,7 +87,7 @@ namespace Pulsar4X.Engine
             var t = totalDistance / warpDB.MaxSpeed;
             var tcost = t * warpDB.BubbleSustainCost;
             double estored = powerDB.EnergyStored[warpDB.EnergyType];
-
+            bool canStart = false;
             if (creationCost <= estored)
             {
 
@@ -102,9 +101,11 @@ namespace Pulsar4X.Engine
                 powerDB.AddDemand(-creationCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
                 powerDB.AddDemand(warpDB.BubbleSustainCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
                 //powerDB.EnergyStore[warpDB.EnergyType] = estore;
-
+                moveDB.HasStarted = true;
+                canStart = true;
             }
 
+            return canStart;
         }
 
         /// <summary>
@@ -117,6 +118,9 @@ namespace Pulsar4X.Engine
 
             var manager = entity.Manager;
             var moveDB = entity.GetDataBlob<WarpMovingDB>();
+            if (!moveDB.HasStarted & !StartNonNewtTranslation(entity))
+                return;
+
             var warpDB = entity.GetDataBlob<WarpAbilityDB>();
 
             var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;

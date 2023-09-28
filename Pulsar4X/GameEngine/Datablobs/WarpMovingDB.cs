@@ -17,6 +17,9 @@ namespace Pulsar4X.Datablobs
     public class WarpMovingDB : BaseDataBlob
     {
         [JsonProperty]
+        public bool HasStarted { get; internal set; } = false;
+
+        [JsonProperty]
         public DateTime LastProcessDateTime = new DateTime();
 
         [JsonProperty]
@@ -38,7 +41,7 @@ namespace Pulsar4X.Datablobs
         public DateTime PredictedExitTime { get; internal set; }
 
         [JsonProperty]
-        internal Vector3 CurrentNonNewtonionVectorMS { get; set; }
+        public Vector3 CurrentNonNewtonionVectorMS { get; internal set; }
 
         /// <summary>
         /// m/s
@@ -122,6 +125,7 @@ namespace Pulsar4X.Datablobs
             IsAtTarget = db.IsAtTarget;
             TargetEntity = db.TargetEntity;
 
+            HasStarted = db.HasStarted;
             TargetPositionDB = db.TargetPositionDB;
 
         }

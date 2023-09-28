@@ -198,7 +198,7 @@ namespace Pulsar4X.SDL2UI
                         if (Entity.TryGetDatablob<WarpMovingDB>(out WarpMovingDB movedb))
                         {
                             ImGui.Text("Warping " + Stringify.Velocity(movedb.CurrentNonNewtonionVectorMS.Length()));
-                            
+
                         }
                         else
                             ImGui.Text("Orbiting: ");
