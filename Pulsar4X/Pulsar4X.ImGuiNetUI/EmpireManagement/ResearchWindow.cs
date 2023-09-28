@@ -195,10 +195,9 @@ namespace Pulsar4X.SDL2UI
         }
         private void DisplayTechs()
         {
-            if(ImGui.BeginTable("ResearchableTechs", 2, ImGuiTableFlags.BordersInnerV))
+            if(ImGui.BeginTable("ResearchableTechs", 1, ImGuiTableFlags.BordersInnerV))
             {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1.5f);
-                ImGui.TableSetupColumn("Level", ImGuiTableColumnFlags.None, 0.25f);
+                ImGui.TableSetupColumn("Name");
                 ImGui.TableHeadersRow();
 
                 for (int i = 0; i < _researchableTechs.Count; i++)
@@ -208,29 +207,39 @@ namespace Pulsar4X.SDL2UI
                         ImGui.TableNextColumn();
 
                         float frac = (float)_researchableTechs[i].ResearchProgress / _researchableTechs[i].ResearchCost;
-                        var size = ImGui.GetTextLineHeight();
+                        var size = ImGui.GetContentRegionAvail();
+                        var height = ImGui.GetTextLineHeight();
                         var pos = ImGui.GetCursorPos();
-                        ImGui.ProgressBar(frac, new Vector2(245, size), "");
-                        if (ImGui.IsItemHovered())
+                        ImGui.ProgressBar(frac, new Vector2(size.X, height), "");
+                        if (ImGui.IsItemHovered()) 
                         {
-                            DisplayHelpers.DescriptiveTooltip(_researchableTechs[i].Name, _uiState.Game.TechCategories[_researchableTechs[i].Category].Name, _researchableTechs[i].Description, "Max Level: " + _researchableTechs[i].MaxLevel);
+                            string metaInfo = "";
+                            if(_researchableTechs[i].Unlocks.ContainsKey(_researchableTechs[i].Level + 1))
+                            {
+                                metaInfo += "Unlocks:\n";
+                                foreach(var item in _researchableTechs[i].Unlocks[_researchableTechs[i].Level + 1])
+                                {
+                                    metaInfo += _factionData.GetName(item) + "\n";
+                                }
+                            }
+                            if(_researchableTechs[i].MaxLevel > 1)
+                            {
+                                metaInfo += "\nMaximum: " + _researchableTechs[i].MaxLevelName();
+                            }
+
+                            DisplayHelpers.DescriptiveTooltip(
+                                _researchableTechs[i].DisplayName(), 
+                                _uiState.Game.TechCategories[_researchableTechs[i].Category].Name, 
+                                _researchableTechs[i].Description, 
+                                metaInfo);
                         }
                         ImGui.SetCursorPos(new Vector2(pos.X + 2f, pos.Y));
-                        ImGui.Text(_researchableTechs[i].Name);
+                        ImGui.Text(_researchableTechs[i].DisplayName());
 
                         if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(0))
                         {
                             if (_selectedTeam > -1)
                                 ResearchProcessor.AssignProject(_scienceTeams[_selectedTeam].scientist, _researchableTechs[i].UniqueID);
-                        }
-                        ImGui.TableNextColumn();
-                        if(_researchableTechs[i].MaxLevel > 1)
-                        {
-                            ImGui.Text(_researchableTechs[i].Level.ToString());
-                        }
-                        else
-                        {
-                            ImGui.Text("-");
                         }
                     }
                 }

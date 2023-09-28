@@ -19,7 +19,7 @@ namespace Pulsar4X.SDL2UI
         public static ImGuiTableFlags TableFlags = ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg;
         public static float LeftColumnWidth = 204f;
         public static float LeftColumnWidthLg = 256f;
-        public static Vector2 ToolTipsize = new Vector2(384, 0);
+        public static Vector2 ToolTipsize = new Vector2(426, 0);
         public static Vector2 Indent = new Vector2(2, 2);
     }
 }

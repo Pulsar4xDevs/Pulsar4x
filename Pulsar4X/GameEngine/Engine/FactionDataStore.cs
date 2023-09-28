@@ -141,5 +141,23 @@ namespace Pulsar4X.Engine
                 }
             }
         }
+
+        public string GetName(string id)
+        {
+            if(LockedArmor.ContainsKey(id)) return CargoGoods[LockedArmor[id].ResourceID].Name;
+            if(Armor.ContainsKey(id)) return CargoGoods[Armor[id].ResourceID].Name;
+            if(LockedCargoTypes.ContainsKey(id)) return LockedCargoTypes[id].Name;
+            if(CargoTypes.ContainsKey(id)) return CargoTypes[id].Name;
+            if(LockedComponentTemplates.ContainsKey(id)) return LockedComponentTemplates[id].Name;
+            if(ComponentTemplates.ContainsKey(id)) return ComponentTemplates[id].Name;
+            if(LockedIndustryTypes.ContainsKey(id)) return LockedIndustryTypes[id].Name;
+            if(IndustryTypes.ContainsKey(id)) return IndustryTypes[id].Name;
+            if(LockedTechs.ContainsKey(id)) return LockedTechs[id].Name;
+            if(Techs.ContainsKey(id)) return Techs[id].Name;
+            if(LockedCargoGoods.Contains(id)) return LockedCargoGoods[id].Name;
+            if(CargoGoods.Contains(id)) return CargoGoods[id].Name;
+
+            return string.Empty;
+        }
     }
 }

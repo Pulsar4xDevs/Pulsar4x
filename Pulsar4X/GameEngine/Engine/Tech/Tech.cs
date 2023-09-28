@@ -25,5 +25,8 @@ namespace Pulsar4X.Engine
             Category = blueprint.Category;
             Unlocks = blueprint.Unlocks;
         }
+
+        public string DisplayName() => MaxLevel > 1 ? $"{Name} {Level + 1}" : Name;
+        public string MaxLevelName() => MaxLevel > 1 ? $"{Name} {MaxLevel}" : Name;
     }
 }

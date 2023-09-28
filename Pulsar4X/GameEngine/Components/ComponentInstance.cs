@@ -148,9 +148,6 @@ namespace Pulsar4X.Components
             Name = instance.Name;
         }
 
-
-        public float HealthPercent()
-        { return HTKRemaining / HTKMax; }
-
+        public float HealthPercent() => HTKRemaining / HTKMax;
     }
 }
