@@ -35,7 +35,9 @@
       "IndustryTypeID": "refining",
       "WealthCost": 3,
       "OutputAmount": 2,
-      "ExhaustVelocityFormula": "3510"
+      "Formulas": {
+        "ExhaustVelocity": "3510"
+      }
     }
   },
   {
@@ -54,7 +56,9 @@
       "IndustryTypeID": "refining",
       "WealthCost": 3,
       "OutputAmount": 2,
-      "ExhaustVelocityFormula": "3615"
+      "Formulas": {
+        "ExhaustVelocity": "3615"
+      }
     }
   },
   {
@@ -73,7 +77,9 @@
       "IndustryTypeID": "refining",
       "WealthCost": 3,
       "OutputAmount": 2,
-      "ExhaustVelocityFormula": "4462"
+      "Formulas": {
+        "ExhaustVelocity": "4462"
+      }
     }
   },
   {
@@ -127,6 +133,24 @@
       "IndustryTypeID": "refining",
       "WealthCost": 0,
       "OutputAmount": 100
+    }
+  },
+  {
+    "Type": "ProcessedMaterial",
+    "Payload": {
+      "UniqueID": "sorium-fuel",
+      "Name": "Sorium Fuel",
+      "Description": "Fuel for SpaceShips",
+      "CargoTypeID": "fuel-storage",
+      "MassPerUnit": 1,
+      "VolumePerUnit": 0.001,
+      "MineralsRequired": {
+        "sorium": 1
+      },
+      "IndustryPointCosts": 10,
+      "IndustryTypeID": "refining",
+      "WealthCost": 0,
+      "OutputAmount": 1
     }
   }
 ]

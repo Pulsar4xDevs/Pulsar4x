@@ -2,7 +2,8 @@
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
 using SDL2;
 using Point = SDL2.SDL.SDL_Point;
@@ -19,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         internal int MouseFrameIncrementY;
 
         internal bool IsPinnedToEntity { get; private set; }
-        internal Guid PinnedEntityGuid;
+        internal string PinnedEntityGuid;
         PositionDB _entityPosDB;
         internal Orbital.Vector3 _camWorldPos_m = new Orbital.Vector3();
         public Orbital.Vector3 CameraWorldPosition_AU

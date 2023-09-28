@@ -4,12 +4,13 @@ using ImGuiNET;
 using ImGuiSDL2CS;
 using System.Numerics;
 using Vector2 = System.Numerics.Vector2;
+using Pulsar4X.Engine;
 
 namespace Pulsar4X.SDL2UI
 {
     public class TimeControl : PulsarGuiWindow
     {
-        ECSLib.MasterTimePulse _timeloop => _uiState.Game.GamePulse;
+        MasterTimePulse _timeloop => _uiState.Game.TimePulse;
 
         bool _isPaused = true;
         int _timeSpanValue = 1;

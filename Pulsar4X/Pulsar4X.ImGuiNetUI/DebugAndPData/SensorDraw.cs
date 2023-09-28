@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine.Sensors;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -18,15 +21,15 @@ namespace Pulsar4X.SDL2UI
         private int _targetIndex = -1;
         private Entity _targetEntity;
         private SensorProfileDB _targetSensorProfile;
-        private SensorProcessorTools.SensorReturnValues[] _targetDetectionQuality;
+        private SensorReturnValues[] _targetDetectionQuality;
 
         private  Dictionary<EMWaveForm, double> _attenuatedWaveForms;
         
         private SystemState _selectedStarSysState;
         private StarSystem _selectedStarSys => _selectedStarSysState.StarSystem;
 
-        private SensorReceverAtbDB[] _selectedReceverAtb;
-        private SensorReceverAbility[] _selectedReceverInstanceAbility;
+        private SensorReceiverAtbDB[] _selectedReceverAtb;
+        private SensorReceiverAbility[] _selectedReceverInstanceAbility;
         
         
         private ImDrawListPtr _draw_list;
@@ -334,20 +337,20 @@ namespace Pulsar4X.SDL2UI
 
             void SetSensorData()
             {                            
-                if (_selectedEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceverAtbDB>(out var recevers))
+                if (_selectedEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtbDB>(out var recevers))
                 {
                     _receverDat = new WaveDrawData();
                     _receverDat.HasAtn = false;
                     var points = _receverDat.Points = new (System.Numerics.Vector2 p0, System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 p3)[recevers.Count];
                     _receverDat.IsWaveDrawn = new (bool drawSrc, bool drawAtn)[recevers.Count];
                     
-                    _selectedReceverAtb = new SensorReceverAtbDB[recevers.Count];
-                    _selectedReceverInstanceAbility = new SensorReceverAbility[recevers.Count];
+                    _selectedReceverAtb = new SensorReceiverAtbDB[recevers.Count];
+                    _selectedReceverInstanceAbility = new SensorReceiverAbility[recevers.Count];
                     int i = 0;
                     foreach (var recever in recevers)
                     {
-                        _selectedReceverAtb[i] = recever.Design.GetAttribute<SensorReceverAtbDB>();
-                        _selectedReceverInstanceAbility[i] = recever.GetAbilityState<SensorReceverAbility>();
+                        _selectedReceverAtb[i] = recever.Design.GetAttribute<SensorReceiverAtbDB>();
+                        _selectedReceverInstanceAbility[i] = recever.GetAbilityState<SensorReceiverAbility>();
                         
                         float low = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthMin_nm;
                         float mid = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthAverage_nm;
@@ -400,13 +403,13 @@ namespace Pulsar4X.SDL2UI
 
                 _reflectDat = MakeTargetWavDat(reflected, range);
                 _emmittrDat = MakeTargetWavDat(emitted, range);
-                _attenuatedWaveForms =  SensorProcessorTools.AttenuatedForDistance(_targetSensorProfile, range);
+                _attenuatedWaveForms =  SensorTools.AttenuatedForDistance(_targetSensorProfile, range);
                 //_detectedDat = _selectedReceverAtb[0].
 
-                _targetDetectionQuality = new SensorProcessorTools.SensorReturnValues[_selectedReceverAtb.Length];
+                _targetDetectionQuality = new SensorReturnValues[_selectedReceverAtb.Length];
                 for (int i = 0; i < _selectedReceverAtb.Length; i++)
                 {
-                    _targetDetectionQuality[i] = SensorProcessorTools.DetectonQuality(_selectedReceverAtb[i], _attenuatedWaveForms);
+                    _targetDetectionQuality[i] = SensorTools.DetectonQuality(_selectedReceverAtb[i], _attenuatedWaveForms);
                 }
 
                 _detectedDat = MakeTargetWavDat(_attenuatedWaveForms, range);
@@ -428,7 +431,7 @@ namespace Pulsar4X.SDL2UI
                     float mid = (float)waveformkvp.Key.WavelengthAverage_nm;
                     float high = (float)waveformkvp.Key.WavelengthMax_nm;
                     float magnatude = (float)waveformkvp.Value;
-                    float atnmag = (float)SensorProcessorTools.AttenuationCalc(magnatude, range);
+                    float atnmag = (float)SensorTools.AttenuationCalc(magnatude, range);
                     if (float.IsInfinity(magnatude))
                         magnatude = float.MaxValue;
                     

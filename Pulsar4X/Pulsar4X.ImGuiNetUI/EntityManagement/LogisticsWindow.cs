@@ -4,14 +4,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
-
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine.Orders;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
 {
     public class LogiShipWindow : PulsarGuiWindow
     {
-        private System.Guid _factionID;
+        private string _factionID;
         private EntityState _entityState;
         private Entity _selectedEntity;
         private LogiShipperDB _tradeshipDB;
@@ -24,7 +26,7 @@ namespace Pulsar4X.SDL2UI
         {
             SetEntity(entity);
         }
-        internal static LogiShipWindow GetInstance(StaticDataStore staticData, EntityState state) {
+        internal static LogiShipWindow GetInstance(FactionDataStore staticData, EntityState state) {
 
             LogiShipWindow instance;
             if (!_uiState.LoadedWindows.ContainsKey(typeof(LogiShipWindow)))
@@ -95,7 +97,7 @@ namespace Pulsar4X.SDL2UI
                         double totalVol = 0;
                         foreach (var type in _cargoDB.TypeStores)
                         {
-                            var typename = StaticRefLib.StaticData.CargoTypes[type.Key].Name;
+                            var typename = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoTypes[type.Key].Name;
                             var typeVol = type.Value.MaxVolume;
                             totalVol += typeVol;
                             var currentVal = _tradeshipDB.TradeSpace[type.Key];
@@ -120,9 +122,9 @@ namespace Pulsar4X.SDL2UI
                             _changes.MaxMass = maxMassVal;
                         }
 
-
-                        var maxdv = OrbitMath.GetWetDV(_selectedEntity, maxMassVal);
-                        var dv = OrbitMath.GetDV(_selectedEntity, maxMassVal);
+                        var cargoLibrary = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+                        var maxdv = OrbitMath.GetWetDV(_selectedEntity, maxMassVal, cargoLibrary);
+                        var dv = OrbitMath.GetDV(_selectedEntity, maxMassVal, cargoLibrary);
                         ImGui.Text($"Max Dv:  {Stringify.Velocity(maxdv)}");
                         ImGui.Text($"Max Dv with current fuel: {Stringify.Velocity(dv)}");
                         

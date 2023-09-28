@@ -4,8 +4,15 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
-
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Designs;
+using Pulsar4X.Components;
+using Pulsar4X.Blueprints;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Extensions;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Atb;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -17,7 +24,7 @@ namespace Pulsar4X.SDL2UI
 
         private string[] _exsistingDesigns;
         private List<ShipDesign> ExistingShipDesigns;
-        private Guid SelectedExistingDesignID = Guid.Empty;
+        private string SelectedExistingDesignID = String.Empty;
         private bool SelectedDesignObsolete;
         bool _imagecreated = false;
 
@@ -35,11 +42,11 @@ namespace Pulsar4X.SDL2UI
         private IntPtr _shipImgPtr;
 
         //TODO: armor, temporary, maybe density should be an "equvelent" and have a different mass? (damage calcs use density for penetration)
-        List<ArmorSD> _armorSelection = new List<ArmorSD>();
+        List<ArmorBlueprint> _armorSelection = new List<ArmorBlueprint>();
         private string[] _armorNames;
         private int _armorIndex = 0;
         private float _armorThickness = 10;
-        private ArmorSD _armor;
+        private ArmorBlueprint _armor;
         private double _armorMass = 0;
 
         private int rawimagewidth;
@@ -129,7 +136,7 @@ namespace Pulsar4X.SDL2UI
                 ShowNoDesigns = true;
                 return;
             }
-            if(SelectedExistingDesignID == Guid.Empty && ExistingShipDesigns.Count > 0)
+            if(SelectedExistingDesignID == String.Empty && ExistingShipDesigns.Count > 0)
                 Select(ExistingShipDesigns[0]);
 
             ShowNoDesigns = false;
@@ -137,24 +144,24 @@ namespace Pulsar4X.SDL2UI
 
         void RefreshArmor()
         {
-            _armorNames = new string[StaticRefLib.StaticData.ArmorTypes.Count];
+            _armorNames = new string[_uiState.Faction.GetDataBlob<FactionInfoDB>().Data.Armor.Count];
             int i = 0;
-            foreach (var kvp in StaticRefLib.StaticData.ArmorTypes)
+            foreach (var kvp in _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.Armor)
             {
-                var armorMat = _uiState.Game.StaticData.GetICargoable(kvp.Key);
+                var armorMat = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(kvp.Value.ResourceID);
                 _armorSelection.Add(kvp.Value);
 
                 _armorNames[i]= armorMat.Name;
                 i++;
             }
             //TODO: bleed over from mod data to get a default armor...
-            _armor = StaticRefLib.StaticData.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
+            _armor = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.Armor["plastic-armor"];
             _armorThickness = 3;
         }
 
         void Select(ShipDesign design)
         {
-            SelectedExistingDesignID = design.ID;
+            SelectedExistingDesignID = design.UniqueID;
             SelectedDesignName = ImGuiSDL2CSHelper.BytesFromString(design.Name, 32);
             SelectedComponents = design.Components;
             SelectedDesignObsolete = design.IsObsolete;
@@ -247,7 +254,7 @@ namespace Pulsar4X.SDL2UI
 
                     if(design.IsObsolete)
                     {
-                        SelectedExistingDesignID = Guid.Empty;
+                        SelectedExistingDesignID = String.Empty;
                     }
 
                     RefreshExistingClasses();
@@ -269,16 +276,16 @@ namespace Pulsar4X.SDL2UI
                 foreach(var design in ExistingShipDesigns)
                 {
                     string name = design.Name;
-                    if (ImGui.Selectable(name + "###existing-design-" + design.ID, design.ID == SelectedExistingDesignID))
+                    if (ImGui.Selectable(name + "###existing-design-" + design.UniqueID, design.UniqueID == SelectedExistingDesignID))
                     {
                         Select(design);
                     }
                     if(ImGui.BeginPopupContextItem())
                     {
-                        if(ImGui.MenuItem("Delete###delete-" + design.ID))
+                        if(ImGui.MenuItem("Delete###delete-" + design.UniqueID))
                         {
-                            _factionInfoDB.ShipDesigns.Remove(design.ID);
-                            SelectedExistingDesignID = Guid.Empty;
+                            _factionInfoDB.ShipDesigns.Remove(design.UniqueID);
+                            SelectedExistingDesignID = String.Empty;
                             RefreshExistingClasses();
                         }
                         ImGui.EndPopup();
@@ -307,7 +314,7 @@ namespace Pulsar4X.SDL2UI
                     IsValid = false
                 };
                 RefreshExistingClasses();
-                SelectedExistingDesignID = design.ID;
+                SelectedExistingDesignID = design.UniqueID;
             }
         }
 
@@ -647,8 +654,8 @@ namespace Pulsar4X.SDL2UI
             double wec = 0;
             double egen = 0;
             double estor = 0;
-            Guid thrusterFuel = Guid.Empty;
-            Dictionary<Guid, double> cstore = new Dictionary<Guid, double>();
+            string thrusterFuel = String.Empty;
+            Dictionary<string, double> cstore = new Dictionary<string, double>();
 
             foreach (var component in SelectedComponents)
             {
@@ -698,7 +705,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            _armorMass = ShipDesign.GetArmorMass(_profile);
+            _armorMass = ShipDesign.GetArmorMass(_profile, _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods);
             mass += (long)Math.Round(_armorMass);
 
             _massDry = mass;
@@ -711,9 +718,9 @@ namespace Pulsar4X.SDL2UI
             _egen = egen;
             _estor = estor;
             //double fuelMass = 0;
-            if (thrusterFuel != Guid.Empty)
+            if (thrusterFuel != String.Empty)
             {
-                _fuelType = StaticRefLib.StaticData.GetICargoable(thrusterFuel);
+                _fuelType = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(thrusterFuel);
                 if (cstore.ContainsKey(_fuelType.CargoTypeID))
                 {
                     _fuelStoreVolume = cstore[_fuelType.CargoTypeID];

@@ -1,0 +1,132 @@
+[
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "reactor",
+      "Name": "Reactor",
+      "Formulas": {
+        "Description": "'A non refuelable reactor, Generates power for a ship'",
+        "Mass": "Ability('Mass')",
+        "Volume": "Ability('Mass')",
+        "HTK": "Max(1, [Mass] / 100)",
+        "CrewReq": "[Mass]",
+        "ResearchCost": "[Mass] * 0.5",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 0.5",
+        "plastic": "[Mass] * 0.4",
+        "copper": "[Mass] * 0.1",
+        "fissile-fuels": "Ability('Fuel Consumption') * 3600 * Ability('Lifetime')"
+      },
+      "ComponentType": "Facility",
+      "MountType": "ShipComponent, ShipCargo, Fighter",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Attributes": [
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the reactor'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "25000",
+          "MinFormula": "1000",
+          "StepFormula": "1",
+          "AttributeFormula": "1500"
+        },
+        {
+          "Name": "Power Output",
+          "Units": "Kw",
+          "DescriptionFormula": "'in Kw'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "50 * [Mass]"
+        },
+        {
+          "Name": "Fuel Consumption",
+          "Units": "kg/s",
+          "DescriptionFormula": "'Fuel Consumption kg per second at Max Output'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Power Output') * 0.0000001"
+        },
+        {
+          "Name": "Lifetime",
+          "Units": "s",
+          "DescriptionFormula": "'How long this reactor will be useful for'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "87600",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "8760"
+        },
+        {
+          "Name": "DB",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs('fissile-fuels', Ability('Fuel Consumption'), 'electricity', Ability('Power Output'), Ability('Lifetime'))",
+          "AttributeType": "Pulsar4X.Atb.EnergyGenerationAtb"
+        },
+        {
+          "Name": "Sensor Signature",
+          "Units": "unknown",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(1700, Ability('Power Output') * 0.1 * [Mass])",
+          "AttributeType": "Pulsar4X.Atb.SensorSignatureAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "battery-bank",
+      "Name": "Battery Bank",
+      "Formulas": {
+        "Description": "'Stores power for a ship'",
+        "Mass": "Ability('Mass')",
+        "Volume": "Ability('Mass')",
+        "HTK": "Max(1, [Mass] / 100)",
+        "CrewReq": "[Mass]",
+        "ResearchCost": "[Mass] * 0.25",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "plastic": "[Mass] * 0.25",
+        "copper": "[Mass] * 0.25",
+        "lithium": "[Mass] * 0.5"
+      },
+      "ComponentType": "Energy Storage",
+      "MountType": "ShipComponent, ShipCargo, Fighter",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Attributes": [
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass of the bank'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "25000",
+          "MinFormula": "1000",
+          "StepFormula": "1",
+          "AttributeFormula": "1500"
+        },
+        {
+          "Name": "Energy Storage",
+          "Units": "KJ",
+          "DescriptionFormula": "'Energy capacity of this part'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Mass') * 500"
+        },
+        {
+          "Name": "DB",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs('electricity', Ability('Energy Storage'))",
+          "AttributeType": "Pulsar4X.Atb.EnergyStoreAtb"
+        }
+      ]
+    }
+  }
+]

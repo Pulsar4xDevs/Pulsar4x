@@ -1,0 +1,748 @@
+[
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "mine",
+      "Name": "Mine",
+      "Formulas": {
+        "Description": "Mines Resources",
+        "Mass": "25000",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "50000",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "gallicite": "60",
+        "corundium": "60"
+      },
+      "ComponentType": "Facility",
+      "MountType": "ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "MiningAmount",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "GuidDictionary": {
+            "hydrocarbons": "10",
+            "iron": "10",
+            "aluminium": "10",
+            "copper": "10",
+            "lithium": "10",
+            "chromium": "10",
+            "fissionables": "10",
+            "sorium": "10",
+            "duranium": "10",
+            "neutronium": "10",
+            "corbomite": "10",
+            "tritanium": "10",
+            "boronide": "10",
+            "uridium": "10",
+            "corundium": "10",
+            "mercassium": "10",
+            "vendarite": "10",
+            "gallicite": "10"
+          },
+          "AttributeFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Datablobs.MineResourcesAtbDB"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "university",
+      "Name": "University",
+      "Formulas": {
+        "Description": "Research new technologies",
+        "Mass": "Ability('Size') * 100",
+        "Volume": "Ability('Size') * 0.1",
+        "HTK": "[Mass]",
+        "CrewReq": "Ability('Size')",
+        "ResearchCost": "10",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass] / 2"
+      },
+      "ResourceCost": {
+        "duranium": "Ability('Size') / 100 * 60",
+        "mercassium": "Ability('Size') / 100 * 60"
+      },
+      "ComponentType":"Facility",
+      "MountType": "ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Size",
+          "DescriptionFormula": "'Size of the university'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "50000",
+          "MinFormula": "500",
+          "StepFormula": "100",
+          "AttributeFormula": "1000"
+        },
+        {
+          "Name": "Research Points",
+          "DescriptionFormula": "'Research points produced per update'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Size') * 0.01"
+        },
+        {
+          "Name": "Bonus",
+          "GuiHint": "GuiTechCategorySelection",
+          "GuidDictionary": {},
+          "AttributeFormula": "GuidString('tech-category-power-propulsion')"
+        },
+        {
+          "Name": "RP Amount Per EconTick",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Research Points'))",
+          "AttributeType": "Pulsar4X.Datablobs.ResearchPointsAtbDB"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "refinery",
+      "Name": "Refinery",
+      "Formulas": {
+        "Description": "An installation designed to refine base minerals into materials",
+        "Mass": "Ability('Size')",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "[Mass] * 0.1",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.05",
+        "copper": "[Mass] * 0.005"
+      },
+      "ComponentType": "Facility",
+      "MountType": "ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Size",
+          "DescriptionFormula": "'Size of this installation'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "10000",
+          "MinFormula": "100",
+          "StepFormula": "50",
+          "AttributeFormula": "5000"
+        },
+        {
+          "Name": "Refinery Points",
+          "DescriptionFormula": "'Refines at a rate of'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Size') * 0.1"
+        },
+        {
+          "Name": "RefineAbilitys",
+          "DescriptionFormula": "''",
+          "GuiHint": "None",
+          "GuidDictionary": {
+            "refining": "Ability('Refinery Points')"
+          },
+          "AttributeFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Atb.IndustryAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "factory",
+      "Name": "Factory",
+      "Formulas": {
+        "Description": "Constructs Facilities, Fighters, Ammo and Components",
+        "Mass": "Ability('Size') * 1000",
+        "Volume": "Ability('Size') * 1.5",
+        "HTK": "[Mass]",
+        "CrewReq": "Ability('Size') * 5",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "Ability('Size') * 20"
+      },
+      "ResourceCost": {
+        "iron": "[Mass] * 0.05",
+        "copper": "[Mass] * 0.005",
+        "aluminium": "[Mass] * 0.005",
+        "plastic": "[Mass] * 0.001"
+      },
+      "ComponentType": "Facility",
+      "MountType": "ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Size",
+          "DescriptionFormula": "'Size of the factory, larger factories produce more construction points'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "TechData('tech-factory-max-size')",
+          "MinFormula": "100",
+          "StepFormula": "50",
+          "AttributeFormula": "500"
+        },
+        {
+          "Name": "Component Construction Points",
+          "DescriptionFormula": "'Daily production towards components'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Size') * 0.1"
+        },            {
+          "Name": "Installation Construction Points",
+          "DescriptionFormula": "'Daily production towards installations'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Size') * 0.1"
+        },
+        {
+          "Name": "Fighter Construction Points",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "0"
+        },
+        {
+          "Name": "Ordnance Construction Points",
+          "DescriptionFormula": "'Daily production towards ordnance'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Ability('Size') * 0.1"
+        },
+        {
+          "Name": "Construction Points",
+          "GuiHint": "None",
+          "GuidDictionary": {
+            "component-construction": "Ability('Component Construction Points')",
+            "installation-construction": "Ability('Installation Construction Points')",
+            "ordnance-construction": "Ability('Ordnance Construction Points')"
+          },
+          "AttributeFormula": "AtbConstrArgs([GuidDict])",
+          "AttributeType": "Pulsar4X.Atb.IndustryAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "shipyard",
+      "Name": "Ship Yard",
+      "Formulas": {
+        "Description": "Construction and launch facilities for ships",
+        "Mass": "500000",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "1000000",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "60",
+        "copper": "60"
+      },
+      "ComponentType":"Facility",
+      "MountType": "ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Component Construction Points",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "1000"
+        },
+        {
+          "Name": "Ship Assembly Points",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "1000"
+        },
+        {
+          "Name": "Slip Size",
+          "DescriptionFormula": "'Maximum volume of ship size this slip can work on'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "10000"
+        },
+        {
+          "Name": "db",
+          "GuiHint": "None",
+          "GuidDictionary": {
+            "component-construction": "Ability('Component Construction Points')",
+            "ship-assembly": "Ability('Ship Assembly Points')"
+          },
+          "AttributeFormula": "AtbConstrArgs([GuidDict], Ability('Slip Size'))",
+          "AttributeType": "Pulsar4X.Atb.IndustryAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "logistics-office",
+      "Name": "Logistics Office",
+      "Formulas": {
+        "Description": "Handles import and Export of goods",
+        "Mass": "5000",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "10",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "60",
+        "copper": "60"
+      },
+      "ComponentType":"Facility",
+      "MountType": "ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Logistic Capacity",
+          "DescriptionFormula": "'How many different items this office can handle'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "100",
+          "MinFormula": "5",
+          "StepFormula": "5",
+          "AttributeFormula": "5"
+        },
+        {
+          "Name": "db",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Logistic Capacity'))",
+          "AttributeType": "Pulsar4X.Atb.LogiBaseAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "general-cargo-hold",
+      "Name": "General Storage",
+      "Formulas": {
+        "Description": "Stores General Cargo",
+        "Mass": "Ability('Warehouse Size')",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "Ability('Size Efficiency') * 0.1",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "60",
+        "copper": "60"
+      },
+      "ComponentType":"Cargo Hold",
+      "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Warehouse Size",
+          "DescriptionFormula": "''",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "Size Efficiency",
+          "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
+          "GuiHint": "GuiTextDisplay",
+          "GuidDictionary": {},
+          "AttributeFormula": "Ability('Warehouse Size') * 0.01"
+        },
+        {
+          "Name": "Cargo Transfer Rate",
+          "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "Transfer Range",
+          "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "DBargsStor",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs('general-storage', Ability('Warehouse Size'))",
+          "AttributeType": "Pulsar4X.Atb.VolumeStorageAtb"
+        },
+        {
+          "Name": "DBArgsXfer",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+          "AttributeType": "Pulsar4X.Atb.StorageTransferRateAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "fuel-cargo-hold",
+      "Name": "Fuel Storage",
+      "Formulas": {
+        "Description": "Stores Fuel",
+        "Mass": "Ability('Tank Radius')",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "Ability('Tank Volume')",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "[Mass]",
+        "copper": "[Mass]"
+      },
+      "ComponentType":"Fuel Storage",
+      "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Tank Radius",
+          "DescriptionFormula": "'The radius of this tank in m'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "1000000",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "2500"
+        },
+        {
+          "Name": "Tank Volume",
+          "Units": "m^3",
+          "DescriptionFormula": "'The volume of this tank.'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "(4 / 3) * Pi * Pow(Ability('Tank Radius'), 3)"
+        },
+        {
+          "Name": "Dry Weight",
+          "Units": "kg",
+          "DescriptionFormula": "'The weight of the empty tank'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "(4 * Pi * Ability('Tank Radius') * Ability('Tank Radius')) * 23.5 "
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs('fuel-storage', Ability('Tank Volume'))",
+          "AttributeType": "Pulsar4X.Atb.VolumeStorageAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "stainless-steel-fuel-tank",
+      "Name": "Stainless Steel Fuel Tank",
+      "Formulas": {
+        "Description": "Stores Fuel",
+        "Mass": "Ability('Dry Weight')",
+        "Volume": "Ability('Tank Volume')",
+        "HTK": "[Mass]",
+        "CrewReq": "0",
+        "ResearchCost": "0",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass] * 0.1"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass]"
+      },
+      "ComponentType":"Fuel Storage",
+      "MountType": "ShipComponent, ShipCargo, PlanetInstallation, Fighter",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Tank Volume",
+          "DescriptionFormula": "'The Volume of this tank'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "1000000",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "2500"
+        },
+        {
+          "Name": "Tank Radius",
+          "DescriptionFormula": "'The radius of this tank.'",
+          "Units": "m",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "Pow(3 * (Ability('Tank Volume') / (4 * Pi) ), 1/3)"
+        },
+        {
+          "Name": "Dry Weight",
+          "DescriptionFormula": "'The weight of the empty tank'",
+          "Units": "kg",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "(1.333 * Pi * ( Pow(Ability('Tank Radius'),3) - Pow( Ability('Tank Radius') - 0.004, 3)  ) * 8000)"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs('fuel-storage', Ability('Tank Volume'))",
+          "AttributeType": "Pulsar4X.Atb.VolumeStorageAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "naval-academy",
+      "Name": "Naval Academy",
+      "Formulas": {
+        "Description": "Graduates Naval officers",
+        "Mass": "Ability('Class Size') * 100",
+        "Volume": "[Mass] * 0.1",
+        "HTK": "[Mass]",
+        "CrewReq": "Ability('Class Size') * 0.25",
+        "ResearchCost": "Ability('Class Size') * 0.5",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "60",
+        "copper": "60"
+      },
+      "ComponentType": "Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Class Size",
+          "DescriptionFormula": "'How big the graduating class size of the academy will be each year.'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "2500",
+          "MinFormula": "10",
+          "StepFormula": "10",
+          "AttributeFormula": "1000"
+        },
+        {
+          "Name": "Class Length",
+          "DescriptionFormula": "'How many months it takes to graduate a class. Longer training graduates officers with better experience and potential.'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "48",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "24"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Class Size'), Ability('Class Length'))",
+          "AttributeType": "Pulsar4X.Atb.NavalAcademyAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "spaceport",
+      "Name": "Planetary Spaceport Complex",
+      "Formulas": {
+        "Description": "A generic does everything space facility",
+        "Mass": "Ability('Warehouse Size')",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "Ability('Size Efficiency') * 0.1",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "duranium": "60",
+        "mercassium": "60"
+      },
+      "ComponentType":"Facility",
+      "MountType": "PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Warehouse Size",
+          "DescriptionFormula": "''",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "Size Efficiency",
+          "DescriptionFormula": "'The amount of tonnage taken up by racking, office space etc.'",
+          "GuiHint": "GuiTextDisplay",
+          "GuidDictionary": {},
+          "AttributeFormula": "Ability('Warehouse Size') * 0.01"
+        },
+        {
+          "Name": "Cargo Transfer Rate",
+          "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "Transfer Range",
+          "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "Total Cargo Stored",
+          "DescriptionFormula": "'The volume of cargo this can store.'",
+          "GuiHint": "GuiTextDisplay",
+          "GuidDictionary": {},
+          "AttributeFormula": "Ability('Warehouse Size') - Ability('Size Efficiency') - Ability('Cargo Transfer Rate')"
+        },
+        {
+          "Name": "DBargsTransfer",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+          "AttributeType": "Pulsar4X.Datablobs.StorageTransferRateAtbDB"
+        },
+        {
+          "Name": "DBargsStorage",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs('general-storage', Ability('Total Cargo Stored'))",
+          "AttributeType": "Pulsar4X.Atb.VolumeStorageAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "infrastructure",
+      "Name": "Infrastructure",
+      "Formulas": {
+        "Description": "Component and buildings needed to keep colonists alive on hostile worlds: currently non functional other than as cargospace",
+        "Mass": "1000",
+        "Volume": "[Mass]",
+        "HTK": "1000",
+        "CrewReq": "10",
+        "ResearchCost": "0",
+        "CreditCost": "0",
+        "BuildPointCost": "100"
+      },
+      "ResourceCost": {
+        "duranium": "100"
+      },
+      "ComponentType":"Infrastructure",
+      "MountType": "ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Support Colonists",
+          "DescriptionFormula": "'Keeps colonists alive on hostile worlds'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "500"
+        },
+        {
+          "Name": "Storage Amount",
+          "DescriptionFormula": "'The amount of space that is dedicated to storage space. '",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "500"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(GuidString('general-storage'), Ability('Storage Amount'))",
+          "AttributeType": "Pulsar4X.Atb.VolumeStorageAtb"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "space-port",
+      "Name": "Space Port",
+      "Formulas": {
+        "Description": "Facilities for transfering cargo",
+        "Mass": "500000",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "1000000",
+        "ResearchCost": "0",
+        "CreditCost": "120",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "duranium": "60",
+        "mercassium": "60"
+      },
+      "ComponentType":"Facility",
+      "MountType": "ShipComponent, ShipCargo, PlanetInstallation",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "installation-construction",
+      "Attributes": [
+        {
+          "Name": "Cargo Transfer Rate",
+          "DescriptionFormula": "'How much cargo can be transfered per hour in kg.'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "Transfer Range",
+          "DescriptionFormula": "'How much Dv can be expended to transfer cargo'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "1000000",
+          "MinFormula": "100",
+          "StepFormula": "100",
+          "AttributeFormula": "50000"
+        },
+        {
+          "Name": "db",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Cargo Transfer Rate'), Ability('Transfer Range'))",
+          "AttributeType": "Pulsar4X.Atb.StorageTransferRateAtb"
+        }
+      ]
+    }
+  }
+]

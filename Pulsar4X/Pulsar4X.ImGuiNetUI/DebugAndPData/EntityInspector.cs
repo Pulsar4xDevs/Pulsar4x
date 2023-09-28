@@ -2,18 +2,23 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Reflection;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.Industry;
+using Pulsar4X.Atb;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Engine.Industry;
+using Pulsar4X.Components;
+using Pulsar4X.Engine.Sensors;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
 {
     public static class EntityInspector
     {
-        private static Guid _entityID = Guid.Empty;
+        private static string _entityID = String.Empty;
         private static BaseDataBlob[] _dataBlobs = new BaseDataBlob[0];
         private static int _selectedDB = -1;
         //private static float _totalHeight;
@@ -151,9 +156,9 @@ namespace Pulsar4X.SDL2UI
                             ImGui.NextColumn();
                         }
                     }
-                    else if (typeof(HashSet<TechSD>).IsAssignableFrom(value.GetType()))
+                    else if (typeof(HashSet<Tech>).IsAssignableFrom(value.GetType()))
                     {
-                        var items = (HashSet<TechSD>)GetValue(memberInfo, obj);
+                        var items = (HashSet<Tech>)GetValue(memberInfo, obj);
                         int itemsCount = items.Count;
                         
                         if (ImGui.TreeNode(memberInfo.Name))
@@ -250,66 +255,67 @@ namespace Pulsar4X.SDL2UI
                         string tooltipStr = "";
                         if (value != null)
                         {
-                            if(value is Guid)
+                            if(value is string)
                             {
-                                var guid = (Guid)value;
+                                var guid = (string)value;
                                 displayStr = guid.ToString();
-                                if (StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(guid, out Entity entity))
-                                {
-                                    displayStr = entity.GetOwnersName();
-                                    tooltipStr = (value.ToString());
-                                }
-                                else if (StaticRefLib.StaticData.Techs.TryGetValue(guid, out TechSD techSD))
-                                {
-                                    displayStr = techSD.Name;
-                                }
-                                else if (StaticRefLib.StaticData.ComponentTemplates.TryGetValue(guid, out ComponentTemplateSD ctempSD))
-                                {
-                                    displayStr = "ComponentTemplateSD" + ctempSD.Name;
-                                    tooltipStr = ctempSD.ID.ToString();
-                                }
-                                else if (_dataBlobs[_selectedDB] is FactionTechDB)
-                                {
-                                    var db = (FactionTechDB)_dataBlobs[_selectedDB];
-                                    if (db.ResearchedTechs.ContainsKey(guid))
-                                    {
-                                        var facInfo = db.OwningEntity.GetDataBlob<FactionInfoDB>();
-                                        if (facInfo.ComponentDesigns.TryGetValue(guid, out ComponentDesign component))
-                                        {
-                                            displayStr = component.Name;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    displayStr = guid.ToString();
-                                }
+                                //FIXME:
+                                // if (StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(guid, out Entity entity))
+                                // {
+                                //     displayStr = entity.GetOwnersName();
+                                //     tooltipStr = (value.ToString());
+                                // }
+                                // else if (StaticRefLib.StaticData.Techs.TryGetValue(guid, out TechSD techSD))
+                                // {
+                                //     displayStr = techSD.Name;
+                                // }
+                                // else if (StaticRefLib.StaticData.ComponentTemplates.TryGetValue(guid, out ComponentTemplateBlueprint ctempSD))
+                                // {
+                                //     displayStr = "ComponentTemplateSD" + ctempSD.Name;
+                                //     tooltipStr = ctempSD.UniqueID.ToString();
+                                // }
+                                // else if (_dataBlobs[_selectedDB] is FactionTechDB)
+                                // {
+                                //     var db = (FactionTechDB)_dataBlobs[_selectedDB];
+                                //     if (db.ResearchedTechs.ContainsKey(guid))
+                                //     {
+                                //         var facInfo = db.OwningEntity.GetDataBlob<FactionInfoDB>();
+                                //         if (facInfo.ComponentDesigns.TryGetValue(guid, out ComponentDesign component))
+                                //         {
+                                //             displayStr = component.Name;
+                                //         }
+                                //     }
+                                // }
+                                // else
+                                // {
+                                     displayStr = guid.ToString();
+                                // }
                             }
                             else if(value is Entity)
                             {
                                 var entity = (Entity)value;
-                                displayStr = (entity.GetOwnersName());
-                                tooltipStr = (entity.Guid.ToString());
+                                displayStr = entity.GetOwnersName();
+                                tooltipStr = entity.Guid.ToString();
                             }
                             else
                             {
                                 displayStr = (value.ToString());
                             }
 
-                            if (value is ProcessedMaterialSD)
+                            if (value is ProcessedMaterial)
                             {
-                                ProcessedMaterialSD mat = (ProcessedMaterialSD)value;
+                                ProcessedMaterial mat = (ProcessedMaterial)value;
                                 displayStr = ("MaterialSD: " + mat.Name);
                             }
 
-                            if (value is IConstrucableDesign)
+                            if (value is IConstructableDesign)
                             {
-                                IConstrucableDesign constD = (IConstrucableDesign)value;
+                                IConstructableDesign constD = (IConstructableDesign)value;
                                 displayStr = "Constructable: " + constD.Name;
                             }
-                            if (value is (TechSD tech ,int pointsResearched, int pointCost))
+                            if (value is (Tech tech ,int pointsResearched, int pointCost))
                             {
-                                (TechSD tech ,int pointsResearched, int pointCost) tval = ((TechSD tech ,int pointsResearched, int pointCost))value;
+                                (Tech tech ,int pointsResearched, int pointCost) tval = ((Tech tech ,int pointsResearched, int pointCost))value;
                                 displayStr = "TechSD: " + tval.tech.Name + " Points Researched: " + tval.pointsResearched + " / " +tval.pointCost;
                             }
                         }
@@ -353,18 +359,17 @@ namespace Pulsar4X.SDL2UI
         static void DisplayComponents(ComponentInstancesDB instancesDB)
         {
             var componentsByDesign = instancesDB.ComponentsByDesign;
-            
 
-            StaticRefLib.Game.GlobalManager.TryGetEntityByGuid(instancesDB.OwningEntity.FactionOwnerID, out var faction);
+            instancesDB.OwningEntity.Manager.Game.GlobalManager.TryGetEntityByGuid(instancesDB.OwningEntity.FactionOwnerID, out var faction);
             FactionInfoDB factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
-            
+
             string[] designNames = new string[componentsByDesign.Count];
             string[][] componentNames = new string[componentsByDesign.Count][];
-            
+
             ComponentDesign[] designs = new ComponentDesign[componentsByDesign.Count];
-            
+
             ComponentAbilityState[][][] states = new ComponentAbilityState[componentsByDesign.Count][][];
-            
+
             int i = 0;
             foreach (var kvp in componentsByDesign)
             {
@@ -440,14 +445,14 @@ namespace Pulsar4X.SDL2UI
             }
 
             ImGui.Text("By Component:");
-            var emmitterComponents = componentInstancesDB.ComponentsByAttribute[typeof(SensorSignatureAtbDB)];
+            var emmitterComponents = componentInstancesDB.ComponentsByAttribute[typeof(SensorSignatureAtb)];
 
             foreach (var component in emmitterComponents)
             {
                 ImGui.Text(component.Name);
                 ImGui.SameLine();
                 ImGui.Text(" ("+ component.Design.TypeName+")");
-                SensorSignatureAtbDB emmitterAtbs = (SensorSignatureAtbDB)component.Design.AttributesByType[typeof(SensorSignatureAtbDB)];
+                SensorSignatureAtb emmitterAtbs = (SensorSignatureAtb)component.Design.AttributesByType[typeof(SensorSignatureAtb)];
                 DisplayValues(emmitterAtbs.PartWaveForm, emmitterAtbs.PartWaveFormMag);
             }
         }

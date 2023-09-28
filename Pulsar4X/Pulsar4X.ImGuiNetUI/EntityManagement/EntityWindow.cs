@@ -1,7 +1,9 @@
 using System;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 
@@ -68,7 +70,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SameLine();
                 if(ImGui.ImageButton(_uiState.Img_Cargo(), ButtonSize))
                 {
-                    var instance = CargoTransfer.GetInstance(_uiState.Game.StaticData, EntityState);
+                    var instance = CargoTransfer.GetInstance(_uiState.Faction.GetDataBlob<FactionInfoDB>().Data, EntityState);
                     instance.ToggleActive();
                     _uiState.ActiveWindow = instance;
                 }
@@ -100,7 +102,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SameLine();
                 if(ImGui.ImageButton(_uiState.Img_Industry(), ButtonSize))
                 {
-                    var instance = ColonyPanel.GetInstance(_uiState.Game.StaticData, EntityState);
+                    var instance = ColonyPanel.GetInstance(_uiState.Faction.GetDataBlob<FactionInfoDB>().Data, EntityState);
                     instance.SetActive(true);
                     _uiState.ActiveWindow = instance;
                 }
@@ -158,7 +160,8 @@ namespace Pulsar4X.SDL2UI
             {
                 if(Entity.HasDataBlob<ShipInfoDB>() && Entity.HasDataBlob<VolumeStorageDB>())
                 {
-                    var (fuelType, fuelPercent) = Entity.GetFuelInfo();
+                    var cargoLibrary = Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+                    var (fuelType, fuelPercent) = Entity.GetFuelInfo(cargoLibrary);
                     var size = ImGui.GetContentRegionAvail();
                     ImGui.PushStyleColor(ImGuiCol.PlotHistogram, Styles.SelectedColor);
                     ImGui.ProgressBar((float)fuelPercent, new Vector2(size.X, 24), "Fuel (" + (fuelPercent * 100) + "%)");
@@ -195,7 +198,7 @@ namespace Pulsar4X.SDL2UI
                         if (Entity.TryGetDatablob<WarpMovingDB>(out WarpMovingDB movedb))
                         {
                             ImGui.Text("Warping " + Stringify.Velocity(movedb.CurrentNonNewtonionVectorMS.Length()));
-                            
+
                         }
                         else
                             ImGui.Text("Orbiting: ");

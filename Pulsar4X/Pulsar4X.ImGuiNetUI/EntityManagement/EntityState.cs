@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.Industry;
+using Pulsar4X.Engine;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine.Orders;
+using Pulsar4X.Engine.Sensors;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -19,7 +23,7 @@ namespace Pulsar4X.SDL2UI
         public List<EntityChangeData> Changes = new List<EntityChangeData>();
         public List<EntityChangeData> _changesNextFrame = new List<EntityChangeData>();
         public CommandReferences CmdRef;
-        internal Guid StarSysGuid;
+        internal string StarSysGuid;
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
         public EntityState(Entity entity)
         {
@@ -113,27 +117,27 @@ namespace Pulsar4X.SDL2UI
             {
                 switch (Entity.GetDataBlob<SystemBodyInfoDB>().BodyType)
                 {
-                    case ECSLib.BodyType.Asteroid:
+                    case DataStructures.BodyType.Asteroid:
                         {
                             BodyType = UserOrbitSettings.OrbitBodyType.Asteroid;
                             break;
                         }
-                    case ECSLib.BodyType.Comet:
+                    case DataStructures.BodyType.Comet:
                         {
                             BodyType = UserOrbitSettings.OrbitBodyType.Comet;
                             break;
                         }
-                    case ECSLib.BodyType.DwarfPlanet:
-                    case ECSLib.BodyType.GasDwarf:
-                    case ECSLib.BodyType.GasGiant:
-                    case ECSLib.BodyType.IceGiant:
-                    case ECSLib.BodyType.Terrestrial:
+                    case DataStructures.BodyType.DwarfPlanet:
+                    case DataStructures.BodyType.GasDwarf:
+                    case DataStructures.BodyType.GasGiant:
+                    case DataStructures.BodyType.IceGiant:
+                    case DataStructures.BodyType.Terrestrial:
                         {
                             BodyType = UserOrbitSettings.OrbitBodyType.Planet;
                             break;
                         }
 
-                    case ECSLib.BodyType.Moon:
+                    case DataStructures.BodyType.Moon:
                         {
                             BodyType = UserOrbitSettings.OrbitBodyType.Moon;
                             break;

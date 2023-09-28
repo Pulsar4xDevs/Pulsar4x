@@ -1,0 +1,48 @@
+{
+  "Type": "ComponentTemplates",
+  "Data": {
+    "Entries": [
+      {
+        "Key": "57614ddb-0756-44cf-857b-8a6578493792",
+        "Value": {
+          "Name": "TestWeight",
+          "ComponentType": "Misc",
+          "ID": "57614ddb-0756-44cf-857b-8a6578493792",
+          "MassFormula": "Ability('Mass')",
+          "VolumeFormula": "[Mass]",
+          "HTKFormula": "[Mass]",
+          "CrewReqFormula": "[Mass]",
+          "ResourceCostFormula": {
+            "Entries": [
+              {
+                "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
+                "Value": "[Mass]"
+              }
+            ]
+          },
+          "ResearchCostFormula": "0",
+          "CreditCostFormula": "[Mass]",
+          "BuildPointCostFormula": "[Mass]",
+          "MountType": "ShipComponent, ShipCargo",
+          "CargoTypeID": "16b4c4f0-7292-4f4d-8fea-22103c70b288",
+          "IndustryTypeID": "B457C6FE-07A7-4EA1-90DB-D2547245FA86",
+          "ComponentAtbSDs": [
+            {
+              "Name": "Mass",
+              "Units": "kg",
+              "DescriptionFormula": "'The mass of the weight'",
+              "GuiHint": "GuiSelectionMaxMin",
+              "GuidDictionary": {
+                "Entries": []
+              },
+              "MaxFormula": "10000",
+              "MinFormula": "1",
+              "StepFormula": "1",
+              "AttributeFormula": "150"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

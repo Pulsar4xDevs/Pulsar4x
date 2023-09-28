@@ -1,17 +1,19 @@
 using System.Collections.Generic;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Events;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
 
     public class GameLogWindow : PulsarGuiWindow
     {
-        private EventLog _eventLog;
+        //private EventLog _eventLog;
         public HashSet<EventType> HidenEvents = new HashSet<EventType>();
         private GameLogWindow()
         {
-            _eventLog = StaticRefLib.EventLog;
+          //  _eventLog = StaticRefLib.EventLog;
         }
         internal static GameLogWindow GetInstance()
         {
@@ -60,39 +62,39 @@ namespace Pulsar4X.SDL2UI
 
 
 
-                    foreach (var gameEvent in _eventLog.GetAllEvents())
-                    {
-                        if (HidenEvents.Contains(gameEvent.EventType))
-                            continue;//skip this event if it's hidden.
+                    // foreach (var gameEvent in _eventLog.GetAllEvents())
+                    // {
+                    //     if (HidenEvents.Contains(gameEvent.EventType))
+                    //         continue;//skip this event if it's hidden.
 
-                        var entity = gameEvent.Entity;
-                        string entityStr = "N/A";
-                        if (gameEvent.Entity != null)
-                            entityStr = gameEvent.EntityName;
-                        string factionStr = "";
-                        if (gameEvent.Faction != null)
-                            if (gameEvent.Faction.HasDataBlob<NameDB>())
-                                factionStr = gameEvent.Faction.GetDataBlob<NameDB>().DefaultName;
-                            else
-                                factionStr = gameEvent.Faction.Guid.ToString();
-                        string typStr = gameEvent.EventType.ToString();
-                        ImGui.Separator();
-                        ImGui.Text(gameEvent.Time.ToString());
-                        ImGui.NextColumn();
-                        ImGui.Text(typStr);
-                        ImGui.NextColumn();
-                        ImGui.Text(factionStr);
-                        ImGui.NextColumn();
-                        ImGui.Text(entityStr);
-                        if (ImGui.IsItemHovered() && entity != null)
-                            ImGui.SetTooltip(entity.Guid.ToString());
-                        ImGui.NextColumn();
-                        ImGui.TextWrapped(gameEvent.Message);
+                    //     var entity = gameEvent.Entity;
+                    //     string entityStr = "N/A";
+                    //     if (gameEvent.Entity != null)
+                    //         entityStr = gameEvent.EntityName;
+                    //     string factionStr = "";
+                    //     if (gameEvent.Faction != null)
+                    //         if (gameEvent.Faction.HasDataBlob<NameDB>())
+                    //             factionStr = gameEvent.Faction.GetDataBlob<NameDB>().DefaultName;
+                    //         else
+                    //             factionStr = gameEvent.Faction.Guid.ToString();
+                    //     string typStr = gameEvent.EventType.ToString();
+                    //     ImGui.Separator();
+                    //     ImGui.Text(gameEvent.Time.ToString());
+                    //     ImGui.NextColumn();
+                    //     ImGui.Text(typStr);
+                    //     ImGui.NextColumn();
+                    //     ImGui.Text(factionStr);
+                    //     ImGui.NextColumn();
+                    //     ImGui.Text(entityStr);
+                    //     if (ImGui.IsItemHovered() && entity != null)
+                    //         ImGui.SetTooltip(entity.Guid.ToString());
+                    //     ImGui.NextColumn();
+                    //     ImGui.TextWrapped(gameEvent.Message);
 
-                        ImGui.NextColumn();
+                    //     ImGui.NextColumn();
 
 
-                    }
+                    // }
                     ImGui.Separator();
 
                 }

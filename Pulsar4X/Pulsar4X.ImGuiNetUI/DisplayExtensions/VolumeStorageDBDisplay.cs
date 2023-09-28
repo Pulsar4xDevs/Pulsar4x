@@ -1,7 +1,14 @@
 using System.Linq;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Missiles;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Engine.Industry;
+using Pulsar4X.Components;
+using Pulsar4X.Engine.Designs;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -11,8 +18,8 @@ namespace Pulsar4X.SDL2UI
         {
             foreach(var (sid, storageType) in storage.TypeStores)
             {
-                string header = uiState.Game.StaticData.CargoTypes[sid].Name + " Storage";
-                string headerId = uiState.Game.StaticData.CargoTypes[sid].ID.ToString();
+                string header = entityState.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoTypes[sid].Name + " Storage";
+                string headerId = entityState.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoTypes[sid].UniqueID.ToString();
                 double freeVolume = storage.GetFreeVolume(sid);
                 double percent = ((storageType.MaxVolume - freeVolume) / storageType.MaxVolume) * 100;
                 header += " (" + percent.ToString("0.#") + "% full)";
@@ -39,20 +46,21 @@ namespace Pulsar4X.SDL2UI
 
                             ImGui.TableNextColumn();
                             if(ImGui.Selectable(cargoType.Name, false, ImGuiSelectableFlags.SpanAllColumns)) {}
-                            if(cargoType is MineralSD)
+                            if(cargoType is Mineral)
                             {
-                                var mineralSD = (MineralSD)cargoType;
+                                var mineralSD = (Mineral)cargoType;
                                 DisplayHelpers.DescriptiveTooltip(cargoType.Name, "Mineral", mineralSD.Description);
                             }
-                            else if(cargoType is ProcessedMaterialSD)
+                            else if(cargoType is ProcessedMaterial)
                             {
-                                var processedMaterialSD = (ProcessedMaterialSD)cargoType;
+                                var processedMaterialSD = (ProcessedMaterial)cargoType;
                                 DisplayHelpers.DescriptiveTooltip(cargoType.Name, "Processed Material", processedMaterialSD.Description);
                             }
                             else if(cargoType is ComponentInstance)
                             {
                                 var componentInstance = (ComponentInstance)cargoType;
                                 DisplayHelpers.DescriptiveTooltip(cargoType.Name, componentInstance.Design.ComponentType, componentInstance.Design.Description);
+                                AddContextMenu(storage, componentInstance, uiState);
                             }
                             else if(cargoType is ComponentDesign)
                             {
@@ -84,6 +92,50 @@ namespace Pulsar4X.SDL2UI
                 }
                 ImGui.PopID();
             }
+        }
+
+        private static void AddContextMenu(VolumeStorageDB volumeStorageDB, ComponentInstance component, GlobalUIState uiState)
+        {
+            ImGui.PushID(component.Design.UniqueID.ToString());
+            if(ImGui.BeginPopupContextItem("###" + component.Design.UniqueID))
+            {
+                ImGui.Text(component.Name);
+                ImGui.Separator();
+
+                bool canInstall = false;
+                if(volumeStorageDB.OwningEntity.HasDataBlob<ColonyInfoDB>()
+                    && component.Design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation))
+                    {
+                        canInstall = true;
+                    }
+                else if(volumeStorageDB.OwningEntity.HasDataBlob<ShipInfoDB>()
+                    && component.Design.ComponentMountType.HasFlag(ComponentMountType.ShipComponent))
+                    {
+                        canInstall = true;
+                    }
+
+                if(canInstall && !volumeStorageDB.TypeStores.ContainsKey(component.CargoTypeID))
+                {
+                    canInstall = false;
+                }
+
+                if(canInstall && ImGui.MenuItem("Install"))
+                {
+                    var storageOrder = RemoveComponentFromStorageOrder.Create(component.ParentEntity, component, 1);
+                    uiState.Game.OrderHandler.HandleOrder(storageOrder);
+
+                    var installOrder = InstallComponentInstanceOrder.Create(component.ParentEntity, component);
+                    uiState.Game.OrderHandler.HandleOrder(installOrder);
+                }
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
+                if(ImGui.MenuItem("Destroy"))
+                {
+
+                }
+                ImGui.PopStyleColor();
+                ImGui.EndPopup();
+            }
+            ImGui.PopID();
         }
     }
 }

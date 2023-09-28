@@ -94,7 +94,7 @@ namespace Pulsar4X.ECSLib
                     if (!minerals.ContainsKey(kvp.Key))
                     {
                         minerals.Add(kvp.Key, kvp.Value.Amount * 1.0);
-                    } 
+                    }
                     else
                     {
                         minerals[kvp.Key] += kvp.Value.Amount * 1.0;

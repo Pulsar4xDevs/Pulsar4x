@@ -1,8 +1,6 @@
 ﻿using System;
-using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
 using SDL2;
-using ImGuiNET;
 using System.Collections.Generic;
 using System.Linq;
 

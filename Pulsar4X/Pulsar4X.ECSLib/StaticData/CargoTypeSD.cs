@@ -1,5 +1,4 @@
 ﻿using System;
-using Pulsar4X.Modding;
 
 namespace Pulsar4X.ECSLib
 {
@@ -18,10 +17,10 @@ namespace Pulsar4X.ECSLib
         Guid CargoTypeID { get;  }
 
         /// <summary>
-        /// The smallest unit mass. 1 for most minerals etc. 
+        /// The smallest unit mass. 1 for most minerals etc.
         /// </summary>
         long MassPerUnit { get; }
-        
+
         double VolumePerUnit { get; }
     }
 

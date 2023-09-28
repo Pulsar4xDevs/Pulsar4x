@@ -3,7 +3,10 @@ using System.Threading.Tasks;
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Industry;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 using SDL2;
 using System;
 using System.Linq;
@@ -13,12 +16,12 @@ namespace Pulsar4X.SDL2UI
 {
     class PlanetaryWindow : NonUniquePulsarGuiWindow
     {
-        private readonly List<MineralSD> _mineralDefinitions = null;
+        private readonly List<Mineral> _mineralDefinitions = null;
         private readonly int _maxMineralNameLength = 0;
         private const string _amountFormat = "#,###,###,###,###,###,##0";   // big enough to render 64 integers
 
         private enum PlanetarySubWindows{
-            generalInfo, 
+            generalInfo,
             installations,
             mineralDeposits
         }
@@ -30,7 +33,7 @@ namespace Pulsar4X.SDL2UI
             _state = state;
             SetName("PlanetaryWindow|" + entity.Entity.Guid.ToString());
             if (_mineralDefinitions == null) {
-                _mineralDefinitions = _uiState.Game.StaticData.CargoGoods.GetMineralsList();
+                _mineralDefinitions = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList().ToList();
                 _maxMineralNameLength = _mineralDefinitions.Max(x => x.Name.Length);
             }
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
@@ -44,7 +47,7 @@ namespace Pulsar4X.SDL2UI
 
         internal static PlanetaryWindow GetInstance(EntityState entity, GlobalUIState state)
         {
-            string name = "PlanetaryWindow|" + entity.Entity.Guid.ToString(); 
+            string name = "PlanetaryWindow|" + entity.Entity.Guid.ToString();
             PlanetaryWindow thisItem;
             if (!_uiState.LoadedNonUniqueWindows.ContainsKey(name))
             {
@@ -196,7 +199,7 @@ namespace Pulsar4X.SDL2UI
                     if (Math.Round(atmosGas.Value, 4) > 0)
                     {
                         rowData.Add(new string[] { "  " + atmosGas.Key.Name, Stringify.Quantity(Math.Round(atmosGas.Value, 4), "0.0###") + " %" });
-                    } 
+                    }
                     else
                     {
                         rowData.Add(new string[] { "  " + atmosGas.Key.Name, "trace amounts" });
@@ -226,7 +229,7 @@ namespace Pulsar4X.SDL2UI
 
             if (_lookedAtEntity.Entity.HasDataBlob<MineralsDB>())
             {
-                Dictionary<Guid, long> mineRates = new Dictionary<Guid, long>();
+                var mineRates = new Dictionary<int, long>();
 
                 MineralsDB mineralsDB = _lookedAtEntity.Entity.GetDataBlob<MineralsDB>();
                 SystemBodyInfoDB systemBodyInfo = _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>();
@@ -262,7 +265,7 @@ namespace Pulsar4X.SDL2UI
                         if (mineralData != null)
                         {
                             var mineralValues = mineralsDB.Minerals[key];
-                            
+
                             row.Add(mineralData.Name);
                             row.Add(mineralValues.Amount.ToString(_amountFormat));
                             row.Add(mineralValues.Accessibility.ToString("0.00"));

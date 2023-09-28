@@ -4,8 +4,7 @@ using System.Numerics;
 
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.Engine;
 using Vector2 = System.Numerics.Vector2;
 
 namespace Pulsar4X.SDL2UI

@@ -1,0 +1,243 @@
+[
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "sorium",
+      "Name": "Sorium",
+      "Description": "Gas used to convert into fuel.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0011111,
+      "Abundance": {
+        "Asteroid": 0.01,
+        "Comet": 0.05,
+        "DwarfPlanet": 0.075,
+        "GasDwarf": 0.1,
+        "GasGiant": 1.0,
+        "IceGiant": 0.5,
+        "Moon": 0.5,
+        "Terrestrial": 1.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "duranium",
+      "Name": "Duranium",
+      "Description": "The most common of the Trans-Newtonian metals.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0001270648,
+      "Density": 900,
+      "Abundance": {
+        "Asteroid": 0.3,
+        "Comet": 0.4,
+        "DwarfPlanet": 0.5,
+        "GasDwarf": 0.0,
+        "GasGiant": 0.0,
+        "IceGiant": 0.1,
+        "Moon": 0.7,
+        "Terrestrial": 1.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "neutronium",
+      "Name": "Neutronium",
+      "Description": "A rare, dense mineral, formed naturally in the cores of neutron stars.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0018691589,
+      "Density": 90000,
+      "Abundance": {
+        "Asteroid": 0.05,
+        "Comet": 0.4,
+        "DwarfPlanet": 0.1,
+        "GasDwarf": 0.1,
+        "GasGiant": 0.2,
+        "IceGiant": 0.1,
+        "Moon": 0.3,
+        "Terrestrial": 0.8
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "corbomite",
+      "Name": "Corbomite",
+      "Description": "A metal with excellent conductivity, used for electronics.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0001388889,
+      "Density": 900,
+      "Abundance": {
+        "Asteroid": 0.1,
+        "Comet": 0.2,
+        "DwarfPlanet": 0.3,
+        "GasDwarf": 0.0,
+        "GasGiant": 0.0,
+        "IceGiant": 0.2,
+        "Moon": 0.5,
+        "Terrestrial": 1.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "tritanium",
+      "Name": "Tritanium",
+      "Description": "Metallic, not stable under atmospheric temperatures.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0000531915,
+      "Density": 900,
+      "Abundance": {
+        "Asteroid": 0.35,
+        "Comet": 0.3,
+        "DwarfPlanet": 0.25,
+        "GasDwarf": 0.0,
+        "GasGiant": 0.0,
+        "IceGiant": 0.5,
+        "Moon": 0.2,
+        "Terrestrial": 0.1
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "boronide",
+      "Name": "Boronide",
+      "Description": "A rare mineral ore.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0001531915,
+      "Density": 900,
+      "Abundance": {
+        "Asteroid": 0.025,
+        "Comet": 0.075,
+        "DwarfPlanet": 0.1,
+        "GasDwarf": 0.0,
+        "GasGiant": 0.0,
+        "IceGiant": 0.1,
+        "Moon": 0.3,
+        "Terrestrial": 0.7
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "uridium",
+      "Name": "Uridium",
+      "Description": "An unstable mineral.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0000531915,
+      "Density": 900,
+      "Abundance": {
+        "Asteroid": 0.2,
+        "Comet": 0.2,
+        "DwarfPlanet": 0.1,
+        "GasDwarf": 0.0,
+        "GasGiant": 0.0,
+        "IceGiant": 0.1,
+        "Moon": 0.3,
+        "Terrestrial": 0.7
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "corundium",
+      "Name": "Corundium",
+      "Description": "Comparable to diamond but out of aluminium oxide.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0003703703,
+      "Density": 900,
+      "Abundance": {
+        "Asteroid": 0.01,
+        "Comet": 0.02,
+        "DwarfPlanet": 0.1,
+        "GasDwarf": 0.0,
+        "GasGiant": 0.0,
+        "IceGiant": 0.2,
+        "Moon": 0.4,
+        "Terrestrial": 0.7
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "mercassium",
+      "Name": "Mercassium",
+      "Description": "A synthetic composite.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0001118568,
+      "Density": 900,
+      "Abundance": {
+        "Asteroid": 0.2,
+        "Comet": 0.25,
+        "DwarfPlanet": 0.3,
+        "GasDwarf": 0.0,
+        "GasGiant": 0.0,
+        "IceGiant": 0.2,
+        "Moon": 0.6,
+        "Terrestrial": 1.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "vendarite",
+      "Name": "Vendarite",
+      "Description": "A valuable mineral.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0001118568,
+      "Density": 900,
+      "Abundance": {
+        "Asteroid": 0.2,
+        "Comet": 0.25,
+        "DwarfPlanet": 0.3,
+        "GasDwarf": 0.0,
+        "GasGiant": 0.0,
+        "IceGiant": 0.2,
+        "Moon": 0.6,
+        "Terrestrial": 1.0
+      }
+    }
+  },
+  {
+    "Type": "Mineral",
+    "Payload": {
+      "UniqueID": "gallicite",
+      "Name": "Gallicite",
+      "Description": "A naturally-occurring mineral in large deposits.",
+      "CargoTypeID": "general-storage",
+      "MassPerUnit": 1.0,
+      "VolumePerUnit": 0.0001118568,
+      "Density": 900,
+      "Abundance": {
+        "Asteroid": 0.2,
+        "Comet": 0.3,
+        "DwarfPlanet": 0.3,
+        "GasDwarf": 0.0,
+        "GasGiant": 0.0,
+        "IceGiant": 0.2,
+        "Moon": 0.6,
+        "Terrestrial": 1.0
+      }
+    }
+  },
+]

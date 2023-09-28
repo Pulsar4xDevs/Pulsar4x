@@ -1,6 +1,7 @@
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI;
 
@@ -27,8 +28,8 @@ public static class PowerDBDisplay
         
         ImGui.Text("Stored: ");
         ImGui.SameLine();
-        string stor = Stringify.Energy(_energyGenDB.EnergyStored[_energyGenDB.EnergyType.ID]);
-        string max = Stringify.Energy(_energyGenDB.EnergyStoreMax[_energyGenDB.EnergyType.ID]);
+        string stor = Stringify.Energy(_energyGenDB.EnergyStored[_energyGenDB.EnergyType.UniqueID]);
+        string max = Stringify.Energy(_energyGenDB.EnergyStoreMax[_energyGenDB.EnergyType.UniqueID]);
         ImGui.Text(stor + " / " + max);
 
         //
@@ -57,7 +58,7 @@ public static class PowerDBDisplay
         
         
         float xstep = _plotSize.X / hgLastObj.seconds ;
-        float ystep = (float)(_plotSize.Y / _energyGenDB.EnergyStoreMax[_energyGenDB.EnergyType.ID]);
+        float ystep = (float)(_plotSize.Y / _energyGenDB.EnergyStoreMax[_energyGenDB.EnergyType.UniqueID]);
         float posX = 0;
         float posYBase = plotPos.Y + _plotSize.Y;
         int index = _energyGenDB.HistogramIndex;

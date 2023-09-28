@@ -1,14 +1,15 @@
 ﻿using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
 using SDL2;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
 using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Damage;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -34,7 +35,7 @@ namespace Pulsar4X.SDL2UI
             {typeof(OrdersListUI), "Orders Window"},
             {typeof(OrderCreationUI), "Order Creation"}
         };
-        internal Game Game;
+        internal Engine.Game Game;
         //internal FactionVM FactionUIState;
         internal bool IsGameLoaded { get { return Game != null; } }
         internal Entity Faction { get; set; }
@@ -43,18 +44,18 @@ namespace Pulsar4X.SDL2UI
         internal bool ShowDemoWindow;
         internal bool ShowDamageWindow;
         internal IntPtr rendererPtr;
-        internal Guid _lastContextMenuOpenedEntityGuid = Guid.Empty;
+        internal string _lastContextMenuOpenedEntityGuid = String.Empty;
         internal GalacticMapRender GalacticMap;
         internal List<UpdateWindowState> UpdateableWindows = new ();
         internal DateTime LastGameUpdateTime = new ();
         internal StarSystem SelectedSystem { get { return StarSystemStates[SelectedStarSysGuid].StarSystem; } }
         internal DateTime SelectedSystemTime { get { return StarSystemStates[SelectedStarSysGuid].StarSystem.StarSysDateTime; } }
         internal DateTime SelectedSysLastUpdateTime = new ();
-        internal Guid SelectedStarSysGuid { get { return GalacticMap.SelectedStarSysGuid; } }
+        internal string SelectedStarSysGuid { get { return GalacticMap.SelectedStarSysGuid; } }
         internal SystemMapRendering SelectedSysMapRender { get { return GalacticMap.SelectedSysMapRender; } }
         internal DateTime PrimarySystemDateTime;
         internal EntityContextMenu ContextMenu { get; set; }
-        internal Dictionary<Guid, SystemState> StarSystemStates = new ();
+        internal Dictionary<string, SystemState> StarSystemStates = new ();
         internal Camera Camera;
         internal ImGuiSDL2CSWindow ViewPort;
         internal System.Numerics.Vector2 MainWinSize { get {return ViewPort.Size;}}
@@ -70,9 +71,9 @@ namespace Pulsar4X.SDL2UI
         internal EntityState LastClickedEntity = null;
         internal EntityState PrimaryEntity { get; private set; }
         internal Orbital.Vector3 LastWorldPointClicked_m { get; set; }
-        internal SpaceMasterVM SpaceMasterVM;
+        //internal SpaceMasterVM SpaceMasterVM;
         internal bool SMenabled = false;
-        internal Dictionary<Guid, EntityWindow> EntityWindows { get; private set; } = new();
+        internal Dictionary<string, EntityWindow> EntityWindows { get; private set; } = new();
 
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
@@ -123,7 +124,7 @@ namespace Pulsar4X.SDL2UI
         {
             Faction = factionEntity;
             FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
-            StarSystemStates = new Dictionary<Guid, SystemState>();
+            StarSystemStates = new Dictionary<string, SystemState>();
             foreach (var guid in factionInfo.KnownSystems)
             {
                 StarSystemStates[guid] = new SystemState(Game.Systems[guid], factionEntity);
@@ -131,7 +132,7 @@ namespace Pulsar4X.SDL2UI
             GalacticMap.SetFaction();
         }
 
-        internal void SetActiveSystem(Guid activeSysID, bool refresh = false)
+        internal void SetActiveSystem(string activeSysID, bool refresh = false)
         {
             if(activeSysID != SelectedStarSysGuid || refresh){
                 DeactivateAllClosableWindows();
@@ -154,8 +155,8 @@ namespace Pulsar4X.SDL2UI
         internal void EnableGameMaster()
         {
             SMenabled = true;
-            StarSystemStates = new Dictionary<Guid, SystemState>();
-            var masterFaction = StaticRefLib.Game.GameMasterFaction;
+            StarSystemStates = new Dictionary<string, SystemState>();
+            var masterFaction = Game.GameMasterFaction;
             SetFaction(masterFaction);
             if(Game != null)
             {
@@ -176,7 +177,7 @@ namespace Pulsar4X.SDL2UI
         //checks wether any event changed the mouse position after a new mouse click, indicating the user is doing something else with the mouse as he was doing before.
         internal void OnFocusMoved()
         {
-            _lastContextMenuOpenedEntityGuid = Guid.Empty;
+            _lastContextMenuOpenedEntityGuid = String.Empty;
         }
 
         //checks wether the planet icon is clicked
@@ -190,7 +191,7 @@ namespace Pulsar4X.SDL2UI
             if (LoadedWindows.ContainsKey(typeof(DistanceRuler)))
                 LoadedWindows[typeof(DistanceRuler)].MapClicked(worldCoord, button);
 
-            Dictionary<Guid, EntityState> allEntities = null;
+            Dictionary<string, EntityState> allEntities = null;
             if(StarSystemStates.ContainsKey(SelectedStarSysGuid))
                 allEntities = StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames;
 
@@ -241,13 +242,13 @@ namespace Pulsar4X.SDL2UI
                 LoadedWindows[typeof(ToolBarWindow)].MapClicked(worldCoord, button);
         }
 
-        internal void EntitySelectedAsPrimary(Guid entityGuid, Guid starSys)
+        internal void EntitySelectedAsPrimary(string entityGuid, string starSys)
         {
             PrimaryEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
             ActiveWindow?.EntitySelectedAsPrimary(PrimaryEntity);
         }
 
-        internal void EntityClicked(Guid entityGuid, Guid starSys, MouseButtons button)
+        internal void EntityClicked(string entityGuid, string starSys, MouseButtons button)
         {
             var entityState = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
             LastClickedEntity = entityState;

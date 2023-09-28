@@ -3,6 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using ImGuiSDL2CS;
 using SDL2;
+using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -10,12 +13,12 @@ namespace Pulsar4X.SDL2UI
     {
         GlobalUIState _state;
         List<SystemState> SystemStates = new List<SystemState>();
-        Dictionary<Guid,SystemMapRendering> RenderedMaps = new Dictionary<Guid, SystemMapRendering>();
-        Dictionary<Guid, StarIcon> StarIcons = new Dictionary<Guid, StarIcon>();
-        ConcurrentDictionary<Guid, NameIcon> _nameIcons = new ConcurrentDictionary<Guid, NameIcon>();
+        Dictionary<string, SystemMapRendering> RenderedMaps = new ();
+        Dictionary<string, StarIcon> StarIcons = new ();
+        ConcurrentDictionary<string, NameIcon> _nameIcons = new ();
         ImGuiSDL2CSWindow _window;
-        internal Guid CapitolSysMap { get; set; }
-        internal Guid SelectedStarSysGuid { get; set; }
+        internal string CapitolSysMap { get; set; }
+        internal string SelectedStarSysGuid { get; set; }
         internal SystemMapRendering SelectedSysMapRender { get { return RenderedMaps[SelectedStarSysGuid]; } }
         Camera _camera;
         IntPtr _renderPtr;
@@ -48,7 +51,7 @@ namespace Pulsar4X.SDL2UI
             float angleIncrease = (float)Math.Max(0.78539816339, 6.28318530718 / _state.StarSystemStates.Count);
             int startR = 200;
             int radInc = 5;
-            foreach (KeyValuePair<Guid, SystemState> item in _state.StarSystemStates)
+            foreach (KeyValuePair<string, SystemState> item in _state.StarSystemStates)
             {
 
                 SystemMapRendering map = new SystemMapRendering(_window, _state);
@@ -57,8 +60,8 @@ namespace Pulsar4X.SDL2UI
                 RenderedMaps[item.Key] = map;
 
                 //TODO: handle binary/multiple star systems better.
-                var starEntity = item.Value.StarSystem.GetFirstEntityWithDataBlob<ECSLib.StarInfoDB>();
-                var orbitdb = starEntity.GetDataBlob<ECSLib.OrbitDB>();
+                var starEntity = item.Value.StarSystem.GetFirstEntityWithDataBlob<StarInfoDB>();
+                var orbitdb = starEntity.GetDataBlob<OrbitDB>();
                 starEntity = orbitdb.Root; //just incase it's a binary system and the entity we got was not the primary
 
                 var starIcon = new StarIcon(starEntity);
@@ -146,7 +149,7 @@ namespace Pulsar4X.SDL2UI
             }
             else// only draw the systemmap. 
             {
-                if (SelectedStarSysGuid != Guid.Empty) 
+                if (SelectedStarSysGuid.IsNotNullOrEmpty()) 
                     RenderedMaps[SelectedStarSysGuid].Draw();
             }
 

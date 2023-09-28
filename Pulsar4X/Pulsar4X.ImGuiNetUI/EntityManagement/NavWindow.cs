@@ -2,12 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
 using Pulsar4X.SDL2UI;
 using Pulsar4X.SDL2UI.ManuverNodes;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = Pulsar4X.Orbital.Vector3;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.ImGuiNetUI.EntityManagement
 {
@@ -92,7 +96,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
             _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + parentMass);
             var fuelTypeID = _newtonThrust.FuelType;
-            _fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
+            _fuelType = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(fuelTypeID);
 
             _burnRate = _newtonThrust.FuelBurnRate;
             _exhaustVelocity = _newtonThrust.ExhaustVelocity;

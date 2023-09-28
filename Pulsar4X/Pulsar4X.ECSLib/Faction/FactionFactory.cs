@@ -49,6 +49,7 @@ namespace Pulsar4X.ECSLib
                 name,
                 new FactionInfoDB(),
                 new FactionAbilitiesDB(),
+
                 new FactionTechDB(game.StaticData.Techs.Values.ToList()),
                 new FactionOwnerDB(),
                 new FleetDB(),

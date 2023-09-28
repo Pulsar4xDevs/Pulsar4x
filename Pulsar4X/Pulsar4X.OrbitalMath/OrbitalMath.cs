@@ -608,11 +608,11 @@ namespace Pulsar4X.Orbital
             }
             else
             {
-                var foo = sgp / Math.Pow(-a, 3);
-                var hyperbolcMeanMotion = Math.Sqrt(foo);
+                var quotient = sgp / Math.Pow(-a, 3);
+                var hyperbolcMeanMotion = Math.Sqrt(quotient);
                 var hyperbolicMeanAnomaly = secondsFromEpoch * hyperbolcMeanMotion;
                 var hyperbolicAnomalyF = GetHyperbolicAnomalyNewtonsMethod(e, hyperbolicMeanAnomaly);
-                trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(ke.Eccentricity, hyperbolicAnomalyF);
+                trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(e, hyperbolicAnomalyF);
 
             }
 
