@@ -131,7 +131,7 @@ namespace Pulsar4X.Orbital
         public static double RadiusFromFocal(double a, double e, double phi, double theta)
         {
             double dividend = a * (1 - e * e);
-            double divisor = 1 - e * Math.Cos(theta - phi);
+            double divisor = 1 + e * Math.Cos(theta - phi);
             double quotent = dividend / divisor;
             return quotent;
         }

@@ -67,7 +67,7 @@ namespace Pulsar4X.ECSLib
             _gameSettings = game.Settings;
         }
 
-        public static void StartNonNewtTranslation(Entity entity)
+        public static bool StartNonNewtTranslation(Entity entity)
         {
             var moveDB = entity.GetDataBlob<WarpMovingDB>();
             var warpDB = entity.GetDataBlob<WarpAbilityDB>();
@@ -86,7 +86,7 @@ namespace Pulsar4X.ECSLib
             var t = totalDistance / warpDB.MaxSpeed;
             var tcost = t * warpDB.BubbleSustainCost;
             double estored = powerDB.EnergyStored[warpDB.EnergyType];
-            
+            bool canStart = false;
             if (creationCost <= estored)
             {
                 
@@ -100,9 +100,11 @@ namespace Pulsar4X.ECSLib
                 powerDB.AddDemand(-creationCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
                 powerDB.AddDemand(warpDB.BubbleSustainCost, entity.StarSysDateTime + TimeSpan.FromSeconds(1));
                 //powerDB.EnergyStore[warpDB.EnergyType] = estore;
-
+                moveDB.HasStarted = true;
+                canStart = true;
             }
 
+            return canStart;
         }
 
         /// <summary>
@@ -115,6 +117,9 @@ namespace Pulsar4X.ECSLib
             
             var manager = entity.Manager;
             var moveDB = entity.GetDataBlob<WarpMovingDB>();
+            if (!moveDB.HasStarted & !StartNonNewtTranslation(entity))
+                return;
+            
             var warpDB = entity.GetDataBlob<WarpAbilityDB>();
             
             var currentVelocityMS = moveDB.CurrentNonNewtonionVectorMS;

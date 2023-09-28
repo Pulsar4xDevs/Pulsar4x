@@ -14,6 +14,9 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class WarpMovingDB : BaseDataBlob
     {
+        [JsonProperty] 
+        public bool HasStarted { get; internal set; } = false;
+        
         [JsonProperty]
         public DateTime LastProcessDateTime = new DateTime();
 
@@ -36,7 +39,7 @@ namespace Pulsar4X.ECSLib
         public DateTime PredictedExitTime { get; internal set; }
 
         [JsonProperty]
-        internal Vector3 CurrentNonNewtonionVectorMS { get; set; }
+        public Vector3 CurrentNonNewtonionVectorMS { get; internal set; }
 
         /// <summary>
         /// m/s
@@ -119,7 +122,7 @@ namespace Pulsar4X.ECSLib
             ExpendDeltaV = db.ExpendDeltaV;
             IsAtTarget = db.IsAtTarget;
             TargetEntity = db.TargetEntity;
-
+            HasStarted = db.HasStarted;
             TargetPositionDB = db.TargetPositionDB;
 
         }

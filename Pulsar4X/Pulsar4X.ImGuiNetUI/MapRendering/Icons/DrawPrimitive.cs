@@ -232,125 +232,66 @@ namespace Pulsar4X.SDL2UI
             points[nPoints - 1] = new Vector2(xc + x, yc + y);
             return points;
         }
-            
-        
-        /// <summary>
-        /// Parametric ellipse taken from:
-        /// "Drawing ellipses, hyperbolas or parabolas with a fixed number of points and maximum inscribed area"
-        /// by L. B. Smith
-        /// published in The Computer journal jan 1971 https://academic.oup.com/comjnl/article/14/1/81/356378
-        /// </summary>
-        /// <param name="loP">londitude of periapsis</param>
-        /// <param name="a">semi major axis</param>
-        /// <param name="b">semi minor axis</param>
-        /// <param name="n">number of required points for a full elipse</param>
-        /// <param name="startPos"></param>
-        /// <param name="endPos"></param>
-        /// <returns></returns>
-        public static Vector2[] KeplerPoints(double loP, double a, double b, int n, Vector2 startPos, Vector2 endPos)
+
+        public static Vector2[] KeplerPoints(KeplerElements ke, Vector2 startPnt, Vector2 endPnt)
         {
-            double linerEccentricity =  EllipseMath.LinearEccentricityFromAxies(a, b);
-            double dphi = 2 * Math.PI / (n - 1);
-
-            
-            double cosLoP = Math.Cos(loP);
-            double sinLoP = Math.Sin(loP);
-            double cosdphi = Math.Cos(dphi);
-            double sindphi = Math.Sin(dphi);
-            
-            //normalise the start & end points to the center ellipes instead of the focal point 
-            double xs = startPos.X - linerEccentricity * cosLoP;
-            double ys = startPos.Y - linerEccentricity * sinLoP;
-            double xe = endPos.X - linerEccentricity * cosLoP;
-            double ye = endPos.Y - linerEccentricity * sinLoP;          
-            double arcStart = Math.Atan2(ys, xs);
-            double arcEnd = Math.Atan2(ye, xe);
-            
-            
-            Console.Clear();
-            Console.WriteLine("ArcStart: " + arcStart + " rad or " + Angle.ToDegrees(arcStart) + " Deg");
-            Console.WriteLine("ArcEnd: " + arcEnd + " rad or " + Angle.ToDegrees(arcEnd) + " Deg");
-            double cosStrt = Math.Cos(arcStart);
-            double sinStrt = Math.Sin(arcStart);
-            double cosEnd = Math.Cos(arcEnd);
-            double sinEnd = Math.Sin(arcEnd);
-            
-            double arcSize = Math.Abs(Angle.DifferenceBetweenRadians(arcEnd, arcStart));
-            Console.WriteLine("Arc Size: " + Angle.ToDegrees(arcSize));
-            if (arcSize == 0 || arcSize > 2 * Math.PI)
-                arcSize = 2 * Math.PI;
-            int nPoints = (int)(arcSize / dphi) + 1;
-    
-            Console.WriteLine("arc size " + Angle.ToDegrees(arcSize));
-            Console.WriteLine("arc Points " + nPoints);
-            
-            double xc = -linerEccentricity * cosLoP;
-            double yc = -linerEccentricity * sinLoP;
-
-            double alpha = cosdphi + sindphi * sinLoP * cosLoP * (a / b - b / a);
-            double bravo = - sindphi * ((b * sinLoP) * (b * sinLoP) + (a * cosLoP) * (a * cosLoP)) / (a * b);
-            double chrly = sindphi * ((b * cosLoP) * (b * cosLoP) + (a * sinLoP) * (a * sinLoP)) / (a * b);
-            double delta = cosdphi + sindphi * sinLoP * cosLoP * (b / a - a / b);
-            delta = delta - (chrly * bravo) / alpha;
-            chrly = chrly / alpha;
-            double x = startPos.X - xc ;
-            double y = startPos.Y - yc ;
-            Vector2[] points = new Vector2[nPoints];
-            points[0] = startPos;
-            for (int i = 1; i < nPoints -1; i++)
-            {
-                double xn = xc + x;
-                double yn = yc + y;
-                points[i] = new Vector2(xn, yn);
-                x = alpha * x + bravo * y;
-                y = chrly * x + delta * y;
-            }
-            
-            points[nPoints - 1] = endPos;
-            return points;
+            var a = ke.SemiMajorAxis;
+            var e = ke.Eccentricity;
+            var lop = ke.LoAN + ke.AoP;
+            return KeplerPoints(a, e, lop, startPnt, endPnt);
         }
                 
         /// <summary>
-        /// Parametric ellipse taken from:
-        /// "Drawing ellipses, hyperbolas or parabolas with a fixed number of points and maximum inscribed area"
-        /// by L. B. Smith
-        /// published in The Computer journal jan 1971 https://academic.oup.com/comjnl/article/14/1/81/356378
+        /// Creates points for an ellipse.
+        /// This formula creates more points at the periapsis and less at the apoapsis.
         /// </summary>
-        /// <param name="xc">x center of ellipse (not focal)</param>
-        /// <param name="yc">x center of ellipse (not focal)</param>
-        /// <param name="loP">londitude of periapsis</param>
-        /// <param name="a">semi major axis</param>
-        /// <param name="b">semi minor axis</param>
-        /// <param name="n">number of required points</param>
+        /// <param name="semiMaj"></param>
+        /// <param name="eccentricity"></param>
+        /// <param name="loP">Longditude of Periapsis, tilt</param>
+        /// <param name="startPnt"></param>
+        /// <param name="endPnt"></param>
+        /// <param name="numPoints"></param>
         /// <returns></returns>
-        public static Vector2[] ElipsePoints(double xc, double yc, double loP, double a, double b, int n)
-        {
-            double dphi = 2 * Math.PI / (n - 1);
-            double cosTheta = Math.Cos(loP);
-            double sinTheta = Math.Sin(loP);
-            double cosdphi = Math.Cos(dphi);
-            double sindphi = Math.Sin(dphi);
-            double alpha = cosdphi + sindphi * sinTheta * cosTheta * (a / b - b / a);
-            double bravo = - sindphi * ((b * sinTheta) * (b * sinTheta) + (a * cosTheta) * (a * cosTheta)) / (a * b);
-            double chrly = sindphi * ((b * cosTheta) * (b * cosTheta) + (a * sinTheta) * (a * sinTheta)) / (a * b);
-            double delta = cosdphi + sindphi * sinTheta * cosTheta * (b / a - a / b);
-            delta = delta - (chrly * bravo) / alpha;
-            chrly = chrly / alpha;
-            double x = a * cosTheta;
-            double y = a * sinTheta;
-            Vector2[] points = new Vector2[n];
-            for (int i = 0; i < n; i++)
+        public static Vector2[] KeplerPoints(double semiMaj, double eccentricity, double loP, Vector2 startPnt, Vector2 endPnt,
+                                             int numPoints = 128)
+        {                    
+            
+            double startAng = Math.Atan2(startPnt.Y, startPnt.X);
+            double endAng =  Math.Atan2(endPnt.Y, endPnt.X);
+            double sweep = Angle.NormaliseRadiansPositive( endAng - startAng);
+        
+            double θ = 0;
+            double x = 0;
+            double y = 0;
+            double r = EllipseMath.RadiusFromFocal(semiMaj, eccentricity, loP, startAng);
+            double Δθ = 2 * Math.PI / (numPoints - 1) * Math.Sign(sweep);
+            if (Δθ == 0)
             {
-                double xn = xc + x;
-                double yn = yc + y;
-                points[i] = new Vector2(xn, yn);
-                x = alpha * x + bravo * y;
-                y = chrly * x + delta * y;
+                return new Vector2[]
+                {
+                    startPnt,
+                    endPnt
+                };
             }
+            numPoints = (int)Math.Abs(sweep / Δθ) + 1; //numpoints for just the arc
+        
+            Vector2[] points = new Vector2[numPoints + 1];
+            for (int i = 0; i < numPoints; i++)
+            {
+                θ = startAng + Δθ * i;
+                r = EllipseMath.RadiusFromFocal(semiMaj, eccentricity, loP, θ);
+                x = r * Math.Cos(θ);
+                y = r * Math.Sin(θ);
+                points[i] = new Vector2(x, y);
+            }
+            //lastPoint:
+            θ = endAng;
+            r = EllipseMath.RadiusFromFocal(semiMaj, eccentricity, loP, θ);
+            points[^1] = endPnt;
 
             return points;
         }
-        
+
         
 
         /// <summary>

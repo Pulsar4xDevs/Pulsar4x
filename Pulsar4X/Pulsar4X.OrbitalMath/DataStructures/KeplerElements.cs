@@ -14,6 +14,7 @@ namespace Pulsar4X.Orbital
         
         /// <summary>
         /// SemiMajorAxis in Metres
+        /// Will be negative for Hyperbola!!!
         /// </summary>
         /// <remarks>a</remarks>
         public double SemiMajorAxis;

@@ -79,8 +79,8 @@ public class NewtonSimpleProcessor : IHotloopProcessor
             var massRemoved = CargoTransferProcessor.AddRemoveCargoMass(entity, fuel, -fuelUsed);
 
             var newmass = massTotal_Kg - massRemoved;
-            
-            OrbitDB newOrbit = OrbitDB.FromKeplerElements(newtonMoveDB.SOIParent, newmass, tgtTraj, dateTimeNow);
+            var soi = newtonMoveDB.OwningEntity.GetSOIParentEntity();
+            OrbitDB newOrbit = OrbitDB.FromKeplerElements(soi, newmass, tgtTraj, dateTimeNow);
             entity.SetDataBlob(newOrbit);
             OrbitProcessor.UpdateOrbit(entity, entity.GetDataBlob<OrbitDB>().Parent.GetDataBlob<PositionDB>(), dateTimeFuture);
             newtonMoveDB.IsComplete = true;
@@ -106,6 +106,17 @@ public class NewtonSimpleMoveDB : BaseDataBlob
     public bool IsComplete = false;
     public Entity SOIParent { get; internal set; }
     public double ParentMass { get; internal set; }
+
+    public NewtonSimpleMoveDB(Entity SoiParent, KeplerElements start, KeplerElements end, DateTime onDateTime)
+    {
+        LastProcessDateTime = onDateTime;
+        ActionOnDateTime = onDateTime;
+        CurrentTrajectory = start;
+        TargetTrajectory = end;
+        SOIParent = SOIParent;
+        ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
+    }
+    
     public override object Clone()
     {
         throw new NotImplementedException();

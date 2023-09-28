@@ -209,7 +209,7 @@ public static class RenderManuverLines
         {
             (KeplerElements ke, Vector2 startPos) item = data[index];
             double le = item.ke.LinearEccentricity;
-
+            double e = item.ke.Eccentricity;
             double lop = item.ke.LoAN + item.ke.AoP;
             double a = item.ke.SemiMajorAxis;
             double b = item.ke.SemiMinorAxis;
@@ -218,7 +218,7 @@ public static class RenderManuverLines
             if (index < data.Count - 1)
                 endPos = data[index + 1].startPos; 
             
-            var kp = CreatePrimitiveShapes.KeplerPoints(lop, a, b, res, startPos, endPos);
+            var kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
             arraylist.Add(kp);
             pointCount += kp.Length;
         }
@@ -253,7 +253,7 @@ public static class RenderManuverLines
         {
             (KeplerElements ke, Vector2 startPos) item = data[index];
             double le = item.ke.LinearEccentricity;
-
+            double e = item.ke.Eccentricity;
             double lop = item.ke.LoAN + item.ke.AoP;
             double a = item.ke.SemiMajorAxis;
             double b = item.ke.SemiMinorAxis;
@@ -262,7 +262,7 @@ public static class RenderManuverLines
             if (index < data.Count - 1)
                 endPos = data[index + 1].startPos; 
             
-            var kp = CreatePrimitiveShapes.KeplerPoints(lop, a, b, res, startPos, endPos);
+            var kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
             arraylist.Add(kp);
             pointCount += kp.Length;
         }
