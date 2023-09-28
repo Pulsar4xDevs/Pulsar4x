@@ -38,11 +38,11 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Separator();
                     DisplayHelpers.PrintRow("Type", bodyInfoDb.BodyType.ToDescription());
                     DisplayHelpers.PrintRow("Tectonic Activity", bodyInfoDb.Tectonics.ToDescription());
-                    DisplayHelpers.PrintRow("Gravity", bodyInfoDb.Gravity.ToString("#"));
+                    DisplayHelpers.PrintRow("Gravity", Stringify.Velocity(bodyInfoDb.Gravity));
                     DisplayHelpers.PrintRow("Temperature", bodyInfoDb.BaseTemperature.ToString("#.#") + " C");
-                    DisplayHelpers.PrintRow("Length of Day", bodyInfoDb.LengthOfDay.ToString("hh") + " hours");
-                    DisplayHelpers.PrintRow("Tilt", bodyInfoDb.AxialTilt.ToString("#"));
-                    DisplayHelpers.PrintRow("Magnetic Field", bodyInfoDb.MagneticField.ToString("#"));
+                    DisplayHelpers.PrintRow("Length of Day", bodyInfoDb.LengthOfDay.TotalHours + " hours");
+                    DisplayHelpers.PrintRow("Tilt", bodyInfoDb.AxialTilt.ToString("#") + "°");
+                    DisplayHelpers.PrintRow("Magnetic Field", bodyInfoDb.MagneticField.ToString("#") + " μT");
                     DisplayHelpers.PrintRow("Radiation Level", bodyInfoDb.RadiationLevel.ToString("#"));
                     DisplayHelpers.PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), separator: false);
                 }

@@ -8,7 +8,7 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Display(this MineralsDB mineralsDB, EntityState entityState, GlobalUIState uiState)
         {
-            var minerals = entityState.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList();
+            var minerals = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList();
 
             if(ImGui.BeginTable("###MineralTable" + entityState.Entity.Guid, 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {

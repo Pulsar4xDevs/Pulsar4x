@@ -15,7 +15,18 @@ namespace Pulsar4X.Engine.Sol
         {
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
-            SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.306f };
+            SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB {
+                BodyType = BodyType.Terrestrial,
+                SupportsPopulations = true,
+                Albedo = 0.306f,
+                Gravity = 9.8,
+                LengthOfDay = TimeSpan.FromHours(24),
+                AxialTilt = 23.439f,
+                MagneticField = 45, // 25 to 65 according to: https://en.wikipedia.org/wiki/Earth%27s_magnetic_field
+                RadiationLevel = 0,
+                AtmosphericDust = 0
+            };
+
             MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius_AU(5.9726E24, Distance.KmToAU(6378.1));
             NameDB planetNameDB = new NameDB("Earth");
             double planetSemiMajorAxisAU = 1.00000011;
