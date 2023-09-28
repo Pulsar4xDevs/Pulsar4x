@@ -140,7 +140,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.TableNextColumn();
                     ImGui.Text(mineralData.Name);
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip(mineralData.Description);
+                        DisplayHelpers.DescriptiveTooltip(mineralData.Name, "Mineral", mineralData.Description);
                     ImGui.TableNextColumn();
                     if(stockpileData != null)
                     {
@@ -154,12 +154,12 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("0");
                     }
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Amount of " + mineralData.Name + " (in tons) available for use in the colonies stockpile.");
+                        ImGui.SetTooltip("Amount of " + mineralData.Name + " available for use in the colony stockpile.");
 
                     ImGui.TableNextColumn();
                     ImGui.Text(mineral.Amount.ToString("#,###,###,###,###,###,##0"));
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Amount of " + mineralData.Name + " (in tons) available that can be mined from this colony.");
+                        ImGui.SetTooltip("Amount of " + mineralData.Name + " available that can be mined from this colony.");
                     ImGui.TableNextColumn();
                     ImGui.Text(mineral.Accessibility.ToString("0.00"));
                     if(ImGui.IsItemHovered())
@@ -169,7 +169,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         ImGui.Text(annualProduction.ToString("#,###,###"));
                         if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip("Annual production of " + mineralData.Name + " (in tons) from this colony.");
+                            ImGui.SetTooltip("Annual production of " + mineralData.Name + " from this colony.");
                     }
                     else
                     {
