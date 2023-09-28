@@ -1,0 +1,202 @@
+[
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "passive-sensor",
+      "Name": "Passive Sensor",
+      "Formulas": {
+        "Description": "Detects emissions and reflections from other objects",
+        "Mass": "Ability('Mass')",
+        "Volume": "Ability('Mass')",
+        "HTK": "Max(1, Ability('Mass') / 100)",
+        "CrewReq": "[Mass]",
+        "ResearchCost": "[Mass] * 2",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "stainless-steel": "[Mass] * 0.5",
+        "plastic": "[Mass] * 0.2",
+        "aluminium": "[Mass] * 0.1",
+        "copper": "[Mass] * 0.1"
+      },
+      "ComponentType": "Sensor",
+      "MountType": "PlanetInstallation, ShipComponent, ShipCargo, Fighter",
+      "IndustryTypeID": "component-construction",
+      "CargoTypeID": "general-storage",
+      "Attributes": [
+        {
+          "Name": "Antenna Size",
+          "Units": "m^2",
+          "DescriptionFormula": "'Gives an effective area of:  '",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "2500",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "1.25"
+        },
+        {
+          "Name": "Effective Size",
+          "Units": "m^2",
+          "GuiHint": "None",
+          "AttributeFormula": "Ability('Antenna Size') * TechData('tech-antenna-efficiency')"
+        },
+        {
+          "Name": "Ideal Detection Wavelength",
+          "Units": "nm",
+          "DescriptionFormula": "'The wavelength this sensor is most efficient at detecting'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "1e12",
+          "MinFormula": "0.01",
+          "StepFormula": "1",
+          "AttributeFormula": "600"
+        },
+        {
+          "Name": "Detection Bandwidth",
+          "Units": "nm",
+          "DescriptionFormula": "'How far from the ideal wavelength will this still detect a signal'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "TechData('tech-antenna-bandwidth')",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "250"
+        },
+        {
+          "Name": "Efficiency",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "1 / (Ability('Detection Bandwidth') / TechData('tech-antenna-bandwidth') )"
+        },
+        {
+          "Name": "Sensitivity at Ideal Wavelength",
+          "Units": "W",
+          "DescriptionFormula": "'Smallest signal this can detect at the ideal wavelength, lower is better.",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "TechData('tech-antenna-sensitivity') / (Ability('Effective Size') * Ability('Effective Size') * Ability('Efficiency'))"
+        },
+        {
+          "Name": "Sensitivity at Worst Wavelength",
+          "Units": "W",
+          "DescriptionFormula": "'Smallest signal this can detect at the worst wavelength, lower is better.'",
+          "GuiHint": "GuiTextDisplay",
+          "AttributeFormula": "TechData('tech-antenna-sensitivity') / (Ability('Effective Size') * Ability('Effective Size') * Ability('Efficiency') * 0.1)"
+        },
+        {
+          "Name": "Resolution",
+          "Units": "MegaPixel",
+          "DescriptionFormula": "'How much detail it can get from a detection. affects likelyhood of component detection etc. '",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "1000",
+          "MinFormula": "0.1",
+          "StepFormula": "1",
+          "AttributeFormula": "1"
+        },
+        {
+          "Name": "Scan Time",
+          "Units": "s",
+          "DescriptionFormula": "'how long it takes to complete a full scan'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "MaxFormula": "86400",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "3600"
+        },
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass Calculation'",
+          "GuiHint": "None",
+          "AttributeFormula": "90 + 10 * Ability('Antenna Size') * Ability('Antenna Size')"
+        },
+        {
+          "Name": "DatablobArguments",
+          "DescriptionFormula": "'(double peakWaveLength, double bandwidth, double bestSensitivity, double worstSensitivity, double resolution, double scanTime)'",
+          "GuiHint": "None",
+          "AttributeFormula": "AtbConstrArgs(Ability('Ideal Detection Wavelength'), Ability('Detection Bandwidth'), Ability('Sensitivity at Ideal Wavelength'), Ability('Sensitivity at Worst Wavelength'), Ability('Resolution'), Ability('Scan Time'))",
+          "AttributeType": "Pulsar4X.Datablobs.SensorReceiverAtbDB"
+        }
+      ]
+    }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "beam-fire-control",
+      "Name": "BeamFireControl",
+      "Formulas": {
+        "Description": "",
+        "Mass": "Ability('Mass')",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "[Mass]",
+        "ResearchCost": "[Mass]",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "duranium": "[Mass]"
+      },
+      "ComponentType": "Weapon",
+      "MountType": "ShipComponent, ShipCargo",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Attributes": [
+        {
+          "Name": "Range",
+          "Units": "kkm",
+          "DescriptionFormula": "'in kkm'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "175",
+          "MinFormula": "10",
+          "StepFormula": "5",
+          "AttributeFormula": "20"
+        },
+        {
+          "Name": "Tracking Speed",
+          "Units": "km/s",
+          "DescriptionFormula": "'in km/s'",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "25000",
+          "MinFormula": "1250",
+          "StepFormula": "250",
+          "AttributeFormula": "5000"
+        },
+        {
+          "Name": "Size vs Range",
+          "Units": "SVR",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "4",
+          "MinFormula": "0.25",
+          "StepFormula": "0.25",
+          "AttributeFormula": "1"
+        },
+        {
+          "Name": "Size vs TrackingSpeed",
+          "Units": "SVTS",
+          "GuiHint": "GuiSelectionMaxMin",
+          "GuidDictionary": {},
+          "MaxFormula": "4",
+          "MinFormula": "0.25",
+          "StepFormula": "0.25",
+          "AttributeFormula": "1"
+        },
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "GuiHint": "None",
+          "GuidDictionary": {},
+          "AttributeFormula": "(Ability('Range') + Ability('Tracking Speed') / 100) * Ability('Size vs Range') *  Ability('Size vs TrackingSpeed')"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "GuidDictionary": {},
+          "AttributeFormula": "AtbConstrArgs(Ability('Range'), Ability('Tracking Speed'))",
+          "AttributeType": "Pulsar4X.Datablobs.BeamFireControlAtbDB"
+        }
+      ]
+    }
+  }
+]

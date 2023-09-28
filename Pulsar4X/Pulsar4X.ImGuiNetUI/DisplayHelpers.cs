@@ -1,6 +1,8 @@
 using System;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -77,7 +79,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        public static void DescriptiveTooltip(string name, string type, string description, bool hideTypeIfSameAsName = false)
+        public static void DescriptiveTooltip(string name, string type, string description, string metaInfo = "", bool hideTypeIfSameAsName = false)
         {
             if(ImGui.IsItemHovered())
             {
@@ -94,13 +96,24 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text(type);
                     ImGui.PopStyleColor();
                 }
-                if(description.IsNotNullOrEmpty())
+                var showDescription = description.IsNotNullOrEmpty();
+                var showMetaInfo = metaInfo.IsNotNullOrEmpty();
+
+                if(showDescription || showMetaInfo)
                 {
                     ImGui.Separator();
-                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.TextWrapped(description);
-                    ImGui.PopStyleColor();
                 }
+
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
+                if(showDescription)
+                {
+                    ImGui.TextWrapped(description);
+                }
+                if(showMetaInfo)
+                {
+                    ImGui.Text(metaInfo);
+                }
+                ImGui.PopStyleColor();
                 ImGui.EndTooltip();
             }
         }

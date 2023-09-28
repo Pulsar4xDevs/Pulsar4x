@@ -1,9 +1,12 @@
 ﻿using System;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 using Vector2 = Pulsar4X.Orbital.Vector2;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -93,7 +96,7 @@ namespace Pulsar4X.SDL2UI
 
             OrderingEntityState = entityState;
             _smMode = smMode;
-            _strictNewtonMode = StaticRefLib.Game.Settings.StrictNewtonion;
+            _strictNewtonMode = entityState.Entity.Manager.Game.Settings.StrictNewtonion;
             _displayText = "Warp Order: " + OrderingEntityState.Name;
             _tooltipText = "Select target to orbit";
             CurrentState = States.NeedsTarget;
@@ -257,6 +260,7 @@ namespace Pulsar4X.SDL2UI
         {
 
             WarpMoveCommand.CreateCommand(
+                _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods,
                 _uiState.Faction.Guid,
                 OrderingEntityState.Entity,
                 TargetEntity.Entity,
@@ -269,11 +273,12 @@ namespace Pulsar4X.SDL2UI
         }
         void ActionAddDB()
         {
-            _uiState.SpaceMasterVM.SMSetOrbitToEntity(
-                OrderingEntityState.Entity, 
-                TargetEntity.Entity, 
-                _orbitWidget.Periapsis.Length(), 
-                _uiState.PrimarySystemDateTime);
+            // FIXME:
+            // _uiState.SpaceMasterVM.SMSetOrbitToEntity(
+            //     OrderingEntityState.Entity, 
+            //     TargetEntity.Entity, 
+            //     _orbitWidget.Periapsis.Length(), 
+            //     _uiState.PrimarySystemDateTime);
             CloseWindow();
         }
 

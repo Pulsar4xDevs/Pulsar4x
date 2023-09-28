@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing.Printing;
-using System.Linq;
-using System.Numerics;
 using ImGuiNET;
-using Microsoft.Win32;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.Industry;
+using Pulsar4X.Engine;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine.Industry;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Engine.Orders;
+using Pulsar4X.Engine.Designs;
 using Pulsar4X.SDL2UI;
-using SDL2;
 using Vector2 = System.Numerics.Vector2;
-using Vector3 = Pulsar4X.Orbital.Vector3;
 
 
 namespace Pulsar4X.ImGuiNetUI.EntityManagement
@@ -18,23 +17,23 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
     public class IndustryPannel2 : UpdateWindowState
     {
-        private Guid _factionID;
+        private string _factionID;
         private FactionInfoDB _factionInfoDB;
-        Dictionary<Guid, (Guid[] itemIDs, string[] itemNames) > _contructablesByPline = new Dictionary<Guid, (Guid[], string[])>();
+        Dictionary<string, (string[] itemIDs, string[] itemNames) > _contructablesByPline = new ();
         private IndustryJob _newConJob;
-        private (Guid pline, int item) _newjobSelectionIndex = (Guid.Empty, 0);
+        private (string pline, int item) _newjobSelectionIndex = (String.Empty, 0);
         private int _newJobbatchCount = 1;
         private bool _newJobRepeat = false;
         private bool _newJobAutoInstall = true;
-        private Dictionary<Guid,IndustryAbilityDB.ProductionLine> _prodLines;
+        private Dictionary<string,IndustryAbilityDB.ProductionLine> _prodLines;
 
-        private Guid _selectedProdLine;
+        private string _selectedProdLine;
         private int _selectedExistingIndex = -1;
         private IndustryJob _selectedExistingConJob
         {
             get
             {
-                if (_selectedProdLine != Guid.Empty
+                if (_selectedProdLine != String.Empty
                     && _selectedExistingIndex > -1
                     && _prodLines[_selectedProdLine].Jobs.Count > _selectedExistingIndex)
                 {
@@ -46,7 +45,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         }
 
         private IndustryJob _lastClickedJob { get; set; }
-        private IConstrucableDesign _lastClickedDesign;
+        private IConstructableDesign _lastClickedDesign;
 
         private Entity _selectedEntity;
         private IndustryAbilityDB _industryDB;
@@ -75,16 +74,16 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             int count = _factionInfoDB.IndustryDesigns.Count;
             //_constructableDesigns = new IConstrucableDesign[count];
             var constructablesNames = new string[count];
-            var constructablesIDs = new Guid[count];
+            var constructablesIDs = new string[count];
 
             int i = 0;
-            Dictionary<Guid, List<int>> _constructablesIndexesByType = new Dictionary<Guid, List<int>>();
+            Dictionary<string, List<int>> _constructablesIndexesByType = new Dictionary<string, List<int>>();
             foreach (var kvp in _factionInfoDB.IndustryDesigns)
             {
                 //_constructableDesigns[i] = kvp.Value;
                 constructablesNames[i] = kvp.Value.Name;
                 constructablesIDs[i] = kvp.Key;
-                Guid typeID = kvp.Value.IndustryTypeID;
+                string typeID = kvp.Value.IndustryTypeID;
 
                 if(!_constructablesIndexesByType.ContainsKey(typeID))
                     _constructablesIndexesByType.Add(typeID, new List<int>());
@@ -95,9 +94,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             foreach (var plineKVP in _prodLines)
             {
-                Guid componentID = plineKVP.Key;
+                string componentID = plineKVP.Key;
                 var pline = plineKVP.Value;
-                List<Guid> itemIDs = new List<Guid>();
+                List<string> itemIDs = new List<string>();
                 List<string> itemNames = new List<string>();
                 foreach (var typeID in pline.IndustryTypeRates.Keys)
                 {
@@ -117,7 +116,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
 
 
-        Guid SelectedConstrucableID
+        string SelectedConstrucableID
         {
 
             get
@@ -222,13 +221,13 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             if (ImGui.ImageButton(_state.Img_Up(), new Vector2(16, 8)) && _selectedExistingConJob != null)
             {
                 var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, -1);
-                StaticRefLib.OrderHandler.HandleOrder(cmd);
+                _uiState.Game.OrderHandler.HandleOrder(cmd);
             }
 
             if (ImGui.ImageButton(_state.Img_Down(), new Vector2(16, 8)) && _selectedExistingConJob != null)
             {
                 var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID, 1);
-                StaticRefLib.OrderHandler.HandleOrder(cmd);
+                _uiState.Game.OrderHandler.HandleOrder(cmd);
             }
 
             ImGui.EndGroup();
@@ -240,7 +239,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 var jobrepeat = _selectedExistingConJob.Auto;
 
                 var cmd = IndustryOrder2.CreateEditJobOrder(_factionID, _selectedEntity, _selectedProdLine,_selectedExistingConJob.JobID, jobcount, !jobrepeat);
-                StaticRefLib.OrderHandler.HandleOrder(cmd);
+                _uiState.Game.OrderHandler.HandleOrder(cmd);
             }
 
             ImGui.SameLine();
@@ -249,7 +248,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 //new ConstructCancelJob(_uiState.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
                 var cmd = IndustryOrder2.CreateCancelJobOrder(_factionID, _selectedEntity, _selectedProdLine, _selectedExistingConJob.JobID);
 
-                StaticRefLib.OrderHandler.HandleOrder(cmd);
+                _uiState.Game.OrderHandler.HandleOrder(cmd);
             }
 
             if (_lastClickedDesign != null)
@@ -280,7 +279,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
                         if (ImGui.Button("Launch to Low Orbit"))
                         {
-                            LaunchShipCmd.CreateCommand(_factionID, _selectedEntity, _selectedProdLine, _lastClickedJob.JobID);
+                            LaunchShipCommand.CreateCommand(_factionID, _selectedEntity, _selectedProdLine, _lastClickedJob.JobID);
                         }
                         //ImGui.SameLine();
 
@@ -300,7 +299,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         void NewJobDisplay()
         {
             //ImGui.BeginChild("InitialiseJob", new Vector2(404, 84), true, ImGuiWindowFlags.ChildWindow);
-            if(_newjobSelectionIndex.pline != Guid.Empty)
+            if(_newjobSelectionIndex.pline != String.Empty)
             {
                 int curItemIndex = _newjobSelectionIndex.item;
 
@@ -332,7 +331,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                         _newConJob.InstallOn = _selectedEntity;
                     _lastClickedJob = _newConJob;
                     _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
-                    StaticRefLib.OrderHandler.HandleOrder(cmd);
+                    _uiState.Game.OrderHandler.HandleOrder(cmd);
                 }
 
             }
@@ -352,7 +351,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.NextColumn();
             foreach (var item in selectedJob.ResourcesRequiredRemaining)
             {
-                ICargoable cargoItem = StaticRefLib.StaticData.CargoGoods.GetAny(item.Key);
+                ICargoable cargoItem = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(item.Key);
                 if (cargoItem == null)
                     cargoItem = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[item.Key];
                 ImGui.Text(cargoItem.Name);

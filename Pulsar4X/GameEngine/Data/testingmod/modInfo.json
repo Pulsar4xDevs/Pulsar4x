@@ -1,0 +1,9 @@
+{
+    "Author": "Pulsar4x Devs",
+    "ModName": "Pulsar4x-Testing",
+    "Version": "0.1",
+    "Namespace": "Pulsar4x-Testing",
+    "DataFiles": [
+        "testData.json"
+    ]
+}

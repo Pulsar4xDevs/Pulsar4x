@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
 using ImGuiNET;
-using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -86,8 +80,8 @@ namespace Pulsar4X.SDL2UI
                 //displays the size in meters of the current screen area account for zoom and window dimensions
                 var windowCornerInWorldCoordinate = _uiState.Camera.WorldCoordinate_m((int)_uiState.MainWinSize.X, (int)_uiState.MainWinSize.Y);
                 ImGui.Text("Current screen is:");
-                ImGui.Text(ECSLib.Stringify.Distance(((windowCornerInWorldCoordinate.X - _uiState.Camera.CameraWorldPosition.X)*2))+" wide.");
-                ImGui.Text(ECSLib.Stringify.Distance((-(windowCornerInWorldCoordinate.Y - _uiState.Camera.CameraWorldPosition.Y)*2))+" tall.");
+                ImGui.Text(Stringify.Distance(((windowCornerInWorldCoordinate.X - _uiState.Camera.CameraWorldPosition.X)*2))+" wide.");
+                ImGui.Text(Stringify.Distance((-(windowCornerInWorldCoordinate.Y - _uiState.Camera.CameraWorldPosition.Y)*2))+" tall.");
                 //ImGui.Text((_uiState.Camera.WorldCoordinate_m((int)_uiState.Camera.ViewPortSize.X, (int)_uiState.Camera.ViewPortSize.Y).X - _uiState.Camera.CameraWorldPosition_m.X).ToString());
                 var mpp = _uiState.Camera.WorldDistance_m(1);
                 /* I can't math. why can't I math?

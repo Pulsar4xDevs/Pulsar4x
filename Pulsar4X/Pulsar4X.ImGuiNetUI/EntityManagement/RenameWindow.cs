@@ -1,6 +1,8 @@
 ﻿using System;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.SDL2UI
 {

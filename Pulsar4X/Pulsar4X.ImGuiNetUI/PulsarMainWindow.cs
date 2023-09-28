@@ -4,10 +4,9 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
 using SDL2;
 using Microsoft.Extensions.Configuration;
-using Pulsar4X.Modding;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -67,11 +66,6 @@ namespace Pulsar4X.SDL2UI
                 if(isMaximized)
                     SDL.SDL_MaximizeWindow(_Handle);
             }
-
-            ModLoader modLoader = new ModLoader();
-            ModDataStore modDataStore = new ModDataStore();
-            modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
-            modLoader.LoadModManifest("Data/testingmod/modInfo.json", modDataStore);
         }
 
         private bool MyEventHandler(SDL2Window window, SDL.SDL_Event e)
@@ -220,9 +214,9 @@ namespace Pulsar4X.SDL2UI
             }
 
             //update and refresh state for GameDateTimechange
-            if(StaticRefLib.Game != null)
+            if(_state.Game != null)
             {
-                DateTime curTime = StaticRefLib.CurrentDateTime;
+                DateTime curTime = _state.Game.TimePulse.GameGlobalDateTime;
                 if (curTime != _state.LastGameUpdateTime)
                 {
                     foreach (var item in _state.UpdateableWindows)

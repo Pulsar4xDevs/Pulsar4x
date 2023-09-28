@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Interfaces;
 using Pulsar4X.Orbital;
 using SDL2;
 
@@ -27,7 +28,7 @@ namespace Pulsar4X.SDL2UI
     {
         internal bool DebugShowCenter = false;
         
-        protected ECSLib.IPosition _positionDB;
+        protected IPosition _positionDB;
         protected Orbital.Vector3 _worldPosition_m { get; set; }
         public Orbital.Vector3 WorldPosition_AU
         {
@@ -58,7 +59,7 @@ namespace Pulsar4X.SDL2UI
         public float Scale = 1;
         public float Heading = 0;
         public bool InMeters = false;
-        public Icon(ECSLib.IPosition positionDB)
+        public Icon(IPosition positionDB)
         {
             _positionDB = positionDB;
             positionByDB = true;
@@ -69,7 +70,7 @@ namespace Pulsar4X.SDL2UI
             positionByDB = false;
         }
 
-        public void ResetPositionDB(ECSLib.IPosition positionDB)
+        public void ResetPositionDB(IPosition positionDB)
         {
             _positionDB = positionDB;
             positionByDB = true;
@@ -209,7 +210,7 @@ namespace Pulsar4X.SDL2UI
             set { _worldPosition = value; }
         }
 
-        public SimpleCircle(ECSLib.IPosition positionDB, double radius, SDL.SDL_Color colour)
+        public SimpleCircle(IPosition positionDB, double radius, SDL.SDL_Color colour)
         {
             _positionDB = positionDB;
             positionByDB = true;
@@ -266,7 +267,7 @@ namespace Pulsar4X.SDL2UI
     {
         Shape _shape;
         Shape _drawShape;
-        protected ECSLib.IPosition _positionDB;
+        protected IPosition _positionDB;
         protected Orbital.Vector3 _worldPosition;
         public SDL.SDL_Point ViewScreenPos;
 
@@ -278,7 +279,7 @@ namespace Pulsar4X.SDL2UI
             set { _worldPosition = value; }
         }
 
-        public SimpleLine(ECSLib.IPosition positionDB, Orbital.Vector2 toPoint, SDL.SDL_Color colour)
+        public SimpleLine(IPosition positionDB, Orbital.Vector2 toPoint, SDL.SDL_Color colour)
         {
             _positionDB = positionDB;
             positionByDB = true;

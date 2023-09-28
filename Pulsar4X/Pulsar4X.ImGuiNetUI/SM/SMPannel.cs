@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -34,7 +36,7 @@ namespace Pulsar4X.SDL2UI
         
         private SMPannel() 
         {
-            _uiState.SpaceMasterVM = new SpaceMasterVM();
+            //_uiState.SpaceMasterVM = new SpaceMasterVM();
             HardRefresh();
         }
 
@@ -53,7 +55,7 @@ namespace Pulsar4X.SDL2UI
             game = _uiState.Game;
             _starSystems = new StarSystem[_uiState.Game.Systems.Count];
             int i = 0;
-            foreach (var starsys in _uiState.Game.Systems.Values)
+            foreach (var starsys in _uiState.Game.Systems.Select(kvp => kvp.Value))
             {
                 _starSystems[i] = starsys;
                 
@@ -110,7 +112,7 @@ namespace Pulsar4X.SDL2UI
                     
                     ImGui.NextColumn();
                     var ownerFactionID = _systemEntities[i].FactionOwnerID;
-                    if(ownerFactionID != Guid.Empty)
+                    if(ownerFactionID != String.Empty)
                     {
                         var ownerFaction = game.GlobalManager.GetGlobalEntityByGuid(ownerFactionID);
                         var factionName = ownerFaction.GetDataBlob<NameDB>().OwnersName;

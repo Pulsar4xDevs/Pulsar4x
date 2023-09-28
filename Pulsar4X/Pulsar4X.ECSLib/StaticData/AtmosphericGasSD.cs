@@ -1,5 +1,4 @@
-﻿using Pulsar4X.Modding;
-
+﻿
 namespace Pulsar4X.ECSLib
 {
     [StaticData(false)]

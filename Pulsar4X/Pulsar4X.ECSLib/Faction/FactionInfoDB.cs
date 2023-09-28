@@ -11,7 +11,6 @@ namespace Pulsar4X.ECSLib
 {
     public class FactionInfoDB : BaseDataBlob, IGetValuesHash
     {
-
         [JsonProperty]
         public List<Entity> Species { get; internal set; } = new List<Entity>();
 

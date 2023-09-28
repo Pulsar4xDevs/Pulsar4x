@@ -5,9 +5,10 @@ using System.Drawing.Imaging;
 using System.Linq;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Damage;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
 using SDL2;
 

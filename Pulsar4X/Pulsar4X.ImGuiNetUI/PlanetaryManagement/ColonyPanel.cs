@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.Industry;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine.Orders;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 using Vector2 = System.Numerics.Vector2;
+using Pulsar4X.Blueprints;
 
 
 namespace Pulsar4X.SDL2UI
@@ -21,8 +23,8 @@ namespace Pulsar4X.SDL2UI
         private IndustryPannel2 _industryPannel;
 
         CargoListPannelSimple _cargoList;
-        StaticDataStore _staticData;
-        private ColonyPanel(StaticDataStore staticData, EntityState selectedEntity)
+        FactionDataStore _staticData;
+        private ColonyPanel(FactionDataStore staticData, EntityState selectedEntity)
         {
             _selectedEntity = selectedEntity;
             _cargoList = new CargoListPannelSimple(staticData, selectedEntity);
@@ -30,7 +32,7 @@ namespace Pulsar4X.SDL2UI
             
         }
 
-        public static ColonyPanel GetInstance(StaticDataStore staticData, EntityState selectedEntity)
+        public static ColonyPanel GetInstance(FactionDataStore staticData, EntityState selectedEntity)
         {
             ColonyPanel instance;
             if (selectedEntity.CmdRef == null)
@@ -142,12 +144,12 @@ namespace Pulsar4X.SDL2UI
 
     public class OverViewPannel
     {
-        private static Guid _entityID;
-        private static Dictionary<Guid, IndustryTypeSD> _industryTypes;
+        private static string _entityID;
+        private static Dictionary<string, IndustryTypeBlueprint> _industryTypes;
         public static void Setup(EntityState selectedEntity)
         {
             _entityID = selectedEntity.Entity.Guid;
-            _industryTypes = Pulsar4X.ECSLib.StaticRefLib.StaticData.IndustryTypes;
+            _industryTypes = new (selectedEntity.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.IndustryTypes);
             
         }
         
@@ -161,12 +163,12 @@ namespace Pulsar4X.SDL2UI
     public class FacilitiesViewPannel
     {
 
-        private static Guid _entityID;
-        private static Dictionary<Guid, IndustryTypeSD> _industryTypes;
+        private static string _entityID;
+        private static Dictionary<string, IndustryTypeBlueprint> _industryTypes;
         public static void Setup(EntityState selectedEntity)
         {
             _entityID = selectedEntity.Entity.Guid;
-            _industryTypes = Pulsar4X.ECSLib.StaticRefLib.StaticData.IndustryTypes;
+            _industryTypes = new (selectedEntity.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.IndustryTypes);
             
         }
 

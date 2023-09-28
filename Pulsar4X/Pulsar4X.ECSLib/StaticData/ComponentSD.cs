@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.ECSLib.Industry;
-using Pulsar4X.Modding;
 
 namespace Pulsar4X.ECSLib
 {
@@ -20,7 +19,7 @@ namespace Pulsar4X.ECSLib
         public string ResearchCostFormula;
         public string CreditCostFormula;
         public string BuildPointCostFormula;
-        //a string which is used in the ui for display and sorting. 
+        //a string which is used in the ui for display and sorting.
         public string ComponentType;
         //if it can be fitted to a ship as a ship component, on a planet as an installation, can be cargo etc.
         public ComponentMountType MountType;
@@ -45,14 +44,14 @@ namespace Pulsar4X.ECSLib
         //public string[] EnumItems;
         //public string[] EnumTechReq;
         //public string[] EnumFormula;
-        
+
         //used if GuiHint is GuiMinMax
         public string MaxFormula;
         public string MinFormula;
         public string StepFormula;
-        
 
-        //if guihint is selection list or minmax, this should point to a default value. 
+
+        //if guihint is selection list or minmax, this should point to a default value.
         public string AttributeFormula;
 
         public string AttributeType;

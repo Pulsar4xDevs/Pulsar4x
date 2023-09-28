@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,7 +61,7 @@ namespace Pulsar4X.SDL2UI
         void TreeGen(Entity _CurrentBody, Entity _SelectedBody)
         {
             SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
-            Dictionary<System.Guid, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithPosition;
+            var _NamedEntityStates = _StarSystemState.EntityStatesWithPosition;
 
             if (_NamedEntityStates.ContainsKey(_CurrentBody.Guid))
             {

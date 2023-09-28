@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using ImGuiSDL2CS;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Atb;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
+using Pulsar4X.Extensions;
 using Pulsar4X.SDL2UI.Combat;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 
@@ -42,7 +45,7 @@ namespace Pulsar4X.SDL2UI
 
         private string _selectedEntityName;
 
-        SensorReceverAtbDB _selectedReceverAtb;
+        SensorReceiverAtbDB _selectedReceverAtb;
 
         SystemState _systemState;
         public SystemState systemState{get{return _systemState;} set{_systemState = value;}}
@@ -268,46 +271,46 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("Event Message");
                         ImGui.NextColumn();
 
-                        foreach (var gameEvent in StaticRefLib.EventLog.GetAllEvents())
-                        {
+                        // foreach (var gameEvent in StaticRefLib.EventLog.GetAllEvents())
+                        // {
 
-                            string entityStr = "";
-                            if (gameEvent.Entity != null)
-                            {
-                                if (gameEvent.EntityName.IsNullOrWhitespace() && gameEvent.Entity.IsValid)
-                                {
-                                    if (gameEvent.Entity.HasDataBlob<NameDB>())
-                                        entityStr = gameEvent.Entity.GetDataBlob<NameDB>().DefaultName;
-                                    else
-                                        entityStr = gameEvent.Entity.Guid.ToString();
-                                }
-                                else
-                                {
-                                    entityStr = gameEvent.EntityName;
-                                }
-                            }
-
-
-                            string factionStr = "";
-                            if (gameEvent.Faction != null)
-                                if (gameEvent.Faction.HasDataBlob<NameDB>())
-                                    factionStr = gameEvent.Faction.GetDataBlob<NameDB>().DefaultName;
-                                else
-                                    factionStr = gameEvent.Faction.Guid.ToString();
-
-                            ImGui.Separator();
-                            ImGui.Text(gameEvent.Time.ToString());
-                                ImGui.NextColumn();
-                            ImGui.Text(factionStr);
-                                ImGui.NextColumn();
-                            ImGui.Text(entityStr);
-                                ImGui.NextColumn();
-                            ImGui.TextWrapped(gameEvent.Message);
-
-                                ImGui.NextColumn();
+                        //     string entityStr = "";
+                        //     if (gameEvent.Entity != null)
+                        //     {
+                        //         if (gameEvent.EntityName.IsNullOrWhitespace() && gameEvent.Entity.IsValid)
+                        //         {
+                        //             if (gameEvent.Entity.HasDataBlob<NameDB>())
+                        //                 entityStr = gameEvent.Entity.GetDataBlob<NameDB>().DefaultName;
+                        //             else
+                        //                 entityStr = gameEvent.Entity.Guid.ToString();
+                        //         }
+                        //         else
+                        //         {
+                        //             entityStr = gameEvent.EntityName;
+                        //         }
+                        //     }
 
 
-                        }
+                        //     string factionStr = "";
+                        //     if (gameEvent.Faction != null)
+                        //         if (gameEvent.Faction.HasDataBlob<NameDB>())
+                        //             factionStr = gameEvent.Faction.GetDataBlob<NameDB>().DefaultName;
+                        //         else
+                        //             factionStr = gameEvent.Faction.Guid.ToString();
+
+                        //     ImGui.Separator();
+                        //     ImGui.Text(gameEvent.Time.ToString());
+                        //         ImGui.NextColumn();
+                        //     ImGui.Text(factionStr);
+                        //         ImGui.NextColumn();
+                        //     ImGui.Text(entityStr);
+                        //         ImGui.NextColumn();
+                        //     ImGui.TextWrapped(gameEvent.Message);
+
+                        //         ImGui.NextColumn();
+
+
+                        // }
                         //ImGui.Separator();
                         //ImGui.Columns();
                         ImGui.EndChild();
@@ -576,13 +579,13 @@ namespace Pulsar4X.SDL2UI
                                     var powerDB = _selectedEntity.GetDataBlob<EnergyGenAbilityDB>();
                                     ImGui.Text("Generates " +powerDB.EnergyType.Name);
                                     ImGui.Text("Max of: " + powerDB.TotalOutputMax + "/s");
-                                    string fueltype = StaticRefLib.StaticData.CargoGoods.GetMaterial(powerDB.TotalFuelUseAtMax.type).Name;
+                                    string fueltype = SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(powerDB.TotalFuelUseAtMax.type).Name;
                                     ImGui.Text("Burning " + powerDB.TotalFuelUseAtMax.maxUse + " of "  +  fueltype);
                                     ImGui.Text("With " + powerDB.LocalFuel + " remaining reactor fuel");
 
                                     foreach (var etype in powerDB.EnergyStored)
                                     {
-                                        string etypename = StaticRefLib.StaticData.CargoGoods.GetMaterial(etype.Key).Name;
+                                        string etypename = SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(etype.Key).Name;
                                         ImGui.Text(etypename);
 
                                         ImGui.Text(etype.Value.ToString() + "/" + powerDB.EnergyStoreMax[etype.Key].ToString());
@@ -604,7 +607,7 @@ namespace Pulsar4X.SDL2UI
 
 
                                     //ImGui.Text("Energy type: " + warpDB.EnergyType);
-                                    ImGui.Text( StaticRefLib.StaticData.CargoGoods.GetMaterial(warpDB.EnergyType).Name);
+                                    ImGui.Text(SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(warpDB.EnergyType).Name);
 
                                     ImGui.Text("Creation Cost: " +warpDB.BubbleCreationCost.ToString());
                                     ImGui.Text("Sustain Cost: " +warpDB.BubbleSustainCost.ToString());
@@ -815,7 +818,7 @@ namespace Pulsar4X.SDL2UI
 
             _allEntites = new List<(string name, Entity entity, string faction)>();
 
-            foreach (var entity in StaticRefLib.Game.Factions)
+            foreach (var entity in _uiState.Game.Factions)
             {
                 addEntity(entity);
             }
@@ -833,9 +836,9 @@ namespace Pulsar4X.SDL2UI
                 if(entity.HasDataBlob<NameDB>())
                     name = entity.GetDataBlob<NameDB>().OwnersName;
                 string factionOwner = Guid.Empty.ToString();
-                if(entity.FactionOwnerID != Guid.Empty)
+                if(entity.FactionOwnerID != String.Empty)
                 {
-                    Entity factionEntity = StaticRefLib.Game.GlobalManager.GetGlobalEntityByGuid(entity.FactionOwnerID);
+                    Entity factionEntity = _uiState.Game.GlobalManager.GetGlobalEntityByGuid(entity.FactionOwnerID);
                     factionOwner = factionEntity.GetDataBlob<NameDB>().OwnersName;
                 }
                 _allEntites.Add((name, entity, factionOwner));

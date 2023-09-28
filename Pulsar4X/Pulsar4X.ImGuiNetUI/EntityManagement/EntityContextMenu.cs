@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
 using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 using Pulsar4X.SDL2UI;
@@ -18,7 +18,7 @@ namespace Pulsar4X.SDL2UI
 
         EntityState _entityState;
 
-        public EntityContextMenu(GlobalUIState state, Guid entityGuid)
+        public EntityContextMenu(GlobalUIState state, string entityGuid)
         {
             _state = state;
             //_uiState.OpenWindows.Add(this);

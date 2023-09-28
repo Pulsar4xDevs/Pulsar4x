@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Orders;
+using Pulsar4X.DataStructures;
 
 public static class OrderRegistry
 {
-    public static Dictionary<string, Func<Guid, Entity, EntityCommand>> Actions = new Dictionary<string, Func<Guid, Entity, EntityCommand>>()
+    public static Dictionary<string, Func<string, Entity, EntityCommand>> Actions = new Dictionary<string, Func<string, Entity, EntityCommand>>()
     {
         { "Move to Nearest Colony", (factionId, fleet) => MoveToNearestColonyAction.CreateCommand(factionId, fleet) },
         { "Refuel", (factionId, fleet) => new RefuelAction() },

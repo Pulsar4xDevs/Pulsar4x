@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
 using Vector3 = System.Numerics.Vector3;
 
@@ -89,7 +92,7 @@ public class ManuverNode
         var parentMass = _orderEntity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
         _sgp = GeneralMath.StandardGravitationalParameter(_totalMass + parentMass);
         var fuelTypeID = _newtonThrust.FuelType;
-        _fuelType = StaticRefLib.StaticData.CargoGoods.GetAny(fuelTypeID);
+        _fuelType = orderEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(fuelTypeID);
         _burnRate = _newtonThrust.FuelBurnRate;
         _exhaustVelocity = _newtonThrust.ExhaustVelocity;
         
@@ -250,7 +253,7 @@ public class ManuverSequence
     /// <summary>
     /// the focal point of orbits in this sequence. 
     /// </summary>
-    public ECSLib.IPosition ParentPosition = new zeroPosition();
+    public IPosition ParentPosition = new zeroPosition();
 
     class zeroPosition : IPosition
     {

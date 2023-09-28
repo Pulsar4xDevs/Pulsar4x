@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using ImGuiNET;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.DataStructures;
 
 namespace ImGuiSDL2CS {
     public static class SDL2Helper {

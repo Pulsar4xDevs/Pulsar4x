@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
+using Pulsar4X.Extensions;
+using Pulsar4X.Interfaces;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI

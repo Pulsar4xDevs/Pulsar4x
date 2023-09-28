@@ -139,15 +139,15 @@ namespace Pulsar4X.SDL2UI
             };
             ToolButtons.Add(btn);
 
-            btn = new ToolBarOption()
-            {
-                Picture = _uiState.Img_Tree(),
-                TooltipText = "Spawn ships and planets",
-                OnClick = new Action(EntitySpawnWindow.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive),
-                //Display a tree with all objects in the system
-            };
-            SMToolButtons.Add(btn);
+            // btn = new ToolBarOption()
+            // {
+            //     Picture = _uiState.Img_Tree(),
+            //     TooltipText = "Spawn ships and planets",
+            //     OnClick = new Action(EntitySpawnWindow.GetInstance().ToggleActive),
+            //     GetActive = new Func<bool>(EntitySpawnWindow.GetInstance().GetActive),
+            //     //Display a tree with all objects in the system
+            // };
+            // SMToolButtons.Add(btn);
 
             btn = new ToolBarOption()
             {

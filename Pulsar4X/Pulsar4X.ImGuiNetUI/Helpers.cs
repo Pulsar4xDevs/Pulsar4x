@@ -5,7 +5,8 @@ using System.Linq;
 using System.Reflection;
 using ImGuiNET;
 using NUnit.Framework;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
@@ -32,7 +33,7 @@ namespace Pulsar4X.SDL2UI
         private string[] _names;
         private int _index = 0;
 
-        public EntityNameSelector(Entity[] entities, NameType nameType, Guid? factionID = null)
+        public EntityNameSelector(Entity[] entities, NameType nameType, string factionID)
         {
             _entities = entities;
             _names = new string[_entities.Length];
@@ -56,7 +57,7 @@ namespace Pulsar4X.SDL2UI
             {
                 for (int i = 0; i < entities.Length; i++)
                 {
-                    _names[i] = _entities[i].GetName((Guid)factionID);
+                    _names[i] = _entities[i].GetName(factionID);
                 }
             }
 
@@ -444,7 +445,7 @@ namespace Pulsar4X.SDL2UI
 
         static string StringifyValue(double value, string format = "0.###")
         {
-            return ECSLib.Stringify.Distance(value, format);
+            return Stringify.Distance(value, format);
         }
 
         public static void Display(string Id, double value, ValueType inputType, ref DisplayType displayType, ref string displayFormat )

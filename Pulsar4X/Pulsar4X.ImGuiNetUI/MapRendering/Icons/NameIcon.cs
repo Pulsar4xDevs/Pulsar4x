@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 using SDL2;
 
 namespace Pulsar4X.SDL2UI
@@ -19,9 +20,9 @@ namespace Pulsar4X.SDL2UI
         public float Height{ get; set; }
         public float X { get { return ViewScreenPos.x; }  }
         public float Y { get { return ViewScreenPos.y; } }
-        Guid _entityGuid;
-        Guid _starSysGuid;
-        public Dictionary<Guid, string> SubNames = new Dictionary<Guid, string>();
+        string _entityGuid;
+        string _starSysGuid;
+        public Dictionary<string, string> SubNames = new Dictionary<string, string>();
         public System.Numerics.Vector2 ViewOffset { get; set; } = new System.Numerics.Vector2();
         public Rectangle ViewDisplayRect = new Rectangle();
         UserOrbitSettings.OrbitBodyType _bodyType = UserOrbitSettings.OrbitBodyType.Unknown;
@@ -60,7 +61,7 @@ namespace Pulsar4X.SDL2UI
             var nameString = entity.GetDataBlob<NameDB>().GetName(_state.Faction);
             SubNames[entity.Guid] = nameString;
         }
-        public void RemoveSubName(Guid guid)
+        public void RemoveSubName(string guid)
         {
             SubNames.Remove(guid);
         }
@@ -98,7 +99,7 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void SetUpContextMenu(Guid entityGuid)
+        private void SetUpContextMenu(string entityGuid)
         {
             _state.EntityClicked(entityGuid, _starSysGuid, MouseButtons.Alt);
             _state.ContextMenu = new EntityContextMenu(_state, entityGuid);

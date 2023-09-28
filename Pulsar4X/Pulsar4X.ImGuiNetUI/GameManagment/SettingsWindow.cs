@@ -2,10 +2,11 @@
 using ImGuiNET;
 using System.Numerics;
 using System.Collections.Generic;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
 using Pulsar4X.SDL2UI.Combat;
 using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -32,7 +33,7 @@ namespace Pulsar4X.SDL2UI
             _isThreaded = _gameSettings.EnableMultiThreading;
             _enforceSingleThread = _gameSettings.EnforceSingleThread;
             
-            _relativeOrbitVelocity = ECSLib.OrbitProcessor.UseRelativeVelocity; //TODO: feel like this should be in game settings
+            _relativeOrbitVelocity = OrbitProcessor.UseRelativeVelocity; //TODO: feel like this should be in game settings
             _strictNewtonion = _gameSettings.StrictNewtonion;
             
             _orbitalDebugWindow = OrbitalDebugWindow.GetInstance();
@@ -143,7 +144,7 @@ namespace Pulsar4X.SDL2UI
 
                         if (ImGui.Checkbox("Translate Uses relative Velocity", ref _relativeOrbitVelocity))
                         {
-                            ECSLib.OrbitProcessor.UseRelativeVelocity = _relativeOrbitVelocity;
+                            OrbitProcessor.UseRelativeVelocity = _relativeOrbitVelocity;
                         }
                         if (ImGui.IsItemHovered())
                         { 

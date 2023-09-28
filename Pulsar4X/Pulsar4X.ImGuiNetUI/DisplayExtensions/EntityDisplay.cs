@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -36,11 +38,11 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Separator();
                     DisplayHelpers.PrintRow("Type", bodyInfoDb.BodyType.ToDescription());
                     DisplayHelpers.PrintRow("Tectonic Activity", bodyInfoDb.Tectonics.ToDescription());
-                    DisplayHelpers.PrintRow("Gravity", bodyInfoDb.Gravity.ToString("#"));
+                    DisplayHelpers.PrintRow("Gravity", Stringify.Velocity(bodyInfoDb.Gravity));
                     DisplayHelpers.PrintRow("Temperature", bodyInfoDb.BaseTemperature.ToString("#.#") + " C");
-                    DisplayHelpers.PrintRow("Length of Day", bodyInfoDb.LengthOfDay.ToString("hh") + " hours");
-                    DisplayHelpers.PrintRow("Tilt", bodyInfoDb.AxialTilt.ToString("#"));
-                    DisplayHelpers.PrintRow("Magnetic Field", bodyInfoDb.MagneticField.ToString("#"));
+                    DisplayHelpers.PrintRow("Length of Day", bodyInfoDb.LengthOfDay.TotalHours + " hours");
+                    DisplayHelpers.PrintRow("Tilt", bodyInfoDb.AxialTilt.ToString("#") + "°");
+                    DisplayHelpers.PrintRow("Magnetic Field", bodyInfoDb.MagneticField.ToString("#") + " μT");
                     DisplayHelpers.PrintRow("Radiation Level", bodyInfoDb.RadiationLevel.ToString("#"));
                     DisplayHelpers.PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), separator: false);
                 }
@@ -86,9 +88,9 @@ namespace Pulsar4X.SDL2UI
         }
         public static void DisplayMining(this Entity entity, GlobalUIState uiState)
         {
-            var mineralStaticInfo = uiState.Game.StaticData.CargoGoods.GetMineralsList();
+            var mineralStaticInfo = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList();
             var minerals = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>()?.Minerals;
-            var miningRates = entity.GetDataBlob<MiningDB>()?.ActualMiningRate;
+            var miningRates = entity.HasDataBlob<MiningDB>() ? entity.GetDataBlob<MiningDB>().ActualMiningRate : new ();
             var storage = entity.GetDataBlob<VolumeStorageDB>()?.TypeStores;
 
             Vector2 topSize = ImGui.GetContentRegionAvail();
@@ -122,7 +124,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableSetupColumn("Years to Depletion");
                 ImGui.TableHeadersRow();
 
-                if(minerals == null) minerals = new Dictionary<Guid, MineralDeposit>();
+                if(minerals == null) minerals = new Dictionary<int, MineralDeposit>();
 
                 foreach(var (id, mineral) in minerals)
                 {
@@ -138,7 +140,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.TableNextColumn();
                     ImGui.Text(mineralData.Name);
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip(mineralData.Description);
+                        DisplayHelpers.DescriptiveTooltip(mineralData.Name, "Mineral", mineralData.Description);
                     ImGui.TableNextColumn();
                     if(stockpileData != null)
                     {
@@ -152,12 +154,12 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("0");
                     }
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Amount of " + mineralData.Name + " (in tons) available for use in the colonies stockpile.");
+                        ImGui.SetTooltip("Amount of " + mineralData.Name + " available for use in the colony stockpile.");
 
                     ImGui.TableNextColumn();
                     ImGui.Text(mineral.Amount.ToString("#,###,###,###,###,###,##0"));
                     if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Amount of " + mineralData.Name + " (in tons) available that can be mined from this colony.");
+                        ImGui.SetTooltip("Amount of " + mineralData.Name + " available that can be mined from this colony.");
                     ImGui.TableNextColumn();
                     ImGui.Text(mineral.Accessibility.ToString("0.00"));
                     if(ImGui.IsItemHovered())
@@ -167,7 +169,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         ImGui.Text(annualProduction.ToString("#,###,###"));
                         if(ImGui.IsItemHovered())
-                            ImGui.SetTooltip("Annual production of " + mineralData.Name + " (in tons) from this colony.");
+                            ImGui.SetTooltip("Annual production of " + mineralData.Name + " from this colony.");
                     }
                     else
                     {
@@ -234,7 +236,7 @@ namespace Pulsar4X.SDL2UI
 
         public static void DisplayLogistics(this Entity entity, EntityState entityState, GlobalUIState uiState)
         {
-            ColonyLogisticsDisplay.GetInstance(StaticRefLib.StaticData, entityState).Display();
+            ColonyLogisticsDisplay.GetInstance(entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data, entityState).Display();
         }
 
         public static void DisplayNavalAcademy(this Entity entity, EntityState entityState, GlobalUIState uiState)

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Numerics;
 using ImGuiNET;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
 using Pulsar4X.ImGuiNetUI;
 using Pulsar4X.SDL2UI;
@@ -219,7 +220,7 @@ namespace Pulsar4X.SDL2UI
                 //Menu is cargo menu
                 else if (T == typeof(CargoTransfer))
                 {
-                    var instance = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState);
+                    var instance = CargoTransfer.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
@@ -231,14 +232,14 @@ namespace Pulsar4X.SDL2UI
                 // }
                 else if (T == typeof(LogiShipWindow))
                 {
-                    var instance = LogiShipWindow.GetInstance(_state.Game.StaticData, _entityState);
+                    var instance = LogiShipWindow.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
                 //Menu is econ menu
                 else if (T == typeof(ColonyPanel))
                 {
-                    var instance = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState);
+                    var instance = ColonyPanel.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState);
                     instance.ToggleActive();
                     _state.ActiveWindow = instance;
                 }
@@ -285,8 +286,8 @@ namespace Pulsar4X.SDL2UI
             else if (T == typeof(FireControl)) returnval = FireControl.GetInstance(_entityState).GetActive();
             //else if (T == typeof(RenameWindow)) returnval = RenameWindow.GetInstance(_entityState).GetActive();
             else if (T == typeof(NavWindow)) returnval = NavWindow.GetInstance(_entityState).GetActive();
-            else if (T == typeof(CargoTransfer)) returnval = CargoTransfer.GetInstance(_state.Game.StaticData, _entityState).GetActive();
-            else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Game.StaticData, _entityState).GetActive();
+            else if (T == typeof(CargoTransfer)) returnval = CargoTransfer.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState).GetActive();
+            else if (T == typeof(ColonyPanel)) returnval = ColonyPanel.GetInstance(_state.Faction.GetDataBlob<FactionInfoDB>().Data, _entityState).GetActive();
             // Instance Windows
             else if (T == typeof(OrdersListUI)) returnval = OrdersListUI.GetInstance(_entityState, _state).GetActive();
             else returnval = false;

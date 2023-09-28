@@ -1,7 +1,10 @@
 ﻿using System;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Sensors;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -21,13 +24,13 @@ namespace Pulsar4X.SDL2UI
         ConcurrentQueue<EntityChangeData> _sensorChanges = new ConcurrentQueue<EntityChangeData>();
         internal List<EntityChangeData> SensorChanges = new List<EntityChangeData>();
         ManagerSubPulse PulseMgr;
-        AEntityChangeListner _changeListner;
-        public List<Guid> EntitysToBin = new List<Guid>();
-        public List<Guid> EntitiesAdded = new List<Guid>();
+        AEntityChangeListener _changeListner;
+        public List<string> EntitysToBin = new List<string>();
+        public List<string> EntitiesAdded = new List<string>();
         public List<EntityChangeData> SystemChanges = new List<EntityChangeData>();
-        public Dictionary<Guid, EntityState> EntityStatesWithNames = new Dictionary<Guid, EntityState>();
-        public Dictionary<Guid, EntityState> EntityStatesWithPosition = new Dictionary<Guid, EntityState>();
-        public Dictionary<Guid, EntityState> EntityStatesColonies = new Dictionary<Guid, EntityState>();
+        public Dictionary<string, EntityState> EntityStatesWithNames = new Dictionary<string, EntityState>();
+        public Dictionary<string, EntityState> EntityStatesWithPosition = new Dictionary<string, EntityState>();
+        public Dictionary<string, EntityState> EntityStatesColonies = new Dictionary<string, EntityState>();
 
         public SystemState(StarSystem system, Entity faction)
         {
@@ -66,7 +69,7 @@ namespace Pulsar4X.SDL2UI
 
             var listnerblobs = new List<int>();
             listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
-            AEntityChangeListner changeListner = new EntityChangeListner(StarSystem, faction, listnerblobs);//, listnerblobs);
+            AEntityChangeListener changeListner = new EntityChangeListener(StarSystem, faction, listnerblobs);//, listnerblobs);
             _changeListner = changeListner;
 
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
@@ -90,7 +93,7 @@ namespace Pulsar4X.SDL2UI
             //SystemContacts = system.FactionSensorContacts[faction.ID];
             //_sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
-            _faction = StaticRefLib.SpaceMaster;
+            _faction = system.Game.GameMasterFaction;
             foreach (var entityItem in system.GetAllEntitiesWithDataBlob<NameDB>())
             {
 
@@ -109,7 +112,7 @@ namespace Pulsar4X.SDL2UI
 
             var listnerblobs = new List<int>();
             listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
-            AEntityChangeListner changeListner = new EntityChangeListnerSM(StarSystem);//, listnerblobs);
+            AEntityChangeListener changeListner = new EntityChangeListenerSM(StarSystem);//, listnerblobs);
             _changeListner = changeListner;
             /*
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
@@ -190,8 +193,8 @@ namespace Pulsar4X.SDL2UI
             {
                 EntityStatesWithPosition.Remove(itemGuid);
             }
-            EntitysToBin = new List<Guid>();
-            EntitiesAdded = new List<Guid>();
+            EntitysToBin = new List<string>();
+            EntitiesAdded = new List<string>();
             SensorChanges = new List<EntityChangeData>();
             SystemChanges = new List<EntityChangeData>();
             foreach (var item in EntityStatesWithPosition.Values)
