@@ -10,7 +10,7 @@ namespace Pulsar4X.Engine.Industry
 {
     public static class MiningHelper
     {
-        public static Dictionary<string, long> CalculateActualMiningRates(Entity colonyEntity)
+        public static Dictionary<int, long> CalculateActualMiningRates(Entity colonyEntity)
         {
             var mineRates = colonyEntity.GetDataBlob<MiningDB>().BaseMiningRate.ToDictionary(k => k.Key, v => v.Value);
             var planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;

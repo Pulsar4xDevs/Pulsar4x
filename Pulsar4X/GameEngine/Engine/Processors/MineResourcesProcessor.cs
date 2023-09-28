@@ -12,7 +12,7 @@ namespace Pulsar4X.Engine
 {
     internal class MineResourcesProcessor : IHotloopProcessor, IRecalcProcessor
     {
-        private Dictionary<string, Mineral> _minerals;
+        private Dictionary<int, Mineral> _minerals;
         public TimeSpan RunFrequency => TimeSpan.FromDays(1);
 
         public TimeSpan FirstRunOffset => TimeSpan.FromHours(1);
@@ -24,9 +24,9 @@ namespace Pulsar4X.Engine
         {
             _minerals = new ();
 
-            foreach(var (id, mineralBlueprint) in game.StartingGameData.Minerals)
+            foreach(var (uniqueID, mineral) in game.StartingGameData.Minerals)
             {
-                _minerals.Add(id, new Mineral(mineralBlueprint));
+                _minerals.Add(mineral.ID, mineral);
             }
         }
 
@@ -39,17 +39,17 @@ namespace Pulsar4X.Engine
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             var entities = manager.GetAllEntitiesWithDataBlob<MiningDB>();
-            foreach(var entity in entities) 
+            foreach(var entity in entities)
             {
                 ProcessEntity(entity, deltaSeconds);
             }
             return entities.Count;
         }
-    
+
         private void MineResources(Entity colonyEntity)
         {
-            Dictionary<string, long> actualMiningRates = colonyEntity.GetDataBlob<MiningDB>().ActualMiningRate;
-            Dictionary<string, MineralDeposit> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
+            Dictionary<int, long> actualMiningRates = colonyEntity.GetDataBlob<MiningDB>().ActualMiningRate;
+            Dictionary<int, MineralDeposit> planetMinerals = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
             VolumeStorageDB stockpile = colonyEntity.GetDataBlob<VolumeStorageDB>();
 
             foreach (var kvp in actualMiningRates)
@@ -66,7 +66,7 @@ namespace Pulsar4X.Engine
                     // StaticRefLib.EventLog.AddPlayerEntityErrorEvent(colonyEntity, EventType.Storage, erstr);
                     continue; //can't store this mineral
                 }
-                
+
                 var unitsMinedThisTick = stockpile.AddCargoByUnit(mineral, unitsMinableThisTick);
 
                 if (unitsMinableThisTick > unitsMinedThisTick)
@@ -94,8 +94,9 @@ namespace Pulsar4X.Engine
         /// <param name="colonyEntity"></param>
         internal static void CalcMaxRate(Entity colonyEntity)
         {
-            var rates = new Dictionary<string, long>();
+            var rates = new Dictionary<int, long>();
             var instancesDB = colonyEntity.GetDataBlob<ComponentInstancesDB>();
+            var cargoLibrary = colonyEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
 
             if (instancesDB.TryGetComponentsByAttribute<MineResourcesAtbDB>(out var instances))
             {
@@ -105,14 +106,16 @@ namespace Pulsar4X.Engine
                 {
                     float healthPercent = instance.HealthPercent();
                     var designInfo = instance.Design.GetAttribute<MineResourcesAtbDB>();
-     
+
                     foreach (var item in designInfo.ResourcesPerEconTick)
                     {
-                        rates.SafeValueAdd(item.Key, Convert.ToInt64(item.Value * healthPercent)); 
+                        // Need to convert the uniqueID (item.Key) to an int ID
+                        var cargoable = cargoLibrary[item.Key];
+                        rates.SafeValueAdd(cargoable.ID, Convert.ToInt64(item.Value * healthPercent));
                     }
                 }
             }
-            
+
             colonyEntity.GetDataBlob<MiningDB>().BaseMiningRate = rates;
 
             // Calculate the actual mining rates if the planet entity has minerals

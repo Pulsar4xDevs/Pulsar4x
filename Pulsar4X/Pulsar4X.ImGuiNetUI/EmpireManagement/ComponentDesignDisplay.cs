@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Blueprints;
@@ -586,8 +585,8 @@ namespace Pulsar4X.SDL2UI
 
         private void GuiHintFuelTypeSelection(ComponentDesignAttribute attribute, GlobalUIState uiState)
         {
-            var cargoTypesToDisplay = new Dictionary<string, ICargoable>();
-            var keys = new List<string>();
+            var cargoTypesToDisplay = new Dictionary<int, ICargoable>();
+            var keys = new List<int>();
             var names = new List<string>();
 
             foreach(var cargoType in attribute.GuidDictionary.Keys)

@@ -45,7 +45,7 @@ namespace Pulsar4X.ImGuiNetUI
         private Dictionary<string, (float reload, float min, float max)> _reloadState = new ();
         //private WeaponState[] _unAssignedWeapons = new WeaponState[0];
         private OrdnanceDesign[] _allOrdnanceDesigns = new OrdnanceDesign[0];
-        Dictionary<string, long> _storedOrdnance = new ();
+        Dictionary<int, long> _storedOrdnance = new ();
         private bool _showOnlyCargoOrdnance = true;
 
 
@@ -288,7 +288,7 @@ namespace Pulsar4X.ImGuiNetUI
                 for (int i = 0; i < _allOrdnanceDesigns.Length; i++)
                 {
                     var ord = _allOrdnanceDesigns[i];
-                    if (_storedOrdnance.ContainsKey(ord.UniqueID))
+                    if (_storedOrdnance.ContainsKey(ord.ID))
                     {
                         ImGui.Selectable(ord.Name);
                         if (ImGui.BeginDragDropSource())
@@ -416,7 +416,7 @@ namespace Pulsar4X.ImGuiNetUI
                 {
                     var shipOrdnances = _orderEntity.GetDataBlob<VolumeStorageDB>().TypeStores[cargoType].CurrentStoreInUnits;
 
-                    foreach (KeyValuePair<string, long> ordType in shipOrdnances)
+                    foreach (var ordType in shipOrdnances)
                         _storedOrdnance[ordType.Key] = ordType.Value;
                 }
             }
@@ -438,7 +438,7 @@ namespace Pulsar4X.ImGuiNetUI
                 if (wpn.FireWeaponInstructions.TryGetOrdnance(out var ordnanceDesign))
                 {
                     assOrdName = ordnanceDesign.Name;
-                    assOrdCount = "(" + _storedOrdnance[ordnanceDesign.UniqueID] + ")";
+                    assOrdCount = "(" + _storedOrdnance[ordnanceDesign.ID] + ")";
                 }
 
                 _weaponNames[wpn.ID] = wpn.Name + "\t" + assOrdName + assOrdCount;

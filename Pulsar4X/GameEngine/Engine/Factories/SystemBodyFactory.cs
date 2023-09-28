@@ -8,6 +8,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
 using Pulsar4X.Modding;
 using Pulsar4X.Engine.Sensors;
+using Pulsar4X.Engine.Industry;
 
 namespace Pulsar4X.Engine
 {
@@ -928,7 +929,7 @@ namespace Pulsar4X.Engine
         /// Generation take into consideration the abundance of the mineral
         /// and the bodies ratio of mass vs planet.
         /// </summary>
-        public void MineralGeneration(List<MineralBlueprint> minerals, StarSystem system, ProtoEntity body)
+        public void MineralGeneration(List<Mineral> minerals, StarSystem system, ProtoEntity body)
         {
             var bodyInfo = body.GetDataBlob<SystemBodyInfoDB>();
             var bodyMass = body.GetDataBlob<MassVolumeDB>();
@@ -969,9 +970,9 @@ namespace Pulsar4X.Engine
                     mdi.Amount = (long)Math.Round(_galaxyGen.Settings.MaxMineralAmmountByBodyType[bodyInfo.BodyType] * genChance);
                     mdi.HalfOriginalAmount = mdi.Amount / 2;
 
-                    if (!mineralInfo.Minerals.ContainsKey(min.UniqueID))
+                    if (!mineralInfo.Minerals.ContainsKey(min.ID))
                     {
-                        mineralInfo.Minerals.Add(min.UniqueID, mdi);
+                        mineralInfo.Minerals.Add(min.ID, mdi);
                     }
                 }
             }
@@ -984,7 +985,7 @@ namespace Pulsar4X.Engine
         /// This function ensures that there is at least 50000 of every mineral and that every mineral has
         /// an accessibility of at least 0.5.
         /// </summary>
-        public void HomeworldMineralGeneration(List<MineralBlueprint> minerals, StarSystem system, Entity body)
+        public void HomeworldMineralGeneration(List<Mineral> minerals, StarSystem system, Entity body)
         {
             var bodyInfo = body.GetDataBlob<SystemBodyInfoDB>();
             var mineralInfo = body.GetDataBlob<MineralsDB>();
@@ -1007,7 +1008,7 @@ namespace Pulsar4X.Engine
                 };
                 mdi.HalfOriginalAmount = mdi.Amount / 2;
 
-                mineralInfo.Minerals.Add(min.UniqueID, mdi);
+                mineralInfo.Minerals.Add(min.ID, mdi);
             }
         }
 

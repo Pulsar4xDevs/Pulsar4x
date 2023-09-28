@@ -34,14 +34,14 @@ namespace Pulsar4X.Extensions
             double volumeStoring = unitsStoring * cargoItem.VolumePerUnit;
             double massStoring = unitsStoring * cargoItem.MassPerUnit;
 
-            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.UniqueID))
+            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
             {
-                store.CurrentStoreInUnits.Add(cargoItem.UniqueID, unitsStoring);
-                store.Cargoables.Add(cargoItem.UniqueID, cargoItem);
+                store.CurrentStoreInUnits.Add(cargoItem.ID, unitsStoring);
+                store.Cargoables.Add(cargoItem.ID, cargoItem);
             }
             else
             {
-                store.CurrentStoreInUnits[cargoItem.UniqueID] += unitsStoring;
+                store.CurrentStoreInUnits[cargoItem.ID] += unitsStoring;
             }
 
             store.FreeVolume -= volumeStoring;
@@ -78,14 +78,14 @@ namespace Pulsar4X.Extensions
             double volumeStoring = unitsStoring * cargoItem.VolumePerUnit;
             double massStoring = unitsStoring * cargoItem.MassPerUnit;
 
-            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.UniqueID))
+            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
             {
-                store.CurrentStoreInUnits.Add(cargoItem.UniqueID, unitsStoring);
-                store.Cargoables.Add(cargoItem.UniqueID, cargoItem);
+                store.CurrentStoreInUnits.Add(cargoItem.ID, unitsStoring);
+                store.Cargoables.Add(cargoItem.ID, cargoItem);
             }
             else
             {
-                store.CurrentStoreInUnits[cargoItem.UniqueID] += unitsStoring;
+                store.CurrentStoreInUnits[cargoItem.ID] += unitsStoring;
             }
 
             store.FreeVolume -= volumeStoring;
@@ -128,14 +128,14 @@ namespace Pulsar4X.Extensions
 
             long amountToAdd = (long)(Math.Min(totalVolume, store.FreeVolume) / cargoItem.VolumePerUnit);
 
-            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.UniqueID))
+            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
             {
-                store.CurrentStoreInUnits.Add(cargoItem.UniqueID, amountToAdd);
-                store.Cargoables.Add(cargoItem.UniqueID, cargoItem);
+                store.CurrentStoreInUnits.Add(cargoItem.ID, amountToAdd);
+                store.Cargoables.Add(cargoItem.ID, cargoItem);
             }
             else
             {
-                store.CurrentStoreInUnits[cargoItem.UniqueID] += amountToAdd;
+                store.CurrentStoreInUnits[cargoItem.ID] += amountToAdd;
             }
 
             store.FreeVolume -= amountToAdd * volumePerUnit;
@@ -165,22 +165,22 @@ namespace Pulsar4X.Extensions
             double volumePerUnit = cargoItem.VolumePerUnit;
             double totalVolume = volumePerUnit * count;
             TypeStore store = db.TypeStores[cargoItem.CargoTypeID];
-            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.UniqueID))
+            if (!store.CurrentStoreInUnits.ContainsKey(cargoItem.ID))
             {
                 return 0;
             }
 
-            long amountInStore = store.CurrentStoreInUnits[cargoItem.UniqueID];
+            long amountInStore = store.CurrentStoreInUnits[cargoItem.ID];
             long amountToRemove = Math.Min(count, amountInStore);
 
-            store.CurrentStoreInUnits[cargoItem.UniqueID] -= amountToRemove;
+            store.CurrentStoreInUnits[cargoItem.ID] -= amountToRemove;
             store.FreeVolume += amountToRemove * volumePerUnit;
             db.TotalStoredMass -= amountToRemove * cargoItem.MassPerUnit;
 
-            if (store.CurrentStoreInUnits[cargoItem.UniqueID] == 0)
+            if (store.CurrentStoreInUnits[cargoItem.ID] == 0)
             {
-                store.CurrentStoreInUnits.Remove(cargoItem.UniqueID);
-                store.Cargoables.Remove(cargoItem.UniqueID);
+                store.CurrentStoreInUnits.Remove(cargoItem.ID);
+                store.Cargoables.Remove(cargoItem.ID);
             }
 
             return amountToRemove;
@@ -197,9 +197,9 @@ namespace Pulsar4X.Extensions
         {
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
                 return 0.0;
-            if (!db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.UniqueID))
+            if (!db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
                 return 0.0;
-            long units = Math.Max(0, db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.UniqueID]);
+            long units = Math.Max(0, db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID]);
 
             return units * cargoItem.VolumePerUnit;
         }
@@ -213,9 +213,9 @@ namespace Pulsar4X.Extensions
         {
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
                 return 0.0;
-            if (!db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.UniqueID))
+            if (!db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
                 return 0.0;
-            long units = Math.Max(0, db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.UniqueID]);
+            long units = Math.Max(0, db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID]);
 
             return units * cargoItem.MassPerUnit;
         }
@@ -229,7 +229,7 @@ namespace Pulsar4X.Extensions
         {
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
                 return 0.0;
-            if (!db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.UniqueID))
+            if (!db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
                 return 0.0;
             var volume = Math.Max(0, db.TypeStores[cargoItem.CargoTypeID].MaxVolume);
 
@@ -245,9 +245,9 @@ namespace Pulsar4X.Extensions
         {
             if (!db.TypeStores.ContainsKey(cargoItem.CargoTypeID))
                 return 0;
-            if (!db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.UniqueID))
+            if (!db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
                 return 0;
-            long units = Math.Max(0, db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.UniqueID]);
+            long units = Math.Max(0, db.TypeStores[cargoItem.CargoTypeID].CurrentStoreInUnits[cargoItem.ID]);
 
             return units;
         }
@@ -340,7 +340,7 @@ namespace Pulsar4X.Extensions
 
         internal static bool HasSpecificEntity(this VolumeStorageDB storeDB, CargoAbleTypeDB item)
         {
-            if (storeDB.TypeStores[item.CargoTypeID].Cargoables.ContainsKey(item.UniqueID))
+            if (storeDB.TypeStores[item.CargoTypeID].Cargoables.ContainsKey(item.ID))
                 return true;
 
             return false;

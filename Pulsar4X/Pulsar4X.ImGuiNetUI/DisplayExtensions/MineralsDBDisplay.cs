@@ -19,7 +19,7 @@ namespace Pulsar4X.SDL2UI
 
                 foreach(var (id, mineral) in mineralsDB.Minerals)
                 {
-                    var mineralData = minerals.FirstOrDefault(x => x.UniqueID == id);
+                    var mineralData = minerals.FirstOrDefault(x => x.ID == id);
                     if (mineralData != null)
                     {
                         ImGui.TableNextRow();

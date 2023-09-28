@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
 
         private List<ICargoable> _allResources;
         private string[] _allResourceNames;
-        private List<string> _allResourceID;
+        private List<int> _allResourceID;
         private int _allResourceIndex = 0;
         private Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedStoredResources;
         private Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedUnstored;
@@ -37,7 +37,7 @@ namespace Pulsar4X.SDL2UI
             _staticData = entity.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
             var allgoods = _staticData.CargoGoods.GetAll();
             var allResourceNames = new List<string>();
-            _allResourceID = new List<string>();
+            _allResourceID = new List<int>();
             _allResources = new List<ICargoable>();
             foreach (var item in allgoods)
             {
@@ -271,8 +271,8 @@ namespace Pulsar4X.SDL2UI
 
                                 var cname = ctype.Name;
                                 var itemsStored = 0;
-                                if (cargoables.ContainsKey(ctype.UniqueID))
-                                    itemsStored = (int)unitsInStore[ctype.UniqueID];
+                                if (cargoables.ContainsKey(ctype.ID))
+                                    itemsStored = (int)unitsInStore[ctype.ID];
                                 var volumePerItem = ctype.VolumePerUnit;
 
                                 ImGui.TableNextColumn();

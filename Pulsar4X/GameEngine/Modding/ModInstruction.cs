@@ -2,6 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Engine.Industry;
 
 namespace Pulsar4X.Modding
 {
@@ -78,10 +79,10 @@ namespace Pulsar4X.Modding
                     instruction.Data = jObject["Payload"].ToObject<IndustryTypeBlueprint>();
                     break;
                 case ModInstruction.DataType.Mineral:
-                    instruction.Data = jObject["Payload"].ToObject<MineralBlueprint>();
+                    instruction.Data = jObject["Payload"].ToObject<Mineral>();
                     break;
                 case ModInstruction.DataType.ProcessedMaterial:
-                    instruction.Data = jObject["Payload"].ToObject<ProcessedMaterialBlueprint>();
+                    instruction.Data = jObject["Payload"].ToObject<ProcessedMaterial>();
                     break;
                 case ModInstruction.DataType.SystemGenSettings:
                     instruction.Data = jObject["Payload"].ToObject<SystemGenSettingsBlueprint>(serializer);

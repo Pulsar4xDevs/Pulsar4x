@@ -71,20 +71,20 @@ namespace Pulsar4X.Datablobs
     {
         public double MaxVolume;
         internal double FreeVolume;
-        public SafeDictionary<string, long> CurrentStoreInUnits = new SafeDictionary<string, long>();
-        internal Dictionary<string, ICargoable> Cargoables =  new Dictionary<string, ICargoable>();
+        public SafeDictionary<int, long> CurrentStoreInUnits = new ();
+        internal Dictionary<int, ICargoable> Cargoables =  new ();
         public TypeStore(double maxVolume)
         {
             MaxVolume = maxVolume;
             FreeVolume = maxVolume;
         }
 
-        public Dictionary<string, ICargoable> GetCargoables()
+        public Dictionary<int, ICargoable> GetCargoables()
         {
-            return new Dictionary<string, ICargoable>(Cargoables);
+            return new (Cargoables);
         }
 
-        public bool HasCargoInStore(string cargoID)
+        public bool HasCargoInStore(int cargoID)
         {
             return CurrentStoreInUnits.ContainsKey(cargoID);
         }
@@ -94,8 +94,8 @@ namespace Pulsar4X.Datablobs
         {
             TypeStore clone = new TypeStore(MaxVolume);
             clone.FreeVolume = FreeVolume;
-            clone.CurrentStoreInUnits = new SafeDictionary<string, long>(CurrentStoreInUnits);
-            clone.Cargoables = new Dictionary<string, ICargoable>(Cargoables);
+            clone.CurrentStoreInUnits = new SafeDictionary<int, long>(CurrentStoreInUnits);
+            clone.Cargoables = new Dictionary<int, ICargoable>(Cargoables);
             return clone;
         }
 

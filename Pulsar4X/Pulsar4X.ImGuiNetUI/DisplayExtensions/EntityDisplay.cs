@@ -124,11 +124,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableSetupColumn("Years to Depletion");
                 ImGui.TableHeadersRow();
 
-                if(minerals == null) minerals = new Dictionary<string, MineralDeposit>();
+                if(minerals == null) minerals = new Dictionary<int, MineralDeposit>();
 
                 foreach(var (id, mineral) in minerals)
                 {
-                    var mineralData = mineralStaticInfo.FirstOrDefault(x => x.UniqueID == id);
+                    var mineralData = mineralStaticInfo.FirstOrDefault(x => x.ID == id);
 
                     if(mineralData == null) continue;
 

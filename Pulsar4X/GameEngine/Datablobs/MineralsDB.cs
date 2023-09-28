@@ -19,7 +19,7 @@ namespace Pulsar4X.Datablobs
     {
         [PublicAPI]
         [JsonProperty]
-        public Dictionary<string, MineralDeposit> Minerals { get; internal set; }
+        public Dictionary<int, MineralDeposit> Minerals { get; internal set; }
 
         public MineralsDB()
         {
@@ -28,7 +28,7 @@ namespace Pulsar4X.Datablobs
 
         public MineralsDB(MineralsDB other)
         {
-            Minerals = new Dictionary<string, MineralDeposit>(other.Minerals);
+            Minerals = new Dictionary<int, MineralDeposit>(other.Minerals);
         }
 
         public override object Clone()

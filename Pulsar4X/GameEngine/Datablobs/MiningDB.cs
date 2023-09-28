@@ -6,17 +6,17 @@ namespace Pulsar4X.Datablobs
 {
     public class MiningDB : BaseDataBlob, IAbilityDescription
     {
-        public Dictionary<string, long> BaseMiningRate { get; set; }
-        public Dictionary<string, long> ActualMiningRate { get; set; }
+        public Dictionary<int, long> BaseMiningRate { get; set; }
+        public Dictionary<int, long> ActualMiningRate { get; set; }
 
         public int NumberOfMines { get; set;} = 0;
 
-        public Dictionary<string, MineralDeposit> MineralDeposit => OwningEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
+        public Dictionary<int, MineralDeposit> MineralDeposit => OwningEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<MineralsDB>().Minerals;
 
         public MiningDB()
         {
-            BaseMiningRate = new Dictionary<string, long>();
-            ActualMiningRate = new Dictionary<string, long>();
+            BaseMiningRate = new Dictionary<int, long>();
+            ActualMiningRate = new Dictionary<int, long>();
         }
 
         public MiningDB(MiningDB db)

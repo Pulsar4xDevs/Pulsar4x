@@ -106,8 +106,8 @@ namespace Pulsar4X.Engine.Industry
                 throw new Exception("Unable to find IndustryAbilityDB");
             }
 
-            
-            
+
+
             foreach (var (prodLineID, prodLine) in industryDB.ProductionLines.ToArray())
             {
                 var industryPointsRemaining = new Dictionary<string, int>(prodLine.IndustryTypeRates);
@@ -129,7 +129,7 @@ namespace Pulsar4X.Engine.Industry
                     //how many construction points each resourcepoint is worth.
                     if (resourceSum == 0)
                         throw new Exception("resources can't cost 0");
-                    
+
                     float pointPerResource = (float)designInfo.IndustryPointCosts / (float)resourceSum;
                     float startingPointsLeft = batchJob.ProductionPointsLeft;
                     float startingPointsToUse = industryPointsToUse;
@@ -142,9 +142,9 @@ namespace Pulsar4X.Engine.Industry
                         //right now we take all the resources we can, for an individual item in the batch.
                         //even if we're taking more than we can use in this turn, we're using/storing it.
                         IDictionary<string, long> resourceCosts = batchJob.ResourcesRequiredRemaining;
-                        
+
                         var totalResourceReq = resourceCosts.Sum(item => item.Value);
-                        
+
                         //Note: this is editing batchjob.ResourcesRequired variable (as ref resourceCosts).
                         ConsumeResources(stockpile, ref resourceCosts);
                         //we calculate the difference between the design resources and the amount of resources we've squirreled away.
@@ -154,7 +154,7 @@ namespace Pulsar4X.Engine.Industry
 
                         // this is the total resources that can be used on this item.
                         var totalResourcesUsed = totalResourceReq - totalResourceStillReq;
-                        // the industry Points equivelent of total used resources.  
+                        // the industry Points equivelent of total used resources.
                         var totalIPEquvelent = totalResourcesUsed * pointPerResource;
 
                         int pointsToUse = 0;
@@ -168,11 +168,11 @@ namespace Pulsar4X.Engine.Industry
                             industryPointsToUse = Math.Min(industryPointsToUse, totalIPEquvelent);
                             pointsToUse = (int)Math.Floor(industryPointsToUse);
                         }
-                        
+
                         //construct only enough for the amount of resources we have.
                         batchJob.ProductionPointsLeft -= pointsToUse;
                         industryPointsRemaining[designInfo.IndustryTypeID] -= pointsToUse;
-                        
+
                         if(startingPointsLeft == batchJob.ProductionPointsLeft
                             && batchJob.ProductionPointsCost > startingPointsToUse)
                         {
@@ -215,9 +215,9 @@ namespace Pulsar4X.Engine.Industry
                 long amountUsedThisTick = 0;
                 if (fromCargo.TypeStores.ContainsKey(cargoTypeID))
                 {
-                    if (fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.UniqueID))
+                    if (fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits.ContainsKey(cargoItem.ID))
                     {
-                        amountUsedThisTick = Math.Min(fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits[cargoItem.UniqueID], kvp.Value);
+                        amountUsedThisTick = Math.Min(fromCargo.TypeStores[cargoTypeID].CurrentStoreInUnits[cargoItem.ID], kvp.Value);
                     }
                 }
 

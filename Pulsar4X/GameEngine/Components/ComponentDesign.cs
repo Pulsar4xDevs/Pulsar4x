@@ -13,6 +13,7 @@ namespace Pulsar4X.Components
     public class ComponentDesign : ICargoable, IConstructableDesign
     {
         public ConstructableGuiHints GuiHints { get; set; }
+        public int ID { get; private set; } = Game.GetEntityID();
         public string UniqueID { get; internal set; }
         public string Name { get; internal set; } //player defined name. ie "5t 2kn Thruster".
         public string ComponentType { get; internal set; } = "";

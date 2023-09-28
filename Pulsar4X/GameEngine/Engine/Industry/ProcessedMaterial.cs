@@ -10,7 +10,10 @@ namespace Pulsar4X.Engine.Industry
 {
     public class ProcessedMaterial : ProcessedMaterialBlueprint, ICargoable, IConstructableDesign
     {
+        public int ID { get; private set; } = Game.GetEntityID();
         public bool IsValid { get; set; } = true;
+
+        public ProcessedMaterial() { }
 
         public ProcessedMaterial(ProcessedMaterialBlueprint blueprint)
         {

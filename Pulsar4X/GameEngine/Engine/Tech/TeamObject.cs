@@ -7,6 +7,7 @@ namespace Pulsar4X.Engine
 {
     public class TeamObject : ICargoable
     {
+        public int ID { get; private set; } = Game.GetEntityID();
         public TeamTypes TeamType { get; protected set; }
         public string LeaderName;
         public int Age;

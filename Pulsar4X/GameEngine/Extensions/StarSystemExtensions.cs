@@ -88,7 +88,7 @@ namespace Pulsar4X.Extensions
 
         public static Dictionary<string, double> GetTotalSystemMinerals(this StarSystem system, ModDataStore dataStore)
         {
-            var minerals = new Dictionary<string, double>();
+            var minerals = new Dictionary<int, double>();
             var bodies = system.GetAllEntitiesWithDataBlob<MineralsDB>().Select(x => x.GetDataBlob<MineralsDB>());
             foreach (var body in bodies)
             {
@@ -106,7 +106,7 @@ namespace Pulsar4X.Extensions
             }
 
             var mineralList = dataStore.Minerals.Values.ToList();
-            var mineralsByName = minerals.ToDictionary(k => mineralList.First(m => m.UniqueID == k.Key).Name, v => v.Value);
+            var mineralsByName = minerals.ToDictionary(k => mineralList.First(m => m.ID == k.Key).Name, v => v.Value);
             return mineralsByName;
         }
 

@@ -5,6 +5,10 @@ namespace Pulsar4X.Engine.Industry
 {
     public class Mineral : MineralBlueprint, ICargoable
     {
+        public int ID { get; private set; } = Game.GetEntityID();
+
+        public Mineral() {}
+
         public Mineral(MineralBlueprint blueprint)
         {
             FullIdentifier = blueprint.FullIdentifier;

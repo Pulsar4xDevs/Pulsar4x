@@ -13,6 +13,9 @@ namespace Pulsar4X.Datablobs
     public class CargoAbleTypeDB : BaseDataBlob , ICargoable, IComponentDesignAttribute
     {
         [JsonProperty]
+        public int ID { get; private set; } = Game.GetEntityID();
+
+        [JsonProperty]
         public string CargoTypeID { get; internal set; }
 
         /// <summary>
@@ -67,6 +70,7 @@ namespace Pulsar4X.Datablobs
 
         public CargoAbleTypeDB(CargoAbleTypeDB cargoTypeDB)
         {
+            ID = cargoTypeDB.ID;
             CargoTypeID = cargoTypeDB.CargoTypeID;
             MustBeSpecificCargo = cargoTypeDB.MustBeSpecificCargo;
         }

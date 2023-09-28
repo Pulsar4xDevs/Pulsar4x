@@ -12,7 +12,7 @@ namespace Pulsar4X.Components
     {
 
         #region ICargoable
-
+        public int ID { get; private set; } = Game.GetEntityID();
         public string UniqueID { get; }
         public string Name { get; }
         public string CargoTypeID { get; }
@@ -138,6 +138,7 @@ namespace Pulsar4X.Components
 
         public ComponentInstance(ComponentInstance instance)
         {
+            ID = instance.ID;
             UniqueID = instance.UniqueID;
             Design = instance.Design;
             IsEnabled = instance.IsEnabled;

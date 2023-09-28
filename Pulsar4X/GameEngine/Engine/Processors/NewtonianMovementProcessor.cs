@@ -115,7 +115,7 @@ namespace Pulsar4X.Engine
                     //remove the deltaV we're expending from the max (TODO: Remove fuel from cargo, change mass of ship)
                     var kgOfFuel = newtonThrust.BurnDeltaV(deltaVThisStep, massTotal_Kg);
                     var ft = newtonThrust.FuelType;
-                    ProcessedMaterial fuel = factionDataStore.CargoGoods.GetMaterials()[ft];
+                    ProcessedMaterial fuel = factionDataStore.CargoGoods.GetMaterial(ft);
                     var massRemoved = CargoTransferProcessor.AddRemoveCargoMass(entity, fuel, -kgOfFuel);
 
                     //convert prograde to global frame of reference for thrust direction
@@ -353,7 +353,7 @@ namespace Pulsar4X.Engine
             var ev = db.ExhaustVelocity;
             var totalMass = parentEntity.GetDataBlob<MassVolumeDB>().MassTotal;
             //db.DryMass_kg = parentEntity.GetDataBlob<MassVolumeDB>().MassDry;
-            ProcessedMaterial fuel = factionDataStore.CargoGoods.GetMaterials()[ft];
+            ProcessedMaterial fuel = factionDataStore.CargoGoods.GetMaterial(ft);
 
             double fuelMass = 0;
             if(parentEntity.HasDataBlob<VolumeStorageDB>())

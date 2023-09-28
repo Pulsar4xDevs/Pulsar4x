@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
         private const string _amountFormat = "#,###,###,###,###,###,##0";   // big enough to render 64 integers
 
         private enum PlanetarySubWindows{
-            generalInfo, 
+            generalInfo,
             installations,
             mineralDeposits
         }
@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
 
         internal static PlanetaryWindow GetInstance(EntityState entity, GlobalUIState state)
         {
-            string name = "PlanetaryWindow|" + entity.Entity.Guid.ToString(); 
+            string name = "PlanetaryWindow|" + entity.Entity.Guid.ToString();
             PlanetaryWindow thisItem;
             if (!_uiState.LoadedNonUniqueWindows.ContainsKey(name))
             {
@@ -199,7 +199,7 @@ namespace Pulsar4X.SDL2UI
                     if (Math.Round(atmosGas.Value, 4) > 0)
                     {
                         rowData.Add(new string[] { "  " + atmosGas.Key.Name, Stringify.Quantity(Math.Round(atmosGas.Value, 4), "0.0###") + " %" });
-                    } 
+                    }
                     else
                     {
                         rowData.Add(new string[] { "  " + atmosGas.Key.Name, "trace amounts" });
@@ -229,7 +229,7 @@ namespace Pulsar4X.SDL2UI
 
             if (_lookedAtEntity.Entity.HasDataBlob<MineralsDB>())
             {
-                Dictionary<string, long> mineRates = new Dictionary<string, long>();
+                var mineRates = new Dictionary<int, long>();
 
                 MineralsDB mineralsDB = _lookedAtEntity.Entity.GetDataBlob<MineralsDB>();
                 SystemBodyInfoDB systemBodyInfo = _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>();
@@ -261,11 +261,11 @@ namespace Pulsar4X.SDL2UI
                     foreach (var key in mineralsDB.Minerals.Keys)
                     {
                         row.Clear();
-                        var mineralData = _mineralDefinitions.FirstOrDefault(x => x.UniqueID == key);
+                        var mineralData = _mineralDefinitions.FirstOrDefault(x => x.ID == key);
                         if (mineralData != null)
                         {
                             var mineralValues = mineralsDB.Minerals[key];
-                            
+
                             row.Add(mineralData.Name);
                             row.Add(mineralValues.Amount.ToString(_amountFormat));
                             row.Add(mineralValues.Accessibility.ToString("0.00"));

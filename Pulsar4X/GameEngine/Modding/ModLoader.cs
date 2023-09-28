@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Extensions;
+using Pulsar4X.Engine.Industry;
 
 namespace Pulsar4X.Modding
 {
@@ -68,10 +69,10 @@ namespace Pulsar4X.Modding
                     ApplyModGeneric<IndustryTypeBlueprint>(baseData.IndustryTypes, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.Mineral:
-                    ApplyModGeneric<MineralBlueprint>(baseData.Minerals, mod, modNamespace);
+                    ApplyModGeneric<Mineral>(baseData.Minerals, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.ProcessedMaterial:
-                    ApplyModGeneric<ProcessedMaterialBlueprint>(baseData.ProcessedMaterials, mod, modNamespace);
+                    ApplyModGeneric<ProcessedMaterial>(baseData.ProcessedMaterials, mod, modNamespace);
                     break;
                 case ModInstruction.DataType.SystemGenSettings:
                     ApplyModGeneric<SystemGenSettingsBlueprint>(baseData.SystemGenSettings, mod, modNamespace);

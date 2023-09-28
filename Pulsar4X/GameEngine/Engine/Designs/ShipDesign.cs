@@ -19,6 +19,7 @@ namespace Pulsar4X.Engine.Designs
     public class ShipDesign : ICargoable, IConstructableDesign, ISerializable
     {
         public ConstructableGuiHints GuiHints { get; } = ConstructableGuiHints.CanBeLaunched;
+        public int ID { get; private set; } = Game.GetEntityID();
         public string UniqueID { get; private set; } = Guid.NewGuid().ToString();
         public string Name { get; set; }
         public string CargoTypeID { get; }

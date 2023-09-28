@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Engine.Industry;
 
 namespace Pulsar4X.Modding
 {
@@ -10,8 +11,8 @@ namespace Pulsar4X.Modding
         public Dictionary<string, CargoTypeBlueprint> CargoTypes { get; set; } = new ();
         public Dictionary<string, ComponentTemplateBlueprint> ComponentTemplates { get; set; } = new ();
         public Dictionary<string, IndustryTypeBlueprint> IndustryTypes { get; set; } = new();
-        public Dictionary<string, MineralBlueprint> Minerals { get; set; } = new ();
-        public Dictionary<string, ProcessedMaterialBlueprint> ProcessedMaterials { get; set; } = new ();
+        public Dictionary<string, Mineral> Minerals { get; set; } = new ();
+        public Dictionary<string, ProcessedMaterial> ProcessedMaterials { get; set; } = new ();
         public Dictionary<string, SystemGenSettingsBlueprint> SystemGenSettings { get; set; } = new ();
         public Dictionary<string, TechBlueprint> Techs { get; set; } = new ();
         public Dictionary<string, TechCategoryBlueprint> TechCategories { get; set; } = new ();

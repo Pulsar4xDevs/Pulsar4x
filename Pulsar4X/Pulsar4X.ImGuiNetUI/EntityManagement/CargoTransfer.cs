@@ -96,7 +96,7 @@ namespace Pulsar4X.SDL2UI
                         var volumeStored = cargoType.Value;
                         var volumePerItem = ctype.VolumePerUnit;
                         var massStored = cargoType.Value * ctype.MassPerUnit;
-                        var itemsStored = unitsInStore[ctype.UniqueID];
+                        var itemsStored = unitsInStore[ctype.ID];
                         if (ImGui.Selectable(cname))
                         {
                         }
@@ -288,7 +288,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (_stores.ContainsKey(cargoItem.CargoTypeID))
             {
-                return _stores[cargoItem.CargoTypeID].HasCargoInStore(cargoItem.UniqueID);
+                return _stores[cargoItem.CargoTypeID].HasCargoInStore(cargoItem.ID);
             }
             return false;
         }

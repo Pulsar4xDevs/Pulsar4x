@@ -8,6 +8,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine.Orders;
+using System.Runtime.CompilerServices;
 
 namespace Pulsar4X.Engine
 {
@@ -37,6 +38,11 @@ namespace Pulsar4X.Engine
         internal ModDataStore StartingGameData { get; private set; }
         internal GalaxyFactory GalaxyGen { get; private set; }
         public List<Entity> Factions { get; } = new List<Entity>();
+
+        [JsonProperty]
+        private int EntityIDCounterValue => EntityIDCounter;
+
+        private static int EntityIDCounter = 0;
 
         internal event EventHandler PostLoad;
 
@@ -73,5 +79,7 @@ namespace Pulsar4X.Engine
         {
             return AtmosphericGases.Values.Where(g => g.ChemicalSymbol.Equals(symbol)).First();
         }
+
+        public static int GetEntityID() => EntityIDCounter++;
     }
 }
