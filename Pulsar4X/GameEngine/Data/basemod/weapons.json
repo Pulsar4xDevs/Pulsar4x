@@ -5,7 +5,7 @@
       "UniqueID": "laser-gun",
       "Name": "LaserGun",
       "Formulas": {
-        "Description": "'Laser Gun'",
+        "Description": "Laser Gun",
         "Mass": "Ability('Power Input') / 1000 + Ability('Chamber Volume') + Ability('Radiator Volume')",
         "Volume": "Ability('Power Input') / 1000 + Ability('Chamber Volume')",
         "HTK": "[Mass]",
@@ -236,7 +236,7 @@
       "UniqueID": "missle-launcher",
       "Name": "Missile Launcher",
       "Formulas": {
-        "Description": "'A tube that houses missiles and launches them'",
+        "Description": "A tube that houses missiles and launches them",
         "Mass": "Ability('Max Mass') * 1.5 ",
         "Volume": "[Mass] * 0.5",
         "HTK": "[Mass]",

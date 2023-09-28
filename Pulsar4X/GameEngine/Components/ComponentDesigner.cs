@@ -6,6 +6,7 @@ using Pulsar4X.Blueprints;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Components
@@ -25,7 +26,17 @@ namespace Pulsar4X.Components
             if(!string.IsNullOrEmpty( componentSD.ComponentType))
                 _design.ComponentType = componentSD.ComponentType;
             _design.UniqueID = Guid.NewGuid().ToString();
-            _design.Description = componentSD.Formulas["Description"];
+
+            if(componentSD.Formulas.ContainsKey("Description")
+                && componentSD.Formulas["Description"].IsNotNullOrEmpty()
+                && componentSD.Formulas["Description"][0] == '\'')
+            {
+                _design.Description = EvaluateDescription(new ChainedExpression(componentSD.Formulas["Description"], this, factionDataStore, factionTech));
+            }
+            else
+            {
+                _design.Description = componentSD.Formulas["Description"];
+            }
             MassFormula = new ChainedExpression(componentSD.Formulas["Mass"], this, factionDataStore, factionTech);
             VolumeFormula = new ChainedExpression(componentSD.Formulas["Volume"], this, factionDataStore, factionTech);
             CrewFormula = new ChainedExpression(componentSD.Formulas["CrewReq"], this, factionDataStore, factionTech);
@@ -357,6 +368,13 @@ namespace Pulsar4X.Components
             }
 
             return setFlags;
+        }
+
+        private string EvaluateDescription(ChainedExpression expression)
+        {
+            expression.Evaluate();
+
+            return expression.StrResult;
         }
     }
 }

@@ -905,7 +905,7 @@ namespace Pulsar4X.Engine
             ComponentTemplateBlueprint template = factionDataStore.ComponentTemplates["general-cargo-hold"];
             componentDesigner = new ComponentDesigner(template, factionDataStore, faction.GetDataBlob<FactionTechDB>());
             componentDesigner.ComponentDesignAttributes["Warehouse Size"].SetValueFromInput(1000000);
-            componentDesigner.Name = "CargoInstallation1";
+            componentDesigner.Name = "General Cargo Hold";
             //return cargoInstalation.CreateDesign(faction);
             _cargoInstalation = componentDesigner.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_cargoInstalation.TechID);
@@ -1023,7 +1023,7 @@ namespace Pulsar4X.Engine
             //[4] worst detection magnatude (not settable)
             sensor.ComponentDesignAttributes["Resolution"].SetValueFromInput(100);   //resolution
             sensor.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
-            sensor.Name = "PassiveScannerInstalation";
+            sensor.Name = "Passive Scanner";
             _sensorInstalation = sensor.CreateDesign(faction);
             faction.GetDataBlob<FactionTechDB>().IncrementLevel(_sensorInstalation.TechID);
             return _sensorInstalation;

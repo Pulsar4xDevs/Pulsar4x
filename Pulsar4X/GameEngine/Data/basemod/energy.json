@@ -5,7 +5,7 @@
       "UniqueID": "reactor",
       "Name": "Reactor",
       "Formulas": {
-        "Description": "'A non refuelable reactor, Generates power for a ship'",
+        "Description": "A non refuelable reactor, Generates power for a ship",
         "Mass": "Ability('Mass')",
         "Volume": "Ability('Mass')",
         "HTK": "Max(1, [Mass] / 100)",
@@ -83,7 +83,7 @@
       "UniqueID": "battery-bank",
       "Name": "Battery Bank",
       "Formulas": {
-        "Description": "'Stores power for a ship'",
+        "Description": "Stores power for a ship",
         "Mass": "Ability('Mass')",
         "Volume": "Ability('Mass')",
         "HTK": "Max(1, [Mass] / 100)",
@@ -135,7 +135,7 @@
       "UniqueID": "rtg",
       "Name": "RTG",
       "Formulas": {
-        "Description": "'A non refuelable reactor, Generates power for a ship'",
+        "Description": "A non refuelable reactor, Generates power for a ship",
         "Mass": "Ability('Mass')",
         "Volume": "Ability('Mass')",
         "HTK": "Max(1, [Mass] / 100)",
@@ -255,7 +255,7 @@
       "UniqueID": "steam-turbine-reactor",
       "Name": "Steam Turbine Reactor",
       "Formulas": {
-        "Description": "'A more powerful reactor that heats water to steam and passes it through a turbine'",
+        "Description": "A more powerful reactor that heats water to steam and passes it through a turbine",
         "Mass": "Ability('Mass')",
         "Volume": "Ability('Mass')",
         "HTK": "Max(1, [Mass] / 100)",

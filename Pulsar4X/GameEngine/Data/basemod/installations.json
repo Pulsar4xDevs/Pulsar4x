@@ -5,7 +5,7 @@
       "UniqueID": "mine",
       "Name": "Mine",
       "Formulas": {
-        "Description": "'Mines Resources'",
+        "Description": "Mines Resources",
         "Mass": "25000",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
@@ -59,7 +59,7 @@
       "UniqueID": "university",
       "Name": "University",
       "Formulas": {
-        "Description": "'Research new technologies'",
+        "Description": "Research new technologies",
         "Mass": "Ability('Size') * 100",
         "Volume": "Ability('Size') * 0.1",
         "HTK": "[Mass]",
@@ -114,7 +114,7 @@
       "UniqueID": "refinery",
       "Name": "Refinery",
       "Formulas": {
-        "Description": "'An installation designed to refine base minerals into materials'",
+        "Description": "An installation designed to refine base minerals into materials",
         "Mass": "Ability('Size')",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
@@ -166,7 +166,7 @@
       "UniqueID": "factory",
       "Name": "Factory",
       "Formulas": {
-        "Description": "'Constructs Facilities, Fighters Ammo and Components'",
+        "Description": "Constructs Facilities, Fighters Ammo and Components",
         "Mass": "Ability('Size')",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
@@ -232,7 +232,7 @@
       "UniqueID": "shipyard",
       "Name": "Ship Yard",
       "Formulas": {
-        "Description": "'Construction and launch facilities for ships'",
+        "Description": "Construction and launch facilities for ships",
         "Mass": "500000",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
@@ -285,7 +285,7 @@
       "UniqueID": "logistics-office",
       "Name": "Logistics Office",
       "Formulas": {
-        "Description": "'Handles import and Export of goods'",
+        "Description": "Handles import and Export of goods",
         "Mass": "5000",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
@@ -328,7 +328,7 @@
       "UniqueID": "general-cargo-hold",
       "Name": "General Storage",
       "Formulas": {
-        "Description": "'Stores General Cargo'",
+        "Description": "Stores General Cargo",
         "Mass": "Ability('Warehouse Size')",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
@@ -404,7 +404,7 @@
       "UniqueID": "fuel-cargo-hold",
       "Name": "Fuel Storage",
       "Formulas": {
-        "Description": "'Stores Fuel'",
+        "Description": "Stores Fuel",
         "Mass": "Ability('Tank Radius')",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
@@ -460,7 +460,7 @@
       "UniqueID": "stainless-steel-fuel-tank",
       "Name": "Stainless Steel Fuel Tank",
       "Formulas": {
-        "Description": "'Stores Fuel'",
+        "Description": "Stores Fuel",
         "Mass": "Ability('Dry Weight')",
         "Volume": "Ability('Tank Volume')",
         "HTK": "[Mass]",
@@ -566,7 +566,7 @@
       "UniqueID": "spaceport",
       "Name": "Planetary Spaceport Complex",
       "Formulas": {
-        "Description": "'A generic does everything space facility'",
+        "Description": "A generic does everything space facility",
         "Mass": "Ability('Warehouse Size')",
         "Volume": "[Mass]",
         "HTK": "[Mass]",
@@ -649,7 +649,7 @@
       "UniqueID": "infrastructure",
       "Name": "Infrastructure",
       "Formulas": {
-        "Description": "'Component and buildings needed to keep colonists alive on hostile worlds: currently non functional other than as cargospace'",
+        "Description": "Component and buildings needed to keep colonists alive on hostile worlds: currently non functional other than as cargospace",
         "Mass": "1000",
         "Volume": "[Mass]",
         "HTK": "1000",
@@ -693,7 +693,7 @@
       "UniqueID": "space-port",
       "Name": "Space Port",
       "Formulas": {
-        "Description": "'Facilities for transfering cargo'",
+        "Description": "Facilities for transfering cargo",
         "Mass": "500000",
         "Volume": "[Mass]",
         "HTK": "[Mass]",

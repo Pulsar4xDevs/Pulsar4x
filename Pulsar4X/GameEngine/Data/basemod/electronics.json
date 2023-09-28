@@ -5,7 +5,7 @@
       "UniqueID": "passive-sensor",
       "Name": "Passive Sensor",
       "Formulas": {
-        "Description": "'Detects emissions and reflections from other objects'",
+        "Description": "Detects emissions and reflections from other objects",
         "Mass": "Ability('Mass')",
         "Volume": "Ability('Mass')",
         "HTK": "Max(1, Ability('Mass') / 100)",
