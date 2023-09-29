@@ -39,7 +39,7 @@ namespace Pulsar4X.Engine
         public SafeDictionary<string, StarSystem> Systems { get; private set; } = new ();
 
         [JsonProperty]
-        public EntityManager GlobalManager { get; }
+        public EntityManager GlobalManager { get; internal set; }
 
         [JsonProperty]
         internal readonly SafeDictionary<string, EntityManager> GlobalManagerDictionary = new ();
@@ -119,16 +119,35 @@ namespace Pulsar4X.Engine
 
         public static string Save(Game game)
         {
-            return JsonConvert.SerializeObject(game);
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                PreserveReferencesHandling = PreserveReferencesHandling.All,
+                Formatting = Formatting.Indented
+            };
+
+            JsonSerializerSettings settings = new JsonSerializerSettings() {
+                Formatting = Formatting.Indented,
+                PreserveReferencesHandling = PreserveReferencesHandling.All
+            };
+
+            return JsonConvert.SerializeObject(game, settings);
         }
 
         public static Game Load(string json)
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            var loadedGame = JsonConvert.DeserializeObject<Game>(json);
+            JsonSerializerSettings settings = new JsonSerializerSettings() {
+                Formatting = Formatting.Indented,
+                PreserveReferencesHandling = PreserveReferencesHandling.All
+            };
+            var loadedGame = JsonConvert.DeserializeObject<Game>(json, settings);
 
             settings.Context = new StreamingContext(StreamingContextStates.All, loadedGame);
             loadedGame.TimePulse = JsonConvert.DeserializeObject<MasterTimePulse>(JObject.Parse(json)["TimePulse"].ToString(), settings);
+            loadedGame.ProcessorManager = JsonConvert.DeserializeObject<ProcessorManager>(JObject.Parse(json)["ProcessManager"].ToString(), settings);
+            loadedGame.GlobalManager = JsonConvert.DeserializeObject<EntityManager>(JObject.Parse(json)["GlobalManager"].ToString(), settings);
+            loadedGame.GameMasterFaction = JsonConvert.DeserializeObject<Entity>(JObject.Parse(json)["GameMasterFaction"].ToString(), settings);
+            // StandAloneOrderHandler currently doesn't need to be serialized
+            // loadedGame.OrderHandler = JsonConvert.DeserializeObject<StandAloneOrderHandler>(JObject.Parse(json)["OrderHandler"].ToString(), settings);
 
             return loadedGame;
         }
@@ -167,6 +186,14 @@ namespace Pulsar4X.Engine
             jsonObject["Settings"] = JToken.FromObject(game.Settings, serializer);
             jsonObject["StartingGameData"] = JToken.FromObject(game.StartingGameData, serializer);
             jsonObject["TimePulse"] = JToken.FromObject(game.TimePulse, serializer);
+            jsonObject["ProcessManager"] = JToken.FromObject(game.ProcessorManager, serializer);
+
+            // StandAloneOrderHandler currently doesn't need to be serialized
+            // jsonObject["OrderHandler"] = JToken.FromObject(game.OrderHandler, serializer);
+
+            jsonObject["GlobalManager"] = JToken.FromObject(game.GlobalManager, serializer);
+            jsonObject["GameMasterFaction"] = JToken.FromObject(game.GameMasterFaction, serializer);
+
             jsonObject["Themes"] = JToken.FromObject(game.Themes, serializer);
             jsonObject["AtmosphericGases"] = JToken.FromObject(game.AtmosphericGases, serializer);
             jsonObject["TechCategories"] = JToken.FromObject(game.TechCategories, serializer);

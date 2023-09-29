@@ -159,5 +159,56 @@ namespace Pulsar4X.Engine
 
             return string.Empty;
         }
+
+        public bool IsResearchable(string id)
+        {
+            return Techs.ContainsKey(id)
+                    && Techs[id].Level < Techs[id].MaxLevel;
+        }
+
+        public void IncrementTechLevel(string id)
+        {
+            if(Techs.ContainsKey(id)) IncrementTechLevel(Techs[id]);
+        }
+
+        public void IncrementTechLevel(Tech tech)
+        {
+            if(!Techs.ContainsKey(tech.UniqueID)) return;
+
+            tech.Level++;
+            tech.ResearchProgress = 0;
+            tech.ResearchCost = tech.TechCostFormula();
+
+            if(tech.Unlocks.ContainsKey(tech.Level))
+            {
+                foreach(var item in tech.Unlocks[tech.Level])
+                {
+                    Unlock(item);
+
+                    if(Techs.ContainsKey(item))
+                    {
+                        var unlockedTech = (Tech)Techs[item];
+                        unlockedTech.ResearchCost = unlockedTech.TechCostFormula();
+                    }
+                }
+            }
+        }
+
+        internal void AddTechPoints(Tech tech, int pointsToAdd)
+        {
+            if(!Techs.ContainsKey(tech.UniqueID)) return;
+
+            var newPointsTotal = tech.ResearchProgress + pointsToAdd;
+            if(newPointsTotal >= tech.ResearchCost)
+            {
+                int remainder = newPointsTotal - tech.ResearchCost;
+                IncrementTechLevel(tech);
+                tech.ResearchProgress = remainder;
+            }
+            else
+            {
+                tech.ResearchProgress = newPointsTotal;
+            }
+        }
     }
 }

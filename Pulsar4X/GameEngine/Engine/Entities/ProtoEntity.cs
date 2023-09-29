@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
@@ -13,7 +14,7 @@ namespace Pulsar4X.Engine
     /// It holds its own datablobs and provides all other functionality (but not performance) of the EntityManager.
     /// </summary>
     [PublicAPI]
-    [JsonConverter(typeof(ProtoEntityConverter))]
+    //[JsonConverter(typeof(ProtoEntityConverter))]
     public class ProtoEntity: IGetValuesHash
     {
         [PublicAPI]
@@ -113,61 +114,61 @@ namespace Pulsar4X.Engine
             return hash;
         }
 
-        internal class ProtoEntityConverter : JsonConverter
-        {
-            public override bool CanConvert(Type objectType)
-            {
-                return objectType == typeof(ProtoEntity);
-            }
+        // public class ProtoEntityConverter : JsonConverter
+        // {
+        //     public override bool CanConvert(Type objectType)
+        //     {
+        //         return objectType == typeof(ProtoEntity);
+        //     }
 
-            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-            {
-                //bool exists1 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
-                var protoEntity = new ProtoEntity();
-                //StarObject (Entity)
-                reader.Read(); // PropertyName ID
-                reader.Read(); // Actual ID
-                protoEntity.Guid = serializer.Deserialize<string>(reader); // Deserialize the ID
-                //bool exists2 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
-                // Deserialize the dataBlobs
-                reader.Read(); // PropertyName DATABLOB
-                while (reader.TokenType == JsonToken.PropertyName)
-                {
-                    var typestring = "Pulsar4X.ECSLib." + (string)reader.Value;
-                    Type dataBlobType = Type.GetType(typestring);
-                    reader.Read(); // StartObject (dataBlob)
-                    if (reader.TokenType == JsonToken.EndObject)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        //bool exists3 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
-                        BaseDataBlob dataBlob = (BaseDataBlob)serializer.Deserialize(reader, dataBlobType); // EndObject (dataBlob)
-                                                                                                            //bool exists4 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
-                        protoEntity.SetDataBlob(dataBlob);
-                    }
-                    reader.Read(); // PropertyName DATABLOB OR EndObject (Entity)
-                    //bool exists5 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
-                }
+        //     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        //     {
+        //         //bool exists1 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
+        //         var protoEntity = new ProtoEntity();
+        //         //StarObject (Entity)
+        //         reader.Read(); // PropertyName ID
+        //         reader.Read(); // Actual ID
+        //         protoEntity.Guid = serializer.Deserialize<string>(reader); // Deserialize the ID
+        //         //bool exists2 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
+        //         // Deserialize the dataBlobs
+        //         reader.Read(); // PropertyName DATABLOB
+        //         while (reader.TokenType == JsonToken.PropertyName)
+        //         {
+        //             var typestring = "Pulsar4X.Datablobs." + (string)reader.Value;
+        //             Type dataBlobType = Type.GetType(typestring);
+        //             reader.Read(); // StartObject (dataBlob)
+        //             if (reader.TokenType == JsonToken.EndObject)
+        //             {
+        //                 break;
+        //             }
+        //             else
+        //             {
+        //                 //bool exists3 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
+        //                 BaseDataBlob dataBlob = (BaseDataBlob)serializer.Deserialize(reader, dataBlobType); // EndObject (dataBlob)
+        //                                                                                                     //bool exists4 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
+        //                 protoEntity.SetDataBlob(dataBlob);
+        //             }
+        //             reader.Read(); // PropertyName DATABLOB OR EndObject (Entity)
+        //             //bool exists5 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
+        //         }
 
-                //bool exists6 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
-                return protoEntity;
-            }
+        //         //bool exists6 = Testing.manager.EntityExistsGlobaly(Testing.entityID);
+        //         return protoEntity;
+        //     }
 
-            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-            {
-                ProtoEntity protoEntity = (ProtoEntity)value;
-                writer.WriteStartObject(); // Start the Entity.
-                writer.WritePropertyName("ID"); // Write the ID PropertyName
-                serializer.Serialize(writer, protoEntity.Guid); // Write the Entity's guid.
-                foreach (BaseDataBlob dataBlob in protoEntity.DataBlobs.Where(dataBlob => dataBlob != null))
-                {
-                    writer.WritePropertyName(dataBlob.GetType().Name); // Write the PropertyName of the dataBlob as the dataBlob's type.
-                    serializer.Serialize(writer, dataBlob); // Serialize the dataBlob in this property.
-                }
-                writer.WriteEndObject(); // End then Entity.
-            }
-        }
+        //     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        //     {
+        //         ProtoEntity protoEntity = (ProtoEntity)value;
+        //         writer.WriteStartObject(); // Start the Entity.
+        //         writer.WritePropertyName("ID"); // Write the ID PropertyName
+        //         serializer.Serialize(writer, protoEntity.Guid); // Write the Entity's guid.
+        //         foreach (BaseDataBlob dataBlob in protoEntity.DataBlobs.Where(dataBlob => dataBlob != null))
+        //         {
+        //             writer.WritePropertyName(dataBlob.GetType().Name); // Write the PropertyName of the dataBlob as the dataBlob's type.
+        //             serializer.Serialize(writer, dataBlob); // Serialize the dataBlob in this property.
+        //         }
+        //         writer.WriteEndObject(); // End then Entity.
+        //     }
+        // }
     }
 }

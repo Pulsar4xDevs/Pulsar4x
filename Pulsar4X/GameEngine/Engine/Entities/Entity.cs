@@ -17,10 +17,21 @@ namespace Pulsar4X.Engine
     public delegate void EntityChangeHandler (EntityChangeData.EntityChangeType changeType, BaseDataBlob db);
 
     [DebuggerDisplay("{" + nameof(DebugDisplay) + "}")]
-    [JsonConverter(typeof(EntityConverter))]
+    //[JsonConverter(typeof(EntityConverter))]
     [PublicAPI]
     public sealed class Entity : ProtoEntity
     {
+        private static readonly EntityManager InvalidManager = EntityManager.InvalidManager;
+
+        /// <summary>
+        /// Static entity reference to an invalid entity.
+        ///
+        /// Functions must never return a null entity. Instead, return InvalidEntity.
+        /// </summary>
+        [NotNull]
+        [PublicAPI]
+        public static readonly Entity InvalidEntity = new Entity();
+
         public event EntityChangeHandler ChangeEvent;
         // Index slot of this entity's datablobs in its EntityManager.
         internal int ID;
@@ -32,27 +43,19 @@ namespace Pulsar4X.Engine
         public EntityManager Manager { get; private set; }
         [JsonProperty]
         public string FactionOwnerID { get; internal set; }
+
+        [JsonIgnore]
         public Entity GetFactionOwner
         {
             get { return Manager.GetGlobalEntityByGuid(FactionOwnerID); }
         }
 
+        [JsonIgnore]
         public DateTime StarSysDateTime => Manager.StarSysDateTime;
 
         [NotNull]
         [PublicAPI]
         public new ReadOnlyCollection<BaseDataBlob> DataBlobs => IsValid ? new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobsForEntity(ID)) : new ReadOnlyCollection<BaseDataBlob>(new List<BaseDataBlob>());
-
-        private static readonly EntityManager InvalidManager = EntityManager.InvalidManager;
-
-        /// <summary>
-        /// Static entity reference to an invalid entity.
-        ///
-        /// Functions must never return a null entity. Instead, return InvalidEntity.
-        /// </summary>
-        [NotNull]
-        [PublicAPI]
-        public static readonly Entity InvalidEntity = new Entity();
 
         public void InvokeChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
         {
@@ -483,53 +486,52 @@ namespace Pulsar4X.Engine
                 SetDataBlob(dataBlob);
             }*/
         }
-
-
-        /// <summary>
-        /// EntityConverter is responsible for deserializing entities when they are encountered as references.
-        /// The EntityConverter must provide a proper reference to the object being deserialized.
-        /// </summary>
-        private class EntityConverter : JsonConverter
-        {
-            public override bool CanConvert(Type objectType)
-            {
-                return objectType == typeof(Entity);
-            }
-
-            /// <summary>
-            /// Returns a Entity object that represents the entity.
-            /// If the Entity's manager has already deserialized the entity, then the EntityManager's reference is returned.
-            /// If not, then we create the entity in the global manager, and when the EntityManager containing this entity deserializes,
-            /// it will transfer the entity (that we create here) to itself. This will preserve all Entity references already deserialized.
-            /// </summary>
-            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-            {
-                Game game = (Game)serializer.Context.Context;
-                Entity entity;
-
-                // Parse the ID from the reader.
-                string entityGuid = reader.Value.ToString();
-
-                // Lookup the entity using a global ID lookup.
-                if (entityGuid == String.Empty)
-                    return InvalidEntity;
-                if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
-                    return entity;
-
-                // If no entity was found, create a new entity in the global manager. TODO: we need to get the FactionOwner guid from the json and use that here.
-                entity = new Entity(entityGuid, game.GlobalManager, String.Empty);
-                return entity;
-            }
-
-            /// <summary>
-            /// Serializes the Entity objects. Entities are serialized as simple Guids in this method.
-            /// Datablobs are saved during EntityManager serialization.
-            /// </summary>
-            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-            {
-                var entity = (Entity)value;
-                serializer.Serialize(writer, entity.Guid);
-            }
-        }
     }
+
+    /// <summary>
+    /// EntityConverter is responsible for deserializing entities when they are encountered as references.
+    /// The EntityConverter must provide a proper reference to the object being deserialized.
+    /// </summary>
+    // public class EntityConverter : JsonConverter
+    // {
+    //     public override bool CanConvert(Type objectType)
+    //     {
+    //         return objectType == typeof(Entity);
+    //     }
+
+    //     /// <summary>
+    //     /// Returns a Entity object that represents the entity.
+    //     /// If the Entity's manager has already deserialized the entity, then the EntityManager's reference is returned.
+    //     /// If not, then we create the entity in the global manager, and when the EntityManager containing this entity deserializes,
+    //     /// it will transfer the entity (that we create here) to itself. This will preserve all Entity references already deserialized.
+    //     /// </summary>
+    //     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    //     {
+    //         Game game = (Game)serializer.Context.Context;
+    //         Entity entity;
+
+    //         // Parse the ID from the reader.
+    //         string entityGuid = reader.Value.ToString();
+
+    //         // Lookup the entity using a global ID lookup.
+    //         if (entityGuid.IsNullOrEmpty())
+    //             return Entity.InvalidEntity;
+    //         if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
+    //             return entity;
+
+    //         // If no entity was found, create a new entity in the global manager. TODO: we need to get the FactionOwner guid from the json and use that here.
+    //         entity = new Entity(entityGuid, game.GlobalManager, String.Empty);
+    //         return entity;
+    //     }
+
+    //     /// <summary>
+    //     /// Serializes the Entity objects. Entities are serialized as simple Guids in this method.
+    //     /// Datablobs are saved during EntityManager serialization.
+    //     /// </summary>
+    //     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    //     {
+    //         var entity = (Entity)value;
+    //         serializer.Serialize(writer, entity.Guid);
+    //     }
+    // }
 }

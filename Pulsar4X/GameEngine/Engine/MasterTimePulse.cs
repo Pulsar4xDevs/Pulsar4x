@@ -312,7 +312,7 @@ namespace Pulsar4X.Engine
             JObject jsonObject = JObject.Load(reader);
             var gameProperty = serializer.Context.Context as Game;
 
-            // If the Game property is already set, deserialize Stuff properties and initialize
+            // If the Game property is already set, deserialize properties and initialize
             if (gameProperty != null)
             {
                 var timePulse = new MasterTimePulse(gameProperty);

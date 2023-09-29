@@ -6,7 +6,7 @@ namespace Pulsar4X.Datablobs
 {
     public class FleetDB : TreeHierarchyDB
     {
-        public string FlagShipID { get; internal set; } = String.Empty;
+        public string FlagShipID { get; internal set; } = string.Empty;
         public bool InheritOrders { get; internal set; } = true;
         public SafeList<ConditionalOrder> StandingOrders { get; } = new ();
 

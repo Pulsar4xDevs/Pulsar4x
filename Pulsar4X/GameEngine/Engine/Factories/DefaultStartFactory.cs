@@ -620,7 +620,7 @@ namespace Pulsar4X.Engine
             spacePortDesigner = new ComponentDesigner(spaceportSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
             spacePortDesigner.Name = "Ship Yard";
             _shipYard = spacePortDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_shipYard.TechID);
+            factionDataStore.IncrementTechLevel(_shipYard.TechID);
             return _shipYard;
         }
         public static ComponentDesign LogisticsOffice(Entity faction, FactionDataStore factionDataStore)
@@ -632,7 +632,7 @@ namespace Pulsar4X.Engine
             logofficeDesigner = new ComponentDesigner(logofficeSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
             logofficeDesigner.Name = "Logistics Office";
             _logiOffice = logofficeDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_logiOffice.TechID);
+            factionDataStore.IncrementTechLevel(_logiOffice.TechID);
             return _logiOffice;
         }
         public static ComponentDesign DefaultThrusterDesign(Game game, Entity faction, FactionDataStore factionDataStore)
@@ -650,7 +650,7 @@ namespace Pulsar4X.Engine
 
             _merlin = engineDesigner.CreateDesign(faction);
 
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_merlin.TechID);
+            factionDataStore.IncrementTechLevel(_merlin.TechID);
             return _merlin;
         }
 
@@ -669,7 +669,7 @@ namespace Pulsar4X.Engine
 
             _f1 = engineDesigner.CreateDesign(faction);
 
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_f1.TechID);
+            factionDataStore.IncrementTechLevel(_f1.TechID);
             return _f1;
         }
 
@@ -695,7 +695,7 @@ namespace Pulsar4X.Engine
 
             _raptor = engineDesigner.CreateDesign(faction);
 
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_raptor.TechID);
+            factionDataStore.IncrementTechLevel(_raptor.TechID);
             return _raptor;
         }
 
@@ -713,7 +713,7 @@ namespace Pulsar4X.Engine
 
             _rs25 = engineDesigner.CreateDesign(faction);
 
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_rs25.TechID);
+            factionDataStore.IncrementTechLevel(_rs25.TechID);
             return _rs25;
         }
 
@@ -735,7 +735,7 @@ namespace Pulsar4X.Engine
 
             _warpDrive = engineDesigner.CreateDesign(faction);
 
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_warpDrive.TechID);
+            factionDataStore.IncrementTechLevel(_warpDrive.TechID);
             return _warpDrive;
         }
 
@@ -754,7 +754,7 @@ namespace Pulsar4X.Engine
 
             _warpDrive = engineDesigner.CreateDesign(faction);
 
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_warpDrive.TechID);
+            factionDataStore.IncrementTechLevel(_warpDrive.TechID);
             return _warpDrive;
         }
 
@@ -768,7 +768,7 @@ namespace Pulsar4X.Engine
             fuelTankDesigner.ComponentDesignAttributes["Tank Volume"].SetValueFromInput(1000);
             fuelTankDesigner.Name = "Tank-1000m^3";
             _fuelTank_1000 = fuelTankDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_1000.TechID);
+            factionDataStore.IncrementTechLevel(_fuelTank_1000.TechID);
             return _fuelTank_1000;
         }
 
@@ -782,7 +782,7 @@ namespace Pulsar4X.Engine
             fuelTankDesigner.ComponentDesignAttributes["Tank Volume"].SetValueFromInput(1500);
             fuelTankDesigner.Name = "Tank-1500m^3";
             _fuelTank_2500 = fuelTankDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_2500.TechID);
+            factionDataStore.IncrementTechLevel(_fuelTank_2500.TechID);
             return _fuelTank_2500;
         }
 
@@ -796,7 +796,7 @@ namespace Pulsar4X.Engine
             fuelTankDesigner.ComponentDesignAttributes["Tank Volume"].SetValueFromInput(3000);
             fuelTankDesigner.Name = "Tank-3000m^3";
             _fuelTank_3000 = fuelTankDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fuelTank_3000.TechID);
+            factionDataStore.IncrementTechLevel(_fuelTank_3000.TechID);
             return _fuelTank_3000;
         }
 
@@ -812,7 +812,7 @@ namespace Pulsar4X.Engine
             laserDesigner.ComponentDesignAttributes["ReloadRate"].SetValueFromInput(5);
 
             _laser = laserDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_laser.TechID);
+            factionDataStore.IncrementTechLevel(_laser.TechID);
             return _laser;
 
         }
@@ -831,7 +831,7 @@ namespace Pulsar4X.Engine
             payloadDesigner.ComponentDesignAttributes["Frag Cone Angle"].SetValueFromInput(180);
             payloadDesigner.Name = "ProxFrag 5kg";
             _payload = payloadDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_payload.TechID);
+            factionDataStore.IncrementTechLevel(_payload.TechID);
             return _payload;
         }
 
@@ -849,7 +849,7 @@ namespace Pulsar4X.Engine
             suiteDesigner.ComponentDesignAttributes["Resolution"].SetValueFromInput(1);
             suiteDesigner.Name = "Passive Yellow 1MP ";
             _missileSuite = suiteDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileSuite.TechID);
+            factionDataStore.IncrementTechLevel(_missileSuite.TechID);
             return _missileSuite;
         }
         public static ComponentDesign DefaultMissileSRB(Game game, Entity faction, FactionDataStore factionDataStore)
@@ -863,7 +863,7 @@ namespace Pulsar4X.Engine
 
             srbDesigner.Name = "SRB 235";
             _missileSRB = srbDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileSRB.TechID);
+            factionDataStore.IncrementTechLevel(_missileSRB.TechID);
             return _missileSRB;
         }
 
@@ -876,7 +876,7 @@ namespace Pulsar4X.Engine
             tubeDesigner = new ComponentDesigner(tubeSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
             tubeDesigner.Name = "MissileTube 500";
             _missileTube = tubeDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_missileTube.TechID);
+            factionDataStore.IncrementTechLevel(_missileTube.TechID);
             return _missileTube;
         }
 
@@ -893,7 +893,7 @@ namespace Pulsar4X.Engine
 
             //return fireControlDesigner.CreateDesign(faction);
             _fireControl = fireControlDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_fireControl.TechID);
+            factionDataStore.IncrementTechLevel(_fireControl.TechID);
             return _fireControl;
         }
 
@@ -908,7 +908,7 @@ namespace Pulsar4X.Engine
             componentDesigner.Name = "General Cargo Hold";
             //return cargoInstalation.CreateDesign(faction);
             _cargoInstalation = componentDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_cargoInstalation.TechID);
+            factionDataStore.IncrementTechLevel(_cargoInstalation.TechID);
             return _cargoInstalation;
         }
 
@@ -923,7 +923,7 @@ namespace Pulsar4X.Engine
             componentDesigner.Name = "Reactor15k";
             //return cargoInstalation.CreateDesign(faction);
             _reactor = componentDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_reactor.TechID);
+            factionDataStore.IncrementTechLevel(_reactor.TechID);
             return _reactor;
         }
 
@@ -937,7 +937,7 @@ namespace Pulsar4X.Engine
             componentDesigner.ComponentDesignAttributes["Mass"].SetValueFromInput(2000);
             componentDesigner.Name = "Battery2t";
             _battery = componentDesigner.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_battery.TechID);
+            factionDataStore.IncrementTechLevel(_battery.TechID);
             return _battery;
         }
 
@@ -953,7 +953,7 @@ namespace Pulsar4X.Engine
             cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
             cargoComponent.Name = "CargoComponent5t";
             _cargoHold = cargoComponent.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_cargoHold.TechID);
+            factionDataStore.IncrementTechLevel(_cargoHold.TechID);
             return _cargoHold;
         }
 
@@ -969,7 +969,7 @@ namespace Pulsar4X.Engine
             cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
             cargoComponent.Name = "CargoComponent1t";
             _cargoCompartment = cargoComponent.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_cargoCompartment.TechID);
+            factionDataStore.IncrementTechLevel(_cargoCompartment.TechID);
             return _cargoCompartment;
         }
         public static ComponentDesign ShipSmallOrdnanceStore(Game game, Entity faction, FactionDataStore factionDataStore)
@@ -984,7 +984,7 @@ namespace Pulsar4X.Engine
             cargoComponent.ComponentDesignAttributes["Transfer Range"].SetValueFromInput(100);
             cargoComponent.Name = "OrdinanceRack-2.5t";
             _ordnanceStore = cargoComponent.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_ordnanceStore.TechID);
+            factionDataStore.IncrementTechLevel(_ordnanceStore.TechID);
             return _ordnanceStore;
         }
 
@@ -1004,7 +1004,7 @@ namespace Pulsar4X.Engine
             sensor.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
             sensor.Name = "PassiveSensor-S50";
             _sensor_50 = sensor.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_sensor_50.TechID);
+            factionDataStore.IncrementTechLevel(_sensor_50.TechID);
             return _sensor_50;
 
         }
@@ -1025,7 +1025,7 @@ namespace Pulsar4X.Engine
             sensor.ComponentDesignAttributes["Scan Time"].SetValueFromInput(3600);//Scan Time
             sensor.Name = "Passive Scanner";
             _sensorInstalation = sensor.CreateDesign(faction);
-            faction.GetDataBlob<FactionTechDB>().IncrementLevel(_sensorInstalation.TechID);
+            factionDataStore.IncrementTechLevel(_sensorInstalation.TechID);
             return _sensorInstalation;
 
         }

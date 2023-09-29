@@ -84,7 +84,7 @@ namespace Pulsar4X.Engine
                 string projectGuid = scientist.ProjectQueue[0].techID;
                 bool cycleProject = scientist.ProjectQueue[0].cycle;
 
-                if(!factionTechs.IsResearchable(projectGuid))
+                if(!factionDataStore.IsResearchable(projectGuid))
                 {
                     scientist.ProjectQueue.RemoveAt(0);
                     continue;
@@ -110,10 +110,10 @@ namespace Pulsar4X.Engine
 
                 researchPoints = (int)(researchPoints * bonus);
 
-                if (factionTechs.IsResearchable(project.UniqueID))
+                if (factionDataStore.IsResearchable(project.UniqueID))
                 {
                     int currentLvl = project.Level;
-                    factionTechs.AddPoints(project.UniqueID, researchPoints);
+                    factionDataStore.AddTechPoints(project, researchPoints);
                     if (project.Level > currentLvl)
                     {
                         scientist.ProjectQueue.RemoveAt(0);

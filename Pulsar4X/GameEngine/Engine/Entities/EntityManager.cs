@@ -10,13 +10,17 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Auth;
 using Pulsar4X.Engine.Sensors;
+using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.Engine
 {
-    public class EntityManager : ISerializable
+    [JsonConverter(typeof(EntityManagerConverter))]
+    public class EntityManager
     {
         [CanBeNull]
         public string ManagerGuid { get; internal set; }
+
+        [JsonIgnore]
         public Game Game { get;  internal set; }
         protected readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
@@ -55,9 +59,7 @@ namespace Pulsar4X.Engine
                 return new List<Entity>();
         }
         [JsonProperty]
-        public ManagerSubPulse ManagerSubpulses {
-            get;
-            protected set; }
+        public ManagerSubPulse ManagerSubpulses { get; internal set; }
 
         /// <summary>
         /// Static reference to an invalid manager.
@@ -827,65 +829,65 @@ namespace Pulsar4X.Engine
         #region ISerializable interface
 
         // ReSharper disable once UnusedParameter.Local
-        public EntityManager(SerializationInfo info, StreamingContext context) : this((Game)context.Context)
-        {
-            var entities = (List<ProtoEntity>)info.GetValue("Entities", typeof(List<ProtoEntity>));
-            ManagerSubpulses = (ManagerSubPulse)info.GetValue("ManagerSubpulses", typeof(ManagerSubPulse));
-            ManagerSubpulses.PostLoadInit(context, this);
-            foreach (ProtoEntity protoEntity in entities)
-            {
-                Entity entity;
-                if (FindEntityByGuid(protoEntity.Guid, out entity))
-                {
-                    // Entity has already been deserialized as a reference. It currently exists on the global manager.
-                    entity.Transfer(this);
-                    foreach (BaseDataBlob dataBlob in protoEntity.DataBlobs.Where(dataBlob => dataBlob != null))
-                    {
-                        entity.SetDataBlob(dataBlob);
-                    }
-                }
-                else
-                {
-                    // Entity has not been previously deserialized. TODO: check whether the faction guid will deserialise after this or if we need to read it and input it into the constructor here.
-                    Entity.Create(this, String.Empty, protoEntity);
-                }
-            }
-        }
+        // public EntityManager(SerializationInfo info, StreamingContext context) : this((Game)context.Context)
+        // {
+        //     var entities = (List<ProtoEntity>)info.GetValue("Entities", typeof(List<ProtoEntity>));
+        //     ManagerSubpulses = (ManagerSubPulse)info.GetValue("ManagerSubpulses", typeof(ManagerSubPulse));
+        //     ManagerSubpulses.PostLoadInit(context, this);
+        //     foreach (ProtoEntity protoEntity in entities)
+        //     {
+        //         Entity entity;
+        //         if (FindEntityByGuid(protoEntity.Guid, out entity))
+        //         {
+        //             // Entity has already been deserialized as a reference. It currently exists on the global manager.
+        //             entity.Transfer(this);
+        //             foreach (BaseDataBlob dataBlob in protoEntity.DataBlobs.Where(dataBlob => dataBlob != null))
+        //             {
+        //                 entity.SetDataBlob(dataBlob);
+        //             }
+        //         }
+        //         else
+        //         {
+        //             // Entity has not been previously deserialized. TODO: check whether the faction guid will deserialise after this or if we need to read it and input it into the constructor here.
+        //             Entity.Create(this, String.Empty, protoEntity);
+        //         }
+        //     }
+        // }
 
-        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            List<ProtoEntity> storedEntities = (from entity in _entities
-                                                where entity != null
-                                                select entity.Clone()).ToList();
+        // public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+        // {
+        //     List<ProtoEntity> storedEntities = (from entity in _entities
+        //                                         where entity != null
+        //                                         select entity.Clone()).ToList();
 
-            info.AddValue("Entities", storedEntities);
-            info.AddValue("ManagerSubpulses", ManagerSubpulses);
-        }
+        //     info.AddValue("Entities", storedEntities);
+        //     info.AddValue("ManagerSubpulses", ManagerSubpulses);
+        // }
 
-        /// <summary>
-        /// OnSerialized callback, called by the JSON serializer. Used to report saving progress back to the application.
-        /// </summary>
-        /// <param name="context"></param>
-        [OnSerialized]
-        private void OnSerialized(StreamingContext context)
-        {
-            if (Game == null)
-            {
-                throw new InvalidOperationException("Fake managers cannot be serialized.");
-            }
-        }
+        // /// <summary>
+        // /// OnSerialized callback, called by the JSON serializer. Used to report saving progress back to the application.
+        // /// </summary>
+        // /// <param name="context"></param>
+        // [OnSerialized]
+        // private void OnSerialized(StreamingContext context)
+        // {
+        //     if (Game == null)
+        //     {
+        //         throw new InvalidOperationException("Fake managers cannot be serialized.");
+        //     }
+        // }
 
-        /// <summary>
-        /// OnDeserialized callback, called by the JSON loader. Used to report loading progress back to the application.
-        /// </summary>
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            if (Game == null)
-            {
-                throw new InvalidOperationException("Fake managers cannot be deserialized.");
-            }
-        }
+        // /// <summary>
+        // /// OnDeserialized callback, called by the JSON loader. Used to report loading progress back to the application.
+        // /// </summary>
+        // [OnDeserialized]
+        // private void OnDeserialized(StreamingContext context)
+        // {
+        //     if (Game == null)
+        //     {
+        //         throw new InvalidOperationException("Fake managers cannot be deserialized.");
+        //     }
+        // }
 
         #endregion
 
@@ -896,6 +898,61 @@ namespace Pulsar4X.Engine
                 Entity entity = _entities[index];
                 entity?.Destroy();
             }
+        }
+    }
+
+    public class EntityManagerConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType) => objectType == typeof(EntityManager);
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            JObject jsonObject = JObject.Load(reader);
+            var gameProperty = serializer.Context.Context as Game;
+
+            // By default if we are deserializing an EntityManager directly it is the global manager
+            var manager = new EntityManager(gameProperty, true);
+
+            manager.ManagerSubpulses = jsonObject["Subpulses"].ToObject<ManagerSubPulse>(serializer);
+
+            List<Entity> entities = jsonObject["Entities"].ToObject<List<Entity>>(serializer);
+
+            foreach (var protoEntity in entities)
+            {
+                protoEntity.Transfer(manager);
+                // if (manager.FindEntityByGuid(protoEntity.Guid, out var entity))
+                // {
+                //     // Entity has already been deserialized as a reference. It currently exists on the global manager.
+                //     entity.Transfer(manager);
+                //     foreach (BaseDataBlob dataBlob in protoEntity.DataBlobs.Where(dataBlob => dataBlob != null))
+                //     {
+                //         entity.SetDataBlob(dataBlob);
+                //     }
+                // }
+                // else
+                // {
+                //     // Entity has not been previously deserialized. TODO: check whether the faction guid will deserialise after this or if we need to read it and input it into the constructor here.
+                //     Entity.Create(manager, String.Empty, protoEntity);
+                // }
+            }
+
+            return manager;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var manager = (EntityManager)value;
+
+            // List<ProtoEntity> storedEntities = (from entity in manager.Entities
+            //                                     where entity != null
+            //                                     select entity.Clone()).ToList();
+
+            JObject obj = new JObject
+            {
+                { "Entities", JObject.FromObject(manager.Entities) },
+                { "Subpulses", JObject.FromObject(manager.ManagerSubpulses) }
+            };
+            obj.WriteTo(writer);
         }
     }
 }

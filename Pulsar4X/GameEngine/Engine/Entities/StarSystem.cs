@@ -10,7 +10,7 @@ namespace Pulsar4X.Engine
 {
     [DebuggerDisplay("{NameDB.DefaultName} - {Guid.ToString()}")]
     [JsonObject(MemberSerialization.OptIn)]
-    public class StarSystem : EntityManager, ISerializable
+    public class StarSystem : EntityManager
     {
         private readonly Random RNG;
 
@@ -94,42 +94,42 @@ namespace Pulsar4X.Engine
             game.Systems.Add(Guid, this);
         }
 
-        public StarSystem(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        // public StarSystem(SerializationInfo info, StreamingContext context) : base(info, context)
+        // {
 
-            ManagerGuid = (string)info.GetValue("ID", typeof(string));
-            Seed = (int)info.GetValue("Seed", typeof(int));
-            NameDB = (NameDB)info.GetValue("Name", typeof(NameDB));
-        }
+        //     ManagerGuid = (string)info.GetValue("ID", typeof(string));
+        //     Seed = (int)info.GetValue("Seed", typeof(int));
+        //     NameDB = (NameDB)info.GetValue("Name", typeof(NameDB));
+        // }
 
-        public void ExportBodies(SerializationInfo info)
-        {
-            List<Entity> bodies = this.GetAllEntitiesWithDataBlob<StarInfoDB>();
-            bodies.AddRange(this.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>());
+        // public void ExportBodies(SerializationInfo info)
+        // {
+        //     List<Entity> bodies = this.GetAllEntitiesWithDataBlob<StarInfoDB>();
+        //     bodies.AddRange(this.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>());
 
-            info.AddValue("ID", Guid);
-            info.AddValue("Seed", Seed);
-            info.AddValue("Name", NameDB);
-            info.AddValue("Bodies", bodies);
-        }
+        //     info.AddValue("ID", Guid);
+        //     info.AddValue("Seed", Seed);
+        //     info.AddValue("Name", NameDB);
+        //     info.AddValue("Bodies", bodies);
+        // }
 
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
+        // public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        // {
 
-            info.AddValue("ID", Guid);
-            info.AddValue("Seed", Seed);
-            info.AddValue("Name", NameDB);
-            base.GetObjectData(info, context);
-        }
+        //     info.AddValue("ID", Guid);
+        //     info.AddValue("Seed", Seed);
+        //     info.AddValue("Name", NameDB);
+        //     base.GetObjectData(info, context);
+        // }
 
 
-        [OnDeserialized]
-        public void OnDeserialized(StreamingContext context)
-        {
-            Game = (Game)context.Context;
-            Game.PostLoad += GameOnPostLoad;
+        // [OnDeserialized]
+        // public void OnDeserialized(StreamingContext context)
+        // {
+        //     Game = (Game)context.Context;
+        //     Game.PostLoad += GameOnPostLoad;
 
-        }
+        // }
 
         private void GameOnPostLoad(object sender, EventArgs eventArgs)
         {

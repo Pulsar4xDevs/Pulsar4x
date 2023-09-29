@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Auth;
 using Pulsar4X.Interfaces;
@@ -50,7 +47,7 @@ namespace Pulsar4X.Engine
             var factionInfo = new FactionInfoDB();
             factionInfo.Data = new FactionDataStore(game.StartingGameData);
 
-            var factionTechDB = new FactionTechDB(factionInfo.Data);
+            var factionTechDB = new FactionTechDB();
 
             var blobs = new List<BaseDataBlob> {
                 name,
@@ -71,7 +68,7 @@ namespace Pulsar4X.Engine
                 // Research any tech that is listed
                 if(factionInfo.Data.Techs.ContainsKey(id))
                 {
-                    factionTechDB.IncrementLevel(id);
+                    factionInfo.Data.IncrementTechLevel(id);
                 }
 
                 if(factionInfo.Data.CargoGoods.IsMaterial(id))

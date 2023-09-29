@@ -59,7 +59,7 @@ namespace Pulsar4X.Components
                         if(factionDataStore.Techs.ContainsKey(kvp.Key.ToString()))
                         {
                             Tech techSD = factionDataStore.Techs[kvp.Key.ToString()];
-                            GuidDictionary.Add(kvp.Key, new ChainedExpression(factionTech.TechDataFormula(techSD).ToString(), this, factionDataStore, factionTech));
+                            GuidDictionary.Add(kvp.Key, new ChainedExpression(techSD.TechDataFormula().ToString(), this, factionDataStore, factionTech));
                         }
                     }
                 }

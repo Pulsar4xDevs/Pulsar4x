@@ -4,10 +4,12 @@ using System.Linq;
 using System.Reflection;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Datablobs;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.Engine
 {
-    //consdisder making this a singleton
+    [JsonConverter(typeof(ProcessManagerConverter))]
     internal class ProcessorManager
     {
 
@@ -15,6 +17,10 @@ namespace Pulsar4X.Engine
         private readonly List<IRecalcProcessor> _recalcProcessors = new List<IRecalcProcessor>();
         //private readonly Dictionary<PulseActionEnum, IHotloopProcessor> _hotloopProcessorsByEnum = new Dictionary<PulseActionEnum, IHotloopProcessor>();
         private readonly Dictionary<string, IInstanceProcessor> _instanceProcessors = new Dictionary<string, IInstanceProcessor>();
+
+        public int HotloopCount => HotloopProcessors.Count;
+        public int RecalcCount => _recalcProcessors.Count;
+        public int InstanceCount => _instanceProcessors.Count;
 
         private Game _game;
         internal ProcessorManager(Game game)
@@ -127,6 +133,36 @@ namespace Pulsar4X.Engine
             return assembly.GetTypes()
                 .Where(baseType.IsAssignableFrom)
                 .Where(t => baseType != t);
+        }
+    }
+
+    public class ProcessManagerConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType) => objectType == typeof(ProcessorManager);
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            // Save JObject to set it later in the second step
+            JObject jsonObject = JObject.Load(reader);
+            var gameProperty = serializer.Context.Context as Game;
+
+            if (gameProperty != null)
+            {
+                var obj = new ProcessorManager(gameProperty);
+                serializer.Populate(jsonObject.CreateReader(), obj);
+                return obj;
+            }
+
+            return null;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            JObject obj = new JObject
+            {
+                // I don't think we need to serialize the processors
+            };
+            obj.WriteTo(writer);
         }
     }
 }

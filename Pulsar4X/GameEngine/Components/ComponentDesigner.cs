@@ -136,7 +136,7 @@ namespace Pulsar4X.Components
                 Design = _design
             };
 
-            tech.ResearchCost = factionTech.TechCostFormula(tech);
+            tech.ResearchCost = tech.TechCostFormula();
 
             _design.TechID = tech.UniqueID;
             faction.Data.Techs.Add(tech.UniqueID, tech);

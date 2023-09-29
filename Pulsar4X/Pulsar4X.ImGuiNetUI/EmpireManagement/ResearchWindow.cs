@@ -78,13 +78,13 @@ namespace Pulsar4X.SDL2UI
         {
             if(selectCategoryFilterIndex == 0)
             {
-                _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionTechDB.IsResearchable(t.UniqueID)).ToList();
+                _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionData.IsResearchable(t.UniqueID)).ToList();
                 _researchableTechs.Sort((a,b) => a.Name.CompareTo(b.Name));
             }
             else
             {
                 var id = techCategoryIds[selectCategoryFilterIndex];
-                _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionTechDB.IsResearchable(t.UniqueID) && t.Category.Equals(id)).ToList();
+                _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionData.IsResearchable(t.UniqueID) && t.Category.Equals(id)).ToList();
                 _researchableTechs.Sort((a,b) => a.Name.CompareTo(b.Name));
             }
 
@@ -194,7 +194,7 @@ namespace Pulsar4X.SDL2UI
                     }
 
                     ImGui.TableNextColumn();
-                    if (scientist.ProjectQueue.Count > 0 && _factionTechDB.IsResearchable(scientist.ProjectQueue[0].techID))
+                    if (scientist.ProjectQueue.Count > 0 && _factionData.IsResearchable(scientist.ProjectQueue[0].techID))
                     {
                         var proj = _researchableTechsByGuid[scientist.ProjectQueue[0].techID];
 
