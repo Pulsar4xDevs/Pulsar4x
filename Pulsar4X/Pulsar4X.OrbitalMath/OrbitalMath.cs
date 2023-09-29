@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace Pulsar4X.Orbital
 {
@@ -367,6 +368,12 @@ namespace Pulsar4X.Orbital
             var TAy = H * q / (r * sgp);
             var TA = Math.Atan2(TAy, TAx);
             return TA;
+        }
+        
+        public static double TrueAmomalyAtRadius(KeplerElements ke, double r)
+        {
+            var p = EllipseMath.SemiLatusRectum(ke.SemiMajorAxis, ke.Eccentricity);
+            return EllipseMath.AngleAtRadus(r, p, ke.Eccentricity);
         }
 
         public static double TrueAnomalyFromEccentricAnomaly(double eccentricity, double eccentricAnomaly)
@@ -815,7 +822,7 @@ namespace Pulsar4X.Orbital
             double eca = currentMeanAnomaly + eccentricity / 2;
             double diff = 10000;
             double eps = 0.000001;
-            double e1 = 0;
+            double e1 = currentMeanAnomaly;
 
             while (diff > eps)
             {
@@ -962,7 +969,7 @@ namespace Pulsar4X.Orbital
         /// <param name="eccentricity">Eccentricity.</param>
         public static Vector3 PositionFromRadius(double radius, double semiLatusRectum, double eccentricity)
         {
-            double θ = AngleAtRadus(radius, semiLatusRectum, eccentricity);
+            double θ = EllipseMath.AngleAtRadus(radius, semiLatusRectum, eccentricity);
             var x = radius * Math.Cos(θ);
             var y = radius * Math.Sin(θ);
             return new Vector3() { X = x, Y = y };
@@ -1133,6 +1140,8 @@ namespace Pulsar4X.Orbital
 
         }
 
+
+
         public static double GetLongditudeOfPeriapsis(double inclination, double aoP, double loAN)
         {
             double lop;
@@ -1155,22 +1164,31 @@ namespace Pulsar4X.Orbital
         /// </summary>
         /// <returns>The to radius from periapsis.</returns>
         /// <param name="orbit">Orbit.</param>
-        /// <param name="radiusAU">Radius au.</param>
-        public static double TimeToRadiusFromPeriapsis(KeplerElements orbit, double radiusAU, double gravitationalParameterAU)
+        /// <param name="radiusAU">Radius</param>
+        public static double TimeToRadiusFromPeriapsis(KeplerElements orbit, double radius, double sgp)
         {
             throw new NotImplementedException();
 
             var a = Distance.MToAU(orbit.SemiMajorAxis);
             var e = orbit.Eccentricity;
             var p = EllipseMath.SemiLatusRectum(a, e);
-            var angle = AngleAtRadus(radiusAU, p, e);
-            //var meanAnomaly = CurrentMeanAnomaly(orbit.MeanAnomalyAtEpoch, meanMotion, )
-            return TimeFromPeriapsis(a, gravitationalParameterAU, Angle.ToDegrees(orbit.MeanAnomalyAtEpoch));
+            var angle = EllipseMath.AngleAtRadus(radius, p, e);
+            //var eccentricAnomoly = GetEccentricAnomalyNewtonsMethod()
+            //var meanAnomaly = GetMeanAnomaly(orbit.Eccentricity, 
+            return TimeFromPeriapsis(a, sgp, orbit.MeanAnomalyAtEpoch);
         }
 
         #endregion
 
 
+        #region HyperBolicFunctions
+
+
+        
+        
+        
+        #endregion
+        
         /// <summary>
         /// Gets the sphere of influence radius of a given body
         /// </summary>
@@ -1183,32 +1201,7 @@ namespace Pulsar4X.Orbital
             return semiMajorAxis * Math.Pow((mass / parentMass), 0.4);
         }
 
-        /// <summary>
-        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
-        /// </summary>
-        /// <returns>The radius from the focal point for a given angle</returns>
-        /// <param name="angle">Angle.</param>
-        /// <param name="semiLatusRectum">Semi latus rectum.</param>
-        /// <param name="eccentricity">Eccentricity.</param>
-        public static double RadiusAtAngle(double angle, double semiLatusRectum, double eccentricity)
-        {
-            return semiLatusRectum / (1 + eccentricity * Math.Cos(angle));
-        }
 
-        /// <summary>
-        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
-        /// </summary>
-        /// <returns>The angle from the focal point for a given radius</returns>
-        /// <param name="radius">Radius.</param>
-        /// <param name="semiLatusRectum">Semi latus rectum.</param>
-        /// <param name="eccentricity">Eccentricity.</param>
-        public static double AngleAtRadus(double radius, double semiLatusRectum, double eccentricity)
-        {
-            //r = p / (1 + e * cos(θ))
-            //1 + e * cos(θ) = p/r
-            //((p / r) -1) / e = cos(θ)
-            return Math.Acos((semiLatusRectum / radius - 1) / eccentricity);
-        }
 
         /// <summary>
         /// Returns the LoP in 2d space (a retrograde orbits aop will be sign switched)

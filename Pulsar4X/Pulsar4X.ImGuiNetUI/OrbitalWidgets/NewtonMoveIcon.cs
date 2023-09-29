@@ -204,9 +204,9 @@ namespace Pulsar4X.SDL2UI
             double _lop = _ke.AoP + _ke.LoAN;
 
             double p = EllipseMath.SemiLatusRectum(a, e);
-            double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, e));
+            double angleToSOIPoint = Math.Abs(EllipseMath.AngleAtRadus(soi, p, e));
             double p1 = EllipseMath.SemiLatusRectum(a1, e1);
-            double ang1 = Math.Abs(OrbitalMath.AngleAtRadus(soi, p1, e1));
+            double ang1 = Math.Abs(EllipseMath.AngleAtRadus(soi, p1, e1));
             
             //the angle used in the calculation is not from the focal point, but from the center( x=a y=0)
             //angleToSOIPoint however is from the focal point so we need to translate from that frame of reference to one from the center. 
@@ -579,9 +579,9 @@ namespace Pulsar4X.SDL2UI
             double _lop = _ke.AoP + _ke.LoAN;
 
             double p = EllipseMath.SemiLatusRectum(a, e);
-            double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(_parentSOI_m, p, e));
+            double angleToSOIPoint = Math.Abs(EllipseMath.AngleAtRadus(_parentSOI_m, p, e));
             double p1 = EllipseMath.SemiLatusRectum(a1, e1);
-            double ang1 = Math.Abs(OrbitalMath.AngleAtRadus(_parentSOI_m, p1, e1));
+            double ang1 = Math.Abs(EllipseMath.AngleAtRadus(_parentSOI_m, p1, e1));
             
             //the angle used in the calculation is not from the focal point, but from the center( x=a y=0)
             //angleToSOIPoint however is from the focal point so we need to translate from that frame of reference to one from the center. 

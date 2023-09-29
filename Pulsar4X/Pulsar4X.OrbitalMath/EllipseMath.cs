@@ -107,6 +107,33 @@ namespace Pulsar4X.Orbital
 
             return area;
         }
+        
+        /// <summary>
+        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
+        /// </summary>
+        /// <returns>The radius from the focal point for a given angle</returns>
+        /// <param name="angle">Angle.</param>
+        /// <param name="semiLatusRectum">Semi latus rectum.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        public static double RadiusAtAngle(double angle, double semiLatusRectum, double eccentricity)
+        {
+            return semiLatusRectum / (1 + eccentricity * Math.Cos(angle));
+        }
+
+        /// <summary>
+        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
+        /// </summary>
+        /// <returns>The angle from the focal point for a given radius</returns>
+        /// <param name="radius">Radius.</param>
+        /// <param name="semiLatusRectum">Semi latus rectum.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        public static double AngleAtRadus(double radius, double semiLatusRectum, double eccentricity)
+        {
+            //r = p / (1 + e * cos(θ))
+            //1 + e * cos(θ) = p/r
+            //((p / r) -1) / e = cos(θ)
+            return Math.Acos((semiLatusRectum / radius - 1) / eccentricity);
+        }
 
         /// <summary>
         /// https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_center

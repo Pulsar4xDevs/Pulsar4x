@@ -110,7 +110,7 @@ namespace Pulsar4X.SDL2UI
                 _lop = Math.PI * 2 - _lop;
 
             double p = EllipseMath.SemiLatusRectum(a, e);
-            double angleToSOIPoint = Math.Abs(OrbitMath.AngleAtRadus(soi, p, e));
+            double angleToSOIPoint = Math.Abs(EllipseMath.AngleAtRadus(soi, p, e));
             //double thetaMax = angleToSOIPoint;
 
             double maxX = soi * Math.Cos(angleToSOIPoint);

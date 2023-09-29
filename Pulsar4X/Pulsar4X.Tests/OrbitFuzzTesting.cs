@@ -138,7 +138,7 @@ namespace Pulsar4X.Tests
                     parentMassDB.MassDry, 
                     2.2e14,          //halleysBodyMass
                     -17.834,     //halleysSemiMajAxis 
-                    1.05,     //Hyperbolic Eccentricity
+                    1.3,     //Hyperbolic Eccentricity
                     0, 
                     0, //halleysLoAN
                     111.33, //halleysAoP

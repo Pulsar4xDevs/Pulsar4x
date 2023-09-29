@@ -55,8 +55,8 @@ namespace Pulsar4X.Tests
             var i = 0;
             for (double angle = 0; angle < Math.PI; angle += 0.0174533)
             {
-                var r = OrbitMath.RadiusAtAngle(angle, p, e);
-                var theta = OrbitMath.AngleAtRadus(r, p, e);
+                var r = EllipseMath.RadiusAtAngle(angle, p, e);
+                var theta = EllipseMath.AngleAtRadus(r, p, e);
                 Assert.AreEqual(angle, theta, angleDelta,  "inc: " + i + " r: " + r);
                 i++;
             }
@@ -380,7 +380,7 @@ namespace Pulsar4X.Tests
             Vector3 result_m = objOrbit.GetPosition(new DateTime());
 
             double keslr = EllipseMath.SemiLatusRectum(ke_m.SemiMajorAxis, ke_m.Eccentricity);
-            double keradius = OrbitMath.RadiusAtAngle(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);
+            double keradius = EllipseMath.RadiusAtAngle(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);
             Vector3 kemathPos = OrbitMath.GetRelativePosition(ke_m.LoAN, ke_m.AoP, ke_m.Inclination, ke_m.TrueAnomalyAtEpoch, keradius);
             
             Assert.AreEqual(kemathPos.Length(), pos_m.Length(), 0.02);
