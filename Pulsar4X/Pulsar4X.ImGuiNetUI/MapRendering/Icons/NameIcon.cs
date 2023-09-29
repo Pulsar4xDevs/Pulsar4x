@@ -26,7 +26,7 @@ namespace Pulsar4X.SDL2UI
         public System.Numerics.Vector2 ViewOffset { get; set; } = new System.Numerics.Vector2();
         public Rectangle ViewDisplayRect = new Rectangle();
         UserOrbitSettings.OrbitBodyType _bodyType = UserOrbitSettings.OrbitBodyType.Unknown;
-        internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[(int)_bodyType]; } }
+        internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[_bodyType]; } }
         public NameIcon(EntityState entityState, GlobalUIState state) : base(entityState.Entity.GetDataBlob<PositionDB>())
         {
             Random rnd = new Random();

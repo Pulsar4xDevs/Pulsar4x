@@ -110,7 +110,6 @@ namespace Pulsar4X.Engine
     [Serializable]
     public class NewGameSettings : GameSettings
     {
-        [JsonIgnore]
         public string SMPassword { get; set; } = "";
 
         #region Player Generation
@@ -123,16 +122,12 @@ namespace Pulsar4X.Engine
         /// <para></para>
         /// If this is false, none of the other options in this region will work.
         /// </summary>
-        [JsonIgnore]
         public bool? CreatePlayerFaction { get; set; } = true;
 
-        [JsonIgnore]
         public string DefaultPlayerName { get; set; } = "Player 1";
 
-        [JsonIgnore]
         public string DefaultPlayerPassword { get; set; } = "";
 
-        [JsonIgnore]
         public string DefaultFactionName { get; set; } = "Terran Federation";
 
 
@@ -140,17 +135,14 @@ namespace Pulsar4X.Engine
         /// Defines if the default Sol Start will be used.
         /// Player faction can still be generated without generating Sol.
         /// </summary>
-        [JsonIgnore]
         public bool? DefaultSolStart { get; set; } = true;
 
         #endregion
 
         #region Not Implemented in ECSLib
 
-        [JsonIgnore]
         public int NumberOfStartingNPR { get; set; } = 1;
 
-        [JsonIgnore]
         public bool? StartingNPRAreConventional { get; set; } = false;
 
         #endregion

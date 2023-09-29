@@ -64,7 +64,7 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<String, NonUniquePulsarGuiWindow> LoadedNonUniqueWindows = new ();
         internal PulsarGuiWindow ActiveWindow { get; set; }
         internal List<List<UserOrbitSettings>> UserOrbitSettingsMtx = new ();
-        internal List<float> DrawNameZoomLvl = new ();
+        internal Dictionary<UserOrbitSettings.OrbitBodyType, float> DrawNameZoomLvl = new ();
         internal Dictionary<string, IntPtr> SDLImageDictionary = new ();
         internal Dictionary<string, int> GLImageDictionary = new ();
         public event EntityClickedEventHandler EntityClickedEvent;
@@ -84,10 +84,18 @@ namespace Pulsar4X.SDL2UI
             //var surfacePtr = SDL.SDL_GetWindowSurface(windowPtr);
             rendererPtr = SDL.SDL_CreateRenderer(windowPtr, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
 
+            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Star, 2f);
+            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Planet, 32f);
+            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Moon, 96f);
+            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Asteroid, 96f);
+            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Comet, 96f);
+            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Colony, 32f);
+            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Ship, 64f);
+            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Unknown, 96f);
+
             for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
             {
                 UserOrbitSettingsMtx.Add(new List<UserOrbitSettings>());
-                DrawNameZoomLvl.Add(100f);
                 for (int j = 0; j < (int)UserOrbitSettings.OrbitTrajectoryType.NumberOf; j++)
                 {
                     UserOrbitSettingsMtx[i].Add(new UserOrbitSettings());

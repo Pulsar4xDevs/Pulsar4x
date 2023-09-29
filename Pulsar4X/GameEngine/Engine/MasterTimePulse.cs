@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
 using Pulsar4X.DataStructures;
+using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.Engine
 {
     public delegate void DateChangedEventHandler(DateTime newDate);
 
-    [JsonObject(MemberSerialization.OptIn)]
+    [JsonConverter(typeof(MasterTimePulseConverter))]
     public class MasterTimePulse : IEquatable<MasterTimePulse>
     {
-        [JsonProperty]
         private SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>();
 
         private Stopwatch _stopwatch = new Stopwatch();
@@ -37,12 +37,20 @@ namespace Pulsar4X.Engine
                 _timer.Interval = _tickInterval.TotalMilliseconds * value;
             }
         }
+
         private float _timeMultiplier = 1f;
 
         private TimeSpan _tickInterval = TimeSpan.FromMilliseconds(250);
-        public TimeSpan TickFrequency { get { return _tickInterval; } set { _tickInterval = value;
-            _timer.Interval = _tickInterval.TotalMilliseconds * _timeMultiplier;
-        } }
+
+        public TimeSpan TickFrequency
+        {
+            get { return _tickInterval; }
+            set
+            {
+                _tickInterval = value;
+                _timer.Interval = _tickInterval.TotalMilliseconds * _timeMultiplier;
+            }
+        }
 
         public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(3600);
 
@@ -69,7 +77,6 @@ namespace Pulsar4X.Engine
             GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
         }
 
-        [JsonProperty]
         private DateTime _gameGlobalDateTime;
 
         public DateTime GameGlobalDateTime
@@ -295,5 +302,47 @@ namespace Pulsar4X.Engine
         }
     }
 
+    public class MasterTimePulseConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType) => objectType == typeof(MasterTimePulse);
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            // Save JObject to set it later in the second step
+            JObject jsonObject = JObject.Load(reader);
+            var gameProperty = serializer.Context.Context as Game;
+
+            // If the Game property is already set, deserialize Stuff properties and initialize
+            if (gameProperty != null)
+            {
+                var timePulse = new MasterTimePulse(gameProperty);
+                serializer.Populate(jsonObject.CreateReader(), timePulse);
+                return timePulse;
+            }
+
+            // If Game is not set, return null for now
+            return null;
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var pulse = (MasterTimePulse)value;
+
+            var entityDictFieldInfo = typeof(MasterTimePulse).GetField("EntityDictionary", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var entityDictValue = entityDictFieldInfo?.GetValue(pulse);
+
+            JObject obj = new JObject
+            {
+                { "GameGlobalDateTime", new JValue(pulse.GameGlobalDateTime) },
+                { "TimeMultiplier", new JValue(pulse.TimeMultiplier) },
+                { "TickFrequency", new JValue(pulse.TickFrequency) },
+                { "Ticklength", new JValue(pulse.Ticklength) },
+                { "LastProcessingTime", new JValue(pulse.LastProcessingTime) },
+                { "LastSubtickTime", new JValue(pulse.LastSubtickTime) },
+                { "EntityDictionary", new JObject(entityDictValue) }
+            };
+            obj.WriteTo(writer);
+        }
+    }
 
 }

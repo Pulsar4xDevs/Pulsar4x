@@ -3,6 +3,7 @@ using ImGuiNET;
 using System.Numerics;
 using Pulsar4X.Engine;
 using Vector2 = System.Numerics.Vector2;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -44,15 +45,15 @@ namespace Pulsar4X.SDL2UI
                     }
                     if (_uiState.IsGameLoaded)
                     {
-                        ImGui.BeginDisabled();
                         if (ImGui.Button("Save Current Game", buttonSize))
                         {
                             _saveGame = !_saveGame;
 
+                            string gameJson = Game.Save(_uiState.Game);
+
                             // FIXME:
                             //SerializationManager.Export(_uiState.Game, "SaveGame");
                         }
-                        ImGui.EndDisabled();
                         if (ImGui.Button("Options", buttonSize))
                         {
                             SettingsWindow.GetInstance().ToggleActive();

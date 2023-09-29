@@ -179,9 +179,9 @@ namespace Pulsar4X.SDL2UI
                             string typeStr = otype.ToString();
                             if (ImGui.TreeNode(typeStr ))
                             {
-                                float _nameZoomLevel = _uiState.DrawNameZoomLvl[(int)otype];
+                                float _nameZoomLevel = _uiState.DrawNameZoomLvl[otype];
                                 ImGui.SliderFloat("Draw Names at Zoom: ", ref _nameZoomLevel, 0.01f, 10000f);
-                                _uiState.DrawNameZoomLvl[(int)otype] = _nameZoomLevel;
+                                _uiState.DrawNameZoomLvl[otype] = _nameZoomLevel;
                                 for (int j = 0; j < (int)UserOrbitSettings.OrbitTrajectoryType.NumberOf; j++)
                                 {
 

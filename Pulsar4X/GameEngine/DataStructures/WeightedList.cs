@@ -48,6 +48,7 @@ namespace Pulsar4X.DataStructures
     /// </code>
     /// </example>
     //[JsonObjectAttribute]
+    [JsonConverter(typeof(WeightedListJsonConverter))]
     public class WeightedList<T> : IEnumerable<WeightedValue<T>>, ISerializable
     {
         private List<WeightedValue<T>> _valueList;
