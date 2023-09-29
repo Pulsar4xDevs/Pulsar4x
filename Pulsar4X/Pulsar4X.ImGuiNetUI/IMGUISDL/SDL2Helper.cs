@@ -69,17 +69,17 @@ namespace ImGuiSDL2CS {
             SDL.SDL_FreeSurface(sdlSurface);
 
 
-            int a;
-            uint f;
-            int qw;
-            int qh;
-            int q = SDL.SDL_QueryTexture(texture, out f, out a, out qw, out qh);
-            if (q != 0)
-            {
-                ImGui.Text("QueryResult: " + q);
-                ImGui.Text(SDL.SDL_GetError());
-            }
-            ImGui.Text("a: " + a +" f: " + f +" w: "+ qw +" h: "+ qh);
+            // int a;
+            // uint f;
+            // int qw;
+            // int qh;
+            // int q = SDL.SDL_QueryTexture(texture, out f, out a, out qw, out qh);
+            // if (q != 0)
+            // {
+            //     ImGui.Text("QueryResult: " + q);
+            //     ImGui.Text(SDL.SDL_GetError());
+            // }
+            // ImGui.Text("a: " + a +" f: " + f +" w: "+ qw +" h: "+ qh);
             
             return texture;
         }

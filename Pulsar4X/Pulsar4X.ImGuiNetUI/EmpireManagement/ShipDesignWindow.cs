@@ -23,7 +23,7 @@ namespace Pulsar4X.SDL2UI
         private byte[] SelectedDesignName =  ImGuiSDL2CSHelper.BytesFromString("foo", 32);
 
         private string[] _exsistingDesigns;
-        private List<ShipDesign> ExistingShipDesigns;
+        private SafeList<ShipDesign> ExistingShipDesigns;
         private string SelectedExistingDesignID = String.Empty;
         private bool SelectedDesignObsolete;
         bool _imagecreated = false;
@@ -128,15 +128,16 @@ namespace Pulsar4X.SDL2UI
 
         void RefreshExistingClasses()
         {
-            ExistingShipDesigns = _factionInfoDB.ShipDesigns.Values.Where(d => !d.IsObsolete).ToList();
-            ExistingShipDesigns.Sort((a, b) => a.Name.CompareTo(b.Name));
+            var designs = _factionInfoDB.ShipDesigns.Values.Where(d => !d.IsObsolete).ToList();
+            designs.Sort((a, b) => a.Name.CompareTo(b.Name));
+            ExistingShipDesigns = new SafeList<ShipDesign>(designs);
 
             if(ExistingShipDesigns.Count == 0)
             {
                 ShowNoDesigns = true;
                 return;
             }
-            if(SelectedExistingDesignID == String.Empty && ExistingShipDesigns.Count > 0)
+            if(SelectedExistingDesignID.IsNullOrEmpty() && ExistingShipDesigns.Count > 0)
                 Select(ExistingShipDesigns[0]);
 
             ShowNoDesigns = false;
@@ -170,7 +171,6 @@ namespace Pulsar4X.SDL2UI
             _armorThickness = design.Armor.thickness;
             DesignChanged = true;
             UpdateShipStats();
-            GenImage();
         }
 
         internal override void Display()
@@ -276,7 +276,7 @@ namespace Pulsar4X.SDL2UI
                 foreach(var design in ExistingShipDesigns)
                 {
                     string name = design.Name;
-                    if (ImGui.Selectable(name + "###existing-design-" + design.UniqueID, design.UniqueID == SelectedExistingDesignID))
+                    if (ImGui.Selectable(name + "###existing-design-" + design.UniqueID, design.UniqueID.Equals(SelectedExistingDesignID)))
                     {
                         Select(design);
                     }
@@ -718,7 +718,7 @@ namespace Pulsar4X.SDL2UI
             _egen = egen;
             _estor = estor;
             //double fuelMass = 0;
-            if (thrusterFuel != String.Empty)
+            if (thrusterFuel.IsNotNullOrEmpty())
             {
                 _fuelType = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(thrusterFuel);
                 if (cstore.ContainsKey(_fuelType.CargoTypeID))
