@@ -30,11 +30,11 @@ namespace Pulsar4X.Engine.Orders
         [JsonIgnore]
         private ComponentInstance _fireControlComponent;
 
-        public string[] WeaponsAssigned = new string[0];
+        public List<string> WeaponsAssigned = new List<string>();
         private List<WeaponState> _weaponsAssigned = new List<WeaponState>();
 
 
-        public static void CreateCommand(Game game, DateTime starSysDate, string factionGuid, string orderEntity, string fireControlGuid, string[] weaponsAssigned)
+        public static void CreateCommand(Game game, DateTime starSysDate, string factionGuid, string orderEntity, string fireControlGuid, List<string> weaponsAssigned)
         {
             var cmd = new SetWeaponsFireControlOrder()
             {
@@ -341,14 +341,15 @@ namespace Pulsar4X.Engine.Orders
         private OrdnanceDesign _ordnanceAssigned;
 
 
-        public static void CreateCommand(DateTime starSysDate, string factionGuid, string orderEntity, string weaponGuid, string ordnanceAssigned)
+        public static void CreateCommand(DateTime starSysDate, Entity faction, Entity orderEntity, WeaponState weapon, string ordnanceAssigned)
         {
             var cmd = new SetOrdinanceToWpnOrder()
             {
-                RequestingFactionGuid = factionGuid,
-                EntityCommandingGuid = orderEntity,
+                RequestingFactionGuid = faction.Guid,
+                EntityCommandingGuid = orderEntity.Guid,
+                _entityCommanding = orderEntity,
                 CreatedDate = starSysDate,
-                WeaponGuid = weaponGuid,
+                WeaponGuid = weapon.ID,
                 OrdnanceAssigned = ordnanceAssigned
             };
             cmd.EntityCommanding.Manager.Game.OrderHandler.HandleOrder(cmd);
@@ -359,7 +360,7 @@ namespace Pulsar4X.Engine.Orders
         internal override void Execute(DateTime atDateTime)
         {
             if (!IsRunning)
-            {
+            {   
                 var wpnState = _weaponInstance.GetAbilityState<WeaponState>();
                 wpnState.FireWeaponInstructions.AssignOrdnance(_ordnanceAssigned);
                 IsRunning = true;

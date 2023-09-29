@@ -173,6 +173,7 @@ namespace Pulsar4X.Components
             return ids;
         }
 
+        public List<String> GetChildrenIDs<IList>() => ChildrenStates.ConvertAll<String>(ChildState => ChildState.ID);
 
     }
 }

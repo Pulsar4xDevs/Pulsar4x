@@ -80,6 +80,18 @@ namespace Pulsar4X.Datablobs
             return false;
         }
 
+        public bool TryGetStates<T>(out List<T> states)
+        where T : ComponentAbilityState
+        {
+            if (TryGetComponentsWithStates<T>(out var instances))
+            {
+                states = instances.ConvertAll<T>(instance => instance.GetAbilityState<T>());
+                return true;
+            }
+            states = new List<T>();
+            return false;
+        }
+
         public bool TryGetStates<T>(out T[] states)
             where T : ComponentAbilityState
         {

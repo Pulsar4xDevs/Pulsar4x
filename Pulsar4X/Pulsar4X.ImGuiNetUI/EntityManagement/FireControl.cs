@@ -24,26 +24,18 @@ namespace Pulsar4X.ImGuiNetUI
         private EntityState _orderEntityState;
         private Entity _orderEntity => _orderEntityState.Entity;
         SensorContact[] _allSensorContacts = new SensorContact[0];
-        string[] _ownEntityNames = new string[0];
         EntityState[] _ownEntites = new EntityState[0];
         private bool _showOwnAsTarget;
-
-        private string _factionID;
 
         //private int _dragDropIndex;
         private string _dragDropGuid;
 
 
-        private int _selectedFCIndex = -1;
-        private FireControlAbilityState[] _fcStates = new FireControlAbilityState[0];
-        private Vector2[] _fcSizes = new Vector2[0];
+        private List<FireControlAbilityState> _fcStates = new List<FireControlAbilityState>();
 
         private Dictionary<string, WeaponState> _wpnDict = new ();
-        private WeaponState[] _allWeaponsStates = new WeaponState[0];
+        private List<WeaponState> _allWeaponsStates = new List<WeaponState>();
 
-        private Dictionary<string, string> _weaponNames = new ();
-        private Dictionary<string, (float reload, float min, float max)> _reloadState = new ();
-        //private WeaponState[] _unAssignedWeapons = new WeaponState[0];
         private OrdnanceDesign[] _allOrdnanceDesigns = new OrdnanceDesign[0];
         Dictionary<int, long> _storedOrdnance = new ();
         private bool _showOnlyCargoOrdnance = true;
@@ -106,13 +98,13 @@ namespace Pulsar4X.ImGuiNetUI
 
         void DisplayFC()
         {
-            for (int i = 0; i < _fcStates.Length; i++)
+            int fcindex = 0;
+            foreach(FireControlAbilityState fc in _fcStates)
             {
-                var fc = _fcStates[i];
 
 
                 var startPoint = ImGui.GetCursorPos();
-                BorderGroup.Begin(fc.Name + "##" + i);
+                BorderGroup.Begin(fc.Name + "##" + fcindex++);
                 //ImGui.BeginChild("fcddarea"+i) ;//("##fcddarea"+i, new Vector2(_fcSizes[i].X -2, _fcSizes[i].Y - 2), false);
 
                 ImGui.Text(fc.TargetName);
@@ -121,56 +113,22 @@ namespace Pulsar4X.ImGuiNetUI
                     if (fc.IsEngaging)
                     {
                         if (ImGui.Button("Cease Fire"))
-                            OpenFire(_fcStates[i].ComponentInstance.UniqueID, SetOpenFireControlOrder.FireModes.CeaseFire);
+                            OpenFire(fc.ComponentInstance.UniqueID, SetOpenFireControlOrder.FireModes.CeaseFire);
                     }
                     else
                     {
                         if (ImGui.Button("Open Fire"))
-                            OpenFire(_fcStates[i].ComponentInstance.UniqueID, SetOpenFireControlOrder.FireModes.OpenFire);
+                            OpenFire(fc.ComponentInstance.UniqueID, SetOpenFireControlOrder.FireModes.OpenFire);
                     }
                 }
 
                 foreach (var wpn in fc.ChildrenStates)
-                {
-                    ImGui.Selectable(_weaponNames[wpn.ID]);
-                    //wpn.ComponentInstance.GetAbilityState<WeaponState>().InternalMagCurAmount
-                    var reloadState = _reloadState[wpn.ID];
-                    ImGui.Text("Reload:" + reloadState.reload + "/" + reloadState.min + "/" + reloadState.max);
-
-                    if (ImGui.BeginDragDropSource())
-                    {
-                        ImGui.Text(wpn.Name);
-                        unsafe
-                        {
-                            int* tesnum = &i;
-                            ImGui.SetDragDropPayload("AssignWeapon", new IntPtr(tesnum), sizeof(int));
-                            _dragDropGuid = wpn.ID;
-                        }
-
-                        ImGui.EndDragDropSource();
-                    }
-
-                    if (ImGui.BeginDragDropTarget())
-                    {
-                        ImGuiPayloadPtr acceptPayload = ImGui.AcceptDragDropPayload("AssignOrdnance");
-                        bool isDroppingOrdnance = false;
-                        unsafe
-                        {
-                            isDroppingOrdnance = acceptPayload.NativePtr != null;
-                        }
-
-                        if (isDroppingOrdnance)
-                            SetOrdnance((WeaponState)wpn, _dragDropGuid);
-
-                    }
-
-                }
+                    ShowWeapon(_wpnDict[wpn.ID]);
 
                 //ImGui.EndChild();
                 BorderGroup.End();
-                _fcSizes[i] = BorderGroup.GetSize;
                 ImGui.SetCursorPos(startPoint);
-                ImGui.InvisibleButton("fcddarea" + i, _fcSizes[i]);
+                ImGui.InvisibleButton("fcddarea" + fcindex, BorderGroup.GetSize);
 
                 if (ImGui.BeginDragDropTarget())
                 {
@@ -200,7 +158,7 @@ namespace Pulsar4X.ImGuiNetUI
                     if (isDroppingOwnTarget)
                         SetTarget(fc, _dragDropGuid);
                     if (isDroppingWeapon)
-                        SetWeapon(_dragDropGuid, fc);
+                        SetWeapon(_wpnDict[_dragDropGuid], fc);
                     ImGui.EndDragDropTarget();
                 }
                 ImGui.NewLine();
@@ -208,49 +166,63 @@ namespace Pulsar4X.ImGuiNetUI
 
         }
 
+        string GetRichWeaponName(WeaponState wpnState)
+        {
+            string weaponname = wpnState.Name + "\t";
+            if (wpnState.FireWeaponInstructions.TryGetOrdnance(out var ordnanceDesign))
+            {
+                weaponname += ordnanceDesign.Name;
+                weaponname += "(" + _storedOrdnance[ordnanceDesign.ID] + ")";
+            }
+            return weaponname;
+        }
+
+        void ShowWeapon(WeaponState wpn, int i = 0)
+        {
+            ImGui.Selectable(GetRichWeaponName(wpn) + "##" + wpn.ComponentInstance.UniqueID);
+            GenericWeaponAtb wpnAtb = wpn.ComponentInstance.Design.GetAttribute<GenericWeaponAtb>();
+            int reloadAmount = wpn.InternalMagCurAmount;
+            int reloadMax = wpnAtb.InternalMagSize;
+            int reloadMin = wpnAtb.AmountPerShot * wpnAtb.MinShotsPerfire;
+            if(reloadAmount < reloadMax)
+                ImGui.Selectable("Reload:" + reloadAmount + "/" + reloadMax + "/" + reloadMin);
+            //wpn.ComponentInstance.GetAbilityState<WeaponState>().InternalMagCurAmount
+
+            if (ImGui.BeginDragDropSource())
+            {
+                ImGui.Text(wpn.Name);
+                unsafe
+                {
+                    int* tesnum = &i;
+                    ImGui.SetDragDropPayload("AssignWeapon", new IntPtr(tesnum), sizeof(int));
+                    _dragDropGuid = wpn.ID;
+                }
+
+                ImGui.EndDragDropSource();
+            }
+            if (ImGui.BeginDragDropTarget())
+            {
+                ImGuiPayloadPtr acceptPayload = ImGui.AcceptDragDropPayload("AssignOrdnance");
+                bool isDropping = false;
+                unsafe
+                {
+                    isDropping = acceptPayload.NativePtr != null;
+                }
+
+                if (isDropping)
+                    SetOrdnance(wpn, _dragDropGuid);
+
+                ImGui.EndDragDropTarget();
+            }
+        }
+
         void UnAssignedWeapons()
         {
             Vector2 unAssStartPos = ImGui.GetCursorPos();
-            BorderGroup.Begin("Un Assigned Weapons");
+            BorderGroup.Begin("Un-Assigned Weapons");
             {
-                for (int i = 0; i < _allWeaponsStates.Length; i++)
-                {
-                    var wpn = _allWeaponsStates[i];
-
-
-
-                    if (wpn.ParentState == null)
-                    {
-                        ImGui.Selectable(_weaponNames[wpn.ID] + "##" + wpn.ComponentInstance.UniqueID);
-                        if (ImGui.BeginDragDropSource())
-                        {
-                            ImGui.Text(wpn.Name);
-                            unsafe
-                            {
-                                int* tesnum = &i;
-                                ImGui.SetDragDropPayload("AssignWeapon", new IntPtr(tesnum), sizeof(int));
-                                _dragDropGuid = wpn.ID;
-                            }
-
-                            ImGui.EndDragDropSource();
-                        }
-
-                        if (ImGui.BeginDragDropTarget())
-                        {
-                            ImGuiPayloadPtr acceptPayload = ImGui.AcceptDragDropPayload("AssignOrdnance");
-                            bool isDropping = false;
-                            unsafe
-                            {
-                                isDropping = acceptPayload.NativePtr != null;
-                            }
-
-                            if (isDropping)
-                                SetOrdnance(wpn, _dragDropGuid);
-
-                            ImGui.EndDragDropTarget();
-                        }
-                    }
-                }
+                foreach (WeaponState wpn in _allWeaponsStates.Where(wpn => wpn.ParentState == null))
+                        ShowWeapon(wpn);
             }
             BorderGroup.End();
             var unAssSize = BorderGroup.GetSize;
@@ -261,9 +233,6 @@ namespace Pulsar4X.ImGuiNetUI
             if (ImGui.BeginDragDropTarget())
             {
 
-
-
-
                 var acceptPayload = ImGui.AcceptDragDropPayload("AssignWeapon");
                 bool isDroppingWeapon = false;
                 unsafe
@@ -273,8 +242,6 @@ namespace Pulsar4X.ImGuiNetUI
 
                 if (isDroppingWeapon)
                     UnSetWeapon(_wpnDict[_dragDropGuid]);
-
-
 
                 ImGui.EndDragDropTarget();
                 ImGui.NewLine();
@@ -364,12 +331,7 @@ namespace Pulsar4X.ImGuiNetUI
             var instancesDB = orderEntity.Entity.GetDataBlob<ComponentInstancesDB>();
             if (orderEntity.DataBlobs.ContainsKey(typeof(FireControlAbilityDB)))
             {
-                if (instancesDB.TryGetStates<FireControlAbilityState>(out _fcStates))
-                {
-
-                }
-
-                _fcSizes = new Vector2[_fcStates.Length];
+                instancesDB.TryGetStates<FireControlAbilityState>(out _fcStates);
             }
             else
             {
@@ -394,8 +356,6 @@ namespace Pulsar4X.ImGuiNetUI
                 _allSensorContacts = contacts.GetAllContacts().ToArray();
             }
             _ownEntites = sysstate.EntityStatesWithPosition.Values.ToArray();
-            RefreshWpnNamesCashe();
-            RefreshReloadStateCashe();
         }
 
         public override void OnSystemTickChange(DateTime newdate)
@@ -421,92 +381,43 @@ namespace Pulsar4X.ImGuiNetUI
                 }
             }
 
-            RefreshWpnNamesCashe();
-            RefreshReloadStateCashe();
-        }
-
-        void RefreshWpnNamesCashe()
-        {
-            _weaponNames = new Dictionary<string, string>();
-            for (int i = 0; i < _allWeaponsStates.Length; i++)
-            {
-
-                var wpn = _allWeaponsStates[i];
-
-                var assOrdName = "";
-                string assOrdCount = "(0)";
-                if (wpn.FireWeaponInstructions.TryGetOrdnance(out var ordnanceDesign))
-                {
-                    assOrdName = ordnanceDesign.Name;
-                    assOrdCount = "(" + _storedOrdnance[ordnanceDesign.ID] + ")";
-                }
-
-                _weaponNames[wpn.ID] = wpn.Name + "\t" + assOrdName + assOrdCount;
-            }
-        }
-
-        void RefreshReloadStateCashe()
-        {
-            _reloadState = new Dictionary<string, (float reload, float min, float max)>();
-            for (int i = 0; i < _allWeaponsStates.Length; i++)
-            {
-                var wpnState = _allWeaponsStates[i];
-                GenericWeaponAtb wpnAtb = wpnState.ComponentInstance.Design.GetAttribute<GenericWeaponAtb>();
-                var reloadAmount = wpnState.InternalMagCurAmount;
-                var reloadMax = wpnAtb.InternalMagSize;
-                var reloadMin = wpnAtb.AmountPerShot * wpnAtb.MinShotsPerfire;
-                _reloadState[wpnState.ID] = (reloadAmount, reloadMin, reloadMax);
-            }
         }
 
         void UnSetWeapon(WeaponState wpnState)
         {
-            var fcState = wpnState.ParentState;
-            var curWpnIDs = fcState.GetChildrenIDs();
-            var newArry = new string[curWpnIDs.Length - 1];
-            int j = 0;
-            for (int i = 0; i < curWpnIDs.Length; i++)
-            {
-                if (curWpnIDs[i] != wpnState.ID)
-                {
-                    newArry[j] = curWpnIDs[i];
-                    j++;
-                }
-            }
-
-            SetWeapons(newArry, fcState.ID);
-            //if(wpnState.ParentState == null)
-
-
+            SetWeapon(wpnState);
         }
 
-        void SetWeapon(string wpnID, FireControlAbilityState fcState)
+        void SetWeapon(WeaponState wpnState, FireControlAbilityState fcState = null)
         {
+            List<string> WpnIDs;
             //var curWpns = fcState.AssignedWeapons;
-            var curWpnIDs = fcState.GetChildrenIDs();
-            var newArry = new string[curWpnIDs.Length + 1];
-            for (int i = 0; i < curWpnIDs.Length; i++)
+            if (fcState != null)
             {
-                newArry[i] = curWpnIDs[i];
+                WpnIDs = fcState.GetChildrenIDs<IList>();
+                WpnIDs.Add(wpnState.ID);
+                SetWeapons(WpnIDs, fcState.ID);
+                return;
             }
-
-            newArry[curWpnIDs.Length] = wpnID;
-            SetWeapons(newArry, fcState.ID);
+            else if(wpnState.ParentState != null)
+            {
+                WpnIDs = wpnState.ParentState.GetChildrenIDs<IList>();
+                WpnIDs.Remove(wpnState.ID);
+                SetWeapons(WpnIDs, wpnState.ParentState.ID);
+            }     
         }
 
-        void SetWeapons(string[] wpnsAssignd, string firecontrolID)
+        void SetWeapons(List<string> wpnsAssignd, string firecontrolID)
         {
             SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, firecontrolID, wpnsAssignd);
         }
 
         void SetOrdnance(WeaponState wpn, string ordnanceAssigned)
         {
-            SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, wpn.ID, ordnanceAssigned);
-            RefreshWpnNamesCashe(); //refresh this or it wont show the change till after a systemtick.
-            RefreshReloadStateCashe();
+            SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction, _orderEntity, wpn, ordnanceAssigned);
         }
 
-        void SetTarget(FireControlAbilityState fcState, string targetID)
+        void SetTarget(FireControlAbilityState fcState, string targetID)    
         {
             var fcGuid = fcState.ComponentInstance.UniqueID;
             SetTargetFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Guid, _orderEntity.Guid, fcGuid, targetID);

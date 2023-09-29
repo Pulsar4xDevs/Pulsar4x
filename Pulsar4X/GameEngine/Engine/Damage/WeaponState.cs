@@ -15,7 +15,6 @@ namespace Pulsar4X.Engine.Damage
         public bool ReadyToFire { get; internal set; }
 
         public string WeaponType = "";
-        
 
         public ComponentInstance WeaponComponentInstance { get; set; }
         public (string name, double value, ValueTypeStruct valueType)[] WeaponStats;
