@@ -292,7 +292,53 @@ namespace Pulsar4X.SDL2UI
             return points;
         }
 
-        
+                /// <summary>
+        /// Creates points for an ellipse.
+        /// This formula creates more points at the periapsis and less at the apoapsis.
+        /// </summary>
+        /// <param name="semiMaj"></param>
+        /// <param name="eccentricity"></param>
+        /// <param name="loP">Longditude of Periapsis, tilt</param>
+        /// <param name="startPnt"></param>
+        /// <param name="endPnt"></param>
+        /// <param name="numPoints"></param>
+        /// <returns></returns>
+        public static void KeplerPoints(KeplerElements ke, Vector2 startPnt, Vector2 endPnt, ref Vector2[] points)
+        {                    
+            
+            double startAng = Math.Atan2(startPnt.Y, startPnt.X);
+            double endAng =  Math.Atan2(endPnt.Y, endPnt.X);
+            double sweep = Angle.NormaliseRadiansPositive( endAng - startAng);
+            var loP = ke.LoAN + ke.AoP;
+            var numPoints = points.Length;
+            double θ = 0;
+            double x = 0;
+            double y = 0;
+            double r = EllipseMath.RadiusFromFocal(ke.SemiMajorAxis, ke.Eccentricity, loP, startAng);
+            //this is the amount of sweep per point, for a full circle/ellipse. 
+            double Δθ = sweep / numPoints;
+            if (Δθ == 0)
+            {
+                for (int i = 0; i < numPoints; i++)
+                {
+                    points[i] = startPnt;
+                }
+                return;
+            }
+
+            for (int i = 0; i < numPoints; i++)
+            {
+                θ = startAng + Δθ * i;
+                r = EllipseMath.RadiusFromFocal(ke.SemiMajorAxis, ke.Eccentricity, loP, θ);
+                x = r * Math.Cos(θ);
+                y = r * Math.Sin(θ);
+                points[i] = new Vector2(x, y);
+            }
+            //lastPoint:
+            θ = endAng;
+            r = EllipseMath.RadiusFromFocal(ke.SemiMajorAxis, ke.Eccentricity, loP, θ);
+            points[^1] = endPnt;
+        }
 
         /// <summary>
         /// Creates the arc.

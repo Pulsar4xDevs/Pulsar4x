@@ -1183,8 +1183,44 @@ namespace Pulsar4X.Orbital
 
         #region HyperBolicFunctions
 
+        public static double GetHyperbolicAnomaly(double e, double trueAnomaly)
+        {
+            var foo = Math.Sqrt(e - 1 / e + 1);
+            var foo2 = Math.Tan(trueAnomaly / 2);
+            var hyperbolicAnomaly = 2 * Math.Atanh(foo * foo2);
+            return hyperbolicAnomaly;
+        }
 
-        
+        public static double GetHyperbolicMeanAnomaly(double e, double hyperbolicAnomaly)
+        {
+            return e * Math.Sinh(hyperbolicAnomaly) - hyperbolicAnomaly;
+        }
+
+        public static double TimeFromHyperbolicMeanAnomaly(KeplerElements ke, double hyperbolicMeanAnomaly)
+        {
+            var foo = Math.Pow(-ke.SemiMajorAxis, 3) / ke.StandardGravParameter;
+            return hyperbolicMeanAnomaly * Math.Sqrt(foo);
+        }
+
+        public static double TimeHyperbolicFromEpochToPeriaps(KeplerElements ke)
+        {
+            double p = EllipseMath.SemiLatusRectum(ke.SemiMajorAxis, ke.Eccentricity);
+            var trueAnomalyAtPeriaps = EllipseMath.AngleAtRadus(ke.Periapsis, p, ke.Eccentricity);
+            var ha = GetHyperbolicAnomaly(ke.Eccentricity, trueAnomalyAtPeriaps);
+            var hma = GetHyperbolicMeanAnomaly(ke.Eccentricity, ha);
+            return TimeFromHyperbolicMeanAnomaly(ke, hma);
+        }
+
+        public static double TimeHyperbolicToTrueAnomalyFromPeriaps(KeplerElements ke, double trueAnomaly)
+        {
+            var t1 = TimeHyperbolicFromEpochToPeriaps(ke);
+            
+            var ha = GetHyperbolicAnomaly(ke.Eccentricity, trueAnomaly);
+            var hma = GetHyperbolicMeanAnomaly(ke.Eccentricity, ha);
+            var t2 = TimeFromHyperbolicMeanAnomaly(ke, hma);
+
+            return t2 - t1;
+        }
         
         
         #endregion

@@ -197,7 +197,8 @@ namespace Pulsar4X.Engine
             jsonObject["Themes"] = JToken.FromObject(game.Themes, serializer);
             jsonObject["AtmosphericGases"] = JToken.FromObject(game.AtmosphericGases, serializer);
             jsonObject["TechCategories"] = JToken.FromObject(game.TechCategories, serializer);
-
+            
+            jsonObject["Systems"] = JToken.FromObject(game.Systems, serializer);
             // TODO: Serialize the other properties.
 
             jsonObject.WriteTo(writer);

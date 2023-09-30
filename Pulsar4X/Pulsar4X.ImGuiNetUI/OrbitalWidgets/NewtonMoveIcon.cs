@@ -341,14 +341,14 @@ namespace Pulsar4X.SDL2UI
             _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
             //we should have one less segment than points. 
             //we should have more Points than _drawPoints. (Points is a full ellipse, we normaly only draw an arc)
-            for (int i = 1; i < _numberOfDrawSegments; i++) 
+            for (int i = 1; i < _numberOfDrawnPoints; i++) 
             {
                 if (index < _numberOfEllipsePoints - 1)
 
                     index++;
                 else
                     index = 0;
-                _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
+                _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, -_points[index].Y);
             }
 
             /*

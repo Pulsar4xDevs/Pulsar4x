@@ -108,19 +108,57 @@ public class ManuverNodesDraw2 : IDrawData
 
     private List<Vector2> _points = new List<Vector2>();
     private List<(SDL.SDL_Color color, int count)> _colors = new List<(SDL.SDL_Color color, int count)>();
-    private SDL.SDL_Point[] DrawPoints = new SDL.SDL_Point[0];
+    private SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
+    
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
-        
+        /*
+        var foo = camera.ViewCoordinateV2_m(WorldPosition_m); //camera position and zoom
+            
+        var trns = Matrix.IDTranslate(foo.X, foo.Y);
+        var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
+        var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
+
+        int index = _index;
+        var spos = camera.ViewCoordinateV2_m(_bodyAbsolutePos);
+
+        //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
+        _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
+        for (int i = 1; i < _numberOfDrawSegments; i++)
+        {
+            if (index < _numberOfArcSegments - 1)
+
+                index++;
+            else
+                index = 0;
+                
+            _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
+        }*/
     }
 
     public void OnPhysicsUpdate()
     {
-        
+        if (_drawPoints.Length != _points.Count)
+            _drawPoints = new SDL.SDL_Point[_points.Count];
     }
 
     public void Draw(IntPtr rendererPtr, Camera camera)
     {
-        throw new NotImplementedException();
+        if (_drawPoints.Length < 1)
+            return;
+        SDL.SDL_Color colour;
+        int k = 0;
+        for (int i = 0; i < _colors.Count - 1; i++)
+        {
+            colour = _colors[i].color;
+            SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);
+            for (int j = 0; j < _colors[i].count; j++)
+            {
+                k = i + j;
+                SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[k].x, _drawPoints[k].y, _drawPoints[k + 1].x, _drawPoints[k +1].y);
+            }
+            
+            
+        }
     }
 }

@@ -32,6 +32,41 @@ namespace Pulsar4X.Tests
             Vector3 resultPos = objOrbit.GetPosition_AU(new DateTime());
         }
 
+        [Test]
+        public void TestHyperbolicFunctions()
+        {
+            var a = -1267000000;
+            
+            double e = 1.07;
+            double p = EllipseMath.SemiLatusRectum(a, e);
+            double sgp = 1.26686534E17;
+            //Assert.AreEqual(1.8359E5, p, 1.0e-1);
+            KeplerElements ke = new KeplerElements()
+            {
+                StandardGravParameter = sgp,
+                Eccentricity = e,
+                SemiMajorAxis = a,
+                Periapsis = EllipseMath.Periapsis(e, a),
+                Epoch = new DateTime(2023, 1, 1, 0, 0, 0)
+            };
+
+            //var linierEccent = e * a;
+            //var peri = linierEccent - a;
+            var h0 = OrbitalMath.GetHyperbolicAnomaly(e, 0);
+            var h1 = OrbitalMath.GetHyperbolicAnomaly(e, Math.PI / 4);
+            var h2 = OrbitalMath.GetHyperbolicAnomaly(e, Math.PI / 2);
+            var h3 = OrbitalMath.GetHyperbolicAnomaly(e, -Math.PI / 2);
+            var h4 = OrbitalMath.GetHyperbolicAnomaly(e, -Math.PI / 4);
+            //var h0 = OrbitalMath.GetHyperbolicAnomaly(e, );
+
+            var ta = EllipseMath.AngleAtRadus(p, p, e);
+            var tadeg = Angle.ToDegrees(ta);
+            var sec = OrbitalMath.TimeHyperbolicToTrueAnomalyFromPeriaps(ke, ta);
+            var timespan = TimeSpan.FromSeconds(sec);
+            
+            
+            
+        }
 
         [Test]
         public void TestPreciseOrbitalSpeed()

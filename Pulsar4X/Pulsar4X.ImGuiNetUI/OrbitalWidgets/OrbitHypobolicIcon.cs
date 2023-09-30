@@ -6,16 +6,20 @@ using Pulsar4X.Extensions;
 using SDL2;
 using System.Linq;
 using System.Collections.Generic;
+using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.SDL2UI
 {
-    public class OrbitHypobolicIcon : Icon
+    public class OrbitHypobolicIcon : Icon, IUpdateUserSettings, IKepler
     {
         protected EntityManager _mgr;
+        private KeplerElements _ke;
         NewtonMoveDB _newtonMoveDB;
-        PositionDB parentPosDB;
-        PositionDB myPosDB;
+        private OrbitDB _orbitDB;
+        PositionDB _parentPosDB;
+        PositionDB _myPosDB;
         double _sgp;
+        private double _soi;
         int _index = 0;
         int _numberOfPoints;
         //internal float a;
@@ -39,25 +43,50 @@ namespace Pulsar4X.SDL2UI
 
         private double _dv = 0;
 
-        public OrbitHypobolicIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonMoveDB>().SOIParent.GetDataBlob<PositionDB>())
+        IPosition IKepler.PositionDB => _myPosDB;
+
+        IPosition IKepler.ParentPosDB => _parentPosDB;
+
+        double IKepler.SemiMaj => _ke.SemiMajorAxis;
+
+        double IKepler.SemiMin => _ke.SemiMinorAxis;
+
+        double IKepler.LoP_radians => OrbitMath.GetLongditudeOfPeriapsis(_ke.Inclination, _ke.AoP, _ke.LoAN);
+
+        double IKepler.Eccentricity => _ke.Eccentricity;
+
+        double IKepler.LinearEccent => _ke.LinearEccentricity;
+        
+        public OrbitHypobolicIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetSOIParentPositionDB())
         {
+            entityState.OrbitIcon = this;
             BodyType = entityState.BodyType;
             TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             _mgr = entityState.Entity.Manager;
-            _newtonMoveDB = entityState.Entity.GetDataBlob<NewtonMoveDB>();
-            parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
-            _positionDB = parentPosDB;
-            myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
+            if (entityState.Entity.TryGetDatablob<NewtonMoveDB>(out _newtonMoveDB))
+            {
+                _ke = _newtonMoveDB.GetElements();
+                _soi = _newtonMoveDB.SOIParent.GetSOI_m();
+            }
+            else if (entityState.Entity.TryGetDatablob(out _orbitDB))
+            {
+                _ke = _orbitDB.GetElements();
+                _soi = entityState.Entity.GetSOI_m();
+            }
+            _parentPosDB = _newtonMoveDB.SOIParent.GetDataBlob<PositionDB>();
+            _positionDB = _parentPosDB;
+            _myPosDB = entityState.Entity.GetDataBlob<PositionDB>();
             _userOrbitSettingsMtx = settings;
             var parentMass = entityState.Entity.GetDataBlob<NewtonMoveDB>().ParentMass;
             var myMass = entityState.Entity.GetDataBlob<MassVolumeDB>().MassDry;
-            _sgp = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
+            //_sgp = UniversalConstants.Science.GravitationalConstant * (parentMass + myMass) / 3.347928976e33;
 
-
+            
             UpdateUserSettings();
             CreatePointArray();
             OnPhysicsUpdate();
         }
+        
         /// <summary>
         ///calculate anything that could have changed from the users input. 
         /// </summary>
@@ -86,9 +115,25 @@ namespace Pulsar4X.SDL2UI
 
         internal void CreatePointArray()
         {
+            
+            double p = EllipseMath.SemiLatusRectum(_ke.SemiMajorAxis, _ke.Eccentricity);
+            double angleToSOIPoint = Math.Abs(EllipseMath.AngleAtRadus(_soi, p, _ke.Eccentricity));
+            var pos = _myPosDB.RelativePosition;
+            Vector2 endPos = new Vector2()
+            {
+                X = _soi * Math.Cos(angleToSOIPoint),
+                Y = _soi * Math.Sin(angleToSOIPoint)
+            };
+            if (_points is null || _points.Length != _numberOfPoints)
+                _points = new Vector2[_numberOfPoints];
+            if (_drawPoints.Length != _points.Length)
+                _drawPoints = new SDL.SDL_Point[_numberOfPoints];
+            CreatePrimitiveShapes.KeplerPoints(_ke, (Vector2)pos, endPos, ref _points);
+            
+            /*
             _dv = _newtonMoveDB.ManuverDeltaVLen;
             Vector3 vel = Distance.MToAU(_newtonMoveDB.CurrentVector_ms);
-            Vector3 pos = Distance.MToAU(myPosDB.RelativePosition);
+            Vector3 pos = Distance.MToAU(_myPosDB.RelativePosition);
             Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
             double e = eccentVector.Length();
             double r = pos.Length();
@@ -102,15 +147,14 @@ namespace Pulsar4X.SDL2UI
             }
 
             double linierEccentricity = e * a;
-            double soi = _newtonMoveDB.SOIParent.GetSOI_AU();
+
 
             //longditudeOfPeriapsis;
             double _lop = Math.Atan2(eccentVector.Y, eccentVector.X);
             if (Vector3.Cross(pos, vel).Z < 0) //anti clockwise orbit
                 _lop = Math.PI * 2 - _lop;
 
-            double p = EllipseMath.SemiLatusRectum(a, e);
-            double angleToSOIPoint = Math.Abs(EllipseMath.AngleAtRadus(soi, p, e));
+
             //double thetaMax = angleToSOIPoint;
 
             double maxX = soi * Math.Cos(angleToSOIPoint);
@@ -159,7 +203,7 @@ namespace Pulsar4X.SDL2UI
                 _points[ctrIndex + i] = new Vector2()
                 {
                     X = x2a,
-                    Y = y2a 
+                    Y = y2a
                 };
 
                 _points[ctrIndex - i] = new Vector2()
@@ -168,36 +212,43 @@ namespace Pulsar4X.SDL2UI
                     Y = y2b
                 };
             }
-
+*/
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-            ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
+            CreatePointArray(); //remove this, this is for testing only.
+            //resize for zoom
+            //translate to position
+            
+            var foo = camera.ViewCoordinate_m(WorldPosition_m);
+            var trns = Matrix.IDTranslate(foo.x, foo.y);
+            var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
+            var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
+            var mtrx = scAU * scZm *  trns;//scale to au, scale for camera zoom, and move to camera position and zoom
 
-            _drawPoints = new SDL.SDL_Point[_numberOfPoints];
+            int index = _index;
+            var spos = camera.ViewCoordinateV2_m(_myPosDB.AbsolutePosition);
 
+            //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
+            //_drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
             for (int i = 0; i < _numberOfPoints; i++)
             {
 
-                Vector2 translated = matrix.TransformD(_points[i].X, _points[i].Y); //add zoom transformation. 
-
-                int x = (int)(ViewScreenPos.x + translated.X);
-                int y = (int)(ViewScreenPos.y + translated.Y);
-
-                _drawPoints[i] = new SDL.SDL_Point() { x = x, y = y };
+                
+                _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
             }
 
         }
 
         public override void OnPhysicsUpdate()
         {
-
+/*
             if (_dv != _newtonMoveDB.ManuverDeltaVLen)
                 CreatePointArray();
             
             
-            Vector3 pos = Distance.MToAU(myPosDB.RelativePosition);
+            Vector3 pos = Distance.MToAU(_myPosDB.RelativePosition);
             var relativePos = new Vector2() { X = pos.X, Y = pos.Y };
  
             
@@ -212,6 +263,7 @@ namespace Pulsar4X.SDL2UI
                     _index = i;
                 }
             }
+            */
         }
 
         public override void Draw(IntPtr rendererPtr, Camera camera)
