@@ -14,6 +14,13 @@ namespace Pulsar4X.SDL2UI
 {
     public class FleetWindow : PulsarGuiWindow
     {
+        private enum IssueOrderType
+        {
+            MoveTo,
+        }
+
+        private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
+
         private readonly FleetDB factionRoot;
         private readonly string factionID;
         private Entity dragEntity = Entity.InvalidEntity;
@@ -276,6 +283,43 @@ namespace Pulsar4X.SDL2UI
                             }
                             ImGui.PopStyleColor();
                         }
+                        ImGui.EndChild();
+                    }
+                    ImGui.EndTabItem();
+                }
+
+                if(ImGui.BeginTabItem("Issue Orders"))
+                {
+                    var size = ImGui.GetContentRegionAvail();
+                    var firstChildSize = new Vector2(size.X * 0.27f, size.Y);
+                    var secondChildSize = new Vector2(size.X * 0.73f - (size.X * 0.01f), size.Y);
+                    if(ImGui.BeginChild("IssueOrders-List", firstChildSize, true))
+                    {
+                        DisplayHelpers.Header("Available Orders");
+
+                        if(ImGui.Selectable("Move to ...", selectedIssueOrderType == IssueOrderType.MoveTo))
+                        {
+                            selectedIssueOrderType = IssueOrderType.MoveTo;
+                        }
+
+                        ImGui.EndChild();
+                    }
+                    ImGui.SameLine();
+                    if(ImGui.BeginChild("IssueOrders", secondChildSize, true))
+                    {
+
+                        switch(selectedIssueOrderType)
+                        {
+                            case IssueOrderType.MoveTo:
+
+                                break;
+                        }
+
+                        if(ImGui.Button("Issue Order"))
+                        {
+
+                        }
+
                         ImGui.EndChild();
                     }
                     ImGui.EndTabItem();
