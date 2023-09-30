@@ -65,6 +65,7 @@ namespace Pulsar4X.SDL2UI
         private double _egen;
         private double _fuelStoreMass;
         private double _fuelStoreVolume;
+        private double _grossTonnage;
         private ICargoable _fuelType;
         bool displayimage = true;
         private EntityDamageProfileDB _profile;
@@ -536,6 +537,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableHeadersRow();
 
                 ImGui.TableNextColumn();
+                ImGui.Text("Gross Tonnage");
+                ImGui.TableNextColumn();
+                ImGui.Text(_grossTonnage.ToString(Styles.IntFormat));
+
+                ImGui.TableNextColumn();
                 ImGui.Text("Mass (Dry)");
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Mass(_massDry));
@@ -552,7 +558,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableNextColumn();
                 ImGui.Text("Thrust to Mass Ratio");
                 ImGui.TableNextColumn();
-                ImGui.Text(_ttwr.ToString("0.####"));
+                ImGui.Text(_ttwr.ToString(Styles.DecimalFormat));
 
                 ImGui.TableNextColumn();
                 ImGui.Text("Fuel Capacity (" + _fuelType.Name + ")");
@@ -657,9 +663,12 @@ namespace Pulsar4X.SDL2UI
             string thrusterFuel = String.Empty;
             Dictionary<string, double> cstore = new Dictionary<string, double>();
 
+            double volume = 0;
+
             foreach (var component in SelectedComponents)
             {
                 mass += component.design.MassPerUnit * component.count;
+                volume += component.design.VolumePerUnit * component.count;
                 if (component.design.HasAttribute<NewtonionThrustAtb>())
                 {
                     var atb = component.design.GetAttribute<NewtonionThrustAtb>();
@@ -708,6 +717,9 @@ namespace Pulsar4X.SDL2UI
             _armorMass = ShipDesign.GetArmorMass(_profile, _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods);
             mass += (long)Math.Round(_armorMass);
 
+            var K = 0.2 + 0.02 * Math.Log10(volume);
+
+            _grossTonnage = volume * K; // GT = V * K from: https://en.wikipedia.org/wiki/Gross_tonnage
             _massDry = mass;
             _tn = tn;
             _ttwr = (tn / mass) * 0.01;

@@ -133,7 +133,10 @@ namespace Pulsar4X.Components
                 MaxLevel = 1,
                 CostFormula = _design.ResearchCostValue.ToString(),
                 Faction = factionEntity,
-                Design = _design
+                Design = _design,
+                Unlocks = new Dictionary<int, List<string>>() {
+                    { 1, new List<string>{ _design.UniqueID } }
+                }
             };
 
             tech.ResearchCost = tech.TechCostFormula();
@@ -147,6 +150,11 @@ namespace Pulsar4X.Components
             {
                 tech.Level = tech.MaxLevel;
                 faction.IndustryDesigns[_design.UniqueID] = _design;
+                faction.Data.CargoGoods.Add(_design);
+            }
+            else
+            {
+                faction.Data.LockedCargoGoods.Add(_design);
             }
 
             faction.InternalComponentDesigns[_design.UniqueID] = _design;

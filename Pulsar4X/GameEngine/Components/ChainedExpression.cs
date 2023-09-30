@@ -513,7 +513,7 @@ namespace Pulsar4X.Components
                 case "TechData":
                     techGuid = (string)args.EvaluateParameters()[0];
                     var tech = _factionDataStore.Techs[techGuid];
-                    args.Result = tech.TechCostFormula();
+                    args.Result = tech.TechDataFormula();
                     break;
 
                 //Returns the tech level for the given guid

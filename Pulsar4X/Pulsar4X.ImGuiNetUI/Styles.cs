@@ -21,5 +21,8 @@ namespace Pulsar4X.SDL2UI
         public static float LeftColumnWidthLg = 256f;
         public static Vector2 ToolTipsize = new Vector2(426, 0);
         public static Vector2 Indent = new Vector2(2, 2);
+
+        public static string IntFormat = "###,###,###,##0";
+        public static string DecimalFormat = "###,###,##0.##";
     }
 }

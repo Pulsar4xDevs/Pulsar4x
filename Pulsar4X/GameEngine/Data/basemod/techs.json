@@ -427,7 +427,8 @@
           "tech-antenna-sensitivity",
           "tech-antenna-efficiency",
           "tech-antenna-bandwidth",
-          "tech-factory-max-size"
+          "tech-factory-max-size",
+          "tech-shipyard-slip-max-size"
         ]
       }
     }
@@ -442,6 +443,18 @@
       "MaxLevel": 10,
       "DataFormula": "(1 + [Level]) * 1000",
       "CostFormula":"(1 + [Level]) * 2500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-shipyard-slip-max-size",
+      "Name": "Shipyard Slip Maximum Size",
+      "Description": "Research into the logistics and design of larger slips for shipyards",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 100,
+      "DataFormula": "(1 + [Level]) * 5000",
+      "CostFormula":"(1 + [Level]) * 500"
     }
   }
 ]

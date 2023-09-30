@@ -266,7 +266,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.SameLine();
                         ImGui.Text("Crew Required");
                         ImGui.TableNextColumn();
-                        ImGui.Text(_componentDesigner.CrewReqValue.ToString());
+                        ImGui.Text(_componentDesigner.CrewReqValue.ToString(Styles.IntFormat));
                     }
 
                     foreach (ComponentDesignAttribute attribute in _componentDesigner.ComponentDesignAttributes.Values) //For each property of the comp type
@@ -329,18 +329,18 @@ namespace Pulsar4X.SDL2UI
                                         break;
                                     default:
                                     {
-                                        displayStr = attribute.Value.ToString() + " " + attribute.Unit;
+                                        displayStr = attribute.Value.ToString(Styles.DecimalFormat) + " " + attribute.Unit;
                                         break;
                                     }
                                 }
 
                                 ImGui.Text(displayStr);
                                 if(ImGui.IsItemHovered())
-                                    ImGui.SetTooltip(attribute.Value.ToString("#,###,###,###,##0") + " " + attribute.Unit);
+                                    ImGui.SetTooltip(attribute.Value.ToString(Styles.IntFormat) + " " + attribute.Unit);
                             }
                             else
                             {
-                                ImGui.Text(attribute.Value.ToString());
+                                ImGui.Text(attribute.Value.ToString(Styles.IntFormat));
                             }
                         }
                         else if(attribute.IsEnabled && attribute.GuiHint == GuiHint.GuiFuelTypeSelection)
@@ -373,21 +373,21 @@ namespace Pulsar4X.SDL2UI
                     ImGui.SameLine();
                     ImGui.Text("Cost");
                     ImGui.TableNextColumn();
-                    ImGui.Text(_componentDesigner.CreditCostValue.ToString());
+                    ImGui.Text(_componentDesigner.CreditCostValue.ToString(Styles.IntFormat));
 
                     ImGui.TableNextColumn();
                     ImGui.Text("");
                     ImGui.SameLine();
                     ImGui.Text("Research");
                     ImGui.TableNextColumn();
-                    ImGui.Text(_componentDesigner.ResearchCostValue.ToString() + " RP");
+                    ImGui.Text(_componentDesigner.ResearchCostValue.ToString(Styles.IntFormat) + " RP");
 
                     ImGui.TableNextColumn();
                     ImGui.Text("");
                     ImGui.SameLine();
                     ImGui.Text("Production");
                     ImGui.TableNextColumn();
-                    ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString() + " IP");
+                    ImGui.Text(_componentDesigner.IndustryPointCostsValue.ToString(Styles.IntFormat) + " IP");
 
                     ImGui.EndTable();
                 }
@@ -412,7 +412,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.SameLine();
                         ImGui.Text(resource.Name);
                         ImGui.TableNextColumn();
-                        ImGui.Text(kvp.Value.ToString());
+                        ImGui.Text(kvp.Value.ToString(Styles.IntFormat));
                     }
                     ImGui.EndTable();
                 }

@@ -238,17 +238,17 @@
       "Name": "Ship Yard",
       "Formulas": {
         "Description": "Construction and launch facilities for ships",
-        "Mass": "500000",
-        "Volume": "[Mass]",
+        "Mass": "Ability('Slip Size') * 8",
+        "Volume": "Ability('Slip Size')",
         "HTK": "[Mass]",
-        "CrewReq": "1000000",
+        "CrewReq": "Ability('Crew Size')",
         "ResearchCost": "0",
         "CreditCost": "120",
         "BuildPointCost": "[Mass]"
       },
       "ResourceCost": {
-        "iron": "60",
-        "copper": "60"
+        "iron": "Ability('Slip Size') * 10",
+        "copper": "Ability('Slip Size') * 0.5"
       },
       "ComponentType":"Facility",
       "MountType": "ShipCargo, PlanetInstallation",
@@ -258,17 +258,29 @@
         {
           "Name": "Component Construction Points",
           "GuiHint": "GuiTextDisplay",
-          "AttributeFormula": "1000"
+          "AttributeFormula": "Ability('Crew Size') * 0.01"
         },
         {
           "Name": "Ship Assembly Points",
           "GuiHint": "GuiTextDisplay",
-          "AttributeFormula": "1000"
+          "AttributeFormula": "Ability('Crew Size') * 0.02"
         },
         {
           "Name": "Slip Size",
-          "DescriptionFormula": "'Maximum volume of ship size this slip can work on'",
-          "GuiHint": "GuiTextDisplay",
+          "DescriptionFormula": "'Maximum gross tonnage this slip can work on'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "TechData('tech-shipyard-slip-max-size') + 20000",
+          "MinFormula": "1000",
+          "StepFormula": "1000",
+          "AttributeFormula": "10000"
+        },
+        {
+          "Name": "Crew Size",
+          "DescriptionFormula": "'More crew leads to faster build times'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "MaxFormula": "1000000",
+          "MinFormula": "1000",
+          "StepFormula": "1000",
           "AttributeFormula": "10000"
         },
         {
