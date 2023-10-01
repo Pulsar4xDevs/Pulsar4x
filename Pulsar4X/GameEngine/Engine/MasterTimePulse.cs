@@ -16,7 +16,7 @@ namespace Pulsar4X.Engine
     [JsonConverter(typeof(MasterTimePulseConverter))]
     public class MasterTimePulse : IEquatable<MasterTimePulse>
     {
-        private SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>();
+        internal SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>();
 
         private Stopwatch _stopwatch = new Stopwatch();
         Stopwatch _subpulseStopwatch = new Stopwatch();
@@ -62,8 +62,8 @@ namespace Pulsar4X.Engine
         /// <summary>
         /// length of time it took to process the last DoProcess
         /// </summary>
-        public TimeSpan LastProcessingTime { get; private set; } = TimeSpan.Zero;
-        public TimeSpan LastSubtickTime { get; private set; } = TimeSpan.Zero;
+        public TimeSpan LastProcessingTime { get; internal set; } = TimeSpan.Zero;
+        public TimeSpan LastSubtickTime { get; internal set; } = TimeSpan.Zero;
         /// <summary>
         /// This invokes the DateChangedEvent.
         /// </summary>
@@ -309,14 +309,21 @@ namespace Pulsar4X.Engine
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             // Save JObject to set it later in the second step
-            JObject jsonObject = JObject.Load(reader);
+            JToken jsonObject = JToken.Load(reader);
             var gameProperty = serializer.Context.Context as Game;
 
             // If the Game property is already set, deserialize properties and initialize
             if (gameProperty != null)
             {
-                var timePulse = new MasterTimePulse(gameProperty);
-                serializer.Populate(jsonObject.CreateReader(), timePulse);
+                var timePulse = new MasterTimePulse(gameProperty) {
+                    GameGlobalDateTime = jsonObject["GameGlobalDateTime"].ToObject<DateTime>(serializer),
+                    TimeMultiplier = jsonObject["TimeMultiplier"].ToObject<float>(serializer),
+                    TickFrequency = jsonObject["TickFrequency"].ToObject<TimeSpan>(serializer),
+                    Ticklength = jsonObject["Ticklength"].ToObject<TimeSpan>(serializer),
+                    LastProcessingTime = jsonObject["LastProcessingTime"].ToObject<TimeSpan>(serializer),
+                    LastSubtickTime = jsonObject["LastSubtickTime"].ToObject<TimeSpan>(serializer),
+                    EntityDictionary = jsonObject["EntityDictionary"].ToObject<SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>>(serializer)
+                };
                 return timePulse;
             }
 

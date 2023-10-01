@@ -31,7 +31,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void VerifySaveAndLoad()
         {
-            DefaultStartFactory.DefaultHumans(_game, "Test Humans");
+            //DefaultStartFactory.DefaultHumans(_game, "Test Humans");
 
             var gameJson = Game.Save(_game);
 

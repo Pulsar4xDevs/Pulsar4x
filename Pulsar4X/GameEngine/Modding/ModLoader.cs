@@ -28,6 +28,8 @@ namespace Pulsar4X.Modding
             // Get the directory of the mod manifest
             string modDirectory = Path.GetDirectoryName(modManifestPath);
 
+            modManifest.ModDirectory = modDirectory;
+
             foreach (var modDataFile in modManifest.DataFiles)
             {
                 // Combine the directory with the mod data file name
@@ -35,13 +37,15 @@ namespace Pulsar4X.Modding
 
                 var modInstructions = JsonConvert.DeserializeObject<List<ModInstruction>>(
                     File.ReadAllText(modDataFilePath),
-                    new JsonSerializerSettings { Converters = new List<JsonConverter> { new ModInstructionJsonConverter(), new WeightedListJsonConverter() } });
+                    new JsonSerializerSettings { Converters = new List<JsonConverter> { new ModInstructionJsonConverter(), new WeightedListConverter() } });
 
                 foreach (var mod in modInstructions)
                 {
                     ApplyMod(baseData, mod, modManifest.Namespace);
                 }
             }
+
+            baseData.ModManifests.Add(modManifest);
 
             LoadedMods.Add(modManifest.Namespace, modManifest);
         }

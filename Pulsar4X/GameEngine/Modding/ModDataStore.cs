@@ -6,6 +6,7 @@ namespace Pulsar4X.Modding
 {
     public class ModDataStore
     {
+        public List<ModManifest> ModManifests { get; set; } = new ();
         public Dictionary<string, ArmorBlueprint> Armor { get; set; } = new ();
         public Dictionary<string, GasBlueprint> AtmosphericGas { get; set; } = new ();
         public Dictionary<string, CargoTypeBlueprint> CargoTypes { get; set; } = new ();
