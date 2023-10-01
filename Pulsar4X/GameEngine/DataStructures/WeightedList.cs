@@ -48,7 +48,7 @@ namespace Pulsar4X.DataStructures
     /// </code>
     /// </example>
     //[JsonObjectAttribute]
-    [JsonConverter(typeof(WeightedListJsonConverter))]
+    [JsonConverter(typeof(WeightedListConverter))]
     public class WeightedList<T> : IEnumerable<WeightedValue<T>>, ISerializable
     {
         private List<WeightedValue<T>> _valueList;
@@ -202,7 +202,7 @@ namespace Pulsar4X.DataStructures
         }
     }
 
-    public class WeightedListJsonConverter : JsonConverter
+    public class WeightedListConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
@@ -211,29 +211,46 @@ namespace Pulsar4X.DataStructures
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var itemType = objectType.GetGenericArguments()[0];
-            var weightedValueType = typeof(WeightedValue<>).MakeGenericType(itemType);
-            var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(weightedValueType));
+            var token = JToken.ReadFrom(reader);
 
-            JArray jsonArray = JArray.Load(reader);
-            foreach (var item in jsonArray)
+            JArray valuesArray;
+            if (token is JObject jObject && jObject["$values"] != null)
             {
-                list.Add(item.ToObject(weightedValueType, serializer));
+                valuesArray = jObject["$values"].Value<JArray>();
+            }
+            else if (token is JArray jArrayToken)
+            {
+                valuesArray = jArrayToken;
+            }
+            else
+            {
+                throw new JsonSerializationException($"Unexpected token type: {token.Type}. Expected a JObject or JArray.");
             }
 
-            var result = Activator.CreateInstance(objectType);
-            var field = objectType.GetField("_valueList", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            field.SetValue(result, list);
+            var weightedListType = typeof(WeightedList<>).MakeGenericType(objectType.GetGenericArguments()[0]);
+            var weightedList = Activator.CreateInstance(weightedListType);
 
-            return result;
+            var addMethod = weightedListType.GetMethod("Add", new[] { typeof(WeightedValue<>).MakeGenericType(objectType.GetGenericArguments()[0]) });
+
+            foreach (var value in valuesArray)
+            {
+                var weightedValue = value.ToObject(typeof(WeightedValue<>).MakeGenericType(objectType.GetGenericArguments()[0]));
+                addMethod.Invoke(weightedList, new[] { weightedValue });
+            }
+
+            return weightedList;
         }
+
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var type = value.GetType();
-            var field = type.GetField("_valueList", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var list = field.GetValue(value);
-            serializer.Serialize(writer, list);
+            var jArray = new JArray();
+            foreach (var item in (System.Collections.IEnumerable)value)
+            {
+                jArray.Add(JObject.FromObject(item));
+            }
+
+            jArray.WriteTo(writer);
         }
     }
 }

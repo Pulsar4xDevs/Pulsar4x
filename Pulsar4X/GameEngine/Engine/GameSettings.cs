@@ -23,8 +23,6 @@ namespace Pulsar4X.Engine
 
         public int MasterSeed = 12345678;
 
-        public IEnumerable<string> DataSets { get; set; } = new List<string>();
-
         public Dictionary<EventType, bool> DefaultHaltOnEvents { get; set; } = new Dictionary<EventType, bool>()
         {
             { EventType.OrdersCompleted, true },

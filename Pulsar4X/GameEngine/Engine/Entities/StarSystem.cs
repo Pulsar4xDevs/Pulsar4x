@@ -1,10 +1,8 @@
 using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
-using System.Runtime.Serialization;
-using System.Collections.Generic;
-using System.Linq;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine
 {
@@ -12,7 +10,7 @@ namespace Pulsar4X.Engine
     [JsonObject(MemberSerialization.OptIn)]
     public class StarSystem : EntityManager
     {
-        private readonly Random RNG;
+        private Random RNG;
 
         [PublicAPI]
         public string Guid
@@ -61,36 +59,31 @@ namespace Pulsar4X.Engine
         }
 
         [JsonConstructor]
-        internal StarSystem()
+        public StarSystem()
         {
         }
 
-        public StarSystem(Game game, string name) : base(game, false)
+        public void Initialize(Game game, string name, int seed = -1, string systemID = "")
         {
+            base.Initialize(game);
+
             NameDB = new NameDB(name);
 
-            var R = new Random();
-            Seed = R.Next(int.MaxValue - 1);        // Find a random integer for the seed so can recreate if needed
-            RNG = new Random(Seed);
-            game.Systems.Add(Guid, this);
-        }
+            if(seed == -1)
+            {
+                var random = new Random();
+                Seed = random.Next(int.MaxValue - 1);
+            }
+            else
+            {
+                Seed = seed;
+            }
 
-        public StarSystem(Game game, string name, int seed) : base(game, false)
-        {
-            NameDB = new NameDB(name);
-
-            Seed = seed;
             RNG = new Random(seed);
-            game.Systems.Add(Guid, this);
-        }
 
-        internal StarSystem(Game game, string name, int seed, string systemID): base(game, false)
-        {
-            NameDB = new NameDB(name);
+            if(systemID.IsNotNullOrEmpty())
+                ManagerGuid = systemID;
 
-            Seed = seed;
-            RNG = new Random(seed);
-            ManagerGuid = systemID;
             game.Systems.Add(Guid, this);
         }
 

@@ -14,7 +14,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.Engine
 {
-    [JsonConverter(typeof(EntityManagerConverter))]
+    //[JsonConverter(typeof(EntityManagerConverter))]
     public class EntityManager
     {
         [CanBeNull]
@@ -25,8 +25,8 @@ namespace Pulsar4X.Engine
         protected readonly List<Entity> _entities = new List<Entity>();
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
         private readonly Dictionary<string, Entity> _localEntityDictionary = new ();
-        private readonly Dictionary<string, EntityManager> _globalEntityDictionary;
-        private readonly ReaderWriterLockSlim _globalGuidDictionaryLock;
+        private Dictionary<string, EntityManager> _globalEntityDictionary;
+        private ReaderWriterLockSlim _globalGuidDictionaryLock;
         public int NumberOfEntites { get { return _entities.Count; } }
         public int NumberOfGlobalEntites { get { return _globalEntityDictionary.Count; } }
         private int _nextID;
@@ -69,8 +69,9 @@ namespace Pulsar4X.Engine
         public static readonly EntityManager InvalidManager = new EntityManager();
 
         #region Constructors
-        protected EntityManager() { }
-        internal EntityManager(Game game, bool isGlobalManager = false)
+        internal EntityManager() { }
+
+        internal void Initialize(Game game, bool isGlobalManager = false)
         {
             Game = game;
             ManagerGuid = Guid.NewGuid().ToString();
@@ -89,7 +90,8 @@ namespace Pulsar4X.Engine
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
-            ManagerSubpulses = new ManagerSubPulse(this, game.ProcessorManager);
+            ManagerSubpulses = new ManagerSubPulse();
+            ManagerSubpulses.Initialize(this, game.ProcessorManager);
         }
 
         private static Dictionary<Type, int> InitializeDataBlobTypes()
@@ -901,58 +903,58 @@ namespace Pulsar4X.Engine
         }
     }
 
-    public class EntityManagerConverter : JsonConverter
-    {
-        public override bool CanConvert(Type objectType) => objectType == typeof(EntityManager);
+    // public class EntityManagerConverter : JsonConverter
+    // {
+    //     public override bool CanConvert(Type objectType) => objectType == typeof(EntityManager);
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            JObject jsonObject = JObject.Load(reader);
-            var gameProperty = serializer.Context.Context as Game;
+    //     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    //     {
+    //         JToken jsonObject = JToken.Load(reader);
+    //         var gameProperty = serializer.Context.Context as Game;
 
-            // By default if we are deserializing an EntityManager directly it is the global manager
-            var manager = new EntityManager(gameProperty, true);
+    //         // By default if we are deserializing an EntityManager directly it is the global manager
+    //         var manager = new EntityManager();
 
-            manager.ManagerSubpulses = jsonObject["Subpulses"].ToObject<ManagerSubPulse>(serializer);
+    //         manager.ManagerSubpulses = jsonObject["Subpulses"].ToObject<ManagerSubPulse>(serializer);
 
-            List<Entity> entities = jsonObject["Entities"].ToObject<List<Entity>>(serializer);
+    //         List<Entity> entities = jsonObject["Entities"].ToObject<List<Entity>>(serializer);
 
-            foreach (var protoEntity in entities)
-            {
-                protoEntity.Transfer(manager);
-                // if (manager.FindEntityByGuid(protoEntity.Guid, out var entity))
-                // {
-                //     // Entity has already been deserialized as a reference. It currently exists on the global manager.
-                //     entity.Transfer(manager);
-                //     foreach (BaseDataBlob dataBlob in protoEntity.DataBlobs.Where(dataBlob => dataBlob != null))
-                //     {
-                //         entity.SetDataBlob(dataBlob);
-                //     }
-                // }
-                // else
-                // {
-                //     // Entity has not been previously deserialized. TODO: check whether the faction guid will deserialise after this or if we need to read it and input it into the constructor here.
-                //     Entity.Create(manager, String.Empty, protoEntity);
-                // }
-            }
+    //         foreach (var protoEntity in entities)
+    //         {
+    //             protoEntity.Transfer(manager);
+    //             // if (manager.FindEntityByGuid(protoEntity.Guid, out var entity))
+    //             // {
+    //             //     // Entity has already been deserialized as a reference. It currently exists on the global manager.
+    //             //     entity.Transfer(manager);
+    //             //     foreach (BaseDataBlob dataBlob in protoEntity.DataBlobs.Where(dataBlob => dataBlob != null))
+    //             //     {
+    //             //         entity.SetDataBlob(dataBlob);
+    //             //     }
+    //             // }
+    //             // else
+    //             // {
+    //             //     // Entity has not been previously deserialized. TODO: check whether the faction guid will deserialise after this or if we need to read it and input it into the constructor here.
+    //             //     Entity.Create(manager, String.Empty, protoEntity);
+    //             // }
+    //         }
 
-            return manager;
-        }
+    //         return manager;
+    //     }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            var manager = (EntityManager)value;
+    //     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    //     {
+    //         var manager = (EntityManager)value;
 
-            // List<ProtoEntity> storedEntities = (from entity in manager.Entities
-            //                                     where entity != null
-            //                                     select entity.Clone()).ToList();
+    //         // List<ProtoEntity> storedEntities = (from entity in manager.Entities
+    //         //                                     where entity != null
+    //         //                                     select entity.Clone()).ToList();
 
-            JObject obj = new JObject
-            {
-                { "Entities", JObject.FromObject(manager.Entities) },
-                { "Subpulses", JObject.FromObject(manager.ManagerSubpulses) }
-            };
-            obj.WriteTo(writer);
-        }
-    }
+    //         JObject obj = new JObject
+    //         {
+    //             { "Entities", JArray.FromObject(manager.Entities) },
+    //             { "Subpulses", JObject.FromObject(manager.ManagerSubpulses) }
+    //         };
+    //         obj.WriteTo(writer);
+    //     }
+    // }
 }

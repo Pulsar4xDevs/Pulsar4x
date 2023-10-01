@@ -11,6 +11,7 @@ using Pulsar4X.Engine.Orders;
 using Newtonsoft.Json.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.IO;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
 namespace Pulsar4X.Engine
@@ -93,7 +94,8 @@ namespace Pulsar4X.Engine
             TimePulse = new (this);
             ProcessorManager = new ProcessorManager(this);
             OrderHandler = new StandAloneOrderHandler(this);
-            GlobalManager = new EntityManager(this, true);
+            GlobalManager = new EntityManager();
+            GlobalManager.Initialize(this, true);
             GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
             GalaxyGen = new GalaxyFactory(SystemGenSettings, settings.MasterSeed);
         }
@@ -119,12 +121,6 @@ namespace Pulsar4X.Engine
 
         public static string Save(Game game)
         {
-            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-            {
-                PreserveReferencesHandling = PreserveReferencesHandling.All,
-                Formatting = Formatting.Indented
-            };
-
             JsonSerializerSettings settings = new JsonSerializerSettings() {
                 Formatting = Formatting.Indented,
                 PreserveReferencesHandling = PreserveReferencesHandling.All
@@ -142,10 +138,12 @@ namespace Pulsar4X.Engine
             var loadedGame = JsonConvert.DeserializeObject<Game>(json, settings);
 
             settings.Context = new StreamingContext(StreamingContextStates.All, loadedGame);
-            loadedGame.TimePulse = JsonConvert.DeserializeObject<MasterTimePulse>(JObject.Parse(json)["TimePulse"].ToString(), settings);
-            loadedGame.ProcessorManager = JsonConvert.DeserializeObject<ProcessorManager>(JObject.Parse(json)["ProcessManager"].ToString(), settings);
-            loadedGame.GlobalManager = JsonConvert.DeserializeObject<EntityManager>(JObject.Parse(json)["GlobalManager"].ToString(), settings);
-            loadedGame.GameMasterFaction = JsonConvert.DeserializeObject<Entity>(JObject.Parse(json)["GameMasterFaction"].ToString(), settings);
+            loadedGame.TimePulse = JsonConvert.DeserializeObject<MasterTimePulse>(JObject.Parse(json)["GameInfo"]["TimePulse"].ToString(), settings);
+            loadedGame.ProcessorManager = new ProcessorManager(loadedGame);
+            //loadedGame.ProcessorManager = JsonConvert.DeserializeObject<ProcessorManager>(JObject.Parse(json)["GameInfo"]["ProcessManager"].ToString(), settings);
+            //loadedGame.GlobalManager = JsonConvert.DeserializeObject<EntityManager>(JObject.Parse(json)["GameInfo"]["GlobalManager"].ToString(), settings);
+            //loadedGame.GlobalManager.Initialize(loadedGame, true);
+            //loadedGame.GameMasterFaction = JsonConvert.DeserializeObject<Entity>(JObject.Parse(json)["GameInfo"]["GameMasterFaction"].ToString(), settings);
             // StandAloneOrderHandler currently doesn't need to be serialized
             // loadedGame.OrderHandler = JsonConvert.DeserializeObject<StandAloneOrderHandler>(JObject.Parse(json)["OrderHandler"].ToString(), settings);
 
@@ -162,17 +160,24 @@ namespace Pulsar4X.Engine
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            var jsonObject = JObject.Load(reader);
+            var jsonObject = JToken.Load(reader);
 
-            ModDataStore startingGameData = jsonObject["StartingGameData"].ToObject<ModDataStore>(serializer);
-            NewGameSettings settings = jsonObject["Settings"].ToObject<NewGameSettings>(serializer);
+            List<ModManifest> modManifests = jsonObject["ModInfo"].ToObject<List<ModManifest>>(serializer);
 
-            var game = new Game(settings, startingGameData);
+            ModLoader modLoader = new ModLoader();
+            ModDataStore modDataStore = new ModDataStore();
 
-            // For each property in the Game class, deserialize it using the serializer.
-            // game.TimePulse = jsonObject["TimePulse"].ToObject<MasterTimePulse>(serializer);
+            foreach(var manifest in modManifests)
+            {
+                var modInfoFilePath = Path.Combine(manifest.ModDirectory, "modInfo.json");
 
-            // TODO: Deserialize the other properties.
+                modLoader.LoadModManifest(modInfoFilePath, modDataStore);
+            }
+
+            var settings = jsonObject["Settings"].ToObject<NewGameSettings>(serializer);
+            //var settings = new NewGameSettings();
+
+            var game = new Game(settings, modDataStore);
 
             return game;
         }
@@ -182,24 +187,27 @@ namespace Pulsar4X.Engine
             var game = (Game)value;
             var jsonObject = new JObject();
 
+            var modInfo = JToken.FromObject(game.StartingGameData.ModManifests, serializer);
+            var settings = JToken.FromObject(game.Settings, serializer);
+            var gameInfo = new JObject();
+
             // For each property in the Game class, serialize it using the serializer.
-            jsonObject["Settings"] = JToken.FromObject(game.Settings, serializer);
-            jsonObject["StartingGameData"] = JToken.FromObject(game.StartingGameData, serializer);
-            jsonObject["TimePulse"] = JToken.FromObject(game.TimePulse, serializer);
-            jsonObject["ProcessManager"] = JToken.FromObject(game.ProcessorManager, serializer);
+            gameInfo["TimePulse"] = JToken.FromObject(game.TimePulse, serializer);
+
+            // ProcessManager currently doesn't need to be serialized
+            //gameInfo["ProcessManager"] = JToken.FromObject(game.ProcessorManager, serializer);
 
             // StandAloneOrderHandler currently doesn't need to be serialized
-            // jsonObject["OrderHandler"] = JToken.FromObject(game.OrderHandler, serializer);
+            // gameInfo["OrderHandler"] = JToken.FromObject(game.OrderHandler, serializer);
 
-            jsonObject["GlobalManager"] = JToken.FromObject(game.GlobalManager, serializer);
-            jsonObject["GameMasterFaction"] = JToken.FromObject(game.GameMasterFaction, serializer);
-
-            jsonObject["Themes"] = JToken.FromObject(game.Themes, serializer);
-            jsonObject["AtmosphericGases"] = JToken.FromObject(game.AtmosphericGases, serializer);
-            jsonObject["TechCategories"] = JToken.FromObject(game.TechCategories, serializer);
-            
-            jsonObject["Systems"] = JToken.FromObject(game.Systems, serializer);
+            gameInfo["GlobalManager"] = JToken.FromObject(game.GlobalManager, serializer);
+            gameInfo["GameMasterFaction"] = JToken.FromObject(game.GameMasterFaction, serializer);
+            gameInfo["Systems"] = JToken.FromObject(game.Systems, serializer);
             // TODO: Serialize the other properties.
+
+            jsonObject["ModInfo"] = modInfo;
+            jsonObject["Settings"] = settings;
+            jsonObject["GameInfo"] = gameInfo;
 
             jsonObject.WriteTo(writer);
         }
