@@ -59,9 +59,27 @@ namespace Pulsar4X.Tests
             var h4 = OrbitalMath.GetHyperbolicAnomaly(e, -Math.PI / 4);
             //var h0 = OrbitalMath.GetHyperbolicAnomaly(e, );
 
-            var ta = EllipseMath.AngleAtRadus(p, p, e);
-            var tadeg = Angle.ToDegrees(ta);
-            var sec = OrbitalMath.TimeHyperbolicToTrueAnomalyFromPeriaps(ke, ta);
+            var ta1 = EllipseMath.AngleAtRadus(100000000, p, e);
+            var ta1Deg = Angle.ToDegrees(ta1);
+            var ha1 = OrbitalMath.GetHyperbolicAnomaly(e, ta1);
+            var hma1 = OrbitalMath.GetHyperbolicMeanAnomaly(e, ha1);
+            var time = TimeSpan.FromSeconds(OrbitalMath.TimeFromHyperbolicMeanAnomaly(ke, hma1));
+            var timex2 = time * 2;
+            Assert.AreEqual(timex2.TotalMinutes, 79, 0.1);
+            
+            var ta2 = EllipseMath.AngleAtRadus2(100000000, p, e);
+            var ta2Deg = Angle.ToDegrees(ta2);
+            var ha2 = OrbitalMath.GetHyperbolicAnomaly(e, ta2);
+            var hma2 = OrbitalMath.GetHyperbolicMeanAnomaly(e, ha2);
+            var time2 = TimeSpan.FromSeconds(OrbitalMath.TimeFromHyperbolicMeanAnomaly(ke, hma2));
+            var time2x2 = time2 * 2;
+            
+            
+            
+            var taAtP = EllipseMath.AngleAtRadus(p, p, e);
+            var tadeg = Angle.ToDegrees(taAtP);
+            Assert.AreEqual(taAtP, Math.PI / 2);
+            var sec = OrbitalMath.TimeHyperbolicToTrueAnomalyFromPeriaps(ke, taAtP);
             var timespan = TimeSpan.FromSeconds(sec);
             
             
@@ -91,8 +109,20 @@ namespace Pulsar4X.Tests
             for (double angle = 0; angle < Math.PI; angle += 0.0174533)
             {
                 var r = EllipseMath.RadiusAtAngle(angle, p, e);
+                var r2 = EllipseMath.RadiusFromFocal(a, e, 0, angle);
                 var theta = EllipseMath.AngleAtRadus(r, p, e);
+                var theta2 = EllipseMath.AngleAtRadus2(r, p, e);
+                var theta3 = EllipseMath.AngleAtRadus3(r, p, e);
+                
+                Assert.AreEqual(r, r2, angleDelta, "two simular functions shouldbe the same");
+                
                 Assert.AreEqual(angle, theta, angleDelta,  "inc: " + i + " r: " + r);
+                if (angle != theta3)
+                {
+                    var foo = Angle.DifferenceBetweenRadians(angle, theta3);
+                    var foodeg = Angle.ToDegrees(foo);
+                }
+                //Assert.AreEqual(angle, theta3, angleDelta);
                 i++;
             }
         }

@@ -1185,7 +1185,7 @@ namespace Pulsar4X.Orbital
 
         public static double GetHyperbolicAnomaly(double e, double trueAnomaly)
         {
-            var foo = Math.Sqrt(e - 1 / e + 1);
+            var foo = Math.Sqrt((e - 1) / (e + 1));
             var foo2 = Math.Tan(trueAnomaly / 2);
             var hyperbolicAnomaly = 2 * Math.Atanh(foo * foo2);
             return hyperbolicAnomaly;
