@@ -33,7 +33,8 @@ namespace Pulsar4X.Engine
 
         public StarSystem CreateSystem(Game game, string name, int seed, bool initialiseAllMinerals = false)
         {
-            StarSystem newSystem = new StarSystem(game, name, seed);
+            StarSystem newSystem = new StarSystem();
+            newSystem.Initialize(game, name, seed);
 
             var rngValue = newSystem.RNGNextDouble();
             int numStars = game.Settings.StarChances.Select(rngValue);
@@ -71,7 +72,8 @@ namespace Pulsar4X.Engine
         public StarSystem CreateTestSystem(Game game, int x = 0, int y = 0)
         {
 
-            StarSystem sol = new StarSystem(game, "something", -1);
+            StarSystem sol = new StarSystem();
+            sol.Initialize(game, "something", -1);
 
             Entity sun = _starFactory.CreateStar(sol, UniversalConstants.Units.SolarMassInKG, UniversalConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "something");
             sun.GetDataBlob<PositionDB>().AbsolutePosition += new Vector3(x, y, 0);
@@ -188,7 +190,8 @@ namespace Pulsar4X.Engine
         public StarSystem CreateSol(Game game)
         {
             // WIP Function...
-            StarSystem sol = new StarSystem(game, "Sol", -1);
+            StarSystem sol = new StarSystem();
+            sol.Initialize(game, "Sol", -1);
             Entity sun = _starFactory.CreateStar(sol, UniversalConstants.Units.SolarMassInKG, UniversalConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
 
             // Planets and their moons
@@ -306,7 +309,8 @@ namespace Pulsar4X.Engine
         /// </summary>
         public StarSystem CreateEccTest(Game game)
         {
-            StarSystem system = new StarSystem(game, "Eccentricity test", -1);
+            StarSystem system = new StarSystem();
+            system.Initialize(game, "Eccentricity test", -1);
 
             Entity sun = _starFactory.CreateStar(system, UniversalConstants.Units.SolarMassInKG, UniversalConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "_ecc");
 
@@ -342,7 +346,8 @@ namespace Pulsar4X.Engine
         /// Adds to game.StarSystem.
         /// </summary>
         public StarSystem CreateLongitudeTest(Game game) {
-            StarSystem system = new StarSystem(game, "Longitude test", -1);
+            StarSystem system = new StarSystem();
+            system.Initialize(game, "Longitude test", -1);
 
             Entity sun = _starFactory.CreateStar(system, UniversalConstants.Units.SolarMassInKG, UniversalConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "_lop");
 

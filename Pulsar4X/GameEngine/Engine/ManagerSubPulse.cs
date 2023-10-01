@@ -298,22 +298,22 @@ namespace Pulsar4X.Engine
         /// constructor for json
         /// </summary>
         [JsonConstructor]
-        private ManagerSubPulse()
+        internal ManagerSubPulse()
         {
             AddPerfHistory();
         }
 
-        internal ManagerSubPulse(EntityManager entityMan, ProcessorManager procMan)
+        internal void Initialize(EntityManager entityManager, ProcessorManager processorManager)
         {
             (string pname, double[] ptimes, double psum)[] pTimes = new (string pname, double[] ptimes, double psum)[] { };
             PerformanceData newData = new PerformanceData() { FullPulseTimeMS = _fullPulseTimeMS, SubpulseTimes = _subpulseTimes.ToArray(), ProcessTimes = pTimes };
             PerfHistory[PerfHistoryIndex] = newData;
 
-            _game = entityMan.Game;
-            _systemLocalDateTime = entityMan.Game.TimePulse.GameGlobalDateTime;
+            _game = entityManager.Game;
+            _systemLocalDateTime = entityManager.Game.TimePulse.GameGlobalDateTime;
             _processToDateTime = _systemLocalDateTime;
-            _entityManager = entityMan;
-            _processManager = procMan;
+            _entityManager = entityManager;
+            _processManager = processorManager;
             InitHotloopProcessors();
         }
 

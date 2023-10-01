@@ -4,6 +4,7 @@ namespace Pulsar4X.Modding
 {
     public class ModManifest
     {
+        public string ModDirectory { get; set; }
         public string Author { get; set; }
         public string ModName { get; set; }
         public string Version { get; set; }
