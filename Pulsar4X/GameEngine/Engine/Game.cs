@@ -37,7 +37,7 @@ namespace Pulsar4X.Engine
         /// List of StarSystems currently in the game.
         /// </summary>
         [JsonProperty(Order = 5)]
-        public SafeDictionary<string, StarSystem> Systems { get; private set; } = new ();
+        public SafeDictionary<string, StarSystem> Systems { get; internal set; } = new ();
 
         [JsonProperty]
         public EntityManager GlobalManager { get; internal set; }
@@ -49,19 +49,19 @@ namespace Pulsar4X.Engine
         internal ProcessorManager ProcessorManager { get; private set; }
 
         [JsonProperty]
-        public Player SpaceMaster = new Player("Space Master", "");
+        public Player SpaceMaster { get; internal set; } = new Player("Space Master", "");
 
         [JsonProperty]
-        public List<Player> Players = new List<Player>();
+        public List<Player> Players { get; internal set; }= new List<Player>();
 
         [JsonProperty]
-        public IOrderHandler OrderHandler { get; private set; }
+        public IOrderHandler OrderHandler { get; internal set; }
 
         [JsonProperty]
-        public Entity GameMasterFaction { get; private set; }
+        public Entity GameMasterFaction { get; internal set; }
 
         [JsonProperty]
-        public GameSettings Settings { get; private set; }
+        public GameSettings Settings { get; internal set; }
 
         [JsonProperty]
         public Random RNG { get; } = new Random(12345689);
@@ -141,9 +141,9 @@ namespace Pulsar4X.Engine
             loadedGame.TimePulse = JsonConvert.DeserializeObject<MasterTimePulse>(JObject.Parse(json)["GameInfo"]["TimePulse"].ToString(), settings);
             loadedGame.ProcessorManager = new ProcessorManager(loadedGame);
             //loadedGame.ProcessorManager = JsonConvert.DeserializeObject<ProcessorManager>(JObject.Parse(json)["GameInfo"]["ProcessManager"].ToString(), settings);
-            //loadedGame.GlobalManager = JsonConvert.DeserializeObject<EntityManager>(JObject.Parse(json)["GameInfo"]["GlobalManager"].ToString(), settings);
-            //loadedGame.GlobalManager.Initialize(loadedGame, true);
-            //loadedGame.GameMasterFaction = JsonConvert.DeserializeObject<Entity>(JObject.Parse(json)["GameInfo"]["GameMasterFaction"].ToString(), settings);
+            loadedGame.GlobalManager = JsonConvert.DeserializeObject<EntityManager>(JObject.Parse(json)["GameInfo"]["GlobalManager"].ToString(), settings);
+            loadedGame.GlobalManager.Initialize(loadedGame, true);
+            loadedGame.GameMasterFaction = JsonConvert.DeserializeObject<Entity>(JObject.Parse(json)["GameInfo"]["GameMasterFaction"].ToString(), settings);
             // StandAloneOrderHandler currently doesn't need to be serialized
             // loadedGame.OrderHandler = JsonConvert.DeserializeObject<StandAloneOrderHandler>(JObject.Parse(json)["OrderHandler"].ToString(), settings);
 

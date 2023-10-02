@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
@@ -18,16 +16,21 @@ namespace Pulsar4X.Engine
     public class ProtoEntity: IGetValuesHash
     {
         [PublicAPI]
+        [JsonProperty]
         public List<BaseDataBlob> DataBlobs { get; set; } = EntityManager.BlankDataBlobList();
 
         [PublicAPI]
+        [JsonProperty]
         public string Guid { get; protected internal set; }
 
         [NotNull]
         [PublicAPI]
+        [JsonProperty]
         public ComparableBitArray DataBlobMask => _protectedDataBlobMask_;
 
         protected ComparableBitArray _protectedDataBlobMask_ = EntityManager.BlankDataBlobMask();
+
+        public ProtoEntity() { }
 
         [PublicAPI]
         public static ProtoEntity Create(string guid, IEnumerable<BaseDataBlob> dataBlobs = null)
