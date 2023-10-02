@@ -13,28 +13,6 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     ///
     
-    
-    public static class OrbitalMathExtensions
-    {
-        /// <summary>
-        /// Time for a burn manuver in seconds
-        /// </summary>
-        /// <param name="ship"></param>
-        /// <param name="dv"></param>
-        /// <param name="mass"></param>
-        /// <returns>time in seconds</returns>
-        public static double BurnTime(this OrbitalMath math, Entity ship, double dv, double mass)
-        {
-            //var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
-            var ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(mass, ve, dv);
-            double tburn = fuelBurned / burnRate;
-            return tburn;
-        }
-    }
-
-
     public class OrbitMath : OrbitalMath
     {
         /// <summary>
@@ -181,6 +159,58 @@ namespace Pulsar4X.ECSLib
             var epoch = entity.StarSysDateTime;
             return KeplerFromPositionAndVelocity(sgp, state.pos, state.Velocity, epoch);
             
+        }
+        
+        public static double GetTrueAnomaly(OrbitDB orbit, DateTime time)
+        {
+            TimeSpan timeSinceEpoch = time - orbit.Epoch;
+
+            // Don't attempt to calculate large timeframes.
+            while (timeSinceEpoch > orbit.OrbitalPeriod && orbit.OrbitalPeriod.Ticks != 0)
+            {
+                long years = timeSinceEpoch.Ticks / orbit.OrbitalPeriod.Ticks;
+                timeSinceEpoch -= TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
+                orbit.Epoch += TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
+            }
+
+            var secondsFromEpoch = timeSinceEpoch.TotalSeconds;
+            if (orbit.Eccentricity < 1) //elliptical orbit
+            {
+                double m0 = orbit.MeanAnomalyAtEpoch;
+                double n = orbit.MeanMotion;
+                double currentMeanAnomaly = OrbitMath.GetMeanAnomalyFromTime(m0, n, secondsFromEpoch);
+
+                double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
+                return OrbitMath.TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
+            }
+            else //hyperbolic orbit
+            {
+                var quotient = orbit.GravitationalParameter_m3S2 / Math.Pow(-orbit.SemiMajorAxis , 3);
+                var hyperbolcMeanMotion = Math.Sqrt(quotient);
+                var hyperbolicMeanAnomaly = secondsFromEpoch * hyperbolcMeanMotion;
+                var hyperbolicAnomalyF = OrbitMath.GetHyperbolicAnomalyNewtonsMethod(orbit.Eccentricity, hyperbolicMeanAnomaly);
+                return OrbitMath.TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, hyperbolicAnomalyF);
+            }
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orbit"></param>
+        /// <param name="currentMeanAnomaly"></param>
+        /// <returns></returns>
+        public static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
+        {
+            if(!OrbitalMath.GetEccentricAnomalyNewtonsMethod(orbit.Eccentricity, currentMeanAnomaly, out double ea))
+            {
+                Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.")
+                {
+                    Entity = orbit.OwningEntity,
+                    EventType = EventType.Opps
+                };
+                StaticRefLib.EventLog.AddEvent(gameEvent);
+            }
+            return ea;
         }
 
         /// <summary>
