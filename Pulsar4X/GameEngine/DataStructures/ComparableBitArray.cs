@@ -1,14 +1,16 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Pulsar4X.DataStructures
 {
+    [JsonConverter(typeof(ComparableBitArrayConverter))]
     public sealed class ComparableBitArray
     {
         [JsonProperty]
-        private readonly int[] _backingValues;
+        public int[] BackingValues { get; internal set; }
         private const int BitsPerValue = 32;
         public List<int> SetBits;
 
@@ -19,7 +21,7 @@ namespace Pulsar4X.DataStructures
         /// </summary>
         private bool Equals(ComparableBitArray other)
         {
-            return other != null && Length == other.Length && _backingValues.SequenceEqual(other._backingValues);
+            return other != null && Length == other.Length && BackingValues.SequenceEqual(other.BackingValues);
         }
 
         /// <summary>
@@ -53,7 +55,7 @@ namespace Pulsar4X.DataStructures
         {
             unchecked
             {
-                return (_backingValues.GetHashCode() * 397) ^ Length;
+                return (BackingValues.GetHashCode() * 397) ^ Length;
             }
         }
 
@@ -87,7 +89,7 @@ namespace Pulsar4X.DataStructures
                 index -= BitsPerValue;
             }
 
-            int backingValue = _backingValues[backingIndex];
+            int backingValue = BackingValues[backingIndex];
 
             return ((backingValue >> index) & 1) == 1;
         }
@@ -118,10 +120,10 @@ namespace Pulsar4X.DataStructures
                 index -= BitsPerValue;
             }
 
-            int backingValue = _backingValues[backingIndex];
+            int backingValue = BackingValues[backingIndex];
 
             backingValue ^= (-value ^ backingValue) & (1 << index);
-            _backingValues[backingIndex] = backingValue;
+            BackingValues[backingIndex] = backingValue;
 
             int bitIndex = index + (backingIndex * BitsPerValue);
 
@@ -151,11 +153,11 @@ namespace Pulsar4X.DataStructures
                 length -= BitsPerValue;
             }
 
-            _backingValues = new int[requiredBackingValues];
+            BackingValues = new int[requiredBackingValues];
 
-            for (int i = 0; i < _backingValues.Length; i++ )
+            for (int i = 0; i < BackingValues.Length; i++ )
             {
-                _backingValues[i] = 0;
+                BackingValues[i] = 0;
             }
 
             Length = length + ((requiredBackingValues * BitsPerValue) - BitsPerValue);
@@ -171,11 +173,11 @@ namespace Pulsar4X.DataStructures
                 throw new ArgumentException("Cannot compare bit arrays of different lengths.");
             }
 
-            var combinedValues = new int[arrayA._backingValues.Length];
+            var combinedValues = new int[arrayA.BackingValues.Length];
 
-            for (int i = 0; i < arrayA._backingValues.Length; i++)
+            for (int i = 0; i < arrayA.BackingValues.Length; i++)
             {
-                combinedValues[i] = (arrayA._backingValues[i] & arrayB._backingValues[i]);
+                combinedValues[i] = (arrayA.BackingValues[i] & arrayB.BackingValues[i]);
             }
 
             return new ComparableBitArray(combinedValues, arrayA.Length);
@@ -191,11 +193,11 @@ namespace Pulsar4X.DataStructures
                 throw new ArgumentException("Cannot compare bit arrays of different lengths.");
             }
 
-            var combinedValues = new int[arrayA._backingValues.Length];
+            var combinedValues = new int[arrayA.BackingValues.Length];
 
-            for (int i = 0; i < arrayA._backingValues.Length; i++)
+            for (int i = 0; i < arrayA.BackingValues.Length; i++)
             {
-                combinedValues[i] = (arrayA._backingValues[i] | arrayB._backingValues[i]);
+                combinedValues[i] = (arrayA.BackingValues[i] | arrayB.BackingValues[i]);
             }
 
             return new ComparableBitArray(combinedValues, arrayA.Length);
@@ -211,11 +213,11 @@ namespace Pulsar4X.DataStructures
                 throw new ArgumentException("Cannot compare bit arrays of different lengths.");
             }
 
-            var combinedValues = new int[arrayA._backingValues.Length];
+            var combinedValues = new int[arrayA.BackingValues.Length];
 
-            for (int i = 0; i < arrayA._backingValues.Length; i++)
+            for (int i = 0; i < arrayA.BackingValues.Length; i++)
             {
-                combinedValues[i] = (arrayA._backingValues[i] ^ arrayB._backingValues[i]);
+                combinedValues[i] = (arrayA.BackingValues[i] ^ arrayB.BackingValues[i]);
             }
 
             return new ComparableBitArray(combinedValues, arrayA.Length);
@@ -223,8 +225,35 @@ namespace Pulsar4X.DataStructures
 
         private ComparableBitArray(int[] backingValues, int length)
         {
-            _backingValues = backingValues;
+            BackingValues = backingValues;
             Length = length;
+        }
+    }
+
+    public class ComparableBitArrayConverter : JsonConverter<ComparableBitArray>
+    {
+        public override void WriteJson(JsonWriter writer, ComparableBitArray value, JsonSerializer serializer)
+        {
+            var jObject = new JObject
+            {
+                { "BackingValues", JToken.FromObject(value.BackingValues) },
+                { "Length", value.Length }
+            };
+            jObject.WriteTo(writer);
+        }
+
+        public override ComparableBitArray ReadJson(JsonReader reader, Type objectType, ComparableBitArray existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            var jObject = JObject.Load(reader);
+            int[] backingValues = jObject["BackingValues"].ToObject<int[]>();
+            int length = jObject["Length"].Value<int>();
+
+            // Use the private constructor to create the ComparableBitArray instance
+            var bitArrayInstance = (ComparableBitArray)Activator.CreateInstance(typeof(ComparableBitArray), 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, 
+                null, new object[] { backingValues, length }, null);
+
+            return bitArrayInstance;
         }
     }
 }
