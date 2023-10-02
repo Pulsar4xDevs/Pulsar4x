@@ -37,10 +37,10 @@ namespace Pulsar4X.Tests
 
             var loadedGame = Game.Load(gameJson);
 
-            Assert.NotNull(loadedGame.TimePulse);
-            Assert.NotNull(loadedGame.ProcessorManager);
-            Assert.NotNull(loadedGame.GlobalManager);
-            Assert.NotNull(loadedGame.GameMasterFaction);
+            Assert.NotNull(loadedGame.TimePulse, "TimePulse null");
+            Assert.NotNull(loadedGame.ProcessorManager, "ProcessorManager null");
+            Assert.NotNull(loadedGame.GlobalManager, "GlobalManager null");
+            Assert.NotNull(loadedGame.GameMasterFaction, "GameMasterFaction null");
 
             Assert.AreEqual(_game.AtmosphericGases.Count, loadedGame.AtmosphericGases.Count);
             Assert.AreEqual(_game.Themes.Count, loadedGame.Themes.Count);
@@ -58,9 +58,10 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(_game.ProcessorManager.RecalcCount, loadedGame.ProcessorManager.RecalcCount);
             Assert.AreEqual(_game.ProcessorManager.InstanceCount, loadedGame.ProcessorManager.InstanceCount);
 
+            Assert.AreEqual(_game.GlobalManager.ManagerGuid, loadedGame.GlobalManager.ManagerGuid, "Global Manager ID");
             Assert.AreEqual(_game.GlobalManager.Entities.Count, loadedGame.GlobalManager.Entities.Count, "Global Manager Entity Count");
 
-            Assert.AreEqual(_game.GameMasterFaction.Guid, loadedGame.GameMasterFaction.Guid);
+            Assert.AreEqual(_game.GameMasterFaction.Guid, loadedGame.GameMasterFaction.Guid, "Game Master Fation Guid");
         }
 
     }

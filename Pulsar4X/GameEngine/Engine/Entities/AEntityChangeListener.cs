@@ -15,7 +15,7 @@ namespace Pulsar4X.Engine
 
         internal AEntityChangeListener(EntityManager manager)
         {
-            manager.EntityListners.Add(this);
+            manager.EntityListeners.Add(this);
         }
 
         internal virtual void AddChange(EntityChangeData changeData)

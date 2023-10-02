@@ -4,61 +4,60 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Threading;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Auth;
 using Pulsar4X.Engine.Sensors;
-using Newtonsoft.Json.Linq;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine
 {
     //[JsonConverter(typeof(EntityManagerConverter))]
     public class EntityManager
     {
-        [CanBeNull]
         public string ManagerGuid { get; internal set; }
 
         [JsonIgnore]
         public Game Game { get;  internal set; }
-        protected readonly List<Entity> _entities = new List<Entity>();
+
+        public List<Entity> Entities { get; internal set; } = new List<Entity>();
+
+        [JsonIgnore]
         private readonly List<List<BaseDataBlob>> _dataBlobMap = new List<List<BaseDataBlob>>();
+
+        [JsonIgnore]
         private readonly Dictionary<string, Entity> _localEntityDictionary = new ();
+
+        [JsonIgnore]
         private Dictionary<string, EntityManager> _globalEntityDictionary;
+
+        [JsonIgnore]
         private ReaderWriterLockSlim _globalGuidDictionaryLock;
-        public int NumberOfEntites { get { return _entities.Count; } }
+
+        [JsonIgnore]
         public int NumberOfGlobalEntites { get { return _globalEntityDictionary.Count; } }
         private int _nextID;
 
+        [JsonIgnore]
         internal readonly List<ComparableBitArray> EntityMasks = new List<ComparableBitArray>();
 
+        [JsonIgnore]
         private static readonly Dictionary<Type, int> InternalDataBlobTypes = InitializeDataBlobTypes();
+
+        [JsonIgnore]
         [PublicAPI]
         public static ReadOnlyDictionary<Type, int> DataBlobTypes = new ReadOnlyDictionary<Type, int>(InternalDataBlobTypes);
 
+        [JsonIgnore]
         public DateTime StarSysDateTime => ManagerSubpulses.StarSysDateTime;
 
-        internal ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
+        internal List<AEntityChangeListener> EntityListeners { get; set; } = new ();
 
-        internal List<AEntityChangeListener> EntityListners = new ();
+        internal Dictionary<string, SystemSensorContacts> FactionSensorContacts { get; set; } = new ();
 
-        internal Dictionary<string, SystemSensorContacts> FactionSensorContacts = new ();
-        public SystemSensorContacts GetSensorContacts(string factionGuid)
-        {
-            if (!FactionSensorContacts.ContainsKey(factionGuid))
-                return new SystemSensorContacts(this, GetGlobalEntityByGuid(factionGuid));
-            return FactionSensorContacts[factionGuid];
-        }
-        Dictionary<string, List<Entity>> EntitesByFaction = new ();
-        public List<Entity> GetEntitiesByFaction(string factionGuid)
-        {
-            if (EntitesByFaction.ContainsKey(factionGuid))
-                return EntitesByFaction[factionGuid];
-            else
-                return new List<Entity>();
-        }
-        [JsonProperty]
+        internal Dictionary<string, List<Entity>> EntitesByFaction { get; set; } = new ();
+
         public ManagerSubPulse ManagerSubpulses { get; internal set; }
 
         /// <summary>
@@ -74,7 +73,12 @@ namespace Pulsar4X.Engine
         internal void Initialize(Game game, bool isGlobalManager = false)
         {
             Game = game;
-            ManagerGuid = Guid.NewGuid().ToString();
+
+            if(ManagerGuid.IsNullOrEmpty())
+            {
+                ManagerGuid = Guid.NewGuid().ToString();
+            }
+
             game.GlobalManagerDictionary.Add(ManagerGuid, this);
             if (isGlobalManager)
             {
@@ -123,18 +127,18 @@ namespace Pulsar4X.Engine
             // Find an entity slot.
             int entityID;
 
-            for (entityID = _nextID; entityID < _entities.Count; entityID++)
+            for (entityID = _nextID; entityID < Entities.Count; entityID++)
             {
-                if (_entities[entityID] == null)
+                if (Entities[entityID] == null)
                 {
                     break;
                 }
             }
             _nextID = entityID + 1;
 
-            if (entityID == _entities.Count)
+            if (entityID == Entities.Count)
             {
-                _entities.Add(entity);
+                Entities.Add(entity);
                 EntityMasks.Add(BlankDataBlobMask());
                 foreach (List<BaseDataBlob> dataBlobList in _dataBlobMap)
                 {
@@ -143,7 +147,7 @@ namespace Pulsar4X.Engine
             }
             else
             {
-                _entities[entityID] = entity;
+                Entities[entityID] = entity;
                 EntityMasks[entityID] = BlankDataBlobMask();
                 foreach (List<BaseDataBlob> dataBlobList in _dataBlobMap)
                 {
@@ -184,7 +188,7 @@ namespace Pulsar4X.Engine
                 }
             }
 
-            UpdateListeners(_entities[entityID], null, EntityChangeData.EntityChangeType.EntityAdded);
+            UpdateListeners(Entities[entityID], null, EntityChangeData.EntityChangeType.EntityAdded);
 
             if (entity.FactionOwnerID != null)
             {
@@ -206,12 +210,12 @@ namespace Pulsar4X.Engine
                 return false;
             }
 
-            return IsValidID(entity.ID) && _entities[entity.ID] == entity;
+            return IsValidID(entity.ID) && Entities[entity.ID] == entity;
         }
 
         private bool IsValidID(int entityID)
         {
-            return entityID >= 0 && entityID < _entities.Count && _entities[entityID] != null;
+            return entityID >= 0 && entityID < Entities.Count && Entities[entityID] != null;
         }
 
         internal void RemoveEntity(Entity entity)
@@ -234,7 +238,7 @@ namespace Pulsar4X.Engine
             // StaticRefLib.EventLog.AddEvent(logevent);
 
             int entityID = entity.ID;
-            _entities[entityID] = null;
+            Entities[entityID] = null;
             EntityMasks[entityID] = null;
 
             _nextID = entityID;
@@ -346,11 +350,11 @@ namespace Pulsar4X.Engine
         {
             _dataBlobMap[typeIndex][entityID] = dataBlob;
             EntityMasks[entityID][typeIndex] = true;
-            dataBlob.OwningEntity = _entities[entityID];
+            dataBlob.OwningEntity = Entities[entityID];
             dataBlob.OnSetToEntity();
             dataBlob.OwningEntity.Manager.ManagerSubpulses.AddSystemInterupt(dataBlob);
             if(updateListners)
-                UpdateListeners(_entities[entityID], dataBlob, EntityChangeData.EntityChangeType.DBAdded);
+                UpdateListeners(Entities[entityID], dataBlob, EntityChangeData.EntityChangeType.DBAdded);
         }
 
         internal void RemoveDataBlob<T>(int entityID) where T : BaseDataBlob
@@ -365,22 +369,37 @@ namespace Pulsar4X.Engine
             _dataBlobMap[typeIndex][entityID].OwningEntity = null;
             _dataBlobMap[typeIndex][entityID] = null;
             EntityMasks[entityID][typeIndex] = false;
-            UpdateListeners(_entities[entityID], db, EntityChangeData.EntityChangeType.DBRemoved);
+            UpdateListeners(Entities[entityID], db, EntityChangeData.EntityChangeType.DBRemoved);
         }
 
         #endregion
 
+        public SystemSensorContacts GetSensorContacts(string factionGuid)
+        {
+            if (!FactionSensorContacts.ContainsKey(factionGuid))
+                return new SystemSensorContacts(this, GetGlobalEntityByGuid(factionGuid));
+            return FactionSensorContacts[factionGuid];
+        }
+
+        public List<Entity> GetEntitiesByFaction(string factionGuid)
+        {
+            if (EntitesByFaction.ContainsKey(factionGuid))
+                return EntitesByFaction[factionGuid];
+            else
+                return new List<Entity>();
+        }
+
         private void UpdateListeners(Entity entity, BaseDataBlob db, EntityChangeData.EntityChangeType change)
         {
             //listners to this work on thier own threads and are not affected by this one.
-            if (EntityListners.Count > 0)
+            if (EntityListeners.Count > 0)
             {
                 var changeData = new EntityChangeData() {
                     Entity = entity,
                     Datablob = db,
                     ChangeType = change
                 };
-                foreach (var listner in EntityListners)
+                foreach (var listner in EntityListeners)
                 {
                     listner.AddChange(changeData);
                 }
@@ -399,7 +418,7 @@ namespace Pulsar4X.Engine
         /// <returns></returns>
         public List<Entity> GetAllEntites()
         {
-            return new List<Entity>(_entities);
+            return new List<Entity>(Entities);
         }
 
         /// <summary>
@@ -523,7 +542,7 @@ namespace Pulsar4X.Engine
                 }
                 if ((entityMask & dataBlobMask) == dataBlobMask)
                 {
-                    entities.Add(_entities[entityID]);
+                    entities.Add(Entities[entityID]);
                 }
             }
 
@@ -572,7 +591,7 @@ namespace Pulsar4X.Engine
 
                 if ((entityMask & dataBlobMask) == BlankDataBlobMask())
                 {
-                    entities.Add(_entities[entityID]);
+                    entities.Add(Entities[entityID]);
                 }
             }
 
@@ -628,7 +647,7 @@ namespace Pulsar4X.Engine
         [NotNull]
         internal Entity GetFirstEntityWithDataBlob(int typeIndex)
         {
-            foreach (Entity entity in _entities)
+            foreach (Entity entity in Entities)
             {
                 if (entity != null && entity.DataBlobMask.SetBits.Contains(typeIndex))
                 {
@@ -895,9 +914,9 @@ namespace Pulsar4X.Engine
 
         public void Clear()
         {
-            for (int index = 0; index < _entities.Count; index++)
+            for (int index = 0; index < Entities.Count; index++)
             {
-                Entity entity = _entities[index];
+                Entity entity = Entities[index];
                 entity?.Destroy();
             }
         }

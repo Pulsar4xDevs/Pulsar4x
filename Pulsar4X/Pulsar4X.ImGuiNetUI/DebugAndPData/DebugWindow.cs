@@ -257,7 +257,7 @@ namespace Pulsar4X.SDL2UI
                     }
 
                     ImGui.Text("Selected Star System: " + _uiState.SelectedStarSysGuid);
-                    ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.NumberOfEntites);
+                    ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.Entities.Count);
                     if(ImGui.CollapsingHeader("Log"))
                     {
                         ImGui.BeginChild("LogChild", new System.Numerics.Vector2(800, 300), true);

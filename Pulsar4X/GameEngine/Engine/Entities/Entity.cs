@@ -4,13 +4,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using NUnit.Framework;
-using Pulsar4X.Orbital;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
-using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
-using Pulsar4X.Engine.Logistics;
 
 namespace Pulsar4X.Engine
 {
@@ -34,7 +30,9 @@ namespace Pulsar4X.Engine
 
         public event EntityChangeHandler ChangeEvent;
         // Index slot of this entity's datablobs in its EntityManager.
-        internal int ID;
+
+        [JsonProperty]
+        internal int ID { get; set; }
 
         private string DebugDisplay => GetDataBlob<NameDB>()?.OwnersName ?? Guid.ToString();
 
@@ -55,6 +53,7 @@ namespace Pulsar4X.Engine
 
         [NotNull]
         [PublicAPI]
+        [JsonIgnore]
         public new ReadOnlyCollection<BaseDataBlob> DataBlobs => IsValid ? new ReadOnlyCollection<BaseDataBlob>(Manager.GetAllDataBlobsForEntity(ID)) : new ReadOnlyCollection<BaseDataBlob>(new List<BaseDataBlob>());
 
         public void InvokeChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
@@ -63,7 +62,7 @@ namespace Pulsar4X.Engine
         }
 
         #region Entity Constructors
-        private Entity()
+        public Entity()
         {
             Manager = InvalidManager;
         }
