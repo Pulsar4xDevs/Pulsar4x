@@ -53,7 +53,7 @@ namespace Pulsar4X.Engine.Orders
 
 
         public static IndustryOrder2 CreateNewJobOrder(
-            string factionGuid, Entity thisEntity, string productionLineID,
+            int factionGuid, Entity thisEntity, string productionLineID,
             IndustryJob jobItem
         )
         {
@@ -69,7 +69,7 @@ namespace Pulsar4X.Engine.Orders
 
 
         public static IndustryOrder2 CreateCancelJobOrder(
-            string factionGuid, Entity thisEntity, string productionLineID,
+            int factionGuid, Entity thisEntity, string productionLineID,
             string OrderID
         )
         {
@@ -81,7 +81,7 @@ namespace Pulsar4X.Engine.Orders
         }
 
         public static IndustryOrder2 CreateChangePriorityOrder(
-            string factionGuid, Entity thisEntity,
+            int factionGuid, Entity thisEntity,
             string productionLineID,
             string OrderID, short delta
         )
@@ -95,7 +95,7 @@ namespace Pulsar4X.Engine.Orders
         }
 
         public static IndustryOrder2 CreateEditJobOrder(
-            string factionGuid, Entity thisEntity, string productionLineID,
+            int factionGuid, Entity thisEntity, string productionLineID,
             string OrderID, ushort quantity = 1, bool repeatJob = false, bool autoInstall = false
         )
         {
@@ -110,10 +110,10 @@ namespace Pulsar4X.Engine.Orders
         }
 
 
-        private IndustryOrder2(string factionGuid, Entity thisEntity)
+        private IndustryOrder2(int factionGuid, Entity thisEntity)
         {
             RequestingFactionGuid = factionGuid;
-            EntityCommandingGuid = thisEntity.Guid;
+            EntityCommandingGuid = thisEntity.Id;
             CreatedDate = thisEntity.StarSysDateTime;
             UseActionLanes = false;
         }

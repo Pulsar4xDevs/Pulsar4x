@@ -16,9 +16,9 @@ namespace Pulsar4X.Engine
         public static Entity CreateColony(Entity factionEntity, Entity speciesEntity, Entity planetEntity, long initialPopulation = 0)
         {
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
-            string planetName = planetEntity.GetDataBlob<NameDB>().GetName(factionEntity.Guid);
+            string planetName = planetEntity.GetDataBlob<NameDB>().GetName(factionEntity.Id);
             NameDB name = new NameDB(planetName + " Colony"); // TODO: Review default name.
-            name.SetName(factionEntity.Guid, name.DefaultName);
+            name.SetName(factionEntity.Id, name.DefaultName);
 
             blobs.Add(name);
             ColonyInfoDB colonyInfoDB = new ColonyInfoDB(speciesEntity, initialPopulation, planetEntity);
@@ -43,7 +43,9 @@ namespace Pulsar4X.Engine
             ComponentInstancesDB installations = new ComponentInstancesDB();
             blobs.Add(installations);
 
-            Entity colonyEntity = new Entity(planetEntity.Manager, factionEntity.Guid, blobs);
+            Entity colonyEntity = Entity.Create();
+            colonyEntity.FactionOwnerID = factionEntity.Id;
+            planetEntity.Manager.AddEntity(colonyEntity, blobs);
             var factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
             factionInfo.Colonies.Add(colonyEntity);
             factionEntity.GetDataBlob<FactionOwnerDB>().SetOwned(colonyEntity);

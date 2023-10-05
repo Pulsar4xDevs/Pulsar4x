@@ -58,7 +58,8 @@ namespace Pulsar4X.Engine
                 new FleetDB(),
                 new OrderableDB(),
             };
-            var factionEntity = new Entity(game.GlobalManager, blobs);
+            var factionEntity = Entity.Create();
+            game.GlobalManager.AddEntity(factionEntity, blobs);
 
             // Need to unlock the starting data in the game
             foreach(var id in game.StartingGameData.DefaultItems["player-starting-items"].Items)
@@ -78,9 +79,9 @@ namespace Pulsar4X.Engine
             }
 
             // Add this faction to the SM's access list.
-            game.SpaceMaster.SetAccess(factionEntity, AccessRole.SM);
-            name.SetName(factionEntity.Guid, factionName);
-            game.Factions.Add(factionEntity);
+            game.SpaceMaster.SetAccess(factionEntity.Id, AccessRole.SM);
+            name.SetName(factionEntity.Id, factionName);
+            game.Factions.Add(factionEntity.Id, factionEntity);
             // FIXME:
             //StaticRefLib.EventLog.AddPlayer(factionEntity);
             return factionEntity;
@@ -94,7 +95,7 @@ namespace Pulsar4X.Engine
 
             if (!Equals(owningPlayer, game.SpaceMaster))
             {
-                owningPlayer.SetAccess(faction, AccessRole.Owner);
+                owningPlayer.SetAccess(faction.Id, AccessRole.Owner);
             }
 
             return faction;

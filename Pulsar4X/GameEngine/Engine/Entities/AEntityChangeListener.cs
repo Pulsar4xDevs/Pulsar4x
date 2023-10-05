@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Datablobs;
+using System;
 
 namespace Pulsar4X.Engine
 {
@@ -91,24 +92,24 @@ namespace Pulsar4X.Engine
 
 
 
-    public class NetEntityChangeListener : EntityChangeListener
-    {
-        internal List<EntityChangeListener> ManagerListeners = new List<EntityChangeListener>(); //TODO: shoudl we rewrite this so we just have one concurrent queue and put all the changes into that (from each of the managers)
-        public NetEntityChangeListener(EntityManager manager, Entity faction) : base(manager, faction, new List<int>())
-        {
-            var knownSystems = faction.GetDataBlob<FactionInfoDB>().KnownSystems;
-            foreach (var starSysGuid in knownSystems)
-            {
-                StarSystem starSys = manager.Game.Systems[starSysGuid];
-                EntityManager starSysManager = starSys;
-                ManagerListeners.Add(new EntityChangeListener(starSysManager, faction, new List<int>()));
-            }
-        }
-    }
+    // public class NetEntityChangeListener : EntityChangeListener
+    // {
+    //     internal List<EntityChangeListener> ManagerListeners = new List<EntityChangeListener>(); //TODO: shoudl we rewrite this so we just have one concurrent queue and put all the changes into that (from each of the managers)
+    //     public NetEntityChangeListener(EntityManager manager, Entity faction) : base(manager, faction, new List<int>())
+    //     {
+    //         var knownSystems = faction.GetDataBlob<FactionInfoDB>().KnownSystems;
+    //         foreach (var starSysGuid in knownSystems)
+    //         {
+    //             StarSystem starSys = manager.Game.Systems[starSysGuid];
+    //             EntityManager starSysManager = starSys;
+    //             ManagerListeners.Add(new EntityChangeListener(starSysManager, faction, new List<int>()));
+    //         }
+    //     }
+    // }
 
     public class EntityChangeListener : AEntityChangeListener
     {
-        internal List<int> IncludeDBTypeIndexFilter = new List<int>();
+        internal List<Type> IncludeDBTypeIndexFilter = new ();
 
         internal Entity ListenForFaction { get; }
         private FactionOwnerDB _ownerDB;
@@ -116,14 +117,14 @@ namespace Pulsar4X.Engine
         /// Initializes a new instance of the <see cref="T:Pulsar4X.ECSLib.EntityChangeListnerDB"/> class.
         /// </summary>
         /// <param name="factionEntity">will listen for any entites added or removed that are owned by this entity</param>
-        public EntityChangeListener(EntityManager manager, Entity factionEntity, List<int> datablobFilter) : base(manager)
+        public EntityChangeListener(EntityManager manager, Entity factionEntity, List<Type> datablobFilter) : base(manager)
         {
             ListenForFaction = factionEntity;
             _ownerDB = ListenForFaction.GetDataBlob<FactionOwnerDB>();
             IncludeDBTypeIndexFilter = datablobFilter;
 
             bool include = false;
-            foreach (var entityitem in manager.GetEntitiesByFaction(ListenForFaction.Guid))
+            foreach (var entityitem in manager.GetEntitiesByFaction(ListenForFaction.Id))
             {
                 foreach (var item in IncludeDBTypeIndexFilter)
                 {
@@ -169,8 +170,8 @@ namespace Pulsar4X.Engine
             foreach (var includeitem in IncludeDBTypeIndexFilter)
             {
                 //debug
-                var someentity = changeData.Entity.Manager.GetFirstEntityWithDataBlob(includeitem);
-                var db = someentity.GetDataBlob<BaseDataBlob>(includeitem);
+                // var someentity = changeData.Entity.Manager.GetFirstEntityWithDataBlob(includeitem);
+                // var db = someentity.GetDataBlob<BaseDataBlob>(includeitem);
                 //end debug
 
                 if (changeData.Entity.HasDataBlob(includeitem))
@@ -185,7 +186,7 @@ namespace Pulsar4X.Engine
                     break;
                 }
             }
-            if (include && ListenForFaction.Guid == changeData.Entity.FactionOwnerID) //note: this will miss a lot of new entittes, since this code gets called before ownership is set on a new entity. it will get caught when a datablob is set though.
+            if (include && ListenForFaction.Id == changeData.Entity.FactionOwnerID) //note: this will miss a lot of new entittes, since this code gets called before ownership is set on a new entity. it will get caught when a datablob is set though.
             {
                 ListningToEntites.Add(changeData.Entity);
                 EntityChanges.Enqueue(changeData);
@@ -210,7 +211,7 @@ namespace Pulsar4X.Engine
             }
             else
             {
-                if (IncludeDBTypeIndexFilter.Contains(EntityManager.DataBlobTypes[changeData.Datablob.GetType()]))
+                if (IncludeDBTypeIndexFilter.Contains(changeData.Datablob.GetType()))
                 {
                     bool include = false;
                     foreach (var includeitem in IncludeDBTypeIndexFilter)
@@ -225,7 +226,7 @@ namespace Pulsar4X.Engine
                             include = true;
                         }
                     }
-                    if (include && _ownerDB.OwnedEntities.ContainsKey(changeData.Entity.Guid))
+                    if (include && _ownerDB.OwnedEntities.ContainsKey(changeData.Entity.Id))
                     {
                         ListningToEntites.Add(changeData.Entity);
                         EntityChangeData addedChange = new EntityChangeData()
@@ -244,7 +245,7 @@ namespace Pulsar4X.Engine
         {
             if (ListningToEntites.Contains(changeData.Entity))
             {
-                if (IncludeDBTypeIndexFilter.Contains(EntityManager.DataBlobTypes[changeData.Datablob.GetType()]))
+                if (IncludeDBTypeIndexFilter.Contains(changeData.Datablob.GetType()))
                 {
                     ListningToEntites.Remove(changeData.Entity);
                 }

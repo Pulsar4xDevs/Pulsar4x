@@ -147,9 +147,7 @@ namespace Pulsar4X.Datablobs
 
         private TreeHierarchyDB GetSameTypeDB(Entity entity)
         {
-            EntityManager.TryGetTypeIndex(GetType(), out var typeIndex);
-
-            return !entity.IsValid ? null : entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
+            return !entity.IsValid ? null : (TreeHierarchyDB)entity.GetDataBlob(this.GetType());
         }
 
         /*

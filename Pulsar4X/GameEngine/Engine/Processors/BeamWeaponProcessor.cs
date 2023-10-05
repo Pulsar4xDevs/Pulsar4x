@@ -11,7 +11,6 @@ namespace Pulsar4X.Engine
 {
     public class BeamWeaponProcessor : IHotloopProcessor
     {
-        private static readonly int _beamInfoIndex = EntityManager.GetTypeIndex<BeamInfoDB>();
         public void Init(Game game)
         {
             //donothing
@@ -19,12 +18,12 @@ namespace Pulsar4X.Engine
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            BeamMovePhysics(entity.GetDataBlob<BeamInfoDB>(_beamInfoIndex), deltaSeconds);
+            BeamMovePhysics(entity.GetDataBlob<BeamInfoDB>(), deltaSeconds);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            var dbs = manager.GetAllDataBlobsOfType<BeamInfoDB>(_beamInfoIndex);
+            var dbs = manager.GetAllDataBlobsOfType<BeamInfoDB>();
             foreach (BeamInfoDB db in dbs)
             { 
                 BeamMovePhysics(db, deltaSeconds);
@@ -105,7 +104,7 @@ namespace Pulsar4X.Engine
             var normVector = Vector3.Normalise(futurePosTime.pos - ourAbsPos);
             var absVector =  normVector * beamVelocity;
             var startPos = (PositionDB)launchingEntity.GetDataBlob<PositionDB>().Clone();
-            var beamInfo = new BeamInfoDB(launchingEntity.Guid, targetEntity, hitsTarget);
+            var beamInfo = new BeamInfoDB(launchingEntity.Id, targetEntity, hitsTarget);
             var beamlenInMeters = beamLenInSeconds * 299792458;
             beamInfo.Positions = new Vector3[2];
             beamInfo.Positions[0] = startPos.AbsolutePosition ;
@@ -118,7 +117,9 @@ namespace Pulsar4X.Engine
             dataBlobs.Add(startPos);
             //dataBlobs.Add(new NameDB("Beam", launchingEntity.FactionOwner, "Beam" ));
 
-            var newbeam = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwnerID, dataBlobs);
+            var newbeam = Entity.Create();
+            newbeam.FactionOwnerID = launchingEntity.FactionOwnerID;
+            launchingEntity.Manager.AddEntity(newbeam, dataBlobs);
         }
 
         public static (Vector3 pos, double seconds) PredictTgtPositionAndTime((Vector3 pos, Vector3 Velocity) ourState, DateTime atTime, Entity targetEntity, double beamVelocity)

@@ -54,8 +54,7 @@ namespace Pulsar4X.Engine
         internal void DoResearch(Entity entity)
         {
 
-            Entity faction;
-            entity.Manager.FindEntityByGuid(entity.FactionOwnerID, out faction);
+            Entity faction = entity.Manager.Game.Factions[entity.FactionOwnerID];
             FactionAbilitiesDB factionAbilities = faction.GetDataBlob<FactionAbilitiesDB>();
             FactionTechDB factionTechs = faction.GetDataBlob<FactionTechDB>();
             EntityResearchDB entityResearch = entity.GetDataBlob<EntityResearchDB>();

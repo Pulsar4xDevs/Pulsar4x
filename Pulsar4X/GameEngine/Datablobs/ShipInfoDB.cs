@@ -13,7 +13,7 @@ namespace Pulsar4X.Datablobs
 
         #region Properties
 
-        public string CommanderID { get; internal set; } = String.Empty;
+        public int CommanderID { get; internal set; } = -1;
 
         public ShipDesign Design { get; private set; }
 

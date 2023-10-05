@@ -34,7 +34,8 @@ namespace Pulsar4X.Engine.Sol
             cometBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, cometOrbitDB);
             PositionDB cometPositionDB = new PositionDB(cometOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
-            Entity comet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, cometPositionDB, cometBodyDB, cometMVDB, cometNameDB, cometOrbitDB, });
+            Entity comet = Entity.Create();
+            sol.AddEntity(comet, new List<BaseDataBlob> { sensorProfile, cometPositionDB, cometBodyDB, cometMVDB, cometNameDB, cometOrbitDB, });
             return comet;
         }
     }

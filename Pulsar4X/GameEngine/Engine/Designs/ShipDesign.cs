@@ -30,7 +30,7 @@ namespace Pulsar4X.Engine.Designs
         public double VolumePerUnit { get; private set; }
         public double Density { get; }
 
-        private string _factionGuid;
+        private int _factionId;
 
         /// <summary>
         /// m^3
@@ -94,7 +94,7 @@ namespace Pulsar4X.Engine.Designs
 
         public ShipDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (ArmorBlueprint armorType, float thickness) armor)
         {
-            _factionGuid = faction.OwningEntity.Guid;
+            _factionId = faction.OwningEntity.Id;
             faction.ShipDesigns.Add(UniqueID, this);
             faction.IndustryDesigns[UniqueID] = this;
             Initialise(faction.Data.CargoGoods, name, components, armor);
@@ -182,7 +182,7 @@ namespace Pulsar4X.Engine.Designs
         {
             info.AddValue(nameof(UniqueID), UniqueID);
             info.AddValue(nameof(Name), Name);
-            info.AddValue(nameof(_factionGuid), _factionGuid);
+            info.AddValue(nameof(_factionId), _factionId);
             info.AddValue(nameof(Armor), Armor);
             info.AddValue(nameof(Components), Components);
         }

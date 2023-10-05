@@ -44,7 +44,7 @@ namespace Pulsar4X.SDL2UI
         internal bool ShowDemoWindow;
         internal bool ShowDamageWindow;
         internal IntPtr rendererPtr;
-        internal string _lastContextMenuOpenedEntityGuid = String.Empty;
+        internal int _lastContextMenuOpenedEntityGuid = -1;
         internal GalacticMapRender GalacticMap;
         internal List<UpdateWindowState> UpdateableWindows = new ();
         internal DateTime LastGameUpdateTime = new ();
@@ -73,7 +73,7 @@ namespace Pulsar4X.SDL2UI
         internal Orbital.Vector3 LastWorldPointClicked_m { get; set; }
         //internal SpaceMasterVM SpaceMasterVM;
         internal bool SMenabled = false;
-        internal Dictionary<string, EntityWindow> EntityWindows { get; private set; } = new();
+        internal Dictionary<int, EntityWindow> EntityWindows { get; private set; } = new();
 
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
@@ -135,7 +135,7 @@ namespace Pulsar4X.SDL2UI
             StarSystemStates = new Dictionary<string, SystemState>();
             foreach (var guid in factionInfo.KnownSystems)
             {
-                StarSystemStates[guid] = new SystemState(Game.Systems[guid], factionEntity);
+                StarSystemStates[guid] = new SystemState((StarSystem)Game.Systems[guid], factionEntity);
             }
             GalacticMap.SetFaction();
         }
@@ -170,7 +170,7 @@ namespace Pulsar4X.SDL2UI
             {
                 foreach (var system in Game.Systems)
                 {
-                    StarSystemStates[system.Key] = SystemState.GetMasterState(system.Value);
+                    StarSystemStates[system.Key] = SystemState.GetMasterState((StarSystem)system.Value);
                 }
             }
         }
@@ -185,7 +185,7 @@ namespace Pulsar4X.SDL2UI
         //checks wether any event changed the mouse position after a new mouse click, indicating the user is doing something else with the mouse as he was doing before.
         internal void OnFocusMoved()
         {
-            _lastContextMenuOpenedEntityGuid = String.Empty;
+            _lastContextMenuOpenedEntityGuid = -1;
         }
 
         //checks wether the planet icon is clicked
@@ -199,7 +199,7 @@ namespace Pulsar4X.SDL2UI
             if (LoadedWindows.ContainsKey(typeof(DistanceRuler)))
                 LoadedWindows[typeof(DistanceRuler)].MapClicked(worldCoord, button);
 
-            Dictionary<string, EntityState> allEntities = null;
+            Dictionary<int, EntityState> allEntities = null;
             if(StarSystemStates.ContainsKey(SelectedStarSysGuid))
                 allEntities = StarSystemStates[SelectedStarSysGuid].EntityStatesWithNames;
 
@@ -236,11 +236,11 @@ namespace Pulsar4X.SDL2UI
                     if(closestEntityDistInM <= closestEntity.GetDataBlob<MassVolumeDB>().RadiusInM || Camera.WorldDistance_AU(minPixelRadius) >=  Distance.MToAU(closestEntityDistInM)){
                         ImGui.Begin("--crash fixer--(this menu`s whole purpose is preventing a ImGui global state related game crash)");
 
-                        EntityClicked(closestEntity.Guid, SelectedStarSysGuid, button);
+                        EntityClicked(closestEntity.Id, SelectedStarSysGuid, button);
                         ImGui.End();
 
                         if(button == MouseButtons.Alt){
-                            _lastContextMenuOpenedEntityGuid = closestEntity.Guid;
+                            _lastContextMenuOpenedEntityGuid = closestEntity.Id;
                         }
                     }
                 }
@@ -250,13 +250,13 @@ namespace Pulsar4X.SDL2UI
                 LoadedWindows[typeof(ToolBarWindow)].MapClicked(worldCoord, button);
         }
 
-        internal void EntitySelectedAsPrimary(string entityGuid, string starSys)
+        internal void EntitySelectedAsPrimary(int entityGuid, string starSys)
         {
             PrimaryEntity = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
             ActiveWindow?.EntitySelectedAsPrimary(PrimaryEntity);
         }
 
-        internal void EntityClicked(string entityGuid, string starSys, MouseButtons button)
+        internal void EntityClicked(int entityGuid, string starSys, MouseButtons button)
         {
             var entityState = StarSystemStates[starSys].EntityStatesWithNames[entityGuid];
             LastClickedEntity = entityState;
@@ -296,7 +296,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void EntityClicked(EntityState entityState, MouseButtons button)
         {
-            EntityClicked(entityState.Entity.Guid, entityState.StarSysGuid, button);
+            EntityClicked(entityState.Entity.Id, entityState.StarSysGuid, button);
         }
     }
 

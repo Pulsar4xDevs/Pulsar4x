@@ -63,7 +63,7 @@ namespace Pulsar4X.SDL2UI
             SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             var _NamedEntityStates = _StarSystemState.EntityStatesWithPosition;
 
-            if (_NamedEntityStates.ContainsKey(_CurrentBody.Guid))
+            if (_NamedEntityStates.ContainsKey(_CurrentBody.Id))
             {
                 var _ChildList = _CurrentBody.GetDataBlob<PositionDB>().Children;
 
@@ -75,11 +75,11 @@ namespace Pulsar4X.SDL2UI
                         _TreeFlags = ImGuiTreeNodeFlags.Selected | _TreeFlags;
                     }
 
-                    bool _Opened = ImGui.TreeNodeEx(_NamedEntityStates[_CurrentBody.Guid].Name, _TreeFlags);
+                    bool _Opened = ImGui.TreeNodeEx(_NamedEntityStates[_CurrentBody.Id].Name, _TreeFlags);
 
                     if (ImGui.IsItemClicked())
                     {
-                        _uiState.EntityClicked(_CurrentBody.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                        _uiState.EntityClicked(_CurrentBody.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                     }
 
                     if (_Opened)
@@ -94,9 +94,9 @@ namespace Pulsar4X.SDL2UI
                 }
                 else
                 {
-                    if (ImGui.Selectable(_NamedEntityStates[_CurrentBody.Guid].Name, _CurrentBody == _SelectedBody))
+                    if (ImGui.Selectable(_NamedEntityStates[_CurrentBody.Id].Name, _CurrentBody == _SelectedBody))
                     {
-                        _uiState.EntityClicked(_CurrentBody.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                        _uiState.EntityClicked(_CurrentBody.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                     }
                 }
 

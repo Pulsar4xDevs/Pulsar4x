@@ -89,7 +89,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         private void HardRefresh(EntityState orderEntity)
         {
             _orderEntity = orderEntity.Entity;
-            _orderEntityName = _orderEntity.GetName(_uiState.Faction.Guid);
+            _orderEntityName = _orderEntity.GetName(_uiState.Faction.Id);
             _newtonThrust = _orderEntity.GetDataBlob<NewtonThrustAbilityDB>();
             _totalMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassTotal; 
             _dryMass = _orderEntity.GetDataBlob<MassVolumeDB>().MassDry;

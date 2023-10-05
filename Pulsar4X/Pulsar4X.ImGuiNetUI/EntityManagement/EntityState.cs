@@ -28,7 +28,7 @@ namespace Pulsar4X.SDL2UI
         public EntityState(Entity entity)
         {
             Entity = entity;
-            foreach (var db in entity.DataBlobs)
+            foreach (var db in entity.Manager.GetAllDataBlobsForEntity(entity.Id))
             {
                 DataBlobs.Add(db.GetType(), db);
             }

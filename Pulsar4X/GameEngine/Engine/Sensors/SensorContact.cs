@@ -13,7 +13,7 @@ namespace Pulsar4X.Engine.Sensors
 
     public class SensorContact
     {
-        public string ActualEntityGuid;
+        public int ActualEntityId;
         public Entity ActualEntity;
 
         public SensorInfoDB SensorInfo;
@@ -25,12 +25,12 @@ namespace Pulsar4X.Engine.Sensors
         public SensorContact(Entity factionEntity, Entity actualEntity, DateTime atDateTime)
         {
             ActualEntity = actualEntity;
-            ActualEntityGuid = actualEntity.Guid;
+            ActualEntityId = actualEntity.Id;
             SensorInfo = new SensorInfoDB(factionEntity, actualEntity, atDateTime);
             Position = new SensorPositionDB(actualEntity.GetDataBlob<PositionDB>());
             var factionInfoDB = factionEntity.GetDataBlob<FactionInfoDB>();
-            if (!factionInfoDB.SensorContacts.ContainsKey(actualEntity.Guid))
-                factionInfoDB.SensorContacts.Add(actualEntity.Guid, this);
+            if (!factionInfoDB.SensorContacts.ContainsKey(actualEntity.Id))
+                factionInfoDB.SensorContacts.Add(actualEntity.Id, this);
             actualEntity.ChangeEvent += ActualEntity_ChangeEvent;
             Name = actualEntity.GetDataBlob<NameDB>().GetName(factionEntity);
         }

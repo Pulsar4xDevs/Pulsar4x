@@ -16,7 +16,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("Hydrosphere: " + atmosphereDB.HydrosphereExtent.ToString() + "%%");
             }
 
-            if(ImGui.BeginTable("###GasTable" + entityState.Entity.Guid, 2))
+            if(ImGui.BeginTable("###GasTable" + entityState.Entity.Id, 2))
             {
                 ImGui.TableSetupColumn("Type");
                 ImGui.TableSetupColumn("Percent");

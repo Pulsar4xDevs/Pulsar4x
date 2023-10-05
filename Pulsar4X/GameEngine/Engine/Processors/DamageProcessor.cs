@@ -191,7 +191,7 @@ namespace Pulsar4X.Engine
             if(!game.Systems.ContainsKey(pDB.SystemGuid))
                 throw new Exception(pDB.SystemGuid);
 
-            StarSystem mySystem = game.Systems[pDB.SystemGuid];
+            StarSystem mySystem = (StarSystem)game.Systems[pDB.SystemGuid];
 
             //Does anything else need to be done to delete a ship?
 
@@ -242,7 +242,7 @@ namespace Pulsar4X.Engine
                 if(!game.Systems.ContainsKey(pDB.SystemGuid))
                     throw new Exception(pDB.SystemGuid);
 
-                StarSystem mySystem = game.Systems[pDB.SystemGuid];
+                StarSystem mySystem = (StarSystem)game.Systems[pDB.SystemGuid];
 
                 mySystem.RemoveEntity(Asteroid);
             }

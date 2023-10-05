@@ -1,3 +1,4 @@
+using System.Security.Principal;
 using NUnit.Framework;
 using Pulsar4X.Engine;
 using Pulsar4X.Modding;
@@ -31,7 +32,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void VerifySaveAndLoad()
         {
-            //DefaultStartFactory.DefaultHumans(_game, "Test Humans");
+            DefaultStartFactory.DefaultHumans(_game, "Test Humans");
 
             var gameJson = Game.Save(_game);
 
@@ -59,9 +60,42 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(_game.ProcessorManager.InstanceCount, loadedGame.ProcessorManager.InstanceCount);
 
             Assert.AreEqual(_game.GlobalManager.ManagerGuid, loadedGame.GlobalManager.ManagerGuid, "Global Manager ID");
-            Assert.AreEqual(_game.GlobalManager.Entities.Count, loadedGame.GlobalManager.Entities.Count, "Global Manager Entity Count");
 
-            Assert.AreEqual(_game.GameMasterFaction.Guid, loadedGame.GameMasterFaction.Guid, "Game Master Fation Guid");
+            var previousEntities = _game.GlobalManager.GetAllEntites();
+            var currentEntities = _game.GlobalManager.GetAllEntites();
+
+            Assert.AreEqual(previousEntities.Count, currentEntities.Count, "Global Manager Entity Count");
+
+            for(int i = 0; i < previousEntities.Count; i++)
+            {
+                Assert.AreEqual(previousEntities[i].Id, currentEntities[i].Id, "Entity ID Check");
+            }
+
+            Assert.AreEqual(_game.Systems.Count, loadedGame.Systems.Count, "Star System Count");
+
+            foreach(var (guid, system) in _game.Systems)
+            {
+                if(!(system is StarSystem)) continue;
+
+                Assert.IsTrue(loadedGame.Systems.ContainsKey(guid), "Star System Guid Check");
+
+                if(!(loadedGame.Systems[guid] is StarSystem)) continue;
+
+                StarSystem saved = (StarSystem)system;
+                StarSystem loaded = (StarSystem)loadedGame.Systems[guid];
+
+                var savedEntities = saved.GetAllEntites();
+                var loadedEntities = loaded.GetAllEntites();
+
+                Assert.AreEqual(savedEntities.Count, loadedEntities.Count, "Star System Entity Count");
+
+                for(int i = 0; i < savedEntities.Count; i++)
+                {
+                    Assert.AreEqual(savedEntities[i].Id, loadedEntities[i].Id, "Star System Entity Id Check");
+                }
+            }
+
+            Assert.AreEqual(_game.GameMasterFaction.Id, loadedGame.GameMasterFaction.Id, "Game Master Fation Guid");
         }
 
     }

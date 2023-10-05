@@ -6,7 +6,7 @@ namespace Pulsar4X.Datablobs;
 public class BeamInfoDB : BaseDataBlob
 {
     public double Frequency;
-    public string FiredBy;
+    public int FiredBy;
     public Vector3 VelocityVector;
     public Vector3[] Positions;
     public bool HitsTarget;
@@ -20,7 +20,7 @@ public class BeamInfoDB : BaseDataBlob
             return _posDB;
         }}
 
-    public BeamInfoDB(string launchedBy, Entity targetEntity, bool hitsTarget)
+    public BeamInfoDB(int launchedBy, Entity targetEntity, bool hitsTarget)
     {
         FiredBy = launchedBy;
         TargetEntity = targetEntity;

@@ -30,7 +30,7 @@ namespace Pulsar4X.Engine.Orders
             var cmd = new AddComponentToStorageOrder(entity, componentInstance, amount)
             {
                 RequestingFactionGuid = entity.FactionOwnerID,
-                EntityCommandingGuid = entity.Guid,
+                EntityCommandingGuid = entity.Id,
                 CreatedDate = entity.Manager.ManagerSubpulses.StarSysDateTime,
                 UseActionLanes = false
             };

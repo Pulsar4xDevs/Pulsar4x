@@ -94,7 +94,8 @@ namespace Pulsar4X.Engine
             //AtmosphereDB mercuryAtmo = new AtmosphereDB();
             SensorProfileDB sensorProfile = new SensorProfileDB();
             mercuryPositionDB.AbsolutePosition += new Vector3(x, y, 0);
-            Entity mercury = new Entity(sol, new List<BaseDataBlob>{sensorProfile, mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
+            Entity mercury = Entity.Create();
+            sol.AddEntity(mercury, new List<BaseDataBlob>{sensorProfile, mercuryPositionDB, mercuryBodyDB, mercuryMVDB, mercuryNameDB, mercuryOrbitDB});
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, mercury);
             SensorTools.PlanetEmmisionSig(sensorProfile, mercuryBodyDB, mercuryMVDB);
 
@@ -110,7 +111,8 @@ namespace Pulsar4X.Engine
             OrbitDB venusOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.MassDry, venusMVDB.MassDry, venusSemiMajAxis, venusEccentricity, venusInclination, venusLoAN, venusLoP, venusMeanLongd, GalaxyGen.Settings.J2000);
             PositionDB venusPositionDB = new PositionDB(venusOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
             sensorProfile = new SensorProfileDB();
-            Entity venus = new Entity(sol, new List<BaseDataBlob> { sensorProfile, venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
+            Entity venus = Entity.Create();
+            sol.AddEntity(venus, new List<BaseDataBlob> { sensorProfile, venusPositionDB, venusBodyDB, venusMVDB, venusNameDB, venusOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, venus);
             SensorTools.PlanetEmmisionSig(sensorProfile, venusBodyDB, venusMVDB);
 
@@ -132,7 +134,8 @@ namespace Pulsar4X.Engine
             atmoGasses.Add(game.StartingGameData.AtmosphericGas["water-vapour"], 0.01f);
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
             sensorProfile = new SensorProfileDB();
-            Entity planet = new Entity(sol, new List<BaseDataBlob> {sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
+            Entity planet = Entity.Create();
+            sol.AddEntity(planet, new List<BaseDataBlob> {sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
             _systemBodyFactory.HomeworldMineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, planet);
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
 
@@ -151,7 +154,8 @@ namespace Pulsar4X.Engine
             OrbitDB lunaOrbitDB = OrbitDB.FromAsteroidFormat(planet, planetMVDB.MassDry, lunaMVDB.MassDry, lunaSemiMajAxis, lunaEccentricity, lunaInclination, lunaLoAN, lunaAoP, lunaMeanAnomaly, GalaxyGen.Settings.J2000);
             PositionDB lunaPositionDB = new PositionDB(lunaOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, planet);
             sensorProfile = new SensorProfileDB();
-            Entity luna = new Entity(sol, new List<BaseDataBlob> {sensorProfile, lunaPositionDB, lunaBodyDB, lunaMVDB, lunaNameDB, lunaOrbitDB });
+            Entity luna = Entity.Create();
+            sol.AddEntity(luna, new List<BaseDataBlob> {sensorProfile, lunaPositionDB, lunaBodyDB, lunaMVDB, lunaNameDB, lunaOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, luna);
             SensorTools.PlanetEmmisionSig(sensorProfile, lunaBodyDB, lunaMVDB);
 
@@ -168,7 +172,8 @@ namespace Pulsar4X.Engine
             OrbitDB halleysOrbitDB = OrbitDB.FromAsteroidFormat(sun, sunMVDB.MassDry, halleysMVDB.MassDry, halleysSemiMajAxis, halleysEccentricity, halleysInclination, halleysLoAN, halleysAoP, halleysMeanAnomaly, new System.DateTime(1994, 2, 17));
             PositionDB halleysPositionDB = new PositionDB(halleysOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun); // + planetPositionDB.AbsolutePosition_AU, sol.ID);
             sensorProfile = new SensorProfileDB();
-            Entity halleysComet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, halleysPositionDB, halleysBodyDB, halleysMVDB, halleysNameDB, halleysOrbitDB });
+            Entity halleysComet = Entity.Create();
+            sol.AddEntity(halleysComet, new List<BaseDataBlob> { sensorProfile, halleysPositionDB, halleysBodyDB, halleysMVDB, halleysNameDB, halleysOrbitDB });
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, halleysComet);
             SensorTools.PlanetEmmisionSig(sensorProfile, halleysBodyDB, halleysMVDB);
 
@@ -335,7 +340,8 @@ namespace Pulsar4X.Engine
                 planetEccentricity = i / 16.0;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.MassDry, planetMVDB.MassDry, planetSemiMajorAxisAU, planetEccentricity, planetEclipticInclination, planetLoAN, planetAoP, planetMeanAnomaly, GalaxyGen.Settings.J2000);
                 planetPositionDB.AbsolutePosition = planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime);
-                Entity planet = new Entity(system, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
+                Entity planet = Entity.Create();
+                system.AddEntity(planet, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
             return system;
@@ -370,7 +376,8 @@ namespace Pulsar4X.Engine
                 planetAoP = i * 15;
                 OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.MassDry, planetMVDB.MassDry, planetSemiMajorAxisAU, planetEccentricity, planetEclipticInclination, planetLoAN, planetAoP, planetMeanAnomaly, GalaxyGen.Settings.J2000);
                 planetPositionDB.AbsolutePosition = planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime);
-                Entity planet = new Entity(system, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
+                Entity planet = Entity.Create();
+                system.AddEntity(planet, new List<BaseDataBlob> { planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB });
             }
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
             return system;

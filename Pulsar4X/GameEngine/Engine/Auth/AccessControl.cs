@@ -23,14 +23,14 @@ namespace Pulsar4X.Engine.Auth
         private static bool CheckAuthorization(Player authorizedPlayer, Entity entity)
         {
             // Get the datablob mask to avoid unnecessary validation checks on method calls.
-            ComparableBitArray entityMask = entity.DataBlobMask;
+            List<Type> blobTypes = entity.Manager.GetAllDataBlobTypesForEntity(entity.Id);
 
-            if (IsSystemBodyAuthorized(authorizedPlayer, entity, entityMask))
+            if (IsSystemBodyAuthorized(authorizedPlayer, entity, blobTypes))
             {
                 return true;
             }
 
-            if (IsOwnedEntityAuthorized(authorizedPlayer, entity, entityMask))
+            if (IsOwnedEntityAuthorized(authorizedPlayer, entity, blobTypes))
             {
                 return true;
             }
@@ -38,7 +38,7 @@ namespace Pulsar4X.Engine.Auth
             return false;
         }
 
-        private static bool IsOwnedEntityAuthorized(Player authorizedPlayer, Entity entity, ComparableBitArray entityMask)
+        private static bool IsOwnedEntityAuthorized(Player authorizedPlayer, Entity entity, List<Type> dataBlobTypes)
         {
             //TODO: TotalyHacked because fuck knows how we're going to do this now.
             return true;
@@ -101,25 +101,26 @@ namespace Pulsar4X.Engine.Auth
         //    return false;
         //}
 
-        private static bool IsSystemBodyAuthorized(Player authorizedPlayer, Entity entity, ComparableBitArray entityMask)
+        private static bool IsSystemBodyAuthorized(Player authorizedPlayer, Entity entity, List<Type> dataBlobTypes)
         {
-            if (entityMask[EntityManager.GetTypeIndex<StarInfoDB>()] ||
-                entityMask[EntityManager.GetTypeIndex<SystemBodyInfoDB>()] ||
-                entityMask[EntityManager.GetTypeIndex<JPSurveyableDB>()] ||
-                entityMask[EntityManager.GetTypeIndex<TransitableDB>()])
+            if(dataBlobTypes.Contains(typeof(StarInfoDB)) ||
+                dataBlobTypes.Contains(typeof(SystemBodyInfoDB)) ||
+                dataBlobTypes.Contains(typeof(JPSurveyableDB)) ||
+                dataBlobTypes.Contains(typeof(TransitableDB)))
             {
                 // Entity systemBody
                 var entityPositionDB = entity.GetDataBlob<PositionDB>();
 
-                List<Entity> factions = FactionsWithAccess(authorizedPlayer, AccessRole.SystemKnowledge);
-                foreach (Entity faction in factions)
+                List<int> factions = FactionsWithAccess(authorizedPlayer, AccessRole.SystemKnowledge);
+                foreach (int factionId in factions)
                 {
+                    var faction = entity.Manager.Game.Factions[factionId];
                     var factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
                     foreach (var knownSystem in factionInfoDB.KnownSystems)
                     {
                         if (knownSystem == entityPositionDB.SystemGuid)
                         {
-                            if (!entityMask[EntityManager.GetTypeIndex<TransitableDB>()])
+                            if (!dataBlobTypes.Contains(typeof(TransitableDB)))
                             {
                                 return true;
                             }
@@ -142,17 +143,17 @@ namespace Pulsar4X.Engine.Auth
             return false;
         }
 
-        private static List<Entity> FactionsWithAccess(Player authorizedPlayer, AccessRole accessRole)
+        private static List<int> FactionsWithAccess(Player authorizedPlayer, AccessRole accessRole)
         {
-            var factions = new List<Entity>();
-            foreach (KeyValuePair<Entity, AccessRole> keyValuePair in authorizedPlayer.AccessRoles)
+            var factions = new List<int>();
+            foreach (KeyValuePair<int, AccessRole> keyValuePair in authorizedPlayer.AccessRoles)
             {
-                Entity faction = keyValuePair.Key;
+                int factionId = keyValuePair.Key;
                 AccessRole access = keyValuePair.Value;
 
                 if (access.HasFlag(accessRole))
                 {
-                    factions.Add(faction);
+                    factions.Add(factionId);
                 }
             }
             return factions;

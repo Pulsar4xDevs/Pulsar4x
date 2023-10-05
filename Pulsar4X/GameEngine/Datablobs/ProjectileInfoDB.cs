@@ -5,7 +5,7 @@ namespace Pulsar4X.Datablobs
 {
     public class ProjectileInfoDB : BaseDataBlob
     {
-        public string LaunchedBy = Guid.NewGuid().ToString();
+        public int LaunchedBy { get; set; } = -1;
         public int Count = 1;
 
         [JsonConstructor]
@@ -13,7 +13,7 @@ namespace Pulsar4X.Datablobs
         {
         }
 
-        public ProjectileInfoDB(string launchedBy, int count)
+        public ProjectileInfoDB(int launchedBy, int count)
         {
             LaunchedBy = launchedBy;
             Count = count;

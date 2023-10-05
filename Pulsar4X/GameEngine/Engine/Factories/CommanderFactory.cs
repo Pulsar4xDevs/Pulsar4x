@@ -7,18 +7,20 @@ namespace Pulsar4X.Engine
 {
     public static class CommanderFactory
     {
-        public static Entity Create(EntityManager manager, string factionID, CommanderDB commanderDB)
+        public static Entity Create(EntityManager manager, int factionID, CommanderDB commanderDB)
         {
             var blobs = new List<BaseDataBlob>();
             var nameDB = new NameDB(commanderDB.ToString(), factionID, commanderDB.ToString());
             blobs.Add(commanderDB);
             blobs.Add(nameDB);
-            var entity = Entity.Create(manager, factionID, blobs);
+            var entity = Entity.Create();
+            entity.FactionOwnerID = factionID;
+            manager.AddEntity(entity, blobs);
 
-            var faction = manager.GetGlobalEntityByGuid(factionID);
+            var faction = manager.Game.Factions[factionID];
             if(faction.TryGetDatablob<FactionInfoDB>(out var factionInfoDB))
             {
-                factionInfoDB.Commanders.Add(entity.Guid);
+                factionInfoDB.Commanders.Add(entity.Id);
             }
 
             return entity;

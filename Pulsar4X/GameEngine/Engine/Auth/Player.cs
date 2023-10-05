@@ -26,8 +26,8 @@ namespace Pulsar4X.Engine.Auth
         //public OrderQueue Orders;
 
         [JsonProperty]
-        private Dictionary<Entity, uint> FactionAccessRoles { get; set; }
-        internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new ReadOnlyDictionary<Entity, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
+        private Dictionary<int, uint> FactionAccessRoles { get; set; }
+        internal ReadOnlyDictionary<int, AccessRole> AccessRoles => new ReadOnlyDictionary<int, AccessRole>(FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
 
         [JsonProperty]
         private string PasswordHash { get; set; }
@@ -54,7 +54,7 @@ namespace Pulsar4X.Engine.Auth
 
             PasswordHash = info.GetString(nameof(PasswordHash));
             Salt = info.GetString(nameof(Salt));
-            FactionAccessRoles = (Dictionary<Entity, uint>)info.GetValue(nameof(FactionAccessRoles), typeof(Dictionary<Entity, uint>));
+            FactionAccessRoles = (Dictionary<int, uint>)info.GetValue(nameof(FactionAccessRoles), typeof(Dictionary<int, uint>));
             //Orders = new OrderQueue();
             HaltsOnEvent = (Dictionary<EventType, bool>)info.GetValue(nameof(HaltsOnEvent), typeof(Dictionary<EventType, bool>));
         }
@@ -62,10 +62,10 @@ namespace Pulsar4X.Engine.Auth
         internal Player(string name, string password = "") : this(name, password, Guid.NewGuid())
         { }
 
-        internal Player(string name, string password, Guid id) : this(name, password, id, new Dictionary<Entity, uint>())
+        internal Player(string name, string password, Guid id) : this(name, password, id, new Dictionary<int, uint>())
         { }
 
-        internal Player(string name, string password, Guid id, Dictionary<Entity, uint> factionAccessRoles)
+        internal Player(string name, string password, Guid id, Dictionary<int, uint> factionAccessRoles)
         {
             ID = id;
             Name = string.IsNullOrEmpty(name) ? "Unnamed Player" : name;
@@ -81,22 +81,22 @@ namespace Pulsar4X.Engine.Auth
 
         #region Internal API
 
-        internal AccessRole GetAccess(Entity faction)
+        internal AccessRole GetAccess(int factionId)
         {
             uint role;
-            FactionAccessRoles.TryGetValue(faction, out role);
+            FactionAccessRoles.TryGetValue(factionId, out role);
             return (AccessRole)role;
         }
 
-        internal void SetAccess(Entity faction, AccessRole accessRole)
+        internal void SetAccess(int factionId, AccessRole accessRole)
         {
-            if (FactionAccessRoles.ContainsKey(faction))
+            if (FactionAccessRoles.ContainsKey(factionId))
             {
-                FactionAccessRoles[faction] = (uint)accessRole;
+                FactionAccessRoles[factionId] = (uint)accessRole;
             }
             else
             {
-                FactionAccessRoles.Add(faction, (uint)accessRole);
+                FactionAccessRoles.Add(factionId, (uint)accessRole);
             }
         }
 
@@ -153,21 +153,21 @@ namespace Pulsar4X.Engine.Auth
         /// <returns>ReadOnlyDictionary containing the access roles.</returns>
         [PublicAPI]
         [Pure]
-        public ReadOnlyDictionary<Entity, AccessRole> GetAccessRoles(AuthenticationToken authToken)
+        public ReadOnlyDictionary<int, AccessRole> GetAccessRoles(AuthenticationToken authToken)
         {
-            return !IsTokenValid(authToken) ? new ReadOnlyDictionary<Entity, AccessRole>(new Dictionary<Entity, AccessRole>()) : AccessRoles;
+            return !IsTokenValid(authToken) ? new ReadOnlyDictionary<int, AccessRole>(new Dictionary<int, AccessRole>()) : AccessRoles;
         }
 
         /// <summary>
         /// Retrieves the AccessRole this player has over the specified faction.
         /// </summary>
         [PublicAPI]
-        public AccessRole GetAccess(AuthenticationToken authToken, Entity faction)
+        public AccessRole GetAccess(AuthenticationToken authToken, int factionId)
         {
             var role = AccessRole.None;
             if (IsTokenValid(authToken))
             {
-                role = GetAccess(faction);
+                role = GetAccess(factionId);
             }
             return role;
         }

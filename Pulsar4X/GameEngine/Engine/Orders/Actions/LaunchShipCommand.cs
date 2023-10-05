@@ -26,12 +26,12 @@ namespace Pulsar4X.Engine.Orders
         private Entity orbitalParent = null;
         private bool _hasLaunched = false;
 
-        public static void CreateCommand(string faction, Entity orderEntity, string lauchSlot, string jobID)
+        public static void CreateCommand(int faction, Entity orderEntity, string lauchSlot, string jobID)
         {
             var cmd = new LaunchShipCommand()
             {
                 RequestingFactionGuid = faction,
-                EntityCommandingGuid = orderEntity.Guid,
+                EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 _launchSlot = lauchSlot,
                 _jobID = jobID

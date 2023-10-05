@@ -16,7 +16,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         private OrderableDB _orderableDB = null;
 
-        private string _movementTargetGuid = String.Empty;
+        private int _movementTargetGuid = -1;
 
         private enum OrderCreationSubWindow
         {
@@ -80,7 +80,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             {
                 RenderTabOptions();
                 if (_orderableDB != null) {
-                    ImGui.TextColored(new System.Numerics.Vector4(0, 123, 0, 255), "Selected Entity: " + _orderEntity.GetName(_uiState.Faction.Guid));
+                    ImGui.TextColored(new System.Numerics.Vector4(0, 123, 0, 255), "Selected Entity: " + _orderEntity.GetName(_uiState.Faction.Id));
                 }
 
                 ImGui.BeginChild("order_creation_tabs");
@@ -123,11 +123,11 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                             var _NamedEntityStates = _NamedEntityStatesByBodyType[orbitBodyType];
                             foreach (var body in _NamedEntityStates)
                             {
-                                if (_orderEntity == null || body.Entity.Guid != _orderEntity.Guid)
+                                if (_orderEntity == null || body.Entity.Id != _orderEntity.Id)
                                 {
-                                    if (ImGui.Selectable(_NamedEntityStates.First(x => x == body).Name, _movementTargetGuid == body.Entity.Guid))
+                                    if (ImGui.Selectable(_NamedEntityStates.First(x => x == body).Name, _movementTargetGuid == body.Entity.Id))
                                     {
-                                        _movementTargetGuid = body.Entity.Guid;
+                                        _movementTargetGuid = body.Entity.Id;
                                     }
                                 }
                             }
@@ -160,7 +160,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
             if (_orderableDB != null)
             {
-                if (_movementTargetGuid != string.Empty)
+                if (_movementTargetGuid != -1)
                 {
                     ImGui.Button("Add Order to\r\nSelected Entity");
                 }

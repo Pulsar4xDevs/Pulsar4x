@@ -37,7 +37,7 @@ namespace Pulsar4X.Engine.Orders
 
         public List<(string item, double value)> DebugDetails = new List<(string, double)>();
 
-        public static void CreateCommand(string faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name="Newtonion thrust")
+        public static void CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, Vector3 expendDeltaV_m, double burnTime, string name="Newtonion thrust")
         {
 
 
@@ -45,7 +45,7 @@ namespace Pulsar4X.Engine.Orders
             var cmd = new NewtonThrustCommand()
             {
                 RequestingFactionGuid = faction,
-                EntityCommandingGuid = orderEntity.Guid,
+                EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 OrbitrelativeDeltaV = expendDeltaV_m,
 
@@ -84,7 +84,7 @@ namespace Pulsar4X.Engine.Orders
                 var cmd = new NewtonThrustCommand()
                 {
                     RequestingFactionGuid = ship.FactionOwnerID,
-                    EntityCommandingGuid = ship.Guid,
+                    EntityCommandingGuid = ship.Id,
                     CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
                     OrbitrelativeDeltaV = manuver.dv,
 
@@ -115,7 +115,7 @@ namespace Pulsar4X.Engine.Orders
                 var cmd = new NewtonThrustCommand()
                 {
                     RequestingFactionGuid = ship.FactionOwnerID,
-                    EntityCommandingGuid = ship.Guid,
+                    EntityCommandingGuid = ship.Id,
                     CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
                     OrbitrelativeDeltaV = manuver.dv,
 
@@ -148,7 +148,7 @@ namespace Pulsar4X.Engine.Orders
             var cmd = new NewtonThrustCommand()
             {
                 RequestingFactionGuid = ship.FactionOwnerID,
-                EntityCommandingGuid = ship.Guid,
+                EntityCommandingGuid = ship.Id,
                 CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
                 OrbitrelativeDeltaV = dv,
 
@@ -259,7 +259,7 @@ namespace Pulsar4X.Engine.Orders
 
         public List<(string item, double value)> DebugDetails = new List<(string, double)>();
 
-        public static void CreateCommand(string faction, Entity orderEntity, Vector3 position, Vector3 startvelocity, Vector3 endvelocity, DateTime manuverNodeTime, string name="Newtonion thrust")
+        public static void CreateCommand(int faction, Entity orderEntity, Vector3 position, Vector3 startvelocity, Vector3 endvelocity, DateTime manuverNodeTime, string name="Newtonion thrust")
         {
             var sgp = orderEntity.GetDataBlob<OrbitDB>().GravitationalParameter_m3S2;
             KeplerElements startKE = OrbitMath.KeplerFromPositionAndVelocity(sgp, position, startvelocity, manuverNodeTime);
@@ -267,7 +267,7 @@ namespace Pulsar4X.Engine.Orders
             CreateCommand(faction, orderEntity, manuverNodeTime, startKE, tgtKE);
         }
 
-        public static void CreateCommand(string faction, Entity orderEntity, DateTime manuverNodeTime, KeplerElements startKE, KeplerElements finKE, string name="Newtonion Simple thrust")
+        public static void CreateCommand(int faction, Entity orderEntity, DateTime manuverNodeTime, KeplerElements startKE, KeplerElements finKE, string name="Newtonion Simple thrust")
         {
 
             var startVec = OrbitalMath.GetStateVectors(startKE, manuverNodeTime);
@@ -281,7 +281,7 @@ namespace Pulsar4X.Engine.Orders
             var cmd = new NewtonSimpeThrustCommand()
             {
                 RequestingFactionGuid = faction,
-                EntityCommandingGuid = orderEntity.Guid,
+                EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 OrbitrelativeDeltaV = new Vector3(manuverVector.X, manuverVector.Y, 0),
                 StartKE = startKE,
@@ -390,12 +390,12 @@ namespace Pulsar4X.Engine.Orders
 
         private double _soiParentMass;
 
-        public static void CreateCommand(string faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
+        public static void CreateCommand(int factionId, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
         {
             var cmd = new ThrustToTargetCmd()
             {
-                RequestingFactionGuid = faction,
-                EntityCommandingGuid = orderEntity.Guid,
+                RequestingFactionGuid = factionId,
+                EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.StarSysDateTime,
                 _targetEntity = targetEntity,
                 ActionOnDate = actionDateTime,
@@ -611,12 +611,12 @@ namespace Pulsar4X.Engine.Orders
         private double _totalFuel;
         private double _soiParentMass;
 
-        public static void CreateCommand(string faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
+        public static void CreateCommand(int faction, Entity orderEntity, DateTime actionDateTime, Entity targetEntity)
         {
             var cmd = new Thrust90ToTargetCmd()
             {
                 RequestingFactionGuid = faction,
-                EntityCommandingGuid = orderEntity.Guid,
+                EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.StarSysDateTime,
                 _targetEntity = targetEntity,
                 ActionOnDate = actionDateTime,

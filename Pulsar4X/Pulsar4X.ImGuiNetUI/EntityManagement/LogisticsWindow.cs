@@ -13,7 +13,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class LogiShipWindow : PulsarGuiWindow
     {
-        private string _factionID;
+        private int _factionID;
         private EntityState _entityState;
         private Entity _selectedEntity;
         private LogiShipperDB _tradeshipDB;

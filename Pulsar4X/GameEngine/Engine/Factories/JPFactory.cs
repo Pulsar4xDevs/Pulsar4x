@@ -40,7 +40,8 @@ namespace Pulsar4X.Engine
 
             var dataBlobs = new List<BaseDataBlob> { jpNameDB, jpTransitableDB, jpPositionDB};
 
-            Entity jumpPoint = Entity.Create(system, String.Empty, dataBlobs);
+            Entity jumpPoint = Entity.Create();
+            system.AddEntity(jumpPoint, dataBlobs);
             return jumpPoint;
         }
 
@@ -106,7 +107,7 @@ namespace Pulsar4X.Engine
             var jpTransitableDB = jumpPoint.GetDataBlob<TransitableDB>();
             var jpPositionDB = jumpPoint.GetDataBlob<PositionDB>();
 
-            StarSystem system = game.Systems[jpPositionDB.SystemGuid];
+            StarSystem system = (StarSystem)game.Systems[jpPositionDB.SystemGuid];
             int systemIndex = system.SystemIndex;
         }
 

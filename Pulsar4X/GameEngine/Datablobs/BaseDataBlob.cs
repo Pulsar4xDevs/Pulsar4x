@@ -5,7 +5,7 @@ using Pulsar4X.Engine;
 namespace Pulsar4X.Datablobs
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public abstract class BaseDataBlob : ICloneable
+    public class BaseDataBlob : ICloneable
     {
         /// <summary>
         /// This is the Entity which Owns/Conatains/IsParentOf this datablob
@@ -20,7 +20,7 @@ namespace Pulsar4X.Datablobs
         internal virtual void OnSetToEntity()
         {
         }
-        public abstract object Clone();
+        public virtual object Clone() { return null; }
 
     }
 

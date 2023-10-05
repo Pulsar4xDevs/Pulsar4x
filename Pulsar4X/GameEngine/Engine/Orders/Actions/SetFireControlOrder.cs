@@ -34,7 +34,7 @@ namespace Pulsar4X.Engine.Orders
         private List<WeaponState> _weaponsAssigned = new List<WeaponState>();
 
 
-        public static void CreateCommand(Game game, DateTime starSysDate, string factionGuid, string orderEntity, string fireControlGuid, List<string> weaponsAssigned)
+        public static void CreateCommand(Game game, DateTime starSysDate, int factionGuid, int orderEntity, string fireControlGuid, List<string> weaponsAssigned)
         {
             var cmd = new SetWeaponsFireControlOrder()
             {
@@ -125,7 +125,7 @@ namespace Pulsar4X.Engine.Orders
         Entity _factionEntity;
 
         [JsonProperty]
-        public string TargetSensorEntityGuid { get; set; }
+        public int TargetSensorEntityGuid { get; set; }
         private Entity _targetSensorEntity;
         private Entity _targetActualEntity;
 
@@ -135,7 +135,7 @@ namespace Pulsar4X.Engine.Orders
         private ComponentInstance _fireControlComponent;
 
 
-        public static void CreateCommand(Game game, DateTime starSysDate, string factionGuid, string orderEntity, string fireControlGuid, string targetGuid)
+        public static void CreateCommand(Game game, DateTime starSysDate, int factionGuid, int orderEntity, string fireControlGuid, int targetGuid)
         {
             var cmd = new SetTargetFireControlOrder()
             {
@@ -177,7 +177,7 @@ namespace Pulsar4X.Engine.Orders
             //IsCommandValid also checks that the entity we're commanding is owned by our faction.
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                if (game.GlobalManager.FindEntityByGuid(TargetSensorEntityGuid, out _targetSensorEntity))
+                if (game.GlobalManager.TryGetEntityById(TargetSensorEntityGuid, out _targetSensorEntity))
                 {
                     if (_targetSensorEntity.HasDataBlob<SensorInfoDB>()) //we want to damage the actual entity, not the sensor clone.
                         _targetActualEntity = _targetSensorEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
@@ -245,8 +245,8 @@ namespace Pulsar4X.Engine.Orders
         {
             var cmd = new SetOpenFireControlOrder()
             {
-                RequestingFactionGuid = faction.Guid,
-                EntityCommandingGuid = shipEntity.Guid,
+                RequestingFactionGuid = faction.Id,
+                EntityCommandingGuid = shipEntity.Id,
                 CreatedDate = shipEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 FireControlGuid = fireControlGuid,
                 IsFiring = isFiring
@@ -345,8 +345,8 @@ namespace Pulsar4X.Engine.Orders
         {
             var cmd = new SetOrdinanceToWpnOrder()
             {
-                RequestingFactionGuid = faction.Guid,
-                EntityCommandingGuid = orderEntity.Guid,
+                RequestingFactionGuid = faction.Id,
+                EntityCommandingGuid = orderEntity.Id,
                 _entityCommanding = orderEntity,
                 CreatedDate = starSysDate,
                 WeaponGuid = weapon.ID,

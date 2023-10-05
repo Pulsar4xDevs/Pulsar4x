@@ -33,13 +33,13 @@ namespace Pulsar4X.Engine.Orders
         /// This is the faction that has requested the command.
         /// </summary>
         /// <value>The requesting faction GUID.</value>
-        internal string RequestingFactionGuid { get; set; }
+        internal int RequestingFactionGuid { get; set; }
         [JsonProperty]
         /// <summary>
         /// The Entity this command is targeted at
         /// </summary>
         /// <value>The entity GUID.</value>
-        internal string EntityCommandingGuid { get; set; }
+        internal int EntityCommandingGuid { get; set; }
 
         [JsonProperty]
         /// <summary>
@@ -87,11 +87,14 @@ namespace Pulsar4X.Engine.Orders
 
     public static class CommandHelpers
     {
-        public static bool IsCommandValid(EntityManager globalManager, string factionGuid, string targetEntityGuid, out Entity factionEntity, out Entity targetEntity)
+        public static bool IsCommandValid(EntityManager globalManager, int factionId, int targetEntityId, out Entity factionEntity, out Entity targetEntity)
         {
-            if(globalManager.FindEntityByGuid(targetEntityGuid, out targetEntity)) {
-                if(globalManager.FindEntityByGuid(factionGuid, out factionEntity)) {
-                    if(targetEntity.FactionOwnerID == factionEntity.Guid)
+            if(globalManager.TryGetEntityById(targetEntityId, out targetEntity)) 
+            {
+                if(globalManager.Game.Factions.ContainsKey(factionId)) 
+                {
+                    factionEntity = globalManager.Game.Factions[factionId];
+                    if(targetEntity.FactionOwnerID == factionEntity.Id)
                         return true;
                 }
             }
@@ -102,30 +105,30 @@ namespace Pulsar4X.Engine.Orders
 
     public class CommandReferences
     {
-        internal string FactionGuid;
-        internal string EntityGuid;
+        internal int FactionId;
+        internal int EntityId;
         public IOrderHandler Handler;
         private ManagerSubPulse _subPulse;
         internal DateTime GetSystemDatetime { get { return _subPulse.StarSysDateTime; } }
 
-        internal CommandReferences(string faction, string entity, IOrderHandler handler, ManagerSubPulse subPulse)
+        internal CommandReferences(int faction, int entity, IOrderHandler handler, ManagerSubPulse subPulse)
         {
-            FactionGuid = faction;
-            EntityGuid = entity;
+            FactionId = faction;
+            EntityId = entity;
             Handler = handler;
             _subPulse = subPulse;
         }
 
         public static CommandReferences CreateForEntity(Game game, Entity entity)
         {
-            return new CommandReferences(entity.FactionOwnerID, entity.Guid, game.OrderHandler, entity.Manager.ManagerSubpulses);
+            return new CommandReferences(entity.FactionOwnerID, entity.Id, game.OrderHandler, entity.Manager.ManagerSubpulses);
         }
 
-        public static CommandReferences CreateForEntity(Game game, string entityGuid)
+        public static CommandReferences CreateForEntity(Game game, int entityId)
         {
             Entity entity;
-            if (game.GlobalManager.FindEntityByGuid(entityGuid, out entity))
-                return new CommandReferences(entity.FactionOwnerID, entityGuid, game.OrderHandler, entity.Manager.ManagerSubpulses);
+            if (game.GlobalManager.TryGetEntityById(entityId, out entity))
+                return new CommandReferences(entity.FactionOwnerID, entityId, game.OrderHandler, entity.Manager.ManagerSubpulses);
             else
                 throw new Exception("Entity Not Found");
         }

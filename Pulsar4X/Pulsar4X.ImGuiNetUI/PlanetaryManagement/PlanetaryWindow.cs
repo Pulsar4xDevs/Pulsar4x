@@ -31,7 +31,7 @@ namespace Pulsar4X.SDL2UI
         public PlanetaryWindow(EntityState entity, GlobalUIState state)
         {
             _state = state;
-            SetName("PlanetaryWindow|" + entity.Entity.Guid.ToString());
+            SetName("PlanetaryWindow|" + entity.Entity.Id.ToString());
             if (_mineralDefinitions == null) {
                 _mineralDefinitions = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList().ToList();
                 _maxMineralNameLength = _mineralDefinitions.Max(x => x.Name.Length);
@@ -47,7 +47,7 @@ namespace Pulsar4X.SDL2UI
 
         internal static PlanetaryWindow GetInstance(EntityState entity, GlobalUIState state)
         {
-            string name = "PlanetaryWindow|" + entity.Entity.Guid.ToString();
+            string name = "PlanetaryWindow|" + entity.Entity.Id.ToString();
             PlanetaryWindow thisItem;
             if (!_uiState.LoadedNonUniqueWindows.ContainsKey(name))
             {

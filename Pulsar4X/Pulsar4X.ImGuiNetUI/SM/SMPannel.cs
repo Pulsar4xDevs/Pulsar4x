@@ -57,7 +57,7 @@ namespace Pulsar4X.SDL2UI
             int i = 0;
             foreach (var starsys in _uiState.Game.Systems.Select(kvp => kvp.Value))
             {
-                _starSystems[i] = starsys;
+                _starSystems[i] = (StarSystem)starsys;
                 
                 i++;
             }
@@ -112,9 +112,9 @@ namespace Pulsar4X.SDL2UI
                     
                     ImGui.NextColumn();
                     var ownerFactionID = _systemEntities[i].FactionOwnerID;
-                    if(ownerFactionID != String.Empty)
+                    if(ownerFactionID != -1)
                     {
-                        var ownerFaction = game.GlobalManager.GetGlobalEntityByGuid(ownerFactionID);
+                        var ownerFaction = game.Factions[ownerFactionID];
                         var factionName = ownerFaction.GetDataBlob<NameDB>().OwnersName;
                         ImGui.Text(factionName);
                     }

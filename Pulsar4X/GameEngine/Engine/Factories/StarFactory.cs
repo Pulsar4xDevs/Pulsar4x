@@ -44,7 +44,10 @@ namespace Pulsar4X.Engine
 
             SensorProfileDB emmisionSignature = SensorTools.SetStarEmmisionSig(starInfoDB, starMassVolumeDB);
 
-            return new Entity(system, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB, emmisionSignature});
+            Entity entity = Entity.Create();
+            system.AddEntity(entity, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB, emmisionSignature});
+
+            return entity;
         }
 
         /// <summary>
@@ -101,7 +104,10 @@ namespace Pulsar4X.Engine
 
                 var baseDataBlobs = new List<BaseDataBlob> {starMVDB, starData, positionData};
 
-                stars.Add(Entity.Create(system, String.Empty, baseDataBlobs));
+                var entity = Entity.Create();
+                system.AddEntity(entity, baseDataBlobs);
+
+                stars.Add(entity);
             }
 
             // The root star must be the most massive. Find it.

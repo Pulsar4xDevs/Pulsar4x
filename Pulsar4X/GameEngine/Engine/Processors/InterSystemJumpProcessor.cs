@@ -12,13 +12,11 @@ namespace Pulsar4X.Engine
         //TODO look at turning the entity into a ProtoEntity instead of shifting it to the GlobalManager
         internal static void JumpOut(Game game, SystemEntityJumpPair jumpPair)
         {
-            jumpPair.JumpingEntity.Transfer(game.GlobalManager);
-
-
+            game.GlobalManager.Transfer(jumpPair.JumpingEntity);
         }
         internal static void JumpIn(Game game, SystemEntityJumpPair jumpPair)
         {
-            jumpPair.JumpingEntity.Transfer(jumpPair.JumpSystem);
+            jumpPair.JumpSystem.Transfer(jumpPair.JumpingEntity);
         }
 
         public static void SetJump(Game game, DateTime exitTime, StarSystem entrySystem, DateTime entryTime, Entity jumpingEntity)

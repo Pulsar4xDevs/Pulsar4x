@@ -28,9 +28,9 @@ namespace Pulsar4X.SDL2UI
 
                     _selectedEntity = value;
                     _selectedEntityName = SelectedEntity.HasDataBlob<NameDB>() ? SelectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction) : "Unknown";
-                    if(_systemState.EntityStatesWithNames.ContainsKey(_selectedEntity.Guid))
+                    if(_systemState.EntityStatesWithNames.ContainsKey(_selectedEntity.Id))
                     {
-                        _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Guid];
+                        _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Id];
                         _uiState.EntityClicked(_selectedEntityState, MouseButtons.Primary);
                     }
                     else
@@ -257,7 +257,7 @@ namespace Pulsar4X.SDL2UI
                     }
 
                     ImGui.Text("Selected Star System: " + _uiState.SelectedStarSysGuid);
-                    ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.Entities.Count);
+                    ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.GetAllEntites().Count);
                     if(ImGui.CollapsingHeader("Log"))
                     {
                         ImGui.BeginChild("LogChild", new System.Numerics.Vector2(800, 300), true);
@@ -336,7 +336,7 @@ namespace Pulsar4X.SDL2UI
                         if (ImGui.CollapsingHeader("Selected Entity: " + _selectedEntityName + "###NameHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                         {
 
-                            ImGui.Text(SelectedEntity.Guid.ToString());
+                            ImGui.Text(SelectedEntity.Id.ToString());
                             if (SelectedEntity.HasDataBlob<PositionDB>())
                             {
                                 var positiondb = SelectedEntity.GetDataBlob<PositionDB>();
@@ -805,10 +805,10 @@ namespace Pulsar4X.SDL2UI
         void RefreshFactionEntites()
         {
             _factionOwnedEntites = new List<(string name, Entity entity)>();
-            var factionEntites = _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Guid);
+            var factionEntites = _uiState.SelectedSystem.GetEntitiesByFaction(_uiState.Faction.Id);
             foreach (var entity in factionEntites.ToArray())
             {
-                string name = entity.Guid.ToString();
+                string name = entity.Id.ToString();
                 if(entity.HasDataBlob<NameDB>())
                 {
                     name = entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
@@ -820,7 +820,7 @@ namespace Pulsar4X.SDL2UI
 
             foreach (var entity in _uiState.Game.Factions)
             {
-                addEntity(entity);
+                addEntity(entity.Value);
             }
 
             foreach (var entity in _uiState.SelectedSystem.GetAllEntites())
@@ -832,13 +832,13 @@ namespace Pulsar4X.SDL2UI
             {
                 if(entity == null)
                     return;
-                string name = entity.Guid.ToString();
+                string name = entity.Id.ToString();
                 if(entity.HasDataBlob<NameDB>())
                     name = entity.GetDataBlob<NameDB>().OwnersName;
                 string factionOwner = Guid.Empty.ToString();
-                if(entity.FactionOwnerID != String.Empty)
+                if(_uiState.Game.Factions.ContainsKey(entity.FactionOwnerID))
                 {
-                    Entity factionEntity = _uiState.Game.GlobalManager.GetGlobalEntityByGuid(entity.FactionOwnerID);
+                    Entity factionEntity = _uiState.Game.Factions[entity.FactionOwnerID];
                     factionOwner = factionEntity.GetDataBlob<NameDB>().OwnersName;
                 }
                 _allEntites.Add((name, entity, factionOwner));

@@ -7,7 +7,6 @@ namespace Pulsar4X.Engine
 {
     public class FleetOrderProcessor : IHotloopProcessor
     {
-        private static readonly int Index = EntityManager.GetTypeIndex<FleetDB>();
         public TimeSpan RunFrequency => TimeSpan.FromHours(1);
 
         public TimeSpan FirstRunOffset => TimeSpan.FromHours(1);
@@ -29,7 +28,7 @@ namespace Pulsar4X.Engine
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            var entities = manager.GetAllDataBlobsOfType<FleetDB>(Index);
+            var entities = manager.GetAllDataBlobsOfType<FleetDB>();
             foreach (var db in entities)
             {
                 Process(db, deltaSeconds);
@@ -43,7 +42,7 @@ namespace Pulsar4X.Engine
             if(fleetDB.StandingOrders.Count == 0) return;
 
             // Fleet must have a flagship to use standing orders
-            if(fleetDB.FlagShipID.IsNullOrEmpty()) return;
+            if(fleetDB.FlagShipID == -1) return;
 
             // Make sure the fleet entity is orderable
             if(!fleetDB.OwningEntity.TryGetDatablob<OrderableDB>(out var orderableDB)) return;

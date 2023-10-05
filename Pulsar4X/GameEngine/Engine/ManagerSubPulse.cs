@@ -120,14 +120,14 @@ namespace Pulsar4X.Engine
 
             public void GetObjectData(SerializationInfo info, StreamingContext context)
             {
-                Dictionary<string, List<string>> instanceProcessors = new Dictionary<string, List<string>>();
+                var instanceProcessors = new Dictionary<string, List<int>>();
                 foreach (var kvpitem in InstanceProcessors)
                 {
                     string typeName = kvpitem.Key; //.TypeName;
-                    instanceProcessors.Add(typeName, new List<string>());
+                    instanceProcessors.Add(typeName, new List<int>());
                     foreach (var entityItem in kvpitem.Value)
                     {
-                        instanceProcessors[typeName].Add(entityItem.Guid);
+                        instanceProcessors[typeName].Add(entityItem.Id);
                     }
                 }
 

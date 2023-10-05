@@ -261,7 +261,7 @@ namespace Pulsar4X.SDL2UI
 
             WarpMoveCommand.CreateCommand(
                 _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods,
-                _uiState.Faction.Guid,
+                _uiState.Faction.Id,
                 OrderingEntityState.Entity,
                 TargetEntity.Entity,
                 _targetInsertionPoint_m,

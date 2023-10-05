@@ -91,10 +91,11 @@ namespace Pulsar4X.Engine.Industry
                 throw new Exception("Tried to ConstructStuff on an entity with no VolumeStorageDB");
             }
 
-            if(!industryEntity.Manager.FindEntityByGuid(industryEntity.FactionOwnerID, out Entity faction))
+            if(!industryEntity.Manager.Game.Factions.ContainsKey(industryEntity.FactionOwnerID))
             {
                 throw new Exception("Unable to find the faction entity");
             }
+            var faction = industryEntity.Manager.Game.Factions[industryEntity.FactionOwnerID];
 
             if(!faction.TryGetDatablob<FactionInfoDB>(out var factionInfo))
             {

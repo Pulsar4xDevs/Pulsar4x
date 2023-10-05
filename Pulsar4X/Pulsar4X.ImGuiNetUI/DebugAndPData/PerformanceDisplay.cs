@@ -54,16 +54,17 @@ namespace Pulsar4X.SDL2UI
         
         private PerformanceDisplay() 
         {
-            _dataBlobTypes = new Type[EntityManager.DataBlobTypes.Count];
-            _dataBlobTypeStrings = new String[EntityManager.DataBlobTypes.Count];
+            // TODO: fix this
+            // _dataBlobTypes = new Type[EntityManager.DataBlobTypes.Count];
+            // _dataBlobTypeStrings = new String[EntityManager.DataBlobTypes.Count];
 
-            int i = 0;
-            foreach (var kvp in EntityManager.DataBlobTypes)
-            {
-                _dataBlobTypes[i]=kvp.Key;
-                _dataBlobTypeStrings[i] = kvp.Key.Name;
-                i++;
-            }
+            // int i = 0;
+            // foreach (var kvp in EntityManager.DataBlobTypes)
+            // {
+            //     _dataBlobTypes[i]=kvp.Key;
+            //     _dataBlobTypeStrings[i] = kvp.Key.Name;
+            //     i++;
+            // }
         }
         internal static PerformanceDisplay GetInstance()
         {
@@ -176,7 +177,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     foreach (var starsys in _uiState.Game.Systems.Select(kvp => kvp.Value))
                     {
-                        ImGui.Text(starsys.Guid.ToString());
+                        ImGui.Text(((StarSystem)starsys).Guid.ToString());
                         ImGui.Text($"    IsProcecssing: {starsys.ManagerSubpulses.IsProcessing}");
                         ImGui.Text($"    CurrentProcess: {starsys.ManagerSubpulses.CurrentProcess}");
                         ImGui.Text($"    Last Total ProcessTime: {starsys.ManagerSubpulses.GetLastPerfData().FullPulseTimeMS}");
@@ -212,10 +213,8 @@ namespace Pulsar4X.SDL2UI
                                           datablobs.Count
                                       ));
                 
-
-                        int typeIndex = EntityManager.GetTypeIndex<OrbitDB>();
                         _sw.Restart();
-                        datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>(typeIndex);
+                        datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>();
                         _sw.Stop();
                         _callData.Add((
                                           "Using GetAllDataBlobsOfType<T>(int typeIndex)\n {0,0} ticks to retreave {1,24} Entites", 
@@ -244,7 +243,7 @@ namespace Pulsar4X.SDL2UI
                                           ));
                         
                         _sw.Restart();
-                        ent.GetDataBlob<OrbitDB>(typeIndex);
+                        ent.GetDataBlob<OrbitDB>();
                         _sw.Stop();
                         _callData.Add((
                                           "Using entity.GetDataBlob<T>(typeIndex)\n {0,0} ticks to get db", 
@@ -272,7 +271,8 @@ namespace Pulsar4X.SDL2UI
                                         ));
                           
                         _sw.Restart();
-                        ent.RemoveDataBlob(typeIndex);
+                        // FIXME: ?
+                        //ent.RemoveDataBlob(typeIndex);
                         _sw.Stop();
                         _callData.Add((
                                             "Using entity.RemoveDataBlob(typeIndex)\n {0,0} ticks to remove from entity", 
@@ -281,7 +281,8 @@ namespace Pulsar4X.SDL2UI
                                         ));
                           
                         _sw.Restart();
-                        ent.SetDataBlob(db, typeIndex);
+                        // FIXME: ?
+                        //ent.SetDataBlob(db, typeIndex);
                         _sw.Stop();
                         _callData.Add((
                                             "Using entity.SetDataBlob(db, typeIndex)\n {0,0} ticks to add to entity", 

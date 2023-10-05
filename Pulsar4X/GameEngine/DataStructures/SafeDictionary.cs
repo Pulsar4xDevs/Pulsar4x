@@ -1,15 +1,28 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.DataStructures
 {
-    [JsonConverter(typeof(SafeDictionaryConverter))]
-    public class SafeDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IEquatable<SafeDictionary<TKey, TValue>>
+
+    public interface ISafeDictionary
     {
+        object this[int index] { get; set; }
+    }
+
+    [JsonConverter(typeof(SafeDictionaryConverter))]
+    public class SafeDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IEquatable<SafeDictionary<TKey, TValue>>, ISafeDictionary
+    {
+        object ISafeDictionary.this[int index]
+        {
+            get => this[(TKey)(object)index];
+            set => this[(TKey)(object)index] = (TValue)value;
+        }
+
         private readonly Dictionary<TKey, TValue> _innerDictionary = new Dictionary<TKey, TValue>();
         private readonly object _lock = new object();
         public delegate void DictionaryChangedHandler(TKey key, TValue value);
@@ -103,6 +116,18 @@ namespace Pulsar4X.DataStructures
         public bool ContainsKey(TKey key)
         {
             lock(_lock) return _innerDictionary.ContainsKey(key);
+        }
+
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
+        {
+            if(ContainsKey(key))
+            {
+                value = _innerDictionary[key];
+                return true;
+            }
+
+            value = default(TValue);
+            return false;
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()

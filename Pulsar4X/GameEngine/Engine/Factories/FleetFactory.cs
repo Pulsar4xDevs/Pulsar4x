@@ -7,7 +7,7 @@ namespace Pulsar4X.Engine
 {
     public static class FleetFactory
     {
-        public static Entity Create(EntityManager manager, string factionID, string name)
+        public static Entity Create(EntityManager manager, int factionID, string name)
         {
             var dataBlobs = new List<BaseDataBlob>();
             var nameDB = new NameDB(name, factionID, name);
@@ -19,7 +19,11 @@ namespace Pulsar4X.Engine
             var orderableDB = new OrderableDB();
             dataBlobs.Add(orderableDB);
 
-            return Entity.Create(manager, factionID, dataBlobs);
+            var entity = Entity.Create();
+            entity.FactionOwnerID = factionID;
+            manager.AddEntity(entity, dataBlobs);
+
+            return entity;
         }
     }
 }
