@@ -149,7 +149,11 @@ namespace Pulsar4X.Orbital
             //r = p / (1 + e * cos(θ))
             //1 + e * cos(θ) = p/r
             //((p / r) -1) / e = cos(θ)
-            return Math.Acos((semiLatusRectum / radius - 1) / eccentricity);
+            
+            //I was getting some floating point errors and values ending up slightly over 1. 
+            //clamp should fix that however not sure if it'll end up hiding other issues. 
+            var foo = Math.Clamp(((semiLatusRectum / radius - 1) / eccentricity), -1, 1);
+            return Math.Acos(foo);
         }
         
         /// <summary>

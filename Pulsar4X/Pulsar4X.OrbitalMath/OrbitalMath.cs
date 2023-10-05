@@ -317,7 +317,7 @@ namespace Pulsar4X.Orbital
 
         #region TrueAnomaly
 
-
+        
         /// <summary>
         /// The True Anomaly in radians
         /// https://en.wikipedia.org/wiki/True_anomaly#From_state_vectors
@@ -330,8 +330,11 @@ namespace Pulsar4X.Orbital
         {
             double e = eccentVector.Length(); //eccentricity
             double r = position.Length();
-
-            if (e > Epsilon) //if eccentricity is bigger than a tiny amount, it's an elliptical orbit.
+            if (e < Epsilon)
+            {
+                return Angle.NormaliseRadiansPositive(Math.Atan2(position.Y, position.X)); //circular orbit, assume AoP is 0;
+            }
+            if (e < 1) //if eccentricity smaller than 1 is elliptic
             {
                 double dotEccPos = Vector3.Dot(eccentVector, position);
                 double talen = e * r;
@@ -344,9 +347,9 @@ namespace Pulsar4X.Orbital
 
                 return Angle.NormaliseRadiansPositive(trueAnomaly);
             }
-            else
+            else //is hyperbolic. 
             {
-                return Angle.NormaliseRadiansPositive(Math.Atan2(position.Y, position.X)); //circular orbit, assume AoP is 0;
+                throw new NotImplementedException();
             }
         }
 
@@ -523,7 +526,7 @@ namespace Pulsar4X.Orbital
             double e = ke.Eccentricity;
             double a = ke.SemiMajorAxis;
             var meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
-            var eccAnom = GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly);
+            GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly, out var eccAnom);
             var trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
             double angleToObj = trueAnomaly + ke.AoP;
 
@@ -610,7 +613,7 @@ namespace Pulsar4X.Orbital
             if (e < 1)
             {
                 double meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
-                double eccAnom = GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly);
+                GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly, out double eccAnom);
                 trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
             }
             else
@@ -777,9 +780,9 @@ namespace Pulsar4X.Orbital
         /// <returns>The eccentric anomaly.</returns>
         /// <param name="eccentricity">Eccentricity.</param>
         /// <param name="currentMeanAnomaly">Current mean anomaly.</param>
-        public static double GetEccentricAnomalyNewtonsMethod(double eccentricity, double currentMeanAnomaly)
+        public static bool GetEccentricAnomalyNewtonsMethod(double eccentricity, double currentMeanAnomaly, out double eccentricAnomaly)
         {
-
+            bool converges = true;
             //Kepler's Equation
             const int numIterations = 1000;
             var e = new double[numIterations];
@@ -811,10 +814,11 @@ namespace Pulsar4X.Orbital
 
             if (i + 1 >= numIterations)
             {
-                throw new Exception("Non-convergence of Newton's method while calculating Eccentric Anomaly.");
+                converges = false;
             }
 
-            return e[i - 1];
+            eccentricAnomaly = e[i - 1];
+            return converges;
         }
 
         public static double GetEccentricAnomalyNewtonsMethod2(double eccentricity, double currentMeanAnomaly)
@@ -1000,7 +1004,7 @@ namespace Pulsar4X.Orbital
             double e = ke.Eccentricity;
             double a = ke.SemiMajorAxis;
             var meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
-            var eccAnom = GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly);
+            GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly, out var eccAnom);
             var trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
             double angle = trueAnomaly + ke.AoP;
 
@@ -1195,7 +1199,11 @@ namespace Pulsar4X.Orbital
         {
             return e * Math.Sinh(hyperbolicAnomaly) - hyperbolicAnomaly;
         }
-
+        public static double TimeFromHyperbolicMeanAnomaly(double sgp, double a, double hyperbolicMeanAnomaly)
+        {
+            var foo = Math.Pow(-a, 3) / sgp;
+            return hyperbolicMeanAnomaly * Math.Sqrt(foo);
+        }
         public static double TimeFromHyperbolicMeanAnomaly(KeplerElements ke, double hyperbolicMeanAnomaly)
         {
             var foo = Math.Pow(-ke.SemiMajorAxis, 3) / ke.StandardGravParameter;

@@ -107,155 +107,19 @@ namespace Pulsar4X.ECSLib
 
         public static double GetTrueAnomaly(this OrbitDB orbit, DateTime time)
         {
-            TimeSpan timeSinceEpoch = time - orbit.Epoch;
-
-            // Don't attempt to calculate large timeframes.
-            while (timeSinceEpoch > orbit.OrbitalPeriod && orbit.OrbitalPeriod.Ticks != 0)
-            {
-                long years = timeSinceEpoch.Ticks / orbit.OrbitalPeriod.Ticks;
-                timeSinceEpoch -= TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
-                orbit.Epoch += TimeSpan.FromTicks(years * orbit.OrbitalPeriod.Ticks);
-            }
-
-            var secondsFromEpoch = timeSinceEpoch.TotalSeconds;
-            if (orbit.Eccentricity < 1)
-            {
-                double m0 = orbit.MeanAnomalyAtEpoch;
-                double n = orbit.MeanMotion;
-                double currentMeanAnomaly = OrbitMath.GetMeanAnomalyFromTime(m0, n, secondsFromEpoch);
-
-                double eccentricAnomaly = orbit.GetEccentricAnomaly(currentMeanAnomaly);
-                return OrbitMath.TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
-            }
-            else
-            {
-                var quotient = orbit.GravitationalParameter_m3S2 / Math.Pow(-orbit.SemiMajorAxis , 3);
-                var hyperbolcMeanMotion = Math.Sqrt(quotient);
-                var hyperbolicMeanAnomaly = secondsFromEpoch * hyperbolcMeanMotion;
-                var hyperbolicAnomalyF = OrbitMath.GetHyperbolicAnomalyNewtonsMethod(orbit.Eccentricity, hyperbolicMeanAnomaly);
-                return OrbitMath.TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, hyperbolicAnomalyF);
-            }
-            /*
-            var x = Math.Cos(eccentricAnomaly) - orbit.Eccentricity;
-            var y = Math.Sqrt(1 - orbit.Eccentricity * orbit.Eccentricity) * Math.Sin(eccentricAnomaly);
-            return Math.Atan2(y, x);
-            */
+            return OrbitMath.GetTrueAnomaly(orbit, time);
         }
         
-        /// <summary>
-        /// this allows us to re-use the array, rather than re-creating it each time.
-        /// ThreadStatic ensures that we have a different array for each thread which avoids thread problems.
-        /// however it only initialises once, so we're checking if it's null.
-        /// this whole thing should help unnessisary memory allocation which means less garbage collection. 
-        /// </summary>
-        private const int numIterations = 1000;
-        [ThreadStatic] 
-        private static double[] e = new double[numIterations];
+
         /// <summary>
         /// Calculates the current Eccentric Anomaly given certain orbital parameters.
         /// </summary>
         public static double GetEccentricAnomaly(this OrbitDB orbit, double currentMeanAnomaly)
         {
-            if (e is null)// threadstatic only inits once so we need to do this... 
-                e = new double[numIterations];
-            //Kepler's Equation
-            //const int numIterations = 1000;
-            //var e = new double[numIterations];
-            const double epsilon = 1E-12; // Plenty of accuracy.
-            int i = 0;
-
-            if (orbit.Eccentricity > 0.8)
-            {
-                e[i] = Math.PI;
-            }
-            else
-            {
-                e[i] = currentMeanAnomaly;
-            }
-
-            do
-            {
-                // Newton's Method.
-                /*					 E(n) - e sin(E(n)) - M(t)
-                 * E(n+1) = E(n) - ( ------------------------- )
-                 *					      1 - e cos(E(n)
-                 * 
-                 * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
-                 * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
-                */
-                e[i + 1] = e[i] - (e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i]));
-                i++;
-            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i + 1 < numIterations);
-
-            if (i + 1 >= numIterations)
-            {
-                Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.")
-                {
-                    Entity = orbit.OwningEntity,
-                    EventType = EventType.Opps
-                };
-
-                StaticRefLib.EventLog.AddEvent(gameEvent);
-                //throw new OrbitProcessorException("Non-convergence of Newton's method while calculating Eccentric Anomaly.", orbit.OwningEntity);
-            }
-
-            return e[i - 1];
+            return OrbitMath.GetEccentricAnomaly(orbit, currentMeanAnomaly);
         }
 
-        /// <summary>
-        /// Untested.
-        /// Gets the Eccentric Anomaly for a hyperbolic trajectory.
-        /// This still requres the Mean Anomaly to be known however.
-        /// Which I'm unsure how to calculate from time. so this may not be useful. included for completeness. 
-        /// </summary>
-        /// <param name="orbit"></param>
-        /// <param name="currentMeanAnomaly"></param>
-        /// <returns></returns>
-        public static double GetEccentricAnomalyH(this OrbitDB orbit, double currentMeanAnomaly)
-        {
-            //Kepler's Equation
-            const int numIterations = 1000;
-            var f = new double[numIterations];
-            const double epsilon = 1E-12; // Plenty of accuracy.
-            int i = 0;
 
-            if (orbit.Eccentricity > 0.8)
-            {
-                f[i] = Math.PI;
-            }
-            else
-            {
-                f[i] = currentMeanAnomaly;
-            }
-
-            do
-            {
-                // Newton's Method.
-                /*					 F(n) - e sinh(E(n)) - M(t)
-                 * F(n+1) = E(n) - ( ------------------------- )
-                 *					      1 - e cosh(F(n)
-                 * 
-                 * F == EccentricAnomalyH, e == Eccentricity, M == MeanAnomaly.
-                 * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
-                */
-                f[i + 1] = f[i] - (f[i] - orbit.Eccentricity * Math.Sinh(f[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cosh(f[i]));
-                i++;
-            } while (Math.Abs(f[i] - f[i - 1]) > epsilon && i + 1 < numIterations);
-
-            if (i + 1 >= numIterations)
-            {
-                Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.")
-                {
-                    Entity = orbit.OwningEntity,
-                    EventType = EventType.Opps
-                };
-
-                StaticRefLib.EventLog.AddEvent(gameEvent);
-                //throw new OrbitProcessorException("Non-convergence of Newton's method while calculating Eccentric Anomaly.", orbit.OwningEntity);
-            }
-
-            return f[i - 1];
-        }
 
         /// <summary>
         /// Parent relative velocity vector. 
