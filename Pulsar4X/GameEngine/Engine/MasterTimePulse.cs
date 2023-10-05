@@ -263,14 +263,14 @@ namespace Pulsar4X.Engine
                 if (_game.Settings.EnableMultiThreading == true)
                 {
                     //multi-threaded
-                    Parallel.ForEach<EntityManager>(_game.Systems.Values, starSys => starSys.ManagerSubpulses.ProcessSystem(nextInterupt));
+                    Parallel.ForEach<StarSystem>(_game.Systems, starSys => starSys.ManagerSubpulses.ProcessSystem(nextInterupt));
 
                     //The above 'blocks' till all the tasks are done.
                 }
                 else
                 {
                     // single-threaded
-                    foreach (EntityManager starSys in _game.Systems.Values)
+                    foreach (StarSystem starSys in _game.Systems)
                     {
                         starSys.ManagerSubpulses.ProcessSystem(nextInterupt);
                     }

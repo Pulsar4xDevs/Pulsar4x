@@ -11,10 +11,10 @@ namespace Pulsar4X.SDL2UI
     /// <summary>
     /// System state.
     /// *Notes*
-    /// Currently Entity has an Entity.ChangeEvent 
-    /// each individual EntityState listens to this and changes the IsDestroyed flag if needed. 
+    /// Currently Entity has an Entity.ChangeEvent
+    /// each individual EntityState listens to this and changes the IsDestroyed flag if needed.
     /// Should that be done here instead? TODO: profile this to see which is faster, if either.
-    /// 
+    ///
     /// </summary>
     public class SystemState
     {
@@ -39,7 +39,11 @@ namespace Pulsar4X.SDL2UI
             _sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
             _faction = faction;
-            foreach (Entity entityItem in StarSystem.GetEntitiesByFaction(faction.Id))
+
+            // FIXME: couldn't get this working with GetEntitiesByFaction, it left out the stars, planets etc
+            var factionEntities = StarSystem.GetEntitiesByFaction(faction.Id);
+            //var allEntities = StarSystem.GetAllEntites();
+            foreach (Entity entityItem in factionEntities)
             {
                 var entityState = new EntityState(entityItem);
                 // Add Data to State if Available
@@ -141,8 +145,8 @@ namespace Pulsar4X.SDL2UI
                             EntityStatesColonies.Add(entityItem.Id, entityState);
                         }
                         break;
-                    //if an entity moves from one system to another, then this should be triggered, 
-                    //currently Entity.ChangeEvent probibly does too, but we might have to tweak this. maybe add another enum? 
+                    //if an entity moves from one system to another, then this should be triggered,
+                    //currently Entity.ChangeEvent probibly does too, but we might have to tweak this. maybe add another enum?
                     case EntityChangeData.EntityChangeType.EntityRemoved:
                         EntitysToBin.Add(change.Entity.Id);
                         break;
@@ -151,7 +155,7 @@ namespace Pulsar4X.SDL2UI
         }
 
         /// <summary>
-        /// Populates the EntitesToBin list and changes. 
+        /// Populates the EntitesToBin list and changes.
         /// Call this before any UI work done.
         /// </summary>
         public void PreFrameSetup()
@@ -170,7 +174,7 @@ namespace Pulsar4X.SDL2UI
 
             foreach (var item in EntityStatesWithPosition.Values)
             {
-                if (item.IsDestroyed) //items get flagged via an event triggered by worker threads. 
+                if (item.IsDestroyed) //items get flagged via an event triggered by worker threads.
                 {
                     if(!EntitysToBin.Contains(item.Entity.Id))
                         EntitysToBin.Add(item.Entity.Id);

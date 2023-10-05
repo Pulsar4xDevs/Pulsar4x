@@ -282,7 +282,14 @@ namespace ImGuiSDL2CS
 
         public static string StringFromBytes(byte[] byteArray)
         {
-            return System.Text.Encoding.UTF8.GetString(byteArray);
+            // Get the string and trim off any trailing null characters
+            string result = System.Text.Encoding.UTF8.GetString(byteArray);
+            int nullIndex = result.IndexOf('\0');
+            if(nullIndex >= 0)
+            {
+                result = result.Substring(0, nullIndex);
+            }
+            return result;
         }
 
         public static (IntPtr, uint) GuidToIntPtr(Guid guid)

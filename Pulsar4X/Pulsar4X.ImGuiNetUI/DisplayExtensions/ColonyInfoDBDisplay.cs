@@ -16,8 +16,9 @@ namespace Pulsar4X.SDL2UI
 
                 foreach(var (species, population) in colony.Population)
                 {
+                    var speciesEntity = uiState.Game.GlobalManager.GetGlobalEntityById(species);
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.Text(species.GetDefaultName());
+                    ImGui.Text(speciesEntity.GetDefaultName());
                     ImGui.PopStyleColor();
                     ImGui.NextColumn();
                     ImGui.Text(Stringify.Quantity(population, "0.##", true));

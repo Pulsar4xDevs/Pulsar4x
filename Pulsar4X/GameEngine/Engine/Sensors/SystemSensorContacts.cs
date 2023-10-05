@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Engine.Sensors
@@ -12,12 +13,20 @@ namespace Pulsar4X.Engine.Sensors
     /// </summary>
     public class SystemSensorContacts
     {
+        [JsonProperty]
         public Entity FactionEntity;
 
+        [JsonProperty]
         public EntityManager ParentManager;
+
+        [JsonProperty]
         Dictionary<int, SensorContact> _sensorContactsByActualGuid = new ();
 
+        [JsonProperty]
         public XThreadData<EntityChangeData> Changes = new XThreadData<EntityChangeData>();
+
+        [JsonConstructor]
+        public SystemSensorContacts() { }
 
         public SystemSensorContacts(EntityManager parentManager, Entity faction)
         {

@@ -235,14 +235,15 @@ namespace Pulsar4X.Datablobs
         [OnDeserialized]
         private void Deserialized(StreamingContext context)
         {
-            var game = (Game)context.Context;
-            game.PostLoad += (sender, args) =>
-            {
-                foreach (var item in AllComponents)
-                {
-                    AddComponentInstance(item.Value);
-                }
-            };
+            // FIXME:
+            // var game = (Game)context.Context;
+            // game.PostLoad += (sender, args) =>
+            // {
+            //     foreach (var item in AllComponents)
+            //     {
+            //         AddComponentInstance(item.Value);
+            //     }
+            // };
 
         }
     }

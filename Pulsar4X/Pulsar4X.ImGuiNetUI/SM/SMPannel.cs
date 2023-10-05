@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
 
 
         private Entity[] _filteredEntities = new Entity[0];
-        
+
         Entity _selectedEntity
         {
             get
@@ -32,15 +32,15 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        
-        
-        private SMPannel() 
+
+
+        private SMPannel()
         {
             //_uiState.SpaceMasterVM = new SpaceMasterVM();
             HardRefresh();
         }
 
-        //TODO auth of some kind. 
+        //TODO auth of some kind.
         public static SMPannel GetInstance()
         {
             if (!_uiState.LoadedWindows.ContainsKey(typeof(SMPannel)))
@@ -55,10 +55,10 @@ namespace Pulsar4X.SDL2UI
             game = _uiState.Game;
             _starSystems = new StarSystem[_uiState.Game.Systems.Count];
             int i = 0;
-            foreach (var starsys in _uiState.Game.Systems.Select(kvp => kvp.Value))
+            foreach (var starsys in _uiState.Game.Systems)
             {
-                _starSystems[i] = (StarSystem)starsys;
-                
+                _starSystems[i] = starsys;
+
                 i++;
             }
 
@@ -73,7 +73,7 @@ namespace Pulsar4X.SDL2UI
                 allEntites.Add(entity);
             }
             _systemEntities = allEntites.ToArray();
-            
+
             _systemEntityNames = new string[_systemEntities.Length];
             for (int j = 0; j < _systemEntities.Length; j++)
             {
@@ -109,7 +109,7 @@ namespace Pulsar4X.SDL2UI
                         _selectedEntityIndex = i;
                         _entityInspectorWindow = !_entityInspectorWindow;
                     }
-                    
+
                     ImGui.NextColumn();
                     var ownerFactionID = _systemEntities[i].FactionOwnerID;
                     if(ownerFactionID != -1)
@@ -123,8 +123,8 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(ownerFactionID.ToString());
                     }
                     ImGui.NextColumn();
-                    
-                    
+
+
                 }
 
                 if (_entityInspectorWindow)

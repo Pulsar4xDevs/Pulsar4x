@@ -34,9 +34,9 @@ namespace Pulsar4X.Engine
             var db = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
             if (!damageableEntity.HasDataBlob<EntityDamageProfileDB>())
             {
-                //I think currently most damageable entites should already have this, 
+                //I think currently most damageable entites should already have this,
                 //need to consider whether an undamaged entity needs this or if we should create it if and when it gets damaged.
-                
+
                 if(damageableEntity.HasDataBlob<ShipInfoDB>())
                 {
                     db = new EntityDamageProfileDB(damageableEntity.GetDataBlob<ShipInfoDB>().Design);
@@ -44,7 +44,7 @@ namespace Pulsar4X.Engine
                 }
                 //return;
             }
-            
+
              return DamageTools.DealDamage(db, damage);
 
             /*
@@ -60,7 +60,7 @@ namespace Pulsar4X.Engine
             {
                 //do shield damage
                 //do armor damage
-                //for components: 
+                //for components:
                 Game game = damageableEntity.Manager.Game;
                 PositionDB ShipPosition = damageableEntity.GetDataBlob<PositionDB>();
 
@@ -76,7 +76,7 @@ namespace Pulsar4X.Engine
 
                     int randValue = mySystem.RNGNext((int)(damageableEntity.GetDataBlob<MassVolumeDB>().Volume_m3)); //volume in m^3
 
-          
+
                     if (damageAttempt == 20) // need to copy this to fully break out of the loop;
                         break;
                 }
@@ -188,10 +188,10 @@ namespace Pulsar4X.Engine
             Game game = DestroyedShip.Manager.Game;
             PositionDB pDB = DestroyedShip.GetDataBlob<PositionDB>();
 
-            if(!game.Systems.ContainsKey(pDB.SystemGuid))
-                throw new Exception(pDB.SystemGuid);
+            var mySystem = game.Systems.Where(s => s.Guid.Equals(pDB.SystemGuid)).First();
 
-            StarSystem mySystem = (StarSystem)game.Systems[pDB.SystemGuid];
+            if(mySystem == null)
+                throw new NullReferenceException($"Unable to find the system {pDB.SystemGuid}");
 
             //Does anything else need to be done to delete a ship?
 
@@ -219,14 +219,14 @@ namespace Pulsar4X.Engine
                 PositionDB pDB = Asteroid.GetDataBlob<PositionDB>();
 
                 EntityManager mySystem = Asteroid.Manager;
-                
+
 
                 var origVel = origOrbit.AbsoluteOrbitalVector_m(atDateTime);
 
                 //public static Entity CreateAsteroid(StarSystem starSys, Entity target, DateTime collisionDate, double asteroidMass = -1.0)
                 //I need the target entity, the collisionDate, and the starSystem. I may have starsystem from guid.
                 //Ok so this should create the asteroid without having to add the new asteroids to a list. as that is done in the factory.
-                Entity newAsteroid1 = AsteroidFactory.CreateAsteroid4(pDB.AbsolutePosition, origOrbit, atDateTime, newMass); 
+                Entity newAsteroid1 = AsteroidFactory.CreateAsteroid4(pDB.AbsolutePosition, origOrbit, atDateTime, newMass);
                 //var newOrbit = OrbitDB.FromVector(origOrbit.Parent, )
                 Entity newAsteroid2 = AsteroidFactory.CreateAsteroid4(pDB.AbsolutePosition, origOrbit, atDateTime, newMass);
 
@@ -239,10 +239,10 @@ namespace Pulsar4X.Engine
                 //delete the existing asteroid.
                 PositionDB pDB = Asteroid.GetDataBlob<PositionDB>();
 
-                if(!game.Systems.ContainsKey(pDB.SystemGuid))
-                    throw new Exception(pDB.SystemGuid);
+                var mySystem = game.Systems.Where(s => s.Guid.Equals(pDB.SystemGuid)).First();
 
-                StarSystem mySystem = (StarSystem)game.Systems[pDB.SystemGuid];
+                if(mySystem == null)
+                    throw new NullReferenceException($"Unable to find the system {pDB.SystemGuid}");
 
                 mySystem.RemoveEntity(Asteroid);
             }

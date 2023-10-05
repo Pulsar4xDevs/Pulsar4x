@@ -37,7 +37,7 @@ namespace Pulsar4X.Engine
         /// List of StarSystems currently in the game.
         /// </summary>
         [JsonProperty]
-        public SafeDictionary<string, EntityManager> Systems { get; internal set; } = new ();
+        public List<StarSystem> Systems { get; internal set; } = new ();
 
         [JsonProperty]
         public EntityManager GlobalManager { get; internal set; }
@@ -78,6 +78,9 @@ namespace Pulsar4X.Engine
         // This is horribly named, it generates the ID's for the ICargoables NOT Entities
         [JsonProperty]
         private int EntityIDCounterValue => EntityIDCounter;
+
+        [JsonProperty]
+        internal int NextEntityID => EntityIDGenerator.NextId;
 
         private static int EntityIDCounter = 0;
 
@@ -142,7 +145,8 @@ namespace Pulsar4X.Engine
         {
             JsonSerializerSettings settings = new JsonSerializerSettings() {
                 Formatting = Formatting.Indented,
-                PreserveReferencesHandling = PreserveReferencesHandling.All
+                PreserveReferencesHandling = PreserveReferencesHandling.All,
+                TypeNameHandling = TypeNameHandling.All
             };
 
             return JsonConvert.SerializeObject(game, settings);
@@ -152,7 +156,8 @@ namespace Pulsar4X.Engine
         {
             JsonSerializerSettings settings = new JsonSerializerSettings() {
                 Formatting = Formatting.Indented,
-                PreserveReferencesHandling = PreserveReferencesHandling.All
+                PreserveReferencesHandling = PreserveReferencesHandling.All,
+                TypeNameHandling = TypeNameHandling.All
             };
             var loadedGame = JsonConvert.DeserializeObject<Game>(json, settings);
 
@@ -160,6 +165,11 @@ namespace Pulsar4X.Engine
             loadedGame.ProcessorManager = new ProcessorManager(loadedGame);
             loadedGame.OrderHandler = new StandAloneOrderHandler(loadedGame);
             loadedGame.GlobalManager.Initialize(loadedGame);
+
+            foreach(var system in loadedGame.Systems)
+            {
+                system.Initialize(loadedGame);
+            }
 
             // settings.Context = new StreamingContext(StreamingContextStates.All, loadedGame);
             // loadedGame.TimePulse = JsonConvert.DeserializeObject<MasterTimePulse>(JObject.Parse(json)["GameInfo"]["TimePulse"].ToString(), settings);

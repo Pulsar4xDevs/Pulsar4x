@@ -36,6 +36,7 @@ namespace Pulsar4X.Engine
 
         public ManagerSubPulse ManagerSubpulses { get; internal set; }
 
+        [JsonProperty]
         internal Dictionary<int, SystemSensorContacts> FactionSensorContacts { get; set; } = new ();
 
         /// <summary>
@@ -64,6 +65,12 @@ namespace Pulsar4X.Engine
 
             ManagerSubpulses = new ManagerSubPulse();
             ManagerSubpulses.Initialize(this, game.ProcessorManager);
+
+            // Make sure all the entities have the manager set
+            foreach(var (id, entity) in _entities)
+            {
+                entity.Manager = this;
+            }
         }
 
         #endregion
@@ -439,7 +446,7 @@ namespace Pulsar4X.Engine
 
         public List<Entity> GetEntitiesByFaction(int factionId)
         {
-            return _entities.Values.Where(e => e.FactionOwnerID == factionId).ToList();
+            return _entities.Values.Where(e => e.FactionOwnerID == factionId || e.FactionOwnerID == -1).ToList();
         }
 
         public Entity GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
@@ -458,7 +465,13 @@ namespace Pulsar4X.Engine
         public Entity GetGlobalEntityById(int entityId)
         {
             Entity entity = Entity.InvalidEntity;
-            foreach(var (guid, manager) in Game.Systems)
+
+            if(Game.GlobalManager.TryGetEntityById(entityId, out entity))
+            {
+                return entity;
+            }
+
+            foreach(var manager in Game.Systems)
             {
                 if(manager.TryGetEntityById(entityId, out entity))
                 {

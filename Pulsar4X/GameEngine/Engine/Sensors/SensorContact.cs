@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 
@@ -21,6 +22,9 @@ namespace Pulsar4X.Engine.Sensors
         //public SensorOrbitDB Orbit;
 
         public string Name = "UnNamed";
+
+        [JsonConstructor]
+        public SensorContact() { }
 
         public SensorContact(Entity factionEntity, Entity actualEntity, DateTime atDateTime)
         {

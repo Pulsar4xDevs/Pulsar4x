@@ -13,7 +13,7 @@ using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
-    
+
     public class PerformanceDisplay : PulsarGuiWindow
     {
 
@@ -21,11 +21,11 @@ namespace Pulsar4X.SDL2UI
         private Type[] _dataBlobTypes;
         private int _dataBlobTypeIndex;
 
-        
+
         Stopwatch _sw = new Stopwatch();
-        
+
         SystemState _systemState;
-        
+
         float largestGFPS = 0;
         int largestIndex = 0;
 
@@ -40,7 +40,7 @@ namespace Pulsar4X.SDL2UI
         float _currentSFPS;
         int _systemRateIndex = 0;
         float[] _systemRates = new float[80];
-        
+
 
         private double ticks1;
         private double ms1;
@@ -50,9 +50,9 @@ namespace Pulsar4X.SDL2UI
         private double count2;
         private double count3;
         private List<(string txt, double time, double count)> _callData = new List<(string txt, double time, double count)>();
-        
-        
-        private PerformanceDisplay() 
+
+
+        private PerformanceDisplay()
         {
             // TODO: fix this
             // _dataBlobTypes = new Type[EntityManager.DataBlobTypes.Count];
@@ -78,8 +78,8 @@ namespace Pulsar4X.SDL2UI
             instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             return instance;
         }
-        
-        
+
+
         void SetFrameRateArray()
         {
             _currentFPS = ImGui.GetIO().Framerate;
@@ -106,7 +106,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(txt_lpt); ImGui.SameLine();
                 var overtime = t_lpt - t_tf;
                 ImGui.TextColored(col, overtime.ToString());
-                
+
                 System.Diagnostics.Process p = System.Diagnostics.Process.GetCurrentProcess();
                 ImGui.Text("Physical mem usage:"); ImGui.SameLine();
                 ImGui.Text((p.WorkingSet64 / 1048576).ToString() + "MiB");
@@ -114,16 +114,16 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text((p.PagedSystemMemorySize64 / 1048576).ToString() + "MiB");
                 ImGui.Text("Paged mem size:"); ImGui.SameLine();
                 ImGui.Text((p.PagedMemorySize64 / 1048576).ToString() + "MiB");
-                
+
                 //plot vars: (label, values, valueOffset, overlayText, scaleMin, scaleMax, graphSize, Stride)
                 //core game processing rate.
                 //ImGui.PlotHistogram("##GRHistogram", _gameRatesDisplay, 10, _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
                 //ImGui.PlotHistogram("##GRHistogram1", _gameRatesDisplay, 0 , _timeSpan.TotalSeconds.ToString(), 0, 1f, new ImVec2(0, 80), sizeof(float));
-                //string label, ref float values... 
+                //string label, ref float values...
                 //ImGui.PlotHistogram(
                 ImGui.PlotHistogram("Game Tick ##GTHistogram", ref _gameRates[0], _gameRates.Length, _gameRateIndex, _currentGFPS.ToString(), 0f, largestGFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
                 ImGui.PlotLines("Game Tick ##GTPlotlines", ref _gameRates[0], _gameRates.Length, _gameRateIndex, _currentGFPS.ToString(), 0, largestGFPS, new System.Numerics.Vector2(248, 60), sizeof(float));
-                //current star system processing rate. 
+                //current star system processing rate.
                 ImGui.PlotHistogram("System Tick ##STHistogram", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0f, 1f, new System.Numerics.Vector2(248, 60), sizeof(float));
                 ImGui.PlotLines("System Tick ##STPlotlines", ref _systemRates[0], _systemRates.Length, _systemRateIndex, _currentSFPS.ToString(), 0, 1, new System.Numerics.Vector2(248, 60), sizeof(float));
                 //ui framerate
@@ -136,8 +136,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SetColumnWidth(1, 64);
                 ImGui.SetColumnWidth(2, 128);
                 ImGui.SetColumnWidth(3, 128);
-                
-                
+
+
                 ImGui.Text("Name"); ImGui.NextColumn();
                 ImGui.Text("Count"); ImGui.NextColumn();
                 ImGui.Text("Run Time"); ImGui.NextColumn();
@@ -145,11 +145,11 @@ namespace Pulsar4X.SDL2UI
                 string str = "";
                 foreach (var item in data.ProcessTimes)
                 {
-                    
+
                     ImGui.Text(item.pname);
                     ImGui.NextColumn();
                     ImGui.Text( item.ptimes.Length.ToString());
-                    
+
                     ImGui.NextColumn();
                     str = $"{(item.psum):0.00}ms";
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
@@ -171,11 +171,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text($"NewtonMoveDB Count: {numDB}");
                 numDB = _systemState.StarSystem.GetAllDataBlobsOfType<SensorAbilityDB>().Count;
                 ImGui.Text($"SensorAbilityDB Count: {numDB}");
-                
-                
+
+
                 if(ImGui.CollapsingHeader("All Systems"))
                 {
-                    foreach (var starsys in _uiState.Game.Systems.Select(kvp => kvp.Value))
+                    foreach (var starsys in _uiState.Game.Systems)
                     {
                         ImGui.Text(((StarSystem)starsys).Guid.ToString());
                         ImGui.Text($"    IsProcecssing: {starsys.ManagerSubpulses.IsProcessing}");
@@ -189,8 +189,8 @@ namespace Pulsar4X.SDL2UI
                 if (ImGui.CollapsingHeader("Call Times"))
                 {
 
-                    
-                    
+
+
                     if (ImGui.Button("Time"))
                     {
                         _callData = new List<(string txt, double time, double count)>();
@@ -198,99 +198,99 @@ namespace Pulsar4X.SDL2UI
                         List<Entity> entites = _systemState.StarSystem.GetAllEntitiesWithDataBlob<OrbitDB>();
                         _sw.Stop();
                         _callData.Add((
-                              "Using GetEntitysWithDatablob\n {0,0} ticks to retreave {1,24} Entites", 
-                              _sw.Elapsed.Ticks, 
+                              "Using GetEntitysWithDatablob\n {0,0} ticks to retreave {1,24} Entites",
+                              _sw.Elapsed.Ticks,
                               entites.Count
                               ));
 
-                        
+
                         _sw.Restart();
                         var datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>();
                         _sw.Stop();
                         _callData.Add((
-                                          "Using GetAllDataBlobsOfType<T>()\n {0,0} ticks to retreave {1,24} Entites", 
-                                          _sw.Elapsed.Ticks, 
+                                          "Using GetAllDataBlobsOfType<T>()\n {0,0} ticks to retreave {1,24} Entites",
+                                          _sw.Elapsed.Ticks,
                                           datablobs.Count
                                       ));
-                
+
                         _sw.Restart();
                         datablobs = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>();
                         _sw.Stop();
                         _callData.Add((
-                                          "Using GetAllDataBlobsOfType<T>(int typeIndex)\n {0,0} ticks to retreave {1,24} Entites", 
-                                          _sw.Elapsed.Ticks, 
+                                          "Using GetAllDataBlobsOfType<T>(int typeIndex)\n {0,0} ticks to retreave {1,24} Entites",
+                                          _sw.Elapsed.Ticks,
                                           datablobs.Count
                                       ));
 
-                        
+
                         var db = datablobs[0];
                         _sw.Restart();
                         var ent = db.OwningEntity;
                         _sw.Stop();
                         _callData.Add((
-                                          "Using datablob.OwningEntity\n {0,0} ticks to retreave the entity", 
-                                          _sw.Elapsed.Ticks, 
-                                          1
-                                      ));
-                        
-                        _sw.Restart();
-                        ent.GetDataBlob<OrbitDB>();
-                        _sw.Stop();
-                        _callData.Add((
-                                          "Using entity.GetDataBlob<T>()\n {0,0} ticks to get db", 
-                                          _sw.Elapsed.Ticks, 
-                                          1
-                                          ));
-                        
-                        _sw.Restart();
-                        ent.GetDataBlob<OrbitDB>();
-                        _sw.Stop();
-                        _callData.Add((
-                                          "Using entity.GetDataBlob<T>(typeIndex)\n {0,0} ticks to get db", 
-                                          _sw.Elapsed.Ticks, 
+                                          "Using datablob.OwningEntity\n {0,0} ticks to retreave the entity",
+                                          _sw.Elapsed.Ticks,
                                           1
                                       ));
 
-                        
+                        _sw.Restart();
+                        ent.GetDataBlob<OrbitDB>();
+                        _sw.Stop();
+                        _callData.Add((
+                                          "Using entity.GetDataBlob<T>()\n {0,0} ticks to get db",
+                                          _sw.Elapsed.Ticks,
+                                          1
+                                          ));
+
+                        _sw.Restart();
+                        ent.GetDataBlob<OrbitDB>();
+                        _sw.Stop();
+                        _callData.Add((
+                                          "Using entity.GetDataBlob<T>(typeIndex)\n {0,0} ticks to get db",
+                                          _sw.Elapsed.Ticks,
+                                          1
+                                      ));
+
+
                         _sw.Restart();
                         ent.RemoveDataBlob<OrbitDB>();
                         _sw.Stop();
                         _callData.Add((
-                                        "Using entity.RemoveDataBlob<T>()\n {0,0} ticks to remove from entity", 
-                                        _sw.Elapsed.Ticks, 
+                                        "Using entity.RemoveDataBlob<T>()\n {0,0} ticks to remove from entity",
+                                        _sw.Elapsed.Ticks,
                                         1
                                     ));
-                          
+
                         _sw.Restart();
                         ent.SetDataBlob(db);
                         _sw.Stop();
                         _callData.Add((
-                                        "Using entity.SetDataBlob(db)\n {0,0} ticks to add to entity", 
-                                            _sw.Elapsed.Ticks, 
+                                        "Using entity.SetDataBlob(db)\n {0,0} ticks to add to entity",
+                                            _sw.Elapsed.Ticks,
                                             1
                                         ));
-                          
+
                         _sw.Restart();
                         // FIXME: ?
                         //ent.RemoveDataBlob(typeIndex);
                         _sw.Stop();
                         _callData.Add((
-                                            "Using entity.RemoveDataBlob(typeIndex)\n {0,0} ticks to remove from entity", 
-                                            _sw.Elapsed.Ticks, 
+                                            "Using entity.RemoveDataBlob(typeIndex)\n {0,0} ticks to remove from entity",
+                                            _sw.Elapsed.Ticks,
                                             1
                                         ));
-                          
+
                         _sw.Restart();
                         // FIXME: ?
                         //ent.SetDataBlob(db, typeIndex);
                         _sw.Stop();
                         _callData.Add((
-                                            "Using entity.SetDataBlob(db, typeIndex)\n {0,0} ticks to add to entity", 
-                                            _sw.Elapsed.Ticks, 
+                                            "Using entity.SetDataBlob(db, typeIndex)\n {0,0} ticks to add to entity",
+                                            _sw.Elapsed.Ticks,
                                             1
                                         ));
 
-                        
+
                     }
 
 
@@ -302,12 +302,12 @@ namespace Pulsar4X.SDL2UI
                         string foo = string.Format(dat.txt, dat.time, dat.count);
                         ImGui.Text(foo);
                     }
-                    
 
-                
-                    
-                    
-                    
+
+
+
+
+
                 }
 
                 if (ImGui.Button("Record To File"))
@@ -319,7 +319,7 @@ namespace Pulsar4X.SDL2UI
 
         void RecordToFile()
         {
-            
+
             var t_lpt = _uiState.Game.TimePulse.LastProcessingTime.TotalMilliseconds;
             var t_tf = _uiState.Game.TimePulse.TickFrequency.TotalMilliseconds;
             var overtime = t_lpt - t_tf;
@@ -333,17 +333,17 @@ namespace Pulsar4X.SDL2UI
             string threaded = string.Format("{0,-28}{1,16}","Threaded:", _uiState.Game.Settings.EnableMultiThreading.ToString());
             string timespan = string.Format("{0,-28}{1,16}","Time Span:" , _uiState.Game.TimePulse.Ticklength.ToString());
             string txt_lpt =  string.Format("{0,-28}{1,16}","Full Process Time:", t_lpt.ToString());
-            
+
             string sysname = _systemState.StarSystem.NameDB.OwnersName;
             string sysptime = string.Format("{0,0} {1,-24}:{2,15}",sysname, "Time:", starsysdata.FullPulseTimeMS.ToString("0.0000"));
             var fpath = System.IO.Path.Combine(dir.FullName, "Perflog_" + machine);
 
             //var sb = StringBuilder(gitver);
-            string dataString = "\n" + gitver + "\n" 
-                                         + datetime + "\n" 
+            string dataString = "\n" + gitver + "\n"
+                                         + datetime + "\n"
                                          + threaded + "\n"
                                          + timespan + "\n"
-                                         + txt_lpt + "\n" 
+                                         + txt_lpt + "\n"
                                          + sysptime + "\n";
             foreach (var data in starsysdata.ProcessTimes)
             {
@@ -388,7 +388,7 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnSystemTickChange(DateTime newDate)
         {
-            
+
         }
 
         public override void OnSelectedSystemChange(StarSystem newStarSys)

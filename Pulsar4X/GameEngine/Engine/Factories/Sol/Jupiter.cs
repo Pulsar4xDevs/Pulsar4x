@@ -35,15 +35,15 @@ namespace Pulsar4X.Engine.Sol
             PositionDB planetPositionDB = new PositionDB(planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
             var pressureAtm = Pressure.KPaToAtm(200f);
-            var atmoGasses = new Dictionary<GasBlueprint, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { game.GetGasBySymbol("H2"), 0.89f * pressureAtm },
-                { game.GetGasBySymbol("He"), 0.10f * pressureAtm },
-                { game.GetGasBySymbol("CH4"), 0.003f * pressureAtm },
-                { game.GetGasBySymbol("NH3"), 0.00026f * pressureAtm },
-                { game.GetGasBySymbol("HD"), 0.000028f * pressureAtm },
-                { game.GetGasBySymbol("C2H6"), 0.000006f * pressureAtm },
-                { game.GetGasBySymbol("H2O"), 0.000004f * pressureAtm }
+                { game.GetGasBySymbol("H2").UniqueID, 0.89f * pressureAtm },
+                { game.GetGasBySymbol("He").UniqueID, 0.10f * pressureAtm },
+                { game.GetGasBySymbol("CH4").UniqueID, 0.003f * pressureAtm },
+                { game.GetGasBySymbol("NH3").UniqueID, 0.00026f * pressureAtm },
+                { game.GetGasBySymbol("HD").UniqueID, 0.000028f * pressureAtm },
+                { game.GetGasBySymbol("C2H6").UniqueID, 0.000006f * pressureAtm },
+                { game.GetGasBySymbol("H2O").UniqueID, 0.000004f * pressureAtm }
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -108, atmoGasses);
 

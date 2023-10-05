@@ -161,7 +161,8 @@ namespace Pulsar4X.SDL2UI
                 ColonyInfoDB tempColonyInfo = _lookedAtEntity.Entity.GetDataBlob<ColonyInfoDB>();
                 foreach (var popPerSpecies in tempColonyInfo.Population)
                 {
-                    rowData.Add(new string[] {" " + popPerSpecies.Key.GetDefaultName(), Stringify.Quantity(popPerSpecies.Value, "0.0##", true) });
+                    var speciesEntity = _uiState.Game.GlobalManager.GetGlobalEntityById(popPerSpecies.Key);
+                    rowData.Add(new string[] {" " + speciesEntity.GetDefaultName(), Stringify.Quantity(popPerSpecies.Value, "0.0##", true) });
                 }
             }
 
@@ -196,13 +197,15 @@ namespace Pulsar4X.SDL2UI
                 rowData.Add(new string[] { "Composition", "" });
                 foreach (var atmosGas in atmosInfo.CompositionByPercent)
                 {
+                    var blueprint = _uiState.Game.AtmosphericGases[atmosGas.Key];
+
                     if (Math.Round(atmosGas.Value, 4) > 0)
                     {
-                        rowData.Add(new string[] { "  " + atmosGas.Key.Name, Stringify.Quantity(Math.Round(atmosGas.Value, 4), "0.0###") + " %" });
+                        rowData.Add(new string[] { "  " + blueprint.Name, Stringify.Quantity(Math.Round(atmosGas.Value, 4), "0.0###") + " %" });
                     }
                     else
                     {
-                        rowData.Add(new string[] { "  " + atmosGas.Key.Name, "trace amounts" });
+                        rowData.Add(new string[] { "  " + blueprint.Name, "trace amounts" });
                     }
                 }
             }

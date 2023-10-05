@@ -128,10 +128,10 @@ namespace Pulsar4X.Engine
             OrbitDB planetOrbitDB = OrbitDB.FromMajorPlanetFormat(sun, sunMVDB.MassDry, planetMVDB.MassDry, planetSemiMajorAxisAU, planetEccentricity, planetEclipticInclination, planetLoAN, planetAoP, planetMeanAnomaly, GalaxyGen.Settings.J2000);
             planetBodyDB.Tectonics = TectonicActivity.EarthLike;
             PositionDB planetPositionDB = new PositionDB(planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
-            Dictionary<GasBlueprint, float> atmoGasses = new Dictionary<GasBlueprint, float>();
-            atmoGasses.Add(game.StartingGameData.AtmosphericGas["nitrogen"], 0.78f);
-            atmoGasses.Add(game.StartingGameData.AtmosphericGas["oxygen"], 0.12f);
-            atmoGasses.Add(game.StartingGameData.AtmosphericGas["water-vapour"], 0.01f);
+            var atmoGasses = new Dictionary<string, float>();
+            atmoGasses.Add(game.StartingGameData.AtmosphericGas["nitrogen"].UniqueID, 0.78f);
+            atmoGasses.Add(game.StartingGameData.AtmosphericGas["oxygen"].UniqueID, 0.12f);
+            atmoGasses.Add(game.StartingGameData.AtmosphericGas["water-vapour"].UniqueID, 0.01f);
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
             sensorProfile = new SensorProfileDB();
             Entity planet = Entity.Create();

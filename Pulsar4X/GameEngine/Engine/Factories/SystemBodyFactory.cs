@@ -1150,13 +1150,13 @@ namespace Pulsar4X.Engine
             // get the primary gass:
             double percentage = 0.6 + 0.3 * system.RNGNextDouble();
             var gas = gases.Select(system.RNGNextDouble());
-            atmoDB.Composition.Add(gas, (float)(percentage * atm));
+            atmoDB.Composition.Add(gas.UniqueID, (float)(percentage * atm));
             gases.Remove(gas);
 
             // get the secondary gas:
             percentage = 0.98 - percentage;
             gas = gases.Select(system.RNGNextDouble());
-            atmoDB.Composition.Add(gas, (float)(percentage * atm));
+            atmoDB.Composition.Add(gas.UniqueID, (float)(percentage * atm));
             gases.Remove(gas);
 
             // get the trace gases, note that we will not care so much about
@@ -1172,7 +1172,7 @@ namespace Pulsar4X.Engine
             {
                 percentage = (remainingPercentage - percentage) * system.RNGNextDouble();  // just use random numbers, it will be close enough.
                 gas = gases.Select(system.RNGNextDouble());
-                atmoDB.Composition.Add(gas, (float)(percentage * atm));
+                atmoDB.Composition.Add(gas.UniqueID, (float)(percentage * atm));
                 gases.Remove(gas);
             }
         }

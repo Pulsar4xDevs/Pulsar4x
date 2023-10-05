@@ -5,6 +5,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Industry;
 
 namespace Pulsar4X.DataStructures
 {
@@ -199,10 +202,10 @@ namespace Pulsar4X.DataStructures
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             Type keyType = objectType.GetGenericArguments()[0];
-            Type valueType = objectType.GetGenericArguments()[1];
-            var constructedDictType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
+            Type baseValueType = objectType.GetGenericArguments()[1];
 
-            var innerDict = serializer.Deserialize(reader, constructedDictType) as IDictionary;
+            var baseDictType = typeof(Dictionary<,>).MakeGenericType(keyType, baseValueType);
+            var innerDict = serializer.Deserialize(reader, baseDictType) as IDictionary;
             var result = Activator.CreateInstance(objectType, innerDict);
             return result;
         }
@@ -213,6 +216,15 @@ namespace Pulsar4X.DataStructures
             var innerDictionaryProperty = objectType.GetProperty("InnerDictionary", BindingFlags.NonPublic | BindingFlags.Instance);
             var innerDictionaryValue = innerDictionaryProperty.GetValue(value);
             serializer.Serialize(writer, innerDictionaryValue);
+        }
+
+        private Type GetDerivedType(Type baseType)
+        {
+            if(baseType == typeof(EntityManager))
+            {
+                return typeof(StarSystem);
+            }
+            return baseType;
         }
     }
 

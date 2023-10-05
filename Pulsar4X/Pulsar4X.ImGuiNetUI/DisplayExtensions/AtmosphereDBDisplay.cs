@@ -24,9 +24,10 @@ namespace Pulsar4X.SDL2UI
 
                 foreach(var (gas, amount) in atmosphereDB.CompositionByPercent)
                 {
+                    var blueprint = uiState.Game.AtmosphericGases[gas];
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
-                    ImGui.Text(gas.Name);
+                    ImGui.Text(blueprint.Name);
                     ImGui.TableNextColumn();
                     if(Math.Round(amount, 4) > 0)
                     {

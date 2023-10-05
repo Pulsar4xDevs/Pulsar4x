@@ -47,7 +47,7 @@ namespace Pulsar4X.Engine
 
         /// <summary>
         /// Gets the number of jumppoints that should generated for a system.
-        /// Based on Aurora 7.0 mechanics as described here: 
+        /// Based on Aurora 7.0 mechanics as described here:
         /// http://aurora2.pentarch.org/index.php?topic=7255.msg80028#msg80028
         /// </summary>
         public static int GetNumJPForSystem(StarSystem system)
@@ -107,8 +107,9 @@ namespace Pulsar4X.Engine
             var jpTransitableDB = jumpPoint.GetDataBlob<TransitableDB>();
             var jpPositionDB = jumpPoint.GetDataBlob<PositionDB>();
 
-            StarSystem system = (StarSystem)game.Systems[jpPositionDB.SystemGuid];
-            int systemIndex = system.SystemIndex;
+            // FIXME: commented out because it wasn't implemented
+            //StarSystem system = (StarSystem)game.Systems[jpPositionDB.SystemGuid];
+            //int systemIndex = system.SystemIndex;
         }
 
         private static void LinkJumpPoints(Entity JP1, Entity JP2)

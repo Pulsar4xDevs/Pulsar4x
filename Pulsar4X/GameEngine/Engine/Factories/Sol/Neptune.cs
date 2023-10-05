@@ -35,13 +35,13 @@ namespace Pulsar4X.Engine.Sol
             PositionDB planetPositionDB = new PositionDB(planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
             var pressureAtm = Pressure.BarToAtm(1000f);         // https://nssdc.gsfc.nasa.gov/planetary/factsheet/neptunefact.html#:~:text=Surface%20Pressure%3A%20%3E%3E1000%20bars,Molecular%20hydrogen%20(H2)%20%2D
-            var atmoGasses = new Dictionary<GasBlueprint, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { game.GetGasBySymbol("H2"),  0.80f * pressureAtm },
-                { game.GetGasBySymbol("He"),  0.19f * pressureAtm },
-                { game.GetGasBySymbol("CH4"), 0.015f * pressureAtm },
-                { game.GetGasBySymbol("HD"),  0.00019f * pressureAtm },
-                { game.GetGasBySymbol("C2H6"),0.0000015f * pressureAtm }
+                { game.GetGasBySymbol("H2").UniqueID,  0.80f * pressureAtm },
+                { game.GetGasBySymbol("He").UniqueID,  0.19f * pressureAtm },
+                { game.GetGasBySymbol("CH4").UniqueID, 0.015f * pressureAtm },
+                { game.GetGasBySymbol("HD").UniqueID,  0.00019f * pressureAtm },
+                { game.GetGasBySymbol("C2H6").UniqueID, 0.0000015f * pressureAtm }
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -201f, atmoGasses);
 

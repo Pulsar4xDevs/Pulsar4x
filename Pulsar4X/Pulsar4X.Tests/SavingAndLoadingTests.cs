@@ -1,3 +1,5 @@
+using System.IO;
+using System.Linq;
 using System.Security.Principal;
 using NUnit.Framework;
 using Pulsar4X.Engine;
@@ -36,12 +38,16 @@ namespace Pulsar4X.Tests
 
             var gameJson = Game.Save(_game);
 
+            System.IO.File.WriteAllText("save.json", gameJson);
+
             var loadedGame = Game.Load(gameJson);
 
             Assert.NotNull(loadedGame.TimePulse, "TimePulse null");
             Assert.NotNull(loadedGame.ProcessorManager, "ProcessorManager null");
             Assert.NotNull(loadedGame.GlobalManager, "GlobalManager null");
             Assert.NotNull(loadedGame.GameMasterFaction, "GameMasterFaction null");
+
+            Assert.AreEqual(_game.NextEntityID, loadedGame.NextEntityID);
 
             Assert.AreEqual(_game.AtmosphericGases.Count, loadedGame.AtmosphericGases.Count);
             Assert.AreEqual(_game.Themes.Count, loadedGame.Themes.Count);
@@ -73,16 +79,12 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(_game.Systems.Count, loadedGame.Systems.Count, "Star System Count");
 
-            foreach(var (guid, system) in _game.Systems)
+            foreach(var system in _game.Systems)
             {
-                if(!(system is StarSystem)) continue;
+                Assert.NotNull(loadedGame.Systems.Where(s => s.Guid.Equals(system.Guid)).First(), "Star System Guid Check");
 
-                Assert.IsTrue(loadedGame.Systems.ContainsKey(guid), "Star System Guid Check");
-
-                if(!(loadedGame.Systems[guid] is StarSystem)) continue;
-
-                StarSystem saved = (StarSystem)system;
-                StarSystem loaded = (StarSystem)loadedGame.Systems[guid];
+                StarSystem saved = system;
+                StarSystem loaded = loadedGame.Systems.Where(s => s.Guid.Equals(system.Guid)).First();
 
                 var savedEntities = saved.GetAllEntites();
                 var loadedEntities = loaded.GetAllEntites();
@@ -92,6 +94,17 @@ namespace Pulsar4X.Tests
                 for(int i = 0; i < savedEntities.Count; i++)
                 {
                     Assert.AreEqual(savedEntities[i].Id, loadedEntities[i].Id, "Star System Entity Id Check");
+                    Assert.AreEqual(savedEntities[i].FactionOwnerID, loadedEntities[i].FactionOwnerID, "Star System Entity FactionOwnerID Check");
+
+                    var savedEntityDatablobs = saved.GetAllDataBlobsForEntity(savedEntities[i].Id);
+                    var loadedEntityDatablobs = loaded.GetAllDataBlobsForEntity(loadedEntities[i].Id);
+
+                    Assert.AreEqual(savedEntityDatablobs.Count, loadedEntityDatablobs.Count, "Entity Datablob Count");
+
+                    for(int j = 0; j < savedEntityDatablobs.Count; j++)
+                    {
+                        Assert.AreEqual(savedEntityDatablobs[j].GetType(), loadedEntityDatablobs[j].GetType(), "Entity Datablob Type Check");
+                    }
                 }
             }
 

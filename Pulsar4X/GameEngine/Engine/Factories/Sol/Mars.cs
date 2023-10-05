@@ -36,18 +36,18 @@ namespace Pulsar4X.Engine.Sol
             PositionDB planetPositionDB = new PositionDB(planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
             var pressureAtm = Pressure.KPaToAtm(0.87f);
-            var atmoGasses = new Dictionary<GasBlueprint, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { game.GetGasBySymbol("CO2"), 0.9597f * pressureAtm },
-                { game.GetGasBySymbol("Ar"), 0.0193f * pressureAtm },
-                { game.GetGasBySymbol("N2"), 0.0189f * pressureAtm },
-                { game.GetGasBySymbol("O2"), 0.00146f * pressureAtm },
-                { game.GetGasBySymbol("CO"), 0.000557f * pressureAtm },
-                { game.GetGasBySymbol("H2O"), 0.000210f * pressureAtm },
-                { game.GetGasBySymbol("NO"), 0.0001f * pressureAtm },
-                { game.GetGasBySymbol("Ne"), 0.0000025f * pressureAtm },
-                { game.GetGasBySymbol("Kr"), 0.0000003f * pressureAtm },
-                { game.GetGasBySymbol("Xe"), 0.0000001f * pressureAtm }
+                { game.GetGasBySymbol("CO2").UniqueID, 0.9597f * pressureAtm },
+                { game.GetGasBySymbol("Ar").UniqueID, 0.0193f * pressureAtm },
+                { game.GetGasBySymbol("N2").UniqueID, 0.0189f * pressureAtm },
+                { game.GetGasBySymbol("O2").UniqueID, 0.00146f * pressureAtm },
+                { game.GetGasBySymbol("CO").UniqueID, 0.000557f * pressureAtm },
+                { game.GetGasBySymbol("H2O").UniqueID, 0.000210f * pressureAtm },
+                { game.GetGasBySymbol("NO").UniqueID, 0.0001f * pressureAtm },
+                { game.GetGasBySymbol("Ne").UniqueID, 0.0000025f * pressureAtm },
+                { game.GetGasBySymbol("Kr").UniqueID, 0.0000003f * pressureAtm },
+                { game.GetGasBySymbol("Xe").UniqueID, 0.0000001f * pressureAtm }
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -63, atmoGasses);
 

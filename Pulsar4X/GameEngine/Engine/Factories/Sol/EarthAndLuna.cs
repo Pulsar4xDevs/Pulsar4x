@@ -42,11 +42,11 @@ namespace Pulsar4X.Engine.Sol
             PositionDB planetPositionDB = new PositionDB(planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
             var pressureAtm = 1.0f;
-            var atmoGasses = new Dictionary<GasBlueprint, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { game.GetGasBySymbol("N2"), 0.78f * pressureAtm },
-                { game.GetGasBySymbol("O2"), 0.12f * pressureAtm },
-                { game.GetGasBySymbol("H2O"), 0.01f * pressureAtm }
+                { game.GetGasBySymbol("N2").UniqueID, 0.78f * pressureAtm },
+                { game.GetGasBySymbol("O2").UniqueID, 0.12f * pressureAtm },
+                { game.GetGasBySymbol("H2O").UniqueID, 0.01f * pressureAtm }
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, true, 71, 1f, 1f, 57.2f, atmoGasses);
 

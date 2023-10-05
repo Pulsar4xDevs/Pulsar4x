@@ -35,6 +35,8 @@ namespace Pulsar4X.Datablobs
                 }
             }
         }
+
+        [JsonProperty]
         protected Entity _owningEntity_;
 
         /// <summary>

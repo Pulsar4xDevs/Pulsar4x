@@ -10,6 +10,7 @@ using Pulsar4X.ImGuiNetUI.EntityManagement;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Damage;
 using Pulsar4X.Datablobs;
+using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -135,7 +136,8 @@ namespace Pulsar4X.SDL2UI
             StarSystemStates = new Dictionary<string, SystemState>();
             foreach (var guid in factionInfo.KnownSystems)
             {
-                StarSystemStates[guid] = new SystemState((StarSystem)Game.Systems[guid], factionEntity);
+                var system = Game.Systems.Where(s => s.Guid.Equals(guid)).First();
+                StarSystemStates[guid] = new SystemState(system, factionEntity);
             }
             GalacticMap.SetFaction();
         }
@@ -170,7 +172,7 @@ namespace Pulsar4X.SDL2UI
             {
                 foreach (var system in Game.Systems)
                 {
-                    StarSystemStates[system.Key] = SystemState.GetMasterState((StarSystem)system.Value);
+                    StarSystemStates[system.Guid] = SystemState.GetMasterState((StarSystem)system);
                 }
             }
         }

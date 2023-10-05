@@ -153,7 +153,7 @@ namespace Pulsar4X.Datablobs
         [OnDeserialized]
         public void OnDeserialized(StreamingContext context)
         {
-            ((Game)context.Context).PostLoad += (sender, args) => { };
+            //((Game)context.Context).PostLoad += (sender, args) => { };
         }
 
         public int GetValueCompareHash(int hash = 17)
