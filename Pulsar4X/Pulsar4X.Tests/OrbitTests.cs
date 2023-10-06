@@ -10,7 +10,39 @@ namespace Pulsar4X.Tests
     [TestFixture, Description("Tests kepler form velocity")]
     public class OrbitTests
     {
-
+    
+    
+        [Test]
+        public void TestOrbitalMath()
+        {
+            var epsilon = 1.0e-15;
+        
+            var parentMass = 1.989e30;
+            var objMass = 2.2e+15;
+            var position = new Vector3() { X = Distance.AuToMt(0.57) }; //Halley's Comet at periapse aprox
+            var velocity = new Vector3() { Y = Distance.KmToM(54) };
+            var sgp = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
+        
+            
+            Vector3 eccentVector = OrbitalMath.EccentricityVector(sgp, position, velocity);
+            double e = eccentVector.Length();
+            double energy = OrbitalMath.GetSpecificOrbitalEnergy(sgp, position, velocity);
+            double a = -sgp / (2 * energy);
+            
+        
+            
+            var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, velocity);
+            var pos = EllipseMath.PositionFromTrueAnomaly(a, e, trueAnomaly);
+            
+            
+            Assert.AreEqual(pos.X, position.X, epsilon);
+            Assert.AreEqual(pos.Y, position.Y, epsilon);
+            
+            
+            
+            
+        }
+    
         public void TestOrbitEpoch()
         {
             Game game = new Game();
@@ -59,7 +91,7 @@ namespace Pulsar4X.Tests
             var h4 = OrbitalMath.GetHyperbolicAnomaly(e, -Math.PI / 4);
             //var h0 = OrbitalMath.GetHyperbolicAnomaly(e, );
 
-            var ta1 = EllipseMath.AngleAtRadus(100000000, p, e);
+            var ta1 = EllipseMath.TrueAnomalyAtRadus(100000000, p, e);
             var ta1Deg = Angle.ToDegrees(ta1);
             var ha1 = OrbitalMath.GetHyperbolicAnomaly(e, ta1);
             var hma1 = OrbitalMath.GetHyperbolicMeanAnomaly(e, ha1);
@@ -76,7 +108,7 @@ namespace Pulsar4X.Tests
             
             
             
-            var taAtP = EllipseMath.AngleAtRadus(p, p, e);
+            var taAtP = EllipseMath.TrueAnomalyAtRadus(p, p, e);
             var tadeg = Angle.ToDegrees(taAtP);
             Assert.AreEqual(taAtP, Math.PI / 2);
             var sec = OrbitalMath.TimeHyperbolicToTrueAnomalyFromPeriaps(ke, taAtP);
@@ -108,9 +140,9 @@ namespace Pulsar4X.Tests
             var i = 0;
             for (double angle = 0; angle < Math.PI; angle += 0.0174533)
             {
-                var r = EllipseMath.RadiusAtAngle(angle, p, e);
-                var r2 = EllipseMath.RadiusFromFocal(a, e, 0, angle);
-                var theta = EllipseMath.AngleAtRadus(r, p, e);
+                var r = EllipseMath.RadiusAtTrueAnomaly(angle, p, e);
+                var r2 = EllipseMath.RadiusAtTrueAnomaly(a, e, 0, angle);
+                var theta = EllipseMath.TrueAnomalyAtRadus(r, p, e);
                 var theta2 = EllipseMath.AngleAtRadus2(r, p, e);
                 var theta3 = EllipseMath.AngleAtRadus3(r, p, e);
                 
@@ -445,7 +477,7 @@ namespace Pulsar4X.Tests
             Vector3 result_m = objOrbit.GetPosition(new DateTime());
 
             double keslr = EllipseMath.SemiLatusRectum(ke_m.SemiMajorAxis, ke_m.Eccentricity);
-            double keradius = EllipseMath.RadiusAtAngle(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);
+            double keradius = EllipseMath.RadiusAtTrueAnomaly(ke_m.TrueAnomalyAtEpoch, keslr, ke_m.Eccentricity);
             Vector3 kemathPos = OrbitMath.GetRelativePosition(ke_m.LoAN, ke_m.AoP, ke_m.Inclination, ke_m.TrueAnomalyAtEpoch, keradius);
             
             Assert.AreEqual(kemathPos.Length(), pos_m.Length(), 0.02);

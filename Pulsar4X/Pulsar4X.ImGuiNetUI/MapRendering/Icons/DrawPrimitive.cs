@@ -263,7 +263,7 @@ namespace Pulsar4X.SDL2UI
             double θ = 0;
             double x = 0;
             double y = 0;
-            double r = EllipseMath.RadiusFromFocal(semiMaj, eccentricity, loP, startAng);
+            double r = EllipseMath.RadiusAtTrueAnomaly(semiMaj, eccentricity, loP, startAng);
             double Δθ = 2 * Math.PI / (numPoints - 1) * Math.Sign(sweep);
             if (Δθ == 0)
             {
@@ -279,14 +279,14 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < numPoints; i++)
             {
                 θ = startAng + Δθ * i;
-                r = EllipseMath.RadiusFromFocal(semiMaj, eccentricity, loP, θ);
+                r = EllipseMath.RadiusAtTrueAnomaly(semiMaj, eccentricity, loP, θ);
                 x = r * Math.Cos(θ);
                 y = r * Math.Sin(θ);
                 points[i] = new Vector2(x, y);
             }
             //lastPoint:
             θ = endAng;
-            r = EllipseMath.RadiusFromFocal(semiMaj, eccentricity, loP, θ);
+            r = EllipseMath.RadiusAtTrueAnomaly(semiMaj, eccentricity, loP, θ);
             points[^1] = endPnt;
 
             return points;
@@ -314,7 +314,7 @@ namespace Pulsar4X.SDL2UI
             double θ = 0;
             double x = 0;
             double y = 0;
-            double r = EllipseMath.RadiusFromFocal(ke.SemiMajorAxis, ke.Eccentricity, loP, startAng);
+            double r = EllipseMath.RadiusAtTrueAnomaly(ke.SemiMajorAxis, ke.Eccentricity, loP, startAng);
             //this is the amount of sweep per point, for a full circle/ellipse. 
             double Δθ = sweep / numPoints;
             if (Δθ == 0)
@@ -329,14 +329,14 @@ namespace Pulsar4X.SDL2UI
             for (int i = 0; i < numPoints; i++)
             {
                 θ = startAng + Δθ * i;
-                r = EllipseMath.RadiusFromFocal(ke.SemiMajorAxis, ke.Eccentricity, loP, θ);
+                r = EllipseMath.RadiusAtTrueAnomaly(ke.SemiMajorAxis, ke.Eccentricity, loP, θ);
                 x = r * Math.Cos(θ);
                 y = r * Math.Sin(θ);
                 points[i] = new Vector2(x, y);
             }
             //lastPoint:
             θ = endAng;
-            r = EllipseMath.RadiusFromFocal(ke.SemiMajorAxis, ke.Eccentricity, loP, θ);
+            r = EllipseMath.RadiusAtTrueAnomaly(ke.SemiMajorAxis, ke.Eccentricity, loP, θ);
             points[^1] = endPnt;
         }
 

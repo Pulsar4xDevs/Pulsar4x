@@ -117,7 +117,7 @@ namespace Pulsar4X.SDL2UI
         {
             
             double p = EllipseMath.SemiLatusRectum(_ke.SemiMajorAxis, _ke.Eccentricity);
-            double angleToSOIPoint = Math.Abs(EllipseMath.AngleAtRadus(_soi, p, _ke.Eccentricity));
+            double angleToSOIPoint = Math.Abs(EllipseMath.TrueAnomalyAtRadus(_soi, p, _ke.Eccentricity));
             var pos = _myPosDB.RelativePosition;
             Vector2 endPos = new Vector2()
             {

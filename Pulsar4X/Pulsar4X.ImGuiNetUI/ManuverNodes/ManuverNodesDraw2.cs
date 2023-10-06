@@ -103,7 +103,7 @@ public class ManuverNodesDraw2 : IDrawData
         double a = ke.SemiMajorAxis;
         double e = ke.Eccentricity;
         double phi = ke.LoAN + ke.AoP;
-        return EllipseMath.RadiusFromFocal(a, e, phi, theta);
+        return EllipseMath.RadiusAtTrueAnomaly(a, e, phi, theta);
     }
 
     private List<Vector2> _points = new List<Vector2>();

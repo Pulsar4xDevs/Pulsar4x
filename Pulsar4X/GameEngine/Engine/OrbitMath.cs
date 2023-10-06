@@ -15,26 +15,7 @@ namespace Pulsar4X.Engine
     /// Some simular functions with simular inputs left in for future performance testing (ie one of the two might be slightly more performant).
     /// </summary>
     ///
-    public static class OrbitalMathExtensions
-    {
-        /// <summary>
-        /// Time for a burn manuver in seconds
-        /// </summary>
-        /// <param name="ship"></param>
-        /// <param name="dv"></param>
-        /// <param name="mass"></param>
-        /// <returns>time in seconds</returns>
-        public static double BurnTime(this OrbitalMath math, Entity ship, double dv, double mass)
-        {
-            //var mass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
-            var ve = ship.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-            var burnRate = ship.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-            double fuelBurned = OrbitalMath.TsiolkovskyFuelUse(mass, ve, dv);
-            double tburn = fuelBurned / burnRate;
-            return tburn;
-        }
-    }
-
+    
     public class OrbitMath : OrbitalMath
     {
         /// <summary>
@@ -51,6 +32,27 @@ namespace Pulsar4X.Engine
                 planetEntity.GetDataBlob<MassVolumeDB>().MassDry, payload
             );
         }
+        
+        /// <summary>
+        /// Currently this only calculates the change in velocity from 0 to planet radius +* 0.33333.
+        /// TODO: add gravity drag and atmosphere drag, and tech improvements for such.  
+        /// </summary>
+        /// <param name="planetRadiusInM"></param>
+        /// <param name="planetMassDryInKG"></param>
+        /// <param name="payload"></param>
+        /// <returns></returns>
+        public static double FuelCostToLowOrbit(double planetRadiusInM, double planetMassDryInKG, double payload)
+        {
+            var lowOrbit = LowOrbitRadius(planetRadiusInM);
+
+            var exaustVelocity = 3000;
+            var sgp = GeneralMath.StandardGravitationalParameter(payload + planetMassDryInKG);
+            Vector3 pos = lowOrbit * Vector3.UnitX;
+
+            var vel = OrbitalMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
+            var fuelCost = OrbitalMath.TsiolkovskyFuelCost(payload, exaustVelocity, vel.speed);
+            return fuelCost;
+        }
 
         /// <summary>
         /// basicaly the radius of the planet * 1.1
@@ -63,6 +65,11 @@ namespace Pulsar4X.Engine
         public static double LowOrbitRadius(Entity planetEntity)
         {
             return LowOrbitRadius(planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM);
+        }
+        
+        public static double LowOrbitRadius(double planetRadiusInM)
+        {
+            return planetRadiusInM * 1.1;
         }
 
         struct orbit

@@ -29,6 +29,27 @@ namespace Pulsar4X.ECSLib
                 planetEntity.GetDataBlob<MassVolumeDB>().MassDry, payload
             );
         }
+        
+        /// <summary>
+        /// Currently this only calculates the change in velocity from 0 to planet radius +* 0.33333.
+        /// TODO: add gravity drag and atmosphere drag, and tech improvements for such.  
+        /// </summary>
+        /// <param name="planetRadiusInM"></param>
+        /// <param name="planetMassDryInKG"></param>
+        /// <param name="payload"></param>
+        /// <returns></returns>
+        public static double FuelCostToLowOrbit(double planetRadiusInM, double planetMassDryInKG, double payload)
+        {
+            var lowOrbit = LowOrbitRadius(planetRadiusInM);
+
+            var exaustVelocity = 3000;
+            var sgp = GeneralMath.StandardGravitationalParameter(payload + planetMassDryInKG);
+            Vector3 pos = lowOrbit * Vector3.UnitX;
+
+            var vel = OrbitalMath.ObjectLocalVelocityPolar(sgp, pos, lowOrbit, 0, 0, 0);
+            var fuelCost = OrbitalMath.TsiolkovskyFuelCost(payload, exaustVelocity, vel.speed);
+            return fuelCost;
+        }
 
         /// <summary>
         /// basicaly the radius of the planet * 1.1 
@@ -42,7 +63,11 @@ namespace Pulsar4X.ECSLib
         {
             return LowOrbitRadius(planetEntity.GetDataBlob<MassVolumeDB>().RadiusInM);
         }
-
+        public static double LowOrbitRadius(double planetRadiusInM)
+        {
+            return planetRadiusInM * 1.1;
+        }
+        
         struct orbit
         {
             public Vector3 position;
@@ -178,18 +203,19 @@ namespace Pulsar4X.ECSLib
             {
                 double m0 = orbit.MeanAnomalyAtEpoch;
                 double n = orbit.MeanMotion;
-                double currentMeanAnomaly = OrbitMath.GetMeanAnomalyFromTime(m0, n, secondsFromEpoch);
+                double currentMeanAnomaly = GetMeanAnomalyFromTime(m0, n, secondsFromEpoch);
 
                 double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
-                return OrbitMath.TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
+                return TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
             }
             else //hyperbolic orbit
             {
+                
                 var quotient = orbit.GravitationalParameter_m3S2 / Math.Pow(-orbit.SemiMajorAxis , 3);
                 var hyperbolcMeanMotion = Math.Sqrt(quotient);
                 var hyperbolicMeanAnomaly = secondsFromEpoch * hyperbolcMeanMotion;
-                var hyperbolicAnomalyF = OrbitMath.GetHyperbolicAnomalyNewtonsMethod(orbit.Eccentricity, hyperbolicMeanAnomaly);
-                return OrbitMath.TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, hyperbolicAnomalyF);
+                double hyperbolicAnomalyF =  GetHyperbolicAnomaly(orbit, hyperbolicMeanAnomaly);
+                return TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, hyperbolicAnomalyF);
             }
         }
         
@@ -201,7 +227,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
-            if(!OrbitalMath.GetEccentricAnomalyNewtonsMethod(orbit.Eccentricity, currentMeanAnomaly, out double ea))
+            if(!OrbitalMath.GetEccentricAnomalyNewtonsMethod(orbit.Eccentricity, currentMeanAnomaly, out double E))
             {
                 Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.")
                 {
@@ -210,7 +236,21 @@ namespace Pulsar4X.ECSLib
                 };
                 StaticRefLib.EventLog.AddEvent(gameEvent);
             }
-            return ea;
+            return E;
+        }
+
+        public static double GetHyperbolicAnomaly(OrbitDB orbit, double currentHyperbolicAnomaly)
+        {
+            if(!GetHyperbolicAnomalyNewtonsMethod(orbit.Eccentricity, currentHyperbolicAnomaly, out double F))
+            {
+                Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.")
+                {
+                    Entity = orbit.OwningEntity,
+                    EventType = EventType.Opps
+                };
+                StaticRefLib.EventLog.AddEvent(gameEvent);
+            }
+            return F;
         }
 
         /// <summary>

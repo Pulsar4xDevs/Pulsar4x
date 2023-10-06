@@ -411,7 +411,7 @@ namespace Pulsar4X.Extensions
             //var a = Distance.MToAU(orbit.SemiMajorAxis);
             //var e = orbit.Eccentricity;
             //var p = EllipseMath.SemiLatusRectum(a, e);
-            //var angle = OrbitMath.AngleAtRadus(radiusAU, p, e);
+            //var angle = OrbitMath.TrueAnomalyAtRadus(radiusAU, p, e);
             ////var meanAnomaly = CurrentMeanAnomaly(orbit.MeanAnomalyAtEpoch, meanMotion, )
             //return OrbitMath.TimeFromPeriapsis(a, orbit.GravitationalParameterAU, orbit.MeanAnomalyAtEpoch_Degrees);
         }

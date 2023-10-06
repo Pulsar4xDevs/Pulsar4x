@@ -124,7 +124,7 @@ namespace Pulsar4X.Orbital
         /// </summary>
         public Vector3 ProgradeVector
         {
-            get { return new Vector3(0, Velocity.Y, 0); }
+            get { return new Vector3(0, Velocity.Length(), 0); }
         }
     }
 }

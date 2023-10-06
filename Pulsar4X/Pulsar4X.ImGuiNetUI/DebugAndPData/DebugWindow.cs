@@ -552,7 +552,7 @@ namespace Pulsar4X.SDL2UI
                                         var pe = pObt.Eccentricity;
                                         var pp = EllipseMath.SemiLatusRectum(pa, pe);
                                         */
-                                        double θ = EllipseMath.AngleAtRadus(soiradius, cp, ce);
+                                        double θ = EllipseMath.TrueAnomalyAtRadus(soiradius, cp, ce);
                                         θ += cAoP;
 
                                         var x = soiradius * Math.Cos(θ);

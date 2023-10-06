@@ -159,8 +159,8 @@ namespace Pulsar4X.SDL2UI
                 _debugWidget.SetKeplerEllipsePoints = points;
 
                 double phi = Angle.NormaliseRadians(_ellipseLoP + Math.PI);
-                double startR = EllipseMath.RadiusFromFocal(_ellipseA, _ellipseEccentricity, phi, _ellipseArcStart);
-                double endR = EllipseMath.RadiusFromFocal(_ellipseA, _ellipseEccentricity, phi, _ellipseArcEnd);
+                double startR = EllipseMath.RadiusAtTrueAnomaly(_ellipseA, _ellipseEccentricity, phi, _ellipseArcStart);
+                double endR = EllipseMath.RadiusAtTrueAnomaly(_ellipseA, _ellipseEccentricity, phi, _ellipseArcEnd);
                 Vector2 startPos = Angle.PositionFromAngle(_ellipseArcStart, startR);
                 Vector2 endPos = Angle.PositionFromAngle(_ellipseArcEnd, endR);
                 

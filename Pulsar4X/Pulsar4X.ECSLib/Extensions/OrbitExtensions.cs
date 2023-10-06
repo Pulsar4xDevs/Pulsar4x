@@ -87,9 +87,9 @@ namespace Pulsar4X.ECSLib
             {
                 return Vector3.Zero;
             }
-
-            // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
-            double radius = orbit.SemiMajorAxis * (1 - orbit.Eccentricity * orbit.Eccentricity) / (1 + orbit.Eccentricity * Math.Cos(trueAnomaly));
+            
+            double p = EllipseMath.SemiLatusRectum(orbit.SemiMajorAxis, orbit.Eccentricity);
+            double radius = EllipseMath.RadiusAtTrueAnomaly(orbit.SemiMajorAxis, p, trueAnomaly); 
 
             double incl = orbit.Inclination;
 
@@ -285,7 +285,7 @@ namespace Pulsar4X.ECSLib
             //var a = Distance.MToAU(orbit.SemiMajorAxis);
             //var e = orbit.Eccentricity;
             //var p = EllipseMath.SemiLatusRectum(a, e);
-            //var angle = OrbitMath.AngleAtRadus(radiusAU, p, e);
+            //var angle = OrbitMath.TrueAnomalyAtRadus(radiusAU, p, e);
             ////var meanAnomaly = CurrentMeanAnomaly(orbit.MeanAnomalyAtEpoch, meanMotion, )
             //return OrbitMath.TimeFromPeriapsis(a, orbit.GravitationalParameterAU, orbit.MeanAnomalyAtEpoch_Degrees);
         }
