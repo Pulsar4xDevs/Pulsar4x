@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.Engine.Designs;
 
@@ -13,22 +11,30 @@ namespace Pulsar4X.Datablobs
 
         #region Properties
 
+        [JsonProperty]
         public int CommanderID { get; internal set; } = -1;
 
+        [JsonProperty]
         public ShipDesign Design { get; private set; }
 
+        [JsonProperty]
         public bool Conscript { get; set; }
 
         // Should we have these: ??
+        [JsonProperty]
         public bool Tanker { get; set; }
+        [JsonProperty]
         public bool Collier { get; set; }
+        [JsonProperty]
         public bool SupplyShip { get; set; }
 
         /// <summary>
         /// The Ships health minus its armour and sheilds, i.e. the total HTK of all its internal Components.
         /// </summary>
+        [JsonProperty]
         public int InternalHTK { get; set; }
 
+        [JsonProperty]
         public bool IsMilitary { get; set; }
 
         //public float Tonnage { get; set; }

@@ -1,10 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reflection;
-using System.Threading;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Auth;
@@ -34,6 +31,7 @@ namespace Pulsar4X.Engine
 
         internal List<AEntityChangeListener> EntityListeners { get; set; } = new ();
 
+        [JsonProperty]
         public ManagerSubPulse ManagerSubpulses { get; internal set; }
 
         [JsonProperty]
@@ -63,13 +61,25 @@ namespace Pulsar4X.Engine
                 game.GlobalManagerDictionary.Add(ManagerGuid, this);
             }
 
-            ManagerSubpulses = new ManagerSubPulse();
+            if(ManagerSubpulses == null)
+            {
+                ManagerSubpulses = new ManagerSubPulse();
+            }
             ManagerSubpulses.Initialize(this, game.ProcessorManager);
 
             // Make sure all the entities have the manager set
             foreach(var (id, entity) in _entities)
             {
                 entity.Manager = this;
+            }
+
+            // Make sure the owning entity is set on all datablobs
+            foreach(var (type, blobDict) in _datablobStores)
+            {
+                foreach(var (id, blob) in blobDict)
+                {
+                    blob.OwningEntity = _entities[id];
+                }
             }
         }
 

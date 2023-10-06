@@ -15,8 +15,13 @@ using System.Linq;
 namespace Pulsar4X.SDL2UI
 {
     public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
+
+    public delegate void FactionChangedEventHandler(GlobalUIState uIState);
+
     public class GlobalUIState
     {
+        public event FactionChangedEventHandler OnFactionChanged;
+
         public bool debugnewgame = true;
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
         internal static readonly Dictionary<Type, string> NamesForMenus = new() {
@@ -140,6 +145,8 @@ namespace Pulsar4X.SDL2UI
                 StarSystemStates[guid] = new SystemState(system, factionEntity);
             }
             GalacticMap.SetFaction();
+
+            OnFactionChanged?.Invoke(this);
         }
 
         internal void SetActiveSystem(string activeSysID, bool refresh = false)

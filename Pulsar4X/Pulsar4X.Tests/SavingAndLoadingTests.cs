@@ -106,6 +106,9 @@ namespace Pulsar4X.Tests
                         Assert.AreEqual(savedEntityDatablobs[j].GetType(), loadedEntityDatablobs[j].GetType(), "Entity Datablob Type Check");
                     }
                 }
+
+                Assert.AreEqual(saved.ManagerSubpulses.QueuedProcesses.Count, loaded.ManagerSubpulses.QueuedProcesses.Count, "Star System Queued Processes Count");
+                Assert.AreEqual(saved.ManagerSubpulses.GetTotalNumberOfProceses(), loaded.ManagerSubpulses.GetTotalNumberOfProceses(), "Star System Subpulse Count");
             }
 
             Assert.AreEqual(_game.GameMasterFaction.Id, loadedGame.GameMasterFaction.Id, "Game Master Fation Guid");

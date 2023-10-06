@@ -21,8 +21,8 @@ namespace Pulsar4X.SDL2UI
 
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
 
-        private readonly FleetDB factionRoot;
-        private readonly int factionID;
+        private FleetDB factionRoot;
+        private int factionID;
         private Entity dragEntity = Entity.InvalidEntity;
         private Entity selectedFleet = null;
         private Entity selectedFleetFlagship = null;
@@ -46,10 +46,9 @@ namespace Pulsar4X.SDL2UI
 
         private FleetWindow()
         {
-            factionID = _uiState.Faction.Id;
-            factionRoot = _uiState.Faction.GetDataBlob<FleetDB>();
-            var firstFleet = factionRoot.Children.Where(c => c.HasDataBlob<FleetDB>()).First();
-            if(firstFleet != null) SelectFleet(firstFleet);
+            FactionChanged(_uiState);
+
+            _uiState.OnFactionChanged += FactionChanged;
 
             orderComparisons = new string[5];
             orderComparisons[0] = ComparisonType.LessThan.ToDescription();
@@ -65,6 +64,14 @@ namespace Pulsar4X.SDL2UI
                 return new FleetWindow();
             }
             return (FleetWindow)_uiState.LoadedWindows[typeof(FleetWindow)];
+        }
+
+        private void FactionChanged(GlobalUIState uiState)
+        {
+            factionID = uiState.Faction.Id;
+            factionRoot = uiState.Faction.GetDataBlob<FleetDB>();
+            var firstFleet = factionRoot.Children.Where(c => c.HasDataBlob<FleetDB>()).First();
+            SelectFleet(firstFleet);
         }
 
         private void SelectFleet(Entity fleet)

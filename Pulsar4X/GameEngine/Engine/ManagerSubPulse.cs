@@ -63,7 +63,7 @@ namespace Pulsar4X.Engine
             }
         }
 
-        [JsonProperty] private SortedDictionary<DateTime, ProcessSet> QueuedProcesses = new SortedDictionary<DateTime, ProcessSet>();
+        [JsonProperty] public SortedDictionary<DateTime, ProcessSet> QueuedProcesses { get; set; } = new SortedDictionary<DateTime, ProcessSet>();
 
         //public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
         public bool IsProcessing = false;
@@ -73,10 +73,10 @@ namespace Pulsar4X.Engine
 
         private EntityManager _entityManager;
 
-        class ProcessSet : ISerializable
+        public class ProcessSet : ISerializable
         {
 
-            [JsonIgnore] //this should get added on initialization.
+            [JsonProperty] //this should get added on initialization.
             internal List<IHotloopProcessor> SystemProcessors = new List<IHotloopProcessor>();
 
             [JsonProperty] //this needs to get saved. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly).

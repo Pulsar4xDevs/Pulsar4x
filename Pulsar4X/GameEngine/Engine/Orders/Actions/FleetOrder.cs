@@ -45,6 +45,7 @@ namespace Pulsar4X.Engine.Orders
         private FleetOrder(int factionGuid, Entity entity)
         {
             RequestingFactionGuid = factionGuid;
+            _entityCommanding = entity;
             EntityCommandingGuid = entity.Id;
             CreatedDate = entity.StarSysDateTime;
             UseActionLanes = true;
@@ -245,11 +246,15 @@ namespace Pulsar4X.Engine.Orders
                     }
                     break;
                 default:
-                    if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+                    if(game.Factions.ContainsKey(RequestingFactionGuid))
                     {
-                        return true;
+                        _factionEntity = game.Factions[RequestingFactionGuid];
                     }
-                    break;
+                    else
+                    {
+                        return false;
+                    }
+                    return RequestingFactionGuid == _entityCommanding.FactionOwnerID;
             }
             return false;
         }

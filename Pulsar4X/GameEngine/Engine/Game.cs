@@ -8,15 +8,11 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine.Orders;
-using Newtonsoft.Json.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
-using System.IO;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
 namespace Pulsar4X.Engine
 {
-    //[JsonConverter(typeof(GameConverter))]
     public class Game
     {
         [JsonProperty]
@@ -93,6 +89,7 @@ namespace Pulsar4X.Engine
             ApplyModData(modDataStore);
             ApplySettings(settings);
             TimePulse = new (this);
+            TimePulse.Initialize(this);
             ProcessorManager = new ProcessorManager(this);
             OrderHandler = new StandAloneOrderHandler(this);
             GlobalManager = new EntityManager();

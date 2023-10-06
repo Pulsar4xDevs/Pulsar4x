@@ -130,10 +130,6 @@ namespace Pulsar4X.Engine
         {
             _game = game;
             _gameGlobalDateTime = game.Settings.StartDateTime;
-            _timer.Interval = _tickInterval.TotalMilliseconds;
-            _timer.Enabled = false;
-            _timer.Elapsed += Timer_Elapsed;
-
         }
 
         public MasterTimePulse() { }
@@ -141,6 +137,9 @@ namespace Pulsar4X.Engine
         public void Initialize(Game game)
         {
             _game = game;
+            _timer.Interval = _tickInterval.TotalMilliseconds;
+            _timer.Enabled = false;
+            _timer.Elapsed += Timer_Elapsed;
         }
 
         #region Public Time Methods. UI interacts with time here
