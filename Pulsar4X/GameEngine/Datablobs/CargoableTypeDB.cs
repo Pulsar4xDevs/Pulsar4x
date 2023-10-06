@@ -26,9 +26,9 @@ namespace Pulsar4X.Datablobs
             get
             {
                 if (OwningEntity.HasDataBlob<DesignInfoDB>())
-                    return this.OwningEntity.GetDataBlob<DesignInfoDB>().DesignEntity.Guid;
+                    return this.OwningEntity.GetDataBlob<DesignInfoDB>().DesignEntity.Id.ToString();
                 else
-                    return this.OwningEntity.Guid;
+                    return this.OwningEntity.Id.ToString();
             }
         }
 

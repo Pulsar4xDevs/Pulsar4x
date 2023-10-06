@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
 
         public EntityState EntityState { get; private set; }
 
-        private string _factionID;
+        private int _factionID;
         private FactionInfoDB _factionInfoDB;
         Dictionary<string, (string[] itemIDs, string[] itemNames) > _contructablesByPline = new ();
         private IndustryJob _newConJob;
@@ -136,7 +136,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             Entity.TryGetDatablob(out _volStorageDB);
-            _factionID = state.Faction.Guid;
+            _factionID = state.Faction.Id;
             Update();
 
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();

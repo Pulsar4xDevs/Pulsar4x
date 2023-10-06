@@ -76,11 +76,11 @@ namespace Pulsar4X.SDL2UI
         internal IntPtr rendererPtr;
         ImGuiSDL2CSWindow _window;
         internal Dictionary<string, IDrawData> UIWidgets = new ();
-        ConcurrentDictionary<string, Icon> _testIcons = new ();
-        ConcurrentDictionary<string, IDrawData> _entityIcons = new ();
-        ConcurrentDictionary<string, IDrawData> _orbitRings = new ();
-        ConcurrentDictionary<string, IDrawData> _moveIcons = new ();
-        internal ConcurrentDictionary<string, NameIcon> _nameIcons = new ();
+        ConcurrentDictionary<int, Icon> _testIcons = new ();
+        ConcurrentDictionary<int, IDrawData> _entityIcons = new ();
+        ConcurrentDictionary<int, IDrawData> _orbitRings = new ();
+        ConcurrentDictionary<int, IDrawData> _moveIcons = new ();
+        internal ConcurrentDictionary<int, NameIcon> _nameIcons = new ();
 
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
         internal Vector2 GalacticMapPosition = new Vector2();
@@ -99,7 +99,7 @@ namespace Pulsar4X.SDL2UI
             //UIWidgets.Add(new CursorCrosshair(new Vector4())); //used for debugging the cursor world position.
             foreach (var item in TestDrawIconData.GetTestIcons())
             {
-                _testIcons.TryAdd(Guid.NewGuid().ToString(), item);
+                _testIcons.TryAdd(-1, item);
             }
         }
 
@@ -108,7 +108,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (_sysState != null)
             {
-                _sysState.StarSystem.GetSensorContacts(_faction.Guid).Changes.Unsubscribe(_sensorChanges);
+                _sysState.StarSystem.GetSensorContacts(_faction.Id).Changes.Unsubscribe(_sensorChanges);
 
             }
             if (_state.StarSystemStates.ContainsKey(starSys.Guid))
@@ -122,7 +122,7 @@ namespace Pulsar4X.SDL2UI
 
             _faction = _state.Faction;
 
-            _sensorMgr = starSys.GetSensorContacts(_faction.Guid);
+            _sensorMgr = starSys.GetSensorContacts(_faction.Id);
 
 
             _sensorChanges = _sensorMgr.Changes.Subscribe();
@@ -143,7 +143,7 @@ namespace Pulsar4X.SDL2UI
 
             if (entityItem.HasDataBlob<NameDB>())
             {
-                _nameIcons.TryAdd(entityItem.Guid, new NameIcon(entityState, _state));
+                _nameIcons.TryAdd(entityItem.Id, new NameIcon(entityState, _state));
             }
 
             if (entityItem.HasDataBlob<OrbitDB>())
@@ -155,7 +155,7 @@ namespace Pulsar4X.SDL2UI
                     if (orbitDB.Eccentricity < 1)
                     {
                         orbit = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
-                        _orbitRings.TryAdd(entityItem.Guid, orbit);
+                        _orbitRings.TryAdd(entityItem.Id, orbit);
                     }
 
                 }
@@ -168,37 +168,37 @@ namespace Pulsar4X.SDL2UI
                 //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
                 //NewtonMoveIcon
                 orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
-                _orbitRings.TryAdd(entityItem.Guid, orb);
+                _orbitRings.TryAdd(entityItem.Id, orb);
             }
 
             if (entityItem.HasDataBlob<StarInfoDB>())
             {
-                _entityIcons.TryAdd(entityItem.Guid, new StarIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new StarIcon(entityItem));
             }
 
             if (entityItem.HasDataBlob<SystemBodyInfoDB>())
             {
-                _entityIcons.TryAdd(entityItem.Guid, new SysBodyIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new SysBodyIcon(entityItem));
             }
 
             if (entityItem.HasDataBlob<ShipInfoDB>())
             {
-                _entityIcons.TryAdd(entityItem.Guid, new ShipIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new ShipIcon(entityItem));
             }
 
             if (entityItem.HasDataBlob<ProjectileInfoDB>())
             {
-                _entityIcons.TryAdd(entityItem.Guid, new ProjectileIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new ProjectileIcon(entityItem));
             }
 
             if (entityItem.HasDataBlob<BeamInfoDB>())
             {
-                _entityIcons.TryAdd(entityItem.Guid, new BeamIcon(entityItem));
+                _entityIcons.TryAdd(entityItem.Id, new BeamIcon(entityItem));
             }
 
         }
 
-        void RemoveIconable(string entityGuid)
+        void RemoveIconable(int entityGuid)
         {
             _testIcons.TryRemove(entityGuid, out var testIcon);
             _entityIcons.TryRemove(entityGuid, out IDrawData entityIcon);
@@ -235,12 +235,12 @@ namespace Pulsar4X.SDL2UI
 
                         if (!orbit.IsStationary)
                         {
-                            if (_sysState.EntityStatesWithPosition.ContainsKey(changeData.Entity.Guid))
-                                entityState = _sysState.EntityStatesWithPosition[changeData.Entity.Guid];
+                            if (_sysState.EntityStatesWithPosition.ContainsKey(changeData.Entity.Id))
+                                entityState = _sysState.EntityStatesWithPosition[changeData.Entity.Id];
                             else
                                 entityState = new EntityState(changeData.Entity) { Name = "Unknown" };
 
-                            _orbitRings[changeData.Entity.Guid] = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
+                            _orbitRings[changeData.Entity.Id] = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
 
                         }
                     }
@@ -251,7 +251,7 @@ namespace Pulsar4X.SDL2UI
                         //Matrix matrix = new Matrix();
                         //matrix.Scale(_camera.ZoomLevel);
                         //widget.OnFrameUpdate(matrix, _camera);
-                        _moveIcons[changeData.Entity.Guid] = widget;
+                        _moveIcons[changeData.Entity.Id] = widget;
                         //_moveIcons.Add(changeData.Entity.ID, widget);
                     }
 
@@ -262,7 +262,7 @@ namespace Pulsar4X.SDL2UI
                             Icon orb;
                             //orb = new OrbitHypobolicIcon(entityState, _state.UserOrbitSettingsMtx);
                             orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
-                            _orbitRings.AddOrUpdate(changeData.Entity.Guid, orb, ((guid, data) => data = orb));
+                            _orbitRings.AddOrUpdate(changeData.Entity.Id, orb, ((guid, data) => data = orb));
                         }
                     }
                     //if (changeData.Datablob is NameDB)
@@ -275,16 +275,16 @@ namespace Pulsar4X.SDL2UI
                     if (changeData.Datablob is OrbitDB)
                     {
 
-                        _orbitRings.TryRemove(changeData.Entity.Guid, out IDrawData foo);
+                        _orbitRings.TryRemove(changeData.Entity.Id, out IDrawData foo);
                     }
                     if (changeData.Datablob is WarpMovingDB)
                     {
-                        _moveIcons.TryRemove(changeData.Entity.Guid, out IDrawData foo);
+                        _moveIcons.TryRemove(changeData.Entity.Id, out IDrawData foo);
                     }
 
                     if (changeData.Datablob is NewtonMoveDB)
                     {
-                        _orbitRings.TryRemove(changeData.Entity.Guid, out IDrawData foo);
+                        _orbitRings.TryRemove(changeData.Entity.Id, out IDrawData foo);
                     }
 
                     //if (changeData.Datablob is NameDB)
@@ -414,13 +414,13 @@ namespace Pulsar4X.SDL2UI
                 else
                 {
                 */
-                UpdateAndDraw(UIWidgets, matrix);
+                UpdateAndDraw(UIWidgets.Values.ToList(), matrix);
 
-                UpdateAndDraw(_orbitRings, matrix);
+                UpdateAndDraw(_orbitRings.Values.ToList(), matrix);
 
-                UpdateAndDraw(_moveIcons, matrix);
+                UpdateAndDraw(_moveIcons.Values.ToList(), matrix);
 
-                UpdateAndDraw(_entityIcons, matrix);
+                UpdateAndDraw(_entityIcons.Values.ToList(), matrix);
 
                 UpdateAndDraw(SelectedEntityExtras, matrix);
 
@@ -458,11 +458,11 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        void UpdateAndDraw(Dictionary<string, IDrawData> icons, Matrix matrix)
+        void UpdateAndDraw(List<IDrawData> icons, Matrix matrix)
         {
-            foreach (var item in icons.Values)
+            foreach (var item in icons)
                 item.OnFrameUpdate(matrix, _camera);
-            foreach (var item in icons.Values)
+            foreach (var item in icons)
                 item.Draw(rendererPtr, _camera);
         }
 
@@ -483,13 +483,6 @@ namespace Pulsar4X.SDL2UI
         //             item.Draw(rendererPtr, _camera);
         //     }
         // }
-        void UpdateAndDraw(ConcurrentDictionary<string, IDrawData> icons, Matrix matrix)
-        {
-            foreach (var item in icons.Values)
-                item.OnFrameUpdate(matrix, _camera);
-            foreach (var item in icons.Values)
-                item.Draw(rendererPtr, _camera);
-        }
 
         public override bool GetActive()
         {

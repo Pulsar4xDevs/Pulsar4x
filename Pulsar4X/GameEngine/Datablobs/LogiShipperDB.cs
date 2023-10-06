@@ -52,7 +52,7 @@ namespace Pulsar4X.Datablobs
             {
                 var order = new ShipLogisticsOrders()
                 {
-                    EntityCommandingGuid = OwningEntity.Guid,
+                    EntityCommandingGuid = OwningEntity.Id,
                     RequestingFactionGuid = OwningEntity.FactionOwnerID,
                 };
                 //StaticRefLib.Game.OrderHandler.HandleOrder(order);

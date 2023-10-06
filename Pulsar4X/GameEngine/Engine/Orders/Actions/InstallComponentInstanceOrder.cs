@@ -28,7 +28,7 @@ namespace Pulsar4X.Engine.Orders
             var cmd = new InstallComponentInstanceOrder(entity, componentInstance)
             {
                 RequestingFactionGuid = entity.FactionOwnerID,
-                EntityCommandingGuid = entity.Guid,
+                EntityCommandingGuid = entity.Id,
                 CreatedDate = entity.Manager.ManagerSubpulses.StarSysDateTime,
                 UseActionLanes = false
             };

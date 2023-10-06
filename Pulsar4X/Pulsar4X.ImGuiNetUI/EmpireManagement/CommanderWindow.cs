@@ -13,12 +13,12 @@ namespace Pulsar4X.SDL2UI
     {
         private Entity _faction;
         private FactionInfoDB _factionInfoDB;
-        private Dictionary<string, Entity> _commanders;
+        private Dictionary<int, Entity> _commanders;
         private CommanderWindow()
         {
             _faction = _uiState.Faction;
             _factionInfoDB = _faction.GetDataBlob<FactionInfoDB>();
-            _commanders = new Dictionary<string, Entity>();
+            _commanders = new Dictionary<int, Entity>();
         }
 
         internal static CommanderWindow GetInstance()
@@ -52,12 +52,12 @@ namespace Pulsar4X.SDL2UI
                         }
                         else
                         {
-                            commander = _uiState.Game.GlobalManager.GetGlobalEntityByGuid(commanderID);
+                            commander = _uiState.Game.GlobalManager.GetGlobalEntityById(commanderID);
                             _commanders.Add(commanderID, commander);
                         }
 
                         ImGui.TableNextColumn();
-                        ImGui.Text(commander.GetName(_faction.Guid));
+                        ImGui.Text(commander.GetName(_faction.Id));
                         ImGui.TableNextColumn();
                         var commanderDB = commander.GetDataBlob<CommanderDB>();
                         var experience = commander.StarSysDateTime - commanderDB.CommissionedOn;

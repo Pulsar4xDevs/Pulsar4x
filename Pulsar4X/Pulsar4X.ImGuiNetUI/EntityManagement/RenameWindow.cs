@@ -21,7 +21,7 @@ namespace Pulsar4X.SDL2UI
         public void SetEntity(Entity entity)
         {
             _selectedEntity = entity;
-            _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(entity.GetName(_uiState.Faction.Guid));
+            _nameInputBuffer = System.Text.Encoding.UTF8.GetBytes(entity.GetName(_uiState.Faction.Id));
             IsActive = true;
             _setFocus = true;
         }

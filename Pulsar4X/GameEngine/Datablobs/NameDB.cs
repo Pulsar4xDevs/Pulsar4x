@@ -15,11 +15,11 @@ namespace Pulsar4X.Datablobs
         /// <summary>
         /// Each faction can have a different name for whatever entity has this blob.
         /// </summary>
-        [JsonProperty]
-        private readonly Dictionary<string, string> _names = new ();
+        [JsonProperty("Names")]
+        private Dictionary<int, string> _names = new ();
 
         [PublicAPI]
-        public string DefaultName => _names[String.Empty];
+        public string DefaultName => _names[-1];
 
         public string OwnersName
         {
@@ -31,16 +31,16 @@ namespace Pulsar4X.Datablobs
             }
         }
 
-        public NameDB() { _names.Add(String.Empty, "Un-Named");}
+        public NameDB() { _names.Add(-1, "Un-Named");}
 
         public NameDB(string defaultName)
         {
-            _names.Add(String.Empty, defaultName);
+            _names.Add(-1, defaultName);
         }
 
-        public NameDB(string defaultName, string factionID, string factionsName)
+        public NameDB(string defaultName, int factionID, string factionsName)
         {
-            _names.Add(String.Empty, defaultName);
+            _names.Add(-1, defaultName);
             _names.Add(factionID, factionsName);
         }
 
@@ -48,7 +48,7 @@ namespace Pulsar4X.Datablobs
 
         public NameDB(NameDB nameDB)
         {
-            _names = new Dictionary<string, string>(nameDB._names);
+            _names = new Dictionary<int, string>(nameDB._names);
         }
 
         public override object Clone()
@@ -59,11 +59,11 @@ namespace Pulsar4X.Datablobs
         #endregion
 
         [PublicAPI]
-        public string GetName(string requestingFaction)
+        public string GetName(int requestingFaction)
         {
             if (!_names.TryGetValue(requestingFaction, out var name))
             {
-                name = OwningEntity.Guid.ToString();
+                name = OwningEntity.Id.ToString();
                 SetName(requestingFaction, name);
             }
             return name;
@@ -72,12 +72,12 @@ namespace Pulsar4X.Datablobs
         [PublicAPI]
         public string GetName(Entity requestingFaction)
         {
-            return GetName(requestingFaction.Guid);
+            return GetName(requestingFaction.Id);
         }
 
 
         [PublicAPI]
-        public void SetName(string requestingFaction, string specifiedName)
+        public void SetName(int requestingFaction, string specifiedName)
         {
             _names[requestingFaction] = specifiedName;
         }
@@ -104,8 +104,8 @@ namespace Pulsar4X.Datablobs
 
         NameDB(NameDB db, SensorInfoDB sensorInfo)
         {
-            _names.Add(String.Empty, db.DefaultName);
-            _names[sensorInfo.Faction.Guid] = db.GetName(sensorInfo.Faction.Guid);
+            _names.Add(-1, db.DefaultName);
+            _names[sensorInfo.Faction.Id] = db.GetName(sensorInfo.Faction.Id);
         }
     }
 }

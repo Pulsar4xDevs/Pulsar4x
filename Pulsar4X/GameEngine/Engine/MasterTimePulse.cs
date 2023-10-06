@@ -13,20 +13,28 @@ namespace Pulsar4X.Engine
 {
     public delegate void DateChangedEventHandler(DateTime newDate);
 
-    [JsonConverter(typeof(MasterTimePulseConverter))]
+    //[JsonConverter(typeof(MasterTimePulseConverter))]
     public class MasterTimePulse : IEquatable<MasterTimePulse>
     {
+        [JsonProperty]
         internal SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>> EntityDictionary = new SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>();
 
+        [JsonIgnore]
         private Stopwatch _stopwatch = new Stopwatch();
+
+        [JsonIgnore]
         Stopwatch _subpulseStopwatch = new Stopwatch();
+
+        [JsonIgnore]
         private Timer _timer = new Timer();
 
+        [JsonIgnore]
         private Action<MasterTimePulse> runSystemProcesses = (MasterTimePulse obj) =>
         {
             obj.DoProcessing(obj.GameGlobalDateTime + obj.Ticklength);
         };
 
+        [JsonProperty]
         //changes how often the tick happens
         public float TimeMultiplier
         {
@@ -38,10 +46,13 @@ namespace Pulsar4X.Engine
             }
         }
 
+        [JsonIgnore]
         private float _timeMultiplier = 1f;
 
+        [JsonIgnore]
         private TimeSpan _tickInterval = TimeSpan.FromMilliseconds(250);
 
+        [JsonProperty]
         public TimeSpan TickFrequency
         {
             get { return _tickInterval; }
@@ -52,17 +63,28 @@ namespace Pulsar4X.Engine
             }
         }
 
+        [JsonProperty]
         public TimeSpan Ticklength { get; set; } = TimeSpan.FromSeconds(3600);
 
+        [JsonIgnore]
         private bool _isProcessing = false;
 
+        [JsonIgnore]
         private bool _isOvertime = false;
+
+        [JsonIgnore]
         private object _lockObj = new object();
+
+        [JsonIgnore]
         private Game _game;
+
         /// <summary>
         /// length of time it took to process the last DoProcess
         /// </summary>
+        [JsonProperty]
         public TimeSpan LastProcessingTime { get; internal set; } = TimeSpan.Zero;
+
+        [JsonProperty]
         public TimeSpan LastSubtickTime { get; internal set; } = TimeSpan.Zero;
         /// <summary>
         /// This invokes the DateChangedEvent.
@@ -77,8 +99,10 @@ namespace Pulsar4X.Engine
             GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
         }
 
+        [JsonIgnore]
         private DateTime _gameGlobalDateTime;
 
+        [JsonProperty]
         public DateTime GameGlobalDateTime
         {
             get { return _gameGlobalDateTime; }
@@ -106,10 +130,16 @@ namespace Pulsar4X.Engine
         {
             _game = game;
             _gameGlobalDateTime = game.Settings.StartDateTime;
+        }
+
+        public MasterTimePulse() { }
+
+        public void Initialize(Game game)
+        {
+            _game = game;
             _timer.Interval = _tickInterval.TotalMilliseconds;
             _timer.Enabled = false;
             _timer.Elapsed += Timer_Elapsed;
-
         }
 
         #region Public Time Methods. UI interacts with time here
@@ -232,14 +262,14 @@ namespace Pulsar4X.Engine
                 if (_game.Settings.EnableMultiThreading == true)
                 {
                     //multi-threaded
-                    Parallel.ForEach<StarSystem>(_game.Systems.Values, starSys => starSys.ManagerSubpulses.ProcessSystem(nextInterupt));
+                    Parallel.ForEach<StarSystem>(_game.Systems, starSys => starSys.ManagerSubpulses.ProcessSystem(nextInterupt));
 
                     //The above 'blocks' till all the tasks are done.
                 }
                 else
                 {
                     // single-threaded
-                    foreach (StarSystem starSys in _game.Systems.Values)
+                    foreach (StarSystem starSys in _game.Systems)
                     {
                         starSys.ManagerSubpulses.ProcessSystem(nextInterupt);
                     }
@@ -302,54 +332,54 @@ namespace Pulsar4X.Engine
         }
     }
 
-    public class MasterTimePulseConverter : JsonConverter
-    {
-        public override bool CanConvert(Type objectType) => objectType == typeof(MasterTimePulse);
+    // public class MasterTimePulseConverter : JsonConverter
+    // {
+    //     public override bool CanConvert(Type objectType) => objectType == typeof(MasterTimePulse);
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            // Save JObject to set it later in the second step
-            JToken jsonObject = JToken.Load(reader);
-            var gameProperty = serializer.Context.Context as Game;
+    //     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    //     {
+    //         // Save JObject to set it later in the second step
+    //         JToken jsonObject = JToken.Load(reader);
+    //         var gameProperty = serializer.Context.Context as Game;
 
-            // If the Game property is already set, deserialize properties and initialize
-            if (gameProperty != null)
-            {
-                var timePulse = new MasterTimePulse(gameProperty) {
-                    GameGlobalDateTime = jsonObject["GameGlobalDateTime"].ToObject<DateTime>(serializer),
-                    TimeMultiplier = jsonObject["TimeMultiplier"].ToObject<float>(serializer),
-                    TickFrequency = jsonObject["TickFrequency"].ToObject<TimeSpan>(serializer),
-                    Ticklength = jsonObject["Ticklength"].ToObject<TimeSpan>(serializer),
-                    LastProcessingTime = jsonObject["LastProcessingTime"].ToObject<TimeSpan>(serializer),
-                    LastSubtickTime = jsonObject["LastSubtickTime"].ToObject<TimeSpan>(serializer),
-                    EntityDictionary = jsonObject["EntityDictionary"].ToObject<SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>>(serializer)
-                };
-                return timePulse;
-            }
+    //         // If the Game property is already set, deserialize properties and initialize
+    //         if (gameProperty != null)
+    //         {
+    //             var timePulse = new MasterTimePulse(gameProperty) {
+    //                 GameGlobalDateTime = jsonObject["GameGlobalDateTime"].ToObject<DateTime>(serializer),
+    //                 TimeMultiplier = jsonObject["TimeMultiplier"].ToObject<float>(serializer),
+    //                 TickFrequency = jsonObject["TickFrequency"].ToObject<TimeSpan>(serializer),
+    //                 Ticklength = jsonObject["Ticklength"].ToObject<TimeSpan>(serializer),
+    //                 LastProcessingTime = jsonObject["LastProcessingTime"].ToObject<TimeSpan>(serializer),
+    //                 LastSubtickTime = jsonObject["LastSubtickTime"].ToObject<TimeSpan>(serializer),
+    //                 EntityDictionary = jsonObject["EntityDictionary"].ToObject<SortedDictionary<DateTime, Dictionary<PulseActionEnum, List<SystemEntityJumpPair>>>>(serializer)
+    //             };
+    //             return timePulse;
+    //         }
 
-            // If Game is not set, return null for now
-            return null;
-        }
+    //         // If Game is not set, return null for now
+    //         return null;
+    //     }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-        {
-            var pulse = (MasterTimePulse)value;
+    //     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    //     {
+    //         var pulse = (MasterTimePulse)value;
 
-            var entityDictFieldInfo = typeof(MasterTimePulse).GetField("EntityDictionary", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var entityDictValue = entityDictFieldInfo?.GetValue(pulse);
+    //         var entityDictFieldInfo = typeof(MasterTimePulse).GetField("EntityDictionary", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+    //         var entityDictValue = entityDictFieldInfo?.GetValue(pulse);
 
-            JObject obj = new JObject
-            {
-                { "GameGlobalDateTime", new JValue(pulse.GameGlobalDateTime) },
-                { "TimeMultiplier", new JValue(pulse.TimeMultiplier) },
-                { "TickFrequency", new JValue(pulse.TickFrequency) },
-                { "Ticklength", new JValue(pulse.Ticklength) },
-                { "LastProcessingTime", new JValue(pulse.LastProcessingTime) },
-                { "LastSubtickTime", new JValue(pulse.LastSubtickTime) },
-                { "EntityDictionary", new JObject(entityDictValue) }
-            };
-            obj.WriteTo(writer);
-        }
-    }
+    //         JObject obj = new JObject
+    //         {
+    //             { "GameGlobalDateTime", new JValue(pulse.GameGlobalDateTime) },
+    //             { "TimeMultiplier", new JValue(pulse.TimeMultiplier) },
+    //             { "TickFrequency", new JValue(pulse.TickFrequency) },
+    //             { "Ticklength", new JValue(pulse.Ticklength) },
+    //             { "LastProcessingTime", new JValue(pulse.LastProcessingTime) },
+    //             { "LastSubtickTime", new JValue(pulse.LastSubtickTime) },
+    //             { "EntityDictionary", new JObject(entityDictValue) }
+    //         };
+    //         obj.WriteTo(writer);
+    //     }
+    // }
 
 }

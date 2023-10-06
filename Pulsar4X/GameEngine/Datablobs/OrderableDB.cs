@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Orders;
 
@@ -5,6 +6,7 @@ namespace Pulsar4X.Datablobs
 {
     public class OrderableDB : BaseDataBlob
     {
+        [JsonProperty]
         public SafeList<EntityCommand> ActionList { get; } = new SafeList<EntityCommand>();
 
         public OrderableDB()

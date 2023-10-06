@@ -27,7 +27,7 @@ namespace Pulsar4X.Engine
             //lock (CurrentEntity)
             //{
                 CurrentEntity = entity;
-                foreach (var datablob in entity.DataBlobs)
+                foreach (var datablob in entity.Manager.GetAllDataBlobsForEntity(entity.Id))
                 {
                     var t = datablob.GetType();
                     if (TypeProcessorMap.ContainsKey(t))

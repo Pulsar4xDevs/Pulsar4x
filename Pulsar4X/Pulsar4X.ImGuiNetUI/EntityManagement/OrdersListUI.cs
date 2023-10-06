@@ -17,7 +17,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         private OrdersListUI(EntityState entity, GlobalUIState state)
         {
             _state = state;
-            SetName("OrdersList|" + entity.Entity.Guid.ToString());
+            SetName("OrdersList|" + entity.Entity.Id.ToString());
             _flags = ImGuiWindowFlags.None;
             onEntityChange(entity);
             _orderEntity = entity.Entity;
@@ -27,7 +27,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         internal static OrdersListUI GetInstance(EntityState entity, GlobalUIState state)
         {
-            string name = "OrdersList|" + entity.Entity.Guid.ToString();
+            string name = "OrdersList|" + entity.Entity.Id.ToString();
             OrdersListUI thisItem;
             if (!_uiState.LoadedNonUniqueWindows.ContainsKey(name))
             {

@@ -71,8 +71,10 @@ namespace Pulsar4X.Datablobs
 		/// 2-Body gravitational parameter of system in m^3/s^2
 		/// </summary>
 		[PublicAPI]
+        [JsonProperty]
 		public double GravitationalParameter_m3S2 { get; protected set; }
 
+        [JsonProperty]
         public double SOI_m { get; protected set; } = double.MaxValue;
 
 
@@ -80,24 +82,28 @@ namespace Pulsar4X.Datablobs
         /// Orbital Period of orbit.
         /// </summary>
         [PublicAPI]
+        [JsonProperty]
         public TimeSpan OrbitalPeriod { get; private set; }
 
 		/// <summary>
 		/// Mean Motion of orbit. in Radians/Sec.
 		/// </summary>
 		[PublicAPI]
+        [JsonProperty]
 		public double MeanMotion { get; protected set; }
 
         /// <summary>
         /// Point in orbit furthest from the ParentBody. Measured in AU.
         /// </summary>
         [PublicAPI]
+        [JsonProperty]
         public double Apoapsis { get; private set; }
 
         /// <summary>
         /// Point in orbit closest to the ParentBody. Measured in AU.
         /// </summary>
         [PublicAPI]
+        [JsonProperty]
         public double Periapsis { get; private set; }
 
         /// <summary>

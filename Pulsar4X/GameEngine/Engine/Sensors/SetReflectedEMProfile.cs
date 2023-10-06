@@ -57,6 +57,10 @@ namespace Pulsar4X.Engine.Sensors
             foreach (var emmissionDB in emmiters)
             {
                 var emittingEntity = emmissionDB.OwningEntity;
+
+                if(emittingEntity == Entity.InvalidEntity)
+                    continue;
+
                 if (emittingEntity != entity) // don't reflect our own emmision.
                 {
                     double distance = position.GetDistanceTo_m(emittingEntity.GetDataBlob<PositionDB>());

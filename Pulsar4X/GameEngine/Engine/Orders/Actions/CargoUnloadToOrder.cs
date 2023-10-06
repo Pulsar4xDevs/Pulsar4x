@@ -15,7 +15,7 @@ namespace Pulsar4X.Engine.Orders
         [JsonIgnore]
         public List<(ICargoable item, long amount)> ItemICargoablesToTransfer = new List<(ICargoable item, long amount)>();
 
-        public string SendCargoToEntityGuid { get; set; }
+        public int SendCargoToEntityGuid { get; set; }
 
         public override ActionLaneTypes ActionLanes => ActionLaneTypes.Movement | ActionLaneTypes.InteractWithExternalEntity;
 
@@ -46,7 +46,7 @@ namespace Pulsar4X.Engine.Orders
         [JsonIgnore]
         Entity sendToEntity;
 
-        public static void CreateCommand(string faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
+        public static void CreateCommand(int faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
         {
             List<(string item, long amount)> itemGuidAmounts = new List<(string, long)>();
             foreach (var tup in itemsToMove)
@@ -57,9 +57,9 @@ namespace Pulsar4X.Engine.Orders
             var cmd = new CargoUnloadToOrder()
             {
                 RequestingFactionGuid = faction,
-                EntityCommandingGuid = cargoFromEntity.Guid,
+                EntityCommandingGuid = cargoFromEntity.Id,
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                SendCargoToEntityGuid = cargoToEntity.Guid,
+                SendCargoToEntityGuid = cargoToEntity.Id,
                 ItemsGuidsToTransfer = itemGuidAmounts,
                 ItemICargoablesToTransfer = itemsToMove
             };
@@ -86,7 +86,7 @@ namespace Pulsar4X.Engine.Orders
                 _cargoTransferDB.ItemsLeftToTransfer = ItemICargoablesToTransfer;
                 _cargoTransferDB.OrderedToTransfer = ItemICargoablesToTransfer;
 
-                EntityCommanding.Manager.SetDataBlob(EntityCommanding.ID, _cargoTransferDB);
+                EntityCommanding.Manager.SetDataBlob(EntityCommanding.Id, _cargoTransferDB);
                 CargoTransferProcessor.SetTransferRate(EntityCommanding, _cargoTransferDB);
                 IsRunning = true;
             }
@@ -96,7 +96,7 @@ namespace Pulsar4X.Engine.Orders
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out factionEntity, out _entityCommanding))
             {
-                if (game.GlobalManager.FindEntityByGuid(SendCargoToEntityGuid, out sendToEntity))
+                if (game.GlobalManager.TryGetEntityById(SendCargoToEntityGuid, out sendToEntity))
                 {
                     return true;
                 }

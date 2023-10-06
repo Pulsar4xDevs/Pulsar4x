@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
                 double percent = ((storageType.MaxVolume - freeVolume) / storageType.MaxVolume) * 100;
                 header += " (" + percent.ToString("0.#") + "% full)";
 
-                ImGui.PushID(entityState.Entity.Guid.ToString());
+                ImGui.PushID(entityState.Entity.Id.ToString());
                 if(ImGui.CollapsingHeader(header + "###" + headerId, flags))
                 {
                     if(ImGui.BeginTable(header + "table", 2, Styles.TableFlags))

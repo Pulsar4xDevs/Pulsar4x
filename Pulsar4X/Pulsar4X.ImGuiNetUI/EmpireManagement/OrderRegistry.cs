@@ -6,7 +6,7 @@ using Pulsar4X.DataStructures;
 
 public static class OrderRegistry
 {
-    public static Dictionary<string, Func<string, Entity, EntityCommand>> Actions = new Dictionary<string, Func<string, Entity, EntityCommand>>()
+    public static Dictionary<string, Func<int, Entity, EntityCommand>> Actions = new Dictionary<string, Func<int, Entity, EntityCommand>>()
     {
         { "Move to Nearest Colony", (factionId, fleet) => MoveToNearestColonyAction.CreateCommand(factionId, fleet) },
         { "Refuel", (factionId, fleet) => new RefuelAction() },

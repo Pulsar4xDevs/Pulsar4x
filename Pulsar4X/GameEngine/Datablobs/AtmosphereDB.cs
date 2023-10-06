@@ -62,18 +62,18 @@ namespace Pulsar4X.Datablobs
         //In Earth Atmospheres (atm).
         //</summary>
         [JsonProperty]
-        public Dictionary<GasBlueprint, float> Composition { get; internal set; }
+        public Dictionary<string, float> Composition { get; internal set; }
 
         //<summary>
         //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
         //In Earth Atmospheres (atm).
         //</summary>
         [JsonProperty]
-        public Dictionary<GasBlueprint, float> CompositionByPercent {
+        public Dictionary<string, float> CompositionByPercent {
             get
             {
                 var totalAtm = Composition.Values.Sum();
-                var byPercent = new Dictionary<GasBlueprint, float>();
+                var byPercent = new Dictionary<string, float>();
                 foreach (var kvp in Composition)
                 {
                     byPercent.Add(kvp.Key, kvp.Value / totalAtm * 100.0f);
@@ -105,7 +105,7 @@ namespace Pulsar4X.Datablobs
         /// </summary>
         public AtmosphereDB()
         {
-            Composition = new Dictionary<GasBlueprint, float>();
+            Composition = new Dictionary<string, float>();
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace Pulsar4X.Datablobs
         /// <param name="greenhousePressue"></param>
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
         /// <param name="composition">a Dictionary of gas types as keys and amounts as values</param>
-        internal AtmosphereDB(float pressure, bool hydrosphere, decimal hydroExtent, float greenhouseFactor, float greenhousePressue, float surfaceTemp, Dictionary<GasBlueprint,float> composition)
+        internal AtmosphereDB(float pressure, bool hydrosphere, decimal hydroExtent, float greenhouseFactor, float greenhousePressue, float surfaceTemp, Dictionary<string,float> composition)
         {
             Pressure = pressure;
             Hydrosphere = hydrosphere;
@@ -133,7 +133,7 @@ namespace Pulsar4X.Datablobs
             : this(atmosphereDB.Pressure, atmosphereDB.Hydrosphere, atmosphereDB.HydrosphereExtent,
             atmosphereDB.GreenhouseFactor, atmosphereDB.GreenhousePressure,
             atmosphereDB.SurfaceTemperature,
-            new Dictionary<GasBlueprint, float>(atmosphereDB.Composition)
+            new Dictionary<string, float>(atmosphereDB.Composition)
             )
         {
 
@@ -152,12 +152,13 @@ namespace Pulsar4X.Datablobs
                 return;
             }
 
-            foreach (KeyValuePair<GasBlueprint, float> gas in Composition)
+            foreach (var gas in Composition)
             {
-                AtomsphereDescriptionAtm += gas.Value.ToString("N4") + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
+                var blueprint = OwningEntity.Manager.Game.AtmosphericGases[gas.Key];
+                AtomsphereDescriptionAtm += gas.Value.ToString("N4") + "atm " + blueprint.Name + " " + blueprint.ChemicalSymbol + ", ";
 
                 if (Pressure != 0) // for extra safety.
-                    AtomsphereDescriptionInPercent += (gas.Value / Pressure).ToString("P1") + " " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", "; ///< @todo this is not right!!
+                    AtomsphereDescriptionInPercent += (gas.Value / Pressure).ToString("P1") + " " + blueprint.Name + " " + blueprint.ChemicalSymbol + ", "; ///< @todo this is not right!!
                 else
                 {
                     // this is here for safty, to prevent any oif these being null.

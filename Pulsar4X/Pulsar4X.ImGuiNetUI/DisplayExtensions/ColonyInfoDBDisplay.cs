@@ -9,15 +9,16 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Display(this ColonyInfoDB colony, EntityState entityState, GlobalUIState uiState)
         {
-            ImGui.PushID("###Population " + entityState.Entity.Guid);
+            ImGui.PushID("###Population " + entityState.Entity.Id);
             if(ImGui.CollapsingHeader("Population", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 ImGui.Columns(2);
 
                 foreach(var (species, population) in colony.Population)
                 {
+                    var speciesEntity = uiState.Game.GlobalManager.GetGlobalEntityById(species);
                     ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
-                    ImGui.Text(species.GetDefaultName());
+                    ImGui.Text(speciesEntity.GetDefaultName());
                     ImGui.PopStyleColor();
                     ImGui.NextColumn();
                     ImGui.Text(Stringify.Quantity(population, "0.##", true));

@@ -37,11 +37,11 @@ namespace Pulsar4X.SDL2UI
             if(!IsActive) return;
 
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(512, 325), ImGuiCond.Once);
-            if (ImGui.Begin(Title + " (" + EntityState.BodyType.ToDescription() + ")###" + Entity.Guid, ref IsActive, _flags))
+            if (ImGui.Begin(Title + " (" + EntityState.BodyType.ToDescription() + ")###" + Entity.Id, ref IsActive, _flags))
             {
                 DisplayActions();
 
-                ImGui.BeginTabBar("Tab bar!###Tabs" + Entity.Guid);
+                ImGui.BeginTabBar("Tab bar!###Tabs" + Entity.Id);
 
                 DisplayInfoTab();
                 DisplayConditionalTabs();
@@ -203,9 +203,9 @@ namespace Pulsar4X.SDL2UI
                         else
                             ImGui.Text("Orbiting: ");
                         ImGui.SameLine();
-                        if(ImGui.SmallButton(parent.GetName(_uiState.Faction.Guid)))
+                        if(ImGui.SmallButton(parent.GetName(_uiState.Faction.Id)))
                         {
-                            _uiState.EntityClicked(parent.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                            _uiState.EntityClicked(parent.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                         }
                     }
                     if(positionDB.Children.Count > 0)
@@ -213,9 +213,9 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text("Children:");
                         foreach(var child in positionDB.Children.ToArray())
                         {
-                            if(ImGui.SmallButton(child.GetName(_uiState.Faction.Guid)))
+                            if(ImGui.SmallButton(child.GetName(_uiState.Faction.Id)))
                             {
-                                _uiState.EntityClicked(child.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                                _uiState.EntityClicked(child.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                             }
                         }
                     }
@@ -232,7 +232,7 @@ namespace Pulsar4X.SDL2UI
 
         private void DisplayConditionalTabs()
         {
-            foreach(var db in Entity.DataBlobs)
+            foreach(var db in Entity.Manager.GetAllDataBlobsForEntity(Entity.Id))
             {
                 if(db is AtmosphereDB && ImGui.BeginTabItem("Atmosphere"))
                 {

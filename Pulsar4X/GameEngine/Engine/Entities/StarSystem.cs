@@ -84,7 +84,7 @@ namespace Pulsar4X.Engine
             if(systemID.IsNotNullOrEmpty())
                 ManagerGuid = systemID;
 
-            game.Systems.Add(Guid, this);
+            game.Systems.Add(this);
         }
 
         // public StarSystem(SerializationInfo info, StreamingContext context) : base(info, context)
@@ -126,12 +126,12 @@ namespace Pulsar4X.Engine
 
         private void GameOnPostLoad(object sender, EventArgs eventArgs)
         {
-            if (!Game.Systems.ContainsKey(Guid))
-            {
-                Game.Systems.Add(Guid, this);
-                if(Game.GameMasterFaction != null) //clients wont have a GameMaster
-                    Game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(Guid);
-            }
+            // if (!Game.Systems.ContainsKey(Guid))
+            // {
+            //     Game.Systems.Add(Guid, this);
+            //     if(Game.GameMasterFaction != null) //clients wont have a GameMaster
+            //         Game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(Guid);
+            // }
         }
     }
 }

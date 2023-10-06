@@ -17,7 +17,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
     public class IndustryPannel2 : UpdateWindowState
     {
-        private string _factionID;
+        private int _factionID;
         private FactionInfoDB _factionInfoDB;
         Dictionary<string, (string[] itemIDs, string[] itemNames) > _contructablesByPline = new ();
         private IndustryJob _newConJob;
@@ -61,7 +61,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             _industryDB = industryDB;
             //_job = job;
             _factionInfoDB = state.Faction.GetDataBlob<FactionInfoDB>();
-            _factionID = state.Faction.Guid;
+            _factionID = state.Faction.Id;
 
             OnUpdate();
         }

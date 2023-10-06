@@ -7,10 +7,19 @@ namespace Pulsar4X.Datablobs
 {
     public class SensorPositionDB : BaseDataBlob, IPosition
     {
+        [JsonProperty]
         internal DataFrom GetDataFrom = DataFrom.Parent;
+
+        [JsonProperty]
         public PositionDB ActualEntityPositionDB; //the detected actual entity
+
+        [JsonProperty]
         public PositionDB ParentPositionDB; //detected actual entity positional parent for relative positions.
+
+        [JsonProperty]
         public Vector3 MemoryrelativePosition_m;
+
+        [JsonProperty]
         internal Vector3 AcuracyOffset = new Vector3();
 
         public Vector3 AbsolutePosition

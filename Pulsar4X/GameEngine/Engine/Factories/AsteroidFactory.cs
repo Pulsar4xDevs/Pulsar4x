@@ -74,7 +74,8 @@ namespace Pulsar4X.Engine
                 sensorPfil
             };
 
-            Entity newELE = new Entity(starSys, planetDBs);
+            Entity newELE = Entity.Create();
+            starSys.AddEntity(newELE, planetDBs);
             return newELE;
         }
 
@@ -128,7 +129,8 @@ namespace Pulsar4X.Engine
                 sensorPfil
             };
 
-            Entity newELE = new Entity(origOrbit.OwningEntity.Manager, planetDBs);
+            Entity newELE = Entity.Create();
+            origOrbit.OwningEntity.Manager.AddEntity(newELE, planetDBs);
             return newELE;
         }
     }

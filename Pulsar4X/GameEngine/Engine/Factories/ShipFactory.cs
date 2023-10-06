@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Security.Cryptography;
-using Newtonsoft.Json;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Designs;
@@ -105,17 +101,19 @@ namespace Pulsar4X.Engine
             dataBlobs.Add(compInstances);
             OrderableDB ordable = new OrderableDB();
             dataBlobs.Add(ordable);
-            var ship = Entity.Create(starsys, ownerFaction.Guid, dataBlobs);
+            var ship = Entity.Create();
+            ship.FactionOwnerID = ownerFaction.Id;
+            starsys.AddEntity(ship, dataBlobs);
 
 
             //some DB's need tobe created after the entity.
-            var namedb = new NameDB(ship.Guid.ToString());
+            var namedb = new NameDB(ship.Id.ToString());
             if (shipName == null)
             {
                 shipName = NameFactory.GetShipName(ownerFaction.Manager.Game);
             }
 
-            namedb.SetName(ownerFaction.Guid, shipName);
+            namedb.SetName(ownerFaction.Id, shipName);
 
             ship.SetDataBlob(namedb);
             ship.SetDataBlob(orbit);

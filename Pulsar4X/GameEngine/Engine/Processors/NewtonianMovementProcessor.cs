@@ -11,11 +11,6 @@ namespace Pulsar4X.Engine
 
     public class NewtonionMovementProcessor : IHotloopProcessor
     {
-        private static readonly int _obtDBIdx = EntityManager.GetTypeIndex<OrbitDB>();
-        private static readonly int _nmDBIdx = EntityManager.GetTypeIndex<NewtonMoveDB>();
-        private static readonly int _nthDBIdx = EntityManager.GetTypeIndex<NewtonThrustAbilityDB>();
-        private static readonly int _posDBIdx = EntityManager.GetTypeIndex<PositionDB>();
-        private static readonly int _massDBIdx = EntityManager.GetTypeIndex<MassVolumeDB>();
         public NewtonionMovementProcessor()
         {
         }
@@ -39,7 +34,7 @@ namespace Pulsar4X.Engine
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
             //List<Entity> entites = manager.GetAllEntitiesWithDataBlob<NewtonMoveDB>(_nmDBIdx);
-            var nmdb = manager.GetAllDataBlobsOfType<NewtonMoveDB>(_nmDBIdx);
+            var nmdb = manager.GetAllDataBlobsOfType<NewtonMoveDB>();
             foreach (var db in nmdb)
             {
                 NewtonMove(db, deltaSeconds);
@@ -62,9 +57,9 @@ namespace Pulsar4X.Engine
             var entity = newtonMoveDB.OwningEntity;
             //NewtonMoveDB newtonMoveDB = entity.GetDataBlob<NewtonMoveDB>();
             var factionDataStore = entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
-            NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>(_nthDBIdx);
-            PositionDB positionDB = entity.GetDataBlob<PositionDB>(_posDBIdx);
-            double massTotal_Kg = entity.GetDataBlob<MassVolumeDB>(_massDBIdx).MassTotal;
+            NewtonThrustAbilityDB newtonThrust = entity.GetDataBlob<NewtonThrustAbilityDB>();
+            PositionDB positionDB = entity.GetDataBlob<PositionDB>();
+            double massTotal_Kg = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             double parentMass_kg = newtonMoveDB.ParentMass;
 
             var manager = entity.Manager;
@@ -84,7 +79,7 @@ namespace Pulsar4X.Engine
                 //double timeStep = Math.Max(secondsToItterate / speed_kms, 1);
                 //timeStep = Math.Min(timeStep, secondsToItterate);
                 double timeStepInSeconds = 1;//because the above seems unstable and looses energy.
-                double distanceToParent_m = positionDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>(_posDBIdx));
+                double distanceToParent_m = positionDB.GetDistanceTo_m(newtonMoveDB.SOIParent.GetDataBlob<PositionDB>());
 
                 distanceToParent_m = Math.Max(distanceToParent_m, 0.1); //don't let the distance be 0 (once collision is in this will likely never happen anyway)
 
@@ -155,7 +150,7 @@ namespace Pulsar4X.Engine
                     //if our parent is a regular kepler object (normaly this is the case)
                     if (newtonMoveDB.SOIParent.HasDataBlob<OrbitDB>())
                     {
-                        var orbitDB = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>(_obtDBIdx);
+                        var orbitDB = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>();
                         newParent = orbitDB.Parent;
                         var parentVelocity = orbitDB.InstantaneousOrbitalVelocityVector_m(entity.StarSysDateTime);
                         parentrelativeVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
@@ -163,13 +158,13 @@ namespace Pulsar4X.Engine
                     }
                     else //if (newtonMoveDB.SOIParent.HasDataBlob<NewtonMoveDB>())
                     {   //this will pretty much never happen.
-                        newParent = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>(_nmDBIdx).SOIParent;
+                        newParent = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().SOIParent;
                         var parentVelocity = newtonMoveDB.SOIParent.GetDataBlob<NewtonMoveDB>().CurrentVector_ms;
                         parentrelativeVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
                     }
                     parentMass_kg = newParent.GetDataBlob<MassVolumeDB>().MassDry;
 
-                    Vector3 posrelativeToNewParent = positionDB.AbsolutePosition - newParent.GetDataBlob<PositionDB>(_posDBIdx).AbsolutePosition;
+                    Vector3 posrelativeToNewParent = positionDB.AbsolutePosition - newParent.GetDataBlob<PositionDB>().AbsolutePosition;
 
 
                     var dateTime = dateTimeNow + TimeSpan.FromSeconds(deltaSeconds - secondsToItterate);

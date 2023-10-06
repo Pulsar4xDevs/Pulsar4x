@@ -1,15 +1,31 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Industry;
 
 namespace Pulsar4X.DataStructures
 {
-    [JsonConverter(typeof(SafeDictionaryConverter))]
-    public class SafeDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IEquatable<SafeDictionary<TKey, TValue>>
+
+    public interface ISafeDictionary
     {
+        object this[int index] { get; set; }
+    }
+
+    [JsonConverter(typeof(SafeDictionaryConverter))]
+    public class SafeDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IEquatable<SafeDictionary<TKey, TValue>>, ISafeDictionary
+    {
+        object ISafeDictionary.this[int index]
+        {
+            get => this[(TKey)(object)index];
+            set => this[(TKey)(object)index] = (TValue)value;
+        }
+
         private readonly Dictionary<TKey, TValue> _innerDictionary = new Dictionary<TKey, TValue>();
         private readonly object _lock = new object();
         public delegate void DictionaryChangedHandler(TKey key, TValue value);
@@ -105,6 +121,18 @@ namespace Pulsar4X.DataStructures
             lock(_lock) return _innerDictionary.ContainsKey(key);
         }
 
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
+        {
+            if(ContainsKey(key))
+            {
+                value = _innerDictionary[key];
+                return true;
+            }
+
+            value = default(TValue);
+            return false;
+        }
+
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
             List<KeyValuePair<TKey, TValue>> snapshot;
@@ -174,10 +202,10 @@ namespace Pulsar4X.DataStructures
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             Type keyType = objectType.GetGenericArguments()[0];
-            Type valueType = objectType.GetGenericArguments()[1];
-            var constructedDictType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
+            Type baseValueType = objectType.GetGenericArguments()[1];
 
-            var innerDict = serializer.Deserialize(reader, constructedDictType) as IDictionary;
+            var baseDictType = typeof(Dictionary<,>).MakeGenericType(keyType, baseValueType);
+            var innerDict = serializer.Deserialize(reader, baseDictType) as IDictionary;
             var result = Activator.CreateInstance(objectType, innerDict);
             return result;
         }
@@ -188,6 +216,15 @@ namespace Pulsar4X.DataStructures
             var innerDictionaryProperty = objectType.GetProperty("InnerDictionary", BindingFlags.NonPublic | BindingFlags.Instance);
             var innerDictionaryValue = innerDictionaryProperty.GetValue(value);
             serializer.Serialize(writer, innerDictionaryValue);
+        }
+
+        private Type GetDerivedType(Type baseType)
+        {
+            if(baseType == typeof(EntityManager))
+            {
+                return typeof(StarSystem);
+            }
+            return baseType;
         }
     }
 

@@ -144,11 +144,11 @@ namespace Pulsar4X.SDL2UI
 
     public class OverViewPannel
     {
-        private static string _entityID;
+        private static int _entityID;
         private static Dictionary<string, IndustryTypeBlueprint> _industryTypes;
         public static void Setup(EntityState selectedEntity)
         {
-            _entityID = selectedEntity.Entity.Guid;
+            _entityID = selectedEntity.Entity.Id;
             _industryTypes = new (selectedEntity.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.IndustryTypes);
             
         }
@@ -163,11 +163,11 @@ namespace Pulsar4X.SDL2UI
     public class FacilitiesViewPannel
     {
 
-        private static string _entityID;
+        private static int _entityID;
         private static Dictionary<string, IndustryTypeBlueprint> _industryTypes;
         public static void Setup(EntityState selectedEntity)
         {
-            _entityID = selectedEntity.Entity.Guid;
+            _entityID = selectedEntity.Entity.Id;
             _industryTypes = new (selectedEntity.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.IndustryTypes);
             
         }

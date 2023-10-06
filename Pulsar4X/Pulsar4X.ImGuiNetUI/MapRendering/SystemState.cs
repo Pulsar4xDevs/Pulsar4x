@@ -11,10 +11,10 @@ namespace Pulsar4X.SDL2UI
     /// <summary>
     /// System state.
     /// *Notes*
-    /// Currently Entity has an Entity.ChangeEvent 
-    /// each individual EntityState listens to this and changes the IsDestroyed flag if needed. 
+    /// Currently Entity has an Entity.ChangeEvent
+    /// each individual EntityState listens to this and changes the IsDestroyed flag if needed.
     /// Should that be done here instead? TODO: profile this to see which is faster, if either.
-    /// 
+    ///
     /// </summary>
     public class SystemState
     {
@@ -25,21 +25,25 @@ namespace Pulsar4X.SDL2UI
         internal List<EntityChangeData> SensorChanges = new List<EntityChangeData>();
         ManagerSubPulse PulseMgr;
         AEntityChangeListener _changeListner;
-        public List<string> EntitysToBin = new List<string>();
-        public List<string> EntitiesAdded = new List<string>();
+        public List<int> EntitysToBin = new ();
+        public List<int> EntitiesAdded = new ();
         public List<EntityChangeData> SystemChanges = new List<EntityChangeData>();
-        public Dictionary<string, EntityState> EntityStatesWithNames = new Dictionary<string, EntityState>();
-        public Dictionary<string, EntityState> EntityStatesWithPosition = new Dictionary<string, EntityState>();
-        public Dictionary<string, EntityState> EntityStatesColonies = new Dictionary<string, EntityState>();
+        public Dictionary<int, EntityState> EntityStatesWithNames = new ();
+        public Dictionary<int, EntityState> EntityStatesWithPosition = new ();
+        public Dictionary<int, EntityState> EntityStatesColonies = new ();
 
         public SystemState(StarSystem system, Entity faction)
         {
             StarSystem = system;
-            SystemContacts = system.GetSensorContacts(faction.Guid);
+            SystemContacts = system.GetSensorContacts(faction.Id);
             _sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
             _faction = faction;
-            foreach (Entity entityItem in StarSystem.GetEntitiesByFaction(faction.Guid))
+
+            // FIXME: couldn't get this working with GetEntitiesByFaction, it left out the stars, planets etc
+            var factionEntities = StarSystem.GetEntitiesByFaction(faction.Id);
+            //var allEntities = StarSystem.GetAllEntites();
+            foreach (Entity entityItem in factionEntities)
             {
                 var entityState = new EntityState(entityItem);
                 // Add Data to State if Available
@@ -55,28 +59,26 @@ namespace Pulsar4X.SDL2UI
                 // Add To Lists
                 if (entityItem.HasDataBlob<NameDB>())
                 {
-                    EntityStatesWithNames.Add(entityItem.Guid, entityState);
+                    EntityStatesWithNames.Add(entityItem.Id, entityState);
                 }
                 if (entityItem.HasDataBlob<PositionDB>())
                 {
-                    EntityStatesWithPosition.Add(entityItem.Guid, entityState);
+                    EntityStatesWithPosition.Add(entityItem.Id, entityState);
                 }
                 if (entityItem.HasDataBlob<ColonyInfoDB>())
                 {
-                    EntityStatesColonies.Add(entityItem.Guid, entityState);
+                    EntityStatesColonies.Add(entityItem.Id, entityState);
                 }
             }
 
-            var listnerblobs = new List<int>();
-            listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
-            AEntityChangeListener changeListner = new EntityChangeListener(StarSystem, faction, listnerblobs);//, listnerblobs);
+            AEntityChangeListener changeListner = new EntityChangeListener(StarSystem, faction, new List<Type>() { typeof(PositionDB) });//, listnerblobs);
             _changeListner = changeListner;
 
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
             {
                 var entityState = new EntityState(sensorContact) { Name = "Unknown" };
-                EntityStatesWithNames.Add(sensorContact.ActualEntityGuid, entityState);
-                EntityStatesWithPosition.Add(sensorContact.ActualEntityGuid, entityState);
+                EntityStatesWithNames.Add(sensorContact.ActualEntityId, entityState);
+                EntityStatesWithPosition.Add(sensorContact.ActualEntityId, entityState);
             }
 
         }
@@ -99,19 +101,17 @@ namespace Pulsar4X.SDL2UI
 
                 var entityState = new EntityState(entityItem);// { Name = "Unknown" };
                 entityState.Name = entityItem.GetDataBlob<NameDB>().DefaultName;
-                EntityStatesWithNames.Add(entityItem.Guid, entityState);
+                EntityStatesWithNames.Add(entityItem.Id, entityState);
                 if (entityItem.HasDataBlob<PositionDB>())
                 {
-                    EntityStatesWithPosition.Add(entityItem.Guid, entityState);
+                    EntityStatesWithPosition.Add(entityItem.Id, entityState);
                 }
                 else if (entityItem.HasDataBlob<ColonyInfoDB>())
                 {
-                    EntityStatesColonies.Add(entityItem.Guid, entityState);
+                    EntityStatesColonies.Add(entityItem.Id, entityState);
                 }
             }
 
-            var listnerblobs = new List<int>();
-            listnerblobs.Add(EntityManager.DataBlobTypes[typeof(PositionDB)]);
             AEntityChangeListener changeListner = new EntityChangeListenerSM(StarSystem);//, listnerblobs);
             _changeListner = changeListner;
             /*
@@ -129,33 +129,33 @@ namespace Pulsar4X.SDL2UI
                 {
                     case EntityChangeData.EntityChangeType.EntityAdded:
                         var entityItem = change.Entity;
-                        EntitiesAdded.Add(change.Entity.Guid);
+                        EntitiesAdded.Add(change.Entity.Id);
                         var entityState = new EntityState(entityItem);// { Name = "Unknown" };
                         if (entityItem.HasDataBlob<NameDB>())
                         {
-                            entityState.Name = entityItem.GetDataBlob<NameDB>().GetName(_faction.Guid);
-                            EntityStatesWithNames.Add(entityItem.Guid, entityState);
+                            entityState.Name = entityItem.GetDataBlob<NameDB>().GetName(_faction.Id);
+                            EntityStatesWithNames.Add(entityItem.Id, entityState);
                         }
                         if (entityItem.HasDataBlob<PositionDB>())
                         {
-                            EntityStatesWithPosition.Add(entityItem.Guid, entityState);
+                            EntityStatesWithPosition.Add(entityItem.Id, entityState);
                         }
                         else if( entityItem.HasDataBlob<ColonyInfoDB>())
                         {
-                            EntityStatesColonies.Add(entityItem.Guid, entityState);
+                            EntityStatesColonies.Add(entityItem.Id, entityState);
                         }
                         break;
-                    //if an entity moves from one system to another, then this should be triggered, 
-                    //currently Entity.ChangeEvent probibly does too, but we might have to tweak this. maybe add another enum? 
+                    //if an entity moves from one system to another, then this should be triggered,
+                    //currently Entity.ChangeEvent probibly does too, but we might have to tweak this. maybe add another enum?
                     case EntityChangeData.EntityChangeType.EntityRemoved:
-                        EntitysToBin.Add(change.Entity.Guid);
+                        EntitysToBin.Add(change.Entity.Id);
                         break;
                 }
 
         }
 
         /// <summary>
-        /// Populates the EntitesToBin list and changes. 
+        /// Populates the EntitesToBin list and changes.
         /// Call this before any UI work done.
         /// </summary>
         public void PreFrameSetup()
@@ -174,10 +174,10 @@ namespace Pulsar4X.SDL2UI
 
             foreach (var item in EntityStatesWithPosition.Values)
             {
-                if (item.IsDestroyed) //items get flagged via an event triggered by worker threads. 
+                if (item.IsDestroyed) //items get flagged via an event triggered by worker threads.
                 {
-                    if(!EntitysToBin.Contains(item.Entity.Guid))
-                        EntitysToBin.Add(item.Entity.Guid);
+                    if(!EntitysToBin.Contains(item.Entity.Id))
+                        EntitysToBin.Add(item.Entity.Id);
                 }
             }
 
@@ -193,8 +193,8 @@ namespace Pulsar4X.SDL2UI
             {
                 EntityStatesWithPosition.Remove(itemGuid);
             }
-            EntitysToBin = new List<string>();
-            EntitiesAdded = new List<string>();
+            EntitysToBin = new List<int>();
+            EntitiesAdded = new List<int>();
             SensorChanges = new List<EntityChangeData>();
             SystemChanges = new List<EntityChangeData>();
             foreach (var item in EntityStatesWithPosition.Values)

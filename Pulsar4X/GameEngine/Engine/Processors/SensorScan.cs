@@ -14,9 +14,7 @@ namespace Pulsar4X.Engine
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
             EntityManager manager = entity.Manager;
-            Entity faction;// = entity.GetDataBlob<OwnedDB>().OwnedByFaction;
-            entity.Manager.FindEntityByGuid(entity.FactionOwnerID, out faction);
-
+            Entity faction = entity.Manager.Game.Factions[entity.FactionOwnerID];
 
             var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
 
@@ -41,7 +39,7 @@ namespace Pulsar4X.Engine
                         sensorMgr = manager.FactionSensorContacts[entity.FactionOwnerID];
 
 
-                    var detections = SensorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition, detectableEntitys, atDateTime, faction.Guid, true);
+                    var detections = SensorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition, detectableEntitys, atDateTime, faction.Id, true);
                     SensorInfoDB sensorInfo;
                     for (int i = 0; i < detections.Length; i++)
                     {
@@ -50,10 +48,10 @@ namespace Pulsar4X.Engine
                         var detectableEntity = detectableEntitys[i];
                         if (detectionValues.SignalStrength_kW > 0.0)
                         {
-                            if (sensorMgr.SensorContactExists(detectableEntity.Guid))
+                            if (sensorMgr.SensorContactExists(detectableEntity.Id))
                             {
                                 //sensorInfo = knownContacts[detectableEntity.ID].GetDataBlob<SensorInfoDB>();
-                                sensorInfo = sensorMgr.GetSensorContact(detectableEntity.Guid).SensorInfo;
+                                sensorInfo = sensorMgr.GetSensorContact(detectableEntity.Id).SensorInfo;
                                 sensorInfo.LatestDetectionQuality = detectionValues;
                                 sensorInfo.LastDetection = atDateTime;
                                 if (sensorInfo.HighestDetectionQuality.SignalQuality < detectionValues.SignalQuality)
@@ -67,16 +65,16 @@ namespace Pulsar4X.Engine
                             {
                                 SensorContact contact = new SensorContact(faction, detectableEntity, atDateTime);
                                 sensorMgr.AddContact(contact);
-                                sensorAbl.CurrentContacts[detectableEntity.Guid] = detectionValues;
+                                sensorAbl.CurrentContacts[detectableEntity.Id] = detectionValues;
 
                                 //knownContacts.Add(detectableEntity.ID, SensorEntityFactory.UpdateSensorContact(receverFaction, sensorInfo)); moved this line to the SensorInfoDB constructor
                             }
 
                         }
-                        else if (sensorMgr.SensorContactExists(detectableEntity.Guid) && sensorAbl.CurrentContacts.ContainsKey(detectableEntity.Guid))
+                        else if (sensorMgr.SensorContactExists(detectableEntity.Id) && sensorAbl.CurrentContacts.ContainsKey(detectableEntity.Id))
                         {
-                            sensorAbl.CurrentContacts.Remove(detectableEntity.Guid);
-                            sensorAbl.OldContacts[detectableEntity.Guid] = detectionValues;
+                            sensorAbl.CurrentContacts.Remove(detectableEntity.Id);
+                            sensorAbl.OldContacts[detectableEntity.Id] = detectionValues;
                         }
                     }
 

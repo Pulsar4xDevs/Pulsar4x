@@ -35,15 +35,16 @@ namespace Pulsar4X.Engine.Sol
             PositionDB planetPositionDB = new PositionDB(planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
             var pressureAtm = Pressure.PaToAtm(1f);
-            var atmoGasses = new Dictionary<GasBlueprint, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { game.GetGasBySymbol("N2"), 0.99f * pressureAtm },
-                { game.GetGasBySymbol("CH4"), 0.005f * pressureAtm },
-                { game.GetGasBySymbol("CO"), 0.0025f * pressureAtm },
+                { game.GetGasBySymbol("N2").UniqueID, 0.99f * pressureAtm },
+                { game.GetGasBySymbol("CH4").UniqueID, 0.005f * pressureAtm },
+                { game.GetGasBySymbol("CO").UniqueID, 0.0025f * pressureAtm },
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -229, atmoGasses);
 
-            Entity planet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
+            Entity planet = Entity.Create();
+            sol.AddEntity(planet, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }
