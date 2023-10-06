@@ -7,7 +7,7 @@ namespace Pulsar4X.Orbital
     /// <summary>
     /// Orbit math.
     /// note multiple simular functions for doing the same thing, some of these are untested.
-    /// Take care when using unless the function has a decent test in the tests project. 
+    /// Take care when using unless the function has a decent test in the tests project.
     /// Some simular functions with simular inputs left in for future performance testing (ie one of the two might be slightly more performant).
     /// </summary>
     public class OrbitalMath
@@ -40,7 +40,7 @@ namespace Pulsar4X.Orbital
 
 			// If we run into negative eccentricity we have big problems
 			Debug.Assert(eccentricity >= 0, "Negative eccentricity, this is physically impossible");
-            
+
             //note that a hyperbolic orbit will have a negitive semiMajorAxis
             semiMajorAxis = -standardGravParam / (2 * specificOrbitalEnergy);
             if (eccentricity > 1) //hypobola
@@ -51,7 +51,7 @@ namespace Pulsar4X.Orbital
             {
                 p = semiMajorAxis * (1 - eccentricity * eccentricity);
             }
-            else //parabola, currently forcing this to be a hyperbola. 
+            else //parabola, currently forcing this to be a hyperbola.
             {
                 p = angularSpeed * angularSpeed / standardGravParam;
                 eccentricity += 1.0E-15;
@@ -59,7 +59,7 @@ namespace Pulsar4X.Orbital
 
             double semiMinorAxis = EllipseMath.SemiMinorAxis(semiMajorAxis, eccentricity);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularSpeed); //should be 0 in 2d. or pi if counter clockwise orbit. 
+            double inclination = Math.Acos(angularVelocity.Z / angularSpeed); //should be 0 in 2d. or pi if counter clockwise orbit.
 
             if (double.IsNaN(inclination))
                 inclination = 0;
@@ -281,7 +281,7 @@ namespace Pulsar4X.Orbital
             Vector3 foo1 = Vector3.Cross(velocity, angularMomentum) / sgp;
             Vector3 foo2 = Vector3.Normalise(position);
             Vector3 E = foo1 - foo2;
-            
+
             if (E.Length() < Epsilon)
             {
                 return Vector3.Zero;
@@ -292,7 +292,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// Slighty different way of calculating eccentrictyVector.
-        /// keep around till profiling pass to see which is faster. 
+        /// keep around till profiling pass to see which is faster.
         /// </summary>
         /// <param name="sgp"></param>
         /// <param name="position"></param>
@@ -317,7 +317,7 @@ namespace Pulsar4X.Orbital
 
         #region TrueAnomaly
 
-        
+
         /// <summary>
         /// The True Anomaly in radians
         /// https://en.wikipedia.org/wiki/True_anomaly#From_state_vectors
@@ -347,9 +347,16 @@ namespace Pulsar4X.Orbital
 
                 return Angle.NormaliseRadiansPositive(trueAnomaly);
             }
-            else //is hyperbolic. 
+            else //is hyperbolic.
             {
-                throw new NotImplementedException();
+                Vector3 hVector = Vector3.Cross(position, velocity);
+                double h = hVector.Length();
+
+                double cosNu = Vector3.Dot(eccentVector, position) / (e * r);
+                double sinNu = Vector3.Dot(position, velocity) / (e * h);
+                double nu = Math.Atan2(sinNu, cosNu);
+
+                return nu;
             }
         }
 
@@ -372,7 +379,7 @@ namespace Pulsar4X.Orbital
             var TA = Math.Atan2(TAy, TAx);
             return TA;
         }
-        
+
         public static double TrueAmomalyAtRadius(KeplerElements ke, double r)
         {
             var p = EllipseMath.SemiLatusRectum(ke.SemiMajorAxis, ke.Eccentricity);
@@ -421,7 +428,7 @@ namespace Pulsar4X.Orbital
         public static Vector3 ParentLocalVeclocityVector(double sgp, Vector3 position, double sma, double eccentricity, double trueAnomaly, double arguemntOfPeriapsis, double inclination, double loAN)
         {
             //TODO: is it worth storing the resulting matrix somewhere, and then just doing the transform on it?
-            //since loAN and incl don't change, it could be stored in orbitDB if we're doing this often enoguh. 
+            //since loAN and incl don't change, it could be stored in orbitDB if we're doing this often enoguh.
             var orbitLocal = (Vector3)ObjectLocalVelocityVector(sgp, position, sma, eccentricity, trueAnomaly, arguemntOfPeriapsis);
 
             var mtxLoAN = Matrix3d.IDRotateZ(-loAN);
@@ -486,7 +493,7 @@ namespace Pulsar4X.Orbital
             var loAN = CalculateLongitudeOfAscendingNode(nodeVector);
             var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, currentVelocityVector);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
+            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit.
             if (double.IsNaN(inclination))
                 inclination = 0;
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
@@ -557,7 +564,7 @@ namespace Pulsar4X.Orbital
             var loAN = CalculateLongitudeOfAscendingNode(nodeVector);
             var trueAnomaly = OrbitalMath.TrueAnomaly(sgp, position, currentVelocityVector);
 
-            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit. 
+            double inclination = Math.Acos(angularVelocity.Z / angularVelocity.Length()); //should be 0 in 2d. or pi if counter clockwise orbit.
             if (double.IsNaN(inclination))
                 inclination = 0;
             var aop = OrbitalMath.GetArgumentOfPeriapsis(position, inclination, loAN, trueAnomaly);
@@ -593,7 +600,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// returns state vectors, TODO velocity vector should be 3d. TODO Use Orbit.StateVectors
-        /// As this uses newtonion method to calculate eccentricAnomaly, this is relatively expensive. 
+        /// As this uses newtonion method to calculate eccentricAnomaly, this is relatively expensive.
         /// </summary>
         /// <param name="ke"></param>
         /// <param name="dateTime"></param>
@@ -607,7 +614,7 @@ namespace Pulsar4X.Orbital
             double i = ke.Inclination;
             double e = ke.Eccentricity;
             double a = ke.SemiMajorAxis;
-            
+
             double trueAnomaly;
 
             if (e < 1)
@@ -633,7 +640,7 @@ namespace Pulsar4X.Orbital
             double z = Math.Sin(i) * Math.Sin(angleToObj);
             double radius = a * (1 - e * e) / (1 + e * Math.Cos(trueAnomaly));
             var position = new Vector3(x, y, z) * radius;
-            
+
             (double speed, double headingAngle) = ObjectLocalVelocityPolar(sgp, position, a, e, trueAnomaly, ke.AoP);
             var v = new Vector2()
             {
@@ -650,7 +657,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// This returns the heading measured from the periapsis (AoP) in radians
-        /// Add the LoP to this to get the true heading in a 2d orbit. 
+        /// Add the LoP to this to get the true heading in a 2d orbit.
         /// </summary>
         /// <returns>The orbital velocity polar coordinate.</returns>
         /// <param name="sgp">Sgp.</param>
@@ -677,7 +684,7 @@ namespace Pulsar4X.Orbital
         /// <param name="semiMajAxis">Semi major axis.</param>
         /// <param name="trueAnomaly">True anomaly.</param>
         /// <param name="aoP">Argument Of Periapsis</param>
-        /// 
+        ///
         public static double ObjectLocalHeading(Vector3 pos, double eccentricity, double semiMajAxis, double trueAnomaly, double aoP)
         {
 
@@ -716,8 +723,8 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Calculates distance/s on an orbit by calculating positions now and second in the future. 
-        /// Fairly slow and inefficent. 
+        /// Calculates distance/s on an orbit by calculating positions now and second in the future.
+        /// Fairly slow and inefficent.
         /// </summary>
         /// <returns>the distance traveled in a second</returns>
         /// <param name="orbit">Orbit.</param>
@@ -749,7 +756,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// This is an aproximation of the mean velocity of an orbit. 
+        /// This is an aproximation of the mean velocity of an orbit.
         /// </summary>
         /// <returns>The orbital velocity in au.</returns>
         /// <param name="orbit">Orbit.</param>
@@ -775,7 +782,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// Gets the eccentric anomaly.
-        /// This can take a number of itterations to calculate so may not be fast. 
+        /// This can take a number of itterations to calculate so may not be fast.
         /// </summary>
         /// <returns>The eccentric anomaly.</returns>
         /// <param name="eccentricity">Eccentricity.</param>
@@ -804,7 +811,7 @@ namespace Pulsar4X.Orbital
                 /*                   E(n) - e sin(E(n)) - M(t)
                  * E(n+1) = E(n) - ( ------------------------- )
                  *                        1 - e cos(E(n)
-                 * 
+                 *
                  * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
                  * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
                 */
@@ -838,7 +845,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Calculates the Eccentric Anomaly given True Anomaly and eccentricity. 
+        /// Calculates the Eccentric Anomaly given True Anomaly and eccentricity.
         /// </summary>
         /// <param name="trueAnomaly">Should be a normalised angle between 2pi and -2pi</param>
         /// <param name="eccentricity"></param>
@@ -874,14 +881,14 @@ namespace Pulsar4X.Orbital
                     var q = Vector3.Dot(position, velocity);
                     var Ex = 1 - radius / semiMajorAxis;
                     var Ey = q / Math.Sqrt(semiMajorAxis * sgp);
-                    var E = Math.Atan2(Ey, Ex); // eccentric anomoly 
+                    var E = Math.Atan2(Ey, Ex); // eccentric anomoly
                     return E;
                 }
         */
-        
+
         /// <summary>
         /// known as F.
-        /// This can take a number of itterations to calculate so may not be fast. 
+        /// This can take a number of itterations to calculate so may not be fast.
         /// </summary>
         /// <returns>The eccentric anomaly.</returns>
         /// <param name="eccentricity">Eccentricity.</param>
@@ -908,7 +915,7 @@ namespace Pulsar4X.Orbital
                  */
                 var dividend = hyperbolicMeanAnomaly - eccentricity * Math.Sinh(F[i]) + F[i];
                 var divisor = eccentricity * Math.Cosh(F[i]) - 1;
-                
+
                 F[i + 1] = F[i] + dividend / divisor;
                 i++;
             } while (Math.Abs(F[i] - F[i - 1]) > epsilon && i + 1 < numIterations);
@@ -920,7 +927,7 @@ namespace Pulsar4X.Orbital
 
             return F[i - 1];
         }
-        
+
         #endregion
 
         #region MeanAnomaly
@@ -1016,7 +1023,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// Another way of getting position, untested, currently unused, copied from somehwere on the net. 
+        /// Another way of getting position, untested, currently unused, copied from somehwere on the net.
         /// Untested
         /// </summary>
         /// <returns>The position.</returns>
@@ -1123,7 +1130,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// Alternate way to get TimeFromPeriapsis
-        /// Doesn't work with Hypobolic orbits due to period being undefined. 
+        /// Doesn't work with Hypobolic orbits due to period being undefined.
         /// </summary>
         /// <returns>The epoch.</returns>
         /// <param name="semiMaj">Semi maj.</param>
@@ -1134,7 +1141,7 @@ namespace Pulsar4X.Orbital
         {
 
             double areaOfEllipse = semiMaj * semiMin * Math.PI;
-            double eccentricAnomalyArea = EllipseMath.AreaOfEllipseSector(semiMaj, semiMaj, 0, eccentricAnomaly); //we get the area as if it's a circile. 
+            double eccentricAnomalyArea = EllipseMath.AreaOfEllipseSector(semiMaj, semiMaj, 0, eccentricAnomaly); //we get the area as if it's a circile.
             double trueArea = semiMin / semiMaj * eccentricAnomalyArea; //we then multiply the result by a fraction of b / a
                                                                         //double areaOfSegment = EllipseMath.AreaOfEllipseSector(semiMaj, semiMin, 0, lop + trueAnomaly);
 
@@ -1178,7 +1185,7 @@ namespace Pulsar4X.Orbital
             var p = EllipseMath.SemiLatusRectum(a, e);
             var angle = EllipseMath.AngleAtRadus(radius, p, e);
             //var eccentricAnomoly = GetEccentricAnomalyNewtonsMethod()
-            //var meanAnomaly = GetMeanAnomaly(orbit.Eccentricity, 
+            //var meanAnomaly = GetMeanAnomaly(orbit.Eccentricity,
             return TimeFromPeriapsis(a, sgp, orbit.MeanAnomalyAtEpoch);
         }
 
@@ -1222,17 +1229,17 @@ namespace Pulsar4X.Orbital
         public static double TimeHyperbolicToTrueAnomalyFromPeriaps(KeplerElements ke, double trueAnomaly)
         {
             var t1 = TimeHyperbolicFromEpochToPeriaps(ke);
-            
+
             var ha = GetHyperbolicAnomaly(ke.Eccentricity, trueAnomaly);
             var hma = GetHyperbolicMeanAnomaly(ke.Eccentricity, ha);
             var t2 = TimeFromHyperbolicMeanAnomaly(ke, hma);
 
             return t2 - t1;
         }
-        
-        
+
+
         #endregion
-        
+
         /// <summary>
         /// Gets the sphere of influence radius of a given body
         /// </summary>
@@ -1323,7 +1330,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// Currently this only calculates the change in velocity from 0 to planet radius +* 0.33333.
-        /// TODO: add gravity drag and atmosphere drag, and tech improvements for such.  
+        /// TODO: add gravity drag and atmosphere drag, and tech improvements for such.
         /// </summary>
         /// <param name="planetRadiusInM"></param>
         /// <param name="planetMassDryInKG"></param>
@@ -1354,7 +1361,7 @@ namespace Pulsar4X.Orbital
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="moverAbsolutePos"></param>
         /// <param name="speed"></param>
@@ -1422,8 +1429,8 @@ namespace Pulsar4X.Orbital
             //dir = normalize(p - pos);
             return (p, atDateTime + TimeSpan.FromSeconds(tim));
         }
-        
-        
+
+
                /// <summary>
         /// THIS NEEDS TESTING.
         /// Hohmann the specified GravParamOfParent, semiMajAxisCurrentBody and semiMajAxisOfTarget.
@@ -1456,7 +1463,7 @@ namespace Pulsar4X.Orbital
 
 
         /// <summary>
-        /// Hohmann transfer manuver, assumes a cicular orbit. 
+        /// Hohmann transfer manuver, assumes a cicular orbit.
         /// </summary>
         /// <param name="sgp"></param>
         /// <param name="r1">radius from parent</param>
@@ -1473,7 +1480,7 @@ namespace Pulsar4X.Orbital
             var dvb = wcb2 * wcb3;
 
             var timeTo2ndBurn = Math.PI * Math.Sqrt((Math.Pow(r1 + r2, 3)) / (8 * sgp));
-            
+
             var manuvers = new (Vector3 burn1, double timeInSeconds)[2];
             manuvers[0] = (new Vector3(0, dva, 0), 0);
             manuvers[1] = (new Vector3(0, dvb, 0), timeTo2ndBurn);
