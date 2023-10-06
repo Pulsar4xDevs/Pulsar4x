@@ -31,13 +31,14 @@ namespace Pulsar4X.Engine
                 foreach (var gas in atmoDB.Composition)
                 {
                     atmoDB.Pressure += gas.Value;
+                    var blueprint = atmoDB.OwningEntity.Manager.Game.AtmosphericGases[gas.Key];
 
                     // only add a greenhouse gas if it is not frozen or liquid:
-                    if (atmoDB.SurfaceTemperature >= gas.Key.BoilingPoint)
+                    if (atmoDB.SurfaceTemperature >= blueprint.BoilingPoint)
                     {
                         // actual greenhouse pressure adjusted by gas GreenhouseEffect.
                         // note that this produces the same affect as in aurora if all GreenhouseEffect bvalue are -1, 0 or 1.
-                        atmoDB.GreenhousePressure += (float)gas.Key.GreenhouseEffect * gas.Value;
+                        atmoDB.GreenhousePressure += (float)blueprint.GreenhouseEffect * gas.Value;
                     }
                 }
 

@@ -26,7 +26,8 @@ namespace Pulsar4X.Engine
 
             foreach (ProtoEntity surveyPoint in surveyPoints)
             {
-                var realPoint = Entity.Create(system, String.Empty, surveyPoint);
+                var realPoint = Entity.Create();
+                system.AddEntity(realPoint, surveyPoint.DataBlobs);
                 realPoint.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
             }
         }
@@ -62,7 +63,9 @@ namespace Pulsar4X.Engine
             //for testing purposes
             var sensorProfileDB = new SensorProfileDB();
 
-            return ProtoEntity.Create(String.Empty, new BaseDataBlob[] { surveyDB, posDB, nameDB, sensorProfileDB });
+            var protoEntity = new ProtoEntity(new List<BaseDataBlob>() { surveyDB, posDB, nameDB, sensorProfileDB });
+
+            return protoEntity;
         }
     }
 }

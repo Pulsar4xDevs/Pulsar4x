@@ -184,7 +184,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 else if (T == typeof(SelectPrimaryBlankMenuHelper))
                 {
-                    _state.EntitySelectedAsPrimary(_entityState.Entity.Guid, _entityState.StarSysGuid);
+                    _state.EntitySelectedAsPrimary(_entityState.Entity.Id, _entityState.StarSysGuid);
                 }
                 //if entity can warp
                 else if (T == typeof(WarpOrderWindow))

@@ -74,7 +74,7 @@ namespace Pulsar4X.SDL2UI
                 var unitsInStore = typeStore.Value.CurrentStoreInUnits;
 
 
-                ImGui.PushID(_entityState.Entity.Guid.ToString());//this helps the ui diferentiate between the left and right side
+                ImGui.PushID(_entityState.Entity.Id.ToString());//this helps the ui diferentiate between the left and right side
                 //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
                 //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
                 string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.UniqueID;
@@ -307,7 +307,7 @@ namespace Pulsar4X.SDL2UI
                 var freeVolume = _volStorageDB.GetFreeVolume(typeStore.Key);
                 var maxVolume = typeStore.Value.MaxVolume;
                 var storedVolume = maxVolume - freeVolume;
-                ImGui.PushID(_entityState.Entity.Guid.ToString()); //this helps the ui diferentiate between the left and right side
+                ImGui.PushID(_entityState.Entity.Id.ToString()); //this helps the ui diferentiate between the left and right side
                 //and the three ### below forces it to ignore everything before the ### wrt being an ID and the stuff after the ### is an id.
                 //this stops the header closing whenever we change the headertext (ie in this case, change the volume)
                 string headerText = stype.Name + " " + Stringify.Volume(freeVolume) + " / " + Stringify.Volume(maxVolume) + " free" + "###" + stype.UniqueID;
@@ -580,7 +580,7 @@ namespace Pulsar4X.SDL2UI
         {
             if(button == MouseButtons.Primary)
             {
-                if(_selectedEntityLeft.Entity.Guid != entity.Entity.Guid && _isSelectingRight)
+                if(_selectedEntityLeft.Entity.Id != entity.Entity.Id && _isSelectingRight)
                     Set2ndCargo(entity);
                 else
                 {
@@ -603,14 +603,14 @@ namespace Pulsar4X.SDL2UI
 
             //create order for items to go to right
             CargoUnloadToOrder.CreateCommand(
-                _uiState.Faction.Guid,
+                _uiState.Faction.Id,
                 _selectedEntityLeft.Entity,
                 _selectedEntityRight.Entity,
                 CargoListLeft.GetAllToMoveOut());
 
             //create order for items to go to left
             CargoUnloadToOrder.CreateCommand(
-                _uiState.Faction.Guid,
+                _uiState.Faction.Id,
                 _selectedEntityRight.Entity,
                 _selectedEntityLeft.Entity,
                 CargoListRight.GetAllToMoveOut());

@@ -21,8 +21,8 @@ namespace Pulsar4X.SDL2UI
 
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
 
-        private readonly FleetDB factionRoot;
-        private readonly string factionID;
+        private FleetDB factionRoot;
+        private int factionID;
         private Entity dragEntity = Entity.InvalidEntity;
         private Entity selectedFleet = null;
         private Entity selectedFleetFlagship = null;
@@ -46,10 +46,9 @@ namespace Pulsar4X.SDL2UI
 
         private FleetWindow()
         {
-            factionID = _uiState.Faction.Guid;
-            factionRoot = _uiState.Faction.GetDataBlob<FleetDB>();
-            var firstFleet = factionRoot.Children.Where(c => c.HasDataBlob<FleetDB>()).First();
-            if(firstFleet != null) SelectFleet(firstFleet);
+            FactionChanged(_uiState);
+
+            _uiState.OnFactionChanged += FactionChanged;
 
             orderComparisons = new string[5];
             orderComparisons[0] = ComparisonType.LessThan.ToDescription();
@@ -67,6 +66,14 @@ namespace Pulsar4X.SDL2UI
             return (FleetWindow)_uiState.LoadedWindows[typeof(FleetWindow)];
         }
 
+        private void FactionChanged(GlobalUIState uiState)
+        {
+            factionID = uiState.Faction.Id;
+            factionRoot = uiState.Faction.GetDataBlob<FleetDB>();
+            var firstFleet = factionRoot.Children.Where(c => c.HasDataBlob<FleetDB>()).First();
+            SelectFleet(firstFleet);
+        }
+
         private void SelectFleet(Entity fleet)
         {
             selectedFleet = fleet;
@@ -74,14 +81,14 @@ namespace Pulsar4X.SDL2UI
             SelectOrder(null);
 
             selectedFleet?.TryGetDatablob<FleetDB>(out selectedFleetDB);
-            if(selectedFleetDB == null || selectedFleetDB.FlagShipID == String.Empty)
+            if(selectedFleetDB == null || selectedFleetDB.FlagShipID == -1)
             {
                 selectedFleetFlagship = null;
                 selectedFleetSystem = null;
             }
             else
             {
-                _uiState.Game.GlobalManager.FindEntityByGuid(selectedFleetDB.FlagShipID, out selectedFleetFlagship);
+                selectedFleetDB.OwningEntity.Manager.TryGetEntityById(selectedFleetDB.FlagShipID, out selectedFleetFlagship);
                 selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB);
                 selectedFleetSystem = positionDB.Root;
                 selectedFleetInheritOrders = selectedFleetDB.InheritOrders;
@@ -139,8 +146,8 @@ namespace Pulsar4X.SDL2UI
                             {
                                 DisplayHelpers.PrintRow("Flagship", selectedFleetFlagship.GetName(factionID));
                                 if(selectedFleetFlagship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB)
-                                    && shipInfoDB.CommanderID.IsNotNullOrEmpty()
-                                    && shipInfoDB.OwningEntity.Manager.FindEntityByGuid(shipInfoDB.CommanderID, out var commanderEntity))
+                                    && shipInfoDB.CommanderID != -1
+                                    && shipInfoDB.OwningEntity.Manager.TryGetEntityById(shipInfoDB.CommanderID, out var commanderEntity))
                                 {
 
                                     DisplayHelpers.PrintRow("Commander", commanderEntity.GetName(factionID));
@@ -165,7 +172,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 if(ImGui.SmallButton(selectedFleetSystem.GetName(factionID)))
                                 {
-                                    _uiState.EntityClicked(selectedFleetSystem.Guid, selectedFleetSystem.Manager.ManagerGuid, MouseButtons.Primary);
+                                    _uiState.EntityClicked(selectedFleetSystem.Id, selectedFleetSystem.Manager.ManagerGuid, MouseButtons.Primary);
                                 }
                                 ImGui.NextColumn();
                                 ImGui.Separator();
@@ -176,7 +183,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.NextColumn();
                                 if(ImGui.SmallButton(positionDB.Parent.GetName(factionID)))
                                 {
-                                    _uiState.EntityClicked(positionDB.Parent.Guid, positionDB.SystemGuid, MouseButtons.Primary);
+                                    _uiState.EntityClicked(positionDB.Parent.Id, positionDB.SystemGuid, MouseButtons.Primary);
                                 }
                             }
                             else
@@ -254,7 +261,7 @@ namespace Pulsar4X.SDL2UI
                                     }
 
                                     string name = ship.GetName(factionID);
-                                    if(fleet.FlagShipID == ship.Guid)
+                                    if(fleet.FlagShipID == ship.Id)
                                     {
                                         name = "(F) " + name;
                                     }
@@ -266,8 +273,8 @@ namespace Pulsar4X.SDL2UI
                                     DisplayShipContextMenu(selectedShips, ship);
                                     ImGui.NextColumn();
                                     if(ship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB)
-                                        && shipInfoDB.CommanderID != String.Empty
-                                        && shipInfoDB.OwningEntity.Manager.FindEntityByGuid(shipInfoDB.CommanderID, out var commanderEntity))
+                                        && shipInfoDB.CommanderID != -1
+                                        && shipInfoDB.OwningEntity.Manager.TryGetEntityById(shipInfoDB.CommanderID, out var commanderEntity))
                                     {
                                         ImGui.Text(commanderEntity.GetName(factionID));
                                     }
@@ -593,7 +600,7 @@ namespace Pulsar4X.SDL2UI
                 return;
             }
 
-            ImGui.PushID(fleet.Guid.ToString());
+            ImGui.PushID(fleet.Id.ToString());
             string name = fleet.GetName(factionID);
             var flags = ImGuiTreeNodeFlags.DefaultOpen;
 
@@ -645,7 +652,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 ImGui.Separator();
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.TerribleColor);
-                if(ImGui.MenuItem("Disband###delete-" + fleet.Guid))
+                if(ImGui.MenuItem("Disband###delete-" + fleet.Id))
                 {
                     var order = FleetOrder.DisbandFleet(factionID, fleet);
                     _uiState.Game.OrderHandler.HandleOrder(order);
@@ -662,11 +669,11 @@ namespace Pulsar4X.SDL2UI
             {
                 if(ImGui.MenuItem("View Ship"))
                 {
-                    _uiState.EntityClicked(ship.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                    _uiState.EntityClicked(ship.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                 }
                 if(!isUnattached)
                 {
-                    if(selectedFleetFlagship != null && ship.Guid == selectedFleetFlagship.Guid)
+                    if(selectedFleetFlagship != null && ship.Id == selectedFleetFlagship.Id)
                     {
                         ImGui.BeginDisabled();
                     }
@@ -676,7 +683,7 @@ namespace Pulsar4X.SDL2UI
                         _uiState.Game.OrderHandler.HandleOrder(setFlagshipOrder);
                         SelectFleet(selectedFleet);
                     }
-                    if(selectedFleetFlagship != null && ship.Guid == selectedFleetFlagship.Guid)
+                    if(selectedFleetFlagship != null && ship.Id == selectedFleetFlagship.Id)
                     {
                         ImGui.EndDisabled();
                     }
@@ -715,7 +722,7 @@ namespace Pulsar4X.SDL2UI
             }
             else
             {
-                ImGui.PushID(fleet.Guid.ToString());
+                ImGui.PushID(fleet.Id.ToString());
                 if(ImGui.MenuItem(fleet.GetName(factionID)))
                 {
                     if(!selected.Any(x => x.Value))

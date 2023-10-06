@@ -44,14 +44,13 @@ namespace Pulsar4X.Atb
 
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
-            var db = parentEntity.GetDataBlob<IndustryAbilityDB>();
             _productionLine = new() {
                 MaxVolume = MaxProductionVolume,
                 IndustryTypeRates = IndustryPoints,
                 Name = componentInstance.Name
             };
 
-            if (db == null)
+            if (!parentEntity.TryGetDatablob<IndustryAbilityDB>(out var db))
             {
                 db = new IndustryAbilityDB(componentInstance.UniqueID, _productionLine);
                 parentEntity.SetDataBlob(db);

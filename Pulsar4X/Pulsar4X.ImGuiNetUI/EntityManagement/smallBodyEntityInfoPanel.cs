@@ -54,7 +54,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             if (ImGui.SmallButton(smallBody.Value.Name))
                             {
-                                _uiState.EntityClicked(smallBody.Value.Entity.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                                _uiState.EntityClicked(smallBody.Value.Entity.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                             }
                         }
                     }

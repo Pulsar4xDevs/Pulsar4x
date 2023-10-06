@@ -66,7 +66,7 @@ namespace Pulsar4X.SDL2UI
 
                 var starIcon = new StarIcon(starEntity);
                 StarIcons[item.Key] = starIcon;
-                var nameIcon = new NameIcon(item.Value.EntityStatesWithNames[starEntity.Guid], _state);
+                var nameIcon = new NameIcon(item.Value.EntityStatesWithNames[starEntity.Id], _state);
                 _nameIcons[item.Key] = nameIcon;
                 var x = (startR + radInc * i) * Math.Sin(startangle - angleIncrease * i);
                 var y = (startR + radInc * i) * Math.Cos(startangle - angleIncrease * i);

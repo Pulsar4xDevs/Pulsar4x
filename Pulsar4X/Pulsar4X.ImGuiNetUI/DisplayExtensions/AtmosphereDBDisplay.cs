@@ -16,7 +16,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("Hydrosphere: " + atmosphereDB.HydrosphereExtent.ToString() + "%%");
             }
 
-            if(ImGui.BeginTable("###GasTable" + entityState.Entity.Guid, 2))
+            if(ImGui.BeginTable("###GasTable" + entityState.Entity.Id, 2))
             {
                 ImGui.TableSetupColumn("Type");
                 ImGui.TableSetupColumn("Percent");
@@ -24,9 +24,10 @@ namespace Pulsar4X.SDL2UI
 
                 foreach(var (gas, amount) in atmosphereDB.CompositionByPercent)
                 {
+                    var blueprint = uiState.Game.AtmosphericGases[gas];
                     ImGui.TableNextRow();
                     ImGui.TableNextColumn();
-                    ImGui.Text(gas.Name);
+                    ImGui.Text(blueprint.Name);
                     ImGui.TableNextColumn();
                     if(Math.Round(amount, 4) > 0)
                     {

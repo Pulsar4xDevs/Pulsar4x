@@ -10,7 +10,7 @@ namespace Pulsar4X.SDL2UI
         {
             var minerals = uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMineralsList();
 
-            if(ImGui.BeginTable("###MineralTable" + entityState.Entity.Guid, 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
+            if(ImGui.BeginTable("###MineralTable" + entityState.Entity.Id, 3, ImGuiTableFlags.BordersV | ImGuiTableFlags.BordersOuterH | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name");
                 ImGui.TableSetupColumn("Amount");

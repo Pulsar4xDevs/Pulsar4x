@@ -53,7 +53,8 @@ namespace Pulsar4X.Engine
             StarSystemFactory starfac = new StarSystemFactory(game);
             StarSystem solSys = starfac.CreateSol(game);
             //sol.ManagerSubpulses.Init(sol);
-            Entity earth = solSys.Entities.FirstOrDefault(x => x.GetDataBlob<NameDB>().DefaultName.Equals("Earth")); //should be fourth entity created
+
+            var earth = solSys.GetAllEntitiesWithDataBlob<NameDB>().Where(e => e.GetDataBlob<NameDB>().DefaultName.Equals("Earth")).First();
             //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
@@ -63,7 +64,7 @@ namespace Pulsar4X.Engine
             foreach (var entity in namedEntites)
             {
                 var nameDB = entity.GetDataBlob<NameDB>();
-                nameDB.SetName(factionEntity.Guid, nameDB.DefaultName);
+                nameDB.SetName(factionEntity.Id, nameDB.DefaultName);
             }
 
             //once per game init stuff
@@ -89,7 +90,7 @@ namespace Pulsar4X.Engine
 
             factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
 
-            factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "UEF");
+            factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Id, "UEF");
 
 
 
@@ -107,8 +108,8 @@ namespace Pulsar4X.Engine
 
 
             solSys2.NameDB = new NameDB("other system");
-            Entity solStar = solSys2.Entities[0];
-            Entity earth2 = solSys2.Entities[1];
+            Entity solStar = solSys2.GetAllEntitiesWithDataBlob<StarInfoDB>().First();
+            Entity earth2 = solSys2.GetAllEntitiesWithDataBlob<NameDB>().Where(e => e.GetDataBlob<NameDB>().DefaultName.Equals("Earth")).First();
 
 
             //sol.ManagerSubpulses.Init(sol);
@@ -119,7 +120,7 @@ namespace Pulsar4X.Engine
             foreach (var entity in namedEntites2)
             {
                 var nameDB = entity.GetDataBlob<NameDB>();
-                nameDB.SetName(factionEntity.Guid, nameDB.DefaultName);
+                nameDB.SetName(factionEntity.Id, nameDB.DefaultName);
             }
 
             Entity colonyEntity2 = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth2);
@@ -153,7 +154,7 @@ namespace Pulsar4X.Engine
             StarSystemFactory starfac = new StarSystemFactory(game);
             StarSystem solSys = starfac.CreateSol(game);
             //sol.ManagerSubpulses.Init(sol);
-            Entity solStar = solSys.Entities[0];
+            Entity solStar = solSys.GetAllEntitiesWithDataBlob<StarInfoDB>().First();
             Entity earth = NameLookup.GetFirstEntityWithName(solSys, "Earth"); //should be fourth entity created
             //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
@@ -163,7 +164,7 @@ namespace Pulsar4X.Engine
             FactionDataStore opForDataStore = targetFaction.GetDataBlob<FactionInfoDB>().Data;
 
             // Set the faction entity to own itself so it can issue orders to itself
-            factionEntity.FactionOwnerID = factionEntity.Guid;
+            factionEntity.FactionOwnerID = factionEntity.Id;
 
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
 
@@ -171,7 +172,7 @@ namespace Pulsar4X.Engine
             foreach (var entity in namedEntites)
             {
                 var nameDB = entity.GetDataBlob<NameDB>();
-                nameDB.SetName(factionEntity.Guid, nameDB.DefaultName);
+                nameDB.SetName(factionEntity.Id, nameDB.DefaultName);
             }
 
             long baseInitialPopulation = 9000000000;
@@ -283,10 +284,10 @@ namespace Pulsar4X.Engine
             //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateLongitudeTest(game).ID);
 
 
-            factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "UEF");
+            factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Id, "UEF");
 
             var fleetName = NameFactory.GetFleetName(game);
-            Entity defaultFleet = FleetFactory.Create(earth.Manager, factionEntity.Guid, fleetName);
+            Entity defaultFleet = FleetFactory.Create(earth.Manager, factionEntity.Id, fleetName);
             defaultFleet.GetDataBlob<FleetDB>().SetParent(factionEntity);
 
             // Todo: handle this in CreateShip
@@ -312,15 +313,15 @@ namespace Pulsar4X.Engine
                 var commanderDB = CommanderFactory.CreateShipCaptain(game);
                 commanderDB.CommissionedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365.25 * 10);
                 commanderDB.RankedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365);
-                var entity = CommanderFactory.Create(earth.Manager, factionEntity.Guid, commanderDB);
+                var entity = CommanderFactory.Create(earth.Manager, factionEntity.Id, commanderDB);
 
-                if(i == 0) gunShip0.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
-                if(i == 1) ship2.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
-                if(i == 2) ship3.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
-                if(i == 3) gunShip1.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
-                if(i == 4) courier.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
-                if(i == 5) courier2.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
-                if(i == 6) starship.GetDataBlob<ShipInfoDB>().CommanderID = entity.Guid;
+                if(i == 0) gunShip0.GetDataBlob<ShipInfoDB>().CommanderID = entity.Id;
+                if(i == 1) ship2.GetDataBlob<ShipInfoDB>().CommanderID = entity.Id;
+                if(i == 2) ship3.GetDataBlob<ShipInfoDB>().CommanderID = entity.Id;
+                if(i == 3) gunShip1.GetDataBlob<ShipInfoDB>().CommanderID = entity.Id;
+                if(i == 4) courier.GetDataBlob<ShipInfoDB>().CommanderID = entity.Id;
+                if(i == 5) courier2.GetDataBlob<ShipInfoDB>().CommanderID = entity.Id;
+                if(i == 6) starship.GetDataBlob<ShipInfoDB>().CommanderID = entity.Id;
             }
 
             var fleetDB = defaultFleet.GetDataBlob<FleetDB>();
@@ -331,13 +332,13 @@ namespace Pulsar4X.Engine
             fleetDB.AddChild(courier);
             fleetDB.AddChild(courier2);
             fleetDB.AddChild(starship);
-            fleetDB.FlagShipID = starship.Guid;
+            fleetDB.FlagShipID = starship.Id;
 
             // This can be removed, only for testing orders without having to set them up in game
             ConditionItem conditionItem = new ConditionItem(new FuelCondition(30f, ComparisonType.GreaterThan));
             CompoundCondition compoundCondition = new CompoundCondition(conditionItem);
             SafeList<EntityCommand> actions = new SafeList<EntityCommand>();
-            actions.Add(MoveToNearestColonyAction.CreateCommand(factionEntity.Guid, defaultFleet));
+            actions.Add(MoveToNearestColonyAction.CreateCommand(factionEntity.Id, defaultFleet));
             var conditionalOrder = new ConditionalOrder(compoundCondition, actions);
             conditionalOrder.Name = "Test";
 
@@ -374,9 +375,9 @@ namespace Pulsar4X.Engine
             Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(game, targetFaction, factionDataStore), targetFaction, earth, (10 * Math.PI / 180), "Target Drone0");
             Entity targetDrone1 = ShipFactory.CreateShip(TargetDrone(game, targetFaction, factionDataStore), targetFaction, earth, (22.5 * Math.PI / 180), "Target Drone1");
             Entity targetDrone2 = ShipFactory.CreateShip(TargetDrone(game, targetFaction, factionDataStore), targetFaction, earth, (45 * Math.PI / 180), "Target Drone2");
-            targetDrone0.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone0");
-            targetDrone1.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone1");
-            targetDrone2.GetDataBlob<NameDB>().SetName(factionEntity.Guid, "TargetDrone2");
+            targetDrone0.GetDataBlob<NameDB>().SetName(factionEntity.Id, "TargetDrone0");
+            targetDrone1.GetDataBlob<NameDB>().SetName(factionEntity.Id, "TargetDrone1");
+            targetDrone2.GetDataBlob<NameDB>().SetName(factionEntity.Id, "TargetDrone2");
 
             CargoTransferProcessor.AddRemoveCargoVolume(targetDrone1, rp1, 1000);
             CargoTransferProcessor.AddRemoveCargoVolume(targetDrone2, rp1, 1000);
@@ -422,11 +423,11 @@ namespace Pulsar4X.Engine
 
 
 
-            solSys.SetDataBlob(gunShip0.ID, new TransitableDB());
-            solSys.SetDataBlob(ship2.ID, new TransitableDB());
-            solSys.SetDataBlob(gunShip1.ID, new TransitableDB());
-            solSys.SetDataBlob(courier.ID, new TransitableDB());
-            solSys.SetDataBlob(courier2.ID, new TransitableDB());
+            solSys.SetDataBlob(gunShip0.Id, new TransitableDB());
+            solSys.SetDataBlob(ship2.Id, new TransitableDB());
+            solSys.SetDataBlob(gunShip1.Id, new TransitableDB());
+            solSys.SetDataBlob(courier.Id, new TransitableDB());
+            solSys.SetDataBlob(courier2.Id, new TransitableDB());
 
             //Entity ship = ShipFactory.CreateShip(shipDesign, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB

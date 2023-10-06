@@ -29,7 +29,7 @@ namespace Pulsar4X.SDL2UI
             _bodyType = _systemBodyInfoDB.BodyType;
             _massVolDB = entity.GetDataBlob<MassVolumeDB>();
             _bodyRadiusAU = _massVolDB.RadiusInAU;
-            _rng = new Random(entity.Guid.GetHashCode()); //use entity guid as a seed for psudoRandomness. 
+            _rng = new Random(entity.Id); //use entity guid as a seed for psudoRandomness. 
 
             switch (_bodyType)
             {

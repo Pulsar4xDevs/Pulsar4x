@@ -10,6 +10,7 @@ namespace Pulsar4X.Datablobs
     /// </summary>
     public class NewtonMoveDB : BaseDataBlob
     {
+        [JsonProperty]
         internal DateTime LastProcessDateTime = new DateTime();
 
 
@@ -17,28 +18,35 @@ namespace Pulsar4X.Datablobs
         /// This is the parent ralitive manuver deltaV (ie within SOI not StarSystem Global)
         /// </summary>
         /// <value></value>
+        [JsonProperty]
         public Vector3 ManuverDeltaV {get; internal set;}
 
         /// <summary>
         /// Just returns the lengths of the manuver deltaV
         /// </summary>
         /// <returns></returns>
+        [JsonProperty]
         public double ManuverDeltaVLen {get{return ManuverDeltaV.Length();}}
         /// <summary>
         /// Orbital Frame Of Reference: Y is prograde
         /// </summary>
         //public Vector3 DeltaVForManuver_FoRO_m { get; private set; }
-
+        [JsonProperty]
         public DateTime ActionOnDateTime { get; internal set; }
 
         /// <summary>
         /// Parent relative velocity vector.
         /// </summary>
+        [JsonProperty]
         public Vector3 CurrentVector_ms { get; internal set; }
 
+        [JsonProperty]
         public Entity SOIParent { get; internal set; }
+
+        [JsonProperty]
         public double ParentMass { get; internal set; }
 
+        [JsonProperty]
         private KeplerElements _ke;
 
         internal void UpdateKeplerElements(KeplerElements ke)

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
@@ -8,6 +7,7 @@ namespace Pulsar4X.Datablobs
 {
     public class TeamsHousedDB : BaseDataBlob
     {
+        [JsonProperty]
         public Dictionary<TeamTypes, List<TeamObject>> TeamsByType = new Dictionary<TeamTypes, List<TeamObject>>();
 
 

@@ -18,7 +18,7 @@ namespace Pulsar4X.SDL2UI
 {
     public static class EntityInspector
     {
-        private static string _entityID = String.Empty;
+        private static int _entityID = -1;
         private static BaseDataBlob[] _dataBlobs = new BaseDataBlob[0];
         private static int _selectedDB = -1;
         //private static float _totalHeight;
@@ -37,7 +37,7 @@ namespace Pulsar4X.SDL2UI
             string ownerName = entity.GetDataBlob<NameDB>().OwnersName;
             if (ImGui.Begin("Entity Inspector:  " + ownerName, ref _isActive))
             {
-                if(entity.Guid != _entityID || entity.DataBlobs.Count != _dataBlobs.Length)
+                if(entity.Id != _entityID || entity.Manager.GetAllDataBlobsForEntity(entity.Id).Count != _dataBlobs.Length)
                     Refresh(entity);
                 
                 DisplayDatablobs(entity);
@@ -51,8 +51,8 @@ namespace Pulsar4X.SDL2UI
 
         public static void Refresh(Entity entity)
         {
-            _entityID = entity.Guid;
-            _dataBlobs = entity.DataBlobs.ToArray();
+            _entityID = entity.Id;
+            _dataBlobs = entity.Manager.GetAllDataBlobsForEntity(entity.Id).ToArray();
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Pulsar4X.SDL2UI
         /// <param name="entity"></param>
         public static void DisplayDatablobs(Entity entity)
         {
-            if (_dataBlobs.Length < 1 || _entityID != entity.Guid)
+            if (_dataBlobs.Length < 1 || _entityID != entity.Id)
             {
                 Refresh(entity);
             }
@@ -295,7 +295,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 var entity = (Entity)value;
                                 displayStr = entity.GetOwnersName();
-                                tooltipStr = entity.Guid.ToString();
+                                tooltipStr = entity.Id.ToString();
                             }
                             else
                             {
@@ -359,8 +359,7 @@ namespace Pulsar4X.SDL2UI
         static void DisplayComponents(ComponentInstancesDB instancesDB)
         {
             var componentsByDesign = instancesDB.ComponentsByDesign;
-
-            instancesDB.OwningEntity.Manager.Game.GlobalManager.TryGetEntityByGuid(instancesDB.OwningEntity.FactionOwnerID, out var faction);
+            var faction = instancesDB.OwningEntity.Manager.Game.Factions[instancesDB.OwningEntity.FactionOwnerID];
             FactionInfoDB factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
 
             string[] designNames = new string[componentsByDesign.Count];

@@ -82,19 +82,19 @@ namespace Pulsar4X.SDL2UI
                         var _parentEntity = _selectedEntity.GetDataBlob<PositionDB>().Parent;
                         bool _hasParentEntity = false;
                         SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
-                        Dictionary<string, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
+                        Dictionary<int, EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithNames;
                         if (_parentEntity != null)
                         {
                             //checks if parent exists in the selected star system and has a name
                             //notice that parent can be any bodyType(ex. asteroid, comet, planet etc), unlike childrenEntities, which are more selectively displayed...
-                            if(_NamedEntityStates.ContainsKey(_parentEntity.Guid))
+                            if(_NamedEntityStates.ContainsKey(_parentEntity.Id))
                             {
-                                var tempEntityState = _NamedEntityStates[_parentEntity.Guid];
+                                var tempEntityState = _NamedEntityStates[_parentEntity.Id];
                                 _hasParentEntity = true;
                                 if(ImGui.SmallButton(tempEntityState.Name))
                                 {
                                     //if(ImGui.SmallButton(parentEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction.ID))){
-                                    _uiState.EntityClicked(_parentEntity.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                                    _uiState.EntityClicked(_parentEntity.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                                     //}
                                 }
                             }
@@ -109,15 +109,15 @@ namespace Pulsar4X.SDL2UI
                         foreach(var childEntity in _selectedEntity.GetDataBlob<PositionDB>().Children)
                         {
                             //checks if child exists in the seclted star system and has name
-                            if(_NamedEntityStates.ContainsKey(childEntity.Guid))
+                            if(_NamedEntityStates.ContainsKey(childEntity.Id))
                             {
-                                var tempEntityState = _NamedEntityStates[childEntity.Guid];
+                                var tempEntityState = _NamedEntityStates[childEntity.Id];
                                 //only show child entities that arent comets or asteroids if the lastClickedEntity(parent entity) isnt either, if LastClickedEntity(parent entity) is either, then show them always
                                 if(_SelectedEntityState.IsSmallBody() && !tempEntityState.IsSmallBody())
                                 {
                                     hasChildrenEntities = true;
                                     if(ImGui.SmallButton(tempEntityState.Name)){
-                                        _uiState.EntityClicked(childEntity.Guid, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                                        _uiState.EntityClicked(childEntity.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                                     }
                                 }
 
@@ -340,7 +340,7 @@ namespace Pulsar4X.SDL2UI
                     _textwidth = new float[2];
                 }
 
-                foreach (var db in entity.DataBlobs)
+                foreach (var db in entity.Manager.GetAllDataBlobsForEntity(entity.Id))
                 {
                     if (db is IAbilityDescription)
                     {

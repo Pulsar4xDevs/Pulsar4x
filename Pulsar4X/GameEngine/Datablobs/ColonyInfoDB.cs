@@ -11,7 +11,7 @@ namespace Pulsar4X.Datablobs
         /// Species Entity and amount
         /// </summary>
         [JsonProperty]
-        public Dictionary<Entity, long> Population { get; internal set; } = new ();
+        public Dictionary<int, long> Population { get; internal set; } = new ();
 
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Pulsar4X.Datablobs
         /// </summary>
         /// <param name="popCount">Species and population number</param>
         /// <param name="planet"> the planet entity this colony is on</param>
-        public ColonyInfoDB(Dictionary<Entity, long> popCount, Entity planet)
+        public ColonyInfoDB(Dictionary<int, long> popCount, Entity planet)
         {
             Population = popCount;
             PlanetEntity = planet;
@@ -64,14 +64,14 @@ namespace Pulsar4X.Datablobs
         }
 
         public ColonyInfoDB(Entity species, long populationCount, Entity planet):this(
-            new Dictionary<Entity, long> {{species, populationCount}},
+            new Dictionary<int, long> {{species.Id, populationCount}},
             planet)
         {
         }
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
         {
-            Population = new Dictionary<Entity, long>(colonyInfoDB.Population);
+            Population = new Dictionary<int, long>(colonyInfoDB.Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
             ComponentStockpile = new Dictionary<string, int>(colonyInfoDB.ComponentStockpile);
             OrdinanceStockpile = new Dictionary<string, float>(colonyInfoDB.OrdinanceStockpile);

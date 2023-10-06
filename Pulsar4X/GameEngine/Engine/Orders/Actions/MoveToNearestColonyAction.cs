@@ -38,8 +38,8 @@ namespace Pulsar4X.Engine.Orders
         private void FindColonyAndSetupWarpCommands()
         {
             if(!EntityCommanding.TryGetDatablob<FleetDB>(out var fleetDB)) return;
-            if(fleetDB.FlagShipID.IsNullOrEmpty()) return;
-            if(!EntityCommanding.Manager.TryGetEntityByGuid(fleetDB.FlagShipID, out var flagship)) return;
+            if(fleetDB.FlagShipID == -1) return;
+            if(!EntityCommanding.Manager.TryGetEntityById(fleetDB.FlagShipID, out var flagship)) return;
             if(!flagship.TryGetDatablob<PositionDB>(out var flagshipPositionDB)) return;
 
             // Get all colonies in the system
@@ -121,13 +121,13 @@ namespace Pulsar4X.Engine.Orders
             _entityCommanding = commandingEntity;
         }
 
-        public static MoveToNearestColonyAction CreateCommand(string factionId, Entity commandingEntity)
+        public static MoveToNearestColonyAction CreateCommand(int factionId, Entity commandingEntity)
         {
             var command = new MoveToNearestColonyAction(commandingEntity)
             {
                 UseActionLanes = true,
                 RequestingFactionGuid = factionId,
-                EntityCommandingGuid = commandingEntity.Guid,
+                EntityCommandingGuid = commandingEntity.Id,
             };
 
             return command;

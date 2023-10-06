@@ -36,18 +36,19 @@ namespace Pulsar4X.Engine.Sol
             PositionDB planetPositionDB = new PositionDB(planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
             var pressureAtm = Pressure.KPaToAtm(140f);
-            var atmoGasses = new Dictionary<GasBlueprint, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { game.GetGasBySymbol("H2"),  0.963f * pressureAtm },
-                { game.GetGasBySymbol("He"),  0.0325f * pressureAtm },
-                { game.GetGasBySymbol("CH4"), 0.0045f * pressureAtm },
-                { game.GetGasBySymbol("NH3"), 0.000125f * pressureAtm },
-                { game.GetGasBySymbol("HD"),  0.000110f * pressureAtm },
-                { game.GetGasBySymbol("C2H6"),0.000007f * pressureAtm }
+                { game.GetGasBySymbol("H2").UniqueID,  0.963f * pressureAtm },
+                { game.GetGasBySymbol("He").UniqueID,  0.0325f * pressureAtm },
+                { game.GetGasBySymbol("CH4").UniqueID, 0.0045f * pressureAtm },
+                { game.GetGasBySymbol("NH3").UniqueID, 0.000125f * pressureAtm },
+                { game.GetGasBySymbol("HD").UniqueID,  0.000110f * pressureAtm },
+                { game.GetGasBySymbol("C2H6").UniqueID,0.000007f * pressureAtm }
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -139, atmoGasses);
 
-            Entity planet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
+            Entity planet = Entity.Create();
+            sol.AddEntity(planet, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }
@@ -78,7 +79,8 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
 
-            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            Entity moon = Entity.Create();
+            sol.AddEntity(moon, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -109,7 +111,8 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
 
-            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            Entity moon = Entity.Create();
+            sol.AddEntity(moon, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -140,7 +143,8 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
 
-            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            Entity moon = Entity.Create();
+            sol.AddEntity(moon, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -171,7 +175,8 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
 
-            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            Entity moon = Entity.Create();
+            sol.AddEntity(moon, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -202,7 +207,8 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
 
-            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            Entity moon = Entity.Create();
+            sol.AddEntity(moon, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -234,15 +240,16 @@ namespace Pulsar4X.Engine.Sol
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
 
             var pressureAtm = Pressure.KPaToAtm(146.7f);
-            var atmoGasses = new Dictionary<GasBlueprint, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { game.GetGasBySymbol("N2"), 0.97f * pressureAtm },
-                { game.GetGasBySymbol("CH4"), 0.028f * pressureAtm },
-                { game.GetGasBySymbol("H2"), 0.002f * pressureAtm }
+                { game.GetGasBySymbol("N2").UniqueID, 0.97f * pressureAtm },
+                { game.GetGasBySymbol("CH4").UniqueID, 0.028f * pressureAtm },
+                { game.GetGasBySymbol("H2").UniqueID, 0.002f * pressureAtm }
             };
             AtmosphereDB moonAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -179.5f, atmoGasses);
 
-            Entity moon = new Entity(sol, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB, moonAtmosphereDB });
+            Entity moon = Entity.Create();
+            sol.AddEntity(moon, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB, moonAtmosphereDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }

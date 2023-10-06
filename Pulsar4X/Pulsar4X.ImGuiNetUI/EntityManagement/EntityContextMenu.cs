@@ -18,7 +18,7 @@ namespace Pulsar4X.SDL2UI
 
         EntityState _entityState;
 
-        public EntityContextMenu(GlobalUIState state, string entityGuid)
+        public EntityContextMenu(GlobalUIState state, int entityGuid)
         {
             _state = state;
             //_uiState.OpenWindows.Add(this);

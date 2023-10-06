@@ -20,7 +20,7 @@ namespace Pulsar4X.SDL2UI
         internal int MouseFrameIncrementY;
 
         internal bool IsPinnedToEntity { get; private set; }
-        internal string PinnedEntityGuid;
+        internal int PinnedEntityGuid;
         PositionDB _entityPosDB;
         internal Orbital.Vector3 _camWorldPos_m = new Orbital.Vector3();
         public Orbital.Vector3 CameraWorldPosition_AU
@@ -92,7 +92,7 @@ namespace Pulsar4X.SDL2UI
                 _entityPosDB = entity.GetDataBlob<PositionDB>();
                 _camWorldPos_m = new Orbital.Vector3(); //zero on it. 
                 IsPinnedToEntity = true;
-                PinnedEntityGuid = entity.Guid;
+                PinnedEntityGuid = entity.Id;
             }
         }
 

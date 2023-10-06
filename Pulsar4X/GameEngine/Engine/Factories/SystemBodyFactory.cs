@@ -47,9 +47,8 @@ namespace Pulsar4X.Engine
                 ruins,
                 emEmtor
             };
-            ProtoEntity newPlanet = ProtoEntity.Create(planetDBs);
 
-            return newPlanet;
+            return new ProtoEntity(planetDBs);
         }
 
         /// <summary>
@@ -142,7 +141,7 @@ namespace Pulsar4X.Engine
             int bodyCount = 1;
             foreach (ProtoEntity protoBody in systemBodies)
             {
-                Entity body = Entity.Create(system, String.Empty, protoBody);
+                Entity body = system.CreateAndAddEntity(protoBody);
                 FinalizeBodies(dataStore, system, body, bodyCount, currentDateTime);
                 bodyCount++;
             }
@@ -201,7 +200,7 @@ namespace Pulsar4X.Engine
 
                 ProtoEntity newCometProto = CreateBaseBody();
                 NameDB cometName = newCometProto.GetDataBlob<NameDB>();
-                cometName.SetName(String.Empty, starName.DefaultName + " - Comet " + (i + 1));
+                cometName.SetName(-1, starName.DefaultName + " - Comet " + (i + 1));
 
                 SystemBodyInfoDB cometBodyDB = newCometProto.GetDataBlob<SystemBodyInfoDB>();
                 cometBodyDB.BodyType = BodyType.Comet;
@@ -209,13 +208,13 @@ namespace Pulsar4X.Engine
                 MassVolumeDB cometMVDB = MassVolumeDB.NewFromMassAndDensity(
                     GeneralMath.Lerp(_galaxyGen.Settings.SystemBodyMassByType[BodyType.Comet], system.RNGNextDouble()),
                     GeneralMath.Lerp(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Comet], system.RNGNextDouble()));
-                newCometProto.SetDataBlob(cometMVDB, EntityManager.GetTypeIndex<MassVolumeDB>());
+                newCometProto.DataBlobs.Add(cometMVDB);
 
                 GenerateCometOrbit(system, star, newCometProto, currentDateTime);
 
                 FinalizeSystemBodyDB(dataStore, system, newCometProto);
 
-                var comet = Entity.Create(system, String.Empty, newCometProto);
+                var comet = system.CreateAndAddEntity(newCometProto);
                 var pos = comet.GetDataBlob<PositionDB>();
                 pos.SystemGuid = system.Guid;
                 pos.SetParent(comet.GetDataBlob<OrbitDB>().Parent);
@@ -381,7 +380,7 @@ namespace Pulsar4X.Engine
 
             var mvDB = MassVolumeDB.NewFromMassAndDensity(mass, density);
             newBody.SetDataBlob(mvDB);
-            Entity body = Entity.Create(system, String.Empty, newBody);
+            Entity body = system.CreateAndAddEntity(newBody);
 
             var positionDB = body.GetDataBlob<PositionDB>();
             positionDB.SystemGuid = system.Guid;
@@ -589,12 +588,12 @@ namespace Pulsar4X.Engine
             }
         }
 
-        private static void FinalizeNameDB(ProtoEntity body, Entity parent, int bodyCount, string suffix = "")
+        private static void FinalizeNameDB(IHasDataBlobs body, Entity parent, int bodyCount, string suffix = "")
         {
             // Set this body's name.
             string parentName = parent.GetDataBlob<NameDB>().DefaultName;
             string bodyName = parentName + " - " + bodyCount + suffix;
-            body.GetDataBlob<NameDB>().SetName(String.Empty, bodyName);
+            body.GetDataBlob<NameDB>().SetName(-1, bodyName);
         }
 
         private void GenerateMoons(StarSystem system, Entity parent, DateTime currentDateTime)
@@ -636,7 +635,7 @@ namespace Pulsar4X.Engine
                 MassVolumeDB newMoonMVDB = MassVolumeDB.NewFromMassAndDensity(
                     GeneralMath.Lerp(moonMassMinMax, system.RNGNextDouble()),
                     GeneralMath.Lerp(_galaxyGen.Settings.SystemBodyDensityByType[BodyType.Moon], system.RNGNextDouble()));
-                newMoon.SetDataBlob(newMoonMVDB, EntityManager.GetTypeIndex<MassVolumeDB>());
+                newMoon.SetDataBlob(newMoonMVDB);
 
                 moons.Add(newMoon);
                 numMoons--;
@@ -650,7 +649,7 @@ namespace Pulsar4X.Engine
             // create proper entities:
             foreach (var moon in moons)
             {
-                var realMoon = Entity.Create(system, String.Empty, moon);
+                var realMoon = system.CreateAndAddEntity(moon);
                 var pos = realMoon.GetDataBlob<PositionDB>();
                 pos.SystemGuid = system.Guid;
                 pos.SetParent(realMoon.GetDataBlob<OrbitDB>().Parent);
@@ -666,7 +665,7 @@ namespace Pulsar4X.Engine
             while (beltMVDB.MassDry > 0)
             {
                 ProtoEntity newProtoBody = CreateBaseBody();
-                Entity newBody = Entity.Create(system, String.Empty, newProtoBody);
+                Entity newBody = system.CreateAndAddEntity(newProtoBody);
                 newBody.GetDataBlob<PositionDB>().SystemGuid = system.Guid;
                 SystemBodyInfoDB newBodyDB = newBody.GetDataBlob<SystemBodyInfoDB>();
 
@@ -682,7 +681,7 @@ namespace Pulsar4X.Engine
                 MassVolumeDB mvDB = MassVolumeDB.NewFromMassAndDensity(
                     GeneralMath.Lerp(_galaxyGen.Settings.SystemBodyMassByType[newBodyDB.BodyType], system.RNGNextDouble()),
                     GeneralMath.Lerp(_galaxyGen.Settings.SystemBodyDensityByType[newBodyDB.BodyType], system.RNGNextDouble()));
-                newBody.SetDataBlob(mvDB, EntityManager.GetTypeIndex<MassVolumeDB>());
+                newBody.SetDataBlob(mvDB);
 
                 FinalizeAsteroidOrbit(system, newBody, referenceOrbit);
                 FinalizeSystemBodyDB(dataStore, system, newBody);
@@ -691,9 +690,6 @@ namespace Pulsar4X.Engine
                 beltMVDB.MassDry -= mvDB.MassDry;
                 asteroidCount++;
             }
-
-            // now we are finished with the belt reference asteroid, remove it:
-            body.Destroy();
         }
 
         /// <summary>
@@ -737,7 +733,7 @@ namespace Pulsar4X.Engine
         /// <summary>
         /// This function puts all the finishing touiches on a system body data blob.
         /// </summary>
-        private void FinalizeSystemBodyDB(ModDataStore dataStore, StarSystem system, ProtoEntity body)
+        private void FinalizeSystemBodyDB(ModDataStore dataStore, StarSystem system, IHasDataBlobs body)
         {
             SystemBodyInfoDB bodyInfo = body.GetDataBlob<SystemBodyInfoDB>();
             OrbitDB bodyOrbit = body.GetDataBlob<OrbitDB>();
@@ -889,7 +885,7 @@ namespace Pulsar4X.Engine
         /// This function generate ruins for the specified system Body.
         /// @todo Make Ruins Generation take star age/type into consideration??
         /// </summary>
-        private void GenerateRuins(StarSystem system, ProtoEntity body)
+        private void GenerateRuins(StarSystem system, IHasDataBlobs body)
         {
             // cache some DBs:
             var atmo = body.GetDataBlob<AtmosphereDB>();
@@ -929,11 +925,11 @@ namespace Pulsar4X.Engine
         /// Generation take into consideration the abundance of the mineral
         /// and the bodies ratio of mass vs planet.
         /// </summary>
-        public void MineralGeneration(List<Mineral> minerals, StarSystem system, ProtoEntity body)
+        public void MineralGeneration(List<Mineral> minerals, StarSystem system, IHasDataBlobs body)
         {
             var bodyInfo = body.GetDataBlob<SystemBodyInfoDB>();
             var bodyMass = body.GetDataBlob<MassVolumeDB>();
-            var mineralInfo = body.GetDataBlob<MineralsDB>();
+            body.TryGetDatablob<MineralsDB>(out var mineralInfo);
 
             // get the mass ratio for this body to planet:
             double massRatio = bodyMass.MassDry / UniversalConstants.Units.EarthMassInKG;
@@ -950,7 +946,7 @@ namespace Pulsar4X.Engine
 
             if(mineralInfo == null)
             {
-                body.SetDataBlob<MineralsDB>(new());
+                body.SetDataBlob(new MineralsDB());
                 mineralInfo = body.GetDataBlob<MineralsDB>();
             }
 
@@ -988,7 +984,7 @@ namespace Pulsar4X.Engine
         public void HomeworldMineralGeneration(List<Mineral> minerals, StarSystem system, Entity body)
         {
             var bodyInfo = body.GetDataBlob<SystemBodyInfoDB>();
-            var mineralInfo = body.GetDataBlob<MineralsDB>();
+            body.TryGetDatablob<MineralsDB>(out var mineralInfo);
 
             if(mineralInfo == null)
             {
@@ -1021,7 +1017,7 @@ namespace Pulsar4X.Engine
         /// Followed by up to 5 trace gases (e.g. Argon).
         /// The bigger the body the more likly it is to have an atmo gas it should have and the more trace gases.
         /// </remarks>
-        public void GenerateAtmosphere(StarSystem system, ProtoEntity body, ModDataStore dataStore)
+        public void GenerateAtmosphere(StarSystem system, IHasDataBlobs body, ModDataStore dataStore)
         {
             var atmoDB = body.GetDataBlob<AtmosphereDB>();
             if (atmoDB == null)
@@ -1154,13 +1150,13 @@ namespace Pulsar4X.Engine
             // get the primary gass:
             double percentage = 0.6 + 0.3 * system.RNGNextDouble();
             var gas = gases.Select(system.RNGNextDouble());
-            atmoDB.Composition.Add(gas, (float)(percentage * atm));
+            atmoDB.Composition.Add(gas.UniqueID, (float)(percentage * atm));
             gases.Remove(gas);
 
             // get the secondary gas:
             percentage = 0.98 - percentage;
             gas = gases.Select(system.RNGNextDouble());
-            atmoDB.Composition.Add(gas, (float)(percentage * atm));
+            atmoDB.Composition.Add(gas.UniqueID, (float)(percentage * atm));
             gases.Remove(gas);
 
             // get the trace gases, note that we will not care so much about
@@ -1176,7 +1172,7 @@ namespace Pulsar4X.Engine
             {
                 percentage = (remainingPercentage - percentage) * system.RNGNextDouble();  // just use random numbers, it will be close enough.
                 gas = gases.Select(system.RNGNextDouble());
-                atmoDB.Composition.Add(gas, (float)(percentage * atm));
+                atmoDB.Composition.Add(gas.UniqueID, (float)(percentage * atm));
                 gases.Remove(gas);
             }
         }

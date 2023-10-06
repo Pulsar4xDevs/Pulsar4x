@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
             if(_uiState.LastClickedEntity != null)
             {
                 if (_orbitalDebugWindow._debugWidget == null || 
-                    _orbitalDebugWindow._debugWidget.EntityGuid != _uiState.LastClickedEntity.Entity.Guid)
+                    _orbitalDebugWindow._debugWidget.EntityGuid != _uiState.LastClickedEntity.Entity.Id)
                 {
                     _orbitalDebugWindow.HardRefresh();
                 }
@@ -66,7 +66,7 @@ namespace Pulsar4X.SDL2UI
         {
             if (_uiState.LastClickedEntity == null)
                 return;            
-            var entityID = _uiState.LastClickedEntity.Entity.Guid;
+            var entityID = _uiState.LastClickedEntity.Entity.Id;
             if (_debugWidget == null || entityID != _debugWidget.EntityGuid)
             {
                 HardRefresh();
@@ -138,7 +138,7 @@ namespace Pulsar4X.SDL2UI
         KeplerElements _keplerElements;
         private IPosition _bodyPosition;
 
-        internal string EntityGuid;
+        internal int EntityGuid;
         internal string parentname;
         internal Vector3 parentPos;
         internal Vector2 _f1a;
@@ -229,7 +229,7 @@ namespace Pulsar4X.SDL2UI
             var myMass = _entity.GetDataBlob<MassVolumeDB>().MassDry;
             _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass); 
 
-            EntityGuid = entityState.Entity.Guid;
+            EntityGuid = entityState.Entity.Id;
             parentname = parentEntity.GetOwnersName();
             parentPos = parentEntity.GetAbsolutePosition();
             

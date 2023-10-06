@@ -37,20 +37,21 @@ namespace Pulsar4X.Engine.Sol
             PositionDB planetPositionDB = new PositionDB(planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
             var pressureAtm = Pressure.BarToAtm(92f);
-            Dictionary<GasBlueprint, float> atmoGasses = new Dictionary<GasBlueprint, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { game.GetGasBySymbol("CO2"), 0.965f * pressureAtm },
-                { game.GetGasBySymbol("N2"), 0.035f * pressureAtm },
-                { game.GetGasBySymbol("SO2"), 0.00015f * pressureAtm },
-                { game.GetGasBySymbol("Ar"), 0.00007f * pressureAtm },
-                { game.GetGasBySymbol("H2O"), 0.00002f * pressureAtm },
-                { game.GetGasBySymbol("CO"), 0.000017f * pressureAtm },
-                { game.GetGasBySymbol("He"), 0.000012f * pressureAtm },
-                { game.GetGasBySymbol("Ne"), 0.000007f * pressureAtm }
+                { game.GetGasBySymbol("CO2").UniqueID, 0.965f * pressureAtm },
+                { game.GetGasBySymbol("N2").UniqueID, 0.035f * pressureAtm },
+                { game.GetGasBySymbol("SO2").UniqueID, 0.00015f * pressureAtm },
+                { game.GetGasBySymbol("Ar").UniqueID, 0.00007f * pressureAtm },
+                { game.GetGasBySymbol("H2O").UniqueID, 0.00002f * pressureAtm },
+                { game.GetGasBySymbol("CO").UniqueID, 0.000017f * pressureAtm },
+                { game.GetGasBySymbol("He").UniqueID, 0.000012f * pressureAtm },
+                { game.GetGasBySymbol("Ne").UniqueID, 0.000007f * pressureAtm }
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, 464f, atmoGasses);
 
-            Entity planet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
+            Entity planet = Entity.Create();
+            sol.AddEntity(planet, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }

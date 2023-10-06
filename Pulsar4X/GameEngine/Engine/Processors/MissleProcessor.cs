@@ -55,14 +55,16 @@ namespace Pulsar4X.Engine
             }
 
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
-            dataBlobs.Add(new ProjectileInfoDB(launchingEntity.Guid, count));
+            dataBlobs.Add(new ProjectileInfoDB(launchingEntity.Id, count));
             dataBlobs.Add(new ComponentInstancesDB());
             dataBlobs.Add(misslPositionDB);
             dataBlobs.Add(MassVolumeDB.NewFromMassAndVolume(missileDesign.WetMass, missileDesign.WetMass));
             dataBlobs.Add(new NameDB(defaultName, launchingEntity.FactionOwnerID,  factionsName));
             dataBlobs.Add(newtmovedb);
             dataBlobs.Add(orderabledb);
-            var newMissile = Entity.Create(launchingEntity.Manager, launchingEntity.FactionOwnerID, dataBlobs);
+            var newMissile = Entity.Create();
+            newMissile.FactionOwnerID = launchingEntity.FactionOwnerID;
+            launchingEntity.Manager.AddEntity(newMissile, dataBlobs);
 
             foreach (var tuple in missileDesign.Components)
             {

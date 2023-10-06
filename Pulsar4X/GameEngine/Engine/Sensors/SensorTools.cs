@@ -12,13 +12,13 @@ namespace Pulsar4X.Engine.Sensors
     public static class SensorTools
     {
 
-        public static SensorReturnValues[] GetDetectedEntites(SensorReceiverAtbDB sensorAtb, Vector3 position, List<Entity> detectableEntities, DateTime atDate, string factionOwner,  bool filterSameFaction = true)
+        public static SensorReturnValues[] GetDetectedEntites(SensorReceiverAtbDB sensorAtb, Vector3 position, List<Entity> detectableEntities, DateTime atDate, int factionOwnerId,  bool filterSameFaction = true)
         {
             SensorReturnValues[] detectionValues = new SensorReturnValues[detectableEntities.Count];
             for (int i = 0; i < detectableEntities.Count; i++)
             {
                 var detectableEntity = detectableEntities[i];
-                if (filterSameFaction && detectableEntity.FactionOwnerID == factionOwner)
+                if (filterSameFaction && detectableEntity.FactionOwnerID == factionOwnerId)
                     continue;
                 else
                 {
@@ -79,10 +79,10 @@ namespace Pulsar4X.Engine.Sensors
             SensorInfoDB sensorInfo;
             if (detectionValues.SignalStrength_kW > 0.0)
             {
-                if (sensorMgr.SensorContactExists(detectableEntity.Guid))
+                if (sensorMgr.SensorContactExists(detectableEntity.Id))
                 {
                     //sensorInfo = knownContacts[detectableEntity.ID].GetDataBlob<SensorInfoDB>();
-                    sensorInfo = sensorMgr.GetSensorContact(detectableEntity.Guid).SensorInfo;
+                    sensorInfo = sensorMgr.GetSensorContact(detectableEntity.Id).SensorInfo;
                     sensorInfo.LatestDetectionQuality = detectionValues;
                     sensorInfo.LastDetection = atDate;
                     if (sensorInfo.HighestDetectionQuality.SignalQuality < detectionValues.SignalQuality)

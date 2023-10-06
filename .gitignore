@@ -3,6 +3,7 @@ Pulsar4X/*/bin
 Pulsar4X/*/obj
 Pulsar4X/packages/*
 Pulsar4X/Pulsar4X.ImGuiNetUI/*.ini
+Pulsar4X/Pulsar4X.ImGuiNetUI/Data/*
 
 # Doxygen output
 doc/doxygen/html/
@@ -47,5 +48,5 @@ _ReSharper.AuroraExtract
 *.usertasks
 Pulsar4X/TestResults/Pulsar4X.TE.Tests.mdf
 Pulsar4X/TestResults/Pulsar4X.TE.Tests_log.ldf
-#Jetbrains Rider files 
+#Jetbrains Rider files
 .idea/

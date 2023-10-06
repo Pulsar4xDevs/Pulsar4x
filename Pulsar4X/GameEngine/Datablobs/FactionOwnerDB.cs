@@ -9,33 +9,34 @@ namespace Pulsar4X.Datablobs
     public class FactionOwnerDB : BaseDataBlob, IGetValuesHash
     {
         [JsonProperty]
-        internal Dictionary<string, Entity> OwnedEntities { get; set; } = new ();
+        internal Dictionary<int, Entity> OwnedEntities { get; set; } = new ();
         private Dictionary<string, List<Entity>> ByStarSystem { get; set; } = new ();
         public FactionOwnerDB() { }
 
         public FactionOwnerDB(FactionOwnerDB db)
         {
-            OwnedEntities = new Dictionary<string, Entity>(db.OwnedEntities);
+            OwnedEntities = new Dictionary<int, Entity>(db.OwnedEntities);
         }
 
         internal void SetOwned(Entity entity)
         {
-            OwnedEntities[entity.Guid] = entity;
-            entity.FactionOwnerID = this.OwningEntity.Guid;
+            OwnedEntities[entity.Id] = entity;
+            // FIXME: was overwriting Id's set from ColonyFactory
+            //entity.FactionOwnerID = this.OwningEntity.Id;
         }
 
         internal void AddEntity(Entity entity)
         {
-            OwnedEntities[entity.Guid] = entity;
+            OwnedEntities[entity.Id] = entity;
             entity.FactionOwnerID = this.OwningEntity.FactionOwnerID;
         }
 
         internal void RemoveEntity(Entity entity)
         {
-            if (OwnedEntities.ContainsKey(entity.Guid))
+            if (OwnedEntities.ContainsKey(entity.Id))
             {
-                OwnedEntities.Remove(entity.Guid);
-                entity.FactionOwnerID = String.Empty;
+                OwnedEntities.Remove(entity.Id);
+                entity.FactionOwnerID = -1;
             }
         }
 

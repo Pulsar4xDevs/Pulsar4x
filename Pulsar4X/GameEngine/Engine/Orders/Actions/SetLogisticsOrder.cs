@@ -58,7 +58,7 @@ public class SetLogisticsOrder : EntityCommand
     {
         SetLogisticsOrder cmd = new SetLogisticsOrder()
         {
-            EntityCommandingGuid = entity.Guid,
+            EntityCommandingGuid = entity.Id,
             RequestingFactionGuid = entity.FactionOwnerID,
             _type = ordertype
         };
@@ -70,7 +70,7 @@ public class SetLogisticsOrder : EntityCommand
     {
         SetLogisticsOrder cmd = new SetLogisticsOrder()
         {
-            EntityCommandingGuid = entity.Guid,
+            EntityCommandingGuid = entity.Id,
             RequestingFactionGuid = entity.FactionOwnerID,
             _type = OrderTypes.SetBaseItems,
             _baseChanges = changes
@@ -95,7 +95,7 @@ public class SetLogisticsOrder : EntityCommand
     {
 
         SetLogisticsOrder cmd = new SetLogisticsOrder();
-        cmd.EntityCommandingGuid = entity.Guid;
+        cmd.EntityCommandingGuid = entity.Id;
         cmd.RequestingFactionGuid = entity.FactionOwnerID;
         cmd._type = OrderTypes.SetShipTypeAmounts;
         cmd._shipChanges = changes;

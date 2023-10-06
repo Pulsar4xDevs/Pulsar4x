@@ -23,8 +23,8 @@ namespace Pulsar4X.Engine.Orders
         {
             var cmd = new RenameCommand()
             {
-                RequestingFactionGuid = faction.Guid,
-                EntityCommandingGuid = orderEntity.Guid,
+                RequestingFactionGuid = faction.Id,
+                EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 NewName = newName,
                 UseActionLanes = false
@@ -36,7 +36,7 @@ namespace Pulsar4X.Engine.Orders
         internal override void Execute(DateTime atDateTime)
         {
             var namedb = _entityCommanding.GetDataBlob<NameDB>();
-            namedb.SetName(_factionEntity.Guid, NewName);
+            namedb.SetName(_factionEntity.Id, NewName);
             _isFinished = true;
         }
 

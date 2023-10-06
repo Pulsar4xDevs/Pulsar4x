@@ -11,7 +11,9 @@ namespace Pulsar4X.Engine
             NameDB name = new NameDB("Human");
             SpeciesDB speciesDB = CreateSpeciesDB_Human();
             var blobs = new List<BaseDataBlob> {name, speciesDB};
-            Entity species = new Entity(systemEntityManager, faction.Guid, blobs);
+            Entity species = Entity.Create();
+            species.FactionOwnerID = faction.Id;
+            systemEntityManager.AddEntity(species, blobs);
             faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
             return species;
         }
@@ -39,7 +41,9 @@ namespace Pulsar4X.Engine
         public static Entity CreateSpeciesFromBlobs(Entity faction, EntityManager globalManager, NameDB nameDB, SpeciesDB speciesDB)
         {
             var blobs = new List<BaseDataBlob> { nameDB, speciesDB };
-            Entity species = new Entity(globalManager, faction.Guid, blobs);
+            Entity species = Entity.Create();
+            species.FactionOwnerID = faction.Id;
+            globalManager.AddEntity(species, blobs);
             faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
             return species;
         }
@@ -56,7 +60,9 @@ namespace Pulsar4X.Engine
             NameDB name = new NameDB("somename"); //where should we get the name from? maybe we should pass a string here.
             SpeciesDB speciesDB = CreateSpeciesDB_FromPlanet(planetEntity);
             var blobs = new List<BaseDataBlob> {name, speciesDB};
-            Entity species = new Entity(systemEntityManager, faction.Guid, blobs);
+            Entity species = Entity.Create();
+            species.FactionOwnerID = faction.Id;
+            systemEntityManager.AddEntity(species, blobs);
             faction.GetDataBlob<FactionInfoDB>().Species.Add(species);
             return species;
         }

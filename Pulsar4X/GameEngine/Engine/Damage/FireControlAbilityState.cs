@@ -22,7 +22,7 @@ namespace Pulsar4X.Engine.Damage
             
         }
 
-        private string _factionOwner;
+        private int _factionOwner;
         public string TargetName
         {
             get

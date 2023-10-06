@@ -18,13 +18,6 @@ namespace Pulsar4X.Engine
     /// </summary>
     public class OrbitProcessor : OrbitProcessorBase, IHotloopProcessor
     {
-        /// <summary>
-        /// TypeIndexes for several dataBlobs used frequently by this processor.
-        /// </summary>
-        private static readonly int OrbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
-        private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
-        private static readonly int StarInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
-
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(5);
 
         public TimeSpan FirstRunOffset => TimeSpan.FromTicks(0);
@@ -56,7 +49,7 @@ namespace Pulsar4X.Engine
             //starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, UpdateSystemOrbits);
             //manager.ManagerSubpulses.AddSystemInterupt(toDate + orbitCycle, PulseActionEnum.OrbitProcessor);
             // Find the first orbital entity.
-            Entity firstOrbital = manager.GetFirstEntityWithDataBlob(StarInfoTypeIndex);
+            Entity firstOrbital = manager.GetFirstEntityWithDataBlob<StarInfoDB>();
 
             if (!firstOrbital.IsValid)
             {
@@ -64,18 +57,18 @@ namespace Pulsar4X.Engine
                 return 0;
             }
 
-            Entity root = firstOrbital.GetDataBlob<OrbitDB>(OrbitTypeIndex).Root;
-            var rootPositionDB = root.GetDataBlob<PositionDB>(PositionTypeIndex);
+            Entity root = firstOrbital.GetDataBlob<OrbitDB>().Root;
+            var rootPositionDB = root.GetDataBlob<PositionDB>();
 
             // Call recursive function to update every orbit in this system.
             int count = UpdateOrbit(root, rootPositionDB, toDate);
             return count;
         }
 
-        public static int UpdateOrbit(ProtoEntity entity, PositionDB parentPositionDB, DateTime toDate)
+        public static int UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime toDate)
         {
-            var entityOrbitDB = entity.GetDataBlob<OrbitDB>(OrbitTypeIndex);
-            var entityPosition = entity.GetDataBlob<PositionDB>(PositionTypeIndex);
+            var entityOrbitDB = entity.GetDataBlob<OrbitDB>();
+            var entityPosition = entity.GetDataBlob<PositionDB>();
             int counter = 1;
             //if(toDate.Minute > entityOrbitDB.OrbitalPeriod.TotalMinutes)
 
@@ -200,9 +193,6 @@ namespace Pulsar4X.Engine
 
     public class OrbitUpdateOftenProcessor : IHotloopProcessor
     {
-        private static readonly int OrbitTypeIndex = EntityManager.GetTypeIndex<OrbitUpdateOftenDB>();
-        private static readonly int PositionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
-
         public TimeSpan RunFrequency => TimeSpan.FromSeconds(1);
 
         public TimeSpan FirstRunOffset => TimeSpan.FromTicks(0);
@@ -217,14 +207,14 @@ namespace Pulsar4X.Engine
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
         {
-            var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>(OrbitTypeIndex);
+            var orbit = entity.GetDataBlob<OrbitUpdateOftenDB>();
             DateTime toDate = entity.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
             UpdateOrbit(orbit, toDate);
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
         {
-            var orbits = manager.GetAllDataBlobsOfType<OrbitUpdateOftenDB>(OrbitTypeIndex);
+            var orbits = manager.GetAllDataBlobsOfType<OrbitUpdateOftenDB>();
             DateTime toDate = manager.ManagerSubpulses.StarSysDateTime + TimeSpan.FromSeconds(deltaSeconds);
             foreach (var orbit in orbits)
             {
@@ -237,7 +227,7 @@ namespace Pulsar4X.Engine
         public static void UpdateOrbit(OrbitUpdateOftenDB entityOrbitDB, DateTime toDate)
         {
 
-            PositionDB entityPosition = entityOrbitDB.OwningEntity.GetDataBlob<PositionDB>(PositionTypeIndex);
+            PositionDB entityPosition = entityOrbitDB.OwningEntity.GetDataBlob<PositionDB>();
             try
             {
                 Vector3 newPosition = entityOrbitDB.GetPosition(toDate);

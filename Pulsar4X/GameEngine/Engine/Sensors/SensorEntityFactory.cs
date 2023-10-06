@@ -30,8 +30,8 @@ namespace Pulsar4X.Engine.Sensors
                 //detectingFaction.GetDataBlob<FactionOwnerDB>().SetOwned(sensorInfo.SensorContact);
             }
 
-            foreach (ISensorCloneMethod db in sensorInfo.DetectedEntity.DataBlobs.OfType<ISensorCloneMethod>())
-            {
+            //foreach (ISensorCloneMethod db in sensorInfo.DetectedEntity.DataBlobs.OfType<ISensorCloneMethod>())
+            //{
                 /*
                 int typeIndex1 = EntityManager.DataBlobTypes[db.GetType()];
                 int typeIndex;
@@ -48,7 +48,7 @@ namespace Pulsar4X.Engine.Sensors
                     //TODO: Networking: we need to send this DB to any listning network clients since it's a change that they wont(and shouldn't) know how to calculate on thier own.
                     //TODO: Networking: write an EntityChangeListner to handle serverside DB change notification.
                 }*/
-            }
+            //}
 
 
 

@@ -44,7 +44,7 @@ namespace Pulsar4X.Datablobs
         public List<Entity> Colonies { get; internal set; } = new ();
 
         [JsonProperty]
-        public SafeList<string> Commanders { get; internal set; } = new ();
+        public SafeList<int> Commanders { get; internal set; } = new ();
 
         [JsonProperty]
         public Dictionary<string, ShipDesign> ShipDesigns = new ();
@@ -73,7 +73,7 @@ namespace Pulsar4X.Datablobs
         /// <summary>
         /// stores sensor contacts for the entire faction, when a contact is created it gets added here.
         /// </summary>
-        internal Dictionary<string, SensorContact> SensorContacts = new ();
+        internal Dictionary<int, SensorContact> SensorContacts = new ();
 
         public Dictionary<EventType, bool> HaltsOnEvent { get; } = new ();
 
@@ -153,14 +153,14 @@ namespace Pulsar4X.Datablobs
         [OnDeserialized]
         public void OnDeserialized(StreamingContext context)
         {
-            ((Game)context.Context).PostLoad += (sender, args) => { };
+            //((Game)context.Context).PostLoad += (sender, args) => { };
         }
 
         public int GetValueCompareHash(int hash = 17)
         {
             foreach (var item in Species)
             {
-                hash = ObjectExtensions.ValueHash(item.Guid, hash);
+                hash = ObjectExtensions.ValueHash(item.Id, hash);
             }
             foreach (var item in KnownSystems)
             {
@@ -168,11 +168,11 @@ namespace Pulsar4X.Datablobs
             }
             foreach (var item in KnownFactions)
             {
-                hash = ObjectExtensions.ValueHash(item.Guid, hash);
+                hash = ObjectExtensions.ValueHash(item.Id, hash);
             }
             foreach (var item in Colonies)
             {
-                hash = ObjectExtensions.ValueHash(item.Guid, hash);
+                hash = ObjectExtensions.ValueHash(item.Id, hash);
             }
             foreach (var item in ShipDesigns.Keys)
             {
@@ -188,7 +188,7 @@ namespace Pulsar4X.Datablobs
                 hash = ObjectExtensions.ValueHash(system.Key, hash);
                 foreach (var jp in system.Value)
                 {
-                    hash = ObjectExtensions.ValueHash(jp.Guid, hash);
+                    hash = ObjectExtensions.ValueHash(jp.Id, hash);
                 }
 
             }

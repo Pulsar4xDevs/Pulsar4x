@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
 
 namespace Pulsar4X.Datablobs
 {
     public class ColonyBonusesDB : BaseDataBlob
     {
-        private Dictionary<AbilityType, float> FactionBonus => OwningEntity.HasDataBlob<FactionAbilitiesDB>() ? OwningEntity.GetDataBlob<FactionAbilitiesDB>().AbilityBonuses : new Dictionary<AbilityType, float>();
+        private Dictionary<AbilityType, float> FactionBonus => OwningEntity != Entity.InvalidEntity && OwningEntity.HasDataBlob<FactionAbilitiesDB>() ? OwningEntity.GetDataBlob<FactionAbilitiesDB>().AbilityBonuses : new Dictionary<AbilityType, float>();
 
         /// <summary>
         /// Returns the Bonus Modifier for a given ability

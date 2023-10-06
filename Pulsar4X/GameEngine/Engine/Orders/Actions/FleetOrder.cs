@@ -42,17 +42,18 @@ namespace Pulsar4X.Engine.Orders
             return isFinished;
         }
 
-        private FleetOrder(string factionGuid, Entity entity)
+        private FleetOrder(int factionGuid, Entity entity)
         {
             RequestingFactionGuid = factionGuid;
-            EntityCommandingGuid = entity.Guid;
+            _entityCommanding = entity;
+            EntityCommandingGuid = entity.Id;
             CreatedDate = entity.StarSysDateTime;
             UseActionLanes = true;
         }
 
         public static FleetOrder CreateFleetOrder(string name, Entity faction)
         {
-            var order = new FleetOrder(faction.Guid, faction)
+            var order = new FleetOrder(faction.Id, faction)
             {
                 OrderType = FleetOrderType.Create,
                 _requestedName = name,
@@ -61,7 +62,7 @@ namespace Pulsar4X.Engine.Orders
             return order;
         }
 
-        public static FleetOrder DisbandFleet(string requestingFaction, Entity fleet)
+        public static FleetOrder DisbandFleet(int requestingFaction, Entity fleet)
         {
             var order = new FleetOrder(requestingFaction, fleet)
             {
@@ -71,7 +72,7 @@ namespace Pulsar4X.Engine.Orders
             return order;
         }
 
-        public static FleetOrder ChangeParent(string requestingFaction, Entity sourceFleet, Entity target)
+        public static FleetOrder ChangeParent(int requestingFaction, Entity sourceFleet, Entity target)
         {
             var order = new FleetOrder(requestingFaction, sourceFleet)
             {
@@ -82,7 +83,7 @@ namespace Pulsar4X.Engine.Orders
             return order;
         }
 
-        public static FleetOrder AssignShip(string requestinFaction, Entity fleet, Entity ship)
+        public static FleetOrder AssignShip(int requestinFaction, Entity fleet, Entity ship)
         {
             var order = new FleetOrder(requestinFaction, fleet)
             {
@@ -93,7 +94,7 @@ namespace Pulsar4X.Engine.Orders
             return order;
         }
 
-        public static FleetOrder UnassignShip(string requestinFaction, Entity fleet, Entity ship)
+        public static FleetOrder UnassignShip(int requestinFaction, Entity fleet, Entity ship)
         {
             var order = new FleetOrder(requestinFaction, fleet)
             {
@@ -104,7 +105,7 @@ namespace Pulsar4X.Engine.Orders
             return order;
         }
 
-        public static FleetOrder SetFlagShip(string requestingFaction, Entity fleet, Entity ship)
+        public static FleetOrder SetFlagShip(int requestingFaction, Entity fleet, Entity ship)
         {
             var order = new FleetOrder(requestingFaction, fleet)
             {
@@ -115,7 +116,7 @@ namespace Pulsar4X.Engine.Orders
             return order;
         }
 
-        public static FleetOrder ToggleInheritOrders(string requestingFaction, Entity fleet)
+        public static FleetOrder ToggleInheritOrders(int requestingFaction, Entity fleet)
         {
             var order = new FleetOrder(requestingFaction, fleet)
             {
@@ -195,11 +196,11 @@ namespace Pulsar4X.Engine.Orders
                     navyDB = _entityCommanding.GetDataBlob<FleetDB>();
 
                     // If no children or no flagship set the ship as the flagship
-                    if(navyDB.Children.Count == 0 || navyDB.FlagShipID == String.Empty)
+                    if(navyDB.Children.Count == 0 || navyDB.FlagShipID == -1)
                     {
-                        navyDB.FlagShipID = _targetEntity.Guid;
+                        navyDB.FlagShipID = _targetEntity.Id;
                         // update to the ships manager
-                        _entityCommanding.Transfer(_targetEntity.Manager);
+                        _targetEntity.Manager.Transfer(_entityCommanding);
                     }
 
                     navyDB.AddChild(_targetEntity);
@@ -208,19 +209,19 @@ namespace Pulsar4X.Engine.Orders
                     navyDB = _entityCommanding.GetDataBlob<FleetDB>();
                     navyDB.RemoveChild(_targetEntity);
 
-                    if(_targetEntity.Guid == navyDB.FlagShipID)
+                    if(_targetEntity.Id == navyDB.FlagShipID)
                     {
-                        navyDB.FlagShipID = String.Empty;
+                        navyDB.FlagShipID = -1;
                         // if we have no flagship, move to the global entity manager
-                        _entityCommanding.Transfer(_manager);
+                        _manager.Transfer(_entityCommanding);
                     }
                     break;
                 case FleetOrderType.SetFlagShip:
                     if(_entityCommanding.Manager != _targetEntity.Manager)
                     {
-                        _entityCommanding.Transfer(_targetEntity.Manager);
+                        _targetEntity.Manager.Transfer(_entityCommanding);
                     }
-                    _entityCommanding.GetDataBlob<FleetDB>().FlagShipID = _targetEntity.Guid;
+                    _entityCommanding.GetDataBlob<FleetDB>().FlagShipID = _targetEntity.Id;
                     break;
                 case FleetOrderType.ToggleInheritOrders:
                     navyDB = _entityCommanding.GetDataBlob<FleetDB>();
@@ -238,18 +239,22 @@ namespace Pulsar4X.Engine.Orders
             switch(OrderType)
             {
                 case FleetOrderType.Create:
-                    if(_manager.FindEntityByGuid(RequestingFactionGuid, out _factionEntity)
-                        && _manager.FindEntityByGuid(EntityCommandingGuid, out _entityCommanding))
+                    if(_manager.TryGetEntityById(RequestingFactionGuid, out _factionEntity)
+                        && _manager.TryGetEntityById(EntityCommandingGuid, out _entityCommanding))
                     {
                         return true;
                     }
                     break;
                 default:
-                    if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
+                    if(game.Factions.ContainsKey(RequestingFactionGuid))
                     {
-                        return true;
+                        _factionEntity = game.Factions[RequestingFactionGuid];
                     }
-                    break;
+                    else
+                    {
+                        return false;
+                    }
+                    return RequestingFactionGuid == _entityCommanding.FactionOwnerID;
             }
             return false;
         }

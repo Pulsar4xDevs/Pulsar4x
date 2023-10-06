@@ -33,7 +33,7 @@ namespace Pulsar4X.SDL2UI
         private string[] _names;
         private int _index = 0;
 
-        public EntityNameSelector(Entity[] entities, NameType nameType, string factionID)
+        public EntityNameSelector(Entity[] entities, NameType nameType, int factionID)
         {
             _entities = entities;
             _names = new string[_entities.Length];
@@ -65,7 +65,7 @@ namespace Pulsar4X.SDL2UI
             {
                 for (int i = 0; i < entities.Length; i++)
                 {
-                    _names[i] = _entities[i].Guid.ToString();
+                    _names[i] = _entities[i].Id.ToString();
                 }
             }
         }

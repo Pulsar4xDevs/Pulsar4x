@@ -23,7 +23,7 @@ namespace Pulsar4X.Engine.Orders
         public override bool IsBlocking => true;
 
         [JsonProperty]
-        public string TargetEntityGuid { get; set; }
+        public int TargetEntityGuid { get; set; }
 
         private Entity _targetEntity;
 
@@ -51,14 +51,14 @@ namespace Pulsar4X.Engine.Orders
         /// <param name="transitStartDatetime">Transit start datetime.</param>
         /// <param name="expendDeltaV">Amount of DV to expend to change the orbit in m/s</param>
         /// /// <param name="mass">mass of ship after warp (needed for DV calc)</param>
-        public static (WarpMoveCommand, NewtonThrustCommand) CreateCommand(CargoDefinitionsLibrary cargoLibrary, string faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_m, DateTime transitStartDatetime, Vector3 expendDeltaV, double mass)
+        public static (WarpMoveCommand, NewtonThrustCommand) CreateCommand(CargoDefinitionsLibrary cargoLibrary, int faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_m, DateTime transitStartDatetime, Vector3 expendDeltaV, double mass)
         {
             var cmd = new WarpMoveCommand()
             {
                 RequestingFactionGuid = faction,
-                EntityCommandingGuid = orderEntity.Guid,
+                EntityCommandingGuid = orderEntity.Id,
                 CreatedDate = orderEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                TargetEntityGuid = targetEntity.Guid,
+                TargetEntityGuid = targetEntity.Id,
                 TargetOffsetPosition_m = targetOffsetPos_m,
                 TransitStartDateTime = transitStartDatetime,
                 ExpendDeltaV = expendDeltaV,
@@ -89,7 +89,7 @@ namespace Pulsar4X.Engine.Orders
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                if (game.GlobalManager.FindEntityByGuid(TargetEntityGuid, out _targetEntity))
+                if (game.GlobalManager.TryGetEntityById(TargetEntityGuid, out _targetEntity))
                 {
                     return true;
                 }

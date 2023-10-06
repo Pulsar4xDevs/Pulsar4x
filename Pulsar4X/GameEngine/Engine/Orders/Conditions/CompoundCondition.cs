@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 
@@ -7,7 +8,10 @@ namespace Pulsar4X.Engine.Orders
 {
     public class CompoundCondition
     {
-        public List<ConditionItem> ConditionItems { get; }
+        [JsonProperty]
+        public List<ConditionItem> ConditionItems { get; set; } = new ();
+
+        public CompoundCondition() { }
 
         public CompoundCondition(params ConditionItem[] conditionItems)
         {

@@ -44,7 +44,7 @@ namespace Pulsar4X.Engine.Orders
             return false;
         }
 
-        public static void CreateCommand(string faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
+        public static void CreateCommand(int faction, Entity cargoFromEntity, Entity cargoToEntity, List<(ICargoable item, long amount)> itemsToMove )
         {
             var itemGuidAmounts = new List<(string, long)>();
 
@@ -56,9 +56,9 @@ namespace Pulsar4X.Engine.Orders
             var unloadcmd = new CargoUnloadToOrder()
             {
                 RequestingFactionGuid = faction,
-                EntityCommandingGuid = cargoFromEntity.Guid,
+                EntityCommandingGuid = cargoFromEntity.Id,
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
-                SendCargoToEntityGuid = cargoToEntity.Guid,
+                SendCargoToEntityGuid = cargoToEntity.Id,
                 ItemsGuidsToTransfer = itemGuidAmounts,
                 ItemICargoablesToTransfer = itemsToMove
             };
@@ -67,7 +67,7 @@ namespace Pulsar4X.Engine.Orders
             var loadCmd = new CargoLoadFromOrder()
             {
                 RequestingFactionGuid = faction,
-                EntityCommandingGuid = cargoToEntity.Guid,
+                EntityCommandingGuid = cargoToEntity.Id,
                 CreatedDate = cargoFromEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 Order = unloadcmd,
                 _cargoFrom = cargoFromEntity

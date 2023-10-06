@@ -24,7 +24,7 @@ namespace Pulsar4X.Extensions
             return "Unknown";
         }
 
-        public static string GetName(this Entity entity, string factionID)
+        public static string GetName(this Entity entity, int factionID)
         {
             if (entity.HasDataBlob<NameDB>())
                 return entity.GetDataBlob<NameDB>().GetName(factionID);

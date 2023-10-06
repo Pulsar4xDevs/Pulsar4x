@@ -36,16 +36,17 @@ namespace Pulsar4X.Engine.Sol
             PositionDB planetPositionDB = new PositionDB(planetOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
             var pressureAtm = Pressure.BarToAtm(1000f);         // https://nssdc.gsfc.nasa.gov/planetary/factsheet/uranusfact.html#:~:text=Surface%20Pressure%3A%20%3E%3E1000%20bars,)%20%2D%2082.5%25%20(3.3%25)%3B
-            var atmoGasses = new Dictionary<GasBlueprint, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { game.GetGasBySymbol("H2"),  0.83f * pressureAtm },
-                { game.GetGasBySymbol("He"),  0.15f * pressureAtm },
-                { game.GetGasBySymbol("CH4"), 0.023f * pressureAtm },
-                { game.GetGasBySymbol("HD"),  0.00009f * pressureAtm }
+                { game.GetGasBySymbol("H2").UniqueID,  0.83f * pressureAtm },
+                { game.GetGasBySymbol("He").UniqueID,  0.15f * pressureAtm },
+                { game.GetGasBySymbol("CH4").UniqueID, 0.023f * pressureAtm },
+                { game.GetGasBySymbol("HD").UniqueID,  0.00009f * pressureAtm }
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -197.2f, atmoGasses);
 
-            Entity planet = new Entity(sol, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
+            Entity planet = Entity.Create();
+            sol.AddEntity(planet, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }

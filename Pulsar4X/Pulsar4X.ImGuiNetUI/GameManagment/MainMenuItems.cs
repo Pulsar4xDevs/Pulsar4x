@@ -4,6 +4,10 @@ using System.Numerics;
 using Pulsar4X.Engine;
 using Vector2 = System.Numerics.Vector2;
 using Newtonsoft.Json;
+using System.IO;
+using System.Linq;
+using Pulsar4X.Extensions;
+using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -51,8 +55,21 @@ namespace Pulsar4X.SDL2UI
 
                             string gameJson = Game.Save(_uiState.Game);
 
+                            File.WriteAllText("save.json", gameJson);
+
                             // FIXME:
                             //SerializationManager.Export(_uiState.Game, "SaveGame");
+                        }
+                        if (ImGui.Button("Load Last Saved Game", buttonSize))
+                        {
+                            string contents = File.ReadAllText("save.json");
+                            var loadedGame = Game.Load(contents);
+
+                            _uiState.Game = loadedGame;
+
+                            var playerFaction = loadedGame.Factions.Where(f => f.Value.GetOwnersName().Equals("UEF")).First();
+                            _uiState.SetFaction(playerFaction.Value);
+                            _uiState.SetActiveSystem(playerFaction.Value.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
                         }
                         if (ImGui.Button("Options", buttonSize))
                         {
