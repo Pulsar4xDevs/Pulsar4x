@@ -7,11 +7,9 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Auth;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Extensions;
-using System.Reflection.Metadata;
 
 namespace Pulsar4X.Engine
 {
-    //[JsonConverter(typeof(EntityManagerConverter))]
     public class EntityManager
     {
         [JsonProperty]
@@ -20,9 +18,20 @@ namespace Pulsar4X.Engine
         [JsonIgnore]
         public Game Game { get;  internal set; }
 
+        /// <summary>
+        /// The Entities Dictionary holds all the entities this manager has. The Key
+        /// is the Entities Id.
+        /// </summary>
         [JsonProperty("Entities")]
         private SafeDictionary<int, Entity> _entities = new ();
 
+        /// <summary>
+        /// The DataBlobStores hold all the datablobs for the entities this manager has.
+        /// The Type key and subsequent Dictionary are lazily instantiated as DataBlobs
+        /// are added to the manager. This helps keep the managers as light and as fast
+        /// as possible. To lookup a DataBlob for an Entity you need the Type of DataBlob
+        /// you want and the Entities Id.
+        /// </summary>
         [JsonProperty("DatablobStores")]
         private SafeDictionary<Type, SafeDictionary<int, BaseDataBlob>> _datablobStores = new ();
 
@@ -167,6 +176,11 @@ namespace Pulsar4X.Engine
                 storeEntry.Value.Remove(entity.Id);
             }
 
+            foreach(var (key, value) in FactionSensorContacts)
+            {
+                value.RemoveContact(entity.Id);
+            }
+
             UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityRemoved);
 
             // Event logevent = new Event(game.TimePulse.GameGlobalDateTime, "Entity Removed From Manager");
@@ -252,43 +266,37 @@ namespace Pulsar4X.Engine
 
         internal void AddDataBlob<T>(int entityID, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
         {
-            if(!_entities.ContainsKey(entityID))
-                throw new ArgumentException("Entity ID does not exist");
-
             var type = typeof(T);
-            if(!_datablobStores.ContainsKey(type))
-                _datablobStores[type] = new SafeDictionary<int, BaseDataBlob>();
-
-            _datablobStores[type][entityID] = dataBlob;
-            dataBlob.OwningEntity = _entities[entityID];
-            dataBlob.OnSetToEntity();
-            ManagerSubpulses.AddSystemInterupt(dataBlob);
-
-            if(updateListeners)
-                UpdateListeners(_entities[entityID], dataBlob, EntityChangeData.EntityChangeType.DBAdded);
+            SetDataBlob(type, entityID, dataBlob, updateListeners);
         }
 
-        internal void SetDataBlob<T>(int entityID, T dataBlob) where T : BaseDataBlob
+        internal void SetDataBlob<T>(int entityID, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
         {
-            AddDataBlob<T>(entityID, dataBlob);
+            var type = typeof(T);
+            SetDataBlob(type, entityID, dataBlob, updateListeners);
         }
 
         internal void SetDataBlob(int entityID, BaseDataBlob dataBlob, bool updateListeners = true)
         {
-            if(!_entities.ContainsKey(entityID))
+            var type = dataBlob.GetType();
+            SetDataBlob(type, entityID, dataBlob, updateListeners);
+        }
+
+        private void SetDataBlob(Type type, int entityId, BaseDataBlob dataBlob, bool updateListeners = true)
+        {
+            if(!_entities.ContainsKey(entityId))
                 throw new ArgumentException("Entity ID does not exist");
 
-            var type = dataBlob.GetType();
             if(!_datablobStores.ContainsKey(type))
                 _datablobStores[type] = new SafeDictionary<int, BaseDataBlob>();
 
-            _datablobStores[type][entityID] = dataBlob;
-            dataBlob.OwningEntity = _entities[entityID];
+            _datablobStores[type][entityId] = dataBlob;
+            dataBlob.OwningEntity = _entities[entityId];
             dataBlob.OnSetToEntity();
             ManagerSubpulses.AddSystemInterupt(dataBlob);
 
             if(updateListeners)
-                UpdateListeners(_entities[entityID], dataBlob, EntityChangeData.EntityChangeType.DBAdded);
+                UpdateListeners(_entities[entityId], dataBlob, EntityChangeData.EntityChangeType.DBAdded);
 
         }
 
@@ -456,7 +464,12 @@ namespace Pulsar4X.Engine
 
         public List<Entity> GetEntitiesByFaction(int factionId)
         {
-            return _entities.Values.Where(e => e.FactionOwnerID == factionId || e.FactionOwnerID == -1).ToList();
+            return _entities.Values.Where(e => e.FactionOwnerID == factionId).ToList();
+        }
+
+        public List<Entity> GetNeutralEntities()
+        {
+            return _entities.Values.Where(e => e.FactionOwnerID == Game.NeutralFactionId).ToList();
         }
 
         public Entity GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
@@ -468,10 +481,20 @@ namespace Pulsar4X.Engine
         public SystemSensorContacts GetSensorContacts(int factionId)
         {
             if (!FactionSensorContacts.ContainsKey(factionId))
-                return new SystemSensorContacts(this, Game.Factions[factionId]);
+            {
+                FactionSensorContacts.Add(factionId, new SystemSensorContacts(this, Game.Factions[factionId]));
+            }
+
             return FactionSensorContacts[factionId];
         }
 
+        /// <summary>
+        /// Gets the Entity with the specified Id from any EntityManager
+        /// in the game. This can be much slower than looking up the
+        /// Entity directly from the EntityManger that contains the Entity.
+        /// </summary>
+        /// <param name="entityId">The Id of the Entity to retrieve.</param>
+        /// <returns>The Entity if one exists, InvalidEntity if it doesn't exist.</returns>
         public Entity GetGlobalEntityById(int entityId)
         {
             Entity entity = Entity.InvalidEntity;

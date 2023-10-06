@@ -40,36 +40,16 @@ namespace Pulsar4X.SDL2UI
             PulseMgr = system.ManagerSubpulses;
             _faction = faction;
 
-            // FIXME: couldn't get this working with GetEntitiesByFaction, it left out the stars, planets etc
             var factionEntities = StarSystem.GetEntitiesByFaction(faction.Id);
-            //var allEntities = StarSystem.GetAllEntites();
             foreach (Entity entityItem in factionEntities)
             {
-                var entityState = new EntityState(entityItem);
-                // Add Data to State if Available
-                if (entityItem.HasDataBlob<NameDB>())
-                {
-                    entityState.Name = entityItem.GetDataBlob<NameDB>().GetName(faction);
-                }
-                if (entityItem.HasDataBlob<PositionDB>())
-                {
-                    entityState.Position = entityItem.GetDataBlob<PositionDB>();
-                }
-
-                // Add To Lists
-                if (entityItem.HasDataBlob<NameDB>())
-                {
-                    EntityStatesWithNames.Add(entityItem.Id, entityState);
-                }
-                if (entityItem.HasDataBlob<PositionDB>())
-                {
-                    EntityStatesWithPosition.Add(entityItem.Id, entityState);
-                }
-                if (entityItem.HasDataBlob<ColonyInfoDB>())
-                {
-                    EntityStatesColonies.Add(entityItem.Id, entityState);
-                }
+                SetupEntity(entityItem, faction);
             }
+
+            // foreach(var neutralEntity in StarSystem.GetNeutralEntities())
+            // {
+            //     SetupEntity(neutralEntity, faction);
+            // }
 
             AEntityChangeListener changeListner = new EntityChangeListener(StarSystem, faction, new List<Type>() { typeof(PositionDB) });//, listnerblobs);
             _changeListner = changeListner;
@@ -77,10 +57,33 @@ namespace Pulsar4X.SDL2UI
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
             {
                 var entityState = new EntityState(sensorContact) { Name = "Unknown" };
-                EntityStatesWithNames.Add(sensorContact.ActualEntityId, entityState);
-                EntityStatesWithPosition.Add(sensorContact.ActualEntityId, entityState);
+                if(!EntityStatesWithNames.ContainsKey(sensorContact.ActualEntityId))
+                    EntityStatesWithNames.Add(sensorContact.ActualEntityId, entityState);
+
+                if(!EntityStatesWithPosition.ContainsKey(sensorContact.ActualEntityId))
+                    EntityStatesWithPosition.Add(sensorContact.ActualEntityId, entityState);
             }
 
+        }
+
+        private void SetupEntity(Entity entityItem, Entity faction)
+        {
+            var entityState = new EntityState(entityItem);
+            // Add Data to State if Available
+            if (!EntityStatesWithNames.ContainsKey(entityItem.Id) && entityItem.HasDataBlob<NameDB>())
+            {
+                entityState.Name = entityItem.GetDataBlob<NameDB>().GetName(faction);
+                EntityStatesWithNames.Add(entityItem.Id, entityState);
+            }
+            if (!EntityStatesWithPosition.ContainsKey(entityItem.Id) && entityItem.HasDataBlob<PositionDB>())
+            {
+                entityState.Position = entityItem.GetDataBlob<PositionDB>();
+                EntityStatesWithPosition.Add(entityItem.Id, entityState);
+            }
+            if (!EntityStatesColonies.ContainsKey(entityItem.Id) && entityItem.HasDataBlob<ColonyInfoDB>())
+            {
+                EntityStatesColonies.Add(entityItem.Id, entityState);
+            }
         }
 
 

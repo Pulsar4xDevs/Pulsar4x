@@ -64,9 +64,13 @@ namespace Pulsar4X.SDL2UI
                 var orbitdb = starEntity.GetDataBlob<OrbitDB>();
                 starEntity = orbitdb.Root; //just incase it's a binary system and the entity we got was not the primary
 
+                var starEntityState = item.Value.EntityStatesWithNames.ContainsKey(starEntity.Id) ?
+                    item.Value.EntityStatesWithNames[starEntity.Id] :
+                    new EntityState(starEntity);
+
                 var starIcon = new StarIcon(starEntity);
                 StarIcons[item.Key] = starIcon;
-                var nameIcon = new NameIcon(item.Value.EntityStatesWithNames[starEntity.Id], _state);
+                var nameIcon = new NameIcon(starEntityState, _state);
                 _nameIcons[item.Key] = nameIcon;
                 var x = (startR + radInc * i) * Math.Sin(startangle - angleIncrease * i);
                 var y = (startR + radInc * i) * Math.Cos(startangle - angleIncrease * i);
@@ -83,7 +87,7 @@ namespace Pulsar4X.SDL2UI
             var sysGuid = entityState.StarSysGuid;
             if(SelectedStarSysGuid != sysGuid && RenderedMaps.ContainsKey(sysGuid))
             {
-                SelectedStarSysGuid = sysGuid; 
+                SelectedStarSysGuid = sysGuid;
             }
 
         }
@@ -102,7 +106,7 @@ namespace Pulsar4X.SDL2UI
                     if(sysid == _state.SelectedStarSysGuid){
                         sysmap.DrawNameIcons();
                     }
-                    
+
                 }
             }
             else
@@ -116,9 +120,9 @@ namespace Pulsar4X.SDL2UI
                         if(item.Key == _state.SelectedStarSysGuid){
                             nameIcons.Add(item.Value);
                         }
-                        
-                       
-                         
+
+
+
                         //}
                         //item.Value.Draw(_uiState.rendererPtr, _uiState.Camera);
                     }
@@ -147,9 +151,9 @@ namespace Pulsar4X.SDL2UI
                     DrawGalmap(matrix);
                 }
             }
-            else// only draw the systemmap. 
+            else// only draw the systemmap.
             {
-                if (SelectedStarSysGuid.IsNotNullOrEmpty()) 
+                if (SelectedStarSysGuid.IsNotNullOrEmpty())
                     RenderedMaps[SelectedStarSysGuid].Draw();
             }
 
@@ -169,9 +173,9 @@ namespace Pulsar4X.SDL2UI
                 if(item.Key == _state.SelectedStarSysGuid){
                      item.Value.Draw(_renderPtr, _camera);
                 }
-               
 
-                
+
+
             }
             lock (_nameIcons)
             {
@@ -207,19 +211,19 @@ namespace Pulsar4X.SDL2UI
             _cellSize = cellSize;
             _gridWidth = width;
             _gridHeight = height;
-            _gridItems = new GridItems[width * height]; 
+            _gridItems = new GridItems[width * height];
         }
 
         public Guid[] GetItemsAtPx(int x, int y)
         {
-            return GetItemsAtCell(x / _cellSize, y / _cellSize); 
+            return GetItemsAtCell(x / _cellSize, y / _cellSize);
         }
 
         public Guid[] GetItemsAtCell(int x, int y)
         {
-            int index = y * _gridWidth + x; 
+            int index = y * _gridWidth + x;
             GridItems items = _gridItems[index];
-            return items.itemGuids;  
+            return items.itemGuids;
         }
 
         public void SetItemsFromPx(int x, int y, Guid guid)

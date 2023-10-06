@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -20,7 +18,7 @@ namespace Pulsar4X.Engine.Sensors
         public EntityManager ParentManager;
 
         [JsonProperty]
-        Dictionary<int, SensorContact> _sensorContactsByActualGuid = new ();
+        Dictionary<int, SensorContact> _sensorContactsByEntityId = new ();
 
         [JsonProperty]
         public XThreadData<EntityChangeData> Changes = new XThreadData<EntityChangeData>();
@@ -32,21 +30,33 @@ namespace Pulsar4X.Engine.Sensors
         {
             ParentManager = parentManager;
             FactionEntity = faction;
-            parentManager.FactionSensorContacts.Add(faction.Id, this);
         }
 
         public bool SensorContactExists(int actualEntityGuid)
         {
-            return _sensorContactsByActualGuid.ContainsKey(actualEntityGuid);
+            return _sensorContactsByEntityId.ContainsKey(actualEntityGuid);
         }
 
         public SensorContact GetSensorContact(int actualEntityId)
         {
-            return (_sensorContactsByActualGuid[actualEntityId]);
+            return _sensorContactsByEntityId[actualEntityId];
         }
+
+        public bool TryGetSensorContact(int entityId, out SensorContact sensorContact)
+        {
+            if(_sensorContactsByEntityId.ContainsKey(entityId))
+            {
+                sensorContact = _sensorContactsByEntityId[entityId];
+                return true;
+            }
+
+            sensorContact = null;
+            return false;
+        }
+
         internal void AddContact(SensorContact sensorContact)
         {
-            _sensorContactsByActualGuid.Add(sensorContact.ActualEntityId, sensorContact);
+            _sensorContactsByEntityId.Add(sensorContact.ActualEntityId, sensorContact);
             Changes.Write(new EntityChangeData()
             {
                 Entity = sensorContact.ActualEntity,
@@ -55,10 +65,10 @@ namespace Pulsar4X.Engine.Sensors
         }
         internal void RemoveContact(int ActualEntityId)
         {
-            if (_sensorContactsByActualGuid.ContainsKey(ActualEntityId))
+            if (_sensorContactsByEntityId.ContainsKey(ActualEntityId))
             {
-                var entity = _sensorContactsByActualGuid[ActualEntityId].ActualEntity;
-                _sensorContactsByActualGuid.Remove(ActualEntityId);
+                var entity = _sensorContactsByEntityId[ActualEntityId].ActualEntity;
+                _sensorContactsByEntityId.Remove(ActualEntityId);
                 Changes.Write(new EntityChangeData()
                 {
                     Entity = entity,
@@ -68,11 +78,11 @@ namespace Pulsar4X.Engine.Sensors
         }
         public List<SensorContact> GetAllContacts()
         {
-            return _sensorContactsByActualGuid.Values.ToList();
+            return _sensorContactsByEntityId.Values.ToList();
         }
-        public List<int> GetAllContactGuids()
+        public List<int> GetAllContactIds()
         {
-            return _sensorContactsByActualGuid.Keys.ToList();
+            return _sensorContactsByEntityId.Keys.ToList();
         }
     }
 }

@@ -300,6 +300,12 @@ namespace Pulsar4X.Engine
             // Clean up cached RNG:
             JPSurveyFactory.GenerateJPSurveyPoints(sol);
 
+            // Go through all the created entities and set them to be neutral
+            foreach(var entity in sol.GetAllEntites())
+            {
+                entity.FactionOwnerID = Game.NeutralFactionId;
+            }
+
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
             return sol;
         }

@@ -15,6 +15,12 @@ namespace Pulsar4X.Engine
 {
     public class Game
     {
+        /// <summary>
+        /// Entities like Suns, Planets, Asteroids etc are considered Neutral
+        /// and should have their FactionOwnerID set equal to NeutralFactionID
+        /// </summary>
+        public static readonly int NeutralFactionId = -99;
+
         [JsonProperty]
         public MasterTimePulse TimePulse { get; internal set; }
 
