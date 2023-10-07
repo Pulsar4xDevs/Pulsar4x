@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
         ConcurrentQueue<EntityChangeData> _sensorChanges = new ConcurrentQueue<EntityChangeData>();
         internal List<EntityChangeData> SensorChanges = new List<EntityChangeData>();
         ManagerSubPulse PulseMgr;
-        AEntityChangeListener _changeListner;
+        AEntityChangeListener _changeListener;
         public List<int> EntitysToBin = new ();
         public List<int> EntitiesAdded = new ();
         public List<EntityChangeData> SystemChanges = new List<EntityChangeData>();
@@ -46,13 +46,8 @@ namespace Pulsar4X.SDL2UI
                 SetupEntity(entityItem, faction);
             }
 
-            // foreach(var neutralEntity in StarSystem.GetNeutralEntities())
-            // {
-            //     SetupEntity(neutralEntity, faction);
-            // }
-
-            AEntityChangeListener changeListner = new EntityChangeListener(StarSystem, faction, new List<Type>() { typeof(PositionDB) });//, listnerblobs);
-            _changeListner = changeListner;
+            AEntityChangeListener changeListener = new EntityChangeListener(StarSystem, faction, new List<Type>() { typeof(PositionDB) });//, listnerblobs);
+            _changeListener = changeListener;
 
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
             {
@@ -116,7 +111,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             AEntityChangeListener changeListner = new EntityChangeListenerSM(StarSystem);//, listnerblobs);
-            _changeListner = changeListner;
+            _changeListener = changeListner;
             /*
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
             {
@@ -131,22 +126,8 @@ namespace Pulsar4X.SDL2UI
                 switch (change.ChangeType)
                 {
                     case EntityChangeData.EntityChangeType.EntityAdded:
-                        var entityItem = change.Entity;
                         EntitiesAdded.Add(change.Entity.Id);
-                        var entityState = new EntityState(entityItem);// { Name = "Unknown" };
-                        if (entityItem.HasDataBlob<NameDB>())
-                        {
-                            entityState.Name = entityItem.GetDataBlob<NameDB>().GetName(_faction.Id);
-                            EntityStatesWithNames.Add(entityItem.Id, entityState);
-                        }
-                        if (entityItem.HasDataBlob<PositionDB>())
-                        {
-                            EntityStatesWithPosition.Add(entityItem.Id, entityState);
-                        }
-                        else if( entityItem.HasDataBlob<ColonyInfoDB>())
-                        {
-                            EntityStatesColonies.Add(entityItem.Id, entityState);
-                        }
+                        SetupEntity(change.Entity, _faction);
                         break;
                     //if an entity moves from one system to another, then this should be triggered,
                     //currently Entity.ChangeEvent probibly does too, but we might have to tweak this. maybe add another enum?
@@ -163,7 +144,7 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void PreFrameSetup()
         {
-            while (_changeListner.TryDequeue(out EntityChangeData change))
+            while (_changeListener.TryDequeue(out EntityChangeData change))
             {
                 SystemChanges.Add(change);
                 HandleUpdates(change);
