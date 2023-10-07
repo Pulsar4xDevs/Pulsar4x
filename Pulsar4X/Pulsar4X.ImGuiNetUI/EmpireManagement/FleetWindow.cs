@@ -70,8 +70,15 @@ namespace Pulsar4X.SDL2UI
         {
             factionID = uiState.Faction.Id;
             factionRoot = uiState.Faction.GetDataBlob<FleetDB>();
-            var firstFleet = factionRoot.Children.Where(c => c.HasDataBlob<FleetDB>()).First();
-            SelectFleet(firstFleet);
+
+            if(factionRoot.Children.Count > 0)
+            {
+                SelectFleet(factionRoot.Children.Where(c => c.HasDataBlob<FleetDB>()).First());
+            }
+            else
+            {
+                SelectFleet(null);
+            }
         }
 
         private void SelectFleet(Entity fleet)

@@ -112,7 +112,7 @@ namespace Pulsar4X.SDL2UI
 
                     ImGui.NextColumn();
                     var ownerFactionID = _systemEntities[i].FactionOwnerID;
-                    if(ownerFactionID != -1)
+                    if(ownerFactionID != -1 && ownerFactionID != Game.NeutralFactionId)
                     {
                         var ownerFaction = game.Factions[ownerFactionID];
                         var factionName = ownerFaction.GetDataBlob<NameDB>().OwnersName;
