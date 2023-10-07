@@ -25,6 +25,9 @@ namespace Pulsar4X.Engine
         [JsonProperty("Entities")]
         private SafeDictionary<int, Entity> _entities = new ();
 
+        [JsonIgnore]
+        public int EntityCount => _entities.Count;
+
         /// <summary>
         /// The DataBlobStores hold all the datablobs for the entities this manager has.
         /// The Type key and subsequent Dictionary are lazily instantiated as DataBlobs

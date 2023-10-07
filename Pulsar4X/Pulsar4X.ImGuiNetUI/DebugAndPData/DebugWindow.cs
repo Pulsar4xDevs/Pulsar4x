@@ -147,657 +147,685 @@ namespace Pulsar4X.SDL2UI
         internal override void Display()
         {
             _isRunningFrame = true;
-            if (IsActive)
+            if(IsActive && ImGui.Begin("debug", ref IsActive))
             {
-                if (ImGui.Begin("debug", ref IsActive))
+                if(ImGui.BeginTabBar("DebugTabs"))
                 {
-
-
-                    BorderGroup.Begin("Info", ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
-
-                    ImGui.Text(_uiState.PrimarySystemDateTime.ToString());
-                    ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
-
-                    BorderGroup.End();
-                    ImGui.NewLine();
-
-                    if (ImGui.CollapsingHeader("Camera Functions", ImGuiTreeNodeFlags.CollapsingHeader))
+                    if(ImGui.BeginTabItem("Info"))
                     {
-                        var cam = _uiState.Camera;
-                        if (cam.IsPinnedToEntity)
+                        BorderGroup.Begin("Info", ImGui.ColorConvertFloat4ToU32(new Vector4(0.5f, 0.5f, 0.5f, 1.0f)));
+
+                        ImGui.Text(_uiState.PrimarySystemDateTime.ToString());
+                        ImGui.Text("GitHash: " + AssemblyInfo.GetGitHash());
+
+                        BorderGroup.End();
+                        ImGui.NewLine();
+
+                        if (ImGui.CollapsingHeader("Camera Functions", ImGuiTreeNodeFlags.CollapsingHeader))
                         {
-                            var entyName = _systemState.EntityStatesWithNames[_uiState.Camera.PinnedEntityGuid].Name;
-                            ImGui.Text("Camera is pinned to:");
+                            var cam = _uiState.Camera;
+                            if (cam.IsPinnedToEntity)
+                            {
+                                var entyName = _systemState.EntityStatesWithNames[_uiState.Camera.PinnedEntityGuid].Name;
+                                ImGui.Text("Camera is pinned to:");
+                                ImGui.SameLine();
+                                ImGui.Text(entyName);
+                            }
+                            else
+                            {
+                                ImGui.Text("Camera is not pinned to an entity.");
+                            }
+
+                            ImGui.Text("Zoom: " + cam.ZoomLevel);
+
+                            ImGui.Text("Raw Cursor Coordinate");
+                            System.Numerics.Vector2 mouseCoord = ImGui.GetMousePos();
+                            ImGui.Text("x: " + mouseCoord.X);
                             ImGui.SameLine();
-                            ImGui.Text(entyName);
+                            ImGui.Text("y: " + mouseCoord.Y);
+
+                            ImGui.Text("Cursor World Coordinate:");
+                            var mouseWorldCoord = cam.MouseWorldCoordinate_m();
+                            ImGui.Text("x" + Stringify.Distance(mouseWorldCoord.X));
+                            ImGui.SameLine();
+                            ImGui.Text("y" + Stringify.Distance(mouseWorldCoord.Y));
+                            var mouseWorldCoord_AU = Distance.MToAU(cam.MouseWorldCoordinate_AU());
+                            ImGui.Text("x" + mouseWorldCoord_AU.X + " AU");
+                            ImGui.SameLine();
+                            ImGui.Text("y" + mouseWorldCoord_AU.Y + " AU");
+
+                            ImGui.Text("Cursor View Coordinate:");
+                            ImGui.Text("(WorldCoord - CameraWorldPos) * zoomLevel + viewportCenter");
+                            ImGui.Text("(" + mouseWorldCoord.X + "-" + cam.CameraWorldPosition.X + ") *" + cam.ZoomLevel + "+" + cam.ViewPortCenter.X);
+                            var mouseViewCoord = cam.ViewCoordinate_m(mouseWorldCoord);
+                            ImGui.Text("x" + mouseViewCoord.x + " p");
+                            ImGui.SameLine();
+                            ImGui.Text("y" + mouseViewCoord.y + " p");
+                            var mouseviewCoord_AU = cam.ViewCoordinate_AU(mouseWorldCoord);
+                            ImGui.Text("x" + mouseviewCoord_AU.x + " p");
+                            ImGui.SameLine();
+                            ImGui.Text("y" + mouseviewCoord_AU.y + " p");
+
+                            ImGui.Text("Camrera WorldPosition");
+                            var camWorldCoord_m = cam.CameraWorldPosition;
+                            ImGui.Text("x" + camWorldCoord_m.X + " m");
+                            ImGui.SameLine();
+                            ImGui.Text("y" + camWorldCoord_m.Y + " m");
+                            var camWorldCoord_AU = Distance.MToAU(cam.CameraWorldPosition);
+                            ImGui.Text("x" + camWorldCoord_AU.X + " AU");
+                            ImGui.SameLine();
+                            ImGui.Text("y" + camWorldCoord_AU.Y + " AU");
+
                         }
-                        else
+
+
+
+
+                        ImGui.Text("Suported Special Chars");
+                        ImGui.Text("Ω, ω, ν, Δ, θ");
+
+
+
+                        if (ImGui.CollapsingHeader("GraphicTests", ImGuiTreeNodeFlags.CollapsingHeader))
                         {
-                            ImGui.Text("Camera is not pinned to an entity.");
+                            var window = GraphicDebugWindow.GetWindow(_uiState);
+                            window.Display();
+                            window.Enable(true, _uiState);
                         }
 
-                        ImGui.Text("Zoom: " + cam.ZoomLevel);
-
-                        ImGui.Text("Raw Cursor Coordinate");
-                        System.Numerics.Vector2 mouseCoord = ImGui.GetMousePos();
-                        ImGui.Text("x: " + mouseCoord.X);
-                        ImGui.SameLine();
-                        ImGui.Text("y: " + mouseCoord.Y);
-
-                        ImGui.Text("Cursor World Coordinate:");
-                        var mouseWorldCoord = cam.MouseWorldCoordinate_m();
-                        ImGui.Text("x" + Stringify.Distance(mouseWorldCoord.X));
-                        ImGui.SameLine();
-                        ImGui.Text("y" + Stringify.Distance(mouseWorldCoord.Y));
-                        var mouseWorldCoord_AU = Distance.MToAU(cam.MouseWorldCoordinate_AU());
-                        ImGui.Text("x" + mouseWorldCoord_AU.X + " AU");
-                        ImGui.SameLine();
-                        ImGui.Text("y" + mouseWorldCoord_AU.Y + " AU");
-
-                        ImGui.Text("Cursor View Coordinate:");
-                        ImGui.Text("(WorldCoord - CameraWorldPos) * zoomLevel + viewportCenter");
-                        ImGui.Text("(" + mouseWorldCoord.X + "-" + cam.CameraWorldPosition.X + ") *" + cam.ZoomLevel + "+" + cam.ViewPortCenter.X);
-                        var mouseViewCoord = cam.ViewCoordinate_m(mouseWorldCoord);
-                        ImGui.Text("x" + mouseViewCoord.x + " p");
-                        ImGui.SameLine();
-                        ImGui.Text("y" + mouseViewCoord.y + " p");
-                        var mouseviewCoord_AU = cam.ViewCoordinate_AU(mouseWorldCoord);
-                        ImGui.Text("x" + mouseviewCoord_AU.x + " p");
-                        ImGui.SameLine();
-                        ImGui.Text("y" + mouseviewCoord_AU.y + " p");
-
-                        ImGui.Text("Camrera WorldPosition");
-                        var camWorldCoord_m = cam.CameraWorldPosition;
-                        ImGui.Text("x" + camWorldCoord_m.X + " m");
-                        ImGui.SameLine();
-                        ImGui.Text("y" + camWorldCoord_m.Y + " m");
-                        var camWorldCoord_AU = Distance.MToAU(cam.CameraWorldPosition);
-                        ImGui.Text("x" + camWorldCoord_AU.X + " AU");
-                        ImGui.SameLine();
-                        ImGui.Text("y" + camWorldCoord_AU.Y + " AU");
-
-                    }
 
 
 
-
-                    ImGui.Text("Suported Special Chars");
-                    ImGui.Text("Ω, ω, ν, Δ, θ");
-
-
-
-                    if (ImGui.CollapsingHeader("GraphicTests", ImGuiTreeNodeFlags.CollapsingHeader))
-                    {
-                        var window = GraphicDebugWindow.GetWindow(_uiState);
-                        window.Display();
-                        window.Enable(true, _uiState);
-                    }
-
-
-
-
-                    if (ImGui.CollapsingHeader("UI Examples"))
-                    {
-                        ImGui.Text("ReOrderable List Exampeles");
-
-                        ImGui.Text("HoverButtons");
-                        HoverButtons();
-
-                        ImGui.Text("Static Buttons");
-                        StaticButtons();
-
-                        ImGui.Text("Buttons Group");
-                        ButtonBox();
-
-                        ImGui.NewLine();
-                        //ImGui.Text("BorderListOptionsWidget");
-                        BorderListOptionsWiget();
-
-                        ImGui.NewLine();
-                    }
-
-                    ImGui.Text("Selected Star System: " + _uiState.SelectedStarSysGuid);
-                    ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.GetAllEntites().Count);
-                    if(ImGui.CollapsingHeader("Log"))
-                    {
-                        ImGui.BeginChild("LogChild", new System.Numerics.Vector2(800, 300), true);
-                        ImGui.Columns(4, "Events", true);
-                        ImGui.Text("DateTime");
-                        ImGui.NextColumn();
-                        ImGui.Text("Faction");
-                        ImGui.NextColumn();
-                        ImGui.Text("Entity");
-                        ImGui.NextColumn();
-                        ImGui.Text("Event Message");
-                        ImGui.NextColumn();
-
-                        // foreach (var gameEvent in StaticRefLib.EventLog.GetAllEvents())
-                        // {
-
-                        //     string entityStr = "";
-                        //     if (gameEvent.Entity != null)
-                        //     {
-                        //         if (gameEvent.EntityName.IsNullOrWhitespace() && gameEvent.Entity.IsValid)
-                        //         {
-                        //             if (gameEvent.Entity.HasDataBlob<NameDB>())
-                        //                 entityStr = gameEvent.Entity.GetDataBlob<NameDB>().DefaultName;
-                        //             else
-                        //                 entityStr = gameEvent.Entity.Guid.ToString();
-                        //         }
-                        //         else
-                        //         {
-                        //             entityStr = gameEvent.EntityName;
-                        //         }
-                        //     }
-
-
-                        //     string factionStr = "";
-                        //     if (gameEvent.Faction != null)
-                        //         if (gameEvent.Faction.HasDataBlob<NameDB>())
-                        //             factionStr = gameEvent.Faction.GetDataBlob<NameDB>().DefaultName;
-                        //         else
-                        //             factionStr = gameEvent.Faction.Guid.ToString();
-
-                        //     ImGui.Separator();
-                        //     ImGui.Text(gameEvent.Time.ToString());
-                        //         ImGui.NextColumn();
-                        //     ImGui.Text(factionStr);
-                        //         ImGui.NextColumn();
-                        //     ImGui.Text(entityStr);
-                        //         ImGui.NextColumn();
-                        //     ImGui.TextWrapped(gameEvent.Message);
-
-                        //         ImGui.NextColumn();
-
-
-                        // }
-                        //ImGui.Separator();
-                        //ImGui.Columns();
-                        ImGui.EndChild();
-                    }
-                    if (ImGui.CollapsingHeader("Entity List"))
-                    {
-                        ImGui.Columns(2);
-                        for (int i = 0; i < _allEntites.Count; i++)
+                        if (ImGui.CollapsingHeader("UI Examples"))
                         {
-                            if (ImGui.Selectable(_allEntites[i].name + "##" + i))
-                            {
-                                SelectedEntity = _allEntites[i].entity;
-                            }
+                            ImGui.Text("ReOrderable List Exampeles");
+
+                            ImGui.Text("HoverButtons");
+                            HoverButtons();
+
+                            ImGui.Text("Static Buttons");
+                            StaticButtons();
+
+                            ImGui.Text("Buttons Group");
+                            ButtonBox();
+
+                            ImGui.NewLine();
+                            //ImGui.Text("BorderListOptionsWidget");
+                            BorderListOptionsWiget();
+
+                            ImGui.NewLine();
+                        }
+
+                        ImGui.Text("Selected Star System: " + _uiState.SelectedStarSysGuid);
+                        ImGui.Text("Number Of Entites: " + _uiState.SelectedSystem.EntityCount);
+                        if(ImGui.CollapsingHeader("Log"))
+                        {
+                            ImGui.BeginChild("LogChild", new System.Numerics.Vector2(800, 300), true);
+                            ImGui.Columns(4, "Events", true);
+                            ImGui.Text("DateTime");
                             ImGui.NextColumn();
-                            ImGui.Text(_allEntites[i].faction);
+                            ImGui.Text("Faction");
+                            ImGui.NextColumn();
+                            ImGui.Text("Entity");
+                            ImGui.NextColumn();
+                            ImGui.Text("Event Message");
                             ImGui.NextColumn();
 
+                            // foreach (var gameEvent in StaticRefLib.EventLog.GetAllEvents())
+                            // {
+
+                            //     string entityStr = "";
+                            //     if (gameEvent.Entity != null)
+                            //     {
+                            //         if (gameEvent.EntityName.IsNullOrWhitespace() && gameEvent.Entity.IsValid)
+                            //         {
+                            //             if (gameEvent.Entity.HasDataBlob<NameDB>())
+                            //                 entityStr = gameEvent.Entity.GetDataBlob<NameDB>().DefaultName;
+                            //             else
+                            //                 entityStr = gameEvent.Entity.Guid.ToString();
+                            //         }
+                            //         else
+                            //         {
+                            //             entityStr = gameEvent.EntityName;
+                            //         }
+                            //     }
+
+
+                            //     string factionStr = "";
+                            //     if (gameEvent.Faction != null)
+                            //         if (gameEvent.Faction.HasDataBlob<NameDB>())
+                            //             factionStr = gameEvent.Faction.GetDataBlob<NameDB>().DefaultName;
+                            //         else
+                            //             factionStr = gameEvent.Faction.Guid.ToString();
+
+                            //     ImGui.Separator();
+                            //     ImGui.Text(gameEvent.Time.ToString());
+                            //         ImGui.NextColumn();
+                            //     ImGui.Text(factionStr);
+                            //         ImGui.NextColumn();
+                            //     ImGui.Text(entityStr);
+                            //         ImGui.NextColumn();
+                            //     ImGui.TextWrapped(gameEvent.Message);
+
+                            //         ImGui.NextColumn();
+
+
+                            // }
+                            //ImGui.Separator();
+                            //ImGui.Columns();
+                            ImGui.EndChild();
                         }
-                        ImGui.Columns(1);
+
+                        ImGui.EndTabItem();
                     }
-                    if (SelectedEntity != null && SelectedEntity.IsValid)
+
+                    if(ImGui.BeginTabItem("Entities"))
                     {
-                        if (ImGui.CollapsingHeader("Selected Entity: " + _selectedEntityName + "###NameHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                        var size = ImGui.GetContentRegionAvail();
+                        var firstChildSize = new System.Numerics.Vector2(size.X * 0.27f, 0);
+                        var secondChildSize = new System.Numerics.Vector2(size.X * 0.72f, 0);
+
+                        if(ImGui.BeginChild("Enttiy Selector", firstChildSize))
                         {
-
-                            ImGui.Text(SelectedEntity.Id.ToString());
-                            if (SelectedEntity.HasDataBlob<PositionDB>())
+                            ImGui.Columns(3);
+                            for (int i = 0; i < _allEntites.Count; i++)
                             {
-                                var positiondb = SelectedEntity.GetDataBlob<PositionDB>();
-                                var posAbs = positiondb.AbsolutePosition;
-                                ImGui.Text("x: " + Stringify.Distance(posAbs.X));
-                                ImGui.Text("y: " + Stringify.Distance(posAbs.Y));
-                                ImGui.Text("z: " + Stringify.Distance(posAbs.Z));
-                                if (positiondb.Parent != null)
+                                if (ImGui.Selectable(_allEntites[i].name + "##" + i))
                                 {
-                                    ImGui.Text("Parent: " + positiondb.Parent.GetDataBlob<NameDB>().DefaultName);
-
-                                    ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition.Length()));
+                                    SelectedEntity = _allEntites[i].entity;
                                 }
-
-                                var relativeState = SelectedEntity.GetRelativeState();
-                                ImGui.Text("relative Velocity: " + relativeState.Velocity);
-                                ImGui.Text("relative Speed: " + Stringify.Velocity(relativeState.Velocity.Length()));
-
+                                ImGui.NextColumn();
+                                ImGui.Text(_allEntites[i].entity.Id.ToString());
+                                ImGui.NextColumn();
+                                ImGui.Text(_allEntites[i].faction);
+                                ImGui.NextColumn();
 
                             }
+                            ImGui.Columns(1);
+                            ImGui.EndChild();
+                        }
 
-                            if (ImGui.CollapsingHeader("DataBlob List"))
+                        ImGui.SameLine();
+
+                        if(SelectedEntity != null && SelectedEntity.IsValid && ImGui.BeginChild("Entity Inspector", secondChildSize))
+                        {
+                            if (ImGui.CollapsingHeader("Selected Entity: " + _selectedEntityName + "###NameHeader", ImGuiTreeNodeFlags.DefaultOpen))
                             {
-                                EntityInspector.DisplayDatablobs(SelectedEntity);
-                                ImGui.NewLine();
-                            }
 
-
-
-
-
-                            if (SelectedEntity.HasDataBlob<MassVolumeDB>())
-                            {
-                                if (ImGui.CollapsingHeader("MassVolumeDB: ###MassVolDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                ImGui.Text(SelectedEntity.Id.ToString());
+                                if (SelectedEntity.HasDataBlob<PositionDB>())
                                 {
-                                    MassVolumeDB mvdb = SelectedEntity.GetDataBlob<MassVolumeDB>();
-                                    ImGui.Text("Mass " + Stringify.Mass(mvdb.MassDry));
-                                    ImGui.Text("Volume " + Stringify.Velocity(mvdb.Volume_m3));
-                                    ImGui.Text("Density " + mvdb.DensityDry_gcm + "g/cm^3");
-                                    ImGui.Text("Radius " + Stringify.Distance(mvdb.RadiusInM));
-                                }
-
-                            }
-                            if (SelectedEntity.HasDataBlob<OrbitDB>() || SelectedEntity.HasDataBlob<OrbitUpdateOftenDB>())
-                            {
-
-                                if (ImGui.Checkbox("Draw SOI", ref _drawSOI))
-                                {
-                                    SimpleCircle cir;
-                                    if (_drawSOI)
+                                    var positiondb = SelectedEntity.GetDataBlob<PositionDB>();
+                                    var posAbs = positiondb.AbsolutePosition;
+                                    ImGui.Text("x: " + Stringify.Distance(posAbs.X));
+                                    ImGui.Text("y: " + Stringify.Distance(posAbs.Y));
+                                    ImGui.Text("z: " + Stringify.Distance(posAbs.Z));
+                                    if (positiondb.Parent != null)
                                     {
-                                        var soiradius = SelectedEntity.GetSOI_AU();
-                                        var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
-                                        cir = new SimpleCircle(SelectedEntity.GetDataBlob<PositionDB>(), soiradius, colour);
+                                        ImGui.Text("Parent: " + positiondb.Parent.GetDataBlob<NameDB>().DefaultName);
 
-                                        _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(cir), cir);
+                                        ImGui.Text("Dist: " + Stringify.Distance(positiondb.RelativePosition.Length()));
                                     }
-                                    else
-                                        _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(cir));
+
+                                    (Vector3 position, Vector3 Velocity) relativeState;
+                                    try
+                                    {
+                                        relativeState = SelectedEntity.GetRelativeState();
+                                    }
+                                    catch(Exception ex)
+                                    {
+                                        relativeState.Velocity = Vector3.Zero;
+                                    }
+
+                                    ImGui.Text("relative Velocity: " + relativeState.Velocity);
+                                    ImGui.Text("relative Speed: " + Stringify.Velocity(relativeState.Velocity.Length()));
                                 }
 
-                                if (ImGui.CollapsingHeader("OrbitDB: ###OrbitDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                if (ImGui.CollapsingHeader("DataBlob List"))
+                                {
+                                    EntityInspector.DisplayDatablobs(SelectedEntity);
+                                    ImGui.NewLine();
+                                }
+
+
+
+
+
+                                if (SelectedEntity.HasDataBlob<MassVolumeDB>())
+                                {
+                                    if (ImGui.CollapsingHeader("MassVolumeDB: ###MassVolDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                    {
+                                        MassVolumeDB mvdb = SelectedEntity.GetDataBlob<MassVolumeDB>();
+                                        ImGui.Text("Mass " + Stringify.Mass(mvdb.MassDry));
+                                        ImGui.Text("Volume " + Stringify.Velocity(mvdb.Volume_m3));
+                                        ImGui.Text("Density " + mvdb.DensityDry_gcm + "g/cm^3");
+                                        ImGui.Text("Radius " + Stringify.Distance(mvdb.RadiusInM));
+                                    }
+
+                                }
+                                if (SelectedEntity.HasDataBlob<OrbitDB>() || SelectedEntity.HasDataBlob<OrbitUpdateOftenDB>())
                                 {
 
-
-                                    OrbitDB orbitDB = SelectedEntity.GetDataBlob<OrbitDB>();
-
-                                    if(orbitDB == null)
-                                        orbitDB = SelectedEntity.GetDataBlob<OrbitUpdateOftenDB>();
-                                    //if (_uiState.CurrentSystemDateTime != lastDate)
-                                    //{
-                                    pos = orbitDB.GetAbsolutePosition_AU(_uiState.PrimarySystemDateTime);
-                                    truAnomoly = orbitDB.GetTrueAnomaly(_uiState.PrimarySystemDateTime);
-                                        //lastDate = _uiState.PrimarySystemDateTime;
-                                    //}
-
-
-                                    ImGui.Text("x: " + pos.X);
-                                    ImGui.Text("y: " + pos.Y);
-                                    ImGui.Text("z: " + pos.Z);
-
-                                    ImGui.Text("MeanMotion: " + Angle.ToDegrees(orbitDB.MeanMotion) + " in Deg/s");
-                                    ImGui.Text("MeanVelocity: " + Stringify.Velocity(orbitDB.MeanOrbitalVelocityInm()));
-
-                                    ImGui.Text("SOI Radius: " + Stringify.Distance(SelectedEntity.GetSOI_m()));
-                                    ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
-                                    ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod.TotalSeconds);
-
-                                    var ke = OrbitMath.KeplerFromOrbitDB(orbitDB);
-                                    ImGui.Columns(3);
-                                    ImGui.SetColumnWidth(0, 128);
-                                    ImGui.SetColumnWidth(1, 128);
-                                    ImGui.SetColumnWidth(2, 128);
-
-                                    ImGui.Text("Eccentricity:");
-                                    ImGui.NextColumn();
-                                    ImGui.Text(orbitDB.Eccentricity.ToString());
-                                    ImGui.NextColumn();
-                                    ImGui.Text(ke.Eccentricity.ToString());
-                                    ImGui.NextColumn();
-
-
-                                    ImGui.Text("AoP:");
-                                    ImGui.NextColumn();
-                                    ImGui.Text(Angle.ToDegrees(orbitDB.ArgumentOfPeriapsis).ToString());
-                                    ImGui.NextColumn();
-                                    ImGui.Text(ke.AoP.ToString());
-                                    ImGui.NextColumn();
-
-
-                                    ImGui.Text("TrueAnomaly:");
-                                    ImGui.NextColumn();
-                                    ImGui.Text(truAnomoly.ToString());
-                                    ImGui.NextColumn();
-                                    ImGui.Text(ke.TrueAnomalyAtEpoch.ToString());
-                                    ImGui.NextColumn();
-
-
-                                    ImGui.Text("SemiMajAxis:");
-                                    ImGui.NextColumn();
-                                    ImGui.Text(Stringify.Distance(orbitDB.SemiMajorAxis));
-                                    ImGui.NextColumn();
-                                    ImGui.Text(Stringify.Distance(ke.SemiMajorAxis));
-                                    ImGui.NextColumn();
-
-
-                                    ImGui.Text("Periapsis: ");
-                                    ImGui.NextColumn();
-                                    ImGui.Text(Stringify.Distance(orbitDB.Periapsis));
-                                    ImGui.NextColumn();
-                                    ImGui.Text(Stringify.Distance(ke.Periapsis));
-                                    ImGui.NextColumn();
-
-
-                                    ImGui.Text("Appoapsis: ");
-                                    ImGui.NextColumn();
-                                    ImGui.Text(Stringify.Distance(orbitDB.Apoapsis));
-                                    ImGui.NextColumn();
-                                    ImGui.Text(Stringify.Distance(ke.Apoapsis));
-                                    ImGui.NextColumn();
-
-
-                                    ImGui.Columns(1);
-
-
-
-
-
-                                    if (orbitDB.Parent != null)
-                                        ImGui.Text("Parent: " + orbitDB.Parent.GetDataBlob<NameDB>().DefaultName);
-                                    if (orbitDB.Children.Count > 0)
+                                    if (ImGui.Checkbox("Draw SOI", ref _drawSOI))
                                     {
-                                        foreach (var item in orbitDB.Children)
+                                        SimpleCircle cir;
+                                        if (_drawSOI)
                                         {
-                                            ImGui.Text(item.GetDataBlob<NameDB>().DefaultName);
+                                            var soiradius = SelectedEntity.GetSOI_AU();
+                                            var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
+                                            cir = new SimpleCircle(SelectedEntity.GetDataBlob<PositionDB>(), soiradius, colour);
+
+                                            _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(cir), cir);
+                                        }
+                                        else
+                                            _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(cir));
+                                    }
+
+                                    if (ImGui.CollapsingHeader("OrbitDB: ###OrbitDBHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                    {
+
+
+                                        OrbitDB orbitDB = SelectedEntity.GetDataBlob<OrbitDB>();
+
+                                        if(orbitDB == null)
+                                            orbitDB = SelectedEntity.GetDataBlob<OrbitUpdateOftenDB>();
+                                        //if (_uiState.CurrentSystemDateTime != lastDate)
+                                        //{
+                                        pos = orbitDB.GetAbsolutePosition_AU(_uiState.PrimarySystemDateTime);
+                                        truAnomoly = orbitDB.GetTrueAnomaly(_uiState.PrimarySystemDateTime);
+                                            //lastDate = _uiState.PrimarySystemDateTime;
+                                        //}
+
+
+                                        ImGui.Text("x: " + pos.X);
+                                        ImGui.Text("y: " + pos.Y);
+                                        ImGui.Text("z: " + pos.Z);
+
+                                        ImGui.Text("MeanMotion: " + Angle.ToDegrees(orbitDB.MeanMotion) + " in Deg/s");
+                                        ImGui.Text("MeanVelocity: " + Stringify.Velocity(orbitDB.MeanOrbitalVelocityInm()));
+
+                                        ImGui.Text("SOI Radius: " + Stringify.Distance(SelectedEntity.GetSOI_m()));
+                                        ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod);
+                                        ImGui.Text("Orbital Period:" + orbitDB.OrbitalPeriod.TotalSeconds);
+
+                                        var ke = OrbitMath.KeplerFromOrbitDB(orbitDB);
+                                        ImGui.Columns(3);
+                                        ImGui.SetColumnWidth(0, 128);
+                                        ImGui.SetColumnWidth(1, 128);
+                                        ImGui.SetColumnWidth(2, 128);
+
+                                        ImGui.Text("Eccentricity:");
+                                        ImGui.NextColumn();
+                                        ImGui.Text(orbitDB.Eccentricity.ToString());
+                                        ImGui.NextColumn();
+                                        ImGui.Text(ke.Eccentricity.ToString());
+                                        ImGui.NextColumn();
+
+
+                                        ImGui.Text("AoP:");
+                                        ImGui.NextColumn();
+                                        ImGui.Text(Angle.ToDegrees(orbitDB.ArgumentOfPeriapsis).ToString());
+                                        ImGui.NextColumn();
+                                        ImGui.Text(ke.AoP.ToString());
+                                        ImGui.NextColumn();
+
+
+                                        ImGui.Text("TrueAnomaly:");
+                                        ImGui.NextColumn();
+                                        ImGui.Text(truAnomoly.ToString());
+                                        ImGui.NextColumn();
+                                        ImGui.Text(ke.TrueAnomalyAtEpoch.ToString());
+                                        ImGui.NextColumn();
+
+
+                                        ImGui.Text("SemiMajAxis:");
+                                        ImGui.NextColumn();
+                                        ImGui.Text(Stringify.Distance(orbitDB.SemiMajorAxis));
+                                        ImGui.NextColumn();
+                                        ImGui.Text(Stringify.Distance(ke.SemiMajorAxis));
+                                        ImGui.NextColumn();
+
+
+                                        ImGui.Text("Periapsis: ");
+                                        ImGui.NextColumn();
+                                        ImGui.Text(Stringify.Distance(orbitDB.Periapsis));
+                                        ImGui.NextColumn();
+                                        ImGui.Text(Stringify.Distance(ke.Periapsis));
+                                        ImGui.NextColumn();
+
+
+                                        ImGui.Text("Appoapsis: ");
+                                        ImGui.NextColumn();
+                                        ImGui.Text(Stringify.Distance(orbitDB.Apoapsis));
+                                        ImGui.NextColumn();
+                                        ImGui.Text(Stringify.Distance(ke.Apoapsis));
+                                        ImGui.NextColumn();
+
+
+                                        ImGui.Columns(1);
+
+
+
+
+
+                                        if (orbitDB.Parent != null)
+                                            ImGui.Text("Parent: " + orbitDB.Parent.GetDataBlob<NameDB>().DefaultName);
+                                        if (orbitDB.Children.Count > 0)
+                                        {
+                                            foreach (var item in orbitDB.Children)
+                                            {
+                                                ImGui.Text(item.GetDataBlob<NameDB>().DefaultName);
+                                            }
+
+                                        }
+
+
+
+                                        var relativeState = SelectedEntity.GetRelativeState();
+                                        //var globalvec = OrbitMath.OrbitToGlobalVector(relativeState.Velocity, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                        var progradeVec = new Vector3(0, 100, 0);
+                                        //var thrustvec = OrbitMath.OrbitToGlobalVector(progradeVec, pos, relativeState.Velocity);
+                                        //var thrustvec2 = OrbitMath.OrbitToGlobalVector(progradeVec, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                        var thrustvec3 = OrbitMath.ProgradeToStateVector(progradeVec, truAnomoly, orbitDB.ArgumentOfPeriapsis, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
+                                        var thrustvec4 = OrbitMath.ProgradeToStateVector(orbitDB.GravitationalParameter_m3S2, progradeVec, pos, relativeState.Velocity);
+                                        ImGui.Text("stateVec: " + relativeState.Velocity);
+                                        //ImGui.Text("globalVec: " + globalvec);
+                                        //ImGui.Text("thrustvec: " + thrustvec);
+                                        //ImGui.Text("thrustvec2: " + thrustvec2);
+                                        ImGui.Text("thrustvec3: " + thrustvec3);
+                                        ImGui.Text("trhustvec4: " + thrustvec4);
+
+                                    }
+                                }
+
+                                if (SelectedEntity.HasDataBlob<NewtonMoveDB>())
+                                {
+                                    if (ImGui.Checkbox("Draw Parent SOI", ref _drawParentSOI))
+                                    {
+                                        SimpleCircle psoi;
+                                        SimpleLine psoilin;
+                                        if (_drawParentSOI)
+                                        {
+                                            var myPos = SelectedEntity.GetDataBlob<PositionDB>();
+                                            var parent = myPos.Parent;
+                                            var pObt = parent.GetDataBlob<OrbitDB>();
+                                            var cnmve = SelectedEntity.GetDataBlob<NewtonMoveDB>();
+
+                                            var soiradius = parent.GetSOI_AU();
+                                            var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
+                                            psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
+                                            var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;
+                                            var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().MassDry;
+
+                                            var sgp = GeneralMath.StandardGravitationalParameter(pmass + mymass);
+                                            var vel = Distance.KmToM(cnmve.CurrentVector_ms);
+                                            var cpos = myPos.RelativePosition;
+                                            var eccentVector = OrbitMath.EccentricityVector(sgp, cpos, vel);
+                                            double ce = eccentVector.Length();
+                                            var r = cpos.Length();
+                                            var v = vel.Length();
+
+                                            var ca = 1 / (2 / r - Math.Pow(v, 2) / sgp);
+                                            var cp = EllipseMath.SemiLatusRectum(ca, ce);
+
+                                            var cAoP = Math.Atan2(eccentVector.Y, eccentVector.X);
+
+                                            /*
+                                            var pa = pObt.SemiMajorAxis;
+                                            var pe = pObt.Eccentricity;
+                                            var pp = EllipseMath.SemiLatusRectum(pa, pe);
+                                            */
+                                            double θ = EllipseMath.TrueAnomalyAtRadus(soiradius, cp, ce);
+                                            θ += cAoP;
+
+                                            var x = soiradius * Math.Cos(θ);
+                                            var y = soiradius * Math.Sin(θ);
+                                            psoilin = new SimpleLine(parent.GetDataBlob<PositionDB>(), new Orbital.Vector2() { X = x, Y = y }, colour);
+
+                                            _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoi), psoi);
+                                            _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoilin), psoilin);
+                                        }
+                                        else
+                                        {
+                                            _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(psoi));
+                                            _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(psoilin));
+                                        }
+                                    }
+
+                                }
+
+
+                                if (SelectedEntity.HasDataBlob<EnergyGenAbilityDB>())
+                                {
+                                    if (ImGui.CollapsingHeader("Power ###PowerHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                    {
+                                        var powerDB = _selectedEntity.GetDataBlob<EnergyGenAbilityDB>();
+                                        ImGui.Text("Generates " +powerDB.EnergyType.Name);
+                                        ImGui.Text("Max of: " + powerDB.TotalOutputMax + "/s");
+                                        string fueltype = SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(powerDB.TotalFuelUseAtMax.type).Name;
+                                        ImGui.Text("Burning " + powerDB.TotalFuelUseAtMax.maxUse + " of "  +  fueltype);
+                                        ImGui.Text("With " + powerDB.LocalFuel + " remaining reactor fuel");
+
+                                        foreach (var etype in powerDB.EnergyStored)
+                                        {
+                                            string etypename = SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(etype.Key).Name;
+                                            ImGui.Text(etypename);
+
+                                            ImGui.Text(etype.Value.ToString() + "/" + powerDB.EnergyStoreMax[etype.Key].ToString());
                                         }
 
                                     }
-
-
-
-                                    var relativeState = SelectedEntity.GetRelativeState();
-                                    //var globalvec = OrbitMath.OrbitToGlobalVector(relativeState.Velocity, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
-                                    var progradeVec = new Vector3(0, 100, 0);
-                                    //var thrustvec = OrbitMath.OrbitToGlobalVector(progradeVec, pos, relativeState.Velocity);
-                                    //var thrustvec2 = OrbitMath.OrbitToGlobalVector(progradeVec, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
-                                    var thrustvec3 = OrbitMath.ProgradeToStateVector(progradeVec, truAnomoly, orbitDB.ArgumentOfPeriapsis, orbitDB.LongitudeOfAscendingNode, orbitDB.Inclination);
-                                    var thrustvec4 = OrbitMath.ProgradeToStateVector(orbitDB.GravitationalParameter_m3S2, progradeVec, pos, relativeState.Velocity);
-                                    ImGui.Text("stateVec: " + relativeState.Velocity);
-                                    //ImGui.Text("globalVec: " + globalvec);
-                                    //ImGui.Text("thrustvec: " + thrustvec);
-                                    //ImGui.Text("thrustvec2: " + thrustvec2);
-                                    ImGui.Text("thrustvec3: " + thrustvec3);
-                                    ImGui.Text("trhustvec4: " + thrustvec4);
-
-                                }
-                            }
-
-                            if (SelectedEntity.HasDataBlob<NewtonMoveDB>())
-                            {
-                                if (ImGui.Checkbox("Draw Parent SOI", ref _drawParentSOI))
-                                {
-                                    SimpleCircle psoi;
-                                    SimpleLine psoilin;
-                                    if (_drawParentSOI)
-                                    {
-                                        var myPos = SelectedEntity.GetDataBlob<PositionDB>();
-                                        var parent = myPos.Parent;
-                                        var pObt = parent.GetDataBlob<OrbitDB>();
-                                        var cnmve = SelectedEntity.GetDataBlob<NewtonMoveDB>();
-
-                                        var soiradius = parent.GetSOI_AU();
-                                        var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
-                                        psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
-                                        var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;
-                                        var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().MassDry;
-
-                                        var sgp = GeneralMath.StandardGravitationalParameter(pmass + mymass);
-                                        var vel = Distance.KmToM(cnmve.CurrentVector_ms);
-                                        var cpos = myPos.RelativePosition;
-                                        var eccentVector = OrbitMath.EccentricityVector(sgp, cpos, vel);
-                                        double ce = eccentVector.Length();
-                                        var r = cpos.Length();
-                                        var v = vel.Length();
-
-                                        var ca = 1 / (2 / r - Math.Pow(v, 2) / sgp);
-                                        var cp = EllipseMath.SemiLatusRectum(ca, ce);
-
-                                        var cAoP = Math.Atan2(eccentVector.Y, eccentVector.X);
-
-                                        /*
-                                        var pa = pObt.SemiMajorAxis;
-                                        var pe = pObt.Eccentricity;
-                                        var pp = EllipseMath.SemiLatusRectum(pa, pe);
-                                        */
-                                        double θ = EllipseMath.TrueAnomalyAtRadus(soiradius, cp, ce);
-                                        θ += cAoP;
-
-                                        var x = soiradius * Math.Cos(θ);
-                                        var y = soiradius * Math.Sin(θ);
-                                        psoilin = new SimpleLine(parent.GetDataBlob<PositionDB>(), new Orbital.Vector2() { X = x, Y = y }, colour);
-
-                                        _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoi), psoi);
-                                        _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoilin), psoilin);
-                                    }
-                                    else
-                                    {
-                                        _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(psoi));
-                                        _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(psoilin));
-                                    }
                                 }
 
-                            }
 
-
-                            if (SelectedEntity.HasDataBlob<EnergyGenAbilityDB>())
-                            {
-                                if (ImGui.CollapsingHeader("Power ###PowerHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                if (SelectedEntity.HasDataBlob<WarpAbilityDB>())
                                 {
-                                    var powerDB = _selectedEntity.GetDataBlob<EnergyGenAbilityDB>();
-                                    ImGui.Text("Generates " +powerDB.EnergyType.Name);
-                                    ImGui.Text("Max of: " + powerDB.TotalOutputMax + "/s");
-                                    string fueltype = SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(powerDB.TotalFuelUseAtMax.type).Name;
-                                    ImGui.Text("Burning " + powerDB.TotalFuelUseAtMax.maxUse + " of "  +  fueltype);
-                                    ImGui.Text("With " + powerDB.LocalFuel + " remaining reactor fuel");
-
-                                    foreach (var etype in powerDB.EnergyStored)
+                                    if (ImGui.CollapsingHeader("Warp: ###WarpHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                     {
-                                        string etypename = SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(etype.Key).Name;
-                                        ImGui.Text(etypename);
+                                        WarpAbilityDB warpDB = SelectedEntity.GetDataBlob<WarpAbilityDB>();
 
-                                        ImGui.Text(etype.Value.ToString() + "/" + powerDB.EnergyStoreMax[etype.Key].ToString());
+                                        ImGui.Text("Max Speed: " + warpDB.MaxSpeed);
+                                        ImGui.Text("CurrentVector: " + warpDB.CurrentVectorMS);
+                                        ImGui.Text("Current Speed: " + warpDB.CurrentVectorMS.Length());
+
+
+                                        //ImGui.Text("Energy type: " + warpDB.EnergyType);
+                                        ImGui.Text(SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(warpDB.EnergyType).Name);
+
+                                        ImGui.Text("Creation Cost: " +warpDB.BubbleCreationCost.ToString());
+                                        ImGui.Text("Sustain Cost: " +warpDB.BubbleSustainCost.ToString());
+                                        ImGui.Text("Collapse Cost: " +warpDB.BubbleCollapseCost.ToString());
+
+                                    }
+
+
+                                }
+                                if (SelectedEntity.HasDataBlob<NewtonMoveDB>())
+                                {
+                                    var nmdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonMoveDB>();
+                                    var ntdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
+                                    if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                    {
+                                        ImGui.Text("Manuver Vector: " + nmdb.ManuverDeltaV);
+                                        ImGui.Text("Total Manuver DV: " + Stringify.Distance(nmdb.ManuverDeltaVLen)+"/s");
+                                        ImGui.Text("Parent Body: " + nmdb.SOIParent.GetDataBlob<NameDB>().DefaultName);
+                                        ImGui.Text("Current Vector:");
+                                        ImGui.Text("X:" + Stringify.Velocity(nmdb.CurrentVector_ms.X));
+                                        ImGui.Text("Y:" + Stringify.Velocity(nmdb.CurrentVector_ms.Y));
+                                        ImGui.Text("Z:" + Stringify.Velocity(nmdb.CurrentVector_ms.Z));
+                                        ImGui.Text("Speed: " + Stringify.Velocity(nmdb.CurrentVector_ms.Length()));
+                                        ImGui.Text("Remaining Dv:" + Stringify.Distance( ntdb.DeltaV) + "/s");
+                                        ImGui.Text("Exhaust Velocity: " + ntdb.ExhaustVelocity);
+                                        ImGui.Text("BurnRate: " + ntdb.FuelBurnRate);
+                                        ImGui.Text("Thrust: " + ntdb.ThrustInNewtons);
                                     }
 
                                 }
-                            }
 
-
-                            if (SelectedEntity.HasDataBlob<WarpAbilityDB>())
-                            {
-                                if (ImGui.CollapsingHeader("Warp: ###WarpHeader", ImGuiTreeNodeFlags.CollapsingHeader))
+                                if (SelectedEntity.HasDataBlob<WarpMovingDB>())
                                 {
-                                    WarpAbilityDB warpDB = SelectedEntity.GetDataBlob<WarpAbilityDB>();
-
-                                    ImGui.Text("Max Speed: " + warpDB.MaxSpeed);
-                                    ImGui.Text("CurrentVector: " + warpDB.CurrentVectorMS);
-                                    ImGui.Text("Current Speed: " + warpDB.CurrentVectorMS.Length());
-
-
-                                    //ImGui.Text("Energy type: " + warpDB.EnergyType);
-                                    ImGui.Text(SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(warpDB.EnergyType).Name);
-
-                                    ImGui.Text("Creation Cost: " +warpDB.BubbleCreationCost.ToString());
-                                    ImGui.Text("Sustain Cost: " +warpDB.BubbleSustainCost.ToString());
-                                    ImGui.Text("Collapse Cost: " +warpDB.BubbleCollapseCost.ToString());
-
-                                }
-
-
-                            }
-                            if (SelectedEntity.HasDataBlob<NewtonMoveDB>())
-                            {
-                                var nmdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonMoveDB>();
-                                var ntdb = _uiState.LastClickedEntity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
-                                if (ImGui.CollapsingHeader("NewtonMove: ###NewtHeader", ImGuiTreeNodeFlags.CollapsingHeader))
-                                {
-                                    ImGui.Text("Manuver Vector: " + nmdb.ManuverDeltaV);
-                                    ImGui.Text("Total Manuver DV: " + Stringify.Distance(nmdb.ManuverDeltaVLen)+"/s");
-                                    ImGui.Text("Parent Body: " + nmdb.SOIParent.GetDataBlob<NameDB>().DefaultName);
-                                    ImGui.Text("Current Vector:");
-                                    ImGui.Text("X:" + Stringify.Velocity(nmdb.CurrentVector_ms.X));
-                                    ImGui.Text("Y:" + Stringify.Velocity(nmdb.CurrentVector_ms.Y));
-                                    ImGui.Text("Z:" + Stringify.Velocity(nmdb.CurrentVector_ms.Z));
-                                    ImGui.Text("Speed: " + Stringify.Velocity(nmdb.CurrentVector_ms.Length()));
-                                    ImGui.Text("Remaining Dv:" + Stringify.Distance( ntdb.DeltaV) + "/s");
-                                    ImGui.Text("Exhaust Velocity: " + ntdb.ExhaustVelocity);
-                                    ImGui.Text("BurnRate: " + ntdb.FuelBurnRate);
-                                    ImGui.Text("Thrust: " + ntdb.ThrustInNewtons);
-                                }
-
-                            }
-
-                            if (SelectedEntity.HasDataBlob<WarpMovingDB>())
-                            {
-                                var db = _uiState.LastClickedEntity.Entity.GetDataBlob<WarpMovingDB>();
-                                if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
-                                {
-                                    ImGui.Text("EntryPoint: ");
-                                    ImGui.Text("X:" + Stringify.Distance(db.EntryPointAbsolute.X));
-                                    ImGui.Text("Y:" + Stringify.Distance(db.EntryPointAbsolute.Y));
-                                    ImGui.Text("Z:" + Stringify.Distance(db.EntryPointAbsolute.Z));
-
-
-                                    ImGui.Text("ExitPoint: ");
-                                    ImGui.Text("X:" + Stringify.Distance(db.ExitPointAbsolute.X));
-                                    ImGui.Text("Y:" + Stringify.Distance(db.ExitPointAbsolute.Y));
-                                    ImGui.Text("Z:" + Stringify.Distance(db.ExitPointAbsolute.Z));
-
-                                    ImGui.Text("Relitive ExitPoint: ");
-                                    ImGui.Text("X:" + Stringify.Distance(db.ExitPointrelative.X));
-                                    ImGui.Text("Y:" + Stringify.Distance(db.ExitPointrelative.Y));
-                                    ImGui.Text("Z:" + Stringify.Distance(db.ExitPointrelative.Z));
-
-
-                                    ImGui.Text("EDA " + db.PredictedExitTime.ToString());
-                                    double distance = Distance.DistanceBetween(db.EntryPointAbsolute, db.ExitPointAbsolute);
-                                    ImGui.Text("Distance " + Stringify.Distance(distance));
-                                    ImGui.SameLine();
-                                    var timeToTarget = db.PredictedExitTime - _uiState.PrimarySystemDateTime;
-                                    ImGui.Text("Remaining TTT " + timeToTarget);
-                                    var totalTime = db.PredictedExitTime - db.EntryDateTime;
-                                    ImGui.Text("Total TTT  " + totalTime);
-                                    double speed = ((distance) / totalTime.TotalSeconds);
-                                    ImGui.Text("speed2 " + speed);
-                                    ImGui.Text("LastDateTime: ");
-                                    ImGui.Text(db.LastProcessDateTime.ToString());
-                                    ImGui.Text("Time Since Last: ");
-                                    var timelen = _uiState.PrimarySystemDateTime - db.LastProcessDateTime;
-                                    ImGui.Text(timelen.ToString());
-
-                                }
-                            }
-
-                            if (_selectedEntity.HasDataBlob<SensorProfileDB>() && ImGui.CollapsingHeader("SensorProfile"))
-                            {
-                                var profile = _selectedEntity.GetDataBlob<SensorProfileDB>();
-                                ImGui.Text("Target CrossSection: " + profile.TargetCrossSection_msq + " m^2");
-                                ImGui.Text("Emitted Count: " + profile.EmittedEMSpectra.Count);
-                                ImGui.Text("Reflected Count: " + profile.ReflectedEMSpectra.Count);
-
-                                double highestMagnatude = 0;
-                                double atWavelength = 0;
-                                foreach (var kvp in profile.EmittedEMSpectra)
-                                {
-                                    if (kvp.Value > highestMagnatude)
+                                    var db = _uiState.LastClickedEntity.Entity.GetDataBlob<WarpMovingDB>();
+                                    if (ImGui.CollapsingHeader("Transit: ###TransitHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                     {
-                                        highestMagnatude = kvp.Value;
-                                        atWavelength = kvp.Key.WavelengthAverage_nm;
+                                        ImGui.Text("EntryPoint: ");
+                                        ImGui.Text("X:" + Stringify.Distance(db.EntryPointAbsolute.X));
+                                        ImGui.Text("Y:" + Stringify.Distance(db.EntryPointAbsolute.Y));
+                                        ImGui.Text("Z:" + Stringify.Distance(db.EntryPointAbsolute.Z));
+
+
+                                        ImGui.Text("ExitPoint: ");
+                                        ImGui.Text("X:" + Stringify.Distance(db.ExitPointAbsolute.X));
+                                        ImGui.Text("Y:" + Stringify.Distance(db.ExitPointAbsolute.Y));
+                                        ImGui.Text("Z:" + Stringify.Distance(db.ExitPointAbsolute.Z));
+
+                                        ImGui.Text("Relitive ExitPoint: ");
+                                        ImGui.Text("X:" + Stringify.Distance(db.ExitPointrelative.X));
+                                        ImGui.Text("Y:" + Stringify.Distance(db.ExitPointrelative.Y));
+                                        ImGui.Text("Z:" + Stringify.Distance(db.ExitPointrelative.Z));
+
+
+                                        ImGui.Text("EDA " + db.PredictedExitTime.ToString());
+                                        double distance = Distance.DistanceBetween(db.EntryPointAbsolute, db.ExitPointAbsolute);
+                                        ImGui.Text("Distance " + Stringify.Distance(distance));
+                                        ImGui.SameLine();
+                                        var timeToTarget = db.PredictedExitTime - _uiState.PrimarySystemDateTime;
+                                        ImGui.Text("Remaining TTT " + timeToTarget);
+                                        var totalTime = db.PredictedExitTime - db.EntryDateTime;
+                                        ImGui.Text("Total TTT  " + totalTime);
+                                        double speed = ((distance) / totalTime.TotalSeconds);
+                                        ImGui.Text("speed2 " + speed);
+                                        ImGui.Text("LastDateTime: ");
+                                        ImGui.Text(db.LastProcessDateTime.ToString());
+                                        ImGui.Text("Time Since Last: ");
+                                        var timelen = _uiState.PrimarySystemDateTime - db.LastProcessDateTime;
+                                        ImGui.Text(timelen.ToString());
+
                                     }
                                 }
 
-                                ImGui.Text("Highest Emitted Signal: " + highestMagnatude + " kw");
-                                ImGui.Text("at wavelength : " + atWavelength + " nm");
-
-                                highestMagnatude = 0;
-                                atWavelength = 0;
-                                foreach (var kvp in profile.ReflectedEMSpectra)
+                                if (_selectedEntity.HasDataBlob<SensorProfileDB>() && ImGui.CollapsingHeader("SensorProfile"))
                                 {
-                                    if (kvp.Value > highestMagnatude)
+                                    var profile = _selectedEntity.GetDataBlob<SensorProfileDB>();
+                                    ImGui.Text("Target CrossSection: " + profile.TargetCrossSection_msq + " m^2");
+                                    ImGui.Text("Emitted Count: " + profile.EmittedEMSpectra.Count);
+                                    ImGui.Text("Reflected Count: " + profile.ReflectedEMSpectra.Count);
+
+                                    double highestMagnatude = 0;
+                                    double atWavelength = 0;
+                                    foreach (var kvp in profile.EmittedEMSpectra)
                                     {
-                                        highestMagnatude = kvp.Value;
-                                        atWavelength = kvp.Key.WavelengthAverage_nm;
+                                        if (kvp.Value > highestMagnatude)
+                                        {
+                                            highestMagnatude = kvp.Value;
+                                            atWavelength = kvp.Key.WavelengthAverage_nm;
+                                        }
+                                    }
+
+                                    ImGui.Text("Highest Emitted Signal: " + highestMagnatude + " kw");
+                                    ImGui.Text("at wavelength : " + atWavelength + " nm");
+
+                                    highestMagnatude = 0;
+                                    atWavelength = 0;
+                                    foreach (var kvp in profile.ReflectedEMSpectra)
+                                    {
+                                        if (kvp.Value > highestMagnatude)
+                                        {
+                                            highestMagnatude = kvp.Value;
+                                            atWavelength = kvp.Key.WavelengthAverage_nm;
+                                        }
+                                    }
+
+                                    ImGui.Text("Highest Reflected Signal: " + highestMagnatude + " kw");
+                                    ImGui.Text("at wavelength : " + atWavelength + " nm");
+
+                                }
+
+                                if (_selectedEntity.HasDataBlob<GenericFiringWeaponsDB>())
+                                {
+                                    var db = _selectedEntity.GetDataBlob<GenericFiringWeaponsDB>();
+                                    if (ImGui.CollapsingHeader("Firing Weapons"))
+                                    {
+                                        for (int i = 0; i < db.WpnIDs.Length; i++)
+                                        {
+                                            float reloadAmount = db.InternalMagQty[i];
+                                            float reloadMax = db.InternalMagSizes[i];
+                                            float reloadPerShot = db.AmountPerShot[i];
+                                            float minShots = db.MinShotsPerfire[i];
+
+                                            float percFull = reloadAmount / reloadMax;
+                                            float percToFire = reloadAmount / (minShots * reloadPerShot);
+                                            float percPerSec = db.ReloadAmountsPerSec[i] / reloadMax ;
+                                            System.Numerics.Vector2 pbsize = new System.Numerics.Vector2(200, 5);
+
+                                            float maxShots = reloadMax / reloadPerShot;
+                                            ImGui.Text("Max shots per burst: " + maxShots);
+                                            ImGui.Text("Min shots per burst: " + minShots);
+
+                                            ImGui.Text("Reload Amount Per Sec:" + db.ReloadAmountsPerSec[i]);
+                                            ImGui.Text("Reload Percent Per Sec:" + percPerSec);
+
+                                            ImGui.Text("Reload Progress " + reloadAmount + "/" + reloadMax);
+                                            ImGui.ProgressBar(percFull, pbsize);
+                                            ImGui.Text("Reload Progress to min fire");
+                                            ImGui.ProgressBar(percToFire, pbsize);
+
+
+                                            var firingShots = db.ShotsFiredThisTick[i];
+                                            ImGui.Text("Firing " + firingShots + " this tick");
+
+                                        }
                                     }
                                 }
 
-                                ImGui.Text("Highest Reflected Signal: " + highestMagnatude + " kw");
-                                ImGui.Text("at wavelength : " + atWavelength + " nm");
-
-                            }
-
-                            if (_selectedEntity.HasDataBlob<GenericFiringWeaponsDB>())
-                            {
-                                var db = _selectedEntity.GetDataBlob<GenericFiringWeaponsDB>();
-                                if (ImGui.CollapsingHeader("Firing Weapons"))
+                                if (SelectedEntity.HasDataBlob<SensorInfoDB>())
                                 {
-                                    for (int i = 0; i < db.WpnIDs.Length; i++)
+                                    var actualEntity = SelectedEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
+
+
+
+                                    if (actualEntity.IsValid && actualEntity.HasDataBlob<AsteroidDamageDB>())
                                     {
-                                        float reloadAmount = db.InternalMagQty[i];
-                                        float reloadMax = db.InternalMagSizes[i];
-                                        float reloadPerShot = db.AmountPerShot[i];
-                                        float minShots = db.MinShotsPerfire[i];
-
-                                        float percFull = reloadAmount / reloadMax;
-                                        float percToFire = reloadAmount / (minShots * reloadPerShot);
-                                        float percPerSec = db.ReloadAmountsPerSec[i] / reloadMax ;
-                                        System.Numerics.Vector2 pbsize = new System.Numerics.Vector2(200, 5);
-
-                                        float maxShots = reloadMax / reloadPerShot;
-                                        ImGui.Text("Max shots per burst: " + maxShots);
-                                        ImGui.Text("Min shots per burst: " + minShots);
-
-                                        ImGui.Text("Reload Amount Per Sec:" + db.ReloadAmountsPerSec[i]);
-                                        ImGui.Text("Reload Percent Per Sec:" + percPerSec);
-
-                                        ImGui.Text("Reload Progress " + reloadAmount + "/" + reloadMax);
-                                        ImGui.ProgressBar(percFull, pbsize);
-                                        ImGui.Text("Reload Progress to min fire");
-                                        ImGui.ProgressBar(percToFire, pbsize);
-
-
-                                        var firingShots = db.ShotsFiredThisTick[i];
-                                        ImGui.Text("Firing " + firingShots + " this tick");
-
+                                        var dmgDB = actualEntity.GetDataBlob<AsteroidDamageDB>();
+                                        ImGui.Text("Remaining HP: " + dmgDB.Health.ToString());
                                     }
                                 }
-                            }
-
-                            if (SelectedEntity.HasDataBlob<SensorInfoDB>())
-                            {
-                                var actualEntity = SelectedEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
-
-
-
-                                if (actualEntity.IsValid && actualEntity.HasDataBlob<AsteroidDamageDB>())
+                                if (_dmgTxtr != IntPtr.Zero)
                                 {
-                                    var dmgDB = actualEntity.GetDataBlob<AsteroidDamageDB>();
-                                    ImGui.Text("Remaining HP: " + dmgDB.Health.ToString());
-                                }
-                            }
-                            if (_dmgTxtr != IntPtr.Zero)
-                            {
-                                if (ImGui.CollapsingHeader("DamageProfile"))
-                                {
-                                    if (ImGui.ImageButton(_dmgTxtr, new System.Numerics.Vector2(64, 64)))
+                                    if (ImGui.CollapsingHeader("DamageProfile"))
                                     {
-                                        //show a full sized scrollable image.
+                                        if (ImGui.ImageButton(_dmgTxtr, new System.Numerics.Vector2(64, 64)))
+                                        {
+                                            //show a full sized scrollable image.
+                                        }
                                     }
                                 }
-                            }
 
-                            if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
-                            {
-                                var dv = DamageViewer.GetInstance();
-                                if (ImGui.Checkbox("Show Damage", ref _showDamageWindow))
+                                if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
                                 {
-                                    if (dv.CanActive)
-                                        DamageViewer.GetInstance().SetActive(_showDamageWindow);
-                                    else
-                                        _showDamageWindow = false;
-                                }
+                                    var dv = DamageViewer.GetInstance();
+                                    if (ImGui.Checkbox("Show Damage", ref _showDamageWindow))
+                                    {
+                                        if (dv.CanActive)
+                                            DamageViewer.GetInstance().SetActive(_showDamageWindow);
+                                        else
+                                            _showDamageWindow = false;
+                                    }
 
+                                }
                             }
 
-
-
+                            ImGui.EndChild();
                         }
+
+                        ImGui.EndTabItem();
                     }
+
+                    ImGui.EndTabBar();
                 }
-                //else IsActive = false;
+
                 ImGui.End();
             }
+
             _isRunningFrame = false;
             _dateChangeSinceLastFrame = false;
         }
@@ -835,11 +863,15 @@ namespace Pulsar4X.SDL2UI
                 string name = entity.Id.ToString();
                 if(entity.HasDataBlob<NameDB>())
                     name = entity.GetDataBlob<NameDB>().OwnersName;
+
                 string factionOwner = Guid.Empty.ToString();
-                if(_uiState.Game.Factions.ContainsKey(entity.FactionOwnerID))
+                if(entity.FactionOwnerID == Game.NeutralFactionId)
                 {
-                    Entity factionEntity = _uiState.Game.Factions[entity.FactionOwnerID];
-                    factionOwner = factionEntity.GetDataBlob<NameDB>().OwnersName;
+                    factionOwner = "Neutral";
+                }
+                else if(_uiState.Game.Factions.ContainsKey(entity.FactionOwnerID))
+                {
+                    factionOwner = _uiState.Game.Factions[entity.FactionOwnerID].GetDataBlob<NameDB>().OwnersName;
                 }
                 _allEntites.Add((name, entity, factionOwner));
             }

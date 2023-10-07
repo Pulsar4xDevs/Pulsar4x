@@ -71,7 +71,7 @@ namespace Pulsar4X.SDL2UI.Combat
             if (!_uiState.LoadedWindows.ContainsKey(typeof(DamageViewer)))
             {
                 var dv = new DamageViewer();
-                if (_uiState.PrimaryEntity.Entity != null)
+                if (_uiState.PrimaryEntity?.Entity != null)
                 {
                     dv.Init(_uiState.PrimaryEntity.Entity);
                 }

@@ -12,21 +12,21 @@ namespace Pulsar4X.Extensions
     {
         public static string GetDefaultName(this Entity entity)
         {
-            if (entity.HasDataBlob<NameDB>())
+            if (entity.IsValid && entity.HasDataBlob<NameDB>())
                 return entity.GetDataBlob<NameDB>().DefaultName;
             return "Unknown";
         }
 
         public static string GetOwnersName(this Entity entity)
         {
-            if (entity.HasDataBlob<NameDB>())
+            if (entity.IsValid && entity.HasDataBlob<NameDB>())
                 return entity.GetDataBlob<NameDB>().OwnersName;
             return "Unknown";
         }
 
         public static string GetName(this Entity entity, int factionID)
         {
-            if (entity.HasDataBlob<NameDB>())
+            if (entity.IsValid && entity.HasDataBlob<NameDB>())
                 return entity.GetDataBlob<NameDB>().GetName(factionID);
             return "Unknown";
         }

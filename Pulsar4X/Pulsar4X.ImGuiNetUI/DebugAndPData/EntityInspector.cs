@@ -428,8 +428,11 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Display(SensorProfileDB db)
         {
-            //var db = entity.GetDataBlob<SensorProfileDB>();
-            var componentInstancesDB = db.OwningEntity.GetDataBlob<ComponentInstancesDB>();
+            if(!db.OwningEntity.TryGetDatablob<ComponentInstancesDB>(out var componentInstancesDB))
+            {
+                return;
+            }
+
             ImGui.Text("Reflected");
             foreach (var kvp in db.ReflectedEMSpectra)
             {
