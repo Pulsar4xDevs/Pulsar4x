@@ -32,12 +32,7 @@ namespace Pulsar4X.Engine
                     FactionInfoDB factionInfo = faction.GetDataBlob<FactionInfoDB>();
 
 
-                    SystemSensorContacts sensorMgr;
-                    if (!manager.FactionSensorContacts.ContainsKey(entity.FactionOwnerID))
-                        sensorMgr = new SystemSensorContacts(manager, faction);
-                    else
-                        sensorMgr = manager.FactionSensorContacts[entity.FactionOwnerID];
-
+                    SystemSensorContacts sensorMgr = manager.GetFactionSensorContacts(entity.FactionOwnerID);
 
                     var detections = SensorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition, detectableEntitys, atDateTime, faction.Id, true);
                     SensorInfoDB sensorInfo;

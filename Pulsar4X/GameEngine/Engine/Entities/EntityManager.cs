@@ -46,8 +46,8 @@ namespace Pulsar4X.Engine
         [JsonProperty]
         public ManagerSubPulse ManagerSubpulses { get; internal set; }
 
-        [JsonProperty]
-        internal Dictionary<int, SystemSensorContacts> FactionSensorContacts { get; set; } = new ();
+        [JsonProperty("FactionSensorContacts")]
+        private Dictionary<int, SystemSensorContacts> _factionSensorContacts = new ();
 
         /// <summary>
         /// Static reference to an invalid manager.
@@ -179,7 +179,7 @@ namespace Pulsar4X.Engine
                 storeEntry.Value.Remove(entity.Id);
             }
 
-            foreach(var (key, value) in FactionSensorContacts)
+            foreach(var (key, value) in _factionSensorContacts)
             {
                 value.RemoveContact(entity.Id);
             }
@@ -483,12 +483,12 @@ namespace Pulsar4X.Engine
 
         public SystemSensorContacts GetSensorContacts(int factionId)
         {
-            if (!FactionSensorContacts.ContainsKey(factionId))
+            if (!_factionSensorContacts.ContainsKey(factionId))
             {
-                FactionSensorContacts.Add(factionId, new SystemSensorContacts(this, Game.Factions[factionId]));
+                _factionSensorContacts.Add(factionId, new SystemSensorContacts(this, Game.Factions[factionId]));
             }
 
-            return FactionSensorContacts[factionId];
+            return _factionSensorContacts[factionId];
         }
 
         /// <summary>
@@ -516,6 +516,14 @@ namespace Pulsar4X.Engine
             }
 
             return Entity.InvalidEntity;
+        }
+
+        public SystemSensorContacts GetFactionSensorContacts(int factionId)
+        {
+            if(!_factionSensorContacts.ContainsKey(factionId))
+                _factionSensorContacts[factionId] = new SystemSensorContacts(this, Game.Factions[factionId]);
+
+            return _factionSensorContacts[factionId];
         }
 
         #endregion
