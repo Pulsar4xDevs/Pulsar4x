@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using Pulsar4X.Engine;
+using System.Collections.Generic;
 
 namespace Pulsar4X.Datablobs
 {
@@ -21,6 +22,8 @@ namespace Pulsar4X.Datablobs
         {
         }
         public virtual object Clone() { return null; }
+
+        public static List<Type> GetDependencies() => new List<Type>();
 
     }
 

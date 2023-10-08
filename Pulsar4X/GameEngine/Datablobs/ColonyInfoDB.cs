@@ -84,5 +84,7 @@ namespace Pulsar4X.Datablobs
         {
             return new ColonyInfoDB(this);
         }
+
+        public new static List<Type> GetDependencies() => new List<Type>() { typeof(NameDB) };
     }
 }

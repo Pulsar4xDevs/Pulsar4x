@@ -35,5 +35,7 @@ namespace Pulsar4X.Datablobs
         {
             return new MineralsDB(this);
         }
+
+        public new static List<Type> GetDependencies() => new List<Type>();
     }
 }

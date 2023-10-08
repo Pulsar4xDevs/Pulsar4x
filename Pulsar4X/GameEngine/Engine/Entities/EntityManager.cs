@@ -7,6 +7,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Auth;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Extensions;
+using System.Reflection;
 
 namespace Pulsar4X.Engine
 {
@@ -114,15 +115,7 @@ namespace Pulsar4X.Engine
             {
                 foreach (var blob in dataBlobs)
                 {
-                    Type blobType = blob.GetType();
-
-                    if (!_datablobStores.ContainsKey(blobType))
-                    {
-                        _datablobStores[blobType] = new SafeDictionary<int, BaseDataBlob>();
-                    }
-
-                    _datablobStores[blobType][entity.Id] = blob;
-                    blob.OwningEntity = entity;
+                    SetDataBlob(entity.Id, blob);
                 }
             }
         }
@@ -289,6 +282,9 @@ namespace Pulsar4X.Engine
         {
             if(!_entities.ContainsKey(entityId))
                 throw new ArgumentException("Entity ID does not exist");
+
+            if(!AreAllDataBlobDependenciesPresent(type, entityId, new HashSet<Type>(), 0))
+                throw new ArgumentException($"{type.Name} is missing dependecies for Entity #{entityId}");
 
             if(!_datablobStores.ContainsKey(type))
                 _datablobStores[type] = new SafeDictionary<int, BaseDataBlob>();
@@ -524,6 +520,42 @@ namespace Pulsar4X.Engine
                 _factionSensorContacts[factionId] = new SystemSensorContacts(this, Game.Factions[factionId]);
 
             return _factionSensorContacts[factionId];
+        }
+
+        private bool AreAllDataBlobDependenciesPresent(Type type, int entityId, HashSet<Type> visitedTypes, int depth)
+        {
+            // We don't want to check this on the intial type that is passed in
+            if(depth > 0)
+            {
+                if(visitedTypes.Contains(type))
+                    return true;
+
+                if(!_datablobStores.ContainsKey(type) || !_datablobStores[type].ContainsKey(entityId))
+                    return false;
+
+                visitedTypes.Add(type);
+            }
+
+            // Get the dependencies for the current type.
+            var method = type.GetMethod("GetDependencies", BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
+            if (method == null)
+                return true;
+                //throw new InvalidOperationException($"{type.Name} does not implement the GetDependencies method.");
+
+            var dependencies = method.Invoke(null, null) as List<Type>;
+
+            if (dependencies == null)
+                return true; // No dependencies.
+
+            // Check each dependency.
+            foreach (var dependency in dependencies)
+            {
+                // Recursively ensure dependencies of the dependency.
+                if (!AreAllDataBlobDependenciesPresent(dependency, entityId, visitedTypes, depth + 1))
+                    return false;
+            }
+
+            return true;
         }
 
         #endregion

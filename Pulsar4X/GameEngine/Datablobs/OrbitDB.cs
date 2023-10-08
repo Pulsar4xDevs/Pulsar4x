@@ -4,12 +4,13 @@ using Newtonsoft.Json;
 using Pulsar4X.Orbital;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
-using Pulsar4X.Interfaces;
+using System.Collections.Generic;
 
 namespace Pulsar4X.Datablobs
 {
     public class OrbitDB : TreeHierarchyDB, IGetValuesHash
     {
+        public new static List<Type> GetDependencies() => new List<Type>() { typeof(PositionDB) };
 
         /// <summary>
         /// Stored in Meters

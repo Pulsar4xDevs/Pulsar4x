@@ -45,7 +45,7 @@ namespace Pulsar4X.Engine
             SensorProfileDB emmisionSignature = SensorTools.SetStarEmmisionSig(starInfoDB, starMassVolumeDB);
 
             Entity entity = Entity.Create();
-            system.AddEntity(entity, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB, emmisionSignature});
+            system.AddEntity(entity, new List<BaseDataBlob> {starPositionDB, starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, emmisionSignature});
 
             return entity;
         }
