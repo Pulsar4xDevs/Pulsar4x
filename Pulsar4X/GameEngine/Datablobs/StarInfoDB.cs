@@ -6,11 +6,14 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Sensors;
+using System.Collections.Generic;
 
 namespace Pulsar4X.Datablobs
 {
     public class StarInfoDB : BaseDataBlob, ISensorCloneMethod
     {
+        public new static List<Type> GetDependencies() => new List<Type>() { typeof(NameDB), typeof(MassVolumeDB) };
+
         /// <summary>
         /// Age of this star. Fluff.
         /// </summary>
