@@ -432,10 +432,10 @@ namespace Pulsar4X.ECSLib
             }
 
             // http://en.wikipedia.org/wiki/Mean_motion
-            MeanMotion = Math.Sqrt(GravitationalParameter_m3S2 / Math.Pow(SemiMajorAxis, 3)); // Calculated in radians.
+            MeanMotion = OrbitMath.GetMeanMotion(GravitationalParameter_m3S2, SemiMajorAxis);
 
-            Apoapsis = (1 + Eccentricity) * SemiMajorAxis;
-            Periapsis = (1 - Eccentricity) * SemiMajorAxis;
+            Apoapsis = EllipseMath.Apoapsis(Eccentricity, SemiMajorAxis);
+            Periapsis = EllipseMath.Periapsis(Eccentricity, SemiMajorAxis);
 
             SOI_m = OrbitMath.GetSOI(SemiMajorAxis, _myMass, _parentMass);
 

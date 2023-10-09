@@ -637,7 +637,7 @@
                 
 //                 //double trueAnomaly = OrbitalMath.TrueAnomaly(eccentVector, position, velocity);
 //                 //double eccentricAnomoly = OrbitalMath.GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, _ke.Eccentricity);
-//                 //var meanAnomaly = OrbitalMath.GetMeanAnomaly(_ke.Eccentricity, eccentricAnomoly);
+//                 //var meanAnomaly = OrbitalMath.GetEllipticMeanAnomaly(_ke.Eccentricity, eccentricAnomoly);
 //                 changed = true;
 //             }
 

@@ -149,7 +149,7 @@ namespace Pulsar4X.Tests
             
         };
 
-        double epsilon, sgp, o_a, o_e, o_i, o_Ω, o_M0, o_n, o_ω, o_lop;
+        double epsilonLen, epsilonRads, sgp, o_a, o_e, o_i, o_Ω, o_M0, o_n, o_ω, o_lop;
         double periodInSeconds, segmentTime;
         DateTime o_epoch;
 
@@ -158,7 +158,8 @@ namespace Pulsar4X.Tests
 			// One effect of switching from AU to m is
 			// an increase of the absolute magnitude of errors
 			// due to the increased value of the lengths
-			epsilon = 1e-1;
+			epsilonLen = 1e-5;
+            epsilonRads = 1e-10;
 
 			sgp = orbit.GravitationalParameter_m3S2;
 			o_a = orbit.SemiMajorAxis;
@@ -182,11 +183,11 @@ namespace Pulsar4X.Tests
                 double p = EllipseMath.SemiLatusRectum(o_a, o_e);
                 double q = EllipseMath.Periapsis(o_e, o_a);
                 var trueAnomalyAtPeriaps = EllipseMath.TrueAnomalyAtRadus(q, p, o_e);
-                var ha = OrbitMath.GetHyperbolicAnomaly(o_e, trueAnomalyAtPeriaps);
+                var ha = OrbitMath.GetHyperbolicAnomalyFromTrueAnomaly(o_e, trueAnomalyAtPeriaps);
                 var hma = OrbitMath.GetHyperbolicMeanAnomaly(o_e, ha);
                 var timeAtPeriaps = OrbitMath.TimeFromHyperbolicMeanAnomaly(sgp, o_a, hma);
                 
-                var ha2 = OrbitMath.GetHyperbolicAnomaly(o_e, Math.PI * 0.5);
+                var ha2 = OrbitMath.GetHyperbolicAnomalyFromTrueAnomaly(o_e, Math.PI * 0.5);
                 var hma2 = OrbitMath.GetHyperbolicMeanAnomaly(o_e, ha2);
                 var timeAtP = OrbitMath.TimeFromHyperbolicMeanAnomaly(sgp, o_a, hma2);
 
@@ -223,21 +224,21 @@ namespace Pulsar4X.Tests
                 var hackspeed = orbitDB.Hackspeed(segmentDatetime);
                 var hackVector = orbitDB.HackVelocityVector(segmentDatetime);
                 
-                Assert.AreEqual(hackspeed, hackVector.Length(), epsilon, "TestData: " + testData.TestName +"\n iteration: " + i);
-                Assert.AreEqual(vel1.Length(), plocVel.Length(), epsilon, "TestData: " + testData.TestName +"\n iteration: " + i);
-                Assert.AreEqual(hackspeed, vel1.Length(), epsilon, "TestData: " + testData.TestName +"\n iteration: " + i);
+                Assert.AreEqual(hackspeed, hackVector.Length(), epsilonLen, "TestData: " + testData.TestName +"\n iteration: " + i);
+                Assert.AreEqual(vel1.Length(), plocVel.Length(), epsilonLen, "TestData: " + testData.TestName +"\n iteration: " + i);
+                Assert.AreEqual(hackspeed, vel1.Length(), epsilonLen, "TestData: " + testData.TestName +"\n iteration: " + i);
                 
-                Assert.AreEqual(hackVector.X, plocVel.X, epsilon);
-                Assert.AreEqual(hackVector.Y, plocVel.Y, epsilon);
-                Assert.AreEqual(hackVector.Z, plocVel.Z, epsilon);
-                Assert.AreEqual(pv.heading, pv1.heading, epsilon);
-                Assert.AreEqual(pv.speed, pv1.speed, epsilon);
-                Assert.AreEqual(vel.Length(), vel1.Length(), epsilon);
-                Assert.AreEqual(vel.Length(), pv.speed, epsilon);
+                Assert.AreEqual(hackVector.X, plocVel.X, epsilonLen);
+                Assert.AreEqual(hackVector.Y, plocVel.Y, epsilonLen);
+                Assert.AreEqual(hackVector.Z, plocVel.Z, epsilonLen);
+                Assert.AreEqual(pv.heading, pv1.heading, epsilonLen);
+                Assert.AreEqual(pv.speed, pv1.speed, epsilonLen);
+                Assert.AreEqual(vel.Length(), vel1.Length(), epsilonLen);
+                Assert.AreEqual(vel.Length(), pv.speed, epsilonLen);
                    
                 var e3 = ev2.Length();
     
-                Assert.AreEqual(o_e, e3, epsilon, "TestData: " + testData.TestName +"\n iteration: " + i + "\n EccentricVector Magnitude should equal the Eccentricity");
+                Assert.AreEqual(o_e, e3, epsilonLen, "TestData: " + testData.TestName +"\n iteration: " + i + "\n EccentricVector Magnitude should equal the Eccentricity");
 
             }
         }
@@ -267,6 +268,54 @@ namespace Pulsar4X.Tests
 
             }
         }
+        
+        [Test, TestCaseSource(nameof(_allTestOrbitData))]
+        public void TestMeanAnomalyCalcs((OrbitDB orbitDB, string TestName) testData)
+        {
+            var orbitDB = testData.orbitDB;
+            SetupElements(orbitDB);
+
+            //lets break the orbit up and check the paremeters at different points of the orbit:
+            for (int i = 0; i < 16; i++)
+            {
+                TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
+                DateTime segmentDatetime = o_epoch + timeSinceEpoch;
+                
+                double o_ν = orbitDB.GetTrueAnomaly(segmentDatetime);
+
+                var pos = orbitDB.GetPosition(segmentDatetime);
+                var vel = orbitDB.InstantaneousOrbitalVelocityVector_m(segmentDatetime);
+
+                //calculate value, and inversion and compare. 
+                double M1;
+                if (o_e < 1)
+                {
+                    double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
+                    double o_E = OrbitMath.GetEccentricAnomaly(orbitDB, o_M);
+                    M1 = OrbitMath.GetEllipticMeanAnomaly(o_e, o_E);
+                    Assert.AreEqual(o_M, M1, epsilonRads, "MeanAnomaly M expected: " + Angle.ToDegrees(o_M) + " was: " + Angle.ToDegrees(M1));
+                }
+                else
+                {
+                    //calculate meanAnomaly the easy way
+                    
+                    //calculate mean motion
+                    var n = OrbitMath.GetMeanMotion(sgp, orbitDB.SemiMajorAxis);
+                    Assert.AreEqual(n, o_n, epsilonRads);
+                    
+                    var o_Mh = OrbitMath.GetHyperbolicMeanAnomalyFromTime(o_n, timeSinceEpoch.TotalSeconds);
+                    
+                    //calculate back to HyperbolicAnomaly H
+                    OrbitMath.GetHyperbolicAnomalyNewtonsMethod(o_e, o_Mh, out var H);
+                    
+                    M1 = OrbitMath.GetHyperbolicMeanAnomaly(o_e, H);
+                    Assert.AreEqual(o_Mh, M1, epsilonRads, "MeanAnomaly Mh expected: " + Angle.ToDegrees(o_Mh) + " was: " + Angle.ToDegrees(M1));
+                }
+
+                
+            }
+        }
+
 
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TrueAnomalyCalcs((OrbitDB orbitDB, string TestName) testData)
@@ -302,6 +351,8 @@ namespace Pulsar4X.Tests
                     ν3 = OrbitMath.TrueAnomalyFromHyperbolicAnomaly(o_e, hyperbolicAnomalyF);
                 }
 
+                OrbitMath.GetTrueAnomaly(orbitDB, segmentDatetime);
+                
                 double d0 = Angle.ToDegrees(o_ν);
                 double d1 = Angle.ToDegrees(ν1);
                 double d2 = Angle.ToDegrees(ν2);
@@ -364,29 +415,7 @@ namespace Pulsar4X.Tests
             }
         }
 
-        [Test, TestCaseSource(nameof(_allTestOrbitData))]
-        public void TestMeanAnomalyCalcs((OrbitDB orbitDB, string TestName) testData)
-        {
-			var orbitDB = testData.orbitDB;
-			SetupElements(orbitDB);
-
-			//lets break the orbit up and check the paremeters at different points of the orbit:
-			for (int i = 0; i < 16; i++)
-            {
-                TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
-                DateTime segmentDatetime = o_epoch + timeSinceEpoch;
-                double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
-                double o_E = orbitDB.GetEccentricAnomaly(o_M);
-                double o_ν = orbitDB.GetTrueAnomaly(segmentDatetime);
-
-                var pos = orbitDB.GetPosition(segmentDatetime);
-                var vel = orbitDB.InstantaneousOrbitalVelocityVector_m(segmentDatetime);
-
-                var M1 = OrbitMath.GetMeanAnomaly(o_e, o_E);
-
-                Assert.AreEqual(o_M, M1, 1.0E-7, "MeanAnomaly M expected: " + Angle.ToDegrees(o_M) + " was: " + Angle.ToDegrees(M1));
-            }
-        }
+        
 
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TestAngleOfPeriapsCalcs((OrbitDB orbitDB, string TestName) testData)
@@ -470,13 +499,13 @@ namespace Pulsar4X.Tests
                 Assert.Multiple(() =>
                 {
                     //these should not change (other than floating point errors) between each itteration
-                    Assert.AreEqual(o_a, ke_a, epsilon, "SemiMajorAxis a"); //should be more accurate than this, though if testing from a given set of ke to state, and back, the calculated could be more acurate...
-                    Assert.AreEqual(o_e, ke_e, epsilon, "Eccentricity e");
-                    AssertExtensions.AreAngleEqual(o_i, ke_i, epsilon, "Inclination i expected: " + Angle.ToDegrees(o_i) + "° was: " + Angle.ToDegrees(ke_i)+"°");
-                    AssertExtensions.AreAngleEqual(o_Ω, ke_Ω, epsilon, "LoAN Ω expected: " + Angle.ToDegrees(o_Ω) + "° was: " + Angle.ToDegrees(ke_Ω)+"°");
-                    AssertExtensions.AreAngleEqual(o_ω, ke_ω, epsilon, "AoP ω expected: " + Angle.ToDegrees(o_ω) + "° was: " + Angle.ToDegrees(ke_ω)+"°");
-                    AssertExtensions.AreAngleEqual(o_lop, ke_lop, epsilon, "LoP expected: " + Angle.ToDegrees(o_lop) + "° was: " + Angle.ToDegrees(ke_lop)+"°");
-                    Assert.AreEqual(o_n, ke_n, epsilon, "MeanMotion n expected: " + Angle.ToDegrees(o_n) + "° was: " + Angle.ToDegrees(ke_n)+"°");
+                    Assert.AreEqual(o_a, ke_a, epsilonLen, "SemiMajorAxis a"); //should be more accurate than this, though if testing from a given set of ke to state, and back, the calculated could be more acurate...
+                    Assert.AreEqual(o_e, ke_e, epsilonLen, "Eccentricity e");
+                    AssertExtensions.AreAngleEqual(o_i, ke_i, epsilonLen, "Inclination i expected: " + Angle.ToDegrees(o_i) + "° was: " + Angle.ToDegrees(ke_i)+"°");
+                    AssertExtensions.AreAngleEqual(o_Ω, ke_Ω, epsilonLen, "LoAN Ω expected: " + Angle.ToDegrees(o_Ω) + "° was: " + Angle.ToDegrees(ke_Ω)+"°");
+                    AssertExtensions.AreAngleEqual(o_ω, ke_ω, epsilonLen, "AoP ω expected: " + Angle.ToDegrees(o_ω) + "° was: " + Angle.ToDegrees(ke_ω)+"°");
+                    AssertExtensions.AreAngleEqual(o_lop, ke_lop, epsilonLen, "LoP expected: " + Angle.ToDegrees(o_lop) + "° was: " + Angle.ToDegrees(ke_lop)+"°");
+                    Assert.AreEqual(o_n, ke_n, epsilonLen, "MeanMotion n expected: " + Angle.ToDegrees(o_n) + "° was: " + Angle.ToDegrees(ke_n)+"°");
                 });
             }
         }
@@ -521,11 +550,11 @@ namespace Pulsar4X.Tests
                 {
                     Assert.AreEqual(o_ν, ke_ν, 1.0E-10);
                     Assert.AreEqual(o_e, ke_e, 1.0E-10);
-                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(ke_E, ke_E2), epsilon);
-                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ke_ν), epsilon, "True Anomaly ν expected: " + Angle.ToDegrees(o_ν) + " was: " + Angle.ToDegrees(ke_ν));
-                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_E, ke_E), epsilon, "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(ke_E));
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(ke_E, ke_E2), epsilonLen);
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ke_ν), epsilonLen, "True Anomaly ν expected: " + Angle.ToDegrees(o_ν) + " was: " + Angle.ToDegrees(ke_ν));
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_E, ke_E), epsilonLen, "EccentricAnomaly E expected: " + Angle.ToDegrees(o_E) + " was: " + Angle.ToDegrees(ke_E));
                     //we're testing ke_M0 here because epoch for ke is *now*.
-                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_M, ke_M0), epsilon, "MeanAnomaly M expected: " + Angle.ToDegrees(o_M) + " was: " + Angle.ToDegrees(ke_M0));
+                    Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_M, ke_M0), epsilonLen, "MeanAnomaly M expected: " + Angle.ToDegrees(o_M) + " was: " + Angle.ToDegrees(ke_M0));
 
                 });
             }

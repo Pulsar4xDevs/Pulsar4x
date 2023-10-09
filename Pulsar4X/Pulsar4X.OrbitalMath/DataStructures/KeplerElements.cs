@@ -10,6 +10,7 @@ namespace Pulsar4X.Orbital
         /// <summary>
         /// In meters kg^3
         /// </summary>
+        /// <remarks>μ</remarks>
         public double StandardGravParameter;
         
         /// <summary>
@@ -75,6 +76,7 @@ namespace Pulsar4X.Orbital
 
         /// <summary>
         /// Orbital Period in Seconds
+        /// Infinate for Hyperbolic!
         /// </summary>
         /// <remarks>P</remarks>
         public double Period;
@@ -88,14 +90,15 @@ namespace Pulsar4X.Orbital
         /// <summary>
         /// True Anomaly At Epoch
         /// </summary>
-        /// <remarks>ν or f or  θ</remarks>
+        /// <remarks>ν or f or θ</remarks>
         public double TrueAnomalyAtEpoch;
         
         /// <summary>
-        /// Eccentric Anomaly
+        /// Eccentric Anomaly for Ellipse
+        /// Hyperbolic Anomaly for Hyperbolic
         /// </summary>
-        /// <remarks>E</remarks>
-        public double EccentricAnomalyAtEpoch;
+        /// <remarks>E0 (ellipse) or F0 (hyperbolic)</remarks>
+        public double AnomalyAtEpoch;
 
         /// <summary>
         /// Epoch

@@ -210,21 +210,20 @@ namespace Pulsar4X.ECSLib
             }
             else //hyperbolic orbit
             {
-                
-                var quotient = orbit.GravitationalParameter_m3S2 / Math.Pow(-orbit.SemiMajorAxis , 3);
-                var hyperbolcMeanMotion = Math.Sqrt(quotient);
-                var hyperbolicMeanAnomaly = secondsFromEpoch * hyperbolcMeanMotion;
+                var hyperbolicMeanAnomaly = secondsFromEpoch * orbit.MeanMotion;
                 double hyperbolicAnomalyF =  GetHyperbolicAnomaly(orbit, hyperbolicMeanAnomaly);
                 return TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, hyperbolicAnomalyF);
             }
         }
+
+
         
         /// <summary>
         /// 
         /// </summary>
         /// <param name="orbit"></param>
         /// <param name="currentMeanAnomaly"></param>
-        /// <returns></returns>
+        /// <returns>E</returns>
         public static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
             if(!OrbitalMath.GetEccentricAnomalyNewtonsMethod(orbit.Eccentricity, currentMeanAnomaly, out double E))
@@ -239,6 +238,12 @@ namespace Pulsar4X.ECSLib
             return E;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orbit"></param>
+        /// <param name="currentHyperbolicAnomaly"></param>
+        /// <returns>F</returns>
         public static double GetHyperbolicAnomaly(OrbitDB orbit, double currentHyperbolicAnomaly)
         {
             if(!GetHyperbolicAnomalyNewtonsMethod(orbit.Eccentricity, currentHyperbolicAnomaly, out double F))

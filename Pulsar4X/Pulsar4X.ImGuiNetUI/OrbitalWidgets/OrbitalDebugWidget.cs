@@ -1336,7 +1336,7 @@ namespace Pulsar4X.SDL2UI
             _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_keplerElements, _meanAnom);
             
             
-            var meanAnom2 = OrbitMath.GetMeanAnomaly(_keplerElements.Eccentricity, _eccentricAnom);
+            var meanAnom2 = OrbitMath.GetEllipticMeanAnomaly(_keplerElements.Eccentricity, _eccentricAnom);
 
             _trueAnomalyAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 80, 4, _loP, _trueAnom, 128);
             _trueAnomalyAngleItem.DataItem = Angle.ToDegrees(_trueAnom);

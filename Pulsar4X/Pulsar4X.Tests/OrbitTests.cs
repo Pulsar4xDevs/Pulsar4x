@@ -84,16 +84,16 @@ namespace Pulsar4X.Tests
 
             //var linierEccent = e * a;
             //var peri = linierEccent - a;
-            var h0 = OrbitalMath.GetHyperbolicAnomaly(e, 0);
-            var h1 = OrbitalMath.GetHyperbolicAnomaly(e, Math.PI / 4);
-            var h2 = OrbitalMath.GetHyperbolicAnomaly(e, Math.PI / 2);
-            var h3 = OrbitalMath.GetHyperbolicAnomaly(e, -Math.PI / 2);
-            var h4 = OrbitalMath.GetHyperbolicAnomaly(e, -Math.PI / 4);
-            //var h0 = OrbitalMath.GetHyperbolicAnomaly(e, );
+            var h0 = OrbitalMath.GetHyperbolicAnomalyFromTrueAnomaly(e, 0);
+            var h1 = OrbitalMath.GetHyperbolicAnomalyFromTrueAnomaly(e, Math.PI / 4);
+            var h2 = OrbitalMath.GetHyperbolicAnomalyFromTrueAnomaly(e, Math.PI / 2);
+            var h3 = OrbitalMath.GetHyperbolicAnomalyFromTrueAnomaly(e, -Math.PI / 2);
+            var h4 = OrbitalMath.GetHyperbolicAnomalyFromTrueAnomaly(e, -Math.PI / 4);
+            //var h0 = OrbitalMath.GetHyperbolicAnomalyFromTrueAnomaly(e, );
 
             var ta1 = EllipseMath.TrueAnomalyAtRadus(100000000, p, e);
             var ta1Deg = Angle.ToDegrees(ta1);
-            var ha1 = OrbitalMath.GetHyperbolicAnomaly(e, ta1);
+            var ha1 = OrbitalMath.GetHyperbolicAnomalyFromTrueAnomaly(e, ta1);
             var hma1 = OrbitalMath.GetHyperbolicMeanAnomaly(e, ha1);
             var time = TimeSpan.FromSeconds(OrbitalMath.TimeFromHyperbolicMeanAnomaly(ke, hma1));
             var timex2 = time * 2;
@@ -101,7 +101,7 @@ namespace Pulsar4X.Tests
             
             var ta2 = EllipseMath.AngleAtRadus2(100000000, p, e);
             var ta2Deg = Angle.ToDegrees(ta2);
-            var ha2 = OrbitalMath.GetHyperbolicAnomaly(e, ta2);
+            var ha2 = OrbitalMath.GetHyperbolicAnomalyFromTrueAnomaly(e, ta2);
             var hma2 = OrbitalMath.GetHyperbolicMeanAnomaly(e, ha2);
             var time2 = TimeSpan.FromSeconds(OrbitalMath.TimeFromHyperbolicMeanAnomaly(ke, hma2));
             var time2x2 = time2 * 2;
