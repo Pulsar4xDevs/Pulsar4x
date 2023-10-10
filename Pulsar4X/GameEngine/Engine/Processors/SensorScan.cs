@@ -16,31 +16,27 @@ namespace Pulsar4X.Engine
             EntityManager manager = entity.Manager;
             Entity faction = entity.Manager.Game.Factions[entity.FactionOwnerID];
 
-            var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
-
             var position = entity.GetDataBlob<PositionDB>();//recever is a componentDB. not a shipDB
             if (position == null) //then it's probilby a colony
                 position = entity.GetDataBlob<ColonyInfoDB>().PlanetEntity.GetDataBlob<PositionDB>();
 
-            if( entity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtbDB>(out var recevers))
+            if( entity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtbDB>(out var receivers))
             {
-                foreach (var recever in recevers)
+                var detectableEntitys = manager.GetAllEntitiesWithDataBlob<SensorProfileDB>();
+
+                foreach (var receiver in receivers)
                 {
-                    var sensorAbl = recever.GetAbilityState<SensorReceiverAbility>();
-                    var sensorAtb = recever.Design.GetAttribute<SensorReceiverAtbDB>();
-
-                    FactionInfoDB factionInfo = faction.GetDataBlob<FactionInfoDB>();
-
-
-                    SystemSensorContacts sensorMgr = manager.GetFactionSensorContacts(entity.FactionOwnerID);
-
+                    var sensorAbl = receiver.GetAbilityState<SensorReceiverAbility>();
+                    var sensorAtb = receiver.Design.GetAttribute<SensorReceiverAtbDB>();
+                    var sensorMgr = manager.GetFactionSensorContacts(entity.FactionOwnerID);
                     var detections = SensorTools.GetDetectedEntites(sensorAtb, position.AbsolutePosition, detectableEntitys, atDateTime, faction.Id, true);
+
                     SensorInfoDB sensorInfo;
                     for (int i = 0; i < detections.Length; i++)
                     {
-                        SensorReturnValues detectionValues;
-                        detectionValues = detections[i];
+                        var detectionValues = detections[i];
                         var detectableEntity = detectableEntitys[i];
+
                         if (detectionValues.SignalStrength_kW > 0.0)
                         {
                             if (sensorMgr.SensorContactExists(detectableEntity.Id))
@@ -58,11 +54,9 @@ namespace Pulsar4X.Engine
                             }
                             else
                             {
-                                SensorContact contact = new SensorContact(faction, detectableEntity, atDateTime);
+                                var contact = new SensorContact(faction, detectableEntity, atDateTime);
                                 sensorMgr.AddContact(contact);
                                 sensorAbl.CurrentContacts[detectableEntity.Id] = detectionValues;
-
-                                //knownContacts.Add(detectableEntity.ID, SensorEntityFactory.UpdateSensorContact(receverFaction, sensorInfo)); moved this line to the SensorInfoDB constructor
                             }
 
                         }
@@ -70,6 +64,7 @@ namespace Pulsar4X.Engine
                         {
                             sensorAbl.CurrentContacts.Remove(detectableEntity.Id);
                             sensorAbl.OldContacts[detectableEntity.Id] = detectionValues;
+                            sensorMgr.RemoveContact(detectableEntity.Id);
                         }
                     }
 

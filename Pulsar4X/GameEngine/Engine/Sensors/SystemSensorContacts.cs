@@ -72,7 +72,7 @@ namespace Pulsar4X.Engine.Sensors
                 Changes.Write(new EntityChangeData()
                 {
                     Entity = entity,
-                    ChangeType = EntityChangeData.EntityChangeType.EntityAdded
+                    ChangeType = EntityChangeData.EntityChangeType.EntityRemoved
                 });
             }
         }

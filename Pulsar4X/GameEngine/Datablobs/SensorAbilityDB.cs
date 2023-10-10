@@ -6,6 +6,8 @@ namespace Pulsar4X.Datablobs
 {
     public class SensorAbilityDB : BaseDataBlob
     {
+        public new static List<Type> GetDependencies() => new List<Type>() { typeof(ComponentInstancesDB) };
+ 
         internal Dictionary<string, SensorReturnValues> CurrentContacts = new ();
         internal Dictionary<string, SensorReturnValues> OldContacts = new ();
 
