@@ -22,20 +22,18 @@ namespace Pulsar4X.Engine.Sensors
                     continue;
                 else
                 {
-                    SensorProfileDB detectableProfile = detectableEntity.GetDataBlob<SensorProfileDB>();
-                    PositionDB detectablePosDB = detectableEntity.GetDataBlob<PositionDB>();
-                    if(detectablePosDB == null)
+                    if(!detectableEntity.TryGetDatablob<PositionDB>(out var detectablePosDB))
                     {
-                        //StaticRefLib.EventLog.AddEvent(new Event("Error: Attempt to get a sensor position on a positionless entity, ID: "+ detectableEntity.Guid));
                         continue;
                     }
 
                     //TODO: check if the below actualy saves us anything. it might be better just to seperatly loop through each of the entites and set the reflection profiles every so often..
-                    TimeSpan timeSinceLastCalc = atDate - detectableProfile.LastDatetimeOfReflectionSet;
-                    double distanceSinceLastCalc = detectablePosDB.GetDistanceTo_m(detectableProfile.LastPositionOfReflectionSet);
-                    if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceSinceLastCalc > 5000) //TODO: move the time and distance numbers here to settings?
-                        SetReflectedEMProfile.SetEntityProfile(detectableEntity, atDate);
+                    // TimeSpan timeSinceLastCalc = atDate - detectableProfile.LastDatetimeOfReflectionSet;
+                    // double distanceSinceLastCalc = detectablePosDB.GetDistanceTo_m(detectableProfile.LastPositionOfReflectionSet);
+                    // if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceSinceLastCalc > 5000) //TODO: move the time and distance numbers here to settings?
+                    //     SetReflectedEMProfile.SetEntityProfile(detectableEntity, atDate);
 
+                    var detectableProfile = detectableEntity.GetDataBlob<SensorProfileDB>();
                     var distance = detectablePosDB.GetDistanceTo_m(position);
                     var attentuatedSignal = AttenuatedForDistance(detectableProfile, distance);
                     SensorReturnValues detectionValue = DetectonQuality(sensorAtb, attentuatedSignal);
@@ -65,7 +63,7 @@ namespace Pulsar4X.Engine.Sensors
             //Only set the reflectedEMProfile of the target if it's not been done recently:
             //TODO: is this still neccicary now that I've found and fixed the loop? (refelctions were getting bounced around)
             if (timeSinceLastCalc > TimeSpan.FromMinutes(30) || distanceSinceLastCalc > 5000) //TODO: move the time and distance numbers here to settings?
-               SetReflectedEMProfile.SetEntityProfile(detectableEntity, atDate);
+                sensorProfile.SetReflectionProfile(atDate);
 
 
 

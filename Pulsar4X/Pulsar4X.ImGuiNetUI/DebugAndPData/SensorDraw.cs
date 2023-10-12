@@ -13,7 +13,7 @@ namespace Pulsar4X.SDL2UI
     {
 
 
-        
+
         private EntityState _selectedEntitySate;
         private Entity _selectedEntity => _selectedEntitySate.Entity;
         private Entity[] _potentialTargetEntities;
@@ -24,29 +24,29 @@ namespace Pulsar4X.SDL2UI
         private SensorReturnValues[] _targetDetectionQuality;
 
         private  Dictionary<EMWaveForm, double> _attenuatedWaveForms;
-        
+
         private SystemState _selectedStarSysState;
         private StarSystem _selectedStarSys => _selectedStarSysState.StarSystem;
 
         private SensorReceiverAtbDB[] _selectedReceverAtb;
         private SensorReceiverAbility[] _selectedReceverInstanceAbility;
-        
-        
+
+
         private ImDrawListPtr _draw_list;
-        
+
         private WaveDrawData _receverDat;
         private WaveDrawData _reflectDat;
         private WaveDrawData _emmittrDat;
         private WaveDrawData _detectedDat;
-        
-        
+
+
         private double lowestWave = 0;
         private double highestWave = 0;
         private double lowestMag = 0;
         private double highestMag = 0;
         private System.Numerics.Vector2 _scalingFactor = new System.Numerics.Vector2(0.1f, 0.1f);
         private System.Numerics.Vector2 _translation = new System.Numerics.Vector2(0,0);
-        private SensorDraw() 
+        private SensorDraw()
         {
             _draw_list = ImGui.GetWindowDrawList();
         }
@@ -71,16 +71,16 @@ namespace Pulsar4X.SDL2UI
                 if(_uiState.LastClickedEntity?.Entity != null)
                     instance._selectedEntitySate = _uiState.LastClickedEntity;
             }
-            
+
             instance._selectedStarSysState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             return instance;
         }
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
         internal override void Display()
         {
             //
@@ -220,7 +220,7 @@ namespace Pulsar4X.SDL2UI
                         }
 
                     }
-                    
+
                 }
 
             void DisplayWavInfo(WaveDrawData wavesArry)
@@ -231,7 +231,7 @@ namespace Pulsar4X.SDL2UI
                         ResetBounds();
 
                     if(wavesArry.HasAtn)
-                    { 
+                    {
                         ImGui.SameLine();
                         if(ImGui.Checkbox("Show Attenuated Wave##drawbool" + i, ref wavesArry.IsWaveDrawn[i].drawAtn))
                             ResetBounds();
@@ -242,7 +242,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Magnitude: " + Stringify.Power(wavesArry.Points[i].p0.Y));
 
                     ImGui.Text("AvgWav: " + Stringify.DistanceSmall(wavesArry.Points[i].p1.X));
-                    
+
                     if(wavesArry.HasAtn)
                     {
                         ImGui.SameLine();
@@ -255,14 +255,14 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(" Magnitude peak:");
                         ImGui.Text("   "+Stringify.Power(wavesArry.Points[i].p1.Y));
                     }
-                    
+
                     ImGui.Text("MaxWav: " + Stringify.DistanceSmall(wavesArry.Points[i].p2.X));
                     ImGui.SameLine();
                     ImGui.Text("Magnitude: " + Stringify.Power(wavesArry.Points[i].p2.Y));
                 }
             }
-            
-           
+
+
 
             void ResetBounds()
             {
@@ -310,15 +310,15 @@ namespace Pulsar4X.SDL2UI
                         float mag1 = dat.Points[i].p0.Y; //xmit lowest value prob 0
                         float mag2 = dat.Points[i].p1.Y; //xmit highest value
                         float mag3 = dat.Points[i].p3.Y; //xmit 2nd highest value
-                        
+
                         if (low < lowestWave)
                             lowestWave = low;
                         if (high > highestWave)
                             highestWave = high;
-                        
+
                         if (mag1 < lowestMag) //will likely be 0
                             lowestMag = mag1;
-                        
+
                         if(dat.IsWaveDrawn[i].drawSrc)
                         {
                             if (mag2 > highestMag)
@@ -336,14 +336,14 @@ namespace Pulsar4X.SDL2UI
 
 
             void SetSensorData()
-            {                            
+            {
                 if (_selectedEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtbDB>(out var recevers))
                 {
                     _receverDat = new WaveDrawData();
                     _receverDat.HasAtn = false;
                     var points = _receverDat.Points = new (System.Numerics.Vector2 p0, System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 p3)[recevers.Count];
                     _receverDat.IsWaveDrawn = new (bool drawSrc, bool drawAtn)[recevers.Count];
-                    
+
                     _selectedReceverAtb = new SensorReceiverAtbDB[recevers.Count];
                     _selectedReceverInstanceAbility = new SensorReceiverAbility[recevers.Count];
                     int i = 0;
@@ -351,20 +351,20 @@ namespace Pulsar4X.SDL2UI
                     {
                         _selectedReceverAtb[i] = recever.Design.GetAttribute<SensorReceiverAtbDB>();
                         _selectedReceverInstanceAbility[i] = recever.GetAbilityState<SensorReceiverAbility>();
-                        
+
                         float low = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthMin_nm;
                         float mid = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthAverage_nm;
                         float high = (float)_selectedReceverAtb[i].RecevingWaveformCapabilty.WavelengthMax_nm;
 
                         float mag1 = (float)_selectedReceverAtb[i].WorstSensitivity_kW;
                         float mag2 = (float)_selectedReceverAtb[i].BestSensitivity_kW;
-                        
+
                         points[i].p0 = new System.Numerics.Vector2(low, mag1);
                         points[i].p1 = new System.Numerics.Vector2(mid, mag2);
                         points[i].p2 =  new System.Numerics.Vector2(high, mag1);
                         i++;
                     }
-                    
+
                     var tgts = _selectedStarSys.GetAllEntitiesWithDataBlob<SensorProfileDB>();
                     _potentialTargetNames = new string[tgts.Count];
                     _potentialTargetEntities = tgts.ToArray();
@@ -384,16 +384,16 @@ namespace Pulsar4X.SDL2UI
                         //{
                             //val.SignalStrength_kW
                         //}
-                        
+
                     }
-                    
+
                 }
             }
 
             void SetTargetData()
             {
                 _targetSensorProfile = _targetEntity.GetDataBlob<SensorProfileDB>();
-                SetReflectedEMProfile.SetEntityProfile(_targetEntity, _uiState.PrimarySystemDateTime);
+                _targetSensorProfile.SetReflectionProfile(_uiState.PrimarySystemDateTime);
                 var emitted = _targetSensorProfile.EmittedEMSpectra;
                 var reflected = _targetSensorProfile.ReflectedEMSpectra;
 
@@ -434,7 +434,7 @@ namespace Pulsar4X.SDL2UI
                     float atnmag = (float)SensorTools.AttenuationCalc(magnatude, range);
                     if (float.IsInfinity(magnatude))
                         magnatude = float.MaxValue;
-                    
+
                     datPts[i].p0 = new System.Numerics.Vector2(low, 0);
                     datPts[i].p1 = new System.Numerics.Vector2(mid, magnatude);
                     datPts[i].p2 = new System.Numerics.Vector2(high, 0);
@@ -444,17 +444,17 @@ namespace Pulsar4X.SDL2UI
 
                 return wavDat;
             }
-            
+
         }
 
         public override void OnGameTickChange(DateTime newDate)
         {
-            
+
         }
 
         public override void OnSystemTickChange(DateTime newDate)
         {
-            
+
         }
 
         public override void OnSelectedSystemChange(StarSystem newStarSys)
@@ -462,7 +462,7 @@ namespace Pulsar4X.SDL2UI
             throw new NotImplementedException();
         }
     }
-    
+
     public class WaveDrawData
     {
         public int Count { get { return Points.Length; } }
