@@ -11,8 +11,8 @@ namespace Pulsar4X.Engine
         {
             var blobs = new List<BaseDataBlob>();
             var nameDB = new NameDB(commanderDB.ToString(), factionID, commanderDB.ToString());
-            blobs.Add(commanderDB);
             blobs.Add(nameDB);
+            blobs.Add(commanderDB);
             var entity = Entity.Create();
             entity.FactionOwnerID = factionID;
             manager.AddEntity(entity, blobs);

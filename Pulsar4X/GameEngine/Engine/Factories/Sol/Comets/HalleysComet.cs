@@ -35,7 +35,7 @@ namespace Pulsar4X.Engine.Sol
             PositionDB cometPositionDB = new PositionDB(cometOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
             Entity comet = Entity.Create();
-            sol.AddEntity(comet, new List<BaseDataBlob> { sensorProfile, cometPositionDB, cometBodyDB, cometMVDB, cometNameDB, cometOrbitDB, });
+            sol.AddEntity(comet, new List<BaseDataBlob> { cometNameDB, sensorProfile, cometPositionDB, cometBodyDB, cometMVDB, cometOrbitDB, });
             return comet;
         }
     }

@@ -16,7 +16,7 @@ namespace Pulsar4X.Engine
     public static class AsteroidFactory
     {
         /// <summary>
-        /// creates an asteroid that will collide with the given entity on the given date. 
+        /// creates an asteroid that will collide with the given entity on the given date.
         /// </summary>
         /// <param name="starSys"></param>
         /// <param name="target"></param>
@@ -64,10 +64,10 @@ namespace Pulsar4X.Engine
 
             var planetDBs = new List<BaseDataBlob>
             {
+                name,
                 posDB,
                 massVolume,
                 planetInfo,
-                name,
                 orbit,
                 AsteroidDmg,
                 dmgPfl,
@@ -111,18 +111,18 @@ namespace Pulsar4X.Engine
 
             //OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, position, velocity, atDateTime);
             //OrbitDB orbit = (OrbitDB)origOrbit.Clone();
-            OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, Distance.MToAU(origOrbit.SemiMajorAxis), 
-                origOrbit.Eccentricity, origOrbit.Inclination, origOrbit.LongitudeOfAscendingNode, 
+            OrbitDB orbit = new OrbitDB(origOrbit.Parent, parentMass, myMass, Distance.MToAU(origOrbit.SemiMajorAxis),
+                origOrbit.Eccentricity, origOrbit.Inclination, origOrbit.LongitudeOfAscendingNode,
                 origOrbit.ArgumentOfPeriapsis, origOrbit.MeanAnomalyAtEpoch, origOrbit.Epoch);
 
             var posDB = new PositionDB(position, parent.Manager.ManagerGuid, parent);
 
             var planetDBs = new List<BaseDataBlob>
             {
+                name,
                 posDB,
                 massVolume,
                 planetInfo,
-                name,
                 orbit,
                 AsteroidDmg,
                 dmgPfl,

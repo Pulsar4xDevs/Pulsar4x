@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
@@ -6,6 +7,8 @@ namespace Pulsar4X.Datablobs
 {
     public class ColonyBonusesDB : BaseDataBlob
     {
+        public new static List<Type> GetDependencies() => new List<Type>() { typeof(ColonyInfoDB) };
+
         private Dictionary<AbilityType, float> FactionBonus => OwningEntity != Entity.InvalidEntity && OwningEntity.HasDataBlob<FactionAbilitiesDB>() ? OwningEntity.GetDataBlob<FactionAbilitiesDB>().AbilityBonuses : new Dictionary<AbilityType, float>();
 
         /// <summary>

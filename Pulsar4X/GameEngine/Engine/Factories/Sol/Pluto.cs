@@ -44,7 +44,7 @@ namespace Pulsar4X.Engine.Sol
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -229, atmoGasses);
 
             Entity planet = Entity.Create();
-            sol.AddEntity(planet, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
+            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, planetAtmosphereDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }

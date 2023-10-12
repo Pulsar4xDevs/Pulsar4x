@@ -51,7 +51,7 @@ namespace Pulsar4X.Engine.Sol
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, true, 71, 1f, 1f, 57.2f, atmoGasses);
 
             Entity planet = Entity.Create();
-            sol.AddEntity(planet, new List<BaseDataBlob> { sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetNameDB, planetOrbitDB, planetAtmosphereDB });
+            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, planetAtmosphereDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }
@@ -81,7 +81,7 @@ namespace Pulsar4X.Engine.Sol
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonNameDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }

@@ -7,6 +7,8 @@ namespace Pulsar4X.Datablobs
 {
     public class CommanderDB : BaseDataBlob
     {
+        public new static List<Type> GetDependencies() => new List<Type>() { typeof(NameDB) };
+
         [JsonProperty]
         public string Name { get; internal set; }
 

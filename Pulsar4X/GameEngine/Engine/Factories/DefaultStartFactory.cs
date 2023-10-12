@@ -417,9 +417,9 @@ namespace Pulsar4X.Engine
             gunShip1.GetDataBlob<PositionDB>().RelativePosition = Distance.AuToMt(new Vector3(0, 8.52699302490434E-05, 0));
             //give the gunship a hypobolic orbit to test:
             //var orbit = OrbitDB.FromVector(earth, gunShip, new Vector4(0, velInAU, 0, 0), game.CurrentDateTime);
-            gunShip1.RemoveDataBlob<OrbitDB>();
-            var nmdb = new NewtonMoveDB(earth, new Vector3(-10000.0, 0, 0));
-            gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);
+            // gunShip1.RemoveDataBlob<OrbitDB>();
+            // var nmdb = new NewtonMoveDB(earth, new Vector3(-10000.0, 0, 0));
+            // gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);
 
 
 

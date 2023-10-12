@@ -2,11 +2,13 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Blueprints;
+using System;
 
 namespace Pulsar4X.Datablobs
 {
     public class AtmosphereDB : BaseDataBlob
     {
+        public new static List<Type> GetDependencies() => new List<Type>() { typeof(SystemBodyInfoDB) };
         /// <summary>
         /// Atmospheric Pressure
         /// In Earth Atmospheres (atm).

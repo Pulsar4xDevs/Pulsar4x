@@ -17,6 +17,7 @@ namespace Pulsar4X.Datablobs
     /// </remarks>
     public class SystemBodyInfoDB : BaseDataBlob, ISensorCloneMethod, IGetValuesHash
     {
+        public new static List<Type> GetDependencies() => new List<Type>() { typeof(NameDB) };
         /// <summary>
         /// Type of body this is. <see cref="BodyType"/>
         /// </summary>
