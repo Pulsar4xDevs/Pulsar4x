@@ -240,6 +240,8 @@ namespace Pulsar4X.Engine
         {
             foreach (var kvp in procDict)
             {
+                if(kvp.Key < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
+
                 if (!QueuedProcesses.ContainsKey(kvp.Key))
                     QueuedProcesses.Add(kvp.Key, new ProcessSet());
                 foreach (var procName in kvp.Value)
@@ -359,6 +361,8 @@ namespace Pulsar4X.Engine
         /// <param name="action"></param>
         internal void AddSystemInterupt(DateTime nextDateTime, IHotloopProcessor actionProcessor)
         {
+            if(nextDateTime < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
+
             if (!QueuedProcesses.ContainsKey(nextDateTime))
                 QueuedProcesses.Add(nextDateTime, new ProcessSet());
             if (!QueuedProcesses[nextDateTime].SystemProcessors.Contains(actionProcessor))
@@ -384,6 +388,9 @@ namespace Pulsar4X.Engine
             var nextInSec = proc.RunFrequency.TotalSeconds - elapsed.TotalSeconds % proc.RunFrequency.TotalSeconds;
             var next = TimeSpan.FromSeconds(nextInSec);
             DateTime nextDT = _processToDateTime + next;
+
+            if(nextDT < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
+
             if(!QueuedProcesses.ContainsKey(nextDT))
                 QueuedProcesses.Add(nextDT, new ProcessSet());
             if (!QueuedProcesses[nextDT].SystemProcessors.Contains(proc))

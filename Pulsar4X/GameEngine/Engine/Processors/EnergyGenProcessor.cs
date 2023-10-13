@@ -32,13 +32,13 @@ namespace Pulsar4X.Engine
             {
                 double timeToFill = Math.Ceiling( freestore / output);
                 DateTime interuptTime = atDateTime + TimeSpan.FromSeconds(timeToFill);
-                entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
+                //entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
             }
             else if (output < 0)
             {
                 double timeToEmpty = Math.Ceiling( Math.Abs(stored / output));
                 DateTime interuptTime = atDateTime + TimeSpan.FromSeconds(timeToEmpty);
-                entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
+                //entity.Manager.ManagerSubpulses.AddEntityInterupt(interuptTime, nameof(EnergyGenProcessor), entity);
             }
 
 
