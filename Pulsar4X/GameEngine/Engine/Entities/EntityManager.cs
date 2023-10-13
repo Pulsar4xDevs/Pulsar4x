@@ -534,6 +534,25 @@ namespace Pulsar4X.Engine
             return Entity.InvalidEntity;
         }
 
+        public bool TryGetGlobalEntityById(int entityId, out Entity entity)
+        {
+            if(Game.GlobalManager.TryGetEntityById(entityId, out entity))
+            {
+                return true;
+            }
+
+            foreach(var manager in Game.Systems)
+            {
+                if(manager.TryGetEntityById(entityId, out entity))
+                {
+                    return true;
+                }
+            }
+
+            entity = Entity.InvalidEntity;
+            return false;
+        }
+
         public SystemSensorContacts GetFactionSensorContacts(int factionId)
         {
             if(!_factionSensorContacts.ContainsKey(factionId))

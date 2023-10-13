@@ -89,8 +89,7 @@ namespace Pulsar4X.Engine.Orders
         {
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                _targetEntity = game.GlobalManager.GetGlobalEntityById(TargetEntityGuid);
-                if (_targetEntity != Entity.InvalidEntity)
+                if (game.GlobalManager.TryGetGlobalEntityById(TargetEntityGuid, out _targetEntity))
                 {
                     return true;
                 }

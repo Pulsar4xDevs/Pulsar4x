@@ -89,8 +89,7 @@ namespace Pulsar4X.Engine.Orders
     {
         public static bool IsCommandValid(EntityManager globalManager, int factionId, int targetEntityId, out Entity factionEntity, out Entity targetEntity)
         {
-            targetEntity = globalManager.GetGlobalEntityById(targetEntityId);
-            if(targetEntity != Entity.InvalidEntity)
+            if(globalManager.TryGetGlobalEntityById(targetEntityId, out targetEntity))
             {
                 if(globalManager.Game.Factions.ContainsKey(factionId))
                 {
