@@ -157,6 +157,7 @@ public class Entity : IHasDataBlobs
         FactionOwnerID = -1;
     }
 
+    [JsonIgnore]
     private string DebuggerDisplay
     {
         get
