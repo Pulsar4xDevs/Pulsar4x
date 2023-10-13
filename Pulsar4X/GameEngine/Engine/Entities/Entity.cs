@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
@@ -8,6 +9,7 @@ namespace Pulsar4X.Engine;
 
 public delegate void EntityChangeHandler (EntityChangeData.EntityChangeType changeType, BaseDataBlob db);
 
+[DebuggerDisplay("{DebuggerDisplay}")]
 public class Entity : IHasDataBlobs
 {
     public int Id { get; private set; }
@@ -153,5 +155,16 @@ public class Entity : IHasDataBlobs
         Manager.RemoveEntity(this);
         Manager = null;
         FactionOwnerID = -1;
+    }
+
+    private string DebuggerDisplay
+    {
+        get
+        {
+            string value = $"({Id})";
+            if(HasDataBlob<NameDB>()) value += " " + GetDataBlob<NameDB>().OwnersName;
+
+            return value;
+        }
     }
 }

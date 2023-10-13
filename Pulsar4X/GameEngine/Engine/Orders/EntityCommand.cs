@@ -89,9 +89,10 @@ namespace Pulsar4X.Engine.Orders
     {
         public static bool IsCommandValid(EntityManager globalManager, int factionId, int targetEntityId, out Entity factionEntity, out Entity targetEntity)
         {
-            if(globalManager.TryGetEntityById(targetEntityId, out targetEntity)) 
+            targetEntity = globalManager.GetGlobalEntityById(targetEntityId);
+            if(targetEntity != Entity.InvalidEntity)
             {
-                if(globalManager.Game.Factions.ContainsKey(factionId)) 
+                if(globalManager.Game.Factions.ContainsKey(factionId))
                 {
                     factionEntity = globalManager.Game.Factions[factionId];
                     if(targetEntity.FactionOwnerID == factionEntity.Id)

@@ -325,13 +325,17 @@ namespace Pulsar4X.SDL2UI
                         switch(selectedIssueOrderType)
                         {
                             case IssueOrderType.MoveTo:
-
+                                var bodies = _uiState.SelectedSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_uiState.Faction.Id);
+                                foreach(var body in bodies)
+                                {
+                                    var name = body.GetName(_uiState.Faction.Id);
+                                    if(ImGui.Button(name + "###movement-button-" + name))
+                                    {
+                                        var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, selectedFleet, body);
+                                        _uiState.Game.OrderHandler.HandleOrder(order);
+                                    }
+                                }
                                 break;
-                        }
-
-                        if(ImGui.Button("Issue Order"))
-                        {
-
                         }
 
                         ImGui.EndChild();

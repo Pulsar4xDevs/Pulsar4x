@@ -390,6 +390,26 @@ namespace Pulsar4X.Engine
             return new List<Entity>();
         }
 
+        public List<Entity> GetAllEntitiesWithDataBlob<T>(int factionId) where T : BaseDataBlob
+        {
+            var type = typeof(T);
+            if(!_datablobStores.TryGetValue(type, out var blobStore))
+            {
+                return new List<Entity>();
+            }
+
+            var list = new List<Entity>();
+            var contacts = _factionSensorContacts[factionId];
+
+            foreach(var contactId in contacts.GetAllContactIds())
+            {
+                if(blobStore.ContainsKey(contactId))
+                    list.Add(_entities[contactId]);
+            }
+
+            return list;
+        }
+
         /// <summary>
         /// Returns a list of entities that contain all dataBlobs defined by the dataBlobMask.
         /// <para></para>
