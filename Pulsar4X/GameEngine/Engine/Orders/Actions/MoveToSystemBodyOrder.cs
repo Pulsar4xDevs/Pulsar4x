@@ -49,14 +49,13 @@ namespace Pulsar4X.Engine.Orders
             {
                 if(!ship.HasDataBlob<WarpAbilityDB>()) continue;
                 if(!ship.TryGetDatablob<PositionDB>(out var shipPositionDB)) continue;
-                if(shipPositionDB.Parent == targetPositionDB.Parent) continue;
 
                 var shipMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
 
                 (Vector3 position, DateTime _) = OrbitProcessor.GetInterceptPosition
                 (
                     ship,
-                    targetPositionDB.Parent.GetDataBlob<OrbitDB>(),
+                    targetPositionDB.OwningEntity.GetDataBlob<OrbitDB>(),
                     EntityCommanding.StarSysDateTime
                 );
 

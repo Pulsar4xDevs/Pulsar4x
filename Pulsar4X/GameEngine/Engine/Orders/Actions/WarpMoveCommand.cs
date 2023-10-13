@@ -106,24 +106,24 @@ namespace Pulsar4X.Engine.Orders
                 string eType = warpDB.EnergyType;
                 double estored = powerDB.EnergyStored[eType];
                 double creationCost = warpDB.BubbleCreationCost;
-                if (creationCost <= estored)
-                {
 
-                    _db = new WarpMovingDB(_entityCommanding, _targetEntity, TargetOffsetPosition_m);
-                    _db.ExpendDeltaV = ExpendDeltaV;
+                // FIXME: alert the player?
+                if (creationCost > estored)
+                    return;
 
-                    EntityCommanding.SetDataBlob(_db);
+                _db = new WarpMovingDB(_entityCommanding, _targetEntity, TargetOffsetPosition_m);
+                _db.ExpendDeltaV = ExpendDeltaV;
 
-                    WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
-                    IsRunning = true;
+                EntityCommanding.SetDataBlob(_db);
 
+                WarpMoveProcessor.StartNonNewtTranslation(EntityCommanding);
+                IsRunning = true;
 
-                    //debug code:
-                    double distance = (_db.EntryPointAbsolute - _db.ExitPointAbsolute).Length();
-                    double time = distance / _entityCommanding.GetDataBlob<WarpAbilityDB>().MaxSpeed;
-                    //Assert.AreEqual((_db.PredictedExitTime - _db.EntryDateTime).TotalSeconds, time, 1.0e-10);
+                //debug code:
+                double distance = (_db.EntryPointAbsolute - _db.ExitPointAbsolute).Length();
+                double time = distance / _entityCommanding.GetDataBlob<WarpAbilityDB>().MaxSpeed;
+                //Assert.AreEqual((_db.PredictedExitTime - _db.EntryDateTime).TotalSeconds, time, 1.0e-10);
 
-                }
             }
         }
 

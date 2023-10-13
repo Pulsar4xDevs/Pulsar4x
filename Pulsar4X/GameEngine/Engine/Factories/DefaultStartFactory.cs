@@ -364,12 +364,12 @@ namespace Pulsar4X.Engine
             //gunShip1.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);
 
             var elec = factionDataStore.CargoGoods["electricity"];
-            gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750;
-            gunShip1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750;
-            ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750;
-            ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750;
-            courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750;
-            courier2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750;
+            gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750000;
+            gunShip1.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750000;
+            ship2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750000;
+            ship3.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750000;
+            courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750000;
+            courier2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750000;
 
 
             Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(game, targetFaction, factionDataStore), targetFaction, earth, (10 * Math.PI / 180), "Target Drone0");
