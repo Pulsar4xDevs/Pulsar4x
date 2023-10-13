@@ -471,9 +471,8 @@ namespace Pulsar4X.Datablobs
             ke.Epoch = Epoch;
             ke.LinearEccentricity = Eccentricity * SemiMajorAxis;                        //ae
             ke.Period = OrbitalPeriod.TotalSeconds;
-			ke.StandardGravParameter = GeneralMath.StandardGravitationalParameter(_myMass + _parentMass);
-
-			//ke.TrueAnomalyAtEpoch  ;   //ν or f or  θ
+			ke.StandardGravParameter = GravitationalParameter_m3S2;
+            ke.TrueAnomalyAtEpoch = OrbitMath.TrueAnomalyFromTime(GravitationalParameter_m3S2, SemiMajorAxis ,Eccentricity, MeanAnomalyAtEpoch, 0) ;   //ν or f or  θ
 			return ke;
         }
 
