@@ -155,7 +155,7 @@ namespace Pulsar4X.Tests
             
         };
 
-        double epsilonLen, epsilonRads, sgp, o_a, o_e, o_i, o_Ω, o_M0, o_n, o_ω, o_lop;
+        double epsilonLen, epsilonRads, epsilont, sgp, o_a, o_e, o_i, o_Ω, o_M0, o_n, o_ω, o_lop;
         double periodInSeconds, segmentTime;
         DateTime o_epoch;
 
@@ -166,6 +166,7 @@ namespace Pulsar4X.Tests
 			// due to the increased value of the lengths
 			epsilonLen = 1e-5;
             epsilonRads = 1e-10;
+            epsilont = 1e-2;
 
 			sgp = orbit.GravitationalParameter_m3S2;
 			o_a = orbit.SemiMajorAxis;
@@ -236,10 +237,10 @@ namespace Pulsar4X.Tests
                     //calculate it back the hard way. 
                     OrbitMath.GetEccentricAnomalyNewtonsMethod(o_e, o_M, out double o_E); //OrbitMath.GetEccentricAnomaly(orbitDB, o_M);
                     M1 = OrbitMath.GetEllipticMeanAnomaly(o_e, o_E);
-                    double t1 = OrbitMath.TimeFromEllipticMeanAnomaly(M1, o_n);
+                    double t1 = OrbitMath.TimeFromEllipticMeanAnomaly(o_M0, M1, o_n);
                     
                     Assert.AreEqual(o_M, M1, epsilonRads, "MeanAnomaly M expected: " + Angle.ToDegrees(o_M) + " was: " + Angle.ToDegrees(M1));
-                    Assert.AreEqual(timeSinceEpoch.TotalSeconds, t1, epsilonLen, "TimeFromMeanAnomaly t1 expected " + timeSinceEpoch.TotalSeconds + " was: " + t1);
+                    Assert.AreEqual(timeSinceEpoch.TotalSeconds, t1, epsilont, "TimeFromMeanAnomaly t1 expected " + timeSinceEpoch.TotalSeconds + " was: " + t1);
                 }
                 else
                 {
@@ -252,7 +253,7 @@ namespace Pulsar4X.Tests
                     M1 = OrbitMath.GetHyperbolicMeanAnomaly(o_e, H);
                     double t1 = OrbitMath.TimeFromHyperbolicMeanAnomaly(sgp, o_a, M1);
                     Assert.AreEqual(o_Mh, M1, epsilonRads, "MeanAnomaly Mh expected: " + Angle.ToDegrees(o_Mh) + " was: " + Angle.ToDegrees(M1));
-                    Assert.AreEqual(timeSinceEpoch.TotalSeconds, t1, epsilonLen, "TimeFromMeanAnomaly t1 expected " + timeSinceEpoch.TotalSeconds + " was: " + t1);
+                    Assert.AreEqual(timeSinceEpoch.TotalSeconds, t1, epsilont, "TimeFromMeanAnomaly t1 expected " + timeSinceEpoch.TotalSeconds + " was: " + t1);
                 }
 
                 

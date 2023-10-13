@@ -378,6 +378,32 @@ namespace Pulsar4X.Orbital
             var TA = Math.Atan2(TAy, TAx);
             return TA;
         }
+
+        /// <summary>
+        /// Works with Elliptical and Hyperbolic.
+        /// </summary>
+        /// <param name="sgp">Standard Gravitational Parameter</param>
+        /// <param name="a">SemiMajorAxis</param>
+        /// <param name="e">Eccentricity</param>
+        /// <param name="m0">Mean Anomaly at Epoch</param>
+        /// <param name="s">Seconds from Epoch</param>
+        /// <returns></returns>
+        public static double TrueAnomalyFromTime(double sgp, double a, double e, double m0, double s)
+        {
+            double meanMotion = GetMeanMotion(sgp, a);
+            if(e < 1)
+            {
+                var m1 = GetMeanAnomalyFromTime(m0, meanMotion, s);
+                GetEccentricAnomalyNewtonsMethod(e, m1, out double E);
+                return TrueAnomalyFromEccentricAnomaly(e, E);
+            }
+            else
+            {
+                var m1 = GetHyperbolicMeanAnomalyFromTime(meanMotion, s);
+                GetHyperbolicAnomalyNewtonsMethod(e, m1, out double F);
+                return TrueAnomalyFromHyperbolicAnomaly(e, F);
+            }
+        }
         
         public static double TrueAmomalyAtRadius(KeplerElements ke, double r)
         {
@@ -981,11 +1007,9 @@ namespace Pulsar4X.Orbital
         public static double GetMeanAnomalyFromTime(double meanAnomalyAtEpoch, double meanMotion, double secondsFromEpoch)
         {
             // http://en.wikipedia.org/wiki/Mean_anomaly (M = M0 + nT)  
-            double currentMeanAnomaly = meanAnomalyAtEpoch;
-            // Add nT
-            currentMeanAnomaly += meanMotion * secondsFromEpoch;
+            double currentMeanAnomaly = meanAnomalyAtEpoch + (meanMotion * secondsFromEpoch);
             // Large nT can cause meanAnomaly to go past 2*Pi. Roll it down. It shouldn't, because timeSinceEpoch should be tapered above, but it has.
-            currentMeanAnomaly = currentMeanAnomaly % (Math.PI * 2);
+            currentMeanAnomaly = Angle.NormaliseRadiansPositive(currentMeanAnomaly); //currentMeanAnomaly % (Math.PI * 2);
             return currentMeanAnomaly;
         }
         
@@ -1189,11 +1213,10 @@ namespace Pulsar4X.Orbital
         /// </summary>
         /// <param name="meanAnomaly">M</param>
         /// <param name="meanMotion">n</param>
-        /// <returns>seconds from </returns>
-        public static double TimeFromEllipticMeanAnomaly(double meanAnomaly, double meanMotion)
+        /// <returns>seconds from epoch</returns>
+        public static double TimeFromEllipticMeanAnomaly(double meanAomalyAtEpoch, double meanAnomaly, double meanMotion)
         {
-            return meanAnomaly / meanMotion;
-
+            return Angle.NormaliseRadiansPositive(meanAnomaly - meanAomalyAtEpoch) / meanMotion;
         }
         
         public static double TimeFromHyperbolicMeanAnomaly(double sgp, double a, double hyperbolicMeanAnomaly)
