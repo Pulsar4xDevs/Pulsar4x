@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine.Orders
 {
     public class MoveToSystemBodyOrder : EntityCommand
     {
-        public override string Name => "Move to System Body";
+        public override string Name => $"Move to {Target.GetOwnersName()}";
         public override string Details => "Moves the fleet to the specified system body.";
         public override ActionLaneTypes ActionLanes { get; } = ActionLaneTypes.IneteractWithSelf | ActionLaneTypes.InteractWithEntitySameFleet | ActionLaneTypes.Movement;
         public override bool IsBlocking => true;
@@ -40,7 +41,7 @@ namespace Pulsar4X.Engine.Orders
 
             // Get the colonies parent radius
             Target.TryGetDatablob<PositionDB>(out var targetPositionDB);
-            double targetSMA = OrbitMath.LowOrbitRadius(targetPositionDB.Parent);
+            double targetSMA = OrbitMath.LowOrbitRadius(targetPositionDB.OwningEntity);
 
             // Get all the ships we need to add the movement command to
             var ships = fleetDB.Children.Where(c => c.HasDataBlob<ShipInfoDB>());
