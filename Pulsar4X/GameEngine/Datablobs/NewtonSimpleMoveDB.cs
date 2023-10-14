@@ -15,13 +15,13 @@ namespace Pulsar4X.Datablobs
         public Entity SOIParent { get; internal set; }
         public double ParentMass { get; internal set; }
 
-        public NewtonSimpleMoveDB(Entity SoiParent, KeplerElements start, KeplerElements end, DateTime onDateTime)
+        public NewtonSimpleMoveDB(Entity soiParent, KeplerElements start, KeplerElements end, DateTime onDateTime)
         {
             LastProcessDateTime = onDateTime;
             ActionOnDateTime = onDateTime;
             CurrentTrajectory = start;
             TargetTrajectory = end;
-            SOIParent = SOIParent;
+            SOIParent = soiParent;
             ParentMass = SOIParent.GetDataBlob<MassVolumeDB>().MassTotal;
         }
         

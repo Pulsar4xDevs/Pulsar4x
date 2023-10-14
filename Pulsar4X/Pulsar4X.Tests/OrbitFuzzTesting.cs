@@ -204,10 +204,10 @@ namespace Pulsar4X.Tests
 		}
         
         /// <summary>
-        // Tests: Time ⟶ EllipticMeanAnomaly  ⟶ EccentricAnomaly
-        //               EllipticMeanAnomaly  ⟵        ↲
-        // Tests: Time ⟶ HyperblicMeanAnomaly ⟶ HyperbolicAnomaly
-        //               HyperblicMeanAnomaly ⟵       ↲
+        /// Tests: Time ⟶ EllipticMeanAnomaly  ⟶ EccentricAnomaly
+        ///        Time ⟵ EllipticMeanAnomaly  ⟵        ↲
+        /// Tests: Time ⟶ HyperblicMeanAnomaly ⟶ HyperbolicAnomaly
+        ///        Time ⟵ HyperblicMeanAnomaly ⟵       ↲
         /// </summary>
         /// <param name="testData"></param>
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
@@ -388,7 +388,12 @@ namespace Pulsar4X.Tests
             }
         }
 
-
+        /// <summary>
+        /// Tests: EccentricAnomaly ⟶ TrueAnomaly  ⟶ *(position, velocity)*
+        ///        EccentricAnomaly ⟵ TrueAnomaly  ⟵        ↲
+        /// Tests: HyperbolicAnomaly ⟶ TrueAnomaly ⟶ *(position, velocity)*
+        ///        HyperbolicAnomaly ⟵ TrueAnomaly ⟵       ↲
+        /// </summary>
         [Test, TestCaseSource(nameof(_allTestOrbitData))]
         public void TrueAnomalyCalcs((OrbitDB orbitDB, string TestName) testData)
         {
@@ -401,41 +406,54 @@ namespace Pulsar4X.Tests
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
                 double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
-                double o_E = orbitDB.GetEccentricAnomaly(o_M);
+                double o_Mh = OrbitMath.GetHyperbolicMeanAnomalyFromTime(sgp, segmentTime);
+                double o_loAN = orbitDB.LongitudeOfAscendingNode;
+                double o_aoP = orbitDB.ArgumentOfPeriapsis;
+                double o_i = orbitDB.Inclination;
+                double o_a = orbitDB.SemiMajorAxis;
+                double o_e = orbitDB.Eccentricity;
+                var o_p = EllipseMath.SemiLatusRectum(o_a, o_e);
                 double o_ν = orbitDB.GetTrueAnomaly(segmentDatetime);
 
-                var pos = orbitDB.GetPosition(segmentDatetime);
+                var posFromDB = orbitDB.GetPosition(segmentDatetime);
                 var vel = orbitDB.InstantaneousOrbitalVelocityVector_m(segmentDatetime);
-
-                Vector3 ev = OrbitMath.EccentricityVector(sgp, pos, (Vector3)vel);
-                double ν1 = OrbitMath.TrueAnomaly(sgp, pos, (Vector3)vel);
-                double ν2 = OrbitMath.TrueAnomaly(ev, pos, (Vector3)vel);
                 
-                double ν3;
                 if(o_e < 1)
-                    ν3 = OrbitMath.TrueAnomalyFromEccentricAnomaly(o_e, o_E);
+                {
+                    OrbitMath.GetEccentricAnomalyNewtonsMethod(o_e, o_M, out double o_E);
+                    var truAnom = OrbitMath.TrueAnomalyFromEccentricAnomaly(o_e, o_E);
+                    var r = EllipseMath.RadiusAtTrueAnomaly(truAnom, o_p, o_e);
+                    var pos = OrbitMath.GetRelativePosition(o_loAN, o_aoP, o_i, truAnom, r);
+                    
+                    var E1 = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(truAnom, o_e);
+
+                    truAnom = Angle.NormaliseRadians(truAnom);
+                    E1 = Angle.NormaliseRadians(E1);
+                    
+                    string message = "TrueAnomaly Expected: " + Angle.ToDegrees(o_ν).ToString() + "°\nBut was: " + Angle.ToDegrees(truAnom).ToString()+ "° ";
+                    Assert.AreEqual(o_ν, truAnom, epsilonRads, message);
+                    message = "EccentricAnomaly Expected: " + Angle.ToDegrees(o_E).ToString() + "°\nBut was: " + Angle.ToDegrees(E1).ToString()+ "° ";
+                    Assert.AreEqual(o_E, E1, epsilonRads, message);
+                }
                 else
                 {
-                    var quotient = sgp / Math.Pow(-o_a, 3);
-                    var hyperbolcMeanMotion = Math.Sqrt(quotient);
-                    var hyperbolicMeanAnomaly = timeSinceEpoch.TotalSeconds * hyperbolcMeanMotion;
-                    var converge = OrbitMath.GetHyperbolicAnomalyNewtonsMethod(o_e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
-                    ν3 = OrbitMath.TrueAnomalyFromHyperbolicAnomaly(o_e, hyperbolicAnomalyF);
+                    OrbitMath.GetHyperbolicAnomalyNewtonsMethod(o_e, o_Mh, out double o_F);
+                    var truAnom = OrbitMath.TrueAnomalyFromHyperbolicAnomaly(o_e, o_F);
+                    var r = EllipseMath.RadiusAtTrueAnomaly(truAnom, o_p, o_e);
+                    var pos = OrbitMath.GetRelativePosition(o_loAN, o_aoP, o_i, truAnom, r);
+                    //var vel = OrbitMath.vel
+                    //var truFromPos = OrbitMath.TrueAnomaly()
+                    var F1 = OrbitMath.GetHyperbolicAnomalyFromTrueAnomaly(o_e, truAnom);
+                    
+                    truAnom = Angle.NormaliseRadians(truAnom);
+                    F1 = Angle.NormaliseRadians(F1);
+                    
+                    string message = "TrueAnomaly Expected: " + Angle.ToDegrees(o_ν).ToString() + "°\nBut was: " + Angle.ToDegrees(truAnom).ToString()+ "° ";
+                    Assert.AreEqual(o_ν, truAnom, epsilonRads, message);
+                    message = "HyperbolicAnomaly Expected: " + Angle.ToDegrees(o_F).ToString() + "°\nBut was: " + Angle.ToDegrees(F1).ToString()+ "° ";
+                    Assert.AreEqual(F1, o_F, epsilonRads, message);
+                    
                 }
-
-                OrbitMath.GetTrueAnomaly(orbitDB, segmentDatetime);
-                
-                double d0 = Angle.ToDegrees(o_ν);
-                double d1 = Angle.ToDegrees(ν1);
-                double d2 = Angle.ToDegrees(ν2);
-                double d3 = Angle.ToDegrees(ν3);
-
-
-                //if (o_e > 1.0e-7) // because this test will fail if we have a circular orbit. 
-                    //Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν1), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d1);
-
-                //Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν2), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d2);
-                Assert.AreEqual(0, Angle.DifferenceBetweenRadians(o_ν, ν3), 1.0E-7, "True Anomaly ν expected: " + d0 + " was: " + d3);
             }
         }
         
