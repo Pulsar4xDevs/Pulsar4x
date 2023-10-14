@@ -21,7 +21,7 @@ namespace Pulsar4X.Engine.Sol
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
             SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.GasGiant, SupportsPopulations = false, Albedo = 0.342f };
-            MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius_AU(5.6834E14, Distance.KmToAU(60268));
+            MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius_AU(5.6834E26, Distance.KmToAU(60268));
             NameDB planetNameDB = new NameDB("Saturn");
 
             double planetSemiMajorAxisAU = 9.5826;
