@@ -849,7 +849,7 @@ namespace Pulsar4X.Orbital
                 converges = false;
             }
 
-            eccentricAnomaly = e[i - 1];
+            eccentricAnomaly = Angle.NormaliseRadiansPositive( e[i - 1]);
             return converges;
         }
 
@@ -880,7 +880,7 @@ namespace Pulsar4X.Orbital
             var E = Math.Acos((Math.Cos(trueAnomaly) + eccentricity) / (1 + eccentricity * Math.Cos(trueAnomaly)));
             if (trueAnomaly > Math.PI || trueAnomaly < 0 && trueAnomaly > -Math.PI)
                 E = -E;
-            return E;
+            return Angle.NormaliseRadiansPositive(E);
         }
 
         /*
@@ -950,7 +950,7 @@ namespace Pulsar4X.Orbital
                 converges = false;
             }
 
-            hyperbolicAnomalyF = F[i - 1];
+            hyperbolicAnomalyF = Angle.NormaliseRadiansPositive(F[i - 1]);
             return converges;
         }
         
@@ -1302,7 +1302,7 @@ namespace Pulsar4X.Orbital
             var foo = Math.Sqrt((e - 1) / (e + 1));
             var foo2 = Math.Tan(trueAnomaly / 2);
             var hyperbolicAnomaly = 2 * Math.Atanh(foo * foo2);
-            return hyperbolicAnomaly;
+            return Angle.NormaliseRadiansPositive(hyperbolicAnomaly);
         }
         public static double GetHyperbolicMeanAnomalyFromTime(double sgp, double a, double secondsFromEpoch)
         {

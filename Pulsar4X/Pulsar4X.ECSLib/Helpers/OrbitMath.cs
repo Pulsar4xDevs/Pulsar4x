@@ -201,18 +201,16 @@ namespace Pulsar4X.ECSLib
             var secondsFromEpoch = timeSinceEpoch.TotalSeconds;
             if (orbit.Eccentricity < 1) //elliptical orbit
             {
-                double m0 = orbit.MeanAnomalyAtEpoch;
-                double n = orbit.MeanMotion;
-                double currentMeanAnomaly = GetMeanAnomalyFromTime(m0, n, secondsFromEpoch);
-
-                double eccentricAnomaly = GetEccentricAnomaly(orbit, currentMeanAnomaly);
-                return TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, eccentricAnomaly);
+                double o_M0 = orbit.MeanAnomalyAtEpoch;
+                double o_M1 = GetMeanAnomalyFromTime(o_M0, orbit.MeanMotion, secondsFromEpoch);
+                double o_E = GetEccentricAnomaly(orbit, o_M1);
+                return TrueAnomalyFromEccentricAnomaly(orbit.Eccentricity, o_E);
             }
             else //hyperbolic orbit
             {
-                var hyperbolicMeanAnomaly = secondsFromEpoch * orbit.MeanMotion;
-                double hyperbolicAnomalyF =  GetHyperbolicAnomaly(orbit, hyperbolicMeanAnomaly);
-                return TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, hyperbolicAnomalyF);
+                double o_Mh = GetHyperbolicMeanAnomalyFromTime(orbit.MeanMotion, secondsFromEpoch);
+                double o_F =  GetHyperbolicAnomaly(orbit, o_Mh);
+                return TrueAnomalyFromHyperbolicAnomaly(orbit.Eccentricity, o_F);
             }
         }
 
@@ -244,9 +242,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="orbit"></param>
         /// <param name="currentHyperbolicAnomaly"></param>
         /// <returns>F</returns>
-        public static double GetHyperbolicAnomaly(OrbitDB orbit, double currentHyperbolicAnomaly)
+        public static double GetHyperbolicAnomaly(OrbitDB orbit, double hyperbolicMeanAnomaly)
         {
-            if(!GetHyperbolicAnomalyNewtonsMethod(orbit.Eccentricity, currentHyperbolicAnomaly, out double F))
+            if(!GetHyperbolicAnomalyNewtonsMethod(orbit.Eccentricity, hyperbolicMeanAnomaly, out double F))
             {
                 Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.")
                 {
