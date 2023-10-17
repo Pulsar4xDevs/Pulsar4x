@@ -625,7 +625,25 @@ namespace Pulsar4X.SDL2UI
                 flags |= ImGuiTreeNodeFlags.Selected;
             }
 
+            string description = "";
+
+            fleet.TryGetDatablob<OrderableDB>(out var orderableDB);
+
+            if(orderableDB.ActionList.Count == 0)
+            {
+                description = "No Orders";
+            }
+            else
+            {
+                foreach(var order in orderableDB.ActionList)
+                {
+                    description += order.Name + "\n";
+                }
+            }
+
             bool isTreeOpen = ImGui.TreeNodeEx(name, flags);
+            if(ImGui.IsItemHovered())
+                DisplayHelpers.DescriptiveTooltip(name, "Fleet", description);
 
             if(isTreeOpen)
             {
