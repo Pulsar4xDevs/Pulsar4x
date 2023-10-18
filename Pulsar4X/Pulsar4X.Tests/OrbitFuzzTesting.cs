@@ -406,14 +406,14 @@ namespace Pulsar4X.Tests
                 TimeSpan timeSinceEpoch = TimeSpan.FromSeconds(segmentTime * i);
                 DateTime segmentDatetime = o_epoch + timeSinceEpoch;
                 double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
-                double o_Mh = OrbitMath.GetHyperbolicMeanAnomalyFromTime(sgp, segmentTime);
+                double o_Mh = OrbitMath.GetHyperbolicMeanAnomalyFromTime(o_n, timeSinceEpoch.TotalSeconds);
                 double o_loAN = orbitDB.LongitudeOfAscendingNode;
                 double o_aoP = orbitDB.ArgumentOfPeriapsis;
                 double o_i = orbitDB.Inclination;
                 double o_a = orbitDB.SemiMajorAxis;
                 double o_e = orbitDB.Eccentricity;
                 var o_p = EllipseMath.SemiLatusRectum(o_a, o_e);
-                double o_ν = orbitDB.GetTrueAnomaly(segmentDatetime);
+                double o_ν = OrbitMath.GetTrueAnomaly(orbitDB, segmentDatetime);// orbitDB.GetTrueAnomaly(segmentDatetime);
 
                 var posFromDB = orbitDB.GetPosition(segmentDatetime);
                 var vel = orbitDB.InstantaneousOrbitalVelocityVector_m(segmentDatetime);
@@ -445,10 +445,12 @@ namespace Pulsar4X.Tests
                     truAnom = Angle.NormaliseRadiansPositive(truAnom);
 
                     
-                    string message = "TrueAnomaly Expected: " + Angle.ToDegrees(o_ν).ToString() + "°\nBut was: " + Angle.ToDegrees(truAnom).ToString()+ "° ";
+                    string message = i + " TrueAnomaly Expected: " + Angle.ToDegrees(o_ν).ToString() + "°\nBut was: " + Angle.ToDegrees(truAnom).ToString()+ "° ";
                     Assert.AreEqual(o_ν, truAnom, epsilonRads, message);
-                    message = "HyperbolicAnomaly Expected: " + Angle.ToDegrees(o_F).ToString() + "°\nBut was: " + Angle.ToDegrees(F1).ToString()+ "° ";
-                    Assert.AreEqual(F1, o_F, epsilonRads, message);
+                    message = i + " HyperbolicAnomaly Expected: " + Angle.ToDegrees(o_F).ToString() + "°\n" +
+                              "But was: " + Angle.ToDegrees(F1).ToString()+ "°\n" +
+                              "For trueAnom of " + Angle.ToDegrees(truAnom).ToString()+ "° ";
+                    Assert.AreEqual(o_F, F1, epsilonRads, message);
                     
                 }
             }
