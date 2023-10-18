@@ -21,6 +21,7 @@ namespace Pulsar4X.SDL2UI
         private bool _relativeOrbitVelocity;
         private bool _strictNewtonion;
         private bool _showSizesDemo = false;
+        private bool _showSelectorWindow = true;
         private OrbitalDebugWindow _orbitalDebugWindow;
         private GameLogWindow _logWindow;
         private SettingsWindow()
@@ -124,6 +125,10 @@ namespace Pulsar4X.SDL2UI
                         SizesDemo.Display();
                     }
 
+                    if(ImGui.Checkbox("Show Selector", ref _showSelectorWindow))
+                    {
+                        Selector.GetInstance().SetActive(_showSelectorWindow);
+                    }
 
                     if (ImGui.CollapsingHeader("Process settings", _xpanderFlags))
                     {
