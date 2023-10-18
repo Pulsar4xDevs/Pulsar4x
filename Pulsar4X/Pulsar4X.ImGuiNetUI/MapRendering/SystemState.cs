@@ -46,8 +46,7 @@ namespace Pulsar4X.SDL2UI
                 SetupEntity(entityItem, faction);
             }
 
-            AEntityChangeListener changeListener = new EntityChangeListener(StarSystem, faction, new List<Type>() { typeof(PositionDB) });//, listnerblobs);
-            _changeListener = changeListener;
+            _changeListener = new EntityChangeListener(StarSystem, faction, new List<Type>());//, listnerblobs);
 
             foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
             {

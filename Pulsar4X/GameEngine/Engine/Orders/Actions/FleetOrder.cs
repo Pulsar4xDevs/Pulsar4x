@@ -51,11 +51,12 @@ namespace Pulsar4X.Engine.Orders
             UseActionLanes = true;
         }
 
-        public static FleetOrder CreateFleetOrder(string name, Entity faction)
+        public static FleetOrder CreateFleetOrder(string name, Entity faction, StarSystem starSystem)
         {
             var order = new FleetOrder(faction.Id, faction)
             {
                 OrderType = FleetOrderType.Create,
+                _manager = starSystem,
                 _requestedName = name,
             };
 
@@ -234,13 +235,13 @@ namespace Pulsar4X.Engine.Orders
 
         internal override bool IsValidCommand(Game game)
         {
-            _manager = game.GlobalManager;
+            if(_manager == null) _manager = game.GlobalManager;
 
             switch(OrderType)
             {
                 case FleetOrderType.Create:
-                    if(_manager.TryGetEntityById(RequestingFactionGuid, out _factionEntity)
-                        && _manager.TryGetEntityById(EntityCommandingGuid, out _entityCommanding))
+                    if(_manager.TryGetGlobalEntityById(RequestingFactionGuid, out _factionEntity)
+                        && _manager.TryGetGlobalEntityById(EntityCommandingGuid, out _entityCommanding))
                     {
                         return true;
                     }

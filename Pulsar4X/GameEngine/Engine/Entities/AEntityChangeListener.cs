@@ -166,7 +166,7 @@ namespace Pulsar4X.Engine
 
         private void OnEntityAdded(EntityChangeData changeData)
         {
-            bool include = false;
+            bool include = true;
             foreach (var includeitem in IncludeDBTypeIndexFilter)
             {
                 //debug

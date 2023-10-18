@@ -118,6 +118,9 @@ namespace Pulsar4X.Engine
                     SetDataBlob(entity.Id, blob);
                 }
             }
+
+            // Update listeners
+            UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityAdded);
         }
 
         public Entity CreateAndAddEntity(ProtoEntity protoEntity)
@@ -595,6 +598,11 @@ namespace Pulsar4X.Engine
             }
 
             return true;
+        }
+
+        public void AddListener(AEntityChangeListener listener)
+        {
+            EntityListeners.Add(listener);
         }
 
         #endregion

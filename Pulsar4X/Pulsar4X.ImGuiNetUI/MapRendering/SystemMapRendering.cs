@@ -379,7 +379,8 @@ namespace Pulsar4X.SDL2UI
                 {
                     foreach (var entityGuid in _sysState.EntitiesAdded)
                     {
-                        AddIconable(_sysState.EntityStatesWithPosition[entityGuid]);
+                        if(_sysState.EntityStatesWithPosition.ContainsKey(entityGuid))
+                            AddIconable(_sysState.EntityStatesWithPosition[entityGuid]);
                     }
                     foreach (var item in _sysState.EntityStatesWithPosition.Values)
                     {
@@ -390,7 +391,8 @@ namespace Pulsar4X.SDL2UI
                     }
                     foreach (var item in _sysState.EntitysToBin)
                     {
-                        RemoveIconable(item);
+                        if(_sysState.EntityStatesWithPosition.ContainsKey(item))
+                            RemoveIconable(item);
                     }
                 }
 

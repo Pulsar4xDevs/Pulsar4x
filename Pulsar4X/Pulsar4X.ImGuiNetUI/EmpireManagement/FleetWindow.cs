@@ -599,7 +599,7 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.Button("Create New Fleet", new Vector2(Styles.LeftColumnWidthLg, 0f)))
             {
                 string name = NameFactory.GetFleetName(_uiState.Game);
-                var order = FleetOrder.CreateFleetOrder(name, _uiState.Faction);
+                var order = FleetOrder.CreateFleetOrder(name, _uiState.Faction, _uiState.SelectedSystem);
                 _uiState.Game.OrderHandler.HandleOrder(order);
             }
         }
