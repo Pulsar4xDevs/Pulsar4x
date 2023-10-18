@@ -426,7 +426,7 @@ namespace Pulsar4X.Orbital
         {
             var x = Math.Sqrt(Math.Pow(eccentricity, 2) - 1 ) * Math.Sinh(hyperbolicAnomaly);
             var y = Math.Cosh(hyperbolicAnomaly) - eccentricity;
-            var ta = Angle.NormaliseRadiansPositive(Math.Atan2(x, y));
+            var ta = Angle.NormaliseRadiansPositive(Math.Atan2(y, x));
             if (ta == double.NaN)
                 throw new Exception("Is NaN");
 
