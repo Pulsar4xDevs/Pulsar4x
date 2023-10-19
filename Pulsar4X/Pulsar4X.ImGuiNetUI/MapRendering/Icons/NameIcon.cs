@@ -5,6 +5,7 @@ using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using SDL2;
+using System.Numerics;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -27,6 +28,9 @@ namespace Pulsar4X.SDL2UI
         public Rectangle ViewDisplayRect = new Rectangle();
         UserOrbitSettings.OrbitBodyType _bodyType = UserOrbitSettings.OrbitBodyType.Unknown;
         internal float DrawAtZoom { get { return _state.DrawNameZoomLvl[_bodyType]; } }
+
+        public Vector4 TextDisplayColor { get; private set; } = Styles.StandardText;
+
         public NameIcon(EntityState entityState, GlobalUIState state) : base(entityState.Entity.GetDataBlob<PositionDB>())
         {
             Random rnd = new Random();
@@ -39,6 +43,14 @@ namespace Pulsar4X.SDL2UI
             entityState.Name = NameString;
             entityState.NameIcon = this;
             _bodyType = entityState.BodyType;
+            if(entityState.Entity.FactionOwnerID == Game.NeutralFactionId)
+            {
+                TextDisplayColor = Styles.DescriptiveColor;
+            }
+            else if(entityState.Entity.FactionOwnerID != _state.Faction.Id)
+            {
+                TextDisplayColor = Styles.BadColor;
+            }
         }
 
 
@@ -169,20 +181,25 @@ namespace Pulsar4X.SDL2UI
             if(!subIcons.Any())
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, Styles.InvisibleColor);
+                ImGui.PushStyleColor(ImGuiCol.Text, icon.TextDisplayColor);
+
                 if (ImGui.Button(icon.NameString + "##" + icon._entityGuid.ToString()))
                 {
                     icon._state.EntityClicked(icon._entityGuid, icon._starSysGuid, MouseButtons.Primary);
                 }
-                ImGui.PopStyleColor();
+                ImGui.PopStyleColor(2);
                 return;
             }
 
+            ImGui.PushStyleColor(ImGuiCol.Text, icon.TextDisplayColor);
             if(ImGui.BeginMenu(icon.NameString))
             {
+                ImGui.PushStyleColor(ImGuiCol.Text, Styles.StandardText);
                 if(ImGui.MenuItem("View " + icon.NameString))
                 {
                     icon._state.EntityClicked(icon._entityGuid, icon._starSysGuid, MouseButtons.Primary);
                 }
+                ImGui.PopStyleColor();
 
                 if(subIcons.Any())
                     ImGui.Separator();
@@ -192,31 +209,38 @@ namespace Pulsar4X.SDL2UI
                 {
                     foreach(var subIcon in subIcons[0])
                     {
+                        ImGui.PushStyleColor(ImGuiCol.Text, subIcon.TextDisplayColor);
                         if(ImGui.MenuItem(subIcon.NameString))
                         {
                             subIcon._state.EntityClicked(subIcon._entityGuid, subIcon._starSysGuid, MouseButtons.Primary);
                         }
+                        ImGui.PopStyleColor();
                     }
                 }
                 else
                 {
                     foreach(var group in subIcons)
                     {
+                        ImGui.PushStyleColor(ImGuiCol.Text, Styles.StandardText);
                         if(ImGui.BeginMenu(group.Key.ToString()))
                         {
                             foreach(var subIcon in group)
                             {
+                                ImGui.PushStyleColor(ImGuiCol.Text, subIcon.TextDisplayColor);
                                 if(ImGui.MenuItem(subIcon.NameString))
                                 {
                                     subIcon._state.EntityClicked(subIcon._entityGuid, subIcon._starSysGuid, MouseButtons.Primary);
                                 }
+                                ImGui.PopStyleColor();
                             }
                             ImGui.EndMenu();
                         }
+                        ImGui.PopStyleColor();
                     }
                 }
                 ImGui.EndMenu();
             }
+            ImGui.PopStyleColor();
         }
 
         private static void BeginNameIcon(NameIcon icon)

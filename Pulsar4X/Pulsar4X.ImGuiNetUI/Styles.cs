@@ -5,6 +5,7 @@ namespace Pulsar4X.SDL2UI
 {
     public static class Styles
     {
+        public static Vector4 StandardText = new Vector4(1f, 1f, 1f, 1f);
         public static Vector4 HighlightColor = new(0.25f, 1f, 0.25f, 0.9f);
         public static Vector4 GoodColor = new (0.25f, 1f, 0.25f, 0.9f);
         public static Vector4 DescriptiveColor = new (0.45f, 0.45f, 0.45f, 1f);
