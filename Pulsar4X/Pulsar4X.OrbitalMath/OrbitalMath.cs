@@ -421,16 +421,17 @@ namespace Pulsar4X.Orbital
 
             return ta;
         }
-
-        public static double TrueAnomalyFromHyperbolicAnomaly(double eccentricity, double hyperbolicAnomaly)
+        
+        public static double TrueAnomalyFromHyperbolicAnomaly(double e, double hyperbolicAnomaly)
         {
-            var x = Math.Sqrt(Math.Pow(eccentricity, 2) - 1 ) * Math.Sinh(hyperbolicAnomaly);
-            var y = Math.Cosh(hyperbolicAnomaly) - eccentricity;
-            var ta = Angle.NormaliseRadiansPositive(Math.Atan2(y, x));
+            var foo = Math.Sqrt((e + 1) / (e - 1));
+            var foo2 = Math.Tanh(hyperbolicAnomaly / 2);
+            var ta = 2 * Math.Atan(foo * foo2);
+            
             if (ta == double.NaN)
                 throw new Exception("Is NaN");
 
-            return ta;
+            return Angle.NormaliseRadians(ta);
         }
 
         #endregion
@@ -949,8 +950,9 @@ namespace Pulsar4X.Orbital
             {
                 converges = false;
             }
-
-            hyperbolicAnomalyF = Angle.NormaliseRadiansPositive(F[i - 1]);
+            //***!!! hyperbolic Anomaly is NOT an angle and shouldn't be normalised !!!***
+            //hyperbolicAnomalyF = Angle.NormaliseRadiansPositive(F[i - 1]);
+            hyperbolicAnomalyF = F[i - 1];
             return converges;
         }
         
@@ -1302,7 +1304,9 @@ namespace Pulsar4X.Orbital
             var foo = Math.Sqrt((e - 1) / (e + 1));
             var foo2 = Math.Tan(trueAnomaly / 2);
             var hyperbolicAnomaly = 2 * Math.Atanh(foo * foo2);
-            return Angle.NormaliseRadiansPositive(hyperbolicAnomaly);
+            //hyperboilc anomaly is not an angle so don't normalise
+            //return Angle.NormaliseRadians(hyperbolicAnomaly);
+            return hyperbolicAnomaly;
         }
         public static double GetHyperbolicMeanAnomalyFromTime(double sgp, double a, double secondsFromEpoch)
         {

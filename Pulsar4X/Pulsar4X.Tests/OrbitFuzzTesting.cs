@@ -442,11 +442,13 @@ namespace Pulsar4X.Tests
                     //var truFromPos = OrbitMath.TrueAnomaly()
                     var F1 = OrbitMath.GetHyperbolicAnomalyFromTrueAnomaly(o_e, truAnom);
                     
-                    truAnom = Angle.NormaliseRadiansPositive(truAnom);
+                    truAnom = Angle.NormaliseRadians(truAnom);
 
                     
-                    string message = i + " TrueAnomaly Expected: " + Angle.ToDegrees(o_ν).ToString() + "°\nBut was: " + Angle.ToDegrees(truAnom).ToString()+ "° ";
+                    string message = i + " TrueAnomaly Expected: " + Angle.ToDegrees(o_ν).ToString() + "°\n" +
+                                     "But was: " + Angle.ToDegrees(truAnom).ToString()+ "° ";
                     Assert.AreEqual(o_ν, truAnom, epsilonRads, message);
+                    
                     message = i + " HyperbolicAnomaly Expected: " + Angle.ToDegrees(o_F).ToString() + "°\n" +
                               "But was: " + Angle.ToDegrees(F1).ToString()+ "°\n" +
                               "For trueAnom of " + Angle.ToDegrees(truAnom).ToString()+ "° ";
