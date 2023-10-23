@@ -186,6 +186,18 @@ namespace Pulsar4X.ECSLib
             
         }
         
+        
+        public static Vector3 GetPosition_m(OrbitDB orbit, double trueAnomaly)
+        {
+            if (orbit.IsStationary)
+            {
+                return Vector3.Zero;
+            }
+            return OrbitalMath.GetPosition(orbit.SemiMajorAxis, orbit.Eccentricity, orbit.LongitudeOfAscendingNode, orbit.ArgumentOfPeriapsis, orbit.Inclination, trueAnomaly);
+        }
+        
+        
+        
         public static double GetTrueAnomaly(OrbitDB orbit, DateTime time)
         {
             TimeSpan timeSinceEpoch = time - orbit.Epoch;

@@ -83,26 +83,7 @@ namespace Pulsar4X.ECSLib
 
         public static Vector3 GetPosition_m(this OrbitDB orbit, double trueAnomaly)
         {
-            if (orbit.IsStationary)
-            {
-                return Vector3.Zero;
-            }
-            
-            double p = EllipseMath.SemiLatusRectum(orbit.SemiMajorAxis, orbit.Eccentricity);
-            double radius = EllipseMath.RadiusAtTrueAnomaly(orbit.SemiMajorAxis, p, trueAnomaly); 
-
-            double incl = orbit.Inclination;
-
-            //https://downloads.rene-schwarz.com/download/M001-Keplerian_Orbit_Elements_to_Cartesian_State_Vectors.pdf
-            double lofAN = orbit.LongitudeOfAscendingNode;
-            //double aofP = Angle.ToRadians(orbit.ArgumentOfPeriapsis);
-            double angleFromLoAN = trueAnomaly + orbit.ArgumentOfPeriapsis;
-
-            double x = Math.Cos(lofAN) * Math.Cos(angleFromLoAN) - Math.Sin(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
-            double y = Math.Sin(lofAN) * Math.Cos(angleFromLoAN) + Math.Cos(lofAN) * Math.Sin(angleFromLoAN) * Math.Cos(incl);
-            double z = Math.Sin(incl) * Math.Sin(angleFromLoAN);
-
-            return new Vector3(x, y, z) * radius;
+            return OrbitMath.GetPosition_m(orbit, trueAnomaly);
         }
 
         public static double GetTrueAnomaly(this OrbitDB orbit, DateTime time)

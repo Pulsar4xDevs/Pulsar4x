@@ -242,17 +242,7 @@ namespace Pulsar4X.Engine
             else
             {
                 OrbitDB newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);
-
-                if(newOrbit.Eccentricity >= 1)
-                {
-                    var newtmove = new NewtonMoveDB(targetEntity, insertionVector_m);
-                    entity.SetDataBlob(newtmove);
-                }
-                else if (newOrbit.Apoapsis < targetSOI) //furtherst point within soi, normal orbit
-                {
-                    entity.SetDataBlob(newOrbit);
-                }
-                else if (newOrbit.Periapsis > targetSOI) //closest point outside soi
+                if (newOrbit.Periapsis > targetSOI) //closest point outside soi
                 {
                     //find who's SOI we are in, and create an orbit around that.
                     targetEntity = OrbitProcessor.FindSOIForPosition((StarSystem)entity.Manager, positionDB.AbsolutePosition);
@@ -260,10 +250,9 @@ namespace Pulsar4X.Engine
                     entity.SetDataBlob(newOrbit);
 
                 }
-                else //closest point inside soi, but furtherest point outside. make a newtonion trajectory.
+                else 
                 {
-                    var newtmove = new NewtonMoveDB(targetEntity, insertionVector_m);
-                    entity.SetDataBlob(newtmove);
+                    entity.SetDataBlob(newOrbit);
                 }
 
                 positionDB.SetParent(targetEntity);
