@@ -80,7 +80,12 @@ namespace Pulsar4X.Orbital
             ke.AoP = GetArgumentOfPeriapsis(position, inclination, ke.LoAN, trueAnomaly); ;
             ke.Inclination = inclination;
             ke.MeanMotion = GetMeanMotion(standardGravParam, semiMajorAxis);
-            ke.MeanAnomalyAtEpoch = GetEllipticMeanAnomaly(eccentricity, eccentricAnomaly);
+            if(eccentricity < 1)
+                ke.MeanAnomalyAtEpoch = GetEllipticMeanAnomaly(eccentricity, eccentricAnomaly);
+            else
+            {
+                ke.MeanAnomalyAtEpoch = 0;
+            }
             ke.TrueAnomalyAtEpoch = trueAnomaly;
             ke.Period = 2 * Math.PI / ke.MeanMotion;
             ke.Epoch = epoch; //TimeFromPeriapsis(semiMajorAxis, standardGravParam, meanAnomaly);
