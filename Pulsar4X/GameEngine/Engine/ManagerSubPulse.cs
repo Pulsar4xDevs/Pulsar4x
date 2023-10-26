@@ -518,6 +518,7 @@ namespace Pulsar4X.Engine
             int deltaSeconds = (int)span.TotalSeconds;
             if (QueuedProcesses.ContainsKey(_processToDateTime))
             {
+                StarSysDateTime = _processToDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
                 var qp = QueuedProcesses[_processToDateTime];
                 foreach (var systemProcess in qp.SystemProcessors)
                 {
@@ -554,7 +555,7 @@ namespace Pulsar4X.Engine
 
                 QueuedProcesses.Remove(_processToDateTime); //once all the processes have been run for that datetime, remove it from the dictionary.
             }
-            StarSysDateTime = _processToDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
+
         }
 
         public int GetTotalNumberOfProceses()
