@@ -197,7 +197,8 @@ namespace Pulsar4X.Engine
             var grandparent = entity.GetSOIParentEntity().GetSOIParentEntity();
             var myMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             var gpMass = grandparent.GetDataBlob<MassVolumeDB>().MassTotal;
-            OrbitDB.FromVector(grandparent, myMass, gpMass, state.pos, state.Velocity, atDateTime);
+            var neworbit = OrbitDB.FromVector(grandparent, myMass, gpMass, state.pos, state.Velocity, atDateTime);
+            entity.SetDataBlob(neworbit);
         }
     }
 
