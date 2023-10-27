@@ -83,7 +83,8 @@ namespace Pulsar4X.ECSLib
 
         public static Vector3 GetPosition_m(this OrbitDB orbit, double trueAnomaly)
         {
-            return OrbitMath.GetPosition_m(orbit, trueAnomaly);
+            throw new Exception("old code exception");
+            //return OrbitMath.GetPosition(orbit, trueAnomaly);
         }
 
         public static double GetTrueAnomaly(this OrbitDB orbit, DateTime time)

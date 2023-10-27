@@ -55,7 +55,7 @@ namespace Pulsar4X.Datablobs
         /// <summary>
         /// Definition of the position of the body in the orbit at the reference time
         /// epoch. Mathematically convenient angle does not correspond to a real angle.
-        /// Stored in degrees.
+        /// Stored in radians.
         /// </summary>
         [PublicAPI]
         [JsonProperty]
@@ -94,14 +94,14 @@ namespace Pulsar4X.Datablobs
 		public double MeanMotion { get; protected set; }
 
         /// <summary>
-        /// Point in orbit furthest from the ParentBody. Measured in AU.
+        /// Point in orbit furthest from the ParentBody. Measured in m.
         /// </summary>
         [PublicAPI]
         [JsonProperty]
         public double Apoapsis { get; private set; }
 
         /// <summary>
-        /// Point in orbit closest to the ParentBody. Measured in AU.
+        /// Point in orbit closest to the ParentBody. Measured in m.
         /// </summary>
         [PublicAPI]
         [JsonProperty]
@@ -165,7 +165,7 @@ namespace Pulsar4X.Datablobs
                 var obta = Angle.ToDegrees(orbit.GetTrueAnomaly(atDateTime));
                 var tadif = Angle.ToDegrees(Angle.DifferenceBetweenRadians(keta, obta));
                 var pos1 = orbit.GetPosition(atDateTime);
-                var pos2 = orbit.GetPosition_m(ke_m.TrueAnomalyAtEpoch);
+                var pos2 = orbit.GetPosition(ke_m.TrueAnomalyAtEpoch);
                 var d2 = (pos1 - pos2).Length();
             }
 
@@ -188,7 +188,7 @@ namespace Pulsar4X.Datablobs
         /// <exception cref="Exception"></exception>
         public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp_m, Vector3 position_m, Vector3 velocity_m, DateTime atDateTime)
         {
-            if (position_m.Length() > parent.GetSOI_AU())
+            if (position_m.Length() > parent.GetSOI_m())
                 throw new Exception("Entity not in target SOI");
             //var sgp  = UniversalConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
             var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position_m, velocity_m, atDateTime);
@@ -430,6 +430,8 @@ namespace Pulsar4X.Datablobs
             GravitationalParameter_m3S2 = GeneralMath.StandardGravitationalParameter(_parentMass + _myMass);
 
             double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis, 3) / (GravitationalParameter_m3S2));
+            if (orbitalPeriod is double.NaN)
+                orbitalPeriod = double.PositiveInfinity;
             if (orbitalPeriod * 10000000 > long.MaxValue)
             {
                 OrbitalPeriod = TimeSpan.MaxValue;
@@ -440,10 +442,10 @@ namespace Pulsar4X.Datablobs
             }
 
             // http://en.wikipedia.org/wiki/Mean_motion
-            MeanMotion = Math.Sqrt(GravitationalParameter_m3S2 / Math.Pow(SemiMajorAxis, 3)); // Calculated in radians.
+            MeanMotion = OrbitMath.GetMeanMotion(GravitationalParameter_m3S2, SemiMajorAxis);
 
-            Apoapsis = (1 + Eccentricity) * SemiMajorAxis;
-            Periapsis = (1 - Eccentricity) * SemiMajorAxis;
+            Apoapsis = EllipseMath.Apoapsis(Eccentricity, SemiMajorAxis);
+            Periapsis = EllipseMath.Periapsis(Eccentricity, SemiMajorAxis);
 
             SOI_m = OrbitMath.GetSOI(SemiMajorAxis, _myMass, _parentMass);
 

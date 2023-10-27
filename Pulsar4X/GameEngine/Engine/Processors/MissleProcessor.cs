@@ -85,7 +85,7 @@ namespace Pulsar4X.Engine
                 var tgtintercept = OrbitMath.GetInterceptPosition_m(parentPosition, speed, tgtEntityOrbit, atDatetime);
                 var tgtEstPos = tgtintercept.position + targetEntity.GetDataBlob<PositionDB>().RelativePosition_m;
 
-                var tgtCurPos = Entity.GetPosition_m(targetEntity, atDatetime);
+                var tgtCurPos = Entity.GetPosition(targetEntity, atDatetime);
 
                 var vectorToTgt = Vector3.Normalise(tgtCurPos - parentPosRal);
 

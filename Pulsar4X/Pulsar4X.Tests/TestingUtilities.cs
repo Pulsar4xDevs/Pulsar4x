@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.ComponentFeatureSets.Damage;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Auth;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
+using Pulsar4X.Components;
+using Pulsar4X.Engine.Designs;
 
 namespace Pulsar4X.Tests
 {
@@ -20,7 +24,9 @@ namespace Pulsar4X.Tests
             parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = MassVolumeDB.NewFromMassAndRadius_m(parentMass, 696342000.0 );
             parentblobs[2] = new OrbitDB();
-            return new Entity(mgr, parentblobs);
+            var ent = Entity.Create();
+            mgr.AddEntity(ent, parentblobs);
+            return ent;
         }
 
         public static Entity BasicEarth(EntityManager mgr)
@@ -30,14 +36,18 @@ namespace Pulsar4X.Tests
             parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
-            return new Entity(mgr, parentblobs);
+            var ent = Entity.Create();
+            mgr.AddEntity(ent, parentblobs);
+            return ent;
         }
 
         internal static Game CreateTestUniverse(int numSystems, DateTime testTime, bool generateDefaultHumans = false)
         {
             var gamesettings = new NewGameSettings { GameName = "Unit Test Game", StartDateTime = testTime, MaxSystems = numSystems, DefaultSolStart = generateDefaultHumans, CreatePlayerFaction = false };
-
-            var game = new Game(gamesettings );
+            ModLoader modLoader = new ModLoader();
+            ModDataStore modDataStore = new ModDataStore();
+            modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+            var game = new Game(gamesettings, modDataStore );
 
             var smAuthToken = new AuthenticationToken(game.SpaceMaster);
 
@@ -57,9 +67,9 @@ namespace Pulsar4X.Tests
             Entity greyAlienSpecies = SpeciesFactory.CreateSpeciesHuman(greyAlienFaction, game.GlobalManager);
 
             // Greys Name the Humans.
-            humanSpecies.GetDataBlob<NameDB>().SetName(greyAlienFaction.Guid, "Stupid Terrans");
+            humanSpecies.GetDataBlob<NameDB>().SetName(greyAlienFaction.Id, "Stupid Terrans");
             // Humans name the Greys.
-            greyAlienSpecies.GetDataBlob<NameDB>().SetName(humanFaction.Guid, "Space bugs");
+            greyAlienSpecies.GetDataBlob<NameDB>().SetName(humanFaction.Id, "Space bugs");
             //TODO Expand the "Test Universe" to cover more datablobs and entities. And ships. Etc.
 
             if (generateDefaultHumans)
@@ -106,8 +116,10 @@ namespace Pulsar4X.Tests
         {
 
             GameSettings = new  NewGameSettings { GameName = "Unit Test Game", MaxSystems = numSystems, CreatePlayerFaction = false };
-
-            Game = new Game(GameSettings);
+            ModLoader modLoader = new ModLoader();
+            ModDataStore modDataStore = new ModDataStore();
+            modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+            Game = new Game(GameSettings, modDataStore);
 
             // add a faction:
             HumanFaction = FactionFactory.CreateFaction(Game, "New Terran Utopian Empire");
@@ -121,23 +133,23 @@ namespace Pulsar4X.Tests
             GreyAlienSpecies = SpeciesFactory.CreateSpeciesHuman(GreyAlienFaction, Game.GlobalManager);
 
             // Greys Name the Humans.
-            HumanSpecies.GetDataBlob<NameDB>().SetName(GreyAlienFaction.Guid, "Stupid Terrans");
+            HumanSpecies.GetDataBlob<NameDB>().SetName(GreyAlienFaction.Id, "Stupid Terrans");
             // Humans name the Greys.
-            GreyAlienSpecies.GetDataBlob<NameDB>().SetName(HumanFaction.Guid, "Space bugs");
+            GreyAlienSpecies.GetDataBlob<NameDB>().SetName(HumanFaction.Id, "Space bugs");
 
 
             StarSystemFactory starfac = new StarSystemFactory(Game);
             Sol = starfac.CreateSol(Game);
             Earth = NameLookup.GetFirstEntityWithName(Sol, "Earth"); //Sol.Entities[3]; //should be fourth entity created 
              EarthColony = ColonyFactory.CreateColony(HumanFaction, HumanSpecies, Earth);
-
-            DefaultEngineDesign = DefaultStartFactory.DefaultThrusterDesign(Game, HumanFaction);
-            DefaultWeaponDesign = DefaultStartFactory.DefaultSimpleLaser(Game, HumanFaction);
-            DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(Game, HumanFaction);
+             var humondatastore = HumanFaction.GetDataBlob<FactionInfoDB>().Data;
+            DefaultEngineDesign = DefaultStartFactory.DefaultThrusterDesign(Game, HumanFaction, humondatastore);
+            DefaultWeaponDesign = DefaultStartFactory.DefaultSimpleLaser(Game, HumanFaction, humondatastore);
+            DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(Game, HumanFaction, humondatastore);
 
             Vector3 position = Earth.GetDataBlob<PositionDB>().AbsolutePosition;
             DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Earth,  "Serial Peacemaker");
-            Sol.SetDataBlob(DefaultShip.ID, new TransitableDB());
+            Sol.SetDataBlob(DefaultShip.Id, new TransitableDB());
         }
 
 

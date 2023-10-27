@@ -186,16 +186,7 @@ namespace Pulsar4X.ECSLib
             
         }
         
-        
-        public static Vector3 GetPosition_m(OrbitDB orbit, double trueAnomaly)
-        {
-            if (orbit.IsStationary)
-            {
-                return Vector3.Zero;
-            }
-            return OrbitalMath.GetPosition(orbit.SemiMajorAxis, orbit.Eccentricity, orbit.LongitudeOfAscendingNode, orbit.ArgumentOfPeriapsis, orbit.Inclination, trueAnomaly);
-        }
-        
+
         
         
         public static double GetTrueAnomaly(OrbitDB orbit, DateTime time)
@@ -236,7 +227,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>E</returns>
         public static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
-            if(!OrbitalMath.GetEccentricAnomalyNewtonsMethod(orbit.Eccentricity, currentMeanAnomaly, out double E))
+            if(!GetEccentricAnomalyNewtonsMethod(orbit.Eccentricity, currentMeanAnomaly, out double E))
             {
                 Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.")
                 {
