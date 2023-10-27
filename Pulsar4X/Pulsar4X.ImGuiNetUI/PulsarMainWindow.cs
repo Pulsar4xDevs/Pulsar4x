@@ -43,7 +43,7 @@ namespace Pulsar4X.SDL2UI
             string preferencesPath = Path.Combine(preferencesDirectory, PreferencesFile);
             if(!File.Exists(preferencesPath))
             {
-                File.Create(preferencesPath);
+                File.Create(preferencesPath).Close();
             }
 
             IConfiguration preferences = new ConfigurationBuilder().AddIniFile(preferencesPath).Build();
