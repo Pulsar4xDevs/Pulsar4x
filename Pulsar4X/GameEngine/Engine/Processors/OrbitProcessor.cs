@@ -189,6 +189,18 @@ namespace Pulsar4X.Engine
         #endregion
     }
 
+    public class ChangeSOIProcessor : IInstanceProcessor
+    {
+        internal override void ProcessEntity(Entity entity, DateTime atDateTime)
+        {
+            var state = entity.GetAbsoluteState();
+            var grandparent = entity.GetSOIParentEntity().GetSOIParentEntity();
+            var myMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+            var gpMass = grandparent.GetDataBlob<MassVolumeDB>().MassTotal;
+            OrbitDB.FromVector(grandparent, myMass, gpMass, state.pos, state.Velocity, atDateTime);
+        }
+    }
+
 
 
     public class OrbitUpdateOftenProcessor : IHotloopProcessor

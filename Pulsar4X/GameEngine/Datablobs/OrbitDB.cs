@@ -186,12 +186,12 @@ namespace Pulsar4X.Datablobs
         /// <param name="atDateTime"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, double sgp_m, Vector3 position_m, Vector3 velocity_m, DateTime atDateTime)
+        public static OrbitDB FromVector(Entity parent, double myMass, double parentMass, Vector3 position_m, Vector3 velocity_m, DateTime atDateTime)
         {
             if (position_m.Length() > parent.GetSOI_m())
                 throw new Exception("Entity not in target SOI");
-            //var sgp  = UniversalConstants.Science.GravitationalConstant * (myMass + parentMass) / 3.347928976e33;
-            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position_m, velocity_m, atDateTime);
+            var sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
+            var ke = OrbitMath.KeplerFromPositionAndVelocity(sgp, position_m, velocity_m, atDateTime);
 
             return FromKeplerElements(parent, myMass, ke, atDateTime);
         }
@@ -501,6 +501,14 @@ namespace Pulsar4X.Datablobs
             if (OwningEntity.HasDataBlob<WarpMovingDB>())
             {
                 OwningEntity.RemoveDataBlob<WarpMovingDB>();
+            }
+
+            if (Eccentricity >= 1)
+            {
+                var soiParent = OwningEntity.GetSOIParentEntity();
+                var soiRadius = OrbitMath.GetSOIRadius(soiParent.GetDataBlob<OrbitDB>());
+                var soiChangeAt = OrbitMath.TimeToRadius(this, soiRadius);
+                OwningEntity.Manager.ManagerSubpulses.AddEntityInterupt(soiChangeAt, nameof(ChangeSOIProcessor), OwningEntity);
             }
         }
 

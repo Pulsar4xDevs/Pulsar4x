@@ -1222,7 +1222,8 @@ namespace Pulsar4X.Orbital
         /// <returns>seconds from epoch</returns>
         public static double TimeFromEllipticMeanAnomaly(double meanAomalyAtEpoch, double meanAnomaly, double meanMotion)
         {
-            return Angle.NormaliseRadiansPositive(meanAnomaly - meanAomalyAtEpoch) / meanMotion;
+            var angle = Angle.NormaliseRadiansPositive(meanAnomaly - meanAomalyAtEpoch);
+            return angle / meanMotion;
         }
         
         public static double TimeFromHyperbolicMeanAnomaly(double sgp, double a, double hyperbolicMeanAnomaly)
@@ -1271,25 +1272,50 @@ namespace Pulsar4X.Orbital
             }
             return lop;
         }
-
-
-        /// <summary>
-        /// Incorrect/Incomplete Unfinished DONOTUSE
-        /// </summary>
-        /// <returns>The to radius from periapsis.</returns>
-        /// <param name="orbit">Orbit.</param>
-        /// <param name="radiusAU">Radius</param>
-        public static double TimeToRadiusFromPeriapsis(KeplerElements orbit, double radius, double sgp)
+        
+        public static double TimeFromTrueAnomalyElliptic(double e, double o_M0, double n, double trueAnomaly)
         {
-            throw new NotImplementedException();
+            if (e < 1)
+            {
+                var o_E = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, e);
+                var o_M = GetEllipticMeanAnomaly(e, o_E);
+                return TimeFromEllipticMeanAnomaly(o_M0, o_M, n);
+            }
 
-            var a = Distance.MToAU(orbit.SemiMajorAxis);
-            var e = orbit.Eccentricity;
-            var p = EllipseMath.SemiLatusRectum(a, e);
-            var angle = EllipseMath.TrueAnomalyAtRadus(radius, p, e);
-            //var eccentricAnomoly = GetEccentricAnomalyNewtonsMethod()
-            //var meanAnomaly = GetEllipticMeanAnomaly(orbit.Eccentricity, 
-            return TimeFromPeriapsis(a, sgp, orbit.MeanAnomalyAtEpoch);
+            throw new Exception("This Function requres e < 1");
+        }
+        
+        public static double TimeFromTrueAnomalyHyperbolic(double sgp, double a, double e, double trueAnomaly)
+        {
+            if (e >= 1)
+            {
+                var o_H = GetHyperbolicAnomalyFromTrueAnomaly(e, trueAnomaly);
+                var o_Mh = GetHyperbolicMeanAnomaly(e, o_H);
+                return TimeFromHyperbolicMeanAnomaly(sgp, a, o_Mh);
+            }
+            throw new Exception("This Function requres e >= 1");
+        }
+        
+        public static double TimeFromTrueAnomaly(KeplerElements ke, double trueAnomaly)
+        {
+            double e = ke.Eccentricity;
+            double n = ke.MeanMotion;
+            double o_M0 = ke.MeanAnomalyAtEpoch;
+            double sgp = ke.StandardGravParameter;
+            double a = ke.SemiMajorAxis;
+            
+            if (e < 1)
+            {
+                var o_E = GetEccentricAnomalyFromTrueAnomaly(trueAnomaly, e);
+                var o_M = GetEllipticMeanAnomaly(e, o_E);
+                return TimeFromEllipticMeanAnomaly(o_M0, o_M, n);
+            }
+            else
+            {
+                var o_H = GetHyperbolicAnomalyFromTrueAnomaly(e, trueAnomaly);
+                var o_Mh = GetHyperbolicMeanAnomaly(e, o_H);
+                return TimeFromHyperbolicMeanAnomaly(sgp, a, o_Mh);
+            }
         }
 
         #endregion

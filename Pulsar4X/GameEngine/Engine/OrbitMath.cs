@@ -397,6 +397,24 @@ namespace Pulsar4X.Engine
 
         #region Time
 
+        public static DateTime TimeToRadius(OrbitDB orbitDB, double r)
+        {
+            double a = orbitDB.SemiMajorAxis;
+            double e = orbitDB.Eccentricity;
+            double p = EllipseMath.SemiLatusRectum(a, e);
+            double ta = EllipseMath.TrueAnomalyAtRadus(r, p, e);
+            double t_s = 0;
+            if (e < 1)
+            {
+                t_s = TimeFromTrueAnomalyElliptic(e, orbitDB.MeanAnomalyAtEpoch, orbitDB.MeanMotion, ta);
+            }
+            else
+            {
+                t_s = TimeFromTrueAnomalyHyperbolic(orbitDB.GravitationalParameter_m3S2, a, e, ta);
+            }
+            return orbitDB.Epoch + TimeSpan.FromSeconds(t_s);
+        }
+        
         /// <summary>
         /// Time for a burn manuver in seconds
         /// </summary>
@@ -415,10 +433,19 @@ namespace Pulsar4X.Engine
         }
 
         #endregion
-        
 
 
 
+        /// <summary>
+        /// returns the SOI radius of *this* orbital body,
+        /// ie for the SOI radius of earth give the orbitDB of earth.
+        /// </summary>
+        /// <param name="orbit"></param>
+        /// <returns></returns>
+        public static double GetSOIRadius(OrbitDB orbit)
+        {
+            return GetSOI(orbit.SemiMajorAxis, orbit._myMass, orbit._parentMass);
+        }
         
         
         

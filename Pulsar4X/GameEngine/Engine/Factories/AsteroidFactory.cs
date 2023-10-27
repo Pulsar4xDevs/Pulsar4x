@@ -55,8 +55,7 @@ namespace Pulsar4X.Engine
             var parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;
             var myMass = massVolume.MassDry;
 
-            double sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
-            OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, sgp, targetPos, velocity, collisionDate);
+            OrbitDB orbit = OrbitDB.FromVector(parent, myMass, parentMass, targetPos, velocity, collisionDate);
 
             var currentpos = orbit.GetAbsolutePosition_m(starSys.Game.TimePulse.GameGlobalDateTime);
             var posDB = new PositionDB(currentpos, parent.Manager.ManagerGuid, parent);
