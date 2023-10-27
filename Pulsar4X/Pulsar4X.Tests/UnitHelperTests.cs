@@ -1,10 +1,10 @@
-﻿using Pulsar4X.ECSLib;
-using Pulsar4X.Orbital;
+﻿using Pulsar4X.Orbital;
 using System;
 
 namespace Pulsar4X.Tests
 {
     using NUnit.Framework;
+    using Pulsar4X.Engine;
 
     [TestFixture, Description("Tests for the unit conversion helpers in GameMath.cs")]
     class UnitHelperTests
@@ -69,7 +69,7 @@ namespace Pulsar4X.Tests
         {
             if (toKelvin)
             {
-                Assert.That(Temperature.ToKelvin(from), Is.EqualTo(to).Within(0.000000001)); 
+                Assert.That(Temperature.ToKelvin(from), Is.EqualTo(to).Within(0.000000001));
             }
             else
             {
@@ -87,7 +87,7 @@ namespace Pulsar4X.Tests
         {
             if (toKelvin)
             {
-                Assert.That(Temperature.ToKelvin(from), Is.EqualTo(to).Within(0.0001)); 
+                Assert.That(Temperature.ToKelvin(from), Is.EqualTo(to).Within(0.0001));
             }
             else
             {

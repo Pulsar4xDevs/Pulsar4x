@@ -1,6 +1,8 @@
-using NuGet.Frameworks;
 using NUnit.Framework;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Blueprints;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
+using Pulsar4X.Modding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,13 +13,19 @@ namespace Pulsar4X.Tests
     {
         private Random R = new Random(22367);
 
-        private SystemGenSettingsSD GetSystemGenSettingsSD()
+        private SystemGenSettingsBlueprint GetSystemGenSettingsSD()
         {
             R = new Random(22367);
             var startDate = new DateTime(2050, 1, 1);
-            var game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }); // reinit with empty game, so we can do a clean test.
-            var galaxyGen = game.GalaxyGen;
-            return galaxyGen.Settings;
+
+            var modLoader = new ModLoader();
+            var modDataStore = new ModDataStore();
+
+            modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+
+            var settings = new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false };
+            var game  = new Game(settings, modDataStore);
+            return game.GalaxyGen.Settings;
         }
 
         [Test]

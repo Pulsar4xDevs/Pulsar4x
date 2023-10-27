@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Blueprints;
+using Pulsar4X.Components;
+using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Tests
 {
@@ -14,25 +19,24 @@ namespace Pulsar4X.Tests
 
 
 
-        private Dictionary<string, AtmosphericGasSD> _gasDictionary;
-        private List<Entity> _planetsList; 
+        private Dictionary<string, GasBlueprint> _gasDictionary;
+        private List<Entity> _planetsList;
         private List<Entity> _speciesList;
 
         [SetUp]
         public void Init()
         {
-            _game = new TestGame();
-            StaticDataManager.LoadData("Pulsar4x", _game.Game);  // TODO: Figure out correct directory
-            _entityManager = _game.Game.GlobalManager;
+            _game  = new TestGame(1);
 
-
+            _entityManager = new EntityManager();
+            _entityManager.Initialize(_game.Game);
 
             // Initialize gas dictionary - haven't found a good way to look up gases without doing this
-            _gasDictionary = new Dictionary<string, AtmosphericGasSD>();
+            _gasDictionary = new Dictionary<string, GasBlueprint>();
 
-            foreach (WeightedValue<AtmosphericGasSD> atmos in _game.Game.StaticData.AtmosphericGases)
+            foreach (var (id, gas) in _game.Game.AtmosphericGases)
             {
-                _gasDictionary.Add(atmos.Value.ChemicalSymbol, atmos.Value);
+                _gasDictionary.Add(gas.UniqueID, gas);
             }
 
 
@@ -47,11 +51,11 @@ namespace Pulsar4X.Tests
             // @todo: add more colonies, especially ones with multiple species in one colony
 
 
-            ComponentTemplateSD infrastructureSD = _game.Game.StaticData.ComponentTemplates[new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb")];
-            ComponentDesigner infrastructureDesigner = new ComponentDesigner(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>());
-            EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureDesigner.CreateDesign(_game.HumanFaction));
+            // ComponentTemplateSD infrastructureSD = _game.Game.StaticData.ComponentTemplates[new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb")];
+            // ComponentDesigner infrastructureDesigner = new ComponentDesigner(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>());
+            // EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureDesigner.CreateDesign(_game.HumanFaction));
 
-            ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
+            // ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
 
         }
 
@@ -91,18 +95,18 @@ namespace Pulsar4X.Tests
         {
             long[] basePop = new long[] { 0, 5, 10, 100, 999, 1000, 10000, 100000, 10000000 };
             long[] infrastructureAmounts = new long[] { 0, 1, 5, 100 };
-            Dictionary<Entity, long> newPop, returnedPop;
+            Dictionary<int, long> newPop, returnedPop;
 
             int i, j, k;
 
-            Guid infGUID = new Guid("08b3e64c-912a-4cd0-90b0-6d0f1014e9bb");
-            ComponentTemplateSD infrastructureSD = _game.Game.StaticData.ComponentTemplates[infGUID];
-            
-            
-            ComponentDesigner infrastructureDesigner = new ComponentDesigner(infrastructureSD, _game.HumanFaction.GetDataBlob<FactionTechDB>());
+            string infGUID = "infrastruture";
+            var factionDataStore = species.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
+            ComponentTemplateBlueprint infrastructureSD = factionDataStore.ComponentTemplates[infGUID];
+
+            ComponentDesigner infrastructureDesigner = new ComponentDesigner(infrastructureSD, factionDataStore, _game.HumanFaction.GetDataBlob<FactionTechDB>());
             ComponentDesign infrastructureDesign = infrastructureDesigner.CreateDesign(_game.HumanFaction);
 
-            Dictionary<Entity, long> pop = _game.EarthColony.GetDataBlob<ColonyInfoDB>().Population;
+            var pop = _game.EarthColony.GetDataBlob<ColonyInfoDB>().Population;
 
 
             // Single iteration growth test
@@ -113,18 +117,18 @@ namespace Pulsar4X.Tests
 
                 // Add the correct number of infrastructure to the colony
                 for (k = 0; k < infrastructureAmounts[i]; k++)
-                    EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureDesign);
+                    _game.EarthColony.AddComponent(infrastructureDesign);
+
                 ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
 
                 for (j = 0; j < basePop.Length; j++)
                 {
-
                     // set up population and infrastructure for each test
                     newPop = _game.EarthColony.GetDataBlob<ColonyInfoDB>().Population;
 
-                    foreach (KeyValuePair<Entity, long> kvp in newPop.ToArray())
+                    foreach (var (id, value) in newPop.ToArray())
                     {
-                        newPop[kvp.Key] = basePop[j];
+                        newPop[id] = basePop[j];
                     }
 
                     //var infrastuctures = _game.EarthColony.GetDataBlob<ComponentInstancesDB>().SpecificInstances[infrastructureEntity].Where(inf => inf.DesignEntity.HasDataBlob<LifeSupportAbilityDB>());
@@ -132,9 +136,9 @@ namespace Pulsar4X.Tests
                     returnedPop = calcGrowthIteration(_game.EarthColony, newPop);
                     PopulationProcessor.GrowPopulation(_game.EarthColony);
 
-                    foreach (KeyValuePair<Entity, long> kvp in pop.ToArray())
+                    foreach (var (id, value) in pop.ToArray())
                     {
-                        Assert.AreEqual(returnedPop[kvp.Key], pop[kvp.Key]);
+                        Assert.AreEqual(returnedPop[id], pop[id]);
                     }
                 }
 
@@ -148,7 +152,7 @@ namespace Pulsar4X.Tests
 
                 // Add the correct number of infrastructure to the colony
                 for (k = 0; k < infrastructureAmounts[i]; k++)
-                    EntityManipulation.AddComponentToEntity(_game.EarthColony, infrastructureDesign);
+                    _game.EarthColony.AddComponent(infrastructureDesign);
                 ReCalcProcessor.ReCalcAbilities(_game.EarthColony);
 
                 for (j = 0; j < basePop.Length; j++)
@@ -156,9 +160,9 @@ namespace Pulsar4X.Tests
                     // set up population and infrastructure for each test
                     newPop = _game.EarthColony.GetDataBlob<ColonyInfoDB>().Population;
 
-                    foreach (KeyValuePair<Entity, long> kvp in newPop.ToArray())
+                    foreach (var (id, value) in newPop.ToArray())
                     {
-                        newPop[kvp.Key] = basePop[j];
+                        newPop[id] = basePop[j];
                     }
 
                     for(k = 0; k < 10; k++)
@@ -167,9 +171,9 @@ namespace Pulsar4X.Tests
                         PopulationProcessor.GrowPopulation(_game.EarthColony);
                     }
 
-                    foreach (KeyValuePair<Entity, long> kvp in pop.ToArray())
+                    foreach (var (id, value) in pop.ToArray())
                     {
-                        Assert.AreEqual(newPop[kvp.Key], pop[kvp.Key]);
+                        Assert.AreEqual(newPop[id], pop[id]);
                     }
                 }
 
@@ -202,10 +206,10 @@ namespace Pulsar4X.Tests
             return newPop;
         }
 
-        private Dictionary<Entity, long> calcGrowthIteration(Entity colony, Dictionary<Entity, long> lastPop )
+        private Dictionary<int, long> calcGrowthIteration(Entity colony, Dictionary<int, long> lastPop )
         {
             // Get current population
-            Dictionary<Entity, long> returnPop = new Dictionary<Entity, long>();
+            var returnPop = new Dictionary<int, long>();
             Entity colonyPlanet = colony.GetDataBlob<ColonyInfoDB>().PlanetEntity;
             var instancesDB = colony.GetDataBlob<ComponentInstancesDB>();
             var popSupportTypes = instancesDB.GetDesignsByType(typeof(PopulationSupportAtbDB));
@@ -215,7 +219,7 @@ namespace Pulsar4X.Tests
             foreach (var design in popSupportTypes)
             {
                 var designValue = design.GetAttribute<PopulationSupportAtbDB>().PopulationCapacity;
-                var numberOf = instancesDB.GetNumberOfComponentsOfDesign(design.ID);
+                var numberOf = instancesDB.GetNumberOfComponentsOfDesign(design.UniqueID);
                 popSupportValue = designValue * numberOf;
             }
 
@@ -225,17 +229,17 @@ namespace Pulsar4X.Tests
 
             long needsSupport = 0;
 
-            foreach (KeyValuePair<Entity, long> kvp in lastPop)
+            foreach (var (id, value) in lastPop)
             {
                 // count the number of different population groups that need infrastructure support
-                var species = kvp.Key.GetDataBlob<SpeciesDB>();
+                var species = colony.Manager.GetGlobalEntityById(id).GetDataBlob<SpeciesDB>();
                 if (species.ColonyCost(colonyPlanet) > 1.0)
                     needsSupport++;
             }
 
-            foreach (KeyValuePair<Entity, long> kvp in lastPop.ToArray())
+            foreach (var (id, value) in lastPop.ToArray())
             {
-                var specDb = kvp.Key.GetDataBlob<SpeciesDB>();
+                var specDb = colony.Manager.GetGlobalEntityById(id).GetDataBlob<SpeciesDB>();
                 double colonyCost = specDb.ColonyCost(colonyPlanet);
                 long maxPopulation;
                 long newPop;
@@ -247,9 +251,9 @@ namespace Pulsar4X.Tests
                 else
                     maxPopulation = -1;
 
-                newPop = calcNewPop(kvp.Value, maxPopulation);
+                newPop = calcNewPop(value, maxPopulation);
 
-                returnPop.Add(kvp.Key, newPop);
+                returnPop.Add(id, newPop);
             }
 
             return returnPop;
@@ -261,18 +265,18 @@ namespace Pulsar4X.Tests
         {
             Entity resultPlanet;
 
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>();
+            var atmoGasses = new Dictionary<string, float>();
 
-            atmoGasses.Add(_gasDictionary["N"], 0.79f);
-            atmoGasses.Add(_gasDictionary["O"], 0.20f);
-            atmoGasses.Add(_gasDictionary["Ar"], 0.01f);
+            atmoGasses.Add("nitrogen", 0.79f);
+            atmoGasses.Add("oxygen", 0.20f);
+            atmoGasses.Add("argon", 0.01f);
             AtmosphereDB atmosphereDB = new AtmosphereDB(1f, true, 71, 1f, 1f, 57.2f, atmoGasses);
 
             resultPlanet = setAtmosphere(atmosphereDB);
 
             resultPlanet.GetDataBlob<SystemBodyInfoDB>().BaseTemperature = 14.0f;
             resultPlanet.GetDataBlob<SystemBodyInfoDB>().Gravity = 1.0;
-            
+
 
             return resultPlanet;
         }
@@ -285,7 +289,8 @@ namespace Pulsar4X.Tests
             earthBodyDB.Gravity = 1.0;
             earthBodyDB.BaseTemperature = 20.0f;
 
-            Entity resultPlanet = new Entity(_entityManager, new List<BaseDataBlob> { earthBodyDB, earthNameDB, atmosDB });
+            Entity resultPlanet = Entity.Create();
+            _entityManager.AddEntity(resultPlanet, new List<BaseDataBlob> { earthBodyDB, earthNameDB, atmosDB });
             return resultPlanet;
         }
 

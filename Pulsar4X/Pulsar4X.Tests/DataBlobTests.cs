@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using NUnit.Framework;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,14 +14,6 @@ namespace Pulsar4X.Tests
     internal class DataBlobTests
     {
         private static readonly List<Type> DataBlobTypes = new List<Type>(Assembly.GetAssembly(typeof(BaseDataBlob)).GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract));
-
-        [Test]
-        public void TypeCount()
-        {
-            // This is mostly a test for the EntityManager, but is included here because we do DataBlobType reflection here.
-            // EntityManager does the same reflection for some of its functions.
-            Assert.AreEqual(DataBlobTypes.Count, EntityManager.BlankDataBlobMask().Length);
-        }
 
         /// <summary>
         /// This test ensures our DataBlobs can be created by Json during deserialization.

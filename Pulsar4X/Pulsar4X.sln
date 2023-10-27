@@ -2,8 +2,6 @@
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulsar4X.ECSLib", "Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj", "{E716FA06-ECDF-B446-96B4-B790AAB5713B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulsar4X.Tests", "Pulsar4X.Tests\Pulsar4X.Tests.csproj", "{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulsar4X.ImGuiNetUI", "Pulsar4X.ImGuiNetUI\Pulsar4X.ImGuiNetUI.csproj", "{8F27EDF1-1680-4CD2-809C-A9D25B207168}"

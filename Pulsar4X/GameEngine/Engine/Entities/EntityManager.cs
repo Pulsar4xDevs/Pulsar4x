@@ -283,6 +283,9 @@ namespace Pulsar4X.Engine
 
         private void SetDataBlob(Type type, int entityId, BaseDataBlob dataBlob, bool updateListeners = true)
         {
+            if(dataBlob is null)
+                throw new ArgumentNullException("DataBlob cannot be null");
+
             if(!_entities.ContainsKey(entityId))
                 throw new ArgumentException("Entity ID does not exist");
 

@@ -1,39 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NuGet.Frameworks;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Engine;
+using Pulsar4X.Blueprints;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
+using Pulsar4X.Modding;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Tests
 {
     [TestFixture, Description("Atmosphere and Species Habitablilty Tests based on entities from runs in Aurora")]
     class AtmosphereAndSpeciesTests
     {
-        private Game _game;
+        ModLoader _modLoader;
+        ModDataStore _modDataStore;
+
+        NewGameSettings _settings;
+        Game _game;
+
         private EntityManager _entityManager;
         private Entity _planet;
-        private Dictionary<string, AtmosphericGasSD> _gasDictionary;
+        private Dictionary<string, GasBlueprint> _gasDictionary;
         private SpeciesDB _humans;
 
         [SetUp]
         public void Init()
         {
-            var gameSettings = new NewGameSettings
-            {
+            _modLoader = new ModLoader();
+            _modDataStore = new ModDataStore();
+
+            _modLoader.LoadModManifest("Data/basemod/modInfo.json", _modDataStore);
+
+            _settings = new NewGameSettings() {
                 MaxSystems = 1
             };
 
-            _game = new Game(gameSettings);
-            StaticDataManager.LoadData("Pulsar4x", _game);
-            _entityManager = new EntityManager(_game);
+            _game  = new Game(_settings, _modDataStore);
+
+            _entityManager = new EntityManager();
+            _entityManager.Initialize(_game);
 
             _humans = new SpeciesDB(1, 0.1, 1.9, 1, 0, 4, 14, -10, 38);
 
-            _gasDictionary = new Dictionary<string, AtmosphericGasSD>();
-            foreach (WeightedValue<AtmosphericGasSD> atmos in _game.StaticData.AtmosphericGases)
+            _gasDictionary = new Dictionary<string, GasBlueprint>();
+            foreach (var (id, gas) in _game.AtmosphericGases)
             {
-                _gasDictionary.Add(atmos.Value.ChemicalSymbol, atmos.Value);
+                _gasDictionary.Add(gas.ChemicalSymbol, gas);
             }
         }
 
@@ -50,7 +62,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestMercury()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(0f, false, 0m, 1.0f, 0.0f, 423.751f, atmoGasses);
@@ -75,12 +87,12 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestEarth()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { _gasDictionary["N2"], 0.79f },
-                { _gasDictionary["O2"], 0.2f },
-                { _gasDictionary["Ar"], 0.01f },
-                { _gasDictionary["H2O"], 0.007f }
+                { _gasDictionary["N2"].UniqueID, 0.79f },
+                { _gasDictionary["O2"].UniqueID, 0.2f },
+                { _gasDictionary["Ar"].UniqueID, 0.01f },
+                { _gasDictionary["H2O"].UniqueID, 0.007f }
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(1.007f, true, 69.72m, 1.007f, 0.0f, 14.185f, atmoGasses);
             _planet = getPlanet(-18.0f, 1.023f, 1.0, atmosphereDB);
@@ -104,7 +116,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestLuna()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(0f, false, 0m, 1.0f, 0.0f, -18.0f, atmoGasses);
@@ -129,11 +141,11 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestMars()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { _gasDictionary["CO2"], 0.0057f },
-                { _gasDictionary["N2"], 0.0002f },
-                { _gasDictionary["Ar"], 0.0001f }
+                { _gasDictionary["CO2"].UniqueID, 0.0057f },
+                { _gasDictionary["N2"].UniqueID, 0.0002f },
+                { _gasDictionary["Ar"].UniqueID, 0.0001f }
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(0.010f, true, 10m, 1.006f, 0.006f, -60.981f, atmoGasses);
             _planet = getPlanet(-66.439f, 1.02f, 0.38, atmosphereDB);
@@ -157,10 +169,10 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestVenus()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { _gasDictionary["CO2"], 89.745f },
-                { _gasDictionary["N2"], 3.255f }
+                { _gasDictionary["CO2"].UniqueID, 89.745f },
+                { _gasDictionary["N2"].UniqueID, 3.255f }
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(100.0f, false, 0m, 3.0f, 89.745f, 626.689f, atmoGasses);
             _planet = getPlanet(26.896f, 1.0f, 0.91, atmosphereDB);
@@ -184,10 +196,10 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestTitan()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { _gasDictionary["N2"], 1.4268f },
-                { _gasDictionary["H2"], 0.0029f }
+                { _gasDictionary["N2"].UniqueID, 1.4268f },
+                { _gasDictionary["H2"].UniqueID, 0.0029f }
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(1.43f, false, 0m, 1.158f, 0.000f, -178.623f, atmoGasses);
             _planet = getPlanet(-190.428f, 1.000f, 0.14, atmosphereDB);
@@ -211,7 +223,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestIo()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(0f, false, 0m, 1.0f, 0.0f, -161.207f, atmoGasses);
@@ -236,11 +248,11 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestMinervaM2()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { _gasDictionary["He"], 0.4073f },
-                { _gasDictionary["H2"], 0.1217f },      // FROZEN
-                { _gasDictionary["Ne"], 0.0049f }       // FROZEN
+                { _gasDictionary["He"].UniqueID, 0.4073f },
+                { _gasDictionary["H2"].UniqueID, 0.1217f },      // FROZEN
+                { _gasDictionary["Ne"].UniqueID, 0.0049f }       // FROZEN
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(0.276f, false, 0m, 1.041f, 0.000f, Temperature.ToCelsius(18.086f), atmoGasses);
             _planet = getPlanet(Temperature.ToCelsius(20.706f), 0.85f, 0.73,  atmosphereDB);
@@ -264,9 +276,9 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestMinervaM8()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { _gasDictionary["H2"], 1.7006f }
+                { _gasDictionary["H2"].UniqueID, 1.7006f }
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(1.701f, false, 0m, 1.170f, 0.000f, -242.958f, atmoGasses);
             _planet = getPlanet(-252.294f, 1.24f, 1.3, atmosphereDB);
@@ -290,11 +302,11 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestMinervaM18()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { _gasDictionary["H2"], 0.5268f },
-                { _gasDictionary["He"], 0.2714f },
-                { _gasDictionary["Ar"], 0.1004f }      // FROZEN
+                { _gasDictionary["H2"].UniqueID, 0.5268f },
+                { _gasDictionary["He"].UniqueID, 0.2714f },
+                { _gasDictionary["Ar"].UniqueID, 0.1004f }      // FROZEN
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(0.597f, false, 0m, 1.08f, 0.000f, -247.985f, atmoGasses);
             _planet = getPlanet(-252.294f, 1.140f, 0.89, atmosphereDB);
@@ -318,11 +330,11 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestOrpheus()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { _gasDictionary["CO2"], 0.3155f },
-                { _gasDictionary["N2"], 0.0132f },
-                { _gasDictionary["H2O"], 0.0000329f }
+                { _gasDictionary["CO2"].UniqueID, 0.3155f },
+                { _gasDictionary["N2"].UniqueID, 0.0132f },
+                { _gasDictionary["H2O"].UniqueID, 0.0000329f }
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(0.329f, false, 0m, 1.348f, 0.316f, Temperature.ToCelsius(325.965f), atmoGasses);
             _planet = getPlanet(Temperature.ToCelsius(309.93f), 0.78f, 0.57, atmosphereDB);
@@ -346,11 +358,11 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestSolstice_B_III()
         {
-            Dictionary<AtmosphericGasSD, float> atmoGasses = new Dictionary<AtmosphericGasSD, float>
+            var atmoGasses = new Dictionary<string, float>
             {
-                { _gasDictionary["H2"], 0.0578f },
-                { _gasDictionary["He"], 0.0385f },
-                { _gasDictionary["N2"], 0.0027f }              // FROZEN
+                { _gasDictionary["H2"].UniqueID, 0.0578f },
+                { _gasDictionary["He"].UniqueID, 0.0385f },
+                { _gasDictionary["N2"].UniqueID, 0.0027f }              // FROZEN
             };
             AtmosphereDB atmosphereDB = new AtmosphereDB(0.094f, true, 8m, 1.009f, 0.0f, Temperature.ToCelsius(51.655f), atmoGasses);
             _planet = getPlanet(Temperature.ToCelsius(64.78f), 0.79f, .31, atmosphereDB);
@@ -381,7 +393,8 @@ namespace Pulsar4X.Tests
 
             NameDB planetNameDB = new NameDB("Test Planet");
 
-            Entity resultPlanet = new Entity(_entityManager, new List<BaseDataBlob> { planetBodyDB, planetNameDB, atmos });
+            Entity resultPlanet = Entity.Create();
+            _entityManager.AddEntity(resultPlanet, new List<BaseDataBlob> { planetBodyDB, planetNameDB, atmos });
 
             return resultPlanet;
         }

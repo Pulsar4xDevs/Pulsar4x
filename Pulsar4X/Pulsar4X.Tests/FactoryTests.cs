@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Auth;
 using System;
 using System.Collections.Generic;
 
@@ -15,7 +17,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = new Game(new NewGameSettings {GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0});
+            _game = new Game(new NewGameSettings {GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0}, new Modding.ModDataStore());
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
         }
 
@@ -28,10 +30,6 @@ namespace Pulsar4X.Tests
             Entity faction = FactionFactory.CreateFaction(_game, factionName);
             NameDB nameDB = faction.GetDataBlob<NameDB>();
             Assert.IsTrue(nameDB.GetName(faction).Equals(factionName));
-
-            Entity factioncopy = faction.Clone(faction.Manager);
-
-            Assert.IsTrue(faction.GetValueCompareHash() == factioncopy.GetValueCompareHash(), "Hashes don't match");
         }
 
         [Test]
@@ -72,8 +70,7 @@ namespace Pulsar4X.Tests
 
             var requiredDataBlobs = new List<Type>()
             {
-                typeof(CommanderDB),
-                typeof(ScientistDB)
+                typeof(CommanderDB)
             };
 
             //Entity scientist = CommanderFactory.CreateScientist(faction, );

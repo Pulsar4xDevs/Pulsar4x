@@ -1,5 +1,4 @@
-﻿using Pulsar4X.ECSLib;
-using Pulsar4X.Orbital;
+﻿using Pulsar4X.Orbital;
 using System;
 using System.Collections.Generic;
 
@@ -76,14 +75,14 @@ namespace Pulsar4X.Tests
 		}
 
         [Test]
-        public void EqualCorrectlyReturnsTrue() 
+        public void EqualCorrectlyReturnsTrue()
         {
             Assert.That(vec1 == new Vector3(vec1), Is.True);
             Assert.That(vec2 == new Vector3(vec2.X, vec2.Y, vec2.Z), Is.True);
         }
 
         [Test]
-        public void EqualCorrectlyReturnsFalse() 
+        public void EqualCorrectlyReturnsFalse()
         {
             Assert.That(vec1 == new Vector3(vec1.X, vec1.Y, vec1.Z + 1), Is.False);
             Assert.That(vec1 == new Vector3(vec1.X, vec1.Y + 1, vec1.Z), Is.False);
@@ -91,7 +90,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void NotEqualCorrectlyReturnsTrue() 
+        public void NotEqualCorrectlyReturnsTrue()
         {
 			Assert.That(vec1 != new Vector3(vec1.X, vec1.Y, vec1.Z + 1), Is.True);
 			Assert.That(vec1 != new Vector3(vec1.X, vec1.Y + 1, vec1.Z), Is.True);
@@ -99,7 +98,7 @@ namespace Pulsar4X.Tests
 		}
 
         [Test]
-        public void NotEqualCorrectlyReturnsFalse() 
+        public void NotEqualCorrectlyReturnsFalse()
         {
 			Assert.That(vec1 != new Vector3(vec1), Is.False);
 			Assert.That(vec2 != new Vector3(vec2.X, vec2.Y, vec2.Z), Is.False);

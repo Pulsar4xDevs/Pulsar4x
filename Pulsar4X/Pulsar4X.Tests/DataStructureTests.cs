@@ -1,7 +1,7 @@
 using System;
 using NUnit.Framework;
-using Pulsar4X.ECSLib;
 using Newtonsoft.Json;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Tests
 {

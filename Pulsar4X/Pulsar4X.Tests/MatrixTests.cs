@@ -1,6 +1,5 @@
 using System;
 using NUnit.Framework;
-using Pulsar4X.ECSLib;
 using Pulsar4X.Orbital;
 
 
@@ -112,12 +111,12 @@ namespace Pulsar4X.Tests
 
 
     }
-    
+
     public class Matrix2dTests
     {
         private Vector2 testVector2X = new Vector2() {X = 10, Y = 0,};
         private Vector2 testVector2Y = new Vector2() {X = 0, Y = 10,};
-        
+
         [Test]
         public void Transform()
         {
@@ -130,11 +129,11 @@ namespace Pulsar4X.Tests
         {
             var rotMtx = Matrix2d.IDRotate(Math.PI * 0.5); //rotate 90 degrees
             var rotvec = rotMtx.Transform(testVector2X );
-            
+
             Assert.AreEqual(0, rotvec.X, 1.5e-15, "X should be 0, \r The vector is: " + rotvec);
 
         }
-        
+
         [Test]
         public void Scale()
         {
@@ -147,13 +146,13 @@ namespace Pulsar4X.Tests
         [Test]
         public void Translate2d()
         {
-            
+
             var tmtx = Matrix2d.IDTranslate(100, 0);
             var trnsformed = tmtx.Transform(testVector2X);
-            
+
             Assert.AreEqual(110, trnsformed.X, "X should be 100, \r The vector is: " + trnsformed);
             Assert.AreEqual(0, trnsformed.Y, "Y should be 0, \r The vector is: " + trnsformed);
-            
+
         }
     }
 }
