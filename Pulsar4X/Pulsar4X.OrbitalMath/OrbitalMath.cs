@@ -1358,7 +1358,7 @@ namespace Pulsar4X.Orbital
         /// <param name="parentMass">Parent mass. ie the sun</param>
         public static double GetSOI(double semiMajorAxis, double mass, double parentMass)
         {
-            return semiMajorAxis * Math.Pow((mass / parentMass), 0.4);
+            return Math.Abs( semiMajorAxis * Math.Pow((mass / parentMass), 0.4));
         }
 
 

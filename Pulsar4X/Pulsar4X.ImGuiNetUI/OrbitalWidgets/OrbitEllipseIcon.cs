@@ -26,9 +26,6 @@ namespace Pulsar4X.SDL2UI
     /// </summary>
     public class OrbitEllipseIcon : OrbitIconBase
     {
-
-
-
         internal OrbitEllipseIcon(EntityState entityState, List<List<UserOrbitSettings>> settings): base(entityState, settings)
         {
 
@@ -40,9 +37,7 @@ namespace Pulsar4X.SDL2UI
             OnPhysicsUpdate();
 
         }
-
-
-
+        
         protected override void CreatePointArray()
         {
             _points = new Vector2[_numberOfArcSegments + 1];

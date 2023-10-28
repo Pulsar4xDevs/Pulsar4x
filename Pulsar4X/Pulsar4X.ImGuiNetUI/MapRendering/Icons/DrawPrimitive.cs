@@ -265,6 +265,8 @@ namespace Pulsar4X.SDL2UI
             double y = 0;
             double r = EllipseMath.RadiusAtTrueAnomaly(semiMaj, eccentricity, loP, startAng);
             double Δθ = 2 * Math.PI / (numPoints - 1) * Math.Sign(sweep);
+            if(eccentricity >= 1)
+                Δθ = sweep / (numPoints - 1) * Math.Sign(sweep); 
             if (Δθ == 0)
             {
                 return new Vector2[]

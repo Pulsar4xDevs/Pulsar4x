@@ -421,6 +421,7 @@ namespace Pulsar4X.Engine
             
             //give the gunship a hypobolic orbit to test:
             var orbit = OrbitDB.FromVector(earth, gunShip1Mass, earthmass, pos, vel, game.TimePulse.GameGlobalDateTime);
+            gunShip1.GetDataBlob<PositionDB>().RelativePosition = pos;
             gunShip1.SetDataBlob<OrbitDB>(orbit);
             // var nmdb = new NewtonMoveDB(earth, new Vector3(-10000.0, 0, 0));
             // gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);

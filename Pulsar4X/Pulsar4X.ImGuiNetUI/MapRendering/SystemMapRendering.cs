@@ -157,6 +157,11 @@ namespace Pulsar4X.SDL2UI
                         orbit = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
                         _orbitRings.TryAdd(entityItem.Id, orbit);
                     }
+                    else
+                    {
+                        orbit = new OrbitHyperbolicIcon2(entityState, _state.UserOrbitSettingsMtx);
+                        _orbitRings.TryAdd(entityItem.Id, orbit);
+                    }
 
                 }
             }
