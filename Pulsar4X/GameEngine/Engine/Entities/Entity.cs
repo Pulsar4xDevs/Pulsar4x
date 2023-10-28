@@ -70,12 +70,7 @@ public class Entity : IHasDataBlobs
 
     public void SetDataBlob<T>(T dataBlob) where T : BaseDataBlob
     {
-        Manager.AddDataBlob<T>(Id, dataBlob);
-    }
-
-    public void SetDataBlob(BaseDataBlob blob)
-    {
-        Manager.SetDataBlob(Id, blob, true);
+        Manager.SetDataBlob(Id, dataBlob);
     }
 
     public void RemoveDataBlob<T>() where T : BaseDataBlob

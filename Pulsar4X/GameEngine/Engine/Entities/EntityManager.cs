@@ -263,28 +263,11 @@ namespace Pulsar4X.Engine
             return _datablobStores[type].ContainsKey(entityID);
         }
 
-        internal void AddDataBlob<T>(int entityID, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
+        internal void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
         {
-            var type = typeof(T);
-            SetDataBlob(type, entityID, dataBlob, updateListeners);
-        }
-
-        internal void SetDataBlob<T>(int entityID, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
-        {
-            var type = typeof(T);
-            SetDataBlob(type, entityID, dataBlob, updateListeners);
-        }
-
-        internal void SetDataBlob(int entityID, BaseDataBlob dataBlob, bool updateListeners = true)
-        {
-            var type = dataBlob.GetType();
-            SetDataBlob(type, entityID, dataBlob, updateListeners);
-        }
-
-        private void SetDataBlob(Type type, int entityId, BaseDataBlob dataBlob, bool updateListeners = true)
-        {
-            if(dataBlob is null)
-                throw new ArgumentNullException("DataBlob cannot be null");
+            Type type = typeof(T);
+            if (dataBlob is null)
+                throw new ArgumentNullException(nameof(dataBlob));
 
             if(!_entities.ContainsKey(entityId))
                 throw new ArgumentException("Entity ID does not exist");
