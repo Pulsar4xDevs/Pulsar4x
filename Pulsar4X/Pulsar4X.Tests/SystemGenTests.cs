@@ -16,6 +16,7 @@ namespace Pulsar4X.Tests
     {
         private Game _game;
         private AuthenticationToken _smAuthToken;
+        private ModDataStore _modDataStore;
 
         /* TODO: Needs updated for new serialization, or deleted.
         [Test]
@@ -26,12 +27,21 @@ namespace Pulsar4X.Tests
         }
         */
 
+        [SetUp]
+        public void Init()
+        {
+            _modDataStore = new ModDataStore();
+            ModLoader modLoader = new();
+            modLoader.LoadModManifest("Data/basemod/modInfo.json", _modDataStore);
+        }
+
+
         [Test]
         [Description("Creates and tests a single star system")]
         public void CreateAndFillStarSystem()
         {
             var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }, new ModDataStore()); // reinit with empty game, so we can do a clean test.
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }, _modDataStore); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSystem(_game, "Argon Prime", 12345); // Keeping with the X3 theme :P
@@ -83,7 +93,7 @@ namespace Pulsar4X.Tests
         public void CreateAndFillStarSystemB()
         {
             var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }, new ModDataStore()); // reinit with empty game, so we can do a clean test.
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }, _modDataStore); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSystem(_game, "Robin Prime", 22367, true);
@@ -148,7 +158,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
 
             // Test initial mineral generation
-            Dictionary<string, double> totalMinerals = system.GetTotalSystemMinerals(new ModDataStore());
+            Dictionary<string, double> totalMinerals = system.GetTotalSystemMinerals(_modDataStore);
             Assert.AreEqual(27084962760, totalMinerals["Sorium"], "Sorium");
             Assert.AreEqual(2504615582, totalMinerals["Neutronium"], "Neutronium");
             Assert.AreEqual(35111974, totalMinerals["Iron"], "Iron");
@@ -173,7 +183,7 @@ namespace Pulsar4X.Tests
         public void CreateAndCheckDeterministic()
         {
             var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }, new ModDataStore()); // reinit with empty game, so we can do a clean test.
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }, _modDataStore); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             var ssf = new StarSystemFactory(_game);
             StarSystem system1 = ssf.CreateSystem(_game, "Argon Prime", 12345); // Keeping with the X3 theme :P
@@ -211,7 +221,7 @@ namespace Pulsar4X.Tests
         public void CreateAndFillSolStarSystem()
         {
             var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0 }, new ModDataStore()); // reinit with empty game, so we can do a clean test.
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0 }, _modDataStore); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSol(_game);
@@ -314,7 +324,7 @@ namespace Pulsar4X.Tests
             System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
 
             const int numSystems = 1000;
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 }, new ModDataStore()); // reinit with empty game, so we can do a clean test.
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 }, _modDataStore); // reinit with empty game, so we can do a clean test.
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             var ssf = new StarSystemFactory(_game);
 
@@ -357,7 +367,7 @@ namespace Pulsar4X.Tests
         public void JPConnectivity()
         {
             const int numSystems = 2000;
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = numSystems }, new ModDataStore());
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = numSystems }, _modDataStore);
             List<StarSystem> systems = _game.Systems;
 
 
