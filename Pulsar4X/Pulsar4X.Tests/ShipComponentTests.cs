@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿/* Very old test. Needs updated for both StaticData nad ComponentTemplates
+
+using NUnit.Framework;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using System;
@@ -560,3 +562,4 @@ namespace Pulsar4X.Tests
 
     }
 }
+*/

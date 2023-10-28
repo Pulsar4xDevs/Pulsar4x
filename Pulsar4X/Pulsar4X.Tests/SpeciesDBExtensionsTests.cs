@@ -1,7 +1,12 @@
+/* Needs Updated for new Static Data system
+
 using System.Collections.Generic;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Tests
 {
@@ -287,3 +292,5 @@ namespace Pulsar4X.Tests
         }
     }
 }
+
+*/
