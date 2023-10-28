@@ -46,6 +46,7 @@ namespace Pulsar4X.Tests
 
         }
 
+        [Test]
         public void TestOrbitEpoch()
         {
             Game game = new Game();
@@ -65,7 +66,7 @@ namespace Pulsar4X.Tests
             game.GlobalManager.AddEntity(parentEntity, parentblobs);
             double sgp_m = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
 
-            OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp_m, position, velocity, new DateTime());
+            OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, position, velocity, new DateTime());
             Vector3 resultPos = objOrbit.GetPosition_AU(new DateTime());
         }
 
@@ -394,7 +395,7 @@ namespace Pulsar4X.Tests
             man.AddEntity(parentEntity, parentblobs);
 
 
-            OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, sgp_m, position_InMeters, velocity_InMetersSec, new DateTime());
+            OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, position_InMeters, velocity_InMetersSec, new DateTime());
             //Vector3 resultPos_AU = OrbitProcessor.GetPosition_AU(objOrbit, new DateTime());
 
             //check LoAN
@@ -541,7 +542,7 @@ namespace Pulsar4X.Tests
 
             var currentDateTime = new DateTime(2000, 1, 1);
 
-            OrbitDB targetOrbit = OrbitDB.FromVector(parentEntity, myMass, parentMass, sgp_m, targetObjPosition, targetObjVelocity, currentDateTime);
+            OrbitDB targetOrbit = OrbitDB.FromVector(parentEntity, myMass, parentMass, targetObjPosition, targetObjVelocity, currentDateTime);
 
 
 

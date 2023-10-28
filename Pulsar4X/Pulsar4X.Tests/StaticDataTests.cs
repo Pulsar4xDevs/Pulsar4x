@@ -1,10 +1,13 @@
-﻿using NUnit.Framework;
-using Pulsar4X.ECSLib;
+﻿/* TODO: Needs updated for new Static Data system, or deleted.
+
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Tests
 {
@@ -404,3 +407,5 @@ namespace Pulsar4X.Tests
         }
     }
 }
+
+*/
