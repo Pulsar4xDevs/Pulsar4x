@@ -119,6 +119,12 @@ namespace Pulsar4X.Engine
                 }
             }
 
+            #warning Entity Validation is Disabled.
+            /*
+            if (!entity.IsValid)
+                throw new InvalidOperationException("Created an invalid entity.");
+            */
+
             // Update listeners
             UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityAdded);
         }
@@ -265,22 +271,12 @@ namespace Pulsar4X.Engine
 
         internal void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
         {
-            Type type = typeof(T);
+            Type type = dataBlob.GetType();
             if (dataBlob is null)
                 throw new ArgumentNullException(nameof(dataBlob));
 
             if(!_entities.ContainsKey(entityId))
                 throw new ArgumentException("Entity ID does not exist");
-
-            if (!AreAllDataBlobDependenciesPresent(type, entityId, new HashSet<Type>(), 0))
-            {
-                // WARNING: This dependency check forces a specific order during entity creation.
-                // This should ideally be moved to the factory for better design.
-                // See GitHub Issue: #375 for more details.
-                #warning Dependency check here means during entity creation we must create datablobs in a specific order. This validation should occur in the factory itself.
-                throw new ArgumentException($"{type.Name} is missing dependencies for Entity #{entityId}");
-            }
-
 
             if(!_datablobStores.ContainsKey(type))
                 _datablobStores[type] = new SafeDictionary<int, BaseDataBlob>();

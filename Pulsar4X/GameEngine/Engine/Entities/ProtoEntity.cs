@@ -31,6 +31,12 @@ public class ProtoEntity : IHasDataBlobs
         return false;
     }
 
+    public void SetDataBlob<T>(T dataBlob)
+        where T : BaseDataBlob
+    {
+        DataBlobs.Add(dataBlob);
+    }
+
     public T GetDataBlob<T>() where T : BaseDataBlob
     {
         var type = typeof(T);
@@ -55,5 +61,10 @@ public class ProtoEntity : IHasDataBlobs
 
         value = null;
         return false;
+    }
+
+    public List<BaseDataBlob> GetAllDataBlobs()
+    {
+        return DataBlobs;
     }
 }

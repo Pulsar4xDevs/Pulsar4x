@@ -4,6 +4,7 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine;
 
@@ -34,7 +35,7 @@ public class Entity : IHasDataBlobs
     public static readonly Entity InvalidEntity = new Entity(-1);
 
     [JsonIgnore]
-    public bool IsValid => Id >= 0 && Manager != null && Manager != EntityManager.InvalidManager && Manager.IsValidEntity(this);
+    public bool IsValid => Id >= 0 && Manager != null && Manager != EntityManager.InvalidManager && Manager.IsValidEntity(this) && this.AreAllDependenciesPresent();
 
     public T GetDataBlob<T>() where T : BaseDataBlob
     {
@@ -66,6 +67,11 @@ public class Entity : IHasDataBlobs
 
         value = null;
         return false;
+    }
+
+    public List<BaseDataBlob> GetAllDataBlobs()
+    {
+        return Manager.GetAllDataBlobsForEntity(Id);
     }
 
     public void SetDataBlob<T>(T dataBlob) where T : BaseDataBlob
