@@ -345,6 +345,8 @@ namespace Pulsar4X.Engine
         internal void AddEntityInterupt(DateTime nextDateTime, string actionProcessor, Entity entity)
         {
             if(nextDateTime < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
+            if (nextDateTime < _processToDateTime)
+                _processToDateTime = nextDateTime;
             if (!QueuedProcesses.ContainsKey(nextDateTime))
                 QueuedProcesses.Add(nextDateTime, new ProcessSet());
             if (!QueuedProcesses[nextDateTime].InstanceProcessors.ContainsKey(actionProcessor))
@@ -482,6 +484,7 @@ namespace Pulsar4X.Engine
                 _processToDateTime = GetNextInterupt(timeDeltaMax);
 
                 ProcessToNextInterupt();
+                
                 _subPulseStopwatch.Stop();
                 _subpulseTimes.Add(_subPulseStopwatch.Elapsed.TotalMilliseconds);
             }
@@ -518,7 +521,6 @@ namespace Pulsar4X.Engine
             int deltaSeconds = (int)span.TotalSeconds;
             if (QueuedProcesses.ContainsKey(_processToDateTime))
             {
-                StarSysDateTime = _processToDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
                 var qp = QueuedProcesses[_processToDateTime];
                 foreach (var systemProcess in qp.SystemProcessors)
                 {
@@ -552,10 +554,10 @@ namespace Pulsar4X.Engine
                         _detailedProcessTimes.Add(pname, new List<double>());
                     _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
                 }
-
+                
                 QueuedProcesses.Remove(_processToDateTime); //once all the processes have been run for that datetime, remove it from the dictionary.
             }
-
+            StarSysDateTime = _processToDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
         }
 
         public int GetTotalNumberOfProceses()
