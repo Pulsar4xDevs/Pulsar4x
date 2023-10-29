@@ -73,17 +73,17 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(systemBodies);
             var numbodies = system.GetNumberOfBodies();
             Assert.AreEqual(1, system.GetNumberOfStars());
-            Assert.AreEqual(2, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
-            Assert.AreEqual(2, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
+            Assert.AreEqual(5, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
+            Assert.AreEqual(4, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
             Assert.AreEqual(1, system.GetNumberOfIceGiants(), "IceGiants");
-            Assert.AreEqual(4, system.GetNumberOfGasGiants(), "GasGiants");
+            Assert.AreEqual(3, system.GetNumberOfGasGiants(), "GasGiants");
             Assert.AreEqual(13, system.GetNumberOfMoons(), "Moons");
-            Assert.AreEqual(49, system.GetNumberOfAsteroids(), "Asteroids");
+            Assert.AreEqual(74, system.GetNumberOfAsteroids(), "Asteroids");
             Assert.AreEqual(0, system.GetNumberOfUnknownObjects(), "unknown");
 
-            Assert.AreEqual(18, system.GetNumberOfComets(), "Comets");
+            Assert.AreEqual(17, system.GetNumberOfComets(), "Comets");
 
-            Assert.AreEqual(93, system.GetNumberOfBodies(), "TotalBodies");
+            Assert.AreEqual(118, system.GetNumberOfBodies(), "TotalBodies");
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
         }
 
@@ -145,37 +145,37 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(systemBodies);
 
             Assert.AreEqual(2, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
-            Assert.AreEqual(3, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
-            Assert.AreEqual(1, system.GetNumberOfIceGiants(), "IceGiants");
-            Assert.AreEqual(3, system.GetNumberOfGasGiants(), "GasGiants");
-            Assert.AreEqual(8, system.GetNumberOfMoons(), "Moons");
-            Assert.AreEqual(62, system.GetNumberOfAsteroids(), "Asteroids");
+            Assert.AreEqual(5, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
+            Assert.AreEqual(2, system.GetNumberOfIceGiants(), "IceGiants");
+            Assert.AreEqual(1, system.GetNumberOfGasGiants(), "GasGiants");
+            Assert.AreEqual(10, system.GetNumberOfMoons(), "Moons");
+            Assert.AreEqual(124, system.GetNumberOfAsteroids(), "Asteroids");
             Assert.AreEqual(0, system.GetNumberOfUnknownObjects(), "unknown");
 
-            Assert.AreEqual(15, system.GetNumberOfComets(), "Comets");
+            Assert.AreEqual(6, system.GetNumberOfComets(), "Comets");
 
-            Assert.AreEqual(96, system.GetNumberOfBodies(), "TotalBodies");
+            Assert.AreEqual(151, system.GetNumberOfBodies(), "TotalBodies");
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
 
             // Test initial mineral generation
             Dictionary<string, double> totalMinerals = system.GetTotalSystemMinerals(_modDataStore);
-            Assert.AreEqual(27084962760, totalMinerals["Sorium"], "Sorium");
-            Assert.AreEqual(2504615582, totalMinerals["Neutronium"], "Neutronium");
-            Assert.AreEqual(35111974, totalMinerals["Iron"], "Iron");
-            Assert.AreEqual(39722250, totalMinerals["Aluminium"], "Aluminium");
-            Assert.AreEqual(29868472, totalMinerals["Lithium"], "Lithium");
-            Assert.AreEqual(22030529, totalMinerals["Fissionables"], "Fissionables");
-            Assert.AreEqual(1216134, totalMinerals["Duranium"], "Duranium");
-            Assert.AreEqual(49794944, totalMinerals["Corbomite"], "Corbomite");
-            Assert.AreEqual(19768268, totalMinerals["Copper"], "Copper");
-            Assert.AreEqual(29407250, totalMinerals["Titanium"], "Titanium");
-            Assert.AreEqual(39038047, totalMinerals["Tritanium"], "Tritanium");
-            Assert.AreEqual(27187517, totalMinerals["Boronide"], "Boronide");
-            Assert.AreEqual(60503947, totalMinerals["Corundium"], "Corundium");
-            Assert.AreEqual(24266487, totalMinerals["Mercassium"], "Mercassium");
-            Assert.AreEqual(59797777, totalMinerals["Vendarite"], "Vendarite");
-            Assert.AreEqual(24001331, totalMinerals["Gallicite"], "Gallicite");
-            Assert.AreEqual(17760843, totalMinerals["Chromium"], "Chromium");
+            Assert.AreEqual(1729718654, totalMinerals["Sorium"], "Sorium");
+            Assert.AreEqual(488000495, totalMinerals["Neutronium"], "Neutronium");
+            Assert.AreEqual(56354910, totalMinerals["Iron"], "Iron");
+            Assert.AreEqual(107192704, totalMinerals["Aluminium"], "Aluminium");
+            Assert.AreEqual(156862817, totalMinerals["Lithium"], "Lithium");
+            Assert.AreEqual(118238249, totalMinerals["Fissionables"], "Fissionables");
+            Assert.AreEqual(40067025, totalMinerals["Duranium"], "Duranium");
+            Assert.AreEqual(108058044, totalMinerals["Corbomite"], "Corbomite");
+            Assert.AreEqual(164017462, totalMinerals["Copper"], "Copper");
+            Assert.AreEqual(66474261, totalMinerals["Titanium"], "Titanium");
+            Assert.AreEqual(339062039, totalMinerals["Tritanium"], "Tritanium");
+            Assert.AreEqual(77772712, totalMinerals["Boronide"], "Boronide");
+            Assert.AreEqual(142161177, totalMinerals["Corundium"], "Corundium");
+            Assert.AreEqual(104074623, totalMinerals["Mercassium"], "Mercassium");
+            Assert.AreEqual(129939122, totalMinerals["Vendarite"], "Vendarite");
+            Assert.AreEqual(119093064, totalMinerals["Gallicite"], "Gallicite");
+            Assert.AreEqual(121693426, totalMinerals["Chromium"], "Chromium");
         }
 
         [Test]
