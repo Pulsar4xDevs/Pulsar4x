@@ -248,7 +248,7 @@ namespace Pulsar4X.Engine
             Type blobType = typeof(T);
 
             if(!_datablobStores.ContainsKey(blobType) || !_datablobStores[blobType].ContainsKey(entityID))
-                return null;
+                throw new KeyNotFoundException($"BlobType {blobType} not found in Manager: {ManagerGuid}");
 
             return (T)_datablobStores[blobType][entityID];
         }
@@ -271,14 +271,15 @@ namespace Pulsar4X.Engine
 
         internal void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
         {
-            Type type = dataBlob.GetType();
+            if (dataBlob == null)
+                throw new ArgumentNullException(nameof(dataBlob));
             if (dataBlob is null)
                 throw new ArgumentNullException(nameof(dataBlob));
-
             if(!_entities.ContainsKey(entityId))
                 throw new ArgumentException("Entity ID does not exist");
 
-            if(!_datablobStores.ContainsKey(type))
+            Type type = dataBlob.GetType();
+            if (!_datablobStores.ContainsKey(type))
                 _datablobStores[type] = new SafeDictionary<int, BaseDataBlob>();
 
             _datablobStores[type][entityId] = dataBlob;

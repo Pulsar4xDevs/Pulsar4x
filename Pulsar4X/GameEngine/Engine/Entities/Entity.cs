@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using NUnit.Framework;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
@@ -153,6 +154,10 @@ public class Entity : IHasDataBlobs
 
     public void Destroy()
     {
+        if (!IsValid)
+        {
+            throw new InvalidOperationException("Invalid Entities cannot be destroyed. Either this entity has already been destroyed, or it was destroyed before it was fully initialized.");
+        }
         Manager.RemoveEntity(this);
         Manager = null;
         FactionOwnerID = -1;
