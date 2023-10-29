@@ -35,7 +35,9 @@ namespace Pulsar4X.Tests
             modLoader.LoadModManifest("Data/basemod/modInfo.json", _modDataStore);
         }
 
-
+        /// <summary>
+        /// TODO: Isolate this method. Any changes to the default static data (Specifically the SystemGenSettings) will break these tests.
+        /// </summary>
         [Test]
         [Description("Creates and tests a single star system")]
         public void CreateAndFillStarSystem()
@@ -87,7 +89,9 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
         }
 
-
+        /// <summary>
+        /// TODO: Isolate this method. Any changes to the default static data (Specifically the SystemGenSettings) will break these tests.
+        /// </summary>
         [Test]
         [Description("Creates and tests another single star system")]
         public void CreateAndFillStarSystemB()
@@ -224,6 +228,9 @@ namespace Pulsar4X.Tests
             }
         }
 
+        /// <summary>
+        /// TODO: Isolate this method. Any changes to the default static data (Specifically the SystemGenSettings) will break these tests.
+        /// </summary>
         [Test]
         [Description("Creates and tests the Sol star system")]
         public void CreateAndFillSolStarSystem()
@@ -370,7 +377,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        [Description("Allows statisical analysis of the connectivity of generated systems")]
+        [Description("Allows statistical analysis of the connectivity of generated systems")]
         [Ignore("Manual statistical analysis Integration test")]
         public void JPConnectivity()
         {
