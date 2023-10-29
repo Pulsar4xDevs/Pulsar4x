@@ -5,6 +5,8 @@ using Pulsar4X.Atb;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace Pulsar4X.Extensions
 {
@@ -385,6 +387,38 @@ namespace Pulsar4X.Extensions
             }
 
             return (null, 0);
+        }
+
+        // Extension method to check if all dependencies are present for a given entity.
+        internal static bool AreAllDependenciesPresent(this IHasDataBlobs entity)
+        {
+            List<BaseDataBlob> dataBlobs = entity.GetAllDataBlobs();
+            HashSet<Type> entityDataBlobTypes = new();
+            HashSet<Type> requiredDataBlobTypes = new();
+            foreach (BaseDataBlob blob in dataBlobs)
+            {
+                entityDataBlobTypes.Add(blob.GetType());
+
+                // List<Type> dependencies = GetDependencies(blob);
+                List<Type> dependencies = new();
+                { // Inlined Method
+                    // TODO: Consider removing this reflection for something more type-safe. Out-Of-Scope for this refactor.
+                    MethodInfo method = blob.GetType().GetMethod("GetDependencies", BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
+                    if (method == null)
+                        continue;
+
+                    var blobDependencies = method.Invoke(null, null) as List<Type>;
+                    dependencies.AddRange(blobDependencies ?? new List<Type>());
+                }
+
+                foreach (Type dependency in dependencies)
+                {
+                    requiredDataBlobTypes.Add(dependency);
+                }
+            }
+
+            // Now Compare the two HashSets to make sure entityDataBlobTypes has all requiredDataBlobTypes
+            return requiredDataBlobTypes.IsSubsetOf(entityDataBlobTypes);
         }
     }
 }
