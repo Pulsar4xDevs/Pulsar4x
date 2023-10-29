@@ -13,6 +13,17 @@ namespace Pulsar4X.Tests
     [TestFixture, Description("Tests kepler form velocity")]
     public class OrbitTests
     {
+        private EntityManager _entityManager; 
+        const double Tolerance = 1e-14;
+
+
+
+        [SetUp]
+        public void Init()
+        {
+            var game = TestingUtilities.CreateTestUniverse(1);
+            _entityManager = game.Systems[0];
+        }
 
 
         [Test]
@@ -49,21 +60,17 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestOrbitEpoch()
         {
-            Game game = new Game();
-            EntityManager man = new EntityManager();
-            man.Initialize(game);
-
             double parentMass = 1.989e30;
             double objMass = 2.2e+15;
             Vector3 position = new Vector3() { X = Distance.AuToMt(0.57) }; //Halley's Comet at periapse aprox
             Vector3 velocity = new Vector3() { Y = 54000 };
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(man.ManagerGuid) { AbsolutePosition = Vector3.Zero };
+            parentblobs[0] = new PositionDB(_entityManager.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = Entity.Create();
-            game.GlobalManager.AddEntity(parentEntity, parentblobs);
+            _entityManager.AddEntity(parentEntity, parentblobs);
             double sgp_m = GeneralMath.StandardGravitationalParameter(parentMass + objMass);
 
             OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, position, velocity, new DateTime());
@@ -383,16 +390,12 @@ namespace Pulsar4X.Tests
             double sgp_m = GeneralMath.StandardGravitationalParameter(objMass + parentMass);
             KeplerElements ke_m = OrbitMath.KeplerFromPositionAndVelocity(sgp_m, position_InMeters, velocity_InMetersSec, new DateTime());
 
-            Game game = new Game();
-            EntityManager man = new EntityManager();
-            man.Initialize(game);
-
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(man.ManagerGuid) { AbsolutePosition = Vector3.Zero };
+            parentblobs[0] = new PositionDB(_entityManager.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = Entity.Create();
-            man.AddEntity(parentEntity, parentblobs);
+            _entityManager.AddEntity(parentEntity, parentblobs);
 
 
             OrbitDB objOrbit = OrbitDB.FromVector(parentEntity, objMass, parentMass, position_InMeters, velocity_InMetersSec, new DateTime());
@@ -415,7 +418,7 @@ namespace Pulsar4X.Tests
             var objM0 = objOrbit.MeanAnomalyAtEpoch;
             var keM0 = ke_m.MeanAnomalyAtEpoch;
             Assert.AreEqual(keM0, objM0, angleΔ);
-            Assert.AreEqual(objM0, OrbitMath.GetMeanAnomalyFromTime(objM0, Angle.ToDegrees(objOrbit.MeanMotion), 0), "meanAnomalyError");
+            Assert.AreEqual(objM0, OrbitMath.GetMeanAnomalyFromTime(objM0, Angle.ToDegrees(objOrbit.MeanMotion), 0), Tolerance, "meanAnomalyError");
 
             //checkEpoch
             var objEpoch = objOrbit.Epoch;
@@ -518,16 +521,13 @@ namespace Pulsar4X.Tests
         {
             double myMass = 10000;
             double parentMass = 1.989e30; //solar mass.
-            Game game = new Game();
-            EntityManager mgr = new EntityManager();
-            mgr.Initialize(game);
 
             BaseDataBlob[] parentblobs = new BaseDataBlob[3];
-            parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition = Vector3.Zero };
+            parentblobs[0] = new PositionDB(_entityManager.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
             Entity parentEntity = Entity.Create();
-            mgr.AddEntity(parentEntity, parentblobs);
+            _entityManager.AddEntity(parentEntity, parentblobs);
 
             Vector3 currentPos_m = new Vector3 { X= Distance.AuToMt( -0.77473184638034), Y =Distance.AuToMt( 0.967145228951685) };
             Vector3 currentVelocity_m = new Vector3 { Y = Distance.KmToM(40) };
@@ -575,33 +575,30 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestNewtonTrajectory()
         {
-            Game game = new Game();
-            EntityManager mgr = new EntityManager();
-            mgr.Initialize(game);
-            Entity parentEntity = TestingUtilities.BasicEarth(mgr);
+            Entity parentEntity = TestingUtilities.BasicEarth(_entityManager);
 
             Vector3 absolutePosition = new Vector3(0, Distance.AuToMt(8.52699302490434E-05), 0);
 
-			PositionDB pos1 = new PositionDB(mgr.ManagerGuid, parentEntity) { AbsolutePosition = absolutePosition };
+			PositionDB pos1 = new PositionDB(_entityManager.ManagerGuid, parentEntity) { AbsolutePosition = absolutePosition };
             var newt1 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs1 = new BaseDataBlob[4];
             objBlobs1[0] = pos1;
             objBlobs1[1] = new MassVolumeDB() { MassDry = 10000 };
-            objBlobs1[2] = new NewtonThrustAbilityDB(mgr.ManagerGuid);
+            objBlobs1[2] = new NewtonThrustAbilityDB(_entityManager.ManagerGuid);
             objBlobs1[3] = newt1;
             Entity objEntity1 = Entity.Create();
-            mgr.AddEntity(objEntity1, objBlobs1);
+            _entityManager.AddEntity(objEntity1, objBlobs1);
 
 
-            PositionDB pos2 = new PositionDB(mgr.ManagerGuid, parentEntity) { AbsolutePosition = absolutePosition };
+            PositionDB pos2 = new PositionDB(_entityManager.ManagerGuid, parentEntity) { AbsolutePosition = absolutePosition };
             var newt2 = new NewtonMoveDB(parentEntity, new Vector3(-10.0, 0, 0)){ ManuverDeltaV = new Vector3(0,1,0)};
             BaseDataBlob[] objBlobs2 = new BaseDataBlob[4];
             objBlobs2[0] = pos2;
             objBlobs2[1] = new MassVolumeDB() { MassDry = 10000 };
-            objBlobs2[2] = new NewtonThrustAbilityDB(mgr.ManagerGuid);
+            objBlobs2[2] = new NewtonThrustAbilityDB(_entityManager.ManagerGuid);
             objBlobs2[3] = newt2;
             Entity objEntity2 = Entity.Create();
-            mgr.AddEntity(objEntity2, objBlobs2);
+            _entityManager.AddEntity(objEntity2, objBlobs2);
 
             var seconds = 100;
             for (int i = 0; i < seconds; i++)

@@ -95,7 +95,7 @@ namespace Pulsar4X.Engine
                 // Generate the star's datablobs.
                 MassVolumeDB starMVDB = MassVolumeDB.NewFromMassAndRadius_m(
                     GeneralMath.Lerp(_galaxyGen.Settings.StarMassBySpectralType[starType], randomSelection),
-                    GeneralMath.Lerp(_galaxyGen.Settings.StarRadiusBySpectralType[starType], randomSelection));
+                    Distance.AuToMt(GeneralMath.Lerp(_galaxyGen.Settings.StarRadiusBySpectralType[starType], randomSelection)));
 
                 StarInfoDB starData = GenerateStarInfo(starMVDB, starType, randomSelection);
 

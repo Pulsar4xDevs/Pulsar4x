@@ -99,7 +99,7 @@ namespace Pulsar4X.Tests
 
             int i, j, k;
 
-            string infGUID = "infrastruture";
+            string infGUID = "infrastructure";
             var factionDataStore = species.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
             ComponentTemplateBlueprint infrastructureSD = factionDataStore.ComponentTemplates[infGUID];
 

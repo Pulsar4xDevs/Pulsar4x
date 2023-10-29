@@ -85,7 +85,7 @@ namespace Pulsar4X.Tests
             Assert.AreSame(_game.GlobalManager, testEntity.Manager);
 
             // Create entity with existing datablobs:
-            var dataBlobs = new List<BaseDataBlob> {new OrbitDB(), new ColonyInfoDB(_pop1, Entity.InvalidEntity)};
+            var dataBlobs = new List<BaseDataBlob> {new OrbitDB(), new ColonyInfoDB(_pop1, Entity.InvalidEntity), new PositionDB(0,0,0,""), new NameDB("TE-CE-1")};
             testEntity = Entity.Create();
             _game.GlobalManager.AddEntity(testEntity, dataBlobs);
             Assert.IsTrue(testEntity.IsValid);
@@ -119,7 +119,7 @@ namespace Pulsar4X.Tests
 
             // Get all DataBlobs of a specific entity.
             var dataBlobs = _game.GlobalManager.GetAllDataBlobsForEntity(testEntity.Id);
-            Assert.AreEqual(2, dataBlobs.Count);
+            Assert.AreEqual(4, dataBlobs.Count);
 
             // empty entity mean empty list.
             testEntity = Entity.Create();
@@ -138,8 +138,7 @@ namespace Pulsar4X.Tests
             Assert.IsNotNull(popDB);
 
             // get a DB we know the entity does not have:
-            AtmosphereDB atmoDB = testEntity.GetDataBlob<AtmosphereDB>();
-            Assert.IsNull(atmoDB);
+            Assert.Catch<KeyNotFoundException>( () => testEntity.GetDataBlob<AtmosphereDB>());
 
             // test with invalid data blob type
             Assert.Catch(typeof(KeyNotFoundException), () =>
@@ -155,17 +154,20 @@ namespace Pulsar4X.Tests
 
             // lets check the entity at index testEntity
             List<BaseDataBlob> testList = _game.GlobalManager.GetAllDataBlobsForEntity(testEntity.Id);
-            Assert.AreEqual(2, testList.Count);  // should have 2 datablobs.
+            Assert.AreEqual(4, testList.Count);  // should have 4 datablobs.
 
             // Remove an entity.
             testEntity.Destroy();
+
+            // Make sure the entity is no longer valid
+            Assert.IsFalse(testEntity.IsValid);
 
             // now lets see if the entity is still there:
             testList = _game.GlobalManager.GetAllDataBlobsForEntity(testEntity.Id);
             Assert.AreEqual(0, testList.Count);  // should have 0 datablobs.
 
             Assert.IsFalse(testEntity.IsValid);
-
+            
             // Now try to remove the entity. Again.
             Assert.Catch<InvalidOperationException>(testEntity.Destroy);
         }
@@ -180,17 +182,10 @@ namespace Pulsar4X.Tests
 
             Assert.IsTrue(testEntity.GetDataBlob<ColonyInfoDB>() != null);  // check that it has the data blob
             testEntity.RemoveDataBlob<ColonyInfoDB>();                     // Remove a data blob
-            Assert.IsTrue(testEntity.GetDataBlob<ColonyInfoDB>() == null); // now check that it doesn't
+            Assert.Catch<KeyNotFoundException>(() => testEntity.GetDataBlob<ColonyInfoDB>()); // now check that it doesn't
 
             // now lets try remove it again:
-            Assert.Catch<InvalidOperationException>(testEntity.RemoveDataBlob<ColonyInfoDB>);
-
-            // cannot remove baseDataBlobs, invalid data blob type:
-            Assert.Catch(typeof(KeyNotFoundException), () =>
-            {
-                testEntity.RemoveDataBlob<BaseDataBlob>();
-            });
-
+            Assert.Catch<KeyNotFoundException>(testEntity.RemoveDataBlob<ColonyInfoDB>);
 
             // reset:
             // testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.InvalidEntity));
@@ -218,15 +213,15 @@ namespace Pulsar4X.Tests
             PopulateEntityManager();
 
             // Find all entities with a specific DataBlob.
-            List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>(_smAuthToken);
+            List<Entity> entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
             Assert.AreEqual(2, entities.Count);
 
             // again, but look for a datablob that no entity has:
-            entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<AtmosphereDB>(_smAuthToken);
+            entities = _game.GlobalManager.GetAllEntitiesWithDataBlob<AtmosphereDB>();
             Assert.AreEqual(0, entities.Count);
 
             // check with invalid data blob type:
-            Assert.Catch(typeof(KeyNotFoundException), () => _game.GlobalManager.GetAllEntitiesWithDataBlob<BaseDataBlob>(_smAuthToken));
+            Assert.IsEmpty(_game.GlobalManager.GetAllEntitiesWithDataBlob<BaseDataBlob>());
 
 
             // now lets just get the one entity:
@@ -234,14 +229,10 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(testEntity.IsValid);
 
             // lookup an entity that does not exist:
-            testEntity = _game.GlobalManager.GetFirstEntityWithDataBlob<AtmosphereDB>();
-            Assert.IsFalse(testEntity.IsValid);
+            Assert.Catch<KeyNotFoundException>(() => _game.GlobalManager.GetFirstEntityWithDataBlob<AtmosphereDB>());
 
-            // try again with incorrect type:
-            Assert.Catch(typeof(KeyNotFoundException), () =>
-            {
-                _game.GlobalManager.GetFirstEntityWithDataBlob<BaseDataBlob>();
-            });
+            // try again with incorrect BaseDataBlob type:
+            Assert.Catch(typeof(KeyNotFoundException), () => _game.GlobalManager.GetFirstEntityWithDataBlob<BaseDataBlob>());
         }
 
         [Test]
@@ -272,7 +263,8 @@ namespace Pulsar4X.Tests
         [Test]
         public void EntityTransfer()
         {
-            EntityManager manager2 = _game.Systems.Last();
+            EntityManager manager2 = new EntityManager();
+            manager2.Initialize(_game);
             Entity testEntity = PopulateEntityManager();
 
             // Ensure we got a valid entity.
@@ -329,7 +321,7 @@ namespace Pulsar4X.Tests
         #region Extra Init Stuff
 
         /// <summary>
-        /// This functions creates 3 entities with a total of 5 data blobs (3 orbits and 2 populations).
+        /// This functions creates 3 entities with a total of 11 data blobs (3 orbits and 2 populations, and required dependent PositionDBs and NameDBs).
         /// </summary>
         /// <returns>It returns a reference to the first entity (containing 1 orbit and 1 pop)</returns>
         private Entity PopulateEntityManager()
@@ -342,14 +334,16 @@ namespace Pulsar4X.Tests
             _game.GlobalManager.AddEntity(testEntity);
             testEntity.SetDataBlob(new OrbitDB());
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.InvalidEntity));
+            testEntity.SetDataBlob(new PositionDB(0, 0, 0, ""));
+            testEntity.SetDataBlob(new NameDB("TE-1"));
 
             // Create an entity with a DataBlobList.
-            var dataBlobs = new List<BaseDataBlob> { new OrbitDB() };
+            var dataBlobs = new List<BaseDataBlob> { new OrbitDB(), new PositionDB(0,0,0,""), new NameDB("TE-2") };
             var entity = Entity.Create();
             _game.GlobalManager.AddEntity(entity, dataBlobs);
 
             // Create one more, just for kicks.
-            dataBlobs = new List<BaseDataBlob> { new OrbitDB(), new ColonyInfoDB(_pop2, Entity.InvalidEntity) };
+            dataBlobs = new List<BaseDataBlob> { new OrbitDB(), new ColonyInfoDB(_pop2, Entity.InvalidEntity), new PositionDB(0, 0, 0, ""), new NameDB("TE-3") };
             entity = Entity.Create();
             _game.GlobalManager.AddEntity(entity, dataBlobs);
 

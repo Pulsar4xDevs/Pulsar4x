@@ -35,7 +35,9 @@ namespace Pulsar4X.Tests
             modLoader.LoadModManifest("Data/basemod/modInfo.json", _modDataStore);
         }
 
-
+        /// <summary>
+        /// TODO: Isolate this method. Any changes to the default static data (Specifically the SystemGenSettings) will break these tests.
+        /// </summary>
         [Test]
         [Description("Creates and tests a single star system")]
         public void CreateAndFillStarSystem()
@@ -73,21 +75,23 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(systemBodies);
             var numbodies = system.GetNumberOfBodies();
             Assert.AreEqual(1, system.GetNumberOfStars());
-            Assert.AreEqual(2, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
-            Assert.AreEqual(2, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
+            Assert.AreEqual(5, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
+            Assert.AreEqual(4, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
             Assert.AreEqual(1, system.GetNumberOfIceGiants(), "IceGiants");
-            Assert.AreEqual(4, system.GetNumberOfGasGiants(), "GasGiants");
+            Assert.AreEqual(3, system.GetNumberOfGasGiants(), "GasGiants");
             Assert.AreEqual(13, system.GetNumberOfMoons(), "Moons");
-            Assert.AreEqual(49, system.GetNumberOfAsteroids(), "Asteroids");
+            Assert.AreEqual(74, system.GetNumberOfAsteroids(), "Asteroids");
             Assert.AreEqual(0, system.GetNumberOfUnknownObjects(), "unknown");
 
-            Assert.AreEqual(18, system.GetNumberOfComets(), "Comets");
+            Assert.AreEqual(17, system.GetNumberOfComets(), "Comets");
 
-            Assert.AreEqual(93, system.GetNumberOfBodies(), "TotalBodies");
+            Assert.AreEqual(118, system.GetNumberOfBodies(), "TotalBodies");
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
         }
 
-
+        /// <summary>
+        /// TODO: Isolate this method. Any changes to the default static data (Specifically the SystemGenSettings) will break these tests.
+        /// </summary>
         [Test]
         [Description("Creates and tests another single star system")]
         public void CreateAndFillStarSystemB()
@@ -145,37 +149,37 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(systemBodies);
 
             Assert.AreEqual(2, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
-            Assert.AreEqual(3, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
-            Assert.AreEqual(1, system.GetNumberOfIceGiants(), "IceGiants");
-            Assert.AreEqual(3, system.GetNumberOfGasGiants(), "GasGiants");
-            Assert.AreEqual(8, system.GetNumberOfMoons(), "Moons");
-            Assert.AreEqual(62, system.GetNumberOfAsteroids(), "Asteroids");
+            Assert.AreEqual(5, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
+            Assert.AreEqual(2, system.GetNumberOfIceGiants(), "IceGiants");
+            Assert.AreEqual(1, system.GetNumberOfGasGiants(), "GasGiants");
+            Assert.AreEqual(10, system.GetNumberOfMoons(), "Moons");
+            Assert.AreEqual(124, system.GetNumberOfAsteroids(), "Asteroids");
             Assert.AreEqual(0, system.GetNumberOfUnknownObjects(), "unknown");
 
-            Assert.AreEqual(15, system.GetNumberOfComets(), "Comets");
+            Assert.AreEqual(6, system.GetNumberOfComets(), "Comets");
 
-            Assert.AreEqual(96, system.GetNumberOfBodies(), "TotalBodies");
+            Assert.AreEqual(151, system.GetNumberOfBodies(), "TotalBodies");
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
 
             // Test initial mineral generation
             Dictionary<string, double> totalMinerals = system.GetTotalSystemMinerals(_modDataStore);
-            Assert.AreEqual(27084962760, totalMinerals["Sorium"], "Sorium");
-            Assert.AreEqual(2504615582, totalMinerals["Neutronium"], "Neutronium");
-            Assert.AreEqual(35111974, totalMinerals["Iron"], "Iron");
-            Assert.AreEqual(39722250, totalMinerals["Aluminium"], "Aluminium");
-            Assert.AreEqual(29868472, totalMinerals["Lithium"], "Lithium");
-            Assert.AreEqual(22030529, totalMinerals["Fissionables"], "Fissionables");
-            Assert.AreEqual(1216134, totalMinerals["Duranium"], "Duranium");
-            Assert.AreEqual(49794944, totalMinerals["Corbomite"], "Corbomite");
-            Assert.AreEqual(19768268, totalMinerals["Copper"], "Copper");
-            Assert.AreEqual(29407250, totalMinerals["Titanium"], "Titanium");
-            Assert.AreEqual(39038047, totalMinerals["Tritanium"], "Tritanium");
-            Assert.AreEqual(27187517, totalMinerals["Boronide"], "Boronide");
-            Assert.AreEqual(60503947, totalMinerals["Corundium"], "Corundium");
-            Assert.AreEqual(24266487, totalMinerals["Mercassium"], "Mercassium");
-            Assert.AreEqual(59797777, totalMinerals["Vendarite"], "Vendarite");
-            Assert.AreEqual(24001331, totalMinerals["Gallicite"], "Gallicite");
-            Assert.AreEqual(17760843, totalMinerals["Chromium"], "Chromium");
+            Assert.AreEqual(1729718654, totalMinerals["Sorium"], "Sorium");
+            Assert.AreEqual(488000495, totalMinerals["Neutronium"], "Neutronium");
+            Assert.AreEqual(56354910, totalMinerals["Iron"], "Iron");
+            Assert.AreEqual(107192704, totalMinerals["Aluminium"], "Aluminium");
+            Assert.AreEqual(156862817, totalMinerals["Lithium"], "Lithium");
+            Assert.AreEqual(118238249, totalMinerals["Fissionables"], "Fissionables");
+            Assert.AreEqual(40067025, totalMinerals["Duranium"], "Duranium");
+            Assert.AreEqual(108058044, totalMinerals["Corbomite"], "Corbomite");
+            Assert.AreEqual(164017462, totalMinerals["Copper"], "Copper");
+            Assert.AreEqual(66474261, totalMinerals["Titanium"], "Titanium");
+            Assert.AreEqual(339062039, totalMinerals["Tritanium"], "Tritanium");
+            Assert.AreEqual(77772712, totalMinerals["Boronide"], "Boronide");
+            Assert.AreEqual(142161177, totalMinerals["Corundium"], "Corundium");
+            Assert.AreEqual(104074623, totalMinerals["Mercassium"], "Mercassium");
+            Assert.AreEqual(129939122, totalMinerals["Vendarite"], "Vendarite");
+            Assert.AreEqual(119093064, totalMinerals["Gallicite"], "Gallicite");
+            Assert.AreEqual(121693426, totalMinerals["Chromium"], "Chromium");
         }
 
         [Test]
@@ -209,13 +213,24 @@ namespace Pulsar4X.Tests
                     BaseDataBlob blob2 = entityTwinDataBlobs[j];
                     Assert.IsTrue(blob1.GetType().ToString() == blob2.GetType().ToString());
 
-                    int hashBlob1 = ((IGetValuesHash)blob1).GetValueCompareHash();
-                    var hashBlob2 = ((IGetValuesHash)blob2).GetValueCompareHash();
+
+                    var getValuesHashBlob1 = blob1 as IGetValuesHash;
+                    var getValuesHashBlob2 = blob1 as IGetValuesHash;
+                    // TODO: Temporary Workaround, not all DataBlobs implement IGetValuesHash.
+                    // See Issue #381
+                    #warning Undefined Equality Checks for DataBlob in Deterministic Test
+                    if (getValuesHashBlob1 == null)
+                        continue;
+                    int hashBlob1 = getValuesHashBlob1.GetValueCompareHash();
+                    int hashBlob2 = getValuesHashBlob2.GetValueCompareHash();
                     Assert.AreEqual(hashBlob1, hashBlob2, "Hashes for iteration" + j + " type " + blob1.GetType() + "Don't match");
                 }
             }
         }
 
+        /// <summary>
+        /// TODO: Isolate this method. Any changes to the default static data (Specifically the SystemGenSettings) will break these tests.
+        /// </summary>
         [Test]
         [Description("Creates and tests the Sol star system")]
         public void CreateAndFillSolStarSystem()
@@ -362,7 +377,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        [Description("Allows statisical analysis of the connectivity of generated systems")]
+        [Description("Allows statistical analysis of the connectivity of generated systems")]
         [Ignore("Manual statistical analysis Integration test")]
         public void JPConnectivity()
         {

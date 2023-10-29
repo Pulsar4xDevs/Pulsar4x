@@ -5,6 +5,7 @@ using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
 
 namespace Pulsar4X.Tests
@@ -17,73 +18,85 @@ namespace Pulsar4X.Tests
     // Test: Time <-- HyperbolicMeanAnomaly <-- HyperbolicAnomaly <-- TrueAnomaly <-----------| 
     public class OrbitFuzzTesting
     {
-        static Game game = new Game();
-        private static StarSystem starSys = new StarSystem();
+        private Game _game;
 
-        static Entity parentBody = TestingUtilities.BasicSol(starSys);
-        static MassVolumeDB parentMassDB = parentBody.GetDataBlob<MassVolumeDB>();
-        
-        static List<(OrbitDB orbitDB, string TestName)> _allTestOrbitData = new List<(OrbitDB, string)>()
+        private Entity _parentBody;
+        private MassVolumeDB _parentMassDB;
+
+        private static List<(OrbitDB orbitDB, string TestName)> _allTestOrbitData = new ();
+
+        double epsilonLen, epsilonRads, epsilont, sgp, o_a, o_e, o_i, o_Ω, o_M0, o_n, o_ω, o_lop;
+        double periodInSeconds, segmentTime;
+        DateTime o_epoch;
+
+        [SetUp]
+        public void Init()
         {
-            (
-             OrbitDB.FromAsteroidFormat //circular orbit.
-                 (
-                 parentBody, 
-                 parentMassDB.MassDry, 
-                 1000, 
-                 1, 
-                 0, 
-                 0, 
-                 0, 
-                 0, 
-                 0, 
-                 new System.DateTime()
-                 ),
-             "Circular Orbit"
-            ),
-            (
-             OrbitDB.FromAsteroidFormat( //elliptical orbit
-                 parentBody, 
-                 parentMassDB.MassDry, 
-                 2.2e14,          //halleysBodyMass
-                 17.834,     //halleysSemiMajAxis 
-                 0.96714,     //halleysEccentricity
-                 0, 
-                 0, //halleysLoAN
-                 0, //halleysAoP
-                 38.38,     //halleysMeanAnomaly at Epoch
-                 new System.DateTime(1994, 2, 17)),
-             "Elliptical 2d 0 LoAN 0 aop Orbit"
-             ),
-            (
-                OrbitDB.FromAsteroidFormat( //elliptical orbit
-                    parentBody, 
-                    parentMassDB.MassDry, 
-                    2.2e14,          //halleysBodyMass
-                    17.834,     //halleysSemiMajAxis 
-                    0.96714,     //halleysEccentricity
-                    0, 
-                    0, //halleysLoAN
-                    45.0, //halleysAoP
-                    38.38,     //halleysMeanAnomaly at Epoch
-                    new System.DateTime(1994, 2, 17)),
-                "Elliptical 2d 0 LoAN, 45.0 aop Orbit"
-            ),
-            (
-                OrbitDB.FromAsteroidFormat( //elliptical orbit
-                    parentBody, 
-                    parentMassDB.MassDry, 
-                    2.2e14,          //halleysBodyMass
-                    17.834,     //halleysSemiMajAxis 
-                    0.96714,     //halleysEccentricity
-                    0, 
-                    0, //halleysLoAN
-                    111.33, //halleysAoP
-                    38.38,     //halleysMeanAnomaly at Epoch
-                    new System.DateTime(1994, 2, 17)),
-                "Elliptical 2d 0 LoAN, 111.33 aop Orbit"
-            ),
-            /* THIS IS an INVALID test, for 2d orbits, LoAN should be 0!
+            _game = TestingUtilities.CreateTestUniverse(1);
+            _parentBody = TestingUtilities.BasicSol(_game.Systems[0]);
+            _parentMassDB = _parentBody.GetDataBlob<MassVolumeDB>();
+
+            _allTestOrbitData = new List<(OrbitDB, string)>()
+            {
+                (
+                    OrbitDB.FromAsteroidFormat //circular orbit.
+                    (
+                        _parentBody,
+                        _parentMassDB.MassDry,
+                        1000,
+                        1,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        new System.DateTime()
+                    ),
+                    "Circular Orbit"
+                ),
+                (
+                    OrbitDB.FromAsteroidFormat( //elliptical orbit
+                        _parentBody,
+                        _parentMassDB.MassDry,
+                        2.2e14,          //halleysBodyMass
+                        17.834,     //halleysSemiMajAxis 
+                        0.96714,     //halleysEccentricity
+                        0,
+                        0, //halleysLoAN
+                        0, //halleysAoP
+                        38.38,     //halleysMeanAnomaly at Epoch
+                        new System.DateTime(1994, 2, 17)),
+                    "Elliptical 2d 0 LoAN 0 aop Orbit"
+                ),
+                (
+                    OrbitDB.FromAsteroidFormat( //elliptical orbit
+                        _parentBody,
+                        _parentMassDB.MassDry,
+                        2.2e14,          //halleysBodyMass
+                        17.834,     //halleysSemiMajAxis 
+                        0.96714,     //halleysEccentricity
+                        0,
+                        0, //halleysLoAN
+                        45.0, //halleysAoP
+                        38.38,     //halleysMeanAnomaly at Epoch
+                        new System.DateTime(1994, 2, 17)),
+                    "Elliptical 2d 0 LoAN, 45.0 aop Orbit"
+                ),
+                (
+                    OrbitDB.FromAsteroidFormat( //elliptical orbit
+                        _parentBody,
+                        _parentMassDB.MassDry,
+                        2.2e14,          //halleysBodyMass
+                        17.834,     //halleysSemiMajAxis 
+                        0.96714,     //halleysEccentricity
+                        0,
+                        0, //halleysLoAN
+                        111.33, //halleysAoP
+                        38.38,     //halleysMeanAnomaly at Epoch
+                        new System.DateTime(1994, 2, 17)),
+                    "Elliptical 2d 0 LoAN, 111.33 aop Orbit"
+                ),
+                /* THIS IS an INVALID test, for 2d orbits, LoAN should be 0!
             (
                 OrbitDB.FromAsteroidFormat( //elliptical orbit
                     parentBody, 
@@ -98,72 +111,68 @@ namespace Pulsar4X.Tests
                     new System.DateTime(1994, 2, 17)),
                 "Elliptical 2d 58.42 LoAN and 111.33 aop Orbit"
             ),*/
-            (
-             OrbitDB.FromAsteroidFormat( //elliptical 2d retrograde orbit. 
-                 parentBody, 
-                 parentMassDB.MassDry, 
-                 2.2e14,             //halleysBodyMass
-                 17.834,         //halleysSemiMajAxis , 
-                 0.96714,         //halleysEccentricity
-                 72.26,  
-                 0, //halleysLoAN
-                 111.33,  //halleysAoP
-                 38.38,     //halleysMeanAnomaly at Epoch
-                 new System.DateTime(1994, 2, 17)),
-             "Elliptical 2d retrograde Orbit"
-            ),
-            (
-             OrbitDB.FromAsteroidFormat( //elliptical 3d orbit. 
-                 parentBody, 
-                 parentMassDB.MassDry, 
-                 2.2e14,            //halleysBodyMass
-                 17.834,     //halleysSemiMajAxis , 
-                 0.96714,     //halleysEccentricity
-                 72.26,     //halleys3dInclination, note retrograde orbit (> 90degrees)
-                 58.42, //halleysLoAN
-                 111.33, //halleysAoP
-                 38.38,     //halleysMeanAnomaly at Epoch
-                 new System.DateTime(1994, 2, 17)),
-             "Elliptical 3d Orbit"
-            ),
-            (
-             OrbitDB.FromAsteroidFormat( //elliptical retrograde 3d orbit. 
-                 parentBody, 
-                 parentMassDB.MassDry, 
-                 2.2e14,            //halleysBodyMass
-                 17.834,     //halleysSemiMajAxis , 
-                 0.96714,     //halleysEccentricity
-                 162.26,     //halleys3dInclination, note retrograde orbit (> 90degrees)
-                 58.42, //halleysLoAN
-                 111.33, //halleysAoP
-                 38.38,     //halleysMeanAnomaly at Epoch
-                 new System.DateTime(1994, 2, 17)),
-             "Elliptical Retrograde 3d Orbit"),
-            
-            (
-                OrbitDB.FromAsteroidFormat( //Hyperbolic orbit
-                    parentBody, 
-                    parentMassDB.MassDry, 
-                    2.2e14,          //halleysBodyMass
-                    -17.834,     //halleysSemiMajAxis 
-                    1.3,     //Hyperbolic Eccentricity
-                    0, 
-                    0, //halleysLoAN
-                    111.33, //halleysAoP
-                    38.38,     //halleysMeanAnomaly at Epoch
-                    new System.DateTime(1994, 2, 17)),
-                "Hyperbolic 2d 0 LoAN, 111.33 aop Orbit"
-            ),
-            
-        };
+                (
+                    OrbitDB.FromAsteroidFormat( //elliptical 2d retrograde orbit. 
+                        _parentBody,
+                        _parentMassDB.MassDry,
+                        2.2e14,             //halleysBodyMass
+                        17.834,         //halleysSemiMajAxis , 
+                        0.96714,         //halleysEccentricity
+                        72.26,
+                        0, //halleysLoAN
+                        111.33,  //halleysAoP
+                        38.38,     //halleysMeanAnomaly at Epoch
+                        new System.DateTime(1994, 2, 17)),
+                    "Elliptical 2d retrograde Orbit"
+                ),
+                (
+                    OrbitDB.FromAsteroidFormat( //elliptical 3d orbit. 
+                        _parentBody,
+                        _parentMassDB.MassDry,
+                        2.2e14,            //halleysBodyMass
+                        17.834,     //halleysSemiMajAxis , 
+                        0.96714,     //halleysEccentricity
+                        72.26,     //halleys3dInclination, note retrograde orbit (> 90degrees)
+                        58.42, //halleysLoAN
+                        111.33, //halleysAoP
+                        38.38,     //halleysMeanAnomaly at Epoch
+                        new System.DateTime(1994, 2, 17)),
+                    "Elliptical 3d Orbit"
+                ),
+                (
+                    OrbitDB.FromAsteroidFormat( //elliptical retrograde 3d orbit. 
+                        _parentBody,
+                        _parentMassDB.MassDry,
+                        2.2e14,            //halleysBodyMass
+                        17.834,     //halleysSemiMajAxis , 
+                        0.96714,     //halleysEccentricity
+                        162.26,     //halleys3dInclination, note retrograde orbit (> 90degrees)
+                        58.42, //halleysLoAN
+                        111.33, //halleysAoP
+                        38.38,     //halleysMeanAnomaly at Epoch
+                        new System.DateTime(1994, 2, 17)),
+                    "Elliptical Retrograde 3d Orbit"),
 
-        double epsilonLen, epsilonRads, epsilont, sgp, o_a, o_e, o_i, o_Ω, o_M0, o_n, o_ω, o_lop;
-        double periodInSeconds, segmentTime;
-        DateTime o_epoch;
+                (
+                    OrbitDB.FromAsteroidFormat( //Hyperbolic orbit
+                        _parentBody,
+                        _parentMassDB.MassDry,
+                        2.2e14,          //halleysBodyMass
+                        -17.834,     //halleysSemiMajAxis 
+                        1.3,     //Hyperbolic Eccentricity
+                        0,
+                        0, //halleysLoAN
+                        111.33, //halleysAoP
+                        38.38,     //halleysMeanAnomaly at Epoch
+                        new System.DateTime(1994, 2, 17)),
+                    "Hyperbolic 2d 0 LoAN, 111.33 aop Orbit"
+                ),
+
+            };
+        }
 
 		private void SetupElements(OrbitDB orbit)
         {
-            starSys.Initialize(game, "Sol", -1);
 			// One effect of switching from AU to m is
 			// an increase of the absolute magnitude of errors
 			// due to the increased value of the lengths
