@@ -185,6 +185,7 @@ namespace Pulsar4X.Tests
             float pressure = 1f;
             GasBlueprint gas = new() {
                 ChemicalSymbol = "NOT",
+                UniqueID = "NOT",
                 MeltingPoint = 0,
                 GreenhouseEffect = -1,
             };
@@ -202,21 +203,25 @@ namespace Pulsar4X.Tests
             float pressure = 1f;
             GasBlueprint gas1 = new() {
                 ChemicalSymbol = "NOT",
+                UniqueID = "NOT",
                 MeltingPoint = 0,
                 GreenhouseEffect = -1
             };
             GasBlueprint gas2 = new() {
                 ChemicalSymbol = "G2",
+                UniqueID = "G2",
                 MeltingPoint = 20,
                 GreenhouseEffect = -1
             };
             GasBlueprint gas3 = new() {
                 ChemicalSymbol = "G3",
+                UniqueID = "G3",
                 MeltingPoint = 20,
                 GreenhouseEffect = 1
             };
             GasBlueprint gas4 = new() {
                 ChemicalSymbol = "G4",
+                UniqueID = "G4",
                 MeltingPoint = 0,
                 GreenhouseEffect = 1
             };

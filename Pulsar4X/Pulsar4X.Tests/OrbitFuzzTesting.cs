@@ -5,6 +5,7 @@ using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
 
 namespace Pulsar4X.Tests
@@ -17,13 +18,12 @@ namespace Pulsar4X.Tests
     // Test: Time <-- HyperbolicMeanAnomaly <-- HyperbolicAnomaly <-- TrueAnomaly <-----------| 
     public class OrbitFuzzTesting
     {
-        private readonly Game _game = new();
-        private StarSystem _starSys;
+        private Game _game;
 
         private Entity _parentBody;
         private MassVolumeDB _parentMassDB;
-        
-        private List<(OrbitDB orbitDB, string TestName)> _allTestOrbitData;
+
+        private static List<(OrbitDB orbitDB, string TestName)> _allTestOrbitData = new ();
 
         double epsilonLen, epsilonRads, epsilont, sgp, o_a, o_e, o_i, o_Ω, o_M0, o_n, o_ω, o_lop;
         double periodInSeconds, segmentTime;
@@ -32,11 +32,8 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-
-
-            _starSys = new StarSystem();
-            _starSys.Initialize(_game);
-            _parentBody = TestingUtilities.BasicSol(_starSys);
+            _game = TestingUtilities.CreateTestUniverse(1);
+            _parentBody = TestingUtilities.BasicSol(_game.Systems[0]);
             _parentMassDB = _parentBody.GetDataBlob<MassVolumeDB>();
 
             _allTestOrbitData = new List<(OrbitDB, string)>()
@@ -176,7 +173,6 @@ namespace Pulsar4X.Tests
 
 		private void SetupElements(OrbitDB orbit)
         {
-            _starSys.Initialize(_game, "Sol", -1);
 			// One effect of switching from AU to m is
 			// an increase of the absolute magnitude of errors
 			// due to the increased value of the lengths

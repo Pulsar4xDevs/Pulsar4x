@@ -20,10 +20,11 @@ namespace Pulsar4X.Tests
         public static Entity BasicSol(EntityManager mgr)
         {
             double parentMass = 1.989e30;
-            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
+            BaseDataBlob[] parentblobs = new BaseDataBlob[4];
             parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = MassVolumeDB.NewFromMassAndRadius_m(parentMass, 696342000.0 );
             parentblobs[2] = new OrbitDB();
+            parentblobs[3] = new NameDB();
             var ent = Entity.Create();
             mgr.AddEntity(ent, parentblobs);
             return ent;
@@ -32,10 +33,11 @@ namespace Pulsar4X.Tests
         public static Entity BasicEarth(EntityManager mgr)
         {
             double parentMass = 5.97237e24;
-            BaseDataBlob[] parentblobs = new BaseDataBlob[3];
+            BaseDataBlob[] parentblobs = new BaseDataBlob[4];
             parentblobs[0] = new PositionDB(mgr.ManagerGuid) { AbsolutePosition = Vector3.Zero };
             parentblobs[1] = new MassVolumeDB() { MassDry = parentMass };
             parentblobs[2] = new OrbitDB();
+            parentblobs[3] = new NameDB();
             var ent = Entity.Create();
             mgr.AddEntity(ent, parentblobs);
             return ent;
@@ -53,7 +55,11 @@ namespace Pulsar4X.Tests
 
             // Systems are currently generated in the Game Constructor.
             // Later, Systems will be initialized in the game constructor, but not actually generated until player discovery.
-            //game.GenerateSystems(smAuthToken, numSystems);
+            var starSystemFactory = new StarSystemFactory(game);
+            for (int i = 0; i < numSystems; i++)
+            {
+                game.Systems.Add(starSystemFactory.CreateSystem(game, $"System {i + 1}", 0));
+            }
 
             // add a faction:
             Entity humanFaction = FactionFactory.CreateFaction(game, "New Terran Utopian Empire");

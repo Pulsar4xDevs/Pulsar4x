@@ -271,8 +271,6 @@ namespace Pulsar4X.Engine
 
         internal void SetDataBlob<T>(int entityId, T dataBlob, bool updateListeners = true) where T : BaseDataBlob
         {
-            if (dataBlob == null)
-                throw new ArgumentNullException(nameof(dataBlob));
             if (dataBlob is null)
                 throw new ArgumentNullException(nameof(dataBlob));
             if(!_entities.ContainsKey(entityId))
