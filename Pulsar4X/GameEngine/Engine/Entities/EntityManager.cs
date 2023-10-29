@@ -294,8 +294,8 @@ namespace Pulsar4X.Engine
                 // WARNING: This dependency check forces a specific order during entity creation.
                 // This should ideally be moved to the factory for better design.
                 // See GitHub Issue: #375 for more details.
-                #warning Dependency check here means during entity creation we must create datablobs in a specific order. This validation should occur in the factory itself.
-                throw new ArgumentException($"{type.Name} is missing dependencies for Entity #{entityId}");
+                //#warning Dependency check here means during entity creation we must create datablobs in a specific order. This validation should occur in the factory itself.
+                //throw new ArgumentException($"{type.Name} is missing dependencies for Entity #{entityId}");
             }
 
 

@@ -31,7 +31,7 @@ namespace Pulsar4X.Engine
             var planetInfo = new SystemBodyInfoDB();
             var minerals = new MineralsDB();
             var name = new NameDB("ProtoBody");
-            var orbit = new OrbitDB();
+            //var orbit = new OrbitDB();
             var atmo = new AtmosphereDB();
             var ruins = new RuinsDB();
             var emEmtor = new SensorProfileDB();
@@ -42,7 +42,7 @@ namespace Pulsar4X.Engine
                 planetInfo,
                 minerals,
                 name,
-                orbit,
+                //orbit,
                 atmo,
                 ruins,
                 emEmtor
@@ -238,8 +238,8 @@ namespace Pulsar4X.Engine
             double argumentOfPeriapsis = system.RNGNextDouble() * 2 * Math.PI;
             double meanAnomaly = system.RNGNextDouble() * 2 * Math.PI;
 
-            comet.SetDataBlob(new OrbitDB(star, starMVDB.MassDry, cometMVDB.MassDry, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode,
-                                            argumentOfPeriapsis, meanAnomaly, currentDateTime));
+            var orbitDB = new OrbitDB(star, starMVDB.MassDry, cometMVDB.MassDry, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, currentDateTime);
+            comet.SetDataBlob(orbitDB);
         }
 
         /// <summary>
