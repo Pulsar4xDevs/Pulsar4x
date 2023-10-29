@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
@@ -8,27 +9,16 @@ namespace Pulsar4X.Engine;
 
 public class ProtoEntity : IHasDataBlobs
 {
-    public List<BaseDataBlob> DataBlobs { get; set; } = new List<BaseDataBlob>();
+    public HashSet<Type> DataBlobTypes { get; } = new();
+    public List<BaseDataBlob> DataBlobs { get; } = new();
 
     public ProtoEntity() { }
     public ProtoEntity(List<BaseDataBlob> dataBlobs)
     {
-        DataBlobs = dataBlobs;
-    }
-
-    public bool TryGetDataBlob<T>(out T value) where T : BaseDataBlob
-    {
-        var type = typeof(T);
-        var found = DataBlobs.Where(db => db.GetType() == type).Any();
-
-        if(found)
+        foreach (BaseDataBlob baseDataBlob in dataBlobs)
         {
-            value = GetDataBlob<T>();
-            return true;
+            SetDataBlob(baseDataBlob);
         }
-
-        value = null;
-        return false;
     }
 
     public void SetDataBlob<T>(T dataBlob)
@@ -41,19 +31,24 @@ public class ProtoEntity : IHasDataBlobs
     {
         var type = typeof(T);
 
-        return (T)DataBlobs.Where(db => db.GetType() == type).First();
+        return (T)DataBlobs.First(db => db.GetType() == type);
     }
 
     public void SetDataBlob(BaseDataBlob dataBlob)
     {
+        Type dbType = dataBlob.GetType();
+        if (DataBlobTypes.Contains(dbType))
+            DataBlobs.Remove(DataBlobs.Find(db => db.GetType() == dbType));
+
         DataBlobs.Add(dataBlob);
+        DataBlobTypes.Add(dbType);
     }
 
     public bool TryGetDatablob<T>(out T value) where T : BaseDataBlob
     {
         var type = typeof(T);
 
-        if(DataBlobs.Where(db => db.GetType() == type).Any())
+        if(DataBlobs.Any(db => db.GetType() == type))
         {
             value = GetDataBlob<T>();
             return true;
