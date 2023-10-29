@@ -24,7 +24,7 @@ public class ProtoEntity : IHasDataBlobs
     public void SetDataBlob<T>(T dataBlob)
         where T : BaseDataBlob
     {
-        DataBlobs.Add(dataBlob);
+        SetDataBlob((BaseDataBlob)dataBlob);
     }
 
     public T GetDataBlob<T>() where T : BaseDataBlob
