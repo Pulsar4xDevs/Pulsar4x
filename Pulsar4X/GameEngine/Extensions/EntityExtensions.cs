@@ -48,10 +48,10 @@ namespace Pulsar4X.Extensions
         /// <returns></returns>
         public static Entity GetSOIParentEntity(this Entity entity, PositionDB positionDB = null)
         {
-            if (positionDB == null)
-                positionDB = entity.GetDataBlob<PositionDB>();
+            if(positionDB == null)
+                return entity.TryGetDatablob<PositionDB>(out positionDB) ? positionDB.Parent : null;
 
-            return positionDB == null ? null : positionDB.Parent;
+            return positionDB.Parent;
         }
 
         public static (Vector3 pos, Vector3 Velocity) GetRelativeState(this Entity entity)
