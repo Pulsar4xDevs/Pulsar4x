@@ -9,6 +9,7 @@
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\matia\source\repos\Pulsar4x\Pulsar4X\Backup\Pulsar4X.Tests\</UpgradeBackupLocation>
     <OldToolsVersion>2.0</OldToolsVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Linux_x64' ">
     <IntermediateOutputPath>obj\Linux_x64\Debug</IntermediateOutputPath>

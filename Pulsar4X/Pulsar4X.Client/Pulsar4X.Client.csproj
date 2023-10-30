@@ -6,6 +6,7 @@
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <OldToolsVersion>Current</OldToolsVersion>
     <ApplicationIcon>Resources\pulsaricon.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Linux_x64' ">
