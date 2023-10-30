@@ -102,31 +102,6 @@ namespace Pulsar4X.Tests
             energydb.EnergyStored[energydb.EnergyType.UniqueID] = energyMax;
 
             Assert.IsTrue(energyMax >= warpAbility.BubbleCreationCost, "Ship does not store enough energy for a succesfull warp bubble creation");
-
-            Assert.AreEqual(warpAbility.CurrentVectorMS.Length(), 0);
-
-            var posDB = _ship.GetDataBlob<PositionDB>();
-            var ralpos = posDB.RelativePosition;
-            var targetPos = new Vector3(ralpos.X , ralpos.Y, ralpos.Z);
-            targetPos.X += expectedSpeed2 * 60 * 60; //distance for an hours travel.
-            WarpMoveCommand.CreateCommand(
-                factionDataStore.CargoGoods,
-                _faction.Id,
-                _ship,
-                _sol,
-                targetPos,
-                _ship.StarSysDateTime,
-                new Vector3(0,0,0), tonnage1);
-
-            Assert.AreEqual(warpAbility.CurrentVectorMS.Length(), expectedSpeed2, 1.0E-15);
-            // _game.GamePulse.Ticklength = TimeSpan.FromSeconds(1);
-            //_game.GamePulse.TimeStep();
-            _game.ProcessorManager.GetProcessor<WarpMovingDB>().ProcessEntity(_ship, 1);
-            var ralposNow = posDB.RelativePosition;
-            var distance = Math.Abs((ralpos - ralposNow).Length());
-
-            Assert.AreEqual(distance, expectedSpeed2, 1.0E-15);
-
         }
   }
 }

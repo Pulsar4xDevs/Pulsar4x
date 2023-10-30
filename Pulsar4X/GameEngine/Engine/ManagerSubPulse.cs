@@ -319,11 +319,10 @@ namespace Pulsar4X.Engine
             InitHotloopProcessors();
         }
 
-        internal void PostLoadInit(StreamingContext context, EntityManager entityManager) //this one is used after loading a game.
+        internal void PostLoadInit(EntityManager entityManager) //this one is used after loading a game.
         {
             _entityManager = entityManager;
             _processManager = entityManager.Game.ProcessorManager;
-            InitHotloopProcessors();
         }
 
         private void InitHotloopProcessors()

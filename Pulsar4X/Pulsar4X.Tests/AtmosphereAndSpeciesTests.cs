@@ -12,10 +12,6 @@ namespace Pulsar4X.Tests
     [TestFixture, Description("Atmosphere and Species Habitablilty Tests based on entities from runs in Aurora")]
     class AtmosphereAndSpeciesTests
     {
-        ModLoader _modLoader;
-        ModDataStore _modDataStore;
-
-        NewGameSettings _settings;
         Game _game;
 
         private EntityManager _entityManager;
@@ -26,20 +22,8 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _modLoader = new ModLoader();
-            _modDataStore = new ModDataStore();
-
-            _modLoader.LoadModManifest("Data/basemod/modInfo.json", _modDataStore);
-
-            _settings = new NewGameSettings() {
-                MaxSystems = 1
-            };
-
-            _game  = new Game(_settings, _modDataStore);
-
-            _entityManager = new EntityManager();
-            _entityManager.Initialize(_game);
-
+            _game = TestingUtilities.CreateTestUniverse(1);
+            _entityManager = _game.Systems[0];
             _humans = new SpeciesDB(1, 0.1, 1.9, 1, 0, 4, 14, -10, 38);
 
             _gasDictionary = new Dictionary<string, GasBlueprint>();
@@ -57,6 +41,16 @@ namespace Pulsar4X.Tests
             _planet = null;
             _gasDictionary = null;
             _humans = null;
+        }
+
+        [Test]
+        public void TestTemperatureCost()
+        {
+            double cost = SpeciesDBExtensions.ColonyTemperatureCost(0, 30, 75, false);
+            Assert.AreEqual(3d, cost);
+
+            cost = SpeciesDBExtensions.ColonyTemperatureCost(0, 22, -48, false);
+            Assert.AreEqual(4.36, cost, 0.01d);
         }
 
         [Test]
@@ -78,7 +72,7 @@ namespace Pulsar4X.Tests
 
             // Test Humans habitability
             Assert.IsTrue(_humans.CanSurviveGravityOn(_planet));
-            Assert.AreEqual(3.215, _humans.ColonyTemperatureCost(_planet), 0.1, "Temperature");
+            Assert.AreEqual(4, SpeciesDBExtensions.ColonyTemperatureCost(_humans.MinimumPressureConstraint, _humans.MaximumTemperatureConstraint, atmosphereDB.SurfaceTemperature, true), 0.1, "Temperature");
             Assert.AreEqual(0, _humans.ColonyPressureCost(_planet), 0.1, "Pressure");
             Assert.AreEqual(2, _humans.ColonyGasCost(_planet), 0.1, "Breathability");
             Assert.AreEqual(0, _humans.ColonyToxicityCost(_planet), 0.1, "Toxicity");
@@ -393,8 +387,10 @@ namespace Pulsar4X.Tests
 
             NameDB planetNameDB = new NameDB("Test Planet");
 
+            OrbitDB orbitDB = new OrbitDB();
+
             Entity resultPlanet = Entity.Create();
-            _entityManager.AddEntity(resultPlanet, new List<BaseDataBlob> { planetBodyDB, planetNameDB, atmos });
+            _entityManager.AddEntity(resultPlanet, new List<BaseDataBlob> { planetBodyDB, planetNameDB, atmos, orbitDB });
 
             return resultPlanet;
         }

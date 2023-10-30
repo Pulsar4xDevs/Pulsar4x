@@ -171,7 +171,7 @@ namespace Pulsar4X.Engine
 
             foreach(var system in loadedGame.Systems)
             {
-                system.Initialize(loadedGame);
+                system.Initialize(loadedGame, true);
             }
 
             // settings.Context = new StreamingContext(StreamingContextStates.All, loadedGame);
