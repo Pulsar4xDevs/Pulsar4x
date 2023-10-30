@@ -60,39 +60,57 @@ namespace Pulsar4X.Engine
         #region Constructors
         internal EntityManager() { }
 
-        internal void Initialize(Game game)
+        internal void Initialize(Game game, bool postLoad = false)
         {
-            Game = game;
+            SelfInitialize(game);
+            SetEntities();
+            InitializeManagerSubPulse(game, postLoad);
+            
 
-            if(ManagerGuid.IsNullOrEmpty())
-            {
-                ManagerGuid = Guid.NewGuid().ToString();
-            }
+            SetEntities();
+        }
 
-            if(!game.GlobalManagerDictionary.ContainsKey(ManagerGuid))
+        private void InitializeManagerSubPulse(Game game, bool postLoad = false)
+        {
+            if (postLoad)
             {
-                game.GlobalManagerDictionary.Add(ManagerGuid, this);
+                ManagerSubpulses.PostLoadInit(this);
+                return;
             }
-
-            if(ManagerSubpulses == null)
-            {
-                ManagerSubpulses = new ManagerSubPulse();
-            }
+            ManagerSubpulses ??= new ManagerSubPulse();
             ManagerSubpulses.Initialize(this, game.ProcessorManager);
+        }
 
+        private void SetEntities()
+        {
             // Make sure all the entities have the manager set
-            foreach(var (id, entity) in _entities)
+            foreach (var (id, entity) in _entities)
             {
                 entity.Manager = this;
             }
 
             // Make sure the owning entity is set on all datablobs
-            foreach(var (type, blobDict) in _datablobStores)
+            foreach (var (type, blobDict) in _datablobStores)
             {
-                foreach(var (id, blob) in blobDict)
+                foreach (var (id, blob) in blobDict)
                 {
                     blob.OwningEntity = _entities[id];
                 }
+            }
+        }
+
+        private void SelfInitialize(Game game)
+        {
+            Game = game;
+
+            if (ManagerGuid.IsNullOrEmpty())
+            {
+                ManagerGuid = Guid.NewGuid().ToString();
+            }
+
+            if (!game.GlobalManagerDictionary.ContainsKey(ManagerGuid))
+            {
+                game.GlobalManagerDictionary.Add(ManagerGuid, this);
             }
         }
 
