@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Engine
 {
@@ -77,7 +78,7 @@ namespace Pulsar4X.Engine
         {
 
             [JsonProperty] //this should get added on initialization.
-            internal List<IHotloopProcessor> SystemProcessors = new List<IHotloopProcessor>();
+            internal SafeList<IHotloopProcessor> SystemProcessors = new SafeList<IHotloopProcessor>();
 
             [JsonProperty] //this needs to get saved. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly).
             internal Dictionary<string, List<Entity>> InstanceProcessors = new Dictionary<string, List<Entity>>();
