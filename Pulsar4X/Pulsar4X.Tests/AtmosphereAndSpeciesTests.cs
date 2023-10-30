@@ -44,6 +44,16 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void TestTemperatureCost()
+        {
+            double cost = SpeciesDBExtensions.ColonyTemperatureCost(0, 30, 75, false);
+            Assert.AreEqual(3d, cost);
+
+            cost = SpeciesDBExtensions.ColonyTemperatureCost(0, 22, -48, false);
+            Assert.AreEqual(4.36, cost, 0.01d);
+        }
+
+        [Test]
         public void TestMercury()
         {
             var atmoGasses = new Dictionary<string, float>
@@ -62,7 +72,7 @@ namespace Pulsar4X.Tests
 
             // Test Humans habitability
             Assert.IsTrue(_humans.CanSurviveGravityOn(_planet));
-            Assert.AreEqual(3.215, _humans.ColonyTemperatureCost(_planet), 0.1, "Temperature");
+            Assert.AreEqual(4, SpeciesDBExtensions.ColonyTemperatureCost(_humans.MinimumPressureConstraint, _humans.MaximumTemperatureConstraint, atmosphereDB.SurfaceTemperature, true), 0.1, "Temperature");
             Assert.AreEqual(0, _humans.ColonyPressureCost(_planet), 0.1, "Pressure");
             Assert.AreEqual(2, _humans.ColonyGasCost(_planet), 0.1, "Breathability");
             Assert.AreEqual(0, _humans.ColonyToxicityCost(_planet), 0.1, "Toxicity");
