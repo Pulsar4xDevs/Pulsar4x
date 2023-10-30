@@ -68,7 +68,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(_game.GlobalManager.ManagerGuid, loadedGame.GlobalManager.ManagerGuid, "Global Manager ID");
 
             var previousEntities = _game.GlobalManager.GetAllEntites();
-            var currentEntities = _game.GlobalManager.GetAllEntites();
+            var currentEntities = loadedGame.GlobalManager.GetAllEntites();
 
             Assert.AreEqual(previousEntities.Count, currentEntities.Count, "Global Manager Entity Count");
 
