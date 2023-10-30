@@ -239,5 +239,22 @@ namespace Pulsar4X.Extensions
             ////var meanAnomaly = CurrentMeanAnomaly(orbit.MeanAnomalyAtEpoch, meanMotion, )
             //return OrbitMath.TimeFromPeriapsis(a, orbit.GravitationalParameterAU, orbit.MeanAnomalyAtEpoch_Degrees);
         }
+
+        public static bool IsTidallyLocked(this OrbitDB orbit, SystemBodyInfoDB systemBodyInfo)
+        {
+            // Define a tolerance threshold to account for small differences 
+            // (you can adjust this value as needed)
+            const double tolerance = 0.05; // 5% tolerance
+
+            double ratio = systemBodyInfo.LengthOfDay.TotalDays / orbit.OrbitalPeriod.TotalDays;
+
+            // Check if the ratio is approximately 1 (within the tolerance)
+            return Math.Abs(ratio - 1.0) < tolerance;
+        }
+
+        public static bool IsTidallyLocked(this SystemBodyInfoDB systemBodyInfo, OrbitDB orbit)
+        {
+            return IsTidallyLocked(orbit, systemBodyInfo);
+        }
     }
 }

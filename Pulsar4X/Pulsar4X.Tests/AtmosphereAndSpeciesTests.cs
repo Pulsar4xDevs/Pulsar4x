@@ -12,10 +12,6 @@ namespace Pulsar4X.Tests
     [TestFixture, Description("Atmosphere and Species Habitablilty Tests based on entities from runs in Aurora")]
     class AtmosphereAndSpeciesTests
     {
-        ModLoader _modLoader;
-        ModDataStore _modDataStore;
-
-        NewGameSettings _settings;
         Game _game;
 
         private EntityManager _entityManager;
@@ -26,20 +22,8 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _modLoader = new ModLoader();
-            _modDataStore = new ModDataStore();
-
-            _modLoader.LoadModManifest("Data/basemod/modInfo.json", _modDataStore);
-
-            _settings = new NewGameSettings() {
-                MaxSystems = 1
-            };
-
-            _game  = new Game(_settings, _modDataStore);
-
-            _entityManager = new EntityManager();
-            _entityManager.Initialize(_game);
-
+            _game = TestingUtilities.CreateTestUniverse(1);
+            _entityManager = _game.Systems[0];
             _humans = new SpeciesDB(1, 0.1, 1.9, 1, 0, 4, 14, -10, 38);
 
             _gasDictionary = new Dictionary<string, GasBlueprint>();
@@ -393,8 +377,10 @@ namespace Pulsar4X.Tests
 
             NameDB planetNameDB = new NameDB("Test Planet");
 
+            OrbitDB orbitDB = new OrbitDB();
+
             Entity resultPlanet = Entity.Create();
-            _entityManager.AddEntity(resultPlanet, new List<BaseDataBlob> { planetBodyDB, planetNameDB, atmos });
+            _entityManager.AddEntity(resultPlanet, new List<BaseDataBlob> { planetBodyDB, planetNameDB, atmos, orbitDB });
 
             return resultPlanet;
         }

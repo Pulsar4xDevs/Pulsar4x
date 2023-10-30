@@ -32,9 +32,6 @@ namespace Pulsar4X.SDL2UI
             {
                 DataBlobs.Add(db.GetType(), db);
             }
-            Position = entity.GetDataBlob<PositionDB>();
-
-            //Name = entity.GetDataBlob<NameDB>().GetName(_uiState.Faction);
             StarSystem starSys = (StarSystem)entity.Manager;
             StarSysGuid = starSys.Guid;
             entity.ChangeEvent += On_entityChangeEvent;
