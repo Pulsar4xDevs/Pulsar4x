@@ -13,7 +13,7 @@ namespace DebugReloadClient
         [STAThread]
         public static void Main(string[] args)
         {
-            var filpth = Path.GetFullPath("../../../Pulsar4X.ImGuiNetUI/bin/Debug/net47/Pulsar4X.ImGuiNetUI.exe");
+            var filpth = Path.GetFullPath("../../../Pulsar4X.Client/bin/Debug/net47/Pulsar4X.Client.exe");
             var ass = new ReloadAssembly(filpth);
 
             dynamic pmw = ass.NewType<PulsarMainWindow>();

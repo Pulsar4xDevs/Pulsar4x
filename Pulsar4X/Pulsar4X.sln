@@ -4,7 +4,7 @@ VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulsar4X.Tests", "Pulsar4X.Tests\Pulsar4X.Tests.csproj", "{833CF332-9313-4FA4-B5F0-F4CADA1BDF58}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulsar4X.ImGuiNetUI", "Pulsar4X.ImGuiNetUI\Pulsar4X.ImGuiNetUI.csproj", "{8F27EDF1-1680-4CD2-809C-A9D25B207168}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pulsar4X.Client", "Pulsar4X.Client\Pulsar4X.Client.csproj", "{8F27EDF1-1680-4CD2-809C-A9D25B207168}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Orbital", "Pulsar4X.OrbitalMath\Pulsar4X.Orbital.csproj", "{5220F218-C3A8-4A23-A9B7-F70C591987F4}"
 EndProject

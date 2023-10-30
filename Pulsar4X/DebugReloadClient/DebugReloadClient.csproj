@@ -13,7 +13,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\MyvarReload\MyvarReload\MyvarReload.csproj" />
       <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj" />
-      <ProjectReference Include="..\Pulsar4X.ImGuiNetUI\Pulsar4X.ImGuiNetUI.csproj" />
+      <ProjectReference Include="..\Pulsar4X.Client\Pulsar4X.Client.csproj" />
     </ItemGroup>
 
 </Project>
