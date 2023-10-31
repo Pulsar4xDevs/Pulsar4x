@@ -11,7 +11,7 @@ namespace Pulsar4X.Engine;
 public delegate void EntityChangeHandler (EntityChangeData.EntityChangeType changeType, BaseDataBlob db);
 
 [DebuggerDisplay("{DebuggerDisplay}")]
-public class Entity : IHasDataBlobs
+public class Entity : IHasDataBlobs, IEquatable<Entity>
 {
     public int Id { get; private set; }
 
@@ -160,6 +160,14 @@ public class Entity : IHasDataBlobs
         Manager.RemoveEntity(this);
         Manager = null;
         FactionOwnerID = -1;
+    }
+
+    public bool Equals(Entity? other)
+    {
+        return other != null
+            && this.Id == other.Id
+            && this.FactionOwnerID == other.FactionOwnerID
+            && this.Manager.ManagerGuid.Equals(other.Manager.ManagerGuid);
     }
 
     [JsonIgnore]
