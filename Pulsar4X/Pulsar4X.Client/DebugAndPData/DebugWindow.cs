@@ -17,8 +17,8 @@ namespace Pulsar4X.SDL2UI
     {
         EntityState _selectedEntityState;
 
-        private Entity _selectedEntity;
-        private Entity SelectedEntity
+        private Entity? _selectedEntity;
+        private Entity? SelectedEntity
         {
             get { return _selectedEntity;}
             set
@@ -372,7 +372,7 @@ namespace Pulsar4X.SDL2UI
                                     {
                                         relativeState = SelectedEntity.GetRelativeState();
                                     }
-                                    catch(Exception ex)
+                                    catch(Exception)
                                     {
                                         relativeState.Velocity = Vector3.Zero;
                                     }
@@ -968,7 +968,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndGroup();
                 if (ImGui.IsItemHovered())
                 {
-                    _hvSelectedIndex = _hvSelectedIndex;
+                    //_hvSelectedIndex = _hvSelectedIndex;
                 }
 
                 ImGui.NextColumn();

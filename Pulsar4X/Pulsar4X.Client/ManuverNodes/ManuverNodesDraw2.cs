@@ -26,7 +26,6 @@ public class ManuverNodesDraw2 : IDrawData
         r = 200, g = 200, b = 200, a = 100,
     };
 
-    
     public ManuverNodesDraw2(Entity entity)
     {
         if (entity.TryGetDatablob(out NavSequenceDB db))
@@ -38,12 +37,11 @@ public class ManuverNodesDraw2 : IDrawData
     {
         _points = new List<Vector2>();
         _colors = new List<(SDL.SDL_Color color, int count)>();
-        int i = 0;
         foreach (var manuver in _db.ManuverNodes)
         {
             var startState = OrbitalMath.GetStateVectors(manuver.StartKepler, manuver.StartDateTime);
             var endState = OrbitalMath.GetStateVectors(manuver.EndKepler, manuver.EndDateTime);
-            
+
             switch (manuver.TypeOfManuver)
             {
                 case Manuver.ManuverType.Warp:
@@ -69,7 +67,6 @@ public class ManuverNodesDraw2 : IDrawData
                 {
                     var startPos = (Vector2)startState.position;
                     var endPos = (Vector2)endState.position;
-                    
                     var sweepAngle = Math.PI * 0.5;
                     var r = RadiusFromFocal(manuver.StartKepler, sweepAngle);
                     var sweepPnt = new Vector2()
@@ -80,8 +77,7 @@ public class ManuverNodesDraw2 : IDrawData
                     var kp = CreatePrimitiveShapes.KeplerPoints(manuver.StartKepler, startPos, sweepPnt);
                     _points.AddRange(kp);
                     _colors.Add((_newtStartColor, kp.Length));
-                    
-                    
+
                     r = RadiusFromFocal(manuver.EndKepler, sweepAngle);
                     sweepPnt = new Vector2()
                     {
@@ -91,7 +87,7 @@ public class ManuverNodesDraw2 : IDrawData
                     kp = CreatePrimitiveShapes.KeplerPoints(manuver.EndKepler, endPos, sweepPnt);
                     _points.AddRange(kp);
                     _colors.Add((_driftColor, kp.Length));
-                    
+
                     break;
                 }
             }

@@ -72,7 +72,7 @@ public class ManuverLinesComplete : IDrawData
     {
         ManuverNode newNode = new ManuverNode(orderEntity, nodeTime);
         var val = RenderManuverLines.FindNodeTime(RootSequence, nodeTime);
-        
+
         if (val[0].nodeIndex != -1) //if has priorNode
         {
             newNode.PriorOrbit = val[0].seq.ManuverNodes[val[0].nodeIndex].TargetOrbit;
@@ -104,7 +104,6 @@ public class ManuverLinesComplete : IDrawData
         SelectedSequence.ManuverSequences.Add(newseq);
         SelectedSequence = newseq;
         AddExsistingEditingNodes();
-        
     }
 
     public void ManipulateNode(int nodeIndex, double _progradeDV, double _radialDV, double tseconds)
@@ -115,7 +114,7 @@ public class ManuverLinesComplete : IDrawData
         {
             var nodeTime = nodeToEdit.NodeTime;
             var val = RenderManuverLines.FindNodeTime(RootSequence, nodeTime);
-        
+
             if (val[0].nodeIndex != -1) //if has priorNode
             {
                 nodeToEdit.PriorOrbit = val[0].seq.ManuverNodes[val[0].nodeIndex].TargetOrbit;
@@ -126,14 +125,11 @@ public class ManuverLinesComplete : IDrawData
                 val[1].seq.ManuverNodes[val[1].nodeIndex].PriorOrbit = nodeToEdit.TargetOrbit;
             }
         }
-            
-        
     }
 
 
     private Vector2[] points = new Vector2[0];
     private SDL.SDL_Point[] DrawPoints = new SDL.SDL_Point[0];
-    
     private SDL.SDL_Point[] DrawPointsEditing = new SDL.SDL_Point[0];
     public void OnFrameUpdate(Matrix matrix, Camera camera)
     {
@@ -141,12 +137,11 @@ public class ManuverLinesComplete : IDrawData
         if (DrawPoints.Length != points.Length)
             DrawPoints = new SDL.SDL_Point[points.Length];
 
-        
         var foo = camera.ViewCoordinateV2_m(RootSequence.ParentPosition.AbsolutePosition); //camera position and zoom
         var trns = Matrix.IDTranslate(foo.X, foo.Y);
         var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
         var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
-        
+
         for (int i = 0; i < points.Length; i++)
         {
             DrawPoints[i] = mtrx.TransformToSDL_Point(points[i].X, points[i].Y);
@@ -163,14 +158,12 @@ public class ManuverLinesComplete : IDrawData
 
     public void OnPhysicsUpdate()
     {
-        
     }
 
     public void Draw(IntPtr rendererPtr, Camera camera)
     {
         SDL.SDL_SetRenderDrawColor(rendererPtr, obtClr.r, obtClr.g, obtClr.b, obtClr.a);
         SDL.SDL_RenderDrawLines(rendererPtr, DrawPoints, DrawPoints.Length);
-        
         SDL.SDL_SetRenderDrawColor(rendererPtr, editClr.r, editClr.g, editClr.b, editClr.a);
         SDL.SDL_RenderDrawLines(rendererPtr, DrawPointsEditing, DrawPointsEditing.Length);
         if(DrawPoints.Length > 1)
@@ -199,9 +192,7 @@ public static class RenderManuverLines
 
     public static Vector2[] CreatePointArray(ManuverSequence manuverSequence)
     {
-        int res = 128;
         var data = GetData(manuverSequence);
-        
 
         List<Vector2[]> arraylist = new List<Vector2[]>();
         var pointCount = 0;
@@ -217,7 +208,7 @@ public static class RenderManuverLines
             Vector2 endPos = startPos;
             if (index < data.Count - 1)
                 endPos = data[index + 1].startPos; 
-            
+
             var kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
             arraylist.Add(kp);
             pointCount += kp.Length;
@@ -231,21 +222,18 @@ public static class RenderManuverLines
             Array.Copy(source, 0, pointArray, paIndex, source.Length );
             paIndex += source.Length;
         }
-        
+
         return pointArray;
     }
-    
-    
+
     public static Vector2[] CreatePointArray(ManuverNode[] manuverNodes)
     {
-        int res = 128;
         List<(KeplerElements ke, Vector2 startPos)> data = new List<(KeplerElements ke, Vector2 startPos)>();
         foreach (var node in manuverNodes)
         {
             var tgtOrbit = node.TargetOrbit;
             data.Add((tgtOrbit, (Vector2)node.NodePosition));
         }
-        
 
         List<Vector2[]> arraylist = new List<Vector2[]>();
         var pointCount = 0;
@@ -261,7 +249,7 @@ public static class RenderManuverLines
             Vector2 endPos = startPos;
             if (index < data.Count - 1)
                 endPos = data[index + 1].startPos; 
-            
+
             var kp = CreatePrimitiveShapes.KeplerPoints(a, e, lop, startPos, endPos);
             arraylist.Add(kp);
             pointCount += kp.Length;
@@ -275,7 +263,7 @@ public static class RenderManuverLines
             Array.Copy(source, 0, pointArray, paIndex, source.Length );
             paIndex += source.Length;
         }
-        
+
         return pointArray;
     }
 
@@ -285,7 +273,7 @@ public static class RenderManuverLines
         (ManuverSequence seq, int priorNodeIndex)[] returnValue = new (ManuverSequence seq, int priorNodeIndex)[2];
         returnValue[0] =  (manuverSequence, -1);
         returnValue[1] = (manuverSequence, -1);
-        
+
         if(manuverSequence.ManuverNodes.Count > 0)
         {
             for (int i = 0; i < manuverSequence.ManuverNodes.Count; i++)

@@ -81,7 +81,7 @@ namespace Pulsar4X.Engine
                 entityPosition.AbsolutePosition = parentPositionDB.AbsolutePosition + newPosition;
 
             }
-            catch (OrbitProcessorException e)
+            catch (OrbitProcessorException)
             {
                 //Do NOT fail to the UI. There is NO data-corruption on this exception.
                 // In this event, we did NOT update our position.
