@@ -344,7 +344,7 @@ namespace Pulsar4X.Engine
         /// <param name="entity"></param>
         internal void AddEntityInterupt(DateTime nextDateTime, string actionProcessor, Entity? entity)
         {
-            if(entity == null) return;
+            if(entity == null) throw new ArgumentNullException("Entity cannot be null");
             if(nextDateTime < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
             if (nextDateTime < _processToDateTime)
                 _processToDateTime = nextDateTime;
