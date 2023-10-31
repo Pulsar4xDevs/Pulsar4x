@@ -24,7 +24,7 @@ namespace Pulsar4X.Datablobs
         [JsonProperty]
         public Dictionary<Entity, int> SurveyPointsAccumulated;
         [JsonProperty]
-        public Entity JumpPointTo;
+        public Entity? JumpPointTo;
         [JsonProperty]
         public string SystemToGuid;
         [JsonProperty]
@@ -43,7 +43,7 @@ namespace Pulsar4X.Datablobs
         /// <summary>
         /// Copy constructor
         /// </summary>
-        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated, Entity jumpPointTo, string systemToGuid, double minimumDistanceToJump_m)
+        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated, Entity? jumpPointTo, string systemToGuid, double minimumDistanceToJump_m)
         {
             SurveyPointsRequired = pointsRequired;
             SurveyPointsAccumulated = new Dictionary<Entity, int>(pointsAccumulated);

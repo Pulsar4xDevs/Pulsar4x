@@ -50,7 +50,7 @@ public class LogiBaseAtb : IComponentDesignAttribute
     public int LogisicCapacity { get; internal set; }
     public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        if (!parentEntity.TryGetDatablob(out LogiBaseDB lbdb))
+        if (!parentEntity.TryGetDatablob(out LogiBaseDB? lbdb))
         {
             parentEntity.SetDataBlob(lbdb = new LogiBaseDB());
         }

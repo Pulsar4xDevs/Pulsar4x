@@ -373,7 +373,7 @@ namespace Pulsar4X.Datablobs
             IsStationary = true;
         }
 
-        public OrbitDB(Entity parent)
+        public OrbitDB(Entity? parent)
             : base(parent)
         {
             IsStationary = false;

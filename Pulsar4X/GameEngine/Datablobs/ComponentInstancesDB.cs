@@ -56,7 +56,7 @@ namespace Pulsar4X.Datablobs
             componentStates = new List<T>();
             foreach (var comp in AllComponents.Values)
             {
-                if( comp.TryGetAbilityState<T>(out T state))
+                if (comp.TryGetAbilityState<T>(out T? state))
                     componentStates.Add(state);
             }
 

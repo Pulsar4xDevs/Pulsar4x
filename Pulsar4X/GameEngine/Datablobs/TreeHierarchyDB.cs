@@ -21,7 +21,7 @@ namespace Pulsar4X.Datablobs
     public abstract class TreeHierarchyDB : BaseDataBlob
     {
         [PublicAPI]
-        public override Entity OwningEntity
+        public override Entity? OwningEntity
         {
             get { return _owningEntity_; }
             internal set
@@ -45,7 +45,7 @@ namespace Pulsar4X.Datablobs
         [CanBeNull]
         [PublicAPI]
         [JsonProperty]
-        public Entity Parent { get; private set; }
+        public Entity? Parent { get; private set; }
 
         /// <summary>
         /// Same type DataBlob of my parent node.
@@ -55,7 +55,7 @@ namespace Pulsar4X.Datablobs
         /// </example>
         [CanBeNull]
         [PublicAPI]
-        public TreeHierarchyDB ParentDB
+        public TreeHierarchyDB? ParentDB
         {
             get
             {
@@ -76,14 +76,14 @@ namespace Pulsar4X.Datablobs
         /// </example>
         [NotNull]
         [PublicAPI]
-        public Entity Root => ParentDB?.Root ?? OwningEntity;
+        public Entity Root => ParentDB?.Root ?? ((OwningEntity == null) ? Entity.InvalidEntity : OwningEntity);
 
         /// <summary>
         /// Same type DataBlob of my root node.
         /// </summary>
         [NotNull]
         [PublicAPI]
-        public TreeHierarchyDB RootDB => GetSameTypeDB(Root);
+        public TreeHierarchyDB? RootDB => GetSameTypeDB(Root);
 
         /// <summary>
         /// All child nodes to this node.
@@ -99,13 +99,13 @@ namespace Pulsar4X.Datablobs
         /// </summary>
         [NotNull]
         [PublicAPI]
-        public List<TreeHierarchyDB> ChildrenDBs => Children.Select(GetSameTypeDB).ToList();
+        public List<TreeHierarchyDB?> ChildrenDBs => Children.Select(GetSameTypeDB).ToList();
 
         /// <summary>
         /// Creates a new TreeHierarchyDB with the provided parent.
         /// </summary>
         /// <param name="parent"></param>
-        protected TreeHierarchyDB(Entity parent)
+        protected TreeHierarchyDB(Entity? parent)
         {
             Parent = parent;
             _children = new List<Entity>();
@@ -127,8 +127,9 @@ namespace Pulsar4X.Datablobs
             Parent = null;
         }
 
-        internal void AddChild(Entity child)
+        internal void AddChild(Entity? child)
         {
+            if(child == null) return;
             if (Children.Contains(child))
             {
                 return;
@@ -137,9 +138,10 @@ namespace Pulsar4X.Datablobs
             //Children.Sort((entity1, entity2) => entity1.ID.CompareTo(entity2.ID));
         }
 
-        internal void RemoveChild(Entity child)
+        internal void RemoveChild(Entity? child)
         {
-            Children.Remove(child);
+            if(child != null)
+                Children.Remove(child);
         }
 
         public IEnumerable<Entity> GetChildren()
@@ -147,7 +149,7 @@ namespace Pulsar4X.Datablobs
             return Children.ToArray();
         }
 
-        private TreeHierarchyDB GetSameTypeDB(Entity entity)
+        private TreeHierarchyDB? GetSameTypeDB(Entity entity)
         {
             return !entity.IsValid ? null : (TreeHierarchyDB)entity.GetDataBlob(this.GetType());
         }

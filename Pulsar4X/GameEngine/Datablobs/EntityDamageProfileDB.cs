@@ -67,7 +67,6 @@ namespace Pulsar4X.Datablobs
             var typeBitmap = new List<(string, RawBmp)>();
             var placementOrder = new List<(string, int)>();
             var instances = new List<ComponentInstance>();
-            int avIndex = 0;
 
             ArmorVertex.Add((0, 0));
             foreach (var componenttype in components)

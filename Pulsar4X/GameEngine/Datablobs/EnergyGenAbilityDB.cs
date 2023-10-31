@@ -28,7 +28,8 @@ namespace Pulsar4X.Datablobs
         public double Output { get; internal set; }
         public void AddDemand(double demand, DateTime atDateTime)
         {
-            EnergyGenProcessor.EnergyGen(OwningEntity, atDateTime);
+            if(OwningEntity != null)
+                EnergyGenProcessor.EnergyGen(OwningEntity, atDateTime);
             Demand += demand;
         }
 

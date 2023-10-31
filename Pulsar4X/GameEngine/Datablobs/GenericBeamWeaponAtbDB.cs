@@ -11,6 +11,7 @@ using Pulsar4X.Engine.Designs;
 using Pulsar4X.Extensions;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Damage;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Pulsar4X.Datablobs
 {
@@ -61,7 +62,7 @@ namespace Pulsar4X.Datablobs
             return false;
         }
 
-        public bool TryGetOrdnance(out OrdnanceDesign ordnanceDesign)
+        public bool TryGetOrdnance([NotNullWhen(true)] out OrdnanceDesign? ordnanceDesign)
         {
             ordnanceDesign = null;
             return false;

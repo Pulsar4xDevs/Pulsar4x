@@ -8,7 +8,7 @@ namespace Pulsar4X.Interfaces
         public bool CanLoadOrdnance(OrdnanceDesign ordnanceDesign);
         public bool AssignOrdnance(OrdnanceDesign ordnanceDesign);
 
-        public bool TryGetOrdnance(out OrdnanceDesign ordnanceDesign);
+        public bool TryGetOrdnance(out OrdnanceDesign? ordnanceDesign);
         
         public void FireWeapon(Entity launchingEntity, Entity tgtEntity, int count);
 

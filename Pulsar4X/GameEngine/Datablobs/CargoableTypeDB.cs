@@ -39,6 +39,7 @@ namespace Pulsar4X.Datablobs
 
         public double Density => OwningEntity.GetDataBlob<MassVolumeDB>().DensityDry_kgm;
 
+        private static string UNKNOWN = "Unknown Object";
         /// <summary>
         /// This should be set to true if the item has become damaged or in any other way needs to maintain state
         /// </summary>
@@ -48,11 +49,12 @@ namespace Pulsar4X.Datablobs
 
             get
             {
-                if (this.OwningEntity.GetDataBlob<NameDB>() != null)
+                if(OwningEntity == null) return UNKNOWN;
+                if(OwningEntity.TryGetDatablob<NameDB>(out var nameDB))
                 {
-                    return this.OwningEntity.GetDataBlob<NameDB>()?.GetName(OwningEntity.FactionOwnerID);
+                    return nameDB.GetName(OwningEntity.FactionOwnerID);
                 }
-                else return "Unknown Object";
+                return UNKNOWN;
             }
         }
 
