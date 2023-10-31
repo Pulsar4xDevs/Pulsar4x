@@ -49,7 +49,7 @@ namespace Pulsar4X.DataStructures
     /// </example>
     //[JsonObjectAttribute]
     [JsonConverter(typeof(WeightedListConverter))]
-    public class WeightedList<T> : IEnumerable<WeightedValue<T>>, ISerializable
+    public class WeightedList<T> : IEnumerable<WeightedValue<T>>
     {
         private List<WeightedValue<T>> _valueList;
 
@@ -178,23 +178,6 @@ namespace Pulsar4X.DataStructures
             return _valueList[index].Value;
         }
 
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("Values", _valueList);
-        }
-
-        public WeightedList(SerializationInfo info, StreamingContext context)
-        {
-            _valueList = (List<WeightedValue<T>>)info.GetValue("Values", typeof(List<WeightedValue<T>>));
-
-            // rebuild total weight:
-            TotalWeight = 0;
-            foreach (var w in _valueList)
-            {
-                TotalWeight += w.Weight;
-            }
-        }
-
         public WeightedValue<T> this[int index]
         {
             get { return _valueList[index]; }
@@ -209,14 +192,14 @@ namespace Pulsar4X.DataStructures
             return objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(WeightedList<>);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             var token = JToken.ReadFrom(reader);
 
-            JArray valuesArray;
+            JArray? valuesArray;
             if (token is JObject jObject && jObject["$values"] != null)
             {
-                valuesArray = jObject["$values"].Value<JArray>();
+                valuesArray = jObject["$values"]?.Value<JArray>();
             }
             else if (token is JArray jArrayToken)
             {
@@ -242,8 +225,9 @@ namespace Pulsar4X.DataStructures
         }
 
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
+            if(value == null) return;
             var jArray = new JArray();
             foreach (var item in (System.Collections.IEnumerable)value)
             {

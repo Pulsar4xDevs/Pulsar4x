@@ -22,7 +22,18 @@ namespace Pulsar4X.DataStructures
     {
         object ISafeDictionary.this[int index]
         {
-            get => this[(TKey)(object)index];
+            get
+            {
+                TKey key = (TKey)(object)index;
+                if (this.TryGetValue(key, out TValue? value))
+                {
+                    return value;
+                }
+                else
+                {
+                    throw new KeyNotFoundException($"Key {index} not found in the dictionary.");
+                }
+            }
             set => this[(TKey)(object)index] = (TValue)value;
         }
 
@@ -105,7 +116,7 @@ namespace Pulsar4X.DataStructures
         {
             lock(_lock)
             {
-                if(_innerDictionary.TryGetValue(key, out TValue value))
+                if(_innerDictionary.TryGetValue(key, out TValue? value))
                 {
                     _innerDictionary.Remove(key);
                     ItemRemoved?.Invoke(key, value);
@@ -121,11 +132,15 @@ namespace Pulsar4X.DataStructures
             lock(_lock) return _innerDictionary.ContainsKey(key);
         }
 
-        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
+        public bool TryGetValue(TKey key, [NotNullWhen(true)] out TValue? value)
         {
             if(ContainsKey(key))
             {
                 value = _innerDictionary[key];
+                if (value is null)
+                {
+                    throw new InvalidOperationException("Unexpected null value in the dictionary.");
+                }
                 return true;
             }
 
@@ -148,7 +163,7 @@ namespace Pulsar4X.DataStructures
             return GetEnumerator();
         }
 
-        public bool Equals(SafeDictionary<TKey, TValue> other)
+        public bool Equals(SafeDictionary<TKey, TValue>? other)
         {
             if(other is null) return false;
             if(ReferenceEquals(this, other)) return true;
@@ -199,7 +214,7 @@ namespace Pulsar4X.DataStructures
             return objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(SafeDictionary<,>);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             Type keyType = objectType.GetGenericArguments()[0];
             Type baseValueType = objectType.GetGenericArguments()[1];
@@ -210,7 +225,7 @@ namespace Pulsar4X.DataStructures
             return result;
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             var objectType = value.GetType();
             var innerDictionaryProperty = objectType.GetProperty("InnerDictionary", BindingFlags.NonPublic | BindingFlags.Instance);

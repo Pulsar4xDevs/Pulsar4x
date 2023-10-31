@@ -21,13 +21,13 @@ namespace Pulsar4X.DataStructures
         /// </summary>
         private bool Equals(ComparableBitArray other)
         {
-            return other != null && Length == other.Length && BackingValues.SequenceEqual(other.BackingValues);
+            return Length == other.Length && BackingValues.SequenceEqual(other.BackingValues);
         }
 
         /// <summary>
         /// Equality overrides so we are not only checking references.
         /// </summary>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null)
                 return false;
@@ -232,7 +232,7 @@ namespace Pulsar4X.DataStructures
 
     public class ComparableBitArrayConverter : JsonConverter<ComparableBitArray>
     {
-        public override void WriteJson(JsonWriter writer, ComparableBitArray value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, ComparableBitArray? value, JsonSerializer serializer)
         {
             var jObject = new JObject
             {
@@ -242,15 +242,15 @@ namespace Pulsar4X.DataStructures
             jObject.WriteTo(writer);
         }
 
-        public override ComparableBitArray ReadJson(JsonReader reader, Type objectType, ComparableBitArray existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override ComparableBitArray? ReadJson(JsonReader reader, Type objectType, ComparableBitArray? existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             var jObject = JObject.Load(reader);
-            int[] backingValues = jObject["BackingValues"].ToObject<int[]>();
-            int length = jObject["Length"].Value<int>();
+            int[]? backingValues = jObject["BackingValues"].ToObject<int[]>();
+            int? length = jObject["Length"]?.Value<int>();
 
             // Use the private constructor to create the ComparableBitArray instance
-            var bitArrayInstance = (ComparableBitArray)Activator.CreateInstance(typeof(ComparableBitArray), 
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance, 
+            var bitArrayInstance = (ComparableBitArray?)Activator.CreateInstance(typeof(ComparableBitArray),
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
                 null, new object[] { backingValues, length }, null);
 
             return bitArrayInstance;

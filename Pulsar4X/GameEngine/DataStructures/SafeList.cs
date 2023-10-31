@@ -106,7 +106,7 @@ namespace Pulsar4X.DataStructures
             return GetEnumerator();
         }
 
-        public bool Equals(SafeList<T> other)
+        public bool Equals(SafeList<T>? other)
         {
             if(other is null) return false;
             if(ReferenceEquals(this, other)) return true;
@@ -154,7 +154,7 @@ namespace Pulsar4X.DataStructures
             return objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(SafeList<>);
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             Type keyType = objectType.GetGenericArguments()[0];
             var constructedListType = typeof(List<>).MakeGenericType(keyType);
@@ -164,7 +164,7 @@ namespace Pulsar4X.DataStructures
             return result;
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             var objectType = value.GetType();
             var innerListProperty = objectType.GetProperty("InnerList", BindingFlags.NonPublic | BindingFlags.Instance);

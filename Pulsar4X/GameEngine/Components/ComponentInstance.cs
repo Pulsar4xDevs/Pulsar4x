@@ -5,6 +5,7 @@ using Pulsar4X.Interfaces;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Pulsar4X.Components
 {
@@ -83,7 +84,7 @@ namespace Pulsar4X.Components
             return (T)_instanceAbilities[typeof(T)];
         }
 
-        public bool TryGetAbilityState<T>(out T attribute)
+        public bool TryGetAbilityState<T>([NotNullWhen(true)] out T? attribute)
             where T : ComponentAbilityState
         {
             if (_instanceAbilities.ContainsKey(typeof(T)))

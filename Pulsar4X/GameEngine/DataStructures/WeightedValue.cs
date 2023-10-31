@@ -12,8 +12,10 @@ namespace Pulsar4X.DataStructures
             return EqualityComparer<T>.Default.Equals(Value, other.Value);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
+            if(obj == null) return false;
+
             if (ReferenceEquals(null, obj))
             {
                 return false;
@@ -31,7 +33,8 @@ namespace Pulsar4X.DataStructures
 
         public override int GetHashCode()
         {
-            return EqualityComparer<T>.Default.GetHashCode(Value);
+            return Value is null ? 0 : EqualityComparer<T>.Default.GetHashCode(Value);
         }
+
     }
 }

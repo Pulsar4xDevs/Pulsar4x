@@ -21,7 +21,9 @@ namespace Pulsar4X.Datablobs
         internal virtual void OnSetToEntity()
         {
         }
-        public virtual object Clone() { return null; }
+
+        // FIXME: changed this to not return null but this seems bad
+        public virtual object Clone() { return new object(); }
 
         public static List<Type> GetDependencies() => new List<Type>();
 

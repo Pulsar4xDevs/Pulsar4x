@@ -10,7 +10,7 @@ namespace Pulsar4X.Blueprints
         public string Units { get; set; }
         public GuiHint GuiHint { get; set; }
         public string GuiIsEnabledFormula { get; set; }
-        public Dictionary<object, string> GuidDictionary { get; set; }
+        public Dictionary<string, string> GuidDictionary { get; set; }
         public string EnumTypeName { get; set; }
         public string MaxFormula { get; set; }
         public string MinFormula { get; set; }

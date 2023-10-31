@@ -175,31 +175,6 @@ namespace Pulsar4X.Components
             }
         }
 
-        internal Guid GuidResult
-        {
-            get
-            {
-                if(Result is null) Evaluate();
-
-                if(Result is null)
-                {
-                    throw new Exception("Result is null");
-                }
-                else if(Result is Guid)
-                {
-                    return (Guid)Result;
-                }
-                else if(Result is string)
-                {
-                    return Guid.Parse(Result.ToString());
-                }
-                else
-                {
-                    throw new Exception("Unexpected Result data Type " + Result.GetType() + " could not be cast to a string");
-                }
-            }
-        }
-
         /// <summary>
         /// Evaluates the expression and updates the Result.
         /// will also cause any other dependant ChainedExpressions to evaluate.
@@ -404,9 +379,9 @@ namespace Pulsar4X.Components
 
                 case "GuidDict":
                     var dict = new Dictionary<string, double>();
-                    foreach (var kvp in _designAttribute.GuidDictionary)
+                    foreach (var (key, expression) in _designAttribute.GuidDictionary)
                     {
-                        dict.Add(kvp.Key.ToString(), kvp.Value.DResult);
+                        dict.Add(key, expression.DResult);
                     }
 
                     args.Result = dict;
@@ -485,17 +460,17 @@ namespace Pulsar4X.Components
 
                 case "EnumDict":
                     string typeAsString = (string)args.Parameters[0].Evaluate();
-                    Type type = Type.GetType(typeAsString);
+                    Type? type = Type.GetType(typeAsString);
                     if (type == null)
                     {
                         throw new Exception("Type not found: " + typeAsString + " Check spelling and namespaces");
                     }
 
                     Type dictType = typeof(Dictionary<,>).MakeGenericType(type, typeof(double));
-                    dynamic dict = Activator.CreateInstance(dictType);
+                    dynamic? dict = Activator.CreateInstance(dictType);
 
                     Type enumDictType = typeof(Dictionary<,>).MakeGenericType(typeof(string), type);
-                    dynamic enumConstants = Activator.CreateInstance(enumDictType);
+                    dynamic? enumConstants = Activator.CreateInstance(enumDictType);
                     foreach (dynamic value in Enum.GetValues(type))
                     {
                         enumConstants.Add(Enum.GetName(type, value), value);

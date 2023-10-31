@@ -24,7 +24,7 @@ namespace Pulsar4X.Components
         /// Sets the parent of this. (no need to set this as a child on the parent)
         /// </summary>
         /// <param name="newParent"></param>
-        public void SetParent(ComponentTreeHeirarchyAbilityState newParent)
+        public void SetParent(ComponentTreeHeirarchyAbilityState? newParent)
         {
             if (ParentState != null)
             {
@@ -32,7 +32,7 @@ namespace Pulsar4X.Components
             }
 
             ParentState = newParent;
-            if(newParent != null)
+            if(ParentState != null)
                 ParentState.ChildrenStates.Add(this);
         }
 

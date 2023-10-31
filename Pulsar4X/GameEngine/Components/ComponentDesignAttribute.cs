@@ -51,14 +51,14 @@ namespace Pulsar4X.Components
 
             if (_templateSD.GuidDictionary != null )
             {
-                GuidDictionary = new Dictionary<object, ChainedExpression>();
+                GuidDictionary = new Dictionary<string, ChainedExpression>();
                 if (GuiHint == GuiHint.GuiTechSelectionList)
                 {
                     foreach (var kvp in _templateSD.GuidDictionary)
                     {
-                        if(factionDataStore.Techs.ContainsKey(kvp.Key.ToString()))
+                        if(factionDataStore.Techs.ContainsKey(kvp.Key))
                         {
-                            Tech techSD = factionDataStore.Techs[kvp.Key.ToString()];
+                            Tech techSD = factionDataStore.Techs[kvp.Key];
                             GuidDictionary.Add(kvp.Key, new ChainedExpression(techSD.TechDataFormula().ToString(), this, factionDataStore, factionTech));
                         }
                     }
@@ -134,7 +134,7 @@ namespace Pulsar4X.Components
             IsEnabledFormula.Evaluate();
         }
 
-        public Dictionary<object, ChainedExpression> GuidDictionary;
+        public Dictionary<string, ChainedExpression> GuidDictionary;
 
         public void SetValueFromDictionaryExpression(string key)
         {
@@ -192,7 +192,6 @@ namespace Pulsar4X.Components
 
         public double Value { get { return Formula.DResult; } }
         public string ValueString {get { return Formula.StrResult; } }
-        public Guid ValueGuid { get { return Formula.GuidResult; } }
 
         public double MinValue;
         internal ChainedExpression MinValueFormula { get; set; }

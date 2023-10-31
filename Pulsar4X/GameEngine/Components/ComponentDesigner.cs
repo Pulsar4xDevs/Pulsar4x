@@ -88,7 +88,7 @@ namespace Pulsar4X.Components
                     object[] constructorArgs = designAttribute.AtbConstrArgs;
                     try
                     {
-                        dynamic attrbute = (IComponentDesignAttribute)Activator.CreateInstance(designAttribute.AttributeType, constructorArgs);
+                        dynamic? attrbute = (IComponentDesignAttribute?)Activator.CreateInstance(designAttribute.AttributeType, constructorArgs);
                         _design.AttributesByType[attrbute.GetType()] = attrbute;
                     }
                     catch (MissingMethodException e)
