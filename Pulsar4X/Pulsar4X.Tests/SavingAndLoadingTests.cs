@@ -1,6 +1,4 @@
-using System.IO;
 using System.Linq;
-using System.Security.Principal;
 using NUnit.Framework;
 using Pulsar4X.Engine;
 using Pulsar4X.Modding;
@@ -10,30 +8,29 @@ namespace Pulsar4X.Tests
     [TestFixture]
     public class SavingAndLoadingTests
     {
-        ModLoader _modLoader;
-        ModDataStore _modDataStore;
-
-        NewGameSettings _settings;
-        Game _game;
+        NewGameSettings? _settings;
+        Game? _game;
 
         [SetUp]
         public void Setup()
         {
-            _modLoader = new ModLoader();
-            _modDataStore = new ModDataStore();
+            var modLoader = new ModLoader();
+            var modDataStore = new ModDataStore();
 
-            _modLoader.LoadModManifest("Data/basemod/modInfo.json", _modDataStore);
+            modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
 
             _settings = new NewGameSettings() {
-                StartDateTime = new System.DateTime(2069, 4, 20)
+                StartDateTime = new System.DateTime(2100, 9, 1)
             };
 
-            _game  = new Game(_settings, _modDataStore);
+            _game  = new Game(_settings, modDataStore);
         }
 
         [Test]
         public void VerifySaveAndLoad()
         {
+            if(_game == null) return;
+
             DefaultStartFactory.DefaultHumans(_game, "Test Humans");
 
             var gameJson = Game.Save(_game);
