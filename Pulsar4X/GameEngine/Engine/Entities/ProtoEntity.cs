@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
-using Microsoft.VisualBasic;
 using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.Engine;
@@ -38,13 +36,17 @@ public class ProtoEntity : IHasDataBlobs
     {
         Type dbType = dataBlob.GetType();
         if (DataBlobTypes.Contains(dbType))
-            DataBlobs.Remove(DataBlobs.Find(db => db.GetType() == dbType));
+        {
+            var item = DataBlobs.Find(db => db.GetType() == dbType);
+            if(item != null)
+                DataBlobs.Remove(item);
+        }
 
         DataBlobs.Add(dataBlob);
         DataBlobTypes.Add(dbType);
     }
 
-    public bool TryGetDatablob<T>(out T value) where T : BaseDataBlob
+    public bool TryGetDatablob<T>(out T? value) where T : BaseDataBlob
     {
         var type = typeof(T);
 

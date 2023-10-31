@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Newtonsoft.Json;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
@@ -8,7 +9,7 @@ using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine;
 
-public delegate void EntityChangeHandler (EntityChangeData.EntityChangeType changeType, BaseDataBlob db);
+public delegate void EntityChangeHandler (EntityChangeData.EntityChangeType changeType, BaseDataBlob? db);
 
 [DebuggerDisplay("{DebuggerDisplay}")]
 public class Entity : IHasDataBlobs, IEquatable<Entity>
@@ -16,7 +17,7 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
     public int Id { get; private set; }
 
     [JsonIgnore]
-    public EntityManager Manager { get; internal set; }
+    public EntityManager? Manager { get; internal set; }
 
     public event EntityChangeHandler ChangeEvent;
 
@@ -57,7 +58,7 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         return Manager.HasDataBlob(Id, type);
     }
 
-    public bool TryGetDatablob<T>(out T value) where T : BaseDataBlob
+    public bool TryGetDatablob<T>([NotNullWhen(true)] out T? value) where T : BaseDataBlob
     {
         if(Manager.HasDataBlob<T>(Id))
         {
@@ -84,7 +85,7 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         Manager.RemoveDatablob<T>(Id);
     }
 
-    public void InvokeChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
+    public void InvokeChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob? db)
     {
         ChangeEvent?.Invoke(changeType, db);
     }

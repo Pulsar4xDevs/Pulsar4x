@@ -118,7 +118,7 @@ namespace Pulsar4X.Engine
 
         #region Entity Management Functions
 
-        public void AddEntity(Entity entity, IEnumerable<BaseDataBlob> dataBlobs = null)
+        public void AddEntity(Entity entity, IEnumerable<BaseDataBlob>? dataBlobs = null)
         {
             if (_entities.ContainsKey(entity.Id))
                 throw new ArgumentException($"Entity with ID {entity.Id} already exists");
@@ -157,7 +157,7 @@ namespace Pulsar4X.Engine
 
         public void Transfer(Entity entity)
         {
-            List<BaseDataBlob> dataBlobs = null;
+            var dataBlobs = new List<BaseDataBlob>();
             if(entity.Manager != null)
             {
                 dataBlobs = entity.Manager.GetAllDataBlobsForEntity(entity.Id);
@@ -322,7 +322,7 @@ namespace Pulsar4X.Engine
 
         #endregion
 
-        private void UpdateListeners(Entity entity, BaseDataBlob db, EntityChangeData.EntityChangeType change)
+        private void UpdateListeners(Entity entity, BaseDataBlob? db, EntityChangeData.EntityChangeType change)
         {
             //listners to this work on thier own threads and are not affected by this one.
             if (EntityListeners.Count > 0)
