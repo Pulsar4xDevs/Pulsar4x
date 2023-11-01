@@ -178,5 +178,21 @@ namespace Pulsar4X.Datablobs
         {
             return new AtmosphereDB(this);
         }
+
+        public override bool Equals(object? obj)
+        {
+            if(!base.Equals(obj)) return false;
+
+            AtmosphereDB other = (AtmosphereDB)obj;
+            if(this.Pressure != other.Pressure) return false;
+            if(this.Hydrosphere != other.Hydrosphere) return false;
+            if(this.HydrosphereExtent != other.HydrosphereExtent) return false;
+            if(this.GreenhouseFactor != other.GreenhouseFactor) return false;
+            if(this.GreenhousePressure != other.GreenhousePressure) return false;
+            if(this.SurfaceTemperature != other.SurfaceTemperature) return false;
+            if(!(this.Composition.Count == other.Composition.Count && !this.Composition.Except(other.Composition).Any())) return false;
+
+            return true;
+        }
     }
 }
