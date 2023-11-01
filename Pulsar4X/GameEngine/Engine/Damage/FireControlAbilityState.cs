@@ -10,7 +10,7 @@ namespace Pulsar4X.Engine.Damage
     public class FireControlAbilityState : ComponentTreeHeirarchyAbilityState
     {
         public Entity Target { get; private set; }
-        private NameDB _TargetNameDB;
+        private NameDB? _TargetNameDB;
 
         internal void SetTarget(Entity target)
         {
@@ -19,7 +19,6 @@ namespace Pulsar4X.Engine.Damage
                 _TargetNameDB = null;
             else
                 _TargetNameDB = target.GetDataBlob<NameDB>();
-            
         }
 
         private int _factionOwner;

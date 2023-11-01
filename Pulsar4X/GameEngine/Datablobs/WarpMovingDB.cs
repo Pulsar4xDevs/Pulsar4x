@@ -53,7 +53,7 @@ namespace Pulsar4X.Datablobs
         internal bool IsAtTarget { get; set; }
 
         [JsonProperty]
-        internal Entity TargetEntity;
+        internal Entity? TargetEntity;
         [JsonIgnore] //don't store datablobs, we catch this on deserialization.
         internal PositionDB TargetPositionDB;
 
@@ -137,7 +137,7 @@ namespace Pulsar4X.Datablobs
             if (TargetEntity != null)
             {
 
-                var game = (Game)context.Context;
+                var game = (Game?)context.Context;
                 game.PostLoad += (sender, args) =>
                 {
                     TargetPositionDB = TargetEntity.GetDataBlob<PositionDB>();

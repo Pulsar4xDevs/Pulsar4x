@@ -530,7 +530,7 @@ namespace Pulsar4X.Components
                     args.Result = argList;
                     break;
                 case "ExhaustVelocityLookup":
-                    var cargo = (ProcessedMaterialBlueprint)_factionDataStore.CargoGoods.GetAny((string)args.EvaluateParameters()[0]);
+                    var cargo = (ProcessedMaterialBlueprint?)_factionDataStore.CargoGoods.GetAny((string)args.EvaluateParameters()[0]);
                     Expression dataExpression = new Expression(cargo.Formulas["ExhaustVelocity"]);
                     args.Result = dataExpression.Evaluate();
                     break;

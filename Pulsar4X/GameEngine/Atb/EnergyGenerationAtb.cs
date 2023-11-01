@@ -33,7 +33,7 @@ namespace Pulsar4X.Atb
         public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
         {
             string resourceID = EnergyTypeID;
-            ICargoable energyCargoable = parentEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(resourceID);
+            ICargoable? energyCargoable = parentEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(resourceID);
             EnergyGenAbilityDB genDB;
             if (!parentEntity.HasDataBlob<EnergyGenAbilityDB>())
             {

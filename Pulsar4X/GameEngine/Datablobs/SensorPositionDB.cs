@@ -14,7 +14,7 @@ namespace Pulsar4X.Datablobs
         public PositionDB ActualEntityPositionDB; //the detected actual entity
 
         [JsonProperty]
-        public PositionDB ParentPositionDB; //detected actual entity positional parent for relative positions.
+        public PositionDB? ParentPositionDB; //detected actual entity positional parent for relative positions.
 
         [JsonProperty]
         public Vector3 MemoryrelativePosition_m;
@@ -62,7 +62,7 @@ namespace Pulsar4X.Datablobs
         {
             ActualEntityPositionDB = actualEntityPosition;
             //if(actualEntityPosition.ParentDB != null)
-            ParentPositionDB = (PositionDB)actualEntityPosition.ParentDB;
+            ParentPositionDB = (PositionDB?)actualEntityPosition.ParentDB;
             GetDataFrom = DataFrom.Parent;
         }
 

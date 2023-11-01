@@ -28,7 +28,7 @@ namespace Pulsar4X.Datablobs
                     throw new Exception("Infinite loop triggered");
                 else
                 {
-                    PositionDB parentpos = (PositionDB)ParentDB;
+                    PositionDB? parentpos = (PositionDB?)ParentDB;
                     if(parentpos == this)
                         throw new Exception("Infinite loop triggered");
                     return parentpos.AbsolutePosition + _positionInMeters;
@@ -40,7 +40,7 @@ namespace Pulsar4X.Datablobs
                     _positionInMeters = value;
                 else
                 {
-                    PositionDB parentpos = (PositionDB)ParentDB;
+                    PositionDB? parentpos = (PositionDB?)ParentDB;
                     _positionInMeters = value - parentpos.AbsolutePosition;
                 }
             } }
@@ -64,7 +64,7 @@ namespace Pulsar4X.Datablobs
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>
         /// <param name="z">Z value.</param>
-        public PositionDB(double x, double y, double z, string systemGuid, Entity parent = null) : base(parent)
+        public PositionDB(double x, double y, double z, string systemGuid, Entity? parent = null) : base(parent)
         {
             AbsolutePosition = new Vector3(x, y, z);
             SystemGuid = systemGuid;
@@ -76,13 +76,13 @@ namespace Pulsar4X.Datablobs
         /// <param name="relativePos_m"></param>
         /// <param name="systemGuid"></param>
         /// <param name="parent"></param>
-        public PositionDB(Vector3 relativePos, string systemGuid, Entity parent = null) : base(parent)
+        public PositionDB(Vector3 relativePos, string systemGuid, Entity? parent = null) : base(parent)
         {
             RelativePosition = relativePos;
             SystemGuid = systemGuid;
         }
 
-        public PositionDB(string systemGuid, Entity parent = null) : base(parent)
+        public PositionDB(string systemGuid, Entity? parent = null) : base(parent)
         {
             Vector3? parentPos = (ParentDB as PositionDB)?.AbsolutePosition;
             AbsolutePosition = parentPos ?? Vector3.Zero;
@@ -112,7 +112,7 @@ namespace Pulsar4X.Datablobs
         /// Can be null.
         /// </summary>
         /// <param name="newParent"></param>
-        internal override void SetParent(Entity newParent)
+        internal override void SetParent(Entity? newParent)
         {
             if (newParent != null && !newParent.HasDataBlob<PositionDB>())
                 throw new Exception("newParent must have a PositionDB");

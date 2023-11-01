@@ -42,7 +42,7 @@ namespace Pulsar4X.Datablobs
 
         public TeamsDB() { }
 
-        public TeamsDB(int teamSize = 0, object initialTask = null)
+        public TeamsDB(int teamSize = 0, object? initialTask = null)
         {
             TeamSize = teamSize;
             TeamTask = initialTask;

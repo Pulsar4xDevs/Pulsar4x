@@ -115,7 +115,7 @@ namespace Pulsar4X.Datablobs
         /// Sets the parent of this node to another node, adjusting hierarchy as needed.
         /// </summary>
         /// <param name="parent"></param>
-        internal virtual void SetParent(Entity parent)
+        internal virtual void SetParent(Entity? parent)
         {
             ParentDB?.RemoveChild(OwningEntity);
             Parent = parent;

@@ -124,7 +124,7 @@ namespace Pulsar4X.Engine
         }
 
         public ICargoable GetAny(int id) => _definitions[id];
-        public ICargoable GetAny(string id) => _definitions.Count == 0 ? null : _definitions.Where(d => d.Value.UniqueID.Equals(id)).Select(kvp => kvp.Value).First();
+        public ICargoable? GetAny(string id) => _definitions.Count == 0 ? null : _definitions.Where(d => d.Value.UniqueID.Equals(id)).Select(kvp => kvp.Value).First();
 
         public bool Contains(int id) => _definitions.ContainsKey(id);
         public bool Contains(string uniqueID) => _definitions.Any(d => d.Value.UniqueID.Equals(uniqueID));

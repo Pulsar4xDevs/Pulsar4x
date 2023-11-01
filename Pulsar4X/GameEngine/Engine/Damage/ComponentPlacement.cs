@@ -170,7 +170,7 @@ namespace Pulsar4X.Engine.Damage
             float thickness = (shipProfile.Armor.thickness - 3) / 10 + 3;
             float maxdensity = 7900;//TODO read this from armor data
             byte armorcolor = (byte)Math.Min(255 * ((shipProfile.Armor.armorType.Density / 2 + maxdensity / 2) / maxdensity), 255);
-            float armorMass = 0;
+
             for (int i = 1; i < linePoints.Count; i++)
             {
                 //Draws the bottom line

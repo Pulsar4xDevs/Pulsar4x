@@ -81,7 +81,7 @@ namespace Pulsar4X.Engine.Designs
             //TODO! we're leaking softcode into hard code here! this is the "ordnance" cargo type, tells us to store this missile in "ordnance" type cargo.
             CargoTypeID = "ordnance-storage"; //new Guid("055E2026-20A4-4CFA-A8CA-A01915A48B5E");
             BurnRate = 0;
-            string fuelType = null;
+            string? fuelType = null;
             double fuelMass = fuelAmountKG;
             double mass = 0;
             double vol = 0;
@@ -108,7 +108,7 @@ namespace Pulsar4X.Engine.Designs
                         //thrusters should all be of the same type.
                         ExaustVelocity = thrAtb.ExhaustVelocity;
                         BurnRate += thrAtb.FuelBurnRate;
-                         fuelType = thrAtb.FuelType;
+                        fuelType = thrAtb.FuelType;
                     }
                 }
             }

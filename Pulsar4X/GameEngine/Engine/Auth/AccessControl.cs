@@ -11,9 +11,9 @@ namespace Pulsar4X.Engine.Auth
         public static bool IsAuthorized(Game game, AuthenticationToken authToken, Entity entity)
         {
             // Initial player verification.
-            Player authorizedPlayer = game?.GetPlayerForToken(authToken);
+            Player? authorizedPlayer = game?.GetPlayerForToken(authToken);
 
-            if (authorizedPlayer == null || entity == null || !entity.IsValid)
+            if (authorizedPlayer is null || entity == null || !entity.IsValid)
             {
                 return false;
             }

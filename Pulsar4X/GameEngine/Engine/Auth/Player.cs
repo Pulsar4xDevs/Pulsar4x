@@ -42,22 +42,22 @@ namespace Pulsar4X.Engine.Auth
 
         #region Constructors
 
-        public Player(SerializationInfo info, StreamingContext context)
-        {
-            ID = (Guid)info.GetValue(nameof(ID), typeof(Guid));
-            Name = info.GetString(nameof(Name));
+        // public Player(SerializationInfo info, StreamingContext context)
+        // {
+        //     ID = (Guid)info.GetValue(nameof(ID), typeof(Guid));
+        //     Name = info.GetString(nameof(Name));
 
-            if (context.State != StreamingContextStates.Persistence)
-            {
-                return;
-            }
+        //     if (context.State != StreamingContextStates.Persistence)
+        //     {
+        //         return;
+        //     }
 
-            PasswordHash = info.GetString(nameof(PasswordHash));
-            Salt = info.GetString(nameof(Salt));
-            FactionAccessRoles = (Dictionary<int, uint>)info.GetValue(nameof(FactionAccessRoles), typeof(Dictionary<int, uint>));
-            //Orders = new OrderQueue();
-            HaltsOnEvent = (Dictionary<EventType, bool>)info.GetValue(nameof(HaltsOnEvent), typeof(Dictionary<EventType, bool>));
-        }
+        //     PasswordHash = info.GetString(nameof(PasswordHash));
+        //     Salt = info.GetString(nameof(Salt));
+        //     FactionAccessRoles = (Dictionary<int, uint>)info.GetValue(nameof(FactionAccessRoles), typeof(Dictionary<int, uint>));
+        //     //Orders = new OrderQueue();
+        //     HaltsOnEvent = (Dictionary<EventType, bool>)info.GetValue(nameof(HaltsOnEvent), typeof(Dictionary<EventType, bool>));
+        // }
 
         internal Player(string name, string password = "") : this(name, password, Guid.NewGuid())
         { }
@@ -219,13 +219,14 @@ namespace Pulsar4X.Engine.Auth
 
         #region Equality Members
 
-        protected bool Equals(Player other)
+        protected bool Equals(Player? other)
         {
             return ID.Equals(other.ID);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
+            if(obj == null) return false;
             if (ReferenceEquals(null, obj))
             {
                 return false;
@@ -242,8 +243,10 @@ namespace Pulsar4X.Engine.Auth
             return ID.GetHashCode();
         }
 
-        public static bool operator ==(Player playerA, Player playerB)
+        public static bool operator ==(Player? playerA, Player? playerB)
         {
+            if(playerA is null && playerB is null) return true;
+            if(playerA is null || playerB is null) return false;
             return Equals(playerA, playerB);
         }
 
@@ -275,7 +278,7 @@ namespace Pulsar4X.Engine.Auth
 
         private static string GenerateSalt()
         {
-            var rng = new RNGCryptoServiceProvider();
+            var rng = RandomNumberGenerator.Create();
             var buff = new byte[12];
             rng.GetBytes(buff);
 
@@ -295,8 +298,9 @@ namespace Pulsar4X.Engine.Auth
         private static byte[] Hash(byte[] value, byte[] salt)
         {
             byte[] saltedValue = salt.Concat(value).ToArray();
+            var sha256 = SHA256.Create();
 
-            return new SHA256Managed().ComputeHash(saltedValue);
+            return sha256.ComputeHash(saltedValue);
         }
 
         #endregion
