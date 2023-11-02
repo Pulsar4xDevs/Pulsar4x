@@ -142,7 +142,7 @@ namespace Pulsar4X.SDL2UI
                     if(ImGui.IsItemHovered())
                         DisplayHelpers.DescriptiveTooltip(mineralData.Name, "Mineral", mineralData.Description);
                     ImGui.TableNextColumn();
-                    if(stockpileData != null)
+                    if(stockpileUnits != null && stockpileUnits.ContainsKey(id))
                     {
                         ImGui.Text(stockpileUnits[id].ToString("#,###,###,###,###,###,##0"));
                     }

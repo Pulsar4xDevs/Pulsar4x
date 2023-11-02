@@ -26,24 +26,24 @@ namespace Pulsar4X.SDL2UI
         private static float _heightMultiplyer = ImGui.GetTextLineHeightWithSpacing();
 
         private static bool _isActive = false;
-        
+
         /// <summary>
         /// use this to display the inspector as it's own window
         /// </summary>
         /// <param name="entity"></param>
         public static void Begin(Entity entity)
         {
-            
+
             string ownerName = entity.GetDataBlob<NameDB>().OwnersName;
             if (ImGui.Begin("Entity Inspector:  " + ownerName, ref _isActive))
             {
-                if(entity.Id != _entityID || entity.Manager.GetAllDataBlobsForEntity(entity.Id).Count != _dataBlobs.Length)
+                if(entity.Id != _entityID || (entity.Manager != null && entity.Manager.GetAllDataBlobsForEntity(entity.Id).Count != _dataBlobs.Length))
                     Refresh(entity);
-                
+
                 DisplayDatablobs(entity);
-                
-                
-                
+
+
+
             }
 
         }
@@ -52,7 +52,8 @@ namespace Pulsar4X.SDL2UI
         public static void Refresh(Entity entity)
         {
             _entityID = entity.Id;
-            _dataBlobs = entity.Manager.GetAllDataBlobsForEntity(entity.Id).ToArray();
+            if(entity.Manager != null)
+                _dataBlobs = entity.Manager.GetAllDataBlobsForEntity(entity.Id).ToArray();
         }
 
         /// <summary>
@@ -66,7 +67,7 @@ namespace Pulsar4X.SDL2UI
                 Refresh(entity);
             }
 
-            
+
             string[] stArray = new string[_dataBlobs.Length];
             for (int i = 0; i < _dataBlobs.Length; i++)
             {
@@ -80,13 +81,13 @@ namespace Pulsar4X.SDL2UI
 
             if (_selectedDB >= _dataBlobs.Length)
                 _selectedDB = -1;
-            
+
             if(_selectedDB >= 0)
                 DBDisplay(_dataBlobs[_selectedDB]);
 
             var p1 = ImGui.GetCursorPos();
             var size = new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, p1.Y - p0.Y );
-            
+
             BorderListOptions.End(size);
         }
 
@@ -95,27 +96,27 @@ namespace Pulsar4X.SDL2UI
             Type dbType = dataBlob.GetType();
 
             MemberInfo[] memberInfos = dbType.GetMembers();
-            
+
             var _totalHeight = _numLines * _heightMultiplyer;
             _numLines = memberInfos.Length;
             var size = new System.Numerics.Vector2(ImGui.GetContentRegionAvail().X, _totalHeight);
-            
+
             ImGui.BeginChild("InnerColomns", size);
-            
+
             ImGui.Columns(2);
 
             RecursiveReflection(dataBlob);
-            
+
 
             ImGui.Columns(0);
-            
+
             ImGui.EndChild();
             DisplayDBSpecifics(dataBlob);
         }
 
         static void RecursiveReflection(object obj)
         {
-            object value = null;
+            object? value = null;
             Type objType = obj.GetType();
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             MemberInfo[] memberInfos = objType.GetMembers(flags);
@@ -124,15 +125,16 @@ namespace Pulsar4X.SDL2UI
                 if (typeof(FieldInfo).IsAssignableFrom(memberInfo.GetType()) || typeof(PropertyInfo).IsAssignableFrom(memberInfo.GetType()))
                 {
                     MemberTypes membertype = memberInfo.MemberType;
-                    object prevVal = value;
+                    object? prevVal = value;
                     value = GetValue(memberInfo, obj);
                     if(value == null)
                         continue;
                     if (typeof(ICollection).IsAssignableFrom(value.GetType()))
                     {
-                        var items = (ICollection)GetValue(memberInfo, obj);
+                        var items = (ICollection?)GetValue(memberInfo, obj);
+                        if(items == null) continue;
                         int itemsCount = items.Count;
-                        
+
                         if (ImGui.TreeNode(memberInfo.Name))
                         {
                             ImGui.NextColumn();
@@ -141,7 +143,7 @@ namespace Pulsar4X.SDL2UI
                             _numLines += itemsCount;
                             lock (items)//TODO: IDK the best way to fix this.
                             {
-                                foreach (var item in items)  
+                                foreach (var item in items)
                                 {
                                     RecursiveReflection(item);
                                 }
@@ -158,9 +160,10 @@ namespace Pulsar4X.SDL2UI
                     }
                     else if (typeof(HashSet<Tech>).IsAssignableFrom(value.GetType()))
                     {
-                        var items = (HashSet<Tech>)GetValue(memberInfo, obj);
+                        var items = (HashSet<Tech>?)GetValue(memberInfo, obj);
+                        if(items == null) continue;
                         int itemsCount = items.Count;
-                        
+
                         if (ImGui.TreeNode(memberInfo.Name))
                         {
                             ImGui.NextColumn();
@@ -169,7 +172,7 @@ namespace Pulsar4X.SDL2UI
                             _numLines += itemsCount;
                             lock (items)//TODO: IDK the best way to fix this.
                             {
-                                foreach (var item in items)  
+                                foreach (var item in items)
                                 {
                                     RecursiveReflection(item);
                                 }
@@ -186,9 +189,10 @@ namespace Pulsar4X.SDL2UI
                     }
                     else if (typeof(IDictionary).IsAssignableFrom(value.GetType()))
                     {
-                        var items = (IDictionary)GetValue(memberInfo, obj);
+                        var items = (IDictionary?)GetValue(memberInfo, obj);
+                        if(items == null) continue;
                         int itemsCount = items.Count;
-                        
+
                         if (ImGui.TreeNode(memberInfo.Name))
                         {
                             ImGui.NextColumn();
@@ -217,17 +221,17 @@ namespace Pulsar4X.SDL2UI
                         //var items = (KeplerElements)GetValue(memberInfo, obj);
                         MemberInfo[] memberInfoske =  typeof(KeplerElements).GetMembers(flags);
                         int itemsCount = memberInfoske.Length;
-                        
+
                         if (ImGui.TreeNode(memberInfo.Name))
                         {
                             ImGui.NextColumn();
                             ImGui.Text("Count: " + itemsCount);
                             ImGui.NextColumn();
                             _numLines += itemsCount;
-    
+
                                 foreach (var memberInfoke in memberInfoske)
                                 {
-                                    object valueke = GetValue(memberInfoke, value);
+                                    object? valueke = GetValue(memberInfoke, value);
                                     ImGui.Text(memberInfoke.Name);
                                     ImGui.NextColumn();
                                     //object value = memberInfo.GetValue(obj);
@@ -251,7 +255,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(memberInfo.Name);
                         ImGui.NextColumn();
                         //object value = memberInfo.GetValue(obj);
-                        string displayStr = "null";
+                        string? displayStr = "null";
                         string tooltipStr = "";
                         if (value != null)
                         {
@@ -299,7 +303,7 @@ namespace Pulsar4X.SDL2UI
                             }
                             else
                             {
-                                displayStr = (value.ToString());
+                                displayStr = value.ToString();
                             }
 
                             if (value is ProcessedMaterial)
@@ -327,8 +331,8 @@ namespace Pulsar4X.SDL2UI
                 }
             }
         }
-        
-        static object GetValue(this MemberInfo memberInfo, object forObject)
+
+        static object? GetValue(this MemberInfo memberInfo, object forObject)
         {
             switch (memberInfo.MemberType)
             {
@@ -336,7 +340,7 @@ namespace Pulsar4X.SDL2UI
                     return ((FieldInfo)memberInfo).GetValue(forObject);
                 case MemberTypes.Property:
                     return ((PropertyInfo)memberInfo).GetValue(forObject);
-                    
+
             }
             return "";
         }
@@ -358,6 +362,8 @@ namespace Pulsar4X.SDL2UI
         private static int _selectedComponent = -1;
         static void DisplayComponents(ComponentInstancesDB instancesDB)
         {
+            if(instancesDB.OwningEntity == null || instancesDB.OwningEntity.Manager == null) return;
+
             var componentsByDesign = instancesDB.ComponentsByDesign;
             var faction = instancesDB.OwningEntity.Manager.Game.Factions[instancesDB.OwningEntity.FactionOwnerID];
             FactionInfoDB factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
@@ -390,44 +396,46 @@ namespace Pulsar4X.SDL2UI
                         states[i][j][k] = state.Value;
                         //state.Value.Name;
                     }
-                    
-                    
+
+
                     //states[i][j] = component.GetAbilityState<>()
                     j++;
                 }
-                
-                
+
+
             }
             //string[] componentInstances = .
-            
-            
+
+
             BorderListOptions.Begin("Components", designNames, ref _selectedDesign, 200);
-            
+
             BorderListOptions.Begin("Instances", componentNames[_selectedDesign], ref _selectedComponent, 150);
 
             foreach (var state in states[_selectedDesign][_selectedComponent])
             {
                 ImGui.Text(state.Name);
             }
-            
+
             BorderListOptions.End(new System.Numerics.Vector2(200, 200));
-            
+
             BorderListOptions.End(new System.Numerics.Vector2(250, 500));
-            
-            
-            
-            
-            
+
+
+
+
+
         }
 
 
     }
-    
+
 
     public static class DebugDisplaySensorProfile
     {
         public static void Display(SensorProfileDB db)
         {
+            if(db.OwningEntity ==  null) return;
+
             if(!db.OwningEntity.TryGetDatablob<ComponentInstancesDB>(out var componentInstancesDB))
             {
                 return;
@@ -437,7 +445,7 @@ namespace Pulsar4X.SDL2UI
             foreach (var kvp in db.ReflectedEMSpectra)
             {
                 DisplayValues(kvp.Key, kvp.Value);
-                
+
             }
 
             ImGui.Text("Emmitted");
@@ -465,14 +473,14 @@ namespace Pulsar4X.SDL2UI
             var avg = waveForm.WavelengthAverage_nm;
             var max = waveForm.WavelengthMax_nm;
             var hight = magnatude;
-            
+
             ImGui.Text(Stringify.DistanceSmall(min));
             ImGui.Text(Stringify.DistanceSmall(avg));
             ImGui.SameLine();
             ImGui.Text(Stringify.Power(hight));
             ImGui.Text(Stringify.DistanceSmall(max));
         }
-        
+
 
         /*
         void DrawWav(WaveDrawData wavesArry, uint colour)
@@ -497,7 +505,7 @@ namespace Pulsar4X.SDL2UI
                 }
 
             }
-                    
+
         } */
     }
 }

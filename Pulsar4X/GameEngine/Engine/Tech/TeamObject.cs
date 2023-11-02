@@ -15,7 +15,7 @@ namespace Pulsar4X.Engine
         [JsonProperty]
         private int _teamSize;
         [JsonProperty]
-        private object _teamTask;
+        private object? _teamTask;
 
         /// <summary>
         /// Determines how many Labs this team can manage
@@ -32,7 +32,7 @@ namespace Pulsar4X.Engine
         /// TODO: Communications Review
         /// Detemine team orders system
         [PublicAPI]
-        public object TeamTask
+        public object? TeamTask
         {
             get { return _teamTask; }
             internal set { _teamTask = value; }
@@ -40,7 +40,7 @@ namespace Pulsar4X.Engine
 
         public TeamObject() { }
 
-        public TeamObject(int teamSize = 0, object initialTask = null)
+        public TeamObject(int teamSize = 0, object? initialTask = null)
         {
             TeamSize = teamSize;
             TeamTask = initialTask;

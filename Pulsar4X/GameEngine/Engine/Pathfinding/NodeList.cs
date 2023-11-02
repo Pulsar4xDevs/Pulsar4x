@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Pulsar4X.Engine
 {
@@ -23,7 +24,23 @@ namespace Pulsar4X.Engine
         /// <summary>
         /// Returns a particular Node instance by key.
         /// </summary>
-        public virtual Node this[string key] => (Node)_data[key];
+        public virtual Node this[string key]
+        {
+            get
+            {
+                object? node = _data[key];
+                if (node != null)
+                {
+                    return (Node)node;
+                }
+                else
+                {
+                    // Handle the case when 'key' is not found in '_data' or when the value is null.
+                    // You can return a default value, throw an exception, or handle it as needed.
+                    throw new KeyNotFoundException($"Key '{key}' not found in the collection or has a null value.");
+                }
+            }
+        }
 
         /// <summary>
         /// Returns the number of nodes in the NodeList.
@@ -108,14 +125,28 @@ namespace Pulsar4X.Engine
                 return _list.MoveNext();
             }
 
-            public Node Current => (Node)((DictionaryEntry)_list.Current).Value;
+            public Node Current
+            {
+                get
+                {
+                    var dictionaryEntry = (DictionaryEntry)_list.Current;
+                    if (dictionaryEntry.Value != null)
+                    {
+                        return (Node)dictionaryEntry.Value;
+                    }
+
+                    // Handle the case when _list.Current is null, not of type DictionaryEntry,
+                    // or its Value is null or not of type Node.
+                    // You can return a default value, throw an exception, or handle it as needed.
+                    throw new InvalidOperationException("Invalid or null value in _list.Current.");
+                }
+            }
 
             // The current property on the IEnumerator interface:
             object IEnumerator.Current => Current;
 
             public void Dispose()
             {
-                _list = null;
             }
         }
         #endregion

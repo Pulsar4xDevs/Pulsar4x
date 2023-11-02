@@ -15,7 +15,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class DebugWindow :PulsarGuiWindow
     {
-        EntityState _selectedEntityState;
+        EntityState? _selectedEntityState;
 
         private Entity? _selectedEntity;
         private Entity? SelectedEntity
@@ -27,28 +27,29 @@ namespace Pulsar4X.SDL2UI
                 {
 
                     _selectedEntity = value;
-                    _selectedEntityName = SelectedEntity.HasDataBlob<NameDB>() ? SelectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction) : "Unknown";
-                    if(_systemState.EntityStatesWithNames.ContainsKey(_selectedEntity.Id))
+
+                    if(_selectedEntity != null)
                     {
-                        _selectedEntityState = _systemState.EntityStatesWithNames[_selectedEntity.Id];
-                        _uiState.EntityClicked(_selectedEntityState, MouseButtons.Primary);
+                        _selectedEntityName = _selectedEntity.HasDataBlob<NameDB>() ? _selectedEntity.GetDataBlob<NameDB>().GetName(_uiState.Faction) : "Unknown";
+                        if(SystemState != null && SystemState.EntityStatesWithNames.ContainsKey(_selectedEntity.Id))
+                        {
+                            _selectedEntityState = SystemState.EntityStatesWithNames[_selectedEntity.Id];
+                            _uiState.EntityClicked(_selectedEntityState, MouseButtons.Primary);
+                        }
                     }
                     else
                     {
                         _selectedEntityState = null;
+                        _selectedEntityName = null;
                     }
-
                     OnSelectedEntityChanged();
                 }
             }
         }
 
-        private string _selectedEntityName;
+        private string? _selectedEntityName;
 
-        SensorReceiverAtbDB _selectedReceverAtb;
-
-        SystemState _systemState;
-        public SystemState systemState{get{return _systemState;} set{_systemState = value;}}
+        public SystemState? SystemState { get; set; }
 
         bool _dateChangeSinceLastFrame = true;
         bool _isRunningFrame = false;
@@ -92,7 +93,7 @@ namespace Pulsar4X.SDL2UI
             }
             //if(_uiState.LastClickedEntity?.Entity != null && instance.SelectedEntity != _uiState.LastClickedEntity.Entity)
             //    instance.SelectedEntity = _uiState.LastClickedEntity.Entity;
-            instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+            instance.SystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             return instance;
         }
 
@@ -108,13 +109,14 @@ namespace Pulsar4X.SDL2UI
 
         private void OnSelectedEntityChanged()
         {
+            if(SelectedEntity == null) return;
 
             if (SelectedEntity.HasDataBlob<EntityDamageProfileDB>())
             {
                 var dmgdb = SelectedEntity.GetDataBlob<EntityDamageProfileDB>();
                 _dmgTxtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, dmgdb.DamageProfile);
             }
-            else if(_selectedEntity.HasDataBlob<SensorInfoDB>())
+            else if(SelectedEntity.HasDataBlob<SensorInfoDB>())
             {
 
                 var actualEntity = SelectedEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
@@ -166,7 +168,7 @@ namespace Pulsar4X.SDL2UI
                             var cam = _uiState.Camera;
                             if (cam.IsPinnedToEntity)
                             {
-                                var entyName = _systemState.EntityStatesWithNames[_uiState.Camera.PinnedEntityGuid].Name;
+                                var entyName = (SystemState == null) ? "<null>" : SystemState.EntityStatesWithNames[_uiState.Camera.PinnedEntityGuid].Name;
                                 ImGui.Text("Camera is pinned to:");
                                 ImGui.SameLine();
                                 ImGui.Text(entyName);
@@ -546,44 +548,7 @@ namespace Pulsar4X.SDL2UI
                                         SimpleLine psoilin;
                                         if (_drawParentSOI)
                                         {
-                                            var myPos = SelectedEntity.GetDataBlob<PositionDB>();
-                                            var parent = myPos.Parent;
-                                            var pObt = parent.GetDataBlob<OrbitDB>();
-                                            var cnmve = SelectedEntity.GetDataBlob<NewtonMoveDB>();
-
-                                            var soiradius = parent.GetSOI_AU();
-                                            var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
-                                            psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
-                                            var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;
-                                            var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().MassDry;
-
-                                            var sgp = GeneralMath.StandardGravitationalParameter(pmass + mymass);
-                                            var vel = Distance.KmToM(cnmve.CurrentVector_ms);
-                                            var cpos = myPos.RelativePosition;
-                                            var eccentVector = OrbitMath.EccentricityVector(sgp, cpos, vel);
-                                            double ce = eccentVector.Length();
-                                            var r = cpos.Length();
-                                            var v = vel.Length();
-
-                                            var ca = 1 / (2 / r - Math.Pow(v, 2) / sgp);
-                                            var cp = EllipseMath.SemiLatusRectum(ca, ce);
-
-                                            var cAoP = Math.Atan2(eccentVector.Y, eccentVector.X);
-
-                                            /*
-                                            var pa = pObt.SemiMajorAxis;
-                                            var pe = pObt.Eccentricity;
-                                            var pp = EllipseMath.SemiLatusRectum(pa, pe);
-                                            */
-                                            double θ = EllipseMath.TrueAnomalyAtRadus(soiradius, cp, ce);
-                                            θ += cAoP;
-
-                                            var x = soiradius * Math.Cos(θ);
-                                            var y = soiradius * Math.Sin(θ);
-                                            psoilin = new SimpleLine(parent.GetDataBlob<PositionDB>(), new Orbital.Vector2() { X = x, Y = y }, colour);
-
-                                            _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoi), psoi);
-                                            _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoilin), psoilin);
+                                            _drawParentSOI = EnableDrawSOI();
                                         }
                                         else
                                         {
@@ -599,7 +564,7 @@ namespace Pulsar4X.SDL2UI
                                 {
                                     if (ImGui.CollapsingHeader("Power ###PowerHeader", ImGuiTreeNodeFlags.CollapsingHeader))
                                     {
-                                        var powerDB = _selectedEntity.GetDataBlob<EnergyGenAbilityDB>();
+                                        var powerDB = SelectedEntity.GetDataBlob<EnergyGenAbilityDB>();
                                         ImGui.Text("Generates " +powerDB.EnergyType.Name);
                                         ImGui.Text("Max of: " + powerDB.TotalOutputMax + "/s");
                                         string fueltype = SelectedEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetMaterial(powerDB.TotalFuelUseAtMax.type).Name;
@@ -703,9 +668,9 @@ namespace Pulsar4X.SDL2UI
                                     }
                                 }
 
-                                if (_selectedEntity.HasDataBlob<SensorProfileDB>() && ImGui.CollapsingHeader("SensorProfile"))
+                                if (SelectedEntity.HasDataBlob<SensorProfileDB>() && ImGui.CollapsingHeader("SensorProfile"))
                                 {
-                                    var profile = _selectedEntity.GetDataBlob<SensorProfileDB>();
+                                    var profile = SelectedEntity.GetDataBlob<SensorProfileDB>();
                                     ImGui.Text("Target CrossSection: " + profile.TargetCrossSection_msq + " m^2");
                                     ImGui.Text("Emitted Count: " + profile.EmittedEMSpectra.Count);
                                     ImGui.Text("Reflected Count: " + profile.ReflectedEMSpectra.Count);
@@ -740,9 +705,9 @@ namespace Pulsar4X.SDL2UI
 
                                 }
 
-                                if (_selectedEntity.HasDataBlob<GenericFiringWeaponsDB>())
+                                if (SelectedEntity.HasDataBlob<GenericFiringWeaponsDB>())
                                 {
-                                    var db = _selectedEntity.GetDataBlob<GenericFiringWeaponsDB>();
+                                    var db = SelectedEntity.GetDataBlob<GenericFiringWeaponsDB>();
                                     if (ImGui.CollapsingHeader("Firing Weapons"))
                                     {
                                         for (int i = 0; i < db.WpnIDs.Length; i++)
@@ -828,6 +793,51 @@ namespace Pulsar4X.SDL2UI
 
             _isRunningFrame = false;
             _dateChangeSinceLastFrame = false;
+        }
+
+        private bool EnableDrawSOI()
+        {
+            if(SelectedEntity == null) return false;
+            var myPos = SelectedEntity.GetDataBlob<PositionDB>();
+
+            if(myPos.Parent == null) return false;
+            var parent = myPos.Parent;
+            var cnmve = SelectedEntity.GetDataBlob<NewtonMoveDB>();
+
+            var soiradius = parent.GetSOI_AU();
+            var colour = new SDL2.SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 };
+            var psoi = new SimpleCircle(parent.GetDataBlob<PositionDB>(), soiradius, colour);
+            var pmass = parent.GetDataBlob<MassVolumeDB>().MassDry;
+            var mymass = SelectedEntity.GetDataBlob<MassVolumeDB>().MassDry;
+
+            var sgp = GeneralMath.StandardGravitationalParameter(pmass + mymass);
+            var vel = Distance.KmToM(cnmve.CurrentVector_ms);
+            var cpos = myPos.RelativePosition;
+            var eccentVector = OrbitMath.EccentricityVector(sgp, cpos, vel);
+            double ce = eccentVector.Length();
+            var r = cpos.Length();
+            var v = vel.Length();
+
+            var ca = 1 / (2 / r - Math.Pow(v, 2) / sgp);
+            var cp = EllipseMath.SemiLatusRectum(ca, ce);
+
+            var cAoP = Math.Atan2(eccentVector.Y, eccentVector.X);
+
+            /*
+            var pa = pObt.SemiMajorAxis;
+            var pe = pObt.Eccentricity;
+            var pp = EllipseMath.SemiLatusRectum(pa, pe);
+            */
+            double θ = EllipseMath.TrueAnomalyAtRadus(soiradius, cp, ce);
+            θ += cAoP;
+
+            var x = soiradius * Math.Cos(θ);
+            var y = soiradius * Math.Sin(θ);
+            var psoilin = new SimpleLine(parent.GetDataBlob<PositionDB>(), new Orbital.Vector2() { X = x, Y = y }, colour);
+
+            _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoi), psoi);
+            _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(psoilin), psoilin);
+            return true;
         }
 
         void RefreshFactionEntites()
@@ -1211,7 +1221,9 @@ namespace Pulsar4X.SDL2UI
         {
             _dateChangeSinceLastFrame = true;
 
-            if (_systemState.EntitiesAdded.Count > 0 || _systemState.EntitysToBin.Count > 0)
+            if(SystemState == null) return;
+
+            if (SystemState.EntitiesAdded.Count > 0 || SystemState.EntitysToBin.Count > 0)
             {
                 RefreshFactionEntites();
             }

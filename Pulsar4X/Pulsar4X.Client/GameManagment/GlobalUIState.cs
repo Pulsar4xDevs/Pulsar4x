@@ -156,7 +156,7 @@ namespace Pulsar4X.SDL2UI
                 var SelectedSys = StarSystemStates[activeSysID].StarSystem;
                 PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
                 GalacticMap.SelectedStarSysGuid = activeSysID;
-                DebugWindow.GetInstance().systemState = StarSystemStates[activeSysID];
+                DebugWindow.GetInstance().SystemState = StarSystemStates[activeSysID];
                 LastClickedEntity = null;
                 PrimaryEntity = null;
             }

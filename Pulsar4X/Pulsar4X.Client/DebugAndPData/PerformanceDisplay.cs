@@ -10,21 +10,16 @@ using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
+using System.Data.Common;
 
 namespace Pulsar4X.SDL2UI
 {
 
     public class PerformanceDisplay : PulsarGuiWindow
     {
-
-        private string[] _dataBlobTypeStrings;
-        private Type[] _dataBlobTypes;
-        private int _dataBlobTypeIndex;
-
-
         Stopwatch _sw = new Stopwatch();
 
-        SystemState _systemState;
+        SystemState? _systemState;
 
         float largestGFPS = 0;
         int largestIndex = 0;
@@ -41,14 +36,6 @@ namespace Pulsar4X.SDL2UI
         int _systemRateIndex = 0;
         float[] _systemRates = new float[80];
 
-
-        private double ticks1;
-        private double ms1;
-        private double ticks2;
-        private double ticks3;
-        private double count1;
-        private double count2;
-        private double count3;
         private List<(string txt, double time, double count)> _callData = new List<(string txt, double time, double count)>();
 
 
@@ -93,7 +80,7 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            if(IsActive && ImGui.Begin("Perf Display"))
+            if(IsActive && _systemState != null && ImGui.Begin("Perf Display"))
             {
                 SetFrameRateArray();
                 ImGui.Text("Global Tick: "); ImGui.SameLine();
@@ -224,90 +211,81 @@ namespace Pulsar4X.SDL2UI
 
 
                         var db = datablobs[0];
-                        _sw.Restart();
-                        var ent = db.OwningEntity;
-                        _sw.Stop();
-                        _callData.Add((
-                                          "Using datablob.OwningEntity\n {0,0} ticks to retreave the entity",
-                                          _sw.Elapsed.Ticks,
-                                          1
-                                      ));
-
-                        _sw.Restart();
-                        ent.GetDataBlob<OrbitDB>();
-                        _sw.Stop();
-                        _callData.Add((
-                                          "Using entity.GetDataBlob<T>()\n {0,0} ticks to get db",
-                                          _sw.Elapsed.Ticks,
-                                          1
-                                          ));
-
-                        _sw.Restart();
-                        ent.GetDataBlob<OrbitDB>();
-                        _sw.Stop();
-                        _callData.Add((
-                                          "Using entity.GetDataBlob<T>(typeIndex)\n {0,0} ticks to get db",
-                                          _sw.Elapsed.Ticks,
-                                          1
-                                      ));
-
-
-                        _sw.Restart();
-                        ent.RemoveDataBlob<OrbitDB>();
-                        _sw.Stop();
-                        _callData.Add((
-                                        "Using entity.RemoveDataBlob<T>()\n {0,0} ticks to remove from entity",
-                                        _sw.Elapsed.Ticks,
-                                        1
-                                    ));
-
-                        _sw.Restart();
-                        ent.SetDataBlob(db);
-                        _sw.Stop();
-                        _callData.Add((
-                                        "Using entity.SetDataBlob(db)\n {0,0} ticks to add to entity",
+                        if(db.OwningEntity != null)
+                        {
+                            _sw.Restart();
+                            var ent = db.OwningEntity;
+                            _sw.Stop();
+                            _callData.Add((
+                                            "Using datablob.OwningEntity\n {0,0} ticks to retreave the entity",
                                             _sw.Elapsed.Ticks,
                                             1
                                         ));
 
-                        _sw.Restart();
-                        // FIXME: ?
-                        //ent.RemoveDataBlob(typeIndex);
-                        _sw.Stop();
-                        _callData.Add((
-                                            "Using entity.RemoveDataBlob(typeIndex)\n {0,0} ticks to remove from entity",
+                            _sw.Restart();
+                            ent.GetDataBlob<OrbitDB>();
+                            _sw.Stop();
+                            _callData.Add((
+                                            "Using entity.GetDataBlob<T>()\n {0,0} ticks to get db",
                                             _sw.Elapsed.Ticks,
                                             1
-                                        ));
+                                            ));
 
-                        _sw.Restart();
-                        // FIXME: ?
-                        //ent.SetDataBlob(db, typeIndex);
-                        _sw.Stop();
-                        _callData.Add((
-                                            "Using entity.SetDataBlob(db, typeIndex)\n {0,0} ticks to add to entity",
+                            _sw.Restart();
+                            ent.GetDataBlob<OrbitDB>();
+                            _sw.Stop();
+                            _callData.Add((
+                                            "Using entity.GetDataBlob<T>(typeIndex)\n {0,0} ticks to get db",
                                             _sw.Elapsed.Ticks,
                                             1
                                         ));
 
 
+                            _sw.Restart();
+                            ent.RemoveDataBlob<OrbitDB>();
+                            _sw.Stop();
+                            _callData.Add((
+                                            "Using entity.RemoveDataBlob<T>()\n {0,0} ticks to remove from entity",
+                                            _sw.Elapsed.Ticks,
+                                            1
+                                        ));
+
+                            _sw.Restart();
+                            ent.SetDataBlob(db);
+                            _sw.Stop();
+                            _callData.Add((
+                                            "Using entity.SetDataBlob(db)\n {0,0} ticks to add to entity",
+                                                _sw.Elapsed.Ticks,
+                                                1
+                                            ));
+
+                            _sw.Restart();
+                            // FIXME: ?
+                            //ent.RemoveDataBlob(typeIndex);
+                            _sw.Stop();
+                            _callData.Add((
+                                                "Using entity.RemoveDataBlob(typeIndex)\n {0,0} ticks to remove from entity",
+                                                _sw.Elapsed.Ticks,
+                                                1
+                                            ));
+
+                            _sw.Restart();
+                            // FIXME: ?
+                            //ent.SetDataBlob(db, typeIndex);
+                            _sw.Stop();
+                            _callData.Add((
+                                                "Using entity.SetDataBlob(db, typeIndex)\n {0,0} ticks to add to entity",
+                                                _sw.Elapsed.Ticks,
+                                                1
+                                            ));
+                        }
                     }
-
-
-
-
 
                     foreach (var dat in _callData)
                     {
                         string foo = string.Format(dat.txt, dat.time, dat.count);
                         ImGui.Text(foo);
                     }
-
-
-
-
-
-
                 }
 
                 if (ImGui.Button("Record To File"))
@@ -319,14 +297,17 @@ namespace Pulsar4X.SDL2UI
 
         void RecordToFile()
         {
+            if(_systemState == null) return;
 
             var t_lpt = _uiState.Game.TimePulse.LastProcessingTime.TotalMilliseconds;
             var t_tf = _uiState.Game.TimePulse.TickFrequency.TotalMilliseconds;
             var overtime = t_lpt - t_tf;
             var starsysdata = _systemState.StarSystem.ManagerSubpulses.GetLastPerfData();
             var dirst = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if(dirst == null) throw new InvalidOperationException($"{dirst} cannot be null");
             var dirinf = new System.IO.DirectoryInfo(dirst);
-            var dir = dirinf.Parent.Parent.Parent.Parent;
+            var dir = dirinf.Parent?.Parent?.Parent?.Parent;
+            if(dir == null) throw new InvalidOperationException("dir cannot be null");
             string machine = Environment.MachineName;
             string gitver = AssemblyInfo.GetGitHash();
             string datetime = DateTime.Now.ToString();

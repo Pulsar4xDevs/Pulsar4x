@@ -14,30 +14,30 @@ namespace Pulsar4X.SDL2UI
 
 
 
-        private EntityState _selectedEntitySate;
-        private Entity _selectedEntity => _selectedEntitySate.Entity;
-        private Entity[] _potentialTargetEntities;
-        private string[] _potentialTargetNames;
+        private EntityState? _selectedEntitySate;
+        private Entity? _selectedEntity => _selectedEntitySate?.Entity;
+        private Entity[]? _potentialTargetEntities;
+        private string[]? _potentialTargetNames;
         private int _targetIndex = -1;
-        private Entity _targetEntity;
-        private SensorProfileDB _targetSensorProfile;
-        private SensorReturnValues[] _targetDetectionQuality;
+        private Entity? _targetEntity;
+        private SensorProfileDB? _targetSensorProfile;
+        private SensorReturnValues[]? _targetDetectionQuality;
 
-        private  Dictionary<EMWaveForm, double> _attenuatedWaveForms;
+        private  Dictionary<EMWaveForm, double> _attenuatedWaveForms = new ();
 
-        private SystemState _selectedStarSysState;
-        private StarSystem _selectedStarSys => _selectedStarSysState.StarSystem;
+        private SystemState? _selectedStarSysState;
+        private StarSystem? _selectedStarSys => _selectedStarSysState?.StarSystem;
 
-        private SensorReceiverAtbDB[] _selectedReceverAtb;
-        private SensorReceiverAbility[] _selectedReceverInstanceAbility;
+        private SensorReceiverAtbDB[]? _selectedReceverAtb;
+        private SensorReceiverAbility[]? _selectedReceverInstanceAbility;
 
 
         private ImDrawListPtr _draw_list;
 
-        private WaveDrawData _receverDat;
-        private WaveDrawData _reflectDat;
-        private WaveDrawData _emmittrDat;
-        private WaveDrawData _detectedDat;
+        private WaveDrawData? _receverDat;
+        private WaveDrawData? _reflectDat;
+        private WaveDrawData? _emmittrDat;
+        private WaveDrawData? _detectedDat;
 
 
         private double lowestWave = 0;
@@ -83,8 +83,7 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            //
-            if(!IsActive || _selectedEntitySate == null)
+            if(!IsActive || _selectedEntitySate == null || _selectedEntity == null)
                 return;
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(1500, 800));
             if (ImGui.Begin("Sensor Display", ref IsActive))
@@ -100,7 +99,9 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Columns(2);
                     ImGui.SetColumnWidth(0, 300);
 
-                    if (ImGui.Combo("Targets", ref _targetIndex, _potentialTargetNames, _potentialTargetNames.Length))
+                    if (_potentialTargetNames != null
+                        && _potentialTargetEntities != null
+                        && ImGui.Combo("Targets", ref _targetIndex, _potentialTargetNames, _potentialTargetNames.Length))
                     {
                         _targetEntity = _potentialTargetEntities[_targetIndex];
                         SetTargetData();
@@ -198,33 +199,37 @@ namespace Pulsar4X.SDL2UI
 
             }
 
-            void DrawWav(WaveDrawData wavesArry, uint colour)
+            void DrawWav(WaveDrawData? wavesArry, uint colour)
+            {
+                if(wavesArry == null) return;
+
+                for (int i = 0; i < wavesArry.Count; i++)
                 {
-                    for (int i = 0; i < wavesArry.Count; i++)
+                    System.Numerics.Vector2 p0 = _translation + wavesArry.Points[i].p0 * _scalingFactor;
+                    System.Numerics.Vector2 p1 = _translation + wavesArry.Points[i].p1 * _scalingFactor;
+                    System.Numerics.Vector2 p2 = _translation + wavesArry.Points[i].p2 * _scalingFactor;
+                    if (wavesArry.IsWaveDrawn[i].drawSrc)
                     {
-                        System.Numerics.Vector2 p0 = _translation + wavesArry.Points[i].p0 * _scalingFactor;
-                        System.Numerics.Vector2 p1 = _translation + wavesArry.Points[i].p1 * _scalingFactor;
-                        System.Numerics.Vector2 p2 = _translation + wavesArry.Points[i].p2 * _scalingFactor;
-                        if (wavesArry.IsWaveDrawn[i].drawSrc)
-                        {
 
-                            //_draw_list.AddLine(p0, p1, colour);
-                            //_draw_list.AddLine(p1, p2, colour);
-                            _draw_list.AddTriangleFilled(p0, p1, p2, colour);
-                        }
+                        //_draw_list.AddLine(p0, p1, colour);
+                        //_draw_list.AddLine(p1, p2, colour);
+                        _draw_list.AddTriangleFilled(p0, p1, p2, colour);
+                    }
 
-                        if (wavesArry.HasAtn && wavesArry.IsWaveDrawn[i].drawAtn)
-                        {
-                            System.Numerics.Vector2 p3 = _translation + wavesArry.Points[i].p3 * _scalingFactor;
-                            _draw_list.AddTriangleFilled(p0, p3, p2, colour);
-                        }
-
+                    if (wavesArry.HasAtn && wavesArry.IsWaveDrawn[i].drawAtn)
+                    {
+                        System.Numerics.Vector2 p3 = _translation + wavesArry.Points[i].p3 * _scalingFactor;
+                        _draw_list.AddTriangleFilled(p0, p3, p2, colour);
                     }
 
                 }
 
-            void DisplayWavInfo(WaveDrawData wavesArry)
+            }
+
+            void DisplayWavInfo(WaveDrawData? wavesArry)
             {
+                if(wavesArry == null) return;
+
                 for (int i = 0; i < wavesArry.Count; i++)
                 {
                     if(ImGui.Checkbox("Show Wave##drawbool" + i, ref wavesArry.IsWaveDrawn[i].drawSrc))
@@ -262,24 +267,22 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-
-
             void ResetBounds()
             {
+                if(_receverDat == null) return;
                 lowestWave = float.PositiveInfinity;
                 lowestMag = float.PositiveInfinity;
                 highestMag = float.NegativeInfinity;
                 highestWave = float.NegativeInfinity;
 
-                var dat = _receverDat;
-                for (int i = 0; i < dat.Count; i++)
+                for (int i = 0; i < _receverDat.Count; i++)
                 {
-                    if(dat.IsWaveDrawn[i].drawSrc)
+                    if(_receverDat.IsWaveDrawn[i].drawSrc)
                     {
-                        float low = dat.Points[i].p0.X;
-                        float high = dat.Points[i].p2.X;
-                        float mag1 = dat.Points[i].p0.Y; //recever highest value
-                        float mag2 = dat.Points[i].p1.Y; //recever lowest value
+                        float low = _receverDat.Points[i].p0.X;
+                        float high = _receverDat.Points[i].p2.X;
+                        float mag1 = _receverDat.Points[i].p0.Y; //recever highest value
+                        float mag2 = _receverDat.Points[i].p1.Y; //recever lowest value
                         if (low < lowestWave)
                             lowestWave = low;
                         if (high > highestWave)
@@ -337,6 +340,8 @@ namespace Pulsar4X.SDL2UI
 
             void SetSensorData()
             {
+                if(_selectedStarSys == null) return;
+
                 if (_selectedEntity.GetDataBlob<ComponentInstancesDB>().TryGetComponentsByAttribute<SensorReceiverAtbDB>(out var recevers))
                 {
                     _receverDat = new WaveDrawData();
@@ -392,6 +397,8 @@ namespace Pulsar4X.SDL2UI
 
             void SetTargetData()
             {
+                if(_selectedReceverAtb == null) return;
+
                 _targetSensorProfile = _targetEntity.GetDataBlob<SensorProfileDB>();
                 _targetSensorProfile.SetReflectionProfile(_uiState.PrimarySystemDateTime);
                 var emitted = _targetSensorProfile.EmittedEMSpectra;
@@ -468,7 +475,7 @@ namespace Pulsar4X.SDL2UI
         public int Count { get { return Points.Length; } }
         public bool HasAtn = false;
         public (System.Numerics.Vector2 p0, System.Numerics.Vector2 p1, System.Numerics.Vector2 p2, System.Numerics.Vector2 p3)[] Points = new (System.Numerics.Vector2, System.Numerics.Vector2, System.Numerics.Vector2, System.Numerics.Vector2)[0];
-        public (bool drawSrc,bool drawAtn)[] IsWaveDrawn = new (bool, bool)[0];
-        public uint[] _receverColours;
+        public (bool drawSrc, bool drawAtn)[] IsWaveDrawn = new (bool, bool)[0];
+        public uint[]? _receverColours;
     }
 }

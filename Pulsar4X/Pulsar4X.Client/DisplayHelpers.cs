@@ -8,7 +8,7 @@ namespace Pulsar4X.SDL2UI
 {
     public static class DisplayHelpers
     {
-        public static void Header(string text, string tooltip = null)
+        public static void Header(string text, string? tooltip = null)
         {
             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
             ImGui.Text(text);
@@ -23,19 +23,19 @@ namespace Pulsar4X.SDL2UI
             ImGui.Separator();
         }
 
-        public static void PrintRow(string one, string two, string tooltipOne = null, string tooltipTwo = null, bool separator = true)
+        public static void PrintRow(string one, string two, string? tooltipOne = null, string? tooltipTwo = null, bool separator = true)
         {
             ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
             ImGui.Text(one);
             ImGui.PopStyleColor();
-            if(tooltipOne != null)
+            if(!string.IsNullOrEmpty(tooltipOne))
             {
                 if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipOne);
             }
             ImGui.NextColumn();
 
             ImGui.Text(two);
-            if(tooltipTwo != null)
+            if(!string.IsNullOrEmpty(tooltipTwo))
             {
                 if(ImGui.IsItemHovered()) ImGui.SetTooltip(tooltipTwo);
             }

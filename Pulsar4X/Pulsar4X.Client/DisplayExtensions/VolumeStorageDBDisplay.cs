@@ -9,6 +9,7 @@ using Pulsar4X.Components;
 using Pulsar4X.Engine.Designs;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine.Orders;
+using System;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -96,6 +97,8 @@ namespace Pulsar4X.SDL2UI
 
         private static void AddContextMenu(VolumeStorageDB volumeStorageDB, ComponentInstance component, GlobalUIState uiState)
         {
+            if(volumeStorageDB.OwningEntity == null) throw new InvalidOperationException($"OwningEntity for {volumeStorageDB} cannot be null");
+
             ImGui.PushID(component.Design.UniqueID.ToString());
             if(ImGui.BeginPopupContextItem("###" + component.Design.UniqueID))
             {

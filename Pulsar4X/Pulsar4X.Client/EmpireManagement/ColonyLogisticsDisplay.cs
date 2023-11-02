@@ -14,7 +14,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class ColonyLogisticsDisplay
     {
-        private static ColonyLogisticsDisplay instance = null;
+        private static ColonyLogisticsDisplay? instance = null;
         private static readonly object padlock = new object();
 
         private Dictionary<ICargoable,(int count, int demandSupplyWeight)> _changes = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();

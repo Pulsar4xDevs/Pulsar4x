@@ -97,6 +97,9 @@ namespace Pulsar4X.Engine
                 // [/Dijkstra]
 
                 // Determine if a path exists.
+                if(!_dist.ContainsKey(destinationNode.Key))
+                    throw new InvalidOperationException($"Value for key '{destinationNode.Key}' is null or not found.");
+
                 totalCost = (double)_dist[destinationNode.Key];
                 if (totalCost == double.MaxValue)
                 {
