@@ -140,7 +140,7 @@ namespace Pulsar4X.Engine
             foreach (var orbit in orbits)
             {
                 var subOrbit = orbit.FindSOIForOrbit(AbsolutePosition);
-                if(subOrbit != null)
+                if(subOrbit != null && subOrbit.OwningEntity != null)
                     withinSOIOf.Add(subOrbit.OwningEntity);
             }
 
@@ -195,6 +195,7 @@ namespace Pulsar4X.Engine
         {
             var state = entity.GetAbsoluteState();
             var parent = entity.GetSOIParentEntity();
+            if(parent == null) throw new NullReferenceException("parent cannot be null");
             var grandparent = parent.GetSOIParentEntity();
             var newParent = grandparent == null ? parent : grandparent;
 

@@ -152,11 +152,11 @@ namespace Pulsar4X.Engine
             double r1;
             double r2;
 
-            Entity soi1 = entity1.GetSOIParentEntity();
-            Entity soi2 = entity2.GetSOIParentEntity();
+            Entity? soi1 = entity1.GetSOIParentEntity();
+            Entity? soi2 = entity2.GetSOIParentEntity();
 
 
-            if(soi1 == soi2)
+            if(soi1 is not null && soi2 is not null && soi1 == soi2)
             {
                 parent = soi1;
                 parentMass = parent.GetDataBlob<MassVolumeDB>().MassDry;

@@ -169,6 +169,7 @@ namespace Pulsar4X.Engine.Orders
             if (!IsRunning && atDateTime >= ActionOnDate)
             {
                  var parent = _entityCommanding.GetSOIParentEntity();
+                 if(parent == null) throw new NullReferenceException("parent cannot be null");
                  var currentVel = _entityCommanding.GetRelativeFutureVelocity(atDateTime);
 
                 var parentMass = _entityCommanding.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
@@ -301,19 +302,20 @@ namespace Pulsar4X.Engine.Orders
         {
             if (!IsRunning && atDateTime >= ActionOnDate)
             {
-                 var parent = _entityCommanding.GetSOIParentEntity();
-                 var currentVel = _entityCommanding.GetRelativeFutureVelocity(atDateTime);
+                var parent = _entityCommanding.GetSOIParentEntity();
 
-                var parentMass = _entityCommanding.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
-                var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
-                var sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
+                if(parent == null) throw new NullReferenceException("parent cannot be null");
 
-                var futurePosition = _entityCommanding.GetRelativeFuturePosition(_vectorDateTime);
-                var futureVector = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
+                // var currentVel = _entityCommanding.GetRelativeFutureVelocity(atDateTime);
 
+                // var parentMass = _entityCommanding.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
+                // var myMass = _entityCommanding.GetDataBlob<MassVolumeDB>().MassTotal;
+                // var sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
 
+                // var futurePosition = _entityCommanding.GetRelativeFuturePosition(_vectorDateTime);
+                // var futureVector = _entityCommanding.GetRelativeFutureVelocity(_vectorDateTime);
 
-                _db = new NewtonSimpleMoveDB(_entityCommanding.GetSOIParentEntity(), StartKE, TargetKE, ActionOnDate);
+                _db = new NewtonSimpleMoveDB(parent, StartKE, TargetKE, ActionOnDate);
                 _entityCommanding.SetDataBlob(_db);
 
                 UpdateDetailString();

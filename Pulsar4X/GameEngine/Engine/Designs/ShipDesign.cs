@@ -66,8 +66,11 @@ namespace Pulsar4X.Engine.Designs
             batchJob.ProductionPointsLeft = designInfo.IndustryPointCosts;
 
             var faction = industryEntity.GetFactionOwner;
+            var industryParent = industryEntity.GetSOIParentEntity();
 
-            var ship = ShipFactory.CreateShip((ShipDesign)designInfo, faction, industryEntity.GetSOIParentEntity());
+            if(industryParent == null) throw new NullReferenceException("industryParent cannot be null");
+
+            var ship = ShipFactory.CreateShip((ShipDesign)designInfo, faction, industryParent);
             if(faction.TryGetDatablob<FleetDB>(out var fleetDB))
             {
                 fleetDB.AddChild(ship);

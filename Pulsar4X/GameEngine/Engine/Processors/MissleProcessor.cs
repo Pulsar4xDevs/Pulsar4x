@@ -44,6 +44,9 @@ namespace Pulsar4X.Engine
 
 
             var orderabledb = new OrderableDB();
+
+            if(misslPositionDB.Parent == null) throw new NullReferenceException("misslePositionDB.Parent cannot be null");
+
             var newtmovedb = new NewtonMoveDB(misslPositionDB.Parent, parentVelocity);
 
             string defaultName = "Missile";

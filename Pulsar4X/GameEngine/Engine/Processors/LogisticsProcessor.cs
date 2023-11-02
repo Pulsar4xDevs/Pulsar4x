@@ -323,8 +323,12 @@ public static class LogisticsCycle
                     tradeItems.Add((cargoTask.item, cargoTask.NumberOfItems));
 
                     var shipOwner = ship.FactionOwnerID;//.GetDataBlob<ObjectOwnershipDB>().OwningEntity;
-                    Entity currentSOIParent = ship.GetSOIParentEntity();
-                    Entity sourceSOIParent = source.GetSOIParentEntity(); //might need some checks in here.
+                    Entity? currentSOIParent = ship.GetSOIParentEntity();
+                    Entity? sourceSOIParent = source.GetSOIParentEntity(); //might need some checks in here.
+
+                    if(currentSOIParent == null) throw new NullReferenceException("currentSOIParent cannot be null");
+                    if(sourceSOIParent == null) throw new NullReferenceException("sourceSOIParent cannot be null");
+
                     //moveto source(if requred)
                     var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
                     var at = ship.StarSysDateTime;

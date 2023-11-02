@@ -33,9 +33,9 @@ namespace Pulsar4X.Extensions
             return "Unknown";
         }
 
-        public static PositionDB GetSOIParentPositionDB(this Entity entity)
+        public static PositionDB? GetSOIParentPositionDB(this Entity entity)
         {
-            return (PositionDB)entity.GetDataBlob<PositionDB>().ParentDB;
+            return (PositionDB?)entity.GetDataBlob<PositionDB>().ParentDB;
         }
 
 
@@ -46,7 +46,7 @@ namespace Pulsar4X.Extensions
         /// <param name="entity"></param>
         /// <param name="positionDB">provide this to save looking it up</param>
         /// <returns></returns>
-        public static Entity GetSOIParentEntity(this Entity entity, PositionDB positionDB = null)
+        public static Entity? GetSOIParentEntity(this Entity entity, PositionDB? positionDB = null)
         {
             if(positionDB == null)
                 return entity.TryGetDatablob<PositionDB>(out positionDB) ? positionDB.Parent : null;
@@ -214,8 +214,10 @@ namespace Pulsar4X.Extensions
             else if (entity.HasDataBlob<NewtonMoveDB>())
             {
                 var vel = NewtonionMovementProcessor.GetRelativeState(entity, entity.GetDataBlob<NewtonMoveDB>(), atDateTime).vel;
+                var parentEntity = GetSOIParentEntity(entity);
+                if(parentEntity == null) throw new NullReferenceException("parentEntity cannot be null");
                 //recurse
-                return GetAbsoluteFutureVelocity(GetSOIParentEntity(entity), atDateTime) + vel;
+                return GetAbsoluteFutureVelocity(parentEntity, atDateTime) + vel;
             }
             else if (entity.HasDataBlob<WarpMovingDB>())
             {
@@ -363,7 +365,7 @@ namespace Pulsar4X.Extensions
             return 0;
         }
 
-        public static (ICargoable, double) GetFuelInfo(this Entity entity, CargoDefinitionsLibrary cargoLibrary)
+        public static (ICargoable?, double) GetFuelInfo(this Entity entity, CargoDefinitionsLibrary cargoLibrary)
         {
             if(entity.TryGetDatablob<ShipInfoDB>(out var shipInfoDB) && entity.TryGetDatablob<VolumeStorageDB>(out var volumeStorageDB))
             {
@@ -403,7 +405,7 @@ namespace Pulsar4X.Extensions
                 List<Type> dependencies = new();
                 { // Inlined Method
                     // TODO: Consider removing this reflection for something more type-safe. Out-Of-Scope for this refactor.
-                    MethodInfo method = blob.GetType().GetMethod("GetDependencies", BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
+                    MethodInfo? method = blob.GetType().GetMethod("GetDependencies", BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly);
                     if (method == null)
                         continue;
 

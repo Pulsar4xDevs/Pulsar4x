@@ -13,6 +13,8 @@ namespace Pulsar4X.Engine
         //maybe the scan freqency /attribute.scanTime should just effect the chance of a detection.
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
+            if(entity.Manager == null) throw new NullReferenceException("entity.Manager cannot be null");
+
             EntityManager manager = entity.Manager;
             Entity faction = entity.Manager.Game.Factions[entity.FactionOwnerID];
 

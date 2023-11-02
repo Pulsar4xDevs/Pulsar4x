@@ -177,9 +177,11 @@ namespace Pulsar4X.Engine
 
         void SetOrbitHereSimple(Entity entity, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
         {
+            if(moveDB.TargetEntity == null) throw new NullReferenceException("moveDB.TargetEntity cannot be null");
+
             double targetSOI = moveDB.TargetEntity.GetSOI_m();
 
-            Entity targetEntity;
+            Entity? targetEntity;
 
             if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(positionDB) > targetSOI)
             {
@@ -189,7 +191,8 @@ namespace Pulsar4X.Engine
             {
                 targetEntity = moveDB.TargetEntity;
             }
-            OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
+
+            if(targetEntity == null) throw new NullReferenceException("targetEntity cannot be null");
 
             //just chuck it in a circular orbit.
             OrbitDB newOrbit = OrbitDB.FromPosition(targetEntity, entity, atDateTime);
@@ -201,12 +204,12 @@ namespace Pulsar4X.Engine
 
         void SetOrbitHere(Entity entity, PositionDB positionDB, WarpMovingDB moveDB, DateTime atDateTime)
         {
-
+            if(moveDB.TargetEntity == null) throw new NullReferenceException("moveDB.TargetEntity cannot be null");
             //propulsionDB.CurrentVectorMS = new Vector3(0, 0, 0);
 
             double targetSOI = moveDB.TargetEntity.GetSOI_m();
 
-            Entity targetEntity;
+            Entity? targetEntity;
 
             if (moveDB.TargetEntity.GetDataBlob<PositionDB>().GetDistanceTo_m(positionDB) > targetSOI)
             {
@@ -216,6 +219,9 @@ namespace Pulsar4X.Engine
             {
                 targetEntity = moveDB.TargetEntity;
             }
+
+            if(targetEntity == null) throw new NullReferenceException("targetEntity cannot be null");
+
             OrbitDB targetOrbit = targetEntity.GetDataBlob<OrbitDB>();
 
 
@@ -245,6 +251,7 @@ namespace Pulsar4X.Engine
                 if (newOrbit.Periapsis > targetSOI) //closest point outside soi
                 {
                     //find who's SOI we are in, and create an orbit around that.
+                    if(entity.Manager == null) throw new NullReferenceException("entity.Manager cannot be null");
                     targetEntity = OrbitProcessor.FindSOIForPosition((StarSystem)entity.Manager, positionDB.AbsolutePosition);
                     newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);
                     entity.SetDataBlob(newOrbit);

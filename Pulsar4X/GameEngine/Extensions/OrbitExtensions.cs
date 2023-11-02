@@ -9,14 +9,15 @@ namespace Pulsar4X.Extensions
 {
     public static class OrbitExtensions
     {
-        public static OrbitDB FindSOIForOrbit(this OrbitDB orbit, Vector3 AbsolutePosition)
+        public static OrbitDB? FindSOIForOrbit(this OrbitDB orbit, Vector3 AbsolutePosition)
         {
             var soi = orbit.SOI_m;
             var pos = orbit.OwningEntity.GetDataBlob<PositionDB>();
             if (AbsolutePosition.GetDistanceTo_m(pos) < soi)
             {
-                foreach (OrbitDB subOrbit in orbit.ChildrenDBs)
+                foreach (OrbitDB? subOrbit in orbit.ChildrenDBs)
                 {
+                    if(subOrbit == null) continue;
                     var suborbitb = subOrbit.FindSOIForOrbit(AbsolutePosition);
                     if (suborbitb != null)
                         return suborbitb;
@@ -158,10 +159,7 @@ namespace Pulsar4X.Extensions
             Vector3 vector = orbit.InstantaneousOrbitalVelocityVector_m(atDateTime);
             if (orbit.Parent != null)
             {
-                if (orbit is OrbitUpdateOftenDB)//this is a horrbile hack. very brittle.
-                    vector += orbit.Parent.GetDataBlob<OrbitDB>().AbsoluteOrbitalVector_m(atDateTime);
-                else
-                    vector += ((OrbitDB)orbit.ParentDB).AbsoluteOrbitalVector_m(atDateTime);
+                vector += orbit.Parent.GetDataBlob<OrbitDB>().AbsoluteOrbitalVector_m(atDateTime);
             }
             return vector;
         }

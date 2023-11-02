@@ -26,7 +26,9 @@ namespace Pulsar4X.Modding
             }
 
             // Get the directory of the mod manifest
-            string modDirectory = Path.GetDirectoryName(modManifestPath);
+            string? modDirectory = Path.GetDirectoryName(modManifestPath);
+
+            if(string.IsNullOrEmpty(modDirectory)) throw new DirectoryNotFoundException($"Could not find {modManifestPath}");
 
             modManifest.ModDirectory = modDirectory;
 
@@ -114,8 +116,10 @@ namespace Pulsar4X.Modding
                                 && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>)
                                 && instruction.CollectionOperation.HasValue)
                             {
-                                var originalList = (IList)property.GetValue(existingData);
+                                var originalList = (IList?)property.GetValue(existingData);
                                 var modList = (IList)modValue;
+
+                                if(originalList == null) throw new NullReferenceException($"Unable to resolve List for {existingData.FullIdentifier}");
 
                                 switch(instruction.CollectionOperation.Value)
                                 {
@@ -141,8 +145,10 @@ namespace Pulsar4X.Modding
                                 && property.PropertyType.GetGenericTypeDefinition() == typeof(Dictionary<,>)
                                 && instruction.CollectionOperation.HasValue)
                             {
-                                var originalDict = (IDictionary)property.GetValue(existingData);
+                                var originalDict = (IDictionary?)property.GetValue(existingData);
                                 var modDict = (IDictionary)modValue;
+
+                                if(originalDict == null) throw new NullReferenceException($"Unable to resolve Dictionary for {existingData.FullIdentifier}");
 
                                 switch(instruction.CollectionOperation.Value)
                                 {

@@ -37,6 +37,8 @@ namespace Pulsar4X.Engine.Logistics
             Vector3 vel = startState.Velocity;
             var targetBody = target.GetSOIParentEntity();
 
+            if(targetBody == null) throw new NullReferenceException("targetBody cannot be null");
+
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
             var sgpTgtBdy = GeneralMath.StandardGravitationalParameter(shipMass + tgtBdyMass);
@@ -95,6 +97,8 @@ namespace Pulsar4X.Engine.Logistics
             Vector3 pos = startState.Position;
             Vector3 vel = startState.Velocity;
             var targetBody = target.GetSOIParentEntity();
+
+            if(targetBody == null) throw new NullReferenceException("targetBody cannot be null");
 
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
@@ -162,6 +166,8 @@ namespace Pulsar4X.Engine.Logistics
             Vector3 vel = startState.Velocity;
             var targetBody = target.GetSOIParentEntity();
 
+            if(targetBody == null) throw new NullReferenceException("targetBody cannot be null");
+
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
             var sgpTgtBdy = GeneralMath.StandardGravitationalParameter(shipMass + tgtBdyMass);
@@ -176,8 +182,6 @@ namespace Pulsar4X.Engine.Logistics
                 mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
             if (ship.HasDataBlob<NewtonMoveDB>())
                 mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
-
-            double targetSMA = OrbitMath.LowOrbitRadius(targetBody);
 
             double targetRad = OrbitMath.LowOrbitRadius(targetBody);
 

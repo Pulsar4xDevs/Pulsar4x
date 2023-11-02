@@ -145,13 +145,14 @@ namespace Pulsar4X.Engine
 
                 if (positionDB.RelativePosition.Length() >= sOIRadius)
                 {
-                    Entity newParent;
+                    Entity? newParent;
                     Vector3 parentrelativeVector;
                     //if our parent is a regular kepler object (normaly this is the case)
                     if (newtonMoveDB.SOIParent.HasDataBlob<OrbitDB>())
                     {
                         var orbitDB = newtonMoveDB.SOIParent.GetDataBlob<OrbitDB>();
                         newParent = orbitDB.Parent;
+                        if(newParent == null) throw new NullReferenceException("newParent cannot be null");
                         var parentVelocity = orbitDB.InstantaneousOrbitalVelocityVector_m(entity.StarSysDateTime);
                         parentrelativeVector = newtonMoveDB.CurrentVector_ms + parentVelocity;
 
@@ -194,6 +195,7 @@ namespace Pulsar4X.Engine
 #endif
                     */
                     var parentEntity = entity.GetSOIParentEntity(positionDB);
+                    if(parentEntity == null) throw new NullReferenceException("parentEntity cannot be null");
 
                     if (kE.Eccentricity < 1) //if we're going to end up in a regular orbit around our new parent
                     {

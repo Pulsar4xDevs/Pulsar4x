@@ -31,18 +31,24 @@ namespace Pulsar4X.Engine.Logistics
             else
             {
                 List<Entity> shipparents = new List<Entity>();
-                Entity soiParent = shippingEntity.GetSOIParentEntity();
+                Entity? soiParent = shippingEntity.GetSOIParentEntity();
                 Entity soiroot = shippingEntity.GetDataBlob<PositionDB>().Root;
+
+                if(soiParent == null) throw new NullReferenceException("soiParent cannot be null");
                 shipparents.Add(soiParent);
                 while (soiParent != soiroot)
                 {
                     soiParent = soiParent.GetSOIParentEntity();
+                    if(soiParent == null) throw new NullReferenceException("soiParent cannot be null");
                     shipparents.Add(soiParent);
                 }
 
 
-                Entity soiTargetParent = tbase.OwningEntity.GetSOIParentEntity();
+                Entity? soiTargetParent = tbase.OwningEntity.GetSOIParentEntity();
                 Entity soiTargetRoot = tbase.OwningEntity.GetDataBlob<PositionDB>().Root;
+
+                if(soiTargetParent == null) throw new NullReferenceException("soiTargetParent cannot be null");
+
                 if (soiroot != soiTargetRoot)
                     throw new Exception("Impossibru!");//this should only happen if we're in different systems, need to eventualy handle that. else the tree has gotten fucked up
                 List<Entity> soiTargetParents = new List<Entity>();
@@ -50,6 +56,7 @@ namespace Pulsar4X.Engine.Logistics
                 while (soiTargetParent != soiroot)
                 {
                     soiTargetParent = soiTargetParent.GetSOIParentEntity();
+                    if(soiTargetParent == null) throw new NullReferenceException("soiTargetParent cannot be null");
                     soiTargetParents.Add(soiTargetParent);
 
                 }
@@ -124,6 +131,7 @@ namespace Pulsar4X.Engine.Logistics
             Vector3 pos = startState.Position;
             Vector3 vel = startState.Velocity;
             var targetBody = target.GetSOIParentEntity();
+            if(targetBody == null) throw new NullReferenceException("targetBody cannot be null");
 
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
@@ -192,7 +200,6 @@ namespace Pulsar4X.Engine.Logistics
             double fuelUse = 0;
             Vector3 pos = startState.Position;
             Vector3 vel = startState.Velocity;
-            var targetBody = target.GetSOIParentEntity();
 
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
@@ -269,6 +276,8 @@ namespace Pulsar4X.Engine.Logistics
             Vector3 vel = startState.Velocity;
             var targetBody = target.GetSOIParentEntity();
 
+            if(targetBody == null) throw new NullReferenceException("targetBody cannot be null");
+
             //var myMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
             var tgtBdyMass = target.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
             var sgpTgtBdy = GeneralMath.StandardGravitationalParameter(shipMass + tgtBdyMass);
@@ -283,8 +292,6 @@ namespace Pulsar4X.Engine.Logistics
                 mySMA = ship.GetDataBlob<OrbitUpdateOftenDB>().SemiMajorAxis;
             if (ship.HasDataBlob<NewtonMoveDB>())
                 mySMA = ship.GetDataBlob<NewtonMoveDB>().GetElements().SemiMajorAxis;
-
-            double targetSMA = OrbitMath.LowOrbitRadius(targetBody);
 
             double targetRad = OrbitMath.LowOrbitRadius(targetBody);
 

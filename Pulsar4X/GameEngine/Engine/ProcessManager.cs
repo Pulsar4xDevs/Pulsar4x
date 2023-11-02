@@ -110,7 +110,8 @@ namespace Pulsar4X.Engine
             var hotloopTypes = GetDerivedTypesFor(typeof(IHotloopProcessor));
             foreach (var hotloopType in hotloopTypes)
             {
-                IHotloopProcessor processor = (IHotloopProcessor)Activator.CreateInstance(hotloopType);
+                IHotloopProcessor? processor = (IHotloopProcessor?)Activator.CreateInstance(hotloopType);
+                if(processor == null) throw new NullReferenceException($"Unable to create instance of {hotloopType.Name}");
                 processor.Init(game);
                 Type type = processor.GetParameterType;
                 HotloopProcessors.Add(type, processor);
@@ -119,7 +120,8 @@ namespace Pulsar4X.Engine
             var instanceTypes = GetDerivedTypesFor(typeof(IInstanceProcessor));
             foreach (var itemType in instanceTypes)
             {
-                IInstanceProcessor processor = (IInstanceProcessor)Activator.CreateInstance(itemType);
+                IInstanceProcessor? processor = (IInstanceProcessor?)Activator.CreateInstance(itemType);
+                if(processor == null) throw new NullReferenceException($"Unable to create instance of {itemType.Name}");
                 _instanceProcessors.Add(processor.TypeName, processor);
             }
 
@@ -140,7 +142,7 @@ namespace Pulsar4X.Engine
     {
         public override bool CanConvert(Type objectType) => objectType == typeof(ProcessorManager);
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             // Save JObject to set it later in the second step
             JObject jsonObject = JObject.Load(reader);
@@ -156,7 +158,7 @@ namespace Pulsar4X.Engine
             return null;
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             JObject obj = new JObject
             {
