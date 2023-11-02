@@ -5,7 +5,7 @@ using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Datablobs
 {
-    public class FactionTechDB : BaseDataBlob, IGetValuesHash
+    public class FactionTechDB : BaseDataBlob
     {
         [PublicAPI]
         [JsonProperty]
@@ -24,12 +24,6 @@ namespace Pulsar4X.Datablobs
         public override object Clone()
         {
             return new FactionTechDB(this);
-        }
-
-        public int GetValueCompareHash(int hash = 17)
-        {
-            hash = ObjectExtensions.ValueHash(ResearchPoints, hash);
-            return hash;
         }
     }
 }

@@ -6,7 +6,7 @@ using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Datablobs
 {
-    public class FactionOwnerDB : BaseDataBlob, IGetValuesHash
+    public class FactionOwnerDB : BaseDataBlob
     {
         [JsonProperty]
         internal Dictionary<int, Entity> OwnedEntities { get; set; } = new ();
@@ -44,16 +44,6 @@ namespace Pulsar4X.Datablobs
         public override object Clone()
         {
             return new FactionOwnerDB(this);
-        }
-
-        public int GetValueCompareHash(int hash = 17)
-        {
-            foreach (var item in OwnedEntities)
-            {
-                hash = ObjectExtensions.ValueHash(item.Key, hash);
-            }
-
-            return hash;
         }
     }
 }

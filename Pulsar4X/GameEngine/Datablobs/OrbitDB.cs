@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Pulsar4X.Datablobs
 {
-    public class OrbitDB : TreeHierarchyDB, IGetValuesHash
+    public class OrbitDB : TreeHierarchyDB
     {
         public new static List<Type> GetDependencies() => new List<Type>() { typeof(PositionDB) };
 
@@ -548,16 +548,6 @@ namespace Pulsar4X.Datablobs
             _myMass = actualDB._myMass;
             CalculateExtendedParameters();
         }
-
-        public int GetValueCompareHash(int hash = 17)
-        {
-            hash = ObjectExtensions.ValueHash(SemiMajorAxis, hash);
-            hash = ObjectExtensions.ValueHash(Eccentricity, hash);
-
-
-            return hash;
-        }
-
         #endregion
     }
 

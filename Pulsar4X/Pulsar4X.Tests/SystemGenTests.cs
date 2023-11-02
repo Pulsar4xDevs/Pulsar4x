@@ -190,7 +190,7 @@ namespace Pulsar4X.Tests
                 Entity entityTwin = orbitTwins[i];
                 var db1 = entityPrime.GetDataBlob<OrbitDB>();
                 var db2 = entityTwin.GetDataBlob<OrbitDB>();
-                Assert.AreEqual(db1.GetValueCompareHash(), db2.GetValueCompareHash());
+                Assert.IsTrue(DataBlobEqualityChecker.AreEqual(db1, db2));
 
                 List<BaseDataBlob> entityPrimeDataBlobs = entityPrime.Manager.GetAllDataBlobsForEntity(entityPrime.Id);
                 List<BaseDataBlob> entityTwinDataBlobs = entityTwin.Manager.GetAllDataBlobsForEntity(entityTwin.Id);
@@ -199,19 +199,7 @@ namespace Pulsar4X.Tests
                 {
                     BaseDataBlob blob1 = entityPrimeDataBlobs[j];
                     BaseDataBlob blob2 = entityTwinDataBlobs[j];
-                    Assert.IsTrue(blob1.GetType().ToString() == blob2.GetType().ToString());
-
-
-                    var getValuesHashBlob1 = blob1 as IGetValuesHash;
-                    var getValuesHashBlob2 = blob1 as IGetValuesHash;
-                    // TODO: Temporary Workaround, not all DataBlobs implement IGetValuesHash.
-                    // See Issue #381
-                    #warning Undefined Equality Checks for DataBlob in Deterministic Test
-                    if (getValuesHashBlob1 == null)
-                        continue;
-                    int hashBlob1 = getValuesHashBlob1.GetValueCompareHash();
-                    int hashBlob2 = getValuesHashBlob2.GetValueCompareHash();
-                    Assert.AreEqual(hashBlob1, hashBlob2, "Hashes for iteration" + j + " type " + blob1.GetType() + "Don't match");
+                    Assert.IsTrue(DataBlobEqualityChecker.AreEqual(blob1, blob2));
                 }
             }
         }
@@ -407,4 +395,6 @@ namespace Pulsar4X.Tests
             }
         }
     }
+
+
 }

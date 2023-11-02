@@ -9,7 +9,7 @@ using Pulsar4X.Extensions;
 namespace Pulsar4X.Datablobs
 {
     [DebuggerDisplay("{" + nameof(OwnersName) + "}")]
-    public class NameDB : BaseDataBlob, ISensorCloneMethod, IGetValuesHash
+    public class NameDB : BaseDataBlob, ISensorCloneMethod
     {
 
         /// <summary>
@@ -85,16 +85,6 @@ namespace Pulsar4X.Datablobs
         public BaseDataBlob SensorClone(SensorInfoDB sensorInfo)
         {
             return new NameDB(this, sensorInfo);
-        }
-
-        public int GetValueCompareHash(int hash = 17)
-        {
-            foreach (var item in _names)
-            {
-                hash = ObjectExtensions.ValueHash(item.Key, hash);
-                hash = ObjectExtensions.ValueHash(item.Value, hash);
-            }
-            return hash;
         }
 
         public void SensorUpdate(SensorInfoDB sensorInfo)

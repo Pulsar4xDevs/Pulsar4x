@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.Engine;
@@ -159,5 +160,35 @@ namespace Pulsar4X.Tests
         }
 
 
+    }
+
+    public static class DataBlobEqualityChecker
+    {
+        public static bool AreEqual<T>(T first, T second) where T : BaseDataBlob
+        {
+            // Get the actual implementation type, not a base type.
+            Type firstType = first.GetType();
+            Type secondType = second.GetType();
+
+            if (firstType != secondType) return false;
+
+            // Reflect equality checks across the properties.
+            foreach (PropertyInfo property in firstType.GetProperties())
+            {
+                object? firstValue = property.GetValue(first);
+                object? secondValue = property.GetValue(second);
+
+                if (firstValue is null && secondValue is null)
+                    continue;
+
+                if (firstValue is null || secondValue is null)
+                    return false;
+
+                if (!firstValue.Equals(secondValue))
+                    return false;
+            }
+
+            return true;
+        }
     }
 }
