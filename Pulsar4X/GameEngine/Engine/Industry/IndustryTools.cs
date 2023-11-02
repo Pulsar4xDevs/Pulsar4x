@@ -199,7 +199,7 @@ namespace Pulsar4X.Engine.Industry
         {
             foreach (var kvp in toUse.ToArray())
             {
-                ICargoable cargoItem = fromCargo.OwningEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(kvp.Key);//fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(kvp.Key);
+                ICargoable? cargoItem = fromCargo.OwningEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(kvp.Key);//fromCargo.OwningEntity.Manager.Game.StaticData.GetICargoable(kvp.Key);
                 if (cargoItem is null)
                 {
                     if (fromCargo.OwningEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().InternalComponentDesigns.TryGetValue(kvp.Key, out var design))
@@ -244,13 +244,13 @@ namespace Pulsar4X.Engine.Industry
             var resReq = job.ResourcesRequiredRemaining;
             foreach (var kvp in resReq)
             {
-                ICargoable cargoItem = industryEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(kvp.Key);
+                ICargoable? cargoItem = industryEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(kvp.Key);
                 if (cargoItem is null)
                 {
-                    if (industryEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().IndustryDesigns.TryGetValue(kvp.Key, out var design))
+                    if (industryEntity.GetFactionOwner.GetDataBlob<FactionInfoDB>().IndustryDesigns.TryGetValue(kvp.Key, out var design)
+                        && design != null)
                     {
-                        if (design != null)
-                            cargoItem = (ICargoable)design;
+                        cargoItem = (ICargoable)design;
                     }
                     else
                     {

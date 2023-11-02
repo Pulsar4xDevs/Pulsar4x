@@ -51,7 +51,7 @@ namespace Pulsar4X.Engine.Orders
         /// <param name="transitStartDatetime">Transit start datetime.</param>
         /// <param name="expendDeltaV">Amount of DV to expend to change the orbit in m/s</param>
         /// /// <param name="mass">mass of ship after warp (needed for DV calc)</param>
-        public static (WarpMoveCommand, NewtonThrustCommand) CreateCommand(CargoDefinitionsLibrary cargoLibrary, int faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_m, DateTime transitStartDatetime, Vector3 expendDeltaV, double mass)
+        public static (WarpMoveCommand, NewtonThrustCommand?) CreateCommand(CargoDefinitionsLibrary cargoLibrary, int faction, Entity orderEntity, Entity targetEntity, Vector3 targetOffsetPos_m, DateTime transitStartDatetime, Vector3 expendDeltaV, double mass)
         {
             var cmd = new WarpMoveCommand()
             {

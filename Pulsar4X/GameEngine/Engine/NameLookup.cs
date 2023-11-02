@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Industry;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Pulsar4X.Engine
 {
@@ -15,7 +16,7 @@ namespace Pulsar4X.Engine
             List<Entity> list = manager.GetAllEntitiesWithDataBlob<NameDB>();
             return TryGetFirstEntityWithName(list, name, out entity);
         }
-        internal static bool TryGetFirstEntityWithName(List<Entity> entitiesWithNameDB, string name, out Entity entity)
+        internal static bool TryGetFirstEntityWithName(List<Entity> entitiesWithNameDB, string name, [NotNullWhen(true)] out Entity? entity)
         {
             foreach (var item in entitiesWithNameDB)
             {

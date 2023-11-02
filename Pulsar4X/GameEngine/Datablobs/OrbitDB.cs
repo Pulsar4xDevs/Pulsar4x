@@ -349,7 +349,7 @@ namespace Pulsar4X.Datablobs
 			return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, Angle.ToRadians(inclination), Angle.ToRadians(longitudeOfAscendingNode), Angle.ToRadians(argumentOfPeriapsis), meanAnomaly, epoch);
         }
 
-        internal OrbitDB(Entity parent, double parentMass, double myMass, double semiMajorAxis_m, double eccentricity, double inclination,
+        internal OrbitDB(Entity? parent, double parentMass, double myMass, double semiMajorAxis_m, double eccentricity, double inclination,
                         double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
             : base(parent)
         {

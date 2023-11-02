@@ -217,7 +217,7 @@ namespace Pulsar4X.Engine
         }
 
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private void Timer_Elapsed(object? sender, ElapsedEventArgs e)
         {
             if (!_isProcessing)
             {
@@ -320,8 +320,10 @@ namespace Pulsar4X.Engine
 
 
 
-        public bool Equals(MasterTimePulse other)
+        public bool Equals(MasterTimePulse? other)
         {
+            if(other is null) return false;
+
             bool equality = false;
             if (GameGlobalDateTime.Equals(other.GameGlobalDateTime))
             {

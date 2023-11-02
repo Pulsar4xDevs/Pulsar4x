@@ -1,6 +1,7 @@
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine;
+using System;
 
 namespace Pulsar4X.Engine.Orders
 {
@@ -24,6 +25,10 @@ namespace Pulsar4X.Engine.Orders
                         entityCommand.EntityCommanding.Manager.ManagerSubpulses.AddEntityInterupt(entityCommand.ActionOnDate, nameof(OrderableProcessor), entityCommand.EntityCommanding);
                     }
                     var orderableDB = entityCommand.EntityCommanding.GetDataBlob<OrderableDB>();
+
+                    if(orderableDB == null) throw new NullReferenceException("orderableDB cannot be null");
+                    if(orderableDB.OwningEntity == null) throw new NullReferenceException("orderableDB.OwningEntity cannot be null");
+
                     orderableDB.ActionList.Add(entityCommand);
                     Game.ProcessorManager.GetInstanceProcessor(nameof(OrderableProcessor)).ProcessEntity(orderableDB.OwningEntity, Game.TimePulse.GameGlobalDateTime);
                 }

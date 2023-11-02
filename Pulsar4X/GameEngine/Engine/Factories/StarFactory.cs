@@ -21,13 +21,13 @@ namespace Pulsar4X.Engine
         /// Creates a star entity in the system.
         /// Does not initialize an orbit.
         /// </summary>
-        public Entity CreateStar(StarSystem system, double mass, double radius, double age, string starClass, double temperature, float luminosity, SpectralType spectralType, string starName = null)
+        public Entity CreateStar(StarSystem system, double mass, double radius, double age, string starClass, double temperature, float luminosity, SpectralType spectralType, string? starName = null)
         {
             double tempRange = temperature / _galaxyGen.Settings.StarTemperatureBySpectralType[spectralType].Max; // temp range from 0 to 1.
             ushort subDivision = (ushort)Math.Round((1 - tempRange) * 10);
             LuminosityClass luminosityClass = LuminosityClass.V;
 
-            if (starName == null)
+            if (string.IsNullOrEmpty(starName))
             {
                 starName = system.NameDB.DefaultName;
             }

@@ -41,6 +41,9 @@ namespace Pulsar4X.Engine.Orders
 
             // Get the colonies parent radius
             Target.TryGetDatablob<PositionDB>(out var targetPositionDB);
+
+            if(targetPositionDB.OwningEntity == null) throw new NullReferenceException("targetPositionDB.OwningEntity cannot be null");
+
             double targetSMA = OrbitMath.LowOrbitRadius(targetPositionDB.OwningEntity);
 
             // Get all the ships we need to add the movement command to
@@ -64,7 +67,7 @@ namespace Pulsar4X.Engine.Orders
 
                 // Create the movement order
                 var cargoLibrary = EntityCommanding.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-                (WarpMoveCommand warpCommand, NewtonThrustCommand thrustCommand) = WarpMoveCommand.CreateCommand(cargoLibrary, RequestingFactionGuid, ship, Target, targetPos, EntityCommanding.StarSysDateTime, new Vector3() , shipMass);
+                (WarpMoveCommand warpCommand, NewtonThrustCommand? thrustCommand) = WarpMoveCommand.CreateCommand(cargoLibrary, RequestingFactionGuid, ship, Target, targetPos, EntityCommanding.StarSysDateTime, new Vector3() , shipMass);
                 _shipCommands.Add(warpCommand);
             }
 

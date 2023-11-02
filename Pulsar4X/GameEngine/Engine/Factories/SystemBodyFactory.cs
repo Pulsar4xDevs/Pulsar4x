@@ -461,7 +461,7 @@ namespace Pulsar4X.Engine
                 remainingBandMass -= currentMVDB.MassDry;
 
                 // Do the heavy math to find the orbit.
-                OrbitDB currentOrbit = FindClearOrbit(system, parent, currentBody, insideApoapsis_m, outsidePeriapsis_m, insideMass, outsideMass, minDistance_m, maxDistance_m, currentDateTime);
+                OrbitDB? currentOrbit = FindClearOrbit(system, parent, currentBody, insideApoapsis_m, outsidePeriapsis_m, insideMass, outsideMass, minDistance_m, maxDistance_m, currentDateTime);
 
                 if (currentOrbit == null)
                 {
@@ -480,7 +480,7 @@ namespace Pulsar4X.Engine
         /// <summary>
         /// Finds a gravitationally stable orbit between the insideApoapsis and the outsidePeriapsis for a body.
         /// </summary>
-        private OrbitDB FindClearOrbit(StarSystem system, Entity parent, ProtoEntity body, double insideApoapsis, double outsidePeriapsis, double insideMass, double outsideMass, double minDistance, double maxDistance, DateTime currentDateTime)
+        private OrbitDB? FindClearOrbit(StarSystem system, Entity parent, ProtoEntity body, double insideApoapsis, double outsidePeriapsis, double insideMass, double outsideMass, double minDistance, double maxDistance, DateTime currentDateTime)
         {
             MassVolumeDB parentMVDB = parent.GetDataBlob<MassVolumeDB>();
             double parentMass = parentMVDB.MassDry;
@@ -588,7 +588,7 @@ namespace Pulsar4X.Engine
             }
         }
 
-        private static void FinalizeNameDB(IHasDataBlobs body, Entity parent, int bodyCount, string suffix = "")
+        private static void FinalizeNameDB(IHasDataBlobs body, Entity? parent, int bodyCount, string suffix = "")
         {
             // Set this body's name.
             string parentName = parent.GetDataBlob<NameDB>().DefaultName;
@@ -739,7 +739,7 @@ namespace Pulsar4X.Engine
             OrbitDB bodyOrbit = body.GetDataBlob<OrbitDB>();
             MassVolumeDB bodyMVDB = body.GetDataBlob<MassVolumeDB>();
 
-            Entity parent = bodyOrbit.Parent;
+            Entity? parent = bodyOrbit.Parent;
             if (parent == null)
             {
                 throw new InvalidOperationException("Body cannot be finalized without a parent.");

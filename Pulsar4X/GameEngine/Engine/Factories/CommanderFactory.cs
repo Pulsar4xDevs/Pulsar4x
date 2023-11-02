@@ -7,8 +7,10 @@ namespace Pulsar4X.Engine
 {
     public static class CommanderFactory
     {
-        public static Entity Create(EntityManager manager, int factionID, CommanderDB commanderDB)
+        public static Entity Create(EntityManager? manager, int factionID, CommanderDB commanderDB)
         {
+            if(manager == null) throw new ArgumentNullException("manager cannot be null");
+
             var blobs = new List<BaseDataBlob>();
             var nameDB = new NameDB(commanderDB.ToString(), factionID, commanderDB.ToString());
             blobs.Add(nameDB);

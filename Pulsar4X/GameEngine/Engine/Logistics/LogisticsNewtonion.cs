@@ -14,6 +14,8 @@ namespace Pulsar4X.Engine.Logistics
     {
         public static double TravelTimeToSource(Entity shippingEntity, LogiBaseDB tbase, OrbitDB odb, DateTime currentDateTime)
         {
+            if(tbase.OwningEntity == null) throw new ArgumentNullException("LogiBaseDB cannot be null");
+
             double travelTimeToSource = 0;
             (Vector3 position, DateTime atDateTime) sourceIntercept;
             if (shippingEntity.HasDataBlob<WarpAbilityDB>())

@@ -59,6 +59,9 @@ namespace Pulsar4X.Engine
         {
             var fuelTypeID = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
             var fuelType = cargoLibrary.GetAny(fuelTypeID);
+
+            if(fuelType == null) throw new NullReferenceException("fuelType cannot be null");
+
             //var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
             var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
             var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
@@ -85,6 +88,9 @@ namespace Pulsar4X.Engine
         {
             var fuelTypeID = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
             var fuelType = cargoLibrary.GetAny(fuelTypeID);
+
+            if(fuelType == null) throw new NullReferenceException("fuelType cannot be null");
+
             //var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
             var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
             var massDry = entity.GetDataBlob<MassVolumeDB>().MassDry;
@@ -133,6 +139,9 @@ namespace Pulsar4X.Engine
             var parentMass = entity.GetSOIParentEntity().GetDataBlob<MassVolumeDB>().MassTotal;
             var fuelTypeID = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelType;
             var fuelType = cargoLibrary.GetAny(fuelTypeID);
+
+            if(fuelType == null) throw new NullReferenceException("fuelType cannot be null");
+
             var fuelMass = entity.GetDataBlob<VolumeStorageDB>().GetMassStored(fuelType);
 
             var massCargoDry = massDry + cargoMass;
@@ -185,7 +194,7 @@ namespace Pulsar4X.Engine
             var pos = moverAbsolutePos;
             double tim = 0;
 
-            var pl = new orbit()
+            var pl = new Orbit()
             {
                 position = moverAbsolutePos,
                 T = targetOrbit.OrbitalPeriod.TotalSeconds,
@@ -384,7 +393,7 @@ namespace Pulsar4X.Engine
 
 
 
-        struct orbit
+        struct Orbit
         {
             public Vector3 position;
             public double T;
@@ -452,6 +461,9 @@ namespace Pulsar4X.Engine
         public static KeplerElements KeplerFromOrbitDB(OrbitDB orbitDB)
         {
             var entity = orbitDB.OwningEntity;
+
+            if(entity == null) throw new NullReferenceException("orbitDB.OwningEntity cannot be null");
+
             var sgp = orbitDB.GravitationalParameter_m3S2;
             var state = entity.GetRelativeState();
             var epoch = entity.StarSysDateTime;

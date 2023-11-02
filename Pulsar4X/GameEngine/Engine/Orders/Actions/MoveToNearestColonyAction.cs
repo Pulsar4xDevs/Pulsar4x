@@ -44,7 +44,7 @@ namespace Pulsar4X.Engine.Orders
 
             // Get all colonies in the system
             var colonies = EntityCommanding.Manager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
-            Entity closestColony = null;
+            Entity? closestColony = null;
             double closestDistance = double.MaxValue;
 
             // Find the closest colony
@@ -67,6 +67,9 @@ namespace Pulsar4X.Engine.Orders
 
             // Get the colonies parent radius
             closestColony.TryGetDatablob<PositionDB>(out var closestColonyPositionDB);
+
+            if(closestColonyPositionDB.Parent == null) return;
+
             double targetSMA = OrbitMath.LowOrbitRadius(closestColonyPositionDB.Parent);
 
             // Get all the ships we need to add the movement command to
@@ -91,7 +94,7 @@ namespace Pulsar4X.Engine.Orders
 
                 // Create the movement order
                 var cargoLibrary = EntityCommanding.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-                (WarpMoveCommand warpCommand, NewtonThrustCommand thrustCommand) = WarpMoveCommand.CreateCommand(cargoLibrary, RequestingFactionGuid, ship, closestColonyPositionDB.Parent, targetPos, EntityCommanding.StarSysDateTime, new Vector3() , shipMass);
+                (WarpMoveCommand warpCommand, NewtonThrustCommand? thrustCommand) = WarpMoveCommand.CreateCommand(cargoLibrary, RequestingFactionGuid, ship, closestColonyPositionDB.Parent, targetPos, EntityCommanding.StarSysDateTime, new Vector3() , shipMass);
                 _shipCommands.Add(warpCommand);
             }
 

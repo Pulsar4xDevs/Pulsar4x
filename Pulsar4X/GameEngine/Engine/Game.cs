@@ -94,6 +94,10 @@ namespace Pulsar4X.Engine
         {
             ApplyModData(modDataStore);
             ApplySettings(settings);
+
+            if(SystemGenSettings == null) throw new ArgumentNullException("SystemGenSettings cannot be null");
+            if(Settings == null) throw new ArgumentNullException("Settings cannot be null");
+
             TimePulse = new (this);
             TimePulse.Initialize(this);
             ProcessorManager = new ProcessorManager(this);
@@ -101,7 +105,7 @@ namespace Pulsar4X.Engine
             GlobalManager = new EntityManager();
             GlobalManager.Initialize(this);
             GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
-            GalaxyGen = new GalaxyFactory(SystemGenSettings, settings.MasterSeed);
+            GalaxyGen = new GalaxyFactory(SystemGenSettings, Settings.MasterSeed);
         }
 
         public void Initialize()
@@ -126,14 +130,14 @@ namespace Pulsar4X.Engine
         }
 
         [CanBeNull]
-        public Player GetPlayerForToken(AuthenticationToken authToken)
+        public Player? GetPlayerForToken(AuthenticationToken authToken)
         {
             if (SpaceMaster.IsTokenValid(authToken))
             {
                 return SpaceMaster;
             }
 
-            Player foundPlayer = Players.Find(player => player.ID == authToken?.PlayerID);
+            Player? foundPlayer = Players.Find(player => player.ID == authToken?.PlayerID);
             return foundPlayer?.IsTokenValid(authToken) != null ? foundPlayer : null;
         }
 

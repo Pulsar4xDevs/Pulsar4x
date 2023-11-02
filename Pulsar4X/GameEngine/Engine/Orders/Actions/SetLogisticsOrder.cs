@@ -40,7 +40,7 @@ public class SetLogisticsOrder : EntityCommand
 
         if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
         {
-            if (_type == OrderTypes.SetBaseItems && _entityCommanding.TryGetDatablob<LogiBaseDB>(out LogiBaseDB lbdb))
+            if (_type == OrderTypes.SetBaseItems && _entityCommanding.TryGetDatablob<LogiBaseDB>(out LogiBaseDB? lbdb))
             {
                 if(lbdb.ListedItems.Count >= _baseChanges.Count)
                     return true;

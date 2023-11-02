@@ -238,7 +238,7 @@ namespace Pulsar4X.Engine.Logistics
             pos = postManuverState.position;
             vel = new Vector3(postManuverState.velocity.X, postManuverState.velocity.Y, 0);
 
-            if(!ship.TryGetDatablob<NavSequenceDB>(out NavSequenceDB navDB))
+            if(!ship.TryGetDatablob<NavSequenceDB>(out NavSequenceDB? navDB))
             {
                 navDB = new NavSequenceDB();
                 ship.SetDataBlob(navDB);

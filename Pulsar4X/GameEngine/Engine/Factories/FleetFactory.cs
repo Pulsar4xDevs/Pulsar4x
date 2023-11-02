@@ -7,8 +7,10 @@ namespace Pulsar4X.Engine
 {
     public static class FleetFactory
     {
-        public static Entity Create(EntityManager manager, int factionID, string name)
+        public static Entity Create(EntityManager? manager, int factionID, string name)
         {
+            if(manager == null) throw new ArgumentNullException("manager cannot be null");
+
             var dataBlobs = new List<BaseDataBlob>();
             var nameDB = new NameDB(name, factionID, name);
             dataBlobs.Add(nameDB);

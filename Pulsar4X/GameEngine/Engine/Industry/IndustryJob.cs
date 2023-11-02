@@ -44,7 +44,7 @@ namespace Pulsar4X.Engine.Industry
             NumberOrdered = 1;
         }
 
-        public Entity InstallOn { get; set; } = null;
+        public Entity? InstallOn { get; set; } = null;
 
         public override void InitialiseJob(ushort numberOrderd, bool auto)
         {

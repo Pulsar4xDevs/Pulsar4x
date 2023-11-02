@@ -380,10 +380,10 @@ namespace Pulsar4X.Engine.Orders
             {
                 var instancesdb = _entityCommanding.GetDataBlob<ComponentInstancesDB>();
 
-                if (instancesdb.AllComponents.TryGetValue(WeaponGuid, out ComponentInstance wpn))
+                if (instancesdb.AllComponents.TryGetValue(WeaponGuid, out ComponentInstance? wpn))
                 {
                     _ordnanceAssigned = _factionEntity.GetDataBlob<FactionInfoDB>().MissileDesigns[OrdnanceAssigned];
-                    if(wpn.TryGetAbilityState(out WeaponState wpnState))
+                    if(wpn.TryGetAbilityState(out WeaponState? wpnState))
                     {
                         _weaponInstance = wpn;
                         return wpnState.FireWeaponInstructions.CanLoadOrdnance(_ordnanceAssigned);

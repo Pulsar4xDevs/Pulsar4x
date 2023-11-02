@@ -23,7 +23,7 @@ namespace Pulsar4X.Engine.Orders
         public double FuelCost;
 
         private Vector3 targetPosition;
-        private Entity orbitalParent = null;
+        private Entity? orbitalParent = null;
         private bool _hasLaunched = false;
 
         public static void CreateCommand(int faction, Entity orderEntity, string lauchSlot, string jobID)
@@ -75,6 +75,8 @@ namespace Pulsar4X.Engine.Orders
             }
             else //IsRunning
             {
+                if(orbitalParent == null) throw new NullReferenceException("orbitalParent cannot be null");
+
                 //_entityCommanding.GetDataBlob<CargoStorageDB>().StoredCargoTypes
                 ShipDesign design = (ShipDesign)_factionEntity.GetDataBlob<FactionInfoDB>().IndustryDesigns[_yardJob.ItemGuid];
                 ShipFactory.CreateShip(design, _factionEntity, targetPosition, orbitalParent);
