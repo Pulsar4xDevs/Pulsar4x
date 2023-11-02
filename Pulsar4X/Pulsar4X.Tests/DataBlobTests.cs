@@ -70,5 +70,15 @@ namespace Pulsar4X.Tests
                 Assert.IsNotNull(dataBlobType.GetCustomAttribute<TestUseOnlyAttribute>(true), "DataBlob is not public");
             }
         }
+
+        [Test]
+        [TestCaseSource(nameof(DataBlobTypes))]
+        public void AllDerivedTypesOfBaseDataBlobImplementIEquatable(Type derivedType)
+        {
+            var equatableType = typeof(IEquatable<>).MakeGenericType(derivedType);
+            bool implementsEquatable = derivedType.GetInterfaces().Any(i => i == equatableType);
+
+            Assert.IsTrue(implementsEquatable, $"{derivedType.Name} does not implement IEquatable<{derivedType.Name}>.");
+        }
     }
 }
