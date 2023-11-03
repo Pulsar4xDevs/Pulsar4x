@@ -149,7 +149,7 @@ namespace Pulsar4X.SDL2UI
             StarSystemStates = new Dictionary<string, SystemState>();
             foreach (var guid in factionInfo.KnownSystems)
             {
-                var system = Game.Systems.Where(s => s.Guid.Equals(guid)).First();
+                var system = Game.Systems.First(s => s.Guid.Equals(guid));
                 StarSystemStates[guid] = new SystemState(system, factionEntity);
             }
             GalacticMap.SetFaction();
@@ -190,12 +190,14 @@ namespace Pulsar4X.SDL2UI
                     StarSystemStates[system.Guid] = SystemState.GetMasterState((StarSystem)system);
                 }
             }
+            SelectedSysMapRender.OnSelectedSystemChange(SelectedSystem);
         }
 
         internal void DisableGameMaster()
         {
             SMenabled = false;
             SetFaction(PlayerFaction);
+            SelectedSysMapRender.OnSelectedSystemChange(SelectedSystem);
         }
 
         internal void ToggleGameMaster()

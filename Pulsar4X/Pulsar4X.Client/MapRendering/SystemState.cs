@@ -89,34 +89,15 @@ namespace Pulsar4X.SDL2UI
         private SystemState(StarSystem system)
         {
             StarSystem = system;
-            //SystemContacts = system.FactionSensorContacts[faction.ID];
-            //_sensorChanges = SystemContacts.Changes.Subscribe();
             PulseMgr = system.ManagerSubpulses;
             _faction = system.Game.GameMasterFaction;
-            foreach (var entityItem in system.GetAllEntitiesWithDataBlob<NameDB>())
-            {
 
-                var entityState = new EntityState(entityItem);// { Name = "Unknown" };
-                entityState.Name = entityItem.GetDataBlob<NameDB>().DefaultName;
-                EntityStatesWithNames.Add(entityItem.Id, entityState);
-                if (entityItem.HasDataBlob<PositionDB>())
-                {
-                    EntityStatesWithPosition.Add(entityItem.Id, entityState);
-                }
-                else if (entityItem.HasDataBlob<ColonyInfoDB>())
-                {
-                    EntityStatesColonies.Add(entityItem.Id, entityState);
-                }
+            foreach(var entity in system.GetAllEntites())
+            {
+                SetupEntity(entity, _faction);
             }
 
-            AEntityChangeListener changeListner = new EntityChangeListenerSM(StarSystem);//, listnerblobs);
-            _changeListener = changeListner;
-            /*
-            foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
-            {
-                var entityState = new EntityState(sensorContact) { Name = "Unknown" };
-                EntityStates.Add(sensorContact.ActualEntity.ID, entityState);
-            }*/
+            _changeListener = new EntityChangeListenerSM(StarSystem);
         }
 
         void HandleUpdates(EntityChangeData change)
