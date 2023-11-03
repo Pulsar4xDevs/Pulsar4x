@@ -1,21 +1,16 @@
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using System.Text;
 using ImGuiNET;
-using ImGuiSDL2CS;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
-using System.Data.Common;
 
 namespace Pulsar4X.SDL2UI
 {
 
-    public class PerformanceDisplay : PulsarGuiWindow
+    public class PerformanceWindow : PulsarGuiWindow
     {
         Stopwatch _sw = new Stopwatch();
 
@@ -39,7 +34,7 @@ namespace Pulsar4X.SDL2UI
         private List<(string txt, double time, double count)> _callData = new List<(string txt, double time, double count)>();
 
 
-        private PerformanceDisplay()
+        private PerformanceWindow()
         {
             // TODO: fix this
             // _dataBlobTypes = new Type[EntityManager.DataBlobTypes.Count];
@@ -53,14 +48,14 @@ namespace Pulsar4X.SDL2UI
             //     i++;
             // }
         }
-        internal static PerformanceDisplay GetInstance()
+        internal static PerformanceWindow GetInstance()
         {
-            PerformanceDisplay instance;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(PerformanceDisplay)))
-                instance = new PerformanceDisplay();
+            PerformanceWindow instance;
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(PerformanceWindow)))
+                instance = new PerformanceWindow();
             else
             {
-                instance = (PerformanceDisplay)_uiState.LoadedWindows[typeof(PerformanceDisplay)];
+                instance = (PerformanceWindow)_uiState.LoadedWindows[typeof(PerformanceWindow)];
             }
             instance._systemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
             return instance;

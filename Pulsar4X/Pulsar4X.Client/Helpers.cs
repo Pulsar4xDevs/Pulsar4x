@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using ImGuiNET;
-using NUnit.Framework;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
-using Vector2 = System.Numerics.Vector2;
 using Vector3 = System.Numerics.Vector3;
 
 namespace Pulsar4X.SDL2UI
@@ -586,8 +581,13 @@ namespace Pulsar4X.SDL2UI
             return SliderDouble(label, ref value, min, max, null, ImGuiSliderFlags.None);
         }
 
-        public static bool SliderDouble(string label, ref double value, double min, double max, string format, ImGuiSliderFlags flags)
+        public static bool SliderDouble(string label, ref double value, double min, double max, string? format, ImGuiSliderFlags flags)
         {
+            if(string.IsNullOrEmpty(format))
+            {
+                format = "";
+            }
+
             //double step = attribute.StepValue;
             //double fstep = step * 10;
             double val = value;

@@ -6,7 +6,7 @@ namespace Pulsar4X.SDL2UI
 {
     public class Program
     {
-        static SDL2Window Instance;
+        static SDL2Window? Instance;
         [STAThread]
         public static void Main()
         {

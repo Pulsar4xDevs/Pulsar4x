@@ -48,11 +48,11 @@ namespace Pulsar4X.SDL2UI
 
             IConfiguration preferences = new ConfigurationBuilder().AddIniFile(preferencesPath).Build();
             IConfigurationSection windowSection = preferences.GetSection("Window Settings");
-            string xPosition = windowSection["X"];
-            string yPosition = windowSection["Y"];
-            string width = windowSection["Width"];
-            string height = windowSection["Height"];
-            string maximized = windowSection["Maximized"];
+            string? xPosition = windowSection["X"];
+            string? yPosition = windowSection["Y"];
+            string? width = windowSection["Width"];
+            string? height = windowSection["Height"];
+            string? maximized = windowSection["Maximized"];
 
             if(xPosition != null) X = int.Parse(xPosition);
             if(yPosition != null) Y = int.Parse(yPosition);
@@ -129,8 +129,15 @@ namespace Pulsar4X.SDL2UI
             {
                 if (e.key.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE)
                 {
-                    MainMenuItems mainMenu = MainMenuItems.GetInstance();
-                    mainMenu.ToggleActive();
+                    MainMenuItems.GetInstance().ToggleActive();
+                }
+                else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_F1)
+                {
+                    DebugWindow.GetInstance().ToggleActive();
+                }
+                else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_F2)
+                {
+                    PerformanceWindow.GetInstance().ToggleActive();
                 }
             }
 

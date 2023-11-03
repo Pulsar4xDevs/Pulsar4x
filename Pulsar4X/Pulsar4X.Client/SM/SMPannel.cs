@@ -22,7 +22,7 @@ namespace Pulsar4X.SDL2UI
 
         private Entity[] _filteredEntities = new Entity[0];
 
-        Entity _selectedEntity
+        Entity? _selectedEntity
         {
             get
             {
@@ -127,7 +127,7 @@ namespace Pulsar4X.SDL2UI
 
                 }
 
-                if (_entityInspectorWindow)
+                if (_entityInspectorWindow && _selectedEntity != null)
                 {
                     EntityInspector.Begin(_selectedEntity);
                 }

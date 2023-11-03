@@ -33,10 +33,10 @@ namespace Pulsar4X.SDL2UI
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
             _isThreaded = _gameSettings.EnableMultiThreading;
             _enforceSingleThread = _gameSettings.EnforceSingleThread;
-            
+
             _relativeOrbitVelocity = OrbitProcessor.UseRelativeVelocity; //TODO: feel like this should be in game settings
             _strictNewtonion = _gameSettings.StrictNewtonion;
-            
+
             _orbitalDebugWindow = OrbitalDebugWindow.GetInstance();
             _logWindow = GameLogWindow.GetInstance();
 
@@ -73,8 +73,8 @@ namespace Pulsar4X.SDL2UI
                     {
                         var lastClickedEntity = _uiState.LastClickedEntity.Entity;
 
-                         if(lastClickedEntity.HasDataBlob<OrbitDB>() 
-                            || lastClickedEntity.HasDataBlob<OrbitUpdateOftenDB>() 
+                         if(lastClickedEntity.HasDataBlob<OrbitDB>()
+                            || lastClickedEntity.HasDataBlob<OrbitUpdateOftenDB>()
                             || lastClickedEntity.HasDataBlob<NewtonMoveDB>())
                         {
                             bool orbitDebugActive = _orbitalDebugWindow.GetActive();
@@ -94,17 +94,17 @@ namespace Pulsar4X.SDL2UI
                     {
                         DebugGUIWindow.GetInstance().ToggleActive();
                     }
-                    
+
                     bool logActive = _logWindow.GetActive();
                     if (ImGui.Checkbox("Show Log", ref logActive))
                     {
                         _logWindow.ToggleActive();
                     }
 
-                    bool perfActive = PerformanceDisplay.GetInstance().GetActive();
+                    bool perfActive = PerformanceWindow.GetInstance().GetActive();
                     if (ImGui.Checkbox("Show Pulsar Performance Window", ref perfActive))
                     {
-                        PerformanceDisplay.GetInstance().ToggleActive();
+                        PerformanceWindow.GetInstance().ToggleActive();
                     }
 
                     ImGui.Checkbox("Show ImguiMetrix", ref _uiState.ShowMetrixWindow);
@@ -116,9 +116,9 @@ namespace Pulsar4X.SDL2UI
                             DamageViewer.GetInstance().SetActive();
                         else
                             DamageViewer.GetInstance().SetActive(false);
-                        
+
                     }
-                    
+
                     ImGui.Checkbox("Show Sizes Demo", ref _showSizesDemo);
                     if(_showSizesDemo)
                     {
@@ -152,25 +152,25 @@ namespace Pulsar4X.SDL2UI
                             OrbitProcessor.UseRelativeVelocity = _relativeOrbitVelocity;
                         }
                         if (ImGui.IsItemHovered())
-                        { 
+                        {
                             if (_relativeOrbitVelocity)
                                 ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using a vector relative to it's origin parent");
                             else
                                 ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter an orbit: \n Using the absolute Vector (ie raltive to the root'sun'");
                         }
-                        
+
                         if (ImGui.Checkbox("Translate Uses Strict Newtonion", ref _strictNewtonion))
                         {
                             _gameSettings.StrictNewtonion = _strictNewtonion;
                         }
                         if (ImGui.IsItemHovered())
-                        { 
+                        {
                             if (_strictNewtonion)
                                 ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter: \n An orbit using a vector relative to it's origin vector");
                             else
                                 ImGui.SetTooltip("Ships exiting from a non newtonion translation will enter: \n a Simple circular orbit ignoring its origin newton vector");
                         }
-                        
+
                     }
 
 
@@ -229,7 +229,7 @@ namespace Pulsar4X.SDL2UI
                                             _userOrbitSettings.MinAlpha = (byte)_minAlpha;
                                             _uiState.SelectedSysMapRender.UpdateUserOrbitSettings();
                                         }
-                                    } 
+                                    }
                                 }
                                 ImGui.TreePop();
                             }
