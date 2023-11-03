@@ -6,7 +6,7 @@ namespace Pulsar4X.Interfaces
     /// <summary>
     /// Hotloop processor - this proccessor is fired at a specific regular time interval
     /// </summary>
-    internal interface IHotloopProcessor
+    public interface IHotloopProcessor
     {
         /// <summary>
         /// used to initialize processors that need access to static data etc, used to construct a derived class's concrete object.
