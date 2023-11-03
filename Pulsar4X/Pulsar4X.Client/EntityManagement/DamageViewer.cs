@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Linq;
 using ImGuiNET;
 using ImGuiSDL2CS;
@@ -10,7 +8,6 @@ using Pulsar4X.Engine.Damage;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Orbital;
-using SDL2;
 
 
 namespace Pulsar4X.SDL2UI.Combat
@@ -18,7 +15,7 @@ namespace Pulsar4X.SDL2UI.Combat
     public class DamageViewer : PulsarGuiWindow
     {
         //private ComponentDesign _componentDesign;
-        private Entity _selectedEntity;
+        private Entity? _selectedEntity;
 
         int _newmatIDCode;
         int _newmatHitPoints = 10;
@@ -42,11 +39,11 @@ namespace Pulsar4X.SDL2UI.Combat
         private IntPtr _componentSDLtexture;
 
         private int _damageEventIndex = 0;
-        private List<RawBmp> _damageFrames;
+        private List<RawBmp>? _damageFrames = null;
         private int _showFrameNum = 0;
         private IntPtr _showDmgFrametx;
 
-        private EntityDamageProfileDB _profile;
+        private EntityDamageProfileDB? _profile;
         private RawBmp _rawShipImage;
         private IntPtr _shipImgPtr;
 
@@ -114,9 +111,10 @@ namespace Pulsar4X.SDL2UI.Combat
 
         void SetDamageEventFrames()
         {
-            _damageFrames = _profile.DamageSlides[_damageEventIndex];
+            _damageFrames = _profile?.DamageSlides[_damageEventIndex];
             _showFrameNum = 0;
-            _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
+            if(_damageFrames != null)
+                _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
         }
 
         static class Beam
@@ -124,13 +122,13 @@ namespace Pulsar4X.SDL2UI.Combat
             public static double BeamFreq = 700;
             public static string[] BeamTypeNames = new string[]
             {
-                "Gama-Ray", 
-                "X-Ray", 
-                "UV", 
-                "Visable", 
-                "Near IR", 
-                "IR", 
-                "MicroWave", 
+                "Gama-Ray",
+                "X-Ray",
+                "UV",
+                "Visable",
+                "Near IR",
+                "IR",
+                "MicroWave",
                 "Radio"
             };
             private static int _beamTypeIndex = 5;
@@ -163,15 +161,15 @@ namespace Pulsar4X.SDL2UI.Combat
                     case 1: //xray
                         MinFreq = 1e-11; //1pm
                         MaxFreq = 1e-8; //10pm
-                        break;                    
+                        break;
                     case 2://uv
                         MinFreq = 1e-8; //10pm
                         MaxFreq = 4e-7; //400nm
-                        break;                    
+                        break;
                     case 3://visable
                         MinFreq = 4e-7; //400nm
                         MaxFreq = 7e-7; //700nm
-                        break;                    
+                        break;
                     case 4://near IR
                         MinFreq = 7e-7; //700nm
                         MaxFreq = 1e-5; //10um
@@ -207,11 +205,11 @@ namespace Pulsar4X.SDL2UI.Combat
                         int w = _rawShipImage.Width; // / 4;
                         int h = _rawShipImage.Height; // / 4;
                         ImGui.Image(_shipImgPtr, new System.Numerics.Vector2(w, h));
-                        
+
                     }
-                    
+
                 }
-                
+
                 if (_shipImgPtr != IntPtr.Zero)
                 {
                     if (ImGui.CollapsingHeader("Fire a Weapon to check damage result"))
@@ -221,11 +219,11 @@ namespace Pulsar4X.SDL2UI.Combat
 
                         ImGui.InputFloat("VelocityX", ref _fireVel.x);
                         ImGui.InputFloat("VelocityY", ref _fireVel.y);
-                            
+
 
                         ImGui.Columns(2);
-                        
-                        if (ImGui.Button("Fire Beam"))
+
+                        if (_profile != null && ImGui.Button("Fire Beam"))
                         {
                             var damageFrag = new DamageFragment()
                             {
@@ -254,7 +252,7 @@ namespace Pulsar4X.SDL2UI.Combat
 
 
                         ImGui.NextColumn();
-                        if (ImGui.Button("Fire Longrod Projectile"))
+                        if (_profile != null && ImGui.Button("Fire Longrod Projectile"))
                         {
                             var damageFrag = new DamageFragment()
                             {
@@ -267,40 +265,35 @@ namespace Pulsar4X.SDL2UI.Combat
                             _damageFrames = DamageTools.DealDamage(_profile, damageFrag);
                             _rawShipImage = _damageFrames.Last();
                         }
-                        
+
                         ImGui.NextColumn();
-                        
+
                         ImGui.InputFloat("Mass", ref _projMass);
                         ImGui.InputFloat("Density", ref _projDensity);
                         ImGui.InputFloat("Length", ref _projLen);
-                        
-                        
+
+
                         ImGui.Columns(0);
 
-                    
+
                     }
                 }
 
-                for (int i = 0; i < _profile.DamageSlides.Count; i++)
-                {
-                    
-                }
-                
-                if(_profile.DamageSlides.Count > 1)
+                if(_profile != null && _profile.DamageSlides.Count > 1)
                 {
                     if (ImGui.SliderInt("Damage Events", ref _damageEventIndex, 0, _profile.DamageSlides.Count))
                     {
                         SetDamageEventFrames();
                     }
                 }
-                
-                if(_profile.DamageSlides.Count > 0 && _damageFrames == null)
+
+                if(_profile != null && _profile.DamageSlides.Count > 0 && _damageFrames == null)
                 {
                     _damageEventIndex = 0;
                     SetDamageEventFrames();
 
                 }
-                
+
                 if (_damageFrames != null && _damageFrames.Count > 0)
                 {
                     if (ImGui.Button("PrevFrame"))
