@@ -11,6 +11,7 @@ using Pulsar4X.Extensions;
 using Pulsar4X.SDL2UI.Combat;
 using Vector3 = Pulsar4X.Orbital.Vector3;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -813,7 +814,7 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.BeginTabItem("Processors"))
             {
                 ImGui.Columns(3);
-                foreach(var (dateTime, processSet) in SystemState.StarSystem.ManagerSubpulses.QueuedProcesses.ToImmutableArray())
+                foreach(var (dateTime, processSet) in SystemState.StarSystem.ManagerSubpulses.QueuedProcesses.ToArray())
                 {
                     if(processSet.SystemProcessors.Count > 0)
                         ImGui.Separator();
@@ -831,7 +832,7 @@ namespace Pulsar4X.SDL2UI
                     if(processSet.InstanceProcessors.Count > 0)
                         ImGui.Separator();
 
-                    foreach(var thing in processSet.InstanceProcessors)
+                    foreach(var thing in processSet.InstanceProcessors.ToArray())
                     {
                         ImGui.Text(dateTime.ToString());
                         ImGui.NextColumn();
