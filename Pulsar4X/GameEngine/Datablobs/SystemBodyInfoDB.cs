@@ -15,7 +15,7 @@ namespace Pulsar4X.Datablobs
     /// <remarks>
     /// Specifically, Minerals, body info, atmosphere info, and gravity.
     /// </remarks>
-    public class SystemBodyInfoDB : BaseDataBlob, ISensorCloneMethod, IGetValuesHash
+    public class SystemBodyInfoDB : BaseDataBlob, ISensorCloneMethod
     {
         public new static List<Type> GetDependencies() => new List<Type>() { typeof(NameDB) };
         /// <summary>
@@ -184,22 +184,6 @@ namespace Pulsar4X.Datablobs
             LengthOfDay = originalDB.LengthOfDay;
             Gravity = originalDB.Gravity;
             Colonies = new List<Entity>(originalDB.Colonies); //this needs to only have owned colonies and sensor entites of unowned colonies.
-        }
-
-        public int GetValueCompareHash(int hash = 17)
-        {
-            hash = ObjectExtensions.ValueHash(BodyType, hash);
-            hash = ObjectExtensions.ValueHash(Tectonics, hash);
-            hash = ObjectExtensions.ValueHash(AxialTilt, hash);
-            hash = ObjectExtensions.ValueHash(MagneticField, hash);
-            hash = ObjectExtensions.ValueHash(BaseTemperature, hash);
-            hash = ObjectExtensions.ValueHash(RadiationLevel, hash);
-            hash = ObjectExtensions.ValueHash(AtmosphericDust, hash);
-            hash = ObjectExtensions.ValueHash(SupportsPopulations, hash);
-            hash = ObjectExtensions.ValueHash(LengthOfDay, hash);
-            hash = ObjectExtensions.ValueHash(Gravity, hash);
-            //hash = ObjectExtensions.ValueHash(Minerals, hash); for some reason minerals were not hashing the same.
-            return hash;
         }
 
         SystemBodyInfoDB(SystemBodyInfoDB originalDB, SensorInfoDB sensorInfo)

@@ -10,7 +10,7 @@ namespace Pulsar4X.Datablobs
     /// This datablob goes into the sensor contact.
     /// TODO: I can't see this actualy getting added to an entity anywhere, maybe it does not need to be a datablob.
     /// </summary>
-    public class SensorInfoDB : BaseDataBlob, IGetValuesHash
+    public class SensorInfoDB : BaseDataBlob
     {
         [JsonProperty]
         internal Entity Faction;
@@ -42,18 +42,6 @@ namespace Pulsar4X.Datablobs
         public override object Clone()
         {
             return new SensorInfoDB(this);
-        }
-
-        public int GetValueCompareHash(int hash = 17)
-        {
-            hash = ObjectExtensions.ValueHash(Faction, hash);
-            hash = ObjectExtensions.ValueHash(DetectedEntityID, hash);
-            hash = ObjectExtensions.ValueHash(SensorContact, hash);
-            hash = ObjectExtensions.ValueHash(LastDetection, hash);
-            hash = ObjectExtensions.ValueHash(LatestDetectionQuality, hash);
-            hash = ObjectExtensions.ValueHash(HighestDetectionQuality, hash);
-
-            return hash;
         }
 
         internal SensorInfoDB(SensorInfoDB db)

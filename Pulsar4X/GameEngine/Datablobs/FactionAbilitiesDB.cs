@@ -9,7 +9,7 @@ using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Datablobs
 {
-    public class FactionAbilitiesDB : BaseDataBlob, IGetValuesHash
+    public class FactionAbilitiesDB : BaseDataBlob
     {
         public int BasePlanetarySensorStrength { get; set; }
 
@@ -72,21 +72,5 @@ namespace Pulsar4X.Datablobs
         {
             return new FactionAbilitiesDB(this);
         }
-
-        public int GetValueCompareHash(int hash = 17)
-        {
-
-            foreach (var item in AbilityBonuses)
-            {
-                hash = ObjectExtensions.ValueHash(item.Key, hash);
-                hash = ObjectExtensions.ValueHash(item.Value, hash);
-            }
-
-            hash = ObjectExtensions.ValueHash(BasePlanetarySensorStrength, hash);
-            hash = ObjectExtensions.ValueHash(BaseGroundUnitStrengthBonus, hash);
-            hash = ObjectExtensions.ValueHash(ColonyCostMultiplier, hash);
-            return hash;
-        }
-
     }
 }

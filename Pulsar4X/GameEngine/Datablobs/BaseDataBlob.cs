@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Pulsar4X.Datablobs
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public abstract class BaseDataBlob : ICloneable, IEquatable<BaseDataBlob>
+    public abstract class BaseDataBlob : ICloneable
     {
         /// <summary>
         /// This is the Entity which Owns/Conatains/IsParentOf this datablob
@@ -34,11 +34,6 @@ namespace Pulsar4X.Datablobs
 
             return true;
         }
-    }
-
-    public interface IGetValuesHash
-    {
-        int GetValueCompareHash(int hash = 17);
     }
 
     public interface IAbilityDescription

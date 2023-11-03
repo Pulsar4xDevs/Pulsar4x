@@ -6,7 +6,7 @@ using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Datablobs
 {
-    public class MassVolumeDB : BaseDataBlob, ISensorCloneMethod, IGetValuesHash
+    public class MassVolumeDB : BaseDataBlob, ISensorCloneMethod
     {
 
         /// <summary>
@@ -262,12 +262,6 @@ namespace Pulsar4X.Datablobs
             DensityDry_gcm = originalDB.DensityDry_gcm;
             RadiusInAU = originalDB.RadiusInAU;
             Volume_km3 = originalDB.Volume_km3;
-        }
-
-        public int GetValueCompareHash(int hash = 17)
-        {
-            hash = ObjectExtensions.ValueHash(DensityDry_gcm, hash);
-            return hash;
         }
     }
 }

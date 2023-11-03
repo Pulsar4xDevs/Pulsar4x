@@ -17,7 +17,7 @@ using Pulsar4X.Modding;
 
 namespace Pulsar4X.Datablobs
 {
-    public class FactionInfoDB : BaseDataBlob, IGetValuesHash
+    public class FactionInfoDB : BaseDataBlob
     {
         [JsonProperty]
         public FactionDataStore Data { get; internal set; } = new FactionDataStore();
@@ -148,52 +148,6 @@ namespace Pulsar4X.Datablobs
             {
                 IndustryDesigns[design.Key] = design.Value;
             }
-        }
-
-        [OnDeserialized]
-        public void OnDeserialized(StreamingContext context)
-        {
-            //((Game)context.Context).PostLoad += (sender, args) => { };
-        }
-
-        public int GetValueCompareHash(int hash = 17)
-        {
-            foreach (var item in Species)
-            {
-                hash = ObjectExtensions.ValueHash(item.Id, hash);
-            }
-            foreach (var item in KnownSystems)
-            {
-                hash = ObjectExtensions.ValueHash(item, hash);
-            }
-            foreach (var item in KnownFactions)
-            {
-                hash = ObjectExtensions.ValueHash(item.Id, hash);
-            }
-            foreach (var item in Colonies)
-            {
-                hash = ObjectExtensions.ValueHash(item.Id, hash);
-            }
-            foreach (var item in ShipDesigns.Keys)
-            {
-                hash = ObjectExtensions.ValueHash(item, hash);
-            }
-            foreach (var item in InternalComponentDesigns)
-            {
-                hash = ObjectExtensions.ValueHash(item.Key, hash);
-                hash = ObjectExtensions.ValueHash(item.Value.UniqueID, hash);
-            }
-            foreach (var system in InternalKnownJumpPoints)
-            {
-                hash = ObjectExtensions.ValueHash(system.Key, hash);
-                foreach (var jp in system.Value)
-                {
-                    hash = ObjectExtensions.ValueHash(jp.Id, hash);
-                }
-
-            }
-
-            return hash;
         }
     }
 }

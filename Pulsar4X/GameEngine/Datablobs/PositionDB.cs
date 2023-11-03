@@ -9,7 +9,7 @@ namespace Pulsar4X.Datablobs
 {
 
     //TODO: get rid of AU, why are we using AU.
-    public class PositionDB : TreeHierarchyDB, IGetValuesHash, IPosition
+    public class PositionDB : TreeHierarchyDB, IPosition
     {
 
         [JsonProperty]
@@ -153,12 +153,6 @@ namespace Pulsar4X.Datablobs
         public override object Clone()
         {
             return new PositionDB(this);
-        }
-
-        public int GetValueCompareHash(int hash = 17)
-        {
-            hash = ObjectExtensions.ValueHash(AbsolutePosition, hash);
-            return hash;
         }
     }
 }
