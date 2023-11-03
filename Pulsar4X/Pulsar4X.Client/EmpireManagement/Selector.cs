@@ -1,6 +1,9 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
@@ -32,6 +35,23 @@ namespace Pulsar4X.SDL2UI
             ImGui.SetNextWindowBgAlpha(0);
             if(ImGui.Begin("###selector", _flags))
             {
+                if(ImGui.CollapsingHeader("Systems", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    // FIXME: this can be done once and updated only when KnownSystems changes
+                    var knownSystems = _uiState.Faction.GetDataBlob<FactionInfoDB>().KnownSystems;
+                    var filteredAndSortedSystems = _uiState.Game.Systems
+                                                        .Where(s => knownSystems.Contains(s.Guid))
+                                                        .OrderBy(s => s.NameDB.OwnersName)
+                                                        .ToList();
+
+                    foreach(var system in filteredAndSortedSystems)
+                    {
+                        if(ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSysGuid.Equals(system.Guid)))
+                        {
+                            _uiState.SelectedSysMapRender.OnSelectedSystemChange(system);
+                        }
+                    }
+                }
                 if(ImGui.CollapsingHeader("Colonies", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     var colonies = _uiState.Faction.GetDataBlob<FactionInfoDB>().Colonies;
@@ -39,18 +59,23 @@ namespace Pulsar4X.SDL2UI
                     {
                         if(ImGui.Selectable(colony.GetName(_uiState.Faction.Id)))
                         {
-                            _uiState.EntityClicked(colony.Id, colony.Manager.ManagerGuid, MouseButtons.Primary);
+                            if(colony.Manager != null)
+                                _uiState.EntityClicked(colony.Id, colony.Manager.ManagerGuid, MouseButtons.Primary);
                         }
                     }
                 }
                 if(ImGui.CollapsingHeader("Fleets", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB.Children;
+                    var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children;
+
+                    if(fleets == null) fleets = new List<Entity>();
+
                     foreach(var fleet in fleets)
                     {
                         if(ImGui.Selectable(fleet.GetName(_uiState.Faction.Id)))
                         {
-                            _uiState.EntityClicked(fleet.Id, fleet.Manager.ManagerGuid, MouseButtons.Primary);
+                            if(fleet.Manager != null)
+                                _uiState.EntityClicked(fleet.Id, fleet.Manager.ManagerGuid, MouseButtons.Primary);
                         }
                     }
                 }
