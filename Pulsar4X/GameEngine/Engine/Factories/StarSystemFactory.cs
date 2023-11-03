@@ -253,22 +253,22 @@ namespace Pulsar4X.Engine
             Entity saturn = SolEntities.Saturn(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, saturn);
             #region Saturn Moons
-            Entity mimas = SolEntities.Mimas(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            Entity mimas = SolEntities.Mimas(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, mimas);
 
-            Entity enceladus = SolEntities.Enceladus(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            Entity enceladus = SolEntities.Enceladus(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, enceladus);
 
-            Entity tethys = SolEntities.Tethys(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            Entity tethys = SolEntities.Tethys(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, tethys);
 
-            Entity dione = SolEntities.Dione(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            Entity dione = SolEntities.Dione(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, dione);
 
-            Entity rhea = SolEntities.Rhea(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            Entity rhea = SolEntities.Rhea(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, rhea);
 
-            Entity titan = SolEntities.Titan(game, sol, sun, jupiter, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            Entity titan = SolEntities.Titan(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, titan);
             #endregion
 

@@ -78,7 +78,7 @@ namespace Pulsar4X.Engine.Sol
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
             sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
@@ -111,7 +111,7 @@ namespace Pulsar4X.Engine.Sol
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
             sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
@@ -144,7 +144,7 @@ namespace Pulsar4X.Engine.Sol
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
             sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
@@ -176,7 +176,7 @@ namespace Pulsar4X.Engine.Sol
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
             sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
@@ -208,7 +208,7 @@ namespace Pulsar4X.Engine.Sol
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
             sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
@@ -240,7 +240,7 @@ namespace Pulsar4X.Engine.Sol
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
             sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
@@ -272,7 +272,7 @@ namespace Pulsar4X.Engine.Sol
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
             sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
@@ -304,7 +304,7 @@ namespace Pulsar4X.Engine.Sol
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
             sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
@@ -336,7 +336,7 @@ namespace Pulsar4X.Engine.Sol
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
             sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
@@ -368,7 +368,7 @@ namespace Pulsar4X.Engine.Sol
 
             OrbitDB moonOrbitDB = OrbitDB.FromAsteroidFormat(parentPlanet, planetMVDB.MassDry, moonMVDB.MassDry, moonSemiMajorAxisAU, moonEccentricity, moonEclipticInclination, moonLoAN, moonAoP, moonMeanAnomaly, epoch);
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
-            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime) + planetPositionDB.AbsolutePosition, sol.Guid, parentPlanet);
+            PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
             Entity moon = Entity.Create();
             sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
