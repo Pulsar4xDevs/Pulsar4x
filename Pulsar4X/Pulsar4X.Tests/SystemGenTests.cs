@@ -180,27 +180,15 @@ namespace Pulsar4X.Tests
             var ssf = new StarSystemFactory(_game);
             StarSystem system1 = ssf.CreateSystem(_game, "Argon Prime", 12345); // Keeping with the X3 theme :P
             StarSystem systemTwin = ssf.CreateSystem(_game, "Argon Prime", 12345);
-            List<Entity> orbitEntities = system1.GetAllEntitiesWithDataBlob<OrbitDB>();
-            List<Entity> orbitTwins = systemTwin.GetAllEntitiesWithDataBlob<OrbitDB>();
 
-            Assert.AreEqual(orbitEntities.Count, orbitTwins.Count);
-            for (int i = 0; i < orbitEntities.Count; i++)
+            List<Entity> system1Entities = system1.GetAllEntites();
+            List<Entity> systemTwinEntities = systemTwin.GetAllEntites();
+            Assert.AreEqual(system1Entities.Count, systemTwinEntities.Count);
+            for (int i = 0; i < system1Entities.Count; i++)
             {
-                Entity entityPrime = orbitEntities[i];
-                Entity entityTwin = orbitTwins[i];
-                var db1 = entityPrime.GetDataBlob<OrbitDB>();
-                var db2 = entityTwin.GetDataBlob<OrbitDB>();
-                Assert.IsTrue(DataBlobEqualityChecker.AreEqual(db1, db2));
-
-                List<BaseDataBlob> entityPrimeDataBlobs = entityPrime.Manager.GetAllDataBlobsForEntity(entityPrime.Id);
-                List<BaseDataBlob> entityTwinDataBlobs = entityTwin.Manager.GetAllDataBlobsForEntity(entityTwin.Id);
-
-                for (int j = 0; j < entityPrimeDataBlobs.Count; j++)
-                {
-                    BaseDataBlob blob1 = entityPrimeDataBlobs[j];
-                    BaseDataBlob blob2 = entityTwinDataBlobs[j];
-                    Assert.IsTrue(DataBlobEqualityChecker.AreEqual(blob1, blob2));
-                }
+                Entity entityPrime = system1Entities[i];
+                Entity entityTwin = systemTwinEntities[i];
+                Assert.IsTrue(DataBlobEqualityChecker.AreEqual(entityPrime, entityTwin));
             }
         }
 
