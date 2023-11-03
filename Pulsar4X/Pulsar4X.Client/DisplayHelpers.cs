@@ -45,7 +45,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Separator();
         }
 
-        public static void ShipTooltip(Entity ship)
+        public static void ShipTooltip(Entity ship, int factionId)
         {
             if(!ship.TryGetDatablob<ShipInfoDB>(out var shipInfo))
                 return;
@@ -53,30 +53,27 @@ namespace Pulsar4X.SDL2UI
             if(!ship.TryGetDatablob<OrderableDB>(out var orderableDB))
                 return;
 
-            if(ImGui.IsItemHovered())
+            var description = "No orders";
+            if(orderableDB.ActionList.Count > 0)
             {
-                ImGui.BeginTooltip();
-                ImGui.Text(shipInfo.Design.Name);
-                ImGui.Separator();
-                if(orderableDB.ActionList.Count > 0)
+                description = "Orders: ";
+                foreach(var action in orderableDB.ActionList)
                 {
-                    ImGui.Text("Orders:");
-                    foreach(var action in orderableDB.ActionList)
-                    {
-                        ImGui.Text(action.Name);
-                        ImGui.SameLine();
-                        if(action.IsRunning)
-                            ImGui.Text("(running)");
-                        else
-                            ImGui.Text("not running");
-                    }
+                    description += action.Name;
+                    if(action.IsRunning)
+                        description += " (running)";
+                    else
+                        description += " (not running)";
                 }
-                else
-                {
-                    ImGui.Text("No orders");
-                }
-                ImGui.EndTooltip();
             }
+
+            var meta = "";
+            if(ship.Manager != null && ship.Manager.TryGetEntityById(shipInfo.CommanderID, out var commander))
+            {
+                meta = "Commanded by: " + commander.GetName(factionId);
+            }
+
+            DescriptiveTooltip(ship.GetName(factionId), shipInfo.Design.Name, description, meta);
         }
 
         public static void DescriptiveTooltip(string name, string type, string description, string metaInfo = "", bool hideTypeIfSameAsName = false)

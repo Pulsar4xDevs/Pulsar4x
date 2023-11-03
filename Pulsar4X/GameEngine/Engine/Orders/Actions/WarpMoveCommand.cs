@@ -2,13 +2,23 @@ using System;
 using Newtonsoft.Json;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine.Orders
 {
     public class WarpMoveCommand : EntityCommand
     {
 
-        public override string Name { get; } = "Nav: Warp Move";
+        public override string Name
+        {
+            get
+            {
+                if(_targetEntity == null || _entityCommanding == null)
+                    return "Warp Move";
+
+                return "Warp Move to " + _targetEntity.GetName(_entityCommanding.FactionOwnerID);
+            }
+        }
 
         public override string Details
         {

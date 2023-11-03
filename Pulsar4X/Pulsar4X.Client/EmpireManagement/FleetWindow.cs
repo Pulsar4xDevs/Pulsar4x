@@ -125,6 +125,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(27f);
 
+                DisplayShips();
+
+                ImGui.SameLine();
+                ImGui.SetCursorPosY(27f);
+
                 DisplayTabs();
 
                 ImGui.End();
@@ -140,19 +145,19 @@ namespace Pulsar4X.SDL2UI
                 if(ImGui.BeginTabItem("Summary"))
                 {
                     Vector2 windowContentSize = ImGui.GetContentRegionAvail();
-                    var firstChildSize = new Vector2(windowContentSize.X * 0.5f, windowContentSize.Y);
+                    var firstChildSize = new Vector2(windowContentSize.X * 0.99f, windowContentSize.Y);
                     var secondChildSize = new Vector2(windowContentSize.X * 0.5f - (windowContentSize.X * 0.01f), windowContentSize.Y);
-                    if(ImGui.BeginChild("FleetSummary1", firstChildSize, true))
+                    if (ImGui.BeginChild("FleetSummary1", firstChildSize, true))
                     {
-                        if(ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
+                        if (ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
                         {
                             ImGui.Columns(2);
                             DisplayHelpers.PrintRow("Name", SelectedFleet.GetName(factionID));
 
-                            if(selectedFleetFlagship != null)
+                            if (selectedFleetFlagship != null)
                             {
                                 DisplayHelpers.PrintRow("Flagship", selectedFleetFlagship.GetName(factionID));
-                                if(selectedFleetFlagship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB)
+                                if (selectedFleetFlagship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB)
                                     && shipInfoDB.CommanderID != -1
                                     && shipInfoDB.OwningEntity.Manager.TryGetEntityById(shipInfoDB.CommanderID, out var commanderEntity))
                                 {
@@ -175,9 +180,9 @@ namespace Pulsar4X.SDL2UI
                             ImGui.Text("Current System");
                             ImGui.PopStyleColor();
                             ImGui.NextColumn();
-                            if(selectedFleetFlagship != null && selectedFleetSystem != null && selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB))
+                            if (selectedFleetFlagship != null && selectedFleetSystem != null && selectedFleetFlagship.TryGetDatablob<PositionDB>(out var positionDB))
                             {
-                                if(ImGui.SmallButton(selectedFleetSystem.GetName(factionID)))
+                                if (ImGui.SmallButton(selectedFleetSystem.GetName(factionID)))
                                 {
                                     _uiState.EntityClicked(selectedFleetSystem.Id, selectedFleetSystem.Manager.ManagerGuid, MouseButtons.Primary);
                                 }
@@ -188,7 +193,7 @@ namespace Pulsar4X.SDL2UI
                                 ImGui.Text("Orbiting");
                                 ImGui.PopStyleColor();
                                 ImGui.NextColumn();
-                                if(ImGui.SmallButton(positionDB.Parent.GetName(factionID)))
+                                if (ImGui.SmallButton(positionDB.Parent.GetName(factionID)))
                                 {
                                     _uiState.EntityClicked(positionDB.Parent.Id, positionDB.SystemGuid, MouseButtons.Primary);
                                 }
@@ -209,30 +214,30 @@ namespace Pulsar4X.SDL2UI
                             DisplayHelpers.PrintRow("Ships", SelectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
                         }
                         ImGui.Columns(1);
-                        if(ImGui.CollapsingHeader("Fleet Orders", ImGuiTreeNodeFlags.DefaultOpen))
+                        if (ImGui.CollapsingHeader("Fleet Orders", ImGuiTreeNodeFlags.DefaultOpen))
                         {
                             SelectedFleet.TryGetDatablob<OrderableDB>(out var orderableDB);
 
-                            if(orderableDB.ActionList.Count == 0)
+                            if (orderableDB.ActionList.Count == 0)
                             {
                                 ImGui.Text("None");
                             }
                             else
                             {
-                                if(ImGui.BeginTable("FleetOrdersTable", 2, Styles.TableFlags))
+                                if (ImGui.BeginTable("FleetOrdersTable", 2, Styles.TableFlags))
                                 {
                                     ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.None, 0.1f);
                                     ImGui.TableSetupColumn("Order", ImGuiTableColumnFlags.None, 1f);
                                     ImGui.TableHeadersRow();
 
                                     var actions = orderableDB.ActionList.ToArray();
-                                    for(int i = 0; i < actions.Length; i++)
+                                    for (int i = 0; i < actions.Length; i++)
                                     {
                                         ImGui.TableNextColumn();
                                         ImGui.Text((i + 1).ToString());
                                         ImGui.TableNextColumn();
                                         ImGui.Text(actions[i].Name);
-                                        if(ImGui.IsItemHovered())
+                                        if (ImGui.IsItemHovered())
                                         {
                                             ImGui.BeginTooltip();
                                             ImGui.Text("IsRunning: " + actions[i].IsRunning);
@@ -248,61 +253,10 @@ namespace Pulsar4X.SDL2UI
                         ImGui.EndChild();
                     }
                     ImGui.SameLine();
-                    if(ImGui.BeginChild("FleetSummary2", secondChildSize, true))
-                    {
-                        if(ImGui.CollapsingHeader("Assigned Ships", ImGuiTreeNodeFlags.DefaultOpen))
-                        {
-                            ImGui.PushStyleColor(ImGuiCol.FrameBg, Styles.InvisibleColor);
-                            if(ImGui.BeginListBox("###assigned-ships", ImGui.GetContentRegionAvail()))
-                            {
-                                ImGui.Columns(2, "assigned-ships-list", true);
-                                var fleet = SelectedFleet.GetDataBlob<FleetDB>();
-                                foreach(var ship in fleet.GetChildren())
-                                {
-                                    // Only display ships
-                                    if(ship.HasDataBlob<FleetDB>()) continue;
-
-                                    if(!selectedShips.ContainsKey(ship))
-                                    {
-                                        selectedShips.Add(ship, false);
-                                    }
-
-                                    string name = ship.GetName(factionID);
-                                    if(fleet.FlagShipID == ship.Id)
-                                    {
-                                        name = "(F) " + name;
-                                    }
-                                    if(ImGui.Selectable(name, selectedShips[ship], ImGuiSelectableFlags.SpanAllColumns))
-                                    {
-                                        selectedShips[ship] = !selectedShips[ship];
-                                    }
-                                    DisplayHelpers.ShipTooltip(ship);
-                                    DisplayShipContextMenu(selectedShips, ship);
-                                    ImGui.NextColumn();
-                                    if(ship.TryGetDatablob<ShipInfoDB>(out var shipInfoDB)
-                                        && shipInfoDB.CommanderID != -1
-                                        && shipInfoDB.OwningEntity.Manager.TryGetEntityById(shipInfoDB.CommanderID, out var commanderEntity))
-                                    {
-                                        ImGui.Text(commanderEntity.GetName(factionID));
-                                    }
-                                    else
-                                    {
-                                        ImGui.Text("-");
-                                    }
-                                    ImGui.NextColumn();
-                                    ImGui.Separator();
-                                }
-                                ImGui.Columns(1);
-                                ImGui.EndListBox();
-                            }
-                            ImGui.PopStyleColor();
-                        }
-                        ImGui.EndChild();
-                    }
                     ImGui.EndTabItem();
                 }
 
-                if(ImGui.BeginTabItem("Issue Orders"))
+                if (ImGui.BeginTabItem("Issue Orders"))
                 {
                     var size = ImGui.GetContentRegionAvail();
                     var firstChildSize = new Vector2(size.X * 0.27f, size.Y);
@@ -552,6 +506,57 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        private void DisplayShips()
+        {
+            var xPosition = ImGui.GetCursorPosX();
+            Vector2 windowContentSize = ImGui.GetContentRegionAvail();
+            if (ImGui.BeginChild("FleetSummary2", new Vector2(Styles.LeftColumnWidthLg, windowContentSize.Y - 24f), true))
+            {
+                DisplayHelpers.Header("Assigned Ships");
+
+                ImGui.PushStyleColor(ImGuiCol.FrameBg, Styles.InvisibleColor);
+                if (ImGui.BeginListBox("###assigned-ships", ImGui.GetContentRegionAvail()))
+                {
+                    var fleet = SelectedFleet.GetDataBlob<FleetDB>();
+                    foreach (var ship in fleet.GetChildren())
+                    {
+                        // Only display ships
+                        if (ship.HasDataBlob<FleetDB>()) continue;
+
+                        if (!selectedShips.ContainsKey(ship))
+                        {
+                            selectedShips.Add(ship, false);
+                        }
+
+                        string name = ship.GetName(factionID);
+                        if (fleet.FlagShipID == ship.Id)
+                        {
+                            name = "(F) " + name;
+                        }
+                        if (ImGui.Selectable(name, selectedShips[ship], ImGuiSelectableFlags.SpanAllColumns))
+                        {
+                            selectedShips[ship] = !selectedShips[ship];
+                        }
+                        DisplayHelpers.ShipTooltip(ship, factionID);
+                        DisplayShipContextMenu(selectedShips, ship);
+                    }
+                    ImGui.EndListBox();
+                }
+                ImGui.PopStyleColor();
+                ImGui.EndChild();
+            }
+
+            ImGui.SetCursorPosX(xPosition);
+            if(ImGui.Button("Select All/None", new Vector2(Styles.LeftColumnWidthLg, 0f)))
+            {
+                bool selectAll = !selectedShips.Values.Any(v => v == true);
+                foreach(var (ship, selected) in selectedShips)
+                {
+                    selectedShips[ship] = selectAll;
+                }
+            }
+        }
+
         private void DisplayFleetList()
         {
             Vector2 windowContentSize = ImGui.GetContentRegionAvail();
@@ -588,7 +593,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             selectedUnattachedShips[ship] = !selectedUnattachedShips[ship];
                         }
-                        DisplayHelpers.ShipTooltip(ship);
+                        DisplayHelpers.ShipTooltip(ship, factionID);
                         DisplayShipContextMenu(selectedUnattachedShips, ship, isUnattached: true);
                     }
                 }
