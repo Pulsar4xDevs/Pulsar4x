@@ -83,7 +83,7 @@ namespace Pulsar4X.SDL2UI
 
                 if (ImGui.Button("SM Mode", buttonSize))
                 {
-                    var pannel = SMPannel.GetInstance();
+                    var pannel = SMWindow.GetInstance();
                     _uiState.ActiveWindow = pannel;
                     pannel.SetActive();
                     _uiState.ToggleGameMaster();

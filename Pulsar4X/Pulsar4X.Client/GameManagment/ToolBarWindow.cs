@@ -153,8 +153,8 @@ namespace Pulsar4X.SDL2UI
             {
                 Picture = _uiState.Img_Tree(),
                 TooltipText = "View SM debug info about a body",
-                OnClick = new Action(SMPannel.GetInstance().ToggleActive),
-                GetActive = new Func<bool>(SMPannel.GetInstance().GetActive),
+                OnClick = new Action(SMWindow.GetInstance().ToggleActive),
+                GetActive = new Func<bool>(SMWindow.GetInstance().GetActive),
                 //Display a list of bodies with some info about them.
             };
             SMToolButtons.Add(btn);

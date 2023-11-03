@@ -8,12 +8,12 @@ using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
 {
-    public class SMPannel : PulsarGuiWindow
+    public class SMWindow : PulsarGuiWindow
     {
-        private Game game;
+        private Game? _game;
         private Entity[] _factions = new Entity[0];
         private StarSystem[] _starSystems = new StarSystem[0];
-        private StarSystem _currentSystem;
+        private StarSystem? _currentSystem;
 
         private int _selectedEntityIndex = -1;
         private Entity[] _systemEntities = new Entity[0];
@@ -34,25 +34,25 @@ namespace Pulsar4X.SDL2UI
 
 
 
-        private SMPannel()
+        private SMWindow()
         {
             //_uiState.SpaceMasterVM = new SpaceMasterVM();
             HardRefresh();
         }
 
         //TODO auth of some kind.
-        public static SMPannel GetInstance()
+        public static SMWindow GetInstance()
         {
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(SMPannel)))
+            if (!_uiState.LoadedWindows.ContainsKey(typeof(SMWindow)))
             {
-                return new SMPannel();
+                return new SMWindow();
             }
-            return (SMPannel)_uiState.LoadedWindows[typeof(SMPannel)];
+            return (SMWindow)_uiState.LoadedWindows[typeof(SMWindow)];
         }
 
         void HardRefresh()
         {
-            game = _uiState.Game;
+            _game = _uiState.Game;
             _starSystems = new StarSystem[_uiState.Game.Systems.Count];
             int i = 0;
             foreach (var starsys in _uiState.Game.Systems)
@@ -100,6 +100,12 @@ namespace Pulsar4X.SDL2UI
                 if(_currentSystem != _uiState.SelectedSystem)
                     HardRefresh();
 
+                if(_game == null)
+                {
+                    ImGui.End();
+                    return;
+                }
+
                 ImGui.Columns(2);
                 ImGui.SetColumnWidth(0, 200);
                 for (int i = 0; i < _systemEntities.Length; i++)
@@ -114,7 +120,7 @@ namespace Pulsar4X.SDL2UI
                     var ownerFactionID = _systemEntities[i].FactionOwnerID;
                     if(ownerFactionID != -1 && ownerFactionID != Game.NeutralFactionId)
                     {
-                        var ownerFaction = game.Factions[ownerFactionID];
+                        var ownerFaction = _game.Factions[ownerFactionID];
                         var factionName = ownerFaction.GetDataBlob<NameDB>().OwnersName;
                         ImGui.Text(factionName);
                     }
