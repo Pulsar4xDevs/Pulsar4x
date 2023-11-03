@@ -45,7 +45,7 @@ namespace Pulsar4X.SDL2UI
             _bodyType = entityState.BodyType;
             if(entityState.Entity.FactionOwnerID == Game.NeutralFactionId)
             {
-                TextDisplayColor = Styles.DescriptiveColor;
+                TextDisplayColor = Styles.NeutralColor;
             }
             else if(entityState.Entity.FactionOwnerID != _state.Faction.Id)
             {
@@ -160,6 +160,7 @@ namespace Pulsar4X.SDL2UI
                 var orderedGroupedIcons = nameIconGrouping.GroupBy(i => i._bodyType).OrderBy(g => g.Key).ToList();
                 var highestPriorityGroup = orderedGroupedIcons.First().ToList();
                 orderedGroupedIcons.RemoveAt(0);
+                ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Styles.NameIconHighlight);
                 for(int i = 0; i < highestPriorityGroup.Count; i++)
                 {
                     if(i == 0)
@@ -170,6 +171,7 @@ namespace Pulsar4X.SDL2UI
                     if(i == highestPriorityGroup.Count - 1)
                         EndNameIcon(highestPriorityGroup[i]);
                 }
+                ImGui.PopStyleColor();
             }
         }
 
