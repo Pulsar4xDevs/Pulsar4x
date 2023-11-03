@@ -66,9 +66,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 if(ImGui.CollapsingHeader("Fleets", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children;
-
-                    if(fleets == null) fleets = new List<Entity>();
+                    var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children ?? new List<Entity>();
 
                     foreach(var fleet in fleets)
                     {
