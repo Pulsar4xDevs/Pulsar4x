@@ -63,7 +63,7 @@ namespace Pulsar4X.Datablobs
         {
             if (!_names.TryGetValue(requestingFaction, out var name))
             {
-                name = OwningEntity.Id.ToString();
+                name = OwnersName;
                 SetName(requestingFaction, name);
             }
             return name;
