@@ -84,17 +84,14 @@ namespace Pulsar4X.SDL2UI
                 {
                     _systemEntityNames[j] = "No NameDB";
                 }
-
-
             }
-
-
         }
 
         private bool _entityInspectorWindow = false;
         internal override void Display()
         {
             //selectedEntityData
+            ImGui.SetNextWindowSizeConstraints(new System.Numerics.Vector2(32, 32), new System.Numerics.Vector2(720, 720));
             if (_uiState.SMenabled && ImGui.Begin("SM", ref IsActive, _flags))
             {
                 if(_currentSystem != _uiState.SelectedSystem)
@@ -117,20 +114,8 @@ namespace Pulsar4X.SDL2UI
                     }
 
                     ImGui.NextColumn();
-                    var ownerFactionID = _systemEntities[i].FactionOwnerID;
-                    if(ownerFactionID != -1 && ownerFactionID != Game.NeutralFactionId)
-                    {
-                        var ownerFaction = _game.Factions[ownerFactionID];
-                        var factionName = ownerFaction.GetDataBlob<NameDB>().OwnersName;
-                        ImGui.Text(factionName);
-                    }
-                    else
-                    {
-                        ImGui.Text(ownerFactionID.ToString());
-                    }
+                    ImGui.Text(_systemEntities[i].GetFactionName());
                     ImGui.NextColumn();
-
-
                 }
 
                 if (_entityInspectorWindow && _selectedEntity != null)

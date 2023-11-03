@@ -14,5 +14,22 @@ namespace Pulsar4X.SDL2UI
 
             return true;
         }
+
+        public static string GetFactionName(this Entity entity)
+        {
+            if(entity.FactionOwnerID == Game.NeutralFactionId)
+            {
+                return "Neutral";
+            }
+            else if(entity.FactionOwnerID != -1 && entity.Manager != null)
+            {
+                var ownerFaction = entity.Manager.Game.Factions[entity.FactionOwnerID];
+                return ownerFaction.GetDataBlob<NameDB>().OwnersName;
+            }
+            else
+            {
+                return entity.FactionOwnerID.ToString();
+            }
+        }
     }
 }
