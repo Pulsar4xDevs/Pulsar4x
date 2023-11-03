@@ -121,7 +121,7 @@ namespace Pulsar4X.SDL2UI
 
             // var factionEntity = DefaultStartFactory.DefaultHumans(game, factionName);
             // AuthProcessor.StorePasswordAsHash(StaticRefLib.Game, factionEntity, factionPasswd);
-            _uiState.SetFaction(newGameFaction);
+            _uiState.SetFaction(newGameFaction, true);
             _uiState.SetActiveSystem(newGameFaction.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
 
             DebugWindow.GetInstance().SetGameEvents();

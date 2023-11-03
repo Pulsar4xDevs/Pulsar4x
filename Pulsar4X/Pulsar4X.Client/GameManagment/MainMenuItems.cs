@@ -68,7 +68,7 @@ namespace Pulsar4X.SDL2UI
                             _uiState.Game = loadedGame;
 
                             var playerFaction = loadedGame.Factions.Where(f => f.Value.GetOwnersName().Equals("UEF")).First();
-                            _uiState.SetFaction(playerFaction.Value);
+                            _uiState.SetFaction(playerFaction.Value, true);
                             _uiState.SetActiveSystem(playerFaction.Value.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
                         }
                         if (ImGui.Button("Options", buttonSize))

@@ -45,6 +45,11 @@ namespace Pulsar4X.SDL2UI
         //internal FactionVM FactionUIState;
         internal bool IsGameLoaded { get { return Game != null; } }
         internal Entity Faction { get; set; }
+
+        /// <summary>
+        /// The player running this clients faction
+        /// </summary>
+        internal Entity PlayerFaction { get; set; }
         internal bool ShowMetrixWindow;
         internal bool ShowImgDbg;
         internal bool ShowDemoWindow;
@@ -134,8 +139,11 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        internal void SetFaction(Entity factionEntity)
+        internal void SetFaction(Entity factionEntity, bool setAsPlayer = false)
         {
+            if(setAsPlayer)
+                PlayerFaction = factionEntity;
+
             Faction = factionEntity;
             FactionInfoDB factionInfo = factionEntity.GetDataBlob<FactionInfoDB>();
             StarSystemStates = new Dictionary<string, SystemState>();
@@ -184,11 +192,19 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        internal void DisableGameMaster()
+        {
+            SMenabled = false;
+            SetFaction(PlayerFaction);
+        }
+
         internal void ToggleGameMaster()
         {
             SMenabled = !SMenabled;
             if(SMenabled)
                 EnableGameMaster();
+            else
+                DisableGameMaster();
         }
 
         //checks wether any event changed the mouse position after a new mouse click, indicating the user is doing something else with the mouse as he was doing before.
