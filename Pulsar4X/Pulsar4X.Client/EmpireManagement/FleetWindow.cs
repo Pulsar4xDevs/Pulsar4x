@@ -24,7 +24,7 @@ namespace Pulsar4X.SDL2UI
         private FleetDB factionRoot;
         private int factionID;
         private Entity dragEntity = Entity.InvalidEntity;
-        private Entity selectedFleet = null;
+        public Entity SelectedFleet { get; private set; } = null;
         private Entity selectedFleetFlagship = null;
         private Entity selectedFleetSystem = null;
         private FleetDB selectedFleetDB = null;
@@ -81,13 +81,13 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void SelectFleet(Entity fleet)
+        public void SelectFleet(Entity fleet)
         {
-            selectedFleet = fleet;
+            SelectedFleet = fleet;
             selectedShips = new ();
             SelectOrder(null);
 
-            selectedFleet?.TryGetDatablob<FleetDB>(out selectedFleetDB);
+            SelectedFleet?.TryGetDatablob<FleetDB>(out selectedFleetDB);
             if(selectedFleetDB == null || selectedFleetDB.FlagShipID == -1)
             {
                 selectedFleetFlagship = null;
@@ -120,7 +120,7 @@ namespace Pulsar4X.SDL2UI
             {
                 DisplayFleetList();
 
-                if(selectedFleet == null) return;
+                if(SelectedFleet == null) return;
 
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(27f);
@@ -147,7 +147,7 @@ namespace Pulsar4X.SDL2UI
                         if(ImGui.CollapsingHeader("Fleet Information", ImGuiTreeNodeFlags.DefaultOpen))
                         {
                             ImGui.Columns(2);
-                            DisplayHelpers.PrintRow("Name", selectedFleet.GetName(factionID));
+                            DisplayHelpers.PrintRow("Name", SelectedFleet.GetName(factionID));
 
                             if(selectedFleetFlagship != null)
                             {
@@ -206,12 +206,12 @@ namespace Pulsar4X.SDL2UI
                             }
                             ImGui.NextColumn();
                             ImGui.Separator();
-                            DisplayHelpers.PrintRow("Ships", selectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
+                            DisplayHelpers.PrintRow("Ships", SelectedFleet.GetDataBlob<FleetDB>().GetChildren().Where(x => !x.HasDataBlob<FleetDB>()).Count().ToString());
                         }
                         ImGui.Columns(1);
                         if(ImGui.CollapsingHeader("Fleet Orders", ImGuiTreeNodeFlags.DefaultOpen))
                         {
-                            selectedFleet.TryGetDatablob<OrderableDB>(out var orderableDB);
+                            SelectedFleet.TryGetDatablob<OrderableDB>(out var orderableDB);
 
                             if(orderableDB.ActionList.Count == 0)
                             {
@@ -256,7 +256,7 @@ namespace Pulsar4X.SDL2UI
                             if(ImGui.BeginListBox("###assigned-ships", ImGui.GetContentRegionAvail()))
                             {
                                 ImGui.Columns(2, "assigned-ships-list", true);
-                                var fleet = selectedFleet.GetDataBlob<FleetDB>();
+                                var fleet = SelectedFleet.GetDataBlob<FleetDB>();
                                 foreach(var ship in fleet.GetChildren())
                                 {
                                     // Only display ships
@@ -331,7 +331,7 @@ namespace Pulsar4X.SDL2UI
                                     var name = body.GetName(_uiState.Faction.Id);
                                     if(ImGui.Button(name + "###movement-button-" + name))
                                     {
-                                        var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, selectedFleet, body);
+                                        var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
                                         _uiState.Game.OrderHandler.HandleOrder(order);
                                     }
                                 }
@@ -524,7 +524,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             if(orderActionsIndex >= 0 && orderActionsIndex < orderActionDescriptions.Length)
                             {
-                                var selectedAction = OrderRegistry.Actions[orderActionDescriptions[orderActionsIndex]](factionID, selectedFleet);
+                                var selectedAction = OrderRegistry.Actions[orderActionDescriptions[orderActionsIndex]](factionID, SelectedFleet);
                                 selectedOrder.Actions.Add(selectedAction);
                             }
                         }
@@ -620,7 +620,7 @@ namespace Pulsar4X.SDL2UI
                 flags |= ImGuiTreeNodeFlags.Leaf;
             }
 
-            if(selectedFleet == fleet)
+            if(SelectedFleet == fleet)
             {
                 flags |= ImGuiTreeNodeFlags.Selected;
             }
@@ -708,9 +708,9 @@ namespace Pulsar4X.SDL2UI
                     }
                     if(ImGui.MenuItem("Promote to Flagship"))
                     {
-                        var setFlagshipOrder = FleetOrder.SetFlagShip(factionID, selectedFleet, ship);
+                        var setFlagshipOrder = FleetOrder.SetFlagShip(factionID, SelectedFleet, ship);
                         _uiState.Game.OrderHandler.HandleOrder(setFlagshipOrder);
-                        SelectFleet(selectedFleet);
+                        SelectFleet(SelectedFleet);
                     }
                     if(selectedFleetFlagship != null && ship.Id == selectedFleetFlagship.Id)
                     {
@@ -743,7 +743,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SameLine();
             }
 
-            if(fleet == selectedFleet && !isUnattached)
+            if(fleet == SelectedFleet && !isUnattached)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, Styles.DescriptiveColor);
                 ImGui.Text(fleet.GetName(factionID));
@@ -756,7 +756,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     if(!selected.Any(x => x.Value))
                     {
-                        var unassignFrom = factionRoot.Children.Contains(ship) ? factionRoot.OwningEntity : selectedFleet;
+                        var unassignFrom = factionRoot.Children.Contains(ship) ? factionRoot.OwningEntity : SelectedFleet;
                         var unassignOrder = FleetOrder.UnassignShip(factionID, unassignFrom, ship);
                         _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
 
@@ -769,7 +769,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             if(!isSelected) continue;
 
-                            var unassignFrom = factionRoot.Children.Contains(selectedShip) ? factionRoot.OwningEntity : selectedFleet;
+                            var unassignFrom = factionRoot.Children.Contains(selectedShip) ? factionRoot.OwningEntity : SelectedFleet;
                             var unassignOrder = FleetOrder.UnassignShip(factionID, unassignFrom, selectedShip);
                             _uiState.Game.OrderHandler.HandleOrder(unassignOrder);
 

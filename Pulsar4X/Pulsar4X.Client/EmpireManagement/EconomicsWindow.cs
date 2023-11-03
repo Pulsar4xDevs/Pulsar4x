@@ -11,7 +11,7 @@ namespace Pulsar4X.SDL2UI
     public class EconomicsWindow : PulsarGuiWindow
     {
         private Dictionary<string, bool> isExpanded = new();
-        private EntityState selectedEntity = null;
+        public EntityState? SelectedEntity { get; private set; } = null;
 
         internal static EconomicsWindow GetInstance()
         {
@@ -21,12 +21,17 @@ namespace Pulsar4X.SDL2UI
                 thisitem = new EconomicsWindow()
                 {
                     // FIXME: this will crash if there are no colonies
-                    selectedEntity = _uiState.StarSystemStates.First().Value.EntityStatesColonies.First().Value
+                    SelectedEntity = _uiState.StarSystemStates.First().Value.EntityStatesColonies.First().Value
                 };
             }
             thisitem = (EconomicsWindow)_uiState.LoadedWindows[typeof(EconomicsWindow)];
 
             return thisitem;
+        }
+
+        public void SelectEntity(EntityState entityState)
+        {
+            SelectedEntity = entityState;
         }
 
         internal override void Display()
@@ -49,7 +54,7 @@ namespace Pulsar4X.SDL2UI
                             {
                                 var population = colony.Entity.GetDataBlob<ColonyInfoDB>().Population.Values.Sum();
 
-                                if(selectedEntity == colony)
+                                if(SelectedEntity == colony)
                                 {
                                     ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.75f, 0.25f, 0.25f, 1f));
                                 }
@@ -60,7 +65,7 @@ namespace Pulsar4X.SDL2UI
 
                                 if(ImGui.SmallButton(colony.Name + " (" + Stringify.Quantity(population) + ")"))
                                 {
-                                    selectedEntity = colony;
+                                    SelectEntity(colony);
                                 }
                                 ImGui.PopStyleColor();
                             }
@@ -70,7 +75,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndChild();
                 }
 
-                if(selectedEntity == null) return;
+                if(SelectedEntity == null) return;
 
                 ImGui.SameLine();
 
@@ -80,27 +85,27 @@ namespace Pulsar4X.SDL2UI
 
                     if(ImGui.BeginTabItem("Summary"))
                     {
-                        selectedEntity.Entity.DisplaySummary(selectedEntity, _uiState);
+                        SelectedEntity.Entity.DisplaySummary(SelectedEntity, _uiState);
                         ImGui.EndTabItem();
                     }
                     if(ImGui.BeginTabItem("Production"))
                     {
-                        selectedEntity.Entity.DisplayIndustry(selectedEntity, _uiState);
+                        SelectedEntity.Entity.DisplayIndustry(SelectedEntity, _uiState);
                         ImGui.EndTabItem();
                     }
                     if(ImGui.BeginTabItem("Mining"))
                     {
-                        selectedEntity.Entity.DisplayMining(_uiState);
+                        SelectedEntity.Entity.DisplayMining(_uiState);
                         ImGui.EndTabItem();
                     }
                     if(ImGui.BeginTabItem("Logistics"))
                     {
-                        selectedEntity.Entity.DisplayLogistics(selectedEntity, _uiState);
+                        SelectedEntity.Entity.DisplayLogistics(SelectedEntity, _uiState);
                         ImGui.EndTabItem();
                     }
-                    if(selectedEntity.Entity.HasDataBlob<NavalAcademyDB>() && ImGui.BeginTabItem("Naval Academy"))
+                    if(SelectedEntity.Entity.HasDataBlob<NavalAcademyDB>() && ImGui.BeginTabItem("Naval Academy"))
                     {
-                        selectedEntity.Entity.DisplayNavalAcademy(selectedEntity, _uiState);
+                        SelectedEntity.Entity.DisplayNavalAcademy(SelectedEntity, _uiState);
                         ImGui.EndTabItem();
                     }
                     ImGui.EndTabBar();

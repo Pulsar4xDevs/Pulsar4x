@@ -57,10 +57,14 @@ namespace Pulsar4X.SDL2UI
                     var colonies = _uiState.Faction.GetDataBlob<FactionInfoDB>().Colonies;
                     foreach(var colony in colonies)
                     {
-                        if(ImGui.Selectable(colony.GetName(_uiState.Faction.Id)))
+                        bool visible = EconomicsWindow.GetInstance().GetActive() && EconomicsWindow.GetInstance().SelectedEntity?.Entity.Id == colony.Id;
+                        if(ImGui.Selectable(colony.GetName(_uiState.Faction.Id), visible))
                         {
-                            if(colony.Manager != null)
-                                _uiState.EntityClicked(colony.Id, colony.Manager.ManagerGuid, MouseButtons.Primary);
+                            if(_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid) && _uiState.StarSystemStates[_uiState.SelectedStarSysGuid].EntityStatesColonies.ContainsKey(colony.Id))
+                            {
+                                EconomicsWindow.GetInstance().SetActive(true);
+                                EconomicsWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSysGuid].EntityStatesColonies[colony.Id]);
+                            }
                         }
                     }
                 }
@@ -70,10 +74,11 @@ namespace Pulsar4X.SDL2UI
 
                     foreach(var fleet in fleets)
                     {
-                        if(ImGui.Selectable(fleet.GetName(_uiState.Faction.Id)))
+                        bool visible = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet.Id == fleet.Id;
+                        if(ImGui.Selectable(fleet.GetName(_uiState.Faction.Id), visible))
                         {
-                            if(fleet.Manager != null)
-                                _uiState.EntityClicked(fleet.Id, fleet.Manager.ManagerGuid, MouseButtons.Primary);
+                            FleetWindow.GetInstance().SetActive(true);
+                            FleetWindow.GetInstance().SelectFleet(fleet);
                         }
                     }
                 }
