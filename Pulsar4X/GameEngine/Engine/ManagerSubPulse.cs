@@ -78,10 +78,10 @@ namespace Pulsar4X.Engine
         {
 
             [JsonProperty] //this should get added on initialization.
-            internal SafeList<IHotloopProcessor> SystemProcessors = new SafeList<IHotloopProcessor>();
+            public SafeList<IHotloopProcessor> SystemProcessors { get; } = new SafeList<IHotloopProcessor>();
 
             [JsonProperty] //this needs to get saved. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly).
-            internal Dictionary<string, List<Entity>> InstanceProcessors = new Dictionary<string, List<Entity>>();
+            public Dictionary<string, List<Entity>> InstanceProcessors { get; } = new Dictionary<string, List<Entity>>();
 
             //todo: need to get a list of InstanceProcessors that have entites owned by a specific faction.
 
