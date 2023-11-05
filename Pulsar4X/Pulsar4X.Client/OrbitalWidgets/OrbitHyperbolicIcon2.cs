@@ -26,21 +26,21 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         
         var _soi = OrbitMath.GetSOIRadius((OrbitDB)_orbitDB.ParentDB);
         double p = EllipseMath.SemiLatusRectum(_orbitDB.SemiMajorAxis, _orbitDB.Eccentricity);
-        double angleToSOIPoint = Math.Abs(EllipseMath.TrueAnomalyAtRadus(_soi, p, _orbitDB.Eccentricity));
-        int retrograde = 1;
-        if (IsRetrogradeOrbit)
-            retrograde = -1;
+        double angleToSOIPoint = (EllipseMath.TrueAnomalyAtRadus(_soi, p, _orbitDB.Eccentricity));
+        double a2 = Angle.NormaliseRadiansPositive(-angleToSOIPoint);
+
         Vector2 startPos = new Vector2()
         {
-            X = _soi * Math.Cos(angleToSOIPoint * retrograde),
-            Y = _soi * Math.Sin(angleToSOIPoint * retrograde)
+            X = _soi * Math.Cos(-angleToSOIPoint),
+            Y = _soi * Math.Sin(-angleToSOIPoint)
         };
         Vector2 endPos = new Vector2()
         {
-            X = _soi * Math.Cos(-angleToSOIPoint * retrograde),
-            Y = _soi * Math.Sin(-angleToSOIPoint * retrograde)
+            X = _soi * Math.Cos(angleToSOIPoint),
+            Y = _soi * Math.Sin(angleToSOIPoint)
         };
         _points = CreatePrimitiveShapes.KeplerPoints(SemiMaj, _eccentricity, _loP_radians, startPos, endPos, _numberOfArcSegments + 1);
+        
     }
     
     
@@ -52,17 +52,20 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         _bodyAbsolutePos = new Vector2(apos.X, apos.Y);
             
         //we find the point in the ellipse which is closest to the body so we can start drawing from the body.
-        double minDist = (_bodyrelativePos - _points[_index]).Length();
-
-        for (int i =0; i < _points.Count(); i++)
+        double minDist = (_bodyrelativePos - _points[0]).Length() ;
+        var ta = Math.Atan2(apos.Y, apos.X);
+        double pa;
+        for (int i =0; i < _points.Length; i++)
         {
-            double dist = (_bodyrelativePos - _points[i]).Length();
+            
+            double dist = (_bodyrelativePos - _points[i]).Length()  ;
             if (dist < minDist)
             {
                 minDist = dist;
-                _index = i;
+                _index = i-1; //-1 so we get the next point along. eg behind the craft not infront of it. 
             }
         }
+        UpdateUserSettings();
     }
     
     public override void OnFrameUpdate(Matrix matrix, Camera camera)
@@ -76,29 +79,47 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
         var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
 
-        int index = _index;
+        
         var spos = camera.ViewCoordinateV2_m(_bodyAbsolutePos);
 
+        if (_drawPoints.Length != _index + 2) 
+            _drawPoints = new SDL.SDL_Point[_index + 2];
+        
         //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
         _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
-        for (int i = 1; i < _numberOfDrawSegments; i++)
+        int i2 = 1;
+        for (int i = _index; i > -1; i--)
         {
-            if (index < _numberOfArcSegments - 1)
-
-                index++;
-            else
-                index = 0;
-                
-            _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
+            _drawPoints[i2] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
+            i2++;
         }
+
+        
+
     }
 
+    public override void UpdateUserSettings()
+    {
+        /*
+        if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
+        {
+            _numberOfArcSegments = _userSettings.NumberOfArcSegments;
+            CreatePointArray();
+        }
 
+        _segmentArcSweepRadians = (float)(Math.PI * 2.0 / _numberOfArcSegments);
+        _numberOfDrawSegments = (int)Math.Max(1, (_userSettings.EllipseSweepRadians / _segmentArcSweepRadians));
+        
+        */
+        _drawPoints = new SDL.SDL_Point[_index + 2];
+        _numberOfDrawSegments = _drawPoints.Length - 1;
+        _alphaChangeAmount = ((float)_userSettings.MaxAlpha - _userSettings.MinAlpha) / _numberOfDrawSegments;
+    }
 
     public override void Draw(IntPtr rendererPtr, Camera camera)
     {
         //now we draw a line between each of the points in the translatedPoints[] array.
-        if (_drawPoints.Count() < _numberOfDrawSegments - 1)
+        if (_drawPoints.Length <= _numberOfDrawSegments - 1)
             return;
         float alpha = _userSettings.MaxAlpha;
         for (int i = 0; i < _numberOfDrawSegments - 1; i++)

@@ -414,8 +414,8 @@ namespace Pulsar4X.Engine
             game.ProcessorManager.RunProcessOnEntity<OrbitDB>(ship3, 0);
 
 
-            var pos = Distance.AuToMt(new Vector3(0, 8.52699302490434E-05, 0));
-            var vel = new Vector3(-10000.0, 0, 0);
+            var pos = Distance.AuToMt(new Vector3(8.52699302490434E-05, 0, 0));
+            var vel = new Vector3(0, 10000.0, 0);
             var gunShip1Mass = gunShip1.GetDataBlob<MassVolumeDB>().MassTotal;
             var earthmass = earth.GetDataBlob<MassVolumeDB>().MassTotal;
             

@@ -117,7 +117,7 @@ namespace Pulsar4X.Orbital
         /// <param name="eccentricity">Eccentricity.</param>
         public static double RadiusAtTrueAnomaly(double angle, double semiLatusRectum, double eccentricity)
         {
-            return semiLatusRectum / (1 + eccentricity * Math.Cos(angle));
+            return Math.Abs( semiLatusRectum / (1 + eccentricity * Math.Cos(angle)));
         }
         
         /// <summary>
@@ -134,7 +134,7 @@ namespace Pulsar4X.Orbital
             double dividend = a * (1 - e * e); // p semilatus rectum
             double divisor = 1 + e * Math.Cos(theta - phi);
             double quotent = dividend / divisor;
-            return quotent;
+            return Math.Abs(quotent);
         }
 
         /// <summary>

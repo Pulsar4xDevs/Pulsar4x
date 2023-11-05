@@ -258,15 +258,19 @@ namespace Pulsar4X.SDL2UI
             
             double startAng = Math.Atan2(startPnt.Y, startPnt.X);
             double endAng =  Math.Atan2(endPnt.Y, endPnt.X);
-            double sweep = Angle.NormaliseRadiansPositive( endAng - startAng);
-        
+            
+            
             double θ = 0;
             double x = 0;
             double y = 0;
             double r = EllipseMath.RadiusAtTrueAnomaly(semiMaj, eccentricity, loP, startAng);
+            double sweep = ( endAng - startAng);
             double Δθ = 2 * Math.PI / (numPoints - 1) * Math.Sign(sweep);
             if(eccentricity >= 1)
-                Δθ = sweep / (numPoints - 1) * Math.Sign(sweep); 
+            {
+                sweep = startAng - endAng;
+                Δθ = sweep / (numPoints - 1) * Math.Sign(sweep);
+            }
             if (Δθ == 0)
             {
                 return new Vector2[]
@@ -287,8 +291,6 @@ namespace Pulsar4X.SDL2UI
                 points[i] = new Vector2(x, y);
             }
             //lastPoint:
-            θ = endAng;
-            r = EllipseMath.RadiusAtTrueAnomaly(semiMaj, eccentricity, loP, θ);
             points[^1] = endPnt;
 
             return points;
