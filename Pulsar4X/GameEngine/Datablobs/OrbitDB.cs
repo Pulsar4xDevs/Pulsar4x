@@ -345,8 +345,11 @@ namespace Pulsar4X.Datablobs
             }
 
             double sma_m = Distance.AuToMt(semiMajorAxis_AU);
-
-			return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, Angle.ToRadians(inclination), Angle.ToRadians(longitudeOfAscendingNode), Angle.ToRadians(argumentOfPeriapsis), meanAnomaly, epoch);
+            double o_i = Angle.NormaliseRadiansPositive(Angle.ToRadians(inclination));
+            double o_loAN = Angle.NormaliseRadiansPositive(Angle.ToRadians(longitudeOfAscendingNode));
+            double o_aoP = Angle.NormaliseRadiansPositive(Angle.ToRadians(argumentOfPeriapsis));
+            double o_M = Angle.NormaliseRadiansPositive(Angle.ToRadians(meanAnomaly));
+			return new OrbitDB(parent, parentMass, myMass, sma_m, eccentricity, o_i, o_loAN, o_aoP, o_M, epoch);
         }
 
         internal OrbitDB(Entity? parent, double parentMass, double myMass, double semiMajorAxis_m, double eccentricity, double inclination,

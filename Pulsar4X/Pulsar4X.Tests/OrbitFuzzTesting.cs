@@ -169,10 +169,24 @@ namespace Pulsar4X.Tests
                     1.3,     //Hyperbolic Eccentricity
                     0,
                     0, //halleysLoAN
-                    111.33, //halleysAoP
+                    0, //halleysAoP
                     38.38,     //halleysMeanAnomaly at Epoch
                     new System.DateTime(1994, 2, 17)),
-                "Hyperbolic 2d 0 LoAN, 111.33 aop Orbit"
+                "Hyperbolic 2d 0 LoAN, 0 aop Orbit"
+            ),
+            (
+                OrbitDB.FromAsteroidFormat( //Hyperbolic orbit
+                    parentBody,
+                    parentMassDB.MassDry,
+                    2.2e14,          //halleysBodyMass
+                    -17.834,     //halleysSemiMajAxis 
+                    1.3,     //Hyperbolic Eccentricity
+                    0,
+                    0, //halleysLoAN
+                    -90, //halleysAoP
+                    38.38,     //halleysMeanAnomaly at Epoch
+                    new System.DateTime(1994, 2, 17)),
+                "Hyperbolic 2d 0 LoAN, 90 aop Orbit"
             ),
 
         };

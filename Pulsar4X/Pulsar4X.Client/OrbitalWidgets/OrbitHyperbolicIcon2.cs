@@ -70,6 +70,8 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
     
     public override void OnFrameUpdate(Matrix matrix, Camera camera)
     {
+        
+        CreatePointArray(); //this is for hot reload debuggign purposes. delete. 
         //resize for zoom
         //translate to position
             

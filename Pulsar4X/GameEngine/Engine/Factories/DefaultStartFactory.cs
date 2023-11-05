@@ -10,6 +10,7 @@ using Pulsar4X.Engine.Designs;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Atb;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine
 {
@@ -414,8 +415,8 @@ namespace Pulsar4X.Engine
             game.ProcessorManager.RunProcessOnEntity<OrbitDB>(ship3, 0);
 
 
-            var pos = Distance.AuToMt(new Vector3(8.52699302490434E-05, 0, 0));
-            var vel = new Vector3(0, 10000.0, 0);
+            var pos = Distance.AuToMt(new Vector3(0, 8.52699302490434E-05, 0));
+            var vel = new Vector3(10000.0, 0, 0);
             var gunShip1Mass = gunShip1.GetDataBlob<MassVolumeDB>().MassTotal;
             var earthmass = earth.GetDataBlob<MassVolumeDB>().MassTotal;
             
@@ -423,6 +424,8 @@ namespace Pulsar4X.Engine
             var orbit = OrbitDB.FromVector(earth, gunShip1Mass, earthmass, pos, vel, game.TimePulse.GameGlobalDateTime);
             gunShip1.GetDataBlob<PositionDB>().RelativePosition = pos;
             gunShip1.SetDataBlob<OrbitDB>(orbit);
+            var pos2 = gunShip1.GetRelativeFuturePosition(game.TimePulse.GameGlobalDateTime);
+            
             // var nmdb = new NewtonMoveDB(earth, new Vector3(-10000.0, 0, 0));
             // gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);
 

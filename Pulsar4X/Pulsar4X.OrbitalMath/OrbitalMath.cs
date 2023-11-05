@@ -239,7 +239,7 @@ namespace Pulsar4X.Orbital
                 W = 2 * Math.PI + W;
             }
 
-            return W;
+            return Angle.NormaliseRadiansPositive(W);
         }
 
         /// <summary>
