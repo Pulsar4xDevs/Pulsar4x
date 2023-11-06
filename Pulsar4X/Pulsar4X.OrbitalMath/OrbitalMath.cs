@@ -224,9 +224,13 @@ namespace Pulsar4X.Orbital
             double TA = trueAnomaly;
             var Cw = (Rx * Math.Cos(loAN) + Ry * Math.Sin(loAN)) / R;
 
-            if (incl == 0 || incl == Math.PI)
+            if (incl == 0)
             {
                 Sw = (Ry * Math.Cos(loAN) - Rx * Math.Sin(loAN)) / R;
+            }
+            else if (incl == Math.PI)
+            {
+                Sw = -((Ry * Math.Cos(loAN) - Rx * Math.Sin(loAN)) / R);
             }
             else
             {
@@ -234,11 +238,7 @@ namespace Pulsar4X.Orbital
             }
 
             var W = Math.Atan2(Sw, Cw) - TA;
-            if (W < 0)
-            {
-                W = 2 * Math.PI + W;
-            }
-
+            
             return Angle.NormaliseRadiansPositive(W);
         }
 
