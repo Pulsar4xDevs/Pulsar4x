@@ -130,6 +130,8 @@ namespace Pulsar4X.SDL2UI
                 {
                     MainMenuItems.GetInstance().ToggleActive();
                 }
+
+                // Hotkeys
                 else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_F1)
                 {
                     DebugWindow.GetInstance().ToggleActive();
@@ -138,6 +140,31 @@ namespace Pulsar4X.SDL2UI
                 {
                     PerformanceWindow.GetInstance().ToggleActive();
                 }
+                else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_1)
+                {
+                    ComponentDesignWindow.GetInstance().ToggleActive();
+                }
+                else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_2)
+                {
+                    ShipDesignWindow.GetInstance().ToggleActive();
+                }
+                else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_3)
+                {
+                    EconomicsWindow.GetInstance().ToggleActive();
+                }
+                else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_4)
+                {
+                    ResearchWindow.GetInstance().ToggleActive();
+                }
+                else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_5)
+                {
+                    FleetWindow.GetInstance().ToggleActive();
+                }
+                else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_6)
+                {
+                    CommanderWindow.GetInstance().ToggleActive();
+                }
+
             }
 
             if (e.type == SDL.SDL_EventType.SDL_MOUSEWHEEL &! ImGui.GetIO().WantCaptureMouse)
