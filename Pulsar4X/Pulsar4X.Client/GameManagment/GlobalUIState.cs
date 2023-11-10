@@ -11,6 +11,7 @@ using Pulsar4X.Engine;
 using Pulsar4X.Engine.Damage;
 using Pulsar4X.Datablobs;
 using System.Linq;
+using Pulsar4X.Input;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -86,6 +87,8 @@ namespace Pulsar4X.SDL2UI
         internal bool SMenabled = false;
         internal Dictionary<int, EntityWindow> EntityWindows { get; private set; } = new();
 
+        internal Stack<IHotKeyHandler> HotKeys { get; private set; } = new ();
+
         internal GlobalUIState(ImGuiSDL2CSWindow viewport)
         {
             ViewPort = viewport;
@@ -112,6 +115,8 @@ namespace Pulsar4X.SDL2UI
                     UserOrbitSettingsMtx[i].Add(new UserOrbitSettings());
                 }
             }
+
+            HotKeys.Push(HotKeyFactory.CreateDefault());
 
             Camera = new Camera(viewport);
 
