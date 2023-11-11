@@ -151,7 +151,7 @@ namespace Pulsar4X.Engine.Orders
                 EntityCommandingGuid = ship.Id,
                 CreatedDate = ship.Manager.ManagerSubpulses.StarSysDateTime,
                 OrbitrelativeDeltaV = dv,
-
+                _entityCommanding = ship,
                 _vectorDateTime = tmanuver,
                 ActionOnDate = tmanuver - TimeSpan.FromSeconds(tburn * 0.5),
             };

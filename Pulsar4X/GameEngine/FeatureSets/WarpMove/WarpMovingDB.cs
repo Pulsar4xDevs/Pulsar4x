@@ -44,11 +44,16 @@ namespace Pulsar4X.Datablobs
         public Vector3 CurrentNonNewtonionVectorMS { get; internal set; }
 
         /// <summary>
-        /// m/s
+        /// Newtonion Vector to burn once warp is complete.
         /// </summary>
         [JsonProperty]
         internal Vector3 ExpendDeltaV { get; set; }
 
+        /// <summary>
+        /// when true, will attempt a newton circularization burn after warp, if ExpendDelaV is 0
+        /// </summary>
+        [JsonProperty] internal bool AutoCirculariseAfterWarp { get; set; } = true;
+        
         [JsonProperty]
         internal bool IsAtTarget { get; set; }
 

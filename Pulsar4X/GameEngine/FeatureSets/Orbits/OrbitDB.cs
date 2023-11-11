@@ -506,6 +506,9 @@ namespace Pulsar4X.Datablobs
                 OwningEntity.RemoveDataBlob<WarpMovingDB>();
             }
 
+            if (OwningEntity.GetDataBlob<PositionDB>().Parent != Parent)
+                OwningEntity.GetDataBlob<PositionDB>().SetParent(Parent);
+
             if (Eccentricity >= 1)
             {
                 var soiParent = OwningEntity.GetSOIParentEntity();
