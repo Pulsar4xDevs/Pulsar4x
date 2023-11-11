@@ -300,7 +300,7 @@ namespace Pulsar4X.Tests
                     double o_M = OrbitMath.GetMeanAnomalyFromTime(o_M0, o_n, timeSinceEpoch.TotalSeconds); //orbitProcessor uses this calc directly
 
                     //calculate it back the hard way. 
-                    OrbitMath.GetEccentricAnomalyNewtonsMethod(o_e, o_M, out double o_E); //OrbitMath.GetEccentricAnomaly(orbitDB, o_M);
+                    OrbitMath.TryGetEccentricAnomaly(o_e, o_M, out double o_E); //OrbitMath.GetEccentricAnomaly(orbitDB, o_M);
                     M1 = OrbitMath.GetEllipticMeanAnomaly(o_e, o_E);
                     double t1 = OrbitMath.TimeFromEllipticMeanAnomaly(o_M0, M1, o_n);
 
@@ -358,7 +358,7 @@ namespace Pulsar4X.Tests
 
                 if (o_e < 1)
                 {
-                    OrbitMath.GetEccentricAnomalyNewtonsMethod(o_e, o_M, out double o_E);
+                    OrbitMath.TryGetEccentricAnomaly(o_e, o_M, out double o_E);
                     var truAnom = OrbitMath.TrueAnomalyFromEccentricAnomaly(o_e, o_E);
                     var r = EllipseMath.RadiusAtTrueAnomaly(truAnom, o_p, o_e);
                     var pos = OrbitMath.GetRelativePosition(o_loAN, o_aoP, o_i, truAnom, r);

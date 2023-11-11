@@ -352,7 +352,7 @@ namespace Pulsar4X.Engine
         /// <returns>E</returns>
         public static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
-            if(!GetEccentricAnomalyNewtonsMethod(orbit.Eccentricity, currentMeanAnomaly, out double E))
+            if(!TryGetEccentricAnomaly(orbit.Eccentricity, currentMeanAnomaly, out double E))
             {
                 /*
                 Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.")

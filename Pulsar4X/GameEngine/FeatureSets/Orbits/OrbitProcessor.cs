@@ -16,7 +16,7 @@ namespace Pulsar4X.Engine
     /// True Anomaly, is calculated using the Eccentric Anomaly this is the angle from the parent (or focal point of the ellipse) to the body.
     /// With the true anomaly, we can then use trig to calculate the position.
     /// </summary>
-    public class OrbitProcessor : OrbitProcessorBase, IHotloopProcessor
+    public class OrbitProcessor : IHotloopProcessor
     {
         public TimeSpan RunFrequency => TimeSpan.FromMinutes(5);
 
@@ -24,6 +24,7 @@ namespace Pulsar4X.Engine
 
         public Type GetParameterType => typeof(OrbitDB);
 
+        public static bool UseRelativeVelocity { get; set; } = true;
 
         public void Init(Game game)
         {

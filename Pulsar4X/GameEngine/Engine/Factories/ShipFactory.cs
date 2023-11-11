@@ -75,7 +75,7 @@ namespace Pulsar4X.Engine
         public static Entity CreateShip(ShipDesign shipDesign, Entity ownerFaction,  KeplerElements ke, Entity parent, string? shipName = null)
         {
             OrbitDB orbit = OrbitDB.FromKeplerElements(parent,shipDesign.MassPerUnit, ke, parent.StarSysDateTime);
-            var position = OrbitProcessor.GetPosition(ke, parent.StarSysDateTime);
+            var position =  OrbitMath.GetPosition(ke, parent.StarSysDateTime);
             return CreateShip(shipDesign, ownerFaction, orbit, parent, shipName);
         }
 
@@ -83,7 +83,7 @@ namespace Pulsar4X.Engine
         {
 
             var starsys = parent.Manager;
-            var position = OrbitProcessor.GetPosition(orbit.GetElements(), parent.StarSysDateTime);
+            var position = OrbitMath.GetPosition(orbit, parent.StarSysDateTime);
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
 
             var shipinfo = new ShipInfoDB(shipDesign);

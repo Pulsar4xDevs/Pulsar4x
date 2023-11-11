@@ -332,6 +332,19 @@ namespace Pulsar4X.Orbital
 
         #region TrueAnomaly
 
+        public static double TrueAnomalyFromElements(KeplerElements ke, DateTime time)
+        {
+            // Get seconds since last time we passed the epoch point in the orbit
+            double timeSinceEpoch = (time - ke.Epoch).TotalSeconds % ke.Period;
+
+            double currentMeanAnomaly = GetMeanAnomalyFromTime(
+                ke.MeanAnomalyAtEpoch, ke.MeanMotion, timeSinceEpoch
+            );
+
+            TryGetEccentricAnomaly(ke.Eccentricity, currentMeanAnomaly, out var eccentricAnomaly);
+            return TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccentricAnomaly);
+        }
+        
         
         /// <summary>
         /// The True Anomaly in radians
@@ -393,7 +406,7 @@ namespace Pulsar4X.Orbital
             if(e < 1)
             {
                 var m1 = GetMeanAnomalyFromTime(m0, meanMotion, s);
-                GetEccentricAnomalyNewtonsMethod(e, m1, out double E);
+                TryGetEccentricAnomaly(e, m1, out double E);
                 return TrueAnomalyFromEccentricAnomaly(e, E);
             }
             else
@@ -438,6 +451,12 @@ namespace Pulsar4X.Orbital
         
         #region Position
 
+        public static Vector3 GetPosition(KeplerElements ke, DateTime time)
+        {
+            var ta = TrueAnomalyFromElements(ke, time);
+            return GetPosition(ke.SemiMajorAxis, ke.Eccentricity, ke.LoAN, ke.AoP, ke.Inclination, ta);
+        }
+        
         public static Vector3 GetPosition(double a, double e, double loAN, double aoP, double i, double trueAnomaly)
         {
             var p = EllipseMath.SemiLatusRectum(a, e);
@@ -479,7 +498,7 @@ namespace Pulsar4X.Orbital
             if(e < 1)
             {
                 var meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
-                GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly, out var eccAnom);
+                TryGetEccentricAnomaly(ke.Eccentricity, meanAnomaly, out var eccAnom);
                 trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
             }
             else
@@ -687,7 +706,7 @@ namespace Pulsar4X.Orbital
             double e = ke.Eccentricity;
             double a = ke.SemiMajorAxis;
             var meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
-            GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly, out var eccAnom);
+            TryGetEccentricAnomaly(ke.Eccentricity, meanAnomaly, out var eccAnom);
             var trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
             double angleToObj = trueAnomaly + ke.AoP;
 
@@ -773,7 +792,7 @@ namespace Pulsar4X.Orbital
             if (e < 1)
             {
                 double meanAnomaly = GetMeanAnomalyFromTime(ke.MeanAnomalyAtEpoch, ke.MeanMotion, secondsFromEpoch);
-                GetEccentricAnomalyNewtonsMethod(ke.Eccentricity, meanAnomaly, out double eccAnom);
+                TryGetEccentricAnomaly(ke.Eccentricity, meanAnomaly, out double eccAnom);
                 trueAnomaly = TrueAnomalyFromEccentricAnomaly(ke.Eccentricity, eccAnom);
             }
             else
@@ -875,35 +894,12 @@ namespace Pulsar4X.Orbital
             return spd;
         }
 
-        /// <summary>
-        /// Calculates distance/s on an orbit by calculating positions now and second in the future. 
-        /// Fairly slow and inefficent. 
-        /// </summary>
-        /// <returns>the distance traveled in a second</returns>
-        /// <param name="orbit">Orbit.</param>
-        /// <param name="atDatetime">At datetime.</param>
-        public static double Hackspeed(KeplerElements orbit, DateTime atDatetime)
-        {
-            var pos1 = OrbitProcessorBase.GetPosition(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
-            var pos2 = OrbitProcessorBase.GetPosition(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
-
-            return Distance.DistanceBetween(pos1, pos2);
-        }
-
-        public static double HackVelocityHeading(KeplerElements orbit, DateTime atDatetime)
-        {
-            var pos1 = OrbitProcessorBase.GetPosition(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
-            var pos2 = OrbitProcessorBase.GetPosition(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
-
-            Vector3 vector = pos2 - pos1;
-            double heading = Math.Atan2(vector.Y, vector.X);
-            return heading;
-        }
+        
 
         public static Vector3 HackVelocityVector(KeplerElements orbit, DateTime atDatetime)
         {
-            var pos1 = OrbitProcessorBase.GetPosition(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
-            var pos2 = OrbitProcessorBase.GetPosition(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
+            var pos1 = OrbitalMath.GetPosition(orbit, atDatetime - TimeSpan.FromSeconds(0.5));
+            var pos2 = OrbitalMath.GetPosition(orbit, atDatetime + TimeSpan.FromSeconds(0.5));
             //double speed = Distance.DistanceBetween(pos1, pos2);
             return pos2 - pos1;
         }
@@ -940,7 +936,7 @@ namespace Pulsar4X.Orbital
         /// <returns>E</returns>
         /// <param name="eccentricity">Eccentricity.</param>
         /// <param name="currentMeanAnomaly">Current mean anomaly.</param>
-        public static bool GetEccentricAnomalyNewtonsMethod(double eccentricity, double currentMeanAnomaly, out double eccentricAnomaly)
+        public static bool TryGetEccentricAnomaly(double eccentricity, double currentMeanAnomaly, out double eccentricAnomaly)
         {
             bool converges = true;
             //Kepler's Equation
@@ -1443,76 +1439,7 @@ namespace Pulsar4X.Orbital
             public double T;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="moverAbsolutePos"></param>
-        /// <param name="speed"></param>
-        /// <param name="targetEntity"></param>
-        /// <param name="atDateTime"></param>
-        /// <param name="offsetPosition">position relative to the target object we wish to stop warp.</param>
-        /// <returns></returns>
-        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition_m(Vector3 moverAbsolutePos, double speed, EntityBase targetEntity, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
-        {
 
-            var pos = moverAbsolutePos;
-            double tim = 0;
-
-            var pl = new Orbit()
-            {
-                position = moverAbsolutePos,
-                T = targetEntity.Orbit.Period,
-            };
-
-            double a = targetEntity.Orbit.SemiMajorAxis * 2;
-
-            Vector3 p;
-            int i;
-            double tt, t, dt, a0, a1, T;
-            // find orbital position with min error (coarse)
-            a1 = -1.0;
-            dt = 0.01 * pl.T;
-
-
-            for (t = 0; t < pl.T; t += dt)
-            {
-                p = OrbitProcessorBase.GetAbsolutePosition(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //pl.position(sim_t + t);                     // try time t
-                p += offsetPosition;
-                tt = (p - pos).Length() / speed;  //length(p - pos) / speed;
-                a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
-                a0 /= pl.T;                                   // remove full periods from the difference
-                a0 -= Math.Floor(a0);
-                a0 *= pl.T;
-                if ((a0 < a1) || (a1 < 0.0))
-                {
-                    a1 = a0;
-                    tim = tt;
-                }   // remember best option
-            }
-            // find orbital position with min error (fine)
-            for (i = 0; i < 10; i++)                               // recursive increase of accuracy
-                for (a1 = -1.0, t = tim - dt, T = tim + dt, dt *= 0.1; t < T; t += dt)
-                {
-                    p = OrbitProcessorBase.GetAbsolutePosition(targetEntity, atDateTime + TimeSpan.FromSeconds(t));  //p = pl.position(sim_t + t);                     // try time t
-                    p += offsetPosition;
-                    tt = (p - pos).Length() / speed;  //tt = length(p - pos) / speed;
-                    a0 = tt - t; if (a0 < 0.0) continue;              // ignore overshoots
-                    a0 /= pl.T;                                   // remove full periods from the difference
-                    a0 -= Math.Floor(a0);
-                    a0 *= pl.T;
-                    if ((a0 < a1) || (a1 < 0.0))
-                    {
-                        a1 = a0;
-                        tim = tt;
-                    }   // remember best option
-                }
-            // direction
-            p = OrbitProcessorBase.GetAbsolutePosition(targetEntity, atDateTime + TimeSpan.FromSeconds(tim));//pl.position(sim_t + tim);
-            p += offsetPosition;
-            //dir = normalize(p - pos);
-            return (p, atDateTime + TimeSpan.FromSeconds(tim));
-        }
-        
         
                /// <summary>
         /// THIS NEEDS TESTING.

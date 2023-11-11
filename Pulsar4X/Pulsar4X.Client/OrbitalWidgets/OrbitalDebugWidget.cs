@@ -290,7 +290,7 @@ namespace Pulsar4X.SDL2UI
             _ae = _semiMajAxis * _keplerElements.Eccentricity;
             
                         DateTime systemDateTime = _entity.StarSysDateTime;
-            _trueAnom = OrbitProcessor.GetTrueAnomaly(_keplerElements, systemDateTime);
+            _trueAnom = OrbitalMath.TrueAnomalyFromElements(_keplerElements, systemDateTime);
 
             /*
             var pos_m = _bodyPosition.RelativePosition_m;
@@ -312,8 +312,9 @@ namespace Pulsar4X.SDL2UI
             
             double secondsFromEpoch = (systemDateTime - _keplerElements.Epoch).TotalSeconds;
             _meanAnom = OrbitMath.GetMeanAnomalyFromTime(_keplerElements.MeanAnomalyAtEpoch, _keplerElements.MeanMotion, secondsFromEpoch);
-
-            _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_keplerElements, _meanAnom);
+            
+            OrbitalMath.TryGetEccentricAnomaly(_keplerElements.Eccentricity, _meanAnom, out _eccentricAnom);
+            
             _eccentricAnom_FromTrueAnom = OrbitMath.GetEccentricAnomalyFromTrueAnomaly(_trueAnom, _keplerElements.Eccentricity);
             //_ecctricAnom_FromStateVectors = OrbitMath.GetEccentricAnomalyFromStateVectors(pos, _semiMajAxis, _ae, _aop);
             //_ecctricAnom_FromStateVectors2 = OrbitMath.GetEccentricAnomalyFromStateVectors2(_sgp, _semiMajAxis, pos, (Vector3)vel);
@@ -1330,10 +1331,10 @@ namespace Pulsar4X.SDL2UI
 
             DateTime systemDateTime = _entity.StarSysDateTime;
             double secondsFromEpoch = (systemDateTime - _keplerElements.Epoch).TotalSeconds;
-            _trueAnom = OrbitProcessor.GetTrueAnomaly(_keplerElements, systemDateTime);
+            _trueAnom = OrbitalMath.TrueAnomalyFromElements(_keplerElements, systemDateTime);
             _meanAnom = OrbitMath.GetMeanAnomalyFromTime(_keplerElements.MeanAnomalyAtEpoch, _keplerElements.MeanMotion, secondsFromEpoch);
 
-            _eccentricAnom = OrbitProcessor.GetEccentricAnomaly(_keplerElements, _meanAnom);
+            OrbitMath.TryGetEccentricAnomaly(_keplerElements.Eccentricity, _meanAnom, out _eccentricAnom);
             
             
             var meanAnom2 = OrbitMath.GetEllipticMeanAnomaly(_keplerElements.Eccentricity, _eccentricAnom);
@@ -1341,10 +1342,7 @@ namespace Pulsar4X.SDL2UI
             _trueAnomalyAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(Vector2.Zero, 80, 4, _loP, _trueAnom, 128);
             _trueAnomalyAngleItem.DataItem = Angle.ToDegrees(_trueAnom);
             _trueAnomalyAngleItem.DataString = Angle.ToDegrees(_trueAnom) + "°";
-
             
-            
-            _trueAnom = OrbitProcessor.GetTrueAnomaly(_keplerElements, systemDateTime);
             /*
             var pos_m = _bodyPosition.RelativePosition_m;
             var vel_m = OrbitMath.ObjectLocalVelocityVector(
