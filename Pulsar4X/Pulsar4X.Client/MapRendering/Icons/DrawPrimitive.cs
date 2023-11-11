@@ -240,7 +240,31 @@ namespace Pulsar4X.SDL2UI
             var lop = ke.LoAN + ke.AoP;
             return KeplerPoints(a, e, lop, startPnt, endPnt);
         }
-                
+              
+        
+        public static Vector2[] HyperbolicPoints(double semiMaj, double eccentricity, double loP, double startAng,
+                                                 int numPoints = 128)
+        {
+            double sweep = startAng * 2;
+            double Δθ = sweep / (numPoints - 1);            
+            
+            double θ = 0;
+            double x = 0;
+            double y = 0;
+            double r = 0;
+        
+            Vector2[] points = new Vector2[numPoints + 1];
+            for (int i = 0; i < numPoints; i++)
+            {
+                θ = Angle.NormaliseRadians((loP + startAng) - Δθ * i);
+                r = EllipseMath.RadiusAtTrueAnomaly(semiMaj, eccentricity, loP, θ);
+                x = r * Math.Cos(θ);
+                y = r * Math.Sin(θ);
+                points[i] = new Vector2(x, y);
+            }
+            return points;
+        }
+        
         /// <summary>
         /// Creates points for an ellipse.
         /// This formula creates more points at the periapsis and less at the apoapsis.

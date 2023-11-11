@@ -27,19 +27,8 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         var _soi = OrbitMath.GetSOIRadius((OrbitDB)_orbitDB.ParentDB);
         double p = EllipseMath.SemiLatusRectum(_orbitDB.SemiMajorAxis, _orbitDB.Eccentricity);
         double angleToSOIPoint = (EllipseMath.TrueAnomalyAtRadus(_soi, p, _orbitDB.Eccentricity));
-        double a2 = Angle.NormaliseRadiansPositive(-angleToSOIPoint);
-
-        Vector2 startPos = new Vector2()
-        {
-            X = _soi * Math.Cos(-angleToSOIPoint),
-            Y = _soi * Math.Sin(-angleToSOIPoint)
-        };
-        Vector2 endPos = new Vector2()
-        {
-            X = _soi * Math.Cos(angleToSOIPoint),
-            Y = _soi * Math.Sin(angleToSOIPoint)
-        };
-        _points = CreatePrimitiveShapes.KeplerPoints(SemiMaj, _eccentricity, _loP_radians, startPos, endPos, _numberOfArcSegments + 1);
+        
+        _points = CreatePrimitiveShapes.HyperbolicPoints(SemiMaj, _eccentricity, _loP_radians, angleToSOIPoint, _numberOfArcSegments + 1);
         
     }
     
@@ -62,7 +51,9 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
             if (dist < minDist)
             {
                 minDist = dist;
-                _index = i-1; //-1 so we get the next point along. eg behind the craft not infront of it. 
+                _index = i;
+                
+                
             }
         }
         UpdateUserSettings();
@@ -70,8 +61,7 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
     
     public override void OnFrameUpdate(Matrix matrix, Camera camera)
     {
-        
-        CreatePointArray(); //this is for hot reload debuggign purposes. delete. 
+
         //resize for zoom
         //translate to position
             
@@ -80,24 +70,34 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         var trns = Matrix.IDTranslate(foo.X, foo.Y);
         var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
         var mtrx =  scAU * matrix * trns; //scale to au, scale for camera zoom, and move to camera position and zoom
-
         
         var spos = camera.ViewCoordinateV2_m(_bodyAbsolutePos);
-
-        if (_drawPoints.Length != _index + 2) 
-            _drawPoints = new SDL.SDL_Point[_index + 2];
-        
-        //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
+        //_drawPoints = new SDL.SDL_Point[_points.Length];
         _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
-        int i2 = 1;
-        for (int i = _index; i > -1; i--)
+
+        /*
+        for (int i = 0; i < _points.Length; i++)
         {
-            _drawPoints[i2] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
-            i2++;
-        }
-
+            _drawPoints[i] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
+        }*/
         
-
+        int i2 = 1;
+        if(IsRetrogradeOrbit)
+        {
+            for (int i = _index-1; i > -1; i--)
+            {
+                _drawPoints[i2] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
+                i2++;
+            }
+        }
+        else
+        {
+            for (int i = _index+1; i < _index + _drawPoints.Length - 1; i++)
+            {
+                _drawPoints[i2] = mtrx.TransformToSDL_Point(_points[i].X, _points[i].Y);
+                i2++;
+            }
+        }
     }
 
     public override void UpdateUserSettings()
@@ -124,7 +124,7 @@ public class OrbitHyperbolicIcon2 : OrbitIconBase
         if (_drawPoints.Length <= _numberOfDrawSegments - 1)
             return;
         float alpha = _userSettings.MaxAlpha;
-        for (int i = 0; i < _numberOfDrawSegments - 1; i++)
+        for (int i = 0; i < _drawPoints.Length - 1; i++)
         {
             SDL.SDL_SetRenderDrawColor(rendererPtr, _userSettings.Red, _userSettings.Grn, _userSettings.Blu, (byte)alpha);//we cast the alpha here to stop rounding errors creaping up. 
             SDL.SDL_RenderDrawLine(rendererPtr, _drawPoints[i].x, _drawPoints[i].y, _drawPoints[i + 1].x, _drawPoints[i +1].y);
