@@ -22,21 +22,21 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
     public event EntityChangeHandler ChangeEvent;
 
     [JsonConstructor]
-    public Entity(int id)
+    private Entity(int id)
     {
         Id = id;
     }
 
     public static Entity Create()
     {
-        var entityId = EntityIDGenerator.GenerateUniqueID();
-        return new Entity(entityId);
+        int entityId = EntityIDGenerator.GenerateUniqueID();
+        return new Entity(entityId) { IsValid = true };
     }
 
     public static readonly Entity InvalidEntity = new Entity(-1);
 
     [JsonIgnore]
-    public bool IsValid => Id >= 0 && Manager != null && Manager != EntityManager.InvalidManager && Manager.IsValidEntity(this) && this.AreAllDependenciesPresent();
+    public bool IsValid { get; internal set; }
 
     public T GetDataBlob<T>() where T : BaseDataBlob
     {
