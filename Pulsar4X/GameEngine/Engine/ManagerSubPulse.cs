@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Engine
 {
@@ -61,6 +62,9 @@ namespace Pulsar4X.Engine
         }
 
         [JsonProperty] public SortedDictionary<DateTime, ProcessSet> QueuedProcesses { get; set; } = new SortedDictionary<DateTime, ProcessSet>();
+
+        [JsonProperty]
+        public SafeDictionary<(Type processorType, Type dbType), DateTime?> HotLoopProcessorsNextRun { get; private set;} = new ();
 
         //public readonly ConcurrentDictionary<Type, TimeSpan> ProcessTime = new ConcurrentDictionary<Type, TimeSpan>();
         public bool IsProcessing = false;
@@ -256,10 +260,20 @@ namespace Pulsar4X.Engine
         {
             if(nextDateTime < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
 
-            if (!QueuedProcesses.ContainsKey(nextDateTime))
-                QueuedProcesses.Add(nextDateTime, new ProcessSet());
-            if (!QueuedProcesses[nextDateTime].SystemProcessors.Contains(actionProcessor))
-                QueuedProcesses[nextDateTime].SystemProcessors.Add(actionProcessor);
+            Type processorType = actionProcessor.GetType();
+            Type dbType = actionProcessor.GetParameterType;
+
+            if(!HotLoopProcessorsNextRun.ContainsKey((processorType, dbType)))
+            {
+                HotLoopProcessorsNextRun.Add((processorType, dbType), nextDateTime);
+            }
+            else
+            {
+                // We only want to set the next run time if it is currently null
+                // if it isn't null then it will already be queued to run!
+                if(HotLoopProcessorsNextRun[(processorType, dbType)] == null)
+                    HotLoopProcessorsNextRun[(processorType, dbType)] = nextDateTime;
+            }
         }
 
         internal void AddSystemInterupt(BaseDataBlob db)
@@ -275,12 +289,6 @@ namespace Pulsar4X.Engine
                 return;
             var proc = _game.ProcessorManager.HotloopProcessors[db.GetType()];
 
-            // If the system process is already queued don't add it again
-            if(QueuedProcesses.Values.Any(set => set.SystemProcessorExists(proc.GetType())))
-            {
-                return;
-            }
-
             DateTime startDate = _game.Settings.StartDateTime;
             var elapsed = _processToDateTime - startDate;
             elapsed -= proc.FirstRunOffset;
@@ -291,10 +299,7 @@ namespace Pulsar4X.Engine
 
             if(nextDT < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
 
-            if(!QueuedProcesses.ContainsKey(nextDT))
-                QueuedProcesses.Add(nextDT, new ProcessSet());
-            if (!QueuedProcesses[nextDT].SystemProcessors.Contains(proc))
-                QueuedProcesses[nextDT].SystemProcessors.Add(proc);
+            AddSystemInterupt(nextDT, proc);
         }
 
     /// <summary>
@@ -382,7 +387,7 @@ namespace Pulsar4X.Engine
                 _processToDateTime = GetNextInterupt(timeDeltaMax);
 
                 ProcessToNextInterupt();
-                
+
                 _subPulseStopwatch.Stop();
                 _subpulseTimes.Add(_subPulseStopwatch.Elapsed.TotalMilliseconds);
             }
@@ -398,7 +403,13 @@ namespace Pulsar4X.Engine
         private DateTime GetNextInterupt(TimeSpan maxSpan)
         {
             DateTime nextInteruptDateTime = StarSysDateTime + maxSpan;
-            if (QueuedProcesses.Keys.Count != 0 && nextInteruptDateTime > QueuedProcesses.Keys.Min())
+
+            if(HotLoopProcessorsNextRun.Count > 0 && nextInteruptDateTime >= HotLoopProcessorsNextRun.Values.Min())
+            {
+                nextInteruptDateTime = HotLoopProcessorsNextRun.Values.Min() ?? nextInteruptDateTime;
+            }
+
+            if (QueuedProcesses.Keys.Count != 0 && nextInteruptDateTime >= QueuedProcesses.Keys.Min())
             {
                 nextInteruptDateTime = QueuedProcesses.Keys.Min();
             }
@@ -417,23 +428,30 @@ namespace Pulsar4X.Engine
         {
             TimeSpan span = (_processToDateTime - _systemLocalDateTime);
             int deltaSeconds = (int)span.TotalSeconds;
+
+            foreach(var (type, runAt) in HotLoopProcessorsNextRun)
+            {
+                if(runAt == null || runAt > _processToDateTime)
+                    continue;
+
+                _processStopwatch.Restart();
+                CurrentProcess = type.ToString();
+                int count = _processManager.HotloopProcessors[type.dbType].ProcessManager(_entityManager, deltaSeconds);
+                _processStopwatch.Stop();
+                //ProcessTime[systemProcess.GetType()] = _processStopwatch.Elapsed;
+                string pname = type.processorType.Name;
+                if(!_detailedProcessTimes.ContainsKey(pname))
+                    _detailedProcessTimes.Add(pname, new List<double>());
+                _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
+                if(count == 0)
+                    HotLoopProcessorsNextRun[type] = null;
+                else
+                    HotLoopProcessorsNextRun[type] = _processToDateTime + _processManager.HotloopProcessors[type.dbType].RunFrequency; //sets the next interupt for this hotloop process
+            }
+
             if (QueuedProcesses.ContainsKey(_processToDateTime))
             {
                 var qp = QueuedProcesses[_processToDateTime];
-                foreach (var systemProcess in qp.SystemProcessors)
-                {
-                    _processStopwatch.Restart();
-                    CurrentProcess = systemProcess.ToString();
-                    int count = systemProcess.ProcessManager(_entityManager, deltaSeconds);
-                    _processStopwatch.Stop();
-                    //ProcessTime[systemProcess.GetType()] = _processStopwatch.Elapsed;
-                    string pname = systemProcess.GetType().Name;
-                    if(!_detailedProcessTimes.ContainsKey(pname))
-                        _detailedProcessTimes.Add(pname, new List<double>());
-                    _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
-                    if(count > 0)
-                        AddSystemInterupt(_processToDateTime + systemProcess.RunFrequency, systemProcess); //sets the next interupt for this hotloop process
-                }
 
                 foreach(var instanceProcessSet in qp.InstanceProcessors)
                 {
@@ -464,7 +482,6 @@ namespace Pulsar4X.Engine
             foreach (var processSet in QueuedProcesses)
             {
                 i += processSet.Value.InstanceProcessors.Count;
-                i += processSet.Value.SystemProcessors.Count;
             }
 
             return i;

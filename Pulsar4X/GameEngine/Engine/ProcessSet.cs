@@ -9,10 +9,6 @@ namespace Pulsar4X.Engine;
 
 public class ProcessSet
 {
-
-    [JsonProperty] //this should get added on initialization.
-    public SafeList<IHotloopProcessor> SystemProcessors { get; } = new SafeList<IHotloopProcessor>();
-
     [JsonProperty] //this needs to get saved. need to check that entities here are saved as guids in the save file and that they get re-referenced on load too (should happen if the serialization manager does its job properly).
     public Dictionary<string, List<Entity>> InstanceProcessors { get; } = new Dictionary<string, List<Entity>>();
 
@@ -89,13 +85,6 @@ public class ProcessSet
 
     internal bool IsEmpty()
     {
-        if (InstanceProcessors.Count == 0 && SystemProcessors.Count == 0)
-            return true;
-        return false;
-    }
-
-    internal bool SystemProcessorExists(Type type)
-    {
-        return SystemProcessors.Any(p => p.GetType() == type);
+        return InstanceProcessors.Count == 0;
     }
 }

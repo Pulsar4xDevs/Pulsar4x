@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
-    public class DebugWindow :PulsarGuiWindow
+    public class DebugWindow : PulsarGuiWindow
     {
         EntityState? _selectedEntityState;
 
@@ -157,7 +157,8 @@ namespace Pulsar4X.SDL2UI
                 {
                     DisplayInfoTab();
                     DisplayEntitiesTab();
-                    DisplayProcessorsTab();
+                    DisplayInstanceProcessorsTab();
+                    DisplayHotLoopProcessorsTab();
 
                     ImGui.EndTabBar();
                 }
@@ -807,28 +808,15 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-        private void DisplayProcessorsTab()
+        private void DisplayInstanceProcessorsTab()
         {
             if(SystemState == null) return;
 
-            if(ImGui.BeginTabItem("Processors"))
+            if(ImGui.BeginTabItem("Instance Processors"))
             {
                 ImGui.Columns(3);
                 foreach(var (dateTime, processSet) in SystemState.StarSystem.ManagerSubpulses.QueuedProcesses.ToArray())
                 {
-                    if(processSet.SystemProcessors.Count > 0)
-                        ImGui.Separator();
-
-                    foreach(var thing in processSet.SystemProcessors)
-                    {
-                        ImGui.Text(dateTime.ToString());
-                        ImGui.NextColumn();
-                        ImGui.Text("System");
-                        ImGui.NextColumn();
-                        ImGui.Text(thing.GetType().Name);
-                        ImGui.NextColumn();
-                    }
-
                     if(processSet.InstanceProcessors.Count > 0)
                         ImGui.Separator();
 
@@ -843,6 +831,26 @@ namespace Pulsar4X.SDL2UI
                     }
                 }
 
+                ImGui.EndTabItem();
+            }
+        }
+
+        private void DisplayHotLoopProcessorsTab()
+        {
+            if(SystemState == null) return;
+
+            if(ImGui.BeginTabItem("HotLoop Processors"))
+            {
+                ImGui.Columns(3);
+                foreach(var (type, dateTime) in SystemState.StarSystem.ManagerSubpulses.HotLoopProcessorsNextRun)
+                {
+                    ImGui.Text(dateTime.ToString());
+                    ImGui.NextColumn();
+                    ImGui.Text("System");
+                    ImGui.NextColumn();
+                    ImGui.Text(type.processorType.Name);
+                    ImGui.NextColumn();
+                }
                 ImGui.EndTabItem();
             }
         }
