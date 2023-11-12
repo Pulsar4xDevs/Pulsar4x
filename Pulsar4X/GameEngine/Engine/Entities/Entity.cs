@@ -30,13 +30,13 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
     public static Entity Create()
     {
         int entityId = EntityIDGenerator.GenerateUniqueID();
-        return new Entity(entityId) { IsValid = true };
+        return new Entity(entityId);
     }
 
     public static readonly Entity InvalidEntity = new Entity(-1);
 
-    [JsonIgnore]
-    public bool IsValid { get; internal set; }
+    [JsonIgnore] 
+    public bool IsValid { get; internal set; } = false;
 
     public T GetDataBlob<T>() where T : BaseDataBlob
     {

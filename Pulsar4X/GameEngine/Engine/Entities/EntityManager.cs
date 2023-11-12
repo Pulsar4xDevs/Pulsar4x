@@ -137,11 +137,10 @@ namespace Pulsar4X.Engine
                 }
             }
 
-            #warning Entity Validation is Disabled.
-            /*
-            if (!entity.IsValid)
-                throw new InvalidOperationException("Created an invalid entity.");
-            */
+            if (!entity.AreAllDependenciesPresent())
+                throw new InvalidOperationException("This entity does not have all of the required DataBlob dependencies.");
+
+            entity.IsValid = true;
 
             // Update listeners
             UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityAdded);
@@ -203,6 +202,8 @@ namespace Pulsar4X.Engine
             {
                 value.RemoveContact(entity.Id);
             }
+
+            entity.IsValid = false;
 
             UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityRemoved);
 
