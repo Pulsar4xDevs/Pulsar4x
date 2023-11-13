@@ -815,12 +815,12 @@ namespace Pulsar4X.SDL2UI
             if(ImGui.BeginTabItem("Instance Processors"))
             {
                 ImGui.Columns(3);
-                foreach(var (dateTime, processSet) in SystemState.StarSystem.ManagerSubpulses.QueuedProcesses.ToArray())
+                foreach(var (dateTime, processSet) in SystemState.StarSystem.ManagerSubpulses.InstanceProcessorsQueue.ToArray())
                 {
-                    if(processSet.InstanceProcessors.Count > 0)
+                    if(processSet.Count > 0)
                         ImGui.Separator();
 
-                    foreach(var thing in processSet.InstanceProcessors.ToArray())
+                    foreach(var thing in processSet.ToArray())
                     {
                         ImGui.Text(dateTime.ToString());
                         ImGui.NextColumn();

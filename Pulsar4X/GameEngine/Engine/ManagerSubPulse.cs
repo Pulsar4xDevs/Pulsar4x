@@ -23,7 +23,8 @@ namespace Pulsar4X.Engine
 
         public PerformanceStopwatch Performance { get; private set; } = new PerformanceStopwatch();
 
-        [JsonProperty] public SortedDictionary<DateTime, ProcessSet> QueuedProcesses { get; set; } = new SortedDictionary<DateTime, ProcessSet>();
+        [JsonProperty]
+        public SortedDictionary<DateTime, Dictionary<string, List<Entity>>> InstanceProcessorsQueue { get; set; } = new ();
 
         [JsonProperty]
         public SafeDictionary<(Type processorType, Type dbType), DateTime?> HotLoopProcessorsNextRun { get; private set;} = new ();
@@ -39,11 +40,17 @@ namespace Pulsar4X.Engine
         internal Dictionary<DateTime, List<String>> GetInstanceProcForEntity(Entity entity)
         {
             var procDict = new Dictionary<DateTime, List<string>>();
-            foreach (var kvp in QueuedProcesses)
+            foreach (var (key, queue) in InstanceProcessorsQueue)
             {
-                var procList = kvp.Value.GetInstanceProcForEntity(entity);
-                if (procList.Count > 0)
-                    procDict.Add(kvp.Key, procList);
+                foreach(var (name, list) in queue)
+                {
+                    if(list.Contains(entity))
+                    {
+                        if(!procDict.ContainsKey(key))
+                            procDict.Add(key, new List<string>());
+                    }
+                    procDict[key].Add(name);
+                }
             }
 
             return procDict;
@@ -55,16 +62,15 @@ namespace Pulsar4X.Engine
             {
                 if(kvp.Key < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
 
-                if (!QueuedProcesses.ContainsKey(kvp.Key))
-                    QueuedProcesses.Add(kvp.Key, new ProcessSet());
+                if (!InstanceProcessorsQueue.ContainsKey(kvp.Key))
+                    InstanceProcessorsQueue.Add(kvp.Key, new Dictionary<string, List<Entity>>());
                 foreach (var procName in kvp.Value)
                 {
-                    if (!QueuedProcesses[kvp.Key].InstanceProcessors.ContainsKey(procName))
-                        QueuedProcesses[kvp.Key].InstanceProcessors.Add(procName, new List<Entity>());
-                    if (!QueuedProcesses[kvp.Key].InstanceProcessors[procName].Contains(entity))
-                        QueuedProcesses[kvp.Key].InstanceProcessors[procName].Add(entity);
+                    if (!InstanceProcessorsQueue[kvp.Key].ContainsKey(procName))
+                        InstanceProcessorsQueue[kvp.Key].Add(procName, new List<Entity>());
+                    if (!InstanceProcessorsQueue[kvp.Key][procName].Contains(entity))
+                        InstanceProcessorsQueue[kvp.Key][procName].Add(entity);
                 }
-
             }
         }
 
@@ -158,12 +164,12 @@ namespace Pulsar4X.Engine
             if(nextDateTime < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
             if (nextDateTime < _processToDateTime)
                 _processToDateTime = nextDateTime;
-            if (!QueuedProcesses.ContainsKey(nextDateTime))
-                QueuedProcesses.Add(nextDateTime, new ProcessSet());
-            if (!QueuedProcesses[nextDateTime].InstanceProcessors.ContainsKey(actionProcessor))
-                QueuedProcesses[nextDateTime].InstanceProcessors.Add(actionProcessor, new List<Entity>());
-            if (!QueuedProcesses[nextDateTime].InstanceProcessors[actionProcessor].Contains(entity))
-                QueuedProcesses[nextDateTime].InstanceProcessors[actionProcessor].Add(entity);
+            if (!InstanceProcessorsQueue.ContainsKey(nextDateTime))
+                InstanceProcessorsQueue.Add(nextDateTime, new Dictionary<string, List<Entity>>());
+            if (!InstanceProcessorsQueue[nextDateTime].ContainsKey(actionProcessor))
+                InstanceProcessorsQueue[nextDateTime].Add(actionProcessor, new List<Entity>());
+            if (!InstanceProcessorsQueue[nextDateTime][actionProcessor].Contains(entity))
+                InstanceProcessorsQueue[nextDateTime][actionProcessor].Add(entity);
         }
 
 
@@ -229,16 +235,20 @@ namespace Pulsar4X.Engine
             //throw new NotImplementedException();
 
             List<DateTime> removekeys = new List<DateTime>();
-            foreach (var kvp in QueuedProcesses)
+            foreach (var (dateTime, dict) in InstanceProcessorsQueue)
             {
-                kvp.Value.RemoveEntity(entity);
-                if(kvp.Value.IsEmpty())
-                    removekeys.Add(kvp.Key);
+                foreach(var (key, list) in dict)
+                {
+                    list.Remove(entity);
+                }
+
+                if(dict.Values.Count == 0)
+                    removekeys.Add(dateTime);
             }
 
             foreach (var item in removekeys)
             {
-                QueuedProcesses.Remove(item);
+                InstanceProcessorsQueue.Remove(item);
             }
 
         }
@@ -254,24 +264,8 @@ namespace Pulsar4X.Engine
         {
 
             Dictionary<DateTime, List<string>> procDict = GetInstanceProcForEntity(entity);
-            List<DateTime> removekeys = new List<DateTime>();
 
-            //get the dates and processors associated with this entity
-            foreach (var kvp in QueuedProcesses)
-            {
-                var procs = kvp.Value.RemoveEntity(entity);
-                if(procs.Count > 0)
-                    procDict.Add(kvp.Key, procs);
-                if(kvp.Value.IsEmpty())
-                    removekeys.Add(kvp.Key);
-            }
-
-            //cleanup
-            foreach (var item in removekeys)
-            {
-                QueuedProcesses.Remove(item);
-            }
-
+            RemoveEntity(entity);
 
             //add the processors to the new system
             starsys.ManagerSubpulses.ImportProcDictForEntity(entity, procDict);
@@ -320,9 +314,9 @@ namespace Pulsar4X.Engine
                 nextInteruptDateTime = HotLoopProcessorsNextRun.Values.Min() ?? nextInteruptDateTime;
             }
 
-            if (QueuedProcesses.Keys.Count != 0 && nextInteruptDateTime >= QueuedProcesses.Keys.Min())
+            if (InstanceProcessorsQueue.Keys.Count != 0 && nextInteruptDateTime >= InstanceProcessorsQueue.Keys.Min())
             {
-                nextInteruptDateTime = QueuedProcesses.Keys.Min();
+                nextInteruptDateTime = InstanceProcessorsQueue.Keys.Min();
             }
             if (nextInteruptDateTime < StarSysDateTime)
                 throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow.
@@ -356,11 +350,11 @@ namespace Pulsar4X.Engine
                     HotLoopProcessorsNextRun[type] = _processToDateTime + _processManager.HotloopProcessors[type.dbType].RunFrequency; //sets the next interupt for this hotloop process
             }
 
-            if (QueuedProcesses.ContainsKey(_processToDateTime))
+            if (InstanceProcessorsQueue.ContainsKey(_processToDateTime))
             {
-                var qp = QueuedProcesses[_processToDateTime];
+                var qp = InstanceProcessorsQueue[_processToDateTime];
 
-                foreach(var instanceProcessSet in qp.InstanceProcessors)
+                foreach(var instanceProcessSet in qp)
                 {
                     var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
                     Performance.Start(processor.GetType().Name);
@@ -372,7 +366,7 @@ namespace Pulsar4X.Engine
                     }
                     Performance.Stop(processor.GetType().Name);
                 }
-                QueuedProcesses.Remove(_processToDateTime); //once all the processes have been run for that datetime, remove it from the dictionary.
+                InstanceProcessorsQueue.Remove(_processToDateTime); //once all the processes have been run for that datetime, remove it from the dictionary.
             }
             StarSysDateTime = _processToDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
         }
@@ -380,9 +374,9 @@ namespace Pulsar4X.Engine
         public int GetTotalNumberOfProceses()
         {
             int i = 0;
-            foreach (var processSet in QueuedProcesses)
+            foreach (var processSet in InstanceProcessorsQueue)
             {
-                i += processSet.Value.InstanceProcessors.Count;
+                i += processSet.Value.Count;
             }
 
             return i;
@@ -391,7 +385,7 @@ namespace Pulsar4X.Engine
         public List<DateTime> GetInteruptDateTimes()
         {
             List<DateTime> dates = new List<DateTime>();
-            foreach (var item in QueuedProcesses)
+            foreach (var item in InstanceProcessorsQueue)
             {
                 dates.Add(item.Key);
             }
