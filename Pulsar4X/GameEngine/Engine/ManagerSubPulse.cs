@@ -2,7 +2,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
 using System.Threading;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
@@ -20,46 +19,9 @@ namespace Pulsar4X.Engine
     [JsonObject(MemberSerialization.OptIn)]
     public class ManagerSubPulse
     {
-
-        public struct PerformanceData
-        {
-            public double FullPulseTimeMS;
-            public double[] SubpulseTimes;
-            public (string pname, double[] ptimes, double psum)[] ProcessTimes;
-        }
-
-        Stopwatch _masterPulseStopwatch = new Stopwatch();
-        Stopwatch _subPulseStopwatch = new Stopwatch();
-        Stopwatch _processStopwatch = new Stopwatch();
-
-        private double _fullPulseTimeMS = double.PositiveInfinity;
-        private List<double> _subpulseTimes = new List<double>();
-        private Dictionary<string, List<double>> _detailedProcessTimes = new Dictionary<string, List<double>>();
-
-        public PerformanceData[] PerfHistory = new PerformanceData[1];
-        public int PerfHistoryIndex { get; private set; }
-
         private Game _game;
 
-        /// <summary>
-        /// Threadsafe Change the amount of history we store for this Manager.
-        /// </summary>
-        public int PerfHistoryCount
-        {
-            get { return PerfHistory.Length; }
-            set
-            {
-                lock (PerfHistory)
-                {
-                    int copyCount = Math.Min(PerfHistory.Length, value);
-                    var oldHistory = PerfHistory;
-                    PerfHistory = new PerformanceData[value];
-                    Buffer.BlockCopy(oldHistory, 0, PerfHistory, 0, copyCount);
-                    if (PerfHistoryIndex > value - 1)
-                        PerfHistoryIndex = value - 1;
-                }
-            }
-        }
+        public PerformanceStopwatch Performance { get; private set; } = new PerformanceStopwatch();
 
         [JsonProperty] public SortedDictionary<DateTime, ProcessSet> QueuedProcesses { get; set; } = new SortedDictionary<DateTime, ProcessSet>();
 
@@ -73,50 +35,6 @@ namespace Pulsar4X.Engine
         private ProcessorManager _processManager;
 
         private EntityManager _entityManager;
-
-        private void AddPerfHistory()
-        {
-            if (PerfHistoryCount <= 0)
-                return;
-
-
-            (string pname, double[] ptimes, double psum)[] pTimes = new (string pname, double[] ptimes, double psum)[_detailedProcessTimes.Count];
-
-            int i1 = 0;
-            foreach (var kvp in _detailedProcessTimes)
-            {
-                var array = kvp.Value.ToArray();
-
-                double sum = 0;
-                for (int i = 0; i < array.Length; i++)
-                {
-                    sum += array[i];
-                }
-
-                pTimes[i1] = (kvp.Key, array, sum);
-                i1++;
-            }
-
-
-            PerformanceData newData = new PerformanceData() { FullPulseTimeMS = _fullPulseTimeMS, SubpulseTimes = _subpulseTimes.ToArray(), ProcessTimes = pTimes };
-
-            lock (PerfHistory)
-            {
-                PerfHistoryIndex++;
-                if (PerfHistoryIndex >= PerfHistoryCount)
-                    PerfHistoryIndex = 0;
-
-                PerfHistory[PerfHistoryIndex] = newData;
-            }
-        }
-
-        public PerformanceData GetLastPerfData()
-        {
-            lock (PerfHistory)
-            {
-                return PerfHistory[PerfHistoryIndex];
-            }
-        }
 
         internal Dictionary<DateTime, List<String>> GetInstanceProcForEntity(Entity entity)
         {
@@ -197,15 +115,13 @@ namespace Pulsar4X.Engine
         [JsonConstructor]
         internal ManagerSubPulse()
         {
-            AddPerfHistory();
         }
 
         internal void Initialize(EntityManager entityManager, ProcessorManager processorManager)
         {
-            (string pname, double[] ptimes, double psum)[] pTimes = new (string pname, double[] ptimes, double psum)[] { };
-            PerformanceData newData = new PerformanceData() { FullPulseTimeMS = _fullPulseTimeMS, SubpulseTimes = _subpulseTimes.ToArray(), ProcessTimes = pTimes };
-            PerfHistory[PerfHistoryIndex] = newData;
-
+            // Run the history once so it has some data to return to the UI
+            Performance.BeginInterval();
+            Performance.EndInterval();
             _game = entityManager.Game;
             _systemLocalDateTime = entityManager.Game.TimePulse.GameGlobalDateTime;
             _processToDateTime = _systemLocalDateTime;
@@ -368,13 +284,11 @@ namespace Pulsar4X.Engine
                 throw new Exception("Temproal Anomaly Exception. Cannot go back in time!"); //because this was actualy happening somehow.
             //the system may need to run several times for a target datetime
             //keep processing the system till we've reached the wanted datetime
-            _masterPulseStopwatch.Restart();
-            _subpulseTimes = new List<double>();
-            _detailedProcessTimes = new Dictionary<string, List<double>>();
+            Performance.BeginInterval();
             IsProcessing = true;
             while (StarSysDateTime < targetDateTime)
             {
-                _subPulseStopwatch.Restart();
+                Performance.BeingSubInterval();
                 //calculate max time the system can run/time to next interupt
                 //this should handle predicted events, ie econ, production, shipjumps, sensors etc.
                 TimeSpan timeDeltaMax = targetDateTime - StarSysDateTime;
@@ -388,14 +302,11 @@ namespace Pulsar4X.Engine
 
                 ProcessToNextInterupt();
 
-                _subPulseStopwatch.Stop();
-                _subpulseTimes.Add(_subPulseStopwatch.Elapsed.TotalMilliseconds);
+                Performance.EndSubInterval();
             }
 
             CurrentProcess = "Waiting";
-            _masterPulseStopwatch.Stop();
-            _fullPulseTimeMS = _masterPulseStopwatch.Elapsed.TotalMilliseconds;
-            AddPerfHistory();
+            Performance.EndInterval();
 
             IsProcessing = false;
         }
@@ -434,15 +345,11 @@ namespace Pulsar4X.Engine
                 if(runAt == null || runAt > _processToDateTime)
                     continue;
 
-                _processStopwatch.Restart();
+                Performance.Start(type.processorType.Name);
                 CurrentProcess = type.ToString();
                 int count = _processManager.HotloopProcessors[type.dbType].ProcessManager(_entityManager, deltaSeconds);
-                _processStopwatch.Stop();
-                //ProcessTime[systemProcess.GetType()] = _processStopwatch.Elapsed;
-                string pname = type.processorType.Name;
-                if(!_detailedProcessTimes.ContainsKey(pname))
-                    _detailedProcessTimes.Add(pname, new List<double>());
-                _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
+                Performance.Stop(type.processorType.Name);
+
                 if(count == 0)
                     HotLoopProcessorsNextRun[type] = null;
                 else
@@ -456,21 +363,15 @@ namespace Pulsar4X.Engine
                 foreach(var instanceProcessSet in qp.InstanceProcessors)
                 {
                     var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
-                    _processStopwatch.Restart();
+                    Performance.Start(processor.GetType().Name);
                     CurrentProcess = instanceProcessSet.Key;
                     foreach (var entity in instanceProcessSet.Value)
                     {
 
                         processor.ProcessEntity(entity, _processToDateTime);
                     }
-                    _processStopwatch.Stop();
-                    //ProcessTime[processor.GetType()] = _processStopwatch.Elapsed;
-                    string pname = processor.GetType().Name;
-                    if(!_detailedProcessTimes.ContainsKey(pname))
-                        _detailedProcessTimes.Add(pname, new List<double>());
-                    _detailedProcessTimes[pname].Add(_processStopwatch.Elapsed.TotalMilliseconds);
+                    Performance.Stop(processor.GetType().Name);
                 }
-                
                 QueuedProcesses.Remove(_processToDateTime); //once all the processes have been run for that datetime, remove it from the dictionary.
             }
             StarSysDateTime = _processToDateTime; //update the localDateTime and invoke the SystemDateChangedEvent

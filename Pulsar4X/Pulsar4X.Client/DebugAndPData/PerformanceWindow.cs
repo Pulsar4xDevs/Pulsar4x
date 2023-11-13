@@ -111,7 +111,7 @@ namespace Pulsar4X.SDL2UI
                 //ui framerate
                 ImGui.PlotHistogram("Frame Rate ##FPSHistogram", ref _frameRates[0], _frameRates.Length, _frameRateIndex, _currentFPS.ToString(), 0f, 10000, new System.Numerics.Vector2(248, 60), sizeof(float));
 
-                var data = _systemState.StarSystem.ManagerSubpulses.GetLastPerfData();
+                var data = _systemState.StarSystem.ManagerSubpulses.Performance.GetLatestEntry();
                 ImGui.Text($"StarSystemID: {_systemState.StarSystem.Guid}");
                 ImGui.Columns(4);
                 ImGui.SetColumnWidth(0, 160);
@@ -125,19 +125,19 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("Run Time"); ImGui.NextColumn();
                 ImGui.Text("Average"); ImGui.NextColumn();
                 string str = "";
-                foreach (var item in data.ProcessTimes)
+                foreach (var (key, values) in data.TimesById)
                 {
 
-                    ImGui.Text(item.pname);
+                    ImGui.Text(key);
                     ImGui.NextColumn();
-                    ImGui.Text( item.ptimes.Length.ToString());
+                    ImGui.Text( values.times.Count.ToString());
 
                     ImGui.NextColumn();
-                    str = $"{(item.psum):0.00}ms";
+                    str = $"{(values.sum):0.00}ms";
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
                     ImGui.Text(str);
                     ImGui.NextColumn();
-                    str = $"{(item.psum / item.ptimes.Length):0.00}ms";
+                    str = $"{(values.sum / values.times.Count):0.00}ms";
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.CalcTextSize(str).X - ImGui.GetScrollX() - 2 * ImGui.GetStyle().ItemSpacing.X);
                     ImGui.Text( str );
                     ImGui.NextColumn();
@@ -145,7 +145,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Columns(1);
                 ImGui.Text($"    IsProcecssing: {_systemState.StarSystem.ManagerSubpulses.IsProcessing}");
                 ImGui.Text($"    CurrentProcess: {_systemState.StarSystem.ManagerSubpulses.CurrentProcess}");
-                ImGui.Text($"    Last Total ProcessTime: {data.FullPulseTimeMS}");
+                ImGui.Text($"    Last Total ProcessTime: {data.FullIntervalTime}");
 
                 var numDB = _systemState.StarSystem.GetAllDataBlobsOfType<OrbitDB>().Count;
                 ImGui.Text($"ObitDB Count: {numDB}");
@@ -162,7 +162,7 @@ namespace Pulsar4X.SDL2UI
                         ImGui.Text(((StarSystem)starsys).Guid.ToString());
                         ImGui.Text($"    IsProcecssing: {starsys.ManagerSubpulses.IsProcessing}");
                         ImGui.Text($"    CurrentProcess: {starsys.ManagerSubpulses.CurrentProcess}");
-                        ImGui.Text($"    Last Total ProcessTime: {starsys.ManagerSubpulses.GetLastPerfData().FullPulseTimeMS}");
+                        ImGui.Text($"    Last Total ProcessTime: {starsys.ManagerSubpulses.Performance.GetLatestEntry().FullIntervalTime}");
 
                     }
                 }
@@ -297,7 +297,7 @@ namespace Pulsar4X.SDL2UI
             var t_lpt = _uiState.Game.TimePulse.LastProcessingTime.TotalMilliseconds;
             var t_tf = _uiState.Game.TimePulse.TickFrequency.TotalMilliseconds;
             var overtime = t_lpt - t_tf;
-            var starsysdata = _systemState.StarSystem.ManagerSubpulses.GetLastPerfData();
+            var starsysdata = _systemState.StarSystem.ManagerSubpulses.Performance.GetLatestEntry();
             var dirst = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if(dirst == null) throw new InvalidOperationException($"{dirst} cannot be null");
             var dirinf = new System.IO.DirectoryInfo(dirst);
@@ -311,7 +311,7 @@ namespace Pulsar4X.SDL2UI
             string txt_lpt =  string.Format("{0,-28}{1,16}","Full Process Time:", t_lpt.ToString());
 
             string sysname = _systemState.StarSystem.NameDB.OwnersName;
-            string sysptime = string.Format("{0,0} {1,-24}:{2,15}",sysname, "Time:", starsysdata.FullPulseTimeMS.ToString("0.0000"));
+            string sysptime = string.Format("{0,0} {1,-24}:{2,15}",sysname, "Time:", starsysdata.FullIntervalTime.ToString("0.0000"));
             var fpath = System.IO.Path.Combine(dir.FullName, "Perflog_" + machine);
 
             //var sb = StringBuilder(gitver);
@@ -321,9 +321,9 @@ namespace Pulsar4X.SDL2UI
                                          + timespan + "\n"
                                          + txt_lpt + "\n"
                                          + sysptime + "\n";
-            foreach (var data in starsysdata.ProcessTimes)
+            foreach (var (key, values) in starsysdata.TimesById)
             {
-                dataString += string.Format("{0,-28}:{1,16}", data.pname, data.psum.ToString("0.0000") + "\n");
+                dataString += string.Format("{0,-28}:{1,16}", key, values.sum.ToString("0.0000") + "\n");
             }
 
             dataString += "_________________________________________________";
