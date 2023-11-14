@@ -8,6 +8,7 @@ using Pulsar4X.Engine.Auth;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Extensions;
 using System.Reflection;
+using Pulsar4X.Events;
 
 namespace Pulsar4X.Engine
 {
@@ -207,17 +208,8 @@ namespace Pulsar4X.Engine
 
             UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityRemoved);
 
-            // Event logevent = new Event(game.TimePulse.GameGlobalDateTime, "Entity Removed From Manager");
-            // logevent.Entity = entity;
-            // if(entity.FactionOwnerID != Guid.Empty)
-            //     logevent.Faction = GetGlobalEntityByGuid(entity.FactionOwnerID);
-            // logevent.SystemGuid = ManagerGuid;
-            // logevent.EventType = EventType.EntityDestroyed;
-            // if (entity.IsValid && entity.HasDataBlob<NameDB>())
-            //     logevent.EntityName = entity.GetDataBlob<NameDB>().OwnersName;
-
-
-            // StaticRefLib.EventLog.AddEvent(logevent);
+            Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerGuid, entity.Id);
+            EventManager.Instance.Publish(e);
         }
 
         public List<BaseDataBlob> GetAllDataBlobsForEntity(int entityID)

@@ -4,6 +4,7 @@ using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Extensions;
+using Pulsar4X.Events;
 
 namespace Pulsar4X.Engine
 {
@@ -82,13 +83,12 @@ namespace Pulsar4X.Engine
                 entityPosition.AbsolutePosition = parentPositionDB.AbsolutePosition + newPosition;
 
             }
-            catch (OrbitProcessorException)
+            catch (OrbitProcessorException ex)
             {
                 //Do NOT fail to the UI. There is NO data-corruption on this exception.
                 // In this event, we did NOT update our position.
-                // Event evt = new Event(game.TimePulse.GameGlobalDateTime, "Non Critical Position Exception thrown in OrbitProcessor for EntityItem " + entity.Guid + " " + e.Message);
-                // evt.EventType = EventType.Opps;
-                // StaticRefLib.EventLog.AddEvent(evt);
+                Event e = Event.Create(EventType.Opps, toDate, $"Non Critical Position Exception thrown in OrbitProcessor for EntityItem {entity.Id} {ex.Message}", entity.FactionOwnerID, entity.Manager.ManagerGuid, entity.Id);
+                EventManager.Instance.Publish(e);
             }
 
             // Update our children.
@@ -251,17 +251,16 @@ namespace Pulsar4X.Engine
                 Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
                 entityPosition.RelativePosition = newPosition;
             }
-            catch (OrbitProcessor.OrbitProcessorException e)
+            catch (OrbitProcessor.OrbitProcessorException ex)
             {
-                var entity = e.Entity;
+                var entity = ex.Entity;
                 string name = "Un-Named";
                 if (entity.HasDataBlob<NameDB>())
                     name = entity.GetDataBlob<NameDB>().OwnersName;
                 //Do NOT fail to the UI. There is NO data-corruption on this exception.
                 // In this event, we did NOT update our position.
-                // Event evt = new Event(game.TimePulse.GameGlobalDateTime, "Non Critical Position Exception thrown in OrbitProcessor for EntityItem " + name + " " + entity.Guid + " " + e.Message);
-                // evt.EventType = EventType.Opps;
-                // StaticRefLib.EventLog.AddEvent(evt);
+                Event e = Event.Create(EventType.Opps, toDate, $"Non Critical Position Exception thrown in OrbitProcessor for EntityItem {name} {entity.Id} {ex.Message}", entity.FactionOwnerID, entity.Manager.ManagerGuid, entity.Id);
+                EventManager.Instance.Publish(e);
             }
         }
     }

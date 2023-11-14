@@ -1,20 +1,29 @@
 using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.Engine;
-using Pulsar4X.Engine.Events;
+using Pulsar4X.Events;
 using Pulsar4X.Datablobs;
+using System;
 
 namespace Pulsar4X.SDL2UI
 {
 
     public class GameLogWindow : PulsarGuiWindow
     {
-        //private EventLog _eventLog;
+        IEventLog _factionEventLog;
+
         public HashSet<EventType> HidenEvents = new HashSet<EventType>();
         private GameLogWindow()
         {
-          //  _eventLog = StaticRefLib.EventLog;
+            _factionEventLog = _uiState.Faction.GetDataBlob<FactionInfoDB>().EventLog;
+            _uiState.OnFactionChanged += OnFactionChanged;
         }
+
+        private void OnFactionChanged(GlobalUIState uIState)
+        {
+            _factionEventLog = _uiState.Faction.GetDataBlob<FactionInfoDB>().EventLog;
+        }
+
         internal static GameLogWindow GetInstance()
         {
             GameLogWindow instance;
@@ -61,40 +70,35 @@ namespace Pulsar4X.SDL2UI
                     ImGui.NextColumn();
 
 
+                    foreach(var e in _factionEventLog.GetEvents())
+                    {
+                        if (HidenEvents.Contains(e.EventType))
+                            continue;//skip this event if it's hidden.
 
-                    // foreach (var gameEvent in _eventLog.GetAllEvents())
-                    // {
-                    //     if (HidenEvents.Contains(gameEvent.EventType))
-                    //         continue;//skip this event if it's hidden.
+                        string entityStr = "N/A";
+                        string factionStr = "";
+                        int id = e.FactionId ?? -1;
+                        if (id != -1)
+                        {
+                            factionStr = _uiState.Game.Factions[id].GetFactionName();
+                        }
 
-                    //     var entity = gameEvent.Entity;
-                    //     string entityStr = "N/A";
-                    //     if (gameEvent.Entity != null)
-                    //         entityStr = gameEvent.EntityName;
-                    //     string factionStr = "";
-                    //     if (gameEvent.Faction != null)
-                    //         if (gameEvent.Faction.HasDataBlob<NameDB>())
-                    //             factionStr = gameEvent.Faction.GetDataBlob<NameDB>().DefaultName;
-                    //         else
-                    //             factionStr = gameEvent.Faction.Guid.ToString();
-                    //     string typStr = gameEvent.EventType.ToString();
-                    //     ImGui.Separator();
-                    //     ImGui.Text(gameEvent.Time.ToString());
-                    //     ImGui.NextColumn();
-                    //     ImGui.Text(typStr);
-                    //     ImGui.NextColumn();
-                    //     ImGui.Text(factionStr);
-                    //     ImGui.NextColumn();
-                    //     ImGui.Text(entityStr);
-                    //     if (ImGui.IsItemHovered() && entity != null)
-                    //         ImGui.SetTooltip(entity.Guid.ToString());
-                    //     ImGui.NextColumn();
-                    //     ImGui.TextWrapped(gameEvent.Message);
+                        string typStr = e.EventType.ToString();
+                        ImGui.Separator();
+                        ImGui.Text(e.StarDate.ToString());
+                        ImGui.NextColumn();
+                        ImGui.Text(typStr);
+                        ImGui.NextColumn();
+                        ImGui.Text(factionStr);
+                        ImGui.NextColumn();
+                        ImGui.Text(entityStr);
+                        ImGui.NextColumn();
+                        ImGui.TextWrapped(e.Message);
 
-                    //     ImGui.NextColumn();
+                        ImGui.NextColumn();
 
 
-                    // }
+                    }
                     ImGui.Separator();
 
                 }

@@ -1,19 +1,15 @@
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.Serialization;
 using Pulsar4X.Components;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
 using Pulsar4X.Engine.Auth;
 using Pulsar4X.Engine.Designs;
-using Pulsar4X.Engine.Events;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Interfaces;
-using Pulsar4X.Modding;
+using Pulsar4X.Events;
 
 namespace Pulsar4X.Datablobs
 {
@@ -81,6 +77,7 @@ namespace Pulsar4X.Datablobs
         private Dictionary<Entity, uint> FactionAccessRoles { get; set; } = new ();
         internal ReadOnlyDictionary<Entity, AccessRole> AccessRoles => new (FactionAccessRoles.ToDictionary(kvp => kvp.Key, kvp => (AccessRole)kvp.Value));
 
+        public IEventLog EventLog { get; internal set; }
 
 
         public FactionInfoDB()

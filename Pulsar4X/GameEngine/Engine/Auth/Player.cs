@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json;
-using Pulsar4X.Engine.Events;
+using Pulsar4X.Events;
 
 namespace Pulsar4X.Engine.Auth
 {

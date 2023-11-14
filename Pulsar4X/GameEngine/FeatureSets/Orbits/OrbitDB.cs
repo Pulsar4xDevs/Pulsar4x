@@ -5,6 +5,7 @@ using Pulsar4X.Orbital;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 using System.Collections.Generic;
+using Pulsar4X.Events;
 
 namespace Pulsar4X.Datablobs
 {
@@ -153,12 +154,8 @@ namespace Pulsar4X.Datablobs
             var d = (pos - relativePos).Length();
             if (d > 1)
             {
-                // var e = new Event(atDateTime, "Positional difference of " + Stringify.Distance(d) + " when creating orbit from velocity");
-                // e.Entity = entity;
-                // e.SystemGuid = entity.Manager.ManagerGuid;
-                // e.EventType = EventType.Opps;
-                // //e.Faction =  entity.FactionOwner;
-                // StaticRefLib.EventLog.AddEvent(e);
+                Event e = Event.Create(EventType.Opps, atDateTime, $"Positional difference of {Stringify.Distance(d)} when creating orbit from velocity", entity.FactionOwnerID, entity.Manager.ManagerGuid, entity.Id);
+                EventManager.Instance.Publish(e);
 
                 //other info:
                 var keta = Angle.ToDegrees(ke_m.TrueAnomalyAtEpoch);

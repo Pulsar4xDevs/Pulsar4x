@@ -4,6 +4,7 @@ using System.Linq;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine.Orders;
+using Pulsar4X.Events;
 
 namespace Pulsar4X.Engine
 {
@@ -63,12 +64,13 @@ namespace Pulsar4X.Engine
                         {
                             if(entityCommand.PauseOnAction &! entityCommand.IsRunning)
                             {
-                                // FIXME:
-                                // Event newEvent = new Event(atDateTime, "Command Halt");
-                                // newEvent.EventType = EventType.OrdersHalt;
-                                // newEvent.Entity = orderableDB.OwningEntity;
-                                // newEvent.Faction = orderableDB.OwningEntity.GetFactionOwner;
-                                // StaticRefLib.EventLog.AddEvent(newEvent);
+                                var e = Event.Create(EventType.OrdersHalt,
+                                                        atDateTime,
+                                                        "",
+                                                        entityCommand.RequestingFactionGuid,
+                                                        entityCommand.EntityCommanding.Manager.ManagerGuid,
+                                                        entityCommand.EntityCommandingGuid);
+                                EventManager.Instance.Publish(e);
                             }
                             entityCommand.Execute(atDateTime);
                         }

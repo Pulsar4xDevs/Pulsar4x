@@ -9,6 +9,8 @@ using Pulsar4X.Blueprints;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Engine.Orders;
 using System.Runtime.CompilerServices;
+using Pulsar4X.Events;
+using Pulsar4X.Datablobs;
 [assembly: InternalsVisibleTo("Pulsar4X.Tests")]
 
 namespace Pulsar4X.Engine
@@ -104,7 +106,7 @@ namespace Pulsar4X.Engine
             OrderHandler = new StandAloneOrderHandler(this);
             GlobalManager = new EntityManager();
             GlobalManager.Initialize(this);
-            GameMasterFaction = FactionFactory.CreatePlayerFaction(this, SpaceMaster, "SpaceMaster Faction");
+            GameMasterFaction = FactionFactory.CreateSpaceMasterFaction(this, SpaceMaster, "SpaceMaster Faction");
             GalaxyGen = new GalaxyFactory(SystemGenSettings, Settings.MasterSeed);
         }
 
@@ -177,6 +179,14 @@ namespace Pulsar4X.Engine
             {
                 system.Initialize(loadedGame, true);
             }
+
+            // Hook up the event logs
+            EventManager.Instance.Clear();
+            foreach(var (id, faction) in loadedGame.Factions)
+            {
+                faction.GetDataBlob<FactionInfoDB>().EventLog.Subscribe();
+            }
+            loadedGame.GameMasterFaction.GetDataBlob<FactionInfoDB>().EventLog.Subscribe();
 
             // settings.Context = new StreamingContext(StreamingContextStates.All, loadedGame);
             // loadedGame.TimePulse = JsonConvert.DeserializeObject<MasterTimePulse>(JObject.Parse(json)["GameInfo"]["TimePulse"].ToString(), settings);

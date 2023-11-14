@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
 using Pulsar4X.DataStructures;
-using Newtonsoft.Json.Linq;
+using Pulsar4X.Events;
 
 namespace Pulsar4X.Engine
 {
@@ -92,9 +92,8 @@ namespace Pulsar4X.Engine
         /// <param name="state"></param>
         private void InvokeDateChange(object state)
         {
-            // Event logevent = new Event(GameGlobalDateTime, "Game Global Date Changed", null, null, null);
-            // logevent.EventType = EventType.GlobalDateChange;
-            // StaticRefLib.EventLog.AddEvent(logevent);
+            Event e = Event.Create(EventType.GlobalDateChange, GameGlobalDateTime, "Game Global Date Change");
+            EventManager.Instance.Publish(e);
 
             GameGlobalDateChangedEvent?.Invoke(GameGlobalDateTime);
         }

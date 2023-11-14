@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Auth;
+using Pulsar4X.Events;
 using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Engine
@@ -61,6 +62,9 @@ namespace Pulsar4X.Engine
             var factionEntity = Entity.Create();
             game.GlobalManager.AddEntity(factionEntity, blobs);
 
+            factionInfo.EventLog = FactionEventLog.Create(factionEntity.Id);
+            factionInfo.EventLog.Subscribe();
+
             // Need to unlock the starting data in the game
             foreach(var id in game.StartingGameData.DefaultItems["player-starting-items"].Items)
             {
@@ -82,8 +86,6 @@ namespace Pulsar4X.Engine
             game.SpaceMaster.SetAccess(factionEntity.Id, AccessRole.SM);
             name.SetName(factionEntity.Id, factionName);
             game.Factions.Add(factionEntity.Id, factionEntity);
-            // FIXME:
-            //StaticRefLib.EventLog.AddPlayer(factionEntity);
             return factionEntity;
         }
 
@@ -97,6 +99,18 @@ namespace Pulsar4X.Engine
             {
                 owningPlayer.SetAccess(faction.Id, AccessRole.Owner);
             }
+
+            return faction;
+        }
+
+        public static Entity CreateSpaceMasterFaction(Game game, Player owningPlayer, string factionName)
+        {
+            Entity faction = CreatePlayerFaction(game, owningPlayer, factionName);
+
+            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
+            factionInfo.EventLog.Unsubscribe();
+            factionInfo.EventLog = SpaceMasterEventLog.Create();
+            factionInfo.EventLog.Subscribe();
 
             return faction;
         }

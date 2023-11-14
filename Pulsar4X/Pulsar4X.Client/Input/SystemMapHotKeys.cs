@@ -21,6 +21,10 @@ public class SystemMapHotKeys : IHotKeyHandler
             {
                 PerformanceWindow.GetInstance().ToggleActive();
             }
+            else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_F3)
+            {
+                GameLogWindow.GetInstance().ToggleActive();
+            }
             else if(e.key.keysym.sym == SDL.SDL_Keycode.SDLK_1)
             {
                 ComponentDesignWindow.GetInstance().ToggleActive();

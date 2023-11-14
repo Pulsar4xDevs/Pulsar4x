@@ -1,21 +1,38 @@
-namespace Pulsar4X.ECSLib
+using System;
+
+namespace Pulsar4X.Events
 {
+    public static class EventTypeHelper
+    {
+        public static EventType GetAllEventTypes()
+        {
+            EventType all = EventType.NoEventType;
+
+            foreach(EventType eventType in Enum.GetValues(typeof(EventType)))
+            {
+                all |= eventType;
+            }
+
+            return all;
+        }
+    }
+
     //Taken from Aurora's 7.1 Stevefire.mdb database.
     public enum EventType
     {
-        NoEventType,
+        NoEventType = 0,
 
         //gameEvents
-        SystemDateChange,
-        GlobalDateChange,
-        EntityDestroyed,
+        SystemDateChange = 1 << 0,
+        GlobalDateChange = 1 << 1,
+        EntityDestroyed = 1 << 2,
 
         #region GameErrors
 
         DataParseError,
 
         #endregion
-        
+
         #region Shipyard Events
 
         ShipConstructionBegan,
@@ -44,7 +61,7 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region Population Events
-        
+
         PopulationBombarded,
         POWRescued, // Friendly POW's returned to population
 
@@ -91,7 +108,7 @@ namespace Pulsar4X.ECSLib
         GroundUnitMoraleDecreased,
 
         ReplacementsExpended,
-        
+
         // Environment Events
         TerraformingCompleted,
         TerraformingReport,
@@ -214,7 +231,7 @@ namespace Pulsar4X.ECSLib
         Communication,
         Diplomacy,
         Reparations,
-        
+
         // Ship State Events
         InsufficientFuel,
         UnableToLand,
@@ -246,7 +263,7 @@ namespace Pulsar4X.ECSLib
         // Life Pod Events
         LifePodExpired,
         SearchAndRescue,
-        
+
         // Intelligence Events
         IntelligenceUpdate,
         NewAlienRace,
@@ -259,7 +276,7 @@ namespace Pulsar4X.ECSLib
         IncrementAdjustment,
         ProgramError,
         Opps,
-        
+
         // Civilian Events
         CivilianActivity,
         CivilianConstruction,
@@ -273,7 +290,7 @@ namespace Pulsar4X.ECSLib
         TeamCaptured,
         EnemyAgentsKilled,
         EnemyAgentsCaptured,
-        
+
         // Sensor Events
         NewHostileContact,
         NewNeutralContact,
@@ -318,7 +335,7 @@ namespace Pulsar4X.ECSLib
         NewStableWormhole,
         WormholeMoved,
         WormholeDisappeared,
-        
+
         #region Unknown/Depreciated/Unused
 
         GeologicalSurveyData, // Depreciated in favor of Mineral Deposit found/accessability increased?
