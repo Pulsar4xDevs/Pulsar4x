@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
 using Pulsar4X.Datablobs;
@@ -12,9 +10,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 {
     public class OrderCreationUI : PulsarGuiWindow
     {
-        private Entity _orderEntity = null;
+        private Entity? _orderEntity = null;
 
-        private OrderableDB _orderableDB = null;
+        private OrderableDB? _orderableDB = null;
 
         private int _movementTargetGuid = -1;
 
@@ -76,10 +74,11 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 _orderableDB = null;
             }
 
-            if (IsActive == true && ImGui.Begin("Order Creation", ref IsActive, _flags))
+            if (IsActive && ImGui.Begin("Order Creation", ref IsActive, _flags))
             {
                 RenderTabOptions();
-                if (_orderableDB != null) {
+                if (_orderableDB != null && _orderEntity != null)
+                {
                     ImGui.TextColored(new System.Numerics.Vector4(0, 123, 0, 255), "Selected Entity: " + _orderEntity.GetName(_uiState.Faction.Id));
                 }
 
@@ -101,7 +100,6 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
                 ImGui.EndChild();
                 ImGui.End();
             }
-            
         }
 
         private void RenderMovement()
@@ -173,7 +171,6 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             {
                 ImGui.TextColored(new System.Numerics.Vector4(123, 0, 0, 255), "Selected\r\nEntity\r\nCannot\r\nAccept\r\nOrders");
             }
-            
 
             ImGui.Columns(1);
         }

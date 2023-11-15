@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -14,7 +13,7 @@ namespace Pulsar4X.SDL2UI
     {
         private static List<ComponentTemplateBlueprint> templates = new();
         private static List<ComponentTemplateBlueprint> filteredTemplates = new ();
-        private static string[] sortedGroupNames;
+        private static string[]? sortedGroupNames;
         private static int selectedFilterIndex = 0;
         private ComponentDesignWindow() { }
 
@@ -61,7 +60,7 @@ namespace Pulsar4X.SDL2UI
 
                     var availableSize = ImGui.GetContentRegionAvail();
                     ImGui.SetNextItemWidth(availableSize.X);
-                    if(ImGui.Combo("###template-filter", ref selectedFilterIndex, sortedGroupNames, sortedGroupNames.Length))
+                    if(ImGui.Combo("###template-filter", ref selectedFilterIndex, sortedGroupNames, sortedGroupNames?.Length ?? 0))
                     {
                         if(selectedFilterIndex == 0)
                         {
@@ -69,7 +68,7 @@ namespace Pulsar4X.SDL2UI
                         }
                         else
                         {
-                            filteredTemplates = templates.Where(t => t.ComponentType.Equals(sortedGroupNames[selectedFilterIndex])).ToList();
+                            filteredTemplates = templates.Where(t => t.ComponentType.Equals(sortedGroupNames?[selectedFilterIndex])).ToList();
                         }
                     }
 

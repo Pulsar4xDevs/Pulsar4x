@@ -14,20 +14,22 @@ using Pulsar4X.Interfaces;
 namespace Pulsar4X.SDL2UI
 {
 
-    public class CargoListPannelSimple: UpdateWindowState
+    public class CargoListPanelSimple: UpdateWindowState
     {
         FactionDataStore _staticData;
         EntityState _entityState;
         VolumeStorageDB _volStorageDB;
         Dictionary<string, TypeStore> _stores = new Dictionary<string, TypeStore>();
 
-        public CargoListPannelSimple(FactionDataStore staticData, EntityState entity)
+        public CargoListPanelSimple(FactionDataStore staticData, EntityState entity)
         {
             _staticData = staticData;
             _entityState = entity;
 
             _volStorageDB = entity.Entity.GetDataBlob<VolumeStorageDB>();
-            _entityState.Entity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulsesOnSystemDateChangedEvent;
+            if(_entityState.Entity.Manager != null)
+                _entityState.Entity.Manager.ManagerSubpulses.SystemDateChangedEvent += ManagerSubpulsesOnSystemDateChangedEvent;
+
             Update();
         }
 
@@ -140,8 +142,8 @@ namespace Pulsar4X.SDL2UI
 
     }
 
-    public delegate void CargoItemSelectedHandler(CargoListPannelComplex cargoPannel);
-    public class CargoListPannelComplex
+    public delegate void CargoItemSelectedHandler(CargoListPanelComplex cargoPannel);
+    public class CargoListPanelComplex
     {
         FactionDataStore _staticData;
         EntityState _entityState;
@@ -154,10 +156,10 @@ namespace Pulsar4X.SDL2UI
 
         //Dictionary<Guid, CargoTypeStoreVM> _cargoResourceStoresDict = new Dictionary<Guid, CargoTypeStoreVM>();
         //public List<CargoTypeStoreVM> CargoResourceStores { get; } = new List<CargoTypeStoreVM>();
-        public ICargoable selectedCargo;
+        public ICargoable? selectedCargo;
         internal Dictionary<Guid,bool> HeadersIsOpenDict { get; set; }
 
-        public CargoListPannelComplex(FactionDataStore staticData, EntityState entity, Dictionary<Guid,bool> headersOpenDict)
+        public CargoListPanelComplex(FactionDataStore staticData, EntityState entity, Dictionary<Guid,bool> headersOpenDict)
         {
             _staticData = staticData;
             _entityState = entity;
@@ -168,7 +170,7 @@ namespace Pulsar4X.SDL2UI
         }
 
 
-        public event CargoItemSelectedHandler CargoItemSelectedEvent;
+        public event CargoItemSelectedHandler? CargoItemSelectedEvent;
 
         public void Update()
         {
@@ -340,7 +342,7 @@ namespace Pulsar4X.SDL2UI
                         if (ImGui.Selectable(cname, isSelected))
                         {
                             selectedCargo = cargoItem;
-                            CargoItemSelectedEvent.Invoke(this);
+                            CargoItemSelectedEvent?.Invoke(this);
                         }
 
                         ImGui.NextColumn();
@@ -395,18 +397,23 @@ namespace Pulsar4X.SDL2UI
 
     public class CargoTransfer : PulsarGuiWindow
     {
-        FactionDataStore _staticData;
-        EntityState _selectedEntityLeft;
-        EntityState _selectedEntityRight;
+        FactionDataStore? _staticData;
+        EntityState? _selectedEntityLeft;
+        EntityState? _selectedEntityRight;
 
-        CargoListPannelComplex _cargoList1;
-        CargoListPannelComplex CargoListLeft
+        CargoListPanelComplex? _cargoList1;
+        CargoListPanelComplex? CargoListLeft
         {
             get { return _cargoList1; }
-            set { _cargoList1 = value; value.CargoItemSelectedEvent += OnCargoItemSelectedEvent; }
+            set 
+            { 
+                _cargoList1 = value;
+                if(value != null)
+                    value.CargoItemSelectedEvent += OnCargoItemSelectedEvent;
+            }
         }
-        CargoListPannelComplex _cargoList2;
-        CargoListPannelComplex CargoListRight
+        CargoListPanelComplex? _cargoList2;
+        CargoListPanelComplex? CargoListRight
         {
             get { return _cargoList2; }
             set
@@ -416,8 +423,8 @@ namespace Pulsar4X.SDL2UI
                     value.CargoItemSelectedEvent += OnCargoItemSelectedEvent;
             }
         }
-        CargoListPannelComplex SelectedCargoPannel;
-        CargoListPannelComplex UnselectedCargoPannel;
+        CargoListPanelComplex? SelectedCargoPanel;
+        CargoListPanelComplex? UnselectedCargoPanel;
         bool _hasCargoAbilityLeft;
         bool _isSelectingRight = false;
         bool _hasCargoAbilityRight;
@@ -471,6 +478,8 @@ namespace Pulsar4X.SDL2UI
 
         void HardRefresh()
         {
+            if(_staticData == null) return;
+
             _selectedEntityLeft = _uiState.PrimaryEntity;
             _selectedEntityRight = null;
             CargoListRight = null;
@@ -479,7 +488,7 @@ namespace Pulsar4X.SDL2UI
             _isSelectingRight = false;
             if(_selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
             {
-                CargoListLeft = new CargoListPannelComplex(_staticData, _selectedEntityLeft, headersOpenDict);
+                CargoListLeft = new CargoListPanelComplex(_staticData, _selectedEntityLeft, headersOpenDict);
                 _hasCargoAbilityLeft = true;
             }
             else
@@ -496,7 +505,7 @@ namespace Pulsar4X.SDL2UI
                 if (_selectedEntityRight != null && _selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
                 {
                     if (!_hasCargoAbilityRight)
-                        CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight, headersOpenDict);
+                        CargoListRight = new CargoListPanelComplex(_staticData, _selectedEntityRight, headersOpenDict);
                     _hasCargoAbilityRight = true;
                 }
                 else
@@ -506,12 +515,12 @@ namespace Pulsar4X.SDL2UI
 
         internal void Set2ndCargo(EntityState entity)
         {
-            if (_selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
+            if (_selectedEntityLeft != null && _selectedEntityLeft.Entity.HasDataBlob<VolumeStorageDB>())
             {
                 _selectedEntityRight = entity;
-                if (entity.Entity.HasDataBlob<VolumeStorageDB>())
+                if (_staticData != null && entity.Entity.HasDataBlob<VolumeStorageDB>())
                 {
-                    CargoListRight = new CargoListPannelComplex(_staticData, _selectedEntityRight, headersOpenDict);
+                    CargoListRight = new CargoListPanelComplex(_staticData, _selectedEntityRight, headersOpenDict);
 
                     CalcTransferRate();
 
@@ -528,6 +537,8 @@ namespace Pulsar4X.SDL2UI
 
         void CalcTransferRate()
         {
+            if(_selectedEntityLeft == null || _selectedEntityRight == null)
+                throw new NullReferenceException();
 
             double? dvDif;
             OrbitDB leftOrbit;
@@ -563,15 +574,15 @@ namespace Pulsar4X.SDL2UI
 
         // called when item on transfer screen is clicked
         // ought to update currently selected item
-        void OnCargoItemSelectedEvent(CargoListPannelComplex cargoPannel)
+        void OnCargoItemSelectedEvent(CargoListPanelComplex cargoPannel)
         {
-            SelectedCargoPannel = cargoPannel;
+            SelectedCargoPanel = cargoPannel;
             if (cargoPannel == CargoListLeft)
-                UnselectedCargoPannel = CargoListRight;
-            else UnselectedCargoPannel = CargoListLeft;
+                UnselectedCargoPanel = CargoListRight;
+            else UnselectedCargoPanel = CargoListLeft;
 
-            if(UnselectedCargoPannel != null)
-                UnselectedCargoPannel.selectedCargo = null;
+            if(UnselectedCargoPanel != null)
+                UnselectedCargoPanel.selectedCargo = null;
 
         }
 
@@ -580,26 +591,34 @@ namespace Pulsar4X.SDL2UI
         {
             if(button == MouseButtons.Primary)
             {
-                if(_selectedEntityLeft.Entity.Id != entity.Entity.Id && _isSelectingRight)
+                if(_selectedEntityLeft != null && _selectedEntityLeft.Entity.Id != entity.Entity.Id && _isSelectingRight)
                     Set2ndCargo(entity);
                 else
                 {
                     HardRefresh();
                 }
-
-
             }
         }
 
         private void MoveItems(int amount)
         {
-            var selectedCargoItem = SelectedCargoPannel.selectedCargo;
-            SelectedCargoPannel.AddUICargoIn(selectedCargoItem, -amount);
-            UnselectedCargoPannel.AddUICargoIn(selectedCargoItem, amount);
+            if(SelectedCargoPanel == null
+                || SelectedCargoPanel.selectedCargo == null
+                || UnselectedCargoPanel == null)
+                throw new NullReferenceException();
+
+            var selectedCargoItem = SelectedCargoPanel.selectedCargo;
+            SelectedCargoPanel.AddUICargoIn(selectedCargoItem, -amount);
+            UnselectedCargoPanel.AddUICargoIn(selectedCargoItem, amount);
         }
 
         private void ActionXferOrder()
         {
+            if(_selectedEntityLeft == null
+                || _selectedEntityRight == null
+                || CargoListLeft == null
+                || CargoListRight == null)
+                throw new NullReferenceException();
 
             //create order for items to go to right
             CargoUnloadToOrder.CreateCommand(
@@ -626,16 +645,16 @@ namespace Pulsar4X.SDL2UI
             {
                 if (ImGui.Begin("Cargo", ref IsActive, _flags))
                 {
-                    if (_hasCargoAbilityLeft)
+                    if (_hasCargoAbilityLeft && CargoListLeft != null)
                     {
                         CargoListLeft.Display();
                         ImGui.SameLine();
                         ImGui.BeginChild("xfer", new Vector2(100, 200));
                         ImGui.Text("Transfer");
 
-                        if (SelectedCargoPannel != null && SelectedCargoPannel.selectedCargo != null)
+                        if (SelectedCargoPanel != null && SelectedCargoPanel.selectedCargo != null)
                         {
-                            if (UnselectedCargoPannel != null && UnselectedCargoPannel.CanStore(SelectedCargoPannel.selectedCargo.CargoTypeID))
+                            if (UnselectedCargoPanel != null && UnselectedCargoPanel.CanStore(SelectedCargoPanel.selectedCargo.CargoTypeID))
                             {
                                 if (ImGui.Button("x100"))
                                 { MoveItems(100); }
@@ -654,7 +673,7 @@ namespace Pulsar4X.SDL2UI
 
                         ImGui.EndChild();
                         ImGui.SameLine();
-                        if (_hasCargoAbilityRight)
+                        if (_hasCargoAbilityRight && CargoListRight != null)
                         {
 
                             CargoListRight.Display();

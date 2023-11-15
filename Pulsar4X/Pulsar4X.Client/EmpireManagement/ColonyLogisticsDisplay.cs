@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Security.Cryptography;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Interfaces;
@@ -23,18 +21,18 @@ namespace Pulsar4X.SDL2UI
         private string[] _allResourceNames;
         private List<int> _allResourceID;
         private int _allResourceIndex = 0;
-        private Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedStoredResources;
-        private Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedUnstored;
+        private Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedStoredResources = new ();
+        private Dictionary<string, Dictionary<ICargoable, (int count, int demandSupplyWeight)>> _displayedUnstored = new ();
         private EntityState _entityState;
         private Entity _selectedEntity;
-        private LogiBaseDB _logisticsDB;
-        private VolumeStorageDB _volStorageDB;
-        private Dictionary<string, TypeStore> _stores;
+        private LogiBaseDB? _logisticsDB;
+        private VolumeStorageDB? _volStorageDB;
+        private Dictionary<string, TypeStore>? _stores;
         private FactionDataStore _staticData;
         private bool isEnabled;
-        private ColonyLogisticsDisplay(EntityState entity)
+        private ColonyLogisticsDisplay(EntityState entityState)
         {
-            _staticData = entity.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
+            _staticData = entityState.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data;
             var allgoods = _staticData.CargoGoods.GetAll();
             var allResourceNames = new List<string>();
             _allResourceID = new List<int>();
@@ -46,8 +44,9 @@ namespace Pulsar4X.SDL2UI
                 _allResources.Add(item.Value);
             }
             _allResourceNames = allResourceNames.ToArray();
-
-            SetEntity(entity);
+            _entityState = entityState;
+            _selectedEntity = entityState.Entity;
+            SetEntity(entityState);
         }
         string _demandHint = "";
         string _demandBuff = "";
@@ -118,7 +117,7 @@ namespace Pulsar4X.SDL2UI
                 var stypeID = ctype.CargoTypeID;
                 if (_stores.ContainsKey(stypeID))
                 {
-                    if (!_displayedUnstored.TryGetValue(stypeID, out Dictionary<ICargoable, (int count, int demandSupplyWeight)> indic))
+                    if (!_displayedUnstored.TryGetValue(stypeID, out Dictionary<ICargoable, (int count, int demandSupplyWeight)>? indic))
                     {
                         indic = new Dictionary<ICargoable, (int count, int demandSupplyWeight)>();
                         _displayedUnstored.Add(stypeID, indic);
@@ -260,8 +259,8 @@ namespace Pulsar4X.SDL2UI
                                 }
                             }
 
-                            var cargoables = _stores[stypeID].GetCargoables();
-                            var unitsInStore = _stores[stypeID].CurrentStoreInUnits;
+                            var cargoables = _stores?[stypeID].GetCargoables() ?? new();
+                            var unitsInStore = _stores?[stypeID].CurrentStoreInUnits ?? new();
                             foreach (var kvp in typeStore.Value)
                             {
                                 var ctype = kvp.Key;

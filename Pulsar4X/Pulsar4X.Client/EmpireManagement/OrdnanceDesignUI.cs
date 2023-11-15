@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using ImGuiNET;
@@ -15,34 +14,27 @@ namespace Pulsar4X.SDL2UI
 {
     public class OrdinanceDesignUI : PulsarGuiWindow
     {
-        private Entity _faction;
-        private FactionTechDB _factionTech;
+        private Entity? _faction;
+        private FactionTechDB? _factionTech;
         private byte[] _designName =  ImGuiSDL2CSHelper.BytesFromString("foo", 32);
-        
-        private OrdnanceDesign[] _currentDesigns;
-        private string[] _currentDesignNames;
+        private OrdnanceDesign[]? _currentDesigns;
+        private string[]? _currentDesignNames;
         private int _currentDesignsSelectedIndex = 0;
-
         private float _missileSize = 1;
-        
         private List<ComponentDesign> _payloadTypes = new List<ComponentDesign>();
-        private OrdnancePayloadAtb _selectedPayload;
-        private string[] _payload;
+        private OrdnancePayloadAtb? _selectedPayload;
+        private string[]? _payload;
         private int _payloadSelectedIndex = 0;
         private int _payloadCount = 1;
-        
         List<ComponentDesign> _eleccPackTypes = new List<ComponentDesign>();
-        private string[] _electronicsPackage;
+        private string[]? _electronicsPackage;
         private int _electronicsSelectedIndex = 0;
-        
         private float _fuelKG;
         private long _thrusterSizeKG;
         ComponentTemplateBlueprint[] _engineTemplates = new ComponentTemplateBlueprint[0];
         private string[] _engineTypeNames = new string[0];
-        private ComponentDesigner _engineDesigner;
+        private ComponentDesigner? _engineDesigner;
         private int _engineDesignTypeIndex = -1;
-        
-        //private int _fuelAmount = 1;
 
         private Dictionary<ComponentDesign, int>  _selectedComponentDesigns = new Dictionary<ComponentDesign, int>();
         private double _totalMass;
@@ -60,9 +52,8 @@ namespace Pulsar4X.SDL2UI
             }
             else
                 thisitem = (OrdinanceDesignUI)_uiState.LoadedWindows[typeof(OrdinanceDesignUI)];
-            
+
             return thisitem;
-            
         }
 
         public void HardRefresh()
@@ -76,7 +67,7 @@ namespace Pulsar4X.SDL2UI
             {
 
             }
-            
+
             _currentDesigns = designs.Values.ToArray();
             _currentDesignNames = new string[_currentDesigns.Length];
             int i = 0;
@@ -85,8 +76,6 @@ namespace Pulsar4X.SDL2UI
                 _currentDesignNames[i] = mdesign.Name;
                 i++;
             }
-            
-
 
             _payloadTypes = new List<ComponentDesign>();
             _eleccPackTypes = new List<ComponentDesign>();
@@ -121,7 +110,7 @@ namespace Pulsar4X.SDL2UI
 
                 }
             }
-            
+
             _payload = new string[_payloadTypes.Count];
             i = 0;
             foreach (var des in _payloadTypes)
@@ -134,11 +123,10 @@ namespace Pulsar4X.SDL2UI
             {
                 _electronicsPackage[i] = des.Name;
             }
-            
+
             _selectedComponentDesigns[_payloadTypes[_payloadSelectedIndex]] = _payloadCount;
             _selectedComponentDesigns[_eleccPackTypes[_electronicsSelectedIndex]] = 1;
-            
-            
+
             var allDesignables = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.ComponentTemplates.Select(kvp => kvp.Value).ToArray();
             List<ComponentTemplateBlueprint> engineTemplates = new List<ComponentTemplateBlueprint>();
             foreach (var designable in allDesignables)
@@ -158,14 +146,20 @@ namespace Pulsar4X.SDL2UI
             {
                 _engineTypeNames[j] = engineTemplates[j].Name;
             }
-            
-            
+
             RefreshMass();
         }
 
         internal override void Display()
         {
-            if (IsActive && ImGui.Begin("Ordnance Design"))
+            if(!IsActive
+                || _currentDesignNames == null
+                || _payload == null
+                || _electronicsPackage == null
+                || _factionTech == null)
+                return;
+
+            if (ImGui.Begin("Ordnance Design"))
             {
                 ImGui.Combo("Current Designs", ref _payloadSelectedIndex, _currentDesignNames, _currentDesignNames.Length);
 
@@ -187,7 +181,7 @@ namespace Pulsar4X.SDL2UI
                 //ImGui.Text("Payload Trigger Type: " + _selectedPayload.Trigger);
                 BorderGroup.End();
                 ImGui.NewLine();
-                
+
                 BorderGroup.Begin("Electronics Suite:");
                 if(ImGui.Combo("ElectronicsSuite", ref _electronicsSelectedIndex, _electronicsPackage, _electronicsPackage.Length))
                 {
@@ -197,9 +191,9 @@ namespace Pulsar4X.SDL2UI
                 var mass = _eleccPackTypes[_electronicsSelectedIndex].MassPerUnit;
                 ImGui.Text("Mass: " + Stringify.Mass(mass));
                 BorderGroup.End();
-                
+
                 ImGui.NewLine();
-                
+
                 BorderGroup.Begin("Engine:");
 
                 if (ImGui.Combo("Engine Types", ref _engineDesignTypeIndex, _engineTypeNames, _engineTypeNames.Length))
@@ -214,17 +208,17 @@ namespace Pulsar4X.SDL2UI
                     _thrusterSizeKG = _engineDesigner.MassValue;
                     RefreshMass();
                 }
-                
+
                 if (ImGui.SliderFloat("Fuel", ref _fuelKG, 1, 1000))
                 {
                     RefreshMass();
                 }
-                
+
                 BorderGroup.End();
-                
+
                 ImGui.NewLine();
                 ImGui.Text("Total Mass: " + Stringify.Mass(_totalMass));
-                
+
                 double burnRate = 0;
                 double exaustVel = 0;
 
@@ -243,10 +237,10 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("Acceleration (wet): " + Stringify.Velocity(thrustNewtons / _totalMass));
                 ImGui.Text("Acceleration (dry): " + Stringify.Velocity(thrustNewtons / (_totalMass - _fuelKG)));
                 ImGui.Text("DeltaV: " + Stringify.Velocity(dv));
-                
+
                 ImGui.InputText("Design Name", _designName, (uint)_designName.Length);
                 NewDesignButton();
-                
+
             }
         }
 
@@ -256,7 +250,6 @@ namespace Pulsar4X.SDL2UI
             foreach (var kvp in _selectedComponentDesigns)
             {
                 _totalMass += kvp.Key.MassPerUnit * kvp.Value;
-                
             }
 
             _totalMass += _fuelKG;
@@ -265,6 +258,9 @@ namespace Pulsar4X.SDL2UI
 
         internal void NewDesignButton()
         {
+            if(_currentDesigns == null || _faction == null)
+                return;
+
             if (ImGui.Button("Create Design") && _engineDesigner != null)
             {
                 int version = 0;
@@ -277,17 +273,14 @@ namespace Pulsar4X.SDL2UI
                             version = design.DesignVersion + 1;
                     }
                 }
-                
 
                 List<(ComponentDesign, int)> misslcomponents = new List<(ComponentDesign, int)>();
                 foreach (var kvp in _selectedComponentDesigns)
                 {
                     misslcomponents.Add((kvp.Key, kvp.Value));
                 }
-                
-                
+
                 var atb = _engineDesigner.GetAttribute<NewtonionThrustAtb>();
-                
                 double burnRate = atb.FuelBurnRate;
                 double exaustVel = atb.ExhaustVelocity;
                 double thrustNewtons = burnRate * exaustVel;
@@ -296,7 +289,6 @@ namespace Pulsar4X.SDL2UI
                 misslcomponents.Add((engineDesign, 1));
                 OrdnanceDesign missileDesign = new OrdnanceDesign(_uiState.Faction.GetDataBlob<FactionInfoDB>(), strName, _fuelKG, misslcomponents);
                 //missileDesign.DesignVersion = version;
-
             }
         }
     }

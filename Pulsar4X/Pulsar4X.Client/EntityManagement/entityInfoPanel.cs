@@ -6,18 +6,17 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
 using System.Numerics;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Pulsar4X.SDL2UI
 {
     public class EntityInfoPanel : PulsarGuiWindow
     {
         private ComponentInstance[][] _componentInstances = new ComponentInstance[0][];
-        private Entity _selectedEntity;
+        private Entity? _selectedEntity;
+
 	    private EntityInfoPanel()
 	    {
 	        _flags =  ImGuiWindowFlags.NoCollapse;// | ImGuiWindowFlags.AlwaysAutoResize;
-        
         }
 
         internal static EntityInfoPanel GetInstance() {
@@ -31,16 +30,15 @@ namespace Pulsar4X.SDL2UI
             {
                 thisItem = (EntityInfoPanel)_uiState.LoadedWindows[typeof(EntityInfoPanel)];
             }
-             
 
             return thisItem;
-
-
         }
+
         //displays selected entity info
         internal override void Display()
         {
-           
+            if(!IsActive) return;
+
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(264, 325), ImGuiCond.Once);
             if (ImGui.Begin("Currently selected", _flags))
             {
@@ -72,7 +70,7 @@ namespace Pulsar4X.SDL2UI
 
 
                     ImGui.Text("Subject: " +  _SelectedEntityState.Name);
-                    
+
                     //ImGui.Text(""+_uiState.LastClickedEntity.);
                     //gets all children and parent nodes, displays their names and makes them clickable to navigate towards them.
 
@@ -324,12 +322,14 @@ namespace Pulsar4X.SDL2UI
         public static class AbilitesDisplay
         {
             private static int _selectedIndex = 0;
-            private static Entity _entity;
+            private static Entity? _entity;
             private static float[] _textwidth = new float[2];
-            
-            
+
             public static void Display(Entity entity)
             {
+                if(entity == null || entity.Manager == null)
+                    throw new NullReferenceException();
+
                 float xwid = 100;
                 List<string> names = new List<string>();
                 List<IAbilityDescription> abilites = new List<IAbilityDescription>();
@@ -348,25 +348,23 @@ namespace Pulsar4X.SDL2UI
                         names.Add(dbdesc.AbilityName());
                         abilites.Add(dbdesc);
                     }
-                }  
-                
+                }
+
                 //left selectable box
                 if (BorderListOptions.Begin("Abilites", names.ToArray(), ref _selectedIndex, 184))
                 {
                     _textwidth = new float[2];
                 }
 
-
-
                 //right box of sub items
                 string[] abilitiesAry = abilites[_selectedIndex].AbilityDescription().Split("\n");
-                
+
                 //we're assuming the first item is a title of sorts
                 var strline = abilitiesAry[0];
                 ImGui.Text(strline);
                 if(xwid < ImGui.GetItemRectSize().X)
                     xwid = ImGui.GetItemRectSize().X;
-                
+
                 ImGui.Indent(2);
                 //we're expecting subsequent items to have a(one) tab char, and we want to allign the righthand side
                 //this whole bit of code could break in intersting ways if there's more than one tab char,
@@ -380,21 +378,20 @@ namespace Pulsar4X.SDL2UI
                     {
                         if(i > 0) //after the tab char
                             ImGui.SetCursorPosX(xpos + _textwidth[i-1] + 12);//allign second row
-                        
+
                         ImGui.Text(tabSplit[i]); //display the text
                         if (_textwidth[i] < ImGui.GetItemRectSize().X) //check the size
                             _textwidth[i] = ImGui.GetItemRectSize().X; //expand the size for the next frame
                         if (i < tabSplit.Length - 1) //put the next item on the same line if there is another item in the array
                             ImGui.SameLine(); //at least this bit shouldnt break if there's more than one tab
                     }
-                    
                 }
                 ImGui.Unindent(2);
                 float ycount = abilites[_selectedIndex].AbilityDescription().Split("\n").Length -1;
                 float yhight = ImGui.GetTextLineHeightWithSpacing() * ycount;
                 if(xwid < _textwidth[0] + _textwidth[1] + 12)
                    xwid = _textwidth[0] + _textwidth[1] + 12;
-                
+
                 BorderListOptions.End(new Vector2(xwid,yhight));
             }
         }

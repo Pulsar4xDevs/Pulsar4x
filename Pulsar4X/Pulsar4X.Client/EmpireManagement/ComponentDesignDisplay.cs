@@ -28,20 +28,20 @@ namespace Pulsar4X.SDL2UI
 
     public sealed class ComponentDesignDisplay
     {
-        private static ComponentDesignDisplay instance = null;
+        private static ComponentDesignDisplay? instance = null;
         private static readonly object padlock = new object();
 
         private NoTemplateState NoTemplateState = NoTemplateState.PleaseSelect;
-        private ComponentDesigner _componentDesigner;
-        public ComponentTemplateBlueprint Template { get; private set;}
-        private string[] _designTypes;
-        private ComponentTemplateBlueprint[] _designables;
+        private ComponentDesigner? _componentDesigner;
+        public ComponentTemplateBlueprint? Template { get; private set;}
+        private string[]? _designTypes;
+        private ComponentTemplateBlueprint[]? _designables;
         private static byte[] _nameInputBuffer = new byte[128];
-        private static Tech[] _techSDs;
-        private static string[] _techNames;
+        private static Tech[]? _techSDs;
+        private static string[]? _techNames;
         private static int _techSelectedIndex = -1;
         //private TechSD[] _techSDs;
-        private static string[] _listNames;
+        private static string[]? _listNames;
 
 
         private ComponentDesignDisplay() { }
@@ -120,10 +120,14 @@ namespace Pulsar4X.SDL2UI
                 {
                     if(!_nameInputBuffer.All(b => b == 0))
                     {
-                        string name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
-                        _componentDesigner.Name = name;
-                        _componentDesigner.CreateDesign(uiState.Faction);
-                        //we reset the designer here, so we don't end up trying to edit the precious design.
+                        if(_componentDesigner != null)
+                        {
+                            string name = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer);
+                            _componentDesigner.Name = name;
+                            _componentDesigner.CreateDesign(uiState.Faction);
+                        }
+
+                        //we reset the designer here, so we don't end up trying to edit the previous design.
                         var factionData = uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
                         var factionTech = uiState.Faction.GetDataBlob<FactionTechDB>();
                         _componentDesigner = new ComponentDesigner(Template, factionData, factionTech);

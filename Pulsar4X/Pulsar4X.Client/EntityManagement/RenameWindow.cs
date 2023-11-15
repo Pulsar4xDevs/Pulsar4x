@@ -8,9 +8,17 @@ namespace Pulsar4X.SDL2UI
 {
     public class RenameWindow : PulsarGuiWindow
     {
-        private Entity _selectedEntity;
-        private byte[] _nameInputBuffer;
-        string nameString { get { return System.Text.Encoding.UTF8.GetString(_nameInputBuffer); } }
+        private Entity? _selectedEntity;
+        private byte[]? _nameInputBuffer;
+        string NameString
+        {
+            get
+            {
+                if(_nameInputBuffer == null)
+                    return "";
+                return System.Text.Encoding.UTF8.GetString(_nameInputBuffer); 
+            }
+        }
         private bool _setFocus = true;
 
         private RenameWindow()
@@ -57,9 +65,9 @@ namespace Pulsar4X.SDL2UI
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Save"))//Gives the user the option to set the name
                 {
-                    if(_nameInputBuffer[0] != 0){//If the user has not entered an empty name
-
-                        RenameCommand.CreateRenameCommand(_uiState.Game, _uiState.Faction, _selectedEntity, nameString);
+                    if(_nameInputBuffer[0] != 0 && _selectedEntity != null)//If the user has not entered an empty name
+                    {
+                        RenameCommand.CreateRenameCommand(_uiState.Game, _uiState.Faction, _selectedEntity, NameString);
                         ImGui.CloseCurrentPopup();
                         IsActive = false;
                     }

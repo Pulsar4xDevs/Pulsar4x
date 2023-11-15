@@ -5,7 +5,6 @@ using Pulsar4X.Interfaces;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Engine.Sensors;
-using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -14,26 +13,31 @@ namespace Pulsar4X.SDL2UI
         public Entity Entity;
         public string Name = "Unknown";
 
-        public IPosition Position;
-        public NameIcon NameIcon;
-        public IKepler OrbitIcon;
-        public OrbitOrderWiget DebugOrbitOrder;
+        public IPosition? Position;
+        public NameIcon? NameIcon;
+        public IKepler? OrbitIcon;
+        public OrbitOrderWiget? DebugOrbitOrder;
         public bool IsDestroyed = false; //currently IsDestroyed = true if moved from one system to another, may need to revisit this. 
         public Dictionary<Type, BaseDataBlob> DataBlobs = new Dictionary<Type, BaseDataBlob>();
         public List<EntityChangeData> Changes = new List<EntityChangeData>();
         public List<EntityChangeData> _changesNextFrame = new List<EntityChangeData>();
-        public CommandReferences CmdRef;
-        internal string StarSysGuid;
+        public CommandReferences? CmdRef;
+        internal string? StarSysGuid;
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
         public EntityState(Entity entity)
         {
             Entity = entity;
-            foreach (var db in entity.Manager.GetAllDataBlobsForEntity(entity.Id))
+            if(entity.Manager != null)
             {
-                DataBlobs.Add(db.GetType(), db);
+                foreach (var db in entity.Manager.GetAllDataBlobsForEntity(entity.Id))
+                {
+                    DataBlobs.Add(db.GetType(), db);
+                }
+
+                StarSystem starSys = (StarSystem)entity.Manager;
+                StarSysGuid = starSys.Guid;
             }
-            StarSystem starSys = (StarSystem)entity.Manager;
-            StarSysGuid = starSys.Guid;
+
             entity.ChangeEvent += On_entityChangeEvent;
 
             SetBodyType();
@@ -41,23 +45,23 @@ namespace Pulsar4X.SDL2UI
 
         public int GetRank()
         {
-            if (this.IsStar()) 
+            var parent = this.GetParent();
+            if (this.IsStar())
             {
                 return 0;
             }
-            else if(this.GetParent() == null) 
+            else if(parent == null)
             {
                 return 0;
             }
             else
             {
-                EntityState _parententityState = new EntityState(this.GetParent());
+                EntityState _parententityState = new EntityState(parent);
                 return _parententityState.GetRank() + 1;
             }
-        
         }
 
-        public Entity GetParent()
+        public Entity? GetParent()
         {
             return Entity.GetDataBlob<PositionDB>().Parent;
         }
@@ -83,8 +87,11 @@ namespace Pulsar4X.SDL2UI
             Position = sensorContact.Position;
 
             //Name = sensorContact.GetDataBlob<NameDB>().GetName(_uiState.Faction);
-            StarSystem starSys = (StarSystem)Entity.Manager;
-            StarSysGuid = starSys.Guid;
+            if(Entity.Manager != null)
+            {
+                StarSystem starSys = (StarSystem)Entity.Manager;
+                StarSysGuid = starSys.Guid;
+            }
             sensorContact.ActualEntity.ChangeEvent += On_entityChangeEvent;
             SetBodyType();
         }
@@ -105,8 +112,6 @@ namespace Pulsar4X.SDL2UI
 
             }
         }
-
- 
 
         void SetBodyType()
         {
@@ -153,16 +158,23 @@ namespace Pulsar4X.SDL2UI
         }
 
         //maybe this should be done in the SystemState?
-        void On_entityChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
+        void On_entityChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob? db)
         {
+
             _changesNextFrame.Add(new EntityChangeData() { ChangeType = changeType, Datablob = db, Entity = Entity });
             switch (changeType)
             {
                 case EntityChangeData.EntityChangeType.DBAdded:
-                    DataBlobs[db.GetType()] = db;
+                    if(db != null)
+                    {
+                        DataBlobs[db.GetType()] = db;
+                    }
                     break;
                 case EntityChangeData.EntityChangeType.DBRemoved:
-                    DataBlobs.Remove(db.GetType());
+                    if(db != null)
+                    {
+                        DataBlobs.Remove(db.GetType());
+                    }
                     break;
                 case EntityChangeData.EntityChangeType.EntityRemoved:
                     DataBlobs.Clear();
@@ -178,7 +190,5 @@ namespace Pulsar4X.SDL2UI
             Changes = _changesNextFrame;
             _changesNextFrame = new List<EntityChangeData>();
         }
-
-        
     }
 }

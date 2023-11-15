@@ -15,6 +15,6 @@ namespace Pulsar4X.Engine
         //TODO: May need DateTime in here at some point for clients.
         public EntityChangeType ChangeType;
         public Entity Entity;
-        public BaseDataBlob Datablob; //will be null if ChangeType is EntityAdded or EntityRemoved.
+        public BaseDataBlob? Datablob; //will be null if ChangeType is EntityAdded or EntityRemoved.
     }
 }

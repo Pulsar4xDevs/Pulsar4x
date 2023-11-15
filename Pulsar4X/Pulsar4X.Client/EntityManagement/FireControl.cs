@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Sensors;
@@ -10,8 +9,6 @@ using Pulsar4X.Engine.Damage;
 using Pulsar4X.Engine.Designs;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.SDL2UI;
-
-using System.Runtime.InteropServices;
 using Vector2 = System.Numerics.Vector2;
 using Pulsar4X.Atb;
 using Pulsar4X.Datablobs;
@@ -21,14 +18,14 @@ namespace Pulsar4X.ImGuiNetUI
 
     public class FireControl : PulsarGuiWindow
     {
-        private EntityState _orderEntityState;
-        private Entity _orderEntity => _orderEntityState.Entity;
+        private EntityState? _orderEntityState;
+        private Entity? _orderEntity => _orderEntityState?.Entity;
         SensorContact[] _allSensorContacts = new SensorContact[0];
         EntityState[] _ownEntites = new EntityState[0];
         private bool _showOwnAsTarget;
 
         //private int _dragDropIndex;
-        private string _dragDropGuid;
+        private string? _dragDropGuid;
         private int _dragDropId;
 
 
@@ -158,7 +155,7 @@ namespace Pulsar4X.ImGuiNetUI
                         SetTarget(fc, _dragDropId);
                     if (isDroppingOwnTarget)
                         SetTarget(fc, _dragDropId);
-                    if (isDroppingWeapon)
+                    if (isDroppingWeapon && !string.IsNullOrEmpty(_dragDropGuid))
                         SetWeapon(_wpnDict[_dragDropGuid], fc);
                     ImGui.EndDragDropTarget();
                 }
@@ -210,7 +207,7 @@ namespace Pulsar4X.ImGuiNetUI
                     isDropping = acceptPayload.NativePtr != null;
                 }
 
-                if (isDropping)
+                if (isDropping && !string.IsNullOrEmpty(_dragDropGuid))
                     SetOrdnance(wpn, _dragDropGuid);
 
                 ImGui.EndDragDropTarget();
@@ -241,7 +238,7 @@ namespace Pulsar4X.ImGuiNetUI
                     isDroppingWeapon = acceptPayload.NativePtr != null;
                 }
 
-                if (isDroppingWeapon)
+                if (isDroppingWeapon && !string.IsNullOrEmpty(_dragDropGuid))
                     UnSetWeapon(_wpnDict[_dragDropGuid]);
 
                 ImGui.EndDragDropTarget();
@@ -368,6 +365,8 @@ namespace Pulsar4X.ImGuiNetUI
                     ctypes.Add(ordDes.CargoTypeID);
             }
 
+            if(_orderEntity == null) return;
+
             foreach (var cargoType in ctypes)
             {
                 if(!_orderEntity.HasDataBlob<VolumeStorageDB>())
@@ -388,7 +387,7 @@ namespace Pulsar4X.ImGuiNetUI
             SetWeapon(wpnState);
         }
 
-        void SetWeapon(WeaponState wpnState, FireControlAbilityState fcState = null)
+        void SetWeapon(WeaponState wpnState, FireControlAbilityState? fcState = null)
         {
             List<string> WpnIDs;
             //var curWpns = fcState.AssignedWeapons;
@@ -404,28 +403,32 @@ namespace Pulsar4X.ImGuiNetUI
                 WpnIDs = wpnState.ParentState.GetChildrenIDs<IList>();
                 WpnIDs.Remove(wpnState.ID);
                 SetWeapons(WpnIDs, wpnState.ParentState.ID);
-            }     
+            }
         }
 
         void SetWeapons(List<string> wpnsAssignd, string firecontrolID)
         {
-            SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Id, _orderEntity.Id, firecontrolID, wpnsAssignd);
+            if(_orderEntity != null)
+                SetWeaponsFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Id, _orderEntity.Id, firecontrolID, wpnsAssignd);
         }
 
         void SetOrdnance(WeaponState wpn, string ordnanceAssigned)
         {
-            SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction, _orderEntity, wpn, ordnanceAssigned);
+            if(_orderEntity != null)
+                SetOrdinanceToWpnOrder.CreateCommand(_uiState.PrimarySystemDateTime, _uiState.Faction, _orderEntity, wpn, ordnanceAssigned);
         }
 
         void SetTarget(FireControlAbilityState fcState, int targetID)
         {
             var fcGuid = fcState.ComponentInstance.UniqueID;
-            SetTargetFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Id, _orderEntity.Id, fcGuid, targetID);
+            if(_orderEntity != null)
+                SetTargetFireControlOrder.CreateCommand(_uiState.Game, _uiState.PrimarySystemDateTime, _uiState.Faction.Id, _orderEntity.Id, fcGuid, targetID);
         }
 
         private void OpenFire(string fcID, SetOpenFireControlOrder.FireModes mode)
         {
-            SetOpenFireControlOrder.CreateCmd(_uiState.Game, _uiState.Faction, _orderEntity, fcID, mode);
+            if(_orderEntity != null)
+                SetOpenFireControlOrder.CreateCmd(_uiState.Game, _uiState.Faction, _orderEntity, fcID, mode);
         }
     }
 }

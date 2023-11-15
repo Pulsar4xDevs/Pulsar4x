@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
-using Pulsar4X.Orbital;
 using Pulsar4X.ImGuiNetUI;
-using Pulsar4X.SDL2UI;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
 
 
@@ -53,25 +50,31 @@ namespace Pulsar4X.SDL2UI
         [PublicAPI]
         internal static bool CheckIfCanOpenWindow(Type T, EntityState _entityState, GlobalUIState _state)
         {
-
-
-            if(T == typeof(JumpThroughJumpPointBlankMenuHelper))
+            if (T != typeof(JumpThroughJumpPointBlankMenuHelper))
             {
-                if(CheckIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state))
-                {
-                    if(_state.PrimaryEntity != null)
-                    {
-                        if(_state.PrimaryEntity.BodyType == UserOrbitSettings.OrbitBodyType.Ship && (Orbital.Distance.DistanceBetween(_state.PrimaryEntity.Position.AbsolutePosition, _entityState.Position.AbsolutePosition) < _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m))
-                        {
-                            return true;
-                        }
-                        else { return false; }
-                    }
-                    else { return false; }
-                }
-                else { return false; }
+                return false;
             }
-            else { return false; }
+
+            if (!CheckIfCanOpenWindow(typeof(GotoSystemBlankMenuHelper), _entityState, _state))
+            {
+                return false;
+            }
+
+            var primaryEntity = _state.PrimaryEntity;
+            if (primaryEntity == null || primaryEntity.Position == null || _entityState.Position == null)
+            {
+                return false;
+            }
+
+            if (primaryEntity.BodyType != UserOrbitSettings.OrbitBodyType.Ship)
+            {
+                return false;
+            }
+
+            var distance = Orbital.Distance.DistanceBetween(primaryEntity.Position.AbsolutePosition, _entityState.Position.AbsolutePosition);
+            var minDistance = _entityState.Entity.GetDataBlob<JPSurveyableDB>().MinimumDistanceToJump_m;
+
+            return distance < minDistance;
         }
 
         internal static bool CheckIfCanOpenWindow(Type T, EntityState _entityState)
@@ -180,9 +183,11 @@ namespace Pulsar4X.SDL2UI
                 //Menu is goto system menu
                 else if (T == typeof(GotoSystemBlankMenuHelper))
                 {
-                    _state.SetActiveSystem(_entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo.GetDataBlob<PositionDB>().SystemGuid);
+                    var jumpPointTo = _entityState.Entity.GetDataBlob<JPSurveyableDB>().JumpPointTo;
+                    if(jumpPointTo != null)
+                        _state.SetActiveSystem(jumpPointTo.GetDataBlob<PositionDB>().SystemGuid);
                 }
-                else if (T == typeof(SelectPrimaryBlankMenuHelper))
+                else if (T == typeof(SelectPrimaryBlankMenuHelper) && _entityState.StarSysGuid != null)
                 {
                     _state.EntitySelectedAsPrimary(_entityState.Entity.Id, _entityState.StarSysGuid);
                 }

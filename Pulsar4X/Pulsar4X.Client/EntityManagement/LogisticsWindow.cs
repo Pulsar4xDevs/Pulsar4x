@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
@@ -14,12 +10,12 @@ namespace Pulsar4X.SDL2UI
     public class LogiShipWindow : PulsarGuiWindow
     {
         private int _factionID;
-        private EntityState _entityState;
-        private Entity _selectedEntity;
-        private LogiShipperDB _tradeshipDB;
-        private VolumeStorageDB _cargoDB;
+        private EntityState? _entityState;
+        private Entity? _selectedEntity;
+        private LogiShipperDB? _tradeshipDB;
+        private VolumeStorageDB? _cargoDB;
 
-        private SetLogisticsOrder.Changes _changes;
+        private SetLogisticsOrder.Changes? _changes;
         private double _changeMass = 1;
 
         private LogiShipWindow(EntityState entity)
@@ -51,17 +47,16 @@ namespace Pulsar4X.SDL2UI
             {
                 if(_selectedEntity.HasDataBlob<LogiShipperDB>())
                     _tradeshipDB = _selectedEntity.GetDataBlob<LogiShipperDB>();
-                else{_tradeshipDB = null;}
+                else
+                    _tradeshipDB = null;
+
                 if(_selectedEntity.HasDataBlob<VolumeStorageDB>())
                     _cargoDB = _selectedEntity.GetDataBlob<VolumeStorageDB>();
-                else{_cargoDB = null;}
+                else
+                    _cargoDB = null;
+
                 CanActive = true;//And note if that it can be displayed
                 _factionID = _selectedEntity.FactionOwnerID;
-            }
-            else
-            {
-                //CanActive = false;
-                //_entityState = null;
             }
         }
 
@@ -72,97 +67,99 @@ namespace Pulsar4X.SDL2UI
         }
         internal override void Display()
         {
+            if(!IsActive
+                || _selectedEntity == null
+                || _cargoDB == null
+                || _tradeshipDB == null
+                || _changes == null)
+                return;
+
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(264, 325), ImGuiCond.Once);
-            if(IsActive)
+
+            if (ImGui.Begin("Logisitcs Ship", ref IsActive, _flags))
             {
-                if (ImGui.Begin("Logisitcs Ship", ref IsActive, _flags))
+                if(!_selectedEntity.HasDataBlob<LogiShipperDB>())
                 {
-                    if(!_selectedEntity.HasDataBlob<LogiShipperDB>())
+                    if(ImGui.Button("Set this entity as an independant Trade Ship"))
                     {
-                        if(ImGui.Button("Set this entity as an independant Trade Ship"))
-                        {
-                            SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.AddLogiShipDB);
-                            _tradeshipDB = _selectedEntity.GetDataBlob<LogiShipperDB>();
-                        }
-
+                        SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.AddLogiShipDB);
+                        _tradeshipDB = _selectedEntity.GetDataBlob<LogiShipperDB>();
                     }
-                    else
+                }
+                else
+                {
+                    if(ImGui.Button("Disable this entity as an independant Trade Ship"))
                     {
-                        if(ImGui.Button("Disable this entity as an independant Trade Ship"))
-                        {
-                            SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.RemoveLogiShipDB);
-                        }
-
-                        ImGui.Text("Allocate amount of cargo space for trade");
-                        double totalVol = 0;
-                        foreach (var type in _cargoDB.TypeStores)
-                        {
-                            var typename = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoTypes[type.Key].Name;
-                            var typeVol = type.Value.MaxVolume;
-                            totalVol += typeVol;
-                            var currentVal = _tradeshipDB.TradeSpace[type.Key];
-                            var volAmounts = _changes.VolumeAmounts;
-                            if(volAmounts.ContainsKey(type.Key))
-                                currentVal = volAmounts[type.Key];
-                            
-                            if(ImGuiExt.SliderDouble(typename, ref currentVal, 0, typeVol))
-                            {
-                                if(!volAmounts.ContainsKey(type.Key))
-                                    volAmounts.Add(type.Key, currentVal);
-                                else
-                                    volAmounts[type.Key] = currentVal;
-                                if (_changes.MaxMass == 0)
-                                    _changes.MaxMass = (int)totalVol;
-                            }
-                        }
-
-                        int maxMassVal = _changes.MaxMass;
-                        if(ImGui.SliderInt("MassConstraint", ref maxMassVal, 0, (int)totalVol))
-                        {
-                            _changes.MaxMass = maxMassVal;
-                        }
-
-                        var cargoLibrary = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
-                        var maxdv = OrbitMath.GetWetDV(_selectedEntity, maxMassVal, cargoLibrary);
-                        var dv = OrbitMath.GetDV(_selectedEntity, maxMassVal, cargoLibrary);
-                        ImGui.Text($"Max Dv:  {Stringify.Velocity(maxdv)}");
-                        ImGui.Text($"Max Dv with current fuel: {Stringify.Velocity(dv)}");
-                        
-                        
-                        if(ImGui.Button("Make it so"))
-                        {
-                            SetLogisticsOrder.CreateCommand_SetShipTypeAmounts(_selectedEntity, _changes);
-                        }
-
-                        ImGui.Text(_tradeshipDB.StateString);
-                        ImGui.Columns(2);
-                        foreach (var item in _tradeshipDB.ActiveCargoTasks)
-                        {
-                            ImGui.Text("From: " + item.Source.GetName(_factionID));
-                            ImGui.NextColumn();
-                            ImGui.Text("To: " + item.Destination.GetName(_factionID));
-                            ImGui.NextColumn();
-                            ImGui.Text(item.item.Name);
-                            ImGui.NextColumn();
-                            ImGui.Text(item.NumberOfItems.ToString());
-                            ImGui.NextColumn();
-                            
-                        }
-                        ImGui.Columns(1);
-
-
-                        ImGui.Text("Current Cargo Manafest");
-                        //ImGui.Text("Maybe this should show entire cargo, not just trade cargo, and use colours to diffentiate?");
-                        ImGui.Columns(2);
-                        foreach (var item in _tradeshipDB.ItemsToShip)
-                        {
-                            ImGui.Text(item.item.Name);
-                            ImGui.NextColumn();
-                            ImGui.Text(item.count.ToString());
-                            ImGui.NextColumn();   
-                        }
-                        ImGui.Columns(1);
+                        SetLogisticsOrder.CreateCommand(_selectedEntity, SetLogisticsOrder.OrderTypes.RemoveLogiShipDB);
                     }
+
+                    ImGui.Text("Allocate amount of cargo space for trade");
+                    double totalVol = 0;
+                    foreach (var type in _cargoDB.TypeStores)
+                    {
+                        var typename = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoTypes[type.Key].Name;
+                        var typeVol = type.Value.MaxVolume;
+                        totalVol += typeVol;
+                        var currentVal = _tradeshipDB.TradeSpace[type.Key];
+                        var volAmounts = _changes.VolumeAmounts;
+                        if(volAmounts.ContainsKey(type.Key))
+                            currentVal = volAmounts[type.Key];
+
+                        if(ImGuiExt.SliderDouble(typename, ref currentVal, 0, typeVol))
+                        {
+                            if(!volAmounts.ContainsKey(type.Key))
+                                volAmounts.Add(type.Key, currentVal);
+                            else
+                                volAmounts[type.Key] = currentVal;
+                            if (_changes.MaxMass == 0)
+                                _changes.MaxMass = (int)totalVol;
+                        }
+                    }
+
+                    int maxMassVal = _changes.MaxMass;
+                    if(ImGui.SliderInt("MassConstraint", ref maxMassVal, 0, (int)totalVol))
+                    {
+                        _changes.MaxMass = maxMassVal;
+                    }
+
+                    var cargoLibrary = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods;
+                    var maxdv = OrbitMath.GetWetDV(_selectedEntity, maxMassVal, cargoLibrary);
+                    var dv = OrbitMath.GetDV(_selectedEntity, maxMassVal, cargoLibrary);
+                    ImGui.Text($"Max Dv:  {Stringify.Velocity(maxdv)}");
+                    ImGui.Text($"Max Dv with current fuel: {Stringify.Velocity(dv)}");
+
+                    if(ImGui.Button("Make it so"))
+                    {
+                        SetLogisticsOrder.CreateCommand_SetShipTypeAmounts(_selectedEntity, _changes);
+                    }
+
+                    ImGui.Text(_tradeshipDB.StateString);
+                    ImGui.Columns(2);
+                    foreach (var item in _tradeshipDB.ActiveCargoTasks)
+                    {
+                        ImGui.Text("From: " + item.Source.GetName(_factionID));
+                        ImGui.NextColumn();
+                        ImGui.Text("To: " + item.Destination.GetName(_factionID));
+                        ImGui.NextColumn();
+                        ImGui.Text(item.item.Name);
+                        ImGui.NextColumn();
+                        ImGui.Text(item.NumberOfItems.ToString());
+                        ImGui.NextColumn();
+                    }
+                    ImGui.Columns(1);
+
+
+                    ImGui.Text("Current Cargo Manafest");
+                    //ImGui.Text("Maybe this should show entire cargo, not just trade cargo, and use colours to diffentiate?");
+                    ImGui.Columns(2);
+                    foreach (var item in _tradeshipDB.ItemsToShip)
+                    {
+                        ImGui.Text(item.item.Name);
+                        ImGui.NextColumn();
+                        ImGui.Text(item.count.ToString());
+                        ImGui.NextColumn();
+                    }
+                    ImGui.Columns(1);
                 }
             }
         }

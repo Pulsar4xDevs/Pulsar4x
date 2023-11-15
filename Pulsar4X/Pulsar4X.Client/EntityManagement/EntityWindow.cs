@@ -168,7 +168,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.PopStyleColor();
                     if (ImGui.IsItemHovered())
                     {
-                        ImGui.SetTooltip(fuelType.Name);
+                        ImGui.SetTooltip(fuelType?.Name ?? "Unknown");
                     }
                 }
 
@@ -192,10 +192,10 @@ namespace Pulsar4X.SDL2UI
 
                 if(Entity.TryGetDatablob<PositionDB>(out var positionDB))
                 {
-                    Entity parent = positionDB.Parent;
+                    Entity? parent = positionDB.Parent;
                     if(parent != null)
                     {
-                        if (Entity.TryGetDatablob<WarpMovingDB>(out WarpMovingDB movedb))
+                        if (Entity.TryGetDatablob<WarpMovingDB>(out var movedb))
                         {
                             ImGui.Text("Warping " + Stringify.Velocity(movedb.CurrentNonNewtonionVectorMS.Length()));
 
@@ -232,6 +232,8 @@ namespace Pulsar4X.SDL2UI
 
         private void DisplayConditionalTabs()
         {
+            if(Entity.Manager == null) return;
+
             foreach(var db in Entity.Manager.GetAllDataBlobsForEntity(Entity.Id))
             {
                 if(db is AtmosphereDB && ImGui.BeginTabItem("Atmosphere"))
@@ -239,31 +241,33 @@ namespace Pulsar4X.SDL2UI
                     ((AtmosphereDB)db).Display(EntityState, _uiState);
                     ImGui.EndTabItem();
                 }
-
-                if(db is MineralsDB && ImGui.BeginTabItem("Minerals"))
+                else if(db is MineralsDB && ImGui.BeginTabItem("Minerals"))
                 {
                     ((MineralsDB)db).Display(EntityState, _uiState);
                     ImGui.EndTabItem();
                 }
-
-                if(db is StarInfoDB && ImGui.BeginTabItem("Star Info"))
+                else if(db is StarInfoDB && ImGui.BeginTabItem("Star Info"))
                 {
                     ((StarInfoDB)db).Display(EntityState, _uiState);
                     ImGui.EndTabItem();
                 }
-                if(db is ComponentInstancesDB && ImGui.BeginTabItem("Components"))
+                else if(db is ComponentInstancesDB && ImGui.BeginTabItem("Components"))
                 {
                     ((ComponentInstancesDB)db).Display(EntityState, _uiState);
                     ImGui.EndTabItem();
                 }
-                if(db is VolumeStorageDB && ImGui.BeginTabItem("Storage"))
+                else if(db is VolumeStorageDB && ImGui.BeginTabItem("Storage"))
                 {
                     ((VolumeStorageDB)db).Display(EntityState, _uiState);
                     ImGui.EndTabItem();
                 }
-                if(db is EnergyGenAbilityDB && ImGui.BeginTabItem("Power"))
+                else if(db is EnergyGenAbilityDB && ImGui.BeginTabItem("Power"))
                 {
                     ((EnergyGenAbilityDB)db).Display(EntityState, _uiState);
+                    ImGui.EndTabItem();
+                }
+                else if(db is FleetDB && ImGui.BeginTabItem("Ships"))
+                {
                     ImGui.EndTabItem();
                 }
             }

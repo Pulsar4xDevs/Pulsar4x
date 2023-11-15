@@ -4,7 +4,6 @@ using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
-using Pulsar4X.Extensions;
 using System.Linq;
 
 namespace Pulsar4X.SDL2UI
@@ -12,15 +11,15 @@ namespace Pulsar4X.SDL2UI
     public class ResearchWindow : PulsarGuiWindow
     {
         private readonly Vector2 invisButtonSize = new (15, 15);
-        private FactionDataStore _factionData;
-        private FactionTechDB _factionTechDB;
-        private List<Tech> _researchableTechs;
-        private Dictionary<string, Tech> _researchableTechsByGuid;
-        private List<(Scientist scientist, Entity atEntity)> _scienceTeams;
+        private FactionDataStore? _factionData;
+        private FactionTechDB? _factionTechDB;
+        private List<Tech> _researchableTechs = new();
+        private Dictionary<string, Tech>? _researchableTechsByGuid;
+        private List<(Scientist scientist, Entity atEntity)>? _scienceTeams;
         private int _selectedTeam = -1;
 
-        private string[] techCategoryNames;
-        private string[] techCategoryIds;
+        private string[]? techCategoryNames;
+        private string[]? techCategoryIds;
         private int selectCategoryFilterIndex = 0;
 
         private ResearchWindow()
@@ -76,6 +75,9 @@ namespace Pulsar4X.SDL2UI
 
         private void RefreshTechs()
         {
+            if(_factionData == null || techCategoryIds == null)
+                return;
+
             if(selectCategoryFilterIndex == 0)
             {
                 _researchableTechs = _factionData.Techs.Select(kvp => kvp.Value).Where(t => _factionData.IsResearchable(t.UniqueID)).ToList();
@@ -93,8 +95,12 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
+            if(!IsActive
+                || techCategoryNames == null
+                || _scienceTeams == null)
+                return;
 
-            if (IsActive && ImGui.Begin("Research and Development", ref IsActive, _flags))
+            if (ImGui.Begin("Research and Development", ref IsActive, _flags))
             {
                 Vector2 windowContentSize = ImGui.GetContentRegionAvail();
                 var firstChildSize = new Vector2(windowContentSize.X * 0.75f, windowContentSize.Y);
@@ -136,6 +142,11 @@ namespace Pulsar4X.SDL2UI
 
         private void DisplayTeams()
         {
+            if(_scienceTeams == null
+                || _factionData == null
+                || _researchableTechsByGuid == null)
+                return;
+
             if(ImGui.BeginTable("Teams", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.BordersInnerH))
             {
                 ImGui.TableSetupColumn("Scientist", ImGuiTableColumnFlags.None, 1f);
@@ -232,6 +243,9 @@ namespace Pulsar4X.SDL2UI
         }
         private void DisplayTechs()
         {
+            if(_factionData == null || _scienceTeams == null)
+                return;
+
             if(ImGui.BeginTable("ResearchableTechs", 1, ImGuiTableFlags.BordersInnerV))
             {
                 for (int i = 0; i < _researchableTechs.Count; i++)
@@ -284,6 +298,9 @@ namespace Pulsar4X.SDL2UI
 
         private void SelectedSci(int selected)
         {
+            if(_scienceTeams == null || _researchableTechsByGuid == null)
+                return;
+
             if(ImGui.BeginTable("TechQueue", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 1f);
@@ -414,7 +431,7 @@ namespace Pulsar4X.SDL2UI
         {
             ImGui.BeginGroup();
 
-            if(_researchableTechsByGuid[scientist.ProjectQueue[i].techID].MaxLevel > 1)
+            if(_researchableTechsByGuid != null &&_researchableTechsByGuid[scientist.ProjectQueue[i].techID].MaxLevel > 1)
             {
                 string cyclestr = queueItem.cycle ? "O": "*";
                 if (ImGui.SmallButton(cyclestr + "##" + i))

@@ -74,7 +74,7 @@ namespace Pulsar4X.SDL2UI
 
                     foreach(var fleet in fleets)
                     {
-                        bool visible = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet.Id == fleet.Id;
+                        bool visible = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
                         if(ImGui.Selectable(fleet.GetName(_uiState.Faction.Id), visible))
                         {
                             FleetWindow.GetInstance().SetActive(true);

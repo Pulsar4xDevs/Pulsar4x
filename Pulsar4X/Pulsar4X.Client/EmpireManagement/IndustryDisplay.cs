@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
@@ -16,35 +15,36 @@ namespace Pulsar4X.SDL2UI
 {
     public sealed class IndustryDisplay
     {
-        private static IndustryDisplay instance = null;
+        private static IndustryDisplay? instance = null;
         private static readonly object padlock = new object();
 
-        public EntityState EntityState { get; private set; }
+        public EntityState? EntityState { get; private set; }
 
         private int _factionID;
-        private FactionInfoDB _factionInfoDB;
+        private FactionInfoDB? _factionInfoDB;
         Dictionary<string, (string[] itemIDs, string[] itemNames) > _contructablesByPline = new ();
-        private IndustryJob _newConJob;
+        private IndustryJob? _newConJob;
         private (string pline, int item) _newjobSelectionIndex = (string.Empty, 0);
         private int _newJobbatchCount = 1;
         private bool _newJobRepeat = false;
         private bool _newJobAutoInstall = true;
         private bool _newJobCanAutoInstall = false;
-        private Entity _newJobAutoInstallEntity = null;
-        private Dictionary<string, IndustryAbilityDB.ProductionLine> _prodLines;
-        private string _selectedProdLine;
+        private Entity? _newJobAutoInstallEntity = null;
+        private Dictionary<string, IndustryAbilityDB.ProductionLine>? _prodLines = null;
+        private string? _selectedProdLine;
         private int _selectedExistingIndex = -1;
-        private IndustryJob _lastClickedJob { get; set; }
-        private IConstructableDesign _lastClickedDesign;
-        private Entity Entity;
-        private IndustryAbilityDB _industryDB;
-        private VolumeStorageDB _volStorageDB;
-        private IndustryJob _selectedExistingConJob
+        private IndustryJob? _lastClickedJob { get; set; }
+        private IConstructableDesign? _lastClickedDesign;
+        private Entity? Entity;
+        private IndustryAbilityDB? _industryDB;
+        private VolumeStorageDB? _volStorageDB;
+        private IndustryJob? _selectedExistingConJob
         {
             get
             {
-                if (_selectedProdLine != string.Empty
+                if (!string.IsNullOrEmpty(_selectedProdLine)
                     && _selectedExistingIndex > -1
+                    && _prodLines != null
                     && _prodLines[_selectedProdLine].Jobs.Count > _selectedExistingIndex)
                 {
                     return _prodLines[_selectedProdLine].Jobs[_selectedExistingIndex];
@@ -58,7 +58,7 @@ namespace Pulsar4X.SDL2UI
         {
             get
             {
-                if(_contructablesByPline.Count != _industryDB.ProductionLines.Count)
+                if(_contructablesByPline.Count != _industryDB?.ProductionLines.Count)
                     Update();
                 return _contructablesByPline[_newjobSelectionIndex.pline].itemIDs[_newjobSelectionIndex.item];
             }
@@ -89,16 +89,17 @@ namespace Pulsar4X.SDL2UI
 
         private void Update()
         {
+            if(_industryDB == null) return;
+
             _prodLines = _industryDB.ProductionLines;
 
-            int count = _factionInfoDB.IndustryDesigns.Count;
+            int count = _factionInfoDB?.IndustryDesigns.Count ?? 0;
             //_constructableDesigns = new IConstrucableDesign[count];
             var constructablesNames = new string[count];
             var constructablesIDs = new string[count];
 
-            int i = 0;
             Dictionary<string, List<int>> _constructablesIndexesByType = new ();
-            var sortedDesigns = _factionInfoDB.IndustryDesigns.Values.ToList();
+            var sortedDesigns = _factionInfoDB?.IndustryDesigns.Values.ToList() ?? new();
             sortedDesigns.Sort((a, b) => a.Name.CompareTo(b.Name));
 
             foreach(var (id, productionLine) in _prodLines)
@@ -123,7 +124,9 @@ namespace Pulsar4X.SDL2UI
 
         public void Display(GlobalUIState state)
         {
-            Entity = EntityState.Entity;
+            Entity = EntityState?.Entity;
+            if(Entity == null) return;
+
             if(!Entity.TryGetDatablob<IndustryAbilityDB>(out _industryDB) || !state.Faction.TryGetDatablob<FactionInfoDB>(out _factionInfoDB))
             {
                 Vector2 topSize = ImGui.GetContentRegionAvail();
@@ -143,7 +146,7 @@ namespace Pulsar4X.SDL2UI
             ProductionLineDisplay(state);
             ImGui.SameLine();
 
-            if(_selectedProdLine.IsNullOrEmpty())
+            if(string.IsNullOrEmpty(_selectedProdLine) || _prodLines == null)
                 return;
 
             if(ImGui.BeginChild("JobDescriptionPane", new Vector2(windowContentSize.X * 0.5f - 8f, windowContentSize.Y), true))
@@ -164,7 +167,7 @@ namespace Pulsar4X.SDL2UI
 
         public void ProductionLineDisplay(GlobalUIState state)
         {
-            if(_prodLines == null)
+            if(_prodLines == null || _factionInfoDB == null)
             {
                 ImGui.Text("No capacity for construction at this colony.");
                 return;
@@ -281,9 +284,9 @@ namespace Pulsar4X.SDL2UI
 
                                             foreach(var (rId, amountRemaining) in jobs[ji].ResourcesRequiredRemaining)
                                             {
-                                                ICargoable cargoItem = state.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(rId);
+                                                ICargoable? cargoItem = _factionInfoDB.Data.CargoGoods.GetAny(rId);
                                                 if (cargoItem == null)
-                                                    cargoItem = state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[rId];
+                                                    cargoItem = _factionInfoDB.ComponentDesigns[rId];
 
                                                 ImGui.TableNextColumn();
                                                 ImGui.Text(cargoItem.Name);
@@ -316,108 +319,111 @@ namespace Pulsar4X.SDL2UI
 
         void NewJobDisplay(GlobalUIState state)
         {
-            //ImGui.BeginChild("InitialiseJob", new Vector2(404, 84), true, ImGuiWindowFlags.ChildWindow);
-            if(_newjobSelectionIndex.pline != String.Empty)
+            if(string.IsNullOrEmpty(_selectedProdLine)
+                || _factionInfoDB == null
+                || _newConJob == null
+                || _prodLines == null
+                || string.IsNullOrEmpty(_newjobSelectionIndex.pline))
+                return;
+
+            int curItemIndex = _newjobSelectionIndex.item;
+
+            // TODO: improve this, preferably store the array of names and update it during Update()
+            var constructableNames = _contructablesByPline[_selectedProdLine].itemNames;
+            // Flatten the dictionary
+            // var flattened = _contructablesByPline.SelectMany(
+            //     kvp => kvp.Value.itemNames.Zip(kvp.Value.itemIDs, (name, id) => new { Id = id, Name = name, ParentKey = kvp.Key }))
+            //     .ToList();
+
+            // // Sort by itemNames
+            // var sorted = flattened.OrderBy(x => x.Name).ToList();
+
+            // // Group back (if you need)
+            // var groupedBack = sorted.GroupBy(x => x.ParentKey)
+            //     .ToDictionary(g => g.Key, g => (itemIDs: g.Select(x => x.Id).ToArray(), itemNames: g.Select(x => x.Name).ToArray()));
+
+            ImGui.NewLine();
+            ImGui.Text("Select a design:");
+            if (ImGui.Combo("", ref curItemIndex, constructableNames, constructableNames.Length))
             {
-                int curItemIndex = _newjobSelectionIndex.item;
-
-                // TODO: improve this, preferably store the array of names and update it during Update()
-                var constructableNames = _contructablesByPline[_selectedProdLine].itemNames;
-                // Flatten the dictionary
-                // var flattened = _contructablesByPline.SelectMany(
-                //     kvp => kvp.Value.itemNames.Zip(kvp.Value.itemIDs, (name, id) => new { Id = id, Name = name, ParentKey = kvp.Key }))
-                //     .ToList();
-
-                // // Sort by itemNames
-                // var sorted = flattened.OrderBy(x => x.Name).ToList();
-
-                // // Group back (if you need)
-                // var groupedBack = sorted.GroupBy(x => x.ParentKey)
-                //     .ToDictionary(g => g.Key, g => (itemIDs: g.Select(x => x.Id).ToArray(), itemNames: g.Select(x => x.Name).ToArray()));
-
-                ImGui.NewLine();
-                ImGui.Text("Select a design:");
-                if (ImGui.Combo("", ref curItemIndex, constructableNames, constructableNames.Length))
+                _newjobSelectionIndex = (_newjobSelectionIndex.pline, curItemIndex);
+                _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
+                _lastClickedJob = _newConJob;
+                _lastClickedDesign = _factionInfoDB?.IndustryDesigns[SelectedConstrucableID];
+                _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
+                _newJobCanAutoInstall = _lastClickedDesign?.GuiHints == ConstructableGuiHints.CanBeInstalled;
+                if(_lastClickedDesign is ComponentDesign)
                 {
-                    _newjobSelectionIndex = (_newjobSelectionIndex.pline, curItemIndex);
-                    _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
-                    _lastClickedJob = _newConJob;
-                    _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
-                    _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
-                    _newJobCanAutoInstall = _lastClickedDesign.GuiHints == ConstructableGuiHints.CanBeInstalled;
-                    if(_lastClickedDesign is ComponentDesign)
-                    {
-                        ComponentDesign cDesign = (ComponentDesign)_lastClickedDesign;
-                        // TODO: check the mount type and display options for the player to auto-install on
-                    }
+                    ComponentDesign cDesign = (ComponentDesign)_lastClickedDesign;
+                    // TODO: check the mount type and display options for the player to auto-install on
                 }
+            }
 
-                ImGui.NewLine();
-                ImGui.Text("Enter the quantity:");
-                if (ImGui.InputInt("##batchcount", ref _newJobbatchCount))
-                {
-                    if(_newJobbatchCount < 1)
-                        _newJobbatchCount = 1;
+            ImGui.NewLine();
+            ImGui.Text("Enter the quantity:");
+            if (ImGui.InputInt("##batchcount", ref _newJobbatchCount))
+            {
+                if(_newJobbatchCount < 1)
+                    _newJobbatchCount = 1;
 
-                    _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
-                }
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("The production line will move to the next job in the queue\nafter finishing the number of items requested.");
+                _newConJob.NumberOrdered = (ushort)_newJobbatchCount;
+            }
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("The production line will move to the next job in the queue\nafter finishing the number of items requested.");
 
-                if(_lastClickedJob != null)
-                    CostsDisplay(_lastClickedJob, state);
+            if(_lastClickedJob != null)
+                CostsDisplay(_lastClickedJob, state);
 
-                ImGui.Columns(1);
-                ImGui.NewLine();
-                ImGui.Checkbox("##repeat", ref _newJobRepeat);
+            ImGui.Columns(1);
+            ImGui.NewLine();
+            ImGui.Checkbox("##repeat", ref _newJobRepeat);
+            ImGui.SameLine();
+            ImGui.Text("Repeat this job?");
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("A repeat job will run until cancelled.");
+
+            if(_newJobCanAutoInstall)
+            {
+                // TODO: need to allow the player to select what to install the component on
+                // depending on the mount type in the component design
+                ImGui.Checkbox("##autoinstall", ref _newJobAutoInstall);
                 ImGui.SameLine();
-                ImGui.Text("Repeat this job?");
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("A repeat job will run until cancelled.");
+                ImGui.Text("Auto-install on completion?");
+            }
 
-                if(_newJobCanAutoInstall)
+            ImGui.NewLine();
+
+            if (ImGui.Button("Queue the job to " + _prodLines[_selectedProdLine].Name))
+            {
+                _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
+
+                if(_newJobCanAutoInstall && _newJobAutoInstall && _lastClickedDesign is ComponentDesign design)
                 {
-                    // TODO: need to allow the player to select what to install the component on
-                    // depending on the mount type in the component design
-                    ImGui.Checkbox("##autoinstall", ref _newJobAutoInstall);
-                    ImGui.SameLine();
-                    ImGui.Text("Auto-install on completion?");
+                    if(design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation))
+                    {
+                        _newConJob.InstallOn = Entity;
+                    }
+                    else if(design.ComponentMountType.HasFlag(ComponentMountType.ShipComponent)
+                        || design.ComponentMountType.HasFlag(ComponentMountType.ShipCargo)
+                        || design.ComponentMountType.HasFlag(ComponentMountType.Fighter)
+                        || design.ComponentMountType.HasFlag(ComponentMountType.Missile))
+                    {
+                        _newConJob.InstallOn = _newJobAutoInstallEntity;
+                    }
                 }
 
-                ImGui.NewLine();
-
-                if (ImGui.Button("Queue the job to " + _prodLines[_selectedProdLine].Name))
+                if(Entity != null)
                 {
-                    _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
-
-                    if(_newJobCanAutoInstall && _newJobAutoInstall && _lastClickedDesign is ComponentDesign design)
-                    {
-                        if(design.ComponentMountType.HasFlag(ComponentMountType.PlanetInstallation))
-                        {
-                            _newConJob.InstallOn = Entity;
-                        }
-                        else if(design.ComponentMountType.HasFlag(ComponentMountType.ShipComponent)
-                            || design.ComponentMountType.HasFlag(ComponentMountType.ShipCargo)
-                            || design.ComponentMountType.HasFlag(ComponentMountType.Fighter)
-                            || design.ComponentMountType.HasFlag(ComponentMountType.Missile))
-                        {
-                            _newConJob.InstallOn = _newJobAutoInstallEntity;
-                        }
-                    }
-
                     var cmd = IndustryOrder2.CreateNewJobOrder(_factionID, Entity, _selectedProdLine, _newConJob);
                     _newConJob.InitialiseJob((ushort)_newJobbatchCount, _newJobRepeat);
                     state.Game.OrderHandler.HandleOrder(cmd);
-
-                    // Reset the displayed construction job
-                    _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
-                    _lastClickedJob = _newConJob;
-                    _lastClickedDesign = _factionInfoDB.IndustryDesigns[SelectedConstrucableID];
                 }
 
+                // Reset the displayed construction job
+                _newConJob = new IndustryJob(state.Faction.GetDataBlob<FactionInfoDB>(), SelectedConstrucableID);
+                _lastClickedJob = _newConJob;
+                _lastClickedDesign = _factionInfoDB?.IndustryDesigns[SelectedConstrucableID];
             }
-
-            //ImGui.EndChild();
         }
 
         void CostsDisplay(JobBase selectedJob, GlobalUIState state)
@@ -448,7 +454,7 @@ namespace Pulsar4X.SDL2UI
 
                 foreach (var item in selectedJob.ResourcesRequiredRemaining)
                 {
-                    ICargoable cargoItem = state.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(item.Key);
+                    ICargoable? cargoItem = state.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(item.Key);
                     if (cargoItem == null)
                         cargoItem = state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[item.Key];
                     var totalCost = selectedJob.NumberOrdered * item.Value;
@@ -464,7 +470,7 @@ namespace Pulsar4X.SDL2UI
                     if(ImGui.IsItemHovered())
                         ImGui.SetTooltip("Total Cost = Cost Per Output * Quantity Ordered\n" + totalCost + " = " + item.Value + " * " + selectedJob.NumberOrdered);
                     ImGui.TableNextColumn();
-                    if (_volStorageDB != null)
+                    if (_volStorageDB != null && _factionInfoDB != null)
                     {
                         var stored = _volStorageDB.GetUnitsStored(cargoItem);
                         if(stored < totalCost)
@@ -483,7 +489,7 @@ namespace Pulsar4X.SDL2UI
                         {
                             if (ImGui.IsItemHovered())
                             {
-                                if (_factionInfoDB.IndustryDesigns.ContainsKey(cargoItem.UniqueID) || state.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.IsMineral(cargoItem.UniqueID))
+                                if (_factionInfoDB.IndustryDesigns.ContainsKey(cargoItem.UniqueID) || _factionInfoDB.Data.CargoGoods.IsMineral(cargoItem.UniqueID))
                                 {
                                     ImGui.SetTooltip("Not enough " + cargoItem.Name + " available on this colony.\nImport or produce some!");
                                 }
@@ -516,14 +522,15 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableSetupColumn("Total", ImGuiTableColumnFlags.None, 1f);
                 ImGui.TableHeadersRow();
 
+                var outputAmount = _lastClickedDesign?.OutputAmount ?? 0;
                 ImGui.TableNextColumn();
                 ImGui.Text("");
                 ImGui.SameLine();
-                ImGui.Text(_lastClickedDesign.Name);
+                ImGui.Text(_lastClickedDesign?.Name ?? "Unknown");
                 ImGui.TableNextColumn();
-                ImGui.Text(_lastClickedDesign.OutputAmount.ToString());
+                ImGui.Text(outputAmount.ToString());
                 ImGui.TableNextColumn();
-                ImGui.Text((_lastClickedDesign.OutputAmount * selectedJob.NumberOrdered).ToString());
+                ImGui.Text((outputAmount * selectedJob.NumberOrdered).ToString());
 
                 ImGui.EndTable();
             }
@@ -535,7 +542,7 @@ namespace Pulsar4X.SDL2UI
             ImGui.PushID(jobID.ToString());
             if(index > 0)
             {
-                if (ImGui.SmallButton("^"))
+                if (ImGui.SmallButton("^") && Entity != null)
                 {
                     var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, Entity, productionLineID, jobID, -1);
                     state.Game.OrderHandler.HandleOrder(cmd);
@@ -551,7 +558,7 @@ namespace Pulsar4X.SDL2UI
 
             if(index < count - 1)
             {
-                if (ImGui.SmallButton("v"))
+                if (ImGui.SmallButton("v") && Entity != null)
                 {
                     var cmd = IndustryOrder2.CreateChangePriorityOrder(_factionID, Entity, productionLineID, jobID, 1);
                     state.Game.OrderHandler.HandleOrder(cmd);
@@ -565,7 +572,7 @@ namespace Pulsar4X.SDL2UI
             }
 
             ImGui.SameLine();
-            if (ImGui.SmallButton("x"))
+            if (ImGui.SmallButton("x") && Entity != null)
             {
                 //new ConstructCancelJob(_uiState.Faction.Guid, _selectedEntity.Guid, _selectedEntity.StarSysDateTime, _selectedExistingConJob.JobID);
                 var cmd = IndustryOrder2.CreateCancelJobOrder(_factionID, Entity, productionLineID, jobID);

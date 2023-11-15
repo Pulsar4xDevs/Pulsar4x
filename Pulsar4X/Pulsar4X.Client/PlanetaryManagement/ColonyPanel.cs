@@ -22,12 +22,12 @@ namespace Pulsar4X.SDL2UI
         private IndustryAbilityDB _industryDB;
         private IndustryPannel2 _industryPannel;
 
-        CargoListPannelSimple _cargoList;
+        CargoListPanelSimple _cargoList;
         FactionDataStore _staticData;
         private ColonyPanel(FactionDataStore staticData, EntityState selectedEntity)
         {
             _selectedEntity = selectedEntity;
-            _cargoList = new CargoListPannelSimple(staticData, selectedEntity);
+            _cargoList = new CargoListPanelSimple(staticData, selectedEntity);
             _staticData = staticData;
             
         }
@@ -130,7 +130,7 @@ namespace Pulsar4X.SDL2UI
                 _industryPannel = null;
             }
             
-            _cargoList = new CargoListPannelSimple(_staticData, _selectedEntity);
+            _cargoList = new CargoListPanelSimple(_staticData, _selectedEntity);
             
 
         }
