@@ -74,7 +74,7 @@ namespace Pulsar4X.SDL2UI
         
         string _displayText;
         string _tooltipText = "";
-        OrbitOrderWiget _orbitWidget;
+        OrbitOrderWidget _orbitWidget;
         WarpMoveOrderWidget _moveWidget;
         bool _smMode;
 
@@ -227,13 +227,13 @@ namespace Pulsar4X.SDL2UI
 
             if (_orbitWidget != null)
             {
-                _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
+                _orbitWidget = new OrbitOrderWidget(TargetEntity.Entity);
                 _uiState.SelectedSysMapRender.UIWidgets[nameof(_orbitWidget)] = _orbitWidget;
  
             }
             else
             {
-                _orbitWidget = new OrbitOrderWiget(TargetEntity.Entity);
+                _orbitWidget = new OrbitOrderWidget(TargetEntity.Entity);
                 _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(_orbitWidget), _orbitWidget);
             }
             

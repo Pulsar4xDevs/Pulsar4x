@@ -16,7 +16,7 @@ namespace Pulsar4X.SDL2UI
         public IPosition? Position;
         public NameIcon? NameIcon;
         public IKepler? OrbitIcon;
-        public OrbitOrderWiget? DebugOrbitOrder;
+        public OrbitOrderWidget? DebugOrbitOrder;
         public bool IsDestroyed = false; //currently IsDestroyed = true if moved from one system to another, may need to revisit this. 
         public Dictionary<Type, BaseDataBlob> DataBlobs = new Dictionary<Type, BaseDataBlob>();
         public List<EntityChangeData> Changes = new List<EntityChangeData>();

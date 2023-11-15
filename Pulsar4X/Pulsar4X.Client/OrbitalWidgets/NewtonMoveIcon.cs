@@ -9,7 +9,6 @@ using SDL2;
 
 namespace Pulsar4X.SDL2UI
 {
-    
     /// <summary>
     /// The key parts of this are taken from the paper
     /// "Drawing ellipses, hyperbolas or parabolas with a
@@ -19,9 +18,9 @@ namespace Pulsar4X.SDL2UI
     public class NewtonMoveIcon : Icon, IUpdateUserSettings, IKepler
     {
         //protected EntityManager _mgr;
-        NewtonMoveDB _newtonMoveDB;
-        PositionDB _parentPosDB;
-        PositionDB _myPosDB;
+        NewtonMoveDB? _newtonMoveDB;
+        PositionDB? _parentPosDB;
+        PositionDB? _myPosDB;
         double _sgp;
         //_taIndex is the point closest to the orbiting object, it's used to 
         int _taIndex;
@@ -33,12 +32,12 @@ namespace Pulsar4X.SDL2UI
         //protected float b;
         //Points is the world coordinate points of an ellipse or hyperbola.
         //eccentricity, focal offset, and longitude of the periapsis are calculated when populating this array.
-        protected Orbital.Vector2[] _points; 
+        protected Orbital.Vector2[] _points = new Vector2[0];
         //_drawpoints is the translated resized screen/pixel location of the above ellipse points. 
         //the above Points are adjusted for camera position and zoom levels when populating this array, as these values can change between frames.
         //[0] is the position of the orbiting object and subsequent positions trail behind the velocity and drawn with decreasing alpha. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
-        
+
         //for drawing the direction of thrust when newton thrusting (world coordinates)
         private Orbital.Vector2[] _thrustLinePoints = new Vector2[2];
         //above adjusted for camera position and zoom. 
@@ -49,7 +48,7 @@ namespace Pulsar4X.SDL2UI
         //user adjustable variables:
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
         internal UserOrbitSettings.OrbitTrajectoryType TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Unknown;
-        protected List<List<UserOrbitSettings>> _userOrbitSettingsMtx;
+        protected List<List<UserOrbitSettings>> _userOrbitSettingsMtx = new();
         protected UserOrbitSettings _userSettings { get { return _userOrbitSettingsMtx[(int)BodyType][(int)TrajectoryType]; } }
 
         //change after user makes adjustments:
@@ -64,7 +63,6 @@ namespace Pulsar4X.SDL2UI
 
         public NewtonMoveIcon(KeplerElements ke, Vector3 position) : base(position)
         {
-            
         }
 
         public NewtonMoveIcon(EntityState entityState, List<List<UserOrbitSettings>> settings) : base(entityState.Entity.GetDataBlob<NewtonMoveDB>().SOIParent.GetDataBlob<PositionDB>())
@@ -84,14 +82,12 @@ namespace Pulsar4X.SDL2UI
 
             _sgp = GeneralMath.StandardGravitationalParameter(myMass + parentMass);
             _ke = _newtonMoveDB.GetElements();
-            
-            
+
             UpdateUserSettings();
             OnPhysicsUpdate();
         }
         public void UpdateUserSettings()
         {
-            
             //if this is the case, we need to rebuild the whole set of points. 
             if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
             {
@@ -120,6 +116,9 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         void SetTrueAnomalyIndex()
         {
+            if(_myPosDB == null)
+                throw new NullReferenceException();
+
             Orbital.Vector2 pos = new Vector2(_myPosDB.RelativePosition.X, _myPosDB.RelativePosition.Y);
             double minDist = (pos - _points[_taIndex]).Length();
 
@@ -135,7 +134,7 @@ namespace Pulsar4X.SDL2UI
         }
         public override void OnPhysicsUpdate()
         {
-            if (_newtonMoveDB.OwningEntity == null) //There's a threaded race condition here which will cause a null...
+            if (_newtonMoveDB == null || _newtonMoveDB.OwningEntity == null) //There's a threaded race condition here which will cause a null...
                 return;
             var ke = _newtonMoveDB.GetElements(); //...cause a null ref exception inside this call. 
             if (ke.Eccentricity != _ke.Eccentricity)
@@ -143,7 +142,6 @@ namespace Pulsar4X.SDL2UI
                 _ke = ke;
                 CreatePointArray();
             }
-            
 
             if (_newtonMoveDB.ManuverDeltaVLen > 0)
             {
@@ -173,19 +171,21 @@ namespace Pulsar4X.SDL2UI
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
                 CreateHyperbolicPoints();
             }
-            
-            if(_newtonMoveDB.ManuverDeltaV.Length() > 0)
+
+            if(_newtonMoveDB != null && _newtonMoveDB.ManuverDeltaV.Length() > 0)
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.NewtonionThrust;
             SetTrueAnomalyIndex();
         }
 
         private void CreateHyperbolicPoints()
         {
+            if(_newtonMoveDB == null || _myPosDB == null)
+                throw new NullReferenceException();
+
             Vector3 vel = _newtonMoveDB.CurrentVector_ms;
             Vector3 pos = _myPosDB.RelativePosition;
             //Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
 
-            
             double e = _ke.Eccentricity; 
             double r = pos.Length();
             double v = vel.Length();
@@ -194,8 +194,8 @@ namespace Pulsar4X.SDL2UI
 
             double a1 = 1 / (2 / r - Math.Pow(v, 2) / _sgp);    //semiMajor Axis
             double b1 = -a * Math.Sqrt(Math.Pow(e, 2) - 1);     //semiMinor Axis
-           Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
-           double e1 = eccentVector.Length();         
+            Vector3 eccentVector = OrbitMath.EccentricityVector(_sgp, pos, vel);
+            double e1 = eccentVector.Length();
 
             double linierEccentricity = e * a;
             double soi = _newtonMoveDB.SOIParent.GetSOI_m();
@@ -207,7 +207,7 @@ namespace Pulsar4X.SDL2UI
             double angleToSOIPoint = Math.Abs(EllipseMath.TrueAnomalyAtRadus(soi, p, e));
             double p1 = EllipseMath.SemiLatusRectum(a1, e1);
             double ang1 = Math.Abs(EllipseMath.TrueAnomalyAtRadus(soi, p1, e1));
-            
+
             //the angle used in the calculation is not from the focal point, but from the center( x=a y=0)
             //angleToSOIPoint however is from the focal point so we need to translate from that frame of reference to one from the center. 
 
@@ -215,12 +215,12 @@ namespace Pulsar4X.SDL2UI
             double x = Math.Abs(Math.Cos(angleToSOIPoint) * soi);
             double x2 = linierEccentricity + x;
             double thetaMax = Math.Atan2(y, x2);
-            
+
             //make it an odd number of points
             if (_numberOfDrawnPoints % 2 == 0)
                 _numberOfDrawnPoints += 1;
             int ctrIndex = _numberOfDrawnPoints / 2;
-            
+
             double dtheta = thetaMax / (ctrIndex - 1);
             double fooA = Math.Cosh(dtheta);
             double fooB = (a / b) * Math.Sinh(dtheta);
@@ -246,15 +246,14 @@ namespace Pulsar4X.SDL2UI
             var mtxrt = Matrix.IDRotate(_lop);
             var mtx = mtxtr * mtxrt;
             var mtxmr =  Matrix.IDMirror(true, false) * mtx;
-            
+
             if(_points is null || _points.Length != _numberOfEllipsePoints)
                 _points = new Orbital.Vector2[_numberOfEllipsePoints];
             if (_drawPoints.Length != _numberOfDrawnPoints)
                 _drawPoints = new SDL.SDL_Point[_numberOfDrawnPoints];
-            
+
             _points[ctrIndex] = mtx.TransformToVector2(points[0]); //periapsis
-            
-            
+
             int j = ctrIndex + 1;
             int k = ctrIndex - 1;
             for (int i = 1; i < ctrIndex + 1; i++)
@@ -296,14 +295,12 @@ namespace Pulsar4X.SDL2UI
 
             double x = a * ct;
             double y = a * st;
-            
+
             //we want the focal point of the ellipse to be at the 'center'  
             //linier ecccentricity is the offset ie the distance between focal and center.
             //we have to rotate the offset since we're already rotating the ellipse above.
             double xc = Math.Cos(_lop) * -linierEccentricity;
             double yc = Math.Sin(_lop) * -linierEccentricity;
-            
-            
 
             for (int i = 0; i < _numberOfEllipsePoints; i++)
             {
@@ -315,14 +312,13 @@ namespace Pulsar4X.SDL2UI
                 x = fooA * x + fooB * y;
                 y = fooC * x + fooD * y;
             }
-            
-
         }
-        
+
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
+            if(_myPosDB == null)
+                throw new NullReferenceException();
 
-            
             //resize from m to au because zoom is au
             //resize for zoom
             //translate to position
@@ -331,17 +327,16 @@ namespace Pulsar4X.SDL2UI
             var scAU = Matrix.IDScale(6.6859E-12, 6.6859E-12);
             var scZm = Matrix.IDScale(camera.ZoomLevel, camera.ZoomLevel);
             var mtrx = scAU * scZm *  trns;
-            
-            
+
             int index = _taIndex;
             var spos = camera.ViewCoordinateV2_m(_myPosDB.AbsolutePosition);
 
             //_drawPoints[0] = mtrx.TransformToSDL_Point(_bodyrelativePos.X, _bodyrelativePos.Y);
-            // [0] is the position of the object. 
+            // [0] is the position of the object.
             _drawPoints[0] = new SDL.SDL_Point(){x = (int)spos.X, y = (int)spos.Y};
-            //we should have one less segment than points. 
+            //we should have one less segment than points.
             //we should have more Points than _drawPoints. (Points is a full ellipse, we normaly only draw an arc)
-            for (int i = 1; i < _numberOfDrawnPoints; i++) 
+            for (int i = 1; i < _numberOfDrawnPoints; i++)
             {
                 if (index < _numberOfEllipsePoints - 1)
 
@@ -365,11 +360,10 @@ namespace Pulsar4X.SDL2UI
                 _drawThrustLinePoints[i] = mtrx2.TransformToSDL_Point(_thrustLinePoints[i].X, _thrustLinePoints[i].Y);
             }
         }
-        
+
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
             //now we draw a line between each of the points in the translatedPoints[] array.
-            
             if (_drawPoints.Length < _numberOfDrawSegments - 1)
                 return;//why was this? maybe prevent a race condition or something?
             float alpha = _userSettings.MaxAlpha;
@@ -383,11 +377,10 @@ namespace Pulsar4X.SDL2UI
             byte g = 50;
             byte b = 200;
             byte a = 255;
-            
-            //now draw the thrust line. 
+
+            //now draw the thrust line.
             SDL.SDL_SetRenderDrawColor(rendererPtr, r, g, b, a);
             SDL.SDL_RenderDrawLine(rendererPtr, _drawThrustLinePoints[0].x, _drawThrustLinePoints[0].y, _drawThrustLinePoints[1].x, _drawThrustLinePoints[1].y);
-            
         }
 
 
@@ -411,17 +404,11 @@ namespace Pulsar4X.SDL2UI
     /// </summary>
     public class KeIcon : Icon, IUpdateUserSettings
     {
-
-        //double _sgp;
-        //private double _sgpAU;
-        int _index = 0;
         int _numberOfPoints;
         //internal float a;
         //protected float b;
-        protected Orbital.Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
+        protected Orbital.Vector2[] _points = new Vector2[0]; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
         protected SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
-        Vector2[] _debugPoints;
-        SDL.SDL_Point[] _debugDrawPoints = new SDL.SDL_Point[0];
 
         //user adjustable variables:
         internal UserOrbitSettings.OrbitBodyType BodyType = UserOrbitSettings.OrbitBodyType.Unknown;
@@ -434,8 +421,6 @@ namespace Pulsar4X.SDL2UI
         protected int _numberOfDrawSegments; //this is now many segments get drawn in the ellipse, ie if the _ellipseSweepAngle or _numberOfArcSegments are less, less will be drawn.
         protected float _segmentArcSweepRadians; //how large each segment in the drawn portion of the ellipse.  
         protected float _alphaChangeAmount;
-
-        private double _dv = 0;
         private KeplerElements _ke;
         private StateVectors _sv;
         private double _parentSOI_m = 0;
@@ -463,7 +448,6 @@ namespace Pulsar4X.SDL2UI
 
         public void UpdateUserSettings()
         {
-            
             //if this is the case, we need to rebuild the whole set of points. 
             if (_userSettings.NumberOfArcSegments != _numberOfArcSegments)
             {
@@ -502,16 +486,13 @@ namespace Pulsar4X.SDL2UI
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
             else
                 TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Elliptical;
-                
+
             CreatePointArray();
-            SetTrueAnomalyIndex();   
-            
+            SetTrueAnomalyIndex();
         }
 
         void SetTrueAnomalyIndex()
         {
-
-
             Orbital.Vector2 pos = new Vector2(_sv.Position.X, _sv.Position.Y);
             double minDist = (pos - _points[_taIndex]).Length();
 
@@ -525,7 +506,6 @@ namespace Pulsar4X.SDL2UI
                 }
             }
         }
-        
 
         public override void OnPhysicsUpdate()
         {
@@ -536,7 +516,7 @@ namespace Pulsar4X.SDL2UI
                     TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Hyperbolic;
                 else
                     TrajectoryType = UserOrbitSettings.OrbitTrajectoryType.Elliptical;
-                
+
                 CreatePointArray();
             }
         }
@@ -557,7 +537,6 @@ namespace Pulsar4X.SDL2UI
 
         private void CreateHyperbolicPoints()
         {
-            
             double e = _ke.Eccentricity; 
             double r = _sv.Position.Length();
             double v = _sv.Velocity.Length();
@@ -570,10 +549,9 @@ namespace Pulsar4X.SDL2UI
                 _ke.StandardGravParameter, 
                 _sv.Position, 
                 new Vector3(_sv.Velocity.X, _sv.Velocity.Y, 0));
-            double e1 = eccentVector.Length();         
+            double e1 = eccentVector.Length();
 
             double linierEccentricity = e * a;
-            
 
             //longditudeOfPeriapsis;
             double _lop = _ke.AoP + _ke.LoAN;
@@ -582,7 +560,7 @@ namespace Pulsar4X.SDL2UI
             double angleToSOIPoint = Math.Abs(EllipseMath.TrueAnomalyAtRadus(_parentSOI_m, p, e));
             double p1 = EllipseMath.SemiLatusRectum(a1, e1);
             double ang1 = Math.Abs(EllipseMath.TrueAnomalyAtRadus(_parentSOI_m, p1, e1));
-            
+
             //the angle used in the calculation is not from the focal point, but from the center( x=a y=0)
             //angleToSOIPoint however is from the focal point so we need to translate from that frame of reference to one from the center. 
 
@@ -590,12 +568,12 @@ namespace Pulsar4X.SDL2UI
             double x = Math.Abs(Math.Cos(angleToSOIPoint) * _parentSOI_m);
             double x2 = linierEccentricity + x;
             double thetaMax = Math.Atan2(y, x2);
-            
+
             //make it an odd number of points
             if (_numberOfPoints % 2 == 0)
                 _numberOfPoints += 1;
             int ctrIndex = _numberOfPoints / 2;
-            
+
             double dtheta = thetaMax / (ctrIndex - 1);
             double fooA = Math.Cosh(dtheta);
             double fooB = (a / b) * Math.Sinh(dtheta);
@@ -621,12 +599,10 @@ namespace Pulsar4X.SDL2UI
             var mtxrt = Matrix.IDRotate(_lop);
             var mtx = mtxtr * mtxrt;
             var mtxmr =  Matrix.IDMirror(true, false) * mtx;
-            
-            
+
             _points = new Orbital.Vector2[_numberOfPoints];
             _points[ctrIndex] = mtx.TransformToVector2(points[0]); //periapsis
-            
-            
+
             int j = ctrIndex + 1;
             int k = ctrIndex - 1;
             for (int i = 1; i < ctrIndex + 1; i++)
@@ -648,7 +624,7 @@ namespace Pulsar4X.SDL2UI
             double _lop = _ke.AoP + _ke.LoAN;
 
             double dTheta = 2 * Math.PI / _numberOfPoints; // _userSettings.EllipseSweepRadians / (_numberOfPoints - 1);
-            
+
             double ct = Math.Cos(_lop);
             double st = Math.Sin(_lop);
             double cdp = Math.Cos(dTheta);
@@ -662,13 +638,13 @@ namespace Pulsar4X.SDL2UI
 
             double x = a * ct;
             double y = a * st;
-            
+
             //we want the focal point of the ellipse to be at the 'center'  
             //linier ecccentricity is the offset ie the distance between focal and center.
             //we have to rotate the offset since we're already rotating the ellipse above.
             double xc = Math.Cos(_lop) * -linierEccentricity;
             double yc = Math.Sin(_lop) * -linierEccentricity;
-            
+
             _points = new Orbital.Vector2[_numberOfPoints];
 
             for (int i = 0; i < _numberOfPoints; i++)
@@ -682,17 +658,12 @@ namespace Pulsar4X.SDL2UI
                 y = fooC * x + fooD * y;
             }
         }
-        
+
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
         {
-
-            
             //resize from m to au because zoom is au
             //resize for zoom
             //translate to position
-            
-            
-            
 
             ViewScreenPos = camera.ViewCoordinate_m(WorldPosition_m);
             var mir = Matrix.IDMirror(true, false);
@@ -704,7 +675,7 @@ namespace Pulsar4X.SDL2UI
             _drawPoints = new SDL.SDL_Point[_numberOfPoints + 1];
 
             int shapeCount = Shapes.Count;
-            DrawShapes = new Shape[shapeCount];            
+            DrawShapes = new Shape[shapeCount];
             if (DebugShowCenter)
             {
                 DrawShapes = new Shape[shapeCount+1];
@@ -726,16 +697,14 @@ namespace Pulsar4X.SDL2UI
                     else
                         index = 0;
                    _drawPoints[i] = mtrx.TransformToSDL_Point(_points[index].X, _points[index].Y);
-                
                 }
             }
             else
             {
                 _drawPoints = mtrx.TransformToSDL_Point(_points);
             }
-            
         }
-        
+
         public override void Draw(IntPtr rendererPtr, Camera camera)
         {
             //now we draw a line between each of the points in the translatedPoints[] array.

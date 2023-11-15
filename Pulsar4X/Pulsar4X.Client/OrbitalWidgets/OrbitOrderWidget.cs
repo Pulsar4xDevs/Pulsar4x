@@ -4,8 +4,6 @@ using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
 using Pulsar4X.Orbital;
 using SDL2;
-using ImGuiNET;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Pulsar4X.SDL2UI
@@ -25,7 +23,7 @@ namespace Pulsar4X.SDL2UI
     /// On ajustments to settings from the user, we re-calculate needed info for that. (if the number of segments change, we have to recreate the point indiex so we run setup in that case) 
     /// Currently we're not distingishing between clockwise and counter clockwise orbits, not sure if the engine even does counterclockwise, will have to check that and fix. 
     /// </summary>
-    public class OrbitOrderWiget : Icon
+    public class OrbitOrderWidget : Icon
     {
 
         enum SetModes
@@ -49,8 +47,8 @@ namespace Pulsar4X.SDL2UI
 
         double _linearEccentricity_m; //distance from the center of the ellpse to one of the focal points. 
 
-        Vector2[] _points; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
-        SDL.SDL_Point[] _drawPoints;
+        Vector2[] _points = new Vector2[0]; //we calculate points around the ellipse and add them here. when we draw them we translate all the points. 
+        SDL.SDL_Point[] _drawPoints = new SDL.SDL_Point[0];
         //sphere of influance radius, if the entity is outside this, then this is affected by the parent (or other) gravitational body
         double _soiWorldRadius_AU; 
         float _soiViewRadius;
@@ -95,7 +93,7 @@ namespace Pulsar4X.SDL2UI
         double _trueAnomaly = 0;
         #endregion
 
-        internal OrbitOrderWiget(Entity targetEntity) : base(targetEntity.GetDataBlob<PositionDB>())
+        internal OrbitOrderWidget(Entity targetEntity) : base(targetEntity.GetDataBlob<PositionDB>())
         {
 
             _bodyPositionDB = targetEntity.GetDataBlob<PositionDB>();
@@ -111,7 +109,7 @@ namespace Pulsar4X.SDL2UI
 
         }
 
-        public OrbitOrderWiget(OrbitDB orbitDB): base(orbitDB.Parent.GetDataBlob<PositionDB>())
+        public OrbitOrderWidget(OrbitDB orbitDB): base(orbitDB.Parent.GetDataBlob<PositionDB>())
         {
             var targetEntity = orbitDB.Parent;
             _bodyPositionDB = targetEntity.GetDataBlob<PositionDB>();

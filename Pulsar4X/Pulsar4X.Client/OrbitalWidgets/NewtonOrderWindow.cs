@@ -12,7 +12,7 @@ namespace Pulsar4X.SDL2UI
     {
 
         EntityState OrderingEntity;
-        OrbitDB _orderEntityOrbit;
+        OrbitDB? _orderEntityOrbit;
 
         float _maxDV;
         float _progradeDV;
@@ -51,10 +51,8 @@ namespace Pulsar4X.SDL2UI
 
         string _displayText;
         string _tooltipText = "";
-        OrbitOrderWiget _orbitWidget;
-        
-        private NewtonionOrderUI _newtonUI;
-        
+        OrbitOrderWidget? _orbitWidget;
+        private NewtonionOrderUI? _newtonUI;
         private double _eccentricity;
         private double Eccentricity
         {
@@ -67,12 +65,13 @@ namespace Pulsar4X.SDL2UI
             } 
         }
 
-        private ChangeCurrentOrbitWindow(EntityState entity)
+        private ChangeCurrentOrbitWindow(EntityState entityState)
         {
 
             _flags = ImGuiWindowFlags.AlwaysAutoResize;
 
-            OnEntityChange(entity);
+            OrderingEntity = entityState;
+            OnEntityChange(entityState);
 
             _displayText = "Change Orbit: " + OrderingEntity.Name;
             _tooltipText = "Expend Dv to change orbit";
@@ -104,6 +103,9 @@ namespace Pulsar4X.SDL2UI
             _actionDateTime = _uiState.PrimarySystemDateTime;
             _orderEntityOrbit = entity.Entity.GetDataBlob<OrbitDB>();
 
+            if(_orderEntityOrbit.Parent == null)
+                throw new NullReferenceException();
+
             _massParentBody = _orderEntityOrbit.Parent.GetDataBlob<MassVolumeDB>().MassDry;
             _massOrderingEntity = OrderingEntity.Entity.GetDataBlob<MassVolumeDB>().MassDry;
             _stdGravParam_m = GeneralMath.StandardGravitationalParameter(_massOrderingEntity + _massParentBody);
@@ -113,40 +115,35 @@ namespace Pulsar4X.SDL2UI
             _orbitalVelocityAtChange_m = new Vector3(velAtChange2d.X, velAtChange2d.Y, 0);
             _originalAngle = Math.Atan2(_orbitalVelocityAtChange_m.X, _orbitalVelocityAtChange_m.Y);
 
-            
+
             var newtondb = entity.Entity.GetDataBlob<NewtonThrustAbilityDB>();
             _newtonUI = new NewtonionOrderUI(newtondb, _massOrderingEntity);
-            
-            
-            
+
             IsActive = true;
         }
 
         internal override void Display()
         {
-            if (IsActive) 
-            { 
-                if (ImGui.Begin(_displayText, ref IsActive, _flags))
+            if(!IsActive)
+                return;
+
+            if (ImGui.Begin(_displayText, ref IsActive, _flags))
+            {
+                //put calcs that needs refreshing each frame in here. (ie calculations from mouse cursor position)
+                if (_orbitWidget == null && _orderEntityOrbit != null && _orderEntityOrbit.Parent != null)
                 {
-                    //put calcs that needs refreshing each frame in here. (ie calculations from mouse cursor position)
-                    if (_orbitWidget == null)
-                    {
-                        _orbitWidget = new OrbitOrderWiget(_orderEntityOrbit.Parent);
-                        _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(OrbitOrderWiget), _orbitWidget);
-                    }
-
-
-                    if(_newtonUI.Display())
-                        Calcs();
-                    
-                    
-
-                    if (ImGui.Button("Action Command"))
-                        ActionCmd();
-
-
-                    //ImGui.SetTooltip(_tooltipText);
+                    _orbitWidget = new OrbitOrderWidget(_orderEntityOrbit.Parent);
+                    _uiState.SelectedSysMapRender.UIWidgets.Add(nameof(OrbitOrderWidget), _orbitWidget);
                 }
+
+
+                if(_newtonUI != null && _newtonUI.Display())
+                    Calcs();
+
+                if (ImGui.Button("Action Command"))
+                    ActionCmd();
+
+                //ImGui.SetTooltip(_tooltipText);
             }
         }
 
@@ -154,7 +151,7 @@ namespace Pulsar4X.SDL2UI
         public override void OnSystemTickChange(DateTime newDate)
         {
 
-            if (_actionDateTime < newDate)
+            if (_actionDateTime < newDate && _orderEntityOrbit != null)
             { 
                 _actionDateTime = newDate;
                 _positonAtChange_m = _orderEntityOrbit.GetPosition( _actionDateTime);
@@ -173,7 +170,9 @@ namespace Pulsar4X.SDL2UI
 
         void Calcs()
         {
-       
+            if(_newtonUI == null || _orbitWidget == null)
+                throw new NullReferenceException();
+
             //double x = (_radialDV * Math.Cos(_originalAngle)) - (_progradeDV * Math.Sin(_originalAngle));
             //double y = (_radialDV * Math.Sin(_originalAngle)) + (_progradeDV * Math.Cos(_originalAngle));
             _deltaV_MS = _newtonUI.DeltaV; //new Orbital.Vector3(x, y, 0);
@@ -181,12 +180,10 @@ namespace Pulsar4X.SDL2UI
 
             _newOrbitalVelocity_m = _orbitalVelocityAtChange_m + _deltaV_MS;
             _newOrbitalSpeed_m = _newOrbitalVelocity_m.Length();
-            
             _newAngle = Math.Atan2(_newOrbitalVelocity_m.X, _newOrbitalVelocity_m.Y);
 
 
             _ke_m = OrbitMath.KeplerFromPositionAndVelocity(_stdGravParam_m, _positonAtChange_m, _newOrbitalVelocity_m, _actionDateTime);
-             
 
             _orbitWidget.SetParametersFromKeplerElements(_ke_m, _positonAtChange_m);
 
@@ -203,7 +200,7 @@ namespace Pulsar4X.SDL2UI
             IsActive = false;
             if (_orbitWidget != null)
             {
-                _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(OrbitOrderWiget));
+                _uiState.SelectedSysMapRender.UIWidgets.Remove(nameof(OrbitOrderWidget));
                 _orbitWidget = null;
             }
 
