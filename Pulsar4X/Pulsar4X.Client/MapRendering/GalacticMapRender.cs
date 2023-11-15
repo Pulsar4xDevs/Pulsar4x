@@ -3,8 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using ImGuiSDL2CS;
 using SDL2;
-using Pulsar4X.Engine;
-using Pulsar4X.Extensions;
 using Pulsar4X.Datablobs;
 
 namespace Pulsar4X.SDL2UI
@@ -17,9 +15,15 @@ namespace Pulsar4X.SDL2UI
         Dictionary<string, StarIcon> StarIcons = new ();
         ConcurrentDictionary<string, NameIcon> _nameIcons = new ();
         ImGuiSDL2CSWindow _window;
-        internal string CapitolSysMap { get; set; }
-        internal string SelectedStarSysGuid { get; set; }
-        internal SystemMapRendering SelectedSysMapRender { get { return RenderedMaps[SelectedStarSysGuid]; } }
+        internal string? CapitolSysMap { get; set; }
+        internal string? SelectedStarSysGuid { get; set; }
+        internal SystemMapRendering? SelectedSysMapRender 
+        {
+            get
+            {
+                return SelectedStarSysGuid == null ? null : RenderedMaps[SelectedStarSysGuid];
+            }
+        }
         Camera _camera;
         IntPtr _renderPtr;
 
@@ -85,14 +89,12 @@ namespace Pulsar4X.SDL2UI
         void _state_EntityClickedEvent(EntityState entityState, MouseButtons mouseButton)
         {
             var sysGuid = entityState.StarSysGuid;
-            if(SelectedStarSysGuid != sysGuid && RenderedMaps.ContainsKey(sysGuid))
+            if(!string.IsNullOrEmpty(sysGuid) && SelectedStarSysGuid != sysGuid && RenderedMaps.ContainsKey(sysGuid))
             {
                 SelectedStarSysGuid = sysGuid;
             }
 
         }
-
-
 
         internal void DrawNameIcons()
         {
@@ -153,7 +155,7 @@ namespace Pulsar4X.SDL2UI
             }
             else// only draw the systemmap.
             {
-                if (SelectedStarSysGuid.IsNotNullOrEmpty())
+                if (!string.IsNullOrEmpty(SelectedStarSysGuid))
                     RenderedMaps[SelectedStarSysGuid].Draw();
             }
 
@@ -195,7 +197,7 @@ namespace Pulsar4X.SDL2UI
         int _cellSize;
         int _gridWidth;
         int _gridHeight;
-        GridItems[] _gridItems;
+        GridItems[] _gridItems = new GridItems[1];
         struct GridItems
         {
             internal Guid[] itemGuids;

@@ -11,29 +11,28 @@ using Pulsar4X.Engine.Designs;
 using Pulsar4X.SDL2UI;
 using Vector2 = System.Numerics.Vector2;
 
-
 namespace Pulsar4X.ImGuiNetUI.EntityManagement
 {
 
-    public class IndustryPannel2 : UpdateWindowState
+    public class IndustryPanel : UpdateWindowState
     {
         private int _factionID;
         private FactionInfoDB _factionInfoDB;
         Dictionary<string, (string[] itemIDs, string[] itemNames) > _contructablesByPline = new ();
-        private IndustryJob _newConJob;
+        private IndustryJob? _newConJob;
         private (string pline, int item) _newjobSelectionIndex = (String.Empty, 0);
         private int _newJobbatchCount = 1;
         private bool _newJobRepeat = false;
         private bool _newJobAutoInstall = true;
-        private Dictionary<string,IndustryAbilityDB.ProductionLine> _prodLines;
+        private Dictionary<string,IndustryAbilityDB.ProductionLine> _prodLines = new();
 
-        private string _selectedProdLine;
+        private string? _selectedProdLine;
         private int _selectedExistingIndex = -1;
-        private IndustryJob _selectedExistingConJob
+        private IndustryJob? _selectedExistingConJob
         {
             get
             {
-                if (_selectedProdLine != String.Empty
+                if (!string.IsNullOrEmpty(_selectedProdLine)
                     && _selectedExistingIndex > -1
                     && _prodLines[_selectedProdLine].Jobs.Count > _selectedExistingIndex)
                 {
@@ -44,8 +43,8 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             }
         }
 
-        private IndustryJob _lastClickedJob { get; set; }
-        private IConstructableDesign _lastClickedDesign;
+        private IndustryJob? _lastClickedJob { get; set; }
+        private IConstructableDesign? _lastClickedDesign;
 
         private Entity _selectedEntity;
         private IndustryAbilityDB _industryDB;
@@ -53,7 +52,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
 
 
-        public IndustryPannel2(GlobalUIState state, Entity selectedEntity, IndustryAbilityDB industryDB)
+        public IndustryPanel(GlobalUIState state, Entity selectedEntity, IndustryAbilityDB industryDB)
         {
 
             _state = state;
@@ -215,6 +214,9 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
 
         void EditButtonsDisplay()
         {
+            if(string.IsNullOrEmpty(_selectedProdLine) || _lastClickedJob == null)
+                throw new NullReferenceException();
+
             //ImGui.BeginChild("Buttons", new Vector2(116, 100), true, ImGuiWindowFlags.ChildWindow);
             ImGui.BeginGroup();
 
@@ -299,7 +301,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
         void NewJobDisplay()
         {
             //ImGui.BeginChild("InitialiseJob", new Vector2(404, 84), true, ImGuiWindowFlags.ChildWindow);
-            if(_newjobSelectionIndex.pline != String.Empty)
+            if(_newjobSelectionIndex.pline != String.Empty && !string.IsNullOrEmpty(_selectedProdLine))
             {
                 int curItemIndex = _newjobSelectionIndex.item;
 
@@ -351,7 +353,7 @@ namespace Pulsar4X.ImGuiNetUI.EntityManagement
             ImGui.NextColumn();
             foreach (var item in selectedJob.ResourcesRequiredRemaining)
             {
-                ICargoable cargoItem = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(item.Key);
+                ICargoable? cargoItem = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(item.Key);
                 if (cargoItem == null)
                     cargoItem = _state.Faction.GetDataBlob<FactionInfoDB>().ComponentDesigns[item.Key];
                 ImGui.Text(cargoItem.Name);

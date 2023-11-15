@@ -67,9 +67,9 @@ namespace Pulsar4X.SDL2UI
     internal class SystemMapRendering : UpdateWindowState
     {
         GlobalUIState _state;
-        SystemSensorContacts _sensorMgr;
-        ConcurrentQueue<EntityChangeData> _sensorChanges;
-        SystemState _sysState;
+        SystemSensorContacts? _sensorMgr;
+        ConcurrentQueue<EntityChangeData>? _sensorChanges;
+        SystemState? _sysState;
         Camera _camera;
         internal IntPtr windowPtr;
         internal IntPtr surfacePtr;
@@ -85,7 +85,7 @@ namespace Pulsar4X.SDL2UI
         internal List<IDrawData> SelectedEntityExtras = new List<IDrawData>();
         internal Vector2 GalacticMapPosition = new Vector2();
         //internal SystemMap_DrawableVM SysMap;
-        Entity _faction;
+        Entity? _faction;
 
         internal SystemMapRendering(ImGuiSDL2CSWindow window, GlobalUIState state)
         {
@@ -106,7 +106,7 @@ namespace Pulsar4X.SDL2UI
 
         internal void SetSystem(StarSystem starSys)
         {
-            if (_sysState != null)
+            if (_sysState != null && _faction != null && _sensorChanges != null)
             {
                 _sysState.StarSystem.GetSensorContacts(_faction.Id).Changes.Unsubscribe(_sensorChanges);
 
@@ -119,21 +119,13 @@ namespace Pulsar4X.SDL2UI
                 _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
             }
 
-
             _faction = _state.Faction;
-
             _sensorMgr = starSys.GetSensorContacts(_faction.Id);
-
-
             _sensorChanges = _sensorMgr.Changes.Subscribe();
             foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
             {
                 AddIconable(entityItem);
             }
-
-            //_uiState.LastClickedEntity = _sysState.EntityStates.Values.ElementAt(0);
-
-
         }
 
 
@@ -206,10 +198,10 @@ namespace Pulsar4X.SDL2UI
         void RemoveIconable(int entityGuid)
         {
             _testIcons.TryRemove(entityGuid, out var testIcon);
-            _entityIcons.TryRemove(entityGuid, out IDrawData entityIcon);
-            _orbitRings.TryRemove(entityGuid, out IDrawData orbitIcon);
+            _entityIcons.TryRemove(entityGuid, out var entityIcon);
+            _orbitRings.TryRemove(entityGuid, out var orbitIcon);
             _moveIcons.TryRemove(entityGuid, out var moveIcon);
-            _nameIcons.TryRemove(entityGuid, out NameIcon nameIcon);
+            _nameIcons.TryRemove(entityGuid, out var nameIcon);
         }
 
 
@@ -240,7 +232,7 @@ namespace Pulsar4X.SDL2UI
 
                         if (!orbit.IsStationary)
                         {
-                            if (_sysState.EntityStatesWithPosition.ContainsKey(changeData.Entity.Id))
+                            if (_sysState != null && _sysState.EntityStatesWithPosition.ContainsKey(changeData.Entity.Id))
                                 entityState = _sysState.EntityStatesWithPosition[changeData.Entity.Id];
                             else
                                 entityState = new EntityState(changeData.Entity) { Name = "Unknown" };
@@ -280,22 +272,18 @@ namespace Pulsar4X.SDL2UI
                     if (changeData.Datablob is OrbitDB)
                     {
 
-                        _orbitRings.TryRemove(changeData.Entity.Id, out IDrawData foo);
+                        _orbitRings.TryRemove(changeData.Entity.Id, out var foo);
                     }
                     if (changeData.Datablob is WarpMovingDB)
                     {
-                        _moveIcons.TryRemove(changeData.Entity.Id, out IDrawData foo);
+                        _moveIcons.TryRemove(changeData.Entity.Id, out var foo);
                     }
 
                     if (changeData.Datablob is NewtonMoveDB)
                     {
-                        _orbitRings.TryRemove(changeData.Entity.Id, out IDrawData foo);
+                        _orbitRings.TryRemove(changeData.Entity.Id, out var foo);
                     }
-
-                    //if (changeData.Datablob is NameDB)
-                    //TextIconList.Remove(changeData.Entity.ID);
                 }
-
             }
         }
 

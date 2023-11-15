@@ -4,7 +4,6 @@ using Pulsar4X.Engine;
 using Pulsar4X.Engine.Sensors;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using Pulsar4X.Extensions;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -20,7 +19,7 @@ namespace Pulsar4X.SDL2UI
     {
         private Entity _faction;
         internal StarSystem StarSystem;
-        internal SystemSensorContacts SystemContacts;
+        internal SystemSensorContacts? SystemContacts;
         ConcurrentQueue<EntityChangeData> _sensorChanges = new ConcurrentQueue<EntityChangeData>();
         internal List<EntityChangeData> SensorChanges = new List<EntityChangeData>();
         ManagerSubPulse PulseMgr;

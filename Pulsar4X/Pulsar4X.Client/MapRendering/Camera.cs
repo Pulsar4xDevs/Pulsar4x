@@ -1,6 +1,4 @@
-﻿using System;
-using System.Numerics;
-using ImGuiNET;
+﻿using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
@@ -21,7 +19,7 @@ namespace Pulsar4X.SDL2UI
 
         internal bool IsPinnedToEntity { get; private set; }
         internal int PinnedEntityGuid;
-        PositionDB _entityPosDB;
+        PositionDB? _entityPosDB;
         internal Orbital.Vector3 _camWorldPos_m = new Orbital.Vector3();
         public Orbital.Vector3 CameraWorldPosition_AU
         {
@@ -31,7 +29,7 @@ namespace Pulsar4X.SDL2UI
             }
 
         }
-       
+
         public Orbital.Vector3 CameraWorldPosition
         {
             get

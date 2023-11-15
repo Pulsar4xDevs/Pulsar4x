@@ -18,12 +18,12 @@ namespace Pulsar4X.SDL2UI
         //data for a toolbar button, requires an SDL image(for Picture)
         {
             public IntPtr Picture;          //Requires an SDL image(for Picture)
-            public string TooltipText;      //Tooltip text for the button
-            public Action OnClick;          //A PulsarGuiWindow`s SetActive function to opens window (or similar function)
+            public string? TooltipText;      //Tooltip text for the button
+            public Action? OnClick;          //A PulsarGuiWindow`s SetActive function to opens window (or similar function)
 
             //Checks if window is open
             //Does not need to be intialized
-            public Func<bool> GetActive;
+            public Func<bool>? GetActive;
             public bool SmButton = false;
         }
 
@@ -208,7 +208,7 @@ namespace Pulsar4X.SDL2UI
                         }
                     }
 
-                    if (ImGui.ImageButton(button.Picture, ButtonSize))//Make the button
+                    if (button.OnClick != null && ImGui.ImageButton(button.Picture, ButtonSize))//Make the button
                     {
                         button.OnClick();
                     }

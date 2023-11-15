@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
+﻿using System.Collections.Generic;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.ImGuiNetUI.EntityManagement;
-using Vector2 = System.Numerics.Vector2;
 using Pulsar4X.Blueprints;
 
 
@@ -17,10 +13,10 @@ namespace Pulsar4X.SDL2UI
     {
         EntityState _selectedEntity;
         //CargoStorageVM _storeVM;
-        private FactionInfoDB _factionInfoDB;
+        private FactionInfoDB? _factionInfoDB;
 
-        private IndustryAbilityDB _industryDB;
-        private IndustryPannel2 _industryPannel;
+        private IndustryAbilityDB? _industryDB;
+        private IndustryPanel? _industryPannel;
 
         CargoListPanelSimple _cargoList;
         FactionDataStore _staticData;
@@ -29,7 +25,6 @@ namespace Pulsar4X.SDL2UI
             _selectedEntity = selectedEntity;
             _cargoList = new CargoListPanelSimple(staticData, selectedEntity);
             _staticData = staticData;
-            
         }
 
         public static ColonyPanel GetInstance(FactionDataStore staticData, EntityState selectedEntity)
@@ -122,16 +117,14 @@ namespace Pulsar4X.SDL2UI
             if (_selectedEntity.Entity.HasDataBlob<IndustryAbilityDB>())
             {
                 _industryDB = _selectedEntity.Entity.GetDataBlob<IndustryAbilityDB>();
-                _industryPannel = new IndustryPannel2(_uiState, _selectedEntity.Entity, _industryDB);
+                _industryPannel = new IndustryPanel(_uiState, _selectedEntity.Entity, _industryDB);
             }
             else
             {
                 _industryDB = null;
                 _industryPannel = null;
             }
-            
             _cargoList = new CargoListPanelSimple(_staticData, _selectedEntity);
-            
 
         }
 
@@ -145,18 +138,16 @@ namespace Pulsar4X.SDL2UI
     public class OverViewPannel
     {
         private static int _entityID;
-        private static Dictionary<string, IndustryTypeBlueprint> _industryTypes;
+        private static Dictionary<string, IndustryTypeBlueprint> _industryTypes = new();
         public static void Setup(EntityState selectedEntity)
         {
             _entityID = selectedEntity.Entity.Id;
             _industryTypes = new (selectedEntity.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.IndustryTypes);
-            
         }
-        
+
         public static void Display(EntityState selectedEntity)
         {
             EntityInfoPanel.AbilitesDisplay.Display(selectedEntity.Entity);
-            
         }
     }
 
@@ -164,12 +155,11 @@ namespace Pulsar4X.SDL2UI
     {
 
         private static int _entityID;
-        private static Dictionary<string, IndustryTypeBlueprint> _industryTypes;
+        private static Dictionary<string, IndustryTypeBlueprint> _industryTypes = new();
         public static void Setup(EntityState selectedEntity)
         {
             _entityID = selectedEntity.Entity.Id;
             _industryTypes = new (selectedEntity.Entity.GetFactionOwner.GetDataBlob<FactionInfoDB>().Data.IndustryTypes);
-            
         }
 
         public static void Display(EntityState selectedEntity)
@@ -177,11 +167,6 @@ namespace Pulsar4X.SDL2UI
             ComponentInstancesDB intances = selectedEntity.Entity.GetDataBlob<ComponentInstancesDB>();
             var componentInstances = EntityInfoPanel.ComponentsDisplay.CreateNewInstanceArray(selectedEntity.Entity);
             EntityInfoPanel.ComponentsDisplay.DisplayComplex(componentInstances);
-
- 
-
         }
-        
-
     }
 }

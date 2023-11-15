@@ -1,13 +1,8 @@
-﻿using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
-using ImGuiNET;
-using ImGuiSDL2CS;
+﻿using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Industry;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
-using SDL2;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -16,7 +11,7 @@ namespace Pulsar4X.SDL2UI
 {
     class PlanetaryWindow : NonUniquePulsarGuiWindow
     {
-        private readonly List<Mineral> _mineralDefinitions = null;
+        private readonly List<Mineral>? _mineralDefinitions = null;
         private readonly int _maxMineralNameLength = 0;
         private const string _amountFormat = "#,###,###,###,###,###,##0";   // big enough to render 64 integers
 
@@ -111,8 +106,7 @@ namespace Pulsar4X.SDL2UI
                 }
             }
 
-            MineralsDB mindb;
-            if (_lookedAtEntity.Entity.TryGetDatablob<MineralsDB>(out mindb) && mindb.Minerals.Any() )
+            if (_lookedAtEntity.Entity.TryGetDatablob<MineralsDB>(out var mindb) && mindb.Minerals.Any() )
             {
                 ImGui.SameLine();
                 if (ImGui.SmallButton("Mineral Deposits"))
@@ -264,7 +258,7 @@ namespace Pulsar4X.SDL2UI
                     foreach (var key in mineralsDB.Minerals.Keys)
                     {
                         row.Clear();
-                        var mineralData = _mineralDefinitions.FirstOrDefault(x => x.ID == key);
+                        var mineralData = _mineralDefinitions?.FirstOrDefault(x => x.ID == key);
                         if (mineralData != null)
                         {
                             var mineralValues = mineralsDB.Minerals[key];

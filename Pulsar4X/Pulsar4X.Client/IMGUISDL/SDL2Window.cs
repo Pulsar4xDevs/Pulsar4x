@@ -83,8 +83,8 @@ namespace ImGuiSDL2CS
 
         public SDL.SDL_WindowFlags Flags => (SDL.SDL_WindowFlags) SDL.SDL_GetWindowFlags(_Handle);
 
-        public Action<SDL2Window> OnLoop;
-        public Func<SDL2Window, SDL.SDL_Event, bool> OnEvent;
+        public Action<SDL2Window>? OnLoop;
+        public Func<SDL2Window, SDL.SDL_Event, bool>? OnEvent;
         public bool IsAlive = false;
 
         public SDL2Window(

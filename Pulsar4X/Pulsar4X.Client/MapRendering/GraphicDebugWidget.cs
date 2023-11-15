@@ -11,7 +11,7 @@ namespace Pulsar4X.SDL2UI
     public class GraphicDebugWindow
     {
         GlobalUIState _state;
-        public static GraphicDebugWindow _graphicDebugWindow;
+        public static GraphicDebugWindow? _graphicDebugWindow;
         GraphicDebugWidget _debugWidget;
         bool _isEnabled = false;
 
@@ -22,8 +22,7 @@ namespace Pulsar4X.SDL2UI
         private float _ellipseArcStart = 0;
         private float _ellipseArcEnd = 0;
         private int _ellipseRes = 180;
-        
-        
+
         public GraphicDebugWindow(GlobalUIState state)
         {
             _state = state;
@@ -59,11 +58,9 @@ namespace Pulsar4X.SDL2UI
 
         internal void Display()
         {
-
-
             ImGui.Text("Cursor World Coordinate:");
             var mouseWorldCoord = Distance.MToAU(_state.Camera.MouseWorldCoordinate_m());
-            
+
             ImGui.Text("x" + mouseWorldCoord.X + " AU");
             ImGui.SameLine();
             ImGui.Text("y" + mouseWorldCoord.Y + " AU");
@@ -163,9 +160,7 @@ namespace Pulsar4X.SDL2UI
                 double endR = EllipseMath.RadiusAtTrueAnomaly(_ellipseA, _ellipseEccentricity, phi, _ellipseArcEnd);
                 Vector2 startPos = Angle.PositionFromAngle(_ellipseArcStart, startR);
                 Vector2 endPos = Angle.PositionFromAngle(_ellipseArcEnd, endR);
-                
-                
-                
+
                 var points2 = CreatePrimitiveShapes.KeplerPoints(_ellipseA, _ellipseEccentricity, _ellipseLoP, startPos, endPos);
                 _debugWidget.SetKeplerEllipsePoints2 = points2;
                 _debugWidget.SetKeplerEllipseEnabled = true;
@@ -175,8 +170,6 @@ namespace Pulsar4X.SDL2UI
             {
                 _debugWidget.SetKeplerEllipseEnabled = false;
             }
-            
-            
         }
     }
 
@@ -202,7 +195,7 @@ namespace Pulsar4X.SDL2UI
                 ElementItems[0].IsEnabled = value;
             }
         }
-        
+
         internal bool SetAngleArcEnabled
         {
             set
@@ -212,7 +205,7 @@ namespace Pulsar4X.SDL2UI
                 ElementItems[2].IsEnabled = value;
             }
         }
-        
+
         internal bool SetArrowEnabled
         {
             set { _mtxArwItem.IsEnabled = value; }
@@ -225,7 +218,7 @@ namespace Pulsar4X.SDL2UI
                 _bezEnabled = value;
             }
         }
-        
+
         internal bool SetKeplerEllipseEnabled
         {
             set
@@ -239,14 +232,16 @@ namespace Pulsar4X.SDL2UI
         {
             set
             {
-                _keplerEllipseItem.Shape.Points = value;
+                if(_keplerEllipseItem.Shape != null)
+                    _keplerEllipseItem.Shape.Points = value;
             }
         }
         internal Vector2[] SetKeplerEllipsePoints2
         {
             set
             {
-                _keplerEllipseItem2.Shape.Points = value;
+                if(_keplerEllipseItem2.Shape != null)
+                    _keplerEllipseItem2.Shape.Points = value;
             }
         }
 
@@ -292,7 +287,6 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(refline);
             refline.IsEnabled = true;
-            
 
             SDL.SDL_Color[] anglelineColour =
             {   new SDL.SDL_Color() { r = 0, g = 255, b = 0, a = 100 }};
@@ -323,8 +317,6 @@ namespace Pulsar4X.SDL2UI
             ElementItems.Add(_anglelineItem);
             _anglelineItem.IsEnabled = false;
 
-
-
             SDL.SDL_Color[] testAngleColour =
             { new SDL.SDL_Color() { r = 0, g = 0, b = 255, a = 100 } };
             SDL.SDL_Color[] testAngleHColour =
@@ -350,8 +342,6 @@ namespace Pulsar4X.SDL2UI
             ElementItems.Add(_testAngleItem);
             _testAngleItem.IsEnabled = false;
 
-
-
             SDL.SDL_Color[] matxRtArwColour =
                 {new SDL.SDL_Color() {r=255, g=255, b= 255, a=100} };
             SDL.SDL_Color[] matxRtArwHColour =
@@ -375,7 +365,6 @@ namespace Pulsar4X.SDL2UI
                 }
             };
 
-            
             SDL.SDL_Color[] ellipse1Colour =
                 {new SDL.SDL_Color() {r=255, g=255, b= 0, a=100} };
             SDL.SDL_Color[] ellipse2Colour =
@@ -401,7 +390,6 @@ namespace Pulsar4X.SDL2UI
             };
             ElementItems.Add(_keplerEllipseItem);
 
-            
             _keplerEllipseItem2 = new ElementItem()
             {
                 NameString = "Ellipse",
@@ -422,7 +410,6 @@ namespace Pulsar4X.SDL2UI
                 }
             };
             ElementItems.Add(_keplerEllipseItem2);
-            
 
             var bcp0 = new Vector2(0,0);
             var bcp1 = new Vector2(0.5, 0) ;
@@ -430,28 +417,27 @@ namespace Pulsar4X.SDL2UI
             var bcp3 = new Vector2(0, 0.5) ;
              _bc   = new BezierCurve(bcp0, bcp1, bcp2, bcp3);
              _bc.SetLinePoints(0.01f);
-            
         }
-
 
         void UpdateElements()
         {
             foreach (var item in ElementItems)
             {
+                if(item.Shape == null) continue;
                 item.Shape.StartPoint = _ctrPnt;
                 item.Shape.Scales = Scales;
             }
 
-            _anglelineItem.Shape.Points = new Orbital.Vector2[] 
-            { 
-                new Orbital.Vector2(), 
-                DrawTools.RotatePoint(new Orbital.Vector2() { X = 256 }, TestingAngle) 
+            if(_anglelineItem.Shape == null || _testAngleItem.Shape == null)
+                throw new NullReferenceException();
+
+            _anglelineItem.Shape.Points = new Orbital.Vector2[]
+            {
+                new Orbital.Vector2(),
+                DrawTools.RotatePoint(new Orbital.Vector2() { X = 256 }, TestingAngle)
             };
             _testAngleItem.DataString = Angle.ToDegrees(TestingAngle).ToString() + "°";
             _testAngleItem.Shape.Points = CreatePrimitiveShapes.AngleArc(new Orbital.Vector2(), 128, -16, 0, TestingAngle, 128);
-
-
-
         }
 
 
@@ -472,8 +458,12 @@ namespace Pulsar4X.SDL2UI
                 ElementItem item = ElementItems[index];
                 if(!item.IsEnabled)
                     continue;
-                
+
                 var shape = item.Shape;
+
+                if(shape == null || shape.Points == null)
+                    throw new NullReferenceException();
+
                 var startPoint = matrix.TransformD(shape.StartPoint.X, shape.StartPoint.Y); //add zoom transformation. 
 
                 Orbital.Vector2[] points = new Orbital.Vector2[shape.Points.Length];
@@ -499,7 +489,7 @@ namespace Pulsar4X.SDL2UI
             }
 
 
-            if(_mtxArwItem.IsEnabled)
+            if(_mtxArwItem.IsEnabled && _mtxArwItem.Shape != null && _mtxArwItem.Shape.Points != null)
             {
                 Orbital.Vector2[] mtxArwPts = new Orbital.Vector2[_mtxArwItem.Shape.Points.Length];
                 var mm = Matrix.IDMirror(MtxArwMirrorX, MtxArwMirrorY);
@@ -525,6 +515,8 @@ namespace Pulsar4X.SDL2UI
         {
             foreach (var shape in DrawComplexShapes)
             {
+                if(shape.Colors == null || shape.ColourChanges == null || shape.Points == null) continue;
+
                 int ci = 0;
                 var colour = shape.Colors[shape.ColourChanges[ci].colourIndex];
                 SDL.SDL_SetRenderDrawColor(rendererPtr, colour.r, colour.g, colour.b, colour.a);

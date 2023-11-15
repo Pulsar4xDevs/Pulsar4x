@@ -19,23 +19,16 @@ namespace Pulsar4X.SDL2UI
     public class ShipDesignWindow : PulsarGuiWindow
     {
         private bool ShowNoDesigns = false;
-
         private byte[] SelectedDesignName =  ImGuiSDL2CSHelper.BytesFromString("foo", 32);
-
-        private string[] _exsistingDesigns;
-        private SafeList<ShipDesign> ExistingShipDesigns;
+        private SafeList<ShipDesign> ExistingShipDesigns = new();
         private string SelectedExistingDesignID = String.Empty;
         private bool SelectedDesignObsolete;
         bool _imagecreated = false;
 
-        private List<ComponentDesign> AvailableShipComponents;
-        private List<ComponentDesign> AllShipComponents;
-        private static string[] _sortedComponentNames;
+        private List<ComponentDesign> AvailableShipComponents = new();
+        private List<ComponentDesign> AllShipComponents = new();
+        private static string[]? _sortedComponentNames;
         private int _componentFilterIndex = 0;
-        private int _selectedDesignsIndex;
-
-        private string[] _shipComponentNames;
-        private int _selectedShipIndex;
 
         List<(ComponentDesign design, int count)> SelectedComponents = new List<(ComponentDesign design, int count)>();
 
@@ -43,10 +36,10 @@ namespace Pulsar4X.SDL2UI
 
         //TODO: armor, temporary, maybe density should be an "equvelent" and have a different mass? (damage calcs use density for penetration)
         List<ArmorBlueprint> _armorSelection = new List<ArmorBlueprint>();
-        private string[] _armorNames;
+        private string[]? _armorNames;
         private int _armorIndex = 0;
         private float _armorThickness = 10;
-        private ArmorBlueprint _armor;
+        private ArmorBlueprint? _armor;
         private double _armorMass = 0;
 
         private int rawimagewidth;
@@ -66,9 +59,9 @@ namespace Pulsar4X.SDL2UI
         private double _fuelStoreMass;
         private double _fuelStoreVolume;
         private double _grossTonnage;
-        private ICargoable _fuelType;
+        private ICargoable? _fuelType;
         bool displayimage = true;
-        private EntityDamageProfileDB _profile;
+        private EntityDamageProfileDB? _profile;
         private bool existingdesignsstatus = true;
         bool DesignChanged = false;
 
@@ -110,6 +103,13 @@ namespace Pulsar4X.SDL2UI
             AllShipComponents = _factionInfoDB.ComponentDesigns.Values.ToList();
             AllShipComponents.Sort((a, b) => a.Name.CompareTo(b.Name));
 
+            var templatesByGroup = AllShipComponents.GroupBy(t => t.ComponentType);
+            var groupNames = templatesByGroup.Select(g => g.Key).ToList();
+            var sortedTempGroupNames = groupNames.OrderBy(name => name).ToArray();
+            _sortedComponentNames = new string[sortedTempGroupNames.Length + 1];
+            _sortedComponentNames[0] = "All";
+            Array.Copy(sortedTempGroupNames, 0, _sortedComponentNames, 1, sortedTempGroupNames.Length);
+
             if(_componentFilterIndex == 0)
             {
                 AvailableShipComponents = new List<ComponentDesign>(AllShipComponents);
@@ -118,13 +118,6 @@ namespace Pulsar4X.SDL2UI
             {
                 AvailableShipComponents = AllShipComponents.Where(t => t.ComponentType.Equals(_sortedComponentNames[_componentFilterIndex])).ToList();
             }
-
-            var templatesByGroup = AllShipComponents.GroupBy(t => t.ComponentType);
-            var groupNames = templatesByGroup.Select(g => g.Key).ToList();
-            var sortedTempGroupNames = groupNames.OrderBy(name => name).ToArray();
-            _sortedComponentNames = new string[sortedTempGroupNames.Length + 1];
-            _sortedComponentNames[0] = "All";
-            Array.Copy(sortedTempGroupNames, 0, _sortedComponentNames, 1, sortedTempGroupNames.Length);
         }
 
         void RefreshExistingClasses()
@@ -146,18 +139,19 @@ namespace Pulsar4X.SDL2UI
 
         void RefreshArmor()
         {
-            _armorNames = new string[_uiState.Faction.GetDataBlob<FactionInfoDB>().Data.Armor.Count];
+            var factionData = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data;
+            _armorNames = new string[factionData.Armor.Count];
             int i = 0;
-            foreach (var kvp in _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.Armor)
+            foreach (var kvp in factionData.Armor)
             {
-                var armorMat = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(kvp.Value.ResourceID);
+                var armorMat = factionData.CargoGoods.GetAny(kvp.Value.ResourceID);
                 _armorSelection.Add(kvp.Value);
 
-                _armorNames[i]= armorMat.Name;
+                _armorNames[i]= armorMat?.Name ?? "Unknown";
                 i++;
             }
             //TODO: bleed over from mod data to get a default armor...
-            _armor = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.Armor["plastic-armor"];
+            _armor = factionData.Armor["plastic-armor"];
             _armorThickness = 3;
         }
 
@@ -241,6 +235,9 @@ namespace Pulsar4X.SDL2UI
                     var design = _factionInfoDB.ShipDesigns[SelectedExistingDesignID];
                     design.Name = name;
                     design.Components = SelectedComponents;
+                    if(_armor == null)
+                        throw new NullReferenceException();
+
                     design.Armor = (_armor, _armorThickness);
                     design.IsObsolete = SelectedDesignObsolete;
                     if(design.IsObsolete)
@@ -310,6 +307,9 @@ namespace Pulsar4X.SDL2UI
                 RefreshArmor();
                 DesignChanged = true;
 
+                if(_armor == null)
+                    throw new NullReferenceException();
+
                 ShipDesign design = new(_factionInfoDB, name, SelectedComponents, (_armor, _armorThickness))
                 {
                     IsValid = false
@@ -345,6 +345,10 @@ namespace Pulsar4X.SDL2UI
                 ImGui.TableNextColumn();
                 ImGui.Text("Type");
                 ImGui.TableNextColumn();
+
+                if(_armorNames == null)
+                    throw new NullReferenceException();
+
                 if (ImGui.Combo("##Armor Selection", ref _armorIndex, _armorNames, _armorNames.Length))
                 {
                     _armor = _armorSelection[_armorIndex];
@@ -463,6 +467,9 @@ namespace Pulsar4X.SDL2UI
 
         internal void DisplayComponentSelection()
         {
+            if(_sortedComponentNames == null)
+                throw new NullReferenceException();
+
             DisplayHelpers.Header("Available Components");
 
             var availableSize = ImGui.GetContentRegionAvail();
@@ -518,6 +525,8 @@ namespace Pulsar4X.SDL2UI
 
         internal void GenImage()
         {
+            if(_profile == null)
+                throw new NullReferenceException();
 
             _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _profile.DamageProfile, _imagecreated);
             rawimagewidth = _profile.DamageProfile.Width;
@@ -561,7 +570,8 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text(_ttwr.ToString(Styles.DecimalFormat));
 
                 ImGui.TableNextColumn();
-                ImGui.Text("Fuel Capacity (" + _fuelType.Name + ")");
+                var fuelName = _fuelType?.Name ?? "Unknown";
+                ImGui.Text("Fuel Capacity (" + fuelName + ")");
                 ImGui.TableNextColumn();
                 ImGui.Text(Stringify.Mass(_fuelStoreMass));
                 ImGui.SameLine();
@@ -643,6 +653,10 @@ namespace Pulsar4X.SDL2UI
         private void UpdateShipStats()
         {
             if(!DesignChanged) return;
+
+            if(_armor == null)
+                throw new NullReferenceException();
+
             _profile = new EntityDamageProfileDB(SelectedComponents, (_armor, _armorThickness));
             if(displayimage)
             {
@@ -733,7 +747,7 @@ namespace Pulsar4X.SDL2UI
             if (thrusterFuel.IsNotNullOrEmpty())
             {
                 _fuelType = _uiState.Faction.GetDataBlob<FactionInfoDB>().Data.CargoGoods.GetAny(thrusterFuel);
-                if (cstore.ContainsKey(_fuelType.CargoTypeID))
+                if (_fuelType != null && cstore.ContainsKey(_fuelType.CargoTypeID))
                 {
                     _fuelStoreVolume = cstore[_fuelType.CargoTypeID];
                     var fuelDensity = _fuelType.MassPerUnit / _fuelType.VolumePerUnit;
