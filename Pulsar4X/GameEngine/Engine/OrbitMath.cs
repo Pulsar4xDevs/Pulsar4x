@@ -3,6 +3,7 @@ using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
 using Pulsar4X.Modding;
+using Pulsar4X.Events;
 
 namespace Pulsar4X.Engine
 {
@@ -252,7 +253,7 @@ namespace Pulsar4X.Engine
         
         public static Vector3 GetPosition(OrbitDB orbit, DateTime atDateTime)
         {
-            return OrbitMath.GetPosition(orbit, orbit.GetTrueAnomaly(atDateTime));
+            return GetPosition(orbit, GetTrueAnomaly(orbit, atDateTime));
         }
         
         public static Vector3 GetPosition(OrbitDB orbit, double trueAnomaly)
@@ -354,14 +355,9 @@ namespace Pulsar4X.Engine
         {
             if(!TryGetEccentricAnomaly(orbit.Eccentricity, currentMeanAnomaly, out double E))
             {
-                /*
-                Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.")
-                {
-                    Entity = orbit.OwningEntity,
-                    EventType = EventType.Opps
-                };
-                StaticRefLib.EventLog.AddEvent(gameEvent);
-                */
+                var datetime = orbit.Parent.StarSysDateTime;
+                var e = Event.Create(EventType.Opps, datetime, "Non-convergence of Newton's method while calculating Eccentric Anomaly.");
+                EventManager.Instance.Publish(e);
             }
             return E;
         }
@@ -374,16 +370,11 @@ namespace Pulsar4X.Engine
         /// <returns>F</returns>
         public static double GetHyperbolicAnomaly(OrbitDB orbit, double hyperbolicMeanAnomaly)
         {
-            if(!GetHyperbolicAnomalyNewtonsMethod(orbit.Eccentricity, hyperbolicMeanAnomaly, out double F))
+            if(!TryGetHyperbolicAnomaly(orbit.Eccentricity, hyperbolicMeanAnomaly, out double F))
             {
-                /*
-                 Event gameEvent = new Event("Non-convergence of Newton's method while calculating Eccentric Anomaly.")
-                {
-                    Entity = orbit.OwningEntity,
-                    EventType = EventType.Opps
-                };
-                StaticRefLib.EventLog.AddEvent(gameEvent);
-                */
+                var datetime = orbit.Parent.StarSysDateTime;
+                var e = Event.Create(EventType.Opps, datetime, "Non-convergence of Newton's method while calculating Hyperbolic Anomaly.");
+                EventManager.Instance.Publish(e);
             }
             return F;
         }

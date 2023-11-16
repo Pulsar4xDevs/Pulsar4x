@@ -46,25 +46,14 @@ namespace Pulsar4X.Engine
 
         internal static int UpdateSystemOrbits(EntityManager manager, DateTime toDate)
         {
-            //TimeSpan orbitCycle = manager.Game.Settings.OrbitCycleTime;
-            //DateTime toDate = manager.ManagerSubpulses.SystemLocalDateTime + orbitCycle;
-            //starSystem.SystemSubpulses.AddSystemInterupt(toDate + orbitCycle, UpdateSystemOrbits);
-            //manager.ManagerSubpulses.AddSystemInterupt(toDate + orbitCycle, PulseActionEnum.OrbitProcessor);
-            // Find the first orbital entity.
-            Entity firstOrbital = manager.GetFirstEntityWithDataBlob<StarInfoDB>();
-
-            if (!firstOrbital.IsValid)
+            var orbits = manager.GetAllDataBlobsOfType<OrbitDB>();
+            foreach (var orbit in orbits)
             {
-                // No orbitals in this manager.
-                return 0;
+                Vector3 newPosition = OrbitMath.GetPosition(orbit, toDate);
+                PositionDB entityPosition = orbit.OwningEntity.GetDataBlob<PositionDB>();
+                entityPosition.RelativePosition = newPosition;
             }
-
-            Entity root = firstOrbital.GetDataBlob<OrbitDB>().Root;
-            var rootPositionDB = root.GetDataBlob<PositionDB>();
-
-            // Call recursive function to update every orbit in this system.
-            int count = UpdateOrbit(root, rootPositionDB, toDate);
-            return count;
+            return orbits.Count;
         }
 
         public static int UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime toDate)

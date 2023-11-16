@@ -412,7 +412,7 @@ namespace Pulsar4X.Orbital
             else
             {
                 var m1 = GetHyperbolicMeanAnomalyFromTime(meanMotion, s);
-                GetHyperbolicAnomalyNewtonsMethod(e, m1, out double F);
+                TryGetHyperbolicAnomaly(e, m1, out double F);
                 return TrueAnomalyFromHyperbolicAnomaly(e, F);
             }
         }
@@ -504,7 +504,7 @@ namespace Pulsar4X.Orbital
             else
             {
                 var hyperbolicMeanAnomaly = GetHyperbolicMeanAnomalyFromTime(ke.StandardGravParameter, a, secondsFromEpoch);
-                GetHyperbolicAnomalyNewtonsMethod(e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
+                TryGetHyperbolicAnomaly(e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
                 trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(e, hyperbolicAnomalyF);
             }
             
@@ -800,7 +800,7 @@ namespace Pulsar4X.Orbital
                 var quotient = sgp / Math.Pow(-a, 3);
                 var hyperbolcMeanMotion = Math.Sqrt(quotient);
                 var hyperbolicMeanAnomaly = secondsFromEpoch * hyperbolcMeanMotion;
-                GetHyperbolicAnomalyNewtonsMethod(e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
+                TryGetHyperbolicAnomaly(e, hyperbolicMeanAnomaly, out double hyperbolicAnomalyF);
                 trueAnomaly = TrueAnomalyFromHyperbolicAnomaly(e, hyperbolicAnomalyF);
 
             }
@@ -927,8 +927,9 @@ namespace Pulsar4X.Orbital
 
         #region EccentricAnomaly
 
-
-
+        private static int numItts = 1000;
+        [ThreadStatic]
+        private static double[] e = new double[numItts];
         /// <summary>
         /// Gets the eccentric anomaly.
         /// This can take a number of itterations to calculate so may not be fast. 
@@ -940,8 +941,8 @@ namespace Pulsar4X.Orbital
         {
             bool converges = true;
             //Kepler's Equation
-            const int numIterations = 1000;
-            var e = new double[numIterations];
+            if (e is null)
+                e = new double[numItts];
             const double epsilon = 1E-12; // Plenty of accuracy.
             int i = 0;
 
@@ -966,9 +967,9 @@ namespace Pulsar4X.Orbital
                 */
                 e[i + 1] = e[i] - (e[i] - eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - eccentricity * Math.Cos(e[i]));
                 i++;
-            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i + 1 < numIterations);
+            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i + 1 < numItts);
 
-            if (i + 1 >= numIterations)
+            if (i + 1 >= numItts)
             {
                 converges = false;
             }
@@ -1042,12 +1043,13 @@ namespace Pulsar4X.Orbital
         /// <returns>H</returns>
         /// <param name="eccentricity">Eccentricity.</param>
         /// <param name="currentMeanAnomaly">Current mean anomaly.</param>
-        public static bool GetHyperbolicAnomalyNewtonsMethod(double eccentricity, double hyperbolicMeanAnomaly, out double hyperbolicAnomalyF)
+        public static bool TryGetHyperbolicAnomaly(double eccentricity, double hyperbolicMeanAnomaly, out double hyperbolicAnomalyF)
         {
             bool converges = true;
             //Kepler's Equation
-            const int numIterations = 1000;
-            var F = new double[numIterations];
+            if (e is null)
+                e = new double[numItts];
+            var F = e;
             const double epsilon = 1E-12; // Plenty of accuracy.
             int i = 0;
 
@@ -1067,9 +1069,9 @@ namespace Pulsar4X.Orbital
                 
                 F[i + 1] = F[i] + dividend / divisor;
                 i++;
-            } while (Math.Abs(F[i] - F[i - 1]) > epsilon && i + 1 < numIterations);
+            } while (Math.Abs(F[i] - F[i - 1]) > epsilon && i + 1 < numItts);
 
-            if (i + 1 >= numIterations)
+            if (i + 1 >= numItts)
             {
                 converges = false;
             }

@@ -313,7 +313,7 @@ namespace Pulsar4X.Tests
                     var o_Mh = OrbitMath.GetHyperbolicMeanAnomalyFromTime(o_n, timeSinceEpoch.TotalSeconds);
 
                     //calculate back to HyperbolicAnomaly H
-                    OrbitMath.GetHyperbolicAnomalyNewtonsMethod(o_e, o_Mh, out var H);
+                    OrbitMath.TryGetHyperbolicAnomaly(o_e, o_Mh, out var H);
 
                     M1 = OrbitMath.GetHyperbolicMeanAnomaly(o_e, H);
                     double t1 = OrbitMath.TimeFromHyperbolicMeanAnomaly(sgp, o_a, M1);
@@ -372,7 +372,7 @@ namespace Pulsar4X.Tests
                 }
                 else
                 {
-                    OrbitMath.GetHyperbolicAnomalyNewtonsMethod(o_e, o_Mh, out double o_F);
+                    OrbitMath.TryGetHyperbolicAnomaly(o_e, o_Mh, out double o_F);
                     var truAnom = OrbitMath.TrueAnomalyFromHyperbolicAnomaly(o_e, o_F);
                     var r = EllipseMath.RadiusAtTrueAnomaly(truAnom, o_p, o_e);
                     var pos = OrbitMath.GetRelativePosition(o_loAN, o_aoP, o_i, truAnom, r);
