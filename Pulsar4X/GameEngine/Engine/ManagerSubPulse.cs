@@ -97,6 +97,7 @@ namespace Pulsar4X.Engine
 
         [JsonProperty] private DateTime _systemLocalDateTime;
         private DateTime _processToDateTime;
+        private DateTime _subStepDateTime;
         public DateTime StarSysDateTime
         {
             get { return _systemLocalDateTime; }
@@ -131,6 +132,7 @@ namespace Pulsar4X.Engine
             _game = entityManager.Game;
             _systemLocalDateTime = entityManager.Game.TimePulse.GameGlobalDateTime;
             _processToDateTime = _systemLocalDateTime;
+            _subStepDateTime = _systemLocalDateTime;
             _entityManager = entityManager;
             _processManager = processorManager;
             InitHotloopProcessors();
@@ -162,8 +164,8 @@ namespace Pulsar4X.Engine
         {
             if(entity == null) throw new ArgumentNullException("Entity cannot be null");
             if(nextDateTime < StarSysDateTime) throw new Exception("Trying to add an interrupt in the past");
-            if (nextDateTime < _processToDateTime)
-                _processToDateTime = nextDateTime;
+            if (nextDateTime < _subStepDateTime)
+                _subStepDateTime = nextDateTime;
             if (!InstanceProcessorsQueue.ContainsKey(nextDateTime))
                 InstanceProcessorsQueue.Add(nextDateTime, new Dictionary<string, List<Entity>>());
             if (!InstanceProcessorsQueue[nextDateTime].ContainsKey(actionProcessor))
@@ -293,7 +295,7 @@ namespace Pulsar4X.Engine
                     //we may need to make this more flexable and shorten the processing loop if this happens?
                     //that might cause issues elsewhere.
                 _processToDateTime = GetNextInterupt(timeDeltaMax);
-
+                _subStepDateTime = _processToDateTime;
                 ProcessToNextInterupt();
 
                 Performance.EndSubInterval();
@@ -331,44 +333,53 @@ namespace Pulsar4X.Engine
         /// <returns>datetime processed to</returns>
         private void ProcessToNextInterupt()
         {
-            TimeSpan span = (_processToDateTime - _systemLocalDateTime);
-            int deltaSeconds = (int)span.TotalSeconds;
-
-            foreach(var (type, runAt) in HotLoopProcessorsNextRun)
+            while (StarSysDateTime <= _processToDateTime)
             {
-                if(runAt == null || runAt > _processToDateTime)
-                    continue;
+                TimeSpan span = (_subStepDateTime - _systemLocalDateTime);
+                int deltaSeconds = (int)span.TotalSeconds;
 
-                Performance.Start(type.processorType.Name);
-                CurrentProcess = type.ToString();
-                int count = _processManager.HotloopProcessors[type.dbType].ProcessManager(_entityManager, deltaSeconds);
-                Performance.Stop(type.processorType.Name);
-
-                if(count == 0)
-                    HotLoopProcessorsNextRun[type] = null;
-                else
-                    HotLoopProcessorsNextRun[type] = _processToDateTime + _processManager.HotloopProcessors[type.dbType].RunFrequency; //sets the next interupt for this hotloop process
-            }
-
-            if (InstanceProcessorsQueue.ContainsKey(_processToDateTime))
-            {
-                var qp = InstanceProcessorsQueue[_processToDateTime];
-
-                foreach(var instanceProcessSet in qp)
+                foreach (var (type, runAt) in HotLoopProcessorsNextRun)
                 {
-                    var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
-                    Performance.Start(processor.GetType().Name);
-                    CurrentProcess = instanceProcessSet.Key;
-                    foreach (var entity in instanceProcessSet.Value)
-                    {
+                    if (runAt == null || runAt > _subStepDateTime)
+                        continue;
 
-                        processor.ProcessEntity(entity, _processToDateTime);
-                    }
-                    Performance.Stop(processor.GetType().Name);
+                    Performance.Start(type.processorType.Name);
+                    CurrentProcess = type.ToString();
+                    int count = _processManager.HotloopProcessors[type.dbType].ProcessManager(_entityManager, deltaSeconds);
+                    Performance.Stop(type.processorType.Name);
+
+                    if (count == 0)
+                        HotLoopProcessorsNextRun[type] = null;
+                    else
+                        HotLoopProcessorsNextRun[type] = _subStepDateTime + _processManager.HotloopProcessors[type.dbType].RunFrequency; //sets the next interupt for this hotloop process
                 }
-                InstanceProcessorsQueue.Remove(_processToDateTime); //once all the processes have been run for that datetime, remove it from the dictionary.
+
+                if (InstanceProcessorsQueue.ContainsKey(_subStepDateTime))
+                {
+                    var qp = InstanceProcessorsQueue[_subStepDateTime];
+
+                    foreach (var instanceProcessSet in qp)
+                    {
+                        var processor = _processManager.GetInstanceProcessor(instanceProcessSet.Key);
+                        Performance.Start(processor.GetType().Name);
+                        CurrentProcess = instanceProcessSet.Key;
+                        foreach (var entity in instanceProcessSet.Value)
+                        {
+
+                            processor.ProcessEntity(entity, _subStepDateTime);
+                        }
+
+                        Performance.Stop(processor.GetType().Name);
+                    }
+
+                    InstanceProcessorsQueue.Remove(_subStepDateTime); //once all the processes have been run for that datetime, remove it from the dictionary.
+                }
+                StarSysDateTime = _subStepDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
+                _subStepDateTime = GetNextInterupt(_processToDateTime - _subStepDateTime);
+                //this lets us run through at least once. 
+                if(StarSysDateTime == _processToDateTime)
+                    break;
             }
-            StarSysDateTime = _processToDateTime; //update the localDateTime and invoke the SystemDateChangedEvent
         }
 
         public int GetTotalNumberOfProceses()
