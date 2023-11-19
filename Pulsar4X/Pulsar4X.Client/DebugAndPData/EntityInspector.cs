@@ -299,7 +299,19 @@ namespace Pulsar4X.SDL2UI
                             {
                                 var entity = (Entity)value;
                                 displayStr = entity.GetOwnersName();
-                                tooltipStr = entity.Id.ToString();
+                                tooltipStr = "ID: " + entity.Id.ToString();
+                            }
+                            else if (value is Vector2)
+                            {
+                                displayStr = value.ToString();
+                                Vector2 v = (Vector2)value;
+                                tooltipStr = "Magnitude: " + Stringify.Number(v.Length());
+                            }
+                            else if (value is Vector3)
+                            {
+                                displayStr = value.ToString();
+                                Vector3 v = (Vector3)value;
+                                tooltipStr = "Magnitude: " + Stringify.Number(v.Length());
                             }
                             else
                             {
