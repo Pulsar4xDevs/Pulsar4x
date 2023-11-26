@@ -116,6 +116,9 @@ namespace Pulsar4X.Datablobs
         {
             if (newParent != null && !newParent.HasDataBlob<PositionDB>())
                 throw new Exception("newParent must have a PositionDB");
+            var oldParent = ParentDB;
+            
+            
             Vector3 currentAbsolute = this.AbsolutePosition;
             Vector3 newRelative;
             if (newParent == null)

@@ -105,7 +105,11 @@ namespace Pulsar4X.SDL2UI
                 ImGui.Text("   " + currenttime.ToShortTimeString());
                 ImGui.SameLine();
                 if (ImGui.SliderFloat("##freqSldr", ref _freqTimeSpanValue, 0.1f, 1, _freqTimeSpanValue.ToString(), ImGuiSliderFlags.None))
+                {
+                    _freqTimeSpanValue = (float)Math.Round(_freqTimeSpanValue, 1);
                     AdjustFreqency();
+                }
+                
                 ImGui.SameLine();
                 if (ImGui.Combo("##freqCmbo", ref _freqSpanType, _timespanTypeSelection, _timespanTypeSelection.Length))
                     AdjustFreqency();

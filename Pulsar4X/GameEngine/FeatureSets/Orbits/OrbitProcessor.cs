@@ -183,15 +183,19 @@ namespace Pulsar4X.Engine
     {
         internal override void ProcessEntity(Entity entity, DateTime atDateTime)
         {
-            var state = entity.GetAbsoluteState();
+            
             var parent = entity.GetSOIParentEntity();
             if(parent == null) throw new NullReferenceException("parent cannot be null");
             var grandparent = parent.GetSOIParentEntity();
             var newParent = grandparent == null ? parent : grandparent;
 
+            var vel = entity.GetAbsoluteState().Velocity;
+            
+            entity.GetDataBlob<PositionDB>().SetParent(newParent);
+            var rpos = entity.GetRalitivePosition();
             var myMass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
             var gpMass = newParent.GetDataBlob<MassVolumeDB>().MassTotal;
-            var neworbit = OrbitDB.FromVector(newParent, myMass, gpMass, state.pos, state.Velocity, atDateTime);
+            var neworbit = OrbitDB.FromVector(newParent, myMass, gpMass, rpos, vel, atDateTime);
             entity.SetDataBlob(neworbit);
         }
     }

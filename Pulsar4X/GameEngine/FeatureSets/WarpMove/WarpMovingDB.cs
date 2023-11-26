@@ -61,6 +61,10 @@ namespace Pulsar4X.Datablobs
         internal Entity? TargetEntity;
         [JsonIgnore] //don't store datablobs, we catch this on deserialization.
         internal PositionDB TargetPositionDB;
+        public PositionDB GetTargetPosDB
+        {
+            get { return TargetPositionDB; }
+        }
 
         public WarpMovingDB()
         {
@@ -115,7 +119,7 @@ namespace Pulsar4X.Datablobs
             PredictedExitTime = targetIntercept.atDateTime;
             SavedNewtonionVector = startState.Velocity;
             TargetEntity = targetEntity;
-
+            TargetPositionDB = targetEntity.GetDataBlob<PositionDB>();
             Heading_Radians = (float)Vector3.AngleBetween(startState.pos, ExitPointAbsolute);
         }
 

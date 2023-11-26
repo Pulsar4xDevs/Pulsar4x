@@ -930,13 +930,15 @@ namespace Pulsar4X.Orbital
         private static int numItts = 1000;
         [ThreadStatic]
         private static double[] e = new double[numItts];
+        
+        
         /// <summary>
-        /// Gets the eccentric anomaly.
-        /// This can take a number of itterations to calculate so may not be fast. 
+        /// Uses Newton intergration.
         /// </summary>
-        /// <returns>E</returns>
-        /// <param name="eccentricity">Eccentricity.</param>
-        /// <param name="currentMeanAnomaly">Current mean anomaly.</param>
+        /// <param name="eccentricity"></param>
+        /// <param name="currentMeanAnomaly"></param>
+        /// <param name="eccentricAnomaly"></param>
+        /// <returns>true if converges, false if not.</returns>
         public static bool TryGetEccentricAnomaly(double eccentricity, double currentMeanAnomaly, out double eccentricAnomaly)
         {
             bool converges = true;
@@ -1035,14 +1037,16 @@ namespace Pulsar4X.Orbital
                     return E;
                 }
         */
+
+
         
         /// <summary>
-        /// known as F.
-        /// This can take a number of itterations to calculate so may not be fast. 
+        /// Uses Newton intergration.
         /// </summary>
-        /// <returns>H</returns>
-        /// <param name="eccentricity">Eccentricity.</param>
-        /// <param name="currentMeanAnomaly">Current mean anomaly.</param>
+        /// <param name="eccentricity"></param>
+        /// <param name="hyperbolicMeanAnomaly"></param>
+        /// <param name="hyperbolicAnomalyF"></param>
+        /// <returns>true if converges, false if not.</returns>
         public static bool TryGetHyperbolicAnomaly(double eccentricity, double hyperbolicMeanAnomaly, out double hyperbolicAnomalyF)
         {
             bool converges = true;

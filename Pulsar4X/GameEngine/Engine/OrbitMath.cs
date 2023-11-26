@@ -439,6 +439,7 @@ namespace Pulsar4X.Engine
         /// <summary>
         /// returns the SOI radius of *this* orbital body,
         /// ie for the SOI radius of earth give the orbitDB of earth.
+        /// TODO: what do we want to return if orbit is the sun? currently returning null.
         /// </summary>
         /// <param name="orbit"></param>
         /// <returns></returns>

@@ -154,7 +154,6 @@ namespace Pulsar4X.SDL2UI
                         orbit = new OrbitHyperbolicIcon2(entityState, _state.UserOrbitSettingsMtx);
                         _orbitRings.TryAdd(entityItem.Id, orbit);
                     }
-
                 }
             }
 
@@ -166,6 +165,14 @@ namespace Pulsar4X.SDL2UI
                 //NewtonMoveIcon
                 orb = new NewtonMoveIcon(entityState, _state.UserOrbitSettingsMtx);
                 _orbitRings.TryAdd(entityItem.Id, orb);
+            }
+
+            if (entityItem.HasDataBlob<WarpMovingDB>())
+            {
+                var wrp = entityItem.GetDataBlob<WarpMovingDB>();
+                Icon wrpIcn;
+                wrpIcn = new WarpMovingIcon(entityItem);
+                _orbitRings.TryAdd(entityItem.Id, wrpIcn);
             }
 
             if (entityItem.HasDataBlob<StarInfoDB>())
@@ -225,25 +232,33 @@ namespace Pulsar4X.SDL2UI
                 {
                     if (changeData.Datablob is OrbitDB)
                     {
-                        OrbitDB orbit = (OrbitDB)changeData.Datablob;
-                        if (orbit.Parent == null)
+                        OrbitDB orbitDB = (OrbitDB)changeData.Datablob;
+                        if (orbitDB.Parent == null)
                             continue;
 
 
-                        if (!orbit.IsStationary)
+                        if (!orbitDB.IsStationary)
                         {
                             if (_sysState != null && _sysState.EntityStatesWithPosition.ContainsKey(changeData.Entity.Id))
                                 entityState = _sysState.EntityStatesWithPosition[changeData.Entity.Id];
                             else
                                 entityState = new EntityState(changeData.Entity) { Name = "Unknown" };
-
-                            _orbitRings[changeData.Entity.Id] = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
+                            OrbitIconBase orbit;
+                            if (orbitDB.Eccentricity < 1)
+                            {
+                               orbit = new OrbitEllipseIcon(entityState, _state.UserOrbitSettingsMtx);
+                            }
+                            else
+                            {
+                                orbit = new OrbitHyperbolicIcon2(entityState, _state.UserOrbitSettingsMtx);
+                            }
+                            _orbitRings[changeData.Entity.Id] = orbit;
 
                         }
                     }
                     if (changeData.Datablob is WarpMovingDB)
                     {
-                        var widget = new ShipMoveWidget(changeData.Entity);
+                        var widget = new WarpMovingIcon(changeData.Entity);
                         widget.OnPhysicsUpdate();
                         //Matrix matrix = new Matrix();
                         //matrix.Scale(_camera.ZoomLevel);

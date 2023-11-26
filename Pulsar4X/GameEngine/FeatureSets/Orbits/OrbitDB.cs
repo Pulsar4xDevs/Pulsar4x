@@ -510,8 +510,15 @@ namespace Pulsar4X.Datablobs
             {
                 var soiParent = OwningEntity.GetSOIParentEntity();
                 var soiRadius = OrbitMath.GetSOIRadius(soiParent.GetDataBlob<OrbitDB>());
-                var soiChangeAt = OrbitMath.TimeToRadius(this, soiRadius);
-                OwningEntity.Manager.ManagerSubpulses.AddEntityInterupt(soiChangeAt, nameof(ChangeSOIProcessor), OwningEntity);
+                if (soiRadius is not double.NaN)//radius will return nan if for example soiParent is the sun. 
+                {
+                    var soiChangeAt = OrbitMath.TimeToRadius(this, soiRadius);
+                    OwningEntity.Manager.ManagerSubpulses.AddEntityInterupt(soiChangeAt, nameof(ChangeSOIProcessor), OwningEntity);
+                }
+                else//in this case we dont need to do a transition. might need to destroy it or something. 
+                {
+                    
+                }
             }
         }
 

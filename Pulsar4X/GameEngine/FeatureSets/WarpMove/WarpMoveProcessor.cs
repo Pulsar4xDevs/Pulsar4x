@@ -57,9 +57,9 @@ namespace Pulsar4X.Engine
     {
         private static GameSettings _gameSettings;
 
-        public TimeSpan RunFrequency => TimeSpan.FromMinutes(10);
+        public TimeSpan RunFrequency => TimeSpan.FromMinutes(5);
 
-        public TimeSpan FirstRunOffset => TimeSpan.FromMinutes(10);
+        public TimeSpan FirstRunOffset => TimeSpan.FromMinutes(0);
 
         public Type GetParameterType => typeof(WarpMovingDB);
 
@@ -151,8 +151,9 @@ namespace Pulsar4X.Engine
             {
                 var powerDB = entity.GetDataBlob<EnergyGenAbilityDB>();
                 positionDB.SetParent(moveDB.TargetEntity);
-                //positionDB.AbsolutePosition_AU = Distance.MToAU(newPositionMt);//this needs to be set before creating the orbitDB
                 positionDB.RelativePosition = moveDB.ExitPointrelative;
+                entity.RemoveDataBlob<WarpMovingDB>();
+                
 
                 if(_gameSettings.StrictNewtonion)
                     SetOrbitHereFullNewt(entity, positionDB, moveDB, dateTimeFuture);
@@ -242,29 +243,29 @@ namespace Pulsar4X.Engine
             OrbitDB targetPlanetsOrbit = targetEntity.GetDataBlob<OrbitDB>();
             Vector3 insertionVector_m = OrbitProcessor.GetOrbitalInsertionVector(moveDB.SavedNewtonionVector, targetPlanetsOrbit, atDateTime);
             positionDB.SetParent(targetEntity);
-
+            moveDB.IsAtTarget = true;
+            
+            OrbitDB newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);
+            entity.SetDataBlob(newOrbit);
+            
+            var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
+            var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
+            var mass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
+            
+            /*
             if (moveDB.ExpendDeltaV.Length() != 0)
             {
-                var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-                var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-                var mass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
-
                 double fuelBurned = OrbitMath.TsiolkovskyFuelUse(mass, exhaustVelocity, moveDB.ExpendDeltaV.Length());
                 double secondsBurn = fuelBurned / burnRate;
                 var manuverNodeTime = entity.StarSysDateTime + TimeSpan.FromSeconds(secondsBurn * 0.5);
                 
                 NewtonThrustCommand.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, moveDB.ExpendDeltaV, secondsBurn);
-                moveDB.IsAtTarget = true;
             }
             else if (moveDB.AutoCirculariseAfterWarp)
             {
-                var burnRate = entity.GetDataBlob<NewtonThrustAbilityDB>().FuelBurnRate;
-                var exhaustVelocity = entity.GetDataBlob<NewtonThrustAbilityDB>().ExhaustVelocity;
-                var mass = entity.GetDataBlob<MassVolumeDB>().MassTotal;
                 var sgp = GeneralMath.StandardGravitationalParameter(mass + targetEntity.GetDataBlob<MassVolumeDB>().MassTotal);
                 var pos = positionDB.RelativePosition;
                 double curSpeed = insertionVector_m.Length();
-
                 double circSpeed = OrbitalMath.InstantaneousOrbitalSpeed(sgp, pos.Length(), pos.Length());
                 double speediff = circSpeed - curSpeed;
                 Vector3 circularizationBurn = speediff * Vector3.Normalise(insertionVector_m);
@@ -274,27 +275,8 @@ namespace Pulsar4X.Engine
                 var manuverNodeTime = entity.StarSysDateTime + TimeSpan.FromSeconds(secondsBurn * 0.5);
 
                 NewtonThrustCommand.CreateCommand(entity.FactionOwnerID, entity, manuverNodeTime, circularizationBurn, secondsBurn);
-                moveDB.IsAtTarget = true;
             }
-            else
-            {
-                OrbitDB newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);
-                if (newOrbit.Periapsis > targetSOI) //closest point outside soi
-                {
-                    //find who's SOI we are in, and create an orbit around that.
-                    if(entity.Manager == null) throw new NullReferenceException("entity.Manager cannot be null");
-                    targetEntity = OrbitProcessor.FindSOIForPosition((StarSystem)entity.Manager, positionDB.AbsolutePosition);
-                    newOrbit = OrbitDB.FromVelocity(targetEntity, entity, insertionVector_m, atDateTime);
-                    entity.SetDataBlob(newOrbit);
-
-                }
-                else 
-                {
-                    entity.SetDataBlob(newOrbit);
-                }
-                positionDB.SetParent(targetEntity);
-                moveDB.IsAtTarget = true;
-            }
+*/
         }
 
         public int ProcessManager(EntityManager manager, int deltaSeconds)
