@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using Pulsar4X.Engine;
 using Pulsar4X.Events;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.Tests;
 
@@ -12,10 +14,22 @@ public class EventLogTests
     FactionEventLog? _factionTwoEventLog;
     SpaceMasterEventLog? _spaceMasterEventLog;
     HaltEventLog? _haltOnEventLog;
+    Game? _game;
 
     [SetUp]
     public void Setup()
     {
+        var modLoader = new ModLoader();
+        var modDataStore = new ModDataStore();
+
+        modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
+
+        var settings = new NewGameSettings() {
+            StartDateTime = new System.DateTime(2100, 9, 1)
+        };
+
+        _game  = new Game(settings, modDataStore);
+
         EventManager.Instance.Clear();
         _factionOneEventLog = FactionEventLog.Create(1);
         _factionOneEventLog.Subscribe();
@@ -25,7 +39,7 @@ public class EventLogTests
         _spaceMasterEventLog = SpaceMasterEventLog.Create();
         _spaceMasterEventLog.Subscribe();
 
-        _haltOnEventLog = HaltEventLog.Create(new List<EventType>() { EventType.GlobalDateChange, EventType.SystemDateChange });
+        _haltOnEventLog = HaltEventLog.Create(new List<EventType>() { EventType.GlobalDateChange, EventType.SystemDateChange }, _game.TimePulse);
         _haltOnEventLog.Subscribe();
     }
 

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
 
 namespace Pulsar4X.Events;
 
@@ -7,14 +8,16 @@ public class HaltEventLog : IEventLog
 {
     private SafeList<Event> _events = new ();
     private List<EventType> _haltsOn;
+    private MasterTimePulse _masterTimePulse;
 
     private HaltEventLog() { }
 
-    public static HaltEventLog Create(List<EventType> eventTypes)
+    public static HaltEventLog Create(List<EventType> eventTypes, MasterTimePulse masterTimePulse)
     {
         return new HaltEventLog()
         {
-            _haltsOn = eventTypes
+            _haltsOn = eventTypes,
+            _masterTimePulse = masterTimePulse
         };
     }
 
@@ -38,7 +41,7 @@ public class HaltEventLog : IEventLog
 
     private void OnEvent(Event e)
     {
-        // TODO: need to halt the game
         _events.Add(e);
+        _masterTimePulse.PauseTime();
     }
 }
