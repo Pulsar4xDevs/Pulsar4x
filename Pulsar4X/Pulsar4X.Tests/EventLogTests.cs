@@ -13,7 +13,6 @@ public class EventLogTests
     FactionEventLog? _factionOneEventLog;
     FactionEventLog? _factionTwoEventLog;
     SpaceMasterEventLog? _spaceMasterEventLog;
-    HaltEventLog? _haltOnEventLog;
     Game? _game;
 
     [SetUp]
@@ -31,16 +30,13 @@ public class EventLogTests
         _game  = new Game(settings, modDataStore);
 
         EventManager.Instance.Clear();
-        _factionOneEventLog = FactionEventLog.Create(1);
+        _factionOneEventLog = FactionEventLog.Create(1, _game.TimePulse);
         _factionOneEventLog.Subscribe();
 
-        _factionTwoEventLog = FactionEventLog.Create(2);
+        _factionTwoEventLog = FactionEventLog.Create(2, _game.TimePulse);
         _factionTwoEventLog.Subscribe();
         _spaceMasterEventLog = SpaceMasterEventLog.Create();
         _spaceMasterEventLog.Subscribe();
-
-        _haltOnEventLog = HaltEventLog.Create(new List<EventType>() { EventType.GlobalDateChange, EventType.SystemDateChange }, _game.TimePulse);
-        _haltOnEventLog.Subscribe();
     }
 
     [Test]
@@ -102,26 +98,5 @@ public class EventLogTests
 
         Assert.AreEqual(2, _spaceMasterEventLog.GetEvents().Count);
     }
-
-    [Test]
-    public void TestHaltEventLog()
-    {
-        if(_haltOnEventLog == null)
-            throw new NullReferenceException();
-
-        Event e = Event.Create(EventType.ActiveContactLost, DateTime.Now, "Testing Events");
-        EventManager.Instance.Publish(e);
-
-        Assert.AreEqual(0, _haltOnEventLog.GetEvents().Count);
-
-        e = Event.Create(EventType.GlobalDateChange, DateTime.Now, "Testing Events");
-        EventManager.Instance.Publish(e);
-
-        Assert.AreEqual(1, _haltOnEventLog.GetEvents().Count);
-
-        e = Event.Create(EventType.SystemDateChange, DateTime.Now, "Testing Events");
-        EventManager.Instance.Publish(e);
-
-        Assert.AreEqual(2, _haltOnEventLog.GetEvents().Count);
-    }
+    
 }

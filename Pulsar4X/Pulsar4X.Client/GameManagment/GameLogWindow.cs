@@ -111,10 +111,12 @@ namespace Pulsar4X.SDL2UI
     {
         private FactionInfoDB _facInfo;
         private HashSet<EventType> _hidenEvents;
+        private List<EventType> _haltingEvents;
         private GameLogSettingsWindow()
         {
             _facInfo = _uiState.Faction.GetDataBlob<FactionInfoDB>();
             _hidenEvents = GameLogWindow.GetInstance().HidenEvents;
+            _haltingEvents = EventManager.Instance.HaltsOn;
         }
         internal static GameLogSettingsWindow GetInstance()
         {
@@ -158,9 +160,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         string typestr = etype.ToString();
 
-                        bool halts = false;
-                        if (_facInfo.HaltsOnEvent.ContainsKey(etype))
-                            halts = _facInfo.HaltsOnEvent[etype];
+                        bool halts = _haltingEvents.Contains(etype);
                         bool isHidden = _hidenEvents.Contains(etype);
 
                         ImGui.Text(typestr);
@@ -169,6 +169,10 @@ namespace Pulsar4X.SDL2UI
                         if (ImGui.Checkbox("##halt" + typestr, ref halts))
                         {
                             _facInfo.HaltsOnEvent[etype] = halts;
+                            if (halts)
+                                _haltingEvents.Add(etype);
+                            else 
+                                _haltingEvents.Remove(etype);
                         }
                         ImGui.NextColumn();
                         //ImGui.SameLine();

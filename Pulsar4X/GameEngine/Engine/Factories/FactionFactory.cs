@@ -62,7 +62,7 @@ namespace Pulsar4X.Engine
             var factionEntity = Entity.Create();
             game.GlobalManager.AddEntity(factionEntity, blobs);
 
-            factionInfo.EventLog = FactionEventLog.Create(factionEntity.Id);
+            factionInfo.EventLog = FactionEventLog.Create(factionEntity.Id, game.TimePulse);
             factionInfo.EventLog.Subscribe();
 
             // Need to unlock the starting data in the game

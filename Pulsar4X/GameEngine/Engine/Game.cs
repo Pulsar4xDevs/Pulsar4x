@@ -63,7 +63,7 @@ namespace Pulsar4X.Engine
 
         [JsonProperty]
         public Entity GameMasterFaction { get; internal set; }
-
+        
         [JsonProperty]
         public GameSettings Settings { get; internal set; }
 

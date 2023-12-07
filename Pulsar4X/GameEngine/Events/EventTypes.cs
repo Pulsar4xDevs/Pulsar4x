@@ -248,6 +248,7 @@ namespace Pulsar4X.Events
         LoadingProblem,
         LifeSupportFailure,
         TractorReleased,
+        SOIChanged,
         // Crew Morale Events
         CrewMoraleFalling,
         ShoreLeaveComplete,

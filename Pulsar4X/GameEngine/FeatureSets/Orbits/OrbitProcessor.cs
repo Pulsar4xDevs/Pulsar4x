@@ -197,6 +197,8 @@ namespace Pulsar4X.Engine
             var gpMass = newParent.GetDataBlob<MassVolumeDB>().MassTotal;
             var neworbit = OrbitDB.FromVector(newParent, myMass, gpMass, rpos, vel, atDateTime);
             entity.SetDataBlob(neworbit);
+            var soievent = Event.Create(EventType.SOIChanged, atDateTime, "SOI changed", entity.FactionOwnerID, entity.Manager.ManagerGuid);
+            EventManager.Instance.Publish(soievent);
         }
     }
 
