@@ -113,14 +113,7 @@ namespace Pulsar4X.Engine
             GalaxyGen = new GalaxyFactory(SystemGenSettings, Settings.MasterSeed);
             HaltEventLog = HaltEventLog.Create(new List<EventType>(), TimePulse);
         }
-
-        public void Initialize()
-        {
-            ProcessorManager = new ProcessorManager(this);
-            OrderHandler = new StandAloneOrderHandler(this);
-            GlobalManager.Initialize(this);
-        }
-
+        
         public void ApplySettings(NewGameSettings settings)
         {
             Settings = settings;

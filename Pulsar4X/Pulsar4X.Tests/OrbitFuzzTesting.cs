@@ -26,7 +26,7 @@ namespace Pulsar4X.Tests
             ModDataStore modDataStore = new ModDataStore();
             modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
             var game = new Game(new NewGameSettings(), modDataStore);
-            game.Initialize();
+
             return game;
         }
 
