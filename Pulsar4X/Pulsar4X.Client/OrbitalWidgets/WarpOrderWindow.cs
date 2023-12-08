@@ -562,7 +562,7 @@ namespace Pulsar4X.SDL2UI
             //OrbitProcessor.InstantaneousOrbitalVelocityPolarCoordinate()
 
             
-            if(OrbitProcessor.UseRelativeVelocity)
+            if(_uiState.Game.Settings.UseRelativeVelocity)
                 _departureOrbitalVelocity_m = OrderingEntityState.Entity.GetRelativeFutureVelocity(_departureDateTime);
             else
                 _departureOrbitalVelocity_m = OrderingEntityState.Entity.GetAbsoluteFutureVelocity(_departureDateTime);

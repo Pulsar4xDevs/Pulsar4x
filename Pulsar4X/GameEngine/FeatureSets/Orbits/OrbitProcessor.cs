@@ -24,12 +24,12 @@ namespace Pulsar4X.Engine
         public TimeSpan FirstRunOffset => TimeSpan.FromTicks(0);
 
         public Type GetParameterType => typeof(OrbitDB);
-
-        public static bool UseRelativeVelocity { get; set; } = true;
-
+        
+        private static GameSettings _gameSettings;
+        
         public void Init(Game game)
         {
-            //nothing needed to do in this one. still need this function since it's required in the interface.
+            _gameSettings = game.Settings;
         }
 
         public void ProcessEntity(Entity entity, int deltaSeconds)
@@ -102,7 +102,7 @@ namespace Pulsar4X.Engine
         /// <param name="atDateTime">At date time.</param>
         public static Vector3 GetOrbitalVector(OrbitDB orbit, DateTime atDateTime)
         {
-            if (UseRelativeVelocity)
+            if (_gameSettings.UseRelativeVelocity)
             {
                 return orbit.InstantaneousOrbitalVelocityVector_m(atDateTime);
             }
@@ -114,7 +114,7 @@ namespace Pulsar4X.Engine
 
         public static Vector3 GetOrbitalInsertionVector(Vector3 departureVelocity, OrbitDB targetOrbit, DateTime arrivalDateTime)
         {
-            if (UseRelativeVelocity)
+            if (_gameSettings.UseRelativeVelocity)
                 return departureVelocity;
             else
             {

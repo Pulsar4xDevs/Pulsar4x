@@ -41,12 +41,24 @@ namespace Pulsar4X.Engine
 
         public bool EnableMultiThreading { get; set; } = false;
         public bool EnforceSingleThread { get; set; } = false; //if above is false and this is true, everything will be done on the main thread, and the UI will wait for processes to finish before updating.
-
-        public bool StrictNewtonion { get; set; } = true;
-
-
+        
         #endregion
 
+        #region warp settings
+
+        /// <summary>
+        /// when true, end of warp will put the entity on the same Newtonion trajectory that it had when it started warp.
+        /// when false the ship will just get dropped into a circular orbit. 
+        /// </summary>
+        public bool StrictNewtonion { get; set; } = false;
+        /// <summary>
+        /// when true ships saved Newtonion trajectory will be ralative to their immediate SOI parent,
+        /// when false it will be ralitive to the root star (ie the absolute velocity). 
+        /// </summary>
+        public bool UseRelativeVelocity { get; set; } = false;
+
+        #endregion
+        
         #region Network Settings
 
         public int portNumber { get; set; }
