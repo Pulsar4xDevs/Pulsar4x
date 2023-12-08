@@ -207,10 +207,10 @@
       "Formulas": {
         "Description": "Surveys the geological conditions of a system body.",
         "Mass": "Ability('Mass')",
-        "Volume": "[Mass]",
+        "Volume": "Max(1, [Mass] * 0.1)",
         "HTK": "[Mass]",
-        "CrewReq": "[Mass]",
-        "ResearchCost": "[Mass]",
+        "CrewReq": "Pow(Ability('Survey Speed') * 2, 3)",
+        "ResearchCost": "Pow(Ability('Survey Speed'), 2)",
         "CreditCost": "[Mass]",
         "BuildPointCost": "[Mass]"
       },
@@ -225,7 +225,7 @@
       "IndustryTypeID": "component-construction",
       "Attributes":[
         {
-          "Name": "Speed",
+          "Name": "Survey Speed",
           "Units": "survey per hour",
           "DescriptionFormula": "'Each point in speed provides one survey point per hour'",
           "GuiHint": "GuiSelectionMaxMinInt",
@@ -240,7 +240,14 @@
           "Units": "kg",
           "DescriptionFormula": "'Mass Calculation'",
           "GuiHint": "None",
-          "AttributeFormula": "90 + 10 * Ability('Speed')"
+          "AttributeFormula": "Pow(10 * Ability('Survey Speed'), 2)"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "GuidDictionary": {},
+          "AttributeFormula": "AtbConstrArgs(Ability('Survey Speed'))",
+          "AttributeType": "Pulsar4X.Datablobs.GeoSurveyAbilityAtbDB"
         }
       ]
     }

@@ -9,6 +9,7 @@ public static class OrderRegistry
     public static Dictionary<string, Func<int, Entity, EntityCommand>> Actions = new Dictionary<string, Func<int, Entity, EntityCommand>>()
     {
         { "Move to Nearest Colony", (factionId, fleet) => MoveToNearestColonyAction.CreateCommand(factionId, fleet) },
+        { "Move to Nearest Geo Survey", (factionId, fleet) => MoveToNearestGeoSurveyAction.CreateCommand(factionId, fleet) },
         { "Refuel", (factionId, fleet) => new RefuelAction() },
         { "Resupply", (factionId, fleet) => new ResupplyAction() }
     };
@@ -16,6 +17,7 @@ public static class OrderRegistry
     public static Dictionary<Type, string> ActionDescriptions = new Dictionary<Type, string>()
     {
         { typeof(MoveToNearestColonyAction), "Move to Nearest Colony" },
+        { typeof(MoveToNearestGeoSurveyAction), "Move to Nearest Geo Survey" },
         { typeof(RefuelAction), "Refuel" },
         { typeof(ResupplyAction), "Resupply" },
     };
