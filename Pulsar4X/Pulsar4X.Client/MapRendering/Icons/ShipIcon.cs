@@ -249,10 +249,16 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnPhysicsUpdate()
         {
-
-            var headingVector = _entity.GetRelativeState().Velocity;
-            var heading = Math.Atan2(headingVector.Y, headingVector.X);
-            Heading = (float)heading;
+            try
+            {
+                var headingVector = _entity.GetRelativeState().Velocity;
+                var heading = Math.Atan2(headingVector.Y, headingVector.X);
+                Heading = (float)heading;
+            }
+            catch(Exception)
+            {
+                // I don't think we need to do anything here
+            }
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
