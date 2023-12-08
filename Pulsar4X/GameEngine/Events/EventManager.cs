@@ -8,7 +8,6 @@ public class EventManager
     private static readonly EventManager instance = new EventManager();
 
     private Dictionary<EventType, Action<Event>> _subscribers = new();
-    public List<EventType> HaltsOn = new List<EventType>();
     private EventManager() {}
 
     public static EventManager Instance => instance;

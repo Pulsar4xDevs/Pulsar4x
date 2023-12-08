@@ -85,6 +85,14 @@ namespace Pulsar4X.DataStructures
             }
         }
 
+        public bool Contains(T item)
+        {
+            lock(_lock)
+            {
+                return _innerList.Contains(item);
+            }
+        }
+
         public void Clear()
         {
             lock(_lock)

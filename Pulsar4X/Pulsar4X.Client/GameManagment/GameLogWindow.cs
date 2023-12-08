@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using ImGuiNET;
-using Pulsar4X.Engine;
 using Pulsar4X.Events;
 using Pulsar4X.Datablobs;
-using System;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -111,12 +109,10 @@ namespace Pulsar4X.SDL2UI
     {
         private FactionInfoDB _facInfo;
         private HashSet<EventType> _hidenEvents;
-        private List<EventType> _haltingEvents;
         private GameLogSettingsWindow()
         {
             _facInfo = _uiState.Faction.GetDataBlob<FactionInfoDB>();
             _hidenEvents = GameLogWindow.GetInstance().HidenEvents;
-            _haltingEvents = EventManager.Instance.HaltsOn;
         }
         internal static GameLogSettingsWindow GetInstance()
         {
@@ -134,62 +130,62 @@ namespace Pulsar4X.SDL2UI
 
         internal override void Display()
         {
-            if (IsActive)
+            if(!IsActive) return;
+
+            System.Numerics.Vector2 size = new System.Numerics.Vector2(264, 600);
+            System.Numerics.Vector2 pos = new System.Numerics.Vector2(0, 0);
+            ImGui.SetNextWindowSize(size, ImGuiCond.Always);
+            ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
+
+            if (ImGui.Begin("Event Settings", ref IsActive))
             {
-                System.Numerics.Vector2 size = new System.Numerics.Vector2(264, 600);
-                System.Numerics.Vector2 pos = new System.Numerics.Vector2(0, 0);
-                ImGui.SetNextWindowSize(size, ImGuiCond.Always);
-                ImGui.SetNextWindowPos(pos, ImGuiCond.Appearing);
+                ImGui.Columns(3);
+                ImGui.SetColumnWidth(0, 164);
+                ImGui.Text("Type");
+                ImGui.NextColumn();
+                ImGui.SetColumnWidth(1, 38);
+                ImGui.Text("Halts");
+                ImGui.NextColumn();
+                ImGui.SetColumnWidth(2, 38);
+                ImGui.Text("Hide");
+                ImGui.Separator();
+                ImGui.NextColumn();
 
+                List<EventType> haltingEvents = _uiState.Game.HaltEventLog.HaltsOn;
 
-                if (ImGui.Begin("Event Settings", ref IsActive))
+                foreach (EventType etype in EventType.GetValues(typeof(EventType)))
                 {
-                    ImGui.Columns(3);
-                    ImGui.SetColumnWidth(0, 164);
-                    ImGui.Text("Type");
-                    ImGui.NextColumn();
-                    ImGui.SetColumnWidth(1, 38);
-                    ImGui.Text("Halts");
-                    ImGui.NextColumn();
-                    ImGui.SetColumnWidth(2, 38);
-                    ImGui.Text("Hide");
-                    ImGui.Separator();
+                    string typestr = etype.ToString();
+
+                    bool halts = haltingEvents.Contains(etype);
+                    bool isHidden = _hidenEvents.Contains(etype);
+
+                    ImGui.Text(typestr);
                     ImGui.NextColumn();
 
-                    foreach (EventType etype in EventType.GetValues(typeof(EventType)))
+                    if (ImGui.Checkbox("##halt" + typestr, ref halts))
                     {
-                        string typestr = etype.ToString();
-
-                        bool halts = _haltingEvents.Contains(etype);
-                        bool isHidden = _hidenEvents.Contains(etype);
-
-                        ImGui.Text(typestr);
-                        ImGui.NextColumn();
-
-                        if (ImGui.Checkbox("##halt" + typestr, ref halts))
-                        {
-                            _facInfo.HaltsOnEvent[etype] = halts;
-                            if (halts)
-                                _haltingEvents.Add(etype);
-                            else 
-                                _haltingEvents.Remove(etype);
-                        }
-                        ImGui.NextColumn();
-                        //ImGui.SameLine();
-                        if (ImGui.Checkbox("##hidden" + typestr, ref isHidden))
-                        {
-                            if (isHidden)
-                                _hidenEvents.Add(etype);
-                            else
-                                _hidenEvents.Remove(etype);
-
-
-                        }
-                        ImGui.NextColumn();
+                        _facInfo.HaltsOnEvent[etype] = halts;
+                        if (halts)
+                            _uiState.Game.HaltEventLog.AddEvent(etype);
+                        else
+                            _uiState.Game.HaltEventLog.RemoveEvent(etype);
                     }
-                    ImGui.Separator();
+                    ImGui.NextColumn();
+                    //ImGui.SameLine();
+                    if (ImGui.Checkbox("##hidden" + typestr, ref isHidden))
+                    {
+                        if (isHidden)
+                            _hidenEvents.Add(etype);
+                        else
+                            _hidenEvents.Remove(etype);
 
+
+                    }
+                    ImGui.NextColumn();
                 }
+                ImGui.Separator();
+
             }
         }
     }

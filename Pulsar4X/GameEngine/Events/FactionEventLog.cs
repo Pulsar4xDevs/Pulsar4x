@@ -37,9 +37,6 @@ public class FactionEventLog : IEventLog
 
     public void OnEvent(Event e)
     {
-        if( EventManager.Instance.HaltsOn.Contains(e.EventType))
-            _masterTimePulse.PauseTime(); //this will get called multiple times with multiple factions... shoudl probabily done better...
-        
         // We only care about events with _factionId present in some way
         if((e.FactionId == null || _factionId != e.FactionId) && !e.ConcernedFactions.Contains(_factionId))
         {

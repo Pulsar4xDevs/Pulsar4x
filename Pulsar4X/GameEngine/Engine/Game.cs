@@ -63,7 +63,7 @@ namespace Pulsar4X.Engine
 
         [JsonProperty]
         public Entity GameMasterFaction { get; internal set; }
-        
+
         [JsonProperty]
         public GameSettings Settings { get; internal set; }
 
@@ -85,6 +85,9 @@ namespace Pulsar4X.Engine
 
         [JsonProperty]
         internal int NextEntityID => EntityIDGenerator.NextId;
+
+        [JsonProperty]
+        public HaltEventLog HaltEventLog { get; set; }
 
         private static int EntityIDCounter = 0;
 
@@ -108,6 +111,7 @@ namespace Pulsar4X.Engine
             GlobalManager.Initialize(this);
             GameMasterFaction = FactionFactory.CreateSpaceMasterFaction(this, SpaceMaster, "SpaceMaster Faction");
             GalaxyGen = new GalaxyFactory(SystemGenSettings, Settings.MasterSeed);
+            HaltEventLog = HaltEventLog.Create(new List<EventType>(), TimePulse);
         }
 
         public void Initialize()
