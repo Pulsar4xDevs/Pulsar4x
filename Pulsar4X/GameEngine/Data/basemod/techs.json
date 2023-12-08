@@ -428,7 +428,8 @@
           "tech-antenna-efficiency",
           "tech-antenna-bandwidth",
           "tech-factory-max-size",
-          "tech-shipyard-slip-max-size"
+          "tech-shipyard-slip-max-size",
+          "tech-geo-surveyor"
         ]
       }
     }
@@ -455,6 +456,23 @@
       "MaxLevel": 100,
       "DataFormula": "(1 + [Level]) * 5000",
       "CostFormula":"(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-geo-surveyor",
+      "Name": "Geological Surveyor",
+      "Description": "Research into geological surveys of system bodies",
+      "Category": "tech-category-biology-genetics",
+      "MaxLevel": 1,
+      "DataFormula": "(1 + [Level]) * 5000",
+      "CostFormula":"(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "geo-surveyor"
+        ]
+      }
     }
   }
 ]

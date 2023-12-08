@@ -198,5 +198,51 @@
         }
       ]
     }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "geo-surveyor",
+      "Name": "Geological Surveyor",
+      "Formulas": {
+        "Description": "Surveys the geological conditions of a system body.",
+        "Mass": "Ability('Mass')",
+        "Volume": "[Mass]",
+        "HTK": "[Mass]",
+        "CrewReq": "[Mass]",
+        "ResearchCost": "[Mass]",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "[Mass]",
+        "copper": "[Mass]",
+        "aluminium": "[Mass]"
+      },
+      "ComponentType": "Science",
+      "MountType": "ShipComponent, ShipCargo",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Attributes":[
+        {
+          "Name": "Speed",
+          "Units": "survey per hour",
+          "DescriptionFormula": "'Each point in speed provides one survey point per hour'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "GuidDictionary": {},
+          "MaxFormula": "10",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "1"
+        },
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass Calculation'",
+          "GuiHint": "None",
+          "AttributeFormula": "90 + 10 * Ability('Speed')"
+        }
+      ]
+    }
   }
 ]
