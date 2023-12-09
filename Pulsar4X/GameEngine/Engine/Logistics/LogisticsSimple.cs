@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.WarpMove;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -18,7 +19,7 @@ namespace Pulsar4X.Engine.Logistics
             (Vector3 position, DateTime atDateTime) sourceIntercept;
             if (shippingEntity.HasDataBlob<WarpAbilityDB>())
             {
-                sourceIntercept = OrbitProcessor.GetInterceptPosition(shippingEntity, odb, currentDateTime);
+                sourceIntercept = WarpMath.GetInterceptPosition(shippingEntity, odb, currentDateTime);
                 travelTimeToSource = (shippingEntity.StarSysDateTime - sourceIntercept.atDateTime).TotalSeconds;
             }
             else
@@ -137,7 +138,7 @@ namespace Pulsar4X.Engine.Logistics
                 new Vector3(),
                 shipMass);
 
-            (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition
+            (Vector3 position, DateTime atDateTime) targetIntercept = WarpMath.GetInterceptPosition
             (
                 ship,
                 target.GetDataBlob<OrbitDB>(),
@@ -188,7 +189,7 @@ namespace Pulsar4X.Engine.Logistics
 
             //var departTime = ship.StarSysDateTime;
             OrbitDB targetOrbit = targetBody.GetDataBlob<OrbitDB>();
-            (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition(ship, targetOrbit, startState.At);
+            (Vector3 position, DateTime eti) targetIntercept = WarpMath.GetInterceptPosition(ship, targetOrbit, startState.At);
             //get newtonion insertion vector (probibly our startState.Velocity)
             Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(startState.Velocity, targetOrbit, targetIntercept.eti);
             var insertionSpeed = insertionVector.Length();

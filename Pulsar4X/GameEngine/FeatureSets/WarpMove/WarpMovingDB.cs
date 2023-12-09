@@ -1,6 +1,7 @@
 using System;
 using System.Data.SqlClient;
 using System.Runtime.Serialization;
+using GameEngine.WarpMove;
 using Newtonsoft.Json;
 using Pulsar4X.Orbital;
 using Pulsar4X.Engine;
@@ -104,7 +105,7 @@ namespace Pulsar4X.Datablobs
         {
             if(!targetEntity.HasDataBlob<OrbitDB>())
                 throw new NotImplementedException("Currently we can only predict the movement of stable orbits - target must have an orbitDB");
-            (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition
+            (Vector3 position, DateTime atDateTime) targetIntercept = WarpMath.GetInterceptPosition
             (
                 thisEntity,
                 targetEntity.GetDataBlob<OrbitDB>(),

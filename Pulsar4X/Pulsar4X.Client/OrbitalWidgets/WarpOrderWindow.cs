@@ -1,4 +1,5 @@
 ﻿using System;
+using GameEngine.WarpMove;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Orbital;
@@ -578,7 +579,7 @@ namespace Pulsar4X.SDL2UI
         {
             _deltaV_MS = _newtonUI.DeltaV;
             OrbitDB targetOrbit = TargetEntity.Entity.GetDataBlob<OrbitDB>();
-            (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition(OrderingEntityState.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
+            (Vector3 position, DateTime eti) targetIntercept = WarpMath.GetInterceptPosition(OrderingEntityState.Entity, TargetEntity.Entity.GetDataBlob<OrbitDB>(), _departureDateTime);
 
             DateTime estArivalDateTime = targetIntercept.eti; //rough calc. 
             

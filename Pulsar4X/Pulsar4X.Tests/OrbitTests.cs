@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using GameEngine.WarpMove;
 using NUnit.Framework;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -546,7 +547,7 @@ namespace Pulsar4X.Tests
 
 
 
-            var intercept_m = OrbitMath.GetInterceptPosition_m(currentPos_m, nonNewtSpeed_m, targetOrbit ,currentDateTime);
+            var intercept_m = WarpMath.GetInterceptPosition_m(currentPos_m, nonNewtSpeed_m, targetOrbit ,currentDateTime);
 
             var futurePos1_m = targetOrbit.GetAbsolutePosition_m(intercept_m.Item2);
 

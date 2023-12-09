@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.WarpMove;
 using Pulsar4X.Orbital;
 using Pulsar4X.Interfaces;
 using Pulsar4X.Datablobs;
@@ -216,7 +217,7 @@ public static class LogisticsCycle
                 else
                     odb = destinEntity.GetSOIParentEntity().GetDataBlob<OrbitDB>();
                     //throw new NotImplementedException("Currently we can only predict the movement of stable orbits - target must have an orbitDB");
-                (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition
+                (Vector3 position, DateTime atDateTime) targetIntercept = WarpMath.GetInterceptPosition
                 (
                     shippingEntity,
                     odb,

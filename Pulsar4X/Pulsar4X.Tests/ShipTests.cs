@@ -8,6 +8,7 @@ using Pulsar4X.Engine.Orders;
 using Pulsar4X.Modding;
 using Pulsar4X.Orbital;
 using System;
+using GameEngine.WarpMove;
 
 namespace Pulsar4X.Tests
 {
@@ -82,7 +83,7 @@ namespace Pulsar4X.Tests
             double warpPower = warpAtb.WarpPower;
             Assert.AreEqual(warpPower * originalEngineNumber , warpAbility.TotalWarpPower, "Incorrect TotalEnginePower");
             double tonnage1 = mvdb.MassTotal;
-            int expectedSpeed1 = ShipMovementProcessor.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage1);
+            int expectedSpeed1 = WarpMath.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage1);
             Assert.AreEqual(expectedSpeed1, warpAbility.MaxSpeed, "Incorrect Max Speed");
 
             _ship.AddComponent(_engineComponentDesign);
@@ -93,7 +94,7 @@ namespace Pulsar4X.Tests
 
             Assert.AreEqual(warpPower * add2engineNumber, warpAbility.TotalWarpPower, "Incorrect TotalEnginePower 2nd engine added");
             double tonnage2 = mvdb.MassTotal;
-            int expectedSpeed2 = ShipMovementProcessor.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage2);
+            int expectedSpeed2 = WarpMath.MaxSpeedCalc(warpAbility.TotalWarpPower, tonnage2);
             Assert.AreEqual(expectedSpeed2, warpAbility.MaxSpeed, "Incorrect Max Speed 2nd engine");
 
 

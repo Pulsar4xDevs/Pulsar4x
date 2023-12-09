@@ -1,5 +1,6 @@
 using System;
 using System.Data.SqlClient;
+using GameEngine.WarpMove;
 using Newtonsoft.Json;
 using Pulsar4X.Orbital;
 using Pulsar4X.Interfaces;
@@ -68,7 +69,7 @@ namespace Pulsar4X.Atb
                 ablty.BubbleSustainCost += BubbleSustainCost;
                 ablty.BubbleCollapseCost += BubbleCollapseCost;
             }
-            ShipMovementProcessor.CalcMaxWarpAndEnergyUsage(parentEntity);
+            WarpMath.CalcMaxWarpAndEnergyUsage(parentEntity);
         }
 
         public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)

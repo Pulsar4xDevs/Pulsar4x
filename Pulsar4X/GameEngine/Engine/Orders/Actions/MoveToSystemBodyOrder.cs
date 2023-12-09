@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GameEngine.WarpMove;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Extensions;
@@ -56,7 +57,7 @@ namespace Pulsar4X.Engine.Orders
 
                 var shipMass = ship.GetDataBlob<MassVolumeDB>().MassTotal;
 
-                (Vector3 position, DateTime _) = OrbitProcessor.GetInterceptPosition
+                (Vector3 position, DateTime _) = WarpMath.GetInterceptPosition
                 (
                     ship,
                     targetPositionDB.OwningEntity.GetDataBlob<OrbitDB>(),

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using GameEngine.WarpMove;
 using ImGuiNET;
 using ImGuiSDL2CS;
 using Pulsar4X.Engine;
@@ -740,7 +741,7 @@ namespace Pulsar4X.SDL2UI
             _wcc = wcc;
             _wec = wec;
             _wsc = wsc;
-            _wspd = ShipMovementProcessor.MaxSpeedCalc(wp, mass);
+            _wspd = WarpMath.MaxSpeedCalc(wp, mass);
             _egen = egen;
             _estor = estor;
             //double fuelMass = 0;

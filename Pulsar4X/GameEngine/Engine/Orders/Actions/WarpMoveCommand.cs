@@ -1,4 +1,5 @@
 using System;
+using GameEngine.WarpMove;
 using Newtonsoft.Json;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
@@ -78,7 +79,7 @@ namespace Pulsar4X.Engine.Orders
             if (expendDeltaV.Length() != 0)
             {
 
-                (Vector3 position, DateTime atDateTime) targetIntercept = OrbitProcessor.GetInterceptPosition
+                (Vector3 position, DateTime atDateTime) targetIntercept = WarpMath.GetInterceptPosition
                 (
                     orderEntity,
                     targetEntity.GetDataBlob<OrbitDB>(),

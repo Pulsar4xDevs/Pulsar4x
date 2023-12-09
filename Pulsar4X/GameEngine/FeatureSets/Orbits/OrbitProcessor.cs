@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.WarpMove;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Interfaces;
@@ -56,38 +57,31 @@ namespace Pulsar4X.Engine
             return orbits.Count;
         }
 
+        /// <summary>
+        /// this will also update any child positions.
+        /// will be slightly slower than UpdateSystemOrbits as it walks the heirarchy 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="parentPositionDB"></param>
+        /// <param name="toDate"></param>
+        /// <returns></returns>
         public static int UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime toDate)
         {
             var entityOrbitDB = entity.GetDataBlob<OrbitDB>();
             var entityPosition = entity.GetDataBlob<PositionDB>();
             int counter = 1;
-            //if(toDate.Minute > entityOrbitDB.OrbitalPeriod.TotalMinutes)
-
+            
             // Get our Parent-Relative coordinates.
-            try
-            {
-                Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
-
-                // Get our Absolute coordinates.
-                entityPosition.AbsolutePosition = parentPositionDB.AbsolutePosition + newPosition;
-
-            }
-            catch (OrbitProcessorException ex)
-            {
-                //Do NOT fail to the UI. There is NO data-corruption on this exception.
-                // In this event, we did NOT update our position.
-                Event e = Event.Create(EventType.Opps, toDate, $"Non Critical Position Exception thrown in OrbitProcessor for EntityItem {entity.Id} {ex.Message}", entity.FactionOwnerID, entity.Manager.ManagerGuid, entity.Id);
-                EventManager.Instance.Publish(e);
-            }
-
+            Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
+            // Get our Absolute coordinates.
+            entityPosition.AbsolutePosition = parentPositionDB.AbsolutePosition + newPosition;
+            
             // Update our children.
             foreach (Entity child in entityOrbitDB.Children)
             {
                 // RECURSION!
-
                 counter += UpdateOrbit(child, entityPosition, toDate);
             }
-
             return counter;
         }
 
@@ -150,31 +144,6 @@ namespace Pulsar4X.Engine
             return closestEntity;
         }
 
-        /// <summary>
-        /// Calculates a cartisian position for an intercept for a ship and an target's orbit using warp.
-        /// </summary>
-        /// <returns>The intercept position and DateTime</returns>
-        /// <param name="mover">The entity that is trying to intercept a target.</param>
-        /// <param name="targetOrbit">Target orbit.</param>
-        /// <param name="atDateTime">Datetime of transit start</param>
-        public static (Vector3 position, DateTime etiDateTime) GetInterceptPosition(Entity mover, OrbitDB targetOrbit, DateTime atDateTime, Vector3 offsetPosition = new Vector3())
-        {
-            Vector3 moverPos = mover.GetAbsoluteFuturePosition(atDateTime);
-            double spd_m = mover.GetDataBlob<WarpAbilityDB>().MaxSpeed;
-            return OrbitMath.GetInterceptPosition_m(moverPos, spd_m, targetOrbit, atDateTime, offsetPosition);
-        }
-
-        internal class OrbitProcessorException : Exception
-        {
-            public override string Message { get; }
-            public Entity Entity { get; }
-
-            public OrbitProcessorException(string message, Entity entity)
-            {
-                Message = message;
-                Entity = entity;
-            }
-        }
 
         #endregion
     }
@@ -204,6 +173,9 @@ namespace Pulsar4X.Engine
 
 
 
+    /// <summary>
+    /// designed to be used for ships in combat etc where we need a more frequent position update. 
+    /// </summary>
     public class OrbitUpdateOftenProcessor : IHotloopProcessor
     {
         public TimeSpan RunFrequency => TimeSpan.FromSeconds(1);
@@ -233,30 +205,16 @@ namespace Pulsar4X.Engine
             {
                 UpdateOrbit(orbit, toDate);
             }
-
             return orbits.Count;
         }
 
         public static void UpdateOrbit(OrbitUpdateOftenDB entityOrbitDB, DateTime toDate)
         {
-
             PositionDB entityPosition = entityOrbitDB.OwningEntity.GetDataBlob<PositionDB>();
-            try
-            {
-                Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
-                entityPosition.RelativePosition = newPosition;
-            }
-            catch (OrbitProcessor.OrbitProcessorException ex)
-            {
-                var entity = ex.Entity;
-                string name = "Un-Named";
-                if (entity.HasDataBlob<NameDB>())
-                    name = entity.GetDataBlob<NameDB>().OwnersName;
-                //Do NOT fail to the UI. There is NO data-corruption on this exception.
-                // In this event, we did NOT update our position.
-                Event e = Event.Create(EventType.Opps, toDate, $"Non Critical Position Exception thrown in OrbitProcessor for EntityItem {name} {entity.Id} {ex.Message}", entity.FactionOwnerID, entity.Manager.ManagerGuid, entity.Id);
-                EventManager.Instance.Publish(e);
-            }
+
+            Vector3 newPosition = entityOrbitDB.GetPosition(toDate);
+            entityPosition.RelativePosition = newPosition;
+            
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameEngine.WarpMove;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Engine;
@@ -20,7 +21,7 @@ namespace Pulsar4X.Engine.Logistics
             (Vector3 position, DateTime atDateTime) sourceIntercept;
             if (shippingEntity.HasDataBlob<WarpAbilityDB>())
             {
-                sourceIntercept = OrbitProcessor.GetInterceptPosition
+                sourceIntercept = WarpMath.GetInterceptPosition
                 (
                     shippingEntity,
                     odb,
@@ -305,7 +306,7 @@ namespace Pulsar4X.Engine.Logistics
 
             //var departTime = ship.StarSysDateTime;
             OrbitDB targetOrbit = targetBody.GetDataBlob<OrbitDB>();
-            (Vector3 position, DateTime eti) targetIntercept = OrbitProcessor.GetInterceptPosition(ship, targetOrbit, startState.At);
+            (Vector3 position, DateTime eti) targetIntercept = WarpMath.GetInterceptPosition(ship, targetOrbit, startState.At);
             Vector3 insertionVector = OrbitProcessor.GetOrbitalInsertionVector(startState.Velocity, targetOrbit, targetIntercept.eti);
             var insertionSpeed = insertionVector.Length();
             var idealSpeed = Math.Sqrt(targetRad / sgpTgtBdy);//for a circular orbit
