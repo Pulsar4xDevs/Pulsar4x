@@ -247,7 +247,7 @@
           "GuiHint": "None",
           "GuidDictionary": {},
           "AttributeFormula": "AtbConstrArgs(Ability('Survey Speed'))",
-          "AttributeType": "Pulsar4X.Datablobs.GeoSurveyAbilityAtbDB"
+          "AttributeType": "Pulsar4X.Atb.GeoSurveyAtb"
         }
       ]
     }
