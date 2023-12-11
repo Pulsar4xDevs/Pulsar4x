@@ -177,7 +177,7 @@ namespace Pulsar4X.Engine.Orders
             //IsCommandValid also checks that the entity we're commanding is owned by our faction.
             if (CommandHelpers.IsCommandValid(game.GlobalManager, RequestingFactionGuid, EntityCommandingGuid, out _factionEntity, out _entityCommanding))
             {
-                if (game.GlobalManager.TryGetEntityById(TargetSensorEntityGuid, out _targetSensorEntity))
+                if (game.GlobalManager.TryGetGlobalEntityById(TargetSensorEntityGuid, out _targetSensorEntity))
                 {
                     if (_targetSensorEntity.HasDataBlob<SensorInfoDB>()) //we want to damage the actual entity, not the sensor clone.
                         _targetActualEntity = _targetSensorEntity.GetDataBlob<SensorInfoDB>().DetectedEntity;
@@ -240,7 +240,8 @@ namespace Pulsar4X.Engine.Orders
         private ComponentInstance _fireControlComponent;
 
         public FireModes IsFiring;
-
+        private Game _game;
+        
         public static void CreateCmd(Game game, Entity faction, Entity shipEntity, string fireControlGuid, FireModes isFiring)
         {
             var cmd = new SetOpenFireControlOrder()
@@ -249,9 +250,11 @@ namespace Pulsar4X.Engine.Orders
                 EntityCommandingGuid = shipEntity.Id,
                 CreatedDate = shipEntity.Manager.ManagerSubpulses.StarSysDateTime,
                 FireControlGuid = fireControlGuid,
-                IsFiring = isFiring
+                IsFiring = isFiring,
+                _game = game
             };
             game.OrderHandler.HandleOrder(cmd);
+            
         }
 
         internal override void Execute(DateTime atDateTime)
@@ -263,16 +266,17 @@ namespace Pulsar4X.Engine.Orders
                 {
                     fcState.IsEngaging = true;
                     DateTime dateTimeNow = _entityCommanding.Manager.ManagerSubpulses.StarSysDateTime;
-                    GenericFiringWeaponsDB blob = _entityCommanding.GetDataBlob<GenericFiringWeaponsDB>();
-                    if (blob == null)
+                    if(!_entityCommanding.TryGetDatablob(out GenericFiringWeaponsDB blob))
                     {
                         blob = new GenericFiringWeaponsDB(fcState.GetChildrenInstances());
                         _entityCommanding.SetDataBlob(blob);
                     }
                     else
+                    {
                         blob.AddWeapons(fcState.GetChildrenInstances());
-
-                    //StaticRefLib.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor),_entityCommanding,  dateTimeNow);
+                    }
+                    
+                    //_game.ProcessorManager.RunInstanceProcessOnEntity(nameof(WeaponProcessor),_entityCommanding,  dateTimeNow);
                 }
                 else if (IsFiring == FireModes.CeaseFire)
                 {
