@@ -53,6 +53,11 @@ namespace Pulsar4X.DataStructures
 
         public (byte r, byte g, byte b, byte a) GetPixel(int x, int y)
         {
+            
+            int colomn = x * Depth;
+            int row = y * colomn;
+            int stride = Width * Depth;
+            
             int offset = (Stride * y) + (x * Depth);
             byte r = ByteArray[offset];
             byte g = ByteArray[offset + 1];

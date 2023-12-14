@@ -228,18 +228,20 @@ namespace Pulsar4X.Engine.Damage
 
             //We need to figure out where the incoming damage intersects with the ship's damage profile "image"
             var pwidth = damageProfile.DamageProfile.Width;
+            var pwIndex = pwidth - 1;//zero based arrays
             var hw = pwidth * 0.5;
             var phight = damageProfile.DamageProfile.Height;
+            var phIndex = phight - 1;//zero based arrays
             var hh = phight * 0.5;
             var len = Math.Sqrt((pwidth * pwidth) + (phight * phight));
 
             //damage.Position ralitive to our targets center, but we need to translate for calculating 0,0 at top left
             Vector2 start = new Vector2(damage.Position.x - hw, damage.Position.y - hh);
-            var end = new Vector2(pwidth * 0.5, phight * 0.5); //center of our target
+            var end = new Vector2((pwidth * 0.5)-1, (phight * 0.5)-1); //center of our target
             var tl = new Vector2(0, 0);
-            var tr = new Vector2(pwidth, 0);
-            var bl = new Vector2(0, phight);
-            var br = new Vector2(pwidth, phight);
+            var tr = new Vector2(pwIndex, 0);
+            var bl = new Vector2(0, phIndex);
+            var br = new Vector2(pwIndex, phIndex);
 
             //pretty sure these can be else ifs.
             Vector2 intersection;

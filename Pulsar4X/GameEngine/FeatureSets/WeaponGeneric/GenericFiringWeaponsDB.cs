@@ -14,7 +14,7 @@ namespace Pulsar4X.Datablobs
         
         public string[] WpnIDs = new string[0];
         public int[] InternalMagSizes = new int[0];
-        public int[] InternalMagQty = new int[0];
+        public int[] InternalMagQty = new int[0]; //this is reload amount not shot amount. 
         public int[] ReloadAmountsPerSec = new int[0];
         public int[] AmountPerShot = new int[0];
         public int[] MinShotsPerfire = new int[0];
@@ -38,9 +38,6 @@ namespace Pulsar4X.Datablobs
         /// <param name="wpns"></param>
         internal void AddWeapons(ComponentInstance[] wpns)
         {
-
-
-
             //first check that the weapons to add don't already exsist in the blob.
             List<ComponentInstance> weaponsToAdd = new List<ComponentInstance>();
             foreach (var wpn in wpns)
