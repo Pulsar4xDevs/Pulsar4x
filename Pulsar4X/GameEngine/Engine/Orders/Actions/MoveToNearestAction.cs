@@ -54,7 +54,7 @@ namespace Pulsar4X.Engine.Orders
             if(!flagship.TryGetDatablob<PositionDB>(out var flagshipPositionDB)) return;
 
             // Get all entites based on the filter
-            List<Entity> entities = EntityCommanding.Manager.GetAllEntites();
+            List<Entity> entities = EntityCommanding.Manager.GetEntitiesAvailableToFaction(RequestingFactionGuid);
             var filteredEntities = entities.Where(e => Filter(e)).ToList();
 
             Entity? closestValidEntity = null;

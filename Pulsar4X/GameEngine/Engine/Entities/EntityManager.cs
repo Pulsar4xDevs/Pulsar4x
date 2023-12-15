@@ -66,7 +66,7 @@ namespace Pulsar4X.Engine
             SelfInitialize(game);
             SetEntities();
             InitializeManagerSubPulse(game, postLoad);
-            
+
 
             SetEntities();
         }
@@ -408,6 +408,29 @@ namespace Pulsar4X.Engine
                 if(blobStore.ContainsKey(contactId))
                     list.Add(_entities[contactId]);
             }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Returns a list of all the entities in this manager that the faction knows about.
+        /// Either through their sensor contacts or because the entities belong to the faction.
+        /// </summary>
+        /// <param name="factionId">The Id of the faction</param>
+        /// <returns>List of entities</returns>
+        public List<Entity> GetEntitiesAvailableToFaction(int factionId)
+        {
+            var list = new List<Entity>();
+
+            // Add all the factions sensor contacts
+            var factionContacts = _factionSensorContacts[factionId];
+            foreach(var contactId in factionContacts.GetAllContactIds())
+            {
+                list.Add(_entities[contactId]);
+            }
+
+            // Add all the entities that belong to the faction
+            list.AddRange(GetEntitiesByFaction(factionId));
 
             return list;
         }
