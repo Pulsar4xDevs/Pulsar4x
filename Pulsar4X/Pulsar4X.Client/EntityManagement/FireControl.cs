@@ -11,7 +11,9 @@ using Pulsar4X.Engine.Orders;
 using Pulsar4X.SDL2UI;
 using Vector2 = System.Numerics.Vector2;
 using Pulsar4X.Atb;
+using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Orbital;
 
 namespace Pulsar4X.ImGuiNetUI
 {
@@ -37,8 +39,8 @@ namespace Pulsar4X.ImGuiNetUI
         private OrdnanceDesign[] _allOrdnanceDesigns = new OrdnanceDesign[0];
         Dictionary<int, long> _storedOrdnance = new ();
         private bool _showOnlyCargoOrdnance = true;
-
-
+        private GenericFiringWeaponsDB _activeWeapons;
+        
         private FireControl()
         {
             _flags = ImGuiWindowFlags.None;
@@ -175,17 +177,31 @@ namespace Pulsar4X.ImGuiNetUI
             return weaponname;
         }
 
+        
         void ShowWeapon(WeaponState wpn, int i = 0)
         {
-            ImGui.Selectable(GetRichWeaponName(wpn) + "##" + wpn.ComponentInstance.UniqueID);
+            string id = wpn.ComponentInstance.UniqueID;
+            int nameSize = 128;
+            
             GenericWeaponAtb wpnAtb = wpn.ComponentInstance.Design.GetAttribute<GenericWeaponAtb>();
             int reloadAmount = wpn.InternalMagCurAmount;
             int reloadMax = wpnAtb.InternalMagSize;
-            int reloadMin = wpnAtb.AmountPerShot * wpnAtb.MinShotsPerfire;
-            if(reloadAmount < reloadMax)
-                ImGui.Selectable("Reload:" + reloadAmount + "/" + reloadMax + "/" + reloadMin);
-            //wpn.ComponentInstance.GetAbilityState<WeaponState>().InternalMagCurAmount
-
+            int reloadMin = wpnAtb.AmountPerShot * wpnAtb.MinShotsPerfire;            
+            
+            ImGuiSelectableFlags flags = ImGuiSelectableFlags.None;
+            var cpos = ImGui.GetCursorPos();
+            
+            ImGui.Text(GetRichWeaponName(wpn));
+            var selectableSize = new Vector2(ImGui.GetColumnWidth(0) - 24, ImGui.GetTextLineHeightWithSpacing());
+            Vector2 progsize = new Vector2(selectableSize.X - nameSize, selectableSize.Y);
+            float reloadAmountPerc = (reloadAmount / reloadMax) * 100;
+            ImGui.SetCursorPos(new Vector2( nameSize, cpos.Y));
+            ImGui.ProgressBar(reloadAmountPerc, progsize);
+            
+            //draw an invisible button over everything for the drag and drop source. 
+            ImGui.SetCursorPos(cpos);
+            ImGui.InvisibleButton(id, selectableSize);
+            
             if (ImGui.BeginDragDropSource())
             {
                 ImGui.Text(wpn.Name);
@@ -198,6 +214,7 @@ namespace Pulsar4X.ImGuiNetUI
 
                 ImGui.EndDragDropSource();
             }
+            
             if (ImGui.BeginDragDropTarget())
             {
                 ImGuiPayloadPtr acceptPayload = ImGui.AcceptDragDropPayload("AssignOrdnance");
@@ -343,6 +360,15 @@ namespace Pulsar4X.ImGuiNetUI
                 {
                     _wpnDict[wpn.ID] = wpn;
                 }
+            }
+
+            if (orderEntity.Entity.TryGetDatablob(out GenericFiringWeaponsDB activeWeapons))
+            {
+                _activeWeapons = activeWeapons;
+            }
+            else
+            {
+                //_activeWeapons = new GenericFiringWeaponsDB(new ComponentInstance[0]);
             }
 
             var sysstate = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];

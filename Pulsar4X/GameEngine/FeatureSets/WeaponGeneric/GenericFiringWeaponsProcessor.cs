@@ -33,6 +33,7 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
         {
             var tickReloadAmount = db.ReloadAmountsPerSec[i];
             db.InternalMagQty[i] += tickReloadAmount;
+            db.WeaponStates[i].InternalMagCurAmount = db.InternalMagQty[i];
         }
         
         //fire weapons that are able.
@@ -45,6 +46,7 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
                 var tgt = db.FireControlStates[i].Target;
                 db.FireInstructions[i].FireWeapon(db.OwningEntity, tgt, shots);
                 db.InternalMagQty[i] -= shots * db.AmountPerShot[i];
+                db.WeaponStates[i].InternalMagCurAmount = db.InternalMagQty[i];
             }    
         }
     }

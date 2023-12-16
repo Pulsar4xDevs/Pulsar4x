@@ -7,9 +7,13 @@ namespace Pulsar4X.Atb
 {
     public class GenericWeaponAtb : IComponentDesignAttribute
     {
+        //max amount of reload points which can be stored
         public int InternalMagSize;
+        //amount of reload points per second
         public int ReloadAmountPerSec;
+        //amount of reload points for a single shot
         public int AmountPerShot;
+        //minimum amount of shots to be able to fire. eg simulate a magazine reload and burst fire. 
         public int MinShotsPerfire;
 
         private GenericWeaponAtb()
