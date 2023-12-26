@@ -172,7 +172,7 @@ namespace Pulsar4X.Engine.Orders
                         navyDB.ParentDB.RemoveChild(_entityCommanding);
                     }
 
-                    _entityCommanding.Manager.RemoveEntity(_entityCommanding);
+                    _entityCommanding.Manager.TagEntityForRemoval(_entityCommanding);
                     break;
                 case FleetOrderType.ChangeParent:
                     // Remove the entity from the parent tree

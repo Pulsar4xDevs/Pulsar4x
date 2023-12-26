@@ -194,7 +194,7 @@ namespace Pulsar4X.ImGuiNetUI
             ImGui.Text(GetRichWeaponName(wpn));
             var selectableSize = new Vector2(ImGui.GetColumnWidth(0) - 24, ImGui.GetTextLineHeightWithSpacing());
             Vector2 progsize = new Vector2(selectableSize.X - nameSize, selectableSize.Y);
-            float reloadAmountPerc = (reloadAmount / reloadMax) * 100;
+            float reloadAmountPerc = (reloadAmount / reloadMax);
             ImGui.SetCursorPos(new Vector2( nameSize, cpos.Y));
             ImGui.ProgressBar(reloadAmountPerc, progsize);
             

@@ -164,6 +164,7 @@ namespace Pulsar4X.SDL2UI
             {
                 item.PostFrameCleanup();
             }
+            _changeListener.TagAsProcessed(true);
         }
     }
 }

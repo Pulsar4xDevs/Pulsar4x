@@ -195,7 +195,7 @@ namespace Pulsar4X.Engine
 
             //Does anything else need to be done to delete a ship?
 
-            mySystem.RemoveEntity(DestroyedShip);
+            mySystem.TagEntityForRemoval(DestroyedShip);
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace Pulsar4X.Engine
                 //var newOrbit = OrbitDB.FromVector(origOrbit.Parent, )
                 Entity newAsteroid2 = AsteroidFactory.CreateAsteroid4(pDB.AbsolutePosition, origOrbit, atDateTime, newMass);
 
-                mySystem.RemoveEntity(Asteroid);
+                mySystem.TagEntityForRemoval(Asteroid);
 
                 //Randomize the number of created asteroids?
             }
@@ -244,7 +244,7 @@ namespace Pulsar4X.Engine
                 if(mySystem == null)
                     throw new NullReferenceException($"Unable to find the system {pDB.SystemGuid}");
 
-                mySystem.RemoveEntity(Asteroid);
+                mySystem.TagEntityForRemoval(Asteroid);
             }
         }
     }

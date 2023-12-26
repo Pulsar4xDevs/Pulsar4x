@@ -9,14 +9,26 @@ namespace Pulsar4X.Engine
 
     public abstract class AEntityChangeListener
     {
+        private object _lockObj = new object();
+        public bool HasProcessed { get; private set; } = false;
+        
         protected ConcurrentQueue<EntityChangeData> EntityChanges { get; } = new ConcurrentQueue<EntityChangeData>();
         internal ConcurrentHashSet<Entity> ListningToEntites { get; } = new ConcurrentHashSet<Entity>();
         //internal List<int> IncludeDBTypeIndexFilter = new List<int>();
         //internal List<int> ExcludeDBTypeIndexFilter = new List<int>();
+        
+        //concurrent queue because we will have multiple systems/entity managers/ threads writing to this.
+        internal ConcurrentQueue<EntityChangeData> stepChanges { get; } = new ConcurrentQueue<EntityChangeData>();
 
         internal AEntityChangeListener(EntityManager manager)
         {
             manager.EntityListeners.Add(this);
+        }
+
+        public void TagAsProcessed(bool hasProcessed)
+        {
+            lock (_lockObj)
+                HasProcessed = hasProcessed;
         }
 
         internal virtual void AddChange(EntityChangeData changeData)
@@ -25,13 +37,12 @@ namespace Pulsar4X.Engine
             {
                 if (ListningToEntites.Contains(changeData.Entity))
                 {
+                    TagAsProcessed(false);
                     EntityChanges.Enqueue(changeData);
                 }
             }
             else
             {
-                bool isvalid = changeData.Entity.IsValid;
-
                 ListningToEntites.Add(changeData.Entity);
                 EntityChanges.Enqueue(changeData);
             }
@@ -47,9 +58,22 @@ namespace Pulsar4X.Engine
         }
 
 
-        internal void Enqueue(EntityChangeData changeData)
+        private ConcurrentHashSet<Entity> entityNew = new ConcurrentHashSet<Entity>(); 
+        internal void OnGlobalStep()
         {
-            EntityChanges.Enqueue(changeData);
+            foreach (var change in stepChanges)
+            {
+                if(change.ChangeType is EntityChangeData.EntityChangeType.EntityAdded)
+                {
+                    entityNew.Add(change.Entity);
+                }
+
+                if (change.ChangeType is EntityChangeData.EntityChangeType.EntityRemoved)
+                {
+                    if (entityNew.Contains(change.Entity))
+                        entityNew.Remove(change.Entity);
+                }
+            }
         }
 
         public bool TryDequeue(out EntityChangeData changeData)
@@ -198,6 +222,12 @@ namespace Pulsar4X.Engine
             if (ListningToEntites.Contains( changeData.Entity))
             {
                 ListningToEntites.Add(changeData.Entity);
+                while (!EntityChanges.IsEmpty)
+                {
+                    //wait
+                    BlockingCollection<EntityChangeData> foo = new BlockingCollection<EntityChangeData>();
+                    
+                }
                 EntityChanges.Enqueue(changeData);
             }
         }
