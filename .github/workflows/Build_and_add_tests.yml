@@ -64,14 +64,14 @@ jobs:
         dotnet-version: 7.0.x
 
     - name: Build
-      shell: zsh
+      shell: bash
       run: |
         cd Pulsar4X
         dotnet restore "Pulsar4X.sln"
         dotnet build --no-restore
           
     - name: Run tests
-      shell: zsh
+      shell: bash
       run: |
         cd Pulsar4X
         dotnet test --no-restore
