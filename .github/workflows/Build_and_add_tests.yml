@@ -28,4 +28,3 @@ jobs:
         shell: pwsh
         run: |
           dotnet test --no-restore
-        needs: Build
