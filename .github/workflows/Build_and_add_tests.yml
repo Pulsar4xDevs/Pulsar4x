@@ -1,4 +1,4 @@
-name: Build and run Pulsar4X tests on Windows Server 2022
+name: Build and run Pulsar4X tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ AddGithubActions ]
 
 jobs:
-  use-actions:
+  build-on-windows-server:
     runs-on: windows-2022
     steps:
       - name: Checkout code
@@ -24,7 +24,7 @@ jobs:
           dotnet restore "Pulsar4X.sln"
           dotnet build --no-restore
           
-      - name: tests
+      - name: run tests
         shell: pwsh
         run: |
           cd Pulsar4X
