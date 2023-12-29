@@ -27,4 +27,5 @@ jobs:
       - name: tests
         shell: pwsh
         run: |
+          cd Pulsar4X
           dotnet test --no-restore
