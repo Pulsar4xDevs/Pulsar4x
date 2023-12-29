@@ -230,10 +230,14 @@ namespace Pulsar4X.Engine
                 {
                     value.RemoveContact(entity.Id);
                 }
+                
+                //actualy remove it from the manager here. 
                 if (!_entities.Remove(entity.Id))
                 {
                     throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
                 }
+                entity.Manager = null;
+                entity.FactionOwnerID = -1;
                 Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerGuid, entity.Id);
                 EventManager.Instance.Publish(e);
 

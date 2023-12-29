@@ -154,13 +154,10 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
 
     public void Destroy()
     {
-        if (!IsValid)
-        {
-            throw new InvalidOperationException("Invalid Entities cannot be destroyed. Either this entity has already been destroyed, or it was destroyed before it was fully initialized.");
-        }
         Manager.TagEntityForRemoval(this);
-        Manager = null;
-        FactionOwnerID = -1;
+        //manager does this:
+        //Manager = null;
+        //FactionOwnerID = -1;
     }
 
     public bool Equals(Entity? other)
