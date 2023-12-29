@@ -2,9 +2,9 @@ name: Build and run Pulsar4X tests
 
 on:
   push:
-    branches: [ Master ]
+    branches: [ DevBranch ]
   pull_request:
-    branches: [ Master ]
+    branches: [ DevBranch ]
 
 jobs:
   windows-server-2022:
