@@ -199,19 +199,20 @@ namespace Pulsar4X.Engine
 
         internal void TagEntityForRemoval(Entity entity)
         {
-            //do we really need to check this?
-            //if so, do we really need to throw an exception?
-            if (!IsValidEntity(entity))
+            //check we've not already tagged this. 
+            if (!_entitiesTaggedForRemoval.Contains(entity))
             {
-                throw new ArgumentException("Provided Entity is not valid in this manager.");
+                //do we really need to check this?
+                //if so, do we really need to throw an exception?
+                if (!IsValidEntity(entity))
+                {
+                    throw new ArgumentException("Provided Entity is not valid in this manager.");
+                }
+                entity.IsValid = false;
+                ManagerSubpulses.RemoveEntity(entity);
+                _entitiesTaggedForRemoval.Add(entity);
+                UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityRemoved);
             }
-
-            
-            
-            entity.IsValid = false;
-            ManagerSubpulses.RemoveEntity(entity);
-            _entitiesTaggedForRemoval.Add(entity);
-            UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityRemoved);
         }
 
         /// <summary>
