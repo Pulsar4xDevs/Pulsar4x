@@ -2,7 +2,6 @@ using System;
 
 namespace NUnit.Framework;
 
-//Test CI
 public class AssertExtensions
 {
     public static void AreAngleEqual(double expected, double actual, double delta)
