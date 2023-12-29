@@ -51,7 +51,7 @@ namespace Pulsar4X.Engine
         {
             foreach (var listener in EntityListeners)
             {
-                if (!listener.HasProcessed)
+                if (!listener.HasBeenProcessed())
                     return false;
             }
             return true;
@@ -199,16 +199,13 @@ namespace Pulsar4X.Engine
 
         internal void TagEntityForRemoval(Entity entity)
         {
-            //do we really need to check these two things?
+            //do we really need to check this?
             //if so, do we really need to throw an exception?
             if (!IsValidEntity(entity))
             {
                 throw new ArgumentException("Provided Entity is not valid in this manager.");
             }
-            if (!_entities.Remove(entity.Id))
-            {
-                throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
-            }
+
             
             
             entity.IsValid = false;
@@ -233,9 +230,13 @@ namespace Pulsar4X.Engine
                 {
                     value.RemoveContact(entity.Id);
                 }
-                
+                if (!_entities.Remove(entity.Id))
+                {
+                    throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
+                }
                 Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerGuid, entity.Id);
                 EventManager.Instance.Publish(e);
+
             }
             _entitiesTaggedForRemoval = new List<Entity>();
         }
@@ -345,6 +346,8 @@ namespace Pulsar4X.Engine
 
         private void UpdateListeners(Entity entity, BaseDataBlob? db, EntityChangeData.EntityChangeType change)
         {
+            if (entity is null)
+                throw new Exception();
             //listners to this work on thier own threads and are not affected by this one.
             if (EntityListeners.Count > 0)
             {

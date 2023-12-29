@@ -101,7 +101,6 @@ namespace Pulsar4X.SDL2UI
 
         void HandleUpdates(EntityChangeData change)
         {
-
                 switch (change.ChangeType)
                 {
                     case EntityChangeData.EntityChangeType.EntityAdded:
@@ -114,7 +113,6 @@ namespace Pulsar4X.SDL2UI
                         EntitysToBin.Add(change.Entity.Id);
                         break;
                 }
-
         }
 
         /// <summary>
@@ -123,6 +121,7 @@ namespace Pulsar4X.SDL2UI
         /// </summary>
         public void PreFrameSetup()
         {
+            _changeListener.TagIsProcessing(true);
             while (_changeListener.TryDequeue(out EntityChangeData change))
             {
                 SystemChanges.Add(change);
@@ -133,8 +132,7 @@ namespace Pulsar4X.SDL2UI
                 SensorChanges.Add(change);
                 HandleUpdates(change);
             }
-
-
+            
             foreach (var item in EntityStatesWithPosition.Values)
             {
                 if (item.IsDestroyed) //items get flagged via an event triggered by worker threads.
@@ -143,7 +141,6 @@ namespace Pulsar4X.SDL2UI
                         EntitysToBin.Add(item.Entity.Id);
                 }
             }
-
         }
 
         /// <summary>
@@ -164,7 +161,7 @@ namespace Pulsar4X.SDL2UI
             {
                 item.PostFrameCleanup();
             }
-            _changeListener.TagAsProcessed(true);
+            _changeListener.TagIsProcessing(false);
         }
     }
 }

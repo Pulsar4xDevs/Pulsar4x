@@ -283,7 +283,7 @@ namespace Pulsar4X.Engine
             Performance.BeginInterval();
             IsProcessing = true;
 
-            if (!SpinWait.SpinUntil(_entityManager.HaveAllListnersProcessed, TimeSpan.FromMilliseconds(500)))
+            if (!SpinWait.SpinUntil(_entityManager.HaveAllListnersProcessed, TimeSpan.FromMilliseconds(1500)))
                 throw new Exception("timeout on listnerProcessing.");
             
             _entityManager.RemoveTaggedEntitys();

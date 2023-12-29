@@ -10,25 +10,23 @@ namespace Pulsar4X.Engine
     public abstract class AEntityChangeListener
     {
         private object _lockObj = new object();
-        public bool HasProcessed { get; private set; } = false;
+        public bool IsProcessing { get; private set; } = false;
         
         protected ConcurrentQueue<EntityChangeData> EntityChanges { get; } = new ConcurrentQueue<EntityChangeData>();
         internal ConcurrentHashSet<Entity> ListningToEntites { get; } = new ConcurrentHashSet<Entity>();
         //internal List<int> IncludeDBTypeIndexFilter = new List<int>();
         //internal List<int> ExcludeDBTypeIndexFilter = new List<int>();
         
-        //concurrent queue because we will have multiple systems/entity managers/ threads writing to this.
-        internal ConcurrentQueue<EntityChangeData> stepChanges { get; } = new ConcurrentQueue<EntityChangeData>();
 
         internal AEntityChangeListener(EntityManager manager)
         {
             manager.EntityListeners.Add(this);
         }
 
-        public void TagAsProcessed(bool hasProcessed)
+        public void TagIsProcessing(bool isProcessing)
         {
             lock (_lockObj)
-                HasProcessed = hasProcessed;
+                IsProcessing = isProcessing;
         }
 
         internal virtual void AddChange(EntityChangeData changeData)
@@ -37,7 +35,6 @@ namespace Pulsar4X.Engine
             {
                 if (ListningToEntites.Contains(changeData.Entity))
                 {
-                    TagAsProcessed(false);
                     EntityChanges.Enqueue(changeData);
                 }
             }
@@ -57,25 +54,18 @@ namespace Pulsar4X.Engine
             return (EntityChanges.Count > 0);
         }
 
-
-        private ConcurrentHashSet<Entity> entityNew = new ConcurrentHashSet<Entity>(); 
-        internal void OnGlobalStep()
+        public bool HasBeenProcessed()
         {
-            foreach (var change in stepChanges)
+            lock (_lockObj)
             {
-                if(change.ChangeType is EntityChangeData.EntityChangeType.EntityAdded)
-                {
-                    entityNew.Add(change.Entity);
-                }
-
-                if (change.ChangeType is EntityChangeData.EntityChangeType.EntityRemoved)
-                {
-                    if (entityNew.Contains(change.Entity))
-                        entityNew.Remove(change.Entity);
-                }
+                if (!IsProcessing && EntityChanges.Count == 0)
+                    return true;
             }
+            return false;
         }
 
+        private ConcurrentHashSet<Entity> entityNew = new ConcurrentHashSet<Entity>(); 
+        
         public bool TryDequeue(out EntityChangeData changeData)
         {
 
@@ -164,11 +154,11 @@ namespace Pulsar4X.Engine
                     ListningToEntites.Add(entityitem);
             }
         }
-
-
-
+        
         internal override void AddChange(EntityChangeData changeData)
         {
+            if (changeData.Entity is null)
+                throw new Exception();
             switch (changeData.ChangeType)
             {
                 case EntityChangeData.EntityChangeType.EntityAdded:
@@ -200,8 +190,6 @@ namespace Pulsar4X.Engine
 
                 if (changeData.Entity.HasDataBlob(includeitem))
                 {
-
-
                     include = true;
                 }
                 else
@@ -222,12 +210,6 @@ namespace Pulsar4X.Engine
             if (ListningToEntites.Contains( changeData.Entity))
             {
                 ListningToEntites.Add(changeData.Entity);
-                while (!EntityChanges.IsEmpty)
-                {
-                    //wait
-                    BlockingCollection<EntityChangeData> foo = new BlockingCollection<EntityChangeData>();
-                    
-                }
                 EntityChanges.Enqueue(changeData);
             }
         }
