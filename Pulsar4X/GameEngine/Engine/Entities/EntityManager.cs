@@ -232,6 +232,17 @@ namespace Pulsar4X.Engine
                     value.RemoveContact(entity.Id);
                 }
                 
+                //remove each of the datablobs.
+                foreach (var db in entity.GetAllDataBlobs())
+                {
+                    var type = db.GetType();
+                    if (_datablobStores.ContainsKey(type))
+                    {
+                        var blob = _datablobStores[type][entity.Id];
+                        blob.OwningEntity = null;
+                        _datablobStores[type].Remove(entity.Id);
+                    }
+                }
                 //actualy remove it from the manager here. 
                 if (!_entities.Remove(entity.Id))
                 {
