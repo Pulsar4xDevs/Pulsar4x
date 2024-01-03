@@ -28,14 +28,6 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
 
     private void UpdateWeapons(GenericFiringWeaponsDB db)
     {
-        //reload all internal magazines.
-        for (int i = 0; i < db.WpnIDs.Length ; i++)
-        {
-            var tickReloadAmount = db.ReloadAmountsPerSec[i];
-            db.InternalMagQty[i] += tickReloadAmount;
-            db.WeaponStates[i].InternalMagCurAmount = db.InternalMagQty[i];
-        }
-        
         //fire weapons that are able.
         for (int i = 0; i < db.WpnIDs.Length; i++)
         {
@@ -49,6 +41,17 @@ public class GenericFiringWeaponsProcessor : IHotloopProcessor
                 db.WeaponStates[i].InternalMagCurAmount = db.InternalMagQty[i];
             }    
         }
+        
+        //reload all internal magazines.
+        for (int i = 0; i < db.WpnIDs.Length ; i++)
+        {
+            var tickReloadAmount = db.ReloadAmountsPerSec[i];
+            var magQty = Math.Max(db.InternalMagQty[i] + tickReloadAmount, db.InternalMagSizes[i]);
+            db.InternalMagQty[i] = magQty;
+            db.WeaponStates[i].InternalMagCurAmount = magQty;
+        }
+        
+
     }
 
     public TimeSpan RunFrequency { get; } = TimeSpan.FromSeconds(1);

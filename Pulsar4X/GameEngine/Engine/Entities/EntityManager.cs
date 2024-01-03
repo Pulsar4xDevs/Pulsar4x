@@ -43,8 +43,21 @@ namespace Pulsar4X.Engine
         [JsonIgnore]
         public DateTime StarSysDateTime => ManagerSubpulses.StarSysDateTime;
 
+        private object _lockObj = new object();
         internal List<AEntityChangeListener> EntityListeners { get; set; } = new ();
+        internal List<Entity> _entitiesTaggedForRemoval = new List<Entity>();
 
+        internal bool HaveAllListnersProcessed()
+        {
+            foreach (var listener in EntityListeners)
+            {
+                if (!listener.HasBeenProcessed())
+                    return false;
+            }
+            return true;
+        }
+        
+        
         [JsonProperty]
         public ManagerSubPulse ManagerSubpulses { get; internal set; }
 
@@ -57,6 +70,8 @@ namespace Pulsar4X.Engine
         [NotNull]
         [PublicAPI]
         public static readonly EntityManager InvalidManager = new EntityManager();
+
+        
 
         #region Constructors
         internal EntityManager() { }
@@ -161,7 +176,7 @@ namespace Pulsar4X.Engine
             if(entity.Manager != null)
             {
                 dataBlobs = entity.Manager.GetAllDataBlobsForEntity(entity.Id);
-                entity.Manager.RemoveEntity(entity);
+                entity.Manager.TagEntityForRemoval(entity);
             }
 
             AddEntity(entity, dataBlobs);
@@ -182,34 +197,64 @@ namespace Pulsar4X.Engine
             return _entities.ContainsKey(entityID);
         }
 
-        internal void RemoveEntity(Entity entity)
+        internal void TagEntityForRemoval(Entity entity)
         {
-            if (!IsValidEntity(entity))
+            //check we've not already tagged this. 
+            if (!_entitiesTaggedForRemoval.Contains(entity))
             {
-                throw new ArgumentException("Provided Entity is not valid in this manager.");
+                //do we really need to check this?
+                //if so, do we really need to throw an exception?
+                if (!IsValidEntity(entity))
+                {
+                    throw new ArgumentException("Provided Entity is not valid in this manager.");
+                }
+                entity.IsValid = false;
+                ManagerSubpulses.RemoveEntity(entity);
+                _entitiesTaggedForRemoval.Add(entity);
+                UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityRemoved);
             }
+        }
 
-            if(!_entities.Remove(entity.Id))
+        /// <summary>
+        /// This should happen at the beginning of a managers time pulse,
+        /// eg entites get removed at the start of the next pulse. 
+        /// </summary>
+        internal void RemoveTaggedEntitys()
+        {
+            foreach (var entity in _entitiesTaggedForRemoval)
             {
-                throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
+                foreach (var storeEntry in _datablobStores)
+                {
+                    storeEntry.Value.Remove(entity.Id);
+                }
+                foreach (var (key, value) in _factionSensorContacts)
+                {
+                    value.RemoveContact(entity.Id);
+                }
+                
+                //remove each of the datablobs.
+                foreach (var db in entity.GetAllDataBlobs())
+                {
+                    var type = db.GetType();
+                    if (_datablobStores.ContainsKey(type))
+                    {
+                        var blob = _datablobStores[type][entity.Id];
+                        blob.OwningEntity = null;
+                        _datablobStores[type].Remove(entity.Id);
+                    }
+                }
+                //actualy remove it from the manager here. 
+                if (!_entities.Remove(entity.Id))
+                {
+                    throw new KeyNotFoundException($"Entity with ID {entity.Id} not found in manager.");
+                }
+                entity.Manager = null;
+                entity.FactionOwnerID = -1;
+                Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerGuid, entity.Id);
+                EventManager.Instance.Publish(e);
+
             }
-
-            foreach(var storeEntry in _datablobStores)
-            {
-                storeEntry.Value.Remove(entity.Id);
-            }
-
-            foreach(var (key, value) in _factionSensorContacts)
-            {
-                value.RemoveContact(entity.Id);
-            }
-
-            entity.IsValid = false;
-
-            UpdateListeners(entity, null, EntityChangeData.EntityChangeType.EntityRemoved);
-
-            Event e = Event.Create(EventType.EntityDestroyed, StarSysDateTime, "Entity Removed From Manager", entity.FactionOwnerID, ManagerGuid, entity.Id);
-            EventManager.Instance.Publish(e);
+            _entitiesTaggedForRemoval = new List<Entity>();
         }
 
         public List<BaseDataBlob> GetAllDataBlobsForEntity(int entityID)
@@ -317,6 +362,8 @@ namespace Pulsar4X.Engine
 
         private void UpdateListeners(Entity entity, BaseDataBlob? db, EntityChangeData.EntityChangeType change)
         {
+            if (entity is null)
+                throw new Exception();
             //listners to this work on thier own threads and are not affected by this one.
             if (EntityListeners.Count > 0)
             {

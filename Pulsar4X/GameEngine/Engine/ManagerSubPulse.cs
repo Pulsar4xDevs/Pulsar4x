@@ -282,6 +282,11 @@ namespace Pulsar4X.Engine
             //keep processing the system till we've reached the wanted datetime
             Performance.BeginInterval();
             IsProcessing = true;
+
+            if (!SpinWait.SpinUntil(_entityManager.HaveAllListnersProcessed, TimeSpan.FromMilliseconds(250)))
+                throw new Exception("timeout on listnerProcessing.");
+            
+            _entityManager.RemoveTaggedEntitys();
             while (StarSysDateTime < targetDateTime)
             {
                 Performance.BeingSubInterval();

@@ -9,14 +9,24 @@ namespace Pulsar4X.Engine
 
     public abstract class AEntityChangeListener
     {
+        private object _lockObj = new object();
+        public bool IsProcessing { get; private set; } = false;
+        
         protected ConcurrentQueue<EntityChangeData> EntityChanges { get; } = new ConcurrentQueue<EntityChangeData>();
         internal ConcurrentHashSet<Entity> ListningToEntites { get; } = new ConcurrentHashSet<Entity>();
         //internal List<int> IncludeDBTypeIndexFilter = new List<int>();
         //internal List<int> ExcludeDBTypeIndexFilter = new List<int>();
+        
 
         internal AEntityChangeListener(EntityManager manager)
         {
             manager.EntityListeners.Add(this);
+        }
+
+        public void TagIsProcessing(bool isProcessing)
+        {
+            lock (_lockObj)
+                IsProcessing = isProcessing;
         }
 
         internal virtual void AddChange(EntityChangeData changeData)
@@ -30,8 +40,6 @@ namespace Pulsar4X.Engine
             }
             else
             {
-                bool isvalid = changeData.Entity.IsValid;
-
                 ListningToEntites.Add(changeData.Entity);
                 EntityChanges.Enqueue(changeData);
             }
@@ -46,12 +54,18 @@ namespace Pulsar4X.Engine
             return (EntityChanges.Count > 0);
         }
 
-
-        internal void Enqueue(EntityChangeData changeData)
+        public bool HasBeenProcessed()
         {
-            EntityChanges.Enqueue(changeData);
+            lock (_lockObj)
+            {
+                if (!IsProcessing && EntityChanges.Count == 0)
+                    return true;
+            }
+            return false;
         }
 
+        private ConcurrentHashSet<Entity> entityNew = new ConcurrentHashSet<Entity>(); 
+        
         public bool TryDequeue(out EntityChangeData changeData)
         {
 
@@ -140,11 +154,11 @@ namespace Pulsar4X.Engine
                     ListningToEntites.Add(entityitem);
             }
         }
-
-
-
+        
         internal override void AddChange(EntityChangeData changeData)
         {
+            if (changeData.Entity is null)
+                throw new Exception();
             switch (changeData.ChangeType)
             {
                 case EntityChangeData.EntityChangeType.EntityAdded:
@@ -176,8 +190,6 @@ namespace Pulsar4X.Engine
 
                 if (changeData.Entity.HasDataBlob(includeitem))
                 {
-
-
                     include = true;
                 }
                 else
