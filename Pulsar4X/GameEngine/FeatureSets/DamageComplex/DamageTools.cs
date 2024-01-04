@@ -152,68 +152,14 @@ namespace Pulsar4X.Engine.Damage
             byte id = color.R;
             return DamageResistsLookupTable[id];
         }
-
-        public static RawBmp CreateComponentByteArray(ComponentDesign componentDesign, byte typeID)
-        {
-
-            //var vol = componentDesign.VolumePerUnit * 1000;
-            var volm3 = componentDesign.VolumePerUnit;
-            //we convert 3d volume to 2d area at 1px = 1cm resolution
-            var area = Math.Cbrt(volm3) * 2 * 1000;
-            var len = Math.Sqrt(area * componentDesign.AspectRatio);
-            var wid = area / len;
-
-
-            double floatdepth = Math.Pow(componentDesign.AspectRatio, (float)1 / 3);
-            double CSA = componentDesign.VolumePerUnit / floatdepth;
-            double floatwidth = Math.Sqrt(CSA) * (double)componentDesign.AspectRatio;
-            //int depth = (int)floatdepth;
-            int width = (int)len;
-            int height = (int)wid;
-            //int v2d = height * width;
-            //int volume = (int)volm3;
-
-            //if (componentDesign.AspectRatio > 1)
-            //{
-            //     width = (int)(width / componentDesign.AspectRatio);
-            //    height = (int)(height / componentDesign.AspectRatio);
-            //}
-
-
-            int imagedepth = 4;
-            int size = imagedepth * width * height;
-            int stride = width * imagedepth;
-
-            byte[] buffer = new byte[size];
-
-            for (int ix = 0; ix < width; ix++)
-            {
-                for (int iy = 0; iy < height; iy++)
-                {
-                    byte c = typeID;
-                    RawBmp.SetPixel(ref buffer, stride, imagedepth, ix, iy, 255, 255,c, 255);
-                }
-            }
-
-            RawBmp bmp = new RawBmp()
-            {
-                ByteArray =  buffer,
-                Stride = stride,
-                Depth = imagedepth,
-                Width = width,
-                Height = height,
-
-            };
-            return bmp;
-        }
-
-
-        public static List<RawBmp> DealDamage(EntityDamageProfileDB damageProfile, DamageFragment damage)
+        
+        public static (List<(byte id, int damageAmount)> damageToComponents, List<RawBmp> damageFrames) DealDamageSim(EntityDamageProfileDB damageProfile, DamageFragment damage)
         {
             RawBmp shipDamageProfile = damageProfile.DamageProfile;
 
             List<RawBmp> damageFrames = new List<RawBmp>();
-
+            List<(byte id, int damageAmount)> damageToComponents = new List<(byte, int)>();
+            
             var fragmentMass = damage.Mass;
             (int x, int y) dpos = (0, 0);
             var dvel = damage.Velocity;
@@ -223,9 +169,7 @@ namespace Pulsar4X.Engine.Damage
             var pixelscale = 0.01;
             double startMomentum = damage.Momentum;
             double momentum = startMomentum;
-
-
-
+            
             //We need to figure out where the incoming damage intersects with the ship's damage profile "image"
             var pwidth = damageProfile.DamageProfile.Width;
             var pwIndex = pwidth - 1;//zero based arrays
@@ -312,25 +256,25 @@ namespace Pulsar4X.Engine.Damage
                     if (momentum > 0)
                     {
                         px = ( px.r, px.g, px.b, 0);
-                        damageProfile.ComponentLookupTable[px.g].HTKRemaining -= 1;
+                        damageToComponents.Add((px.g, 1));
                     }
-
                 }
-
+                
+                //this is the damage fragment
                 thisFrame.SetPixel(dpos.x, dpos.y, byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)momentum);
+                
+                //this is the entity being damaged.
                 thisFrame.SetPixel(savedpxloc.x, savedpxloc.y, savedpx.r, savedpx.g, savedpx.b, savedpx.a);
                 damageFrames.Add(thisFrame);
                 savedpxloc = dpos;
                 savedpx = px;
-
-
+                
                 double dt = 1 / dvel.Length();
                 pos.X += dvel.X * dt;
                 pos.Y += dvel.Y * dt;
                 dpos.x = Convert.ToInt32(pos.X);
                 dpos.y = Convert.ToInt32(pos.Y);
             }
-
 
             Buffer.BlockCopy(damageFrames.Last().ByteArray, 0, byteArray, 0, shipDamageProfile.ByteArray.Length);
             var finalFrame = new RawBmp()
@@ -342,11 +286,11 @@ namespace Pulsar4X.Engine.Damage
                 Stride = shipDamageProfile.Stride
             };
             finalFrame.SetPixel(savedpxloc.x, savedpxloc.y, savedpx.r, savedpx.g, savedpx.b, savedpx.a);
-            damageProfile.DamageSlides.Add(damageFrames);
+            //damageProfile.DamageSlides.Add(damageFrames);
+            
+            damageProfile.DamageEvents.Add(damage);
             damageProfile.DamageProfile = finalFrame;
-            return damageFrames;
+            return (damageToComponents, damageFrames);
         }
-
-
     }
 }

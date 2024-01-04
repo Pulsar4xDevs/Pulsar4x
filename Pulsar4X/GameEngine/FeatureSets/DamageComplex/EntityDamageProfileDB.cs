@@ -26,13 +26,14 @@ namespace Pulsar4X.Datablobs
         /// except we're only storing the guid here.
         /// </summary>
         public List<(string id, int count)> PlacementOrder;
+        
+        
         /// <summary>
         /// this allows us to encode the green value of the ShipDamageProfile to a component instance.
-        /// it's really a single dimentional version of the ship design's List<(ComponentDesign design, int count)> Components
+        /// it's really a single dimensional version of the ship design's List<(ComponentDesign design, int count)> Components
         /// </summary>
-        public List<ComponentInstance> ComponentLookupTable = new List<ComponentInstance>();
-
-        public List<(string, RawBmp)> TypeBitmaps;
+        public List<ComponentInstance> ComponentLookupTable = new List<ComponentInstance>(255);
+        public List<(string id, RawBmp bmp)> IndividualComponentBitmaps = new List<(string, RawBmp)>(255);
 
         //public List<(int index, int size)> Bulkheads; maybe connect armor/skin at these points.
         //if we get around to doing technical stuff like being able to break a ship into two pieces,
@@ -40,10 +41,9 @@ namespace Pulsar4X.Datablobs
 
 
         public RawBmp DamageProfile;
-        public List<List<RawBmp>> DamageSlides = new List<List<RawBmp>>();
+        public List<DamageFragment> DamageEvents = new List<DamageFragment>();
 
-
-
+        
         [JsonConstructor]
         private EntityDamageProfileDB()
         {
@@ -64,7 +64,7 @@ namespace Pulsar4X.Datablobs
 
         private void Init(List<(ComponentDesign component, int count)> components, (ArmorBlueprint armorSD, float thickness) armor)
         {
-            var typeBitmap = new List<(string, RawBmp)>();
+            var componentBitmaps = new List<(string, RawBmp)>(255);
             var placementOrder = new List<(string, int)>();
             var instances = new List<ComponentInstance>();
 
@@ -81,8 +81,8 @@ namespace Pulsar4X.Datablobs
                 ArmorVertex.Add(((int)len,(int)(wid * (componenttype.count) * 0.5)));
 
 
-                RawBmp compBmp = DamageTools.CreateComponentByteArray(componenttype.component, (byte)typeBitmap.Count);
-                typeBitmap.Add((typeGuid, compBmp));
+                RawBmp compBmp = ComponentPlacement.CreateComponentByteArray(componenttype.component);
+                componentBitmaps.Add((typeGuid, compBmp));
 
 
                 placementOrder.Add((typeGuid, componenttype.count));
@@ -95,7 +95,7 @@ namespace Pulsar4X.Datablobs
 
 
             PlacementOrder = placementOrder;
-            TypeBitmaps = typeBitmap;
+            IndividualComponentBitmaps = componentBitmaps;
             Armor = armor;
             ComponentLookupTable = instances;
             DamageProfile = ComponentPlacement.CreateShipBmp(this);
@@ -241,7 +241,7 @@ namespace Pulsar4X.Datablobs
             Armor = db.Armor;
             ArmorVertex = db.ArmorVertex;
             PlacementOrder = db.PlacementOrder;
-            TypeBitmaps = db.TypeBitmaps;
+            IndividualComponentBitmaps = db.IndividualComponentBitmaps;
             DamageProfile = db.DamageProfile;
         }
 

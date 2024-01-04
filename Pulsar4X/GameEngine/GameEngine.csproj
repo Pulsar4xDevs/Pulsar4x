@@ -30,7 +30,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Engine\Damage" />
     <Folder Include="FeatureSets\DamageSimple" />
   </ItemGroup>
 </Project>

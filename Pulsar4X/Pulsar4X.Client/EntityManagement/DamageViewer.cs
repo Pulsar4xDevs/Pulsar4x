@@ -95,9 +95,9 @@ namespace Pulsar4X.SDL2UI.Combat
                 _rawShipImage = _profile.DamageProfile;
                 _shipImgPtr = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _rawShipImage);
 
-                if (_profile.DamageSlides.Count > 0)
+                if (_profile.DamageEvents.Count > 0)
                 {
-                    _damageEventIndex = _profile.DamageSlides.Count - 1;
+                    _damageEventIndex = _profile.DamageEvents.Count - 1;
                     SetDamageEventFrames();
                 }
 
@@ -111,7 +111,7 @@ namespace Pulsar4X.SDL2UI.Combat
 
         void SetDamageEventFrames()
         {
-            _damageFrames = _profile?.DamageSlides[_damageEventIndex];
+            _damageFrames = DamageTools.DealDamageSim(_profile, _profile.DamageEvents[_damageEventIndex]).damageFrames;
             _showFrameNum = 0;
             if(_damageFrames != null)
                 _showDmgFrametx = SDL2Helper.CreateSDLTexture(_uiState.rendererPtr, _damageFrames[_showFrameNum]);
@@ -235,7 +235,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                 Momentum = (float)_momentum,
 
                             };
-                            _damageFrames = DamageTools.DealDamage(_profile, damageFrag);
+                            _damageFrames = DamageTools.DealDamageSim(_profile, damageFrag).damageFrames;
                             _rawShipImage = _damageFrames.Last();
                         }
                         ImGui.NextColumn();
@@ -262,7 +262,7 @@ namespace Pulsar4X.SDL2UI.Combat
                                 Density = _projDensity,
                                 Length = _projLen
                             };
-                            _damageFrames = DamageTools.DealDamage(_profile, damageFrag);
+                            _damageFrames = DamageTools.DealDamageSim(_profile, damageFrag).damageFrames;
                             _rawShipImage = _damageFrames.Last();
                         }
 
@@ -279,15 +279,15 @@ namespace Pulsar4X.SDL2UI.Combat
                     }
                 }
 
-                if(_profile != null && _profile.DamageSlides.Count > 1)
+                if(_profile != null && _profile.DamageEvents.Count > 0)
                 {
-                    if (ImGui.SliderInt("Damage Events", ref _damageEventIndex, 0, _profile.DamageSlides.Count))
+                    if (ImGui.SliderInt("Damage Events", ref _damageEventIndex, 1, _profile.DamageEvents.Count))
                     {
                         SetDamageEventFrames();
                     }
                 }
 
-                if(_profile != null && _profile.DamageSlides.Count > 0 && _damageFrames == null)
+                if(_profile != null && _profile.DamageEvents.Count > 0 && _damageFrames == null)
                 {
                     _damageEventIndex = 0;
                     SetDamageEventFrames();

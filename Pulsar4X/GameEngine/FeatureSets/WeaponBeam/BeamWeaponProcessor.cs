@@ -71,7 +71,7 @@ namespace Pulsar4X.Engine
                         Momentum = (float)(UniversalConstants.Science.PlankConstant * freq),
                         Length = (float)(beamInfo.Positions[0] - beamInfo.Positions[1]).Length(),
                     };
-                    var slides = DamageProcessor.OnTakingDamage(beamInfo.TargetEntity, damage);
+                    DamageProcessor.OnTakingDamage(beamInfo.TargetEntity, damage);
                     beamInfo.OwningEntity.Destroy();
                 }
                 else

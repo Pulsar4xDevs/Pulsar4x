@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework.Constraints;
+using Pulsar4X.Components;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
 using Pulsar4X.DataStructures;
@@ -11,12 +12,71 @@ namespace Pulsar4X.Engine.Damage
     public static class ComponentPlacement
     {
 
+        /// <summary>
+        /// this creates a bitmap for a single component.
+        /// </summary>
+        /// <param name="componentDesign"></param>
+        /// <param name="typeID"></param>
+        /// <returns></returns>
+        public static RawBmp CreateComponentByteArray(ComponentDesign componentDesign)
+        {
+            //var vol = componentDesign.VolumePerUnit * 1000;
+            var volm3 = componentDesign.VolumePerUnit;
+            //we convert 3d volume to 2d area at 1px = 1cm resolution
+            var area = Math.Cbrt(volm3) * 2 * 1000;
+            var len = Math.Sqrt(area * componentDesign.AspectRatio);
+            var wid = area / len;
+
+
+            double floatdepth = Math.Pow(componentDesign.AspectRatio, (float)1 / 3);
+            double CSA = componentDesign.VolumePerUnit / floatdepth;
+            double floatwidth = Math.Sqrt(CSA) * (double)componentDesign.AspectRatio;
+            //int depth = (int)floatdepth;
+            int width = (int)len;
+            int height = (int)wid;
+            //int v2d = height * width;
+            //int volume = (int)volm3;
+
+            //if (componentDesign.AspectRatio > 1)
+            //{
+            //     width = (int)(width / componentDesign.AspectRatio);
+            //    height = (int)(height / componentDesign.AspectRatio);
+            //}
+
+
+            int imagedepth = 4;
+            int size = imagedepth * width * height;
+            int stride = width * imagedepth;
+
+            byte[] buffer = new byte[size];
+
+            for (int ix = 0; ix < width; ix++)
+            {
+                for (int iy = 0; iy < height; iy++)
+                {
+                    RawBmp.SetPixel(ref buffer, stride, imagedepth, ix, iy, 255, 255,255, 255);
+                }
+            }
+
+            RawBmp bmp = new RawBmp()
+            {
+                ByteArray =  buffer,
+                Stride = stride,
+                Depth = imagedepth,
+                Width = width,
+                Height = height,
+
+            };
+            return bmp;
+        }
+
+        
         public static RawBmp CreateShipBmp(EntityDamageProfileDB shipProfile)
         {
             // byte armorID = 255;//shipProfile.Armor.IDCode;
             var po = shipProfile.PlacementOrder;
 
-            List<(string typeID, RawBmp bmp)> typeBitmaps = shipProfile.TypeBitmaps;
+            List<(string typeID, RawBmp bmp)> typeBitmaps = shipProfile.IndividualComponentBitmaps;
             List<(int width, int height)> partsize = new List<(int width, int height)>();
             partsize.Add((1, 1));
             int componentWidthNum = 0;

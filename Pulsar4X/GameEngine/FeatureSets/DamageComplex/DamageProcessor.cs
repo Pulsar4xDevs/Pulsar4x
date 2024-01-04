@@ -28,7 +28,7 @@ namespace Pulsar4X.Engine
         /// </summary>
         /// <param name="damageableEntity"></param>
         /// <param name="damageAmount"></param>
-        public static List<RawBmp> OnTakingDamage(Entity damageableEntity, DamageFragment damage)
+        public static void OnTakingDamage(Entity damageableEntity, DamageFragment damageFragment)
         {
 
             var db = damageableEntity.GetDataBlob<EntityDamageProfileDB>();
@@ -44,8 +44,14 @@ namespace Pulsar4X.Engine
                 }
                 //return;
             }
+            
+            var damages = DamageTools.DealDamageSim(db, damageFragment);
 
-             return DamageTools.DealDamage(db, damage);
+            foreach (var damage in damages.damageToComponents)
+            {
+                db.ComponentLookupTable[damage.id].HTKRemaining -= damage.damageAmount;
+            }
+            
 
             /*
             if (damageableEntity.HasDataBlob<AsteroidDamageDB>())
