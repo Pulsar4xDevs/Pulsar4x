@@ -13,7 +13,7 @@ r : maps to a damage resistance table. currently only used by armor, (components
     and is set in the ui damage viewer (eek! obv was tempory wip for quick test setup.)
     this has a byte ID (red) material hitpoints, and material density)
 g : maps to the specific component instance. (ships currently will only be able to have 255 components max.)
-b : currently unused
+b : currently unused, maybe status and phase type? eg no physics, temprature, solid, liquid, gas.
 a : is the health of the material at this point. 
 
 An undamaged ship is suposed to have/share a "DamageProfile" of it's design class to save memory. 

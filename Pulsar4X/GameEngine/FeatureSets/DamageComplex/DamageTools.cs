@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using Pulsar4X.Blueprints;
 using Pulsar4X.Orbital;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
@@ -23,7 +24,10 @@ namespace Pulsar4X.Engine.Damage
         Structural = 15
     }
 
-    public struct DamageResist
+    /// <summary>
+    /// Merge this into materials?
+    /// </summary>
+    public class DamageResistBlueprint: Blueprint
     {
         /*
          this could potentialy get more complex,
@@ -33,11 +37,14 @@ namespace Pulsar4X.Engine.Damage
         */
         public byte IDCode;
         public int HitPoints;
+
+        public int MeltingPoint;
         //public float Heat;
         //public float Kinetic;
         public float Density;
 
-        public DamageResist(byte iDCode, int hitPoints, float density)
+        
+        public DamageResistBlueprint(byte iDCode, int hitPoints, float density) 
         {
             IDCode = iDCode;
             HitPoints = hitPoints;
@@ -52,7 +59,7 @@ namespace Pulsar4X.Engine.Damage
     {
         public Vector2 Velocity;
         public (int x,int y) Position;
-        //public double Angle;
+        public double Heat;
         public float Mass;
         public float Momentum;
         public float Density;//kg/m^3
@@ -61,18 +68,11 @@ namespace Pulsar4X.Engine.Damage
 
     public static class DamageTools
     {
-        public static Dictionary<byte, DamageResist> DamageResistsLookupTable = new Dictionary<byte, DamageResist>()
+        public static Dictionary<byte, DamageResistBlueprint> DamageResistsLookupTable = new Dictionary<byte, DamageResistBlueprint>()
         {
-            {0, new DamageResist() {IDCode = 0, HitPoints = 0}} //emptyspace
+           
         };
-
-        // struct Bitmap
-        // {
-        //     public int Height;
-        //     public int Width;
-        //     public int Stride;
-        //     public byte[] PxArray;
-        // }
+        
 
         public static RawBmp LoadFromBitMap(string file)
         {
@@ -147,7 +147,7 @@ namespace Pulsar4X.Engine.Damage
             return color;
         }
 
-        public static DamageResist FromColor(Color color)
+        public static DamageResistBlueprint FromColor(Color color)
         {
             byte id = color.R;
             return DamageResistsLookupTable[id];
@@ -245,7 +245,7 @@ namespace Pulsar4X.Engine.Damage
                 (byte r, byte g, byte b, byte a) px = thisFrame.GetPixel(dpos.x, dpos.y);
                 if (px.a > 0)
                 {
-                    DamageResist damageresist = DamageResistsLookupTable[px.r];
+                    DamageResistBlueprint damageresist = DamageResistsLookupTable[px.r];
 
                     double density = damageresist.Density / (px.a / 255f); //density / health
                     double maxImpactDepth = dlen * dden / density;
