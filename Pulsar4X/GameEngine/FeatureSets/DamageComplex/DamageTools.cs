@@ -51,7 +51,10 @@ namespace Pulsar4X.Engine.Damage
             //Heat = heat;
             //Kinetic = kinetic;
             Density = density; //kg/m^3
-            DamageTools.DamageResistsLookupTable.Add(IDCode, this);
+            if (DamageTools.DamageResistsLookupTable.ContainsKey(iDCode))
+                DamageTools.DamageResistsLookupTable[iDCode] = this;
+            else 
+                DamageTools.DamageResistsLookupTable.Add(IDCode, this);
         }
     }
 

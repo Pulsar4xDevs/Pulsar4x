@@ -93,7 +93,7 @@ namespace Pulsar4X.Modding
                 case ModInstruction.DataType.Theme:
                     ApplyModGeneric<ThemeBlueprint>(baseData.Themes, mod, modNamespace);
                     break;
-                case ModInstruction.DataType.DamageResist:
+                case ModInstruction.DataType.DamageResistance:
                     ApplyModGeneric<DamageResistBlueprint>(baseData.DamageResists, mod, modNamespace);
                     break;
             }
