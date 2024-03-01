@@ -6,6 +6,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Pulsar4X.DataStructures;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Engine.Damage;
 using Pulsar4X.Extensions;
 using Pulsar4X.Engine.Industry;
 
@@ -91,6 +92,9 @@ namespace Pulsar4X.Modding
                     break;
                 case ModInstruction.DataType.Theme:
                     ApplyModGeneric<ThemeBlueprint>(baseData.Themes, mod, modNamespace);
+                    break;
+                case ModInstruction.DataType.DamageResist:
+                    ApplyModGeneric<DamageResistBlueprint>(baseData.DamageResists, mod, modNamespace);
                     break;
             }
         }

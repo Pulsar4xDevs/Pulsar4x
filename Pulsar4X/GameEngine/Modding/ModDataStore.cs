@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Engine.Damage;
 using Pulsar4X.Engine.Industry;
 
 namespace Pulsar4X.Modding
@@ -19,5 +20,7 @@ namespace Pulsar4X.Modding
         public Dictionary<string, TechCategoryBlueprint> TechCategories { get; set; } = new ();
         public Dictionary<string, ThemeBlueprint> Themes { get; set; } = new ();
         public Dictionary<string, DefaultItemsBlueprint> DefaultItems { get; set; } = new ();
+
+        public Dictionary<string, DamageResistBlueprint> DamageResists { get; set; } = new();
     }
 }

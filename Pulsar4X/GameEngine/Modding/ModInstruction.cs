@@ -2,6 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Pulsar4X.Blueprints;
+using Pulsar4X.Engine.Damage;
 using Pulsar4X.Engine.Industry;
 
 namespace Pulsar4X.Modding
@@ -22,6 +23,7 @@ namespace Pulsar4X.Modding
             Tech,
             TechCategory,
             Theme,
+            DamageResist,
         }
         public enum OperationType { Default, Remove }
         public enum CollectionOperationType { Add, Remove, Overwrite }
@@ -95,6 +97,9 @@ namespace Pulsar4X.Modding
                     break;
                 case ModInstruction.DataType.Theme:
                     instruction.Data = jObject["Payload"].ToObject<ThemeBlueprint>();
+                    break;
+                case ModInstruction.DataType.DamageResist:
+                    instruction.Data = jObject["DamageResistance"].ToObject<DamageResistBlueprint>();
                     break;
             }
 

@@ -71,7 +71,7 @@ namespace Pulsar4X.Engine
         public Random RNG { get; } = new Random(12345689);
 
         [JsonProperty]
-        internal ModDataStore StartingGameData { get; private set; }
+        public ModDataStore StartingGameData { get; private set; }
 
         [JsonProperty]
         internal GalaxyFactory GalaxyGen { get; private set; }

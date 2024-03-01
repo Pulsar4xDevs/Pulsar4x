@@ -1,0 +1,52 @@
+[
+  {
+    "Type": "DamageResistance",
+    "Payload": {
+      "UniqueID": "0",
+      "MaterialID": "",
+      "HitPoints": "0",
+      "MeltingPoint": "0",
+      "Density": "0"
+    }
+  },
+  {
+    "Type": "DamageResistance",
+    "Payload": {
+      "UniqueID": "100",
+      "MaterialID": "plastic",
+      "HitPoints": "255",
+      "MeltingPoint": "170",
+      "Density": "1175f"
+    }
+  },
+  {
+    "Type": "DamageResistance",
+    "Payload": {
+      "UniqueID": "150",
+      "MaterialID": "aluminium",
+      "HitPoints": "0",
+      "MeltingPoint": "660",
+      "Density": "2700f"
+    }
+  },
+  {
+    "Type": "DamageResistance",
+    "Payload": {
+      "UniqueID": "200",
+      "MaterialID": "titanium",
+      "HitPoints": "255",
+      "MeltingPoint": "1668",
+      "Density": "4540f"
+    }
+  },
+  {
+    "Type": "DamageResistance",
+    "Payload": {
+      "UniqueID": "255",
+      "MaterialID": "stainless-steel",
+      "HitPoints": "255",
+      "MeltingPoint": "1400",
+      "Density": "7900"
+    }
+  }
+]

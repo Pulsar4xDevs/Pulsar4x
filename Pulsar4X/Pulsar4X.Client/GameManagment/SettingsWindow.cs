@@ -69,6 +69,12 @@ namespace Pulsar4X.SDL2UI
                         DebugWindow.GetInstance().ToggleActive();
                     }
 
+                    bool dataViewerActive = DataViewerWindow.GetInstance().GetActive();
+                    if (ImGui.Checkbox("Show DataViewer Window", ref dataViewerActive))
+                    {
+                        DataViewerWindow.GetInstance().ToggleActive();
+                    }
+
                     if (_uiState.LastClickedEntity != null)
                     {
                         var lastClickedEntity = _uiState.LastClickedEntity.Entity;

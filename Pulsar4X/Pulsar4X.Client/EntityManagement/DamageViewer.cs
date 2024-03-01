@@ -52,11 +52,11 @@ namespace Pulsar4X.SDL2UI.Combat
         private DamageViewer()
         {
 
-            DamageResist polyprop = new DamageResist(100, 255, 1175f);
-            DamageResist aluminium = new DamageResist(150, 255, 2700f);
-            DamageResist titanium = new DamageResist(200, 255, 4540f);
-            DamageResist steelCarbon = new DamageResist(230, 255, 7860);
-            DamageResist steelStainless = new DamageResist(255, 255, 7900);
+            DamageResistBlueprint polyprop = new DamageResistBlueprint(100, 255, 1175f);
+            DamageResistBlueprint aluminium = new DamageResistBlueprint(150, 255, 2700f);
+            DamageResistBlueprint titanium = new DamageResistBlueprint(200, 255, 4540f);
+            DamageResistBlueprint steelCarbon = new DamageResistBlueprint(230, 255, 7860);
+            DamageResistBlueprint steelStainless = new DamageResistBlueprint(255, 255, 7900);
 
 
             //_componentDesign.DamageResistance = aluminium;
@@ -125,7 +125,7 @@ namespace Pulsar4X.SDL2UI.Combat
                 "Gama-Ray",
                 "X-Ray",
                 "UV",
-                "Visable",
+                "Visible",
                 "Near IR",
                 "IR",
                 "MicroWave",
@@ -281,7 +281,7 @@ namespace Pulsar4X.SDL2UI.Combat
 
                 if(_profile != null && _profile.DamageEvents.Count > 0)
                 {
-                    if (ImGui.SliderInt("Damage Events", ref _damageEventIndex, 1, _profile.DamageEvents.Count))
+                    if (ImGui.SliderInt("Damage Events", ref _damageEventIndex, 1, _profile.DamageEvents.Count - 1))
                     {
                         SetDamageEventFrames();
                     }
