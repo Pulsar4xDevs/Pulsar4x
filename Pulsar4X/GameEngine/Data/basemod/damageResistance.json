@@ -16,7 +16,7 @@
       "MaterialID": "plastic",
       "HitPoints": "255",
       "MeltingPoint": "170",
-      "Density": "1175f"
+      "Density": "1175"
     }
   },
   {
@@ -26,7 +26,7 @@
       "MaterialID": "aluminium",
       "HitPoints": "0",
       "MeltingPoint": "660",
-      "Density": "2700f"
+      "Density": "2700"
     }
   },
   {
@@ -36,7 +36,7 @@
       "MaterialID": "titanium",
       "HitPoints": "255",
       "MeltingPoint": "1668",
-      "Density": "4540f"
+      "Density": "4540"
     }
   },
   {

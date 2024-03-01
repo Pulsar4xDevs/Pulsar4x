@@ -21,6 +21,7 @@
         "systemGenSettings.json",
         "techCategories.json",
         "techs.json",
-        "weapons.json"
+        "weapons.json",
+        "damageResistance.json"
     ]
 }

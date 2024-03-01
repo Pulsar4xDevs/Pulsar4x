@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using ImGuiNET;
 using Pulsar4X.Engine;
 using Pulsar4X.Engine.Industry;
@@ -119,8 +120,11 @@ public static class ModDataInspector
 
                             if (ImGui.TreeNode(de.Key.ToString()))
                             {
+                                ImGui.NextColumn();
+                                ImGui.NextColumn();
                                 _numLines += itemsCount;
                                 RecursiveReflection(de.Value);
+                                ImGui.Unindent();
                                 ImGui.Separator();
                             }
                             else
@@ -249,7 +253,7 @@ public static class ModDataInspector
                 if (typeof(FieldInfo).IsAssignableFrom(memberInfo.GetType()) || typeof(PropertyInfo).IsAssignableFrom(memberInfo.GetType()))
                 {
                     value = GetValue(memberInfo, obj);
-                    if(value == null)
+                    if(value == null || memberInfo.GetCustomAttribute<CompilerGeneratedAttribute>()!= null)
                         continue;
                     if (typeof(ICollection).IsAssignableFrom(value.GetType()))
                     {
@@ -438,24 +442,29 @@ public static class ModDataInspector
     
     static object? GetValue(this MemberInfo memberInfo, object forObject)
     {
-        switch (memberInfo.MemberType)
-        {
-            case MemberTypes.Field:
-                return ((FieldInfo)memberInfo).GetValue(forObject);
-            case MemberTypes.Property:
+        
+            switch (memberInfo.MemberType)
             {
-                try
+                case MemberTypes.Field:
                 {
-                    return ((PropertyInfo)memberInfo).GetValue(forObject);
-                }
-                catch (Exception e)
-                {
-                    return "";
-                }
-                
-            }
 
-        }
+                    return ((FieldInfo)memberInfo).GetValue(forObject);
+                }
+                case MemberTypes.Property:
+                {
+                    try
+                    {
+                        return ((PropertyInfo)memberInfo).GetValue(forObject);
+                    }
+                    catch (Exception e)
+                    {
+                        return "";
+                    }
+
+                }
+
+            }
+        
         return "";
     }
 }
