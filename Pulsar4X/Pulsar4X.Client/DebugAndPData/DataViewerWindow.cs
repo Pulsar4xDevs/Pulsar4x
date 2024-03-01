@@ -42,19 +42,11 @@ public class DataViewerWindow : PulsarGuiWindow
         if (IsActive && ImGui.Begin("Mod Data", ref IsActive))
         {
             
-            
             object? value = null;
             Type objType = _modDataStore.GetType();
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
             MemberInfo[] memberInfos = objType.GetMembers(flags);
-            
             ModDataInspector.DisplayDataObj(_modDataStore);
-            
-            //ModDataInspector.RecursiveReflection(_modDataStore);
-            
-            
-            
-            
             
         }
     }
@@ -96,15 +88,7 @@ public static class ModDataInspector
 
         string[] stArray = stList.ToArray();
         
-        
-        
-        
-        
         BorderListOptions.Begin("DataItems:", stArray, ref _selectedItem, 300f);
-
-        
-        
-        
         
         var p0 = ImGui.GetCursorPos();
 
@@ -121,7 +105,36 @@ public static class ModDataInspector
             ImGui.BeginChild("InnerColomns", chsize);
             ImGui.Columns(2);
 
-            if (typeof(ICollection).IsAssignableFrom(value.GetType()))
+            if (typeof(IDictionary).IsAssignableFrom(value.GetType()))
+            {
+                var items = (IDictionary?)GetValue(memberInfo, dataObj);
+                if (items != null)
+                {
+                    int itemsCount = items.Count;
+                    lock (items) //TODO: IDK the best way to fix this.
+                    {
+                        foreach (var item in items)
+                        {
+                            DictionaryEntry de = (DictionaryEntry)item;
+
+                            if (ImGui.TreeNode(de.Key.ToString()))
+                            {
+                                _numLines += itemsCount;
+                                RecursiveReflection(de.Value);
+                                ImGui.Separator();
+                            }
+                            else
+                            {
+
+                            }
+                        }
+                    }
+                    ImGui.TreePop();
+                }
+            }
+            
+            
+            else if (typeof(ICollection).IsAssignableFrom(value.GetType()))
             {
                 var items = (ICollection?)GetValue(memberInfo, dataObj);
                 if (items != null)
@@ -151,39 +164,7 @@ public static class ModDataInspector
                     }
                 }
             }
-
-            else if (typeof(IDictionary).IsAssignableFrom(value.GetType()))
-            {
-                var items = (IDictionary?)GetValue(memberInfo, dataObj);
-                if (items == null)
-                {
-                    int itemsCount = items.Count;
-
-                    if (ImGui.TreeNode(memberInfo.Name))
-                    {
-                        ImGui.NextColumn();
-                        ImGui.Text("Count: " + itemsCount);
-                        ImGui.NextColumn();
-                        _numLines += itemsCount;
-                        lock (items) //TODO: IDK the best way to fix this.
-                        {
-                            foreach (var item in items)
-                            {
-                                RecursiveReflection(item);
-                            }
-                        }
-
-                        ImGui.TreePop();
-                    }
-                    else
-                    {
-                        ImGui.NextColumn();
-                        ImGui.Text("Count: " + itemsCount);
-                        ImGui.NextColumn();
-                    }
-                }
-            }
-
+            
             else
             {
                 ImGui.Text(memberInfo.Name);
