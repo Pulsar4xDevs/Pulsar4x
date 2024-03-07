@@ -208,17 +208,17 @@ namespace Pulsar4X.SDL2UI
                             _uiState.EntityClicked(parent.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
                         }
                     }
-                    if(positionDB.Children.Count > 0)
-                    {
-                        ImGui.Text("Children:");
-                        foreach(var child in positionDB.Children.ToArray())
-                        {
-                            if(ImGui.SmallButton(child.GetName(_uiState.Faction.Id)))
-                            {
-                                _uiState.EntityClicked(child.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
-                            }
-                        }
-                    }
+                    // if(positionDB.Children.Count > 0)
+                    // {
+                    //     ImGui.Text("Children:");
+                    //     foreach(var child in positionDB.Children.ToArray())
+                    //     {
+                    //         if(ImGui.SmallButton(child.GetName(_uiState.Faction.Id)))
+                    //         {
+                    //             _uiState.EntityClicked(child.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
+                    //         }
+                    //     }
+                    // }
                 }
 
                 if(Entity.HasDataBlob<ColonyInfoDB>())
