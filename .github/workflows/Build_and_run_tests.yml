@@ -11,9 +11,9 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup dotnet
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 7.0.x
 
@@ -23,7 +23,7 @@ jobs:
           cd Pulsar4X
           dotnet restore "Pulsar4X.sln"
           dotnet build --no-restore
-          
+
       - name: Run tests
         shell: pwsh
         run: |
@@ -34,9 +34,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Setup dotnet
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 7.0.x
 
@@ -46,20 +46,20 @@ jobs:
         cd Pulsar4X
         dotnet restore "Pulsar4X.sln"
         dotnet build --no-restore
-          
+
     - name: Run tests
       shell: bash
       run: |
         cd Pulsar4X
         dotnet test --no-restore
-  
+
   macOS-12:
     runs-on: macos-12
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Setup dotnet
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 7.0.x
 
@@ -69,7 +69,7 @@ jobs:
         cd Pulsar4X
         dotnet restore "Pulsar4X.sln"
         dotnet build --no-restore
-          
+
     - name: Run tests
       shell: bash
       run: |
