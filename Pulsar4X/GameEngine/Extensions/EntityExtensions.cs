@@ -422,5 +422,20 @@ namespace Pulsar4X.Extensions
             // Now Compare the two HashSets to make sure entityDataBlobTypes has all requiredDataBlobTypes
             return requiredDataBlobTypes.IsSubsetOf(entityDataBlobTypes);
         }
+
+        public static bool IsOrHasColony(this Entity entity) {
+            if(entity.HasDataBlob<ColonyInfoDB>()) return true;
+
+            if(entity.TryGetDatablob<PositionDB>(out var positionDB))
+            {
+                foreach(var child in positionDB.Children)
+                {
+                    if(child.HasDataBlob<ColonyInfoDB>())
+                        return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

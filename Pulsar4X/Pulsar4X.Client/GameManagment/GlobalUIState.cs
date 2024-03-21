@@ -80,7 +80,7 @@ namespace Pulsar4X.SDL2UI
         internal Dictionary<string, IntPtr> SDLImageDictionary = new ();
         internal Dictionary<string, int> GLImageDictionary = new ();
         public event EntityClickedEventHandler EntityClickedEvent;
-        internal EntityState LastClickedEntity = null;
+        internal EntityState? LastClickedEntity = null;
         internal EntityState PrimaryEntity { get; private set; }
         internal Orbital.Vector3 LastWorldPointClicked_m { get; set; }
         //internal SpaceMasterVM SpaceMasterVM;

@@ -4,103 +4,99 @@ using Pulsar4X.Datablobs;
 using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
+using Pulsar4X.Extensions;
 
-namespace Pulsar4X.SDL2UI
+namespace Pulsar4X.SDL2UI;
+public class SystemTreeViewer : PulsarGuiWindow
 {
-    public class SystemTreeViewer : PulsarGuiWindow
+    private SystemTreeViewer()
     {
-	    private SystemTreeViewer()
-	    {
-	        _flags = ImGuiWindowFlags.AlwaysAutoResize;
-        
-        }
+    }
 
-        internal static SystemTreeViewer GetInstance() {
-            SystemTreeViewer thisItem;
-            if (!_uiState.LoadedWindows.ContainsKey(typeof(SystemTreeViewer)))
-            {
-                thisItem = new SystemTreeViewer();
-            }
-            else
-            {
-                thisItem = (SystemTreeViewer)_uiState.LoadedWindows[typeof(SystemTreeViewer)];
-            }            
-
-            return thisItem;
-        }
-
-        //displays selected entity info
-        internal override void Display()
+    internal static SystemTreeViewer GetInstance() {
+        SystemTreeViewer thisItem;
+        if (!_uiState.LoadedWindows.ContainsKey(typeof(SystemTreeViewer)))
         {
-            if (IsActive && ImGui.Begin("System Tree", _flags))
-            {
-                if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
-                {
-                    SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
-                    List<EntityState> _NamedEntityStates = _StarSystemState.EntityStatesWithPosition.Values.OrderBy(x => x.Position.AbsolutePosition).ToList();
-                    List<EntityState> _Stars = new List<EntityState>();
-
-                    foreach (EntityState Body in _NamedEntityStates)
-                    {
-                        if (Body.IsStar())
-                        {
-                            if (_uiState.LastClickedEntity != null)
-                            {
-                                TreeGen(Body.Entity, _uiState.LastClickedEntity.Entity);
-                            }
-                            else
-                            {
-                                TreeGen(Body.Entity, Body.Entity);
-                            }
-                        }
-                    }
-                }
-            }
+            thisItem = new SystemTreeViewer();
         }
-
-        void TreeGen(Entity _CurrentBody, Entity _SelectedBody)
+        else
         {
-            SystemState _StarSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
-            var _NamedEntityStates = _StarSystemState.EntityStatesWithPosition;
+            thisItem = (SystemTreeViewer)_uiState.LoadedWindows[typeof(SystemTreeViewer)];
+        }
 
-            if (_NamedEntityStates.ContainsKey(_CurrentBody.Id))
+        return thisItem;
+    }
+
+    //displays selected entity info
+    internal override void Display()
+    {
+        if(!IsActive) return;
+
+        if (ImGui.Begin("System Viewer", _flags))
+        {
+            if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
             {
-                var _ChildList = _CurrentBody.GetDataBlob<PositionDB>().Children;
+                SystemState starSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+                List<EntityState> stars = starSystemState.EntityStatesWithPosition.Values
+                    .Where(e => e.IsStar())
+                    .OrderBy(x => x.Position?.AbsolutePosition ?? Orbital.Vector3.Zero)
+                    .ToList();
 
-                if (_ChildList.Count > 0)
+                if(ImGui.BeginTable("DesignStatsTables", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
-                    ImGuiTreeNodeFlags _TreeFlags = ImGuiTreeNodeFlags.OpenOnArrow;
-                    if (_CurrentBody == _SelectedBody)
+                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None);
+                    ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None);
+                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None);
+                    ImGui.TableHeadersRow();
+
+                    foreach (var body in stars)
                     {
-                        _TreeFlags = ImGuiTreeNodeFlags.Selected | _TreeFlags;
+                        TreeGen(body.Entity, _uiState.LastClickedEntity?.Entity ?? body.Entity);
                     }
 
-                    bool _Opened = ImGui.TreeNodeEx(_NamedEntityStates[_CurrentBody.Id].Name, _TreeFlags);
-
-                    if (ImGui.IsItemClicked())
-                    {
-                        _uiState.EntityClicked(_CurrentBody.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
-                    }
-
-                    if (_Opened)
-                    {
-                        _ChildList = _ChildList.OrderBy(x => x.GetDataBlob<PositionDB>().AbsolutePosition).ToList();
-                        foreach (Entity _ChildBody in _ChildList)
-                        {
-                            TreeGen(_ChildBody, _SelectedBody);
-                        }
-                        ImGui.TreePop();
-                    }
+                    ImGui.EndTable();
                 }
-                else
-                {
-                    if (ImGui.Selectable(_NamedEntityStates[_CurrentBody.Id].Name, _CurrentBody == _SelectedBody))
-                    {
-                        _uiState.EntityClicked(_CurrentBody.Id, _uiState.SelectedStarSysGuid, MouseButtons.Primary);
-                    }
-                }
-
             }
         }
+    }
+
+    void TreeGen(Entity currentBody, Entity selectedBody, int depth = 0)
+    {
+        SystemState starSystemState = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid];
+        var entityStates = starSystemState.EntityStatesWithPosition;
+
+        if (entityStates.ContainsKey(currentBody.Id) && (currentBody.HasDataBlob<StarInfoDB>() || currentBody.HasDataBlob<SystemBodyInfoDB>()))
+        {
+            if(!currentBody.TryGetDatablob<PositionDB>(out var positionDB))
+                return;
+
+            PrintEntity(currentBody, depth);
+
+            var children = positionDB.Children;
+            if (children.Count > 0)
+            {
+                children = children.OrderBy(x => x.GetDataBlob<PositionDB>().AbsolutePosition).ToList();
+                foreach (var child in children)
+                {
+                    TreeGen(child, selectedBody, depth + 1);
+                }
+            }
+        }
+    }
+
+    private void PrintEntity(Entity entity, int depth = 0)
+    {
+        var bodyType = entity.HasDataBlob<SystemBodyInfoDB>() ?
+            entity.GetDataBlob<SystemBodyInfoDB>().BodyType.ToDescription() :
+            "Star";
+
+        ImGui.TableNextColumn();
+        if(depth > 0) ImGui.Indent(16 * depth);
+        ImGui.Text(entity.GetName(_uiState.Faction.Id));
+        if(depth > 0) ImGui.Unindent(16 * depth);
+        ImGui.TableNextColumn();
+        ImGui.Text(bodyType);
+        ImGui.TableNextColumn();
+        ImGui.Text(entity.IsOrHasColony() ? "C" : "");
     }
 }
