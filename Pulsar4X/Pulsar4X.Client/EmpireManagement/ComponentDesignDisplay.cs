@@ -98,6 +98,7 @@ namespace Pulsar4X.SDL2UI
                 ImGui.EndChild();
             }
             ImGui.SameLine();
+            ImGui.SetCursorPosY(27f);
 
             var position = ImGui.GetCursorPos();
             if (ImGui.BeginChild("ComponentDesignChildWindow2", new Vector2(windowContentSize.X * 0.49f, windowContentSize.Y * 0.65f), true))

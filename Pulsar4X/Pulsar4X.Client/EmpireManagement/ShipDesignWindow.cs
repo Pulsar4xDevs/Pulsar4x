@@ -202,12 +202,14 @@ namespace Pulsar4X.SDL2UI
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
+                ImGui.SetCursorPosY(27f);
                 if(ImGui.BeginChild("ShipDesign2", secondChildSize, true))
                 {
                     DisplayComponents();
                     ImGui.EndChild();
                 }
                 ImGui.SameLine();
+                ImGui.SetCursorPosY(27f);
                 if(ImGui.BeginChild("ShipDesign3", thirdChildSize, true))
                 {
                     DisplayStats();
@@ -354,6 +356,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     _armor = _armorSelection[_armorIndex];
                     DesignChanged = true;
+                    ImGui.EndCombo();
                 }
 
                 ImGui.TableNextColumn();
@@ -485,6 +488,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     AvailableShipComponents = AllShipComponents.Where(t => t.ComponentType.Equals(_sortedComponentNames[_componentFilterIndex])).ToList();
                 }
+                ImGui.EndCombo();
             }
 
             if(ImGui.BeginTable("DesignStatsTables", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
