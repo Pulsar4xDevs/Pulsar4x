@@ -75,7 +75,7 @@ public class SystemTreeViewer : PulsarGuiWindow
             var children = positionDB.Children;
             if (children.Count > 0)
             {
-                children = children.OrderBy(x => x.GetDataBlob<PositionDB>().AbsolutePosition).ToList();
+                children = new(children.OrderBy(x => x.GetDataBlob<PositionDB>().AbsolutePosition).ToList());
                 foreach (var child in children)
                 {
                     TreeGen(child, selectedBody, depth + 1);

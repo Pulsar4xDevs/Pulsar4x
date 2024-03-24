@@ -3,6 +3,7 @@ using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 using Pulsar4X.Extensions;
 
@@ -70,7 +71,7 @@ namespace Pulsar4X.SDL2UI
                 }
                 if(ImGui.CollapsingHeader("Fleets", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children ?? new List<Entity>();
+                    var fleets = _uiState.Faction.GetDataBlob<FleetDB>().RootDB?.Children ?? new SafeList<Entity>();
 
                     foreach(var fleet in fleets)
                     {

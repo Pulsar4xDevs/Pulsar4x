@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Engine;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Datablobs
 {
@@ -90,9 +91,9 @@ namespace Pulsar4X.Datablobs
         /// </summary>
         [NotNull]
         [PublicAPI]
-        public List<Entity> Children => _children;
+        public SafeList<Entity> Children => _children;
         [JsonProperty]
-        private readonly List<Entity> _children;
+        private readonly SafeList<Entity> _children;
 
         /// <summary>
         /// All node nodeDB's to this node.
@@ -108,7 +109,7 @@ namespace Pulsar4X.Datablobs
         protected TreeHierarchyDB(Entity? parent)
         {
             Parent = parent;
-            _children = new List<Entity>();
+            _children = new SafeList<Entity>();
         }
 
         /// <summary>

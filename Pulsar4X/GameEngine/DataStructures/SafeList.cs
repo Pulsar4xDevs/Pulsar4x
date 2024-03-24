@@ -48,6 +48,14 @@ namespace Pulsar4X.DataStructures
             }
         }
 
+        public int RemoveAll(Predicate<T> match)
+        {
+            lock(_lock)
+            {
+                return _innerList.RemoveAll(match);
+            }
+        }
+
         public void Insert(int index, T item)
         {
             lock(_lock)
@@ -98,6 +106,14 @@ namespace Pulsar4X.DataStructures
             lock(_lock)
             {
                 _innerList.Clear();
+            }
+        }
+
+        public T[] ToArray()
+        {
+            lock(_lock)
+            {
+                return _innerList.ToArray();
             }
         }
 
