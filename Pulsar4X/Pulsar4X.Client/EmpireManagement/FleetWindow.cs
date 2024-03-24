@@ -17,6 +17,7 @@ namespace Pulsar4X.SDL2UI
         private enum IssueOrderType
         {
             MoveTo,
+            GeoSurvey,
         }
 
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
@@ -276,17 +277,20 @@ namespace Pulsar4X.SDL2UI
                         {
                             selectedIssueOrderType = IssueOrderType.MoveTo;
                         }
+                        if(SelectedFleet.HasGeoSurveyAbility() && ImGui.Selectable("Geo Survey ...", selectedIssueOrderType == IssueOrderType.GeoSurvey))
+                        {
+                            selectedIssueOrderType = IssueOrderType.GeoSurvey;
+                        }
 
                         ImGui.EndChild();
                     }
                     ImGui.SameLine();
                     if(ImGui.BeginChild("IssueOrders", secondChildSize, true))
                     {
-
+                        var bodies = _uiState.SelectedSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_uiState.Faction.Id);
                         switch(selectedIssueOrderType)
                         {
                             case IssueOrderType.MoveTo:
-                                var bodies = _uiState.SelectedSystem.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_uiState.Faction.Id);
                                 foreach(var body in bodies)
                                 {
                                     var name = body.GetName(_uiState.Faction.Id);
@@ -294,6 +298,17 @@ namespace Pulsar4X.SDL2UI
                                     {
                                         var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
                                         _uiState.Game.OrderHandler.HandleOrder(order);
+                                    }
+                                }
+                                break;
+                            case IssueOrderType.GeoSurvey:
+                                foreach(var body in bodies)
+                                {
+                                    var name = body.GetName(_uiState.Faction.Id);
+                                    if(ImGui.Button(name + "###geosurvey-button-" + name))
+                                    {
+                                        // var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
+                                        // _uiState.Game.OrderHandler.HandleOrder(order);
                                     }
                                 }
                                 break;
