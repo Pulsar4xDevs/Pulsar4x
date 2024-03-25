@@ -11,7 +11,7 @@ namespace Pulsar4X.Engine.Orders
         {
             return entity.HasDataBlob<SystemBodyInfoDB>()
                 && !entity.HasDataBlob<StarInfoDB>()
-                && (!entity.HasDataBlob<GeoSurveyStatusDB>() || !entity.GetDataBlob<GeoSurveyStatusDB>().IsSurveyComplete(RequestingFactionGuid));
+                && (!entity.HasDataBlob<GeoSurveyableDB>() || !entity.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(RequestingFactionGuid));
         }
 
         public static MoveToNearestGeoSurveyAction CreateCommand(int factionId, Entity commandingEntity)

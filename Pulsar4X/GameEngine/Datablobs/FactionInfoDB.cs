@@ -79,7 +79,6 @@ namespace Pulsar4X.Datablobs
 
         public IEventLog EventLog { get; internal set; }
 
-
         public FactionInfoDB()
         {
             var componentDesigns = new Dictionary<string, ComponentDesign>();

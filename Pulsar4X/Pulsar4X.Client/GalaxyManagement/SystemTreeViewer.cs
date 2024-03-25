@@ -42,11 +42,12 @@ public class SystemTreeViewer : PulsarGuiWindow
                     .OrderBy(x => x.Position?.AbsolutePosition ?? Orbital.Vector3.Zero)
                     .ToList();
 
-                if(ImGui.BeginTable("DesignStatsTables", 3, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+                if(ImGui.BeginTable("DesignStatsTables", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
                     ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None);
                     ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None);
-                    ImGui.TableSetupColumn("", ImGuiTableColumnFlags.None);
+                    ImGui.TableSetupColumn("Colony", ImGuiTableColumnFlags.None);
+                    ImGui.TableSetupColumn("GeoSurvey", ImGuiTableColumnFlags.None);
                     ImGui.TableHeadersRow();
 
                     foreach (var body in stars)
@@ -106,6 +107,29 @@ public class SystemTreeViewer : PulsarGuiWindow
             {
                 EconomicsWindow.GetInstance().SetActive(true);
                 EconomicsWindow.GetInstance().SelectEntity(colony);
+            }
+        }
+        else
+        {
+            ImGui.Text("");
+        }
+        ImGui.TableNextColumn();
+        if(entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
+        {
+            if(geoSurveyableDB.HasSurveyStarted(_uiState.Faction.Id))
+            {
+                if(geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id))
+                {
+                    ImGui.Text("Complete");
+                }
+                else
+                {
+                    ImGui.Text("In Progress");
+                }
+            }
+            else
+            {
+                ImGui.Text("Surveyable");
             }
         }
         else
