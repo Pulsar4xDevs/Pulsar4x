@@ -423,20 +423,20 @@ namespace Pulsar4X.Extensions
             return requiredDataBlobTypes.IsSubsetOf(entityDataBlobTypes);
         }
 
-        public static bool IsOrHasColony(this Entity entity) 
+        public static (bool, int) IsOrHasColony(this Entity entity) 
         {
-            if(entity.HasDataBlob<ColonyInfoDB>()) return true;
+            if(entity.HasDataBlob<ColonyInfoDB>()) return (true, entity.Id);
 
             if(entity.TryGetDatablob<PositionDB>(out var positionDB))
             {
                 foreach(var child in positionDB.Children)
                 {
                     if(child.HasDataBlob<ColonyInfoDB>())
-                        return true;
+                        return (true, child.Id);
                 }
             }
 
-            return false;
+            return (false, -1);
         }
 
         public static bool HasGeoSurveyAbility(this Entity entity) 

@@ -97,6 +97,19 @@ public class SystemTreeViewer : PulsarGuiWindow
         ImGui.TableNextColumn();
         ImGui.Text(bodyType);
         ImGui.TableNextColumn();
-        ImGui.Text(entity.IsOrHasColony() ? "C" : "");
+
+        var result = entity.IsOrHasColony();
+        if(result.Item1)
+        {
+            if(ImGui.SmallButton("Colony###" + result.Item2))
+            {
+                EconomicsWindow.GetInstance().SetActive(true);
+                EconomicsWindow.GetInstance().SelectEntity(_uiState.StarSystemStates[_uiState.SelectedStarSysGuid].EntityStatesColonies[result.Item2]);
+            }
+        }
+        else
+        {
+            ImGui.Text("");
+        }
     }
 }
