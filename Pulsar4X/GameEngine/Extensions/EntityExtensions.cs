@@ -423,6 +423,11 @@ namespace Pulsar4X.Extensions
             return requiredDataBlobTypes.IsSubsetOf(entityDataBlobTypes);
         }
 
+        /// <summary>
+        /// Returns true if the entity or one of it's direct children is a colony.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns>true and the colony ID or false and -1</returns>
         public static (bool, int) IsOrHasColony(this Entity entity) 
         {
             if(entity.HasDataBlob<ColonyInfoDB>()) return (true, entity.Id);
@@ -439,6 +444,11 @@ namespace Pulsar4X.Extensions
             return (false, -1);
         }
 
+        /// <summary>
+        /// Checks if the entity has the ability to conduct geo-surveys
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns>True if itself or any child entities in a fleet have the ability to conduct geo-surveys</returns>
         public static bool HasGeoSurveyAbility(this Entity entity) 
         {
             if(entity.HasDataBlob<GeoSurveyAbilityDB>()) return true;
