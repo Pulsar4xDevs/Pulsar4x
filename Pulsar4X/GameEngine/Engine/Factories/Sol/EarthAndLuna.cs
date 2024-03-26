@@ -52,7 +52,7 @@ namespace Pulsar4X.Engine.Sol
 
             var geoSurveyable = new GeoSurveyableDB()
             {
-                pointsRequired = 1500
+                PointsRequired = 1500
             };
 
             Entity planet = Entity.Create();
@@ -87,7 +87,7 @@ namespace Pulsar4X.Engine.Sol
 
             var geoSurveyable = new GeoSurveyableDB()
             {
-                pointsRequired = 250
+                PointsRequired = 250
             };
 
             Entity moon = Entity.Create();

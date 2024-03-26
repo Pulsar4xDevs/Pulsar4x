@@ -6,7 +6,7 @@ namespace Pulsar4X.Datablobs;
 public class GeoSurveyableDB : BaseDataBlob
 {
     [JsonProperty]
-    public uint pointsRequired { get; set; }
+    public uint PointsRequired { get; set; }
 
     /// <summary>
     /// Stores the status of the geosurveys that have been conducted by each faction
