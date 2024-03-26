@@ -34,8 +34,13 @@ namespace Pulsar4X.Engine.Sol
             cometBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, cometOrbitDB);
             PositionDB cometPositionDB = new PositionDB(cometOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, sun);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity comet = Entity.Create();
-            sol.AddEntity(comet, new List<BaseDataBlob> { cometNameDB, sensorProfile, cometPositionDB, cometBodyDB, cometMVDB, cometOrbitDB, });
+            sol.AddEntity(comet, new List<BaseDataBlob> { cometNameDB, sensorProfile, cometPositionDB, cometBodyDB, cometMVDB, cometOrbitDB, geoSurveyable });
             return comet;
         }
     }

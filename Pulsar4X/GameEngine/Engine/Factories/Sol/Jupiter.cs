@@ -47,8 +47,13 @@ namespace Pulsar4X.Engine.Sol
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -108, atmoGasses);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 2550
+            };
+
             Entity planet = Entity.Create();
-            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, planetAtmosphereDB });
+            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, planetAtmosphereDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }
@@ -80,8 +85,13 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -113,8 +123,13 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -146,8 +161,13 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -178,8 +198,13 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -210,8 +235,13 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -242,8 +272,13 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -274,8 +309,13 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -306,8 +346,13 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -338,8 +383,13 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }
@@ -370,8 +420,13 @@ namespace Pulsar4X.Engine.Sol
             moonBodyDB.BaseTemperature = (float)SystemBodyFactory.CalculateBaseTemperatureOfBody(sun, planetOrbit); //yes, using parent planet orbit here, since this is the DB it calculates the average distance from.
             PositionDB moonPositionDB = new PositionDB(moonOrbitDB.GetPosition(game.TimePulse.GameGlobalDateTime), sol.Guid, parentPlanet);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }

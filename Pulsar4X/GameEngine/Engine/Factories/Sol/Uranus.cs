@@ -45,8 +45,13 @@ namespace Pulsar4X.Engine.Sol
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -197.2f, atmoGasses);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity planet = Entity.Create();
-            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, planetAtmosphereDB });
+            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, planetAtmosphereDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }
