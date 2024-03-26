@@ -159,6 +159,7 @@ namespace Pulsar4X.Engine
             Entity solStar = solSys.GetAllEntitiesWithDataBlob<StarInfoDB>().First();
             Entity earth = NameLookup.GetFirstEntityWithName(solSys, "Earth"); //should be fourth entity created
             Entity luna = NameLookup.GetFirstEntityWithName(solSys, "Luna");
+            Entity mars = NameLookup.GetFirstEntityWithName(solSys, "Mars");
             //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             FactionInfoDB factionInfoDB = factionEntity.GetDataBlob<FactionInfoDB>();
@@ -166,6 +167,7 @@ namespace Pulsar4X.Engine
 
             earth.GetDataBlob<GeoSurveyableDB>().GeoSurveyStatus[factionEntity.Id] = 0;
             luna.GetDataBlob<GeoSurveyableDB>().GeoSurveyStatus[factionEntity.Id] = 0;
+            mars.GetDataBlob<GeoSurveyableDB>().GeoSurveyStatus[factionEntity.Id] = 0;
 
             Entity targetFaction = FactionFactory.CreateFaction(game, "OpFor");
             FactionDataStore opForDataStore = targetFaction.GetDataBlob<FactionInfoDB>().Data;

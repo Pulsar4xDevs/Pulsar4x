@@ -68,7 +68,7 @@ namespace Pulsar4X.Engine.Sol
             OrbitDB planetOrbit = parentPlanet.GetDataBlob<OrbitDB>();
             PositionDB planetPositionDB = parentPlanet.GetDataBlob<PositionDB>();
 
-            SystemBodyInfoDB moonBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Moon, SupportsPopulations = true };
+            SystemBodyInfoDB moonBodyDB = new SystemBodyInfoDB { Gravity = 1.625, BodyType = BodyType.Moon, SupportsPopulations = true };
             MassVolumeDB moonMVDB = MassVolumeDB.NewFromMassAndRadius_AU(7.34767309E22, Distance.KmToAU(6378.1));
             NameDB moonNameDB = new NameDB("Luna");
             double moonSemiMajorAxisAU = Distance.KmToAU(0.3844E6);

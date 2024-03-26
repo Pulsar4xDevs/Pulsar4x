@@ -19,7 +19,7 @@ namespace Pulsar4X.Engine.Sol
         {
             MassVolumeDB sunMVDB = sun.GetDataBlob<MassVolumeDB>();
 
-            SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.25f };
+            SystemBodyInfoDB planetBodyDB = new SystemBodyInfoDB { Gravity = 3.72076, BodyType = BodyType.Terrestrial, SupportsPopulations = true, Albedo = 0.25f };
             MassVolumeDB planetMVDB = MassVolumeDB.NewFromMassAndRadius_AU(0.64174E24, Distance.KmToAU(3396.2));
             NameDB planetNameDB = new NameDB("Mars");
 
@@ -51,8 +51,13 @@ namespace Pulsar4X.Engine.Sol
             };
             AtmosphereDB planetAtmosphereDB = new AtmosphereDB(pressureAtm, false, 0, 0, 0, -63, atmoGasses);
 
+            var geoSurveyable = new GeoSurveyableDB()
+            {
+                PointsRequired = 575
+            };
+
             Entity planet = Entity.Create();
-            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, planetAtmosphereDB });
+            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, planetAtmosphereDB, geoSurveyable });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }

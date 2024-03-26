@@ -42,12 +42,17 @@ public class SystemTreeViewer : PulsarGuiWindow
                     .OrderBy(x => x.Position?.AbsolutePosition ?? Orbital.Vector3.Zero)
                     .ToList();
 
-                if(ImGui.BeginTable("DesignStatsTables", 4, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
+                if(ImGui.BeginTable("DesignStatsTables", 9, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.RowBg))
                 {
-                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None);
-                    ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None);
-                    ImGui.TableSetupColumn("Colony", ImGuiTableColumnFlags.None);
-                    ImGui.TableSetupColumn("GeoSurvey", ImGuiTableColumnFlags.None);
+                    ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.None, 0.1f);
+                    ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.None, 0.1f);
+                    ImGui.TableSetupColumn("Colony", ImGuiTableColumnFlags.None, 0.075f);
+                    ImGui.TableSetupColumn("GeoSurvey", ImGuiTableColumnFlags.None, 0.075f);
+                    ImGui.TableSetupColumn("Gravity", ImGuiTableColumnFlags.None, 0.075f);
+                    ImGui.TableSetupColumn("Temperature", ImGuiTableColumnFlags.None, 0.075f);
+                    ImGui.TableSetupColumn("Atm Pressure", ImGuiTableColumnFlags.None, 0.075f);
+                    ImGui.TableSetupColumn("Oxygen", ImGuiTableColumnFlags.None, 0.075f);
+                    ImGui.TableSetupColumn("Minerals", ImGuiTableColumnFlags.None, 0.075f);
                     ImGui.TableHeadersRow();
 
                     foreach (var body in stars)
@@ -114,6 +119,7 @@ public class SystemTreeViewer : PulsarGuiWindow
             ImGui.Text("");
         }
         ImGui.TableNextColumn();
+        bool isSurveyComplete = false;
         if(entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
         {
             if(geoSurveyableDB.HasSurveyStarted(_uiState.Faction.Id))
@@ -121,6 +127,7 @@ public class SystemTreeViewer : PulsarGuiWindow
                 if(geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id))
                 {
                     ImGui.Text("Complete");
+                    isSurveyComplete = true;
                 }
                 else
                 {
@@ -136,5 +143,58 @@ public class SystemTreeViewer : PulsarGuiWindow
         {
             ImGui.Text("");
         }
+
+        if(isSurveyComplete)
+        {
+            var bodyInfoDb = entity.GetDataBlob<SystemBodyInfoDB>();
+            ImGui.TableNextColumn();
+            ImGui.Text(Stringify.Velocity(bodyInfoDb.Gravity));
+            ImGui.TableNextColumn();
+            ImGui.Text(bodyInfoDb.BaseTemperature.ToString("#.#") + " C");
+
+            if(entity.TryGetDatablob<AtmosphereDB>(out var atmosphereDB))
+            {
+                ImGui.TableNextColumn();
+                ImGui.Text(Stringify.Number(atmosphereDB.Pressure));
+                ImGui.TableNextColumn();
+                if(atmosphereDB.Composition.ContainsKey("oxygen"))
+                {
+                    ImGui.Text(atmosphereDB.Composition["oxygen"] > 0.001 ? atmosphereDB.Composition["oxygen"].ToString("0.0#") : "trace");
+                }
+                else
+                {
+                    ImGui.Text("No");
+                }
+            }
+            else
+            {
+                ImGui.TableNextColumn();
+                ImGui.TableNextColumn();
+            }
+
+            if(entity.TryGetDatablob<MineralsDB>(out var mineralsDB))
+            {
+                ImGui.TableNextColumn();
+                ImGui.Text("Yes");
+            }
+            else
+            {
+                ImGui.TableNextRow();
+            }
+        }
+        else
+        {
+            ImGui.TableNextRow();
+        }
+
+
+        //  DisplayHelpers.PrintRow("Tectonic Activity", bodyInfoDb.Tectonics.ToDescription());
+        //             DisplayHelpers.PrintRow("Gravity", Stringify.Velocity(bodyInfoDb.Gravity));
+        //             DisplayHelpers.PrintRow("Temperature", bodyInfoDb.BaseTemperature.ToString("#.#") + " C");
+        //             DisplayHelpers.PrintRow("Length of Day", bodyInfoDb.LengthOfDay.TotalHours + " hours");
+        //             DisplayHelpers.PrintRow("Tilt", bodyInfoDb.AxialTilt.ToString("#") + "°");
+        //             DisplayHelpers.PrintRow("Magnetic Field", bodyInfoDb.MagneticField.ToString("#") + " μT");
+        //             DisplayHelpers.PrintRow("Radiation Level", bodyInfoDb.RadiationLevel.ToString("#"));
+        //             DisplayHelpers.PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), separator: false);
     }
 }
