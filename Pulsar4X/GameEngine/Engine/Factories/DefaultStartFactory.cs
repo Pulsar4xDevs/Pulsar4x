@@ -344,14 +344,14 @@ namespace Pulsar4X.Engine
             fleetDB.FlagShipID = starship.Id;
 
             // This can be removed, only for testing orders without having to set them up in game
-            ConditionItem conditionItem = new ConditionItem(new FuelCondition(30f, ComparisonType.GreaterThan));
-            CompoundCondition compoundCondition = new CompoundCondition(conditionItem);
-            SafeList<EntityCommand> actions = new SafeList<EntityCommand>();
-            actions.Add(MoveToNearestColonyAction.CreateCommand(factionEntity.Id, defaultFleet));
-            var conditionalOrder = new ConditionalOrder(compoundCondition, actions);
-            conditionalOrder.Name = "Test";
+            // ConditionItem conditionItem = new ConditionItem(new FuelCondition(30f, ComparisonType.GreaterThan));
+            // CompoundCondition compoundCondition = new CompoundCondition(conditionItem);
+            // SafeList<EntityCommand> actions = new SafeList<EntityCommand>();
+            // actions.Add(MoveToNearestColonyAction.CreateCommand(factionEntity.Id, defaultFleet));
+            // var conditionalOrder = new ConditionalOrder(compoundCondition, actions);
+            // conditionalOrder.Name = "Test";
 
-            fleetDB.StandingOrders.Add(conditionalOrder);
+            // fleetDB.StandingOrders.Add(conditionalOrder);
 
             CargoTransferProcessor.AddCargoItems(colonyEntity, rp1, 10000);
             CargoTransferProcessor.AddCargoItems(colonyEntity, methalox, 10000);
