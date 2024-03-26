@@ -6,6 +6,7 @@ namespace Pulsar4X.Datablobs;
 public class BeamInfoDB : BaseDataBlob
 {
     public double Frequency;
+    public double Energy;
     public int FiredBy;
     public Vector3 VelocityVector;
     public Vector3[] Positions;

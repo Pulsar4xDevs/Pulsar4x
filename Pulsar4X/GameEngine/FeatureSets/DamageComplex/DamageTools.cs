@@ -62,7 +62,7 @@ namespace Pulsar4X.Engine.Damage
     {
         public Vector2 Velocity;
         public (int x,int y) Position;
-        public double Heat;
+        public double Energy;
         public float Mass;
         public float Momentum;
         public float Density;//kg/m^3
@@ -155,7 +155,155 @@ namespace Pulsar4X.Engine.Damage
             byte id = color.R;
             return DamageResistsLookupTable[id];
         }
-        
+        public static (List<(byte id, int damageAmount)> damageToComponents, List<RawBmp> damageFrames) DealDamageEnergyBeamSim(EntityDamageProfileDB damageProfile, DamageFragment damage)
+        {
+            RawBmp shipDamageProfile = damageProfile.DamageProfile;
+
+            List<RawBmp> damageFrames = new List<RawBmp>();
+            List<(byte id, int damageAmount)> damageToComponents = new List<(byte, int)>();
+            
+            var fragmentMass = damage.Mass;
+            (int x, int y) dpos = (0, 0);
+            var dvel = damage.Velocity;
+            var dden = damage.Density;
+            var dlen = damage.Length;
+            var pos = new Vector2(dpos.x, dpos.y);
+            var pixelscale = 0.01;
+            double startMomentum = damage.Momentum;
+            double momentum = startMomentum;
+            
+            double energy = damage.Energy;  //jules
+            
+            
+            //We need to figure out where the incoming damage intersects with the ship's damage profile "image"
+            var pwidth = damageProfile.DamageProfile.Width;
+            var pwIndex = pwidth - 1;//zero based arrays
+            var hw = pwidth * 0.5;
+            var phight = damageProfile.DamageProfile.Height;
+            var phIndex = phight - 1;//zero based arrays
+            var hh = phight * 0.5;
+            var len = Math.Sqrt((pwidth * pwidth) + (phight * phight));
+
+            //damage.Position ralitive to our targets center, but we need to translate for calculating 0,0 at top left
+            Vector2 start = new Vector2(damage.Position.x - hw, damage.Position.y - hh);
+            var end = new Vector2((pwidth * 0.5)-1, (phight * 0.5)-1); //center of our target
+            var tl = new Vector2(0, 0);
+            var tr = new Vector2(pwIndex, 0);
+            var bl = new Vector2(0, phIndex);
+            var br = new Vector2(pwIndex, phIndex);
+
+            //pretty sure these can be else ifs.
+            Vector2 intersection;
+
+            //left
+            if (GeneralMath.LineIntersectsLine(start, end, tl, bl, out intersection))
+            {
+            }
+            //right
+            else if (GeneralMath.LineIntersectsLine(start, end, tr, br, out intersection))
+            {
+            }
+            //top
+            else if (GeneralMath.LineIntersectsLine(start,end,tl, tr, out intersection))
+            {
+            }
+            //bottom
+            else if (GeneralMath.LineIntersectsLine(start,end,bl, br, out intersection))
+            {
+            }
+
+            dpos.x = Convert.ToInt32(intersection.X);
+            dpos.y = Convert.ToInt32(intersection.Y);
+
+            byte[] byteArray = new byte[shipDamageProfile.ByteArray.Length];
+            Buffer.BlockCopy(shipDamageProfile.ByteArray, 0, byteArray, 0, shipDamageProfile.ByteArray.Length);
+            RawBmp firstFrame = new RawBmp()
+            {
+                ByteArray = byteArray,
+                Height = shipDamageProfile.Height,
+                Width = shipDamageProfile.Width,
+                Depth = shipDamageProfile.Depth,
+                Stride = shipDamageProfile.Stride
+            };
+            damageFrames.Add(firstFrame);
+            (byte r, byte g, byte b, byte a) savedpx = shipDamageProfile.GetPixel(dpos.x, dpos.y);
+            (int x, int y) savedpxloc = dpos;
+
+            while (
+                energy > 0 &&
+                dpos.x >= 0 &&
+                dpos.x <= shipDamageProfile.Width &&
+                dpos.y >= 0 && dpos.y <= shipDamageProfile.Height)
+            {
+                byteArray = new byte[shipDamageProfile.ByteArray.Length];
+                RawBmp lastFrame = damageFrames.Last();
+                Buffer.BlockCopy(lastFrame.ByteArray, 0, byteArray, 0, shipDamageProfile.ByteArray.Length);
+                var thisFrame = new RawBmp()
+                {
+                    ByteArray = byteArray,
+                    Height = shipDamageProfile.Height,
+                    Width = shipDamageProfile.Width,
+                    Depth = shipDamageProfile.Depth,
+                    Stride = shipDamageProfile.Stride
+                };
+
+                (byte r, byte g, byte b, byte a) px = thisFrame.GetPixel(dpos.x, dpos.y);
+                if (px.a > 0)
+                {
+                    DamageResistBlueprint damageresist = DamageResistsLookupTable[px.r];
+                   
+                    double density = damageresist.Density / (px.a / 255f); //density / health
+                    
+                    
+                    double volume3d = 0.002; //in meters from 2d area
+                    double pixelMass = density * volume3d;         //1px = 1cm
+                    double time = 0.1;              // this is the time/ressolution in seconds  
+                    double secificHeat = energy / pixelMass * time;
+                    
+                    double maxImpactDepth = dlen * dden / density;
+                    double depthPercent = pixelscale / maxImpactDepth;
+                    dlen -= (float)(damage.Length * depthPercent);
+                    var momentumLoss = startMomentum * depthPercent;
+                    momentum -= momentumLoss;
+                    if (momentum > 0)
+                    {
+                        px = ( px.r, px.g, px.b, 0);
+                        damageToComponents.Add((px.g, 1));
+                    }
+                }
+                
+                //this is the damage fragment
+                thisFrame.SetPixel(dpos.x, dpos.y, byte.MaxValue, byte.MaxValue, byte.MaxValue, (byte)momentum);
+                
+                //this is the entity being damaged.
+                thisFrame.SetPixel(savedpxloc.x, savedpxloc.y, savedpx.r, savedpx.g, savedpx.b, savedpx.a);
+                damageFrames.Add(thisFrame);
+                savedpxloc = dpos;
+                savedpx = px;
+                
+                double dt = 1 / dvel.Length();
+                pos.X += dvel.X * dt;
+                pos.Y += dvel.Y * dt;
+                dpos.x = Convert.ToInt32(pos.X);
+                dpos.y = Convert.ToInt32(pos.Y);
+            }
+
+            Buffer.BlockCopy(damageFrames.Last().ByteArray, 0, byteArray, 0, shipDamageProfile.ByteArray.Length);
+            var finalFrame = new RawBmp()
+            {
+                ByteArray = byteArray,
+                Height = shipDamageProfile.Height,
+                Width = shipDamageProfile.Width,
+                Depth = shipDamageProfile.Depth,
+                Stride = shipDamageProfile.Stride
+            };
+            finalFrame.SetPixel(savedpxloc.x, savedpxloc.y, savedpx.r, savedpx.g, savedpx.b, savedpx.a);
+            //damageProfile.DamageSlides.Add(damageFrames);
+            
+            damageProfile.DamageEvents.Add(damage);
+            damageProfile.DamageProfile = finalFrame;
+            return (damageToComponents, damageFrames);
+        }
         public static (List<(byte id, int damageAmount)> damageToComponents, List<RawBmp> damageFrames) DealDamageSim(EntityDamageProfileDB damageProfile, DamageFragment damage)
         {
             RawBmp shipDamageProfile = damageProfile.DamageProfile;

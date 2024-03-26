@@ -20,7 +20,6 @@ namespace Pulsar4X.Engine.Damage
         /// <returns></returns>
         public static RawBmp CreateComponentByteArray(ComponentDesign componentDesign)
         {
-            //var vol = componentDesign.VolumePerUnit * 1000;
             var volm3 = componentDesign.VolumePerUnit;
             //we convert 3d volume to 2d area at 1px = 1cm resolution
             var area = Math.Cbrt(volm3) * 2 * 1000;
@@ -43,7 +42,16 @@ namespace Pulsar4X.Engine.Damage
             //    height = (int)(height / componentDesign.AspectRatio);
             //}
 
-
+            //we're just defaulting to 255 which is stainless for now.
+            //this is related to the damageResistsBlueprints,
+            //eventualy we need to read the types of materials the component is made up from
+            //match those up with a resistance blueprint (the materials should prob have a field for that ID)
+            //calculate the ratios of each resistanceblueprint and do eg: 2 pix of stainless 5 pix of alu, 1 px of copper, repeat. 
+            //other ways to do this is to have the resist blueprints (or componentblueprints) match to an actual 255 bit monocrome bitmap.
+            //which would *look* good (eg make an engine look engine like etc) but the artist would have to match up the amounts of different material types
+            //or ignore that altogether. 
+            byte damageResistanceID = 255; 
+            
             int imagedepth = 4;
             int size = imagedepth * width * height;
             int stride = width * imagedepth;
@@ -54,7 +62,7 @@ namespace Pulsar4X.Engine.Damage
             {
                 for (int iy = 0; iy < height; iy++)
                 {
-                    RawBmp.SetPixel(ref buffer, stride, imagedepth, ix, iy, 255, 255,255, 255);
+                    RawBmp.SetPixel(ref buffer, stride, imagedepth, ix, iy, damageResistanceID, 255,255, 255);
                 }
             }
 

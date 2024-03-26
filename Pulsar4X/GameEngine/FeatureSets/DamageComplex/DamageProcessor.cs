@@ -45,7 +45,7 @@ namespace Pulsar4X.Engine
                 //return;
             }
             
-            var damages = DamageTools.DealDamageSim(db, damageFragment);
+            var damages = DamageTools.DealDamageEnergyBeamSim(db, damageFragment);
 
             foreach (var damage in damages.damageToComponents)
             {

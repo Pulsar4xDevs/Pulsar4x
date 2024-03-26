@@ -830,12 +830,8 @@ namespace Pulsar4X.Engine
             if (_laser != null)
                 return _laser;
             ComponentDesigner laserDesigner;
-            ComponentTemplateBlueprint laserSD = factionDataStore.ComponentTemplates["laser-gun"];
+            ComponentTemplateBlueprint laserSD = factionDataStore.ComponentTemplates["laser-weapon"];
             laserDesigner = new ComponentDesigner(laserSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            laserDesigner.ComponentDesignAttributes["Range"].SetValueFromInput(100);
-            laserDesigner.ComponentDesignAttributes["Damage"].SetValueFromInput(5000);
-            laserDesigner.ComponentDesignAttributes["ReloadRate"].SetValueFromInput(5);
-
             _laser = laserDesigner.CreateDesign(faction);
             factionDataStore.IncrementTechLevel(_laser.TechID);
             return _laser;
