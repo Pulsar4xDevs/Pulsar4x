@@ -249,7 +249,7 @@ namespace Pulsar4X.SDL2UI
                                         {
                                             ImGui.BeginTooltip();
                                             ImGui.Text("IsRunning: " + actions[i].IsRunning);
-                                            ImGui.Text("IsFinished(): " + actions[i].IsFinished());
+                                            ImGui.Text("IsFinished: " + actions[i].IsFinished());
                                             ImGui.EndTooltip();
                                         }
                                     }
@@ -304,11 +304,17 @@ namespace Pulsar4X.SDL2UI
                             case IssueOrderType.GeoSurvey:
                                 foreach(var body in bodies)
                                 {
+                                    if(!body.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB)) continue;
+                                    if(geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id)) continue;
+
                                     var name = body.GetName(_uiState.Faction.Id);
                                     if(ImGui.Button(name + "###geosurvey-button-" + name))
                                     {
-                                        // var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
-                                        // _uiState.Game.OrderHandler.HandleOrder(order);
+                                        var order = MoveToSystemBodyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
+                                        _uiState.Game.OrderHandler.HandleOrder(order);
+
+                                        var order2 = GeoSurveyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
+                                        _uiState.Game.OrderHandler.HandleOrder(order2);
                                     }
                                 }
                                 break;

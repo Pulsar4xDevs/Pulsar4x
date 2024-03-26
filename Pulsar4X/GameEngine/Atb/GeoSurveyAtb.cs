@@ -9,11 +9,11 @@ namespace Pulsar4X.Atb;
 public class GeoSurveyAtb : IComponentDesignAttribute
 {
     [JsonProperty]
-    public int Speed { get; set; } = 1;
+    public uint Speed { get; set; } = 1;
 
     public GeoSurveyAtb(int speed)
     {
-        Speed = speed;
+        Speed = (uint)speed;
     }
 
     public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
