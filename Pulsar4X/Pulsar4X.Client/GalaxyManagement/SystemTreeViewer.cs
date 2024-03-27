@@ -131,7 +131,8 @@ public class SystemTreeViewer : PulsarGuiWindow
                 }
                 else
                 {
-                    ImGui.Text("In Progress");
+                    float percent = (1f - (float)geoSurveyableDB.GeoSurveyStatus[_uiState.Faction.Id] / (float)geoSurveyableDB.PointsRequired) * 100;
+                    ImGui.Text(percent.ToString("#.##") + "%%");
                 }
             }
             else
@@ -186,15 +187,5 @@ public class SystemTreeViewer : PulsarGuiWindow
         {
             ImGui.TableNextRow();
         }
-
-
-        //  DisplayHelpers.PrintRow("Tectonic Activity", bodyInfoDb.Tectonics.ToDescription());
-        //             DisplayHelpers.PrintRow("Gravity", Stringify.Velocity(bodyInfoDb.Gravity));
-        //             DisplayHelpers.PrintRow("Temperature", bodyInfoDb.BaseTemperature.ToString("#.#") + " C");
-        //             DisplayHelpers.PrintRow("Length of Day", bodyInfoDb.LengthOfDay.TotalHours + " hours");
-        //             DisplayHelpers.PrintRow("Tilt", bodyInfoDb.AxialTilt.ToString("#") + "°");
-        //             DisplayHelpers.PrintRow("Magnetic Field", bodyInfoDb.MagneticField.ToString("#") + " μT");
-        //             DisplayHelpers.PrintRow("Radiation Level", bodyInfoDb.RadiationLevel.ToString("#"));
-        //             DisplayHelpers.PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), separator: false);
     }
 }

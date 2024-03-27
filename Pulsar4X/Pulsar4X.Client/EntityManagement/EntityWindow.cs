@@ -234,14 +234,16 @@ namespace Pulsar4X.SDL2UI
         {
             if(Entity.Manager == null) return;
 
+            bool isGeoSurveyed = Entity.HasDataBlob<GeoSurveyableDB>() ? Entity.GetDataBlob<GeoSurveyableDB>().IsSurveyComplete(_uiState.Faction.Id) : false;
+
             foreach(var db in Entity.Manager.GetAllDataBlobsForEntity(Entity.Id))
             {
-                if(db is AtmosphereDB && ImGui.BeginTabItem("Atmosphere"))
+                if(isGeoSurveyed && db is AtmosphereDB && ImGui.BeginTabItem("Atmosphere"))
                 {
                     ((AtmosphereDB)db).Display(EntityState, _uiState);
                     ImGui.EndTabItem();
                 }
-                else if(db is MineralsDB && ImGui.BeginTabItem("Minerals"))
+                else if(isGeoSurveyed && db is MineralsDB && ImGui.BeginTabItem("Minerals"))
                 {
                     ((MineralsDB)db).Display(EntityState, _uiState);
                     ImGui.EndTabItem();
