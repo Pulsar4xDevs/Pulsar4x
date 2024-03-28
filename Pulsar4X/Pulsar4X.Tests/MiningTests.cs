@@ -1,5 +1,10 @@
 ﻿using NUnit.Framework;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Blueprints;
+using Pulsar4X.Components;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Auth;
+using Pulsar4X.Modding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +14,7 @@ namespace Pulsar4X.Tests
     [TestFixture]
     public class MiningTests
     {
-        private Guid _mineDesignGUID = new Guid("f7084155-04c3-49e8-bf43-c7ef4befa550");
+        private string _mineDesignGUID = "mine";
         private Game _game;
         private AuthenticationToken _smAuthToken;
 
@@ -17,8 +22,12 @@ namespace Pulsar4X.Tests
         [Description("Creates and tests the Sol star system with humans with resources")]
         public void TestHumansOnEarthInSol()
         {
+            var modLoader = new ModLoader();
+            var modDataStore = new ModDataStore();
+
+            modLoader.LoadModManifest("Data/basemod/modInfo.json", modDataStore);
             var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0 }, modDataStore); // reinit with empty game, so we can do a clean test.
             _game.Settings.EnableMultiThreading = true;
             _game.Settings.EnforceSingleThread = false;
 
@@ -45,8 +54,6 @@ namespace Pulsar4X.Tests
             // Earth
             var earth = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Earth"));
             Assert.IsNotNull(earth);
-
-            var mineralsList = _game.StaticData.CargoGoods.GetMineralsList();
 
             //var earthResources = earth.Minerals.ToDictionary(k => mineralsList.FirstOrDefault(x => x.ID == k.Key).Name, v => v.Value);
             //Assert.AreEqual(19, earthResources.Keys.Count);
@@ -88,16 +95,16 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(500000000, earthColony.Population.Values.First());
             Assert.AreEqual(1800, earthColony.OwningEntity.GetDataBlob<MiningDB>().BaseMiningRate.Sum(x => x.Value));
 
-            _game.GamePulse.Ticklength = TimeSpan.FromHours(24);
-            var targetDate = _game.GamePulse.GameGlobalDateTime.AddHours(24);
-            _game.GamePulse.TimeStep();     // Jump forward 1 day
+            _game.TimePulse.Ticklength = TimeSpan.FromHours(24);
+            var targetDate = _game.TimePulse.GameGlobalDateTime.AddHours(24);
+            _game.TimePulse.TimeStep();     // Jump forward 1 day
 
-            while (_game.GamePulse.GameGlobalDateTime < targetDate)
+            while (_game.TimePulse.GameGlobalDateTime < targetDate)
             {
                 // wait timeStep to finish
             }
 
-            bodies = _game.GetSystems(_smAuthToken).First().GetAllDataBlobsOfType<SystemBodyInfoDB>();
+            bodies = _game.Systems.First().GetAllDataBlobsOfType<SystemBodyInfoDB>();
             earth = bodies.FirstOrDefault(x => x.OwningEntity.GetDataBlob<NameDB>().DefaultName.Equals("Earth"));
             //var earthResourcesAfter = earth.Minerals.ToDictionary(k => mineralsList.FirstOrDefault(x => x.ID == k.Key).Name, v => v.Value);
             // Uncomment following lines and run as debug to regenerate expected value checks if resource list or generation changes.
@@ -132,15 +139,15 @@ namespace Pulsar4X.Tests
         private ColonyInfoDB SetupColony(Entity faction, Entity species, Entity planet)
         {
             var colonyEntity = ColonyFactory.CreateColony(faction, species, planet, 500000000);
-
+            var dataStore = faction.GetDataBlob<FactionInfoDB>().Data;
             // Mines
-            ComponentTemplateSD mineSD = _game.StaticData.ComponentTemplates[_mineDesignGUID];
-            ComponentDesigner mineDesigner = new ComponentDesigner(mineSD, faction.GetDataBlob<FactionTechDB>());
+            ComponentTemplateBlueprint mineSD = dataStore.ComponentTemplates[_mineDesignGUID];
+            ComponentDesigner mineDesigner = new ComponentDesigner(mineSD, dataStore, faction.GetDataBlob<FactionTechDB>());
             ComponentDesign mineDesign = mineDesigner.CreateDesign(faction);
 
             colonyEntity.AddComponent(mineDesign, 10);
 
-            ComponentDesign cargoInstallation = DefaultStartFactory.DefaultCargoInstallation(_game, faction);
+            ComponentDesign cargoInstallation = DefaultStartFactory.DefaultCargoInstallation(_game, faction, dataStore);
             colonyEntity.AddComponent(cargoInstallation, 10);
 
             ReCalcProcessor.ReCalcAbilities(colonyEntity);
@@ -151,7 +158,7 @@ namespace Pulsar4X.Tests
         private void CheckLevels(Dictionary<string, MineralDeposit> resourceData, string resource, double accessibility, long quantity)
         {
             Assert.IsTrue(resourceData.ContainsKey(resource));
-            var depositInfo = resourceData[resource]; 
+            var depositInfo = resourceData[resource];
             Assert.AreEqual(Math.Round(accessibility, 6), Math.Round(depositInfo.Accessibility, 6), resource + " is not at expected availability level.");
             Assert.AreEqual(quantity, depositInfo.Amount, resource + " is not at expected amount.");
         }

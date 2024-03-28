@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
-using Pulsar4X.ECSLib;
-using System.Diagnostics;
-using Pulsar4X.ECSLib.ComponentFeatureSets.CargoStorage;
+using Pulsar4X.Modding;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Industry;
+using Pulsar4X.Interfaces;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Tests
 {
@@ -19,11 +19,19 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            var gameSettings = new NewGameSettings();
-            gameSettings.MaxSystems = 10;
-            _game = new Game(gameSettings);
-            StaticDataManager.LoadData("Pulsar4x", _game);
-            _entityManager = new EntityManager(_game);
+             var _modLoader = new ModLoader();
+            var _modDataStore = new ModDataStore();
+
+            _modLoader.LoadModManifest("Data/basemod/modInfo.json", _modDataStore);
+
+            var _settings = new NewGameSettings() {
+                MaxSystems = 10
+            };
+
+            _game  = new Game(_settings, _modDataStore);
+
+            _entityManager = new EntityManager();
+            _entityManager.Initialize(_game);
         }
 
         [TearDown]
@@ -36,20 +44,20 @@ namespace Pulsar4X.Tests
         [Test]
         public void CargoDefinitionsLibrary_When_AskedIfSomethingIsAMineral_Should_CorrectlyRespond()
         {
-            var minerals = new List<MineralSD>();
-            var mineralCargoTypeId = Guid.NewGuid();
+            var minerals = new List<Mineral>();
+            var mineralCargoTypeId = Guid.NewGuid().ToString();
 
             var otherJunk = new List<ICargoable>();
-            var otherCargoTypeId = Guid.NewGuid();
+            var otherCargoTypeId = Guid.NewGuid().ToString();;
 
             var theDice = new Random();
 
             var diceRollMinerals = theDice.Next(15, 20);
             for (var i = 0; i < diceRollMinerals; i++)
             {
-                var randomMineral = new MineralSD()
+                var randomMineral = new Mineral()
                 {
-                    ID = Guid.NewGuid(),
+                    UniqueID = Guid.NewGuid().ToString(),
                     CargoTypeID = mineralCargoTypeId,
                     MassPerUnit = 1000,
                     Name = "RandomMineral_" + i.ToString(),
@@ -63,14 +71,14 @@ namespace Pulsar4X.Tests
             {
                 var randomCargoThing = new JustSomeCargoThing()
                 {
-                    ID = Guid.NewGuid(),
+                    UniqueID = Guid.NewGuid().ToString(),
                     CargoTypeID = otherCargoTypeId,
                     MassPerUnit = 1000,
                     Name = "AThing_" + i.ToString()
                 };
                 otherJunk.Add(randomCargoThing);
             }
-            
+
             var library = new CargoDefinitionsLibrary();
             library.LoadMineralDefinitions(minerals);
             library.LoadOtherDefinitions(otherJunk);
@@ -88,20 +96,20 @@ namespace Pulsar4X.Tests
         [Test]
         public void CargoDefinitionsLibrary_When_AskedIfSomethingIsAMaterial_Should_CorrectlyRespond()
         {
-            var materials = new List<ProcessedMaterialSD>();
-            var materialCargoTypeId = Guid.NewGuid();
+            var materials = new List<ProcessedMaterial>();
+            var materialCargoTypeId = Guid.NewGuid().ToString();
 
             var otherJunk = new List<ICargoable>();
-            var otherCargoTypeId = Guid.NewGuid();
+            var otherCargoTypeId = Guid.NewGuid().ToString();
 
             var theDice = new Random();
 
             var diceRollMaterials = theDice.Next(15, 20);
             for (var i = 0; i < diceRollMaterials; i++)
             {
-                var randomMaterial = new ProcessedMaterialSD()
+                var randomMaterial = new ProcessedMaterial()
                 {
-                    ID = Guid.NewGuid(),
+                    UniqueID = Guid.NewGuid().ToString(),
                     CargoTypeID = materialCargoTypeId,
                     MassPerUnit = 1000,
                     Name = "RandomMaterial_" + i.ToString(),
@@ -115,7 +123,7 @@ namespace Pulsar4X.Tests
             {
                 var randomCargoThing = new JustSomeCargoThing()
                 {
-                    ID = Guid.NewGuid(),
+                    UniqueID = Guid.NewGuid().ToString(),
                     CargoTypeID = otherCargoTypeId,
                     MassPerUnit = 1000,
                     Name = "AThing_" + i.ToString()
@@ -140,20 +148,20 @@ namespace Pulsar4X.Tests
         [Test]
         public void CargoDefinitionsLibrary_When_AskedIfSomethingIsOtherCargo_Should_CorrectlyRespond()
         {
-            var materials = new List<ProcessedMaterialSD>();
-            var materialCargoTypeId = Guid.NewGuid();
+            var materials = new List<ProcessedMaterial>();
+            var materialCargoTypeId = Guid.NewGuid().ToString();
 
             var otherJunk = new List<ICargoable>();
-            var otherCargoTypeId = Guid.NewGuid();
+            var otherCargoTypeId = Guid.NewGuid().ToString();
 
             var theDice = new Random();
 
             var diceRollMaterials = theDice.Next(15, 20);
             for (var i = 0; i < diceRollMaterials; i++)
             {
-                var randomMaterial = new ProcessedMaterialSD()
+                var randomMaterial = new ProcessedMaterial()
                 {
-                    ID = Guid.NewGuid(),
+                    UniqueID = Guid.NewGuid().ToString(),
                     CargoTypeID = materialCargoTypeId,
                     MassPerUnit = 1000,
                     Name = "RandomMaterial_" + i.ToString(),
@@ -167,7 +175,7 @@ namespace Pulsar4X.Tests
             {
                 var randomCargoThing = new JustSomeCargoThing()
                 {
-                    ID = Guid.NewGuid(),
+                    UniqueID = Guid.NewGuid().ToString(),
                     CargoTypeID = otherCargoTypeId,
                     MassPerUnit = 1000,
                     Name = "AThing_" + i.ToString()
@@ -190,18 +198,11 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        public void CargoDefinitionsLibrary_When_GEttingADefinitionFromTheLibraryThatDoesnotExist_Should_ReturnNull()
+        public void CargoDefinitionsLibrary_When_GettingADefinitionFromTheLibraryThatDoesnotExist_Should_ReturnNull()
         {
             var library = new CargoDefinitionsLibrary();
-            Assert.IsNull(library.GetAny(Guid.NewGuid()));
+            Assert.IsNull(library.GetAny(Guid.NewGuid().ToString()));
         }
-
-    
-
-
-
-
-
 
         [Test]
         public void VolumeStorage_BasicChecks()
@@ -211,8 +212,8 @@ namespace Pulsar4X.Tests
             var cookiePile = new VolumeStorageDB();
             cookiePile.TypeStores.Add(cookies.CargoTypeID, new TypeStore(100));
             var added = cookiePile.AddCargoByUnit(cookies, 99);
-            
-            
+
+
             var storedCookies = cookiePile.GetUnitsStored(cookies);
             var storedCookieMass = cookiePile.GetMassStored(cookies);
             var storedCookieVolume = cookiePile.GetVolumeStored(cookies);
@@ -222,7 +223,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual( 99, storedCookies);
             Assert.AreEqual(99, storedCookieMass);
             Assert.AreEqual(99, storedCookieVolume);
-            
+
             var addMore = cookiePile.AddCargoByUnit(cookies, 100);
             var storedCookies2 = cookiePile.GetUnitsStored(cookies);
             var storedCookieMass2 = cookiePile.GetMassStored(cookies);
@@ -236,29 +237,29 @@ namespace Pulsar4X.Tests
 
 
 
-        private ProcessedMaterialSD SetupCookieTradeGood()
+        private ProcessedMaterial SetupCookieTradeGood()
         {
-            var cookies = new ProcessedMaterialSD
+            var cookies = new ProcessedMaterial
             {
                 Name = "Clicked Cookies",
                 Description = "Tastes like carpal tunnel and time.",
-                ID = Guid.NewGuid(),
-                CargoTypeID = Guid.NewGuid(),
+                UniqueID = Guid.NewGuid().ToString(),
+                CargoTypeID = Guid.NewGuid().ToString(),
                 MassPerUnit = 1,
-                VolumePerUnit = 1//these are some really really big cookies. 
+                VolumePerUnit = 1//these are some really really big cookies.
             };
 
             return cookies;
         }
 
-        private ProcessedMaterialSD SetupRockTradeGood()
+        private ProcessedMaterial SetupRockTradeGood()
         {
-            var rock = new ProcessedMaterialSD
+            var rock = new ProcessedMaterial
             {
                 Name = "Rock",
                 Description = "A pile of heavy rocks. Very useful. Trust me.",
-                ID = Guid.NewGuid(),
-                CargoTypeID = Guid.NewGuid(),
+                UniqueID = Guid.NewGuid().ToString(),
+                CargoTypeID = Guid.NewGuid().ToString(),
                 MassPerUnit = 10,
                 VolumePerUnit = 0.0001,
             };
@@ -269,11 +270,12 @@ namespace Pulsar4X.Tests
 
     public class JustSomeCargoThing : ICargoable
     {
-        public Guid ID { get; set; }
+        public int ID { get; set; }
+        public string UniqueID { get; set; }
 
         public string Name { get; set; }
 
-        public Guid CargoTypeID { get; set; }
+        public string CargoTypeID { get; set; }
 
         public long MassPerUnit { get; set; }
         public double VolumePerUnit { get; }

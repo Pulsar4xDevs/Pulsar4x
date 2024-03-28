@@ -1,0 +1,478 @@
+[
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-mining-production",
+      "Name": "Mining Production Efficiency",
+      "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 11,
+      "DataFormula": "1 + [Level] * 1.5",
+      "CostFormula": "(1 + [Level]) * 100"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-capacitors",
+      "Name": "Capacitors",
+      "Description": "",
+      "MaxLevel": 10,
+      "DataFormula": "1 + [Level] * 0.25 ",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-conductors",
+      "Name": "Conductors",
+      "Description": "",
+      "MaxLevel": 10,
+      "DataFormula": "1 * [Level]",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-alcubierre-miniaturization",
+      "Name": "Alcubierre Miniaturization",
+      "Description": "Research into shrinking a drive to fit smaller form factors",
+      "MaxLevel": 10,
+      "DataFormula": "250 - [Level] * 20 ",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "500 + [Level] * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-alcubierre-bubble-creation-cost",
+      "Name": "Alcubierre Bubble Creation Cost",
+      "Description": "By finding better ways to manipulate the warp bubble, we can make the drive more efficient",
+      "MaxLevel": 10,
+      "DataFormula": "1.0 - [Level] * 0.05",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "500 + [Level] * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-alcubierre-sustain-cost",
+      "Name": "Alcubierre Sustain Cost",
+      "Description": "By finding better ways to manipulate the warp bubble, we can make the drive more efficient",
+      "MaxLevel": 10,
+      "DataFormula": "1.0 - [Level] * 0.05 ",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "500 + [Level] * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-alcubierre-collapse-efficiency",
+      "Name": "Alcubierre Collapse Efficency",
+      "Description": "We can recover some of the energy put into creating the bubble when we collapse it in a controlled manner",
+      "MaxLevel": 15,
+      "DataFormula": "0.0 + [Level] * 0.05 ",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "500 + [Level] * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-conventional-engine-max-power",
+      "Name": "Rocket Engine Maximum Power",
+      "Description": "Research to increase the upper limits of conventional rocket power",
+      "MaxLevel": 7,
+      "DataFormula": "1 + ([Level] * 1.5)",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 100"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-conventional-engine-min-power",
+      "Name": "Rocket Engine Minimum Power",
+      "Description": "Research to find the lower limits of conventional rocket power",
+      "MaxLevel": 7,
+      "DataFormula": "0.9 - [Level] * 0.1",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 100"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-solid-fuel",
+      "Name": "Solid Fuel",
+      "Description": "",
+      "MaxLevel": 10,
+      "DataFormula": "1 + [Level] * 0.1",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-conventional-engine-max-size",
+      "Name": "Rocket Engine Maximum Size",
+      "Description": "Research into better cooling allows larger engine sizes",
+      "MaxLevel": 20,
+      "DataFormula": "250 + [Level] * 25",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-conventional-engine-min-size",
+      "Name": "Rocket Engine Minimum Size",
+      "Description": "Research into miniaturization allows smaller engine sizes",
+      "MaxLevel": 20,
+      "DataFormula": "Max(1, 100 - [Level] * 5)",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-conventional-engine-exhaust-velocity",
+      "Name": "Rocket Engine Exhaust Velocity",
+      "Description": "Research into higher exhaust velocities for engines, making them more efficient",
+      "MaxLevel": 10,
+      "DataFormula": "[Level] * 100",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-conventional-engine-fuel-consumption",
+      "Name": "Rocket Engine Fuel Consumption",
+      "Description": "Research into better plumbing and pump layouts allows better fuel efficiency",
+      "MaxLevel": 20,
+      "DataFormula": "1 - [Level] * 0.01",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 100"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-conventional-engine",
+      "Name": "Conventional Engine Technology",
+      "Description": "",
+      "ID": "35608fe6-0d65-4a5f-b452-78a3e5e6ce2c",
+      "MaxLevel": 1,
+      "DataFormula": "0.2",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "tech-conventional-engine-max-power",
+          "tech-conventional-engine-min-power",
+          "tech-conventional-engine-max-size",
+          "tech-conventional-engine-min-size",
+          "tech-conventional-engine-exhaust-velocity",
+          "tech-conventional-engine-fuel-consumption",
+          "tech-nuclear-engine"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-nuclear-engine",
+      "Name": "Nuclear Thermal Engine Technology",
+      "Description": "",
+      "MaxLevel": 1,
+      "DataFormula": "5",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 2500",
+      "Unlocks": {
+        "1": [
+          "tech-nuclear-pulse-engine"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-nuclear-pulse-engine",
+      "Name": "Nuclear Pulse Engine Technology",
+      "Description": "",
+      "MaxLevel": 1,
+      "DataFormula": "5",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 5000",
+      "Unlocks": {
+        "1": [
+          "tech-ion-engine"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-ion-engine",
+      "Name": "Ion Drive Technology",
+      "Description": "",
+      "MaxLevel": 1,
+      "DataFormula": "1000",
+      "Category": "tech-category-power-propulsion",
+      "CostFormula": "(1 + [Level]) * 10000"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-jumpoint-stabilization",
+      "Name": "JumpPoint Stabilization",
+      "Description": "A ship equipped with this module can Stabilise a JumpPoint",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 1,
+      "DataFormula": "[Level]",
+      "CostFormula": "2500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-jumpoint-stabilization-size-reduction",
+      "Name": "JumpPoint Size Reduction",
+      "Description": "Reduces the size of a component required for Jump Point Stabilisation",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 10,
+      "DataFormula": "100 - [Level] * 5",
+      "CostFormula": "(1 + [Level]) * 2500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-jumpoint-stabilization-time-reduction",
+      "Name": "JumpPoint Time Reduction",
+      "Description": "Reduces the time it takes to stabilise a Jump Point",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 10,
+      "DataFormula": "[Level]",
+      "CostFormula": "(1 + [Level]) * 2500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-high-explosives",
+      "Name": "High Explosives",
+      "Description": "Better explosive compounds increase the Relative effectiveness factor",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 10,
+      "DataFormula": "1.66 + [Level] * 0.1",
+      "CostFormula": "(1 + [Level]) * 2500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-high-explosives-warheads",
+      "Name": "HE Warheads",
+      "Description": "High Explosive Warheads that produce a large amount of heat and pressure",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 10,
+      "DataFormula": "[Level]",
+      "CostFormula": "(1 + [Level]) * 2500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-fragmentation-warheads",
+      "Name": "Fragmentation Warheads",
+      "Description": "Warheads that produce a large amount of fragmentation",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 10,
+      "DataFormula": "[Level]",
+      "CostFormula": "(1 + [Level]) * 2500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-fission-warheads",
+      "Name": "Fission Warheads",
+      "Description": "Warheads that produce massive amounts of Heat and pressure",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 10,
+      "DataFormula": "[Level]",
+      "CostFormula": "(1 + [Level]) * 2500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-laser-warheads",
+      "Name": "Laser Warheads",
+      "Description": "Smart warheads that fire a high energy beam towards the target on detonation",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 10,
+      "DataFormula": "[Level]",
+      "CostFormula": "(1 + [Level]) * 2500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-triggers",
+      "Name": "Trigger Tech",
+      "Description": "Enables different warhead triggers for ordnance",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 4,
+      "DataFormula": "[Level]",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-guidance",
+      "Name": "Guidance Tech",
+      "Description": "Enables different guidance options ordnance",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 4,
+      "DataFormula": "[Level]",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-antenna-sensitivity",
+      "Name": "Antenna Sensitivity",
+      "Description": "Improvements to antennas to increase the ability to pick up smaller signals from background noise",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 9,
+      "DataFormula": "0.01 - [Level] * 0.001",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-antenna-efficiency",
+      "Name": "Antenna Efficiency",
+      "Description": "Improvements to antennas increase the effective area of a sensor, allowing for greater sensitivity for a smaller size",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 25,
+      "DataFormula": "0.75 + [Level] * 0.1",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-antenna-bandwidth",
+      "Name": "Antenna Bandwidth",
+      "Description": "Improvements to antennas increase the max bandwidth of an antenna",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 95,
+      "DataFormula": "500 + [Level] * 100",
+      "CostFormula": "(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-modern-technology",
+      "Name": "Modern Technology",
+      "Description": "Unlocks all modern technologies needed for space flight and exploration",
+      "Category": "tech-category-missiles-kinetic-weapons",
+      "MaxLevel": 1,
+      "DataFormula": "1",
+      "CostFormula": "0",
+      "Unlocks": {
+        "1": [
+          "tech-mining-production",
+          "tech-capacitors",
+          "tech-conductors",
+          "tech-alcubierre-miniaturization",
+          "tech-alcubierre-bubble-creation-cost",
+          "tech-alcubierre-sustain-cost",
+          "tech-alcubierre-collapse-efficiency",
+          "tech-solid-fuel",
+          "tech-conventional-engine",
+          "tech-jumpoint-stabilization",
+          "tech-jumpoint-stabilization-size-reduction",
+          "tech-jumpoint-stabilization-time-reduction",
+          "tech-high-explosives",
+          "tech-high-explosives-warheads",
+          "tech-fragmentation-warheads",
+          "tech-fission-warheads",
+          "tech-laser-warheads",
+          "tech-triggers",
+          "tech-guidance",
+          "tech-antenna-sensitivity",
+          "tech-antenna-efficiency",
+          "tech-antenna-bandwidth",
+          "tech-factory-max-size",
+          "tech-shipyard-slip-max-size",
+          "tech-geo-surveyor"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-factory-max-size",
+      "Name": "Factory Maximum Size",
+      "Description": "Research into the logistics and design of larger factories",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 10,
+      "DataFormula": "(1 + [Level]) * 1000",
+      "CostFormula":"(1 + [Level]) * 2500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-shipyard-slip-max-size",
+      "Name": "Shipyard Slip Maximum Size",
+      "Description": "Research into the logistics and design of larger slips for shipyards",
+      "Category": "tech-category-construction-production",
+      "MaxLevel": 100,
+      "DataFormula": "(1 + [Level]) * 5000",
+      "CostFormula":"(1 + [Level]) * 500"
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-geo-surveyor",
+      "Name": "Geological Surveyor",
+      "Description": "Research into geological surveys of system bodies",
+      "Category": "tech-category-biology-genetics",
+      "MaxLevel": 1,
+      "DataFormula": "(1 + [Level]) * 5000",
+      "CostFormula":"(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "geo-surveyor"
+        ]
+      }
+    }
+  }
+]

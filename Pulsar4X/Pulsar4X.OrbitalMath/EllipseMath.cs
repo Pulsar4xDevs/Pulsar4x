@@ -107,7 +107,80 @@ namespace Pulsar4X.Orbital
 
             return area;
         }
+        
+        /// <summary>
+        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
+        /// </summary>
+        /// <returns>The radius from the focal point for a given angle</returns>
+        /// <param name="angle">Angle.</param>
+        /// <param name="semiLatusRectum">Semi latus rectum.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        public static double RadiusAtTrueAnomaly(double angle, double semiLatusRectum, double eccentricity)
+        {
+            return Math.Abs( semiLatusRectum / (1 + eccentricity * Math.Cos(angle)));
+        }
+        
+        /// <summary>
+        /// https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_focus
+        /// this is the same as RadiusAtTrueAnomaly, but allows for phi. 
+        /// </summary>
+        /// <param name="a">semi major</param>
+        /// <param name="e">eccentricy</param>
+        /// <param name="phi">angle from focal 1 to focal 2 (or center)</param>
+        /// <param name="theta">angle</param>
+        /// <returns></returns>
+        public static double RadiusAtTrueAnomaly(double a, double e, double phi, double theta)
+        {
+            double dividend = a * (1 - e * e); // p semilatus rectum
+            double divisor = 1 + e * Math.Cos(theta - phi);
+            double quotent = dividend / divisor;
+            return Math.Abs(quotent);
+        }
 
+        /// <summary>
+        /// works with ellipse and hyperabola. Plucked from: http://www.bogan.ca/orbits/kepler/orbteqtn.html
+        /// </summary>
+        /// <returns>The angle from the focal point for a given radius</returns>
+        /// <param name="radius">Radius.</param>
+        /// <param name="semiLatusRectum">Semi latus rectum.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        public static double TrueAnomalyAtRadus(double radius, double semiLatusRectum, double eccentricity)
+        {
+            //r = p / (1 + e * cos(θ))
+            //1 + e * cos(θ) = p/r
+            //((p / r) -1) / e = cos(θ)
+            
+            //I was getting some floating point errors and values ending up slightly over 1. 
+            //clamp should fix that however not sure if it'll end up hiding other issues. 
+            var foo = Math.Clamp(((semiLatusRectum / radius - 1) / eccentricity), -1, 1);
+            return Math.Acos(foo);
+        }
+        
+        /// <summary>
+        /// !!I think this is incorrect!!
+        /// This is plucked from https://control.asu.edu/Classes/MAE462/462Lecture05.pdf
+        /// </summary>
+        /// <param name="radius"></param>
+        /// <param name="semiLatusRectum"></param>
+        /// <param name="eccentricity"></param>
+        /// <returns></returns>
+        public static double AngleAtRadus2(double radius, double semiLatusRectum, double eccentricity)
+        {
+            return Math.Acos(1 / eccentricity - radius / (eccentricity * semiLatusRectum));
+        }
+        
+        /// <summary>
+        /// plucked from a YT comment. also incorrect.
+        /// </summary>
+        /// <param name="radius"></param>
+        /// <param name="semiLatusRectum"></param>
+        /// <param name="eccentricity"></param>
+        /// <returns></returns>
+        public static double AngleAtRadus3(double radius, double semiLatusRectum, double eccentricity)
+        {
+            return Math.Acos((semiLatusRectum / radius * eccentricity - 1) / eccentricity);
+        }
+        
         /// <summary>
         /// https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_center
         /// </summary>
@@ -120,21 +193,27 @@ namespace Pulsar4X.Orbital
             return b / Math.Sqrt(1 - (e * Math.Cos(theta)) * (e * Math.Cos(theta)));
         }
 
-        /// <summary>
-        /// https://en.wikipedia.org/wiki/Ellipse#Polar_form_relative_to_focus
-        /// </summary>
-        /// <param name="a">semi major</param>
-        /// <param name="e">eccentricy</param>
-        /// <param name="phi">angle from focal 1 to focal 2 (or center)</param>
-        /// <param name="theta">angle</param>
-        /// <returns></returns>
-        public static double RadiusFromFocal(double a, double e, double phi, double theta)
+        public static Vector2 PositionFromTrueAnomaly(double a, double e, double trueAnomaly)
         {
-            double dividend = a * (1 - e * e);
-            double divisor = 1 - e * Math.Cos(theta - phi);
-            double quotent = dividend / divisor;
-            return quotent;
+            double p = SemiLatusRectum(a, e);
+            var r = RadiusAtTrueAnomaly(trueAnomaly, p, e);
+            Vector2 pos = new Vector2() { X = r * Math.Cos(trueAnomaly), Y = r * Math.Sin(trueAnomaly) };
+            return pos;
         }
-
+        
+        /// <summary>
+        /// Gets the position of an intersect between an orbit and a circle(radius)
+        /// </summary>
+        /// <returns>The from radius.</returns>
+        /// <param name="radius">Radius.</param>
+        /// <param name="semiLatusRectum">Semi latus rectum.</param>
+        /// <param name="eccentricity">Eccentricity.</param>
+        public static Vector2 PositionFromRadius(double radius, double semiLatusRectum, double eccentricity)
+        {
+            double θ = TrueAnomalyAtRadus(radius, semiLatusRectum, eccentricity);
+            var x = radius * Math.Cos(θ);
+            var y = radius * Math.Sin(θ);
+            return new Vector2() { X = x, Y = y };
+        }
     }
 }

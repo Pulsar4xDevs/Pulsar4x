@@ -23,11 +23,11 @@ namespace Pulsar4X.ECSLib
             var industryDB = industryEntity.GetDataBlob<IndustryAbilityDB>();
             ProcessedMaterialSD material = (ProcessedMaterialSD)designInfo;
             storage.AddCargoByUnit(material, OutputAmount);
-            
+
             batchJob.ResourcesRequiredRemaining = new Dictionary<Guid, long>(material.ResourceCosts);
             batchJob.ProductionPointsLeft = batchJob.ProductionPointsCost; //and reset the points left for the next job in the batch.
             batchJob.NumberCompleted += 1;
-            
+
             if (batchJob.NumberCompleted == batchJob.NumberOrdered)
             {
                 industryDB.ProductionLines[productionLine].Jobs.Remove(batchJob);
@@ -51,5 +51,7 @@ namespace Pulsar4X.ECSLib
         public Guid CargoTypeID { get; init; }
         public long MassPerUnit { get; init; }
         public double VolumePerUnit { get; init; }
+
+        public string ExhaustVelocityFormula { get; init; }
     }
 }

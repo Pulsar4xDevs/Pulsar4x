@@ -1,0 +1,43 @@
+
+Damage system is very much work in progress.
+This file is a quick note on how it's intended to work.
+this note may be incomplete and out of date at any point. 
+
+The vision for damage was to have some sort of falling sands physics model (without the "falling" and gravity)
+the simulation would take a damage fragment with a given mass and velocity and sim it hitting the different materials of the ship.
+
+it does this by using a data array for the ship which is layed out simular to a classic bitmap. 
+(see RawBmp class).
+the different depths (or colours in a classic bitmap) provide data on the material type the damage fragment is hitting.
+r : maps to a damage resistance table. currently only used by armor, (components default to 255 which is stainless steel) 
+    and is set in the ui damage viewer (eek! obv was tempory wip for quick test setup.)
+    this has a byte ID (red) material hitpoints, and material density)
+g : maps to the specific component instance. (ships currently will only be able to have 255 components max.)
+b : currently unused, maybe status and phase type? eg no physics, temprature, solid, liquid, gas.
+a : is the health of the material at this point. 
+
+An undamaged ship is suposed to have/share a "DamageProfile" of it's design class to save memory. 
+    though I don't think this is currently the case. 
+    once a ship becomes damaged it's damage profile will be the last frame of the sim. 
+
+Damage fragments are stored in the EntityDamageProfileDB as a list, so the ui can re-create the frames of the sim for the player. 
+    (without storing the frames, as that very quickly increases in memory). 
+
+The 3d volume of the ship is converted into a 2d plane (see DamageTools.CreateComponentByteArray())
+Currently 1px = 1cm
+
+Intent at some point is to have the damage profile bitmap be a recursivly scaling data array. 
+    eg a large undamaged ship might have a pixel = 1m, but as it takes damage, the pixels that are damaged 
+    get subdivided into smaller scales. 
+    my last attempt at trying to conceptualise the mechanics of how to store this data didn't get far. 
+
+although the ui uses this bitmap to display the ship layout in the ship design, and also to display the damage being dealt,
+it's primarily a way to sim the damage, rather than eye candy. 
+
+components currently have a bitmap too which is probibly unneccisary. 
+    I don't think it's really used other than to get soemthing for the ship damage profile to copy.
+    though maybe having something setup that can deterministicaly create component images would be nifty? 
+
+DamageViewer in the ui is currently mostly a debugging/visial developing tool rather than what the player is supposed to see,
+    hence a bunch of code to sim firing different weapons at it and some stuff which should be in the engine. 
+

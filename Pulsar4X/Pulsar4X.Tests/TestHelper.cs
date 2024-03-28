@@ -1,5 +1,8 @@
 using System.Collections.Generic;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Blueprints;
+using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
 
 namespace Pulsar4X.Tests
 {
@@ -7,7 +10,7 @@ namespace Pulsar4X.Tests
     {
         protected Game _game;
         protected EntityManager _entityManager;
-        protected Dictionary<string, AtmosphericGasSD> _gasDictionary;
+        protected Dictionary<string, GasBlueprint> _gasDictionary;
         protected SpeciesDB _humans;
         protected AtmosphereDB _atmosphere;
 
@@ -22,7 +25,10 @@ namespace Pulsar4X.Tests
             };
             NameDB planetNameDB = new("Test Planet");
 
-            return new(_entityManager, new List<BaseDataBlob> { planetBodyDB, planetNameDB, atmosphere });
+            var result = Entity.Create();
+            _entityManager.AddEntity(result, new List<BaseDataBlob> { planetBodyDB, planetNameDB, atmosphere });
+
+            return result;
         }
     }
 }

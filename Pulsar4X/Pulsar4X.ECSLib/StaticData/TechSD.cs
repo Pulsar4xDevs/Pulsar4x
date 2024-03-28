@@ -26,7 +26,7 @@ namespace Pulsar4X.ECSLib
     }
 
     [StaticDataAttribute(true, IDPropertyName = "ID")]
-    public struct TechSD
+    public class TechSD
     {
         public string Name { get; set; }
         public string Description;

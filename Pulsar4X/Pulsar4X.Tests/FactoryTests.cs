@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Datablobs;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Auth;
 using System;
 using System.Collections.Generic;
 
@@ -15,7 +17,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _game = new Game(new NewGameSettings {GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0});
+            _game = TestingUtilities.CreateTestUniverse(1);
             _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
         }
 
@@ -27,13 +29,7 @@ namespace Pulsar4X.Tests
 
             Entity faction = FactionFactory.CreateFaction(_game, factionName);
             NameDB nameDB = faction.GetDataBlob<NameDB>();
-            Assert.IsTrue(nameDB.GetName(faction) == factionName);
-
-            Entity factioncopy = faction.Clone(faction.Manager);
-
-            Assert.IsTrue(faction.GetValueCompareHash() == factioncopy.GetValueCompareHash(), "Hashes don't match");
-            
-
+            Assert.IsTrue(nameDB.GetName(faction).Equals(factionName));
         }
 
         [Test]
@@ -50,7 +46,7 @@ namespace Pulsar4X.Tests
             Entity species = SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
             var requiredDataBlobs = new List<Type>()
             {
-                typeof(ColonyInfoDB), 
+                typeof(ColonyInfoDB),
                 typeof(NameDB),
                 typeof(InstallationsDB)
 
@@ -74,8 +70,7 @@ namespace Pulsar4X.Tests
 
             var requiredDataBlobs = new List<Type>()
             {
-                typeof(CommanderDB),
-                typeof(ScientistDB)
+                typeof(CommanderDB)
             };
 
             //Entity scientist = CommanderFactory.CreateScientist(faction, );
@@ -83,7 +78,7 @@ namespace Pulsar4X.Tests
             //Assert.IsTrue(HasAllRequiredDatablobs(scientist, requiredDataBlobs), "Scientist Entity doesn't contains all required datablobs");
         }
 
-     
+
 
     }
 }

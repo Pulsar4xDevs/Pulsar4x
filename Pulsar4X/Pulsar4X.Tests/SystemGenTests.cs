@@ -1,8 +1,13 @@
 ﻿using NUnit.Framework;
-using Pulsar4X.ECSLib;
+using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
+using Pulsar4X.Engine;
+using Pulsar4X.Engine.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Pulsar4X.Extensions;
+using Pulsar4X.Modding;
 
 namespace Pulsar4X.Tests
 {
@@ -10,22 +15,30 @@ namespace Pulsar4X.Tests
     public class SystemGenTests
     {
         private Game _game;
-        private AuthenticationToken _smAuthToken;
 
+        /* TODO: Needs updated for new serialization, or deleted.
         [Test]
         [Description("Outputs all the systems generated in the init of this test to XML")]
         public void OutputToXML()
         {
             SerializationManager.ExportStarSystemsToXML(_game);
         }
+        */
 
+        [SetUp]
+        public void Init()
+        {
+            // Recreate the universe each test.
+            _game = TestingUtilities.CreateTestUniverse(1);
+        }
+
+        /// <summary>
+        /// TODO: Isolate this method. Any changes to the default static data (Specifically the SystemGenSettings) will break these tests.
+        /// </summary>
         [Test]
         [Description("Creates and tests a single star system")]
         public void CreateAndFillStarSystem()
         {
-            var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }); // reinit with empty game, so we can do a clean test.
-            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSystem(_game, "Argon Prime", 12345); // Keeping with the X3 theme :P
 
@@ -33,7 +46,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(1, system.GetNumberOfStars());
 
             // lets test that the stars generated okay:
-            List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>(_smAuthToken);
+            List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>();
             Assert.IsNotEmpty(stars);
 
             StarInfoDB argonPrimeA = stars[0].GetDataBlob<StarInfoDB>();
@@ -56,28 +69,27 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(systemBodies);
             var numbodies = system.GetNumberOfBodies();
             Assert.AreEqual(1, system.GetNumberOfStars());
-            Assert.AreEqual(2, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
-            Assert.AreEqual(2, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
+            Assert.AreEqual(5, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
+            Assert.AreEqual(4, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
             Assert.AreEqual(1, system.GetNumberOfIceGiants(), "IceGiants");
-            Assert.AreEqual(4, system.GetNumberOfGasGiants(), "GasGiants");
+            Assert.AreEqual(3, system.GetNumberOfGasGiants(), "GasGiants");
             Assert.AreEqual(13, system.GetNumberOfMoons(), "Moons");
-            Assert.AreEqual(49, system.GetNumberOfAsteroids(), "Asteroids");
+            Assert.AreEqual(74, system.GetNumberOfAsteroids(), "Asteroids");
             Assert.AreEqual(0, system.GetNumberOfUnknownObjects(), "unknown");
 
-            Assert.AreEqual(18, system.GetNumberOfComets(), "Comets");
+            Assert.AreEqual(17, system.GetNumberOfComets(), "Comets");
 
-            Assert.AreEqual(93, system.GetNumberOfBodies(), "TotalBodies");
+            Assert.AreEqual(118, system.GetNumberOfBodies(), "TotalBodies");
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
         }
 
-
+        /// <summary>
+        /// TODO: Isolate this method. Any changes to the default static data (Specifically the SystemGenSettings) will break these tests.
+        /// </summary>
         [Test]
         [Description("Creates and tests another single star system")]
         public void CreateAndFillStarSystemB()
         {
-            var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }); // reinit with empty game, so we can do a clean test.
-            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSystem(_game, "Robin Prime", 22367, true);
 
@@ -124,91 +136,69 @@ namespace Pulsar4X.Tests
 
             Assert.IsTrue(robinPrimeAMV.MassDry > robinPrimeBMV.MassDry, "Star A should be the most massive.");
 
-            List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken);
+            List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
             Assert.IsNotEmpty(systemBodies);
 
             Assert.AreEqual(2, system.GetNumberOfTerrestrialPlanets(), "TerrestrialPlanets");
-            Assert.AreEqual(3, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
-            Assert.AreEqual(1, system.GetNumberOfIceGiants(), "IceGiants");
-            Assert.AreEqual(3, system.GetNumberOfGasGiants(), "GasGiants");
-            Assert.AreEqual(8, system.GetNumberOfMoons(), "Moons");
-            Assert.AreEqual(62, system.GetNumberOfAsteroids(), "Asteroids");
+            Assert.AreEqual(5, system.GetNumberOfDwarfPlanets(), "DwarfPlanets");
+            Assert.AreEqual(2, system.GetNumberOfIceGiants(), "IceGiants");
+            Assert.AreEqual(1, system.GetNumberOfGasGiants(), "GasGiants");
+            Assert.AreEqual(10, system.GetNumberOfMoons(), "Moons");
+            Assert.AreEqual(124, system.GetNumberOfAsteroids(), "Asteroids");
             Assert.AreEqual(0, system.GetNumberOfUnknownObjects(), "unknown");
 
-            Assert.AreEqual(15, system.GetNumberOfComets(), "Comets");
+            Assert.AreEqual(6, system.GetNumberOfComets(), "Comets");
 
-            Assert.AreEqual(96, system.GetNumberOfBodies(), "TotalBodies");
+            Assert.AreEqual(151, system.GetNumberOfBodies(), "TotalBodies");
             Assert.AreEqual(systemBodies.Count, system.GetNumberOfBodies());
 
             // Test initial mineral generation
-            var totalMinerals = system.GetTotalSystemMinerals(_game.StaticData);
-            Assert.AreEqual(27084962760, totalMinerals["Sorium"], "Sorium");
-            Assert.AreEqual(2504615582, totalMinerals["Neutronium"], "Neutronium");
-            Assert.AreEqual(35111974, totalMinerals["Iron"], "Iron");
-            Assert.AreEqual(39722250, totalMinerals["Aluminium"], "Aluminium");
-            Assert.AreEqual(29868472, totalMinerals["Lithium"], "Lithium");
-            Assert.AreEqual(22030529, totalMinerals["Fissionables"], "Fissionables");
-            Assert.AreEqual(1216134, totalMinerals["Duranium"], "Duranium");
-            Assert.AreEqual(49794944, totalMinerals["Corbomite"], "Corbomite");
-            Assert.AreEqual(19768268, totalMinerals["Copper"], "Copper");
-            Assert.AreEqual(29407250, totalMinerals["Titanium"], "Titanium");
-            Assert.AreEqual(39038047, totalMinerals["Tritanium"], "Tritanium");
-            Assert.AreEqual(27187517, totalMinerals["Boronide"], "Boronide");
-            Assert.AreEqual(60503947, totalMinerals["Corundium"], "Corundium");
-            Assert.AreEqual(24266487, totalMinerals["Mercassium"], "Mercassium");
-            Assert.AreEqual(59797777, totalMinerals["Vendarite"], "Vendarite");
-            Assert.AreEqual(24001331, totalMinerals["Gallicite"], "Gallicite");
-            Assert.AreEqual(17760843, totalMinerals["Chromium"], "Chromium");
+            Dictionary<string, double> totalMinerals = system.GetTotalSystemMinerals(_game.StartingGameData);
+            Assert.AreEqual(1729718654, totalMinerals["Sorium"], "Sorium");
+            Assert.AreEqual(488000495, totalMinerals["Neutronium"], "Neutronium");
+            Assert.AreEqual(56354910, totalMinerals["Iron"], "Iron");
+            Assert.AreEqual(107192704, totalMinerals["Aluminium"], "Aluminium");
+            Assert.AreEqual(156862817, totalMinerals["Lithium"], "Lithium");
+            Assert.AreEqual(118238249, totalMinerals["Fissionables"], "Fissionables");
+            Assert.AreEqual(40067025, totalMinerals["Duranium"], "Duranium");
+            Assert.AreEqual(108058044, totalMinerals["Corbomite"], "Corbomite");
+            Assert.AreEqual(164017462, totalMinerals["Copper"], "Copper");
+            Assert.AreEqual(66474261, totalMinerals["Titanium"], "Titanium");
+            Assert.AreEqual(339062039, totalMinerals["Tritanium"], "Tritanium");
+            Assert.AreEqual(77772712, totalMinerals["Boronide"], "Boronide");
+            Assert.AreEqual(142161177, totalMinerals["Corundium"], "Corundium");
+            Assert.AreEqual(104074623, totalMinerals["Mercassium"], "Mercassium");
+            Assert.AreEqual(129939122, totalMinerals["Vendarite"], "Vendarite");
+            Assert.AreEqual(119093064, totalMinerals["Gallicite"], "Gallicite");
+            Assert.AreEqual(121693426, totalMinerals["Chromium"], "Chromium");
         }
 
         [Test]
         [Description("Creates and tests a single star system")]
         public void CreateAndCheckDeterministic()
         {
-            var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0, CreatePlayerFaction = false }); // reinit with empty game, so we can do a clean test.
-            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
-            StarSystemFactory ssf = new StarSystemFactory(_game);
-            var system1 = ssf.CreateSystem(_game, "Argon Prime", 12345); // Keeping with the X3 theme :P
-            var systemtwin = ssf.CreateSystem(_game, "Argon Prime", 12345);
-            var orbitEntites = system1.GetAllEntitiesWithDataBlob<OrbitDB>();
-            var orbitTwins = systemtwin.GetAllEntitiesWithDataBlob<OrbitDB>();
+            var ssf = new StarSystemFactory(_game);
+            StarSystem system1 = ssf.CreateSystem(_game, "Argon Prime", 12345); // Keeping with the X3 theme :P
+            StarSystem systemTwin = ssf.CreateSystem(_game, "Argon Prime", 12345);
 
-            Assert.AreEqual(orbitEntites.Count, orbitTwins.Count);
-            for (int i = 0; i < orbitEntites.Count; i++)
+            List<Entity> system1Entities = system1.GetAllEntites();
+            List<Entity> systemTwinEntities = systemTwin.GetAllEntites();
+            Assert.AreEqual(system1Entities.Count, systemTwinEntities.Count);
+            for (int i = 0; i < system1Entities.Count; i++)
             {
-                var entityPrime = orbitEntites[i];
-                var entityTwin = orbitTwins[i];
-                var db1 = entityPrime.GetDataBlob<OrbitDB>();
-                var db2 = entityTwin.GetDataBlob<OrbitDB>();
-                Assert.AreEqual(db1.GetValueCompareHash(), db2.GetValueCompareHash());
-
-                for (int j = 0; j < entityPrime.DataBlobs.Count; j++)
-                {
-                    var blob1 = entityPrime.DataBlobs[j];
-                    var blob2 = entityTwin.DataBlobs[j];
-                    Assert.IsTrue(blob1.GetType().ToString() == blob2.GetType().ToString());
-
-                    if (blob1 is IGetValuesHash)
-                    {
-                        IGetValuesHash hashblob1 = (IGetValuesHash)blob1;
-                        IGetValuesHash hashblob2 = (IGetValuesHash)blob2;
-                        var hash1 = hashblob1.GetValueCompareHash();
-                        var hash2 = hashblob2.GetValueCompareHash();
-                        Assert.AreEqual(hash1, hash2, "Hashes for itteration" + j + " type " + blob1.GetType().ToString() + "Don't match");
-                    }
-                }
-
+                Entity entityPrime = system1Entities[i];
+                Entity entityTwin = systemTwinEntities[i];
+                Assert.IsTrue(DataBlobEqualityChecker.AreEqual(entityPrime, entityTwin));
             }
         }
 
+        /// <summary>
+        /// TODO: Isolate this method. Any changes to the default static data (Specifically the SystemGenSettings) will break these tests.
+        /// </summary>
         [Test]
         [Description("Creates and tests the Sol star system")]
         public void CreateAndFillSolStarSystem()
         {
-            var startDate = new DateTime(2050, 1, 1);
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = startDate, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
-            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             StarSystemFactory ssf = new StarSystemFactory(_game);
             var system = ssf.CreateSol(_game);
 
@@ -222,7 +212,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(4, system.GetNumberOfTerrestrialPlanets());
 
             // lets test that the stars generated okay:
-            List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>(_smAuthToken);
+            List<Entity> stars = system.GetAllEntitiesWithDataBlob<StarInfoDB>();
             Assert.IsNotEmpty(stars);
 
             StarInfoDB sol = stars[0].GetDataBlob<StarInfoDB>();
@@ -239,7 +229,7 @@ namespace Pulsar4X.Tests
 
             // now confirm the system bodies all created
 
-            List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>(_smAuthToken);
+            List<Entity> systemBodies = system.GetAllEntitiesWithDataBlob<SystemBodyInfoDB>();
             Assert.IsNotEmpty(systemBodies);
 
             List<SystemBodyInfoDB> bodies = system.GetAllDataBlobsOfType<SystemBodyInfoDB>();
@@ -310,8 +300,6 @@ namespace Pulsar4X.Tests
             System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
 
             const int numSystems = 1000;
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = 0 }); // reinit with empty game, so we can do a clean test.
-            _smAuthToken = new AuthenticationToken(_game.SpaceMaster);
             var ssf = new StarSystemFactory(_game);
 
             GC.Collect();
@@ -329,9 +317,9 @@ namespace Pulsar4X.Tests
             double totalTime = timer.Elapsed.TotalSeconds;
 
             int totalEntities = 0;
-            foreach (StarSystem system in _game.GetSystems(_smAuthToken))
+            foreach (StarSystem system in _game.Systems)
             {
-                List<Entity> entities = system.GetAllEntitiesWithDataBlob<OrbitDB>(_smAuthToken);
+                List<Entity> entities = system.GetAllEntitiesWithDataBlob<OrbitDB>();
                 totalEntities += entities.Count;
             }
 
@@ -348,26 +336,26 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        [Description("Allows statisical analysis of the connectivity of generated systems")]
+        [Description("Allows statistical analysis of the connectivity of generated systems")]
         [Ignore("Manual statistical analysis Integration test")]
         public void JPConnectivity()
         {
             const int numSystems = 2000;
-            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = numSystems });
-            List<StarSystem> systems = _game.GetSystems(new AuthenticationToken(_game.SpaceMaster));
+            _game = new Game(new NewGameSettings { GameName = "Unit Test Game", StartDateTime = DateTime.Now, MaxSystems = numSystems }, _game.StartingGameData);
+            List<StarSystem> systems = _game.Systems;
 
 
-            var jumpPointCounts = new Dictionary<Guid, int>();
+            var jumpPointCounts = new Dictionary<string, int>();
 
             foreach (StarSystem starSystem in systems)
             {
-                List<Entity> systemJumpPoints = starSystem.GetAllEntitiesWithDataBlob<TransitableDB>(_smAuthToken);
+                List<Entity> systemJumpPoints = starSystem.GetAllEntitiesWithDataBlob<TransitableDB>();
 
                 jumpPointCounts.Add(starSystem.Guid, systemJumpPoints.Count);
             }
 
             var statisticalSpread = new Dictionary<int, int>();
-            foreach (KeyValuePair<Guid, int> keyValuePair in jumpPointCounts)
+            foreach (KeyValuePair<string, int> keyValuePair in jumpPointCounts)
             {
                 int numJPs = keyValuePair.Value;
 
@@ -395,4 +383,6 @@ namespace Pulsar4X.Tests
             }
         }
     }
+
+
 }

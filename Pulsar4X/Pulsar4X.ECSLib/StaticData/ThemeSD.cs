@@ -3,14 +3,15 @@ using System.Collections.Generic;
 namespace Pulsar4X.ECSLib
 {
     [StaticData(false)]
-    public struct ThemeSD
+    public class ThemeSD
     {
-        public string Name;
-        public List<string> FleetNames;
-        public List<string> ShipNames;
-        public List<string> CommanderNames;
-        public Dictionary<int, string> NavyRanks;
-        public Dictionary<int, string> NavyRanksAbbreviations;
+        public string Name { get; set; }
+        public List<string> FleetNames { get; set; }
+        public List<string> ShipNames { get; set; }
+        public List<string> FirstNames { get; set; }
+        public List<string> LastNames { get; set; }
+        public Dictionary<int, string> NavyRanks { get; set; }
+        public Dictionary<int, string> NavyRanksAbbreviations { get; set; }
 
         public bool Equals(ThemeSD other)
         {

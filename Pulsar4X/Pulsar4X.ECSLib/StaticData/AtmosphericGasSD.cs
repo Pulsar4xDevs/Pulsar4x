@@ -1,7 +1,8 @@
-﻿namespace Pulsar4X.ECSLib
+﻿
+namespace Pulsar4X.ECSLib
 {
     [StaticData(false)]
-    public struct AtmosphericGasSD
+    public class AtmosphericGasSD
     {
         /// <summary>
         /// Common name of the gas.

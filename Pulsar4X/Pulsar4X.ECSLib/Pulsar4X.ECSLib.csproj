@@ -128,7 +128,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInPackage>false</IncludeInPackage>
     </None>
-    <None Update="Data\Pulsar4x\ReinfedMaterialsData.json">
+    <None Update="Data\Pulsar4x\RefinedMaterialsData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Data\Pulsar4x\SystemGenSettings.json">
@@ -155,6 +155,12 @@
     <None Update="Data\Pulsar4x\DefaultTheme.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Data\basemod\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\testingmod\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Update="Data\Pulsar4x\ComponentDataMisc.json">
@@ -169,7 +175,6 @@
     <Folder Include="ComponentFeatureSets\SimpleBeamWeapon" />
     <Folder Include="DataBlobs\ComponentInstanceDBs\" />
     <Folder Include="Factories\ShipComponents\" />
-    <Folder Include="ComponentFeatureSets\NewtonionMovement\" />
     <Folder Include="Factories\SystemGen\SolEntities\Asteroids\" />
   </ItemGroup>
   <ItemGroup>

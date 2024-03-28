@@ -1,0 +1,27 @@
+{
+    "Author": "Pulsar4x Devs",
+    "ModName": "Pulsar4x",
+    "Version": "0.1",
+    "Namespace": "Pulsar4x",
+    "DataFiles": [
+        "armor.json",
+        "atmosphereGases.json",
+        "cargoTypes.json",
+        "electronics.json",
+        "energy.json",
+        "engines.json",
+        "defaultItems.json",
+        "defaultTheme.json",
+        "industryTypes.json",
+        "installations.json",
+        "materials.json",
+        "minerals.json",
+        "mineralsAurora.json",
+        "ordnance.json",
+        "systemGenSettings.json",
+        "techCategories.json",
+        "techs.json",
+        "weapons.json",
+        "damageResistance.json"
+    ]
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "Type": "TechCategory",
+    "Payload": {
+      "UniqueID": "tech-category-designs",
+      "Name": "Designs",
+      "Description": "Research into custom designed components, ships and installations"
+    }
+  },
+  {
+    "Type": "TechCategory",
+    "Payload": {
+      "UniqueID": "tech-category-biology-genetics",
+      "Name": "Biology & Genetics",
+      "Description": "Research into biology and human genetics"
+    }
+  },
+  {
+    "Type": "TechCategory",
+    "Payload": {
+      "UniqueID": "tech-category-construction-production",
+      "Name": "Construction & Production",
+      "Description": "Research into new and improved construction and production methods"
+    }
+  },
+  {
+    "Type": "TechCategory",
+    "Payload": {
+      "UniqueID": "tech-category-defensive-systems",
+      "Name": "Defensive System",
+      "Description": "Research into protective armor and shields"
+    }
+  },
+  {
+    "Type": "TechCategory",
+    "Payload": {
+      "UniqueID": "tech-category-energy-weapons",
+      "Name": "Energy Weapons",
+      "Description": "Research into weapons that rely on destructive uses of energy"
+    }
+  },
+  {
+    "Type": "TechCategory",
+    "Payload": {
+      "UniqueID": "tech-category-ground-combat",
+      "Name": "Ground Combat",
+      "Description": "Research into ground combat"
+    }
+  },
+  {
+    "Type": "TechCategory",
+    "Payload": {
+      "UniqueID": "tech-category-missiles-kinetic-weapons",
+      "Name": "Missiles & Kinetic Weapons",
+      "Description": "Research into missles and kinetic weaponry"
+    }
+  },
+  {
+    "Type": "TechCategory",
+    "Payload": {
+      "UniqueID": "tech-category-power-propulsion",
+      "Name": "Power & Propulsion",
+      "Description": "Research into rocket engine power"
+    }
+  },
+  {
+    "Type": "TechCategory",
+    "Payload": {
+      "UniqueID": "tech-category-sensors",
+      "Name": "Sensors",
+      "Description": "Research into new and improved sensors"
+    }
+  }
+]
