@@ -464,13 +464,30 @@
       "UniqueID": "tech-geo-surveyor",
       "Name": "Geological Surveyor",
       "Description": "Research into geological surveys of system bodies",
-      "Category": "tech-category-biology-genetics",
+      "Category": "tech-category-designs",
       "MaxLevel": 1,
       "DataFormula": "(1 + [Level]) * 5000",
       "CostFormula":"(1 + [Level]) * 500",
       "Unlocks": {
         "1": [
           "geo-surveyor"
+        ]
+      }
+    }
+  },
+  {
+    "Type": "Tech",
+    "Payload": {
+      "UniqueID": "tech-gravitational-surveyor",
+      "Name": "Gravitational Surveyor",
+      "Description": "Research into surveying gravitational anomalies",
+      "Category": "tech-category-designs",
+      "MaxLevel": 1,
+      "DataFormula": "(1 + [Level]) * 5000",
+      "CostFormula":"(1 + [Level]) * 500",
+      "Unlocks": {
+        "1": [
+          "gravitational-surveyor"
         ]
       }
     }

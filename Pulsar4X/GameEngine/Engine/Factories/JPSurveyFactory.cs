@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Pulsar4X.Orbital;
 using Pulsar4X.Datablobs;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Engine
 {
@@ -57,7 +58,7 @@ namespace Pulsar4X.Engine
             // TODO: Load "pointsRequired" from GalaxyGen settings
             const int pointsRequired = 400;
 
-            var surveyDB = new JPSurveyableDB(pointsRequired, new Dictionary<Entity, int>(), 10000000);
+            var surveyDB = new JPSurveyableDB(pointsRequired, new SafeDictionary<int, uint>(), 10000000);
             var posDB = new PositionDB(x, y, 0, String.Empty);
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
             //for testing purposes
