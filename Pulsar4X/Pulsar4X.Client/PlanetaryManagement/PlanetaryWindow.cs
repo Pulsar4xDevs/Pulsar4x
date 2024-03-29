@@ -230,23 +230,23 @@ namespace Pulsar4X.SDL2UI
 
                 MineralsDB mineralsDB = _lookedAtEntity.Entity.GetDataBlob<MineralsDB>();
                 SystemBodyInfoDB systemBodyInfo = _lookedAtEntity.Entity.GetDataBlob<SystemBodyInfoDB>();
-                if (systemBodyInfo.Colonies.Any())
-                {
-                    // if colonies exists then
-                    headerRow.Add(new KeyValuePair<string, TextAlign>("Mining Rate", TextAlign.Right));
-                    foreach (Entity colonyEntity in systemBodyInfo.Colonies)
-                    {
-                        var colonyRates = MiningHelper.CalculateActualMiningRates(colonyEntity);
-                        foreach (var rate in colonyRates)
-                        {
-                            if (!mineRates.ContainsKey(rate.Key))
-                            {
-                                mineRates.Add(rate.Key, 0);
-                            }
-                            mineRates[rate.Key] += rate.Value;
-                        }
-                    }
-                }
+                // if (systemBodyInfo.Colonies.Any())
+                // {
+                //     // if colonies exists then
+                //     headerRow.Add(new KeyValuePair<string, TextAlign>("Mining Rate", TextAlign.Right));
+                //     foreach (Entity colonyEntity in systemBodyInfo.Colonies)
+                //     {
+                //         var colonyRates = MiningHelper.CalculateActualMiningRates(colonyEntity);
+                //         foreach (var rate in colonyRates)
+                //         {
+                //             if (!mineRates.ContainsKey(rate.Key))
+                //             {
+                //                 mineRates.Add(rate.Key, 0);
+                //             }
+                //             mineRates[rate.Key] += rate.Value;
+                //         }
+                //     }
+                // }
 
                 var deposits = mineralsDB.Minerals.Where(x => x.Value.Amount > 0);
                 if (deposits.Any())

@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Extensions;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.SDL2UI;
 public class SystemTreeViewer : PulsarGuiWindow
@@ -96,6 +97,9 @@ public class SystemTreeViewer : PulsarGuiWindow
             entity.GetDataBlob<SystemBodyInfoDB>().BodyType.ToDescription() :
             "Star";
 
+        entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB);
+        bool isSurveyComplete = geoSurveyableDB == null ? false : geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
+
         ImGui.TableNextColumn();
         if(depth > 0) ImGui.Indent(16 * depth);
         ImGui.Text(entity.GetName(_uiState.Faction.Id));
@@ -108,7 +112,7 @@ public class SystemTreeViewer : PulsarGuiWindow
         if(result.Item1)
         {
             var colony = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid].EntityStatesColonies[result.Item2];
-            if(colony.Entity.FactionOwnerID == _uiState.Faction.Id && ImGui.SmallButton("Colony###" + result.Item2))
+            if(colony.Entity.FactionOwnerID == _uiState.Faction.Id && ImGui.SmallButton(colony.Entity.GetOwnersName() + "###" + result.Item2))
             {
                 EconomicsWindow.GetInstance().SetActive(true);
                 EconomicsWindow.GetInstance().SelectEntity(colony);
@@ -116,18 +120,28 @@ public class SystemTreeViewer : PulsarGuiWindow
         }
         else
         {
-            ImGui.Text("");
+            if(isSurveyComplete && entity.HasDataBlob<ColonizeableDB>())
+            {
+                if(ImGui.SmallButton("Colonize"))
+                {
+                    var species = _uiState.Faction.GetDataBlob<FactionInfoDB>().Species[0];
+                    var command = CreateColonyOrder.CreateCommand(_uiState.Faction, species, entity);
+                    _uiState.Game.OrderHandler.HandleOrder(command);
+                }
+            }
+            else
+            {
+                ImGui.Text("");
+            }
         }
         ImGui.TableNextColumn();
-        bool isSurveyComplete = false;
-        if(entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
+        if(geoSurveyableDB != null)
         {
             if(geoSurveyableDB.HasSurveyStarted(_uiState.Faction.Id))
             {
-                if(geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id))
+                if(isSurveyComplete)
                 {
                     ImGui.Text("Complete");
-                    isSurveyComplete = true;
                 }
                 else
                 {
