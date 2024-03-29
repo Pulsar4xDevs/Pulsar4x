@@ -8,6 +8,7 @@ using Pulsar4X.DataStructures;
 using Pulsar4X.Extensions;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Engine.Sol;
+using Pulsar4X.Engine.Factories;
 
 namespace Pulsar4X.Engine
 {
@@ -209,11 +210,13 @@ namespace Pulsar4X.Engine
             Entity earth = SolEntities.Earth(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
             _systemBodyFactory.HomeworldMineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, earth);
             #region Earth Moon
-            Entity luna = SolEntities.Luna(game, sol, sun, earth, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            //Entity luna = SolEntities.Luna(game, sol, sun, earth, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var luna = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/luna.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, luna);
             #endregion
 
-            Entity mars = SolEntities.Mars(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            //Entity mars = SolEntities.Mars(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var mars = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/mars.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, mars);
 
             Entity jupiter = SolEntities.Jupiter(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
@@ -294,7 +297,8 @@ namespace Pulsar4X.Engine
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, ceres);
 
             // Comets
-            Entity halleysComet = SolEntities.HalleysComet(game, sol, sun, new System.DateTime(1994, 2, 17), new SensorProfileDB());
+            //Entity halleysComet = SolEntities.HalleysComet(game, sol, sun, new System.DateTime(1994, 2, 17), new SensorProfileDB());
+            var halleysComet = SystemBodyFromJsonFactory.Create(game, sol, sun, new System.DateTime(1994, 2, 17), new SensorProfileDB(), "Data/basemod/bodies/halleyscomet.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, halleysComet);
 
             // Clean up cached RNG:
