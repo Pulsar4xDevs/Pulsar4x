@@ -33,7 +33,7 @@ public class SystemTreeViewer : PulsarGuiWindow
     {
         if(!IsActive) return;
 
-        if (ImGui.Begin("System Viewer", _flags))
+        if (ImGui.Begin("System Viewer", ref IsActive, _flags))
         {
             if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
             {
