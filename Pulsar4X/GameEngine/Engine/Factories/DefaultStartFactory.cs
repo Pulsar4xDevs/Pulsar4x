@@ -46,6 +46,7 @@ namespace Pulsar4X.Engine
         private static ShipDesign _spaceXStarShipDesign;
         private static OrdnanceDesign _missile;
         private static ComponentDesign _geoSurveyor;
+        private static ComponentDesign _jpSurveyor;
 
 
         // this code is a test for multiple systems, worth mentioning it utterly failed, modularity is good when you have it huh.ç
@@ -489,6 +490,7 @@ namespace Pulsar4X.Engine
                 (DefaultBFC(game, faction, factionDataStore), 1),
                 (ShipSmallCargo(game, faction, factionDataStore), 1),
                 (DefaultGeoSurveyor(game, faction, factionDataStore), 1),
+                (DefaultJPSurveyor(game, faction, factionDataStore), 1),
                 (DefaultFuelTank(game, faction, factionDataStore), 2),
                 (DefaultWarpDesign(game, faction, factionDataStore), 4),
                 (DefaultBatteryBank(game, faction, factionDataStore), 3),
@@ -1060,6 +1062,19 @@ namespace Pulsar4X.Engine
             _geoSurveyor = design.CreateDesign(faction);
             factionDataStore.IncrementTechLevel(_geoSurveyor.TechID);
             return _geoSurveyor;
+        }
+
+        public static ComponentDesign DefaultJPSurveyor(Game game, Entity faction, FactionDataStore factionDataStore)
+        {
+            if (_jpSurveyor != null)
+                return _jpSurveyor;
+            ComponentTemplateBlueprint template = factionDataStore.ComponentTemplates["gravitational-surveyor"];
+            ComponentDesigner design = new ComponentDesigner(template, factionDataStore, faction.GetDataBlob<FactionTechDB>());
+            design.ComponentDesignAttributes["Survey Speed"].SetValueFromInput(10);
+            design.Name = "Gravitational Surveyor";
+            _jpSurveyor = design.CreateDesign(faction);
+            factionDataStore.IncrementTechLevel(_jpSurveyor.TechID);
+            return _jpSurveyor;
         }
     }
 

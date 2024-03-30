@@ -18,23 +18,23 @@ public class GravSurveyAtb : IComponentDesignAttribute
 
     public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        if(parentEntity.TryGetDatablob<GravSurveyAbilityDB>(out var gravSurveyAbilityDB))
+        if(parentEntity.TryGetDatablob<JPSurveyAbilityDB>(out var gravSurveyAbilityDB))
         {
             gravSurveyAbilityDB.Speed += Speed;
         }
         else
         {
-            parentEntity.SetDataBlob<GravSurveyAbilityDB>(new GravSurveyAbilityDB() { Speed = Speed });
+            parentEntity.SetDataBlob<JPSurveyAbilityDB>(new JPSurveyAbilityDB() { Speed = Speed });
         }
     }
 
     public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        if(parentEntity.TryGetDatablob<GravSurveyAbilityDB>(out var gravSurveyAbilityDB))
+        if(parentEntity.TryGetDatablob<JPSurveyAbilityDB>(out var gravSurveyAbilityDB))
         {
             if(Speed >= gravSurveyAbilityDB.Speed)
             {
-                parentEntity.RemoveDataBlob<GravSurveyAbilityDB>();
+                parentEntity.RemoveDataBlob<JPSurveyAbilityDB>();
             }
             else
             {

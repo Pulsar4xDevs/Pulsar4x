@@ -18,6 +18,7 @@ namespace Pulsar4X.SDL2UI
         {
             MoveTo,
             GeoSurvey,
+            JPSurvey
         }
 
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
@@ -281,6 +282,10 @@ namespace Pulsar4X.SDL2UI
                         {
                             selectedIssueOrderType = IssueOrderType.GeoSurvey;
                         }
+                        if(SelectedFleet.HasJPSurveyAbililty() && ImGui.Selectable("Jump Point Survey ...", selectedIssueOrderType == IssueOrderType.JPSurvey))
+                        {
+                            selectedIssueOrderType = IssueOrderType.JPSurvey;
+                        }
 
                         ImGui.EndChild();
                     }
@@ -315,6 +320,26 @@ namespace Pulsar4X.SDL2UI
 
                                         var order2 = GeoSurveyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, body);
                                         _uiState.Game.OrderHandler.HandleOrder(order2);
+                                    }
+                                }
+                                break;
+                            case IssueOrderType.JPSurvey:
+                                var jumpPointDBs = _uiState.SelectedSystem.GetAllDataBlobsOfType<JPSurveyableDB>();
+                                foreach(var jpSurveyableDB in jumpPointDBs)
+                                {
+                                    if(jpSurveyableDB.IsSurveyComplete(_uiState.Faction.Id)) continue;
+
+                                    var name = jpSurveyableDB.OwningEntity?.GetName(_uiState.Faction.Id);
+                                    if(ImGui.Button(name + "###jpsurvey-button-" + name))
+                                    {
+                                        if(jpSurveyableDB.OwningEntity != null)
+                                        {
+                                            var order = MoveFleetTowardsTargetOrder.CreateCommand(SelectedFleet, jpSurveyableDB.OwningEntity);
+                                            _uiState.Game.OrderHandler.HandleOrder(order);
+
+                                            var order2 = JPSurveyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, jpSurveyableDB.OwningEntity);
+                                            _uiState.Game.OrderHandler.HandleOrder(order2);
+                                        }
                                     }
                                 }
                                 break;

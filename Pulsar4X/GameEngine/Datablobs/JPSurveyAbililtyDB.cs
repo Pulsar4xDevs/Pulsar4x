@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.Datablobs;
 
-public class GravSurveyAbilityDB : BaseDataBlob
+public class JPSurveyAbilityDB : BaseDataBlob
 {
     [JsonProperty]
     public uint Speed { get; set; }
