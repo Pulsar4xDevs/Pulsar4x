@@ -201,21 +201,18 @@ namespace Pulsar4X.Engine
             Entity sun = _starFactory.CreateStar(sol, UniversalConstants.Units.SolarMassInKG, UniversalConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
 
             // Planets and their moons
-            Entity mercury = SolEntities.Mercury(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var mercury = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/mercury.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, mercury);
 
-            Entity venus = SolEntities.Venus(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var venus = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/venus.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, venus);
 
-            Entity earth = SolEntities.Earth(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var earth = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/earth.json");
             _systemBodyFactory.HomeworldMineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, earth);
-            #region Earth Moon
-            //Entity luna = SolEntities.Luna(game, sol, sun, earth, GalaxyGen.Settings.J2000, new SensorProfileDB());
+
             var luna = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/luna.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, luna);
-            #endregion
 
-            //Entity mars = SolEntities.Mars(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
             var mars = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/mars.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, mars);
 
@@ -297,7 +294,6 @@ namespace Pulsar4X.Engine
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, ceres);
 
             // Comets
-            //Entity halleysComet = SolEntities.HalleysComet(game, sol, sun, new System.DateTime(1994, 2, 17), new SensorProfileDB());
             var halleysComet = SystemBodyFromJsonFactory.Create(game, sol, sun, new System.DateTime(1994, 2, 17), new SensorProfileDB(), "Data/basemod/bodies/halleyscomet.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, halleysComet);
 

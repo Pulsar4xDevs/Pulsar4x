@@ -1,0 +1,39 @@
+{
+  "name": "Earth",
+  "colonizeable": true,
+  "info": {
+    "gravity": 9.8,
+    "type": "terrestrial",
+    "albedo": 0.306,
+    "axialTilt": 23.439,
+    "magneticField": 45,
+    "mass": 5.9726E24,
+    "radius": 6378.1,
+    "tectonics": "earth-like",
+    "lengthOfDay": "1.00:00:00"
+  },
+  "orbit": {
+    "semiMajorAxis": 149597887,
+    "eccentricity": 0.01671022,
+    "eclipticInclination": 0,
+    "LoAN": -11.26064,
+    "AoP": 102.94719,
+    "meanAnomaly": 100.46435
+  },
+  "atmosphere": {
+    "pressure": 1,
+    "hydrosphere": true,
+    "hyrdoExtent": 71,
+    "greenhouseFactor": 1,
+    "greenhousePressure": 1,
+    "surfaceTemperature": 57.2,
+    "gases": [
+      { "symbol": "N2", "percent": 0.78 },
+      { "symbol": "O2", "percent": 0.12 },
+      { "symbol": "H2O", "percent": 0.01 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 1500
+  }
+}
