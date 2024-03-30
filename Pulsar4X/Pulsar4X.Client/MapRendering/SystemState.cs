@@ -132,7 +132,7 @@ namespace Pulsar4X.SDL2UI
                 SensorChanges.Add(change);
                 HandleUpdates(change);
             }
-            
+
             foreach (var item in EntityStatesWithPosition.Values)
             {
                 if (item.IsDestroyed) //items get flagged via an event triggered by worker threads.

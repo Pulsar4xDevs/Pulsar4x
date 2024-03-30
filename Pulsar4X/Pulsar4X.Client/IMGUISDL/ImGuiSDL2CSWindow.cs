@@ -71,9 +71,6 @@ namespace ImGuiSDL2CS
 
         public void ImGuiOnLoop(SDL2Window window)
         {
-            GL.ClearColor(0.1f, 0.125f, 0.15f, 1f);
-            GL.Clear(GL.Enum.GL_COLOR_BUFFER_BIT);
-
             ImGuiRender();
             Swap();
         }

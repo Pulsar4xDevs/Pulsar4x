@@ -377,79 +377,72 @@ namespace Pulsar4X.SDL2UI
 
         internal void Draw()
         {
-            if (_camera.ZoomLevel <= 0.1) //todo: base this number off the largest orbit
+            
+            if (_sysState != null)
             {
-                //draw galaxy map instead
+                foreach (var entityGuid in _sysState.EntitiesAdded)
+                {
+                    if(_sysState.EntityStatesWithPosition.ContainsKey(entityGuid))
+                        AddIconable(_sysState.EntityStatesWithPosition[entityGuid]);
+                }
+                foreach (var item in _sysState.EntityStatesWithPosition.Values)
+                {
+                    if (item.Changes.Count > 0)
+                    {
+                        HandleChanges(item);
+                    }
+                }
+                foreach (var item in _sysState.EntitysToBin)
+                {
+                    if(_sysState.EntityStatesWithPosition.ContainsKey(item))
+                        RemoveIconable(item);
+                }
+            }
+
+            byte oR, oG, oB, oA;
+            SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
+            SDL.SDL_BlendMode blendMode;
+            SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
+            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+
+            var matrix = _camera.GetZoomMatrix();
+
+            /*
+            if (SysMap == null)
+            {
+                foreach (var icon in _testIcons.Values)
+                {
+                    icon.ViewScreenPos = matrix.Transform(icon.WorldPosition.X, icon.WorldPosition.Y);
+                    icon.Draw(rendererPtr, _camera);
+                }
             }
             else
             {
-                if (_sysState != null)
-                {
-                    foreach (var entityGuid in _sysState.EntitiesAdded)
-                    {
-                        if(_sysState.EntityStatesWithPosition.ContainsKey(entityGuid))
-                            AddIconable(_sysState.EntityStatesWithPosition[entityGuid]);
-                    }
-                    foreach (var item in _sysState.EntityStatesWithPosition.Values)
-                    {
-                        if (item.Changes.Count > 0)
-                        {
-                            HandleChanges(item);
-                        }
-                    }
-                    foreach (var item in _sysState.EntitysToBin)
-                    {
-                        if(_sysState.EntityStatesWithPosition.ContainsKey(item))
-                            RemoveIconable(item);
-                    }
-                }
+            */
+            UpdateAndDraw(UIWidgets.Values.ToList(), matrix);
 
-                byte oR, oG, oB, oA;
-                SDL.SDL_GetRenderDrawColor(rendererPtr, out oR, out oG, out oB, out oA);
-                SDL.SDL_BlendMode blendMode;
-                SDL.SDL_GetRenderDrawBlendMode(rendererPtr, out blendMode);
-                SDL.SDL_SetRenderDrawBlendMode(rendererPtr, SDL.SDL_BlendMode.SDL_BLENDMODE_BLEND);
+            UpdateAndDraw(_orbitRings.Values.ToList(), matrix);
 
-                var matrix = _camera.GetZoomMatrix();
+            UpdateAndDraw(_moveIcons.Values.ToList(), matrix);
 
-                /*
-                if (SysMap == null)
-                {
-                    foreach (var icon in _testIcons.Values)
-                    {
-                        icon.ViewScreenPos = matrix.Transform(icon.WorldPosition.X, icon.WorldPosition.Y);
-                        icon.Draw(rendererPtr, _camera);
-                    }
-                }
-                else
-                {
-                */
-                UpdateAndDraw(UIWidgets.Values.ToList(), matrix);
+            UpdateAndDraw(_entityIcons.Values.ToList(), matrix);
 
-                UpdateAndDraw(_orbitRings.Values.ToList(), matrix);
-
-                UpdateAndDraw(_moveIcons.Values.ToList(), matrix);
-
-                UpdateAndDraw(_entityIcons.Values.ToList(), matrix);
-
-                UpdateAndDraw(SelectedEntityExtras, matrix);
+            UpdateAndDraw(SelectedEntityExtras, matrix);
 
 
-                //because _nameIcons are imgui not sdl, we don't draw them here.
-                //we draw them in PulsarMainWindow.ImGuiLayout
-                lock (_nameIcons)
-                {
-                    foreach (var item in _nameIcons.Values)
-                        item.OnFrameUpdate(matrix, _camera);
-                }
-                TextIconsDistribute();
-
-                //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
-
-                SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
-                SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
-                //}
+            //because _nameIcons are imgui not sdl, we don't draw them here.
+            //we draw them in PulsarMainWindow.ImGuiLayout
+            lock (_nameIcons)
+            {
+                foreach (var item in _nameIcons.Values)
+                    item.OnFrameUpdate(matrix, _camera);
             }
+            TextIconsDistribute();
+
+            //ImGui.GetOverlayDrawList().AddText(new System.Numerics.Vector2(500, 500), 16777215, "FooBarBaz");
+
+            SDL.SDL_SetRenderDrawColor(rendererPtr, oR, oG, oB, oA);
+            SDL.SDL_SetRenderDrawBlendMode(rendererPtr, blendMode);
         }
 
         public void DrawNameIcons()
