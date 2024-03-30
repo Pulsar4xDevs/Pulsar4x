@@ -76,10 +76,30 @@ namespace Pulsar4X.SDL2UI
                     foreach(var fleet in fleets)
                     {
                         bool visible = FleetWindow.GetInstance().GetActive() && FleetWindow.GetInstance().SelectedFleet?.Id == fleet.Id;
-                        if(ImGui.Selectable(fleet.GetName(_uiState.Faction.Id), visible))
+                        string display = fleet.GetName(_uiState.Faction.Id);
+                        if(ImGui.Selectable(display, visible))
                         {
                             FleetWindow.GetInstance().SetActive(true);
                             FleetWindow.GetInstance().SelectFleet(fleet);
+                        }
+                        if (ImGui.IsItemHovered())
+                        {
+                            ImGui.BeginTooltip();
+
+                            if(fleet.TryGetDatablob<OrderableDB>(out var orderableDb)
+                            && orderableDb.ActionList.Count > 0)
+                            {
+                                ImGui.Text("Orders:");
+                                for(int i = 0; i < orderableDb.ActionList.Count; i++)
+                                {
+                                    ImGui.Text(orderableDb.ActionList[i].Name);
+                                }
+                            }
+                            else
+                            {
+                                ImGui.Text("No orders");
+                            }
+                            ImGui.EndTooltip();
                         }
                     }
                 }

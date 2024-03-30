@@ -9,37 +9,42 @@ namespace Pulsar4X.SDL2UI
     {
         public static void Display(this AtmosphereDB atmosphereDB, EntityState entityState, GlobalUIState uiState)
         {
-            ImGui.Text("Surface Temp: " + atmosphereDB.SurfaceTemperature.ToString("###,##0.00") + "°C");
-            ImGui.Text("Pressure: " + atmosphereDB.Pressure + " atm");
-            if(atmosphereDB.Hydrosphere)
+            if(ImGui.CollapsingHeader("Atmosphere", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                ImGui.Text("Hydrosphere: " + atmosphereDB.HydrosphereExtent.ToString() + "%%");
-            }
-
-            if(ImGui.BeginTable("###GasTable" + entityState.Entity.Id, 2))
-            {
-                ImGui.TableSetupColumn("Type");
-                ImGui.TableSetupColumn("Percent");
-                ImGui.TableHeadersRow();
-
-                foreach(var (gas, amount) in atmosphereDB.CompositionByPercent)
+                ImGui.Columns(2);
+                DisplayHelpers.PrintRow("Surface Temp", atmosphereDB.SurfaceTemperature.ToString("###,##0.00") + "°C");
+                DisplayHelpers.PrintRow("Pressure", atmosphereDB.Pressure + " atm");
+                if(atmosphereDB.Hydrosphere)
                 {
-                    var blueprint = uiState.Game.AtmosphericGases[gas];
-                    ImGui.TableNextRow();
-                    ImGui.TableNextColumn();
-                    ImGui.Text(blueprint.Name);
-                    ImGui.TableNextColumn();
-                    if(Math.Round(amount, 4) > 0)
-                    {
-                        ImGui.Text(Stringify.Quantity(Math.Round(amount, 4)) + " %%");
-                    }
-                    else
-                    {
-                        ImGui.Text("trace amounts");
-                    }
+                    DisplayHelpers.PrintRow("Hydrosphere", atmosphereDB.HydrosphereExtent.ToString() + "%%");
                 }
+                ImGui.Columns(1);
 
-                ImGui.EndTable();
+                if(ImGui.BeginTable("###GasTable" + entityState.Entity.Id, 2))
+                {
+                    ImGui.TableSetupColumn("Type");
+                    ImGui.TableSetupColumn("Percent");
+                    ImGui.TableHeadersRow();
+
+                    foreach(var (gas, amount) in atmosphereDB.CompositionByPercent)
+                    {
+                        var blueprint = uiState.Game.AtmosphericGases[gas];
+                        ImGui.TableNextRow();
+                        ImGui.TableNextColumn();
+                        ImGui.Text(blueprint.Name);
+                        ImGui.TableNextColumn();
+                        if(Math.Round(amount, 4) > 0)
+                        {
+                            ImGui.Text(Stringify.Quantity(Math.Round(amount, 4)) + " %%");
+                        }
+                        else
+                        {
+                            ImGui.Text("trace amounts");
+                        }
+                    }
+
+                    ImGui.EndTable();
+                }
             }
         }
     }

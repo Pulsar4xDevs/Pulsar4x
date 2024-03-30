@@ -172,6 +172,9 @@ namespace Pulsar4X.Engine
 
         public void Transfer(Entity entity)
         {
+            // Don't allow an entity to transer to the manager it's already in
+            if(entity.Manager == this) return;
+
             var dataBlobs = new List<BaseDataBlob>();
             if(entity.Manager != null)
             {

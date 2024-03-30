@@ -93,18 +93,6 @@ namespace Pulsar4X.Datablobs
         public bool SupportsPopulations { get; internal set; }
 
         /// <summary>
-        /// List of Colonies that reside on this body.
-        /// </summary>
-        /// <remarks>
-        /// TODO: Entity Review
-        /// We may want to remove this list and use PositionDB to link colonies to bodies.
-        /// NOTE: Not currently used?
-        /// </remarks>
-        [PublicAPI]
-        [JsonProperty]
-        public List<Entity> Colonies { get; internal set; } = new List<Entity>();
-
-        /// <summary>
         /// Length of day for this body. Mostly fluff.
         /// </summary>
         [PublicAPI]
@@ -183,7 +171,6 @@ namespace Pulsar4X.Datablobs
             SupportsPopulations = originalDB.SupportsPopulations;
             LengthOfDay = originalDB.LengthOfDay;
             Gravity = originalDB.Gravity;
-            Colonies = new List<Entity>(originalDB.Colonies); //this needs to only have owned colonies and sensor entites of unowned colonies.
         }
 
         SystemBodyInfoDB(SystemBodyInfoDB originalDB, SensorInfoDB sensorInfo)

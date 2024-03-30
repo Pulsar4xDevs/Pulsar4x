@@ -6,46 +6,46 @@ using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Atb;
 
-public class GeoSurveyAtb : IComponentDesignAttribute
+public class GravSurveyAtb : IComponentDesignAttribute
 {
     [JsonProperty]
     public uint Speed { get; set; } = 1;
 
-    public GeoSurveyAtb(int speed)
+    public GravSurveyAtb(int speed)
     {
         Speed = (uint)speed;
     }
 
     public void OnComponentInstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        if(parentEntity.TryGetDatablob<GeoSurveyAbilityDB>(out var geoSurveyAbilityDB))
+        if(parentEntity.TryGetDatablob<JPSurveyAbilityDB>(out var gravSurveyAbilityDB))
         {
-            geoSurveyAbilityDB.Speed += Speed;
+            gravSurveyAbilityDB.Speed += Speed;
         }
         else
         {
-            parentEntity.SetDataBlob<GeoSurveyAbilityDB>(new GeoSurveyAbilityDB() { Speed = Speed });
+            parentEntity.SetDataBlob<JPSurveyAbilityDB>(new JPSurveyAbilityDB() { Speed = Speed });
         }
     }
 
     public void OnComponentUninstallation(Entity parentEntity, ComponentInstance componentInstance)
     {
-        if(parentEntity.TryGetDatablob<GeoSurveyAbilityDB>(out var geoSurveyAbilityDB))
+        if(parentEntity.TryGetDatablob<JPSurveyAbilityDB>(out var gravSurveyAbilityDB))
         {
-            if(Speed >= geoSurveyAbilityDB.Speed)
+            if(Speed >= gravSurveyAbilityDB.Speed)
             {
-                parentEntity.RemoveDataBlob<GeoSurveyAbilityDB>();
+                parentEntity.RemoveDataBlob<JPSurveyAbilityDB>();
             }
             else
             {
-                geoSurveyAbilityDB.Speed -= Speed;
+                gravSurveyAbilityDB.Speed -= Speed;
             }
         }
     }
 
     public string AtbName()
     {
-        return "Geological Surveyor";
+        return "Gravitational Surveyor";
     }
 
     public string AtbDescription()

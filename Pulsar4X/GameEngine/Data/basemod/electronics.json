@@ -251,5 +251,58 @@
         }
       ]
     }
+  },
+  {
+    "Type": "ComponentTemplate",
+    "Payload": {
+      "UniqueID": "gravitational-surveyor",
+      "Name": "Gravitational Surveyor",
+      "Formulas": {
+        "Description": "Surveys gravatational anomalies",
+        "Mass": "Ability('Mass')",
+        "Volume": "Max(1, [Mass] * 0.1)",
+        "HTK": "[Mass]",
+        "CrewReq": "Pow(Ability('Survey Speed') * 2, 3)",
+        "ResearchCost": "Pow(Ability('Survey Speed'), 2)",
+        "CreditCost": "[Mass]",
+        "BuildPointCost": "[Mass]"
+      },
+      "ResourceCost": {
+        "iron": "[Mass]",
+        "copper": "[Mass]",
+        "aluminium": "[Mass]"
+      },
+      "ComponentType": "Science",
+      "MountType": "ShipComponent, ShipCargo",
+      "CargoTypeID": "general-storage",
+      "IndustryTypeID": "component-construction",
+      "Attributes":[
+        {
+          "Name": "Survey Speed",
+          "Units": "survey points per day",
+          "DescriptionFormula": "'Each point in speed provides one survey point per day'",
+          "GuiHint": "GuiSelectionMaxMinInt",
+          "GuidDictionary": {},
+          "MaxFormula": "10",
+          "MinFormula": "1",
+          "StepFormula": "1",
+          "AttributeFormula": "1"
+        },
+        {
+          "Name": "Mass",
+          "Units": "kg",
+          "DescriptionFormula": "'Mass Calculation'",
+          "GuiHint": "None",
+          "AttributeFormula": "Pow(10 * Ability('Survey Speed'), 2)"
+        },
+        {
+          "Name": "DBargs",
+          "GuiHint": "None",
+          "GuidDictionary": {},
+          "AttributeFormula": "AtbConstrArgs(Ability('Survey Speed'))",
+          "AttributeType": "Pulsar4X.Atb.GravSurveyAtb"
+        }
+      ]
+    }
   }
 ]

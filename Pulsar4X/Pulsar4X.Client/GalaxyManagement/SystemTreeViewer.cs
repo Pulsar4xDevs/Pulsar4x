@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using Pulsar4X.Extensions;
+using Pulsar4X.Engine.Orders;
 
 namespace Pulsar4X.SDL2UI;
 public class SystemTreeViewer : PulsarGuiWindow
@@ -32,7 +33,7 @@ public class SystemTreeViewer : PulsarGuiWindow
     {
         if(!IsActive) return;
 
-        if (ImGui.Begin("System Viewer", _flags))
+        if (ImGui.Begin("System Viewer", ref IsActive, _flags))
         {
             if (_uiState.StarSystemStates.ContainsKey(_uiState.SelectedStarSysGuid))
             {
@@ -96,6 +97,9 @@ public class SystemTreeViewer : PulsarGuiWindow
             entity.GetDataBlob<SystemBodyInfoDB>().BodyType.ToDescription() :
             "Star";
 
+        entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB);
+        bool isSurveyComplete = geoSurveyableDB == null ? false : geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id);
+
         ImGui.TableNextColumn();
         if(depth > 0) ImGui.Indent(16 * depth);
         ImGui.Text(entity.GetName(_uiState.Faction.Id));
@@ -108,7 +112,7 @@ public class SystemTreeViewer : PulsarGuiWindow
         if(result.Item1)
         {
             var colony = _uiState.StarSystemStates[_uiState.SelectedStarSysGuid].EntityStatesColonies[result.Item2];
-            if(colony.Entity.FactionOwnerID == _uiState.Faction.Id && ImGui.SmallButton("Colony###" + result.Item2))
+            if(colony.Entity.FactionOwnerID == _uiState.Faction.Id && ImGui.SmallButton(colony.Entity.GetOwnersName() + "###" + result.Item2))
             {
                 EconomicsWindow.GetInstance().SetActive(true);
                 EconomicsWindow.GetInstance().SelectEntity(colony);
@@ -116,22 +120,33 @@ public class SystemTreeViewer : PulsarGuiWindow
         }
         else
         {
-            ImGui.Text("");
+            if(isSurveyComplete && entity.HasDataBlob<ColonizeableDB>())
+            {
+                if(ImGui.SmallButton("Colonize"))
+                {
+                    var species = _uiState.Faction.GetDataBlob<FactionInfoDB>().Species[0];
+                    var command = CreateColonyOrder.CreateCommand(_uiState.Faction, species, entity);
+                    _uiState.Game.OrderHandler.HandleOrder(command);
+                }
+            }
+            else
+            {
+                ImGui.Text("");
+            }
         }
         ImGui.TableNextColumn();
-        bool isSurveyComplete = false;
-        if(entity.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
+        if(geoSurveyableDB != null)
         {
             if(geoSurveyableDB.HasSurveyStarted(_uiState.Faction.Id))
             {
-                if(geoSurveyableDB.IsSurveyComplete(_uiState.Faction.Id))
+                if(isSurveyComplete)
                 {
                     ImGui.Text("Complete");
-                    isSurveyComplete = true;
                 }
                 else
                 {
-                    ImGui.Text("In Progress");
+                    float percent = (1f - (float)geoSurveyableDB.GeoSurveyStatus[_uiState.Faction.Id] / (float)geoSurveyableDB.PointsRequired) * 100;
+                    ImGui.Text(percent.ToString("#.##") + "%%");
                 }
             }
             else
@@ -186,15 +201,5 @@ public class SystemTreeViewer : PulsarGuiWindow
         {
             ImGui.TableNextRow();
         }
-
-
-        //  DisplayHelpers.PrintRow("Tectonic Activity", bodyInfoDb.Tectonics.ToDescription());
-        //             DisplayHelpers.PrintRow("Gravity", Stringify.Velocity(bodyInfoDb.Gravity));
-        //             DisplayHelpers.PrintRow("Temperature", bodyInfoDb.BaseTemperature.ToString("#.#") + " C");
-        //             DisplayHelpers.PrintRow("Length of Day", bodyInfoDb.LengthOfDay.TotalHours + " hours");
-        //             DisplayHelpers.PrintRow("Tilt", bodyInfoDb.AxialTilt.ToString("#") + "°");
-        //             DisplayHelpers.PrintRow("Magnetic Field", bodyInfoDb.MagneticField.ToString("#") + " μT");
-        //             DisplayHelpers.PrintRow("Radiation Level", bodyInfoDb.RadiationLevel.ToString("#"));
-        //             DisplayHelpers.PrintRow("Atmospheric Dust", bodyInfoDb.AtmosphericDust.ToString("#"), separator: false);
     }
 }

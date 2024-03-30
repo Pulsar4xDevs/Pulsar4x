@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System;
 using Pulsar4X.Engine;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.Datablobs
 {
@@ -20,9 +20,9 @@ namespace Pulsar4X.Datablobs
     public class JPSurveyableDB : BaseDataBlob
     {
         [JsonProperty]
-        public int SurveyPointsRequired;
+        public uint PointsRequired;
         [JsonProperty]
-        public Dictionary<Entity, int> SurveyPointsAccumulated;
+        public SafeDictionary<int, uint> SurveyPointsRemaining;
         [JsonProperty]
         public Entity? JumpPointTo;
         [JsonProperty]
@@ -36,17 +36,17 @@ namespace Pulsar4X.Datablobs
         public JPSurveyableDB() { }
 
 
-        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated, double minimumDistanceToJump_m): this(pointsRequired, pointsAccumulated, null, String.Empty, minimumDistanceToJump_m){
+        public JPSurveyableDB(uint pointsRequired, SafeDictionary<int, uint> pointsAccumulated, double minimumDistanceToJump_m): this(pointsRequired, pointsAccumulated, null, String.Empty, minimumDistanceToJump_m){
 
         }
 
         /// <summary>
         /// Copy constructor
         /// </summary>
-        public JPSurveyableDB(int pointsRequired, IDictionary<Entity, int> pointsAccumulated, Entity? jumpPointTo, string systemToGuid, double minimumDistanceToJump_m)
+        public JPSurveyableDB(uint pointsRequired, SafeDictionary<int, uint> pointsAccumulated, Entity? jumpPointTo, string systemToGuid, double minimumDistanceToJump_m)
         {
-            SurveyPointsRequired = pointsRequired;
-            SurveyPointsAccumulated = new Dictionary<Entity, int>(pointsAccumulated);
+            PointsRequired = pointsRequired;
+            SurveyPointsRemaining = new (pointsAccumulated);
             JumpPointTo = jumpPointTo;
             SystemToGuid = systemToGuid;
             MinimumDistanceToJump_m = minimumDistanceToJump_m;
@@ -58,7 +58,7 @@ namespace Pulsar4X.Datablobs
         /// <returns></returns>
         public override object Clone()
         {
-            return new JPSurveyableDB(SurveyPointsRequired, SurveyPointsAccumulated, JumpPointTo, SystemToGuid, MinimumDistanceToJump_m);
+            return new JPSurveyableDB(PointsRequired, SurveyPointsRemaining, JumpPointTo, SystemToGuid, MinimumDistanceToJump_m);
         }
     }
 }

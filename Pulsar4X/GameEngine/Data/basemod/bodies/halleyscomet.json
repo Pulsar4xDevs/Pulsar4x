@@ -1,0 +1,22 @@
+{
+  "name": "Halleys Comet",
+  "colonizeable": false,
+  "info": {
+    "gravity": 0,
+    "type": "comet",
+    "albedo": 0.04,
+    "mass": 2.2E14,
+    "radius": 11
+  },
+  "orbit": {
+    "semiMajorAxis": 2.6679E9,
+    "eccentricity": 0.96714,
+    "eclipticInclination": 180,
+    "LoAN": 58.42,
+    "AoP": 111.33,
+    "meanAnomaly": 38.38
+  },
+  "geoSurvey": {
+    "pointsRequired": 575
+  }
+}

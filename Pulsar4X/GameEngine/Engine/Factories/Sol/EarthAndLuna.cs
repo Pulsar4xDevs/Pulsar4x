@@ -56,7 +56,7 @@ namespace Pulsar4X.Engine.Sol
             };
 
             Entity planet = Entity.Create();
-            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, planetAtmosphereDB, geoSurveyable });
+            sol.AddEntity(planet, new List<BaseDataBlob> { planetNameDB, sensorProfile, planetPositionDB, planetBodyDB, planetMVDB, planetOrbitDB, planetAtmosphereDB, geoSurveyable, new ColonizeableDB() });
             SensorTools.PlanetEmmisionSig(sensorProfile, planetBodyDB, planetMVDB);
             return planet;
         }
@@ -91,7 +91,7 @@ namespace Pulsar4X.Engine.Sol
             };
 
             Entity moon = Entity.Create();
-            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable });
+            sol.AddEntity(moon, new List<BaseDataBlob> { moonNameDB, sensorProfile, moonPositionDB, moonBodyDB, moonMVDB, moonOrbitDB, geoSurveyable, new ColonizeableDB() });
             SensorTools.PlanetEmmisionSig(sensorProfile, moonBodyDB, moonMVDB);
             return moon;
         }

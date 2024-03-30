@@ -46,6 +46,7 @@ namespace Pulsar4X.Engine
         private static ShipDesign _spaceXStarShipDesign;
         private static OrdnanceDesign _missile;
         private static ComponentDesign _geoSurveyor;
+        private static ComponentDesign _jpSurveyor;
 
 
         // this code is a test for multiple systems, worth mentioning it utterly failed, modularity is good when you have it huh.ç
@@ -344,14 +345,14 @@ namespace Pulsar4X.Engine
             fleetDB.FlagShipID = starship.Id;
 
             // This can be removed, only for testing orders without having to set them up in game
-            ConditionItem conditionItem = new ConditionItem(new FuelCondition(30f, ComparisonType.GreaterThan));
-            CompoundCondition compoundCondition = new CompoundCondition(conditionItem);
-            SafeList<EntityCommand> actions = new SafeList<EntityCommand>();
-            actions.Add(MoveToNearestColonyAction.CreateCommand(factionEntity.Id, defaultFleet));
-            var conditionalOrder = new ConditionalOrder(compoundCondition, actions);
-            conditionalOrder.Name = "Test";
+            // ConditionItem conditionItem = new ConditionItem(new FuelCondition(30f, ComparisonType.GreaterThan));
+            // CompoundCondition compoundCondition = new CompoundCondition(conditionItem);
+            // SafeList<EntityCommand> actions = new SafeList<EntityCommand>();
+            // actions.Add(MoveToNearestColonyAction.CreateCommand(factionEntity.Id, defaultFleet));
+            // var conditionalOrder = new ConditionalOrder(compoundCondition, actions);
+            // conditionalOrder.Name = "Test";
 
-            fleetDB.StandingOrders.Add(conditionalOrder);
+            // fleetDB.StandingOrders.Add(conditionalOrder);
 
             CargoTransferProcessor.AddCargoItems(colonyEntity, rp1, 10000);
             CargoTransferProcessor.AddCargoItems(colonyEntity, methalox, 10000);
@@ -425,26 +426,20 @@ namespace Pulsar4X.Engine
 
             //var pos = Distance.AuToMt(new Vector3(8.52699302490434E-05, 0, 0));
             //var vel = new Vector3(0, 10000.0, 0);
-            var pos = Distance.AuToMt(new Vector3(0, 8.52699302490434E-05, 0));
-            var vel = new Vector3(-10000.0, 0, 0);
-            
-            var gunShip1Mass = gunShip1.GetDataBlob<MassVolumeDB>().MassTotal;
-            var earthmass = earth.GetDataBlob<MassVolumeDB>().MassTotal;
-            
-            //give the gunship a hypobolic orbit to test:
-            var orbit = OrbitDB.FromVector(earth, gunShip1Mass, earthmass, pos, vel, game.TimePulse.GameGlobalDateTime);
-            gunShip1.GetDataBlob<PositionDB>().RelativePosition = pos;
-            gunShip1.SetDataBlob<OrbitDB>(orbit);
-            var pos2 = gunShip1.GetRelativeFuturePosition(game.TimePulse.GameGlobalDateTime);
-            
-            
-            
-            
-            
+            // var pos = Distance.AuToMt(new Vector3(0, 8.52699302490434E-05, 0));
+            // var vel = new Vector3(-10000.0, 0, 0);
+
+            // var gunShip1Mass = gunShip1.GetDataBlob<MassVolumeDB>().MassTotal;
+            // var earthmass = earth.GetDataBlob<MassVolumeDB>().MassTotal;
+
+            // //give the gunship a hypobolic orbit to test:
+            // var orbit = OrbitDB.FromVector(earth, gunShip1Mass, earthmass, pos, vel, game.TimePulse.GameGlobalDateTime);
+            // gunShip1.GetDataBlob<PositionDB>().RelativePosition = pos;
+            // gunShip1.SetDataBlob<OrbitDB>(orbit);
+            // var pos2 = gunShip1.GetRelativeFuturePosition(game.TimePulse.GameGlobalDateTime);
+
             // var nmdb = new NewtonMoveDB(earth, new Vector3(-10000.0, 0, 0));
             // gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);
-
-
 
             solSys.SetDataBlob(gunShip0.Id, new TransitableDB());
             solSys.SetDataBlob(ship2.Id, new TransitableDB());
@@ -495,6 +490,7 @@ namespace Pulsar4X.Engine
                 (DefaultBFC(game, faction, factionDataStore), 1),
                 (ShipSmallCargo(game, faction, factionDataStore), 1),
                 (DefaultGeoSurveyor(game, faction, factionDataStore), 1),
+                (DefaultJPSurveyor(game, faction, factionDataStore), 1),
                 (DefaultFuelTank(game, faction, factionDataStore), 2),
                 (DefaultWarpDesign(game, faction, factionDataStore), 4),
                 (DefaultBatteryBank(game, faction, factionDataStore), 3),
@@ -1062,6 +1058,19 @@ namespace Pulsar4X.Engine
             _geoSurveyor = design.CreateDesign(faction);
             factionDataStore.IncrementTechLevel(_geoSurveyor.TechID);
             return _geoSurveyor;
+        }
+
+        public static ComponentDesign DefaultJPSurveyor(Game game, Entity faction, FactionDataStore factionDataStore)
+        {
+            if (_jpSurveyor != null)
+                return _jpSurveyor;
+            ComponentTemplateBlueprint template = factionDataStore.ComponentTemplates["gravitational-surveyor"];
+            ComponentDesigner design = new ComponentDesigner(template, factionDataStore, faction.GetDataBlob<FactionTechDB>());
+            design.ComponentDesignAttributes["Survey Speed"].SetValueFromInput(10);
+            design.Name = "Gravitational Surveyor";
+            _jpSurveyor = design.CreateDesign(faction);
+            factionDataStore.IncrementTechLevel(_jpSurveyor.TechID);
+            return _jpSurveyor;
         }
     }
 

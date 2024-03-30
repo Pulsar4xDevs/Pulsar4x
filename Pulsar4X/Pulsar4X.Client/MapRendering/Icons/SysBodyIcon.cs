@@ -29,7 +29,7 @@ namespace Pulsar4X.SDL2UI
             _bodyType = _systemBodyInfoDB.BodyType;
             _massVolDB = entity.GetDataBlob<MassVolumeDB>();
             _bodyRadiusAU = _massVolDB.RadiusInAU;
-            _rng = new Random(entity.Id); //use entity guid as a seed for psudoRandomness. 
+            _rng = new Random(entity.Id); //use entity guid as a seed for psudoRandomness.
 
             switch (_bodyType)
             {
@@ -48,10 +48,6 @@ namespace Pulsar4X.SDL2UI
             {
 
             }
-            if (_systemBodyInfoDB.Colonies.Count > 0)
-            {
-
-            }
         }
 
         void Terestrial()
@@ -61,8 +57,8 @@ namespace Pulsar4X.SDL2UI
             var points = CreatePrimitiveShapes.Circle(0, 0, 100, segments);
 
 
-            //colors picked out of my ass for a blue/green look. 
-            //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff. 
+            //colors picked out of my ass for a blue/green look.
+            //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff.
             byte r = 0;
             byte g = 100;
             byte b = 100;
@@ -83,13 +79,13 @@ namespace Pulsar4X.SDL2UI
             var points = CreatePrimitiveShapes.CreateArc(0, 0, horDiameter, vertDiameter, 0, Math.PI * 2, segments);
             for (int i = 0; i < segments; i = i + 2)
             {
-                //this is not right, need to pull the points in towards the center, not just pull them left. 
+                //this is not right, need to pull the points in towards the center, not just pull them left.
                 double x = points[i].X - _rng.Next(jagMin, jagMax);
                 double y = points[i].Y - _rng.Next(jagMin, jagMax);
                 points[i] = new Vector2() { X = x, Y = y };
             }
-            //colors picked out of my ass for a brown look. 
-            //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff. 
+            //colors picked out of my ass for a brown look.
+            //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff.
             byte r = 150;
             byte g = 100;
             byte b = 50;
@@ -103,8 +99,8 @@ namespace Pulsar4X.SDL2UI
 
             short segments = 24;
             var points = CreatePrimitiveShapes.Circle(0, 0, 100, segments);
-            //colors picked out of my ass . 
-            //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff. 
+            //colors picked out of my ass .
+            //TODO: use minerals for this? but migth not have that info. going to have to work in with sensor stuff.
             byte r = 100;
             byte g = 100;
             byte b = 100;

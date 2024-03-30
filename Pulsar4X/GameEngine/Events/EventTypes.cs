@@ -416,6 +416,8 @@ namespace Pulsar4X.Events
         ItsLifeJim, // Easter Egg Event?
 
         #endregion
+
+        ColonyCreated,
     }
 
 }

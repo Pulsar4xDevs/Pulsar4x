@@ -132,7 +132,9 @@ namespace Pulsar4X.SDL2UI
                 Vector2 topSize = ImGui.GetContentRegionAvail();
                 if(ImGui.BeginChild("NoProductionAvailable", new Vector2(topSize.X, 56f), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                 {
+                    ImGui.PushStyleColor(ImGuiCol.Text, Styles.OkColor);
                     ImGui.Text("You need an installation capable of production. Consider importing one.\n\nExamples: Factory, Shipyard or Refinery");
+                    ImGui.PopStyleColor();
                     ImGui.EndChild();
                 }
                 return;
