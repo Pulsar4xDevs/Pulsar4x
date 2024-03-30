@@ -1,0 +1,22 @@
+{
+  "name": "Elara",
+  "parent": "Jupiter",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.046,
+    "mass": 48.7E17,
+    "radius": 39.95
+  },
+  "orbit": {
+    "semiMajorAxis": 11741000,
+    "eccentricity": 0.217,
+    "eclipticInclination": 0,
+    "LoAN": 109.4,
+    "AoP": 143.6,
+    "meanAnomaly": 333
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

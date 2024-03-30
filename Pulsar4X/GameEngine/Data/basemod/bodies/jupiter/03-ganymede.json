@@ -1,0 +1,33 @@
+{
+  "name": "Ganymede",
+  "parent": "Jupiter",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.43,
+    "mass": 1.4819E23,
+    "radius": 2634.1
+  },
+  "orbit": {
+    "semiMajorAxis": 1.0704E6,
+    "eccentricity": 0.0013,
+    "eclipticInclination": 0.2,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "atmosphere": {
+    "pressure": 1.18E-11,
+    "hydrosphere": false,
+    "hyrdoExtent": 0,
+    "greenhouseFactor": 0,
+    "greenhousePressure": 0,
+    "surfaceTemperature": -163,
+    "gases": [
+      { "symbol": "O2", "percent": 0.55 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Himalia",
+  "parent": "Jupiter",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.057,
+    "mass": 4.2E18,
+    "radius": 85
+  },
+  "orbit": {
+    "semiMajorAxis": 11388690,
+    "eccentricity": 0.1537860,
+    "eclipticInclination": 29.90917,
+    "LoAN": 44.99935,
+    "AoP": 21.60643,
+    "meanAnomaly": 94.30785
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

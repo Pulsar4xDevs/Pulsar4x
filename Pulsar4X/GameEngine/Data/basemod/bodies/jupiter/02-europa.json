@@ -1,0 +1,22 @@
+{
+  "name": "Europa",
+  "parent": "Jupiter",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.67,
+    "mass": 4.799844E22,
+    "radius": 1560.8
+  },
+  "orbit": {
+    "semiMajorAxis": 670900,
+    "eccentricity": 0.009,
+    "eclipticInclination": 1.791,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

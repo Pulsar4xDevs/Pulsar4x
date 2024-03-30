@@ -1,0 +1,22 @@
+{
+  "name": "Lysithea",
+  "parent": "Jupiter",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.036,
+    "mass": 6.3E16,
+    "radius": 21.1
+  },
+  "orbit": {
+    "semiMajorAxis": 11717000,
+    "eccentricity": 0.112,
+    "eclipticInclination": 0,
+    "LoAN": 5.5,
+    "AoP": 49.5,
+    "meanAnomaly": 329.1
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}
