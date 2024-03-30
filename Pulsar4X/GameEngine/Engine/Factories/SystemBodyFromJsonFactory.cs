@@ -161,10 +161,10 @@ public static class SystemBodyFromJsonFactory
         return bodyType switch
         {
             "terrestrial" => BodyType.Terrestrial,
-            "gasGiant" => BodyType.GasGiant,
-            "iceGiant" => BodyType.IceGiant,
-            "dwarfPlanet" => BodyType.DwarfPlanet,
-            "gasDwarf" => BodyType.GasDwarf,
+            "gas-giant" => BodyType.GasGiant,
+            "ice-giant" => BodyType.IceGiant,
+            "dwarf-planet" => BodyType.DwarfPlanet,
+            "gas-dwarf" => BodyType.GasDwarf,
             "moon" => BodyType.Moon,
             "asteroid" => BodyType.Asteroid,
             "comet" => BodyType.Comet,
