@@ -1,0 +1,22 @@
+{
+  "name": "Tethys",
+  "parent": "Saturn",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.8,
+    "mass": 6.17449E20,
+    "radius": 531.1
+  },
+  "orbit": {
+    "semiMajorAxis": 294619,
+    "eccentricity": 0.0001,
+    "eclipticInclination": 1.12,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}

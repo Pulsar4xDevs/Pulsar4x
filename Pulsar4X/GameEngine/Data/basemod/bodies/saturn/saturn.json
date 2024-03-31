@@ -1,0 +1,37 @@
+{
+  "name": "Saturn",
+  "colonizeable": false,
+  "info": {
+    "type": "gas-giant",
+    "albedo": 0.342,
+    "mass": 5.6834E26,
+    "radius": 60268
+  },
+  "orbit": {
+    "semiMajorAxis": 1.51450E9,
+    "eccentricity": 0.0565,
+    "eclipticInclination": 2.485,
+    "LoAN": 113.665,
+    "AoP": 339.293,
+    "meanAnomaly": 317.02
+  },
+  "atmosphere": {
+    "pressure": 1.38169257,
+    "hydrosphere": false,
+    "hyrdoExtent": 0,
+    "greenhouseFactor": 0,
+    "greenhousePressure": 0,
+    "surfaceTemperature": -139,
+    "gases": [
+      { "symbol": "H2", "percent": 0.963 },
+      { "symbol": "He", "percent": 0.0325 },
+      { "symbol": "CH4", "percent": 0.0045 },
+      { "symbol": "NH3", "percent": 0.000125 },
+      { "symbol": "HD", "percent": 0.00011 },
+      { "symbol": "C2H6", "percent": 0.000007 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 2500
+  }
+}

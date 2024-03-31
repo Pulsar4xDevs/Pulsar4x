@@ -245,25 +245,25 @@ namespace Pulsar4X.Engine
             var lysithea = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/jupiter/lysithea.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, lysithea);
 
-            Entity saturn = SolEntities.Saturn(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var saturn = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/saturn.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, saturn);
 
-            Entity mimas = SolEntities.Mimas(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var mimas = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/mimas.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, mimas);
 
-            Entity enceladus = SolEntities.Enceladus(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var enceladus = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/enceladus.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, enceladus);
 
-            Entity tethys = SolEntities.Tethys(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var tethys = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/tethys.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, tethys);
 
-            Entity dione = SolEntities.Dione(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var dione = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/dione.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, dione);
 
-            Entity rhea = SolEntities.Rhea(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var rhea = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/rhea.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, rhea);
 
-            Entity titan = SolEntities.Titan(game, sol, sun, saturn, GalaxyGen.Settings.J2000, new SensorProfileDB());
+            var titan = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/saturn/titan.json");
             _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), sol, titan);
 
             Entity uranus = SolEntities.Uranus(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB());

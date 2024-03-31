@@ -1,0 +1,22 @@
+{
+  "name": "Mimas",
+  "parent": "Saturn",
+  "colonizeable": true,
+  "info": {
+    "type": "moon",
+    "albedo": 0.962,
+    "mass": 3.7493E19,
+    "radius": 198.2
+  },
+  "orbit": {
+    "semiMajorAxis": 185539,
+    "eccentricity": 0.0196,
+    "eclipticInclination": 1.574,
+    "LoAN": 0,
+    "AoP": 0,
+    "meanAnomaly": 0
+  },
+  "geoSurvey": {
+    "pointsRequired": 500
+  }
+}
