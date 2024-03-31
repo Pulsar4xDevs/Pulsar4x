@@ -9,6 +9,8 @@ using Pulsar4X.Extensions;
 using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Engine.Sol;
 using Pulsar4X.Engine.Factories;
+using System.IO;
+using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.Engine
 {
@@ -194,7 +196,7 @@ namespace Pulsar4X.Engine
             // WIP Function...
             StarSystem sol = new StarSystem();
             sol.Initialize(game, "Sol", -1);
-            Entity sun = _starFactory.CreateStar(sol, UniversalConstants.Units.SolarMassInKG, UniversalConstants.Units.SolarRadiusInAu, 4.6E9, "G", 5778, 1, SpectralType.G, "Sol");
+            var sun = StarFromJsonFactory.Create(sol, GalaxyGen.Settings, "Data/basemod/bodies/sol.json");
 
             // Planets and their moons
             var mercury = SystemBodyFromJsonFactory.Create(game, sol, sun, GalaxyGen.Settings.J2000, new SensorProfileDB(), "Data/basemod/bodies/mercury.json");
@@ -303,6 +305,55 @@ namespace Pulsar4X.Engine
             game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(sol.Guid);
             return sol;
         }
+
+        public StarSystem LoadSystemFromJson(Game game, string folder)
+        {
+            string fileContents = File.ReadAllText(Path.Combine(folder, "systemInfo.json"));
+            var rootJson = JObject.Parse(fileContents);
+            var systemName = rootJson["name"].ToString();
+            var rngSeed = (int?)rootJson["seed"] ?? -1;
+
+            StarSystem system = new StarSystem();
+            system.Initialize(game, systemName, rngSeed);
+
+            var stars = (JArray?)rootJson["stars"];
+            Entity? rootStar = null;
+            foreach(var starFileName in stars)
+            {
+                var star = StarFromJsonFactory.Create(system, GalaxyGen.Settings, Path.Combine(folder, starFileName.ToString()));
+                if(rootStar == null)
+                    rootStar = star;
+            }
+
+            if(rootStar != null)
+            {
+                var bodies = (JArray?)rootJson["bodies"];
+                foreach(var bodyFileName in bodies)
+                {
+                    var body = SystemBodyFromJsonFactory.Create(
+                        game,
+                        system,
+                        rootStar,
+                        GalaxyGen.Settings.J2000,
+                        new SensorProfileDB(),
+                        Path.Combine(folder, bodyFileName.ToString()));
+                    _systemBodyFactory.MineralGeneration(game.StartingGameData.Minerals.Values.ToList(), system, body);
+                }
+            }
+
+            JPSurveyFactory.GenerateJPSurveyPoints(system);
+
+            // Go through all the created entities and set them to be neutral
+            foreach(var entity in system.GetAllEntites())
+            {
+                entity.FactionOwnerID = Game.NeutralFactionId;
+            }
+
+            game.GameMasterFaction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(system.Guid);
+
+            return system;
+        }
+
 
         #region TestSystems
 

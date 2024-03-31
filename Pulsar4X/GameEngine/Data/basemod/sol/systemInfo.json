@@ -1,0 +1,39 @@
+{
+  "name": "Sol",
+  "stars": [
+    "sol.json"
+  ],
+  "bodies": [
+    "mercury.json",
+    "venus.json",
+    "earth.json",
+    "mars.json",
+    "jupiter/jupiter.json",
+    "saturn/saturn.json",
+    "uranus.json",
+    "neptune.json",
+    "ceres.json",
+    "eris.json",
+    "halleyscomet.json",
+    "haumea.json",
+    "luna.json",
+    "makemake.json",
+    "pluto.json",
+    "jupiter/01-io.json",
+    "jupiter/02-europa.json",
+    "jupiter/03-ganymede.json",
+    "jupiter/04-callisto.json",
+    "jupiter/amalthea.json",
+    "jupiter/elara.json",
+    "jupiter/himalia.json",
+    "jupiter/lysithea.json",
+    "jupiter/pasiphae.json",
+    "jupiter/sinope.json",
+    "saturn/dione.json",
+    "saturn/enceladus.json",
+    "saturn/mimas.json",
+    "saturn/rhea.json",
+    "saturn/tethys.json",
+    "saturn/titan.json"
+  ]
+}

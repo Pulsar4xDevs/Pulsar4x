@@ -155,7 +155,7 @@ namespace Pulsar4X.Engine
 
             //var log = StaticRefLib.EventLog;
             StarSystemFactory starfac = new StarSystemFactory(game);
-            StarSystem solSys = starfac.CreateSol(game);
+            StarSystem solSys = starfac.LoadSystemFromJson(game, "Data/basemod/sol/");
             //sol.ManagerSubpulses.Init(sol);
             Entity solStar = solSys.GetAllEntitiesWithDataBlob<StarInfoDB>().First();
             Entity earth = NameLookup.GetFirstEntityWithName(solSys, "Earth"); //should be fourth entity created

@@ -1,0 +1,13 @@
+{
+  "name": "Sol",
+  "info": {
+    "mass": 1.98855E30,
+    "radius": 696342,
+    "age": 4.6E9,
+    "class": "G",
+    "temperature": 5778,
+    "luminosity": 1,
+    "luminosityClass": "V",
+    "spectralType": "G"
+  }
+}
