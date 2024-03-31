@@ -1,0 +1,36 @@
+{
+  "name": "Pluto",
+  "colonizeable": true,
+  "info": {
+    "gravity": 0.62,
+    "type": "dwarf-planet",
+    "albedo": 0.49,
+    "axialTilt": 122.53,
+    "mass": 1.303E22,
+    "radius": 1188.3
+  },
+  "orbit": {
+    "semiMajorAxis": 5.90638E9,
+    "eccentricity": 0.2488,
+    "eclipticInclination": 17.16,
+    "LoAN": 110.299,
+    "AoP": 113.834,
+    "meanAnomaly": 14.53
+  },
+  "atmosphere": {
+    "pressure": 0.00000987,
+    "hydrosphere": false,
+    "hyrdoExtent": 0,
+    "greenhouseFactor": 0,
+    "greenhousePressure": 0,
+    "surfaceTemperature": -229,
+    "gases": [
+      { "symbol": "N2", "percent": 0.99 },
+      { "symbol": "CH4", "percent": 0.005 },
+      { "symbol": "CO", "percent": 0.0025 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 750
+  }
+}

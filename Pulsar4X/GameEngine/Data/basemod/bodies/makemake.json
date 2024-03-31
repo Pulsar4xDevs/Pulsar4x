@@ -1,0 +1,21 @@
+{
+  "name": "Makemake",
+  "colonizeable": true,
+  "info": {
+    "type": "dwarf-planet",
+    "albedo": 0.74,
+    "mass": 3.1E21,
+    "radius": 739
+  },
+  "orbit": {
+    "semiMajorAxis": 6.7962E9,
+    "eccentricity": 0.16126,
+    "eclipticInclination": 28.9835,
+    "LoAN": 79.62,
+    "AoP": 294.834,
+    "meanAnomaly": 165.514
+  },
+  "geoSurvey": {
+    "pointsRequired": 750
+  }
+}

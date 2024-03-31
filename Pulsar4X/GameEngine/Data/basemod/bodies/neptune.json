@@ -1,0 +1,38 @@
+{
+  "name": "Neptune",
+  "colonizeable": true,
+  "info": {
+    "gravity": 11.15,
+    "type": "ice-giant",
+    "albedo": 0.29,
+    "axialTilt": 28.32,
+    "mass": 1.02413E26,
+    "radius": 24764
+  },
+  "orbit": {
+    "semiMajorAxis": 4.5E9,
+    "eccentricity": 0.008678,
+    "eclipticInclination": 1.77,
+    "LoAN": 131.783,
+    "AoP": 273.187,
+    "meanAnomaly": 259.883
+  },
+  "atmosphere": {
+    "pressure": 986.923267,
+    "hydrosphere": false,
+    "hyrdoExtent": 0,
+    "greenhouseFactor": 0,
+    "greenhousePressure": 0,
+    "surfaceTemperature": -201,
+    "gases": [
+      { "symbol": "H2", "percent": 0.8 },
+      { "symbol": "He", "percent": 0.19 },
+      { "symbol": "CH4", "percent": 0.015 },
+      { "symbol": "HD", "percent": 0.00019 },
+      { "symbol": "C2H6", "percent": 0.0000015 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 2500
+  }
+}

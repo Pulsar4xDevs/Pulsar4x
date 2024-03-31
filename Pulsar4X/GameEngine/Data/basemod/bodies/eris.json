@@ -1,0 +1,21 @@
+{
+  "name": "Eris",
+  "colonizeable": true,
+  "info": {
+    "type": "dwarf-planet",
+    "albedo": 0.96,
+    "mass": 1.66E22,
+    "radius": 1163
+  },
+  "orbit": {
+    "semiMajorAxis": 10.152E9,
+    "eccentricity": 0.43607,
+    "eclipticInclination": 44.04,
+    "LoAN": 35.951,
+    "AoP": 151.639,
+    "meanAnomaly": 205.989
+  },
+  "geoSurvey": {
+    "pointsRequired": 750
+  }
+}

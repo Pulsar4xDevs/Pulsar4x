@@ -1,0 +1,37 @@
+{
+  "name": "Uranus",
+  "colonizeable": true,
+  "info": {
+    "gravity": 8.69,
+    "type": "ice-giant",
+    "albedo": 0.3,
+    "axialTilt": 82.23,
+    "mass": 8.6810E25,
+    "radius": 25559
+  },
+  "orbit": {
+    "semiMajorAxis": 2.870972E9,
+    "eccentricity": 0.04717,
+    "eclipticInclination": 0.773,
+    "LoAN": 74.006,
+    "AoP": 96.998857,
+    "meanAnomaly": 142.2386
+  },
+  "atmosphere": {
+    "pressure": 1.28300025,
+    "hydrosphere": false,
+    "hyrdoExtent": 0,
+    "greenhouseFactor": 0,
+    "greenhousePressure": 0,
+    "surfaceTemperature": -197.2,
+    "gases": [
+      { "symbol": "H2", "percent": 0.83 },
+      { "symbol": "He", "percent": 0.15 },
+      { "symbol": "CH4", "percent": 0.023 },
+      { "symbol": "HD", "percent": 0.00009 }
+    ]
+  },
+  "geoSurvey": {
+    "pointsRequired": 2500
+  }
+}

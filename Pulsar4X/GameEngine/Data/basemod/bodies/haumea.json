@@ -1,0 +1,22 @@
+{
+  "name": "Haumea",
+  "colonizeable": true,
+  "info": {
+    "type": "dwarf-planet",
+    "albedo": 0.33,
+    "axialTilt": 126,
+    "mass": 4.006E21,
+    "radius": 798
+  },
+  "orbit": {
+    "semiMajorAxis": 6.4501E9,
+    "eccentricity": 0.19642,
+    "eclipticInclination": 28.2137,
+    "LoAN": 122.167,
+    "AoP": 239.041,
+    "meanAnomaly": 218.205
+  },
+  "geoSurvey": {
+    "pointsRequired": 750
+  }
+}
