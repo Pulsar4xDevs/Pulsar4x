@@ -1,0 +1,8 @@
+{
+  "systems": [
+    "sol/"
+  ],
+  "factions": [
+    "defaultStart/uef.json"
+  ]
+}

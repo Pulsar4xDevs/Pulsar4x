@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using Pulsar4X.Blueprints;
 using Pulsar4X.Components;
 using Pulsar4X.Datablobs;
@@ -42,6 +44,58 @@ namespace Pulsar4X.Engine
         private static OrdnanceDesign _missile;
         private static ComponentDesign _geoSurveyor;
         private static ComponentDesign _jpSurveyor;
+
+        public static (Entity?, string) LoadFromJson(Game game, string filePath)
+        {
+            ComponentDesigner.StartResearched = true;
+
+            string fileContents = File.ReadAllText(filePath);
+            var rootDirectory = (string?)Path.GetDirectoryName(filePath) ?? "Data/basemod/";
+            var rootJson = JObject.Parse(fileContents);
+
+            StarSystemFactory starSystemFactory = new StarSystemFactory(game);
+            StarSystem? startingSystem = null;
+            Entity? playerFaction = null;
+
+            var systemsToLoad = (JArray?)rootJson["systems"];
+            foreach(var systemToLoad in systemsToLoad)
+            {
+                var system = starSystemFactory.LoadSystemFromJson(game, Path.Combine(rootDirectory, systemToLoad.ToString()));
+
+                // TODO: allow the json to set this
+                if(startingSystem == null)
+                    startingSystem = system;
+            }
+
+            var factionsToLoad = (JArray?)rootJson["factions"];
+            foreach(var factionToLoad in factionsToLoad)
+            {
+                var faction = FactionFactory.LoadFromJson(game, Path.Combine(rootDirectory, factionToLoad.ToString()));
+
+                faction.FactionOwnerID = faction.Id;
+                faction.GetDataBlob<FactionInfoDB>().KnownSystems.Add(startingSystem.Guid);
+
+                // TODO: allow the json to set this
+                if(playerFaction == null)
+                    playerFaction = faction;
+            }
+
+            var pow = startingSystem.GetAllEntitiesWithDataBlob<EnergyGenAbilityDB>();
+            foreach (var entityItem in pow)
+            {
+                game.ProcessorManager.GetInstanceProcessor(nameof(EnergyGenProcessor)).ProcessEntity(entityItem,  game.TimePulse.GameGlobalDateTime);
+
+            }
+
+            var entitiesWithSensors = startingSystem.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
+            foreach (var entityItem in entitiesWithSensors)
+            {
+                game.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem,  game.TimePulse.GameGlobalDateTime);
+            }
+
+            ComponentDesigner.StartResearched = false;
+            return (playerFaction, startingSystem.Guid);
+        }
 
         public static Entity DefaultHumans(Game game, string name)
         {

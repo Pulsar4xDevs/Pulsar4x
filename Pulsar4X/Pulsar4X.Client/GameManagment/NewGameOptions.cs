@@ -110,19 +110,19 @@ namespace Pulsar4X.SDL2UI
             var factionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer);
             var factionPasswd = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer);
 
-            var newGameFaction = Pulsar4X.Engine.DefaultStartFactory.DefaultHumans(game, factionName);
+            var (newGameFaction, systemId) = Pulsar4X.Engine.DefaultStartFactory.LoadFromJson(game, "Data/basemod/defaultStart.json");
+
+            if(newGameFaction == null) return;
 
             //TODO: Tidyup: new Game(gameSettings) doesn't currently create a default faction as per the settings.
             //this should probilby be fixed, either we create it there or we... dont.
             //_uiState.Game = new ECSLib.Game(gameSettings);
             _uiState.Game = game;
 
-
-
             // var factionEntity = DefaultStartFactory.DefaultHumans(game, factionName);
             // AuthProcessor.StorePasswordAsHash(StaticRefLib.Game, factionEntity, factionPasswd);
             _uiState.SetFaction(newGameFaction, true);
-            _uiState.SetActiveSystem(newGameFaction.GetDataBlob<FactionInfoDB>().KnownSystems[0]);
+            _uiState.SetActiveSystem(systemId);
 
             DebugWindow.GetInstance().SetGameEvents();
             IsActive = false;

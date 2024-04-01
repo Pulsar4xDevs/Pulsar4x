@@ -310,11 +310,12 @@ namespace Pulsar4X.Engine
         {
             string fileContents = File.ReadAllText(Path.Combine(folder, "systemInfo.json"));
             var rootJson = JObject.Parse(fileContents);
+            var id = rootJson["id"].ToString();
             var systemName = rootJson["name"].ToString();
             var rngSeed = (int?)rootJson["seed"] ?? -1;
 
             StarSystem system = new StarSystem();
-            system.Initialize(game, systemName, rngSeed);
+            system.Initialize(game, systemName, rngSeed, id);
 
             var stars = (JArray?)rootJson["stars"];
             Entity? rootStar = null;
