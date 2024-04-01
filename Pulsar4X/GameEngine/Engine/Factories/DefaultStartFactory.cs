@@ -115,6 +115,9 @@ namespace Pulsar4X.Engine
             DefaultMissileTube(factionEntity, factionDataStore);
             MissileDesign250(factionEntity);
             ShipSmallOrdnanceStore(factionEntity, factionDataStore);
+            DefaultGeoSurveyor(factionEntity, factionDataStore);
+            DefaultJPSurveyor(factionEntity, factionDataStore);
+            DefaultBatteryBank(factionEntity, factionDataStore);
 
             colonyEntity.AddComponent(mineDesign);
             colonyEntity.AddComponent(refinaryDesign);
@@ -337,25 +340,8 @@ namespace Pulsar4X.Engine
         {
             if (_defaultShipDesign != null)
                 return _defaultShipDesign;
-            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
-            List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
-            {
-                (ShipPassiveSensor(faction, factionDataStore), 1),
-                (DefaultSimpleLaser(faction, factionDataStore), 2),
-                (DefaultBFC(faction, factionDataStore), 1),
-                (ShipSmallCargo(faction, factionDataStore), 1),
-                (DefaultGeoSurveyor(faction, factionDataStore), 1),
-                (DefaultJPSurveyor(faction, factionDataStore), 1),
-                (DefaultFuelTank(faction, factionDataStore), 2),
-                (DefaultWarpDesign(faction, factionDataStore), 4),
-                (DefaultBatteryBank(faction, factionDataStore), 3),
-                (DefaultFisionReactor(faction, factionDataStore), 1),
-                (DefaultThrusterDesign(faction, factionDataStore), 3),
 
-            };
-            ArmorBlueprint plastic = factionDataStore.Armor["plastic-armor"]; //factionDataStore.ArmorTypes[new Guid("207af637-95a0-4b89-ac4a-6d66a81cfb2f")];
-            _defaultShipDesign = new ShipDesign(factionInfo, "Ob'enn Dropship", components2, (plastic, 3));
-            _defaultShipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _defaultShipDesign.Armor);
+            _defaultShipDesign = ShipDesignFromJson.Create(faction, factionDataStore, "Data/basemod/shipDesigns/obennDropship.json");
             return _defaultShipDesign;
         }
 
