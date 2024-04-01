@@ -37,5 +37,24 @@
         { "id": "default-design-ordnance-rack-2.5t", "amount": 1 }
       ]
     }
+  ],
+  "fleets": [
+    {
+      "name": "Military Fleet",
+      "location": {
+        "systemId": "sol",
+        "body": "Earth"
+      },
+      "ships": [
+        {
+          "designId": "default-ship-design-gunship",
+          "name": "Serial Peacemaker"
+        },
+        {
+          "designId": "default-ship-design-gunship",
+          "name": "Prevailing Stillness"
+        }
+      ]
+    }
   ]
 }

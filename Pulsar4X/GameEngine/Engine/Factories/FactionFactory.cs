@@ -175,6 +175,38 @@ namespace Pulsar4X.Engine
                 ReCalcProcessor.ReCalcAbilities(colony);
             }
 
+            var fleetsToLoad = (JArray?)rootJson["fleets"];
+            if(fleetsToLoad != null)
+            {
+                foreach(var fleetToLoad in fleetsToLoad)
+                {
+                    var fleetName = (string?)fleetToLoad["name"] ?? NameFactory.GetFleetName(game);
+                    var systemId = fleetToLoad["location"]["systemId"].ToString();
+                    var system = game.Systems.Find(s => s.Guid.Equals(systemId));
+                    if(system == null) throw new NullReferenceException("invalid systemId in json");
+                    var location = NameLookup.GetFirstEntityWithName(system, fleetToLoad["location"]["body"].ToString());
+
+                    var fleet = FleetFactory.Create(system, faction.Id, fleetName);
+                    var fleetDB = fleet.GetDataBlob<FleetDB>();
+                    fleetDB.SetParent(faction);
+
+                    var shipsInFleet = (JArray?)fleetToLoad["ships"];
+                    if(shipsInFleet != null)
+                    {
+                        foreach(var shipToLoad in shipsInFleet)
+                        {
+                            var designId = shipToLoad["designId"].ToString();
+                            var shipName = (string?)shipToLoad["name"] ?? NameFactory.GetShipName(game);
+                            var ship = ShipFactory.CreateShip(factionInfoDB.ShipDesigns[designId], faction, location, shipName);
+                            fleetDB.AddChild(ship);
+
+                            if(fleetDB.FlagShipID < 0)
+                                fleetDB.FlagShipID = ship.Id;
+                        }
+                    }
+                }
+            }
+
             return faction;
         }
 

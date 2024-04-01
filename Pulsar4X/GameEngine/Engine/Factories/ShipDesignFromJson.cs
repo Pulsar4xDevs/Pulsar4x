@@ -18,6 +18,7 @@ public static class ShipDesignFromJson
         var factionInfoDB = faction.GetDataBlob<FactionInfoDB>();
         var shipComponents = new List<(ComponentDesign, int)>();
 
+        var id = (string?)rootJson["id"] ?? null;
         var designName = rootJson["name"].ToString();
 
         var components = (JArray?)rootJson["components"];
@@ -25,11 +26,11 @@ public static class ShipDesignFromJson
         {
             foreach(var component in components)
             {
-                var id = component["id"].ToString();
+                var designId = component["id"].ToString();
                 var amount = (int?)component["amount"] ?? 0;
 
                 shipComponents.Add((
-                  factionInfoDB.InternalComponentDesigns[id],
+                  factionInfoDB.InternalComponentDesigns[designId],
                   amount
                 ));
             }
@@ -39,7 +40,7 @@ public static class ShipDesignFromJson
         var armorThickness = (int?)rootJson["armor"]["thickness"] ?? 1;
 
         var armor = factionDataStore.Armor[armorId];
-        var design = new ShipDesign(factionInfoDB, designName, shipComponents, (armor, armorThickness))
+        var design = new ShipDesign(factionInfoDB, designName, shipComponents, (armor, armorThickness), id)
         {
           DamageProfileDB = new EntityDamageProfileDB(shipComponents, (armor, armorThickness))
         };

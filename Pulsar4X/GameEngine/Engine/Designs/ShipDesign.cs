@@ -95,8 +95,9 @@ namespace Pulsar4X.Engine.Designs
         {
         }
 
-        public ShipDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (ArmorBlueprint armorType, float thickness) armor)
+        public ShipDesign(FactionInfoDB faction, string name, List<(ComponentDesign design, int count)> components, (ArmorBlueprint armorType, float thickness) armor, string? id = null)
         {
+            if(id != null) UniqueID = id;
             _factionId = faction.OwningEntity.Id;
             faction.ShipDesigns.Add(UniqueID, this);
             faction.IndustryDesigns[UniqueID] = this;
