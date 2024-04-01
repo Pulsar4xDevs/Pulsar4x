@@ -73,12 +73,13 @@ namespace Pulsar4X.Engine.Designs
 
         public OrdnanceDesign(FactionInfoDB faction, string name, double fuelAmountKG,  List<(ComponentDesign design, int count)> components, string? id = null)
         {
+            if(id != null)
+                UniqueID = id;
+
             faction.MissileDesigns.Add(UniqueID, this);
             faction.IndustryDesigns[UniqueID] = this;
             Name = name;
             Components = components;
-            if(id != null)
-                UniqueID = id;
 
             //TODO! we're leaking softcode into hard code here! this is the "ordnance" cargo type, tells us to store this missile in "ordnance" type cargo.
             CargoTypeID = "ordnance-storage"; //new Guid("055E2026-20A4-4CFA-A8CA-A01915A48B5E");
