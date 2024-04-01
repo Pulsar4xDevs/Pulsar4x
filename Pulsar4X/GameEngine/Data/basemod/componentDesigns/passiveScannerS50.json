@@ -1,4 +1,5 @@
 {
+  "id": "default-design-passive-sensor-s50",
   "name": "PassiveSensor-S50",
   "templateId": "passive-sensor",
   "attributes": [
