@@ -19,13 +19,13 @@ namespace Pulsar4X.Components
     {
         ComponentDesign _design = new ComponentDesign();
         internal static bool StartResearched = false;
-        public ComponentDesigner(ComponentTemplateBlueprint componentSD, FactionDataStore factionDataStore, FactionTechDB factionTech)
+        public ComponentDesigner(ComponentTemplateBlueprint componentSD, FactionDataStore factionDataStore, FactionTechDB factionTech, string? uniqueId = null)
         {
             TypeName = componentSD.Name;
             Name = componentSD.Name;
             if(!string.IsNullOrEmpty( componentSD.ComponentType))
                 _design.ComponentType = componentSD.ComponentType;
-            _design.UniqueID = Guid.NewGuid().ToString();
+            _design.UniqueID = uniqueId ?? Guid.NewGuid().ToString();
 
             if(componentSD.Formulas.ContainsKey("Description")
                 && componentSD.Formulas["Description"].IsNotNullOrEmpty()
@@ -126,7 +126,7 @@ namespace Pulsar4X.Components
             FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
             Tech tech = new Tech()
             {
-                UniqueID = _design.UniqueID,
+                UniqueID = "tech-" + _design.UniqueID,
                 Name = _design.Name + " Design Research",
                 Description = "Research into building " + _design.Name,
                 Category = "tech-category-designs",
