@@ -1,0 +1,13 @@
+{
+  "name": "Starship",
+  "armor": {
+    "id": "stainless-steel-armor",
+    "thickness": 12.75
+  },
+  "components": [
+    { "id": "default-design-passive-sensor-s50", "amount": 1 },
+    { "id": "default-design-cargo-hold-1t", "amount": 1 },
+    { "id": "default-design-fuel-tank-1500", "amount": 1 },
+    { "id": "default-design-raptor", "amount": 3 }
+  ]
+}

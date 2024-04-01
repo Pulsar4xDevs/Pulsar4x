@@ -1,4 +1,5 @@
 {
+  "id": "default-design-raptor",
   "name": "Raptor-Vac",
   "templateId": "conventional-engine",
   "attributes": [

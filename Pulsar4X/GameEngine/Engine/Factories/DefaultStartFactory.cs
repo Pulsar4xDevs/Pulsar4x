@@ -100,6 +100,7 @@ namespace Pulsar4X.Engine
             DefaultWarpDesign(factionEntity, factionDataStore);
             DefaultFuelTank(factionEntity, factionDataStore);
             LargeFuelTank(factionEntity, factionDataStore);
+            VLargeFuelTank(factionEntity, factionDataStore);
             DefaultCargoInstallation(factionEntity, factionDataStore);
             DefaultSimpleLaser(factionEntity, factionDataStore);
             DefaultBFC(factionEntity, factionDataStore);
@@ -118,6 +119,7 @@ namespace Pulsar4X.Engine
             DefaultGeoSurveyor(factionEntity, factionDataStore);
             DefaultJPSurveyor(factionEntity, factionDataStore);
             DefaultBatteryBank(factionEntity, factionDataStore);
+            ComponentDesignFromJson.Create(factionEntity, factionDataStore, "Data/basemod/componentDesigns/alcuberiWhite-2k.json");
 
             colonyEntity.AddComponent(mineDesign);
             colonyEntity.AddComponent(refinaryDesign);
@@ -239,7 +241,13 @@ namespace Pulsar4X.Engine
             courier.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750000;
             courier2.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750000;
 
-
+            ComponentDesignFromJson.Create(targetFaction, opForDataStore, "Data/basemod/componentDesigns/passiveScannerS50.json");
+            ComponentDesignFromJson.Create(targetFaction, opForDataStore, "Data/basemod/componentDesigns/fuelTank-1000.json");
+            ComponentDesignFromJson.Create(targetFaction, opForDataStore, "Data/basemod/componentDesigns/alcuberiWhite-500.json");
+            ComponentDesignFromJson.Create(targetFaction, opForDataStore, "Data/basemod/componentDesigns/battery-2t.json");
+            ComponentDesignFromJson.Create(targetFaction, opForDataStore, "Data/basemod/componentDesigns/reactor-15k.json");
+            ComponentDesignFromJson.Create(targetFaction, opForDataStore, "Data/basemod/componentDesigns/merlin.json");
+            
             Entity targetDrone0 = ShipFactory.CreateShip(TargetDrone(targetFaction, factionDataStore), targetFaction, earth, (10 * Math.PI / 180), "Target Drone0");
             Entity targetDrone1 = ShipFactory.CreateShip(TargetDrone(targetFaction, factionDataStore), targetFaction, earth, (22.5 * Math.PI / 180), "Target Drone1");
             Entity targetDrone2 = ShipFactory.CreateShip(TargetDrone(targetFaction, factionDataStore), targetFaction, earth, (45 * Math.PI / 180), "Target Drone2");
@@ -357,18 +365,8 @@ namespace Pulsar4X.Engine
              */
             if (_spaceXStarShipDesign != null)
                 return _spaceXStarShipDesign;
-            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
-            List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
-            {
-                (ShipPassiveSensor(faction, factionDataStore), 1),
-                (ShipSmallCargo(faction, factionDataStore), 1),
-                (LargeFuelTank(faction, factionDataStore), 1),
-                (RaptorThrusterDesign(faction, factionDataStore), 3), //3 for vac
 
-            };
-            ArmorBlueprint stainless = factionDataStore.Armor["stainless-steel-armor"];// factionDataStore.ArmorTypes[new Guid("05dce711-8846-488a-b0f3-57fd7924b268")];
-            _spaceXStarShipDesign = new ShipDesign(factionInfo, "Starship", components2, (stainless, 12.75f));
-            _spaceXStarShipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _spaceXStarShipDesign.Armor);
+            _spaceXStarShipDesign = ShipDesignFromJson.Create(faction, factionDataStore, "Data/basemod/shipDesigns/starship.json");
             return _spaceXStarShipDesign;
         }
 
@@ -376,84 +374,24 @@ namespace Pulsar4X.Engine
         {
             if (_gunshipDesign != null)
                 return _gunshipDesign;
-            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
-            List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
-            {
-                (ShipPassiveSensor(faction, factionDataStore), 1),
-                (DefaultSimpleLaser(faction, factionDataStore), 2),
-                (DefaultBFC(faction, factionDataStore), 1),
-                (DefaultMissileTube(faction, factionDataStore),1),
-                (ShipSmallOrdnanceStore(faction, factionDataStore), 2),
-                (ShipSmallCargo(faction, factionDataStore), 1),
-                (DefaultFuelTank(faction, factionDataStore), 2),
-                (DefaultWarpDesign(faction, factionDataStore), 4),
-                (DefaultBatteryBank(faction, factionDataStore), 3),
-                (DefaultFisionReactor(faction, factionDataStore), 1),
-                (DefaultThrusterDesign(faction, factionDataStore), 4),
-            };
-            ArmorBlueprint plastic = factionDataStore.Armor["plastic-armor"];
-            _gunshipDesign = new ShipDesign(factionInfo, "Sanctum Adroit GunShip", components2, (plastic, 3));
-            _gunshipDesign.DamageProfileDB = new EntityDamageProfileDB(components2, _gunshipDesign.Armor);
+
+            _gunshipDesign = ShipDesignFromJson.Create(faction, factionDataStore, "Data/basemod/shipDesigns/gunship.json");
             return _gunshipDesign;
         }
 
         public static ShipDesign TargetDrone(Entity faction, FactionDataStore factionDataStore)
         {
-            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
-            List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
-            {
-                (_sensor_50, 1),
-                (_fuelTank_1000, 2),
-                (_warpDrive, 4),
-                (_battery, 3),
-                (_reactor, 1),
-                (_merlin, 4),
-            };
-            ArmorBlueprint plastic = factionDataStore.Armor["plastic-armor"];
-            var shipdesign = new ShipDesign(factionInfo, "TargetDrone", components2, (plastic, 3));
-            shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
-            return shipdesign;
+            return ShipDesignFromJson.Create(faction, factionDataStore, "Data/basemod/shipDesigns/targetDrone.json");
         }
 
         public static ShipDesign CargoShipDesign(Entity faction, FactionDataStore factionDataStore)
         {
-            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
-            List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
-            {
-                (DefaultSimpleLaser(faction, factionDataStore), 1),
-                (DefaultBFC(faction, factionDataStore), 1),
-                (_sensor_50, 1),
-                (_fuelTank_2500, 1),
-                (_fuelTank_2500, 1),
-                (_cargoHold, 1),
-                (_warpDrive, 4),
-                (_battery, 2),
-                (_reactor, 1),
-                (_rs25, 4),
-            };
-            ArmorBlueprint plastic = factionDataStore.Armor["plastic-armor"];
-            var shipdesign = new ShipDesign(factionInfo, "Planet Express Ship", components2, (plastic, 3));
-            shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
-            return shipdesign;
+            return ShipDesignFromJson.Create(faction, factionDataStore, "Data/basemod/shipDesigns/cargoship.json");
         }
 
         public static ShipDesign CargoCourierDesign(Entity faction, FactionDataStore factionDataStore)
         {
-            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
-            List<(ComponentDesign, int)> components2 = new List<(ComponentDesign, int)>()
-            {
-                (_sensor_50, 1),
-                (VLargeFuelTank(faction, factionDataStore), 1),
-                (ShipSmallCargo(faction, factionDataStore), 1),
-                (LargeWarpDesign(faction, factionDataStore), 1),
-                (_battery, 2),
-                (_reactor, 1),
-                (_rs25, 1),
-            };
-            ArmorBlueprint plastic = factionDataStore.Armor["plastic-armor"];
-            var shipdesign = new ShipDesign(factionInfo, "Cargo Courier", components2, (plastic, 1));
-            shipdesign.DamageProfileDB = new EntityDamageProfileDB(components2, shipdesign.Armor);
-            return shipdesign;
+            return ShipDesignFromJson.Create(faction, factionDataStore, "Data/basemod/shipDesigns/cargoCourier.json");
         }
 
         public static OrdnanceDesign MissileDesign250(Entity faction)
