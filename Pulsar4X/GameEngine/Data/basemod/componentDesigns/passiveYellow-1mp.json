@@ -1,4 +1,5 @@
 {
+  "id": "default-design-missile-sensors",
   "name": "Passive Yellow 1MP",
   "templateId": "missile-electronics-suite",
   "attributes": [

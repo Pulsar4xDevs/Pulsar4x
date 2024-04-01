@@ -398,16 +398,7 @@ namespace Pulsar4X.Engine
         {
             if (_missile != null)
                 return _missile;
-            var factionInfo = faction.GetDataBlob<FactionInfoDB>();
-
-            List<(ComponentDesign, int)> components = new List<(ComponentDesign, int)>()
-            {
-                (DefaultFragPayload(faction, factionInfo.Data), 1),
-                (DefaultMissileSensors(faction, factionInfo.Data), 1),
-                (DefaultMissileSRB(faction, factionInfo.Data), 1),
-            };
-            double fuelkg = 225;
-            _missile = new OrdnanceDesign(factionInfo, "Missile250", fuelkg, components);
+            _missile = OrdnanceDesignFromJson.Create(faction, "Data/basemod/ordnanceDesigns/missile-250.json");
             return _missile;
         }
 
