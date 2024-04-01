@@ -48,18 +48,21 @@ namespace Pulsar4X.Engine
 
             ComponentDesigner.StartResearched = true;//any components we design should be researched already. turn this off at the end.
 
-            //var log = StaticRefLib.EventLog;
             StarSystemFactory starfac = new StarSystemFactory(game);
-            StarSystem solSys = starfac.LoadSystemFromJson(game, "Data/basemod/sol/");
-            //sol.ManagerSubpulses.Init(sol);
-            Entity solStar = solSys.GetAllEntitiesWithDataBlob<StarInfoDB>().First();
-            Entity earth = NameLookup.GetFirstEntityWithName(solSys, "Earth"); //should be fourth entity created
-            Entity luna = NameLookup.GetFirstEntityWithName(solSys, "Luna");
-            Entity mars = NameLookup.GetFirstEntityWithName(solSys, "Mars");
-            //Entity factionEntity = FactionFactory.CreatePlayerFaction(game, owner, name);
+            StarSystem startingSystem = starfac.LoadSystemFromJson(game, "Data/basemod/sol/");
+            Entity solStar = startingSystem.GetAllEntitiesWithDataBlob<StarInfoDB>().First();
+            Entity earth = NameLookup.GetFirstEntityWithName(startingSystem, "Earth");
+            Entity luna = NameLookup.GetFirstEntityWithName(startingSystem, "Luna");
+            Entity mars = NameLookup.GetFirstEntityWithName(startingSystem, "Mars");
+
             Entity factionEntity = FactionFactory.CreateFaction(game, name);
             FactionInfoDB factionInfoDB = factionEntity.GetDataBlob<FactionInfoDB>();
             FactionDataStore factionDataStore = factionInfoDB.Data;
+
+            // Set the faction entity to own itself so it can issue orders to itself
+            factionEntity.FactionOwnerID = factionEntity.Id;
+            factionInfoDB.KnownSystems.Add(startingSystem.Guid);
+            factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Id, "UEF");
 
             earth.GetDataBlob<GeoSurveyableDB>().GeoSurveyStatus[factionEntity.Id] = 0;
             luna.GetDataBlob<GeoSurveyableDB>().GeoSurveyStatus[factionEntity.Id] = 0;
@@ -68,15 +71,10 @@ namespace Pulsar4X.Engine
             Entity targetFaction = FactionFactory.CreateFaction(game, "OpFor");
             FactionDataStore opForDataStore = targetFaction.GetDataBlob<FactionInfoDB>().Data;
 
-            // Set the faction entity to own itself so it can issue orders to itself
-            factionEntity.FactionOwnerID = factionEntity.Id;
-
             Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
 
-            var namedEntites = solSys.GetAllEntitiesWithDataBlob<NameDB>();
-            foreach (var entity in namedEntites)
+            foreach (var nameDB in startingSystem.GetAllDataBlobsOfType<NameDB>())
             {
-                var nameDB = entity.GetDataBlob<NameDB>();
                 nameDB.SetName(factionEntity.Id, nameDB.DefaultName);
             }
 
@@ -85,7 +83,7 @@ namespace Pulsar4X.Engine
             long initialPopulationOfEarth = game.RNG.NextInt64(baseInitialPopulation - variablePopulation, baseInitialPopulation + variablePopulation);
 
             Entity colonyEntity = ColonyFactory.CreateColony(factionEntity, speciesEntity, earth, initialPopulationOfEarth);
-            Entity marsColony = ColonyFactory.CreateColony(factionEntity, speciesEntity, NameLookup.GetFirstEntityWithName(solSys, "Mars"));
+            Entity marsColony = ColonyFactory.CreateColony(factionEntity, speciesEntity, NameLookup.GetFirstEntityWithName(startingSystem, "Mars"));
 
             var mineDesign = ComponentDesignFromJson.Create(factionEntity, factionDataStore, "Data/basemod/componentDesigns/mine.json");
             var refinaryDesign = ComponentDesignFromJson.Create(factionEntity, factionDataStore, "Data/basemod/componentDesigns/refinery.json");
@@ -94,10 +92,6 @@ namespace Pulsar4X.Engine
 
             Scientist scientistEntity = CommanderFactory.CreateScientist(factionEntity, colonyEntity);
             colonyEntity.GetDataBlob<TeamsHousedDB>().AddTeam(scientistEntity);
-
-            FactionTechDB factionTech = factionEntity.GetDataBlob<FactionTechDB>();
-            //TechProcessor.ApplyTech(factionTech, factionDataStore.Techs[new ID("35608fe6-0d65-4a5f-b452-78a3e5e6ce2c")]); //add conventional engine for testing.
-            //ResearchProcessor.CheckRequrements(factionTech);
 
             DefaultThrusterDesign(factionEntity, factionDataStore);
             F1ThrusterDesign(factionEntity, factionDataStore);
@@ -139,8 +133,6 @@ namespace Pulsar4X.Engine
             ReCalcProcessor.ReCalcAbilities(marsColony);
 
             var earthCargo = colonyEntity.GetDataBlob<VolumeStorageDB>();
-
-            //colonyEntity.GetDataBlob<ColonyInfoDB>().Population[speciesEntity] = 9000000000;
             var rawSorium = factionDataStore.CargoGoods["sorium"];
 
             var iron = factionDataStore.CargoGoods["iron"];
@@ -170,15 +162,6 @@ namespace Pulsar4X.Engine
             LogiBaseDB marslogiBase = marsColony.GetDataBlob<LogiBaseDB>();
             marslogiBase.ListedItems.Add(iron, (-1000, 1));
             marsColony.SetDataBlob(marslogiBase);
-
-            factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(solSys.Guid);
-
-            //test systems
-            //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateEccTest(game).ID);
-            //factionEntity.GetDataBlob<FactionInfoDB>().KnownSystems.Add(starfac.CreateLongitudeTest(game).ID);
-
-
-            factionEntity.GetDataBlob<NameDB>().SetName(factionEntity.Id, "UEF");
 
             var fleetName = NameFactory.GetFleetName(game);
             Entity defaultFleet = FleetFactory.Create(earth.Manager, factionEntity.Id, fleetName);
@@ -228,16 +211,6 @@ namespace Pulsar4X.Engine
             fleetDB.AddChild(starship);
             fleetDB.FlagShipID = starship.Id;
 
-            // This can be removed, only for testing orders without having to set them up in game
-            // ConditionItem conditionItem = new ConditionItem(new FuelCondition(30f, ComparisonType.GreaterThan));
-            // CompoundCondition compoundCondition = new CompoundCondition(conditionItem);
-            // SafeList<EntityCommand> actions = new SafeList<EntityCommand>();
-            // actions.Add(MoveToNearestColonyAction.CreateCommand(factionEntity.Id, defaultFleet));
-            // var conditionalOrder = new ConditionalOrder(compoundCondition, actions);
-            // conditionalOrder.Name = "Test";
-
-            // fleetDB.StandingOrders.Add(conditionalOrder);
-
             CargoTransferProcessor.AddCargoItems(colonyEntity, rp1, 10000);
             CargoTransferProcessor.AddCargoItems(colonyEntity, methalox, 10000);
             CargoTransferProcessor.AddCargoItems(colonyEntity, hydrolox, 10000);
@@ -254,8 +227,6 @@ namespace Pulsar4X.Engine
 
             CargoTransferProcessor.AddCargoItems(gunShip0, _missile, 20);
             CargoTransferProcessor.AddCargoItems(gunShip1, _missile, 20);
-            //gunShip0.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);
-            //gunShip1.GetDataBlob<VolumeStorageDB>().AddCargoByUnit(MissileDesign250(game, factionEntity), 20);
 
             var elec = factionDataStore.CargoGoods["electricity"];
             gunShip0.GetDataBlob<EnergyGenAbilityDB>().EnergyStored[elec.UniqueID] = 2750000;
@@ -325,11 +296,11 @@ namespace Pulsar4X.Engine
             // var nmdb = new NewtonMoveDB(earth, new Vector3(-10000.0, 0, 0));
             // gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);
 
-            solSys.SetDataBlob(gunShip0.Id, new TransitableDB());
-            solSys.SetDataBlob(ship2.Id, new TransitableDB());
-            solSys.SetDataBlob(gunShip1.Id, new TransitableDB());
-            solSys.SetDataBlob(courier.Id, new TransitableDB());
-            solSys.SetDataBlob(courier2.Id, new TransitableDB());
+            startingSystem.SetDataBlob(gunShip0.Id, new TransitableDB());
+            startingSystem.SetDataBlob(ship2.Id, new TransitableDB());
+            startingSystem.SetDataBlob(gunShip1.Id, new TransitableDB());
+            startingSystem.SetDataBlob(courier.Id, new TransitableDB());
+            startingSystem.SetDataBlob(courier2.Id, new TransitableDB());
 
             //Entity ship = ShipFactory.CreateShip(shipDesign, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB
@@ -341,17 +312,17 @@ namespace Pulsar4X.Engine
             //sol.SystemManager.SetDataBlob(ship.ID, new TransitableDB());
 
             //Entity rock = AsteroidFactory.CreateAsteroid2(sol, earth, game.CurrentDateTime + TimeSpan.FromDays(365));
-            Entity rock = AsteroidFactory.CreateAsteroid(solSys, earth, game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(365));
+            Entity rock = AsteroidFactory.CreateAsteroid(startingSystem, earth, game.TimePulse.GameGlobalDateTime + TimeSpan.FromDays(365));
 
 
-            var pow = solSys.GetAllEntitiesWithDataBlob<EnergyGenAbilityDB>();
+            var pow = startingSystem.GetAllEntitiesWithDataBlob<EnergyGenAbilityDB>();
             foreach (var entityItem in pow)
             {
                 game.ProcessorManager.GetInstanceProcessor(nameof(EnergyGenProcessor)).ProcessEntity(entityItem,  game.TimePulse.GameGlobalDateTime);
 
             }
 
-            var entitiesWithSensors = solSys.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
+            var entitiesWithSensors = startingSystem.GetAllEntitiesWithDataBlob<SensorAbilityDB>();
             foreach (var entityItem in entitiesWithSensors)
             {
                 game.ProcessorManager.GetInstanceProcessor(nameof(SensorScan)).ProcessEntity(entityItem,  game.TimePulse.GameGlobalDateTime);
