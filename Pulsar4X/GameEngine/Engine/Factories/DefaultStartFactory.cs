@@ -71,7 +71,7 @@ namespace Pulsar4X.Engine
             Entity targetFaction = FactionFactory.CreateFaction(game, "OpFor");
             FactionDataStore opForDataStore = targetFaction.GetDataBlob<FactionInfoDB>().Data;
 
-            Entity speciesEntity = SpeciesFactory.CreateSpeciesHuman(factionEntity, game.GlobalManager);
+            var speciesEntity = SpeciesFactory.CreateFromJson(factionEntity, game.GlobalManager, "Data/basemod/defaultStart/species-humans.json");
 
             foreach (var nameDB in startingSystem.GetAllDataBlobsOfType<NameDB>())
             {
