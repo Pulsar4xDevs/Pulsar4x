@@ -15,10 +15,11 @@ public static class ComponentDesignFromJson
 
         var templateName = rootJson["templateId"].ToString();
         var designName = rootJson["name"].ToString();
+        var id = rootJson["id"] == null ? null : rootJson["id"].ToString();
 
         ComponentDesign design;
         var blueprint = factionDataStore.ComponentTemplates[templateName];
-        var designer = new ComponentDesigner(blueprint, factionDataStore, faction.GetDataBlob<FactionTechDB>()){
+        var designer = new ComponentDesigner(blueprint, factionDataStore, faction.GetDataBlob<FactionTechDB>(), id){
             Name = designName
         };
 
