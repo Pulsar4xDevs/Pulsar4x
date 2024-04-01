@@ -11,6 +11,7 @@ using Pulsar4X.Engine.Sensors;
 using Pulsar4X.Engine.Orders;
 using Pulsar4X.Atb;
 using Pulsar4X.Extensions;
+using Pulsar4X.Engine.Factories;
 
 namespace Pulsar4X.Engine
 {
@@ -661,17 +662,8 @@ namespace Pulsar4X.Engine
             if (_merlin != null)
                 return _merlin;
 
-            ComponentDesigner engineDesigner;
+            _merlin = ComponentDesignFromJson.Create(game, faction, factionDataStore, "Data/basemod/componentDesigns/merlin.json");
 
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
-            engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(30);
-            engineDesigner.Name = "Merlin";
-            //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
-
-            _merlin = engineDesigner.CreateDesign(faction);
-
-            factionDataStore.IncrementTechLevel(_merlin.TechID);
             return _merlin;
         }
 
@@ -680,17 +672,7 @@ namespace Pulsar4X.Engine
             if (_f1 != null)
                 return _f1;
 
-            ComponentDesigner engineDesigner;
-
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
-            engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(50);
-            engineDesigner.Name = "F1";
-            //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
-
-            _f1 = engineDesigner.CreateDesign(faction);
-
-            factionDataStore.IncrementTechLevel(_f1.TechID);
+            _f1 = ComponentDesignFromJson.Create(game, faction, factionDataStore, "Data/basemod/componentDesigns/f1.json");
             return _f1;
         }
 
@@ -705,18 +687,8 @@ namespace Pulsar4X.Engine
             if (_raptor != null)
                 return _raptor;
 
-            ComponentDesigner engineDesigner;
+            _raptor = ComponentDesignFromJson.Create(game, faction, factionDataStore, "Data/basemod/componentDesigns/raptor.json");
 
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
-            engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(15);
-            engineDesigner.ComponentDesignAttributes["Fuel Type"].SetValueFromString("methalox");
-            engineDesigner.Name = "Raptor-Vac";
-            //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
-
-            _raptor = engineDesigner.CreateDesign(faction);
-
-            factionDataStore.IncrementTechLevel(_raptor.TechID);
             return _raptor;
         }
 
@@ -724,17 +696,7 @@ namespace Pulsar4X.Engine
         {
             if (_rs25 != null)
                 return _rs25;
-            ComponentDesigner engineDesigner;
-            ComponentTemplateBlueprint engineSD = factionDataStore.ComponentTemplates["conventional-engine"];
-            engineDesigner = new ComponentDesigner(engineSD, factionDataStore, faction.GetDataBlob<FactionTechDB>());
-            engineDesigner.ComponentDesignAttributes["Size"].SetValueFromInput(100);
-            engineDesigner.ComponentDesignAttributes["Fuel Type"].SetValueFromString("hydrolox");
-            engineDesigner.Name = "RS-25";
-            //engineDesignDB.ComponentDesignAbilities[1].SetValueFromInput
-
-            _rs25 = engineDesigner.CreateDesign(faction);
-
-            factionDataStore.IncrementTechLevel(_rs25.TechID);
+            _rs25 = ComponentDesignFromJson.Create(game, faction, factionDataStore, "Data/basemod/componentDesigns/rs-25.json");
             return _rs25;
         }
 

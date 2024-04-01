@@ -1,0 +1,7 @@
+{
+  "name": "Merlin",
+  "templateId": "conventional-engine",
+  "attributes": [
+    { "key": "Size", "value": 30 }
+  ]
+}

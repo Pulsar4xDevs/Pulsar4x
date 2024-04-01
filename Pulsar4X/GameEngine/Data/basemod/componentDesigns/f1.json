@@ -1,0 +1,7 @@
+{
+  "name": "F1",
+  "templateId": "conventional-engine",
+  "attributes": [
+    { "key": "Size", "value": 50 }
+  ]
+}
