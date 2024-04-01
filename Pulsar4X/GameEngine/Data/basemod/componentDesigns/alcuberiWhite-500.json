@@ -1,0 +1,7 @@
+{
+  "name": "Alcuberi-White 500",
+  "templateId": "alcubierre-warp-drive",
+  "attributes": [
+    { "key": "Mass", "value": 500 }
+  ]
+}

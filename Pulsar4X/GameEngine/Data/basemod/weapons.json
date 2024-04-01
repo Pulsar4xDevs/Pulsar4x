@@ -224,7 +224,7 @@
   {
     "Type": "ComponentTemplate",
     "Payload": {
-      "UniqueID": "missle-launcher",
+      "UniqueID": "missile-launcher",
       "Name": "Missile Launcher",
       "Formulas": {
         "Description": "A tube that houses missiles and launches them",

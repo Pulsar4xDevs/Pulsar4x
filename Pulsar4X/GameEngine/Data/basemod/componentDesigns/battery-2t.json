@@ -1,0 +1,7 @@
+{
+  "name": "Battery 2t",
+  "templateId": "battery-bank",
+  "attributes": [
+    { "key": "Mass", "value": 2000 }
+  ]
+}

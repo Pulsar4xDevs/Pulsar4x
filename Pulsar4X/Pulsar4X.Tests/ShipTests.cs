@@ -67,9 +67,9 @@ namespace Pulsar4X.Tests
             //_engineComponentDesign = engineDesigner.CreateDesign(_faction);
             var factionDataStore = _faction.GetDataBlob<FactionInfoDB>().Data;
 
-            _engineComponentDesign = DefaultStartFactory.DefaultWarpDesign(_game, _faction, factionDataStore);
+            _engineComponentDesign = DefaultStartFactory.DefaultWarpDesign(_faction, factionDataStore);
 
-            _shipDesign = DefaultStartFactory.DefaultShipDesign(_game, _faction, factionDataStore);
+            _shipDesign = DefaultStartFactory.DefaultShipDesign(_faction, factionDataStore);
             _ship = ShipFactory.CreateShip(_shipDesign, _faction, _sol, "Testship");
 
             ComponentInstancesDB instancesdb = _ship.GetDataBlob<ComponentInstancesDB>();

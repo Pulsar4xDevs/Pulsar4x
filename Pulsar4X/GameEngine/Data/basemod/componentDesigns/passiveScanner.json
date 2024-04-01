@@ -1,0 +1,11 @@
+{
+  "name": "Passive Scanner",
+  "templateId": "passive-sensor",
+  "attributes": [
+    { "key": "Antenna Size", "value": 5000 },
+    { "key": "Ideal Detection Wavelength", "value": 470 },
+    { "key": "Detection Bandwidth", "value": 250 },
+    { "key": "Resolution", "value": 100 },
+    { "key": "Scan Time", "value": 3600 }
+  ]
+}

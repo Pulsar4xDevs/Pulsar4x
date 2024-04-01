@@ -147,7 +147,7 @@ namespace Pulsar4X.Tests
 
             colonyEntity.AddComponent(mineDesign, 10);
 
-            ComponentDesign cargoInstallation = DefaultStartFactory.DefaultCargoInstallation(_game, faction, dataStore);
+            ComponentDesign cargoInstallation = DefaultStartFactory.DefaultCargoInstallation(faction, dataStore);
             colonyEntity.AddComponent(cargoInstallation, 10);
 
             ReCalcProcessor.ReCalcAbilities(colonyEntity);

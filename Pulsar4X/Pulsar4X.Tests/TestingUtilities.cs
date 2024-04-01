@@ -148,9 +148,9 @@ namespace Pulsar4X.Tests
             Earth = NameLookup.GetFirstEntityWithName(Sol, "Earth"); //Sol.Entities[3]; //should be fourth entity created 
              EarthColony = ColonyFactory.CreateColony(HumanFaction, HumanSpecies, Earth);
              var humondatastore = HumanFaction.GetDataBlob<FactionInfoDB>().Data;
-            DefaultEngineDesign = DefaultStartFactory.DefaultThrusterDesign(Game, HumanFaction, humondatastore);
-            DefaultWeaponDesign = DefaultStartFactory.DefaultSimpleLaser(Game, HumanFaction, humondatastore);
-            DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(Game, HumanFaction, humondatastore);
+            DefaultEngineDesign = DefaultStartFactory.DefaultThrusterDesign(HumanFaction, humondatastore);
+            DefaultWeaponDesign = DefaultStartFactory.DefaultSimpleLaser(HumanFaction, humondatastore);
+            DefaultShipDesign = DefaultStartFactory.DefaultShipDesign(HumanFaction, humondatastore);
 
             Vector3 position = Earth.GetDataBlob<PositionDB>().AbsolutePosition;
             DefaultShip = ShipFactory.CreateShip(DefaultShipDesign, HumanFaction, position, Earth,  "Serial Peacemaker");

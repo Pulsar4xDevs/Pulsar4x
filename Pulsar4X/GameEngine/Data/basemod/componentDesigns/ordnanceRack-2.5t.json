@@ -1,0 +1,9 @@
+{
+  "name": "Ordnance Rack 2.5t",
+  "templateId": "ordnance-cargo-hold",
+  "attributes": [
+    { "key": "Rack Size", "value": 2627 },
+    { "key": "Cargo Transfer Rate", "value": 100 },
+    { "key": "Transfer Range", "value": 100 }
+  ]
+}

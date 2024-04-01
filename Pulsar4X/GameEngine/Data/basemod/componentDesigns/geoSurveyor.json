@@ -1,0 +1,7 @@
+{
+  "name": "Geo Surveyor Mk1",
+  "templateId": "geo-surveyor",
+  "attributes": [
+    { "key": "Survey Speed", "value": 1 }
+  ]
+}

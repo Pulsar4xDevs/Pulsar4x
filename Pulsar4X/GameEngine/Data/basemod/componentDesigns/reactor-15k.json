@@ -1,0 +1,7 @@
+{
+  "name": "Reactor 15k",
+  "templateId": "reactor",
+  "attributes": [
+    { "key": "Mass", "value": 1000 }
+  ]
+}
