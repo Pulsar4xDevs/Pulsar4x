@@ -172,26 +172,7 @@ namespace Pulsar4X.Engine
                     }
                 }
 
-                var cargoToAdd = (JArray?)colonyToLoad["cargo"];
-                if(cargoToAdd != null)
-                {
-                    foreach(var toAdd in cargoToAdd)
-                    {
-                        var cargoId = toAdd["id"].ToString();
-                        var amount = (int?)toAdd["amount"] ?? 1;
-                        var type = (string?)toAdd["type"] ?? "byMass";
-
-                        switch(type)
-                        {
-                            case "byCount":
-                                CargoTransferProcessor.AddCargoItems(colony, factionDataStore.CargoGoods[cargoId], amount);
-                                break;
-                            default:
-                                CargoTransferProcessor.AddRemoveCargoMass(colony, factionDataStore.CargoGoods[cargoId], amount);
-                                break;
-                        }
-                    }
-                }
+                LoadCargo(colony, factionDataStore, (JArray?)colonyToLoad["cargo"]);
 
                 //TODO: optionally set this from json
                 Scientist scientistEntity = CommanderFactory.CreateScientist(faction, colony);
@@ -233,12 +214,36 @@ namespace Pulsar4X.Engine
 
                             if(fleetDB.FlagShipID < 0)
                                 fleetDB.FlagShipID = ship.Id;
+
+                            LoadCargo(ship, factionDataStore, (JArray?)shipToLoad["cargo"]);
                         }
                     }
                 }
             }
 
             return faction;
+        }
+
+        private static void LoadCargo(Entity target, FactionDataStore factionDataStore, JArray? cargoArray)
+        {
+            if(cargoArray == null) return;
+
+            foreach(var toAdd in cargoArray)
+            {
+                var cargoId = toAdd["id"].ToString();
+                var amount = (int?)toAdd["amount"] ?? 1;
+                var type = (string?)toAdd["type"] ?? "byMass";
+
+                switch(type)
+                {
+                    case "byCount":
+                        CargoTransferProcessor.AddCargoItems(target, factionDataStore.CargoGoods[cargoId], amount);
+                        break;
+                    default:
+                        CargoTransferProcessor.AddRemoveCargoMass(target, factionDataStore.CargoGoods[cargoId], amount);
+                        break;
+                }
+            }
         }
 
 

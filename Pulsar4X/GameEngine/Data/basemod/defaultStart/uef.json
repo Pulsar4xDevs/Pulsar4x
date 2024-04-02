@@ -61,11 +61,19 @@
       "ships": [
         {
           "designId": "default-ship-design-gunship",
-          "name": "Serial Peacemaker"
+          "name": "Serial Peacemaker",
+          "cargo": [
+            { "id": "default-ordnance-missile-250", "amount": 20, "type": "byCount" },
+            { "id": "rp-1", "amount": 2000 }
+          ]
         },
         {
           "designId": "default-ship-design-gunship",
-          "name": "Prevailing Stillness"
+          "name": "Prevailing Stillness",
+          "cargo": [
+            { "id": "default-ordnance-missile-250", "amount": 20, "type": "byCount" },
+            { "id": "rp-1", "amount": 2000 }
+          ]
         }
       ]
     }
