@@ -172,6 +172,27 @@ namespace Pulsar4X.Engine
                     }
                 }
 
+                var cargoToAdd = (JArray?)colonyToLoad["cargo"];
+                if(cargoToAdd != null)
+                {
+                    foreach(var toAdd in cargoToAdd)
+                    {
+                        var cargoId = toAdd["id"].ToString();
+                        var amount = (int?)toAdd["amount"] ?? 1;
+                        var type = (string?)toAdd["type"] ?? "byMass";
+
+                        switch(type)
+                        {
+                            case "byCount":
+                                CargoTransferProcessor.AddCargoItems(colony, factionDataStore.CargoGoods[cargoId], amount);
+                                break;
+                            default:
+                                CargoTransferProcessor.AddRemoveCargoMass(colony, factionDataStore.CargoGoods[cargoId], amount);
+                                break;
+                        }
+                    }
+                }
+
                 //TODO: optionally set this from json
                 Scientist scientistEntity = CommanderFactory.CreateScientist(faction, colony);
                 colony.GetDataBlob<TeamsHousedDB>().AddTeam(scientistEntity);

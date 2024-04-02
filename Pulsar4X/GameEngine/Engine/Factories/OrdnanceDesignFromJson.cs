@@ -37,6 +37,6 @@ public static class OrdnanceDesignFromJson
             }
         }
 
-        return new OrdnanceDesign(factionInfoDB, designName, fuelAmount, ordnanceComponents, id);
+        return new OrdnanceDesign(factionInfoDB, designName, fuelAmount, ordnanceComponents, id, true);
     }
 }
