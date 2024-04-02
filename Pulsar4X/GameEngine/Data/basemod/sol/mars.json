@@ -10,12 +10,12 @@
     "tectonics": "earth-like"
   },
   "orbit": {
-    "semiMajorAxis": 227.92E6,
+    "semiMajorAxis": 227.939366E6,
     "eccentricity": 0.0934,
-    "eclipticInclination": 0,
+    "eclipticInclination": 1.85,
     "LoAN": 49.57854,
-    "AoP": 336.04084,
-    "meanAnomaly": 355.45332
+    "AoP": 286.5,
+    "meanAnomaly": 19.412
   },
   "atmosphere": {
     "pressure": 0.87,

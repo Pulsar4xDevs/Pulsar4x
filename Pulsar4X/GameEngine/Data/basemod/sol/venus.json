@@ -21,7 +21,7 @@
   "atmosphere": {
     "pressure": 92,
     "hydrosphere": false,
-    "hyrdoExtent": 0,
+    "hydroExtent": 0,
     "greenhouseFactor": 0,
     "greenhousePressure": 0,
     "surfaceTemperature": 464,
