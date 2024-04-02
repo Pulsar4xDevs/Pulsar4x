@@ -172,6 +172,10 @@ namespace Pulsar4X.Engine
                     }
                 }
 
+                //TODO: optionally set this from json
+                Scientist scientistEntity = CommanderFactory.CreateScientist(faction, colony);
+                colony.GetDataBlob<TeamsHousedDB>().AddTeam(scientistEntity);
+
                 ReCalcProcessor.ReCalcAbilities(colony);
             }
 
@@ -199,6 +203,12 @@ namespace Pulsar4X.Engine
                             var shipName = (string?)shipToLoad["name"] ?? NameFactory.GetShipName(game);
                             var ship = ShipFactory.CreateShip(factionInfoDB.ShipDesigns[designId], faction, location, shipName);
                             fleetDB.AddChild(ship);
+
+                            var commanderDB = CommanderFactory.CreateShipCaptain(game);
+                            commanderDB.CommissionedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365.25 * 10);
+                            commanderDB.RankedOn = game.TimePulse.GameGlobalDateTime - TimeSpan.FromDays(365);
+                            var commander = CommanderFactory.Create(system, faction.Id, commanderDB);
+                            ship.GetDataBlob<ShipInfoDB>().CommanderID = commander.Id;
 
                             if(fleetDB.FlagShipID < 0)
                                 fleetDB.FlagShipID = ship.Id;
