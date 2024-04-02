@@ -1,4 +1,5 @@
 {
+  "id": "default-ship-design-target-drone",
   "name": "Target Drone",
   "armor": {
     "id": "plastic-armor",

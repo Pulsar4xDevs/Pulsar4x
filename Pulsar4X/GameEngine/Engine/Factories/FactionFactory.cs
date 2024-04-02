@@ -136,49 +136,52 @@ namespace Pulsar4X.Engine
             }
 
             var coloniesToLoad = (JArray?)rootJson["colonies"];
-            foreach(var colonyToLoad in coloniesToLoad)
+            if(coloniesToLoad != null)
             {
-                var systemId = colonyToLoad["systemId"].ToString();
-
-                var system = game.Systems.Find(s => s.Guid.Equals(systemId));
-                if(system == null) throw new NullReferenceException("invalid systemId in json");
-                var location = NameLookup.GetFirstEntityWithName(system, colonyToLoad["location"].ToString());
-
-                // Mark the colony location as geo surveyed
-                if(location.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
+                foreach(var colonyToLoad in coloniesToLoad)
                 {
-                    geoSurveyableDB.GeoSurveyStatus[faction.Id] = 0;
-                }
+                    var systemId = colonyToLoad["systemId"].ToString();
 
-                var speciesName = colonyToLoad["species"]["name"].ToString();
-                var species = faction.GetDataBlob<FactionInfoDB>().Species.Find(s => s.GetOwnersName().Equals(speciesName));
-                if(species == null) throw new NullReferenceException("invalid species name in json");
-                var population = (long?)colonyToLoad["species"]["population"] ?? 0;
+                    var system = game.Systems.Find(s => s.Guid.Equals(systemId));
+                    if(system == null) throw new NullReferenceException("invalid systemId in json");
+                    var location = NameLookup.GetFirstEntityWithName(system, colonyToLoad["location"].ToString());
 
-                var colony = ColonyFactory.CreateColony(faction, species, location, population);
-
-                var installationsToAdd = (JArray?)colonyToLoad["installations"];
-                if(installationsToAdd != null)
-                {
-                    foreach(var install in installationsToAdd)
+                    // Mark the colony location as geo surveyed
+                    if(location.TryGetDatablob<GeoSurveyableDB>(out var geoSurveyableDB))
                     {
-                        var installId = install["id"].ToString();
-                        var amount = (int?)install["amount"] ?? 1;
-
-                        colony.AddComponent(
-                            factionInfoDB.InternalComponentDesigns[installId],
-                            amount
-                        );
+                        geoSurveyableDB.GeoSurveyStatus[faction.Id] = 0;
                     }
+
+                    var speciesName = colonyToLoad["species"]["name"].ToString();
+                    var species = faction.GetDataBlob<FactionInfoDB>().Species.Find(s => s.GetOwnersName().Equals(speciesName));
+                    if(species == null) throw new NullReferenceException("invalid species name in json");
+                    var population = (long?)colonyToLoad["species"]["population"] ?? 0;
+
+                    var colony = ColonyFactory.CreateColony(faction, species, location, population);
+
+                    var installationsToAdd = (JArray?)colonyToLoad["installations"];
+                    if(installationsToAdd != null)
+                    {
+                        foreach(var install in installationsToAdd)
+                        {
+                            var installId = install["id"].ToString();
+                            var amount = (int?)install["amount"] ?? 1;
+
+                            colony.AddComponent(
+                                factionInfoDB.InternalComponentDesigns[installId],
+                                amount
+                            );
+                        }
+                    }
+
+                    LoadCargo(colony, factionDataStore, (JArray?)colonyToLoad["cargo"]);
+
+                    //TODO: optionally set this from json
+                    Scientist scientistEntity = CommanderFactory.CreateScientist(faction, colony);
+                    colony.GetDataBlob<TeamsHousedDB>().AddTeam(scientistEntity);
+
+                    ReCalcProcessor.ReCalcAbilities(colony);
                 }
-
-                LoadCargo(colony, factionDataStore, (JArray?)colonyToLoad["cargo"]);
-
-                //TODO: optionally set this from json
-                Scientist scientistEntity = CommanderFactory.CreateScientist(faction, colony);
-                colony.GetDataBlob<TeamsHousedDB>().AddTeam(scientistEntity);
-
-                ReCalcProcessor.ReCalcAbilities(colony);
             }
 
             var fleetsToLoad = (JArray?)rootJson["fleets"];

@@ -3,6 +3,7 @@
     "sol/"
   ],
   "factions": [
-    "defaultStart/uef.json"
+    "defaultStart/uef.json",
+    "defaultStart/opposition.json"
   ]
 }
