@@ -165,7 +165,7 @@ namespace Pulsar4X.SDL2UI
         internal void SetActiveSystem(string activeSysID, bool refresh = false)
         {
             if(activeSysID != SelectedStarSysGuid || refresh){
-                DeactivateAllClosableWindows();
+                //DeactivateAllClosableWindows();
                 var SelectedSys = StarSystemStates[activeSysID].StarSystem;
                 PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
                 GalacticMap.SelectedStarSysGuid = activeSysID;

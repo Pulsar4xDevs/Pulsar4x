@@ -49,7 +49,7 @@ namespace Pulsar4X.SDL2UI
                     {
                         if(ImGui.Selectable(system.NameDB.OwnersName, _uiState.SelectedStarSysGuid.Equals(system.Guid)))
                         {
-                            _uiState.SelectedSysMapRender.OnSelectedSystemChange(system);
+                            _uiState.SetActiveSystem(system.Guid);
                         }
                     }
                 }
