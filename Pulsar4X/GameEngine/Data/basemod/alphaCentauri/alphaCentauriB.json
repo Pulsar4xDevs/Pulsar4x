@@ -1,0 +1,21 @@
+{
+  "name": "Alpha Centauri B",
+  "info": {
+    "mass": 1.5E30,
+    "radius": 598000,
+    "age": 5.3E9,
+    "class": "K",
+    "temperature": 5260,
+    "luminosity": 1.5,
+    "luminosityClass": "V",
+    "spectralType": "K"
+  },
+  "orbit": {
+    "semiMajorAxis": 149597887,
+    "eccentricity": 0.51947,
+    "eclipticInclination": 79.243,
+    "LoAN": 205.073,
+    "AoP": 231.519,
+    "meanAnomaly": 0
+  }
+}

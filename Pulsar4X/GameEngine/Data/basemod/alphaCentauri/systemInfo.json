@@ -1,0 +1,10 @@
+{
+  "id": "alpha-centauri",
+  "name": "Alpha Centauri",
+  "stars": [
+    "alphaCentauriA.json",
+    "alphaCentauriB.json"
+  ],
+  "bodies": [
+  ]
+}

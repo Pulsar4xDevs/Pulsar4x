@@ -1,0 +1,13 @@
+{
+  "name": "Alpha Centauri A",
+  "info": {
+    "mass": 2E30,
+    "radius": 847000,
+    "age": 4.85E9,
+    "class": "G",
+    "temperature": 5790,
+    "luminosity": 1.5,
+    "luminosityClass": "V",
+    "spectralType": "G"
+  }
+}

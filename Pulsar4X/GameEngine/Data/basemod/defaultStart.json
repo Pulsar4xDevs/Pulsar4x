@@ -1,6 +1,7 @@
 {
   "systems": [
-    "sol/"
+    "sol/",
+    "alphaCentauri/"
   ],
   "factions": [
     "defaultStart/uef.json",
