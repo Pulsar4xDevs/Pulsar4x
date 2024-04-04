@@ -11,7 +11,8 @@
     "shipDesigns/cargoship.json",
     "shipDesigns/gunship.json",
     "shipDesigns/obennDropship.json",
-    "shipDesigns/starship.json"
+    "shipDesigns/starship.json",
+    "shipDesigns/surveyor.json"
   ],
   "species": [
     "species-humans.json"
@@ -72,6 +73,22 @@
           "name": "Prevailing Stillness",
           "cargo": [
             { "id": "default-ordnance-missile-250", "amount": 20, "type": "byCount" },
+            { "id": "rp-1", "amount": 2000 }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Science Fleet",
+      "location": {
+        "systemId": "sol",
+        "body": "Luna"
+      },
+      "ships": [
+        {
+          "designId": "default-ship-design-surveyor",
+          "name": "Surveyor I",
+          "cargo": [
             { "id": "rp-1", "amount": 2000 }
           ]
         }
