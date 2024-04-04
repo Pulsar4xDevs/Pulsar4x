@@ -97,7 +97,6 @@ namespace Pulsar4X.SDL2UI
                 GameName = ImGuiSDL2CSHelper.StringFromBytes(_nameInputBuffer),
                 MaxSystems = _maxSystems,
                 SMPassword = ImGuiSDL2CSHelper.StringFromBytes(_smPassInputbuffer),
-                //DataSets = options.SelectedModList.Select(dvi => dvi.Directory),
                 CreatePlayerFaction = true,
                 DefaultFactionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer),
                 DefaultPlayerPassword = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer),
@@ -107,20 +106,12 @@ namespace Pulsar4X.SDL2UI
 
             Pulsar4X.Engine.Game game = new Pulsar4X.Engine.Game(gameSettings, modDataStore);
 
-            var factionName = ImGuiSDL2CSHelper.StringFromBytes(_factionInputBuffer);
-            var factionPasswd = ImGuiSDL2CSHelper.StringFromBytes(_passInputBuffer);
-
+            // TODO: need to add the implementation for a random start
             var (newGameFaction, systemId) = Pulsar4X.Engine.DefaultStartFactory.LoadFromJson(game, "Data/basemod/defaultStart.json");
 
             if(newGameFaction == null) return;
 
-            //TODO: Tidyup: new Game(gameSettings) doesn't currently create a default faction as per the settings.
-            //this should probilby be fixed, either we create it there or we... dont.
-            //_uiState.Game = new ECSLib.Game(gameSettings);
             _uiState.Game = game;
-
-            // var factionEntity = DefaultStartFactory.DefaultHumans(game, factionName);
-            // AuthProcessor.StorePasswordAsHash(StaticRefLib.Game, factionEntity, factionPasswd);
             _uiState.SetFaction(newGameFaction, true);
             _uiState.SetActiveSystem(systemId);
 

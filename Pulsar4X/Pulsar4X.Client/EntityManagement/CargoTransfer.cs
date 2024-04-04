@@ -134,12 +134,6 @@ namespace Pulsar4X.SDL2UI
             Update();
         }
 
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
-        {
-            throw new NotImplementedException();
-        }
-
-
     }
 
     public delegate void CargoItemSelectedHandler(CargoListPanelComplex cargoPannel);
@@ -405,8 +399,8 @@ namespace Pulsar4X.SDL2UI
         CargoListPanelComplex? CargoListLeft
         {
             get { return _cargoList1; }
-            set 
-            { 
+            set
+            {
                 _cargoList1 = value;
                 if(value != null)
                     value.CargoItemSelectedEvent += OnCargoItemSelectedEvent;

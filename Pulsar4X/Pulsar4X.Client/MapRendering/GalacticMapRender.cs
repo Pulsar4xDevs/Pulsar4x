@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ImGuiSDL2CS;
 using SDL2;
 using Pulsar4X.Datablobs;
+using System.Data;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -16,8 +17,8 @@ namespace Pulsar4X.SDL2UI
         ConcurrentDictionary<string, NameIcon> _nameIcons = new ();
         ImGuiSDL2CSWindow _window;
         internal string? CapitolSysMap { get; set; }
-        internal string? SelectedStarSysGuid { get; set; }
-        internal SystemMapRendering? SelectedSysMapRender 
+        internal string SelectedStarSysGuid { get { return _state.SelectedStarSysGuid; } }
+        internal SystemMapRendering? SelectedSysMapRender
         {
             get
             {
@@ -45,9 +46,10 @@ namespace Pulsar4X.SDL2UI
             int gridhig = (int)size.Y / cellSize;
             grid = new CollisionGrid(gridwid, gridhig, cellSize);
             _state.EntityClickedEvent += _state_EntityClickedEvent;
+            _state.OnFactionChanged += SetFaction;
         }
 
-        internal void SetFaction()
+        internal void SetFaction(GlobalUIState uIState)
         {
             //StarIcons = new Dictionary<ID, IDrawData>();
             int i = 0;
@@ -57,11 +59,21 @@ namespace Pulsar4X.SDL2UI
             int radInc = 5;
             foreach (KeyValuePair<string, SystemState> item in _state.StarSystemStates)
             {
+                var x = (startR + radInc * i) * Math.Sin(startangle - angleIncrease * i);
+                var y = (startR + radInc * i) * Math.Cos(startangle - angleIncrease * i);
 
-                SystemMapRendering map = new SystemMapRendering(_window, _state);
+                if(!RenderedMaps.ContainsKey(item.Key))
+                {
+                    SystemMapRendering map = new SystemMapRendering(_window, _state);
 
-                map.SetSystem(item.Value.StarSystem);
-                RenderedMaps[item.Key] = map;
+                    map.Initialize(item.Value.StarSystem);
+                    RenderedMaps[item.Key] = map;
+                    map.GalacticMapPosition.X = x;
+                    map.GalacticMapPosition.Y = y;
+                }
+                {
+                    RenderedMaps[item.Key].UpdateSystemState(item.Value);
+                }
 
                 //TODO: handle binary/multiple star systems better.
                 var starEntity = item.Value.StarSystem.GetFirstEntityWithDataBlob<StarInfoDB>();
@@ -76,12 +88,9 @@ namespace Pulsar4X.SDL2UI
                 StarIcons[item.Key] = starIcon;
                 var nameIcon = new NameIcon(starEntityState, _state);
                 _nameIcons[item.Key] = nameIcon;
-                var x = (startR + radInc * i) * Math.Sin(startangle - angleIncrease * i);
-                var y = (startR + radInc * i) * Math.Cos(startangle - angleIncrease * i);
                 starIcon.WorldPosition_m = new Orbital.Vector3(x, y, 0);
                 nameIcon.WorldPosition_m = new Orbital.Vector3(x, y, 0);
-                map.GalacticMapPosition.X = x;
-                map.GalacticMapPosition.Y = y;
+
                 i++;
             }
         }
@@ -91,7 +100,7 @@ namespace Pulsar4X.SDL2UI
             var sysGuid = entityState.StarSysGuid;
             if(!string.IsNullOrEmpty(sysGuid) && SelectedStarSysGuid != sysGuid && RenderedMaps.ContainsKey(sysGuid))
             {
-                SelectedStarSysGuid = sysGuid;
+                _state.SetActiveSystem(sysGuid);
             }
 
         }

@@ -12,9 +12,9 @@ namespace Pulsar4X.SDL2UI
     public class DebugGUIWindow : PulsarGuiWindow
     {
 
-        private DebugGUIWindow() 
+        private DebugGUIWindow()
         {
-              
+
         }
         internal static DebugGUIWindow GetInstance()
         {
@@ -45,7 +45,7 @@ namespace Pulsar4X.SDL2UI
                     ImGui.Text("Window Width: " + ImGui.GetContentRegionAvail().X);
 
                     string datetimenow = DateTime.Now.ToString();
-                    
+
 
                 }
 
@@ -60,11 +60,6 @@ namespace Pulsar4X.SDL2UI
 
         public override void OnSystemTickChange(DateTime newDate)
         {
-        }
-
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
-        {
-            throw new NotImplementedException();
         }
     }
 }

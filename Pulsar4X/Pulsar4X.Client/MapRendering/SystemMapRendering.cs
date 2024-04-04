@@ -48,18 +48,18 @@ namespace Pulsar4X.SDL2UI
             {
                 _testIcons.TryAdd(-1, item);
             }
+
+            //_state.OnStarSystemChanged += RespondToSystemChange;
+            //_state.OnFactionChanged += RespondToSystemChange;
         }
 
 
-        internal void SetSystem(StarSystem starSys)
+        internal void Initialize(StarSystem starSys)
         {
-            if (_sysState != null && _faction != null && _sensorChanges != null)
-            {
-                _sysState.StarSystem.GetSensorContacts(_faction.Id).Changes.Unsubscribe(_sensorChanges);
-
-            }
             if (_state.StarSystemStates.ContainsKey(starSys.Guid))
+            {
                 _sysState = _state.StarSystemStates[starSys.Guid];
+            }
             else
             {
                 _sysState = new SystemState(starSys, _state.Faction);
@@ -76,6 +76,26 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
+        public void UpdateSystemState(SystemState systemState)
+        {
+            _testIcons.Clear();
+            _entityIcons.Clear();
+            _orbitRings.Clear();
+            _moveIcons.Clear();
+            _nameIcons.Clear();
+
+            _sysState = systemState;
+            _state.StarSystemStates[_sysState.StarSystem.Guid] = _sysState;
+
+            _faction = _state.Faction;
+            _sensorMgr = systemState.StarSystem.GetSensorContacts(_faction.Id);
+            _sensorChanges = _sensorMgr.Changes.Subscribe();
+
+            foreach (var entityItem in _sysState.EntityStatesWithPosition.Values)
+            {
+                AddIconable(entityItem);
+            }
+        }
 
         void AddIconable(EntityState entityState)
         {
@@ -459,11 +479,6 @@ namespace Pulsar4X.SDL2UI
             {
                 icon.OnPhysicsUpdate();
             }
-        }
-
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
-        {
-            SetSystem(newStarSys);
         }
     }
 }

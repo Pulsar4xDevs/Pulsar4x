@@ -39,24 +39,35 @@ namespace Pulsar4X.SDL2UI
             PulseMgr = system.ManagerSubpulses;
             _faction = faction;
 
-            var factionEntities = StarSystem.GetEntitiesByFaction(faction.Id);
-            foreach (Entity entityItem in factionEntities)
+            if(_faction.Id == system.Game.GameMasterFaction.Id)
             {
-                SetupEntity(entityItem, faction);
+                foreach(var entity in system.GetAllEntites())
+                {
+                    SetupEntity(entity, _faction);
+                }
+
+                _changeListener = new EntityChangeListenerSM(StarSystem);
             }
-
-            _changeListener = new EntityChangeListener(StarSystem, faction, new List<Type>());//, listnerblobs);
-
-            foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
+            else
             {
-                var entityState = new EntityState(sensorContact) { Name = "Unknown" };
-                if(!EntityStatesWithNames.ContainsKey(sensorContact.ActualEntityId))
-                    EntityStatesWithNames.Add(sensorContact.ActualEntityId, entityState);
+                var factionEntities = StarSystem.GetEntitiesByFaction(faction.Id);
+                foreach (Entity entityItem in factionEntities)
+                {
+                    SetupEntity(entityItem, faction);
+                }
 
-                if(!EntityStatesWithPosition.ContainsKey(sensorContact.ActualEntityId))
-                    EntityStatesWithPosition.Add(sensorContact.ActualEntityId, entityState);
+                _changeListener = new EntityChangeListener(StarSystem, faction, new List<Type>());//, listnerblobs);
+
+                foreach (SensorContact sensorContact in SystemContacts.GetAllContacts())
+                {
+                    var entityState = new EntityState(sensorContact) { Name = "Unknown" };
+                    if(!EntityStatesWithNames.ContainsKey(sensorContact.ActualEntityId))
+                        EntityStatesWithNames.Add(sensorContact.ActualEntityId, entityState);
+
+                    if(!EntityStatesWithPosition.ContainsKey(sensorContact.ActualEntityId))
+                        EntityStatesWithPosition.Add(sensorContact.ActualEntityId, entityState);
+                }
             }
-
         }
 
         private void SetupEntity(Entity entityItem, Entity faction)

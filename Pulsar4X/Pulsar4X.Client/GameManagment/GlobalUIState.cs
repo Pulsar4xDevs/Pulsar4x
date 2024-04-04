@@ -18,10 +18,12 @@ namespace Pulsar4X.SDL2UI
     public delegate void EntityClickedEventHandler(EntityState entityState, MouseButtons mouseButton);
 
     public delegate void FactionChangedEventHandler(GlobalUIState uIState);
+    public delegate void StarSystemChangedEventHandler(GlobalUIState uIState);
 
     public class GlobalUIState
     {
         public event FactionChangedEventHandler OnFactionChanged;
+        public event StarSystemChangedEventHandler OnStarSystemChanged;
 
         public bool debugnewgame = true;
         //internal PulsarGuiWindow distanceRulerWindow { get; set; }
@@ -63,7 +65,7 @@ namespace Pulsar4X.SDL2UI
         internal StarSystem SelectedSystem { get { return StarSystemStates[SelectedStarSysGuid].StarSystem; } }
         internal DateTime SelectedSystemTime { get { return StarSystemStates[SelectedStarSysGuid].StarSystem.StarSysDateTime; } }
         internal DateTime SelectedSysLastUpdateTime = new ();
-        internal string SelectedStarSysGuid { get { return GalacticMap.SelectedStarSysGuid; } }
+        internal string SelectedStarSysGuid { get; private set; }
         internal SystemMapRendering SelectedSysMapRender { get { return GalacticMap.SelectedSysMapRender; } }
         internal DateTime PrimarySystemDateTime;
         internal EntityContextMenu ContextMenu { get; set; }
@@ -157,21 +159,22 @@ namespace Pulsar4X.SDL2UI
                 var system = Game.Systems.First(s => s.Guid.Equals(guid));
                 StarSystemStates[guid] = new SystemState(system, factionEntity);
             }
-            GalacticMap.SetFaction();
 
             OnFactionChanged?.Invoke(this);
         }
 
         internal void SetActiveSystem(string activeSysID, bool refresh = false)
         {
-            if(activeSysID != SelectedStarSysGuid || refresh){
-                //DeactivateAllClosableWindows();
+            if(!activeSysID.Equals(SelectedStarSysGuid) || refresh){
+                SelectedStarSysGuid = activeSysID;
+
                 var SelectedSys = StarSystemStates[activeSysID].StarSystem;
                 PrimarySystemDateTime = SelectedSys.ManagerSubpulses.StarSysDateTime;
-                GalacticMap.SelectedStarSysGuid = activeSysID;
-                DebugWindow.GetInstance().SystemState = StarSystemStates[activeSysID];
+                DebugWindow.GetInstance().SystemState = StarSystemStates[activeSysID]; // Fix this, should be handled internally in the window
                 LastClickedEntity = null;
                 PrimaryEntity = null;
+
+                OnStarSystemChanged?.Invoke(this);
             }
 
         }
@@ -179,30 +182,19 @@ namespace Pulsar4X.SDL2UI
         internal void RefreshStarSystemStates()
         {
             SetFaction(Faction);
-            SetActiveSystem(SelectedStarSysGuid ,true);
+            SetActiveSystem(SelectedStarSysGuid, true);
         }
 
         internal void EnableGameMaster()
         {
             SMenabled = true;
-            StarSystemStates = new Dictionary<string, SystemState>();
-            var masterFaction = Game.GameMasterFaction;
-            SetFaction(masterFaction);
-            if(Game != null)
-            {
-                foreach (var system in Game.Systems)
-                {
-                    StarSystemStates[system.Guid] = SystemState.GetMasterState((StarSystem)system);
-                }
-            }
-            SelectedSysMapRender.OnSelectedSystemChange(SelectedSystem);
+            SetFaction(Game.GameMasterFaction);
         }
 
         internal void DisableGameMaster()
         {
             SMenabled = false;
             SetFaction(PlayerFaction);
-            SelectedSysMapRender.OnSelectedSystemChange(SelectedSystem);
         }
 
         internal void ToggleGameMaster()

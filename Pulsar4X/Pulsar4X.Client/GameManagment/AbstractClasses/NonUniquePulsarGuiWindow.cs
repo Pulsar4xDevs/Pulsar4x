@@ -68,9 +68,5 @@ namespace Pulsar4X.SDL2UI
         public override void OnSystemTickChange(DateTime newDate)
         {
         }
-
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
-        {
-        }
     }
 }

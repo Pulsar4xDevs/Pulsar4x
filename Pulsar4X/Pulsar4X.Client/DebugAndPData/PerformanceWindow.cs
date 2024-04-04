@@ -366,10 +366,5 @@ namespace Pulsar4X.SDL2UI
         {
 
         }
-
-        public override void OnSelectedSystemChange(StarSystem newStarSys)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
