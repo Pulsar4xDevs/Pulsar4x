@@ -13,9 +13,7 @@ namespace Pulsar4X.Datablobs
     public class SensorInfoDB : BaseDataBlob
     {
         [JsonProperty]
-        internal Entity Faction;
-        [JsonProperty]
-        internal Guid DetectedEntityID;
+        internal int FactionId;
         [JsonIgnore]
         public Entity DetectedEntity; //the actual entity that we've detected.
         [JsonProperty]
@@ -32,11 +30,9 @@ namespace Pulsar4X.Datablobs
 
         internal SensorInfoDB(Entity factionEntity, Entity detectedEntity, DateTime atDate)
         {
-            Faction = factionEntity;
+            FactionId = factionEntity.Id;
             DetectedEntity = detectedEntity;
             LastDetection = atDate;
-
-
         }
 
         public override object Clone()
@@ -46,8 +42,7 @@ namespace Pulsar4X.Datablobs
 
         internal SensorInfoDB(SensorInfoDB db)
         {
-            Faction = db.Faction;
-            DetectedEntityID = db.DetectedEntityID;
+            FactionId = db.FactionId;
             DetectedEntity = db.DetectedEntity;
             SensorContact = db.SensorContact;
             LastDetection = db.LastDetection;

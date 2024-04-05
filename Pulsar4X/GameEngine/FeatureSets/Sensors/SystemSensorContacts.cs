@@ -12,10 +12,7 @@ namespace Pulsar4X.Engine.Sensors
     public class SystemSensorContacts
     {
         [JsonProperty]
-        public Entity FactionEntity;
-
-        [JsonProperty]
-        public EntityManager ParentManager;
+        public int FactionId;
 
         [JsonProperty]
         Dictionary<int, SensorContact> _sensorContactsByEntityId = new ();
@@ -26,10 +23,9 @@ namespace Pulsar4X.Engine.Sensors
         [JsonConstructor]
         public SystemSensorContacts() { }
 
-        public SystemSensorContacts(EntityManager parentManager, Entity faction)
+        public SystemSensorContacts(Entity faction)
         {
-            ParentManager = parentManager;
-            FactionEntity = faction;
+            FactionId = faction.Id;
         }
 
         public bool SensorContactExists(int actualEntityGuid)
@@ -42,7 +38,7 @@ namespace Pulsar4X.Engine.Sensors
             return _sensorContactsByEntityId[actualEntityId];
         }
 
-        public bool TryGetSensorContact(int entityId, out SensorContact sensorContact)
+        public bool TryGetSensorContact(int entityId, out SensorContact? sensorContact)
         {
             if(_sensorContactsByEntityId.ContainsKey(entityId))
             {

@@ -74,14 +74,14 @@ namespace Pulsar4X.SDL2UI
         {
             var entityState = new EntityState(entityItem);
             // Add Data to State if Available
-            if (!EntityStatesWithNames.ContainsKey(entityItem.Id) && entityItem.HasDataBlob<NameDB>())
+            if (!EntityStatesWithNames.ContainsKey(entityItem.Id) && entityItem.TryGetDatablob<NameDB>(out var nameDB))
             {
-                entityState.Name = entityItem.GetDataBlob<NameDB>().GetName(faction);
+                entityState.Name = nameDB.GetName(faction);
                 EntityStatesWithNames.Add(entityItem.Id, entityState);
             }
-            if (!EntityStatesWithPosition.ContainsKey(entityItem.Id) && entityItem.HasDataBlob<PositionDB>())
+            if (!EntityStatesWithPosition.ContainsKey(entityItem.Id) && entityItem.TryGetDatablob<PositionDB>(out var positionDB))
             {
-                entityState.Position = entityItem.GetDataBlob<PositionDB>();
+                entityState.Position = positionDB;
                 EntityStatesWithPosition.Add(entityItem.Id, entityState);
             }
             if (!EntityStatesColonies.ContainsKey(entityItem.Id) && entityItem.HasDataBlob<ColonyInfoDB>())

@@ -576,7 +576,7 @@ namespace Pulsar4X.Engine
         {
             if (!_factionSensorContacts.ContainsKey(factionId))
             {
-                _factionSensorContacts.Add(factionId, new SystemSensorContacts(this, Game.Factions[factionId]));
+                _factionSensorContacts.Add(factionId, new SystemSensorContacts(Game.Factions[factionId]));
             }
 
             return _factionSensorContacts[factionId];
@@ -626,14 +626,6 @@ namespace Pulsar4X.Engine
 
             entity = Entity.InvalidEntity;
             return false;
-        }
-
-        public SystemSensorContacts GetFactionSensorContacts(int factionId)
-        {
-            if(!_factionSensorContacts.ContainsKey(factionId))
-                _factionSensorContacts[factionId] = new SystemSensorContacts(this, Game.Factions[factionId]);
-
-            return _factionSensorContacts[factionId];
         }
 
         private bool AreAllDataBlobDependenciesPresent(Type type, int entityId, HashSet<Type> visitedTypes, int depth)

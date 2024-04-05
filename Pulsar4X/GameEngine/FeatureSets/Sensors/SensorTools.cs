@@ -45,9 +45,10 @@ namespace Pulsar4X.Engine.Sensors
             return detectionValues;
         }
 
+        /*
         internal static void DetectEntites(SystemSensorContacts sensorMgr, FactionInfoDB factionInfo, PositionDB receverPos, SensorReceiverAtbDB receverDB, Entity detectableEntity, DateTime atDate)
         {
-            Entity receverFaction = sensorMgr.FactionEntity;
+            Entity receverFaction = sensorMgr.FactionId;
             //Entity receverFaction;// = receverDB.OwningEntity.GetDataBlob<OwnedDB>().OwnedByFaction;
             //detectableEntity.Manager.FindEntityByGuid(receverDB.OwningEntity.FactionOwner, out receverFaction);
             var knownContacts = factionInfo.SensorContacts; //receverFaction.GetDataBlob<FactionInfoDB>().SensorEntites;
@@ -101,6 +102,7 @@ namespace Pulsar4X.Engine.Sensors
 
             }
         }
+        */
 
         public static SensorReturnValues DetectonQuality(SensorReceiverAtbDB recever, Dictionary<EMWaveForm, double> signalAtPosition)
         {
