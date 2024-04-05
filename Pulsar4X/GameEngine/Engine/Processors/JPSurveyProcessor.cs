@@ -1,5 +1,7 @@
 using System;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Events;
+using Pulsar4X.Extensions;
 using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Engine;
@@ -27,9 +29,19 @@ public class JPSurveyProcessor : IInstanceProcessor
             if(!jpSurveyableDB.SurveyPointsRemaining.ContainsKey(Fleet.FactionOwnerID))
                 jpSurveyableDB.SurveyPointsRemaining[Fleet.FactionOwnerID] = jpSurveyableDB.PointsRequired;
 
-            if(totalSurveyPoints > jpSurveyableDB.SurveyPointsRemaining[Fleet.FactionOwnerID])
+            if(totalSurveyPoints >= jpSurveyableDB.SurveyPointsRemaining[Fleet.FactionOwnerID])
             {
+                // Survey is complete
                 jpSurveyableDB.SurveyPointsRemaining[Fleet.FactionOwnerID] = 0;
+
+                EventManager.Instance.Publish(
+                    Event.Create(
+                        EventType.JumpPointSurveyCompleted,
+                        atDateTime,
+                        $"Survey of {Target.GetName(Fleet.FactionOwnerID)} complete",
+                        Fleet.FactionOwnerID,
+                        Target.Manager.ManagerGuid,
+                        Target.Id));
             }
             else
             {

@@ -327,6 +327,7 @@ namespace Pulsar4X.Events
         NewJumpConnection,
         NewSystemDiscovered,
         JumpPointFound,
+        JumpPointSurveyCompleted,
 
         // Empire Events
         EmpireInDebt,

@@ -1,5 +1,7 @@
 using System;
 using Pulsar4X.Datablobs;
+using Pulsar4X.Events;
+using Pulsar4X.Extensions;
 using Pulsar4X.Interfaces;
 
 namespace Pulsar4X.Engine;
@@ -27,9 +29,19 @@ public class GeoSurveyProcessor : IInstanceProcessor
             if(!geoSurveyableDB.GeoSurveyStatus.ContainsKey(Fleet.FactionOwnerID))
                 geoSurveyableDB.GeoSurveyStatus[Fleet.FactionOwnerID] = geoSurveyableDB.PointsRequired;
 
-            if(totalSurveyPoints > geoSurveyableDB.GeoSurveyStatus[Fleet.FactionOwnerID])
+            if(totalSurveyPoints >= geoSurveyableDB.GeoSurveyStatus[Fleet.FactionOwnerID])
             {
+                // Survey is complete
                 geoSurveyableDB.GeoSurveyStatus[Fleet.FactionOwnerID] = 0;
+
+                EventManager.Instance.Publish(
+                    Event.Create(
+                        EventType.GeoSurveyCompleted,
+                        atDateTime,
+                        $"Geo Survey of {Target.GetName(Fleet.FactionOwnerID)} complete",
+                        Fleet.FactionOwnerID,
+                        Target.Manager.ManagerGuid,
+                        Target.Id));
             }
             else
             {
