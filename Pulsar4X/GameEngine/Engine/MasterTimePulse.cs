@@ -290,31 +290,22 @@ namespace Pulsar4X.Engine
 
         private DateTime ProcessNextInterupt(DateTime maxDateTime)
         {
-            DateTime processedTo;
-            DateTime nextInteruptDateTime;
-            if (EntityDictionary.Keys.Count != 0)
+            if(EntityDictionary.Keys.Count == 0) return maxDateTime;
+
+            DateTime nextInteruptDateTime = EntityDictionary.Keys.Min();
+
+            if(nextInteruptDateTime > maxDateTime) return maxDateTime;
+
+            foreach (var delegateListPair in EntityDictionary[nextInteruptDateTime])
             {
-                nextInteruptDateTime = EntityDictionary.Keys.Min();
-                if (nextInteruptDateTime <= maxDateTime)
+                foreach (var jumpPair in delegateListPair.Value) //foreach entity in the value list
                 {
-                    foreach (var delegateListPair in EntityDictionary[nextInteruptDateTime])
-                    {
-                        foreach (var jumpPair in delegateListPair.Value) //foreach entity in the value list
-                        {
-                            //delegateListPair.Key.DynamicInvoke(_game, jumpPair);
-                            PulseActionDictionary.DoAction(delegateListPair.Key, _game, jumpPair);
-                        }
-
-                    }
-                    processedTo = nextInteruptDateTime;
+                    //delegateListPair.Key.DynamicInvoke(_game, jumpPair);
+                    PulseActionDictionary.DoAction(delegateListPair.Key, _game, jumpPair);
                 }
-                else
-                    processedTo = maxDateTime;
-            }
-            else
-                processedTo = maxDateTime;
 
-            return processedTo;
+            }
+            return nextInteruptDateTime;
         }
 
 
