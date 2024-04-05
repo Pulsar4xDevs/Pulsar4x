@@ -14,8 +14,8 @@ namespace Pulsar4X.SDL2UI
         Vector3 _currentPosition = new Vector3();
         Vector3 _relativeEndPoint = new Vector3();
         private Vector3 _currentRelativeEndPoint = new Vector3();
-        private PositionDB _targetParentPos;
-        
+        private PositionDB? _targetParentPos;
+
         public byte Red = 255;
         public byte Grn = 255;
         public byte Blu = 0;
@@ -43,7 +43,8 @@ namespace Pulsar4X.SDL2UI
         public override void OnPhysicsUpdate()
         {
             _currentPosition = _positionDB.AbsolutePosition;
-            _currentRelativeEndPoint = _targetParentPos.AbsolutePosition + _relativeEndPoint;
+            if(_targetParentPos != null)
+                _currentRelativeEndPoint = _targetParentPos.AbsolutePosition + _relativeEndPoint;
         }
 
         public override void OnFrameUpdate(Matrix matrix, Camera camera)
