@@ -90,26 +90,6 @@ namespace Pulsar4X.SDL2UI
             }
         }
 
-
-        public static SystemState GetMasterState(StarSystem starSystem)
-        {
-            return new SystemState(starSystem);
-        }
-
-        private SystemState(StarSystem system)
-        {
-            StarSystem = system;
-            PulseMgr = system.ManagerSubpulses;
-            _faction = system.Game.GameMasterFaction;
-
-            foreach(var entity in system.GetAllEntites())
-            {
-                SetupEntity(entity, _faction);
-            }
-
-            _changeListener = new EntityChangeListenerSM(StarSystem);
-        }
-
         void HandleUpdates(EntityChangeData change)
         {
                 switch (change.ChangeType)
