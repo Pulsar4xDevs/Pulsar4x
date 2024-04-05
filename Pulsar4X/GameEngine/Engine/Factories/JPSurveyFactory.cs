@@ -13,16 +13,16 @@ namespace Pulsar4X.Engine
             // TODO: Make these settings load from GalaxyGen settings.
             var ringSettings = new Dictionary<double, int>
             {
-                { Distance.AuToMt(2), 6 }
+                { Distance.AuToMt(2), 6 },
+                { Distance.AuToMt(10), 8 }
             };
 
             var surveyPoints = new List<ProtoEntity>();
-            foreach (KeyValuePair<double, int> ringSetting in ringSettings)
+            int numGenerated = 0;
+            foreach (var (distance, numPoints) in ringSettings)
             {
-                double distance = ringSetting.Key;
-                int numPoints = ringSetting.Value;
-
-                surveyPoints.AddRange(GenerateSurveyRing(distance, numPoints));
+                surveyPoints.AddRange(GenerateSurveyRing(distance, numPoints, numGenerated));
+                numGenerated += numPoints;
             }
 
             foreach (ProtoEntity surveyPoint in surveyPoints)
@@ -63,6 +63,8 @@ namespace Pulsar4X.Engine
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
             //for testing purposes
             var sensorProfileDB = new SensorProfileDB();
+            sensorProfileDB.EmittedEMSpectra.Add(new Sensors.EMWaveForm(0, 500, 1000), 1E12);
+            sensorProfileDB.Reflectivity = 0;
 
             var protoEntity = new ProtoEntity(new List<BaseDataBlob>() { surveyDB, posDB, nameDB, sensorProfileDB });
 
