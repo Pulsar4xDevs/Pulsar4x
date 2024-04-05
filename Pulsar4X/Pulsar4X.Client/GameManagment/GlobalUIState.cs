@@ -107,7 +107,7 @@ namespace Pulsar4X.SDL2UI
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Comet, 96f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Colony, 32f);
             DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Ship, 64f);
-            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Unknown, 96f);
+            DrawNameZoomLvl.Add(UserOrbitSettings.OrbitBodyType.Unknown, 16f);
 
             for (int i = 0; i < (int)UserOrbitSettings.OrbitBodyType.NumberOf; i++)
             {

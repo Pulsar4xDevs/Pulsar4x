@@ -26,8 +26,11 @@ namespace Pulsar4X.Engine
                 Y = -Y;
             }
 
+            var x_km = Distance.AuToKm(X);
+            var y_km = Distance.AuToKm(Y);
+
             NameDB jpNameDB = new NameDB("Jump Point");
-            PositionDB jpPositionDB = new PositionDB(X, Y, 0, system.Guid);
+            PositionDB jpPositionDB = new PositionDB(x_km * 1000, y_km * 1000, 0, system.Guid);
             TransitableDB jpTransitableDB = new TransitableDB
             {
                 IsStabilized = system.Game.Settings.AllJumpPointsStabilized ?? false
