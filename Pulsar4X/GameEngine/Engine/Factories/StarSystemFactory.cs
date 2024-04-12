@@ -342,8 +342,20 @@ namespace Pulsar4X.Engine
                 }
             }
 
-            JPSurveyFactory.GenerateJPSurveyPoints(system);
-            JPFactory.GenerateJumpPoints(this, system);
+            var surveyRings = (JArray?)rootJson["surveyRings"];
+            if(surveyRings != null)
+            {
+                var ringSettings = new Dictionary<double, int>();
+
+                foreach(var ring in surveyRings)
+                {
+                    var radius = (double?)ring["ringRadiusInAU"] ?? 1;
+                    var count = (int?)ring["count"] ?? 1;
+
+                    ringSettings.Add(Distance.AuToMt(radius), count);
+                }
+                JPSurveyFactory.GenerateJPSurveyPoints(system, ringSettings);
+            }
 
             // Go through all the created entities and set them to be neutral
             foreach(var entity in system.GetAllEntites())

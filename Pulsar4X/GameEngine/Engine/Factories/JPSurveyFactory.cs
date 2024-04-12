@@ -8,14 +8,16 @@ namespace Pulsar4X.Engine
 {
     internal static class JPSurveyFactory
     {
-        internal static void GenerateJPSurveyPoints(StarSystem system)
+        internal static void GenerateJPSurveyPoints(StarSystem system, Dictionary<double, int>? ringSettings = null)
         {
-            // TODO: Make these settings load from GalaxyGen settings.
-            var ringSettings = new Dictionary<double, int>
+            if(ringSettings == null)
             {
-                { Distance.AuToMt(2), 6 },
-                { Distance.AuToMt(10), 8 }
-            };
+                ringSettings = new Dictionary<double, int>
+                {
+                    { Distance.AuToMt(2), 6 },
+                    { Distance.AuToMt(10), 8 }
+                };
+            }
 
             var surveyPoints = new List<ProtoEntity>();
             int numGenerated = 0;
@@ -63,7 +65,7 @@ namespace Pulsar4X.Engine
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
             //for testing purposes
             var sensorProfileDB = new SensorProfileDB();
-            sensorProfileDB.EmittedEMSpectra.Add(new Sensors.EMWaveForm(0, 500, 1000), 1E12);
+            sensorProfileDB.EmittedEMSpectra.Add(new Sensors.EMWaveForm(0, 500, 1000), 1E6);
             sensorProfileDB.Reflectivity = 0;
 
             var protoEntity = new ProtoEntity(new List<BaseDataBlob>() { surveyDB, posDB, nameDB, sensorProfileDB });
