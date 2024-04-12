@@ -356,6 +356,10 @@ namespace Pulsar4X.Engine
                 }
                 JPSurveyFactory.GenerateJPSurveyPoints(system, ringSettings);
             }
+            else
+            {
+                JPSurveyFactory.GenerateJPSurveyPoints(system);
+            }
 
             // Go through all the created entities and set them to be neutral
             foreach(var entity in system.GetAllEntites())
