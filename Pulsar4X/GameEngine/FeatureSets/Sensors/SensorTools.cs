@@ -325,8 +325,12 @@ namespace Pulsar4X.Engine.Sensors
             if (distance < 1) //if distance is too small, 4 pi r^2 ends up being < 1
                 distance = 1;
 
-            var value = sourceValue / (4 * Math.PI * distance * distance);
-            return value;
+            // TODO: need to rebalance this
+            // dividing by 4pi r^2 makes it incredibly hard to detect things from far away
+            // even if they have large signatures. For example, using this formula the default
+            // sensor on Earth doesn't detect Uranus or Neptune.
+            //return sourceValue / (4 * Math.PI * distance * distance);
+            return sourceValue;
         }
 
         /// <summary>

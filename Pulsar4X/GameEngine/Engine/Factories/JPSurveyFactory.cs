@@ -65,7 +65,7 @@ namespace Pulsar4X.Engine
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
             //for testing purposes
             var sensorProfileDB = new SensorProfileDB();
-            sensorProfileDB.EmittedEMSpectra.Add(new Sensors.EMWaveForm(0, 500, 1000), 1E6);
+            sensorProfileDB.EmittedEMSpectra.Add(new Sensors.EMWaveForm(0, 500, 1000), 1E9);
             sensorProfileDB.Reflectivity = 0;
 
             var protoEntity = new ProtoEntity(new List<BaseDataBlob>() { surveyDB, posDB, nameDB, sensorProfileDB });
