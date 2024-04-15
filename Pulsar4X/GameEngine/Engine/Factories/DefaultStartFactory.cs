@@ -67,6 +67,25 @@ namespace Pulsar4X.Engine
                     startingSystem = system;
             }
 
+            var jumpPoints = (JArray?)rootJson["jumpPoints"];
+            if(jumpPoints != null)
+            {
+                foreach(var pair in jumpPoints)
+                {
+                    var from = (string?)pair["from"];
+                    var to = (string?)pair["to"];
+
+                    var fromSystem = game.Systems.First(s => s.Guid.Equals(from));
+                    var fromJP = JPFactory.CreateJumpPoint(starSystemFactory, fromSystem);
+
+                    var toSystem = game.Systems.First(s => s.Guid.Equals(to));
+                    var toJP = JPFactory.CreateJumpPoint(starSystemFactory, toSystem);
+
+                    fromJP.GetDataBlob<JumpPointDB>().DestinationId = toJP.Id;
+                    toJP.GetDataBlob<JumpPointDB>().DestinationId = fromJP.Id;
+                }
+            }
+
             var factionsToLoad = (JArray?)rootJson["factions"];
             foreach(var factionToLoad in factionsToLoad)
             {
