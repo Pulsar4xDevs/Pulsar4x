@@ -361,11 +361,11 @@ namespace Pulsar4X.Engine
             // var nmdb = new NewtonMoveDB(earth, new Vector3(-10000.0, 0, 0));
             // gunShip1.SetDataBlob<NewtonMoveDB>(nmdb);
 
-            startingSystem.SetDataBlob(gunShip0.Id, new TransitableDB());
-            startingSystem.SetDataBlob(ship2.Id, new TransitableDB());
-            startingSystem.SetDataBlob(gunShip1.Id, new TransitableDB());
-            startingSystem.SetDataBlob(courier.Id, new TransitableDB());
-            startingSystem.SetDataBlob(courier2.Id, new TransitableDB());
+            startingSystem.SetDataBlob(gunShip0.Id, new JumpPointDB());
+            startingSystem.SetDataBlob(ship2.Id, new JumpPointDB());
+            startingSystem.SetDataBlob(gunShip1.Id, new JumpPointDB());
+            startingSystem.SetDataBlob(courier.Id, new JumpPointDB());
+            startingSystem.SetDataBlob(courier2.Id, new JumpPointDB());
 
             //Entity ship = ShipFactory.CreateShip(shipDesign, sol.SystemManager, factionEntity, position, sol, "Serial Peacemaker");
             //ship.SetDataBlob(earth.GetDataBlob<PositionDB>()); //first ship reference PositionDB

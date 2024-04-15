@@ -31,7 +31,7 @@ namespace Pulsar4X.Engine
 
             NameDB jpNameDB = new NameDB("Jump Point");
             PositionDB jpPositionDB = new PositionDB(x_km * 1000, y_km * 1000, 0, system.Guid);
-            TransitableDB jpTransitableDB = new TransitableDB
+            JumpPointDB jpTransitableDB = new JumpPointDB
             {
                 IsStabilized = system.Game.Settings.AllJumpPointsStabilized ?? false
             };
@@ -107,7 +107,7 @@ namespace Pulsar4X.Engine
 
         private static void CreateConnection(Game game, Entity jumpPoint)
         {
-            var jpTransitableDB = jumpPoint.GetDataBlob<TransitableDB>();
+            var jpTransitableDB = jumpPoint.GetDataBlob<JumpPointDB>();
             var jpPositionDB = jumpPoint.GetDataBlob<PositionDB>();
 
             // FIXME: commented out because it wasn't implemented
@@ -117,11 +117,11 @@ namespace Pulsar4X.Engine
 
         private static void LinkJumpPoints(Entity JP1, Entity JP2)
         {
-            var jp1TransitableDB = JP1.GetDataBlob<TransitableDB>();
-            var jp2TransitableDB = JP2.GetDataBlob<TransitableDB>();
+            var jp1TransitableDB = JP1.GetDataBlob<JumpPointDB>();
+            var jp2TransitableDB = JP2.GetDataBlob<JumpPointDB>();
 
-            jp1TransitableDB.Destination = JP2;
-            jp2TransitableDB.Destination = JP1;
+            jp1TransitableDB.DestinationId = JP2.Id;
+            jp2TransitableDB.DestinationId = JP1.Id;
         }
     }
 }

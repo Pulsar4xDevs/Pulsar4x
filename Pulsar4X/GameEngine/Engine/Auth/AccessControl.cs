@@ -106,7 +106,7 @@ namespace Pulsar4X.Engine.Auth
             if(dataBlobTypes.Contains(typeof(StarInfoDB)) ||
                 dataBlobTypes.Contains(typeof(SystemBodyInfoDB)) ||
                 dataBlobTypes.Contains(typeof(JPSurveyableDB)) ||
-                dataBlobTypes.Contains(typeof(TransitableDB)))
+                dataBlobTypes.Contains(typeof(JumpPointDB)))
             {
                 // Entity systemBody
                 var entityPositionDB = entity.GetDataBlob<PositionDB>();
@@ -120,7 +120,7 @@ namespace Pulsar4X.Engine.Auth
                     {
                         if (knownSystem == entityPositionDB.SystemGuid)
                         {
-                            if (!dataBlobTypes.Contains(typeof(TransitableDB)))
+                            if (!dataBlobTypes.Contains(typeof(JumpPointDB)))
                             {
                                 return true;
                             }

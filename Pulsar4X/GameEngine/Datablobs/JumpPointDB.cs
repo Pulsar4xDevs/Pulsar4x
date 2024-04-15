@@ -4,15 +4,15 @@ using Pulsar4X.Engine;
 namespace Pulsar4X.Datablobs
 {
     /// <summary>
-    /// TransitableDB defines an entity as capable of being used as a jump point.
+    /// JumpPointDB defines a jump point
     /// </summary>
-    public class TransitableDB : BaseDataBlob
+    public class JumpPointDB : BaseDataBlob
     {
         /// <summary>
-        /// Destination that this jump point goes to.
+        /// The Id of the entity that this jump point goes to
         /// </summary>
         [JsonProperty]
-        public Entity Destination { get; internal set; }
+        public int DestinationId { get; internal set; }
 
         /// <summary>
         /// Determination if this jump point has a "gate" on it.
@@ -24,19 +24,22 @@ namespace Pulsar4X.Datablobs
         [JsonProperty]
         public bool IsStabilized { get; internal set; }
 
-        public TransitableDB() { }
+        public JumpPointDB() { }
 
-        public TransitableDB(Entity destination) : this(destination, false) { }
-
-        public TransitableDB(Entity destination, bool isStabilized)
+        public JumpPointDB(int destinationId, bool isStabilized = false)
         {
-            Destination = destination;
+            DestinationId = destinationId;
             IsStabilized = isStabilized;
+        }
+
+        public JumpPointDB(Entity destination, bool isStabilized = false)
+            : this(destination.Id, isStabilized)
+        {
         }
 
         public override object Clone()
         {
-            return new TransitableDB(Destination, IsStabilized);
+            return new JumpPointDB(DestinationId, IsStabilized);
         }
     }
 }

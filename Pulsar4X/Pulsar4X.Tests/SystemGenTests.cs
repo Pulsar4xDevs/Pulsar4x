@@ -349,7 +349,7 @@ namespace Pulsar4X.Tests
 
             foreach (StarSystem starSystem in systems)
             {
-                List<Entity> systemJumpPoints = starSystem.GetAllEntitiesWithDataBlob<TransitableDB>();
+                List<Entity> systemJumpPoints = starSystem.GetAllEntitiesWithDataBlob<JumpPointDB>();
 
                 jumpPointCounts.Add(starSystem.Guid, systemJumpPoints.Count);
             }
