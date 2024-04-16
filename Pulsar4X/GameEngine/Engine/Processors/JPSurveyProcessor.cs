@@ -32,48 +32,8 @@ public class JPSurveyProcessor : IInstanceProcessor
 
             if(totalSurveyPoints >= jpSurveyableDB.SurveyPointsRemaining[Fleet.FactionOwnerID])
             {
-                // Survey is complete
-                jpSurveyableDB.SurveyPointsRemaining[Fleet.FactionOwnerID] = 0;
-
-                EventManager.Instance.Publish(
-                    Event.Create(
-                        EventType.JumpPointSurveyCompleted,
-                        atDateTime,
-                        $"Survey of {Target.GetName(Fleet.FactionOwnerID)} complete",
-                        Fleet.FactionOwnerID,
-                        Target.Manager.ManagerGuid,
-                        Target.Id));
-
-                // Roll is see if a jump point is revealed
-                var surveyLocationsRemaining = Fleet.Manager.GetAllDataBlobsOfType<JPSurveyableDB>()
-                                                .Where(db => !db.IsSurveyComplete(Fleet.FactionOwnerID))
-                                                .ToList();
-                var jpRemaining = Fleet.Manager.GetAllDataBlobsOfType<JumpPointDB>()
-                                                .Where(db => !db.IsDiscovered.Contains(Fleet.FactionOwnerID))
-                                                .ToList();
-                
-                if(surveyLocationsRemaining.Count < 1 && jpRemaining.Count > 0)
-                {
-                    // TODO: don't roll just discover the last JP
-                }
-
-                var chance = (double)jpRemaining.Count / (double)surveyLocationsRemaining.Count;
-                var roll = Target.Manager.Game.RNG.NextDouble();
-
-                if(chance >= roll)
-                {
-                    var jp = jpRemaining.First(); // TODO: pick randomly from remaining
-                    jp.IsDiscovered.Add(Fleet.FactionOwnerID);
-
-                    EventManager.Instance.Publish(
-                        Event.Create(
-                            EventType.JumpPointDetected,
-                            atDateTime,
-                            $"Jump Point discovered",
-                            Fleet.FactionOwnerID,
-                            jp.OwningEntity.Manager.ManagerGuid,
-                            jp.OwningEntity.Id));
-                }
+                RollToDiscoverJumpPoint(atDateTime);
+                MarkSurveyAsComplete(jpSurveyableDB, atDateTime);
             }
             else
             {
@@ -100,5 +60,48 @@ public class JPSurveyProcessor : IInstanceProcessor
         }
 
         return totalSurveyPoints;
+    }
+
+    private void MarkSurveyAsComplete(JPSurveyableDB jpSurveyableDB, DateTime atDateTime)
+    {
+        jpSurveyableDB.SurveyPointsRemaining[Fleet.FactionOwnerID] = 0;
+
+        EventManager.Instance.Publish(
+            Event.Create(
+                EventType.JumpPointSurveyCompleted,
+                atDateTime,
+                $"Survey of {Target.GetName(Fleet.FactionOwnerID)} complete",
+                Fleet.FactionOwnerID,
+                Target.Manager.ManagerGuid,
+                Target.Id));
+    }
+
+    private void RollToDiscoverJumpPoint(DateTime atDateTime)
+    {
+        // Roll is see if a jump point is revealed
+        var surveyLocationsRemaining = Fleet.Manager.GetAllDataBlobsOfType<JPSurveyableDB>()
+                                        .Where(db => !db.IsSurveyComplete(Fleet.FactionOwnerID))
+                                        .ToList();
+        var jpRemaining = Fleet.Manager.GetAllDataBlobsOfType<JumpPointDB>()
+                            .Where(db => !db.IsDiscovered.Contains(Fleet.FactionOwnerID))
+                            .ToList();
+        
+        var chance = (double)jpRemaining.Count / (double)surveyLocationsRemaining.Count;
+        var roll = Target.Manager.Game.RNG.NextDouble();
+
+        if(chance >= roll)
+        {
+            var jp = jpRemaining.First(); // TODO: pick randomly from remaining
+            jp.IsDiscovered.Add(Fleet.FactionOwnerID);
+
+            EventManager.Instance.Publish(
+                Event.Create(
+                    EventType.JumpPointDetected,
+                    atDateTime,
+                    $"Jump Point discovered",
+                    Fleet.FactionOwnerID,
+                    jp.OwningEntity.Manager.ManagerGuid,
+                    jp.OwningEntity.Id));
+        }
     }
 }
