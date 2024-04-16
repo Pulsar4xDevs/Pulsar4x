@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using Pulsar4X.DataStructures;
 using Pulsar4X.Engine;
 
 namespace Pulsar4X.Datablobs
@@ -23,6 +25,9 @@ namespace Pulsar4X.Datablobs
         /// </remarks>
         [JsonProperty]
         public bool IsStabilized { get; internal set; }
+
+        [JsonProperty]
+        public HashSet<int> IsDiscovered { get; internal set; } = new HashSet<int>();
 
         public JumpPointDB() { }
 

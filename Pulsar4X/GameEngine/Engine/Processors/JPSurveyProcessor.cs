@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Pulsar4X.Datablobs;
 using Pulsar4X.Events;
 using Pulsar4X.Extensions;
@@ -42,6 +43,37 @@ public class JPSurveyProcessor : IInstanceProcessor
                         Fleet.FactionOwnerID,
                         Target.Manager.ManagerGuid,
                         Target.Id));
+
+                // Roll is see if a jump point is revealed
+                var surveyLocationsRemaining = Fleet.Manager.GetAllDataBlobsOfType<JPSurveyableDB>()
+                                                .Where(db => !db.IsSurveyComplete(Fleet.FactionOwnerID))
+                                                .ToList();
+                var jpRemaining = Fleet.Manager.GetAllDataBlobsOfType<JumpPointDB>()
+                                                .Where(db => !db.IsDiscovered.Contains(Fleet.FactionOwnerID))
+                                                .ToList();
+                
+                if(surveyLocationsRemaining.Count < 1 && jpRemaining.Count > 0)
+                {
+                    // TODO: don't roll just discover the last JP
+                }
+
+                var chance = (double)jpRemaining.Count / (double)surveyLocationsRemaining.Count;
+                var roll = Target.Manager.Game.RNG.NextDouble();
+
+                if(chance >= roll)
+                {
+                    var jp = jpRemaining.First(); // TODO: pick randomly from remaining
+                    jp.IsDiscovered.Add(Fleet.FactionOwnerID);
+
+                    EventManager.Instance.Publish(
+                        Event.Create(
+                            EventType.JumpPointDetected,
+                            atDateTime,
+                            $"Jump Point discovered",
+                            Fleet.FactionOwnerID,
+                            jp.OwningEntity.Manager.ManagerGuid,
+                            jp.OwningEntity.Id));
+                }
             }
             else
             {
