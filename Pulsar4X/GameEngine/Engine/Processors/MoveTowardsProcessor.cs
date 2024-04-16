@@ -35,6 +35,7 @@ public class MoveTowardsProcessor : IHotloopProcessor
         if(movementVector.Length() > distanceToTarget)
         {
             currentPosition.AbsolutePosition = targetPosition.AbsolutePosition;
+            currentPosition.SetParent(targetPosition.OwningEntity);
             entity.RemoveDataBlob<MoveTowardsTargetDB>();
         }
         else
