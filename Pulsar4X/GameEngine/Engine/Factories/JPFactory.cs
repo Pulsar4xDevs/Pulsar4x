@@ -44,6 +44,7 @@ namespace Pulsar4X.Engine
             var dataBlobs = new List<BaseDataBlob> { jpNameDB, jpTransitableDB, jpPositionDB};
 
             Entity jumpPoint = Entity.Create();
+            jumpPoint.FactionOwnerID = Game.NeutralFactionId;
             system.AddEntity(jumpPoint, dataBlobs);
             return jumpPoint;
         }
