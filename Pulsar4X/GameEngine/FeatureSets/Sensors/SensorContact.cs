@@ -39,9 +39,9 @@ namespace Pulsar4X.Engine.Sensors
             Name = actualEntity.GetDataBlob<NameDB>().GetName(factionEntity);
         }
 
-        void ActualEntity_ChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob? db)
+        void ActualEntity_ChangeEvent(EntityChangeData change)
         {
-            if (changeType == EntityChangeData.EntityChangeType.EntityRemoved)
+            if (change.ChangeType == EntityChangeData.EntityChangeType.EntityRemoved)
             {
                 Position.GetDataFrom = DataFrom.Memory;
             }

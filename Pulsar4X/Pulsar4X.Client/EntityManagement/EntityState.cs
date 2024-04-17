@@ -158,25 +158,30 @@ namespace Pulsar4X.SDL2UI
         }
 
         //maybe this should be done in the SystemState?
-        void On_entityChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob? db)
+        void On_entityChangeEvent(EntityChangeData change)
         {
 
-            _changesNextFrame.Add(new EntityChangeData() { ChangeType = changeType, Datablob = db, Entity = Entity });
-            switch (changeType)
+            _changesNextFrame.Add(new EntityChangeData() { ChangeType = change.ChangeType, Datablob = change.Datablob, Entity = Entity });
+            switch (change.ChangeType)
             {
                 case EntityChangeData.EntityChangeType.DBAdded:
-                    if(db != null)
+                    if(change.Datablob != null)
                     {
-                        DataBlobs[db.GetType()] = db;
+                        DataBlobs[change.Datablob.GetType()] = change.Datablob;
                     }
                     break;
                 case EntityChangeData.EntityChangeType.DBRemoved:
-                    if(db != null)
+                    if(change.Datablob != null)
                     {
-                        DataBlobs.Remove(db.GetType());
+                        DataBlobs.Remove(change.Datablob.GetType());
                     }
                     break;
                 case EntityChangeData.EntityChangeType.EntityRemoved:
+                    DataBlobs.Clear();
+                    IsDestroyed = true;
+                    break;
+                case EntityChangeData.EntityChangeType.EntityHiddenFromFaction:
+                    // TODO: check the factionId against the global UI state factionId
                     DataBlobs.Clear();
                     IsDestroyed = true;
                     break;

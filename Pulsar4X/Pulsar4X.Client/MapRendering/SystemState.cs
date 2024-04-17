@@ -72,12 +72,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     if(StarSystem.TryGetEntityById(entityId, out var entity))
                     {
-                        var entityState = new EntityState(entity) { Name = "Unknown" };
-                        if(!EntityStatesWithNames.ContainsKey(entity.Id))
-                            EntityStatesWithNames.Add(entity.Id, entityState);
-
-                        if(!EntityStatesWithPosition.ContainsKey(entity.Id))
-                            EntityStatesWithPosition.Add(entity.Id, entityState);
+                        SetupEntity(entity, faction);
                     }
                 }
             }
@@ -115,6 +110,13 @@ namespace Pulsar4X.SDL2UI
                     //currently Entity.ChangeEvent probibly does too, but we might have to tweak this. maybe add another enum?
                     case EntityChangeData.EntityChangeType.EntityRemoved:
                         EntitysToBin.Add(change.Entity.Id);
+                        break;
+                    case EntityChangeData.EntityChangeType.EntityVisibleToFaction:
+                        if(change.FactionId != null && change.FactionId == _faction.Id)
+                        {
+                            EntitiesAdded.Add(change.Entity.Id);
+                            SetupEntity(change.Entity, _faction);
+                        }
                         break;
                 }
         }

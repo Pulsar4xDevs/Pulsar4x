@@ -53,33 +53,33 @@ namespace Pulsar4X.SDL2UI
             Engines(100, 60, 0, 130);
         }
 
-        void Entity_ChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
+        void Entity_ChangeEvent(EntityChangeData change)
         {
-            if(changeType == EntityChangeData.EntityChangeType.DBAdded)
+            if(change.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
             {
-                if (db is OrbitDB)
+                if (change.Datablob is OrbitDB)
                 {
-                    _orbitDB = (OrbitDB)db;
+                    _orbitDB = (OrbitDB)change.Datablob;
                     var i = _orbitDB.Inclination;
                     var aop = _orbitDB.ArgumentOfPeriapsis;
                     var loan = _orbitDB.LongitudeOfAscendingNode;
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
-                else if (db is WarpMovingDB)
-                    _warpMoveDB = (WarpMovingDB)db;
-                else if (db is NewtonMoveDB)
+                else if (change.Datablob is WarpMovingDB)
+                    _warpMoveDB = (WarpMovingDB)change.Datablob;
+                else if (change.Datablob is NewtonMoveDB)
                 {
-                    _newtonMoveDB = (NewtonMoveDB)db;
+                    _newtonMoveDB = (NewtonMoveDB)change.Datablob;
                     //NewtonVectors();
                 }
             }
-            else if (changeType == EntityChangeData.EntityChangeType.DBRemoved)
+            else if (change.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
             {
-                if (db is OrbitDB)
+                if (change.Datablob is OrbitDB)
                     _orbitDB = null;
-                else if (db is WarpMovingDB)
+                else if (change.Datablob is WarpMovingDB)
                     _warpMoveDB = null;
-                else if (db is NewtonMoveDB)
+                else if (change.Datablob is NewtonMoveDB)
                 {
                     _newtonMoveDB = null;
                     //Shapes.RemoveAt(Shapes.Count-1);
@@ -335,39 +335,39 @@ namespace Pulsar4X.SDL2UI
         {
         }
         
-        void Entity_ChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
+        void Entity_ChangeEvent(EntityChangeData change)
         {
-            if(changeType == EntityChangeData.EntityChangeType.DBAdded)
+            if(change.ChangeType == EntityChangeData.EntityChangeType.DBAdded)
             {
-                if (db is OrbitDB)
+                if (change.Datablob is OrbitDB)
                 {
-                    _orbitDB = (OrbitDB)db;
+                    _orbitDB = (OrbitDB)change.Datablob;
                     var i = _orbitDB.Inclination;
                     var aop = _orbitDB.ArgumentOfPeriapsis;
                     var loan = _orbitDB.LongitudeOfAscendingNode;
                     _lop = (float)OrbitMath.GetLongditudeOfPeriapsis(i, aop, loan);
                 }
-                else if (db is NewtonMoveDB)
+                else if (change.Datablob is NewtonMoveDB)
                 {
-                    _newtonMoveDB = (NewtonMoveDB)db;
+                    _newtonMoveDB = (NewtonMoveDB)change.Datablob;
                     
                     if(!Shapes.Contains(_flame))
                         Shapes.Add(_flame);
                 }
-                else if (db is WarpMovingDB)
-                    _warpMoveDB = (WarpMovingDB)db;                    
+                else if (change.Datablob is WarpMovingDB)
+                    _warpMoveDB = (WarpMovingDB)change.Datablob;                    
             }
-            else if (changeType == EntityChangeData.EntityChangeType.DBRemoved)
+            else if (change.ChangeType == EntityChangeData.EntityChangeType.DBRemoved)
             {
-                if (db is OrbitDB)
+                if (change.Datablob is OrbitDB)
                     _orbitDB = null;
-                if (db is NewtonMoveDB)
+                if (change.Datablob is NewtonMoveDB)
                 {
                     _newtonMoveDB = null;
                     if (Shapes.Contains(_flame))
                         Shapes.Remove(_flame);
                 }
-                else if (db is WarpMovingDB)
+                else if (change.Datablob is WarpMovingDB)
                     _warpMoveDB = null;
             }
         }
@@ -465,7 +465,7 @@ namespace Pulsar4X.SDL2UI
         {
         }
         
-        void Entity_ChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob db)
+        void Entity_ChangeEvent(EntityChangeData change)
         {
 
         }

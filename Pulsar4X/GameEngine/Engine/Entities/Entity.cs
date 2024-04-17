@@ -9,7 +9,7 @@ using Pulsar4X.Extensions;
 
 namespace Pulsar4X.Engine;
 
-public delegate void EntityChangeHandler (EntityChangeData.EntityChangeType changeType, BaseDataBlob? db);
+public delegate void EntityChangeHandler (EntityChangeData change);
 
 [DebuggerDisplay("{DebuggerDisplay}")]
 public class Entity : IHasDataBlobs, IEquatable<Entity>
@@ -85,9 +85,9 @@ public class Entity : IHasDataBlobs, IEquatable<Entity>
         Manager.RemoveDatablob<T>(Id);
     }
 
-    public void InvokeChangeEvent(EntityChangeData.EntityChangeType changeType, BaseDataBlob? db)
+    public void InvokeChangeEvent(EntityChangeData change)
     {
-        ChangeEvent?.Invoke(changeType, db);
+        ChangeEvent?.Invoke(change);
     }
 
     [JsonIgnore]
