@@ -109,6 +109,17 @@ public class JPSurveyProcessor : IInstanceProcessor
                     Fleet.FactionOwnerID,
                     jp.OwningEntity.Manager.ManagerGuid,
                     jp.OwningEntity.Id));
+
+            // If this was the last jump point, hide the rest of the survey locations
+            if(jpRemaining.Count == 1)
+            {
+                foreach(var surveyLocation in surveyLocationsRemaining)
+                {
+                    if(surveyLocation.OwningEntity.Id == Target.Id) continue;
+
+                    surveyLocation.OwningEntity.Manager.HideNeutralEntityFromFaction(Fleet.FactionOwnerID, surveyLocation.OwningEntity.Id);
+                }
+            }
         }
     }
 }
