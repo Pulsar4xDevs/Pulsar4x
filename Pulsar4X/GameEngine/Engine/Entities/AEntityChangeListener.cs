@@ -174,6 +174,7 @@ namespace Pulsar4X.Engine
                     OnDBRemoved(changeData);
                     break;
                 default:
+                    EntityChanges.Enqueue(changeData);
                     break;
             }
         }
