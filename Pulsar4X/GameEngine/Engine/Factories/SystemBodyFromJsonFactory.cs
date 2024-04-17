@@ -23,7 +23,6 @@ public static class SystemBodyFromJsonFactory
 
         var nameDb = new NameDB(rootJson["name"].ToString());
         blobsToAdd.Add(nameDb);
-        blobsToAdd.Add(sensorProfileDB);
 
         var systemBodyInfoDB = new SystemBodyInfoDB()
         {
@@ -66,8 +65,8 @@ public static class SystemBodyFromJsonFactory
 
         switch(systemBodyInfoDB.BodyType)
         {
-            case BodyType.Asteroid:
             case BodyType.Comet:
+            case BodyType.Asteroid:
             case BodyType.Moon:
                 orbitDB = OrbitDB.FromAsteroidFormat(
                     parentBody,
@@ -150,9 +149,18 @@ public static class SystemBodyFromJsonFactory
                 blobsToAdd.Add(new ColonizeableDB());
         }
 
+        if(systemBodyInfoDB.BodyType == BodyType.Comet)
+        {
+            blobsToAdd.Add(sensorProfileDB);
+            SensorTools.PlanetEmmisionSig(sensorProfileDB, systemBodyInfoDB, massVolumeDB);
+        }
+        else
+        {
+            blobsToAdd.Add(new VisibleByDefaultDB());
+        }
+
         Entity body = Entity.Create();
         system.AddEntity(body, blobsToAdd);
-        SensorTools.PlanetEmmisionSig(sensorProfileDB, systemBodyInfoDB, massVolumeDB);
         return body;
     }
 

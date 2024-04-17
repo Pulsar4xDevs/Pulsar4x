@@ -64,7 +64,11 @@ public class JPSurveyProcessor : IInstanceProcessor
 
     private void MarkSurveyAsComplete(JPSurveyableDB jpSurveyableDB, DateTime atDateTime)
     {
+        // Mark the survey as complete
         jpSurveyableDB.SurveyPointsRemaining[Fleet.FactionOwnerID] = 0;
+
+        // Hide the survey location from the faction that just completed the survey
+        jpSurveyableDB.OwningEntity.Manager.HideNeutralEntityFromFaction(Fleet.FactionOwnerID, jpSurveyableDB.OwningEntity.Id);
 
         EventManager.Instance.Publish(
             Event.Create(
@@ -93,6 +97,9 @@ public class JPSurveyProcessor : IInstanceProcessor
         {
             var jp = jpRemaining.First(); // TODO: pick randomly from remaining
             jp.IsDiscovered.Add(Fleet.FactionOwnerID);
+
+            // Show the jump point to the faction that just completed the survey
+            jp.OwningEntity.Manager.ShowNeutralEntityToFaction(Fleet.FactionOwnerID, jp.OwningEntity.Id);
 
             EventManager.Instance.Publish(
                 Event.Create(
