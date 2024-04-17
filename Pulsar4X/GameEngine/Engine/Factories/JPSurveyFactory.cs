@@ -64,11 +64,12 @@ namespace Pulsar4X.Engine
             var posDB = new PositionDB(x, y, 0, String.Empty);
             var nameDB = new NameDB($"Survey Point #{nameNumber}");
             //for testing purposes
-            var sensorProfileDB = new SensorProfileDB();
-            sensorProfileDB.EmittedEMSpectra.Add(new Sensors.EMWaveForm(0, 500, 1000), 1E9);
-            sensorProfileDB.Reflectivity = 0;
+            // var sensorProfileDB = new SensorProfileDB();
+            // sensorProfileDB.EmittedEMSpectra.Add(new Sensors.EMWaveForm(0, 500, 1000), 1E9);
+            // sensorProfileDB.Reflectivity = 0;
+            var visibleByDefaultDB = new VisibleByDefaultDB();
 
-            var protoEntity = new ProtoEntity(new List<BaseDataBlob>() { surveyDB, posDB, nameDB, sensorProfileDB });
+            var protoEntity = new ProtoEntity(new List<BaseDataBlob>() { surveyDB, posDB, nameDB, visibleByDefaultDB });
 
             return protoEntity;
         }

@@ -67,6 +67,19 @@ namespace Pulsar4X.SDL2UI
                     if(!EntityStatesWithPosition.ContainsKey(sensorContact.ActualEntityId))
                         EntityStatesWithPosition.Add(sensorContact.ActualEntityId, entityState);
                 }
+
+                foreach(var entityId in StarSystem.GetNonOwnedEntititesForFaction(faction.Id))
+                {
+                    if(StarSystem.TryGetEntityById(entityId, out var entity))
+                    {
+                        var entityState = new EntityState(entity) { Name = "Unknown" };
+                        if(!EntityStatesWithNames.ContainsKey(entity.Id))
+                            EntityStatesWithNames.Add(entity.Id, entityState);
+
+                        if(!EntityStatesWithPosition.ContainsKey(entity.Id))
+                            EntityStatesWithPosition.Add(entity.Id, entityState);
+                    }
+                }
             }
         }
 

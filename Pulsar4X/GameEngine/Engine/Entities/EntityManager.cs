@@ -65,6 +65,13 @@ namespace Pulsar4X.Engine
         private Dictionary<int, SystemSensorContacts> _factionSensorContacts = new ();
 
         /// <summary>
+        /// List of neutral entities per faction that the given
+        /// faction knows about.
+        /// </summary>
+        [JsonProperty]
+        private Dictionary<int, List<int>> _factionNeutralContacts = new ();
+
+        /// <summary>
         /// Static reference to an invalid manager.
         /// </summary>
         [NotNull]
@@ -580,6 +587,46 @@ namespace Pulsar4X.Engine
             }
 
             return _factionSensorContacts[factionId];
+        }
+
+        /// <summary>
+        /// Return any entities the faction knows about that aren't
+        /// owned by the faction and aren't sensor contacts
+        /// </summary>
+        /// <param name="factionId"></param>
+        /// <returns></returns>
+        public List<int> GetNonOwnedEntititesForFaction(int factionId)
+        {
+            SetupDefaultNeutralEntitiesForFaction(factionId);
+
+            return _factionNeutralContacts[factionId];
+        }
+
+        public void HideNeutralEntityFromFaction(int factionId, int entityId)
+        {
+            SetupDefaultNeutralEntitiesForFaction(factionId);
+
+            _factionNeutralContacts[factionId].Remove(entityId);
+        }
+
+        public void ShowNeutralEntityToFaction(int factionId, int entityId)
+        {
+            SetupDefaultNeutralEntitiesForFaction(factionId);
+
+            _factionNeutralContacts[factionId].Add(entityId);
+        }
+
+        private void SetupDefaultNeutralEntitiesForFaction(int factionId)
+        {
+            if(!_factionNeutralContacts.ContainsKey(factionId))
+            {
+                _factionNeutralContacts[factionId] = new List<int>();
+                var defaultVisible = GetAllEntitiesWithDataBlob<VisibleByDefaultDB>();
+                foreach(var entity in defaultVisible)
+                {
+                    _factionNeutralContacts[factionId].Add(entity.Id);
+                }
+            }
         }
 
         /// <summary>
