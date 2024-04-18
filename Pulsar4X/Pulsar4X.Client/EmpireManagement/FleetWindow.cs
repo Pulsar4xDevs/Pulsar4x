@@ -18,7 +18,8 @@ namespace Pulsar4X.SDL2UI
         {
             MoveTo,
             GeoSurvey,
-            JPSurvey
+            JPSurvey,
+            Jump,
         }
 
         private IssueOrderType selectedIssueOrderType = IssueOrderType.MoveTo;
@@ -286,6 +287,10 @@ namespace Pulsar4X.SDL2UI
                         {
                             selectedIssueOrderType = IssueOrderType.JPSurvey;
                         }
+                        if(ImGui.Selectable("Jump...", selectedIssueOrderType == IssueOrderType.Jump))
+                        {
+                            selectedIssueOrderType = IssueOrderType.Jump;
+                        }
 
                         ImGui.EndChild();
                     }
@@ -339,6 +344,25 @@ namespace Pulsar4X.SDL2UI
 
                                             var order2 = JPSurveyOrder.CreateCommand(_uiState.Faction.Id, SelectedFleet, jpSurveyableDB.OwningEntity);
                                             _uiState.Game.OrderHandler.HandleOrder(order2);
+                                        }
+                                    }
+                                }
+                                break;
+                            case IssueOrderType.Jump:
+                                var jumpGates = _uiState.SelectedSystem.GetAllDataBlobsOfType<JumpPointDB>();
+                                foreach(var jumpGateDB in jumpGates)
+                                {
+                                    if(!jumpGateDB.IsDiscovered.Contains(_uiState.Faction.Id)) continue;
+
+                                    var name = jumpGateDB.OwningEntity?.GetName(_uiState.Faction.Id);
+                                    if(ImGui.Button(name + "###jump-gate-button-" + name))
+                                    {
+                                        if(jumpGateDB.OwningEntity != null)
+                                        {
+                                            var order = MoveFleetTowardsTargetOrder.CreateCommand(SelectedFleet, jumpGateDB.OwningEntity);
+                                            _uiState.Game.OrderHandler.HandleOrder(order);
+
+                                            JumpOrder.CreateAndExecute(_uiState.Game, _uiState.Faction, SelectedFleet, jumpGateDB);
                                         }
                                     }
                                 }
