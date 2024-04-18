@@ -15,6 +15,7 @@ using Pulsar4X.Input;
 using System.Net.Http;
 using Pulsar4X.Messaging;
 using System.Threading.Tasks;
+using Pulsar4X.DataStructures;
 
 namespace Pulsar4X.SDL2UI
 {
@@ -65,7 +66,7 @@ namespace Pulsar4X.SDL2UI
         internal IntPtr rendererPtr;
         internal int _lastContextMenuOpenedEntityGuid = -1;
         internal GalacticMapRender GalacticMap;
-        internal List<UpdateWindowState> UpdateableWindows = new ();
+        internal SafeList<UpdateWindowState> UpdateableWindows = new ();
         internal DateTime LastGameUpdateTime = new ();
         internal StarSystem SelectedSystem { get { return StarSystemStates[SelectedStarSysGuid].StarSystem; } }
         internal DateTime SelectedSystemTime { get { return StarSystemStates[SelectedStarSysGuid].StarSystem.StarSysDateTime; } }
@@ -181,7 +182,7 @@ namespace Pulsar4X.SDL2UI
                 {
                     if(!StarSystemStates.ContainsKey(message.SystemId)){
                         StarSystemStates[message.SystemId] = new SystemState(Game.Systems.First(s => s.Guid.Equals(message.SystemId)), Faction);
-                    }    
+                    }
                     OnStarSystemAdded?.Invoke(this, message.SystemId);
                 }
             });
